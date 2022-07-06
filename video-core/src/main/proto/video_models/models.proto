@@ -1,0 +1,175 @@
+syntax = "proto3";
+
+package stream.video;
+
+import "validate/validate.proto";
+
+option go_package = "github.com/GetStream/video/protobuf/video_models";
+
+// Edges are where we deploy video servers
+message Edge {
+  string name = 1 [(validate.rules).string.min_len = 1];
+  string latency_url = 2 [(validate.rules).string.min_len = 1];
+}
+
+// TODO: to discuss. do we keep a log per call of
+// - people joining
+// - reactions
+// - etc?
+// - maybe it only makes sense when you transcribe the call
+
+// Edges are where we deploy video servers
+message EdgeServer {
+  string url = 1;
+}
+
+message Latency {
+  repeated float measurements = 1;
+}
+
+// 3 different type of broadcast
+message Broadcast {
+  string id = 1;
+  oneof Details {
+    RTMPBroadcast rtmp = 2;
+    HLSBroadcast hls = 3;
+    RecordBroadcast record = 4;
+  }
+}
+
+message RTMPBroadcast {
+  string call_id = 1;
+  repeated string rtmpurls = 2;
+  int32 width = 3;
+  int32 height = 4;
+}
+message HLSBroadcast {
+
+}
+
+message File {
+  string type = 1;
+  bool composite = 2;
+  string user_id = 3;
+  string url = 4;
+}
+
+message RecordBroadcast {
+  bool composite = 1; // if true merge all audio and video, if false split them
+  repeated File files = 2;
+}
+
+message User {
+  string id = 1 [(validate.rules).string.min_len = 1];
+  // TODO: zoom allows you to invite any of your colleagues in their invite screen
+  repeated string teams = 2;
+  string type = 3;
+
+  string created_at = 7;
+  string updated_at = 8;
+}
+
+message Device {
+  string user_id = 1;
+  string id = 2;
+  string push_provider = 3;
+  bool disabled = 4;
+  string disabled_reason = 5;
+  string push_provider_name = 6;
+  string created_at = 7;
+  string updated_at = 8;
+
+}
+
+enum Codec {
+  CODEC_H264_UNSPECIFIED = 0;
+  CODEC_VP8 = 1;
+  CODEC_VP9 = 2;
+}
+
+enum RecordingStorage {
+  RECORDING_STORAGE_S3_UNSPECIFIED = 0;
+}
+
+message RecordingStorageOptions {
+  RecordingStorage storage = 2;
+  string access_key = 3;
+  string secret_key = 4;
+  string bucket_name = 5;
+  string region = 6;
+  string path = 7;
+}
+
+message BroadcastOptions {
+  string rtmp_url = 1;
+  string hls_url = 2;
+}
+
+message TranscribeOptions {
+
+}
+
+message CallType {
+  string name = 1;
+  Security security = 2;
+
+  // enable broadcasting by default when creating a call of this type
+  bool broadcast = 3;
+  repeated BroadcastOptions broadcast_options = 4;
+
+  // enable transcription by default
+  bool transcribe = 5;
+  TranscribeOptions transcribe_options = 6;
+
+  string created_at = 7;
+  string updated_at = 8;
+}
+
+message Security {
+  // TODO this is actually one of the most complex UI things in zoom :)
+  // controls if regular users are allowed to do the following
+  // yes/no/request
+  enum IsAllowed {
+    IS_ALLOWED_YES_UNSPECIFIED = 0;
+    IS_ALLOWED_NO = 1;
+    IS_ALLOWED_REQUEST = 2;
+  }
+  bool hide_profile_pictures = 1;
+  IsAllowed share_screen = 2;
+  bool rename_user = 3;
+  IsAllowed unmute = 4;
+  IsAllowed start_video = 5;
+  IsAllowed screen_share = 6;
+  IsAllowed record = 7;
+  IsAllowed broadcast = 8;
+
+}
+
+// those who are online in the call
+message Participant {
+  string user_id = 1;
+  string role = 2;
+  bool online = 3;
+}
+
+message CallState {
+  // Little different to member/watcher concept. Both are in the participant list
+  string call_id = 1;
+  repeated Participant participants = 2;
+}
+
+message Call {
+  string id = 1 [(validate.rules).string.min_len = 1];
+  string name = 2;
+  string created_by_user_id = 3;
+  string created_at = 4;
+  string updated_at = 5;
+
+  // enable broadcasting by default when creating a call of this type
+  bool broadcast = 6;
+  repeated BroadcastOptions broadcast_options = 7;
+
+  // enable transcription by default
+  bool transcribe = 8;
+  TranscribeOptions transcribe_options = 9;
+}

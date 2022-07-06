@@ -1,0 +1,81 @@
+syntax = "proto3";
+
+package stream.video;
+
+import "video_models/models.proto";
+
+option go_package = "github.com/GetStream/video/protobuf/video_events";
+
+/**
+CallRinging is fired when a call is created with the ring=true option
+Or when you manually call call.ring()
+ */
+message CallRinging {
+  Call call = 1;
+}
+
+/**
+CallCreated is fired when a call is created
+ */
+message CallCreated {
+  Call call = 1;
+}
+
+message CallUpdated {
+  Call call = 1;
+}
+
+message CallEnded {
+  Call call = 1;
+}
+
+message CallDeleted {
+  Call call = 1;
+}
+
+message UserUpdated {
+  User user = 1;
+}
+
+message ParticipantInvited {
+  Participant participant = 1;
+}
+
+message ParticipantUpdated {
+  Participant participant = 1;
+}
+
+message ParticipantDeleted {
+  string user_id = 1;
+}
+
+message ParticipantJoined {
+  Participant participant = 1;
+}
+
+message ParticipantLeft {
+  Participant participant = 1;
+}
+
+message BroadcastStarted {
+  Broadcast broadcast = 1;
+}
+
+message BroadcastEnded {
+  Broadcast broadcast = 1;
+}
+
+// events
+
+//mute: when someone, or multiple people are muted
+//unmute: when someone, or multiple people are unmuted
+//broadcast.preferences: request from the SFU to the client to provide a different list of uploads
+//screenshare.started
+//screenshare.stopped
+//security.updated: share screen, chat, rename, unmute, start video, hide profile pictures
+//settings: multiple people can share, 1 person can share
+//request: screenshare, recording, unmute
+//room.created
+//room.updated
+//sfu.switch (actually this can be handled using the webrtc connection, but that seems less reliable)
+//network.quality

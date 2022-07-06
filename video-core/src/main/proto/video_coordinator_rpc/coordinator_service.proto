@@ -1,0 +1,310 @@
+syntax = "proto3";
+
+package stream.video;
+
+import "validate/validate.proto";
+import "video_models/models.proto";
+
+option go_package = "github.com/GetStream/video/protobuf/video_coordinator_rpc";
+
+// PROTO questions
+/*
+Best way to model map<string, interface?>
+Best way to support generic error handling
+And response duration time tracking
+Auth headers
+ */
+
+// TODO: how do we include a common error to all responses?
+message Error {
+  int64 code = 1;
+  string description = 2;
+  bytes data = 3;
+}
+
+service CallCoordinatorService {
+  // basic CRUD operations on calls
+  rpc CreateCall(CreateCallRequest) returns (CreateCallResponse);
+  rpc GetCall(GetCallRequest) returns (GetCallResponse);
+  rpc UpdateCall(UpdateCallRequest) returns (UpdateCallResponse);
+  rpc DeleteCall(DeleteCallRequest) returns (DeleteCallResponse);
+
+  // join call
+  rpc JoinCall(JoinCallRequest) returns (JoinCallResponse);
+  rpc SelectEdgeServer(SelectEdgeServerRequest) returns(SelectEdgeServerResponse);
+  rpc LeaveCall(LeaveCallRequest) returns (LeaveCallResponse);
+  rpc EndCall(EndCallRequest) returns (EndCallResponse);
+
+  // register mobile device for push
+  rpc AddDevice(AddDeviceRequest) returns (AddDeviceResponse);
+  rpc RemoveDevice(RemoveDeviceRequest) returns (RemoveDeviceResponse);
+  rpc ListDevices(ListDevicesRequest) returns (ListDevicesResponse);
+
+  // add reaction should perhaps just be handled by chat
+  rpc SendCustomEvent(SendCustomEventRequest) returns (SendCustomEventResponse);
+
+  // room is a confusing name. better to call it breakout room
+  // breakout rooms have their own audio/video track
+  // breakout rooms have their own chat
+  /**
+  TODO
+  rpc CreateBreakoutRoom(CreateBreakoutRoomRequest) returns (CreateBreakoutRoomResponse);
+  rpc JoinBreakoutRoom() returns ();
+  rpc LeaveBreakoutRoom() returns ();
+  rpc DeleteBreakoutRoom() returns ();
+  */
+
+  // server side sync & advanced endpoints
+  rpc CreateOrUpdateCalls(CreateOrUpdateCallsRequest) returns (CreateOrUpdateCallsResponse);
+  rpc CreateOrUpdateUsers(CreateOrUpdateUsersRequest) returns (CreateOrUpdateUsersResponse);
+
+  // recording a call or transcribing a call can be
+  // A. Enabled by default for a call type
+  // B. Enabled when creating the call per the default call type settings
+  // C. Configured differently for that specific call
+  // D. Enabled during the call
+  rpc TranscribeCall(TranscribeCallRequest) returns (TranscribeCallResponse);
+  rpc StopTranscribeCall(StopTranscribeCallRequest) returns (StopTranscribeCallResponse);
+
+  // start broadcast/ stop broadcast to HLS, RTMP and storage
+  rpc StartBroadcast(StartBroadcastRequest) returns (StartBroadcastResponse);
+  rpc StopBroadcast(StopBroadcastRequest) returns (StartBroadcastResponse);
+
+  // User & GDPR endpoints, delete user
+  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
+  rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse);
+  rpc ExportUser(ExportUserRequest) returns (ExportUserResponse);
+  // This requires having some sort of user/team level concept
+
+  // call recording endpoints
+  rpc StartRecording(StartRecordingRequest) returns (StartRecordingResponse);
+  rpc StopRecording(StopRecordingRequest) returns (StopRecordingResponse);
+  rpc GetRecordings(GetRecordingsRequest) returns (GetRecordingsResponse);
+}
+
+message GetCallRequest {
+  string id = 1;
+  string type = 2;
+}
+
+message GetCallResponse {
+  Call call = 1;
+  CallState call_state = 2;
+}
+
+message CreateOrUpdateCallsRequest {
+  repeated CreateCallRequest calls = 1;
+}
+
+message CreateOrUpdateCallsResponse {
+  repeated Call calls = 1;
+}
+
+message CreateCallRequest {
+  string id = 1;
+  string type = 2;
+  bytes jsonencoded_custom_data = 3;
+  repeated string participants = 4;
+
+  // TODO: additional options and overrides to default settings
+  // enable broadcasting
+  bool broadcast = 6;
+  repeated BroadcastOptions broadcast_options = 7;
+
+  // enable transcription
+  bool transcribe = 8;
+  TranscribeOptions transcribe_options = 9;
+
+  bool recording = 10;
+  bool ring = 11; // if true, will call/ring on the browser and phone. default is false
+}
+
+message CreateCallResponse {
+  Call call = 1 [(validate.rules).message.required = true];
+}
+
+message UpdateCallRequest {
+  string id = 1;
+  string type = 2;
+  bytes jsonencoded_custom_data = 3;
+  string auth_token = 4;
+  // TODO: additional options and overrides to default settings
+}
+message UpdateCallResponse {
+  Call call = 1;
+}
+
+message DeleteCallRequest {
+  string id = 1;
+}
+message DeleteCallResponse {
+}
+
+message SelectEdgeServerRequest {
+  string call_id = 1;
+  string user_id = 2;
+  map<string, Latency> latency_by_edge = 3;
+}
+
+message SelectEdgeServerResponse {
+  EdgeServer edge_server = 1;
+  string token = 2; // this is the token livekit needs, not the same token
+}
+
+message AddDeviceRequest {
+  string user_id = 1;
+  string id = 2;
+  string push_provider = 3;
+  bool disabled = 4;
+  string disabled_reason = 5;
+  string push_provider_name = 6;
+}
+
+message AddDeviceResponse {
+}
+
+message RemoveDeviceRequest {
+  string id = 1;
+}
+
+message RemoveDeviceResponse {
+}
+
+message ListDevicesRequest {
+  string user_id = 1;
+}
+
+message ListDevicesResponse {
+  repeated Device devices = 1;
+}
+
+message CreateUserRequest {
+  string id = 1;
+}
+
+message CreateOrUpdateUsersRequest {
+  repeated CreateUserRequest users = 1;
+}
+
+message CreateOrUpdateUsersResponse {
+  repeated User users = 1;
+}
+
+message DeleteUserRequest {
+  string id = 1;
+}
+
+// TODO: do we support both soft and hard delete
+message ExportUserRequest {
+  string id = 1;
+}
+
+// TODO: talk about what data we should export on the GDPR endpoints for a user
+message ExportUserResponse {
+  string id = 1;
+}
+
+message DeleteUserResponse {
+  string id = 1;
+}
+
+message CreateUserResponse {
+  User user = 1;
+}
+
+message SendCustomEventRequest {
+  string type = 1;
+  bytes data = 2;
+}
+
+message SendCustomEventResponse {
+}
+
+message JoinCallRequest {
+  string call_id = 1;
+}
+
+message UserCapability {
+  string action = 1;
+  string description = 2;
+}
+
+message JoinCallResponse {
+  User user = 1;
+  Call call = 2;
+  CallState call_state = 3;
+  repeated Edge edges = 4;
+  repeated UserCapability own_capabilities = 5;
+}
+
+message LeaveCallRequest {
+
+}
+
+message LeaveCallResponse {
+}
+
+message EndCallRequest {
+
+}
+
+message EndCallResponse {
+}
+
+message StartBroadcastRequest {
+  string type = 1; // initially RTMP, record and HLS
+  // TODO: understand what fields we need to track here
+}
+
+message StartBroadcastResponse {
+}
+
+message StopBroadcastRequest {
+}
+
+message StopBroadcastResponse {
+}
+
+message TranscribeCallRequest {
+  // TODO: research what options we need here
+}
+
+message TranscribeCallResponse {
+}
+
+message StopTranscribeCallRequest {
+}
+
+message StopTranscribeCallResponse {
+}
+
+message StoreLatencyRequest {
+}
+
+message StoreLatencyResponse {
+}
+
+message StartRecordingRequest {
+  string call_id = 1;
+  RecordingStorageOptions storage_options = 2;
+  Codec codec = 3;
+}
+
+message StartRecordingResponse {
+}
+
+message StopRecordingRequest {
+  string call_id = 1;
+}
+
+message StopRecordingResponse {
+}
+
+// TODO: how do we do filtering and pagination with proto?
+// here we need to be able to filter, sort and limit by
+// call id, call custom attribute, call creation time, call including a user, call by type
+message GetRecordingsRequest {
+}
+
+message GetRecordingsResponse {
+}

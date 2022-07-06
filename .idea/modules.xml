@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/stream-video-android.iml" filepath="$PROJECT_DIR$/.idea/modules/stream-video-android.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/stream-video-android.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/stream-video-android.app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/stream-video-android.app.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/stream-video-android.app.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/stream-video-android.app.main.iml" filepath="$PROJECT_DIR$/.idea/modules/app/stream-video-android.app.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/stream-video-android.app.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/stream-video-android.app.unitTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/video-core/stream-video-android.video-core.iml" filepath="$PROJECT_DIR$/.idea/modules/video-core/stream-video-android.video-core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/video-core/stream-video-android.video-core.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/video-core/stream-video-android.video-core.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/video-core/stream-video-android.video-core.main.iml" filepath="$PROJECT_DIR$/.idea/modules/video-core/stream-video-android.video-core.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/video-core/stream-video-android.video-core.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/video-core/stream-video-android.video-core.unitTest.iml" />
+    </modules>
+  </component>
+</project>
