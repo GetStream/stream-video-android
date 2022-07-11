@@ -10,15 +10,13 @@ import io.getstream.video.android.utils.onSuccessSuspend
 import io.livekit.android.ConnectOptions
 import io.livekit.android.LiveKit
 import io.livekit.android.RoomOptions
-import io.livekit.android.events.RoomEvent
-import io.livekit.android.events.collect
-import io.livekit.android.room.track.Track
+import io.livekit.android.room.RoomListener
 import io.livekit.android.room.track.VideoTrack
 import kotlinx.coroutines.launch
 import stream.video.SelectEdgeServerRequest
 import stream.video.SelectEdgeServerResponse
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), RoomListener {
 
     private lateinit var binding: ActivityMainBinding
 
@@ -33,7 +31,6 @@ class MainActivity : AppCompatActivity() {
             val result = client.selectEdgeServer(
                 SelectEdgeServerRequest(
                     call_id = "testroom",
-                    user_id = "filbabic"
                 )
             )
 
@@ -60,60 +57,23 @@ class MainActivity : AppCompatActivity() {
             applicationContext,
             RoomOptions()
         )
+        room.listener = this@MainActivity
 
         room.connect(
             url = url,
             token = token,
-            options = ConnectOptions()
+            options = ConnectOptions(autoSubscribe = true)
         )
+        val participant = room.localParticipant
 
-        room.localParticipant.setCameraEnabled(true)
-        room.localParticipant.setMicrophoneEnabled(true)
+        participant.setCameraEnabled(true)
+        participant.setMicrophoneEnabled(true)
 
-        lifecycleScope.launch {
-            room.events.collect { event ->
-                when (event) {
-                    is RoomEvent.Reconnecting -> {}
-                    is RoomEvent.Reconnected -> {}
-                    is RoomEvent.Disconnected -> {}
-                    is RoomEvent.ParticipantConnected -> {
-                        Log.d("henloParticipant", "frens")
-                    }
-                    is RoomEvent.ParticipantDisconnected -> {}
-                    is RoomEvent.ActiveSpeakersChanged -> {}
-                    is RoomEvent.RoomMetadataChanged -> {}
-                    is RoomEvent.ParticipantMetadataChanged -> {}
-                    is RoomEvent.TrackMuted -> {}
-                    is RoomEvent.TrackUnmuted -> {}
-                    is RoomEvent.TrackPublished -> {
-                        Log.d("henloPublished", "frens")
-                        val track = event.publication.track
-                        renderVideo(track)
-                    }
-                    is RoomEvent.TrackUnpublished -> {}
-                    is RoomEvent.TrackSubscribed -> {
-                        Log.d("henloSubscribed", "frens")
-                        renderVideo(event.track)
-                    }
-                    is RoomEvent.TrackSubscriptionFailed -> {}
-                    is RoomEvent.TrackUnsubscribed -> {}
-                    is RoomEvent.TrackStreamStateChanged -> {}
-                    is RoomEvent.TrackSubscriptionPermissionChanged -> {}
-                    is RoomEvent.DataReceived -> {}
-                    is RoomEvent.ConnectionQualityChanged -> {}
-                    is RoomEvent.FailedToConnect -> {}
-                    is RoomEvent.ParticipantPermissionsChanged -> {
-                    }
-                }
-            }
-        }
-    }
+        val videoTrack = participant.videoTracks.firstOrNull()?.second as? VideoTrack ?: return
 
-    private fun renderVideo(track: Track?) {
-        val video = track as? VideoTrack
-        if (video != null) {
-            video.addRenderer(binding.rendererView)
-        }
+        // we need to connect both the room to the renderer and the track, to show something
+        room.initVideoRenderer(binding.rendererView)
+        videoTrack.addRenderer(binding.rendererView)
     }
 
     private fun enrichUrl(url: String): String {
