@@ -1,4 +1,4 @@
-package utils
+package io.getstream.video.android.utils
 
 open class ChatError(
     val message: String? = null,

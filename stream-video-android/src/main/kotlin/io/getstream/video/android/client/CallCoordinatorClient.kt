@@ -2,7 +2,7 @@ package io.getstream.video.android.client
 
 import stream.video.SelectEdgeServerRequest
 import stream.video.SelectEdgeServerResponse
-import utils.Result
+import io.getstream.video.android.utils.Result
 
 interface CallCoordinatorClient {
 

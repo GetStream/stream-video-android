@@ -5,8 +5,8 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import stream.video.SelectEdgeServerRequest
-import utils.onError
-import utils.onSuccess
+import io.getstream.video.android.utils.onError
+import io.getstream.video.android.utils.onSuccess
 
 class MainActivity : AppCompatActivity() {
 

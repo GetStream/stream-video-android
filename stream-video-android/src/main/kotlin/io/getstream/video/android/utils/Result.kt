@@ -1,4 +1,4 @@
-package utils
+package io.getstream.video.android.utils
 
 /**
  *  A class which encapsulates a successful outcome with a value of type [T] or a failure with [ChatError].

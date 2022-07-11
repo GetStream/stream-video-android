@@ -3,7 +3,7 @@ package io.getstream.video.android.client
 import io.getstream.video.android.api.CallCoordinatorService
 import stream.video.SelectEdgeServerRequest
 import stream.video.SelectEdgeServerResponse
-import utils.Result
+import io.getstream.video.android.utils.Result
 
 class CallCoordinatorClientImpl(
     private val callCoordinatorService: CallCoordinatorService
