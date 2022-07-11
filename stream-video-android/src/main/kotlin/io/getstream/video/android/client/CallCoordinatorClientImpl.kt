@@ -17,15 +17,16 @@ class CallCoordinatorClientImpl(
      * @return [Result] wrapper around the response from the server, or an error if something went
      * wrong.
      */
-    override suspend fun selectEdgeServer(request: SelectEdgeServerRequest): Result<SelectEdgeServerResponse> = try {
-        val response = callCoordinatorService.selectEdgeServer(request)
+    override suspend fun selectEdgeServer(request: SelectEdgeServerRequest): Result<SelectEdgeServerResponse> =
+        try {
+            val response = callCoordinatorService.selectEdgeServer(request)
 
-        if (response.edge_server != null) {
-            Result.success(response)
-        } else {
-            throw NullPointerException("Invalid response, edge server is null.")
+            if (response.edge_server != null) {
+                Result.success(response)
+            } else {
+                throw NullPointerException("Invalid response, edge server is null.")
+            }
+        } catch (error: Throwable) {
+            Result.error(error)
         }
-    } catch (error: Throwable) {
-        Result.error(error)
-    }
 }
