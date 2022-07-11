@@ -1,19 +1,28 @@
 plugins {
-    id 'com.android.application'
+    id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
+    id 'com.squareup.wire'
+}
+
+wire {
+    kotlin {
+        rpcRole = 'none'
+    }
+
+    protoPath {
+        srcDir 'src/main/proto'
+    }
 }
 
 android {
     compileSdk 32
 
     defaultConfig {
-        applicationId "io.getstream.video.android"
         minSdk 21
         targetSdk 32
-        versionCode 1
-        versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
     }
 
     buildTypes {
@@ -23,8 +32,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
     kotlinOptions {
         jvmTarget = '1.8'
@@ -32,12 +41,15 @@ android {
 }
 
 dependencies {
-    implementation project(':stream-video-android')
+
     implementation 'androidx.core:core-ktx:1.8.0'
     implementation 'androidx.appcompat:appcompat:1.4.2'
     implementation 'com.google.android.material:material:1.6.1'
-    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.5.0'
 
+    api 'com.squareup.wire:wire-runtime:4.4.0'
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-wire:2.9.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.10.0'
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
