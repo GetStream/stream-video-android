@@ -1,5 +1,7 @@
 # Stream Video Android
 
+[![Android CI](https://github.com/GetStream/video-android/actions/workflows/android.yml/badge.svg)](https://github.com/GetStream/video-android/actions/workflows/android.yml)
+
 Stream Video repository for Android.
 
 
