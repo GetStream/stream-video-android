@@ -40,6 +40,10 @@ android {
     }
 }
 
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+    kotlinOptions.freeCompilerArgs += ["-Xexplicit-api=strict"]
+}
+
 dependencies {
 
     implementation 'androidx.core:core-ktx:1.8.0'

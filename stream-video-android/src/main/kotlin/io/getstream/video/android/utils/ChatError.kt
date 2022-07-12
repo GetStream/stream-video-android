@@ -1,8 +1,8 @@
 package io.getstream.video.android.utils
 
-open class ChatError(
-    val message: String? = null,
-    val cause: Throwable? = null
+public open class ChatError(
+    public val message: String? = null,
+    public val cause: Throwable? = null
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

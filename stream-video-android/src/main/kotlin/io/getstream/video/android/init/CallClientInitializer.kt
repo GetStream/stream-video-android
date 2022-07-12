@@ -10,7 +10,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.wire.WireConverterFactory
 import retrofit2.create
 
-object CallClientInitializer {
+public object CallClientInitializer {
 
     private var callCoordinatorClient: CallCoordinatorClient? = null
 
@@ -21,7 +21,7 @@ object CallClientInitializer {
      * @param userToken The token of the current user. Throws if it's empty.
      * @return A cached instance of the [CallCoordinatorClient] used to communicate with the API.
      */
-    fun buildClient(userToken: String): CallCoordinatorClient {
+    public fun buildClient(userToken: String): CallCoordinatorClient {
         if (userToken.isBlank()) throw IllegalArgumentException("Cannot initialize io.getstream.video.android.client with empty user token.")
 
         val currentClient = callCoordinatorClient

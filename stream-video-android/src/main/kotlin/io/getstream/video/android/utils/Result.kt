@@ -3,40 +3,40 @@ package io.getstream.video.android.utils
 /**
  *  A class which encapsulates a successful outcome with a value of type [T] or a failure with [ChatError].
  */
-class Result<T : Any> private constructor(
+public class Result<T : Any> private constructor(
     private val data: T?,
     private val error: ChatError?,
 ) {
 
     @Suppress("DEPRECATION")
-    constructor(data: T) : this(data, null)
+    internal constructor(data: T) : this(data, null)
 
     @Suppress("DEPRECATION")
-    constructor(error: ChatError) : this(null, error)
+    internal constructor(error: ChatError) : this(null, error)
 
     /**
      * Returns true if a request of payload response has been successful.
      */
-    val isSuccess: Boolean
+    public val isSuccess: Boolean
         get() = data != null
 
     /**
      * Returns true if a request of payload response has been failed.
      */
-    val isError: Boolean
+    public val isError: Boolean
         get() = error != null
 
     /**
      * Returns the successful data payload.
      */
-    fun data(): T {
+    public fun data(): T {
         return checkNotNull(data) { "Result is not successful. Check result.isSuccess before reading the data." }
     }
 
     /**
      * Returns the [ChatError] error payload.
      */
-    fun error(): ChatError {
+    public fun error(): ChatError {
         return checkNotNull(error) {
             "Result is successful, not an error. Check result.isSuccess before reading the error."
         }
@@ -64,7 +64,7 @@ class Result<T : Any> private constructor(
         return "Result(data=$data, error=$error)"
     }
 
-    companion object {
+    public companion object {
 
         /**
          * Creates a [Result] object with [data] payload.
@@ -74,7 +74,7 @@ class Result<T : Any> private constructor(
          * @return [Result] of [T] that contains successful data payload.
          */
         @JvmStatic
-        fun <T : Any> success(data: T): Result<T> {
+        public fun <T : Any> success(data: T): Result<T> {
             return Result(data)
         }
 
@@ -86,7 +86,7 @@ class Result<T : Any> private constructor(
          * @return [Result] of [T] that contains [ChatError] error payload.
          */
         @JvmStatic
-        fun <T : Any> error(t: Throwable): Result<T> {
+        public fun <T : Any> error(t: Throwable): Result<T> {
             return Result(null, ChatError(t.message, t))
         }
 
@@ -98,7 +98,7 @@ class Result<T : Any> private constructor(
          * @return [Result] of [T] that contains [ChatError] error payload.
          */
         @JvmStatic
-        fun <T : Any> error(error: ChatError): Result<T> {
+        public fun <T : Any> error(error: ChatError): Result<T> {
             return Result(null, error)
         }
     }
@@ -112,7 +112,7 @@ class Result<T : Any> private constructor(
  * @return The original instance of the [Result].
  */
 @JvmSynthetic
-inline fun <T : Any> Result<T>.onSuccess(
+public inline fun <T : Any> Result<T>.onSuccess(
     crossinline successSideEffect: (T) -> Unit,
 ): Result<T> = apply {
     if (isSuccess) {
@@ -128,7 +128,7 @@ inline fun <T : Any> Result<T>.onSuccess(
  * @return The original instance of the [Result].
  */
 @JvmSynthetic
-suspend inline fun <T : Any> Result<T>.onSuccessSuspend(
+public suspend inline fun <T : Any> Result<T>.onSuccessSuspend(
     crossinline successSideEffect: suspend (T) -> Unit,
 ): Result<T> = apply {
     if (isSuccess) {
@@ -144,7 +144,7 @@ suspend inline fun <T : Any> Result<T>.onSuccessSuspend(
  * @return The original instance of the [Result].
  */
 @JvmSynthetic
-inline fun <T : Any> Result<T>.onError(
+public inline fun <T : Any> Result<T>.onError(
     crossinline errorSideEffect: (ChatError) -> Unit,
 ): Result<T> = apply {
     if (isError) {
@@ -160,7 +160,7 @@ inline fun <T : Any> Result<T>.onError(
  * @return The original instance of the [Result].
  */
 @JvmSynthetic
-suspend inline fun <T : Any> Result<T>.onErrorSuspend(
+public suspend inline fun <T : Any> Result<T>.onErrorSuspend(
     crossinline errorSideEffect: suspend (ChatError) -> Unit,
 ): Result<T> = apply {
     if (isError) {
@@ -173,11 +173,11 @@ suspend inline fun <T : Any> Result<T>.onErrorSuspend(
  *
  * @return A [Result] the contains an instance of [T] as a data payload.
  */
-fun <T : Any> T.toResult(): Result<T> = Result.success(this)
+public fun <T : Any> T.toResult(): Result<T> = Result.success(this)
 
 /**
  * Returns a [Result] of type [T] that contains an they same error as payload.
  *
  * @return A [Result] of type [T] that contains an they same error as payload.
  */
-fun <T : Any> ChatError.toResultError(): Result<T> = Result.error(this)
+public fun <T : Any> ChatError.toResultError(): Result<T> = Result.error(this)

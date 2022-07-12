@@ -5,7 +5,7 @@ import stream.video.SelectEdgeServerRequest
 import stream.video.SelectEdgeServerResponse
 import io.getstream.video.android.utils.Result
 
-class CallCoordinatorClientImpl(
+internal class CallCoordinatorClientImpl(
     private val callCoordinatorService: CallCoordinatorService
 ) : CallCoordinatorClient {
 

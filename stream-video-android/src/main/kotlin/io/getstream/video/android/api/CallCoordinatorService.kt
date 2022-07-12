@@ -14,9 +14,9 @@ import stream.video.SelectEdgeServerResponse
  *
  * We also override the Content-Type header to match our BE implementation.
  */
-interface CallCoordinatorService {
+public interface CallCoordinatorService {
 
     @Headers("Content-Type: application/protobuf")
     @POST("/stream.video.CallCoordinatorService/SelectEdgeServer")
-    suspend fun selectEdgeServer(@Body selectEdgeServerRequest: SelectEdgeServerRequest): SelectEdgeServerResponse
+    public suspend fun selectEdgeServer(@Body selectEdgeServerRequest: SelectEdgeServerRequest): SelectEdgeServerResponse
 }
