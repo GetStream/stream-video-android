@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.client
+package io.getstream.video.android.client.coordinator
 
 import io.getstream.video.android.api.CallCoordinatorService
 import io.getstream.video.android.utils.Result
@@ -37,10 +37,10 @@ internal class CallCoordinatorClientImpl(
         try {
             val response = callCoordinatorService.selectEdgeServer(request)
 
-            if (response.edge_server != null) {
+            if (response.edge_server != null && response.token.isNotBlank()) {
                 Result.success(response)
             } else {
-                throw NullPointerException("Invalid response, edge server is null.")
+                throw NullPointerException("Invalid response, edge server or token are missing.")
             }
         } catch (error: Throwable) {
             Result.error(error)

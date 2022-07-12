@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.client
+package io.getstream.video.android.client.coordinator
 
 import io.getstream.video.android.utils.Result
 import stream.video.SelectEdgeServerRequest

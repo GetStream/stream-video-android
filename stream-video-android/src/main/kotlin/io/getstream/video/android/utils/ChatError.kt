@@ -16,6 +16,12 @@
 
 package io.getstream.video.android.utils
 
+/**
+ * Represents an SDK error that contains a message and the cause.
+ *
+ * @property message The message that represents the error.
+ * @property cause Cause of the error, either a BE exception or an SDK based one.
+ */
 public open class ChatError(
     public val message: String? = null,
     public val cause: Throwable? = null
