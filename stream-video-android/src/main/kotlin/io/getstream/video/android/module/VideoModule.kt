@@ -16,12 +16,14 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.wire.WireConverterFactory
+import stream.video.User
 
 /**
  * Serves as an internal DI framework that allows us to cache heavy components reused across the
  * SDK.
  *
  * @property apiKey The key used to authenticate user apps with the API.
+ * @property user The currently logged in user.
  * @property tokenProvider Provider of user-tokens.
  * @property appContext The context of the app, used for Android-based dependencies.
  * @property lifecycle The lifecycle of the process.
@@ -29,6 +31,7 @@ import retrofit2.converter.wire.WireConverterFactory
  */
 internal class VideoModule(
     private val apiKey: String,
+    private val user: User,
     private val tokenProvider: TokenProvider,
     private val appContext: Context,
     private val lifecycle: Lifecycle,
@@ -70,7 +73,9 @@ internal class VideoModule(
      * User state that provides the information about the current user.
      */
     private val userState: UserState by lazy {
-        UserState()
+        UserState().apply {
+            setUser(this@VideoModule.user)
+        }
     }
 
     // TODO - build notification handler/provider
@@ -86,7 +91,7 @@ internal class VideoModule(
             .addInterceptor(
                 buildInterceptor(
                     apiKey = apiKey,
-                    userToken = tokenProvider.provideUserToken()
+                    tokenProvider = tokenProvider
                 )
             )
             .addInterceptor(
@@ -101,17 +106,17 @@ internal class VideoModule(
      * Builds the HTTP interceptor that adds headers to all API calls.
      *
      * @param apiKey The API key of the app.
-     * @param userToken The token of the current user.
+     * @param tokenProvider Provider of the user token.
      *
      * @return [Interceptor] which adds headers.
      */
     private fun buildInterceptor(
         apiKey: String,
-        userToken: String
+        tokenProvider: TokenProvider
     ): Interceptor = Interceptor {
         val original = it.request()
         val updated = original.newBuilder()
-            .addHeader(HEADER_AUTHORIZATION, userToken)
+            .addHeader(HEADER_AUTHORIZATION, tokenProvider.provideUserToken())
             // TODO - add API key to auth or use to authenticate the user?
             .build()
 

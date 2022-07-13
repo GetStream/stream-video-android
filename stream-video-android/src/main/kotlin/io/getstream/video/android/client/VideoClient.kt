@@ -63,8 +63,17 @@ public class VideoClient(
         return callCoordinatorClient.selectEdgeServer(request)
     }
 
+    /**
+     * Builder for the [VideoClient] that sets all the dependencies up.
+     *
+     * @property apiKey The key used to validate the user app.
+     * @property user Currently logged in user.
+     * @property appContext Context of the app.
+     * @property tokenProvider Handle that provides the user token.
+     */
     public class Builder(
         private val apiKey: String,
+        private val user: User,
         private val appContext: Context,
         private val tokenProvider: TokenProvider
     ) {
@@ -92,6 +101,7 @@ public class VideoClient(
 
             val videoModule = VideoModule(
                 apiKey = apiKey,
+                user = user,
                 tokenProvider = tokenProvider,
                 appContext = appContext,
                 lifecycle = lifecycle,
