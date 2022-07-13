@@ -1,4 +1,4 @@
-package io.getstream.video.android
+package io.getstream.video.android.app
 
 import io.getstream.video.android.token.TokenProvider
 

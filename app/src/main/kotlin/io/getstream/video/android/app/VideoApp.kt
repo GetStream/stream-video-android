@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android
+package io.getstream.video.android.app
 
 import android.app.Application
 import io.getstream.video.android.client.VideoClient

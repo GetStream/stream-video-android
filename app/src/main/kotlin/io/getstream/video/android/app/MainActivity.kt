@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android
+package io.getstream.video.android.app
 
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import io.getstream.video.android.databinding.ActivityMainBinding
+import io.getstream.video.android.app.databinding.ActivityMainBinding
 import io.getstream.video.android.utils.onError
 import io.getstream.video.android.utils.onSuccessSuspend
 import io.livekit.android.ConnectOptions
