@@ -42,7 +42,6 @@ import kotlinx.coroutines.launch
 import stream.video.SelectEdgeServerRequest
 import stream.video.SelectEdgeServerResponse
 
-
 class MainActivity : AppCompatActivity(), RoomListener {
 
     private lateinit var binding: ActivityMainBinding
@@ -71,8 +70,6 @@ class MainActivity : AppCompatActivity(), RoomListener {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-
     }
 
     override fun onResume() {
@@ -140,10 +137,12 @@ class MainActivity : AppCompatActivity(), RoomListener {
     }
 
     private fun startSettings() {
-        startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-            val uri = Uri.fromParts("package", packageName, null)
-            data = uri
-        })
+        startActivity(
+            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                val uri = Uri.fromParts("package", packageName, null)
+                data = uri
+            }
+        )
     }
 
     private fun startVideoFlow() {
