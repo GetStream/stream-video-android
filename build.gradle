@@ -14,3 +14,10 @@ subprojects {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+
+apply from: teamPropsFile("git-hooks.gradle.kts")
+
+def teamPropsFile(String propsFile){
+    def teamPropsDir = file("team-props")
+    return new File(teamPropsDir, propsFile)
+}

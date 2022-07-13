@@ -1,3 +1,6 @@
+import io.getstream.video.android.Configuration
+import io.getstream.video.android.Dependencies
+
 plugins {
     id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
@@ -15,11 +18,11 @@ wire {
 }
 
 android {
-    compileSdk 32
+    compileSdk Configuration.compileSdk
 
     defaultConfig {
-        minSdk 21
-        targetSdk 32
+        minSdk Configuration.minSdk
+        targetSdk Configuration.targetSdk
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
@@ -31,12 +34,18 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
     kotlinOptions {
         jvmTarget = '1.8'
+    }
+
+    lintOptions {
+        abortOnError false
     }
 }
 
@@ -45,25 +54,24 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
 }
 
 dependencies {
-
-    implementation 'androidx.core:core-ktx:1.8.0'
-    implementation 'androidx.appcompat:appcompat:1.4.2'
-    implementation 'com.google.android.material:material:1.6.1'
+    implementation Dependencies.androidxCore
+    implementation Dependencies.androidxAppcompat
+    implementation Dependencies.material
 
     // lifecycle
-    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.5.0"
-    implementation "androidx.lifecycle:lifecycle-process:2.5.0"
+    implementation Dependencies.androidxLifecycleRuntime
+    implementation Dependencies.androidxLifecycleProcess
 
     // coroutines
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.1'
+    implementation Dependencies.coroutines
 
     // API & Protobuf
-    api 'com.squareup.wire:wire-runtime:4.4.0'
-    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
-    implementation 'com.squareup.retrofit2:converter-wire:2.9.0'
-    implementation 'com.squareup.okhttp3:logging-interceptor:4.10.0'
+    api Dependencies.wireRuntime
+    implementation Dependencies.retrofit
+    implementation Dependencies.retrofitWireConverter
+    implementation Dependencies.okhttpLoggingInterceptor
 
-    api "io.livekit:livekit-android:1.0.1"
+    api Dependencies.liveKit
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'

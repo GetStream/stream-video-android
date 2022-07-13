@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2014-2022 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.client
 
 import android.content.Context
@@ -13,7 +29,12 @@ import io.getstream.video.android.utils.Result
 import io.livekit.android.ConnectOptions
 import kotlinx.coroutines.CoroutineScope
 import okhttp3.logging.HttpLoggingInterceptor
-import stream.video.*
+import stream.video.Call
+import stream.video.Device
+import stream.video.Latency
+import stream.video.SelectEdgeServerRequest
+import stream.video.SelectEdgeServerResponse
+import stream.video.User
 
 /**
  * The core client that handles all API and socket communication and acts as a central place to
@@ -41,7 +62,6 @@ public class VideoClient(
     }
 
     public fun registerDevice(device: Device) {
-
     }
 
     public fun joinCall(type: String, id: String, connectOptions: ConnectOptions): Call {
@@ -121,7 +141,6 @@ public class VideoClient(
             return videoClient
         }
     }
-
 
     public companion object {
 

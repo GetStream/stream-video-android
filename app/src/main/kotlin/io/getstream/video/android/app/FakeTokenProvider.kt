@@ -14,19 +14,13 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.client.coordinator
+package io.getstream.video.android.app
 
-import io.getstream.video.android.utils.Result
-import stream.video.SelectEdgeServerRequest
-import stream.video.SelectEdgeServerResponse
+import io.getstream.video.android.token.TokenProvider
 
-public interface CallCoordinatorClient {
+class FakeTokenProvider : TokenProvider {
 
-    /**
-     * Asks the API for a correct edge server that can handle a connection for the given request.
-     *
-     * @param request The set of information used to find the server.
-     * @return a [Result] wrapper of the [SelectEdgeServerResponse], based on the API response.
-     */
-    public suspend fun selectEdgeServer(request: SelectEdgeServerRequest): Result<SelectEdgeServerResponse>
+    override fun provideUserToken(): String {
+        return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidG9tbWFzbyJ9.XGkxJKi33fHr3cHyLFc6HRnbPgLuwNHuETWQ2MWzz5c"
+    }
 }
