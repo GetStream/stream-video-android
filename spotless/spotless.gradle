@@ -5,7 +5,7 @@ spotless {
         target "**/*.kt"
         targetExclude "**/build/**/*.kt"
         ktlint()
-        licenseHeaderFile "$rootDir/spotless/copyright.kt"
+        licenseHeaderFile "$rootDir/spotless/spotless.license.kt"
         trimTrailingWhitespace()
         endWithNewline()
     }
