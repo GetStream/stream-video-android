@@ -25,5 +25,10 @@ public interface TokenProvider {
     /**
      * @return The user token backed by authentication services.
      */
-    public fun provideUserToken(): String
+    public fun loadToken(): String
+
+    /**
+     * @return The user token that's cached.
+     */
+    public fun getCachedToken(): String
 }

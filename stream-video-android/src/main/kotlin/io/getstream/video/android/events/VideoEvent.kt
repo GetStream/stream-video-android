@@ -14,16 +14,27 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.socket
+package io.getstream.video.android.events
 
-import io.getstream.video.android.utils.VideoError
 import stream.video.User
+import java.util.*
 
-public interface VideoSocket {
-
-    public fun connectUser(user: User)
-
-    public fun reconnectUser(user: User)
-
-    public fun onSocketError(error: VideoError)
+/**
+ * Represents the events coming in from the socket.
+ */
+public sealed class VideoEvent {
+    public abstract val type: String
+    public abstract val createdAt: Date
 }
+
+/**
+ * Triggered when a user gets connected to the WS
+ */
+public data class ConnectedEvent(
+    override val type: String,
+    override val createdAt: Date,
+    val me: User,
+    val connectionId: String,
+) : VideoEvent()
+
+// TODO - rest of the events

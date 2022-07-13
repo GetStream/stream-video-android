@@ -17,14 +17,20 @@
 package io.getstream.video.android.module
 
 import android.content.Context
+import android.net.ConnectivityManager
 import androidx.lifecycle.Lifecycle
 import io.getstream.video.android.api.CallCoordinatorService
 import io.getstream.video.android.client.coordinator.CallCoordinatorClient
 import io.getstream.video.android.client.coordinator.CallCoordinatorClientImpl
 import io.getstream.video.android.client.user.UserState
 import io.getstream.video.android.dispatchers.DispatcherProvider
+import io.getstream.video.android.network.NetworkStateProvider
+import io.getstream.video.android.parser.VideoParser
+import io.getstream.video.android.socket.SocketFactory
 import io.getstream.video.android.socket.VideoSocket
 import io.getstream.video.android.socket.VideoSocketImpl
+import io.getstream.video.android.token.TokenManager
+import io.getstream.video.android.token.TokenManagerImpl
 import io.getstream.video.android.token.TokenProvider
 import kotlinx.coroutines.CoroutineScope
 import okhttp3.Interceptor
@@ -94,6 +100,48 @@ internal class VideoModule(
         }
     }
 
+    /**
+     * Cached user token manager.
+     */
+    private val tokenManager: TokenManager by lazy {
+        TokenManagerImpl().apply {
+            setTokenProvider(tokenProvider)
+        }
+    }
+
+    // TODO - add moshi parser
+    private val videoParser: VideoParser by lazy {
+        object : VideoParser {
+            override fun toJson(any: Any): String {
+                return ""
+            }
+
+            override fun <T : Any> fromJson(raw: String, clazz: Class<T>): T {
+                TODO("Not implemented")
+            }
+        }
+    }
+
+    /**
+     * Factory for providing sockets based on the connected user.
+     */
+    private val socketFactory: SocketFactory by lazy {
+        SocketFactory(
+            parser = videoParser,
+            tokenManager = tokenManager
+        )
+    }
+
+    /**
+     * Provider that handles connectivity and listens to state changes, exposing them to listeners.
+     */
+    private val networkStateProvider: NetworkStateProvider by lazy {
+        NetworkStateProvider(
+            connectivityManager = appContext
+                .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        )
+    }
+
     // TODO - build notification handler/provider
 
     /**
@@ -132,7 +180,7 @@ internal class VideoModule(
     ): Interceptor = Interceptor {
         val original = it.request()
         val updated = original.newBuilder()
-            .addHeader(HEADER_AUTHORIZATION, tokenProvider.provideUserToken())
+            .addHeader(HEADER_AUTHORIZATION, tokenProvider.getCachedToken())
             // TODO - add API key to auth or use to authenticate the user?
             .build()
 
@@ -161,7 +209,16 @@ internal class VideoModule(
      * @return The WebSocket handler that is used to connect to different calls.
      */
     public fun socket(): VideoSocket {
-        return VideoSocketImpl()
+        // TODO - web socket URL
+        return VideoSocketImpl(
+            apiKey = apiKey,
+            wssUrl = "",
+            tokenManager = tokenManager,
+            socketFactory = socketFactory,
+            networkStateProvider = networkStateProvider,
+            parser = videoParser,
+            coroutineScope = scope
+        )
     }
 
     /**

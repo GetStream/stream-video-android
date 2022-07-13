@@ -136,29 +136,8 @@ public class VideoClient(
                 userState = videoModule.userState(),
                 callCoordinatorClient = videoModule.callClient()
             )
-            instance = videoClient
 
             return videoClient
-        }
-    }
-
-    public companion object {
-
-        /**
-         * The current instance of the [VideoClient].
-         */
-        private var instance: VideoClient? = null
-
-        /**
-         * @return The static reusable instance of the [VideoClient] built using
-         * [VideoClient.Builder.build].
-         */
-        @JvmStatic
-        public fun instance(): VideoClient {
-            return instance
-                ?: throw IllegalArgumentException(
-                    "VideoClient is not initialized! Call VideoClient.Builder::build() before accessing."
-                )
         }
     }
 }

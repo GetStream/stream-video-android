@@ -17,10 +17,16 @@
 package io.getstream.video.android.client.coordinator
 
 import io.getstream.video.android.api.CallCoordinatorService
+import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Result
+import io.getstream.video.android.utils.Success
+import io.getstream.video.android.utils.VideoError
 import stream.video.SelectEdgeServerRequest
 import stream.video.SelectEdgeServerResponse
 
+/**
+ * An accessor that allows us to communicate with the API around video calls.
+ */
 internal class CallCoordinatorClientImpl(
     private val callCoordinatorService: CallCoordinatorService
 ) : CallCoordinatorClient {
@@ -38,11 +44,11 @@ internal class CallCoordinatorClientImpl(
             val response = callCoordinatorService.selectEdgeServer(request)
 
             if (response.edge_server != null && response.token.isNotBlank()) {
-                Result.success(response)
+                Success(response)
             } else {
                 throw NullPointerException("Invalid response, edge server or token are missing.")
             }
         } catch (error: Throwable) {
-            Result.error(error)
+            Failure(VideoError(error.message, error))
         }
 }

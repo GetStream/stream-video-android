@@ -16,14 +16,17 @@
 
 package io.getstream.video.android.socket
 
-import io.getstream.video.android.utils.VideoError
-import stream.video.User
+import io.getstream.video.android.events.VideoEvent
+import io.getstream.video.android.parser.VideoParser
+import okhttp3.WebSocket
 
-public interface VideoSocket {
+internal class Socket(private val socket: WebSocket, private val parser: VideoParser) {
 
-    public fun connectUser(user: User)
+    fun send(event: VideoEvent) {
+        socket.send(parser.toJson(event))
+    }
 
-    public fun reconnectUser(user: User)
-
-    public fun onSocketError(error: VideoError)
+    fun close(code: Int, reason: String) {
+        socket.close(code, reason)
+    }
 }

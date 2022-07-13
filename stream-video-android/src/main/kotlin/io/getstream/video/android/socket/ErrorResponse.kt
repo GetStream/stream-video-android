@@ -16,14 +16,12 @@
 
 package io.getstream.video.android.socket
 
-import io.getstream.video.android.utils.VideoError
-import stream.video.User
-
-public interface VideoSocket {
-
-    public fun connectUser(user: User)
-
-    public fun reconnectUser(user: User)
-
-    public fun onSocketError(error: VideoError)
+public data class ErrorResponse(
+    val code: Int = -1,
+    var message: String = "",
+    var statusCode: Int = -1,
+    val exceptionFields: Map<String, String> = mapOf(),
+    var moreInfo: String = ""
+) {
+    var duration: String = ""
 }

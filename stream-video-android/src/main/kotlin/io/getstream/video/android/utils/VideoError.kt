@@ -22,7 +22,7 @@ package io.getstream.video.android.utils
  * @property message The message that represents the error.
  * @property cause Cause of the error, either a BE exception or an SDK based one.
  */
-public open class ChatError(
+public open class VideoError(
     public val message: String? = null,
     public val cause: Throwable? = null
 ) {
@@ -30,7 +30,7 @@ public open class ChatError(
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        return (other as? ChatError)?.let {
+        return (other as? VideoError)?.let {
             message == it.message && cause.equalCause(it.cause)
         } ?: false
     }

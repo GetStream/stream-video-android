@@ -16,14 +16,4 @@
 
 package io.getstream.video.android.socket
 
-import io.getstream.video.android.utils.VideoError
-import stream.video.User
-
-public interface VideoSocket {
-
-    public fun connectUser(user: User)
-
-    public fun reconnectUser(user: User)
-
-    public fun onSocketError(error: VideoError)
-}
+public data class SocketErrorMessage(val error: ErrorResponse? = null)

@@ -20,7 +20,22 @@ import io.getstream.video.android.token.TokenProvider
 
 class FakeTokenProvider : TokenProvider {
 
-    override fun provideUserToken(): String {
-        return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidG9tbWFzbyJ9.XGkxJKi33fHr3cHyLFc6HRnbPgLuwNHuETWQ2MWzz5c"
+    private var token: String = ""
+
+    init {
+        loadToken()
+    }
+
+    override fun loadToken(): String {
+        val token =
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidG9tbWFzbyJ9.XGkxJKi33fHr3cHyLFc6HRnbPgLuwNHuETWQ2MWzz5c"
+
+        this.token = token
+
+        return token
+    }
+
+    override fun getCachedToken(): String {
+        return token
     }
 }
