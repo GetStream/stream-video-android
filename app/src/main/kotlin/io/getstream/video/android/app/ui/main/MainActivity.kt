@@ -25,19 +25,40 @@ import android.os.Build.VERSION_CODES.M
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
+import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Call
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.app.VideoApp
-import io.getstream.video.android.app.databinding.ActivityMainBinding
+import io.getstream.video.android.ui.components.MainStage
+import io.getstream.video.android.ui.components.ParticipantsList
 import io.getstream.video.android.utils.onError
 import io.getstream.video.android.utils.onSuccessSuspend
 import io.livekit.android.ConnectOptions
 import io.livekit.android.LiveKit
 import io.livekit.android.RoomOptions
+import io.livekit.android.room.Room
 import io.livekit.android.room.RoomListener
+import io.livekit.android.room.participant.Participant
+import io.livekit.android.room.participant.RemoteParticipant
+import io.livekit.android.room.track.Track
+import io.livekit.android.room.track.TrackPublication
 import io.livekit.android.room.track.VideoTrack
 import kotlinx.coroutines.launch
 import stream.video.SelectEdgeServerRequest
@@ -45,7 +66,6 @@ import stream.video.SelectEdgeServerResponse
 
 class MainActivity : AppCompatActivity(), RoomListener {
 
-    private lateinit var binding: ActivityMainBinding
     private var hasInitializedVideo: Boolean = false
 
     @RequiresApi(M)
@@ -67,10 +87,52 @@ class MainActivity : AppCompatActivity(), RoomListener {
         }
     }
 
+    /**
+     * State.
+     */
+    // TODO - Expose through a ViewModel at some point
+    private var room: MutableState<Room?> = mutableStateOf(null)
+    private var videoTrack: MutableState<VideoTrack?> = mutableStateOf(null)
+    private var participants: MutableState<List<Participant>> = mutableStateOf(emptyList())
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        setContent {
+            val track by videoTrack
+            val room by room
+
+            Column(modifier = Modifier.fillMaxSize()) {
+
+                val currentTrack = track
+                val currentRoom = room
+
+                if (currentTrack != null && currentRoom != null) {
+                    MainStage(
+                        room = currentRoom,
+                        track = currentTrack
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .height(250.dp)
+                            .fillMaxWidth()
+                    ) {
+                        Image(
+                            modifier = Modifier.align(Alignment.Center),
+                            imageVector = Icons.Default.Call,
+                            contentDescription = null
+                        )
+                    }
+                }
+
+                if (currentRoom != null) {
+                    ParticipantsList(
+                        room = currentRoom,
+                        participants = participants.value
+                    )
+                }
+            }
+        }
     }
 
     override fun onResume() {
@@ -188,6 +250,7 @@ class MainActivity : AppCompatActivity(), RoomListener {
             token = token,
             options = ConnectOptions(autoSubscribe = true)
         )
+        this.room.value = room
         val participant = room.localParticipant
 
         participant.setCameraEnabled(true)
@@ -195,9 +258,7 @@ class MainActivity : AppCompatActivity(), RoomListener {
 
         val videoTrack = participant.videoTracks.firstOrNull()?.second as? VideoTrack ?: return
 
-        // we need to connect both the room to the renderer and the track, to show something
-        room.initVideoRenderer(binding.rendererView)
-        videoTrack.addRenderer(binding.rendererView)
+        this.videoTrack.value = videoTrack
         hasInitializedVideo = true
     }
 
@@ -205,5 +266,44 @@ class MainActivity : AppCompatActivity(), RoomListener {
         if (url.startsWith("wss://")) return url
 
         return "wss://$url"
+    }
+
+    // TODO - implement better event handling inside a VM
+    override fun onTrackSubscribed(
+        track: Track,
+        publication: TrackPublication,
+        participant: RemoteParticipant,
+        room: Room
+    ) {
+        super.onTrackSubscribed(track, publication, participant, room)
+        val current = participants.value
+
+        participants.value = (current + participant).distinctBy { it.sid }
+    }
+
+    override fun onTrackUnsubscribed(
+        track: Track,
+        publications: TrackPublication,
+        participant: RemoteParticipant,
+        room: Room
+    ) {
+        super.onTrackUnsubscribed(track, publications, participant, room)
+        val current = participants.value
+
+        participants.value = (current - participant).distinctBy { it.sid }
+    }
+
+    override fun onParticipantConnected(room: Room, participant: RemoteParticipant) {
+        super.onParticipantConnected(room, participant)
+        val current = participants.value
+
+        participants.value = (current + participant).distinctBy { it.sid }
+    }
+
+    override fun onParticipantDisconnected(room: Room, participant: RemoteParticipant) {
+        super.onParticipantDisconnected(room, participant)
+        val current = participants.value
+
+        participants.value = (current - participant).distinctBy { it.sid }
     }
 }

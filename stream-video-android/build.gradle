@@ -44,8 +44,16 @@ android {
         jvmTarget = '1.8'
     }
 
+    buildFeatures {
+        compose true
+    }
+
     lintOptions {
         abortOnError false
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion "1.1.1"
     }
 }
 
@@ -72,6 +80,14 @@ dependencies {
     implementation Dependencies.okhttpLoggingInterceptor
 
     api Dependencies.liveKit
+
+    // Compose
+    implementation Dependencies.composeCompiler
+    implementation Dependencies.composeUi
+    implementation Dependencies.composeUiTooling
+    implementation Dependencies.composeFoundation
+    implementation Dependencies.composeMaterial
+    implementation Dependencies.activityCompose
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
