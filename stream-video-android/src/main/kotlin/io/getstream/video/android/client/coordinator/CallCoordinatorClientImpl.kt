@@ -21,6 +21,8 @@ import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Result
 import io.getstream.video.android.utils.Success
 import io.getstream.video.android.utils.VideoError
+import stream.video.JoinCallRequest
+import stream.video.JoinCallResponse
 import stream.video.SelectEdgeServerRequest
 import stream.video.SelectEdgeServerResponse
 
@@ -43,11 +45,16 @@ internal class CallCoordinatorClientImpl(
         try {
             val response = callCoordinatorService.selectEdgeServer(request)
 
-            if (response.edge_server != null && response.token.isNotBlank()) {
-                Success(response)
-            } else {
-                throw NullPointerException("Invalid response, edge server or token are missing.")
-            }
+            Success(response)
+        } catch (error: Throwable) {
+            Failure(VideoError(error.message, error))
+        }
+
+    override suspend fun joinCall(request: JoinCallRequest): Result<JoinCallResponse> =
+        try {
+            val response = callCoordinatorService.joinCall(request)
+
+            Success(response)
         } catch (error: Throwable) {
             Failure(VideoError(error.message, error))
         }

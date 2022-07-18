@@ -61,7 +61,6 @@ import io.livekit.android.room.track.Track
 import io.livekit.android.room.track.TrackPublication
 import io.livekit.android.room.track.VideoTrack
 import kotlinx.coroutines.launch
-import stream.video.SelectEdgeServerRequest
 import stream.video.SelectEdgeServerResponse
 
 class MainActivity : AppCompatActivity(), RoomListener {
@@ -214,10 +213,9 @@ class MainActivity : AppCompatActivity(), RoomListener {
         val client = VideoApp.videoClient
 
         lifecycleScope.launch {
-            val result = client.selectEdgeServer(
-                SelectEdgeServerRequest(
-                    call_id = "testroom",
-                )
+            val result = client.joinCall(
+                "video",
+                id = "testroom"
             )
 
             result.onSuccessSuspend { response ->

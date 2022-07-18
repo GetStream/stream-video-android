@@ -17,6 +17,7 @@
 package io.getstream.video.android.client
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ProcessLifecycleOwner
 import io.getstream.video.android.client.coordinator.CallCoordinatorClient
@@ -25,16 +26,22 @@ import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.module.VideoModule
 import io.getstream.video.android.socket.VideoSocket
 import io.getstream.video.android.token.TokenProvider
+import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Result
-import io.livekit.android.ConnectOptions
+import io.getstream.video.android.utils.Success
+import io.getstream.video.android.utils.VideoError
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import okhttp3.logging.HttpLoggingInterceptor
-import stream.video.Call
 import stream.video.Device
+import stream.video.Edge
+import stream.video.JoinCallRequest
 import stream.video.Latency
 import stream.video.SelectEdgeServerRequest
 import stream.video.SelectEdgeServerResponse
 import stream.video.User
+import java.net.URL
 
 /**
  * The core client that handles all API and socket communication and acts as a central place to
@@ -64,15 +71,64 @@ public class VideoClient(
     public fun registerDevice(device: Device) {
     }
 
-    public fun joinCall(type: String, id: String, connectOptions: ConnectOptions): Call {
-        // TODO - implement
-        return Call()
+    public suspend fun joinCall(type: String, id: String): Result<SelectEdgeServerResponse> {
+        val callResult = callCoordinatorClient.joinCall(
+            JoinCallRequest(
+                id = id,
+                type = type
+            )
+        )
+
+        if (callResult is Success) {
+            val data = callResult.data
+
+            return try {
+                val latencyResults = data.edges.associate {
+                    it.latency_url to measureLatency(it)
+                }
+
+                Log.d("latency", latencyResults.toString())
+
+                selectEdgeServer(
+                    request = SelectEdgeServerRequest(
+                        call_id = id,
+                        latency_by_edge = latencyResults
+                    )
+                )
+            } catch (error: Throwable) {
+                Failure(VideoError(error.message, error))
+            }
+        } else {
+            return Failure((callResult as Failure).error)
+        }
     }
 
-    public fun measureLatency(call: Call): Latency {
+    // TODO - pull this out in a utility or a helper class
+    private suspend fun measureLatency(edge: Edge): Latency = withContext(Dispatchers.IO) {
+        val measurements = mutableListOf<Float>()
+        val latencyUrl = edge.latency_url
 
-        // TODO - implement
-        return Latency()
+        // TODO - placeholder for localhost on android
+        val url = if (latencyUrl.contains("localhost")) {
+            latencyUrl.replace("localhost", "10.0.2.2")
+        } else {
+            latencyUrl
+        }
+
+        repeat(3) {
+            val request = URL(url)
+            val start = System.currentTimeMillis()
+            val connection = request.openConnection()
+
+            connection.connect()
+
+            val end = System.currentTimeMillis()
+
+            val seconds = (end - start) / 1000f
+            measurements.add(seconds)
+        }
+
+        Latency(measurements_seconds = measurements)
     }
 
     /**
