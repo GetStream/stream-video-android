@@ -35,15 +35,29 @@ android {
 
     buildFeatures {
         viewBinding true
+        compose true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion "1.1.1"
     }
 }
 
 dependencies {
     implementation project(':stream-video-android')
+
     implementation Dependencies.androidxCore
     implementation Dependencies.androidxAppcompat
     implementation Dependencies.material
     implementation Dependencies.androidxLifecycleRuntime
+
+    // Compose
+    implementation Dependencies.composeCompiler
+    implementation Dependencies.composeUi
+    implementation Dependencies.composeUiTooling
+    implementation Dependencies.composeFoundation
+    implementation Dependencies.composeMaterial
+    implementation Dependencies.activityCompose
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'

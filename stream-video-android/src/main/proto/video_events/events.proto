@@ -6,6 +6,38 @@ import "video_models/models.proto";
 
 option go_package = "github.com/GetStream/video/protobuf/video_events";
 
+
+message WebsocketEvent {
+  oneof event_payload {
+    Healthcheck health_check = 1;
+    CallRinging call_ringing = 2;
+    CallCreated call_created = 3;
+    CallUpdated call_updated = 4;
+    CallEnded call_ended = 5;
+    CallDeleted call_deleted = 6;
+    UserUpdated user_updated = 7;
+    ParticipantInvited participant_invited = 8;
+    ParticipantUpdated participant_updated = 9;
+    ParticipantDeleted participant_deleted = 10;
+    ParticipantJoined participant_joined = 11;
+    ParticipantLeft participant_left = 12;
+    BroadcastStarted broadcast_started = 13;
+    BroadcastEnded broadcast_ended = 14;
+    AuthPayload auth_payload = 15;
+  }
+}
+
+message Healthcheck {
+  string user_id = 1;
+  string client_id = 2;
+}
+
+message AuthPayload {
+  User user = 1;
+  Device device = 2;
+  string token = 3;
+}
+
 /**
 CallRinging is fired when a call is created with the ring=true option
 Or when you manually call call.ring()

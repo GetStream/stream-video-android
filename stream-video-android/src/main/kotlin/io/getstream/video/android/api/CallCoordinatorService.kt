@@ -19,6 +19,8 @@ package io.getstream.video.android.api
 import retrofit2.http.Body
 import retrofit2.http.Headers
 import retrofit2.http.POST
+import stream.video.JoinCallRequest
+import stream.video.JoinCallResponse
 import stream.video.SelectEdgeServerRequest
 import stream.video.SelectEdgeServerResponse
 
@@ -31,6 +33,10 @@ import stream.video.SelectEdgeServerResponse
  * We also override the Content-Type header to match our BE implementation.
  */
 public interface CallCoordinatorService {
+
+    @Headers("Content-Type: application/protobuf")
+    @POST("/stream.video.CallCoordinatorService/JoinCall")
+    public suspend fun joinCall(@Body joinCallRequest: JoinCallRequest): JoinCallResponse
 
     @Headers("Content-Type: application/protobuf")
     @POST("/stream.video.CallCoordinatorService/SelectEdgeServer")

@@ -2,41 +2,39 @@ syntax = "proto3";
 
 package stream.video;
 
+import "google/protobuf/struct.proto";
+import "google/protobuf/wrappers.proto";
 import "validate/validate.proto";
 import "video_models/models.proto";
 
 option go_package = "github.com/GetStream/video/protobuf/video_coordinator_rpc";
 
-// PROTO questions
-/*
-Best way to model map<string, interface?>
-Best way to support generic error handling
-And response duration time tracking
-Auth headers
- */
-
-// TODO: how do we include a common error to all responses?
-message Error {
-  int64 code = 1;
-  string description = 2;
-  bytes data = 3;
-}
-
 service CallCoordinatorService {
-  // basic CRUD operations on calls
+  // CreateCall creates a new call that is unique for the combination of type and id fields
+  // If a call with the same type and id already exists then the call will be updated based on the request (if allowed and if needed)
+  // The user calling this endpoint will be created if necessary ({id: id})
+  // The users listed in the participants field will also be created if necessary ({id: id})
   rpc CreateCall(CreateCallRequest) returns (CreateCallResponse);
+
+  // GetCall retrieves the state for one call, the user calling this endpoint is created if missing
   rpc GetCall(GetCallRequest) returns (GetCallResponse);
+
   rpc UpdateCall(UpdateCallRequest) returns (UpdateCallResponse);
   rpc DeleteCall(DeleteCallRequest) returns (DeleteCallResponse);
 
-  // join call
+  // JoinCall returns the call state and the list of edges that the user should be check for latency
+  // this endpoint is meant to be used to prepare the information needed to call the SelectEdgeServer endpoint
   rpc JoinCall(JoinCallRequest) returns (JoinCallResponse);
+
   rpc SelectEdgeServer(SelectEdgeServerRequest) returns(SelectEdgeServerResponse);
   rpc LeaveCall(LeaveCallRequest) returns (LeaveCallResponse);
   rpc EndCall(EndCallRequest) returns (EndCallResponse);
 
-  // register mobile device for push
+  // AddDevice registers the mobile device for push notifications
+  // this endpoint will create the user if missing
+  // if a device with the same id and push_provider_name exists, then the operation will be ignored
   rpc AddDevice(AddDeviceRequest) returns (AddDeviceResponse);
+
   rpc RemoveDevice(RemoveDeviceRequest) returns (RemoveDeviceResponse);
   rpc ListDevices(ListDevicesRequest) returns (ListDevicesResponse);
 
@@ -80,6 +78,10 @@ service CallCoordinatorService {
   rpc StartRecording(StartRecordingRequest) returns (StartRecordingResponse);
   rpc StopRecording(StopRecordingRequest) returns (StopRecordingResponse);
   rpc GetRecordings(GetRecordingsRequest) returns (GetRecordingsResponse);
+
+  // endpoints needed to build a good dashboard experience
+  // - listing calls and filtering based on their attributes
+  // - listing users and filtering based on their attributes
 }
 
 message GetCallRequest {
@@ -101,22 +103,35 @@ message CreateOrUpdateCallsResponse {
 }
 
 message CreateCallRequest {
-  string id = 1;
-  string type = 2;
-  bytes jsonencoded_custom_data = 3;
-  repeated string participants = 4;
+  // the call type
+  string type = 1;
 
-  // TODO: additional options and overrides to default settings
-  // enable broadcasting
-  bool broadcast = 6;
+  // the call id, if not provided a unique value will be generated based on UUID v4
+  string id = 2;
+
+  // call custom data
+  google.protobuf.Struct custom = 3;
+
+  // the list of participant ids
+  repeated string participant_ids = 4;
+
+  // broadcasting, overrides the default call type setting if provided
+  google.protobuf.BoolValue broadcast = 6;
+
+  // the broadcasting options, only relevant if broadcast is enabled
   repeated BroadcastOptions broadcast_options = 7;
 
-  // enable transcription
-  bool transcribe = 8;
+  // transcription, overrides the default call type setting if provided
+  google.protobuf.BoolValue transcribe = 8;
+
+  // the transcription options for this call, only relevant if transcribe is enabled
   TranscribeOptions transcribe_options = 9;
 
-  bool recording = 10;
-  bool ring = 11; // if true, will call/ring on the browser and phone. default is false
+  // the recording option, overrides the default call type setting if provided
+  google.protobuf.BoolValue recording = 10;
+
+  // the ring option, overrides the default call type setting if provided
+  google.protobuf.BoolValue notify = 11;
 }
 
 message CreateCallResponse {
@@ -126,8 +141,7 @@ message CreateCallResponse {
 message UpdateCallRequest {
   string id = 1;
   string type = 2;
-  bytes jsonencoded_custom_data = 3;
-  string auth_token = 4;
+  bytes json_encoded_custom_data = 3;
   // TODO: additional options and overrides to default settings
 }
 message UpdateCallResponse {
@@ -142,26 +156,29 @@ message DeleteCallResponse {
 
 message SelectEdgeServerRequest {
   string call_id = 1;
-  string user_id = 2;
   map<string, Latency> latency_by_edge = 3;
 }
 
 message SelectEdgeServerResponse {
+  // the edge server hosting the video call
   EdgeServer edge_server = 1;
-  string token = 2; // this is the token livekit needs, not the same token
+
+  // the auth token needed to authenticate to the edge server
+  string token = 2 [(validate.rules).string.min_len = 1];
 }
 
 message AddDeviceRequest {
-  string user_id = 1;
-  string id = 2;
-  string push_provider = 3;
-  bool disabled = 4;
-  string disabled_reason = 5;
-  string push_provider_name = 6;
+  // the device id to register
+  string id = 1;
+
+  // the name of the push notification provider (eg. apn-production)
+  string push_provider_name = 2;
+
+  // the id of the user the device is registered to, only server-side requests can provide this
+  string user_id = 3;
 }
 
-message AddDeviceResponse {
-}
+message AddDeviceResponse { }
 
 message RemoveDeviceRequest {
   string id = 1;
@@ -171,6 +188,7 @@ message RemoveDeviceResponse {
 }
 
 message ListDevicesRequest {
+  // the id of the user, only server-side requests can provide this
   string user_id = 1;
 }
 
@@ -221,7 +239,8 @@ message SendCustomEventResponse {
 }
 
 message JoinCallRequest {
-  string call_id = 1;
+  string id = 1;
+  string type = 2;
 }
 
 message UserCapability {

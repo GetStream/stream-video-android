@@ -65,7 +65,6 @@ public class VideoClient(
     }
 
     public fun joinCall(type: String, id: String, connectOptions: ConnectOptions): Call {
-
         // TODO - implement
         return Call()
     }

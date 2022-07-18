@@ -19,6 +19,7 @@ package io.getstream.video.android.app
 import android.app.Application
 import io.getstream.video.android.client.VideoClient
 import io.getstream.video.android.logging.LoggingLevel
+import io.getstream.video.android.token.TokenProvider
 import stream.video.User
 
 class VideoApp : Application() {
@@ -26,19 +27,6 @@ class VideoApp : Application() {
     override fun onCreate() {
         super.onCreate()
         instance = this
-        videoClient = VideoClient
-            .Builder(
-                apiKey = "fake-api-key",
-                appContext = instance,
-                user = buildFakeUser(),
-                tokenProvider = FakeTokenProvider()
-            )
-            .loggingLevel(LoggingLevel.BODY)
-            .build()
-    }
-
-    private fun buildFakeUser(): User {
-        return User(id = "tommaso")
     }
 
     companion object {
@@ -46,5 +34,26 @@ class VideoApp : Application() {
 
         lateinit var videoClient: VideoClient
             private set
+
+        /**
+         * Sets up and returns the [videoClient] required to connect to the API.
+         */
+        fun initializeClient(
+            apiKey: String,
+            tokenProvider: TokenProvider,
+            user: User
+        ): VideoClient {
+            videoClient = VideoClient
+                .Builder(
+                    apiKey = apiKey,
+                    appContext = instance,
+                    user = user,
+                    tokenProvider = tokenProvider
+                )
+                .loggingLevel(LoggingLevel.BODY)
+                .build()
+
+            return videoClient
+        }
     }
 }

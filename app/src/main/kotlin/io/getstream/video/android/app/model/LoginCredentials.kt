@@ -14,17 +14,9 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.app
+package io.getstream.video.android.app.model
 
-import io.getstream.video.android.token.TokenProvider
-
-class FakeTokenProvider(private val token: String) : TokenProvider {
-
-    override fun loadToken(): String {
-        return token
-    }
-
-    override fun getCachedToken(): String {
-        return token
-    }
-}
+data class LoginCredentials(
+    val name: String,
+    val token: String
+)

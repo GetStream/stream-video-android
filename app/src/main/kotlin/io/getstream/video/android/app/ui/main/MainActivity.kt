@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.app
+package io.getstream.video.android.app.ui.main
 
 import android.Manifest
 import android.content.Intent
@@ -30,6 +30,7 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import io.getstream.video.android.app.VideoApp
 import io.getstream.video.android.app.databinding.ActivityMainBinding
 import io.getstream.video.android.utils.onError
 import io.getstream.video.android.utils.onSuccessSuspend
@@ -204,9 +205,5 @@ class MainActivity : AppCompatActivity(), RoomListener {
         if (url.startsWith("wss://")) return url
 
         return "wss://$url"
-    }
-
-    companion object {
-        private const val CODE_PERMISSIONS = 101
     }
 }

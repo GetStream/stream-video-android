@@ -13,6 +13,8 @@ object Versions {
     internal const val ANDROIDX_APPCOMPAT = "1.4.2"
     internal const val ANDROIDX_CORE = "1.8.0"
     internal const val ANDROIDX_LIFECYCLE = "2.5.0"
+    internal const val ACTIVITY_COMPOSE = "1.5.0"
+    internal const val COMPOSE = "1.1.1"
 
     internal const val WIRE = "4.4.0"
     internal const val RETROFIT = "2.9.0"
@@ -40,6 +42,14 @@ object Dependencies {
     const val androidxCore = "androidx.core:core-ktx:${Versions.ANDROIDX_CORE}"
     const val androidxLifecycleRuntime = "androidx.lifecycle:lifecycle-runtime-ktx:${Versions.ANDROIDX_LIFECYCLE}"
     const val androidxLifecycleProcess = "androidx.lifecycle:lifecycle-process:${Versions.ANDROIDX_LIFECYCLE}"
+
+    // Compose
+    const val activityCompose = "androidx.activity:activity-compose:${Versions.ACTIVITY_COMPOSE}"
+    const val composeCompiler = "androidx.compose.compiler:compiler:${Versions.COMPOSE}"
+    const val composeUi = "androidx.compose.ui:ui:${Versions.COMPOSE}"
+    const val composeUiTooling = "androidx.compose.ui:ui-tooling:${Versions.COMPOSE}"
+    const val composeFoundation = "androidx.compose.foundation:foundation:${Versions.COMPOSE}"
+    const val composeMaterial = "androidx.compose.material:material:${Versions.COMPOSE}"
 
     const val wireRuntime = "com.squareup.wire:wire-runtime:${Versions.WIRE}"
     const val retrofit = "com.squareup.retrofit2:retrofit:${Versions.RETROFIT}"
