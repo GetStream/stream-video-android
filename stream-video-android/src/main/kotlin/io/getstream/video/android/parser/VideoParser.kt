@@ -16,13 +16,13 @@
 
 package io.getstream.video.android.parser
 
+import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.errors.VideoErrorCode
 import io.getstream.video.android.errors.VideoNetworkError
 import io.getstream.video.android.socket.ErrorResponse
 import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Result
 import io.getstream.video.android.utils.Success
-import io.getstream.video.android.utils.VideoError
 import okhttp3.Response
 import okhttp3.ResponseBody
 

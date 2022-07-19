@@ -16,6 +16,8 @@
 
 package io.getstream.video.android.utils
 
+import io.getstream.video.android.errors.VideoError
+
 /**
  *  A class which encapsulates a successful outcome with a value of type [T] or a failure with [VideoError].
  */

@@ -17,6 +17,7 @@
 package io.getstream.video.android.app.ui.main
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -211,11 +212,12 @@ class MainActivity : AppCompatActivity(), RoomListener {
         if (hasInitializedVideo) return
 
         val client = VideoApp.videoClient
+        val callId = intent.getStringExtra(KEY_CALL_ID) ?: return
 
         lifecycleScope.launch {
             val result = client.joinCall(
                 "video",
-                id = "testroom"
+                id = callId
             )
 
             result.onSuccessSuspend { response ->
@@ -303,5 +305,15 @@ class MainActivity : AppCompatActivity(), RoomListener {
         val current = participants.value
 
         participants.value = (current - participant).distinctBy { it.sid }
+    }
+
+    companion object {
+        private const val KEY_CALL_ID = "call_id"
+
+        public fun getIntent(context: Context, callId: String): Intent {
+            return Intent(context, MainActivity::class.java).apply {
+                putExtra(KEY_CALL_ID, callId)
+            }
+        }
     }
 }

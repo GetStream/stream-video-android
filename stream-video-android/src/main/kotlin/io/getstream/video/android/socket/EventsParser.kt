@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.socket
 
+import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.errors.VideoErrorCode
 import io.getstream.video.android.errors.VideoNetworkError
 import io.getstream.video.android.events.ConnectedEvent
@@ -23,7 +24,6 @@ import io.getstream.video.android.events.VideoEvent
 import io.getstream.video.android.parser.VideoParser
 import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Success
-import io.getstream.video.android.utils.VideoError
 import okhttp3.Response
 import okhttp3.WebSocket
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.utils
+package io.getstream.video.android.errors
 
 /**
  * Represents an SDK error that contains a message and the cause.

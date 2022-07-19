@@ -21,6 +21,7 @@ import android.os.Looper
 import androidx.annotation.VisibleForTesting
 import io.getstream.video.android.dispatchers.DispatcherProvider
 import io.getstream.video.android.errors.DisconnectCause
+import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.errors.VideoErrorCode
 import io.getstream.video.android.errors.VideoNetworkError
 import io.getstream.video.android.events.ConnectedEvent
@@ -28,7 +29,6 @@ import io.getstream.video.android.events.VideoEvent
 import io.getstream.video.android.network.NetworkStateProvider
 import io.getstream.video.android.parser.VideoParser
 import io.getstream.video.android.token.TokenManager
-import io.getstream.video.android.utils.VideoError
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay

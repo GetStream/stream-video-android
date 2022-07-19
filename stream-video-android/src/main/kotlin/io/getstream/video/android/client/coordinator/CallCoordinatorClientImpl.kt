@@ -17,10 +17,12 @@
 package io.getstream.video.android.client.coordinator
 
 import io.getstream.video.android.api.CallCoordinatorService
+import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Result
 import io.getstream.video.android.utils.Success
-import io.getstream.video.android.utils.VideoError
+import stream.video.CreateCallRequest
+import stream.video.CreateCallResponse
 import stream.video.JoinCallRequest
 import stream.video.JoinCallResponse
 import stream.video.SelectEdgeServerRequest
@@ -53,6 +55,15 @@ internal class CallCoordinatorClientImpl(
     override suspend fun joinCall(request: JoinCallRequest): Result<JoinCallResponse> =
         try {
             val response = callCoordinatorService.joinCall(request)
+
+            Success(response)
+        } catch (error: Throwable) {
+            Failure(VideoError(error.message, error))
+        }
+
+    override suspend fun createCall(createCallRequest: CreateCallRequest): Result<CreateCallResponse> =
+        try {
+            val response = callCoordinatorService.createCall(createCallRequest)
 
             Success(response)
         } catch (error: Throwable) {

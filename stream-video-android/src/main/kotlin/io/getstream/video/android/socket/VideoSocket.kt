@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.socket
 
-import io.getstream.video.android.utils.VideoError
+import io.getstream.video.android.errors.VideoError
 import stream.video.User
 
 public interface VideoSocket {

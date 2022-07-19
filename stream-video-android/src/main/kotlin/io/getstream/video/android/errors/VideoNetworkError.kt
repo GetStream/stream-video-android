@@ -16,8 +16,6 @@
 
 package io.getstream.video.android.errors
 
-import io.getstream.video.android.utils.VideoError
-
 public class VideoNetworkError private constructor(
     public val description: String,
     cause: Throwable? = null,

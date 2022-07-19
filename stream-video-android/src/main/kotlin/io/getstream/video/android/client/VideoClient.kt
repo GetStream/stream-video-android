@@ -22,6 +22,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ProcessLifecycleOwner
 import io.getstream.video.android.client.coordinator.CallCoordinatorClient
 import io.getstream.video.android.client.user.UserState
+import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.module.VideoModule
 import io.getstream.video.android.socket.VideoSocket
@@ -29,11 +30,13 @@ import io.getstream.video.android.token.TokenProvider
 import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Result
 import io.getstream.video.android.utils.Success
-import io.getstream.video.android.utils.VideoError
+import io.getstream.video.android.utils.getLatencyMeasurements
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.logging.HttpLoggingInterceptor
+import stream.video.CreateCallRequest
+import stream.video.CreateCallResponse
 import stream.video.Device
 import stream.video.Edge
 import stream.video.JoinCallRequest
@@ -41,7 +44,6 @@ import stream.video.Latency
 import stream.video.SelectEdgeServerRequest
 import stream.video.SelectEdgeServerResponse
 import stream.video.User
-import java.net.URL
 
 /**
  * The core client that handles all API and socket communication and acts as a central place to
@@ -71,11 +73,38 @@ public class VideoClient(
     public fun registerDevice(device: Device) {
     }
 
+    /**
+     * @see CallCoordinatorClient.joinCall for details.
+     */
     public suspend fun joinCall(type: String, id: String): Result<SelectEdgeServerResponse> {
+        val createCallResult = callCoordinatorClient.createCall(
+            CreateCallRequest(
+                type = type,
+                id = id
+            )
+        )
+
+        return when (createCallResult) {
+            is Success -> joinCreatedCall(createCallResult.data)
+            is Failure -> return Failure(createCallResult.error)
+        }
+    }
+
+    private suspend fun joinCreatedCall(response: CreateCallResponse): Result<SelectEdgeServerResponse> {
+        val call = response.call!!
+
+//        val newCall = Call(
+//            custom = mapOf(
+//                "image" to "dawkjdawpdawd",
+//                "unreadCount" to 5
+//            )
+//        )
+        // TODO - test the limitation of serialize/deserialize process (e.g. numbers)
+
         val callResult = callCoordinatorClient.joinCall(
             JoinCallRequest(
-                id = id,
-                type = type
+                id = call.id,
+                type = call.type
             )
         )
 
@@ -87,11 +116,11 @@ public class VideoClient(
                     it.latency_url to measureLatency(it)
                 }
 
-                Log.d("latency", latencyResults.toString())
+                Log.d("latencyCheck", latencyResults.toString())
 
                 selectEdgeServer(
                     request = SelectEdgeServerRequest(
-                        call_id = id,
+                        call_id = call.id,
                         latency_by_edge = latencyResults
                     )
                 )
@@ -103,30 +132,14 @@ public class VideoClient(
         }
     }
 
-    // TODO - pull this out in a utility or a helper class
+    /**
+     * Measures and prepares the latency which describes how much time it takes to ping the server.
+     *
+     * @param edge The edge we want to measure.
+     * @return [Latency] which contains measurements from ping connections.
+     */
     private suspend fun measureLatency(edge: Edge): Latency = withContext(Dispatchers.IO) {
-        val measurements = mutableListOf<Float>()
-        val latencyUrl = edge.latency_url
-
-        // TODO - placeholder for localhost on android
-        val url = if (latencyUrl.contains("localhost")) {
-            latencyUrl.replace("localhost", "10.0.2.2")
-        } else {
-            latencyUrl
-        }
-
-        repeat(3) {
-            val request = URL(url)
-            val start = System.currentTimeMillis()
-            val connection = request.openConnection()
-
-            connection.connect()
-
-            val end = System.currentTimeMillis()
-
-            val seconds = (end - start) / 1000f
-            measurements.add(seconds)
-        }
+        val measurements = getLatencyMeasurements(edge.latency_url)
 
         Latency(measurements_seconds = measurements)
     }
@@ -170,7 +183,10 @@ public class VideoClient(
          * logic of the SDK.
          */
         public fun build(): VideoClient {
-            if (apiKey.isBlank()) throw IllegalArgumentException("API key cannot be empty!")
+            if (apiKey.isBlank() ||
+                user.id.isBlank() ||
+                tokenProvider.getCachedToken().isBlank()
+            ) throw IllegalArgumentException("The API key, user ID and token cannot be empty!")
 
             val lifecycle = ProcessLifecycleOwner.get().lifecycle
 
@@ -183,7 +199,7 @@ public class VideoClient(
                 loggingLevel = loggingLevel
             )
 
-            val videoClient = VideoClient(
+            return VideoClient(
                 lifecycle = lifecycle,
                 tokenProvider = tokenProvider,
                 scope = videoModule.scope(),
@@ -191,8 +207,6 @@ public class VideoClient(
                 userState = videoModule.userState(),
                 callCoordinatorClient = videoModule.callClient()
             )
-
-            return videoClient
         }
     }
 }

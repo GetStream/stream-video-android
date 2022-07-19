@@ -17,6 +17,8 @@
 package io.getstream.video.android.client.coordinator
 
 import io.getstream.video.android.utils.Result
+import stream.video.CreateCallRequest
+import stream.video.CreateCallResponse
 import stream.video.JoinCallRequest
 import stream.video.JoinCallResponse
 import stream.video.SelectEdgeServerRequest
@@ -25,16 +27,24 @@ import stream.video.SelectEdgeServerResponse
 public interface CallCoordinatorClient {
 
     /**
+     *
+     */
+    public suspend fun createCall(createCallRequest: CreateCallRequest): Result<CreateCallResponse>
+
+    /**
+     * Asks the server to join a call. This gives the user information which servers they can
+     * choose from to fully join the call experience, based on latency.
+     *
+     * @param request The information used to prepare a call.
+     * @return [JoinCallResponse] which helps us determine the correct connection.
+     */
+    public suspend fun joinCall(request: JoinCallRequest): Result<JoinCallResponse>
+
+    /**
      * Asks the API for a correct edge server that can handle a connection for the given request.
      *
      * @param request The set of information used to find the server.
      * @return a [Result] wrapper of the [SelectEdgeServerResponse], based on the API response.
      */
     public suspend fun selectEdgeServer(request: SelectEdgeServerRequest): Result<SelectEdgeServerResponse>
-
-    /**
-     * Asks the server to join a call. This gives the user information on which servers they can
-     * choose from to fully join the call experience.
-     */
-    public suspend fun joinCall(request: JoinCallRequest): Result<JoinCallResponse>
 }

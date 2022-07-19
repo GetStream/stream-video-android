@@ -14,6 +14,7 @@ wire {
 
     protoPath {
         srcDir 'src/main/proto'
+        // TODO -> check proto docs to generate a library instead of files directly
     }
 }
 

@@ -72,7 +72,7 @@ internal class VideoModule(
     private val retrofitClient: Retrofit by lazy {
         Retrofit.Builder()
             .client(okHttpClient)
-            .addConverterFactory(WireConverterFactory.create())
+            .addConverterFactory(WireConverterFactory.create().apply {})
             .baseUrl(BASE_URL)
             .build()
     }
