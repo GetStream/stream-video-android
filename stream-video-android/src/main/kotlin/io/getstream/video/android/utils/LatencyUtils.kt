@@ -16,6 +16,8 @@
 
 package io.getstream.video.android.utils
 
+import java.io.BufferedReader
+import java.io.InputStreamReader
 import java.net.URL
 
 /**
@@ -35,8 +37,11 @@ public fun getLatencyMeasurements(latencyUrl: String): List<Float> {
         val connection = request.openConnection()
 
         connection.connect()
-        // TODO - read the response completely -> check if we want to do it through retrofit
-        // TODO - check if the connection is cached
+
+        // Read and print the input
+        val inputStream = BufferedReader(InputStreamReader(connection.getInputStream()))
+        println(inputStream.readLines().toString())
+        inputStream.close()
 
         val end = System.currentTimeMillis()
 
