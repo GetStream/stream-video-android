@@ -16,8 +16,8 @@
 
 package io.getstream.video.android.client.user
 
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import stream.video.User
 
 public class UserState {
@@ -27,7 +27,7 @@ public class UserState {
      * subscribers.
      */
     private val userFlow = MutableStateFlow(EMPTY_USER)
-    public val user: Flow<User> = userFlow
+    public val user: StateFlow<User> = userFlow
 
     /**
      * Emits the new user update to all listeners.

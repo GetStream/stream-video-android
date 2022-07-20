@@ -27,14 +27,15 @@ message WebsocketEvent {
   }
 }
 
+
 message Healthcheck {
   string user_id = 1;
   string client_id = 2;
 }
 
 message AuthPayload {
-  User user = 1;
-  Device device = 2;
+  UserRequest user = 1;
+  DeviceRequest device = 2;
   string token = 3;
 }
 

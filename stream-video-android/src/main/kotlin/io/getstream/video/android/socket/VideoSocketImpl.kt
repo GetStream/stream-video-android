@@ -19,6 +19,7 @@ package io.getstream.video.android.socket
 import android.os.Handler
 import android.os.Looper
 import androidx.annotation.VisibleForTesting
+import io.getstream.video.android.client.user.UserState
 import io.getstream.video.android.dispatchers.DispatcherProvider
 import io.getstream.video.android.errors.DisconnectCause
 import io.getstream.video.android.errors.VideoError
@@ -34,7 +35,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import stream.video.AuthPayload
 import stream.video.User
+import stream.video.UserRequest
 import kotlin.math.pow
 import kotlin.properties.Delegates
 
@@ -56,6 +59,7 @@ internal class VideoSocketImpl(
     private val socketFactory: SocketFactory,
     private val networkStateProvider: NetworkStateProvider,
     private val parser: VideoParser,
+    private val userState: UserState,
     private val coroutineScope: CoroutineScope,
 ) : VideoSocket {
     private var connectionConf: SocketFactory.ConnectionConf? = null
@@ -109,6 +113,12 @@ internal class VideoSocketImpl(
                 is State.Connected -> {
                     healthMonitor.start()
                     callListeners { it.onConnected(newState.event) }
+                    socket?.send(
+                        AuthPayload(
+                            user = UserRequest(id = userState.user.value.id),
+                            token = tokenManager.getToken()
+                        )
+                    )
                 }
                 is State.NetworkDisconnected -> {
                     shutdownSocketConnection()
@@ -213,15 +223,15 @@ internal class VideoSocketImpl(
         state = State.DisconnectedPermanently(null)
     }
 
-    internal fun releaseConnection() {
+    override fun releaseConnection() {
         state = State.DisconnectedByRequest
     }
 
-    internal fun onConnectionResolved(event: ConnectedEvent) {
+    override fun onConnectionResolved(event: ConnectedEvent) {
         state = State.Connected(event)
     }
 
-    internal fun onEvent(event: VideoEvent) {
+    override fun onEvent(event: Any) {
         healthMonitor.ack()
         callListeners { listener -> listener.onEvent(event) }
     }

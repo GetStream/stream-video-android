@@ -16,16 +16,14 @@
 
 package io.getstream.video.android.socket
 
-import io.getstream.video.android.parser.VideoParser
-import okhttp3.WebSocket
+internal sealed class SocketState {
+    object Idle : SocketState()
+    object Pending : SocketState()
+    class Connected(val connectionId: String) : SocketState()
+    object Disconnected : SocketState()
 
-internal class Socket(private val socket: WebSocket, private val parser: VideoParser) {
-
-    fun send(event: Any) {
-        socket.send(parser.toJson(event))
-    }
-
-    fun close(code: Int, reason: String) {
-        socket.close(code, reason)
+    internal fun connectionIdOrError(): String = when (this) {
+        is Connected -> connectionId
+        else -> error("This state doesn't contain connectionId")
     }
 }

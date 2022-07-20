@@ -22,8 +22,6 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import stream.video.User
 import java.io.UnsupportedEncodingException
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
 
 internal class SocketFactory(
     private val parser: VideoParser,
@@ -33,29 +31,11 @@ internal class SocketFactory(
 
     @Throws(UnsupportedEncodingException::class)
     fun createSocket(eventsParser: EventsParser, connectionConf: ConnectionConf): Socket {
-        val url = buildUrl(connectionConf)
+        val url = connectionConf.endpoint
         val request = Request.Builder().url(url).build()
         val newWebSocket = httpClient.newWebSocket(request, eventsParser)
 
         return Socket(newWebSocket, parser)
-    }
-
-    @Throws(UnsupportedEncodingException::class)
-    private fun buildUrl(connectionConf: ConnectionConf): String {
-        var json = buildUserDetailJson(connectionConf)
-        return try {
-            json = URLEncoder.encode(json, StandardCharsets.UTF_8.name())
-            val baseWsUrl =
-                "${connectionConf.endpoint}connect?json=$json&api_key=${connectionConf.apiKey}"
-            when (connectionConf) {
-                is ConnectionConf.UserConnectionConf -> {
-                    val token = tokenManager.getToken()
-                    "$baseWsUrl&authorization=$token&stream-auth-type=jwt"
-                }
-            }
-        } catch (_: Throwable) {
-            throw UnsupportedEncodingException("Unable to encode user details json: $json")
-        }
     }
 
     private fun buildUserDetailJson(connectionConf: ConnectionConf): String {

@@ -19,7 +19,6 @@ package io.getstream.video.android.socket
 import io.getstream.video.android.errors.DisconnectCause
 import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.events.ConnectedEvent
-import io.getstream.video.android.events.VideoEvent
 
 public open class SocketListener {
 
@@ -35,6 +34,6 @@ public open class SocketListener {
     public open fun onError(error: VideoError) {
     }
 
-    public open fun onEvent(event: VideoEvent) {
+    public open fun onEvent(event: Any) {
     }
 }

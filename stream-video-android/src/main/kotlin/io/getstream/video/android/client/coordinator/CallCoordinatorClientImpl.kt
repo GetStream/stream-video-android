@@ -52,6 +52,14 @@ internal class CallCoordinatorClientImpl(
             Failure(VideoError(error.message, error))
         }
 
+    /**
+     * Attempts to join a [stream.video.Call]. If successful, gives us more information about the
+     * user and the call itself.
+     *
+     * @param request The details of the call, like the ID and its type.
+     * @return [Result] wrapper around the response from the server, or an error if something went
+     * wrong.
+     */
     override suspend fun joinCall(request: JoinCallRequest): Result<JoinCallResponse> =
         try {
             val response = callCoordinatorService.joinCall(request)
@@ -61,6 +69,13 @@ internal class CallCoordinatorClientImpl(
             Failure(VideoError(error.message, error))
         }
 
+    /**
+     * Attempts to create a new [stream.video.Call].
+     *
+     * @param createCallRequest The information used to create a call.
+     * @return [Result] wrapper around the response from the server, or an error if something went
+     * wrong.
+     */
     override suspend fun createCall(createCallRequest: CreateCallRequest): Result<CreateCallResponse> =
         try {
             val response = callCoordinatorService.createCall(createCallRequest)

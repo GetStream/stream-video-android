@@ -27,7 +27,10 @@ import stream.video.SelectEdgeServerResponse
 public interface CallCoordinatorClient {
 
     /**
+     * Creates a new call that users can connect to and communicate in.
      *
+     * @param createCallRequest The information used to describe the call.
+     * @return [CreateCallResponse] which holds the newly created [stream.video.Call].
      */
     public suspend fun createCall(createCallRequest: CreateCallRequest): Result<CreateCallResponse>
 

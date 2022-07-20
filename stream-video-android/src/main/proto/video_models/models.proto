@@ -73,6 +73,15 @@ message User {
   string updated_at = 8;
 }
 
+message UserRequest {
+  string id = 1 [(validate.rules).string.min_len = 1];
+  repeated string teams = 2;
+  string role = 3;
+  google.protobuf.Struct custom = 4;
+  string name = 5;
+  string profile_image_url = 6;
+}
+
 message Device {
   string user_id = 1;
   string id = 2;
@@ -81,7 +90,14 @@ message Device {
   string push_provider_name = 5;
   string created_at = 6;
   string updated_at = 7;
+}
 
+message DeviceRequest {
+  string user_id = 1;
+  string id = 2;
+  bool disabled = 3;
+  string disabled_reason = 4;
+  string push_provider_name = 5;
 }
 
 enum Codec {
@@ -153,6 +169,26 @@ message Participant {
   string user_id = 1;
   string role = 2;
   bool online = 3;
+  google.protobuf.Struct custom = 4 ;
+  // call creation date as RFC3339 string
+  string created_at = 5 [(validate.rules).string.min_len = 1];
+
+  // call last update date as RFC3339 string
+  string updated_at = 6 [(validate.rules).string.min_len = 1];
+
+}
+
+message ParticipantRequest {
+  string user_id = 1;
+  string role = 2;
+  // call custom data
+  google.protobuf.Struct custom = 3 ;
+  // call creation date as RFC3339 string
+  string created_at = 4 [(validate.rules).string.min_len = 1];
+
+  // call last update date as RFC3339 string
+  string updated_at = 5 [(validate.rules).string.min_len = 1];
+
 }
 
 message CallState {

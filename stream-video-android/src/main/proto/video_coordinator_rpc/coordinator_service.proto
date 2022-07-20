@@ -178,7 +178,9 @@ message AddDeviceRequest {
   string user_id = 3;
 }
 
-message AddDeviceResponse { }
+message AddDeviceResponse {
+  Device device = 1;
+}
 
 message RemoveDeviceRequest {
   string id = 1;

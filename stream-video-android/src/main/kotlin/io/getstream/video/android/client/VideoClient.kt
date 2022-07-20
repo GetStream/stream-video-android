@@ -25,6 +25,8 @@ import io.getstream.video.android.client.user.UserState
 import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.module.VideoModule
+import io.getstream.video.android.socket.SocketState
+import io.getstream.video.android.socket.SocketStateService
 import io.getstream.video.android.socket.VideoSocket
 import io.getstream.video.android.token.TokenProvider
 import io.getstream.video.android.utils.Failure
@@ -33,6 +35,7 @@ import io.getstream.video.android.utils.Success
 import io.getstream.video.android.utils.getLatencyMeasurements
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.logging.HttpLoggingInterceptor
 import stream.video.CreateCallRequest
@@ -60,14 +63,25 @@ public class VideoClient(
     private val scope: CoroutineScope,
     private val tokenProvider: TokenProvider,
     private val socket: VideoSocket,
+    private val socketStateService: SocketStateService,
     private val userState: UserState,
     private val callCoordinatorClient: CallCoordinatorClient
 ) {
 
-    // TODO lifecyle observer
+    private val lifecycleObserver = StreamLifecycleObserver(
+        lifecycle,
+        object : LifecycleHandler {
+            override fun resume() = reconnectSocket()
+            override fun stopped() {
+                socket.releaseConnection()
+            }
+        }
+    )
 
-    public fun setUser(user: User) {
-        this.userState.setUser(user)
+    init {
+        scope.launch(Dispatchers.Main.immediate) {
+            lifecycleObserver.observe()
+        }
     }
 
     public fun registerDevice(device: Device) {
@@ -90,16 +104,15 @@ public class VideoClient(
         }
     }
 
+    /**
+     * Once the call is set up, we can initiate the Join flow, by analyzing the latency of servers
+     * and choosing the correct one.
+     *
+     * @param response Information about the newly created call.
+     * @return [Result] wrapper around [SelectEdgeServerResponse] once the correct server is chosen.
+     */
     private suspend fun joinCreatedCall(response: CreateCallResponse): Result<SelectEdgeServerResponse> {
         val call = response.call!!
-
-//        val newCall = Call(
-//            custom = mapOf(
-//                "image" to "dawkjdawpdawd",
-//                "unreadCount" to 5
-//            )
-//        )
-        // TODO - test the limitation of serialize/deserialize process (e.g. numbers)
 
         val callResult = callCoordinatorClient.joinCall(
             JoinCallRequest(
@@ -149,6 +162,17 @@ public class VideoClient(
      */
     public suspend fun selectEdgeServer(request: SelectEdgeServerRequest): Result<SelectEdgeServerResponse> {
         return callCoordinatorClient.selectEdgeServer(request)
+    }
+
+    /**
+     * Attempts to reconnect the socket if it's in a disconnected state and the user is available.
+     */
+    public fun reconnectSocket() {
+        val user = userState.user.value
+
+        if (socketStateService.state is SocketState.Disconnected && user.id.isNotBlank()) {
+            socket.reconnectUser(user)
+        }
     }
 
     /**
@@ -204,6 +228,7 @@ public class VideoClient(
                 tokenProvider = tokenProvider,
                 scope = videoModule.scope(),
                 socket = videoModule.socket(),
+                socketStateService = SocketStateService(),
                 userState = videoModule.userState(),
                 callCoordinatorClient = videoModule.callClient()
             )

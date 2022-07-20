@@ -17,6 +17,7 @@
 package io.getstream.video.android.socket
 
 import io.getstream.video.android.errors.VideoError
+import io.getstream.video.android.events.ConnectedEvent
 import stream.video.User
 
 public interface VideoSocket {
@@ -26,4 +27,10 @@ public interface VideoSocket {
     public fun reconnectUser(user: User)
 
     public fun onSocketError(error: VideoError)
+
+    public fun onEvent(event: Any)
+
+    public fun onConnectionResolved(event: ConnectedEvent)
+
+    public fun releaseConnection()
 }

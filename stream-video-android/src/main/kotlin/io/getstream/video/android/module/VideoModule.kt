@@ -209,14 +209,14 @@ internal class VideoModule(
      * @return The WebSocket handler that is used to connect to different calls.
      */
     public fun socket(): VideoSocket {
-        // TODO - web socket URL
         return VideoSocketImpl(
             apiKey = apiKey,
-            wssUrl = "",
+            wssUrl = "ws://localhost:8989/",
             tokenManager = tokenManager,
             socketFactory = socketFactory,
             networkStateProvider = networkStateProvider,
             parser = videoParser,
+            userState = userState,
             coroutineScope = scope
         )
     }
