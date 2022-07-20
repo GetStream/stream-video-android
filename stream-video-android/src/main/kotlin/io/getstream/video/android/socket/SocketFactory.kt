@@ -31,7 +31,7 @@ internal class SocketFactory(
 
     @Throws(UnsupportedEncodingException::class)
     fun createSocket(eventsParser: EventsParser, connectionConf: ConnectionConf): Socket {
-        val url = connectionConf.endpoint
+        val url = connectionConf.endpoint.replace("localhost", "10.0.2.2") // TODO - pull out as an extension for reusability
         val request = Request.Builder().url(url).build()
         val newWebSocket = httpClient.newWebSocket(request, eventsParser)
 

@@ -33,4 +33,8 @@ public interface VideoSocket {
     public fun onConnectionResolved(event: ConnectedEvent)
 
     public fun releaseConnection()
+
+    public fun addListener(socketListener: SocketListener)
+
+    public fun removeListener(socketListener: SocketListener)
 }

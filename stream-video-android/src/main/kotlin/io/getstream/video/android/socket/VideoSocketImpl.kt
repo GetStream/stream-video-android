@@ -113,12 +113,6 @@ internal class VideoSocketImpl(
                 is State.Connected -> {
                     healthMonitor.start()
                     callListeners { it.onConnected(newState.event) }
-                    socket?.send(
-                        AuthPayload(
-                            user = UserRequest(id = userState.user.value.id),
-                            token = tokenManager.getToken()
-                        )
-                    )
                 }
                 is State.NetworkDisconnected -> {
                     shutdownSocketConnection()
@@ -187,15 +181,15 @@ internal class VideoSocketImpl(
         }
     }
 
-    internal fun removeListener(listener: SocketListener) {
+    override fun removeListener(socketListener: SocketListener) {
         synchronized(listeners) {
-            listeners.remove(listener)
+            listeners.remove(socketListener)
         }
     }
 
-    internal fun addListener(listener: SocketListener) {
+    override fun addListener(socketListener: SocketListener) {
         synchronized(listeners) {
-            listeners.add(listener)
+            listeners.add(socketListener)
         }
     }
 
@@ -251,8 +245,15 @@ internal class VideoSocketImpl(
             is SocketFactory.ConnectionConf.UserConnectionConf -> {
                 socketConnectionJob = coroutineScope.launch {
                     tokenManager.ensureTokenLoaded()
-                    withContext(DispatcherProvider.Main) {
+                    withContext(DispatcherProvider.Immediate) {
                         socket = socketFactory.createSocket(createNewEventsParser(), connectionConf)
+
+                        socket?.authenticate(
+                            AuthPayload(
+                                user = UserRequest(id = userState.user.value.id),
+                                token = tokenManager.getToken()
+                            )
+                        )
                     }
                 }
                 State.Connecting

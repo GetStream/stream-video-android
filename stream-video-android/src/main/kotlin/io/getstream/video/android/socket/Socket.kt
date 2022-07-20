@@ -18,8 +18,13 @@ package io.getstream.video.android.socket
 
 import io.getstream.video.android.parser.VideoParser
 import okhttp3.WebSocket
+import stream.video.AuthPayload
 
 internal class Socket(private val socket: WebSocket, private val parser: VideoParser) {
+
+    fun authenticate(authPayload: AuthPayload) {
+        socket.send(authPayload.encodeByteString())
+    }
 
     fun send(event: Any) {
         socket.send(parser.toJson(event))

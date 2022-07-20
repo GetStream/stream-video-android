@@ -25,6 +25,7 @@ import io.getstream.video.android.client.user.UserState
 import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.module.VideoModule
+import io.getstream.video.android.socket.SocketListener
 import io.getstream.video.android.socket.SocketState
 import io.getstream.video.android.socket.SocketStateService
 import io.getstream.video.android.socket.VideoSocket
@@ -82,6 +83,15 @@ public class VideoClient(
         scope.launch(Dispatchers.Main.immediate) {
             lifecycleObserver.observe()
         }
+
+        socket.connectUser(userState.user.value)
+
+        // TODO check if we need to add any listener logic
+        socket.addListener(object : SocketListener() {
+            override fun onConnecting() {
+                super.onConnecting()
+            }
+        })
     }
 
     public fun registerDevice(device: Device) {
