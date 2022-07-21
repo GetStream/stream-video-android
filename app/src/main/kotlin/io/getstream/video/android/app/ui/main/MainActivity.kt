@@ -28,6 +28,7 @@ import android.provider.Settings
 import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -39,34 +40,28 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Call
-import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.app.VideoApp
 import io.getstream.video.android.ui.components.MainStage
-import io.getstream.video.android.ui.components.ParticipantsList
 import io.getstream.video.android.utils.onError
 import io.getstream.video.android.utils.onSuccessSuspend
+import io.getstream.video.android.viewmodel.CallViewModel
 import io.livekit.android.ConnectOptions
 import io.livekit.android.LiveKit
 import io.livekit.android.RoomOptions
-import io.livekit.android.room.Room
 import io.livekit.android.room.RoomListener
-import io.livekit.android.room.participant.Participant
-import io.livekit.android.room.participant.RemoteParticipant
-import io.livekit.android.room.track.Track
-import io.livekit.android.room.track.TrackPublication
-import io.livekit.android.room.track.VideoTrack
 import kotlinx.coroutines.launch
 import stream.video.SelectEdgeServerResponse
 
 class MainActivity : AppCompatActivity(), RoomListener {
 
-    private var hasInitializedVideo: Boolean = false
+    private val callViewModel by viewModels<CallViewModel>()
 
     @RequiresApi(M)
     private val permissionsContract = registerForActivityResult(
@@ -87,50 +82,45 @@ class MainActivity : AppCompatActivity(), RoomListener {
         }
     }
 
-    /**
-     * State.
-     */
-    // TODO - Expose through a ViewModel at some point
-    private var room: MutableState<Room?> = mutableStateOf(null)
-    private var videoTrack: MutableState<VideoTrack?> = mutableStateOf(null)
-    private var participants: MutableState<List<Participant>> = mutableStateOf(emptyList())
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            val track by videoTrack
-            val room by room
+            VideoCallContent()
+        }
+    }
 
-            Column(modifier = Modifier.fillMaxSize()) {
+    @Composable
+    private fun VideoCallContent() {
+        val room by callViewModel.roomState.collectAsState(initial = null)
+        val localParticipant by callViewModel.localParticipant.collectAsState(initial = null)
+        val participants by callViewModel.participants.collectAsState(initial = emptyList())
 
-                val currentTrack = track
-                val currentRoom = room
+        Column(modifier = Modifier.fillMaxSize()) {
+            val currentRoom = room
+            val speaker = localParticipant
 
-                if (currentTrack != null && currentRoom != null) {
-                    MainStage(
-                        room = currentRoom,
-                        track = currentTrack
-                    )
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .height(250.dp)
-                            .fillMaxWidth()
-                    ) {
-                        Image(
-                            modifier = Modifier.align(Alignment.Center),
-                            imageVector = Icons.Default.Call,
-                            contentDescription = null
-                        )
-                    }
-                }
-
-                if (currentRoom != null) {
-                    ParticipantsList(
-                        room = currentRoom,
-                        participants = participants.value
+            if (currentRoom == null || speaker == null) {
+                Box(
+                    modifier = Modifier
+                        .height(250.dp)
+                        .fillMaxWidth()
+                ) {
+                    Image(
+                        modifier = Modifier.align(Alignment.Center),
+                        imageVector = Icons.Default.Call,
+                        contentDescription = null
                     )
                 }
+            } else {
+                MainStage(
+                    modifier = Modifier
+                        .weight(0.7f)
+                        .fillMaxWidth(),
+                    room = currentRoom,
+                    speaker = speaker
+                )
+
+                // TODO participants
             }
         }
     }
@@ -142,6 +132,62 @@ class MainActivity : AppCompatActivity(), RoomListener {
         } else {
             startVideoFlow()
         }
+    }
+
+    private fun startSettings() {
+        startActivity(
+            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                val uri = Uri.fromParts("package", packageName, null)
+                data = uri
+            }
+        )
+    }
+
+    private fun startVideoFlow() {
+        val isInitialized = callViewModel.isVideoInitialized.value
+        if (isInitialized) return
+
+        val client = VideoApp.videoClient
+        val callId = intent.getStringExtra(KEY_CALL_ID) ?: return
+
+        lifecycleScope.launch {
+            val result = client.joinCall(
+                "video",
+                id = callId
+            )
+
+            result.onSuccessSuspend { response -> connectToRoom(response) }
+
+            result.onError {
+                Log.d("Couldn't select server", it.message ?: "")
+            }
+        }
+    }
+
+    private suspend fun connectToRoom(response: SelectEdgeServerResponse) {
+        val server = response.edge_server ?: return
+        val token = response.token
+
+        val url = enrichUrl(server.url)
+
+        val room = LiveKit.create(
+            applicationContext,
+            RoomOptions()
+        )
+
+        room.connect(
+            url = url,
+            token = token,
+            options = ConnectOptions(autoSubscribe = true)
+        )
+
+        callViewModel.init(room)
+    }
+
+    private fun enrichUrl(url: String): String {
+        if (url.startsWith("wss://")) return url
+
+        return "wss://$url"
     }
 
     @RequiresApi(M)
@@ -199,118 +245,10 @@ class MainActivity : AppCompatActivity(), RoomListener {
             .show()
     }
 
-    private fun startSettings() {
-        startActivity(
-            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                val uri = Uri.fromParts("package", packageName, null)
-                data = uri
-            }
-        )
-    }
-
-    private fun startVideoFlow() {
-        if (hasInitializedVideo) return
-
-        val client = VideoApp.videoClient
-        val callId = intent.getStringExtra(KEY_CALL_ID) ?: return
-
-        lifecycleScope.launch {
-            val result = client.joinCall(
-                "video",
-                id = callId
-            )
-
-            result.onSuccessSuspend { response ->
-                val server = response.edge_server
-                connectToRoom(response)
-
-                Log.d("selectResponse", server?.url ?: "")
-            }
-
-            result.onError {
-                Log.d("selectResponse", it.message ?: "")
-            }
-        }
-    }
-
-    private suspend fun connectToRoom(response: SelectEdgeServerResponse) {
-        val server = response.edge_server ?: return
-        val token = response.token
-
-        val url = enrichUrl(server.url)
-
-        val room = LiveKit.create(
-            applicationContext,
-            RoomOptions()
-        )
-        room.listener = this@MainActivity
-
-        room.connect(
-            url = url,
-            token = token,
-            options = ConnectOptions(autoSubscribe = true)
-        )
-        this.room.value = room
-        val participant = room.localParticipant
-
-        participant.setCameraEnabled(true)
-        participant.setMicrophoneEnabled(true)
-
-        val videoTrack = participant.videoTracks.firstOrNull()?.second as? VideoTrack ?: return
-
-        this.videoTrack.value = videoTrack
-        hasInitializedVideo = true
-    }
-
-    private fun enrichUrl(url: String): String {
-        if (url.startsWith("wss://")) return url
-
-        return "wss://$url"
-    }
-
-    // TODO - implement better event handling inside a VM
-    override fun onTrackSubscribed(
-        track: Track,
-        publication: TrackPublication,
-        participant: RemoteParticipant,
-        room: Room
-    ) {
-        super.onTrackSubscribed(track, publication, participant, room)
-        val current = participants.value
-
-        participants.value = (current + participant).distinctBy { it.sid }
-    }
-
-    override fun onTrackUnsubscribed(
-        track: Track,
-        publications: TrackPublication,
-        participant: RemoteParticipant,
-        room: Room
-    ) {
-        super.onTrackUnsubscribed(track, publications, participant, room)
-        val current = participants.value
-
-        participants.value = (current - participant).distinctBy { it.sid }
-    }
-
-    override fun onParticipantConnected(room: Room, participant: RemoteParticipant) {
-        super.onParticipantConnected(room, participant)
-        val current = participants.value
-
-        participants.value = (current + participant).distinctBy { it.sid }
-    }
-
-    override fun onParticipantDisconnected(room: Room, participant: RemoteParticipant) {
-        super.onParticipantDisconnected(room, participant)
-        val current = participants.value
-
-        participants.value = (current - participant).distinctBy { it.sid }
-    }
-
     companion object {
         private const val KEY_CALL_ID = "call_id"
 
-        public fun getIntent(context: Context, callId: String): Intent {
+        internal fun getIntent(context: Context, callId: String): Intent {
             return Intent(context, MainActivity::class.java).apply {
                 putExtra(KEY_CALL_ID, callId)
             }

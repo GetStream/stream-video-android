@@ -16,24 +16,25 @@
 
 package io.getstream.video.android.ui.components
 
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import io.livekit.android.room.Room
+import io.livekit.android.room.participant.Participant
 import io.livekit.android.room.track.VideoTrack
 
 @Composable
 public fun MainStage(
     room: Room,
-    track: VideoTrack
+    speaker: Participant,
+    modifier: Modifier = Modifier
 ) {
-    VideoItem(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(250.dp),
-        room = room,
-        videoTrack = track
-    )
+    val track = speaker.videoTracks.firstOrNull { it.second is VideoTrack }?.second as? VideoTrack
+
+    if (track != null) {
+        VideoItem(
+            modifier = modifier,
+            room = room,
+            videoTrack = track
+        )
+    }
 }
