@@ -126,10 +126,7 @@ internal class VideoModule(
      * Factory for providing sockets based on the connected user.
      */
     private val socketFactory: SocketFactory by lazy {
-        SocketFactory(
-            parser = videoParser,
-            tokenManager = tokenManager
-        )
+        SocketFactory(parser = videoParser)
     }
 
     /**

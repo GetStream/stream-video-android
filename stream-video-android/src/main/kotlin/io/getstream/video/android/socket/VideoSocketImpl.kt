@@ -144,11 +144,11 @@ internal class VideoSocketImpl(
     override fun onSocketError(error: VideoError) {
         if (state !is State.DisconnectedPermanently) {
             callListeners { it.onError(error) }
-            (error as? VideoNetworkError)?.let(::onChatNetworkError)
+            (error as? VideoNetworkError)?.let(::onNetworkError)
         }
     }
 
-    private fun onChatNetworkError(error: VideoNetworkError) {
+    private fun onNetworkError(error: VideoNetworkError) {
         if (VideoErrorCode.isAuthenticationError(error.streamCode)) {
             tokenManager.expireToken()
         }
@@ -194,11 +194,11 @@ internal class VideoSocketImpl(
     }
 
     override fun connectUser(user: User) {
-        connect(SocketFactory.ConnectionConf.UserConnectionConf(wssUrl, apiKey, user))
+        connect(SocketFactory.ConnectionConf(wssUrl))
     }
 
     override fun reconnectUser(user: User) {
-        reconnect(SocketFactory.ConnectionConf.UserConnectionConf(wssUrl, apiKey, user))
+        reconnect(SocketFactory.ConnectionConf(wssUrl))
     }
 
     internal fun connect(connectionConf: SocketFactory.ConnectionConf) {
@@ -242,7 +242,7 @@ internal class VideoSocketImpl(
     private fun setupSocket(connectionConf: SocketFactory.ConnectionConf?) {
         state = when (connectionConf) {
             null -> State.DisconnectedPermanently(null)
-            is SocketFactory.ConnectionConf.UserConnectionConf -> {
+            else -> {
                 socketConnectionJob = coroutineScope.launch {
                     tokenManager.ensureTokenLoaded()
                     withContext(DispatcherProvider.Immediate) {

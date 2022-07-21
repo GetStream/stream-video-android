@@ -17,67 +17,46 @@
 package io.getstream.video.android.socket
 
 import io.getstream.video.android.parser.VideoParser
-import io.getstream.video.android.token.TokenManager
+import io.getstream.video.android.utils.prepareUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import stream.video.User
-import java.io.UnsupportedEncodingException
+import java.util.concurrent.TimeUnit
 
+/**
+ * Builds sockets that connect a specific URL described in the configuration.
+ *
+ * @property parser The parser used to process events.
+ * @property httpClient The client that connects to a given URL and builds a socket.
+ */
 internal class SocketFactory(
     private val parser: VideoParser,
-    private val tokenManager: TokenManager,
-    private val httpClient: OkHttpClient = OkHttpClient(),
+    private val httpClient: OkHttpClient = OkHttpClient.Builder()
+        .pingInterval(15, TimeUnit.SECONDS)
+        .build(),
 ) {
 
-    @Throws(UnsupportedEncodingException::class)
+    /**
+     * Creates a socket that's used to observe events from the server.
+     *
+     * @param eventsParser Parser used to transform events.
+     * @param connectionConf Configuration used to build the socket.
+     */
     fun createSocket(eventsParser: EventsParser, connectionConf: ConnectionConf): Socket {
-        val url = connectionConf.endpoint.replace("localhost", "10.0.2.2") // TODO - pull out as an extension for reusability
+        val url = prepareUrl(connectionConf.endpoint)
         val request = Request.Builder().url(url).build()
         val newWebSocket = httpClient.newWebSocket(request, eventsParser)
 
         return Socket(newWebSocket, parser)
     }
 
-    private fun buildUserDetailJson(connectionConf: ConnectionConf): String {
-        val data = mapOf(
-            "user_details" to connectionConf.reduceUserDetails(),
-            "user_id" to connectionConf.user.id,
-            "server_determines_connection_id" to true,
-            // TODO - tracking headers
-        )
-        return parser.toJson(data)
-    }
-
     /**
-     * Converts the [User] object to a map of properties updated while connecting the user.
+     * Describes the configuration used to build a socket.
      *
-     * @return A map of User's properties to update.
+     * @property endpoint The URL endpoint to connect the socket to.
      */
-    private fun ConnectionConf.reduceUserDetails(): Map<String, Any> =
-        mutableMapOf<String, Any>("id" to user.id)
-            .apply {
-                if (!isReconnection) {
-                    put("teams", user.teams)
-
-                    // TODO - how do we define custom data?
-//                if (user.image.isNotBlank()) put("image", user.image)
-//                if (user.name.isNotBlank()) put("name", user.name)
-//                putAll(user.extraData)
-                }
-            }
-
-    internal sealed class ConnectionConf {
+    internal class ConnectionConf(val endpoint: String) {
         var isReconnection: Boolean = false
             private set
-        abstract val endpoint: String
-        abstract val apiKey: String
-        abstract val user: User
-
-        data class UserConnectionConf(
-            override val endpoint: String,
-            override val apiKey: String,
-            override val user: User,
-        ) : ConnectionConf()
 
         internal fun asReconnectionConf(): ConnectionConf = this.also { isReconnection = true }
     }

@@ -55,12 +55,12 @@ public fun getLatencyMeasurements(latencyUrl: String): List<Float> {
 /**
  * Prepares the URL for localhost/emulator observation.
  *
- * @param latencyUrl The original server ping URL.
+ * @param url The original URL.
  * @return [String] representation of the valid URL.
  */
-private fun prepareUrl(latencyUrl: String): String =
-    if (latencyUrl.contains("localhost")) {
-        latencyUrl.replace("localhost", "10.0.2.2")
+internal fun prepareUrl(url: String): String =
+    if (url.contains("localhost")) {
+        url.replace("localhost", "10.0.2.2")
     } else {
-        latencyUrl
+        url
     }

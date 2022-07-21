@@ -22,6 +22,10 @@ import stream.video.AuthPayload
 
 internal class Socket(private val socket: WebSocket, private val parser: VideoParser) {
 
+    /**
+     * Sends the [authPayload] as a Binary message to the socket, attempting to authenticate the
+     * currently logged in user.
+     */
     fun authenticate(authPayload: AuthPayload) {
         socket.send(authPayload.encodeByteString())
     }
