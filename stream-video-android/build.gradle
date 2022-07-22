@@ -5,6 +5,7 @@ import io.getstream.video.android.Versions
 plugins {
     id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
+    id 'org.jetbrains.kotlin.plugin.serialization'
     id 'com.squareup.wire'
     id 'binary-compatibility-validator'
 }
@@ -81,6 +82,7 @@ dependencies {
     implementation Dependencies.retrofit
     implementation Dependencies.retrofitWireConverter
     implementation Dependencies.okhttpLoggingInterceptor
+    implementation Dependencies.kotlinSerializationJson
 
     api Dependencies.liveKit
 

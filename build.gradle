@@ -9,6 +9,7 @@ buildscript {
     dependencies {
         classpath Dependencies.androidGradlePlugin
         classpath Dependencies.kotlinGradlePlugin
+        classpath Dependencies.kotlinSerializationPlugin
         classpath Dependencies.wirePlugin
         classpath Dependencies.spotlessGradlePlugin
         classpath Dependencies.kotlinBinaryValidator
