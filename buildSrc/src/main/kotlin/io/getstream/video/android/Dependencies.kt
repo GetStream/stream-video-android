@@ -4,9 +4,9 @@ object Versions {
     internal const val ANDROID_GRADLE_PLUGIN = "7.2.1"
     internal const val ANDROID_GRADLE_SPOTLESS = "6.7.0"
     internal const val GRADLE_NEXUS_PUBLISH_PLUGIN = "1.1.0"
-    internal const val KOTLIN = "1.7.10"
-    internal const val KOTLIN_GRADLE_DOKKA = "1.7.10"
-    internal const val KOTLIN_BINARY_VALIDATOR = "0.10.1"
+    internal const val KOTLIN = "1.6.10"
+    internal const val KOTLIN_GRADLE_DOKKA = "1.6.10"
+    internal const val KOTLIN_BINARY_VALIDATOR = "0.11.0"
     internal const val KOTLIN_COROUTINE = "1.6.1"
 
     internal const val MATERIAL = "1.6.1"
@@ -34,6 +34,7 @@ object Dependencies {
     const val dokka = "org.jetbrains.dokka:dokka-gradle-plugin:${Versions.KOTLIN_GRADLE_DOKKA}"
     const val kotlinBinaryValidator =
         "org.jetbrains.kotlinx:binary-compatibility-validator:${Versions.KOTLIN_BINARY_VALIDATOR}"
+    const val wirePlugin = "com.squareup.wire:wire-gradle-plugin:${Versions.WIRE}"
     const val coroutines =
         "org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.KOTLIN_COROUTINE}"
 
