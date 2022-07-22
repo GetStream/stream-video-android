@@ -7,7 +7,7 @@ object Versions {
     internal const val KOTLIN = "1.6.10"
     internal const val KOTLIN_GRADLE_DOKKA = "1.6.10"
     internal const val KOTLIN_BINARY_VALIDATOR = "0.11.0"
-    internal const val KOTLIN_COROUTINE = "1.6.1"
+    internal const val KOTLIN_COROUTINE = "1.6.4"
 
     internal const val MATERIAL = "1.6.1"
     internal const val ANDROIDX_APPCOMPAT = "1.4.2"
