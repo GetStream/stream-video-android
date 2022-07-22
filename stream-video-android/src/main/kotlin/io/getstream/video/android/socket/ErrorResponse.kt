@@ -16,6 +16,9 @@
 
 package io.getstream.video.android.socket
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 public data class ErrorResponse(
     val code: Int = -1,
     var message: String = "",

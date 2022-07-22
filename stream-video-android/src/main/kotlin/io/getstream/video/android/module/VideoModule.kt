@@ -109,18 +109,7 @@ internal class VideoModule(
         }
     }
 
-    // TODO - add moshi parser
-    private val videoParser: VideoParser by lazy {
-        object : VideoParser {
-            override fun toJson(any: Any): String {
-                return ""
-            }
-
-            override fun <T : Any> fromJson(raw: String, clazz: Class<T>): T {
-                TODO("Not implemented")
-            }
-        }
-    }
+    private val videoParser: VideoParser by lazy { VideoParser() }
 
     /**
      * Factory for providing sockets based on the connected user.
