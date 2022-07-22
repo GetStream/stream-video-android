@@ -73,7 +73,7 @@ internal class VideoModule(
         Retrofit.Builder()
             .client(okHttpClient)
             .addConverterFactory(WireConverterFactory.create().apply {})
-            .baseUrl(BASE_URL)
+            .baseUrl(REDIRECT_BASE_URL ?: BASE_URL)
             .build()
     }
 
@@ -208,7 +208,7 @@ internal class VideoModule(
     public fun socket(): VideoSocket {
         return VideoSocketImpl(
             apiKey = apiKey,
-            wssUrl = "ws://localhost:8989/",
+            wssUrl = WS_BASE_URL,
             tokenManager = tokenManager,
             socketFactory = socketFactory,
             networkStateProvider = networkStateProvider,
@@ -232,8 +232,19 @@ internal class VideoModule(
         private const val HEADER_AUTHORIZATION = "authorization"
 
         /**
+         * Used for testing on devices and redirecting from a public realm to localhost.
+         *
+         * Will only be used if the value is non-null, so if you're able to test locally, just
+         * leave it as-is.
+         */
+        @Suppress("RedundantNullableReturnType")
+        private val REDIRECT_BASE_URL: String? = "https://09cb-83-131-252-51.eu.ngrok.io"
+
+        /**
          * The base URL of the API.
          */
         private const val BASE_URL = "http://10.0.2.2:26991"
+
+        private const val WS_BASE_URL = "ws://localhost:8989/"
     }
 }

@@ -16,8 +16,14 @@
 
 package io.getstream.video.android.ui.components
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Call
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import io.livekit.android.compose.VideoRenderer
 import io.livekit.android.room.Room
 import io.livekit.android.room.participant.Participant
 import io.livekit.android.room.track.VideoTrack
@@ -31,10 +37,20 @@ public fun MainStage(
     val track = speaker.videoTracks.firstOrNull { it.second is VideoTrack }?.second as? VideoTrack
 
     if (track != null) {
-        VideoItem(
+        VideoRenderer(
             modifier = modifier,
             room = room,
             videoTrack = track
         )
+    } else {
+        Box(
+            modifier = modifier
+        ) {
+            Image(
+                modifier = Modifier.align(Alignment.Center),
+                imageVector = Icons.Default.Call,
+                contentDescription = null
+            )
+        }
     }
 }

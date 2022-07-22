@@ -89,6 +89,7 @@ dependencies {
     implementation Dependencies.composeFoundation
     implementation Dependencies.composeMaterial
     implementation Dependencies.activityCompose
+    implementation Dependencies.composeIconsExtended
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'

@@ -48,18 +48,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.app.VideoApp
+import io.getstream.video.android.app.ui.login.LoginActivity
+import io.getstream.video.android.ui.components.CallDetails
 import io.getstream.video.android.ui.components.MainStage
 import io.getstream.video.android.utils.onError
 import io.getstream.video.android.utils.onSuccessSuspend
 import io.getstream.video.android.viewmodel.CallViewModel
-import io.livekit.android.ConnectOptions
 import io.livekit.android.LiveKit
 import io.livekit.android.RoomOptions
-import io.livekit.android.room.RoomListener
 import kotlinx.coroutines.launch
 import stream.video.SelectEdgeServerResponse
 
-class MainActivity : AppCompatActivity(), RoomListener {
+class MainActivity : AppCompatActivity() {
 
     private val callViewModel by viewModels<CallViewModel>()
 
@@ -92,14 +92,16 @@ class MainActivity : AppCompatActivity(), RoomListener {
     @Composable
     private fun VideoCallContent() {
         val room by callViewModel.roomState.collectAsState(initial = null)
-        val localParticipant by callViewModel.localParticipant.collectAsState(initial = null)
-        val participants by callViewModel.participants.collectAsState(initial = emptyList())
+        val participants by callViewModel.participantList.collectAsState(initial = emptyList())
+        val speaker by callViewModel.primarySpeaker.collectAsState(initial = null)
+        val isCameraEnabled by callViewModel.isCameraEnabled.collectAsState(initial = false)
+        val isMicrophoneEnabled by callViewModel.isMicrophoneEnabled.collectAsState(initial = false)
 
         Column(modifier = Modifier.fillMaxSize()) {
             val currentRoom = room
-            val speaker = localParticipant
+            val currentSpeaker = speaker
 
-            if (currentRoom == null || speaker == null) {
+            if (currentRoom == null || currentSpeaker == null) {
                 Box(
                     modifier = Modifier
                         .height(250.dp)
@@ -114,13 +116,32 @@ class MainActivity : AppCompatActivity(), RoomListener {
             } else {
                 MainStage(
                     modifier = Modifier
-                        .weight(0.7f)
+                        .weight(0.5f)
                         .fillMaxWidth(),
                     room = currentRoom,
-                    speaker = speaker
+                    speaker = currentSpeaker
                 )
 
-                // TODO participants
+                CallDetails(
+                    modifier = Modifier.weight(0.5f),
+                    room = currentRoom,
+                    isCameraEnabled = isCameraEnabled,
+                    isMicrophoneEnabled = isMicrophoneEnabled,
+                    participants = participants,
+                    primarySpeaker = currentSpeaker,
+                    onEndCall = {
+                        val intent = Intent(this@MainActivity, LoginActivity::class.java)
+                        startActivity(intent)
+                        finish()
+                    },
+                    onCameraToggled = { isEnabled -> callViewModel.toggleCamera(isEnabled) },
+                    onMicrophoneToggled = { isEnabled ->
+                        callViewModel.toggleMicrophone(
+                            isEnabled
+                        )
+                    },
+                    onCameraFlipped = callViewModel::flipCamera
+                )
             }
         }
     }
@@ -164,7 +185,7 @@ class MainActivity : AppCompatActivity(), RoomListener {
         }
     }
 
-    private suspend fun connectToRoom(response: SelectEdgeServerResponse) {
+    private fun connectToRoom(response: SelectEdgeServerResponse) {
         val server = response.edge_server ?: return
         val token = response.token
 
@@ -175,13 +196,7 @@ class MainActivity : AppCompatActivity(), RoomListener {
             RoomOptions()
         )
 
-        room.connect(
-            url = url,
-            token = token,
-            options = ConnectOptions(autoSubscribe = true)
-        )
-
-        callViewModel.init(room)
+        callViewModel.init(room, url, token)
     }
 
     private fun enrichUrl(url: String): String {

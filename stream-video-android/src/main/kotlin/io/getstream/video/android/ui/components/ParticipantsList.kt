@@ -17,11 +17,13 @@
 package io.getstream.video.android.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import io.livekit.android.compose.VideoRenderer
 import io.livekit.android.room.Room
 import io.livekit.android.room.participant.Participant
 import io.livekit.android.room.track.VideoTrack
@@ -30,13 +32,16 @@ import io.livekit.android.room.track.VideoTrack
 public fun ParticipantsList(
     room: Room,
     participants: List<Participant>,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    primarySpeaker: Participant?
 ) {
+    val secondarySpeakers = participants.filter { it.sid != primarySpeaker?.sid }
+
     LazyRow(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items(participants) { participant ->
+        items(secondarySpeakers) { participant ->
             ParticipantItem(
                 room,
                 participant
@@ -50,6 +55,10 @@ public fun ParticipantItem(room: Room, participant: Participant) {
     val track = participant.videoTracks.firstOrNull()?.second as? VideoTrack
 
     if (track != null) {
-        VideoItem(room = room, videoTrack = track)
+        VideoRenderer(
+            modifier = Modifier.size(150.dp),
+            room = room,
+            videoTrack = track
+        )
     }
 }

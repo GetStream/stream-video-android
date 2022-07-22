@@ -40,8 +40,10 @@ object Dependencies {
     const val material = "com.google.android.material:material:${Versions.MATERIAL}"
     const val androidxAppcompat = "androidx.appcompat:appcompat:${Versions.ANDROIDX_APPCOMPAT}"
     const val androidxCore = "androidx.core:core-ktx:${Versions.ANDROIDX_CORE}"
-    const val androidxLifecycleRuntime = "androidx.lifecycle:lifecycle-runtime-ktx:${Versions.ANDROIDX_LIFECYCLE}"
-    const val androidxLifecycleProcess = "androidx.lifecycle:lifecycle-process:${Versions.ANDROIDX_LIFECYCLE}"
+    const val androidxLifecycleRuntime =
+        "androidx.lifecycle:lifecycle-runtime-ktx:${Versions.ANDROIDX_LIFECYCLE}"
+    const val androidxLifecycleProcess =
+        "androidx.lifecycle:lifecycle-process:${Versions.ANDROIDX_LIFECYCLE}"
 
     // Compose
     const val activityCompose = "androidx.activity:activity-compose:${Versions.ACTIVITY_COMPOSE}"
@@ -50,11 +52,13 @@ object Dependencies {
     const val composeUiTooling = "androidx.compose.ui:ui-tooling:${Versions.COMPOSE}"
     const val composeFoundation = "androidx.compose.foundation:foundation:${Versions.COMPOSE}"
     const val composeMaterial = "androidx.compose.material:material:${Versions.COMPOSE}"
+    const val composeIconsExtended = "androidx.compose.material:material-icons-extended:${Versions.COMPOSE}"
 
     const val wireRuntime = "com.squareup.wire:wire-runtime:${Versions.WIRE}"
     const val retrofit = "com.squareup.retrofit2:retrofit:${Versions.RETROFIT}"
     const val retrofitWireConverter = "com.squareup.retrofit2:converter-wire:${Versions.RETROFIT}"
-    const val okhttpLoggingInterceptor = "com.squareup.okhttp3:logging-interceptor:${Versions.OKHTTP}"
+    const val okhttpLoggingInterceptor =
+        "com.squareup.okhttp3:logging-interceptor:${Versions.OKHTTP}"
 
     const val liveKit = "io.livekit:livekit-android:${Versions.LIVE_KIT}"
 }

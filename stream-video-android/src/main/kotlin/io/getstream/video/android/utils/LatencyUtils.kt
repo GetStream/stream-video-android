@@ -29,7 +29,10 @@ import java.net.URL
 public fun getLatencyMeasurements(latencyUrl: String): List<Float> {
     val measurements = mutableListOf<Float>()
 
-    val url = prepareUrl(latencyUrl)
+    /**
+     * Used for setting up testing on devices.
+     */
+    val url = REDIRECT_PING_URL ?: prepareUrl(latencyUrl)
 
     repeat(3) {
         val request = URL(url)
@@ -64,3 +67,12 @@ internal fun prepareUrl(url: String): String =
     } else {
         url
     }
+
+/**
+ * Used for testing on devices and redirecting from a public realm to localhost.
+ *
+ * Will only be used if the value is non-null, so if you're able to test locally, just
+ * leave it as-is.
+ */
+@Suppress("RedundantNullableReturnType")
+private val REDIRECT_PING_URL: String? = "https://18a3-83-131-252-51.eu.ngrok.io/ping"

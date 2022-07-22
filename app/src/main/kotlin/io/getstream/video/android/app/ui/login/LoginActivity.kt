@@ -46,7 +46,7 @@ import java.util.*
 
 class LoginActivity : AppCompatActivity() {
 
-    private val callIdState = mutableStateOf("")
+    private val callIdState = mutableStateOf("testroom")
     private val loginItemsState = mutableStateOf(getUsers())
 
     override fun onCreate(savedInstanceState: Bundle?) {
