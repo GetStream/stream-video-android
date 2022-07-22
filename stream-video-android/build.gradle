@@ -1,10 +1,12 @@
 import io.getstream.video.android.Configuration
 import io.getstream.video.android.Dependencies
+import io.getstream.video.android.Versions
 
 plugins {
     id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
     id 'com.squareup.wire'
+    id 'binary-compatibility-validator'
 }
 
 wire {
@@ -54,7 +56,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion "1.1.1"
+        kotlinCompilerExtensionVersion Versions.COMPOSE
     }
 }
 
@@ -91,6 +93,7 @@ dependencies {
     implementation Dependencies.activityCompose
     implementation Dependencies.composeIconsExtended
 
+    // Unit Tests
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'

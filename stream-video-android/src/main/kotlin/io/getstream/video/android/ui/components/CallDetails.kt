@@ -69,7 +69,6 @@ public fun CallDetails(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
-
             Spacer(modifier = Modifier.width(16.dp))
 
             Icon(
