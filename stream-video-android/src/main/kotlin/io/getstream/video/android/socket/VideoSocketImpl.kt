@@ -20,7 +20,6 @@ import android.os.Handler
 import android.os.Looper
 import androidx.annotation.VisibleForTesting
 import io.getstream.video.android.client.user.UserState
-import io.getstream.video.android.dispatchers.DispatcherProvider
 import io.getstream.video.android.errors.DisconnectCause
 import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.errors.VideoErrorCode
@@ -34,7 +33,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import stream.video.AuthPayload
 import stream.video.User
 import stream.video.UserRequest
@@ -78,7 +76,7 @@ internal class VideoSocketImpl(
 
             override fun check() {
                 (state as? State.Connected)?.let {
-                    sendEvent(it.event)
+                    sendPing("Ping")
                 }
             }
         }
@@ -111,6 +109,12 @@ internal class VideoSocketImpl(
                     callListeners { it.onConnecting() }
                 }
                 is State.Connected -> {
+                    socket?.authenticate(
+                        AuthPayload(
+                            user = UserRequest(id = userState.user.value.id),
+                            token = tokenManager.getToken()
+                        )
+                    )
                     healthMonitor.start()
                     callListeners { it.onConnected(newState.event) }
                 }
@@ -234,6 +238,10 @@ internal class VideoSocketImpl(
         socket?.send(event)
     }
 
+    internal fun sendPing(data: String) {
+        socket?.ping(data)
+    }
+
     private fun reconnect(connectionConf: SocketFactory.ConnectionConf?) {
         shutdownSocketConnection()
         setupSocket(connectionConf?.asReconnectionConf())
@@ -245,16 +253,8 @@ internal class VideoSocketImpl(
             else -> {
                 socketConnectionJob = coroutineScope.launch {
                     tokenManager.ensureTokenLoaded()
-                    withContext(DispatcherProvider.Immediate) {
-                        socket = socketFactory.createSocket(createNewEventsParser(), connectionConf)
 
-                        socket?.authenticate(
-                            AuthPayload(
-                                user = UserRequest(id = userState.user.value.id),
-                                token = tokenManager.getToken()
-                            )
-                        )
-                    }
+                    socket = socketFactory.createSocket(createNewEventsParser(), connectionConf)
                 }
                 State.Connecting
             }

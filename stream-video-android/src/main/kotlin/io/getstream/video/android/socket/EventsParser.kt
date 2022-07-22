@@ -26,6 +26,7 @@ import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Success
 import okhttp3.Response
 import okhttp3.WebSocket
+import java.util.*
 
 @Suppress("TooManyFunctions")
 internal class EventsParser(
@@ -39,6 +40,14 @@ internal class EventsParser(
     override fun onOpen(webSocket: WebSocket, response: Response) {
         connectionEventReceived = false
         closedByClient = false
+
+        chatSocket.onConnectionResolved(
+            ConnectedEvent( // TODO - fix this once BE implements a proper connection flow
+                type = "connected",
+                createdAt = Date(),
+                connectionId = ""
+            )
+        )
     }
 
     @Suppress("TooGenericExceptionCaught")

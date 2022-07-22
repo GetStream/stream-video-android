@@ -34,6 +34,10 @@ internal class Socket(private val socket: WebSocket, private val parser: VideoPa
         socket.send(parser.toJson(event))
     }
 
+    fun ping(message: String) {
+        socket.send(message)
+    }
+
     fun close(code: Int, reason: String) {
         socket.close(code, reason)
     }

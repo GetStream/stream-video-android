@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.events
 
-import stream.video.User
 import java.util.*
 
 /**
@@ -33,7 +32,6 @@ public sealed class VideoEvent {
 public data class ConnectedEvent(
     override val type: String,
     override val createdAt: Date,
-    val me: User,
     val connectionId: String,
 ) : VideoEvent()
 

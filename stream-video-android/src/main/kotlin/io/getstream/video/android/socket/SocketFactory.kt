@@ -20,7 +20,7 @@ import io.getstream.video.android.parser.VideoParser
 import io.getstream.video.android.utils.prepareUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import java.util.concurrent.TimeUnit
+import okhttp3.logging.HttpLoggingInterceptor
 
 /**
  * Builds sockets that connect a specific URL described in the configuration.
@@ -31,7 +31,11 @@ import java.util.concurrent.TimeUnit
 internal class SocketFactory(
     private val parser: VideoParser,
     private val httpClient: OkHttpClient = OkHttpClient.Builder()
-        .pingInterval(15, TimeUnit.SECONDS)
+        .addInterceptor(
+            HttpLoggingInterceptor().apply {
+                level = HttpLoggingInterceptor.Level.BODY
+            }
+        )
         .build(),
 ) {
 
@@ -43,10 +47,15 @@ internal class SocketFactory(
      */
     fun createSocket(eventsParser: EventsParser, connectionConf: ConnectionConf): Socket {
         val url = prepareUrl(connectionConf.endpoint)
-        val request = Request.Builder().url(url).build()
-        val newWebSocket = httpClient.newWebSocket(request, eventsParser)
+        val request = Request
+            .Builder()
+            .url(url)
+            .addHeader("Connection", "Upgrade")
+            .addHeader("Upgrade", "websocket")
+            .build()
 
-        return Socket(newWebSocket, parser)
+        val webSocket = httpClient.newWebSocket(request, eventsParser)
+        return Socket(webSocket, parser)
     }
 
     /**

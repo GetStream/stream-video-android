@@ -75,4 +75,4 @@ internal fun prepareUrl(url: String): String =
  * leave it as-is.
  */
 @Suppress("RedundantNullableReturnType")
-private val REDIRECT_PING_URL: String? = "https://18a3-83-131-252-51.eu.ngrok.io/ping"
+private val REDIRECT_PING_URL: String? = null // "<redirect-url>/ping"

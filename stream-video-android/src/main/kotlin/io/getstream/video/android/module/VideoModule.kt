@@ -208,7 +208,7 @@ internal class VideoModule(
     public fun socket(): VideoSocket {
         return VideoSocketImpl(
             apiKey = apiKey,
-            wssUrl = WS_BASE_URL,
+            wssUrl = REDIRECT_WS_BASE_URL ?: WS_BASE_URL,
             tokenManager = tokenManager,
             socketFactory = socketFactory,
             networkStateProvider = networkStateProvider,
@@ -238,13 +238,21 @@ internal class VideoModule(
          * leave it as-is.
          */
         @Suppress("RedundantNullableReturnType")
-        private val REDIRECT_BASE_URL: String? = "https://09cb-83-131-252-51.eu.ngrok.io"
+        private val REDIRECT_BASE_URL: String? = null // e.g. "https://dc54-83-131-252-51.eu.ngrok.io"
 
         /**
          * The base URL of the API.
          */
         private const val BASE_URL = "http://10.0.2.2:26991"
 
+        /**
+         * Used for testing on devices and redirecting from a public realm to localhost.
+         *
+         * Will only be used if the value is non-null, so if you're able to test locally, just
+         * leave it as-is.
+         */
+        @Suppress("RedundantNullableReturnType")
+        private val REDIRECT_WS_BASE_URL: String? = null // e.g. "ws://4.tcp.eu.ngrok.io:12265"
         private const val WS_BASE_URL = "ws://localhost:8989/"
     }
 }
