@@ -86,7 +86,7 @@ public class VideoClient(
             lifecycleObserver.observe()
         }
 
-        socket.connectUser(userState.user.value)
+        socket.connectSocket()
     }
 
     public fun registerDevice(device: Device) {

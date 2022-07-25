@@ -22,7 +22,9 @@ import stream.video.User
 
 public interface VideoSocket {
 
-    public fun connectUser(user: User)
+    public fun connectSocket()
+
+    public fun authenticateUser()
 
     public fun reconnectUser(user: User)
 

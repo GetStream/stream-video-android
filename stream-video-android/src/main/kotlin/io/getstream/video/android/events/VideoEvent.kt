@@ -16,23 +16,23 @@
 
 package io.getstream.video.android.events
 
-import java.util.*
-
 /**
  * Represents the events coming in from the socket.
  */
-public sealed class VideoEvent {
-    public abstract val type: String
-    public abstract val createdAt: Date
-}
+public sealed class VideoEvent
 
 /**
  * Triggered when a user gets connected to the WS
  */
 public data class ConnectedEvent(
-    override val type: String,
-    override val createdAt: Date,
     val connectionId: String,
 ) : VideoEvent()
+
+public data class HealthCheckEvent(
+    val clientId: String,
+    val userId: String
+) : VideoEvent()
+
+public object UnknownEvent : VideoEvent()
 
 // TODO - rest of the events

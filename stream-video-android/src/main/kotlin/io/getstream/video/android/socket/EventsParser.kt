@@ -20,18 +20,17 @@ import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.errors.VideoErrorCode
 import io.getstream.video.android.errors.VideoNetworkError
 import io.getstream.video.android.events.ConnectedEvent
-import io.getstream.video.android.events.VideoEvent
+import io.getstream.video.android.events.HealthCheckEvent
 import io.getstream.video.android.parser.VideoParser
-import io.getstream.video.android.utils.Failure
-import io.getstream.video.android.utils.Success
 import okhttp3.Response
 import okhttp3.WebSocket
-import java.util.*
+import okio.ByteString
+import stream.video.WebsocketEvent
 
 @Suppress("TooManyFunctions")
 internal class EventsParser(
     private val parser: VideoParser,
-    private val chatSocket: VideoSocket,
+    private val videoSocket: VideoSocket,
 ) : okhttp3.WebSocketListener() {
 
     private var connectionEventReceived = false
@@ -41,26 +40,24 @@ internal class EventsParser(
         connectionEventReceived = false
         closedByClient = false
 
-        chatSocket.onConnectionResolved(
-            ConnectedEvent( // TODO - fix this once BE implements a proper connection flow
-                type = "connected",
-                createdAt = Date(),
-                connectionId = ""
-            )
-        )
+        videoSocket.authenticateUser()
     }
 
-    @Suppress("TooGenericExceptionCaught")
-    override fun onMessage(webSocket: WebSocket, text: String) {
+    override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
+        super.onMessage(webSocket, bytes)
         try {
-            val errorMessage = parser.fromJsonOrError(text, SocketErrorMessage::class.java)
-            if (errorMessage is Success && errorMessage.data.error != null) {
-                handleErrorEvent(errorMessage.data.error)
-            } else {
-                handleEvent(text)
+            val rawEvent = WebsocketEvent.ADAPTER.decode(bytes)
+            val processedEvent = EventMapper.mapEvent(rawEvent)
+
+            // TODO - We could get the Connected event here instead
+            if (!connectionEventReceived && processedEvent is HealthCheckEvent) {
+                connectionEventReceived = true
+                videoSocket.onConnectionResolved(ConnectedEvent(processedEvent.clientId))
             }
-        } catch (t: Throwable) {
-            onSocketError(VideoNetworkError.create(VideoErrorCode.UNABLE_TO_PARSE_SOCKET_EVENT))
+
+            videoSocket.onEvent(processedEvent)
+        } catch (error: Throwable) {
+            error.printStackTrace()
         }
     }
 
@@ -91,49 +88,9 @@ internal class EventsParser(
         closedByClient = true
     }
 
-    private fun handleEvent(text: String) {
-        val eventResult = parser.fromJsonOrError(text, VideoEvent::class.java)
-        if (eventResult is Success) {
-            val event = eventResult.data
-            if (!connectionEventReceived) {
-                if (event is ConnectedEvent) {
-                    connectionEventReceived = true
-                    onConnectionResolved(event)
-                } else {
-                    onSocketError(VideoNetworkError.create(VideoErrorCode.CANT_PARSE_CONNECTION_EVENT))
-                }
-            } else {
-                onEvent(event)
-            }
-        } else if (eventResult is Failure) {
-            onSocketError(
-                VideoNetworkError.create(
-                    VideoErrorCode.CANT_PARSE_EVENT,
-                    eventResult.error.cause
-                )
-            )
-        }
-    }
-
-    private fun handleErrorEvent(error: ErrorResponse) {
-        onSocketError(VideoNetworkError.create(error.code, error.message, error.statusCode))
-    }
-
     private fun onSocketError(error: VideoError) {
         if (!closedByClient) {
-            chatSocket.onSocketError(error)
-        }
-    }
-
-    private fun onConnectionResolved(event: ConnectedEvent) {
-        if (!closedByClient) {
-            chatSocket.onConnectionResolved(event)
-        }
-    }
-
-    private fun onEvent(event: VideoEvent) {
-        if (!closedByClient) {
-            chatSocket.onEvent(event)
+            videoSocket.onSocketError(error)
         }
     }
 

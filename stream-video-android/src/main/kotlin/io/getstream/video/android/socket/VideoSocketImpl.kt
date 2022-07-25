@@ -109,12 +109,6 @@ internal class VideoSocketImpl(
                     callListeners { it.onConnecting() }
                 }
                 is State.Connected -> {
-                    socket?.authenticate(
-                        AuthPayload(
-                            user = UserRequest(id = userState.user.value.id),
-                            token = tokenManager.getToken()
-                        )
-                    )
                     healthMonitor.start()
                     callListeners { it.onConnected(newState.event) }
                 }
@@ -197,8 +191,17 @@ internal class VideoSocketImpl(
         }
     }
 
-    override fun connectUser(user: User) {
+    override fun connectSocket() {
         connect(SocketFactory.ConnectionConf(wssUrl))
+    }
+
+    override fun authenticateUser() {
+        socket?.authenticate(
+            AuthPayload(
+                user = UserRequest(id = userState.user.value.id),
+                token = tokenManager.getToken()
+            )
+        )
     }
 
     override fun reconnectUser(user: User) {
