@@ -19,7 +19,7 @@ jobs:
           java-version: 11
       - name: spotless
         run: ./gradlew spotlessCheck
-        
+
   api_check:
     name: API check
     runs-on: ubuntu-18.04
