@@ -1,9 +1,12 @@
 # Stream Video Android
 
-[![Android CI](https://github.com/GetStream/video-android/actions/workflows/android.yml/badge.svg)](https://github.com/GetStream/video-android/actions/workflows/android.yml)
+<p align="center">
+  <a href="https://github.com/GetStream/stream-video-android/actions/workflows/android.yml"><img alt="Build Status" src="https://github.com/GetStream/stream-video-android/actions/workflows/android.yml/badge.svg"/></a>
+  <a href="https://android-arsenal.com/api?level=21"><img alt="API" src="https://img.shields.io/badge/API-21%2B-brightgreen.svg?style=flat"/></a>
+  <a href="https://getstream.io"><img src="https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/HayesGordon/e7f3c4587859c17f3e593fd3ff5b13f4/raw/11d9d9385c9f34374ede25f6471dc743b977a914/badge.json" alt="Stream Feeds"></a>
+</p>
 
 Stream Video repository for Android.
-
 
 # Introduction
 
@@ -18,7 +21,7 @@ Stream Video Android contains the following parts below:
 
 [Square's wire](https://github.com/square/wire/) contains dedicated compiler that interprets and generates interfaces for our Domain and API models defined in our protobuf schema.
 
-By adding our protocol buffer schemes into the `stream-video-android` module's [/src/main/proto](https://github.com/GetStream/video-android/tree/main/stream-video-kotlin/src/main/proto) package, it will generate code in the `stream.video` package as the below:
+By adding our protocol buffer schemes into the `stream-video-android` module's [/src/main/proto](https://github.com/GetStream/stream-video-android/tree/main/stream-video-kotlin/src/main/proto) package, it will generate code in the `stream.video` package as the below:
 
 ![generated-codes](https://user-images.githubusercontent.com/17215808/178219855-18d27ad6-dacb-4ccb-b392-4b032338f53f.png)
 
