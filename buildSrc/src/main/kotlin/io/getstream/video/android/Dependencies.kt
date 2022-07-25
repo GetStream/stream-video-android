@@ -6,8 +6,9 @@ object Versions {
     internal const val GRADLE_NEXUS_PUBLISH_PLUGIN = "1.1.0"
     internal const val KOTLIN = "1.6.10"
     internal const val KOTLIN_GRADLE_DOKKA = "1.6.10"
+    internal const val KOTLIN_SERIALIZATION_JSON = "1.3.2"
     internal const val KOTLIN_BINARY_VALIDATOR = "0.11.0"
-    internal const val KOTLIN_COROUTINE = "1.6.1"
+    internal const val KOTLIN_COROUTINE = "1.6.4"
 
     internal const val MATERIAL = "1.6.1"
     internal const val ANDROIDX_APPCOMPAT = "1.4.2"
@@ -29,6 +30,9 @@ object Dependencies {
     const val gradleNexusPublishPlugin =
         "io.github.gradle-nexus:publish-plugin:${Versions.GRADLE_NEXUS_PUBLISH_PLUGIN}"
     const val kotlinGradlePlugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:${Versions.KOTLIN}"
+    const val kotlinSerializationPlugin = "org.jetbrains.kotlin:kotlin-serialization:${Versions.KOTLIN}"
+    const val kotlinSerializationJson =
+        "org.jetbrains.kotlinx:kotlinx-serialization-json:${Versions.KOTLIN_SERIALIZATION_JSON}"
     const val spotlessGradlePlugin =
         "com.diffplug.spotless:spotless-plugin-gradle:${Versions.ANDROID_GRADLE_SPOTLESS}"
     const val dokka = "org.jetbrains.dokka:dokka-gradle-plugin:${Versions.KOTLIN_GRADLE_DOKKA}"

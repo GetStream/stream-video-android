@@ -23,21 +23,29 @@ import io.getstream.video.android.socket.ErrorResponse
 import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Result
 import io.getstream.video.android.utils.Success
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import okhttp3.Response
 import okhttp3.ResponseBody
 
-internal interface VideoParser {
+internal class VideoParser {
 
     private val tag: String
         get() = VideoParser::class.java.simpleName
 
-    fun toJson(any: Any): String
-    fun <T : Any> fromJson(raw: String, clazz: Class<T>): T
+    fun toJson(any: Any): String {
+        return Json.encodeToString(any)
+    }
+
+    inline fun <reified T : Any> fromJson(raw: String): T {
+        return Json.decodeFromString(raw)
+    }
 
     @Suppress("TooGenericExceptionCaught")
-    fun <T : Any> fromJsonOrError(raw: String, clazz: Class<T>): Result<T> {
+    inline fun <reified T : Any> fromJsonOrError(raw: String, clazz: Class<T>): Result<T> {
         return try {
-            Success(fromJson(raw, clazz))
+            Success(fromJson(raw))
         } catch (expected: Throwable) {
             Failure(VideoError("fromJsonOrError error parsing of $clazz into $raw", expected))
         }
@@ -55,7 +63,7 @@ internal interface VideoParser {
                 VideoNetworkError.create(VideoErrorCode.NO_ERROR_BODY, statusCode = statusCode)
             } else {
                 val error = try {
-                    fromJson(body, ErrorResponse::class.java)
+                    fromJson(body)
                 } catch (_: Throwable) {
                     ErrorResponse().apply { message = body }
                 }
@@ -77,7 +85,7 @@ internal interface VideoParser {
     fun toError(errorResponseBody: ResponseBody): VideoNetworkError {
         return try {
             val errorResponse: ErrorResponse =
-                fromJson(errorResponseBody.string(), ErrorResponse::class.java)
+                fromJson(errorResponseBody.string())
             val (code, message, statusCode, _, moreInfo) = errorResponse
 
             VideoNetworkError.create(

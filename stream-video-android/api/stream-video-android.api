@@ -855,7 +855,9 @@ public final class io/getstream/video/android/model/VideoRoom {
 
 public final class io/getstream/video/android/socket/ErrorResponse {
 	public static final field $stable I
+	public static final field Companion Lio/getstream/video/android/socket/ErrorResponse$Companion;
 	public fun <init> ()V
+	public synthetic fun <init> (IILjava/lang/String;ILjava/util/Map;Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/internal/SerializationConstructorMarker;)V
 	public fun <init> (ILjava/lang/String;ILjava/util/Map;Ljava/lang/String;)V
 	public synthetic fun <init> (ILjava/lang/String;ILjava/util/Map;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()I
@@ -878,6 +880,24 @@ public final class io/getstream/video/android/socket/ErrorResponse {
 	public final fun setMoreInfo (Ljava/lang/String;)V
 	public final fun setStatusCode (I)V
 	public fun toString ()Ljava/lang/String;
+	public static final fun write$Self (Lio/getstream/video/android/socket/ErrorResponse;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+}
+
+public final class io/getstream/video/android/socket/ErrorResponse$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field $stable I
+	public static final field INSTANCE Lio/getstream/video/android/socket/ErrorResponse$$serializer;
+	public static final synthetic field descriptor Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/getstream/video/android/socket/ErrorResponse;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/getstream/video/android/socket/ErrorResponse;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/getstream/video/android/socket/ErrorResponse$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
 public final class io/getstream/video/android/socket/SocketErrorMessage {
