@@ -799,24 +799,37 @@ public final class io/getstream/video/android/errors/VideoNetworkError$Companion
 
 public final class io/getstream/video/android/events/ConnectedEvent : io/getstream/video/android/events/VideoEvent {
 	public static final field $stable I
-	public fun <init> (Ljava/lang/String;Ljava/util/Date;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;)V
 	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/util/Date;
-	public final fun component3 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;Ljava/util/Date;Ljava/lang/String;)Lio/getstream/video/android/events/ConnectedEvent;
-	public static synthetic fun copy$default (Lio/getstream/video/android/events/ConnectedEvent;Ljava/lang/String;Ljava/util/Date;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/events/ConnectedEvent;
+	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/events/ConnectedEvent;
+	public static synthetic fun copy$default (Lio/getstream/video/android/events/ConnectedEvent;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/events/ConnectedEvent;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getConnectionId ()Ljava/lang/String;
-	public fun getCreatedAt ()Ljava/util/Date;
-	public fun getType ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class io/getstream/video/android/events/HealthCheckEvent : io/getstream/video/android/events/VideoEvent {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lio/getstream/video/android/events/HealthCheckEvent;
+	public static synthetic fun copy$default (Lio/getstream/video/android/events/HealthCheckEvent;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/events/HealthCheckEvent;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getClientId ()Ljava/lang/String;
+	public final fun getUserId ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/events/UnknownEvent : io/getstream/video/android/events/VideoEvent {
+	public static final field $stable I
+	public static final field INSTANCE Lio/getstream/video/android/events/UnknownEvent;
+}
+
 public abstract class io/getstream/video/android/events/VideoEvent {
 	public static final field $stable I
-	public abstract fun getCreatedAt ()Ljava/util/Date;
-	public abstract fun getType ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/logging/LoggingLevel : java/lang/Enum {
@@ -934,7 +947,8 @@ public final class io/getstream/video/android/socket/SocketStateService {
 
 public abstract interface class io/getstream/video/android/socket/VideoSocket {
 	public abstract fun addListener (Lio/getstream/video/android/socket/SocketListener;)V
-	public abstract fun connectUser (Lstream/video/User;)V
+	public abstract fun authenticateUser ()V
+	public abstract fun connectSocket ()V
 	public abstract fun onConnectionResolved (Lio/getstream/video/android/events/ConnectedEvent;)V
 	public abstract fun onEvent (Ljava/lang/Object;)V
 	public abstract fun onSocketError (Lio/getstream/video/android/errors/VideoError;)V
