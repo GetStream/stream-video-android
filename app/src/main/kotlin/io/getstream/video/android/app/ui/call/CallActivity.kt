@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.app.ui.main
+package io.getstream.video.android.app.ui.call
 
 import android.Manifest
 import android.content.Context
@@ -48,7 +48,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.app.VideoApp
-import io.getstream.video.android.app.ui.login.LoginActivity
+import io.getstream.video.android.app.ui.home.HomeActivity
 import io.getstream.video.android.ui.components.CallDetails
 import io.getstream.video.android.ui.components.MainStage
 import io.getstream.video.android.utils.onError
@@ -59,7 +59,7 @@ import io.livekit.android.RoomOptions
 import kotlinx.coroutines.launch
 import stream.video.SelectEdgeServerResponse
 
-class MainActivity : AppCompatActivity() {
+class CallActivity : AppCompatActivity() {
 
     private val callViewModel by viewModels<CallViewModel>()
 
@@ -130,7 +130,7 @@ class MainActivity : AppCompatActivity() {
                     participants = participants,
                     primarySpeaker = currentSpeaker,
                     onEndCall = {
-                        val intent = Intent(this@MainActivity, LoginActivity::class.java)
+                        val intent = HomeActivity.getIntent(this@CallActivity)
                         startActivity(intent)
                         finish()
                     },
@@ -170,11 +170,13 @@ class MainActivity : AppCompatActivity() {
 
         val client = VideoApp.videoClient
         val callId = intent.getStringExtra(KEY_CALL_ID) ?: return
+        val participants = intent.getStringArrayExtra(KEY_PARTICIPANTS) ?: emptyArray()
 
         lifecycleScope.launch {
             val result = client.joinCall(
                 "video",
-                id = callId
+                id = callId,
+                participantIds = participants.toList()
             )
 
             result.onSuccessSuspend { response -> connectToRoom(response) }
@@ -262,10 +264,16 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         private const val KEY_CALL_ID = "call_id"
+        private const val KEY_PARTICIPANTS = "participants"
 
-        internal fun getIntent(context: Context, callId: String): Intent {
-            return Intent(context, MainActivity::class.java).apply {
+        internal fun getIntent(
+            context: Context,
+            callId: String,
+            participants: List<String>
+        ): Intent {
+            return Intent(context, CallActivity::class.java).apply {
                 putExtra(KEY_CALL_ID, callId)
+                putExtra(KEY_PARTICIPANTS, participants.toTypedArray())
             }
         }
     }

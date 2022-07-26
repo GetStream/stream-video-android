@@ -25,6 +25,7 @@ import io.getstream.video.android.client.user.UserState
 import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.module.VideoModule
+import io.getstream.video.android.socket.SocketListener
 import io.getstream.video.android.socket.SocketState
 import io.getstream.video.android.socket.SocketStateService
 import io.getstream.video.android.socket.VideoSocket
@@ -95,11 +96,16 @@ public class VideoClient(
     /**
      * @see CallCoordinatorClient.joinCall for details.
      */
-    public suspend fun joinCall(type: String, id: String): Result<SelectEdgeServerResponse> {
+    public suspend fun joinCall(
+        type: String,
+        id: String,
+        participantIds: List<String> = emptyList()
+    ): Result<SelectEdgeServerResponse> {
         val createCallResult = callCoordinatorClient.createCall(
             CreateCallRequest(
                 type = type,
-                id = id
+                id = id,
+                participant_ids = participantIds
             )
         )
 
@@ -178,6 +184,29 @@ public class VideoClient(
         if (socketStateService.state is SocketState.Disconnected && user.id.isNotBlank()) {
             socket.reconnectUser(user)
         }
+    }
+
+    /**
+     * Returns the currently logged in user.
+     */
+    public fun getUser(): User = userState.user.value
+
+    /**
+     * Attaches a listener to the active Socket.
+     *
+     * @param socketListener The listener that will consume events.
+     */
+    public fun addSocketListener(socketListener: SocketListener) {
+        socket.addListener(socketListener)
+    }
+
+    /**
+     * Removes a listener from the active Socket.
+     *
+     * @param socketListener The listener that will be removed.
+     */
+    public fun removeSocketListener(socketListener: SocketListener) {
+        socket.removeListener(socketListener)
     }
 
     /**

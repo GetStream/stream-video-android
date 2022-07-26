@@ -672,9 +672,13 @@ public abstract interface class io/getstream/video/android/api/CallCoordinatorSe
 public final class io/getstream/video/android/client/VideoClient {
 	public static final field $stable I
 	public fun <init> (Landroidx/lifecycle/Lifecycle;Lkotlinx/coroutines/CoroutineScope;Lio/getstream/video/android/token/TokenProvider;Lio/getstream/video/android/socket/VideoSocket;Lio/getstream/video/android/socket/SocketStateService;Lio/getstream/video/android/client/user/UserState;Lio/getstream/video/android/client/coordinator/CallCoordinatorClient;)V
-	public final fun joinCall (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun addSocketListener (Lio/getstream/video/android/socket/SocketListener;)V
+	public final fun getUser ()Lstream/video/User;
+	public final fun joinCall (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun joinCall$default (Lio/getstream/video/android/client/VideoClient;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun reconnectSocket ()V
 	public final fun registerDevice (Lstream/video/Device;)V
+	public final fun removeSocketListener (Lio/getstream/video/android/socket/SocketListener;)V
 	public final fun selectEdgeServer (Lstream/video/SelectEdgeServerRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
@@ -795,6 +799,18 @@ public final class io/getstream/video/android/errors/VideoNetworkError$Companion
 	public final fun create (Lio/getstream/video/android/errors/VideoErrorCode;Ljava/lang/Throwable;I)Lio/getstream/video/android/errors/VideoNetworkError;
 	public static synthetic fun create$default (Lio/getstream/video/android/errors/VideoNetworkError$Companion;ILjava/lang/String;ILjava/lang/Throwable;ILjava/lang/Object;)Lio/getstream/video/android/errors/VideoNetworkError;
 	public static synthetic fun create$default (Lio/getstream/video/android/errors/VideoNetworkError$Companion;Lio/getstream/video/android/errors/VideoErrorCode;Ljava/lang/Throwable;IILjava/lang/Object;)Lio/getstream/video/android/errors/VideoNetworkError;
+}
+
+public final class io/getstream/video/android/events/CallCreatedEvent : io/getstream/video/android/events/VideoEvent {
+	public static final field $stable I
+	public fun <init> (Lstream/video/Call;)V
+	public final fun component1 ()Lstream/video/Call;
+	public final fun copy (Lstream/video/Call;)Lio/getstream/video/android/events/CallCreatedEvent;
+	public static synthetic fun copy$default (Lio/getstream/video/android/events/CallCreatedEvent;Lstream/video/Call;ILjava/lang/Object;)Lio/getstream/video/android/events/CallCreatedEvent;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCall ()Lstream/video/Call;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/events/ConnectedEvent : io/getstream/video/android/events/VideoEvent {

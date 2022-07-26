@@ -16,8 +16,9 @@
 
 package io.getstream.video.android.app.model
 
-data class LoginCredentials(
-    val name: String,
+data class UserCredentials(
+    val id: String,
     val token: String,
+    val name: String,
     val isSelected: Boolean = false
 )

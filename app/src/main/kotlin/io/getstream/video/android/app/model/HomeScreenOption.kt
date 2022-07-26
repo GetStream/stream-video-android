@@ -14,31 +14,9 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.events
+package io.getstream.video.android.app.model
 
-import stream.video.Call
-
-/**
- * Represents the events coming in from the socket.
- */
-public sealed class VideoEvent
-
-/**
- * Triggered when a user gets connected to the WS
- */
-public data class ConnectedEvent(
-    val connectionId: String,
-) : VideoEvent()
-
-public data class HealthCheckEvent(
-    val clientId: String,
-    val userId: String
-) : VideoEvent()
-
-public data class CallCreatedEvent(
-    val call: Call
-) : VideoEvent()
-
-public object UnknownEvent : VideoEvent()
-
-// TODO - rest of the events
+enum class HomeScreenOption {
+    CREATE_CALL,
+    JOIN_CALL
+}

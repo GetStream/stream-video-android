@@ -24,7 +24,9 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ui.main.MainActivity" />
+        <activity android:name=".ui.home.HomeActivity" />
+
+        <activity android:name=".ui.call.CallActivity" />
     </application>
 
 </manifest>

@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.socket
 
+import io.getstream.video.android.events.CallCreatedEvent
 import io.getstream.video.android.events.HealthCheckEvent
 import io.getstream.video.android.events.UnknownEvent
 import io.getstream.video.android.events.VideoEvent
@@ -35,6 +36,10 @@ internal object EventMapper {
                 userId = user_id,
                 clientId = client_id
             )
+        }
+
+        socketEvent.call_created != null -> with(socketEvent.call_created) {
+            CallCreatedEvent(call!!)
         }
 
         else -> UnknownEvent
