@@ -48,7 +48,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.app.VideoApp
-import io.getstream.video.android.app.ui.home.HomeActivity
 import io.getstream.video.android.ui.components.CallDetails
 import io.getstream.video.android.ui.components.MainStage
 import io.getstream.video.android.utils.onError
@@ -130,8 +129,7 @@ class CallActivity : AppCompatActivity() {
                     participants = participants,
                     primarySpeaker = currentSpeaker,
                     onEndCall = {
-                        val intent = HomeActivity.getIntent(this@CallActivity)
-                        startActivity(intent)
+                        currentRoom.disconnect()
                         finish()
                     },
                     onCameraToggled = { isEnabled -> callViewModel.toggleCamera(isEnabled) },

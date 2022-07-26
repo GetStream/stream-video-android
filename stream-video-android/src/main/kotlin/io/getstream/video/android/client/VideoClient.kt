@@ -181,7 +181,7 @@ public class VideoClient(
     public fun reconnectSocket() {
         val user = userState.user.value
 
-        if (socketStateService.state is SocketState.Disconnected && user.id.isNotBlank()) {
+        if (socketStateService.state !is SocketState.Connected && user.id.isNotBlank()) {
             socket.reconnectUser(user)
         }
     }
