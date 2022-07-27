@@ -27,7 +27,7 @@ public sealed class VideoEvent
  * Triggered when a user gets connected to the WS
  */
 public data class ConnectedEvent(
-    val connectionId: String,
+    val clientId: String,
 ) : VideoEvent()
 
 public data class HealthCheckEvent(

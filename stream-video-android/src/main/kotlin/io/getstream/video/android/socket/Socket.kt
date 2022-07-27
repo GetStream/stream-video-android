@@ -16,11 +16,17 @@
 
 package io.getstream.video.android.socket
 
-import io.getstream.video.android.parser.VideoParser
+import com.squareup.wire.Message
 import okhttp3.WebSocket
 import stream.video.AuthPayload
+import stream.video.Healthcheck
 
-internal class Socket(private val socket: WebSocket, private val parser: VideoParser) {
+/**
+ * Wrapper around the [WebSocket] that lets you send different types of events.
+ *
+ * @property socket The real WS that we send data to and receive data from.
+ */
+internal class Socket(private val socket: WebSocket) {
 
     /**
      * Sends the [authPayload] as a Binary message to the socket, attempting to authenticate the
@@ -30,14 +36,30 @@ internal class Socket(private val socket: WebSocket, private val parser: VideoPa
         socket.send(authPayload.encodeByteString())
     }
 
-    fun send(event: Any) {
-        socket.send(parser.toJson(event))
+    /**
+     * Sends an event which can be encoded into a ByteString using proto.
+     *
+     * @param event The event to send to the socket.
+     */
+    fun send(event: Message<*, *>) {
+        socket.send(event.encodeByteString())
     }
 
-    fun ping(message: String) {
-        socket.send(message)
+    /**
+     * Pings the server with a state update.
+     *
+     * @param state The state of the connection.
+     */
+    fun ping(state: Healthcheck) {
+        socket.send(state.encodeByteString())
     }
 
+    /**
+     * Closes the connection of the WebSocket with a given code and reason.
+     *
+     * @param code Code that describes the type of close.
+     * @param reason The explanation of the close.
+     */
     fun close(code: Int, reason: String) {
         socket.close(code, reason)
     }

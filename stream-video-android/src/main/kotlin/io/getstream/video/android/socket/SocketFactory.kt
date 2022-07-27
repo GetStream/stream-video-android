@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.socket
 
-import io.getstream.video.android.parser.VideoParser
 import io.getstream.video.android.utils.prepareUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -25,11 +24,9 @@ import okhttp3.logging.HttpLoggingInterceptor
 /**
  * Builds sockets that connect a specific URL described in the configuration.
  *
- * @property parser The parser used to process events.
  * @property httpClient The client that connects to a given URL and builds a socket.
  */
 internal class SocketFactory(
-    private val parser: VideoParser,
     private val httpClient: OkHttpClient = OkHttpClient.Builder()
         .addInterceptor(
             HttpLoggingInterceptor().apply {
@@ -55,7 +52,7 @@ internal class SocketFactory(
             .build()
 
         val webSocket = httpClient.newWebSocket(request, eventsParser)
-        return Socket(webSocket, parser)
+        return Socket(webSocket)
     }
 
     /**

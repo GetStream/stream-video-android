@@ -25,7 +25,6 @@ import io.getstream.video.android.client.coordinator.CallCoordinatorClientImpl
 import io.getstream.video.android.client.user.UserState
 import io.getstream.video.android.dispatchers.DispatcherProvider
 import io.getstream.video.android.network.NetworkStateProvider
-import io.getstream.video.android.parser.VideoParser
 import io.getstream.video.android.socket.SocketFactory
 import io.getstream.video.android.socket.VideoSocket
 import io.getstream.video.android.socket.VideoSocketImpl
@@ -109,13 +108,11 @@ internal class VideoModule(
         }
     }
 
-    private val videoParser: VideoParser by lazy { VideoParser() }
-
     /**
      * Factory for providing sockets based on the connected user.
      */
     private val socketFactory: SocketFactory by lazy {
-        SocketFactory(parser = videoParser)
+        SocketFactory()
     }
 
     /**
@@ -180,28 +177,27 @@ internal class VideoModule(
     /**
      * @return [CoroutineScope] used for all API requests.
      */
-    public fun scope(): CoroutineScope {
+    internal fun scope(): CoroutineScope {
         return scope
     }
 
     /**
      * @return The [CallCoordinatorClient] used to communicate to the API.
      */
-    public fun callClient(): CallCoordinatorClient {
+    internal fun callClient(): CallCoordinatorClient {
         return callCoordinatorClient
     }
 
     /**
      * @return The WebSocket handler that is used to connect to different calls.
      */
-    public fun socket(): VideoSocket {
+    internal fun socket(): VideoSocket {
         return VideoSocketImpl(
             apiKey = apiKey,
             wssUrl = REDIRECT_WS_BASE_URL ?: WS_BASE_URL,
             tokenManager = tokenManager,
             socketFactory = socketFactory,
             networkStateProvider = networkStateProvider,
-            parser = videoParser,
             userState = userState,
             coroutineScope = scope
         )
@@ -210,7 +206,7 @@ internal class VideoModule(
     /**
      * @return The [UserState] that serves us information about the currently logged in user.
      */
-    public fun userState(): UserState {
+    internal fun userState(): UserState {
         return userState
     }
 
@@ -227,7 +223,8 @@ internal class VideoModule(
          * leave it as-is.
          */
         @Suppress("RedundantNullableReturnType")
-        private val REDIRECT_BASE_URL: String? = null // e.g. "https://dc54-83-131-252-51.eu.ngrok.io"
+        private val REDIRECT_BASE_URL: String? =
+            "https://86c8-89-172-237-242.eu.ngrok.io" // e.g. "https://dc54-83-131-252-51.eu.ngrok.io"
 
         /**
          * The base URL of the API.

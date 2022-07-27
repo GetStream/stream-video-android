@@ -34,11 +34,12 @@ service CallCoordinatorService {
   // this endpoint will create the user if missing
   // if a device with the same id and push_provider_name exists, then the operation will be ignored
   rpc AddDevice(AddDeviceRequest) returns (AddDeviceResponse);
-
   rpc RemoveDevice(RemoveDeviceRequest) returns (RemoveDeviceResponse);
   rpc ListDevices(ListDevicesRequest) returns (ListDevicesResponse);
 
   // add reaction should perhaps just be handled by chat
+  rpc SendEvent(SendEventRequest) returns (SendEventResponse);
+
   rpc SendCustomEvent(SendCustomEventRequest) returns (SendCustomEventResponse);
 
   // room is a confusing name. better to call it breakout room
@@ -64,24 +65,29 @@ service CallCoordinatorService {
   rpc TranscribeCall(TranscribeCallRequest) returns (TranscribeCallResponse);
   rpc StopTranscribeCall(StopTranscribeCallRequest) returns (StopTranscribeCallResponse);
 
-  // start broadcast/ stop broadcast to HLS, RTMP and storage
+  // starts broadcast to HLS and/or RTMP, replaces existing settings if broadcasting is already started
   rpc StartBroadcast(StartBroadcastRequest) returns (StartBroadcastResponse);
-  rpc StopBroadcast(StopBroadcastRequest) returns (StartBroadcastResponse);
+  // stops broadcasting to HLS and/or RTMP
+  rpc StopBroadcast(StopBroadcastRequest) returns (StopBroadcastResponse);
+
+  rpc StartRecording(StartRecordingRequest) returns (StartRecordingResponse);
+  rpc StopRecording(StopRecordingRequest) returns (StopRecordingResponse);
+  rpc GetRecordings(GetRecordingsRequest) returns (GetRecordingsResponse);
 
   // User & GDPR endpoints, delete user
+  // we need to review the API contract based on Chat
   rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
   rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse);
   rpc ExportUser(ExportUserRequest) returns (ExportUserResponse);
   // This requires having some sort of user/team level concept
 
-  // call recording endpoints
-  rpc StartRecording(StartRecordingRequest) returns (StartRecordingResponse);
-  rpc StopRecording(StopRecordingRequest) returns (StopRecordingResponse);
-  rpc GetRecordings(GetRecordingsRequest) returns (GetRecordingsResponse);
-
   // endpoints needed to build a good dashboard experience
   // - listing calls and filtering based on their attributes
   // - listing users and filtering based on their attributes
+
+  // endpoint for storing stats
+  // endpoint for reviewing the quality of calls
+  // endpoint for reporting issues with a call
 }
 
 message GetCallRequest {
@@ -104,10 +110,10 @@ message CreateOrUpdateCallsResponse {
 
 message CreateCallRequest {
   // the call type
-  string type = 1;
+  string type = 1; // required
 
   // the call id, if not provided a unique value will be generated based on UUID v4
-  string id = 2;
+  string id = 2; // required
 
   // call custom data
   google.protobuf.Struct custom = 3;
@@ -115,11 +121,11 @@ message CreateCallRequest {
   // the list of participant ids
   repeated string participant_ids = 4;
 
-  // broadcasting, overrides the default call type setting if provided
-  google.protobuf.BoolValue broadcast = 6;
+  // HLS broadcast, overrides the default call type setting if provided
+  google.protobuf.BoolValue hls_broadcast = 6;
 
-  // the broadcasting options, only relevant if broadcast is enabled
-  repeated BroadcastOptions broadcast_options = 7;
+  // request video to be forwarded to a list of RTMP servers
+  RTMPOptions rtmp = 7;
 
   // transcription, overrides the default call type setting if provided
   google.protobuf.BoolValue transcribe = 8;
@@ -155,13 +161,14 @@ message DeleteCallResponse {
 }
 
 message SelectEdgeServerRequest {
-  string call_id = 1;
+  string call_type = 1;
+  string call_id = 2;
   map<string, Latency> latency_by_edge = 3;
 }
 
 message SelectEdgeServerResponse {
   // the edge server hosting the video call
-  EdgeServer edge_server = 1;
+  EdgeServer edge_server = 1 [(validate.rules).message.required = true];
 
   // the auth token needed to authenticate to the edge server
   string token = 2 [(validate.rules).string.min_len = 1];
@@ -184,6 +191,7 @@ message AddDeviceResponse {
 
 message RemoveDeviceRequest {
   string id = 1;
+  string user_id = 2;
 }
 
 message RemoveDeviceResponse {
@@ -200,6 +208,11 @@ message ListDevicesResponse {
 
 message CreateUserRequest {
   string id = 1;
+  repeated string teams = 2;
+  string role = 3;
+  google.protobuf.Struct custom = 4;
+  string name = 5;
+  string image_url = 6;
 }
 
 message CreateOrUpdateUsersRequest {
@@ -273,11 +286,19 @@ message EndCallResponse {
 }
 
 message StartBroadcastRequest {
-  string type = 1; // initially RTMP, record and HLS
-  // TODO: understand what fields we need to track here
+  // call id and type
+  string call_id = 1;
+  string call_type = 2;
+
+  // toggles HLS broadcasting on/off
+  bool hls_broadcast = 3;
+
+  // enables rtmp broadcasting
+  RTMPOptions rtmp = 5;
 }
 
 message StartBroadcastResponse {
+  Broadcast broadcast = 1;
 }
 
 message StopBroadcastRequest {
@@ -306,19 +327,20 @@ message StoreLatencyResponse {
 }
 
 message StartRecordingRequest {
-  string call_id = 1;
-  RecordingStorageOptions storage_options = 2;
-  Codec codec = 3;
+  string call_type = 1;
+  string call_id = 2;
 }
 
 message StartRecordingResponse {
 }
 
 message StopRecordingRequest {
-  string call_id = 1;
+  string call_type = 1;
+  string call_id = 2;
 }
 
 message StopRecordingResponse {
+  string s3_file_url = 1;
 }
 
 // TODO: how do we do filtering and pagination with proto?
@@ -328,4 +350,30 @@ message GetRecordingsRequest {
 }
 
 message GetRecordingsResponse {
+  message Recording {
+    string call_type = 1;
+    string call_id = 2;
+    string s3_file_url = 3;
+    string start_time = 4;
+    string stop_time = 5;
+  }
+
+  repeated Recording recordings = 1;
+}
+
+enum UserEventType {
+  USER_EVENT_TYPE_AUDIO_MUTED_UNSPECIFIED = 0;
+  USER_EVENT_TYPE_AUDIO_UNMUTED = 1;
+  USER_EVENT_TYPE_VIDEO_STARTED = 2;
+  USER_EVENT_TYPE_VIDEO_STOPPED = 3;
+}
+
+message SendEventRequest {
+  string user_id = 1;
+  string call_type = 2;
+  string call_id = 3;
+  UserEventType event_type = 4;
+}
+
+message SendEventResponse {
 }

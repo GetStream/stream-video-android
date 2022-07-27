@@ -42,7 +42,7 @@ public class SocketStateService {
         FiniteStateMachine {
             initialState(SocketState.Idle)
 
-            defaultHandler { state, event ->
+            defaultHandler { state, _ ->
                 state
             }
 

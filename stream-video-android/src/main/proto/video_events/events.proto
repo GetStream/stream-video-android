@@ -3,6 +3,7 @@ syntax = "proto3";
 package stream.video;
 
 import "video_models/models.proto";
+import "video_coordinator_rpc/coordinator_service.proto";
 
 option go_package = "github.com/GetStream/video/protobuf/video_events";
 
@@ -24,6 +25,14 @@ message WebsocketEvent {
     BroadcastStarted broadcast_started = 13;
     BroadcastEnded broadcast_ended = 14;
     AuthPayload auth_payload = 15;
+    AudioMuted audio_muted = 16;
+    AudioUnmuted audio_unmuted = 17;
+    VideoStarted video_started = 18;
+    VideoStopped video_stopped = 19;
+    ScreenshareStarted screenshare_started = 20;
+    ScreenshareStopped screenshare_stopped = 21;
+    RecordingStarted recording_started = 22;
+    RecordingStopped recording_stopped = 23;
   }
 }
 
@@ -31,10 +40,14 @@ message WebsocketEvent {
 message Healthcheck {
   string user_id = 1;
   string client_id = 2;
+  string call_type = 3;
+  string call_id = 4;
+  bool video = 5;
+  bool audio = 6;
 }
 
 message AuthPayload {
-  UserRequest user = 1;
+  CreateUserRequest user = 1;
   DeviceRequest device = 2;
   string token = 3;
 }
@@ -66,36 +79,83 @@ message CallDeleted {
   Call call = 1;
 }
 
+message AudioMuted {
+  Call call = 1;
+  oneof target {
+    string user_id = 2;
+    bool all_users = 3;
+  }
+}
+
+message AudioUnmuted {
+  Call call = 1;
+  string user_id = 2;
+}
+
+message VideoStarted {
+  Call call = 1;
+  string user_id = 2;
+}
+
+message VideoStopped {
+  Call call = 1;
+  string user_id = 2;
+}
+
+message ScreenshareStarted{
+  Call call = 1;
+  string user_id = 2;
+}
+
+message ScreenshareStopped{
+  Call call = 1;
+  string user_id = 2;
+}
+
+message RecordingStarted {
+  Call call = 1;
+}
+
+message RecordingStopped {
+  Call call = 1;
+}
+
 message UserUpdated {
   User user = 1;
 }
 
 message ParticipantInvited {
-  Participant participant = 1;
+  Call call = 1;
+  Participant participant = 2;
 }
 
 message ParticipantUpdated {
-  Participant participant = 1;
+  Call call = 1;
+  Participant participant = 2;
 }
 
 message ParticipantDeleted {
-  string user_id = 1;
+  Call call = 1;
+  string user_id = 2;
 }
 
+// ParticipantJoined is fired when a user joins a call
 message ParticipantJoined {
-  Participant participant = 1;
+  Call call = 1;
+  Participant participant = 2;
 }
 
 message ParticipantLeft {
-  Participant participant = 1;
+  Call call = 1;
+  Participant participant = 2;
 }
 
 message BroadcastStarted {
-  Broadcast broadcast = 1;
+  Call call = 1;
 }
 
 message BroadcastEnded {
-  Broadcast broadcast = 1;
+  Call call = 1;
 }
 
 // events
@@ -103,8 +163,6 @@ message BroadcastEnded {
 //mute: when someone, or multiple people are muted
 //unmute: when someone, or multiple people are unmuted
 //broadcast.preferences: request from the SFU to the client to provide a different list of uploads
-//screenshare.started
-//screenshare.stopped
 //security.updated: share screen, chat, rename, unmute, start video, hide profile pictures
 //settings: multiple people can share, 1 person can share
 //request: screenshare, recording, unmute

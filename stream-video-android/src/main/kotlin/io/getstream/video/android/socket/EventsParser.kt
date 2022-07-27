@@ -21,7 +21,6 @@ import io.getstream.video.android.errors.VideoErrorCode
 import io.getstream.video.android.errors.VideoNetworkError
 import io.getstream.video.android.events.ConnectedEvent
 import io.getstream.video.android.events.HealthCheckEvent
-import io.getstream.video.android.parser.VideoParser
 import okhttp3.Response
 import okhttp3.WebSocket
 import okio.ByteString
@@ -29,7 +28,6 @@ import stream.video.WebsocketEvent
 
 @Suppress("TooManyFunctions")
 internal class EventsParser(
-    private val parser: VideoParser,
     private val videoSocket: VideoSocket,
 ) : okhttp3.WebSocketListener() {
 

@@ -22,30 +22,16 @@ message Edge {
 // Edges are where we deploy video servers
 message EdgeServer {
   string url = 1;
+
+  // Returns information about the server location
+  message Coordinates {
+    float lat = 1;
+    float long = 2;
+  }
 }
 
 message Latency {
   repeated float measurements_seconds = 1;
-}
-
-// 3 different type of broadcast
-message Broadcast {
-  string id = 1;
-  oneof Details {
-    RTMPBroadcast rtmp = 2;
-    HLSBroadcast hls = 3;
-    RecordBroadcast record = 4;
-  }
-}
-
-message RTMPBroadcast {
-  string call_id = 1;
-  repeated string rtmpurls = 2;
-  int32 width = 3;
-  int32 height = 4;
-}
-message HLSBroadcast {
-
 }
 
 message File {
@@ -119,8 +105,12 @@ message RecordingStorageOptions {
   string path = 7;
 }
 
-message BroadcastOptions {
-  string rtmp_url = 1;
+message RTMPOptions {
+  repeated string urls = 1;
+}
+
+message Broadcast {
+  RTMPOptions rtmp = 1;
   string hls_url = 2;
 }
 
@@ -129,19 +119,23 @@ message TranscribeOptions {
 }
 
 message CallType {
+  // the unique name for the call type
   string name = 1;
+  // TODO: maybe we need to move this to permissions / own_capabilities
   Security security = 2;
 
-  // enable broadcasting by default when creating a call of this type
-  bool broadcast = 3;
-  repeated BroadcastOptions broadcast_options = 4;
+  // when recording is true, calls are recorded on S3
+  bool recording = 4;
+
+  // when enabled, calls get an HLS URL by default
+  bool hls_broadcast = 5;
 
   // enable transcription by default
-  bool transcribe = 5;
-  TranscribeOptions transcribe_options = 6;
+  bool transcribe = 6;
+  TranscribeOptions transcribe_options = 7;
 
-  string created_at = 7;
-  string updated_at = 8;
+  string created_at = 8;
+  string updated_at = 9;
 }
 
 message Security {
@@ -161,20 +155,21 @@ message Security {
   IsAllowed screen_share = 6;
   IsAllowed record = 7;
   IsAllowed broadcast = 8;
-
 }
 
 // those who are online in the call
 message Participant {
-  string user_id = 1;
+  User user = 1;
   string role = 2;
   bool online = 3;
   google.protobuf.Struct custom = 4 ;
+  bool video = 5;
+  bool audio = 6;
   // call creation date as RFC3339 string
-  string created_at = 5 [(validate.rules).string.min_len = 1];
+  string created_at = 7 [(validate.rules).string.min_len = 1];
 
   // call last update date as RFC3339 string
-  string updated_at = 6 [(validate.rules).string.min_len = 1];
+  string updated_at = 8 [(validate.rules).string.min_len = 1];
 
 }
 
@@ -205,7 +200,6 @@ message Call {
   // the id of the user that created this call
   string created_by_user_id = 3 [(validate.rules).string.min_len = 1];
 
-  // call custom data
   google.protobuf.Struct custom = 4;
 
   // call creation date as RFC3339 string
@@ -214,9 +208,11 @@ message Call {
   // call last update date as RFC3339 string
   string updated_at = 6 [(validate.rules).string.min_len = 1];
 
-  // enable broadcasting by default when creating a call of this type
-  bool broadcast = 7;
-  repeated BroadcastOptions broadcast_options = 8;
+  // when recording is true, calls are recorded on S3
+  bool recording = 7;
+
+  // broadcast settings for this call
+  Broadcast broadcast = 8;
 
   // enable transcription by default
   bool transcribe = 9;

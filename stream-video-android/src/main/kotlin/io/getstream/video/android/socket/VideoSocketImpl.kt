@@ -25,17 +25,16 @@ import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.errors.VideoErrorCode
 import io.getstream.video.android.errors.VideoNetworkError
 import io.getstream.video.android.events.ConnectedEvent
-import io.getstream.video.android.events.VideoEvent
 import io.getstream.video.android.network.NetworkStateProvider
-import io.getstream.video.android.parser.VideoParser
 import io.getstream.video.android.token.TokenManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import stream.video.AuthPayload
+import stream.video.CreateUserRequest
+import stream.video.Healthcheck
 import stream.video.User
-import stream.video.UserRequest
 import kotlin.math.pow
 import kotlin.properties.Delegates
 
@@ -47,7 +46,6 @@ import kotlin.properties.Delegates
  * @property tokenManager Wrapper around a token providing service that manages its validity.
  * @property socketFactory Factory used to build new socket instances.
  * @property networkStateProvider Provides the network state and lifecycle handles.
- * @property parser Used to parse socket related events.
  * @property coroutineScope The scope used to launch any operations.
  */
 internal class VideoSocketImpl(
@@ -56,13 +54,14 @@ internal class VideoSocketImpl(
     private val tokenManager: TokenManager,
     private val socketFactory: SocketFactory,
     private val networkStateProvider: NetworkStateProvider,
-    private val parser: VideoParser,
     private val userState: UserState,
     private val coroutineScope: CoroutineScope,
 ) : VideoSocket {
     private var connectionConf: SocketFactory.ConnectionConf? = null
     private var socket: Socket? = null
     private var eventsParser: EventsParser? = null
+    private var clientId: String = ""
+
     private var socketConnectionJob: Job? = null
     private val listeners = mutableSetOf<SocketListener>()
     private val eventUiHandler = Handler(Looper.getMainLooper())
@@ -76,7 +75,12 @@ internal class VideoSocketImpl(
 
             override fun check() {
                 (state as? State.Connected)?.let {
-                    sendPing("Ping")
+                    sendPing(
+                        Healthcheck(
+                            user_id = userState.user.value.id,
+                            client_id = clientId
+                        )
+                    )
                 }
             }
         }
@@ -196,9 +200,11 @@ internal class VideoSocketImpl(
     }
 
     override fun authenticateUser() {
+        val user = userState.user.value
+
         socket?.authenticate(
             AuthPayload(
-                user = UserRequest(id = userState.user.value.id),
+                user = CreateUserRequest(id = user.id, name = user.name),
                 token = tokenManager.getToken()
             )
         )
@@ -229,6 +235,7 @@ internal class VideoSocketImpl(
     }
 
     override fun onConnectionResolved(event: ConnectedEvent) {
+        this.clientId = event.clientId
         state = State.Connected(event)
     }
 
@@ -237,12 +244,8 @@ internal class VideoSocketImpl(
         callListeners { listener -> listener.onEvent(event) }
     }
 
-    internal fun sendEvent(event: VideoEvent) {
-        socket?.send(event)
-    }
-
-    internal fun sendPing(data: String) {
-        socket?.ping(data)
+    internal fun sendPing(state: Healthcheck) {
+        socket?.ping(state)
     }
 
     private fun reconnect(connectionConf: SocketFactory.ConnectionConf?) {
@@ -264,7 +267,7 @@ internal class VideoSocketImpl(
         }
     }
 
-    private fun createNewEventsParser(): EventsParser = EventsParser(parser, this).also {
+    private fun createNewEventsParser(): EventsParser = EventsParser(this).also {
         eventsParser = it
     }
 
