@@ -18,7 +18,6 @@ package io.getstream.video.android.socket
 
 import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.events.ConnectedEvent
-import stream.video.Call
 
 public interface VideoSocket {
 
@@ -38,16 +37,19 @@ public interface VideoSocket {
     public fun reconnect()
 
     /**
-     * Triggered when the user joins a call.
+     * Updates the information of the active call, if any.
      *
-     * @param call The information about the call.
+     * @param callId The unique ID of the call.
+     * @param callType The type of the call, e.g. video.
+     * @param audioEnabled If the audio of the participant is enabled.
+     * @param videoEnabled If the video of the participant is enabled.
      */
-    public fun onCallJoined(call: Call)
-
-    /**
-     * Triggered when the user leaves a call.
-     */
-    public fun onCallClosed()
+    public fun updateCallState(
+        callId: String,
+        callType: String,
+        audioEnabled: Boolean,
+        videoEnabled: Boolean
+    )
 
     /**
      * Triggered when an error happens with the socket connection or events parsing.

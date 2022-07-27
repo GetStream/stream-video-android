@@ -32,7 +32,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import stream.video.AuthPayload
-import stream.video.Call
 import stream.video.CreateUserRequest
 import stream.video.Healthcheck
 import kotlin.math.pow
@@ -61,11 +60,19 @@ internal class VideoSocketImpl(
     private var socket: Socket? = null
     private var eventsParser: EventsParser? = null
     private var clientId: String = ""
-    private var activeCall: Call? = null
 
     private var socketConnectionJob: Job? = null
     private val listeners = mutableSetOf<SocketListener>()
     private val eventUiHandler = Handler(Looper.getMainLooper())
+
+    /**
+     * Call related state.
+     */
+    private var callType: String = ""
+    private var callId: String = ""
+    private var audioEnabled: Boolean = true
+    private var videoEnabled: Boolean = true
+
     private val healthMonitor = HealthMonitor(
         object : HealthMonitor.HealthCallback {
             override fun reconnect() {
@@ -80,8 +87,10 @@ internal class VideoSocketImpl(
                         Healthcheck(
                             user_id = userState.user.value.id,
                             client_id = clientId,
-                            call_type = activeCall?.type ?: "",
-                            call_id = activeCall?.id ?: ""
+                            call_type = callType,
+                            call_id = callId,
+                            audio = audioEnabled,
+                            video = videoEnabled
                         )
                     )
                 }
@@ -228,12 +237,16 @@ internal class VideoSocketImpl(
         networkStateProvider.subscribe(networkStateListener)
     }
 
-    override fun onCallJoined(call: Call) {
-        this.activeCall = call
-    }
-
-    override fun onCallClosed() {
-        this.activeCall = null
+    override fun updateCallState(
+        callId: String,
+        callType: String,
+        audioEnabled: Boolean,
+        videoEnabled: Boolean
+    ) {
+        this.callType = callType
+        this.callId = callId
+        this.audioEnabled = audioEnabled
+        this.videoEnabled = videoEnabled
     }
 
     override fun releaseConnection() {

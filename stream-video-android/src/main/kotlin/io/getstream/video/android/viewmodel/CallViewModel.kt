@@ -18,13 +18,12 @@ package io.getstream.video.android.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import io.livekit.android.ConnectOptions
+import io.getstream.video.android.model.LocalParticipant
+import io.getstream.video.android.model.Participant
+import io.getstream.video.android.model.RemoteParticipant
+import io.getstream.video.android.model.VideoRoom
 import io.livekit.android.events.RoomEvent
 import io.livekit.android.events.collect
-import io.livekit.android.room.Room
-import io.livekit.android.room.participant.LocalParticipant
-import io.livekit.android.room.participant.Participant
-import io.livekit.android.room.participant.RemoteParticipant
 import io.livekit.android.room.track.CameraPosition
 import io.livekit.android.room.track.LocalVideoTrack
 import io.livekit.android.room.track.LocalVideoTrackOptions
@@ -39,14 +38,16 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import stream.video.Call
 
 public class CallViewModel : ViewModel() {
 
     private var url: String = ""
     private var token: String = ""
+    private var call: Call? = null
 
-    private val _roomState: MutableStateFlow<Room?> = MutableStateFlow(null)
-    public val roomState: Flow<Room> = _roomState.filterNotNull()
+    private val _roomState: MutableStateFlow<VideoRoom?> = MutableStateFlow(null)
+    public val roomState: Flow<VideoRoom> = _roomState.filterNotNull()
 
     private var _localParticipantState: MutableStateFlow<LocalParticipant?> = MutableStateFlow(null)
     public val localParticipant: Flow<LocalParticipant> = _localParticipantState.filterNotNull()
@@ -55,7 +56,11 @@ public class CallViewModel : ViewModel() {
     public val isVideoInitialized: StateFlow<Boolean> = _isVideoInitialized
 
     public val activeSpeakers: Flow<List<Participant>> =
-        roomState.flatMapLatest { it::activeSpeakers.flow }
+        roomState.flatMapLatest {
+            it.value::activeSpeakers.flow.map { items ->
+                items.map { user -> RemoteParticipant(user) }
+            }
+        }
 
     private val _isCameraEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
     public val isCameraEnabled: Flow<Boolean> = _isCameraEnabled
@@ -65,10 +70,17 @@ public class CallViewModel : ViewModel() {
 
     public val participantList: Flow<List<Participant>> =
         roomState
-            .flatMapLatest { it::remoteParticipants.flow }
+            .flatMapLatest {
+                it.value::remoteParticipants.flow.map { map ->
+                    val ids = map.keys
+                    val values = map.values
+
+                    ids to values.map { RemoteParticipant(it) }
+                }
+            }
             .combine(localParticipant) { remote, local -> remote to local }
             .map { (remoteParticipants, localParticipant) ->
-                listOf<Participant>(localParticipant) + remoteParticipants.values
+                listOf<Participant>(localParticipant) + remoteParticipants.second
             }
 
     private val mutablePrimarySpeaker = MutableStateFlow<Participant?>(null)
@@ -78,28 +90,27 @@ public class CallViewModel : ViewModel() {
     public val flipButtonVideoEnabled: StateFlow<Boolean> = mutableFlipVideoButtonEnabled
 
     public fun init(
-        room: Room,
+        videoRoom: VideoRoom,
+        call: Call,
         url: String,
         token: String
     ) {
         this.url = url
         this.token = token
+        this.call = call
 
         viewModelScope.launch {
-            room.connect(
-                url = url,
-                token = token,
-                options = ConnectOptions(autoSubscribe = true)
-            )
+            videoRoom.connect(url = url, token = token)
 
-            _roomState.value = room
-            _localParticipantState.value = room.localParticipant
+            _roomState.value = videoRoom
+            _localParticipantState.value = videoRoom.localParticipant
             _isVideoInitialized.value = true
 
-            setupLocalParticipant(room.localParticipant)
-            setupEvents(room)
+            setupLocalParticipant(videoRoom.localParticipant)
+            setupEvents(videoRoom)
 
-            handlePrimarySpeaker(emptyList(), emptyList(), room)
+            handlePrimarySpeaker(emptyList(), emptyList(), videoRoom)
+            updateCallState()
 
             combine(
                 participantList,
@@ -128,9 +139,9 @@ public class CallViewModel : ViewModel() {
         }
     }
 
-    private fun setupEvents(room: Room) {
+    private fun setupEvents(room: VideoRoom) {
         viewModelScope.launch {
-            room.events.collect { event -> processEvent(event) }
+            room.value.events.collect { event -> processEvent(event) }
         }
     }
 
@@ -161,7 +172,7 @@ public class CallViewModel : ViewModel() {
     private fun handlePrimarySpeaker(
         participantsList: List<Participant>,
         speakers: List<Participant>,
-        room: Room?
+        room: VideoRoom?
     ) {
 
         var speaker = mutablePrimarySpeaker.value
@@ -212,6 +223,7 @@ public class CallViewModel : ViewModel() {
         viewModelScope.launch {
             participant.setCameraEnabled(enabled)
             _isCameraEnabled.value = enabled
+            updateCallState()
         }
     }
 
@@ -221,7 +233,21 @@ public class CallViewModel : ViewModel() {
         viewModelScope.launch {
             participant.setMicrophoneEnabled(enabled)
             _isMicrophoneEnabled.value = enabled
+            updateCallState()
         }
+    }
+
+    private fun updateCallState() {
+        val videoRoom = _roomState.value ?: return
+        val call = call ?: return
+        val participant = _localParticipantState.value
+
+        videoRoom.updateCallState(
+            call.id,
+            call.type,
+            participant?.isAudioEnabled ?: false,
+            participant?.isVideoEnabled ?: false
+        )
     }
 
     public fun flipCamera() {
@@ -248,7 +274,7 @@ public class CallViewModel : ViewModel() {
         viewModelScope.coroutineContext.cancelChildren()
 
         viewModelScope.launch {
-            init(room, url, token)
+            init(room, call!!, url, token)
         }
     }
 }

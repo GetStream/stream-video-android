@@ -38,12 +38,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import io.livekit.android.room.Room
-import io.livekit.android.room.participant.Participant
+import io.getstream.video.android.model.Participant
+import io.getstream.video.android.model.VideoRoom
 
 @Composable
 public fun CallDetails(
-    room: Room,
+    room: VideoRoom,
     isMicrophoneEnabled: Boolean,
     isCameraEnabled: Boolean,
     participants: List<Participant>,

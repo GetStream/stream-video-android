@@ -16,10 +16,38 @@
 
 package io.getstream.video.android.model
 
-import livekit.LivekitModels
+import io.getstream.video.android.socket.VideoSocket
+import io.livekit.android.room.Room
 
 public data class VideoRoom(
-    val room: LivekitModels.Room
-)
+    public val value: Room,
+    private val socket: VideoSocket // TODO figure this out
+) {
+    public val localParticipant: LocalParticipant
+        get() = LocalParticipant(value.localParticipant)
 
-// Todo - expose required properties
+    public fun updateCallState(
+        callId: String,
+        callType: String,
+        audioEnabled: Boolean,
+        videoEnabled: Boolean
+    ) {
+        socket.updateCallState(
+            callId = callId,
+            callType = callType,
+            audioEnabled = audioEnabled,
+            videoEnabled = videoEnabled
+        )
+    }
+
+    public fun updateAudioState(isEnabled: Boolean) {
+    }
+
+    public suspend fun connect(url: String, token: String) {
+        value.connect(url, token)
+    }
+
+    public fun disconnect() {
+        value.disconnect()
+    }
+}

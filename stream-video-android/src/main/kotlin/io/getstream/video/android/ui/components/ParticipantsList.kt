@@ -23,14 +23,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import io.getstream.video.android.model.Participant
+import io.getstream.video.android.model.VideoRoom
 import io.livekit.android.compose.VideoRenderer
-import io.livekit.android.room.Room
-import io.livekit.android.room.participant.Participant
 import io.livekit.android.room.track.VideoTrack
 
 @Composable
 public fun ParticipantsList(
-    room: Room,
+    room: VideoRoom,
     participants: List<Participant>,
     modifier: Modifier = Modifier,
     primarySpeaker: Participant?
@@ -51,13 +51,13 @@ public fun ParticipantsList(
 }
 
 @Composable
-public fun ParticipantItem(room: Room, participant: Participant) {
+public fun ParticipantItem(room: VideoRoom, participant: Participant) {
     val track = participant.videoTracks.firstOrNull()?.second as? VideoTrack
 
     if (track != null) {
         VideoRenderer(
             modifier = Modifier.size(150.dp),
-            room = room,
+            room = room.value,
             videoTrack = track
         )
     }

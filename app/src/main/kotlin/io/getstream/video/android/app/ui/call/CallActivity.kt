@@ -53,10 +53,7 @@ import io.getstream.video.android.ui.components.MainStage
 import io.getstream.video.android.utils.onError
 import io.getstream.video.android.utils.onSuccessSuspend
 import io.getstream.video.android.viewmodel.CallViewModel
-import io.livekit.android.LiveKit
-import io.livekit.android.RoomOptions
 import kotlinx.coroutines.launch
-import stream.video.SelectEdgeServerResponse
 
 class CallActivity : AppCompatActivity() {
 
@@ -177,32 +174,14 @@ class CallActivity : AppCompatActivity() {
                 participantIds = participants.toList()
             )
 
-            result.onSuccessSuspend { response -> connectToRoom(response) }
+            result.onSuccessSuspend { (room, call, url, token) ->
+                callViewModel.init(room, call, url, token)
+            }
 
             result.onError {
                 Log.d("Couldn't select server", it.message ?: "")
             }
         }
-    }
-
-    private fun connectToRoom(response: SelectEdgeServerResponse) {
-        val server = response.edge_server ?: return
-        val token = response.token
-
-        val url = enrichUrl(server.url)
-
-        val room = LiveKit.create(
-            applicationContext,
-            RoomOptions()
-        )
-
-        callViewModel.init(room, url, token)
-    }
-
-    private fun enrichUrl(url: String): String {
-        if (url.startsWith("wss://")) return url
-
-        return "wss://$url"
     }
 
     @RequiresApi(M)

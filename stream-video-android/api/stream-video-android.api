@@ -671,7 +671,7 @@ public abstract interface class io/getstream/video/android/api/CallCoordinatorSe
 
 public final class io/getstream/video/android/client/VideoClient {
 	public static final field $stable I
-	public fun <init> (Landroidx/lifecycle/Lifecycle;Lkotlinx/coroutines/CoroutineScope;Lio/getstream/video/android/token/TokenProvider;Lio/getstream/video/android/socket/VideoSocket;Lio/getstream/video/android/socket/SocketStateService;Lio/getstream/video/android/client/user/UserState;Lio/getstream/video/android/client/coordinator/CallCoordinatorClient;)V
+	public fun <init> (Landroidx/lifecycle/Lifecycle;Landroid/content/Context;Lkotlinx/coroutines/CoroutineScope;Lio/getstream/video/android/token/TokenProvider;Lio/getstream/video/android/socket/VideoSocket;Lio/getstream/video/android/socket/SocketStateService;Lio/getstream/video/android/client/user/UserState;Lio/getstream/video/android/client/coordinator/CallCoordinatorClient;)V
 	public final fun addSocketListener (Lio/getstream/video/android/socket/SocketListener;)V
 	public final fun getUser ()Lstream/video/User;
 	public final fun joinCall (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -857,6 +857,61 @@ public final class io/getstream/video/android/logging/LoggingLevel : java/lang/E
 	public static fun values ()[Lio/getstream/video/android/logging/LoggingLevel;
 }
 
+public final class io/getstream/video/android/model/JoinCallResponse {
+	public static final field $stable I
+	public fun <init> (Lio/getstream/video/android/model/VideoRoom;Lstream/video/Call;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Lio/getstream/video/android/model/VideoRoom;
+	public final fun component2 ()Lstream/video/Call;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun copy (Lio/getstream/video/android/model/VideoRoom;Lstream/video/Call;Ljava/lang/String;Ljava/lang/String;)Lio/getstream/video/android/model/JoinCallResponse;
+	public static synthetic fun copy$default (Lio/getstream/video/android/model/JoinCallResponse;Lio/getstream/video/android/model/VideoRoom;Lstream/video/Call;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/model/JoinCallResponse;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCall ()Lstream/video/Call;
+	public final fun getCallUrl ()Ljava/lang/String;
+	public final fun getUserToken ()Ljava/lang/String;
+	public final fun getVideoRoom ()Lio/getstream/video/android/model/VideoRoom;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/model/LocalParticipant : io/getstream/video/android/model/Participant {
+	public static final field $stable I
+	public fun <init> (Lio/livekit/android/room/participant/LocalParticipant;)V
+	public final fun copy (Lio/livekit/android/room/participant/LocalParticipant;)Lio/getstream/video/android/model/LocalParticipant;
+	public static synthetic fun copy$default (Lio/getstream/video/android/model/LocalParticipant;Lio/livekit/android/room/participant/LocalParticipant;ILjava/lang/Object;)Lio/getstream/video/android/model/LocalParticipant;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getSid ()Ljava/lang/String;
+	public final fun getTrackPublication (Lio/livekit/android/room/track/Track$Source;)Lio/livekit/android/room/track/LocalTrackPublication;
+	public fun getValue ()Lio/livekit/android/room/participant/Participant;
+	public fun getVideoTracks ()Ljava/util/List;
+	public fun hashCode ()I
+	public final fun isAudioEnabled ()Z
+	public final fun isVideoEnabled ()Z
+	public final fun setCameraEnabled (ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun setMicrophoneEnabled (ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class io/getstream/video/android/model/Participant {
+	public abstract fun getSid ()Ljava/lang/String;
+	public abstract fun getValue ()Lio/livekit/android/room/participant/Participant;
+	public abstract fun getVideoTracks ()Ljava/util/List;
+}
+
+public final class io/getstream/video/android/model/Participant$DefaultImpls {
+	public static fun getSid (Lio/getstream/video/android/model/Participant;)Ljava/lang/String;
+	public static fun getVideoTracks (Lio/getstream/video/android/model/Participant;)Ljava/util/List;
+}
+
+public final class io/getstream/video/android/model/RemoteParticipant : io/getstream/video/android/model/Participant {
+	public static final field $stable I
+	public fun <init> (Lio/livekit/android/room/participant/Participant;)V
+	public fun getSid ()Ljava/lang/String;
+	public fun getValue ()Lio/livekit/android/room/participant/Participant;
+	public fun getVideoTracks ()Ljava/util/List;
+}
+
 public final class io/getstream/video/android/model/Track {
 	public static final field $stable I
 	public fun <init> (Lio/livekit/android/room/track/Track;)V
@@ -871,14 +926,19 @@ public final class io/getstream/video/android/model/Track {
 
 public final class io/getstream/video/android/model/VideoRoom {
 	public static final field $stable I
-	public fun <init> (Llivekit/LivekitModels$Room;)V
-	public final fun component1 ()Llivekit/LivekitModels$Room;
-	public final fun copy (Llivekit/LivekitModels$Room;)Lio/getstream/video/android/model/VideoRoom;
-	public static synthetic fun copy$default (Lio/getstream/video/android/model/VideoRoom;Llivekit/LivekitModels$Room;ILjava/lang/Object;)Lio/getstream/video/android/model/VideoRoom;
+	public fun <init> (Lio/livekit/android/room/Room;Lio/getstream/video/android/socket/VideoSocket;)V
+	public final fun component1 ()Lio/livekit/android/room/Room;
+	public final fun connect (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun copy (Lio/livekit/android/room/Room;Lio/getstream/video/android/socket/VideoSocket;)Lio/getstream/video/android/model/VideoRoom;
+	public static synthetic fun copy$default (Lio/getstream/video/android/model/VideoRoom;Lio/livekit/android/room/Room;Lio/getstream/video/android/socket/VideoSocket;ILjava/lang/Object;)Lio/getstream/video/android/model/VideoRoom;
+	public final fun disconnect ()V
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getRoom ()Llivekit/LivekitModels$Room;
+	public final fun getLocalParticipant ()Lio/getstream/video/android/model/LocalParticipant;
+	public final fun getValue ()Lio/livekit/android/room/Room;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+	public final fun updateAudioState (Z)V
+	public final fun updateCallState (Ljava/lang/String;Ljava/lang/String;ZZ)V
 }
 
 public final class io/getstream/video/android/socket/ErrorResponse {
@@ -966,14 +1026,13 @@ public abstract interface class io/getstream/video/android/socket/VideoSocket {
 	public abstract fun addListener (Lio/getstream/video/android/socket/SocketListener;)V
 	public abstract fun authenticateUser ()V
 	public abstract fun connectSocket ()V
-	public abstract fun onCallClosed ()V
-	public abstract fun onCallJoined (Lstream/video/Call;)V
 	public abstract fun onConnectionResolved (Lio/getstream/video/android/events/ConnectedEvent;)V
 	public abstract fun onEvent (Ljava/lang/Object;)V
 	public abstract fun onSocketError (Lio/getstream/video/android/errors/VideoError;)V
 	public abstract fun reconnect ()V
 	public abstract fun releaseConnection ()V
 	public abstract fun removeListener (Lio/getstream/video/android/socket/SocketListener;)V
+	public abstract fun updateCallState (Ljava/lang/String;Ljava/lang/String;ZZ)V
 }
 
 public abstract interface class io/getstream/video/android/token/TokenProvider {
@@ -982,16 +1041,16 @@ public abstract interface class io/getstream/video/android/token/TokenProvider {
 }
 
 public final class io/getstream/video/android/ui/components/CallDetailsKt {
-	public static final fun CallDetails (Lio/livekit/android/room/Room;ZZLjava/util/List;Lio/livekit/android/room/participant/Participant;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+	public static final fun CallDetails (Lio/getstream/video/android/model/VideoRoom;ZZLjava/util/List;Lio/getstream/video/android/model/Participant;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/ui/components/MainStageKt {
-	public static final fun MainStage (Lio/livekit/android/room/Room;Lio/livekit/android/room/participant/Participant;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+	public static final fun MainStage (Lio/getstream/video/android/model/VideoRoom;Lio/getstream/video/android/model/Participant;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/ui/components/ParticipantsListKt {
-	public static final fun ParticipantItem (Lio/livekit/android/room/Room;Lio/livekit/android/room/participant/Participant;Landroidx/compose/runtime/Composer;I)V
-	public static final fun ParticipantsList (Lio/livekit/android/room/Room;Ljava/util/List;Landroidx/compose/ui/Modifier;Lio/livekit/android/room/participant/Participant;Landroidx/compose/runtime/Composer;II)V
+	public static final fun ParticipantItem (Lio/getstream/video/android/model/VideoRoom;Lio/getstream/video/android/model/Participant;Landroidx/compose/runtime/Composer;I)V
+	public static final fun ParticipantsList (Lio/getstream/video/android/model/VideoRoom;Ljava/util/List;Landroidx/compose/ui/Modifier;Lio/getstream/video/android/model/Participant;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/ui/components/VideoItemKt {
@@ -1025,6 +1084,10 @@ public final class io/getstream/video/android/utils/ResultKt {
 	public static final synthetic fun onSuccessSuspend (Lio/getstream/video/android/utils/Result;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
+public final class io/getstream/video/android/utils/StringUtilsKt {
+	public static final fun enrichSocketURL (Ljava/lang/String;)Ljava/lang/String;
+}
+
 public final class io/getstream/video/android/utils/Success : io/getstream/video/android/utils/Result {
 	public static final field $stable I
 	public fun <init> (Ljava/lang/Object;)V
@@ -1047,7 +1110,7 @@ public final class io/getstream/video/android/viewmodel/CallViewModel : androidx
 	public final fun getParticipantList ()Lkotlinx/coroutines/flow/Flow;
 	public final fun getPrimarySpeaker ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getRoomState ()Lkotlinx/coroutines/flow/Flow;
-	public final fun init (Lio/livekit/android/room/Room;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun init (Lio/getstream/video/android/model/VideoRoom;Lstream/video/Call;Ljava/lang/String;Ljava/lang/String;)V
 	public final fun isCameraEnabled ()Lkotlinx/coroutines/flow/Flow;
 	public final fun isMicrophoneEnabled ()Lkotlinx/coroutines/flow/Flow;
 	public final fun isVideoInitialized ()Lkotlinx/coroutines/flow/StateFlow;

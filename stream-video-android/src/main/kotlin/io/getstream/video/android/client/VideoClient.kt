@@ -17,13 +17,14 @@
 package io.getstream.video.android.client
 
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ProcessLifecycleOwner
 import io.getstream.video.android.client.coordinator.CallCoordinatorClient
 import io.getstream.video.android.client.user.UserState
 import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.logging.LoggingLevel
+import io.getstream.video.android.model.JoinCallResponse
+import io.getstream.video.android.model.VideoRoom
 import io.getstream.video.android.module.VideoModule
 import io.getstream.video.android.socket.SocketListener
 import io.getstream.video.android.socket.SocketState
@@ -34,7 +35,9 @@ import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Result
 import io.getstream.video.android.utils.Success
 import io.getstream.video.android.utils.getLatencyMeasurements
-import io.getstream.video.android.utils.onSuccess
+import io.livekit.android.LiveKit
+import io.livekit.android.RoomOptions
+import io.livekit.android.room.Room
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -62,6 +65,7 @@ import stream.video.User
  */
 public class VideoClient(
     lifecycle: Lifecycle,
+    private val applicationContext: Context,
     private val scope: CoroutineScope,
     private val tokenProvider: TokenProvider,
     private val socket: VideoSocket,
@@ -101,7 +105,7 @@ public class VideoClient(
         type: String,
         id: String,
         participantIds: List<String> = emptyList()
-    ): Result<SelectEdgeServerResponse> {
+    ): Result<JoinCallResponse> {
         val createCallResult = callCoordinatorClient.createCall(
             CreateCallRequest(
                 type = type,
@@ -111,15 +115,7 @@ public class VideoClient(
         )
 
         return when (createCallResult) {
-            is Success -> {
-                val joinResult = joinCreatedCall(createCallResult.data)
-
-                joinResult.onSuccess {
-                    socket.onCallJoined(createCallResult.data.call!!)
-                }
-
-                joinResult
-            }
+            is Success -> joinCreatedCall(createCallResult.data)
             is Failure -> return Failure(createCallResult.error)
         }
     }
@@ -128,7 +124,12 @@ public class VideoClient(
      * Notifies the client that we've left the call and can clean up state.
      */
     public fun leaveCall() {
-        socket.onCallClosed()
+        socket.updateCallState(
+            callId = "",
+            callType = "",
+            audioEnabled = false,
+            videoEnabled = false
+        )
     }
 
     /**
@@ -138,7 +139,7 @@ public class VideoClient(
      * @param response Information about the newly created call.
      * @return [Result] wrapper around [SelectEdgeServerResponse] once the correct server is chosen.
      */
-    private suspend fun joinCreatedCall(response: CreateCallResponse): Result<SelectEdgeServerResponse> {
+    private suspend fun joinCreatedCall(response: CreateCallResponse): Result<JoinCallResponse> {
         val call = response.call!!
 
         val callResult = callCoordinatorClient.joinCall(
@@ -156,20 +157,37 @@ public class VideoClient(
                     it.latency_url to measureLatency(it)
                 }
 
-                Log.d("latencyCheck", latencyResults.toString())
-
-                selectEdgeServer(
+                val selectEdgeServerResult = selectEdgeServer(
                     request = SelectEdgeServerRequest(
                         call_id = call.id,
                         latency_by_edge = latencyResults
                     )
                 )
+
+                when (selectEdgeServerResult) {
+                    is Success -> Success(
+                        JoinCallResponse(
+                            videoRoom = VideoRoom(value = createRoom(), socket = socket),
+                            call = call,
+                            callUrl = selectEdgeServerResult.data.edge_server?.url!!,
+                            userToken = selectEdgeServerResult.data.token
+                        )
+                    )
+                    is Failure -> Failure(selectEdgeServerResult.error)
+                }
             } catch (error: Throwable) {
                 Failure(VideoError(error.message, error))
             }
         } else {
             return Failure((callResult as Failure).error)
         }
+    }
+
+    private fun createRoom(): Room {
+        return LiveKit.create(
+            applicationContext,
+            RoomOptions()
+        )
     }
 
     /**
@@ -275,6 +293,7 @@ public class VideoClient(
 
             return VideoClient(
                 lifecycle = lifecycle,
+                applicationContext = appContext,
                 tokenProvider = tokenProvider,
                 scope = videoModule.scope(),
                 socket = videoModule.socket(),
