@@ -676,6 +676,7 @@ public final class io/getstream/video/android/client/VideoClient {
 	public final fun getUser ()Lstream/video/User;
 	public final fun joinCall (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun joinCall$default (Lio/getstream/video/android/client/VideoClient;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun leaveCall ()V
 	public final fun reconnectSocket ()V
 	public final fun registerDevice (Lstream/video/Device;)V
 	public final fun removeSocketListener (Lio/getstream/video/android/socket/SocketListener;)V
@@ -965,10 +966,12 @@ public abstract interface class io/getstream/video/android/socket/VideoSocket {
 	public abstract fun addListener (Lio/getstream/video/android/socket/SocketListener;)V
 	public abstract fun authenticateUser ()V
 	public abstract fun connectSocket ()V
+	public abstract fun onCallClosed ()V
+	public abstract fun onCallJoined (Lstream/video/Call;)V
 	public abstract fun onConnectionResolved (Lio/getstream/video/android/events/ConnectedEvent;)V
 	public abstract fun onEvent (Ljava/lang/Object;)V
 	public abstract fun onSocketError (Lio/getstream/video/android/errors/VideoError;)V
-	public abstract fun reconnectUser (Lstream/video/User;)V
+	public abstract fun reconnect ()V
 	public abstract fun releaseConnection ()V
 	public abstract fun removeListener (Lio/getstream/video/android/socket/SocketListener;)V
 }

@@ -182,8 +182,7 @@ class HomeActivity : AppCompatActivity() {
 
         ParticipantsOptions()
 
-        val isDataValid =
-            participantsOptions.value.any { it.isSelected } && callIdState.value.isNotBlank()
+        val isDataValid = callIdState.value.isNotBlank()
 
         Button(
             modifier = Modifier

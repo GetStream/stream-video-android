@@ -18,25 +18,70 @@ package io.getstream.video.android.socket
 
 import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.events.ConnectedEvent
-import stream.video.User
+import stream.video.Call
 
 public interface VideoSocket {
 
+    /**
+     * Initializes the socket connection.
+     */
     public fun connectSocket()
 
+    /**
+     * Attempts to authenticate the user after the initial connection event.
+     */
     public fun authenticateUser()
 
-    public fun reconnectUser(user: User)
+    /**
+     * Attempts to reconnect the socket.
+     */
+    public fun reconnect()
 
+    /**
+     * Triggered when the user joins a call.
+     *
+     * @param call The information about the call.
+     */
+    public fun onCallJoined(call: Call)
+
+    /**
+     * Triggered when the user leaves a call.
+     */
+    public fun onCallClosed()
+
+    /**
+     * Triggered when an error happens with the socket connection or events parsing.
+     *
+     * @param error The issue that caused the socket to fail.
+     */
     public fun onSocketError(error: VideoError)
 
+    /**
+     * Triggered when an event is received from the socket.
+     *
+     * @param event The event received.
+     */
     public fun onEvent(event: Any)
 
+    /**
+     * Triggered when the connection is fully resolved and validated.
+     *
+     * @param event The event that holds connection data.
+     */
     public fun onConnectionResolved(event: ConnectedEvent)
 
+    /**
+     * Releases the socket connection when required in the app lifecycle.
+     */
     public fun releaseConnection()
 
+    /**
+     * Attaches a listener to the socket that receives events.
+     */
     public fun addListener(socketListener: SocketListener)
 
+    /**
+     * Detaches a listener from the socket to stop receiving events.
+     */
     public fun removeListener(socketListener: SocketListener)
 }

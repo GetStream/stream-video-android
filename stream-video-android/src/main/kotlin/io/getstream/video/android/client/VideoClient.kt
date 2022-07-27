@@ -34,6 +34,7 @@ import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Result
 import io.getstream.video.android.utils.Success
 import io.getstream.video.android.utils.getLatencyMeasurements
+import io.getstream.video.android.utils.onSuccess
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -110,9 +111,24 @@ public class VideoClient(
         )
 
         return when (createCallResult) {
-            is Success -> joinCreatedCall(createCallResult.data)
+            is Success -> {
+                val joinResult = joinCreatedCall(createCallResult.data)
+
+                joinResult.onSuccess {
+                    socket.onCallJoined(createCallResult.data.call!!)
+                }
+
+                joinResult
+            }
             is Failure -> return Failure(createCallResult.error)
         }
+    }
+
+    /**
+     * Notifies the client that we've left the call and can clean up state.
+     */
+    public fun leaveCall() {
+        socket.onCallClosed()
     }
 
     /**
@@ -182,7 +198,7 @@ public class VideoClient(
         val user = userState.user.value
 
         if (socketStateService.state !is SocketState.Connected && user.id.isNotBlank()) {
-            socket.reconnectUser(user)
+            socket.reconnect()
         }
     }
 

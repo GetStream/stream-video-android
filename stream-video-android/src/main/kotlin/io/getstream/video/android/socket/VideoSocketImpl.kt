@@ -32,9 +32,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import stream.video.AuthPayload
+import stream.video.Call
 import stream.video.CreateUserRequest
 import stream.video.Healthcheck
-import stream.video.User
 import kotlin.math.pow
 import kotlin.properties.Delegates
 
@@ -61,6 +61,7 @@ internal class VideoSocketImpl(
     private var socket: Socket? = null
     private var eventsParser: EventsParser? = null
     private var clientId: String = ""
+    private var activeCall: Call? = null
 
     private var socketConnectionJob: Job? = null
     private val listeners = mutableSetOf<SocketListener>()
@@ -78,7 +79,9 @@ internal class VideoSocketImpl(
                     sendPing(
                         Healthcheck(
                             user_id = userState.user.value.id,
-                            client_id = clientId
+                            client_id = clientId,
+                            call_type = activeCall?.type ?: "",
+                            call_id = activeCall?.id ?: ""
                         )
                     )
                 }
@@ -210,7 +213,7 @@ internal class VideoSocketImpl(
         )
     }
 
-    override fun reconnectUser(user: User) {
+    override fun reconnect() {
         reconnect(SocketFactory.ConnectionConf(wssUrl))
     }
 
@@ -225,9 +228,12 @@ internal class VideoSocketImpl(
         networkStateProvider.subscribe(networkStateListener)
     }
 
-    internal fun disconnect() {
-        reconnectionAttempts = 0
-        state = State.DisconnectedPermanently(null)
+    override fun onCallJoined(call: Call) {
+        this.activeCall = call
+    }
+
+    override fun onCallClosed() {
+        this.activeCall = null
     }
 
     override fun releaseConnection() {
