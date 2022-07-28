@@ -16,32 +16,15 @@
 
 package io.getstream.video.android.model
 
-import io.getstream.video.android.socket.VideoSocket
 import io.livekit.android.room.Room
+import io.livekit.android.room.track.CameraPosition
+import io.livekit.android.room.track.LocalVideoTrack
+import io.livekit.android.room.track.LocalVideoTrackOptions
+import io.livekit.android.room.track.Track
 
-public data class VideoRoom(
-    public val value: Room,
-    private val socket: VideoSocket // TODO figure this out
-) {
+public data class VideoRoom(public val value: Room) {
     public val localParticipant: LocalParticipant
         get() = LocalParticipant(value.localParticipant)
-
-    public fun updateCallState(
-        callId: String,
-        callType: String,
-        audioEnabled: Boolean,
-        videoEnabled: Boolean
-    ) {
-        socket.updateCallState(
-            callId = callId,
-            callType = callType,
-            audioEnabled = audioEnabled,
-            videoEnabled = videoEnabled
-        )
-    }
-
-    public fun updateAudioState(isEnabled: Boolean) {
-    }
 
     public suspend fun connect(url: String, token: String) {
         value.connect(url, token)
@@ -49,5 +32,19 @@ public data class VideoRoom(
 
     public fun disconnect() {
         value.disconnect()
+    }
+
+    public fun flipCamera() {
+        val videoTrack = localParticipant.getTrackPublication(Track.Source.CAMERA)
+            ?.track as? LocalVideoTrack
+            ?: return
+
+        val newOptions = when (videoTrack.options.position) {
+            CameraPosition.FRONT -> LocalVideoTrackOptions(position = CameraPosition.BACK)
+            CameraPosition.BACK -> LocalVideoTrackOptions(position = CameraPosition.FRONT)
+            else -> LocalVideoTrackOptions()
+        }
+
+        videoTrack.restartTrack(newOptions)
     }
 }

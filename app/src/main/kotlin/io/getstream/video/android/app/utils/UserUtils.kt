@@ -21,19 +21,19 @@ import io.getstream.video.android.app.model.UserCredentials
 fun getUsers(): List<UserCredentials> {
     return listOf(
         UserCredentials(
-            id = "filip",
+            id = "filip2",
             name = "Filip",
-            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiZmlsaXAifQ.qjL9ajhHQgtrlKDvINmN7Kmf8uuZv52d4j8elnqN2iM"
+            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiZmlsaXAyIn0.FHap2f5AC0nkxmvSJnM4iN_jmMMYfhRb4_S2Rn10hvw"
         ),
         UserCredentials(
-            id = "mile_kitic",
+            id = "mile_kralj",
             name = "Mile Kitic",
-            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoibWlsZV9raXRpYyJ9.BW7ckfQexMNS_aag9b7iNEfihffR2q8UxBRGtx3NL-8"
+            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoibWlsZV9rcmFsaiJ9.QTuoQufYuyJkkcaCCSr3ECojHzQGCF1S0eEPMEgekjE"
         ),
         UserCredentials(
             id = "jedini_toma",
             name = "Toma Zdravkovic",
-            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidG9tYSJ9.0ZhjX_HCFE6cQ55znQeNi6DLXJ1g_mgww8idyQIeWMA"
+            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiamVkaW5pX3RvbWEifQ.BosMY_OaCL7Yz4gGt62Vyc96v7RhV88X6liFpbTEWTE"
         )
     )
 }

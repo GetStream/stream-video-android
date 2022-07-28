@@ -18,6 +18,7 @@ package io.getstream.video.android.socket
 
 import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.events.ConnectedEvent
+import stream.video.Call
 
 public interface VideoSocket {
 
@@ -39,17 +40,16 @@ public interface VideoSocket {
     /**
      * Updates the information of the active call, if any.
      *
-     * @param callId The unique ID of the call.
-     * @param callType The type of the call, e.g. video.
-     * @param audioEnabled If the audio of the participant is enabled.
-     * @param videoEnabled If the video of the participant is enabled.
+     * @param call The call that holds the necessary data.
      */
-    public fun updateCallState(
-        callId: String,
-        callType: String,
-        audioEnabled: Boolean,
-        videoEnabled: Boolean
-    )
+    public fun updateCallState(call: Call?)
+
+    /**
+     * Gets the current call state, if it exists.
+     *
+     * @return [Call] If it exists, or null otherwise.
+     */
+    public fun getCallState(): Call?
 
     /**
      * Triggered when an error happens with the socket connection or events parsing.

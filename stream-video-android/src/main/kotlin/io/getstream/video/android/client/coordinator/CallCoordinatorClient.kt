@@ -23,6 +23,7 @@ import stream.video.JoinCallRequest
 import stream.video.JoinCallResponse
 import stream.video.SelectEdgeServerRequest
 import stream.video.SelectEdgeServerResponse
+import stream.video.SendEventRequest
 
 public interface CallCoordinatorClient {
 
@@ -50,4 +51,13 @@ public interface CallCoordinatorClient {
      * @return a [Result] wrapper of the [SelectEdgeServerResponse], based on the API response.
      */
     public suspend fun selectEdgeServer(request: SelectEdgeServerRequest): Result<SelectEdgeServerResponse>
+
+    /**
+     * Sends a user-based event to the API to notify if we've changed something in the state of the
+     * call. The events can be any of the [stream.video.UserEventType].
+     *
+     * @param sendEventRequest The request holding information about the event type and the call.
+     * @return a [Result] wrapper if the call succeeded or not.
+     */
+    public suspend fun sendUserEvent(sendEventRequest: SendEventRequest): Result<Boolean>
 }

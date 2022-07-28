@@ -210,7 +210,7 @@ internal class VideoModule(
         return userState
     }
 
-    private companion object {
+    internal companion object {
         /**
          * Key used to prove authorization to the API.
          */
@@ -223,13 +223,21 @@ internal class VideoModule(
          * leave it as-is.
          */
         @Suppress("RedundantNullableReturnType")
-        private val REDIRECT_BASE_URL: String? =
-            "https://86c8-89-172-237-242.eu.ngrok.io" // e.g. "https://dc54-83-131-252-51.eu.ngrok.io"
+        private val REDIRECT_BASE_URL: String? = null // e.g. "https://dc54-83-131-252-51.eu.ngrok.io"
 
         /**
          * The base URL of the API.
          */
         private const val BASE_URL = "http://10.0.2.2:26991"
+
+        /**
+         * Used for testing on devices and redirecting from a public realm to localhost.
+         *
+         * Will only be used if the value is non-null, so if you're able to test locally, just
+         * leave it as-is.
+         */
+        @Suppress("RedundantNullableReturnType")
+        internal val REDIRECT_PING_URL: String? = null // "<redirect-url>/ping"
 
         /**
          * Used for testing on devices and redirecting from a public realm to localhost.

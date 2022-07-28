@@ -62,7 +62,7 @@ android {
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
-    kotlinOptions.freeCompilerArgs += ["-Xexplicit-api=strict"]
+    kotlinOptions.freeCompilerArgs += ["-Xexplicit-api=strict", "-Xjvm-default=enable"]
 }
 
 dependencies {

@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.utils
 
+import io.getstream.video.android.module.VideoModule
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.URL
@@ -32,7 +33,7 @@ public fun getLatencyMeasurements(latencyUrl: String): List<Float> {
     /**
      * Used for setting up testing on devices.
      */
-    val url = REDIRECT_PING_URL ?: prepareUrl(latencyUrl)
+    val url = VideoModule.REDIRECT_PING_URL ?: prepareUrl(latencyUrl)
 
     repeat(3) {
         val request = URL(url)
@@ -67,12 +68,3 @@ internal fun prepareUrl(url: String): String =
     } else {
         url
     }
-
-/**
- * Used for testing on devices and redirecting from a public realm to localhost.
- *
- * Will only be used if the value is non-null, so if you're able to test locally, just
- * leave it as-is.
- */
-@Suppress("RedundantNullableReturnType")
-private val REDIRECT_PING_URL: String? = null // "<redirect-url>/ping"

@@ -32,6 +32,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import stream.video.AuthPayload
+import stream.video.Call
 import stream.video.CreateUserRequest
 import stream.video.Healthcheck
 import kotlin.math.pow
@@ -68,10 +69,7 @@ internal class VideoSocketImpl(
     /**
      * Call related state.
      */
-    private var callType: String = ""
-    private var callId: String = ""
-    private var audioEnabled: Boolean = true
-    private var videoEnabled: Boolean = true
+    private var call: Call? = null
 
     private val healthMonitor = HealthMonitor(
         object : HealthMonitor.HealthCallback {
@@ -87,10 +85,8 @@ internal class VideoSocketImpl(
                         Healthcheck(
                             user_id = userState.user.value.id,
                             client_id = clientId,
-                            call_type = callType,
-                            call_id = callId,
-                            audio = audioEnabled,
-                            video = videoEnabled
+                            call_type = call?.type ?: "",
+                            call_id = call?.id ?: "",
                         )
                     )
                 }
@@ -237,17 +233,11 @@ internal class VideoSocketImpl(
         networkStateProvider.subscribe(networkStateListener)
     }
 
-    override fun updateCallState(
-        callId: String,
-        callType: String,
-        audioEnabled: Boolean,
-        videoEnabled: Boolean
-    ) {
-        this.callType = callType
-        this.callId = callId
-        this.audioEnabled = audioEnabled
-        this.videoEnabled = videoEnabled
+    override fun updateCallState(call: Call?) {
+        this.call = call
     }
+
+    override fun getCallState(): Call? = call
 
     override fun releaseConnection() {
         state = State.DisconnectedByRequest

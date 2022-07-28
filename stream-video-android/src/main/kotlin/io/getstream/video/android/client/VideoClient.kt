@@ -34,6 +34,7 @@ import io.getstream.video.android.token.TokenProvider
 import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Result
 import io.getstream.video.android.utils.Success
+import io.getstream.video.android.utils.enrichSocketURL
 import io.getstream.video.android.utils.getLatencyMeasurements
 import io.livekit.android.LiveKit
 import io.livekit.android.RoomOptions
@@ -51,7 +52,9 @@ import stream.video.JoinCallRequest
 import stream.video.Latency
 import stream.video.SelectEdgeServerRequest
 import stream.video.SelectEdgeServerResponse
+import stream.video.SendEventRequest
 import stream.video.User
+import stream.video.UserEventType
 
 /**
  * The core client that handles all API and socket communication and acts as a central place to
@@ -95,7 +98,11 @@ public class VideoClient(
         socket.connectSocket()
     }
 
-    public fun registerDevice(device: Device) {
+    /**
+     * Start region - API calls.
+     */
+
+    public suspend fun registerDevice(device: Device) {
     }
 
     /**
@@ -118,18 +125,6 @@ public class VideoClient(
             is Success -> joinCreatedCall(createCallResult.data)
             is Failure -> return Failure(createCallResult.error)
         }
-    }
-
-    /**
-     * Notifies the client that we've left the call and can clean up state.
-     */
-    public fun leaveCall() {
-        socket.updateCallState(
-            callId = "",
-            callType = "",
-            audioEnabled = false,
-            videoEnabled = false
-        )
     }
 
     /**
@@ -165,14 +160,18 @@ public class VideoClient(
                 )
 
                 when (selectEdgeServerResult) {
-                    is Success -> Success(
-                        JoinCallResponse(
-                            videoRoom = VideoRoom(value = createRoom(), socket = socket),
-                            call = call,
-                            callUrl = selectEdgeServerResult.data.edge_server?.url!!,
-                            userToken = selectEdgeServerResult.data.token
+                    is Success -> {
+                        socket.updateCallState(call)
+
+                        Success(
+                            JoinCallResponse(
+                                videoRoom = VideoRoom(value = createRoom()),
+                                call = call,
+                                callUrl = enrichSocketURL(selectEdgeServerResult.data.edge_server?.url!!),
+                                userToken = selectEdgeServerResult.data.token
+                            )
                         )
-                    )
+                    }
                     is Failure -> Failure(selectEdgeServerResult.error)
                 }
             } catch (error: Throwable) {
@@ -183,6 +182,9 @@ public class VideoClient(
         }
     }
 
+    /**
+     * Creates a [Room] we can connect to and listen to events from.
+     */
     private fun createRoom(): Room {
         return LiveKit.create(
             applicationContext,
@@ -207,6 +209,34 @@ public class VideoClient(
      */
     public suspend fun selectEdgeServer(request: SelectEdgeServerRequest): Result<SelectEdgeServerResponse> {
         return callCoordinatorClient.selectEdgeServer(request)
+    }
+
+    /**
+     * @see CallCoordinatorClient.sendUserEvent for details.
+     */
+    public suspend fun sendUserEvent(userEventType: UserEventType): Result<Boolean> {
+        val call = socket.getCallState()
+            ?: return Failure(error = VideoError(message = "No call is active!"))
+
+        return callCoordinatorClient.sendUserEvent(
+            SendEventRequest(
+                user_id = userState.user.value.id,
+                call_id = call.id,
+                call_type = call.type,
+                event_type = userEventType
+            )
+        )
+    }
+
+    /**
+     * End region - API calls.
+     */
+
+    /**
+     * Notifies the client that we've left the call and can clean up state.
+     */
+    public fun leaveCall() {
+        socket.updateCallState(null)
     }
 
     /**

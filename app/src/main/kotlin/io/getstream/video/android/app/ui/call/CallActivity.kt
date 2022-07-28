@@ -53,11 +53,13 @@ import io.getstream.video.android.ui.components.MainStage
 import io.getstream.video.android.utils.onError
 import io.getstream.video.android.utils.onSuccessSuspend
 import io.getstream.video.android.viewmodel.CallViewModel
+import io.getstream.video.android.viewmodel.CallViewModelFactory
 import kotlinx.coroutines.launch
 
 class CallActivity : AppCompatActivity() {
 
-    private val callViewModel by viewModels<CallViewModel>()
+    private val factory by lazy { CallViewModelFactory(VideoApp.videoClient) }
+    private val callViewModel by viewModels<CallViewModel>(factoryProducer = { factory })
 
     @RequiresApi(M)
     private val permissionsContract = registerForActivityResult(

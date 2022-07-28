@@ -667,6 +667,7 @@ public abstract interface class io/getstream/video/android/api/CallCoordinatorSe
 	public abstract fun createCall (Lstream/video/CreateCallRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun joinCall (Lstream/video/JoinCallRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun selectEdgeServer (Lstream/video/SelectEdgeServerRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun sendUserEvent (Lstream/video/SendEventRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class io/getstream/video/android/client/VideoClient {
@@ -678,9 +679,10 @@ public final class io/getstream/video/android/client/VideoClient {
 	public static synthetic fun joinCall$default (Lio/getstream/video/android/client/VideoClient;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun leaveCall ()V
 	public final fun reconnectSocket ()V
-	public final fun registerDevice (Lstream/video/Device;)V
+	public final fun registerDevice (Lstream/video/Device;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun removeSocketListener (Lio/getstream/video/android/socket/SocketListener;)V
 	public final fun selectEdgeServer (Lstream/video/SelectEdgeServerRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun sendUserEvent (Lstream/video/UserEventType;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class io/getstream/video/android/client/VideoClient$Builder {
@@ -694,6 +696,7 @@ public abstract interface class io/getstream/video/android/client/coordinator/Ca
 	public abstract fun createCall (Lstream/video/CreateCallRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun joinCall (Lstream/video/JoinCallRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun selectEdgeServer (Lstream/video/SelectEdgeServerRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun sendUserEvent (Lstream/video/SendEventRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class io/getstream/video/android/client/user/UserState {
@@ -926,19 +929,18 @@ public final class io/getstream/video/android/model/Track {
 
 public final class io/getstream/video/android/model/VideoRoom {
 	public static final field $stable I
-	public fun <init> (Lio/livekit/android/room/Room;Lio/getstream/video/android/socket/VideoSocket;)V
+	public fun <init> (Lio/livekit/android/room/Room;)V
 	public final fun component1 ()Lio/livekit/android/room/Room;
 	public final fun connect (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun copy (Lio/livekit/android/room/Room;Lio/getstream/video/android/socket/VideoSocket;)Lio/getstream/video/android/model/VideoRoom;
-	public static synthetic fun copy$default (Lio/getstream/video/android/model/VideoRoom;Lio/livekit/android/room/Room;Lio/getstream/video/android/socket/VideoSocket;ILjava/lang/Object;)Lio/getstream/video/android/model/VideoRoom;
+	public final fun copy (Lio/livekit/android/room/Room;)Lio/getstream/video/android/model/VideoRoom;
+	public static synthetic fun copy$default (Lio/getstream/video/android/model/VideoRoom;Lio/livekit/android/room/Room;ILjava/lang/Object;)Lio/getstream/video/android/model/VideoRoom;
 	public final fun disconnect ()V
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun flipCamera ()V
 	public final fun getLocalParticipant ()Lio/getstream/video/android/model/LocalParticipant;
 	public final fun getValue ()Lio/livekit/android/room/Room;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public final fun updateAudioState (Z)V
-	public final fun updateCallState (Ljava/lang/String;Ljava/lang/String;ZZ)V
 }
 
 public final class io/getstream/video/android/socket/ErrorResponse {
@@ -1026,13 +1028,14 @@ public abstract interface class io/getstream/video/android/socket/VideoSocket {
 	public abstract fun addListener (Lio/getstream/video/android/socket/SocketListener;)V
 	public abstract fun authenticateUser ()V
 	public abstract fun connectSocket ()V
+	public abstract fun getCallState ()Lstream/video/Call;
 	public abstract fun onConnectionResolved (Lio/getstream/video/android/events/ConnectedEvent;)V
 	public abstract fun onEvent (Ljava/lang/Object;)V
 	public abstract fun onSocketError (Lio/getstream/video/android/errors/VideoError;)V
 	public abstract fun reconnect ()V
 	public abstract fun releaseConnection ()V
 	public abstract fun removeListener (Lio/getstream/video/android/socket/SocketListener;)V
-	public abstract fun updateCallState (Ljava/lang/String;Ljava/lang/String;ZZ)V
+	public abstract fun updateCallState (Lstream/video/Call;)V
 }
 
 public abstract interface class io/getstream/video/android/token/TokenProvider {
@@ -1102,7 +1105,7 @@ public final class io/getstream/video/android/utils/Success : io/getstream/video
 
 public final class io/getstream/video/android/viewmodel/CallViewModel : androidx/lifecycle/ViewModel {
 	public static final field $stable I
-	public fun <init> ()V
+	public fun <init> (Lio/getstream/video/android/client/VideoClient;)V
 	public final fun flipCamera ()V
 	public final fun getActiveSpeakers ()Lkotlinx/coroutines/flow/Flow;
 	public final fun getFlipButtonVideoEnabled ()Lkotlinx/coroutines/flow/StateFlow;
@@ -1117,6 +1120,12 @@ public final class io/getstream/video/android/viewmodel/CallViewModel : androidx
 	public final fun reconnect ()V
 	public final fun toggleCamera (Z)V
 	public final fun toggleMicrophone (Z)V
+}
+
+public final class io/getstream/video/android/viewmodel/CallViewModelFactory : androidx/lifecycle/ViewModelProvider$Factory {
+	public static final field $stable I
+	public fun <init> (Lio/getstream/video/android/client/VideoClient;)V
+	public fun create (Ljava/lang/Class;)Landroidx/lifecycle/ViewModel;
 }
 
 public final class stream/video/AddDeviceRequest : com/squareup/wire/Message {
@@ -1396,6 +1405,45 @@ public final class stream/video/CallRinging : com/squareup/wire/Message {
 public final class stream/video/CallRinging$Companion {
 }
 
+public final class stream/video/CallStatEvent : com/squareup/wire/Message {
+	public static final field $stable I
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field Companion Lstream/video/CallStatEvent$Companion;
+	public fun <init> ()V
+	public fun <init> (Lstream/video/CallStatEventType;Ljava/lang/String;Lokio/ByteString;)V
+	public synthetic fun <init> (Lstream/video/CallStatEventType;Ljava/lang/String;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (Lstream/video/CallStatEventType;Ljava/lang/String;Lokio/ByteString;)Lstream/video/CallStatEvent;
+	public static synthetic fun copy$default (Lstream/video/CallStatEvent;Lstream/video/CallStatEventType;Ljava/lang/String;Lokio/ByteString;ILjava/lang/Object;)Lstream/video/CallStatEvent;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getTime ()Ljava/lang/String;
+	public final fun getType ()Lstream/video/CallStatEventType;
+	public fun hashCode ()I
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public synthetic fun newBuilder ()Ljava/lang/Void;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class stream/video/CallStatEvent$Companion {
+}
+
+public final class stream/video/CallStatEventType : java/lang/Enum, com/squareup/wire/WireEnum {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field AUDIO_DELAY Lstream/video/CallStatEventType;
+	public static final field AUDIO_FROZEN Lstream/video/CallStatEventType;
+	public static final field Companion Lstream/video/CallStatEventType$Companion;
+	public static final field VIDEO_DELAY Lstream/video/CallStatEventType;
+	public static final field VIDEO_FROZEN Lstream/video/CallStatEventType;
+	public static final field VIDEO_NOT_OPTIMAL Lstream/video/CallStatEventType;
+	public static final fun fromValue (I)Lstream/video/CallStatEventType;
+	public fun getValue ()I
+	public static fun valueOf (Ljava/lang/String;)Lstream/video/CallStatEventType;
+	public static fun values ()[Lstream/video/CallStatEventType;
+}
+
+public final class stream/video/CallStatEventType$Companion {
+	public final fun fromValue (I)Lstream/video/CallStatEventType;
+}
+
 public final class stream/video/CallState : com/squareup/wire/Message {
 	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
@@ -1414,6 +1462,27 @@ public final class stream/video/CallState : com/squareup/wire/Message {
 }
 
 public final class stream/video/CallState$Companion {
+}
+
+public final class stream/video/CallStats : com/squareup/wire/Message {
+	public static final field $stable I
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field Companion Lstream/video/CallStats$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/util/List;Ljava/util/List;Lokio/ByteString;)V
+	public synthetic fun <init> (Ljava/util/List;Ljava/util/List;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (Ljava/util/List;Ljava/util/List;Lokio/ByteString;)Lstream/video/CallStats;
+	public static synthetic fun copy$default (Lstream/video/CallStats;Ljava/util/List;Ljava/util/List;Lokio/ByteString;ILjava/lang/Object;)Lstream/video/CallStats;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCall_timeline ()Ljava/util/List;
+	public final fun getParticipant_timelines ()Ljava/util/List;
+	public fun hashCode ()I
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public synthetic fun newBuilder ()Ljava/lang/Void;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class stream/video/CallStats$Companion {
 }
 
 public final class stream/video/CallType : com/squareup/wire/Message {
@@ -1573,11 +1642,12 @@ public final class stream/video/CreateOrUpdateUsersRequest : com/squareup/wire/M
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/CreateOrUpdateUsersRequest$Companion;
 	public fun <init> ()V
-	public fun <init> (Ljava/util/List;Lokio/ByteString;)V
-	public synthetic fun <init> (Ljava/util/List;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun copy (Ljava/util/List;Lokio/ByteString;)Lstream/video/CreateOrUpdateUsersRequest;
-	public static synthetic fun copy$default (Lstream/video/CreateOrUpdateUsersRequest;Ljava/util/List;Lokio/ByteString;ILjava/lang/Object;)Lstream/video/CreateOrUpdateUsersRequest;
+	public fun <init> (Ljava/util/List;ZLokio/ByteString;)V
+	public synthetic fun <init> (Ljava/util/List;ZLokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (Ljava/util/List;ZLokio/ByteString;)Lstream/video/CreateOrUpdateUsersRequest;
+	public static synthetic fun copy$default (Lstream/video/CreateOrUpdateUsersRequest;Ljava/util/List;ZLokio/ByteString;ILjava/lang/Object;)Lstream/video/CreateOrUpdateUsersRequest;
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFull_update ()Z
 	public final fun getUsers ()Ljava/util/List;
 	public fun hashCode ()I
 	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
@@ -1987,6 +2057,48 @@ public final class stream/video/GetCallResponse : com/squareup/wire/Message {
 public final class stream/video/GetCallResponse$Companion {
 }
 
+public final class stream/video/GetCallStatsRequest : com/squareup/wire/Message {
+	public static final field $stable I
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field Companion Lstream/video/GetCallStatsRequest$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;)Lstream/video/GetCallStatsRequest;
+	public static synthetic fun copy$default (Lstream/video/GetCallStatsRequest;Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;ILjava/lang/Object;)Lstream/video/GetCallStatsRequest;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCall_id ()Ljava/lang/String;
+	public final fun getCall_type ()Ljava/lang/String;
+	public fun hashCode ()I
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public synthetic fun newBuilder ()Ljava/lang/Void;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class stream/video/GetCallStatsRequest$Companion {
+}
+
+public final class stream/video/GetCallStatsResponse : com/squareup/wire/Message {
+	public static final field $stable I
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field Companion Lstream/video/GetCallStatsResponse$Companion;
+	public fun <init> ()V
+	public fun <init> (Lstream/video/Call;Lstream/video/CallStats;Lokio/ByteString;)V
+	public synthetic fun <init> (Lstream/video/Call;Lstream/video/CallStats;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (Lstream/video/Call;Lstream/video/CallStats;Lokio/ByteString;)Lstream/video/GetCallStatsResponse;
+	public static synthetic fun copy$default (Lstream/video/GetCallStatsResponse;Lstream/video/Call;Lstream/video/CallStats;Lokio/ByteString;ILjava/lang/Object;)Lstream/video/GetCallStatsResponse;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCall ()Lstream/video/Call;
+	public final fun getCall_stats ()Lstream/video/CallStats;
+	public fun hashCode ()I
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public synthetic fun newBuilder ()Ljava/lang/Void;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class stream/video/GetCallStatsResponse$Companion {
+}
+
 public final class stream/video/GetRecordingsRequest : com/squareup/wire/Message {
 	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
@@ -2243,6 +2355,27 @@ public final class stream/video/Participant : com/squareup/wire/Message {
 }
 
 public final class stream/video/Participant$Companion {
+}
+
+public final class stream/video/ParticipantCallStatEvent : com/squareup/wire/Message {
+	public static final field $stable I
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field Companion Lstream/video/ParticipantCallStatEvent$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/util/List;Lokio/ByteString;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/util/List;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (Ljava/lang/String;Ljava/util/List;Lokio/ByteString;)Lstream/video/ParticipantCallStatEvent;
+	public static synthetic fun copy$default (Lstream/video/ParticipantCallStatEvent;Ljava/lang/String;Ljava/util/List;Lokio/ByteString;ILjava/lang/Object;)Lstream/video/ParticipantCallStatEvent;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCall_timeline ()Ljava/util/List;
+	public final fun getParticipant_id ()Ljava/lang/String;
+	public fun hashCode ()I
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public synthetic fun newBuilder ()Ljava/lang/Void;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class stream/video/ParticipantCallStatEvent$Companion {
 }
 
 public final class stream/video/ParticipantDeleted : com/squareup/wire/Message {
@@ -2532,6 +2665,91 @@ public final class stream/video/RemoveDeviceResponse : com/squareup/wire/Message
 }
 
 public final class stream/video/RemoveDeviceResponse$Companion {
+}
+
+public final class stream/video/ReportIssueRequest : com/squareup/wire/Message {
+	public static final field $stable I
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field Companion Lstream/video/ReportIssueRequest$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lokio/ByteString;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lokio/ByteString;)Lstream/video/ReportIssueRequest;
+	public static synthetic fun copy$default (Lstream/video/ReportIssueRequest;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lokio/ByteString;ILjava/lang/Object;)Lstream/video/ReportIssueRequest;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCall_id ()Ljava/lang/String;
+	public final fun getCall_type ()Ljava/lang/String;
+	public final fun getCustom ()Ljava/util/Map;
+	public final fun getDescription ()Ljava/lang/String;
+	public fun hashCode ()I
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public synthetic fun newBuilder ()Ljava/lang/Void;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class stream/video/ReportIssueRequest$Companion {
+}
+
+public final class stream/video/ReportIssueResponse : com/squareup/wire/Message {
+	public static final field $stable I
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field Companion Lstream/video/ReportIssueResponse$Companion;
+	public fun <init> ()V
+	public fun <init> (Lokio/ByteString;)V
+	public synthetic fun <init> (Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (Lokio/ByteString;)Lstream/video/ReportIssueResponse;
+	public static synthetic fun copy$default (Lstream/video/ReportIssueResponse;Lokio/ByteString;ILjava/lang/Object;)Lstream/video/ReportIssueResponse;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public synthetic fun newBuilder ()Ljava/lang/Void;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class stream/video/ReportIssueResponse$Companion {
+}
+
+public final class stream/video/ReviewCallRequest : com/squareup/wire/Message {
+	public static final field $stable I
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field Companion Lstream/video/ReviewCallRequest$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;FLjava/lang/String;Ljava/util/Map;Lokio/ByteString;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;FLjava/lang/String;Ljava/util/Map;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;FLjava/lang/String;Ljava/util/Map;Lokio/ByteString;)Lstream/video/ReviewCallRequest;
+	public static synthetic fun copy$default (Lstream/video/ReviewCallRequest;Ljava/lang/String;Ljava/lang/String;FLjava/lang/String;Ljava/util/Map;Lokio/ByteString;ILjava/lang/Object;)Lstream/video/ReviewCallRequest;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCall_id ()Ljava/lang/String;
+	public final fun getCall_type ()Ljava/lang/String;
+	public final fun getCustom ()Ljava/util/Map;
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getStars ()F
+	public fun hashCode ()I
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public synthetic fun newBuilder ()Ljava/lang/Void;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class stream/video/ReviewCallRequest$Companion {
+}
+
+public final class stream/video/ReviewCallResponse : com/squareup/wire/Message {
+	public static final field $stable I
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field Companion Lstream/video/ReviewCallResponse$Companion;
+	public fun <init> ()V
+	public fun <init> (Lokio/ByteString;)V
+	public synthetic fun <init> (Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (Lokio/ByteString;)Lstream/video/ReviewCallResponse;
+	public static synthetic fun copy$default (Lstream/video/ReviewCallResponse;Lokio/ByteString;ILjava/lang/Object;)Lstream/video/ReviewCallResponse;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public synthetic fun newBuilder ()Ljava/lang/Void;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class stream/video/ReviewCallResponse$Companion {
 }
 
 public final class stream/video/ScreenshareStarted : com/squareup/wire/Message {
@@ -2944,6 +3162,47 @@ public final class stream/video/StopTranscribeCallResponse : com/squareup/wire/M
 public final class stream/video/StopTranscribeCallResponse$Companion {
 }
 
+public final class stream/video/StoreCallStatsRequest : com/squareup/wire/Message {
+	public static final field $stable I
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field Companion Lstream/video/StoreCallStatsRequest$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lokio/ByteString;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lokio/ByteString;)Lstream/video/StoreCallStatsRequest;
+	public static synthetic fun copy$default (Lstream/video/StoreCallStatsRequest;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lokio/ByteString;ILjava/lang/Object;)Lstream/video/StoreCallStatsRequest;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCall_id ()Ljava/lang/String;
+	public final fun getCall_type ()Ljava/lang/String;
+	public final fun getData_ ()Ljava/util/Map;
+	public fun hashCode ()I
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public synthetic fun newBuilder ()Ljava/lang/Void;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class stream/video/StoreCallStatsRequest$Companion {
+}
+
+public final class stream/video/StoreCallStatsResponse : com/squareup/wire/Message {
+	public static final field $stable I
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field Companion Lstream/video/StoreCallStatsResponse$Companion;
+	public fun <init> ()V
+	public fun <init> (Lokio/ByteString;)V
+	public synthetic fun <init> (Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (Lokio/ByteString;)Lstream/video/StoreCallStatsResponse;
+	public static synthetic fun copy$default (Lstream/video/StoreCallStatsResponse;Lokio/ByteString;ILjava/lang/Object;)Lstream/video/StoreCallStatsResponse;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public synthetic fun newBuilder ()Ljava/lang/Void;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class stream/video/StoreCallStatsResponse$Companion {
+}
+
 public final class stream/video/StoreLatencyRequest : com/squareup/wire/Message {
 	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
@@ -3094,8 +3353,8 @@ public final class stream/video/User : com/squareup/wire/Message {
 	public final fun getCreated_at ()Ljava/lang/String;
 	public final fun getCustom ()Ljava/util/Map;
 	public final fun getId ()Ljava/lang/String;
+	public final fun getImage_url ()Ljava/lang/String;
 	public final fun getName ()Ljava/lang/String;
-	public final fun getProfile_image_url ()Ljava/lang/String;
 	public final fun getRole ()Ljava/lang/String;
 	public final fun getTeams ()Ljava/util/List;
 	public final fun getUpdated_at ()Ljava/lang/String;

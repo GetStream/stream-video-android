@@ -25,6 +25,8 @@ import stream.video.JoinCallRequest
 import stream.video.JoinCallResponse
 import stream.video.SelectEdgeServerRequest
 import stream.video.SelectEdgeServerResponse
+import stream.video.SendEventRequest
+import stream.video.SendEventResponse
 
 /**
  * Main service used to communicate with our API regarding video services.
@@ -47,4 +49,8 @@ public interface CallCoordinatorService {
     @Headers("Content-Type: application/protobuf")
     @POST("/stream.video.CallCoordinatorService/SelectEdgeServer")
     public suspend fun selectEdgeServer(@Body selectEdgeServerRequest: SelectEdgeServerRequest): SelectEdgeServerResponse
+
+    @Headers("Content-Type: application/protobuf")
+    @POST("/stream.video.CallCoordinatorService/SendEvent")
+    public suspend fun sendUserEvent(@Body sendEventRequest: SendEventRequest): SendEventResponse
 }

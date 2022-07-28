@@ -18,16 +18,11 @@ package io.getstream.video.android.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import io.getstream.video.android.client.VideoClient
 import io.getstream.video.android.model.LocalParticipant
 import io.getstream.video.android.model.Participant
 import io.getstream.video.android.model.RemoteParticipant
 import io.getstream.video.android.model.VideoRoom
-import io.livekit.android.events.RoomEvent
-import io.livekit.android.events.collect
-import io.livekit.android.room.track.CameraPosition
-import io.livekit.android.room.track.LocalVideoTrack
-import io.livekit.android.room.track.LocalVideoTrackOptions
-import io.livekit.android.room.track.Track
 import io.livekit.android.util.flow
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.flow.Flow
@@ -39,8 +34,11 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import stream.video.Call
+import stream.video.UserEventType
 
-public class CallViewModel : ViewModel() {
+public class CallViewModel(
+    private val videoClient: VideoClient
+) : ViewModel() {
 
     private var url: String = ""
     private var token: String = ""
@@ -107,10 +105,8 @@ public class CallViewModel : ViewModel() {
             _isVideoInitialized.value = true
 
             setupLocalParticipant(videoRoom.localParticipant)
-            setupEvents(videoRoom)
 
             handlePrimarySpeaker(emptyList(), emptyList(), videoRoom)
-            updateCallState()
 
             combine(
                 participantList,
@@ -133,40 +129,12 @@ public class CallViewModel : ViewModel() {
         viewModelScope.launch {
             localParticipant.setMicrophoneEnabled(true)
             _isMicrophoneEnabled.value = true
+            videoClient.sendUserEvent(UserEventType.USER_EVENT_TYPE_AUDIO_UNMUTED)
 
             localParticipant.setCameraEnabled(true)
             _isCameraEnabled.value = true
+            videoClient.sendUserEvent(UserEventType.USER_EVENT_TYPE_VIDEO_STARTED)
         }
-    }
-
-    private fun setupEvents(room: VideoRoom) {
-        viewModelScope.launch {
-            room.value.events.collect { event -> processEvent(event) }
-        }
-    }
-
-    private fun processEvent(event: RoomEvent): Unit = when (event) {
-        is RoomEvent.Reconnecting -> {}
-        is RoomEvent.Reconnected -> {}
-        is RoomEvent.Disconnected -> {}
-        is RoomEvent.ParticipantConnected -> Unit
-        is RoomEvent.ParticipantDisconnected -> Unit
-        is RoomEvent.ActiveSpeakersChanged -> Unit
-        is RoomEvent.RoomMetadataChanged -> Unit
-        is RoomEvent.ParticipantMetadataChanged -> Unit
-        is RoomEvent.TrackMuted -> Unit
-        is RoomEvent.TrackUnmuted -> Unit
-        is RoomEvent.TrackPublished -> Unit
-        is RoomEvent.TrackUnpublished -> Unit
-        is RoomEvent.TrackSubscribed -> Unit
-        is RoomEvent.TrackSubscriptionFailed -> Unit
-        is RoomEvent.TrackUnsubscribed -> Unit
-        is RoomEvent.TrackStreamStateChanged -> Unit
-        is RoomEvent.TrackSubscriptionPermissionChanged -> Unit
-        is RoomEvent.DataReceived -> Unit
-        is RoomEvent.ConnectionQualityChanged -> Unit
-        is RoomEvent.FailedToConnect -> Unit
-        is RoomEvent.ParticipantPermissionsChanged -> Unit
     }
 
     private fun handlePrimarySpeaker(
@@ -223,7 +191,10 @@ public class CallViewModel : ViewModel() {
         viewModelScope.launch {
             participant.setCameraEnabled(enabled)
             _isCameraEnabled.value = enabled
-            updateCallState()
+            val event =
+                if (enabled) UserEventType.USER_EVENT_TYPE_VIDEO_STARTED
+                else UserEventType.USER_EVENT_TYPE_VIDEO_STOPPED
+            videoClient.sendUserEvent(event)
         }
     }
 
@@ -233,37 +204,18 @@ public class CallViewModel : ViewModel() {
         viewModelScope.launch {
             participant.setMicrophoneEnabled(enabled)
             _isMicrophoneEnabled.value = enabled
-            updateCallState()
+
+            val event =
+                if (enabled) UserEventType.USER_EVENT_TYPE_AUDIO_UNMUTED
+                else UserEventType.USER_EVENT_TYPE_AUDIO_MUTED_UNSPECIFIED
+            videoClient.sendUserEvent(event)
         }
-    }
-
-    private fun updateCallState() {
-        val videoRoom = _roomState.value ?: return
-        val call = call ?: return
-        val participant = _localParticipantState.value
-
-        videoRoom.updateCallState(
-            call.id,
-            call.type,
-            participant?.isAudioEnabled ?: false,
-            participant?.isVideoEnabled ?: false
-        )
     }
 
     public fun flipCamera() {
         val room = _roomState.value ?: return
 
-        val videoTrack = room.localParticipant.getTrackPublication(Track.Source.CAMERA)
-            ?.track as? LocalVideoTrack
-            ?: return
-
-        val newOptions = when (videoTrack.options.position) {
-            CameraPosition.FRONT -> LocalVideoTrackOptions(position = CameraPosition.BACK)
-            CameraPosition.BACK -> LocalVideoTrackOptions(position = CameraPosition.FRONT)
-            else -> LocalVideoTrackOptions()
-        }
-
-        videoTrack.restartTrack(newOptions)
+        room.flipCamera()
     }
 
     public fun reconnect() {

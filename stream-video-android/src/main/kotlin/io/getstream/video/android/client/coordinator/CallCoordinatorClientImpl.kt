@@ -27,6 +27,7 @@ import stream.video.JoinCallRequest
 import stream.video.JoinCallResponse
 import stream.video.SelectEdgeServerRequest
 import stream.video.SelectEdgeServerResponse
+import stream.video.SendEventRequest
 
 /**
  * An accessor that allows us to communicate with the API around video calls.
@@ -36,16 +37,15 @@ internal class CallCoordinatorClientImpl(
 ) : CallCoordinatorClient {
 
     /**
-     * Finds the correct server to connect to for given user and [request]. In case there are no
-     * servers, returns an error to the user.
+     * Attempts to create a new [stream.video.Call].
      *
-     * @param request The data used to find the best server.
+     * @param createCallRequest The information used to create a call.
      * @return [Result] wrapper around the response from the server, or an error if something went
      * wrong.
      */
-    override suspend fun selectEdgeServer(request: SelectEdgeServerRequest): Result<SelectEdgeServerResponse> =
+    override suspend fun createCall(createCallRequest: CreateCallRequest): Result<CreateCallResponse> =
         try {
-            val response = callCoordinatorService.selectEdgeServer(request)
+            val response = callCoordinatorService.createCall(createCallRequest)
 
             Success(response)
         } catch (error: Throwable) {
@@ -70,17 +70,34 @@ internal class CallCoordinatorClientImpl(
         }
 
     /**
-     * Attempts to create a new [stream.video.Call].
+     * Finds the correct server to connect to for given user and [request]. In case there are no
+     * servers, returns an error to the user.
      *
-     * @param createCallRequest The information used to create a call.
+     * @param request The data used to find the best server.
      * @return [Result] wrapper around the response from the server, or an error if something went
      * wrong.
      */
-    override suspend fun createCall(createCallRequest: CreateCallRequest): Result<CreateCallResponse> =
+    override suspend fun selectEdgeServer(request: SelectEdgeServerRequest): Result<SelectEdgeServerResponse> =
         try {
-            val response = callCoordinatorService.createCall(createCallRequest)
+            val response = callCoordinatorService.selectEdgeServer(request)
 
             Success(response)
+        } catch (error: Throwable) {
+            Failure(VideoError(error.message, error))
+        }
+
+    /**
+     * Sends a user-based event to the API to notify if we've changed something in the state of the
+     * call. The events can be any of the [stream.video.UserEventType].
+     *
+     * @param sendEventRequest The request holding information about the event type and the call.
+     * @return a [Result] wrapper if the call succeeded or not.
+     */
+    override suspend fun sendUserEvent(sendEventRequest: SendEventRequest): Result<Boolean> =
+        try {
+            callCoordinatorService.sendUserEvent(sendEventRequest)
+
+            Success(true)
         } catch (error: Throwable) {
             Failure(VideoError(error.message, error))
         }
