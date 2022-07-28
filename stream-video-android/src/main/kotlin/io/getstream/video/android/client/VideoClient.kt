@@ -75,7 +75,7 @@ public class VideoClient(
 ) {
 
     /**
-     * Observes the app lifecyle and attempts to reconnect/release the socket connection.
+     * Observes the app lifecycle and attempts to reconnect/release the socket connection.
      */
     private val lifecycleObserver = StreamLifecycleObserver(
         lifecycle,
