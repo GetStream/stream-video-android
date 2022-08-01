@@ -3174,7 +3174,7 @@ public final class stream/video/StoreCallStatsRequest : com/squareup/wire/Messag
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCall_id ()Ljava/lang/String;
 	public final fun getCall_type ()Ljava/lang/String;
-	public final fun getData_ ()Ljava/util/Map;
+	public final fun getStats ()Ljava/util/Map;
 	public fun hashCode ()I
 	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
 	public synthetic fun newBuilder ()Ljava/lang/Void;

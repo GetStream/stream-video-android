@@ -342,9 +342,12 @@ message StartRecordingRequest {
 }
 
 message StoreCallStatsRequest {
+  // The call type
   string call_type = 1;
+  // The call id
   string call_id = 2;
-  google.protobuf.Struct data = 3;
+  // A WebRTC Stats report, as defined in https://www.w3.org/TR/webrtc/#dom-rtcstatsreport
+  google.protobuf.Struct stats = 3;
 }
 
 enum CallStatEventType {
