@@ -18,6 +18,7 @@ package io.getstream.video.android.socket
 
 import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.events.ConnectedEvent
+import io.getstream.video.android.events.VideoEvent
 import stream.video.Call
 
 public interface VideoSocket {
@@ -63,7 +64,7 @@ public interface VideoSocket {
      *
      * @param event The event received.
      */
-    public fun onEvent(event: Any)
+    public fun onEvent(event: VideoEvent)
 
     /**
      * Triggered when the connection is fully resolved and validated.

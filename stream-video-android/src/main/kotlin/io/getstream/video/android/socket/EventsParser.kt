@@ -51,9 +51,9 @@ internal class EventsParser(
             if (!connectionEventReceived && processedEvent is HealthCheckEvent) {
                 connectionEventReceived = true
                 videoSocket.onConnectionResolved(ConnectedEvent(processedEvent.clientId))
+            } else {
+                videoSocket.onEvent(processedEvent)
             }
-
-            videoSocket.onEvent(processedEvent)
         } catch (error: Throwable) {
             error.printStackTrace()
         }

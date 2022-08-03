@@ -84,7 +84,7 @@ dependencies {
     implementation Dependencies.okhttpLoggingInterceptor
     implementation Dependencies.kotlinSerializationJson
 
-    api Dependencies.liveKit
+    implementation Dependencies.liveKit
 
     // Compose
     implementation Dependencies.composeCompiler

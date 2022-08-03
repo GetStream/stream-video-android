@@ -16,17 +16,9 @@
 
 package io.getstream.video.android.model
 
-import io.livekit.android.room.participant.Participant
-import io.livekit.android.room.track.Track
-import io.livekit.android.room.track.TrackPublication
-
-public interface Participant {
-
-    public val value: Participant
-
-    public val sid: String
-        get() = value.sid
-
-    public val videoTracks: List<Pair<TrackPublication, Track?>>
-        get() = value.videoTracks
-}
+public data class VideoParticipantState(
+    val userId: String,
+    val userName: String,
+    val isLocalAudioEnabled: Boolean,
+    val isLocalVideoEnabled: Boolean
+)

@@ -165,7 +165,12 @@ public class VideoClient(
 
                         Success(
                             JoinCallResponse(
-                                videoRoom = VideoRoom(value = createRoom()),
+                                videoRoom = VideoRoom(
+                                    value = createRoom(),
+                                    videoSocket = socket
+                                ).apply {
+                                    updateParticipants(data.call_state?.participants ?: emptyList())
+                                },
                                 call = call,
                                 callUrl = enrichSocketURL(selectEdgeServerResult.data.edge_server?.url!!),
                                 userToken = selectEdgeServerResult.data.token

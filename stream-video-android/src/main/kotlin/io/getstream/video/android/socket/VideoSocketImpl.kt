@@ -25,6 +25,7 @@ import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.errors.VideoErrorCode
 import io.getstream.video.android.errors.VideoNetworkError
 import io.getstream.video.android.events.ConnectedEvent
+import io.getstream.video.android.events.VideoEvent
 import io.getstream.video.android.network.NetworkStateProvider
 import io.getstream.video.android.token.TokenManager
 import kotlinx.coroutines.CoroutineScope
@@ -248,7 +249,7 @@ internal class VideoSocketImpl(
         state = State.Connected(event)
     }
 
-    override fun onEvent(event: Any) {
+    override fun onEvent(event: VideoEvent) {
         healthMonitor.ack()
         callListeners { listener -> listener.onEvent(event) }
     }

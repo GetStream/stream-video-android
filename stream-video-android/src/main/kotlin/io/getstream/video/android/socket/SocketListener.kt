@@ -19,21 +19,22 @@ package io.getstream.video.android.socket
 import io.getstream.video.android.errors.DisconnectCause
 import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.events.ConnectedEvent
+import io.getstream.video.android.events.VideoEvent
 
-public open class SocketListener {
+public interface SocketListener {
 
-    public open fun onConnecting() {
+    public fun onConnecting() {
     }
 
-    public open fun onConnected(event: ConnectedEvent) {
+    public fun onConnected(event: ConnectedEvent) {
     }
 
-    public open fun onDisconnected(cause: DisconnectCause) {
+    public fun onDisconnected(cause: DisconnectCause) {
     }
 
-    public open fun onError(error: VideoError) {
+    public fun onError(error: VideoError) {
     }
 
-    public open fun onEvent(event: Any) {
+    public fun onEvent(event: VideoEvent) {
     }
 }

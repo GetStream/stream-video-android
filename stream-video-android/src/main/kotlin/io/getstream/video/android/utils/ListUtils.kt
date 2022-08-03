@@ -14,11 +14,22 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.model
+package io.getstream.video.android.utils
 
-public class RemoteParticipant(
-    private val remoteValue: io.livekit.android.room.participant.Participant
-) : Participant {
-    override val value: io.livekit.android.room.participant.Participant
-        get() = remoteValue
+public inline fun <T> List<T>.update(condition: (T) -> Boolean, transformer: (T) -> T): List<T> {
+    val itemIndex = this.indexOfFirst(condition)
+
+    val mutableList = toMutableList()
+    val updatedItem = transformer(this[itemIndex])
+
+    mutableList.removeAt(itemIndex)
+    mutableList.add(itemIndex, updatedItem)
+
+    return mutableList
+}
+
+public inline fun <T> List<T>.updateAll(transformer: (T) -> T): List<T> {
+    val mutableList = toMutableList()
+
+    return mutableList.map(transformer)
 }

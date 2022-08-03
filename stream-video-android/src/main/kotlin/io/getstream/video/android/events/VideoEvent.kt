@@ -17,6 +17,7 @@
 package io.getstream.video.android.events
 
 import stream.video.Call
+import stream.video.Participant
 
 /**
  * Represents the events coming in from the socket.
@@ -24,19 +25,73 @@ import stream.video.Call
 public sealed class VideoEvent
 
 /**
- * Triggered when a user gets connected to the WS
+ * Triggered when a user gets connected to the WS.
  */
 public data class ConnectedEvent(
     val clientId: String,
 ) : VideoEvent()
 
+/**
+ * Sent periodically by the server to keep the connection alive.
+ */
 public data class HealthCheckEvent(
     val clientId: String,
     val userId: String
 ) : VideoEvent()
 
+/**
+ * Sent when someone creates a call and invites another person to participate.
+ */
 public data class CallCreatedEvent(
     val call: Call
+) : VideoEvent()
+
+/**
+ * Triggered whenever a user's audio is unmuted or started.
+ */
+public data class AudioUnmutedEvent(
+    val userId: String,
+    val call: Call
+) : VideoEvent()
+
+/**
+ * Triggered whenever a user's audio is muted. Either responds to everyone being muted in a call, or just one
+ * user.
+ */
+public data class AudioMutedEvent(
+    val userId: String,
+    val call: Call,
+    val areAllUsersMuted: Boolean
+) : VideoEvent()
+
+/**
+ * Triggered whenever a user's video starts.
+ */
+public data class VideoStartedEvent(
+    val userId: String,
+    val call: Call
+) : VideoEvent()
+
+/**
+ * Triggered whenever a user's video is stopped.
+ */
+public data class VideoStoppedEvent(
+    val userId: String,
+    val call: Call
+) : VideoEvent()
+
+/**
+ * Triggered when someone joins a call.
+ */
+public data class ParticipantJoinedEvent(
+    val participant: Participant
+) : VideoEvent()
+
+/**
+ * Triggered when someone leaves a call.
+ */
+public data class ParticipantLeftEvent(
+    val participant: Participant
 ) : VideoEvent()
 
 public object UnknownEvent : VideoEvent()

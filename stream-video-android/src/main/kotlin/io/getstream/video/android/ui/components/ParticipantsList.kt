@@ -23,7 +23,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.model.Participant
+import io.getstream.video.android.model.VideoParticipant
 import io.getstream.video.android.model.VideoRoom
 import io.livekit.android.compose.VideoRenderer
 import io.livekit.android.room.track.VideoTrack
@@ -31,9 +31,9 @@ import io.livekit.android.room.track.VideoTrack
 @Composable
 public fun ParticipantsList(
     room: VideoRoom,
-    participants: List<Participant>,
+    participants: List<VideoParticipant>,
     modifier: Modifier = Modifier,
-    primarySpeaker: Participant?
+    primarySpeaker: VideoParticipant?
 ) {
     val secondarySpeakers = participants.filter { it.sid != primarySpeaker?.sid }
 
@@ -51,7 +51,7 @@ public fun ParticipantsList(
 }
 
 @Composable
-public fun ParticipantItem(room: VideoRoom, participant: Participant) {
+public fun ParticipantItem(room: VideoRoom, participant: VideoParticipant) {
     val track = participant.videoTracks.firstOrNull()?.second as? VideoTrack
 
     if (track != null) {

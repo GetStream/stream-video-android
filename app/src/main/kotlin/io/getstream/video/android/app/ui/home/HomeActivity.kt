@@ -64,6 +64,7 @@ import io.getstream.video.android.app.ui.call.CallActivity
 import io.getstream.video.android.app.ui.components.UserList
 import io.getstream.video.android.app.utils.getUsers
 import io.getstream.video.android.events.CallCreatedEvent
+import io.getstream.video.android.events.VideoEvent
 import io.getstream.video.android.socket.SocketListener
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -85,8 +86,8 @@ class HomeActivity : AppCompatActivity() {
 
     private val invitedCallState: MutableState<Call?> = mutableStateOf(null)
 
-    private val socketListener = object : SocketListener() {
-        override fun onEvent(event: Any) {
+    private val socketListener = object : SocketListener {
+        override fun onEvent(event: VideoEvent) {
             if (event is CallCreatedEvent) {
                 invitedCallState.value = event.call
             }
