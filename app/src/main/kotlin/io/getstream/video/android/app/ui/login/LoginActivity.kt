@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.app.ui.login
 
+import android.content.IntentFilter
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
@@ -36,6 +37,8 @@ import io.getstream.video.android.app.VideoApp
 import io.getstream.video.android.app.ui.components.UserList
 import io.getstream.video.android.app.ui.home.HomeActivity
 import io.getstream.video.android.app.utils.getUsers
+import io.getstream.video.android.notifications.CallNotificationReceiver
+import io.getstream.video.android.notifications.CallNotificationReceiver.Companion.ACTION_CALL
 import stream.video.User
 
 class LoginActivity : AppCompatActivity() {
@@ -44,6 +47,11 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        registerReceiver(
+            CallNotificationReceiver(),
+            IntentFilter(ACTION_CALL)
+        )
+
         setContent {
             Column(
                 modifier = Modifier.fillMaxWidth(),
