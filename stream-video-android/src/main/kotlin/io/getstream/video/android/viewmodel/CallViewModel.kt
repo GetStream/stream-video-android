@@ -236,9 +236,9 @@ public class CallViewModel(private val videoClient: VideoClient) : ViewModel() {
     }
 
     public fun leaveCall() {
-        val currentRoom = _roomState.value ?: return
+        val currentRoom = _roomState.value
 
-        currentRoom.disconnect()
+        currentRoom?.disconnect()
         this.videoClient.leaveCall()
         viewModelScope.cancel()
     }

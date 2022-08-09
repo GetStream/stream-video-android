@@ -8,6 +8,7 @@ plugins {
     id 'org.jetbrains.kotlin.plugin.serialization'
     id 'com.squareup.wire'
     id 'binary-compatibility-validator'
+    id 'com.google.gms.google-services'
 }
 
 wire {
@@ -84,7 +85,9 @@ dependencies {
     implementation Dependencies.okhttpLoggingInterceptor
     implementation Dependencies.kotlinSerializationJson
 
+    // A/V Calls
     implementation Dependencies.liveKit
+    api 'com.github.webrtc-sdk:android:104.5112.01'
 
     // Compose
     implementation Dependencies.composeCompiler
@@ -94,6 +97,10 @@ dependencies {
     implementation Dependencies.composeMaterial
     implementation Dependencies.activityCompose
     implementation Dependencies.composeIconsExtended
+
+    // Notifications
+    implementation platform('com.google.firebase:firebase-bom:30.3.1')
+    implementation "com.google.firebase:firebase-messaging"
 
     // Unit Tests
     testImplementation 'junit:junit:4.13.2'

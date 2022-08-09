@@ -33,18 +33,18 @@ internal interface TokenManager {
     fun expireToken()
 
     /**
-     * Check if a [TokenProvider] has been provided.
+     * Check if a [CredentialsProvider] has been provided.
      *
      * @return true if a token provider has been provided, false on another case.
      */
     fun hasTokenProvider(): Boolean
 
     /**
-     * Inject a new [TokenProvider]
+     * Inject a new [CredentialsProvider]
      *
-     * @param provider A [TokenProvider] which serves the token based on custom implementation.
+     * @param provider A [CredentialsProvider] which serves the token based on custom implementation.
      */
-    fun setTokenProvider(provider: TokenProvider)
+    fun setTokenProvider(provider: CredentialsProvider)
 
     /**
      * Obtain last token loaded.

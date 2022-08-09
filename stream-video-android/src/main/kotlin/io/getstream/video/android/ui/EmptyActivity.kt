@@ -14,17 +14,8 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.app
+package io.getstream.video.android.ui
 
-import io.getstream.video.android.token.TokenProvider
+import androidx.appcompat.app.AppCompatActivity
 
-class FakeTokenProvider(private val token: String) : TokenProvider {
-
-    override fun loadToken(): String {
-        return token
-    }
-
-    override fun getCachedToken(): String {
-        return token
-    }
-}
+public class EmptyActivity : AppCompatActivity()

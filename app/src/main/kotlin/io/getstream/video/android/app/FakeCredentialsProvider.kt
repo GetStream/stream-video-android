@@ -14,21 +14,28 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.token
+package io.getstream.video.android.app
 
-/**
- * Exposes a way to build a token provided that connects to custom implementation for
- * authentication.
- */
-public interface TokenProvider {
+import io.getstream.video.android.token.CredentialsProvider
 
-    /**
-     * @return The user token backed by authentication services.
-     */
-    public fun loadToken(): String
+class FakeCredentialsProvider(
+    private val token: String,
+    private val apiKey: String
+) : CredentialsProvider {
 
-    /**
-     * @return The user token that's cached.
-     */
-    public fun getCachedToken(): String
+    override fun loadToken(): String {
+        return token
+    }
+
+    override fun getCachedToken(): String {
+        return token
+    }
+
+    override fun getCachedApiKey(): String {
+        return apiKey
+    }
+
+    override fun loadApiKey(): String {
+        return apiKey
+    }
 }

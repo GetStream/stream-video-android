@@ -30,7 +30,7 @@ import io.getstream.video.android.socket.SocketListener
 import io.getstream.video.android.socket.SocketState
 import io.getstream.video.android.socket.SocketStateService
 import io.getstream.video.android.socket.VideoSocket
-import io.getstream.video.android.token.TokenProvider
+import io.getstream.video.android.token.CredentialsProvider
 import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Result
 import io.getstream.video.android.utils.Success
@@ -70,7 +70,7 @@ public class VideoClient(
     lifecycle: Lifecycle,
     private val applicationContext: Context,
     private val scope: CoroutineScope,
-    private val tokenProvider: TokenProvider,
+    private val credentialsProvider: CredentialsProvider,
     private val socket: VideoSocket,
     private val socketStateService: SocketStateService,
     private val userState: UserState,
@@ -281,16 +281,14 @@ public class VideoClient(
     /**
      * Builder for the [VideoClient] that sets all the dependencies up.
      *
-     * @property apiKey The key used to validate the user app.
      * @property user Currently logged in user.
      * @property appContext Context of the app.
-     * @property tokenProvider Handle that provides the user token.
+     * @property credentialsProvider Handle that provides the user token.
      */
     public class Builder(
-        private val apiKey: String,
         private val user: User,
         private val appContext: Context,
-        private val tokenProvider: TokenProvider
+        private val credentialsProvider: CredentialsProvider
     ) {
         private var loggingLevel: HttpLoggingInterceptor.Level = HttpLoggingInterceptor.Level.NONE
 
@@ -310,17 +308,16 @@ public class VideoClient(
          * logic of the SDK.
          */
         public fun build(): VideoClient {
-            if (apiKey.isBlank() ||
+            if (credentialsProvider.loadApiKey().isBlank() ||
                 user.id.isBlank() ||
-                tokenProvider.getCachedToken().isBlank()
+                credentialsProvider.getCachedToken().isBlank()
             ) throw IllegalArgumentException("The API key, user ID and token cannot be empty!")
 
             val lifecycle = ProcessLifecycleOwner.get().lifecycle
 
             val videoModule = VideoModule(
-                apiKey = apiKey,
                 user = user,
-                tokenProvider = tokenProvider,
+                credentialsProvider = credentialsProvider,
                 appContext = appContext,
                 lifecycle = lifecycle,
                 loggingLevel = loggingLevel
@@ -329,7 +326,7 @@ public class VideoClient(
             return VideoClient(
                 lifecycle = lifecycle,
                 applicationContext = appContext,
-                tokenProvider = tokenProvider,
+                credentialsProvider = credentialsProvider,
                 scope = videoModule.scope(),
                 socket = videoModule.socket(),
                 socketStateService = SocketStateService(),
