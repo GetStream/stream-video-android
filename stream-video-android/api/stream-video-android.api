@@ -672,7 +672,7 @@ public abstract interface class io/getstream/video/android/api/CallCoordinatorSe
 
 public final class io/getstream/video/android/client/VideoClient {
 	public static final field $stable I
-	public fun <init> (Landroidx/lifecycle/Lifecycle;Landroid/content/Context;Lkotlinx/coroutines/CoroutineScope;Lio/getstream/video/android/token/TokenProvider;Lio/getstream/video/android/socket/VideoSocket;Lio/getstream/video/android/socket/SocketStateService;Lio/getstream/video/android/client/user/UserState;Lio/getstream/video/android/client/coordinator/CallCoordinatorClient;)V
+	public fun <init> (Landroidx/lifecycle/Lifecycle;Landroid/content/Context;Lkotlinx/coroutines/CoroutineScope;Lio/getstream/video/android/token/CredentialsProvider;Lio/getstream/video/android/socket/VideoSocket;Lio/getstream/video/android/socket/SocketStateService;Lio/getstream/video/android/client/user/UserState;Lio/getstream/video/android/client/coordinator/CallCoordinatorClient;)V
 	public final fun addSocketListener (Lio/getstream/video/android/socket/SocketListener;)V
 	public final fun getUser ()Lstream/video/User;
 	public final fun joinCall (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -687,7 +687,7 @@ public final class io/getstream/video/android/client/VideoClient {
 
 public final class io/getstream/video/android/client/VideoClient$Builder {
 	public static final field $stable I
-	public fun <init> (Ljava/lang/String;Lstream/video/User;Landroid/content/Context;Lio/getstream/video/android/token/TokenProvider;)V
+	public fun <init> (Lstream/video/User;Landroid/content/Context;Lio/getstream/video/android/token/CredentialsProvider;)V
 	public final fun build ()Lio/getstream/video/android/client/VideoClient;
 	public final fun loggingLevel (Lio/getstream/video/android/logging/LoggingLevel;)Lio/getstream/video/android/client/VideoClient$Builder;
 }
@@ -1164,8 +1164,10 @@ public abstract interface class io/getstream/video/android/socket/VideoSocket {
 	public abstract fun updateCallState (Lstream/video/Call;)V
 }
 
-public abstract interface class io/getstream/video/android/token/TokenProvider {
+public abstract interface class io/getstream/video/android/token/CredentialsProvider {
+	public abstract fun getCachedApiKey ()Ljava/lang/String;
 	public abstract fun getCachedToken ()Ljava/lang/String;
+	public abstract fun loadApiKey ()Ljava/lang/String;
 	public abstract fun loadToken ()Ljava/lang/String;
 }
 

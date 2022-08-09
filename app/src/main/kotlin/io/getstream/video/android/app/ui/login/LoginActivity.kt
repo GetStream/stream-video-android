@@ -32,7 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.getstream.video.android.app.FakeTokenProvider
+import io.getstream.video.android.app.FakeCredentialsProvider
 import io.getstream.video.android.app.VideoApp
 import io.getstream.video.android.app.ui.components.UserList
 import io.getstream.video.android.app.ui.home.HomeActivity
@@ -92,8 +92,10 @@ class LoginActivity : AppCompatActivity() {
         val selectedUser = loginItemsState.value.firstOrNull { it.isSelected } ?: return
 
         VideoApp.initializeClient(
-            "fake-api-key",
-            tokenProvider = FakeTokenProvider(selectedUser.token),
+            credentialsProvider = FakeCredentialsProvider(
+                token = selectedUser.token,
+                apiKey = "fake-api-key"
+            ),
             user = User(id = selectedUser.id, name = selectedUser.name)
         )
         startActivity(HomeActivity.getIntent(this))

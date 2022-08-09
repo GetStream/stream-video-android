@@ -28,9 +28,9 @@ import io.getstream.video.android.network.NetworkStateProvider
 import io.getstream.video.android.socket.SocketFactory
 import io.getstream.video.android.socket.VideoSocket
 import io.getstream.video.android.socket.VideoSocketImpl
+import io.getstream.video.android.token.CredentialsProvider
 import io.getstream.video.android.token.TokenManager
 import io.getstream.video.android.token.TokenManagerImpl
-import io.getstream.video.android.token.TokenProvider
 import kotlinx.coroutines.CoroutineScope
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -43,17 +43,15 @@ import stream.video.User
  * Serves as an internal DI framework that allows us to cache heavy components reused across the
  * SDK.
  *
- * @property apiKey The key used to authenticate user apps with the API.
  * @property user The currently logged in user.
- * @property tokenProvider Provider of user-tokens.
+ * @property credentialsProvider Provider of user-tokens.
  * @property appContext The context of the app, used for Android-based dependencies.
  * @property lifecycle The lifecycle of the process.
  * @property loggingLevel Log level used for all HTTP requests towards the API.
  */
 internal class VideoModule(
-    private val apiKey: String,
     private val user: User,
-    private val tokenProvider: TokenProvider,
+    private val credentialsProvider: CredentialsProvider,
     private val appContext: Context,
     private val lifecycle: Lifecycle,
     private val loggingLevel: HttpLoggingInterceptor.Level
@@ -62,7 +60,7 @@ internal class VideoModule(
      * Cached instance of the HTTP client.
      */
     private val okHttpClient: OkHttpClient by lazy {
-        buildOkHttpClient(tokenProvider)
+        buildOkHttpClient(credentialsProvider)
     }
 
     /**
@@ -104,7 +102,7 @@ internal class VideoModule(
      */
     private val tokenManager: TokenManager by lazy {
         TokenManagerImpl().apply {
-            setTokenProvider(tokenProvider)
+            setTokenProvider(credentialsProvider)
         }
     }
 
@@ -130,15 +128,15 @@ internal class VideoModule(
     /**
      * Builds the [OkHttpClient] used for all API calls.
      *
-     * @param tokenProvider The user-token provider used to attach authorization headers.
+     * @param credentialsProvider The user-token and API key provider used to attach authorization
+     * headers.
      * @return [OkHttpClient] that allows us API calls.
      */
-    private fun buildOkHttpClient(tokenProvider: TokenProvider): OkHttpClient {
+    private fun buildOkHttpClient(credentialsProvider: CredentialsProvider): OkHttpClient {
         return OkHttpClient.Builder()
             .addInterceptor(
                 buildInterceptor(
-                    apiKey = apiKey,
-                    tokenProvider = tokenProvider
+                    credentialsProvider = credentialsProvider
                 )
             )
             .addInterceptor(
@@ -152,19 +150,17 @@ internal class VideoModule(
     /**
      * Builds the HTTP interceptor that adds headers to all API calls.
      *
-     * @param apiKey The API key of the app.
-     * @param tokenProvider Provider of the user token.
+     * @param credentialsProvider Provider of the user token and API key.
      *
      * @return [Interceptor] which adds headers.
      */
     private fun buildInterceptor(
-        apiKey: String,
-        tokenProvider: TokenProvider
+        credentialsProvider: CredentialsProvider
     ): Interceptor = Interceptor {
         val original = it.request()
         val updated = original.newBuilder()
-            .addHeader(HEADER_AUTHORIZATION, tokenProvider.getCachedToken())
-            // TODO - add API key to auth or use to authenticate the user?
+            .addHeader(HEADER_AUTHORIZATION, credentialsProvider.getCachedToken())
+            .addHeader(HEADER_API_KEY, credentialsProvider.getCachedApiKey())
             .build()
 
         it.proceed(updated)
@@ -193,7 +189,6 @@ internal class VideoModule(
      */
     internal fun socket(): VideoSocket {
         return VideoSocketImpl(
-            apiKey = apiKey,
             wssUrl = REDIRECT_WS_BASE_URL ?: WS_BASE_URL,
             tokenManager = tokenManager,
             socketFactory = socketFactory,
@@ -215,6 +210,7 @@ internal class VideoModule(
          * Key used to prove authorization to the API.
          */
         private const val HEADER_AUTHORIZATION = "authorization"
+        private const val HEADER_API_KEY = "api_key"
 
         /**
          * Used for testing on devices and redirecting from a public realm to localhost.
@@ -223,7 +219,8 @@ internal class VideoModule(
          * leave it as-is.
          */
         @Suppress("RedundantNullableReturnType")
-        private val REDIRECT_BASE_URL: String? = null // e.g. "https://dc54-83-131-252-51.eu.ngrok.io"
+        private val REDIRECT_BASE_URL: String? =
+            "https://8bed-89-172-240-87.eu.ngrok.io" // e.g. "https://dc54-83-131-252-51.eu.ngrok.io"
 
         /**
          * The base URL of the API.
@@ -237,7 +234,8 @@ internal class VideoModule(
          * leave it as-is.
          */
         @Suppress("RedundantNullableReturnType")
-        internal val REDIRECT_PING_URL: String? = null // "<redirect-url>/ping"
+        internal val REDIRECT_PING_URL: String? =
+            "https://f4b2-89-172-240-87.eu.ngrok.io/ping" // "<redirect-url>/ping"
 
         /**
          * Used for testing on devices and redirecting from a public realm to localhost.
@@ -246,7 +244,8 @@ internal class VideoModule(
          * leave it as-is.
          */
         @Suppress("RedundantNullableReturnType")
-        private val REDIRECT_WS_BASE_URL: String? = null // e.g. "ws://4.tcp.eu.ngrok.io:12265"
+        private val REDIRECT_WS_BASE_URL: String? =
+            "ws://2.tcp.eu.ngrok.io:18848" // e.g. "ws://4.tcp.eu.ngrok.io:12265"
         private const val WS_BASE_URL = "ws://localhost:8989/"
     }
 }

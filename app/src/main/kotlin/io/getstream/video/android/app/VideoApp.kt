@@ -19,7 +19,7 @@ package io.getstream.video.android.app
 import android.app.Application
 import io.getstream.video.android.client.VideoClient
 import io.getstream.video.android.logging.LoggingLevel
-import io.getstream.video.android.token.TokenProvider
+import io.getstream.video.android.token.CredentialsProvider
 import stream.video.User
 
 class VideoApp : Application() {
@@ -39,16 +39,14 @@ class VideoApp : Application() {
          * Sets up and returns the [videoClient] required to connect to the API.
          */
         fun initializeClient(
-            apiKey: String,
-            tokenProvider: TokenProvider,
+            credentialsProvider: CredentialsProvider,
             user: User
         ): VideoClient {
             videoClient = VideoClient
                 .Builder(
-                    apiKey = apiKey,
                     appContext = instance,
                     user = user,
-                    tokenProvider = tokenProvider
+                    credentialsProvider = credentialsProvider
                 )
                 .loggingLevel(LoggingLevel.BODY)
                 .build()
