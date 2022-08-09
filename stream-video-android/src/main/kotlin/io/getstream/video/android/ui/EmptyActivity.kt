@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.model
+package io.getstream.video.android.ui
 
-public class RemoteParticipant(
-    private val remoteValue: io.livekit.android.room.participant.Participant
-) : Participant {
-    override val value: io.livekit.android.room.participant.Participant
-        get() = remoteValue
-}
+import androidx.appcompat.app.AppCompatActivity
+
+public class EmptyActivity : AppCompatActivity()

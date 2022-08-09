@@ -14,27 +14,11 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.socket
+package io.getstream.video.android.model
 
-import io.getstream.video.android.errors.DisconnectCause
-import io.getstream.video.android.errors.VideoError
-import io.getstream.video.android.events.ConnectedEvent
-import io.getstream.video.android.events.VideoEvent
-
-public interface SocketListener {
-
-    public fun onConnecting() {
-    }
-
-    public fun onConnected(event: ConnectedEvent) {
-    }
-
-    public fun onDisconnected(cause: DisconnectCause) {
-    }
-
-    public fun onError(error: VideoError) {
-    }
-
-    public fun onEvent(event: VideoEvent) {
-    }
-}
+public data class VideoParticipantState(
+    val userId: String,
+    val userName: String,
+    val isLocalAudioEnabled: Boolean,
+    val isLocalVideoEnabled: Boolean
+)

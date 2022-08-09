@@ -19,7 +19,7 @@ package io.getstream.video.android.token
 internal class TokenManagerImpl : TokenManager {
     @Volatile
     private var token: String = EMPTY_TOKEN
-    private lateinit var provider: TokenProvider
+    private lateinit var provider: CredentialsProvider
 
     override fun ensureTokenLoaded() {
         if (!hasToken()) {
@@ -33,7 +33,7 @@ internal class TokenManagerImpl : TokenManager {
         }
     }
 
-    override fun setTokenProvider(provider: TokenProvider) {
+    override fun setTokenProvider(provider: CredentialsProvider) {
         this.provider = provider
         this.token = provider.getCachedToken()
     }

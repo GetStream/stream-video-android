@@ -25,6 +25,7 @@ import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.errors.VideoErrorCode
 import io.getstream.video.android.errors.VideoNetworkError
 import io.getstream.video.android.events.ConnectedEvent
+import io.getstream.video.android.events.VideoEvent
 import io.getstream.video.android.network.NetworkStateProvider
 import io.getstream.video.android.token.TokenManager
 import kotlinx.coroutines.CoroutineScope
@@ -41,7 +42,6 @@ import kotlin.properties.Delegates
 /**
  * Socket implementation used to handle the lifecycle of a WebSocket and its related state.
  *
- * @property apiKey The key of the application connecting to the API.
  * @property wssUrl Base URL for the API socket.
  * @property tokenManager Wrapper around a token providing service that manages its validity.
  * @property socketFactory Factory used to build new socket instances.
@@ -49,7 +49,6 @@ import kotlin.properties.Delegates
  * @property coroutineScope The scope used to launch any operations.
  */
 internal class VideoSocketImpl(
-    private val apiKey: String,
     private val wssUrl: String,
     private val tokenManager: TokenManager,
     private val socketFactory: SocketFactory,
@@ -248,7 +247,7 @@ internal class VideoSocketImpl(
         state = State.Connected(event)
     }
 
-    override fun onEvent(event: Any) {
+    override fun onEvent(event: VideoEvent) {
         healthMonitor.ack()
         callListeners { listener -> listener.onEvent(event) }
     }

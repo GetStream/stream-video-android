@@ -14,19 +14,25 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.model
+package io.getstream.video.android.token
 
-import io.livekit.android.room.participant.Participant
-import io.livekit.android.room.track.Track
-import io.livekit.android.room.track.TrackPublication
+/**
+ * Exposes a way to build a token provided that connects to custom implementation for
+ * authentication.
+ */
+public interface CredentialsProvider {
 
-public interface Participant {
+    /**
+     * @return The user token backed by authentication services.
+     */
+    public fun loadToken(): String
 
-    public val value: Participant
+    /**
+     * @return The user token that's cached.
+     */
+    public fun getCachedToken(): String
 
-    public val sid: String
-        get() = value.sid
+    public fun loadApiKey(): String
 
-    public val videoTracks: List<Pair<TrackPublication, Track?>>
-        get() = value.videoTracks
+    public fun getCachedApiKey(): String
 }

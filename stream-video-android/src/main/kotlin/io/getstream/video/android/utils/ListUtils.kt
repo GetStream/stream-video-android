@@ -14,17 +14,22 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.app
+package io.getstream.video.android.utils
 
-import io.getstream.video.android.token.TokenProvider
+public inline fun <T> List<T>.update(condition: (T) -> Boolean, transformer: (T) -> T): List<T> {
+    val itemIndex = this.indexOfFirst(condition)
 
-class FakeTokenProvider(private val token: String) : TokenProvider {
+    val mutableList = toMutableList()
+    val updatedItem = transformer(this[itemIndex])
 
-    override fun loadToken(): String {
-        return token
-    }
+    mutableList.removeAt(itemIndex)
+    mutableList.add(itemIndex, updatedItem)
 
-    override fun getCachedToken(): String {
-        return token
-    }
+    return mutableList
+}
+
+public inline fun <T> List<T>.updateAll(transformer: (T) -> T): List<T> {
+    val mutableList = toMutableList()
+
+    return mutableList.map(transformer)
 }
