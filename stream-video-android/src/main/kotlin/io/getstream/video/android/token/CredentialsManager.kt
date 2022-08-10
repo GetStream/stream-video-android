@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.token
 
-internal interface TokenManager {
+internal interface CredentialsManager {
     /**
      * Ensure a token has been loaded.
      */
@@ -25,7 +25,7 @@ internal interface TokenManager {
     /**
      * Load a new token.
      */
-    fun loadSync(): String
+    fun loadTokenSync(): String
 
     /**
      * Expire the current token.
@@ -44,7 +44,7 @@ internal interface TokenManager {
      *
      * @param provider A [CredentialsProvider] which serves the token based on custom implementation.
      */
-    fun setTokenProvider(provider: CredentialsProvider)
+    fun setCredentialsProvider(provider: CredentialsProvider)
 
     /**
      * Obtain last token loaded.
@@ -59,4 +59,9 @@ internal interface TokenManager {
      * @return true if a token was loaded and it is not expired, false on another case.
      */
     fun hasToken(): Boolean
+
+    /**
+     * @return The API key for this environment.
+     */
+    fun getApiKey(): String
 }

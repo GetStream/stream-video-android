@@ -20,5 +20,6 @@ data class UserCredentials(
     val id: String,
     val token: String,
     val name: String,
+    val image: String,
     val isSelected: Boolean = false
 )

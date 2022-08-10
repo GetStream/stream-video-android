@@ -28,9 +28,9 @@ import io.getstream.video.android.network.NetworkStateProvider
 import io.getstream.video.android.socket.SocketFactory
 import io.getstream.video.android.socket.VideoSocket
 import io.getstream.video.android.socket.VideoSocketImpl
+import io.getstream.video.android.token.CredentialsManager
+import io.getstream.video.android.token.CredentialsManagerImpl
 import io.getstream.video.android.token.CredentialsProvider
-import io.getstream.video.android.token.TokenManager
-import io.getstream.video.android.token.TokenManagerImpl
 import kotlinx.coroutines.CoroutineScope
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -80,7 +80,7 @@ internal class VideoModule(
     private val callCoordinatorClient: CallCoordinatorClient by lazy {
         val service = retrofitClient.create(CallCoordinatorService::class.java)
 
-        CallCoordinatorClientImpl(service)
+        CallCoordinatorClientImpl(service, credentialsProvider)
     }
 
     /**
@@ -100,9 +100,9 @@ internal class VideoModule(
     /**
      * Cached user token manager.
      */
-    private val tokenManager: TokenManager by lazy {
-        TokenManagerImpl().apply {
-            setTokenProvider(credentialsProvider)
+    private val credentialsManager: CredentialsManager by lazy {
+        CredentialsManagerImpl().apply {
+            setCredentialsProvider(credentialsProvider)
         }
     }
 
@@ -160,7 +160,6 @@ internal class VideoModule(
         val original = it.request()
         val updated = original.newBuilder()
             .addHeader(HEADER_AUTHORIZATION, credentialsProvider.getCachedToken())
-            .addHeader(HEADER_API_KEY, credentialsProvider.getCachedApiKey())
             .build()
 
         it.proceed(updated)
@@ -190,7 +189,7 @@ internal class VideoModule(
     internal fun socket(): VideoSocket {
         return VideoSocketImpl(
             wssUrl = REDIRECT_WS_BASE_URL ?: WS_BASE_URL,
-            tokenManager = tokenManager,
+            credentialsManager = credentialsManager,
             socketFactory = socketFactory,
             networkStateProvider = networkStateProvider,
             userState = userState,
@@ -210,7 +209,6 @@ internal class VideoModule(
          * Key used to prove authorization to the API.
          */
         private const val HEADER_AUTHORIZATION = "authorization"
-        private const val HEADER_API_KEY = "api_key"
 
         /**
          * Used for testing on devices and redirecting from a public realm to localhost.
@@ -220,7 +218,7 @@ internal class VideoModule(
          */
         @Suppress("RedundantNullableReturnType")
         private val REDIRECT_BASE_URL: String? =
-            "https://8bed-89-172-240-87.eu.ngrok.io" // e.g. "https://dc54-83-131-252-51.eu.ngrok.io"
+            "https://e65b-83-131-245-5.eu.ngrok.io" // e.g. "https://dc54-83-131-252-51.eu.ngrok.io"
 
         /**
          * The base URL of the API.
@@ -235,7 +233,7 @@ internal class VideoModule(
          */
         @Suppress("RedundantNullableReturnType")
         internal val REDIRECT_PING_URL: String? =
-            "https://f4b2-89-172-240-87.eu.ngrok.io/ping" // "<redirect-url>/ping"
+            "https://ee3c-83-131-245-5.eu.ngrok.io/ping" // "<redirect-url>/ping"
 
         /**
          * Used for testing on devices and redirecting from a public realm to localhost.
@@ -245,7 +243,7 @@ internal class VideoModule(
          */
         @Suppress("RedundantNullableReturnType")
         private val REDIRECT_WS_BASE_URL: String? =
-            "ws://2.tcp.eu.ngrok.io:18848" // e.g. "ws://4.tcp.eu.ngrok.io:12265"
+            "ws://7.tcp.eu.ngrok.io:12624" // e.g. "ws://4.tcp.eu.ngrok.io:12265"
         private const val WS_BASE_URL = "ws://localhost:8989/"
     }
 }

@@ -21,19 +21,22 @@ import io.getstream.video.android.app.model.UserCredentials
 fun getUsers(): List<UserCredentials> {
     return listOf(
         UserCredentials(
-            id = "filip2",
+            id = "filip_babic",
             name = "Filip",
-            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiZmlsaXAyIn0.FHap2f5AC0nkxmvSJnM4iN_jmMMYfhRb4_S2Rn10hvw"
+            image = "https://avatars.githubusercontent.com/u/17215808?v=4",
+            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiZmlsaXBfYmFiaWMifQ.y-9wv1_yuG41crxTWL9V5wb33du3DXv-m-EFeIH92wk"
         ),
         UserCredentials(
             id = "mile_kralj",
             name = "Mile Kitic",
-            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoibWlsZV9rcmFsaiJ9.QTuoQufYuyJkkcaCCSr3ECojHzQGCF1S0eEPMEgekjE"
+            image = "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Mile_Kitic_from_BISO0675.jpg/300px-Mile_Kitic_from_BISO0675.jpg",
+            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoibWlsZV9rcmFsaiJ9.SWkPo6Z2EOGlFgQdKafIygyrheGeSXi6D9JDv-zJ7rY"
         ),
         UserCredentials(
-            id = "jedini_toma",
+            id = "toma_zdravkovic",
             name = "Toma Zdravkovic",
-            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiamVkaW5pX3RvbWEifQ.BosMY_OaCL7Yz4gGt62Vyc96v7RhV88X6liFpbTEWTE"
+            image = "https://upload.wikimedia.org/wikipedia/commons/d/da/Toma_Zdravkovi%C4%87.jpg",
+            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidG9tYV96ZHJhdmtvdmljIn0.NzcC4Y9DvSUEES3NkvqutNBOtKtZAQzovOoASzAZcG4"
         )
     )
 }

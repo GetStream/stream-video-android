@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package stream.video;
 
+import "google/protobuf/empty.proto";
 import "google/protobuf/struct.proto";
 import "google/protobuf/wrappers.proto";
 import "validate/validate.proto";
@@ -81,20 +82,115 @@ service CallCoordinatorService {
   rpc ExportUser(ExportUserRequest) returns (ExportUserResponse);
   // This requires having some sort of user/team level concept
 
-  // TODO: endpoints needed to build a good dashboard experience
+  // update application settings
+  rpc UpdateAppSettings(UpdateAppSettingsRequest) returns (AppSettingsResponse);
+  // get application settings
+  rpc GetAppSettings(google.protobuf.Empty) returns (AppSettingsResponse);
+  // create a call type
+  rpc CreateCallType(CallTypeRequestInput) returns (CallTypeResponse);
+  // updates an existing call type
+  rpc UpdateCallType(CallTypeRequestInput) returns (CallTypeResponse);
+  // deletes a call type, returns an error if there are calls for this type
+  rpc DeleteCallType(DeleteCallTypeRequest) returns (DeleteCallTypeResponse);
+  // returns the list of permissions for a call type
+  rpc ListPermissions(ListPermissionsRequest) returns (ListPermissionsResponse);
+  // creates a custom user role
+  rpc CreateRole(CreateRoleRequest) returns (CreateRoleResponse);
+  // creates a custom user role
+  rpc DeleteRole(DeleteRoleRequest) returns (DeleteRoleResponse);
+
+  // adds a new push provider
+  rpc AddPushProvider(AddPushProviderRequest) returns (AppSettingsResponse);
+
+  // updates a push provider
+  rpc UpdatePushProvider(UpdatePushProviderRequest) returns (AppSettingsResponse);
+
+  // deletes an existing push provider
+  rpc DeletePushProvider(DeletePushProviderRequest) returns (AppSettingsResponse);
+
+  // endpoints needed to build a good dashboard experience
   // - listing calls and filtering based on their attributes
   // - listing users and filtering based on their attributes
 
   // endpoint for storing stats (perhaps we should move this to the SFU layer though)
-  rpc StoreCallStats(StoreCallStatsRequest) returns (StoreCallStatsResponse);
+  rpc ReportCallStats(ReportCallStatsRequest) returns (ReportCallStatsResponse);
   rpc GetCallStats(GetCallStatsRequest) returns (GetCallStatsResponse);
   // endpoint for reviewing/rating the quality of calls
   rpc ReviewCall(ReviewCallRequest) returns (ReviewCallResponse);
   // endpoint for users to report issues with a call
   rpc ReportIssue(ReportIssueRequest) returns (ReportIssueResponse);
+}
 
+message AddPushProviderRequest {
+  PushProvider settings = 1;
+}
 
+message UpdatePushProviderRequest {
+  PushProvider settings = 1;
+}
 
+message DeletePushProviderRequest {
+  string name = 1;
+}
+
+message UpdateAppSettingsRequest {
+  // the webhook URL
+  google.protobuf.StringValue webhook_url = 1;
+  // sqs settings
+  SqsSettings sqs_settings = 2;
+}
+
+message AppSettingsResponse {
+  ApplicationSettings settings = 1;
+}
+
+message DeleteRoleRequest {
+  // the name of the role
+  string name = 1;
+}
+
+message DeleteRoleResponse {
+}
+
+message CreateRoleRequest {
+  // the unique name for the role
+  string name = 1;
+}
+
+message CreateRoleResponse {
+}
+
+message DeleteCallTypeRequest {
+  // the name of the call type
+  string name = 1;
+}
+
+message DeleteCallTypeResponse {
+}
+
+message CallTypeResponse {
+  // the call type updated
+  CallType call_type = 1;
+}
+
+message CallTypeRequestInput {
+  // the name of the call type, must be unique for the application
+  string name = 1;
+
+  // the permission granted to users by their role
+  map<string, Permissions> grants = 2;
+
+  // the feature settings
+  Features features = 3;
+}
+
+message ListPermissionsRequest {
+  string call_type = 1;
+}
+
+message ListPermissionsResponse {
+  // the set of permissions by user role
+  map<string, Permissions> permissions = 1;
 }
 
 message GetCallRequest {
@@ -341,7 +437,7 @@ message StartRecordingRequest {
   string call_id = 2;
 }
 
-message StoreCallStatsRequest {
+message ReportCallStatsRequest {
   // The call type
   string call_type = 1;
   // The call id
@@ -351,11 +447,11 @@ message StoreCallStatsRequest {
 }
 
 enum CallStatEventType {
-  AUDIO_FROZEN = 0;
-  AUDIO_DELAY = 1;
-  VIDEO_FROZEN = 2;
-  VIDEO_DELAY = 3;
-  VIDEO_NOT_OPTIMAL = 4;
+  CALL_STAT_EVENT_TYPE_AUDIO_FROZEN_UNSPECIFIED = 0;
+  CALL_STAT_EVENT_TYPE_AUDIO_DELAY = 1;
+  CALL_STAT_EVENT_TYPE_VIDEO_FROZEN = 2;
+  CALL_STAT_EVENT_TYPE_VIDEO_DELAY = 3;
+  CALL_STAT_EVENT_TYPE_VIDEO_NOT_OPTIMAL = 4;
 }
 
 message CallStatEvent {
@@ -393,7 +489,7 @@ message ReportIssueResponse {
 
 message ParticipantCallStatEvent {
   string participant_id = 1;
-  repeated CallStatEvent call_timeline = 2;
+  repeated CallStatEvent call_timelines = 2;
 
 }
 
@@ -405,7 +501,7 @@ message GetCallStatsRequest {
 }
 
 message CallStats {
-  repeated CallStatEvent call_timeline = 1;
+  repeated CallStatEvent call_timelines = 1;
   repeated ParticipantCallStatEvent participant_timelines = 2;
 }
 
@@ -414,7 +510,7 @@ message GetCallStatsResponse {
   CallStats call_stats = 2;
 }
 
-message StoreCallStatsResponse {}
+message ReportCallStatsResponse {}
 
 message StartRecordingResponse {
 }

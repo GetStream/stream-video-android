@@ -118,43 +118,87 @@ message TranscribeOptions {
 
 }
 
+enum Action {
+  ACTION_EMPTY_UNSPECIFIED = 0;
+  ACTION_CREATE_CALL = 1;
+  ACTION_DELETE_CALL = 2;
+  ACTION_SCREENSHARE = 3;
+  ACTION_RECORD_CALL = 4;
+  ACTION_START_TRANSCRIBE = 5;
+  ACTION_RENAME_USER = 6;
+  ACTION_HIDE_PROFILE_PICTURES = 7;
+  ACTION_UNMUTE = 8;
+  ACTION_MUTE_OTHER_USER = 9;
+  ACTION_START_VIDEO = 10;
+  ACTION_BROADCAST_CALL = 11;
+}
+
+
+message Permission {
+  // the unique permission identifier
+  string id = 1;
+
+  // the human readable version of the permission
+  string name = 2;
+
+  // the description of the permission
+  string description = 3;
+
+  // the action that this permission grants
+  Action action = 4;
+
+  // if true, the permission only applies if the user is the owner of the resource (eg. the creator of a call)
+  bool owner = 5;
+
+  // if true, the permission only applies if user and resource are from the same team
+  bool same_team = 6;
+}
+
+message Permissions {
+  repeated Permission permissions = 1;
+}
+
+message Grant {
+  string call_type = 1;
+  // if provided we store this at the call level and merge with call_type
+  string call_id = 2;
+  string role = 3;
+  repeated Action actions = 5;
+}
+
+enum FeatureToggle {
+  // the feature is available and enabled by default
+  FEATURE_TOGGLE_FEATURE_FLAG_ENABLED_UNSPECIFIED = 0;
+  // the feature is available but needs to be turned on the call level
+  FEATURE_TOGGLE_FEATURE_FLAG_AVAILABLE = 1;
+  // the feature is disabled and cannot be turned on
+  FEATURE_TOGGLE_FEATURE_FLAG_DISABLED = 2;
+}
+
+message Features {
+  // recording calls
+  FeatureToggle recording = 1;
+
+  // HLS stream broadcast
+  FeatureToggle hls_broadcast = 3;
+
+  // call transcription
+  FeatureToggle transcribe = 4;
+  TranscribeOptions transcribe_options = 5;
+}
+
 message CallType {
   // the unique name for the call type
   string name = 1;
-  // TODO: maybe we need to move this to permissions / own_capabilities
-  Security security = 2;
 
-  // when recording is true, calls are recorded on S3
-  bool recording = 4;
+  // the permissions set for this call type
+  map<string, Permissions> permissions = 2;
 
-  // when enabled, calls get an HLS URL by default
-  bool hls_broadcast = 5;
+  // the features enabled by default for this type of calls
+  Features features = 3;
 
-  // enable transcription by default
-  bool transcribe = 6;
-  TranscribeOptions transcribe_options = 7;
-
-  string created_at = 8;
-  string updated_at = 9;
-}
-
-message Security {
-  // TODO this is actually one of the most complex UI things in zoom :)
-  // controls if regular users are allowed to do the following
-  // yes/no/request
-  enum IsAllowed {
-    IS_ALLOWED_YES_UNSPECIFIED = 0;
-    IS_ALLOWED_NO = 1;
-    IS_ALLOWED_REQUEST = 2;
-  }
-  bool hide_profile_pictures = 1;
-  IsAllowed share_screen = 2;
-  bool rename_user = 3;
-  IsAllowed unmute = 4;
-  IsAllowed start_video = 5;
-  IsAllowed screen_share = 6;
-  IsAllowed record = 7;
-  IsAllowed broadcast = 8;
+  string created_at = 4;
+  string updated_at = 5;
 }
 
 // those who are online in the call
@@ -170,7 +214,6 @@ message Participant {
 
   // call last update date as RFC3339 string
   string updated_at = 8 [(validate.rules).string.min_len = 1];
-
 }
 
 message ParticipantRequest {
@@ -183,7 +226,6 @@ message ParticipantRequest {
 
   // call last update date as RFC3339 string
   string updated_at = 5 [(validate.rules).string.min_len = 1];
-
 }
 
 message CallState {
@@ -200,21 +242,82 @@ message Call {
   // the id of the user that created this call
   string created_by_user_id = 3 [(validate.rules).string.min_len = 1];
 
-  google.protobuf.Struct custom = 4;
+  // the id of the current host for this call
+  string host_user_id = 4;
+
+  google.protobuf.Struct custom = 5;
 
   // call creation date as RFC3339 string
-  string created_at = 5 [(validate.rules).string.min_len = 1];
+  string created_at = 6 [(validate.rules).string.min_len = 1];
 
   // call last update date as RFC3339 string
-  string updated_at = 6 [(validate.rules).string.min_len = 1];
+  string updated_at = 7 [(validate.rules).string.min_len = 1];
 
   // when recording is true, calls are recorded on S3
-  bool recording = 7;
+  bool recording = 8;
 
   // broadcast settings for this call
-  Broadcast broadcast = 8;
+  Broadcast broadcast = 9;
 
   // enable transcription by default
-  bool transcribe = 9;
-  TranscribeOptions transcribe_options = 10;
+  bool transcribe = 10;
+  TranscribeOptions transcribe_options = 11;
+}
+
+message ApnSettings {
+  string auth_key = 1;
+  string key_id = 2;
+  string apn_topic = 3;
+  string team_id = 4;
+  bool development = 5;
+}
+
+message FirebaseSettings {
+  string server_key = 1;
+  string credentials_json = 2;
+}
+
+message HuaweiSettings {
+  string id = 1;
+  string secret = 2;
+}
+
+message XiaomiSettings {
+  string package_name = 1;
+  string secret = 2;
+}
+
+message SqsSettings {
+  string url = 1;
+  string key = 2;
+  string secret = 3;
+}
+
+message PushProvider {
+  // the name for this push provider, unique for this application
+  // @example apn_production
+  // @example firebase_staging
+  string name = 1;
+
+  oneof settings {
+    // apn push configs
+    ApnSettings apn_settings = 2;
+    // firebase push configs
+    FirebaseSettings firebase_settings = 3;
+    // huawei push configs
+    HuaweiSettings huawei_settings = 4;
+    // xiaomi push configs
+    XiaomiSettings xiaomi_settings = 5;
+  }
+
+  bool disabled = 6;
+}
+
+message ApplicationSettings {
+  // the webhook URL
+  string webhook_url = 1;
+  // push providers configured
+  repeated PushProvider push_providers = 2;
+  // sqs settings
+  SqsSettings sqs_settings = 3;
 }

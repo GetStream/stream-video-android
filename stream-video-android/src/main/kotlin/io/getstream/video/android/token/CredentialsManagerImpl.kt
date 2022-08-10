@@ -16,26 +16,28 @@
 
 package io.getstream.video.android.token
 
-internal class TokenManagerImpl : TokenManager {
+internal class CredentialsManagerImpl : CredentialsManager {
     @Volatile
     private var token: String = EMPTY_TOKEN
+    private var apiKey: String = EMPTY_TOKEN
     private lateinit var provider: CredentialsProvider
 
     override fun ensureTokenLoaded() {
         if (!hasToken()) {
-            loadSync()
+            loadTokenSync()
         }
     }
 
-    override fun loadSync(): String {
+    override fun loadTokenSync(): String {
         return provider.getCachedToken().also {
             this.token = it
         }
     }
 
-    override fun setTokenProvider(provider: CredentialsProvider) {
+    override fun setCredentialsProvider(provider: CredentialsProvider) {
         this.provider = provider
         this.token = provider.getCachedToken()
+        this.apiKey = provider.getCachedApiKey()
     }
 
     override fun hasTokenProvider(): Boolean {
@@ -50,6 +52,10 @@ internal class TokenManagerImpl : TokenManager {
 
     override fun expireToken() {
         token = EMPTY_TOKEN
+    }
+
+    override fun getApiKey(): String {
+        return apiKey
     }
 
     companion object {

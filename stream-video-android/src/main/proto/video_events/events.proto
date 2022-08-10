@@ -2,8 +2,8 @@ syntax = "proto3";
 
 package stream.video;
 
-import "video_models/models.proto";
 import "video_coordinator_rpc/coordinator_service.proto";
+import "video_models/models.proto";
 
 option go_package = "github.com/GetStream/video/protobuf/video_events";
 
@@ -49,7 +49,8 @@ message Healthcheck {
 message AuthPayload {
   CreateUserRequest user = 1;
   DeviceRequest device = 2;
-  string token = 3;
+  string api_key = 3;
+  string token = 4;
 }
 
 /**

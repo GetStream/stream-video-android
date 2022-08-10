@@ -19,6 +19,7 @@ package io.getstream.video.android.api
 import retrofit2.http.Body
 import retrofit2.http.Headers
 import retrofit2.http.POST
+import retrofit2.http.Query
 import stream.video.CreateCallRequest
 import stream.video.CreateCallResponse
 import stream.video.JoinCallRequest
@@ -40,17 +41,34 @@ public interface CallCoordinatorService {
 
     @Headers("Content-Type: application/protobuf")
     @POST("/stream.video.CallCoordinatorService/CreateCall")
-    public suspend fun createCall(@Body createCallRequest: CreateCallRequest): CreateCallResponse
+    public suspend fun createCall(
+        @Body createCallRequest: CreateCallRequest,
+        @Query(QUERY_API_KEY) apiKey: String
+    ): CreateCallResponse
 
     @Headers("Content-Type: application/protobuf")
     @POST("/stream.video.CallCoordinatorService/JoinCall")
-    public suspend fun joinCall(@Body joinCallRequest: JoinCallRequest): JoinCallResponse
+    public suspend fun joinCall(
+        @Body joinCallRequest: JoinCallRequest,
+        @Query(QUERY_API_KEY) apiKey: String
+    ): JoinCallResponse
 
     @Headers("Content-Type: application/protobuf")
     @POST("/stream.video.CallCoordinatorService/SelectEdgeServer")
-    public suspend fun selectEdgeServer(@Body selectEdgeServerRequest: SelectEdgeServerRequest): SelectEdgeServerResponse
+    public suspend fun selectEdgeServer(
+        @Body selectEdgeServerRequest: SelectEdgeServerRequest,
+        @Query(QUERY_API_KEY) apiKey: String
+    ): SelectEdgeServerResponse
 
     @Headers("Content-Type: application/protobuf")
     @POST("/stream.video.CallCoordinatorService/SendEvent")
-    public suspend fun sendUserEvent(@Body sendEventRequest: SendEventRequest): SendEventResponse
+    public suspend fun sendUserEvent(
+        @Body sendEventRequest: SendEventRequest,
+        @Query(QUERY_API_KEY) apiKey: String
+    ): SendEventResponse
 }
+
+/**
+ * API key query we need to send for all API calls.
+ */
+private const val QUERY_API_KEY = "api_key"

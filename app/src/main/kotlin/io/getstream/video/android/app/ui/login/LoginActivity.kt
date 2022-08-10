@@ -94,9 +94,9 @@ class LoginActivity : AppCompatActivity() {
         VideoApp.initializeClient(
             credentialsProvider = FakeCredentialsProvider(
                 token = selectedUser.token,
-                apiKey = "fake-api-key"
+                apiKey = "key1"
             ),
-            user = User(id = selectedUser.id, name = selectedUser.name)
+            user = User(id = selectedUser.id, name = selectedUser.name, image_url = selectedUser.image)
         )
         startActivity(HomeActivity.getIntent(this))
         finish()

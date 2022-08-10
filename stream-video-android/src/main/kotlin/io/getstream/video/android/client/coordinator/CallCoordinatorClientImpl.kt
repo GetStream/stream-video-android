@@ -18,6 +18,7 @@ package io.getstream.video.android.client.coordinator
 
 import io.getstream.video.android.api.CallCoordinatorService
 import io.getstream.video.android.errors.VideoError
+import io.getstream.video.android.token.CredentialsProvider
 import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Result
 import io.getstream.video.android.utils.Success
@@ -33,7 +34,8 @@ import stream.video.SendEventRequest
  * An accessor that allows us to communicate with the API around video calls.
  */
 internal class CallCoordinatorClientImpl(
-    private val callCoordinatorService: CallCoordinatorService
+    private val callCoordinatorService: CallCoordinatorService,
+    private val credentialsProvider: CredentialsProvider
 ) : CallCoordinatorClient {
 
     /**
@@ -45,7 +47,10 @@ internal class CallCoordinatorClientImpl(
      */
     override suspend fun createCall(createCallRequest: CreateCallRequest): Result<CreateCallResponse> =
         try {
-            val response = callCoordinatorService.createCall(createCallRequest)
+            val response = callCoordinatorService.createCall(
+                createCallRequest = createCallRequest,
+                apiKey = credentialsProvider.getCachedApiKey()
+            )
 
             Success(response)
         } catch (error: Throwable) {
@@ -62,7 +67,10 @@ internal class CallCoordinatorClientImpl(
      */
     override suspend fun joinCall(request: JoinCallRequest): Result<JoinCallResponse> =
         try {
-            val response = callCoordinatorService.joinCall(request)
+            val response = callCoordinatorService.joinCall(
+                joinCallRequest = request,
+                apiKey = credentialsProvider.getCachedApiKey()
+            )
 
             Success(response)
         } catch (error: Throwable) {
@@ -79,7 +87,10 @@ internal class CallCoordinatorClientImpl(
      */
     override suspend fun selectEdgeServer(request: SelectEdgeServerRequest): Result<SelectEdgeServerResponse> =
         try {
-            val response = callCoordinatorService.selectEdgeServer(request)
+            val response = callCoordinatorService.selectEdgeServer(
+                selectEdgeServerRequest = request,
+                apiKey = credentialsProvider.getCachedApiKey()
+            )
 
             Success(response)
         } catch (error: Throwable) {
@@ -95,7 +106,10 @@ internal class CallCoordinatorClientImpl(
      */
     override suspend fun sendUserEvent(sendEventRequest: SendEventRequest): Result<Boolean> =
         try {
-            callCoordinatorService.sendUserEvent(sendEventRequest)
+            callCoordinatorService.sendUserEvent(
+                sendEventRequest = sendEventRequest,
+                apiKey = credentialsProvider.getCachedApiKey()
+            )
 
             Success(true)
         } catch (error: Throwable) {

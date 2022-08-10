@@ -27,7 +27,7 @@ import io.getstream.video.android.errors.VideoNetworkError
 import io.getstream.video.android.events.ConnectedEvent
 import io.getstream.video.android.events.VideoEvent
 import io.getstream.video.android.network.NetworkStateProvider
-import io.getstream.video.android.token.TokenManager
+import io.getstream.video.android.token.CredentialsManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -43,14 +43,14 @@ import kotlin.properties.Delegates
  * Socket implementation used to handle the lifecycle of a WebSocket and its related state.
  *
  * @property wssUrl Base URL for the API socket.
- * @property tokenManager Wrapper around a token providing service that manages its validity.
+ * @property credentialsManager Wrapper around a token providing service that manages its validity.
  * @property socketFactory Factory used to build new socket instances.
  * @property networkStateProvider Provides the network state and lifecycle handles.
  * @property coroutineScope The scope used to launch any operations.
  */
 internal class VideoSocketImpl(
     private val wssUrl: String,
-    private val tokenManager: TokenManager,
+    private val credentialsManager: CredentialsManager,
     private val socketFactory: SocketFactory,
     private val networkStateProvider: NetworkStateProvider,
     private val userState: UserState,
@@ -159,7 +159,7 @@ internal class VideoSocketImpl(
 
     private fun onNetworkError(error: VideoNetworkError) {
         if (VideoErrorCode.isAuthenticationError(error.streamCode)) {
-            tokenManager.expireToken()
+            credentialsManager.expireToken()
         }
 
         when (error.streamCode) {
@@ -212,7 +212,8 @@ internal class VideoSocketImpl(
         socket?.authenticate(
             AuthPayload(
                 user = CreateUserRequest(id = user.id, name = user.name),
-                token = tokenManager.getToken()
+                token = credentialsManager.getToken(),
+                api_key = credentialsManager.getApiKey()
             )
         )
     }
@@ -266,7 +267,7 @@ internal class VideoSocketImpl(
             null -> State.DisconnectedPermanently(null)
             else -> {
                 socketConnectionJob = coroutineScope.launch {
-                    tokenManager.ensureTokenLoaded()
+                    credentialsManager.ensureTokenLoaded()
 
                     socket = socketFactory.createSocket(createNewEventsParser(), connectionConf)
                 }
