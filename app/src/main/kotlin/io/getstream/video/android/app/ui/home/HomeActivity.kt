@@ -21,37 +21,24 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Call
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -66,9 +53,7 @@ import io.getstream.video.android.app.utils.getUsers
 import io.getstream.video.android.events.CallCreatedEvent
 import io.getstream.video.android.events.VideoEvent
 import io.getstream.video.android.socket.SocketListener
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import stream.video.Call
+import io.getstream.video.android.ui.IncomingCallActivity
 
 class HomeActivity : AppCompatActivity() {
 
@@ -84,12 +69,10 @@ class HomeActivity : AppCompatActivity() {
 
     private val callIdState: MutableState<String> = mutableStateOf("testroom")
 
-    private val invitedCallState: MutableState<Call?> = mutableStateOf(null)
-
     private val socketListener = object : SocketListener {
         override fun onEvent(event: VideoEvent) {
             if (event is CallCreatedEvent) {
-                invitedCallState.value = event.call
+                startActivity(IncomingCallActivity.getLaunchIntent(this@HomeActivity))
             }
         }
     }
@@ -120,59 +103,6 @@ class HomeActivity : AppCompatActivity() {
                 } else {
                     JoinCallContent()
                 }
-            }
-            val invitedState by remember { invitedCallState }
-            val currentInvite = invitedState
-
-            if (currentInvite != null) {
-                CallInviteDialog(currentInvite)
-            }
-        }
-    }
-
-    @Composable
-    fun CallInviteDialog(currentInvite: Call) {
-        val scope = rememberCoroutineScope()
-        SideEffect {
-            scope.launch {
-                delay(10000)
-                invitedCallState.value = null
-            }
-        }
-
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.White),
-            horizontalAlignment = CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(text = "${currentInvite.created_by_user_id} is calling you!")
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    modifier = Modifier
-                        .background(color = Color.Red, shape = CircleShape)
-                        .padding(8.dp)
-                        .clickable { invitedCallState.value = null },
-                    imageVector = Icons.Default.Close,
-                    tint = Color.White,
-                    contentDescription = "Decline call"
-                )
-
-                Spacer(modifier = Modifier.width(16.dp))
-
-                Icon(
-                    modifier = Modifier
-                        .background(color = Color.Green, shape = CircleShape)
-                        .padding(8.dp)
-                        .clickable { navigateToCall(currentInvite.id) },
-                    imageVector = Icons.Default.Call,
-                    tint = Color.White,
-                    contentDescription = "Join call"
-                )
             }
         }
     }
