@@ -100,15 +100,13 @@ public class CallViewModel(private val videoClient: VideoClient) : ViewModel() {
             combine(
                 participantList,
                 activeSpeakers,
-            ) { participants, speakers -> participants to speakers }
-                .combine(roomState) { pair, room -> pair to room }
-                .collect { (participantPair, room) ->
-                    val (participantList, speakers) = participantPair
-
+                roomState
+            ) { participants, speakers, roomState -> Triple(participants, speakers, roomState) }
+                .collect { (participants, speakers, roomState) ->
                     handlePrimarySpeaker(
-                        participantList,
+                        participants,
                         speakers,
-                        room
+                        roomState
                     )
                 }
         }
