@@ -24,6 +24,7 @@ object Versions {
     internal const val OKHTTP = "4.10.0"
 
     internal const val LIVE_KIT = "1.0.1"
+    internal const val WEBRTC = "104.5112.01"
 }
 
 object Dependencies {
@@ -68,4 +69,5 @@ object Dependencies {
         "com.squareup.okhttp3:logging-interceptor:${Versions.OKHTTP}"
 
     const val liveKit = "io.livekit:livekit-android:${Versions.LIVE_KIT}"
+    const val webRTC = "com.github.webrtc-sdk:android:${Versions.WEBRTC}"
 }

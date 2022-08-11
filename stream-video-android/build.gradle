@@ -87,7 +87,7 @@ dependencies {
 
     // A/V Calls
     implementation Dependencies.liveKit
-    api 'com.github.webrtc-sdk:android:104.5112.01'
+    api Dependencies.webRTC
 
     // Compose
     implementation Dependencies.composeRuntime
