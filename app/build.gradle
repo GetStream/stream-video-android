@@ -26,10 +26,12 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
     }
+
     kotlinOptions {
         jvmTarget = '1.8'
     }
@@ -39,12 +41,12 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion Versions.COMPOSE
+        kotlinCompilerExtensionVersion Versions.COMPOSE_COMPILER
     }
 }
 
 dependencies {
-    implementation project(':stream-video-android')
+    implementation project(":stream-video-android")
 
     implementation Dependencies.androidxCore
     implementation Dependencies.androidxAppcompat
@@ -52,7 +54,7 @@ dependencies {
     implementation Dependencies.androidxLifecycleRuntime
 
     // Compose
-    implementation Dependencies.composeCompiler
+    implementation Dependencies.composeRuntime
     implementation Dependencies.composeUi
     implementation Dependencies.composeUiTooling
     implementation Dependencies.composeFoundation

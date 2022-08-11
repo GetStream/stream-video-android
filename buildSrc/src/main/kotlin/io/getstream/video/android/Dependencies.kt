@@ -4,8 +4,8 @@ object Versions {
     internal const val ANDROID_GRADLE_PLUGIN = "7.2.1"
     internal const val ANDROID_GRADLE_SPOTLESS = "6.7.0"
     internal const val GRADLE_NEXUS_PUBLISH_PLUGIN = "1.1.0"
-    internal const val KOTLIN = "1.7.0"
-    internal const val KOTLIN_GRADLE_DOKKA = "1.7.0"
+    internal const val KOTLIN = "1.7.10"
+    internal const val KOTLIN_GRADLE_DOKKA = "1.7.10"
     internal const val KOTLIN_SERIALIZATION_JSON = "1.3.2"
     internal const val KOTLIN_BINARY_VALIDATOR = "0.11.0"
     internal const val KOTLIN_COROUTINE = "1.6.4"
@@ -15,7 +15,9 @@ object Versions {
     internal const val ANDROIDX_CORE = "1.8.0"
     internal const val ANDROIDX_LIFECYCLE = "2.5.1"
     internal const val ACTIVITY_COMPOSE = "1.5.0"
-    internal const val COMPOSE = "1.2.0"
+
+    internal const val COMPOSE = "1.2.1"
+    const val COMPOSE_COMPILER = "1.3.0"
 
     internal const val WIRE = "4.4.0"
     internal const val RETROFIT = "2.9.0"
@@ -52,7 +54,7 @@ object Dependencies {
 
     // Compose
     const val activityCompose = "androidx.activity:activity-compose:${Versions.ACTIVITY_COMPOSE}"
-    const val composeCompiler = "androidx.compose.compiler:compiler:${Versions.COMPOSE}"
+    const val composeRuntime = "androidx.compose.runtime:runtime:${Versions.COMPOSE}"
     const val composeUi = "androidx.compose.ui:ui:${Versions.COMPOSE}"
     const val composeUiTooling = "androidx.compose.ui:ui-tooling:${Versions.COMPOSE}"
     const val composeFoundation = "androidx.compose.foundation:foundation:${Versions.COMPOSE}"

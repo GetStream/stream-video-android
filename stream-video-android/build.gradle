@@ -58,7 +58,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion Versions.COMPOSE
+        kotlinCompilerExtensionVersion Versions.COMPOSE_COMPILER
     }
 }
 
@@ -90,7 +90,7 @@ dependencies {
     api 'com.github.webrtc-sdk:android:104.5112.01'
 
     // Compose
-    implementation Dependencies.composeCompiler
+    implementation Dependencies.composeRuntime
     implementation Dependencies.composeUi
     implementation Dependencies.composeUiTooling
     implementation Dependencies.composeFoundation
