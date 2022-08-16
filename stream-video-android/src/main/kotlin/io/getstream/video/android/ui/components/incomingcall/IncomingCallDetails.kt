@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.utils
+package io.getstream.video.android.ui.components.incomingcall
 
-public fun enrichSocketURL(url: String): String {
-    if (url.startsWith("wss://")) return url
+import androidx.compose.runtime.Composable
+import io.getstream.video.android.model.VideoParticipant
+import io.getstream.video.android.ui.components.participants.ParticipantAvatars
+import io.getstream.video.android.ui.components.participants.ParticipantInformation
 
-    return "wss://$url"
-}
+@Composable
+public fun IncomingCallDetails(
+    participants: List<VideoParticipant>
+) {
+    ParticipantAvatars(participants = participants)
 
-internal fun String.initials(): String {
-    return trim()
-        .split("\\s+".toRegex())
-        .take(2)
-        .joinToString(separator = "") { it.take(1).uppercase() }
+    ParticipantInformation(participants = participants)
 }

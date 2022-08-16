@@ -97,6 +97,7 @@ dependencies {
     implementation Dependencies.composeMaterial
     implementation Dependencies.activityCompose
     implementation Dependencies.composeIconsExtended
+    implementation Dependencies.composeCoil
 
     // Notifications
     implementation platform('com.google.firebase:firebase-bom:30.3.1')

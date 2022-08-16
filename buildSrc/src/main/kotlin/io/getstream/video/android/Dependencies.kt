@@ -18,6 +18,7 @@ object Versions {
 
     internal const val COMPOSE = "1.2.1"
     const val COMPOSE_COMPILER = "1.3.0"
+    internal const val COIL = "2.1.0"
 
     internal const val WIRE = "4.4.0"
     internal const val RETROFIT = "2.9.0"
@@ -61,6 +62,7 @@ object Dependencies {
     const val composeFoundation = "androidx.compose.foundation:foundation:${Versions.COMPOSE}"
     const val composeMaterial = "androidx.compose.material:material:${Versions.COMPOSE}"
     const val composeIconsExtended = "androidx.compose.material:material-icons-extended:${Versions.COMPOSE}"
+    const val composeCoil = "io.coil-kt:coil-compose:${Versions.COIL}"
 
     const val wireRuntime = "com.squareup.wire:wire-runtime:${Versions.WIRE}"
     const val retrofit = "com.squareup.retrofit2:retrofit:${Versions.RETROFIT}"

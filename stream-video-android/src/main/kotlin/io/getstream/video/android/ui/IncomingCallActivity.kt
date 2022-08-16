@@ -16,79 +16,46 @@
 
 package io.getstream.video.android.ui
 
+import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.WindowManager
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Icon
-import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Call
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
+import androidx.lifecycle.lifecycleScope
+import io.getstream.video.android.model.CallType
+import io.getstream.video.android.ui.components.incomingcall.IncomingCall
+import kotlinx.coroutines.delay
 
 public class IncomingCallActivity : AppCompatActivity() {
+
+    // TODO - Build a ViewModel for this
 
     override fun onCreate(savedInstanceState: Bundle?) {
         showWhenLockedAndTurnScreenOn()
         super.onCreate(savedInstanceState)
-        Log.d("henloFrens", "receiving from lock")
+        lifecycleScope.launchWhenCreated {
+            delay(10000)
+            finish()
+        }
         setContent {
-            CallInviteDialog()
+            // TODO - load the data from a getCall(GetCallRequest)
+            IncomingCall(
+                callId = "",
+                callType = CallType.VIDEO,
+                participants = emptyList(),
+                onDeclineCall = { finish() },
+                onAcceptCall = { callId, isVideoEnabled ->
+                    joinCall(callId, isVideoEnabled)
+                }
+            )
         }
     }
 
-    @Composable
-    private fun CallInviteDialog() {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.White),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(text = "Someone is calling you!")
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    modifier = Modifier
-                        .background(color = Color.Red, shape = CircleShape)
-                        .padding(8.dp),
-                    imageVector = Icons.Default.Close,
-                    tint = Color.White,
-                    contentDescription = "Decline call"
-                )
-
-                Spacer(modifier = Modifier.width(16.dp))
-
-                Icon(
-                    modifier = Modifier
-                        .background(color = Color.Green, shape = CircleShape)
-                        .padding(8.dp),
-                    imageVector = Icons.Default.Call,
-                    tint = Color.White,
-                    contentDescription = "Join call"
-                )
-            }
-        }
+    private fun joinCall(callId: String, videoEnabled: Boolean) {
+        // TODO - do we start an activity here or do we trigger some handler in the VideoClient that lets the user decide what to do?
+        finish()
     }
 
     private fun showWhenLockedAndTurnScreenOn() {
@@ -100,6 +67,14 @@ public class IncomingCallActivity : AppCompatActivity() {
                 WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
                     or WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
             )
+        }
+    }
+
+    public companion object {
+        public fun getLaunchIntent(context: Context): Intent {
+            return Intent(context, IncomingCallActivity::class.java).apply {
+                // TODO - maybe set data
+            }
         }
     }
 }
