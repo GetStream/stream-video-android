@@ -75,10 +75,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.app.VideoApp
+import io.getstream.video.android.compose.ui.components.CallDetails
+import io.getstream.video.android.compose.ui.components.MainStage
 import io.getstream.video.android.model.VideoParticipantState
 import io.getstream.video.android.model.VideoRoom
-import io.getstream.video.android.ui.components.CallDetails
-import io.getstream.video.android.ui.components.MainStage
 import io.getstream.video.android.utils.onError
 import io.getstream.video.android.utils.onSuccessSuspend
 import io.getstream.video.android.viewmodel.CallViewModel

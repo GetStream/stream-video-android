@@ -1,5 +1,4 @@
 public final class io/envoyproxy/pgv/validate/AnyRules : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lio/envoyproxy/pgv/validate/AnyRules$Companion;
 	public fun <init> ()V
@@ -21,7 +20,6 @@ public final class io/envoyproxy/pgv/validate/AnyRules$Companion {
 }
 
 public final class io/envoyproxy/pgv/validate/BoolRules : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lio/envoyproxy/pgv/validate/BoolRules$Companion;
 	public fun <init> ()V
@@ -41,7 +39,6 @@ public final class io/envoyproxy/pgv/validate/BoolRules$Companion {
 }
 
 public final class io/envoyproxy/pgv/validate/BytesRules : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lio/envoyproxy/pgv/validate/BytesRules$Companion;
 	public fun <init> ()V
@@ -78,7 +75,6 @@ public abstract interface annotation class io/envoyproxy/pgv/validate/DisabledOp
 }
 
 public final class io/envoyproxy/pgv/validate/DoubleRules : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lio/envoyproxy/pgv/validate/DoubleRules$Companion;
 	public fun <init> ()V
@@ -105,7 +101,6 @@ public final class io/envoyproxy/pgv/validate/DoubleRules$Companion {
 }
 
 public final class io/envoyproxy/pgv/validate/DurationRules : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lio/envoyproxy/pgv/validate/DurationRules$Companion;
 	public fun <init> ()V
@@ -132,7 +127,6 @@ public final class io/envoyproxy/pgv/validate/DurationRules$Companion {
 }
 
 public final class io/envoyproxy/pgv/validate/EnumRules : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lio/envoyproxy/pgv/validate/EnumRules$Companion;
 	public fun <init> ()V
@@ -155,7 +149,6 @@ public final class io/envoyproxy/pgv/validate/EnumRules$Companion {
 }
 
 public final class io/envoyproxy/pgv/validate/FieldRules : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lio/envoyproxy/pgv/validate/FieldRules$Companion;
 	public fun <init> ()V
@@ -196,7 +189,6 @@ public final class io/envoyproxy/pgv/validate/FieldRules$Companion {
 }
 
 public final class io/envoyproxy/pgv/validate/Fixed32Rules : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lio/envoyproxy/pgv/validate/Fixed32Rules$Companion;
 	public fun <init> ()V
@@ -223,7 +215,6 @@ public final class io/envoyproxy/pgv/validate/Fixed32Rules$Companion {
 }
 
 public final class io/envoyproxy/pgv/validate/Fixed64Rules : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lio/envoyproxy/pgv/validate/Fixed64Rules$Companion;
 	public fun <init> ()V
@@ -250,7 +241,6 @@ public final class io/envoyproxy/pgv/validate/Fixed64Rules$Companion {
 }
 
 public final class io/envoyproxy/pgv/validate/FloatRules : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lio/envoyproxy/pgv/validate/FloatRules$Companion;
 	public fun <init> ()V
@@ -281,7 +271,6 @@ public abstract interface annotation class io/envoyproxy/pgv/validate/IgnoredOpt
 }
 
 public final class io/envoyproxy/pgv/validate/Int32Rules : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lio/envoyproxy/pgv/validate/Int32Rules$Companion;
 	public fun <init> ()V
@@ -308,7 +297,6 @@ public final class io/envoyproxy/pgv/validate/Int32Rules$Companion {
 }
 
 public final class io/envoyproxy/pgv/validate/Int64Rules : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lio/envoyproxy/pgv/validate/Int64Rules$Companion;
 	public fun <init> ()V
@@ -351,7 +339,6 @@ public final class io/envoyproxy/pgv/validate/KnownRegex$Companion {
 }
 
 public final class io/envoyproxy/pgv/validate/MapRules : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lio/envoyproxy/pgv/validate/MapRules$Companion;
 	public fun <init> ()V
@@ -376,7 +363,6 @@ public final class io/envoyproxy/pgv/validate/MapRules$Companion {
 }
 
 public final class io/envoyproxy/pgv/validate/MessageRules : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lio/envoyproxy/pgv/validate/MessageRules$Companion;
 	public fun <init> ()V
@@ -397,7 +383,6 @@ public final class io/envoyproxy/pgv/validate/MessageRules$Companion {
 }
 
 public final class io/envoyproxy/pgv/validate/RepeatedRules : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lio/envoyproxy/pgv/validate/RepeatedRules$Companion;
 	public fun <init> ()V
@@ -421,7 +406,6 @@ public final class io/envoyproxy/pgv/validate/RepeatedRules$Companion {
 }
 
 public final class io/envoyproxy/pgv/validate/SFixed32Rules : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lio/envoyproxy/pgv/validate/SFixed32Rules$Companion;
 	public fun <init> ()V
@@ -448,7 +432,6 @@ public final class io/envoyproxy/pgv/validate/SFixed32Rules$Companion {
 }
 
 public final class io/envoyproxy/pgv/validate/SFixed64Rules : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lio/envoyproxy/pgv/validate/SFixed64Rules$Companion;
 	public fun <init> ()V
@@ -475,7 +458,6 @@ public final class io/envoyproxy/pgv/validate/SFixed64Rules$Companion {
 }
 
 public final class io/envoyproxy/pgv/validate/SInt32Rules : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lio/envoyproxy/pgv/validate/SInt32Rules$Companion;
 	public fun <init> ()V
@@ -502,7 +484,6 @@ public final class io/envoyproxy/pgv/validate/SInt32Rules$Companion {
 }
 
 public final class io/envoyproxy/pgv/validate/SInt64Rules : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lio/envoyproxy/pgv/validate/SInt64Rules$Companion;
 	public fun <init> ()V
@@ -529,7 +510,6 @@ public final class io/envoyproxy/pgv/validate/SInt64Rules$Companion {
 }
 
 public final class io/envoyproxy/pgv/validate/StringRules : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lio/envoyproxy/pgv/validate/StringRules$Companion;
 	public static final field DEFAULT_STRICT Z
@@ -575,7 +555,6 @@ public final class io/envoyproxy/pgv/validate/StringRules$Companion {
 }
 
 public final class io/envoyproxy/pgv/validate/TimestampRules : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lio/envoyproxy/pgv/validate/TimestampRules$Companion;
 	public fun <init> ()V
@@ -603,7 +582,6 @@ public final class io/envoyproxy/pgv/validate/TimestampRules$Companion {
 }
 
 public final class io/envoyproxy/pgv/validate/UInt32Rules : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lio/envoyproxy/pgv/validate/UInt32Rules$Companion;
 	public fun <init> ()V
@@ -630,7 +608,6 @@ public final class io/envoyproxy/pgv/validate/UInt32Rules$Companion {
 }
 
 public final class io/envoyproxy/pgv/validate/UInt64Rules : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lio/envoyproxy/pgv/validate/UInt64Rules$Companion;
 	public fun <init> ()V
@@ -671,7 +648,6 @@ public abstract interface class io/getstream/video/android/api/CallCoordinatorSe
 }
 
 public final class io/getstream/video/android/client/VideoClient {
-	public static final field $stable I
 	public fun <init> (Landroidx/lifecycle/Lifecycle;Landroid/content/Context;Lkotlinx/coroutines/CoroutineScope;Lio/getstream/video/android/token/CredentialsProvider;Lio/getstream/video/android/socket/VideoSocket;Lio/getstream/video/android/socket/SocketStateService;Lio/getstream/video/android/client/user/UserState;Lio/getstream/video/android/client/coordinator/CallCoordinatorClient;)V
 	public final fun addSocketListener (Lio/getstream/video/android/socket/SocketListener;)V
 	public final fun getUser ()Lstream/video/User;
@@ -686,7 +662,6 @@ public final class io/getstream/video/android/client/VideoClient {
 }
 
 public final class io/getstream/video/android/client/VideoClient$Builder {
-	public static final field $stable I
 	public fun <init> (Lstream/video/User;Landroid/content/Context;Lio/getstream/video/android/token/CredentialsProvider;)V
 	public final fun build ()Lio/getstream/video/android/client/VideoClient;
 	public final fun loggingLevel (Lio/getstream/video/android/logging/LoggingLevel;)Lio/getstream/video/android/client/VideoClient$Builder;
@@ -700,7 +675,6 @@ public abstract interface class io/getstream/video/android/client/coordinator/Ca
 }
 
 public final class io/getstream/video/android/client/user/UserState {
-	public static final field $stable I
 	public static final field Companion Lio/getstream/video/android/client/user/UserState$Companion;
 	public fun <init> ()V
 	public final fun getUser ()Lkotlinx/coroutines/flow/StateFlow;
@@ -711,7 +685,6 @@ public final class io/getstream/video/android/client/user/UserState$Companion {
 }
 
 public final class io/getstream/video/android/dispatchers/DispatcherProvider {
-	public static final field $stable I
 	public static final field INSTANCE Lio/getstream/video/android/dispatchers/DispatcherProvider;
 	public final fun getIO ()Lkotlinx/coroutines/CoroutineDispatcher;
 	public final fun getImmediate ()Lkotlinx/coroutines/CoroutineDispatcher;
@@ -721,33 +694,27 @@ public final class io/getstream/video/android/dispatchers/DispatcherProvider {
 }
 
 public abstract class io/getstream/video/android/errors/DisconnectCause {
-	public static final field $stable I
 }
 
 public final class io/getstream/video/android/errors/DisconnectCause$ConnectionReleased : io/getstream/video/android/errors/DisconnectCause {
-	public static final field $stable I
 	public static final field INSTANCE Lio/getstream/video/android/errors/DisconnectCause$ConnectionReleased;
 }
 
 public final class io/getstream/video/android/errors/DisconnectCause$Error : io/getstream/video/android/errors/DisconnectCause {
-	public static final field $stable I
 	public fun <init> (Lio/getstream/video/android/errors/VideoNetworkError;)V
 	public final fun getError ()Lio/getstream/video/android/errors/VideoNetworkError;
 }
 
 public final class io/getstream/video/android/errors/DisconnectCause$NetworkNotAvailable : io/getstream/video/android/errors/DisconnectCause {
-	public static final field $stable I
 	public static final field INSTANCE Lio/getstream/video/android/errors/DisconnectCause$NetworkNotAvailable;
 }
 
 public final class io/getstream/video/android/errors/DisconnectCause$UnrecoverableError : io/getstream/video/android/errors/DisconnectCause {
-	public static final field $stable I
 	public fun <init> (Lio/getstream/video/android/errors/VideoNetworkError;)V
 	public final fun getError ()Lio/getstream/video/android/errors/VideoNetworkError;
 }
 
 public class io/getstream/video/android/errors/VideoError {
-	public static final field $stable I
 	public fun <init> ()V
 	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -787,7 +754,6 @@ public final class io/getstream/video/android/errors/VideoErrorCode$Companion {
 }
 
 public final class io/getstream/video/android/errors/VideoNetworkError : io/getstream/video/android/errors/VideoError {
-	public static final field $stable I
 	public static final field Companion Lio/getstream/video/android/errors/VideoNetworkError$Companion;
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun equals (Ljava/lang/Object;)Z
@@ -806,7 +772,6 @@ public final class io/getstream/video/android/errors/VideoNetworkError$Companion
 }
 
 public final class io/getstream/video/android/events/AudioMutedEvent : io/getstream/video/android/events/VideoEvent {
-	public static final field $stable I
 	public fun <init> (Ljava/lang/String;Lstream/video/Call;Z)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lstream/video/Call;
@@ -822,7 +787,6 @@ public final class io/getstream/video/android/events/AudioMutedEvent : io/getstr
 }
 
 public final class io/getstream/video/android/events/AudioUnmutedEvent : io/getstream/video/android/events/VideoEvent {
-	public static final field $stable I
 	public fun <init> (Ljava/lang/String;Lstream/video/Call;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lstream/video/Call;
@@ -836,7 +800,6 @@ public final class io/getstream/video/android/events/AudioUnmutedEvent : io/gets
 }
 
 public final class io/getstream/video/android/events/CallCreatedEvent : io/getstream/video/android/events/VideoEvent {
-	public static final field $stable I
 	public fun <init> (Lstream/video/Call;)V
 	public final fun component1 ()Lstream/video/Call;
 	public final fun copy (Lstream/video/Call;)Lio/getstream/video/android/events/CallCreatedEvent;
@@ -848,7 +811,6 @@ public final class io/getstream/video/android/events/CallCreatedEvent : io/getst
 }
 
 public final class io/getstream/video/android/events/ConnectedEvent : io/getstream/video/android/events/VideoEvent {
-	public static final field $stable I
 	public fun <init> (Ljava/lang/String;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/events/ConnectedEvent;
@@ -860,7 +822,6 @@ public final class io/getstream/video/android/events/ConnectedEvent : io/getstre
 }
 
 public final class io/getstream/video/android/events/HealthCheckEvent : io/getstream/video/android/events/VideoEvent {
-	public static final field $stable I
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
@@ -874,7 +835,6 @@ public final class io/getstream/video/android/events/HealthCheckEvent : io/getst
 }
 
 public final class io/getstream/video/android/events/ParticipantJoinedEvent : io/getstream/video/android/events/VideoEvent {
-	public static final field $stable I
 	public fun <init> (Lstream/video/Participant;)V
 	public final fun component1 ()Lstream/video/Participant;
 	public final fun copy (Lstream/video/Participant;)Lio/getstream/video/android/events/ParticipantJoinedEvent;
@@ -886,7 +846,6 @@ public final class io/getstream/video/android/events/ParticipantJoinedEvent : io
 }
 
 public final class io/getstream/video/android/events/ParticipantLeftEvent : io/getstream/video/android/events/VideoEvent {
-	public static final field $stable I
 	public fun <init> (Lstream/video/Participant;)V
 	public final fun component1 ()Lstream/video/Participant;
 	public final fun copy (Lstream/video/Participant;)Lio/getstream/video/android/events/ParticipantLeftEvent;
@@ -898,16 +857,13 @@ public final class io/getstream/video/android/events/ParticipantLeftEvent : io/g
 }
 
 public final class io/getstream/video/android/events/UnknownEvent : io/getstream/video/android/events/VideoEvent {
-	public static final field $stable I
 	public static final field INSTANCE Lio/getstream/video/android/events/UnknownEvent;
 }
 
 public abstract class io/getstream/video/android/events/VideoEvent {
-	public static final field $stable I
 }
 
 public final class io/getstream/video/android/events/VideoStartedEvent : io/getstream/video/android/events/VideoEvent {
-	public static final field $stable I
 	public fun <init> (Ljava/lang/String;Lstream/video/Call;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lstream/video/Call;
@@ -921,7 +877,6 @@ public final class io/getstream/video/android/events/VideoStartedEvent : io/gets
 }
 
 public final class io/getstream/video/android/events/VideoStoppedEvent : io/getstream/video/android/events/VideoEvent {
-	public static final field $stable I
 	public fun <init> (Ljava/lang/String;Lstream/video/Call;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lstream/video/Call;
@@ -932,41 +887,6 @@ public final class io/getstream/video/android/events/VideoStoppedEvent : io/gets
 	public final fun getUserId ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-}
-
-public abstract interface class io/getstream/video/android/imageloading/StreamCoilImageLoaderFactory {
-	public static final field Companion Lio/getstream/video/android/imageloading/StreamCoilImageLoaderFactory$Companion;
-	public abstract fun imageLoader (Landroid/content/Context;)Lcoil/ImageLoader;
-}
-
-public final class io/getstream/video/android/imageloading/StreamCoilImageLoaderFactory$Companion {
-	public final fun defaultFactory ()Lio/getstream/video/android/imageloading/StreamCoilImageLoaderFactory;
-}
-
-public final class io/getstream/video/android/imageloading/StreamImageLoaderFactory : coil/ImageLoaderFactory {
-	public static final field $stable I
-	public fun <init> (Landroid/content/Context;Lkotlin/jvm/functions/Function1;)V
-	public synthetic fun <init> (Landroid/content/Context;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun newImageLoader ()Lcoil/ImageLoader;
-}
-
-public final class io/getstream/video/android/imageloading/StreamImageLoaderKt {
-	public static final fun getLocalStreamImageLoader ()Landroidx/compose/runtime/ProvidableCompositionLocal;
-}
-
-public final class io/getstream/video/android/imageloading/StreamImageLoaderProvidableCompositionLocal {
-	public static final synthetic fun box-impl (Landroidx/compose/runtime/ProvidableCompositionLocal;)Lio/getstream/video/android/imageloading/StreamImageLoaderProvidableCompositionLocal;
-	public static synthetic fun constructor-impl$default (Landroidx/compose/runtime/ProvidableCompositionLocal;ILkotlin/jvm/internal/DefaultConstructorMarker;)Landroidx/compose/runtime/ProvidableCompositionLocal;
-	public fun equals (Ljava/lang/Object;)Z
-	public static fun equals-impl (Landroidx/compose/runtime/ProvidableCompositionLocal;Ljava/lang/Object;)Z
-	public static final fun equals-impl0 (Landroidx/compose/runtime/ProvidableCompositionLocal;Landroidx/compose/runtime/ProvidableCompositionLocal;)Z
-	public static final fun getCurrent (Landroidx/compose/runtime/ProvidableCompositionLocal;Landroidx/compose/runtime/Composer;I)Lcoil/ImageLoader;
-	public fun hashCode ()I
-	public static fun hashCode-impl (Landroidx/compose/runtime/ProvidableCompositionLocal;)I
-	public static final fun provides-impl (Landroidx/compose/runtime/ProvidableCompositionLocal;Lcoil/ImageLoader;)Landroidx/compose/runtime/ProvidedValue;
-	public fun toString ()Ljava/lang/String;
-	public static fun toString-impl (Landroidx/compose/runtime/ProvidableCompositionLocal;)Ljava/lang/String;
-	public final synthetic fun unbox-impl ()Landroidx/compose/runtime/ProvidableCompositionLocal;
 }
 
 public final class io/getstream/video/android/logging/LoggingLevel : java/lang/Enum {
@@ -985,7 +905,6 @@ public final class io/getstream/video/android/model/CallType : java/lang/Enum {
 }
 
 public final class io/getstream/video/android/model/JoinCallResponse {
-	public static final field $stable I
 	public fun <init> (Lio/getstream/video/android/model/VideoRoom;Lstream/video/Call;Ljava/lang/String;Ljava/lang/String;)V
 	public final fun component1 ()Lio/getstream/video/android/model/VideoRoom;
 	public final fun component2 ()Lstream/video/Call;
@@ -1003,7 +922,6 @@ public final class io/getstream/video/android/model/JoinCallResponse {
 }
 
 public final class io/getstream/video/android/model/Track {
-	public static final field $stable I
 	public fun <init> (Lio/livekit/android/room/track/Track;)V
 	public final fun component1 ()Lio/livekit/android/room/track/Track;
 	public final fun copy (Lio/livekit/android/room/track/Track;)Lio/getstream/video/android/model/Track;
@@ -1015,7 +933,6 @@ public final class io/getstream/video/android/model/Track {
 }
 
 public final class io/getstream/video/android/model/VideoParticipant {
-	public static final field $stable I
 	public fun <init> ()V
 	public fun <init> (Lio/livekit/android/room/participant/Participant;Lstream/video/Participant;)V
 	public synthetic fun <init> (Lio/livekit/android/room/participant/Participant;Lstream/video/Participant;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -1036,7 +953,6 @@ public final class io/getstream/video/android/model/VideoParticipant {
 }
 
 public final class io/getstream/video/android/model/VideoParticipantState {
-	public static final field $stable I
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;ZZ)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
@@ -1054,7 +970,6 @@ public final class io/getstream/video/android/model/VideoParticipantState {
 }
 
 public final class io/getstream/video/android/model/VideoRoom : io/getstream/video/android/socket/SocketListener {
-	public static final field $stable I
 	public fun <init> (Lio/livekit/android/room/Room;Lio/getstream/video/android/socket/VideoSocket;)V
 	public final fun addEventListener (Lio/getstream/video/android/socket/SocketListener;)V
 	public final fun component1 ()Lio/livekit/android/room/Room;
@@ -1083,30 +998,7 @@ public final class io/getstream/video/android/model/VideoRoom : io/getstream/vid
 	public final fun updateParticipants (Ljava/util/List;)V
 }
 
-public final class io/getstream/video/android/notifications/CallNotificationReceiver : android/content/BroadcastReceiver {
-	public static final field $stable I
-	public static final field ACTION_CALL Ljava/lang/String;
-	public static final field Companion Lio/getstream/video/android/notifications/CallNotificationReceiver$Companion;
-	public fun <init> ()V
-	public fun onReceive (Landroid/content/Context;Landroid/content/Intent;)V
-}
-
-public final class io/getstream/video/android/notifications/CallNotificationReceiver$Companion {
-}
-
-public final class io/getstream/video/android/notifications/CallService : com/google/firebase/messaging/FirebaseMessagingService {
-	public static final field $stable I
-	public static final field ACTION_CALL Ljava/lang/String;
-	public static final field Companion Lio/getstream/video/android/notifications/CallService$Companion;
-	public fun <init> ()V
-	public fun onMessageReceived (Lcom/google/firebase/messaging/RemoteMessage;)V
-}
-
-public final class io/getstream/video/android/notifications/CallService$Companion {
-}
-
 public final class io/getstream/video/android/socket/ErrorResponse {
-	public static final field $stable I
 	public static final field Companion Lio/getstream/video/android/socket/ErrorResponse$Companion;
 	public fun <init> ()V
 	public synthetic fun <init> (IILjava/lang/String;ILjava/util/Map;Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/internal/SerializationConstructorMarker;)V
@@ -1136,7 +1028,6 @@ public final class io/getstream/video/android/socket/ErrorResponse {
 }
 
 public final class io/getstream/video/android/socket/ErrorResponse$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
-	public static final field $stable I
 	public static final field INSTANCE Lio/getstream/video/android/socket/ErrorResponse$$serializer;
 	public static final synthetic field descriptor Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
@@ -1153,7 +1044,6 @@ public final class io/getstream/video/android/socket/ErrorResponse$Companion {
 }
 
 public final class io/getstream/video/android/socket/SocketErrorMessage {
-	public static final field $stable I
 	public fun <init> ()V
 	public fun <init> (Lio/getstream/video/android/socket/ErrorResponse;)V
 	public synthetic fun <init> (Lio/getstream/video/android/socket/ErrorResponse;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -1183,7 +1073,6 @@ public final class io/getstream/video/android/socket/SocketListener$DefaultImpls
 }
 
 public final class io/getstream/video/android/socket/SocketStateService {
-	public static final field $stable I
 	public fun <init> ()V
 	public final fun onConnected (Ljava/lang/String;)V
 	public final fun onConnectionRequested ()V
@@ -1206,147 +1095,6 @@ public abstract interface class io/getstream/video/android/socket/VideoSocket {
 	public abstract fun updateCallState (Lstream/video/Call;)V
 }
 
-public final class io/getstream/video/android/theme/StreamColors {
-	public static final field Companion Lio/getstream/video/android/theme/StreamColors$Companion;
-	public synthetic fun <init> (JJJJJJJJJJJJJJLkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1-0d7_KjU ()J
-	public final fun component10-0d7_KjU ()J
-	public final fun component11-0d7_KjU ()J
-	public final fun component12-0d7_KjU ()J
-	public final fun component13-0d7_KjU ()J
-	public final fun component14-0d7_KjU ()J
-	public final fun component2-0d7_KjU ()J
-	public final fun component3-0d7_KjU ()J
-	public final fun component4-0d7_KjU ()J
-	public final fun component5-0d7_KjU ()J
-	public final fun component6-0d7_KjU ()J
-	public final fun component7-0d7_KjU ()J
-	public final fun component8-0d7_KjU ()J
-	public final fun component9-0d7_KjU ()J
-	public final fun copy-dVHXu7A (JJJJJJJJJJJJJJ)Lio/getstream/video/android/theme/StreamColors;
-	public static synthetic fun copy-dVHXu7A$default (Lio/getstream/video/android/theme/StreamColors;JJJJJJJJJJJJJJILjava/lang/Object;)Lio/getstream/video/android/theme/StreamColors;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getAppBackground-0d7_KjU ()J
-	public final fun getBarsBackground-0d7_KjU ()J
-	public final fun getBorders-0d7_KjU ()J
-	public final fun getDisabled-0d7_KjU ()J
-	public final fun getErrorAccent-0d7_KjU ()J
-	public final fun getHighlight-0d7_KjU ()J
-	public final fun getInfoAccent-0d7_KjU ()J
-	public final fun getInputBackground-0d7_KjU ()J
-	public final fun getLinkBackground-0d7_KjU ()J
-	public final fun getOverlay-0d7_KjU ()J
-	public final fun getOverlayDark-0d7_KjU ()J
-	public final fun getPrimaryAccent-0d7_KjU ()J
-	public final fun getTextHighEmphasis-0d7_KjU ()J
-	public final fun getTextLowEmphasis-0d7_KjU ()J
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/theme/StreamColors$Companion {
-	public final fun defaultColors (Landroidx/compose/runtime/Composer;I)Lio/getstream/video/android/theme/StreamColors;
-	public final fun defaultDarkColors (Landroidx/compose/runtime/Composer;I)Lio/getstream/video/android/theme/StreamColors;
-}
-
-public final class io/getstream/video/android/theme/StreamDimens {
-	public static final field Companion Lio/getstream/video/android/theme/StreamDimens$Companion;
-	public synthetic fun <init> (FFFFFFJJLkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1-D9Ej5fM ()F
-	public final fun component2-D9Ej5fM ()F
-	public final fun component3-D9Ej5fM ()F
-	public final fun component4-D9Ej5fM ()F
-	public final fun component5-D9Ej5fM ()F
-	public final fun component6-D9Ej5fM ()F
-	public final fun component7-XSAIIZE ()J
-	public final fun component8-XSAIIZE ()J
-	public final fun copy-1sqVaMk (FFFFFFJJ)Lio/getstream/video/android/theme/StreamDimens;
-	public static synthetic fun copy-1sqVaMk$default (Lio/getstream/video/android/theme/StreamDimens;FFFFFFJJILjava/lang/Object;)Lio/getstream/video/android/theme/StreamDimens;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getCallAvatarSize-D9Ej5fM ()F
-	public final fun getDirectCallUserNameTextSize-XSAIIZE ()J
-	public final fun getGroupCallUserNameTextSize-XSAIIZE ()J
-	public final fun getHeaderElevation-D9Ej5fM ()F
-	public final fun getLargeButtonSize-D9Ej5fM ()F
-	public final fun getMediumButtonSize-D9Ej5fM ()F
-	public final fun getSingleAvatarSize-D9Ej5fM ()F
-	public final fun getSmallButtonSize-D9Ej5fM ()F
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/theme/StreamDimens$Companion {
-	public final fun defaultDimens ()Lio/getstream/video/android/theme/StreamDimens;
-}
-
-public final class io/getstream/video/android/theme/StreamShapes {
-	public static final field Companion Lio/getstream/video/android/theme/StreamShapes$Companion;
-	public fun <init> (Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;)V
-	public final fun component1 ()Landroidx/compose/ui/graphics/Shape;
-	public final fun component2 ()Landroidx/compose/ui/graphics/Shape;
-	public final fun copy (Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;)Lio/getstream/video/android/theme/StreamShapes;
-	public static synthetic fun copy$default (Lio/getstream/video/android/theme/StreamShapes;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;ILjava/lang/Object;)Lio/getstream/video/android/theme/StreamShapes;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getAvatar ()Landroidx/compose/ui/graphics/Shape;
-	public final fun getCallButton ()Landroidx/compose/ui/graphics/Shape;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/theme/StreamShapes$Companion {
-	public final fun defaultShapes ()Lio/getstream/video/android/theme/StreamShapes;
-}
-
-public final class io/getstream/video/android/theme/StreamTypography {
-	public static final field Companion Lio/getstream/video/android/theme/StreamTypography$Companion;
-	public fun <init> (Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;)V
-	public final fun component1 ()Landroidx/compose/ui/text/TextStyle;
-	public final fun component10 ()Landroidx/compose/ui/text/TextStyle;
-	public final fun component11 ()Landroidx/compose/ui/text/TextStyle;
-	public final fun component2 ()Landroidx/compose/ui/text/TextStyle;
-	public final fun component3 ()Landroidx/compose/ui/text/TextStyle;
-	public final fun component4 ()Landroidx/compose/ui/text/TextStyle;
-	public final fun component5 ()Landroidx/compose/ui/text/TextStyle;
-	public final fun component6 ()Landroidx/compose/ui/text/TextStyle;
-	public final fun component7 ()Landroidx/compose/ui/text/TextStyle;
-	public final fun component8 ()Landroidx/compose/ui/text/TextStyle;
-	public final fun component9 ()Landroidx/compose/ui/text/TextStyle;
-	public final fun copy (Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;)Lio/getstream/video/android/theme/StreamTypography;
-	public static synthetic fun copy$default (Lio/getstream/video/android/theme/StreamTypography;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;ILjava/lang/Object;)Lio/getstream/video/android/theme/StreamTypography;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getBody ()Landroidx/compose/ui/text/TextStyle;
-	public final fun getBodyBold ()Landroidx/compose/ui/text/TextStyle;
-	public final fun getBodyItalic ()Landroidx/compose/ui/text/TextStyle;
-	public final fun getCaptionBold ()Landroidx/compose/ui/text/TextStyle;
-	public final fun getFootnote ()Landroidx/compose/ui/text/TextStyle;
-	public final fun getFootnoteBold ()Landroidx/compose/ui/text/TextStyle;
-	public final fun getFootnoteItalic ()Landroidx/compose/ui/text/TextStyle;
-	public final fun getTabBar ()Landroidx/compose/ui/text/TextStyle;
-	public final fun getTitle1 ()Landroidx/compose/ui/text/TextStyle;
-	public final fun getTitle3 ()Landroidx/compose/ui/text/TextStyle;
-	public final fun getTitle3Bold ()Landroidx/compose/ui/text/TextStyle;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/theme/StreamTypography$Companion {
-	public final fun defaultTypography (Landroidx/compose/ui/text/font/FontFamily;)Lio/getstream/video/android/theme/StreamTypography;
-	public static synthetic fun defaultTypography$default (Lio/getstream/video/android/theme/StreamTypography$Companion;Landroidx/compose/ui/text/font/FontFamily;ILjava/lang/Object;)Lio/getstream/video/android/theme/StreamTypography;
-}
-
-public final class io/getstream/video/android/theme/VideoTheme {
-	public static final field $stable I
-	public static final field INSTANCE Lio/getstream/video/android/theme/VideoTheme;
-	public final fun getColors (Landroidx/compose/runtime/Composer;I)Lio/getstream/video/android/theme/StreamColors;
-	public final fun getDimens (Landroidx/compose/runtime/Composer;I)Lio/getstream/video/android/theme/StreamDimens;
-	public final fun getShapes (Landroidx/compose/runtime/Composer;I)Lio/getstream/video/android/theme/StreamShapes;
-	public final fun getTypography (Landroidx/compose/runtime/Composer;I)Lio/getstream/video/android/theme/StreamTypography;
-}
-
-public final class io/getstream/video/android/theme/VideoThemeKt {
-	public static final fun VideoTheme (ZLio/getstream/video/android/theme/StreamColors;Lio/getstream/video/android/theme/StreamDimens;Lio/getstream/video/android/theme/StreamTypography;Lio/getstream/video/android/theme/StreamShapes;Landroidx/compose/material/ripple/RippleTheme;Lio/getstream/video/android/imageloading/StreamCoilImageLoaderFactory;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
-}
-
 public abstract interface class io/getstream/video/android/token/CredentialsProvider {
 	public abstract fun getCachedApiKey ()Ljava/lang/String;
 	public abstract fun getCachedToken ()Ljava/lang/String;
@@ -1354,89 +1102,11 @@ public abstract interface class io/getstream/video/android/token/CredentialsProv
 	public abstract fun loadToken ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/ui/EmptyActivity : androidx/appcompat/app/AppCompatActivity {
-	public static final field $stable I
-	public fun <init> ()V
-}
-
-public final class io/getstream/video/android/ui/IncomingCallActivity : androidx/appcompat/app/AppCompatActivity {
-	public static final field $stable I
-	public static final field Companion Lio/getstream/video/android/ui/IncomingCallActivity$Companion;
-	public fun <init> ()V
-}
-
-public final class io/getstream/video/android/ui/IncomingCallActivity$Companion {
-	public final fun getLaunchIntent (Landroid/content/Context;)Landroid/content/Intent;
-}
-
-public final class io/getstream/video/android/ui/components/CallDetailsKt {
-	public static final fun CallDetails (Lio/getstream/video/android/model/VideoRoom;ZZLjava/util/List;Lio/getstream/video/android/model/VideoParticipant;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
-}
-
-public final class io/getstream/video/android/ui/components/MainStageKt {
-	public static final fun MainStage (Lio/getstream/video/android/model/VideoRoom;Lio/getstream/video/android/model/VideoParticipant;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
-}
-
-public final class io/getstream/video/android/ui/components/ParticipantsListKt {
-	public static final fun ParticipantItem (Lio/getstream/video/android/model/VideoRoom;Lio/getstream/video/android/model/VideoParticipant;Landroidx/compose/runtime/Composer;I)V
-	public static final fun ParticipantsList (Lio/getstream/video/android/model/VideoRoom;Ljava/util/List;Landroidx/compose/ui/Modifier;Lio/getstream/video/android/model/VideoParticipant;Landroidx/compose/runtime/Composer;II)V
-}
-
-public final class io/getstream/video/android/ui/components/VideoItemKt {
-	public static final fun VideoItem (Lio/livekit/android/room/Room;Lio/livekit/android/room/track/VideoTrack;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
-}
-
-public final class io/getstream/video/android/ui/components/avatar/AvatarKt {
-	public static final fun Avatar-h3Hjrnc (Ljava/lang/String;Ljava/lang/String;Landroidx/compose/ui/Modifier;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/graphics/painter/Painter;Ljava/lang/String;JLkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;II)V
-}
-
-public final class io/getstream/video/android/ui/components/avatar/ImageAvatarKt {
-	public static final fun ImageAvatar (Landroidx/compose/ui/graphics/painter/Painter;Landroidx/compose/ui/Modifier;Landroidx/compose/ui/graphics/Shape;Ljava/lang/String;Lkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;II)V
-}
-
-public final class io/getstream/video/android/ui/components/avatar/InitialsAvatarKt {
-	public static final fun InitialsAvatar--jUOA0U (Ljava/lang/String;Landroidx/compose/ui/Modifier;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/text/TextStyle;JLkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;II)V
-}
-
-public final class io/getstream/video/android/ui/components/avatar/UserAvatarKt {
-	public static final fun UserAvatar-wXjn5To (Lstream/video/User;Landroidx/compose/ui/Modifier;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/text/TextStyle;Ljava/lang/String;JLkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;II)V
-}
-
-public final class io/getstream/video/android/ui/components/incomingcall/ComposableSingletons$IncomingCallOptionsKt {
-	public static final field INSTANCE Lio/getstream/video/android/ui/components/incomingcall/ComposableSingletons$IncomingCallOptionsKt;
-	public static field lambda-1 Lkotlin/jvm/functions/Function2;
-	public static field lambda-2 Lkotlin/jvm/functions/Function2;
-	public fun <init> ()V
-	public final fun getLambda-1$stream_video_android_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda-2$stream_video_android_release ()Lkotlin/jvm/functions/Function2;
-}
-
-public final class io/getstream/video/android/ui/components/incomingcall/IncomingCallDetailsKt {
-	public static final fun IncomingCallDetails (Ljava/util/List;Landroidx/compose/runtime/Composer;I)V
-}
-
-public final class io/getstream/video/android/ui/components/incomingcall/IncomingCallKt {
-	public static final fun IncomingCall (Ljava/lang/String;Lio/getstream/video/android/model/CallType;Ljava/util/List;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
-}
-
-public final class io/getstream/video/android/ui/components/incomingcall/IncomingCallOptionsKt {
-	public static final fun IncomingCallOptions (Ljava/lang/String;Lio/getstream/video/android/model/CallType;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
-}
-
-public final class io/getstream/video/android/ui/components/participants/ParticipantAvatarsKt {
-	public static final fun ParticipantAvatars (Ljava/util/List;Landroidx/compose/runtime/Composer;I)V
-}
-
-public final class io/getstream/video/android/ui/components/participants/ParticipantInformationKt {
-	public static final fun ParticipantInformation (Ljava/util/List;Landroidx/compose/runtime/Composer;I)V
-}
-
 public final class io/getstream/video/android/utils/ColorUtilsKt {
 	public static final fun adjustColorBrightness (IF)I
 }
 
 public final class io/getstream/video/android/utils/Failure : io/getstream/video/android/utils/Result {
-	public static final field $stable I
 	public fun <init> (Lio/getstream/video/android/errors/VideoError;)V
 	public final fun component1 ()Lio/getstream/video/android/errors/VideoError;
 	public final fun copy (Lio/getstream/video/android/errors/VideoError;)Lio/getstream/video/android/utils/Failure;
@@ -1445,10 +1115,6 @@ public final class io/getstream/video/android/utils/Failure : io/getstream/video
 	public final fun getError ()Lio/getstream/video/android/errors/VideoError;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/utils/ImageUtilsKt {
-	public static final fun rememberStreamImagePainter-MqR-F_0 (Ljava/lang/Object;Landroidx/compose/ui/graphics/painter/Painter;Landroidx/compose/ui/graphics/painter/Painter;Landroidx/compose/ui/graphics/painter/Painter;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Landroidx/compose/ui/layout/ContentScale;ILandroidx/compose/runtime/Composer;II)Lcoil/compose/AsyncImagePainter;
 }
 
 public final class io/getstream/video/android/utils/LatencyUtilsKt {
@@ -1461,7 +1127,6 @@ public final class io/getstream/video/android/utils/ListUtilsKt {
 }
 
 public abstract class io/getstream/video/android/utils/Result {
-	public static final field $stable I
 }
 
 public final class io/getstream/video/android/utils/ResultKt {
@@ -1476,7 +1141,6 @@ public final class io/getstream/video/android/utils/StringUtilsKt {
 }
 
 public final class io/getstream/video/android/utils/Success : io/getstream/video/android/utils/Result {
-	public static final field $stable I
 	public fun <init> (Ljava/lang/Object;)V
 	public final fun component1 ()Ljava/lang/Object;
 	public final fun copy (Ljava/lang/Object;)Lio/getstream/video/android/utils/Success;
@@ -1488,7 +1152,6 @@ public final class io/getstream/video/android/utils/Success : io/getstream/video
 }
 
 public final class io/getstream/video/android/viewmodel/CallViewModel : androidx/lifecycle/ViewModel {
-	public static final field $stable I
 	public fun <init> (Lio/getstream/video/android/client/VideoClient;)V
 	public final fun flipCamera ()V
 	public final fun getActiveSpeakers ()Lkotlinx/coroutines/flow/Flow;
@@ -1513,7 +1176,6 @@ public final class io/getstream/video/android/viewmodel/CallViewModel : androidx
 }
 
 public final class io/getstream/video/android/viewmodel/CallViewModelFactory : androidx/lifecycle/ViewModelProvider$Factory {
-	public static final field $stable I
 	public fun <init> (Lio/getstream/video/android/client/VideoClient;)V
 	public fun create (Ljava/lang/Class;)Landroidx/lifecycle/ViewModel;
 }
@@ -1544,7 +1206,6 @@ public final class stream/video/Action$Companion {
 }
 
 public final class stream/video/AddDeviceRequest : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/AddDeviceRequest$Companion;
 	public fun <init> ()V
@@ -1566,7 +1227,6 @@ public final class stream/video/AddDeviceRequest$Companion {
 }
 
 public final class stream/video/AddDeviceResponse : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/AddDeviceResponse$Companion;
 	public fun <init> ()V
@@ -1586,7 +1246,6 @@ public final class stream/video/AddDeviceResponse$Companion {
 }
 
 public final class stream/video/AddPushProviderRequest : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/AddPushProviderRequest$Companion;
 	public fun <init> ()V
@@ -1606,7 +1265,6 @@ public final class stream/video/AddPushProviderRequest$Companion {
 }
 
 public final class stream/video/ApnSettings : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/ApnSettings$Companion;
 	public fun <init> ()V
@@ -1630,7 +1288,6 @@ public final class stream/video/ApnSettings$Companion {
 }
 
 public final class stream/video/AppSettingsResponse : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/AppSettingsResponse$Companion;
 	public fun <init> ()V
@@ -1650,7 +1307,6 @@ public final class stream/video/AppSettingsResponse$Companion {
 }
 
 public final class stream/video/ApplicationSettings : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/ApplicationSettings$Companion;
 	public fun <init> ()V
@@ -1672,7 +1328,6 @@ public final class stream/video/ApplicationSettings$Companion {
 }
 
 public final class stream/video/AudioMuted : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/AudioMuted$Companion;
 	public fun <init> ()V
@@ -1694,7 +1349,6 @@ public final class stream/video/AudioMuted$Companion {
 }
 
 public final class stream/video/AudioUnmuted : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/AudioUnmuted$Companion;
 	public fun <init> ()V
@@ -1715,7 +1369,6 @@ public final class stream/video/AudioUnmuted$Companion {
 }
 
 public final class stream/video/AuthPayload : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/AuthPayload$Companion;
 	public fun <init> ()V
@@ -1738,7 +1391,6 @@ public final class stream/video/AuthPayload$Companion {
 }
 
 public final class stream/video/Broadcast : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/Broadcast$Companion;
 	public fun <init> ()V
@@ -1759,7 +1411,6 @@ public final class stream/video/Broadcast$Companion {
 }
 
 public final class stream/video/BroadcastEnded : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/BroadcastEnded$Companion;
 	public fun <init> ()V
@@ -1779,7 +1430,6 @@ public final class stream/video/BroadcastEnded$Companion {
 }
 
 public final class stream/video/BroadcastStarted : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/BroadcastStarted$Companion;
 	public fun <init> ()V
@@ -1799,7 +1449,6 @@ public final class stream/video/BroadcastStarted$Companion {
 }
 
 public final class stream/video/Call : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/Call$Companion;
 	public fun <init> ()V
@@ -1829,7 +1478,6 @@ public final class stream/video/Call$Companion {
 }
 
 public final class stream/video/CallCreated : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/CallCreated$Companion;
 	public fun <init> ()V
@@ -1849,7 +1497,6 @@ public final class stream/video/CallCreated$Companion {
 }
 
 public final class stream/video/CallDeleted : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/CallDeleted$Companion;
 	public fun <init> ()V
@@ -1869,7 +1516,6 @@ public final class stream/video/CallDeleted$Companion {
 }
 
 public final class stream/video/CallEnded : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/CallEnded$Companion;
 	public fun <init> ()V
@@ -1889,7 +1535,6 @@ public final class stream/video/CallEnded$Companion {
 }
 
 public final class stream/video/CallRinging : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/CallRinging$Companion;
 	public fun <init> ()V
@@ -1909,7 +1554,6 @@ public final class stream/video/CallRinging$Companion {
 }
 
 public final class stream/video/CallStatEvent : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/CallStatEvent$Companion;
 	public fun <init> ()V
@@ -1948,7 +1592,6 @@ public final class stream/video/CallStatEventType$Companion {
 }
 
 public final class stream/video/CallState : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/CallState$Companion;
 	public fun <init> ()V
@@ -1968,7 +1611,6 @@ public final class stream/video/CallState$Companion {
 }
 
 public final class stream/video/CallStats : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/CallStats$Companion;
 	public fun <init> ()V
@@ -1989,7 +1631,6 @@ public final class stream/video/CallStats$Companion {
 }
 
 public final class stream/video/CallType : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/CallType$Companion;
 	public fun <init> ()V
@@ -2013,7 +1654,6 @@ public final class stream/video/CallType$Companion {
 }
 
 public final class stream/video/CallTypeRequestInput : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/CallTypeRequestInput$Companion;
 	public fun <init> ()V
@@ -2035,7 +1675,6 @@ public final class stream/video/CallTypeRequestInput$Companion {
 }
 
 public final class stream/video/CallTypeResponse : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/CallTypeResponse$Companion;
 	public fun <init> ()V
@@ -2055,7 +1694,6 @@ public final class stream/video/CallTypeResponse$Companion {
 }
 
 public final class stream/video/CallUpdated : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/CallUpdated$Companion;
 	public fun <init> ()V
@@ -2091,7 +1729,6 @@ public final class stream/video/Codec$Companion {
 }
 
 public final class stream/video/CreateCallRequest : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/CreateCallRequest$Companion;
 	public fun <init> ()V
@@ -2120,7 +1757,6 @@ public final class stream/video/CreateCallRequest$Companion {
 }
 
 public final class stream/video/CreateCallResponse : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/CreateCallResponse$Companion;
 	public fun <init> ()V
@@ -2140,7 +1776,6 @@ public final class stream/video/CreateCallResponse$Companion {
 }
 
 public final class stream/video/CreateOrUpdateCallsRequest : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/CreateOrUpdateCallsRequest$Companion;
 	public fun <init> ()V
@@ -2160,7 +1795,6 @@ public final class stream/video/CreateOrUpdateCallsRequest$Companion {
 }
 
 public final class stream/video/CreateOrUpdateCallsResponse : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/CreateOrUpdateCallsResponse$Companion;
 	public fun <init> ()V
@@ -2180,7 +1814,6 @@ public final class stream/video/CreateOrUpdateCallsResponse$Companion {
 }
 
 public final class stream/video/CreateOrUpdateUsersRequest : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/CreateOrUpdateUsersRequest$Companion;
 	public fun <init> ()V
@@ -2201,7 +1834,6 @@ public final class stream/video/CreateOrUpdateUsersRequest$Companion {
 }
 
 public final class stream/video/CreateOrUpdateUsersResponse : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/CreateOrUpdateUsersResponse$Companion;
 	public fun <init> ()V
@@ -2221,7 +1853,6 @@ public final class stream/video/CreateOrUpdateUsersResponse$Companion {
 }
 
 public final class stream/video/CreateRoleRequest : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/CreateRoleRequest$Companion;
 	public fun <init> ()V
@@ -2241,7 +1872,6 @@ public final class stream/video/CreateRoleRequest$Companion {
 }
 
 public final class stream/video/CreateRoleResponse : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/CreateRoleResponse$Companion;
 	public fun <init> ()V
@@ -2260,7 +1890,6 @@ public final class stream/video/CreateRoleResponse$Companion {
 }
 
 public final class stream/video/CreateUserRequest : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/CreateUserRequest$Companion;
 	public fun <init> ()V
@@ -2285,7 +1914,6 @@ public final class stream/video/CreateUserRequest$Companion {
 }
 
 public final class stream/video/CreateUserResponse : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/CreateUserResponse$Companion;
 	public fun <init> ()V
@@ -2305,7 +1933,6 @@ public final class stream/video/CreateUserResponse$Companion {
 }
 
 public final class stream/video/DeleteCallRequest : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/DeleteCallRequest$Companion;
 	public fun <init> ()V
@@ -2325,7 +1952,6 @@ public final class stream/video/DeleteCallRequest$Companion {
 }
 
 public final class stream/video/DeleteCallResponse : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/DeleteCallResponse$Companion;
 	public fun <init> ()V
@@ -2344,7 +1970,6 @@ public final class stream/video/DeleteCallResponse$Companion {
 }
 
 public final class stream/video/DeleteCallTypeRequest : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/DeleteCallTypeRequest$Companion;
 	public fun <init> ()V
@@ -2364,7 +1989,6 @@ public final class stream/video/DeleteCallTypeRequest$Companion {
 }
 
 public final class stream/video/DeleteCallTypeResponse : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/DeleteCallTypeResponse$Companion;
 	public fun <init> ()V
@@ -2383,7 +2007,6 @@ public final class stream/video/DeleteCallTypeResponse$Companion {
 }
 
 public final class stream/video/DeletePushProviderRequest : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/DeletePushProviderRequest$Companion;
 	public fun <init> ()V
@@ -2403,7 +2026,6 @@ public final class stream/video/DeletePushProviderRequest$Companion {
 }
 
 public final class stream/video/DeleteRoleRequest : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/DeleteRoleRequest$Companion;
 	public fun <init> ()V
@@ -2423,7 +2045,6 @@ public final class stream/video/DeleteRoleRequest$Companion {
 }
 
 public final class stream/video/DeleteRoleResponse : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/DeleteRoleResponse$Companion;
 	public fun <init> ()V
@@ -2442,7 +2063,6 @@ public final class stream/video/DeleteRoleResponse$Companion {
 }
 
 public final class stream/video/DeleteUserRequest : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/DeleteUserRequest$Companion;
 	public fun <init> ()V
@@ -2462,7 +2082,6 @@ public final class stream/video/DeleteUserRequest$Companion {
 }
 
 public final class stream/video/DeleteUserResponse : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/DeleteUserResponse$Companion;
 	public fun <init> ()V
@@ -2482,7 +2101,6 @@ public final class stream/video/DeleteUserResponse$Companion {
 }
 
 public final class stream/video/Device : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/Device$Companion;
 	public fun <init> ()V
@@ -2508,7 +2126,6 @@ public final class stream/video/Device$Companion {
 }
 
 public final class stream/video/DeviceRequest : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/DeviceRequest$Companion;
 	public fun <init> ()V
@@ -2532,7 +2149,6 @@ public final class stream/video/DeviceRequest$Companion {
 }
 
 public final class stream/video/Edge : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/Edge$Companion;
 	public fun <init> ()V
@@ -2553,7 +2169,6 @@ public final class stream/video/Edge$Companion {
 }
 
 public final class stream/video/EdgeServer : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/EdgeServer$Companion;
 	public fun <init> ()V
@@ -2573,7 +2188,6 @@ public final class stream/video/EdgeServer$Companion {
 }
 
 public final class stream/video/EdgeServer$Coordinates : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/EdgeServer$Coordinates$Companion;
 	public fun <init> ()V
@@ -2594,7 +2208,6 @@ public final class stream/video/EdgeServer$Coordinates$Companion {
 }
 
 public final class stream/video/EndCallRequest : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/EndCallRequest$Companion;
 	public fun <init> ()V
@@ -2613,7 +2226,6 @@ public final class stream/video/EndCallRequest$Companion {
 }
 
 public final class stream/video/EndCallResponse : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/EndCallResponse$Companion;
 	public fun <init> ()V
@@ -2632,7 +2244,6 @@ public final class stream/video/EndCallResponse$Companion {
 }
 
 public final class stream/video/ExportUserRequest : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/ExportUserRequest$Companion;
 	public fun <init> ()V
@@ -2652,7 +2263,6 @@ public final class stream/video/ExportUserRequest$Companion {
 }
 
 public final class stream/video/ExportUserResponse : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/ExportUserResponse$Companion;
 	public fun <init> ()V
@@ -2688,7 +2298,6 @@ public final class stream/video/FeatureToggle$Companion {
 }
 
 public final class stream/video/Features : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/Features$Companion;
 	public fun <init> ()V
@@ -2711,7 +2320,6 @@ public final class stream/video/Features$Companion {
 }
 
 public final class stream/video/File : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/File$Companion;
 	public fun <init> ()V
@@ -2734,7 +2342,6 @@ public final class stream/video/File$Companion {
 }
 
 public final class stream/video/FirebaseSettings : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/FirebaseSettings$Companion;
 	public fun <init> ()V
@@ -2755,7 +2362,6 @@ public final class stream/video/FirebaseSettings$Companion {
 }
 
 public final class stream/video/GetCallRequest : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/GetCallRequest$Companion;
 	public fun <init> ()V
@@ -2776,7 +2382,6 @@ public final class stream/video/GetCallRequest$Companion {
 }
 
 public final class stream/video/GetCallResponse : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/GetCallResponse$Companion;
 	public fun <init> ()V
@@ -2797,7 +2402,6 @@ public final class stream/video/GetCallResponse$Companion {
 }
 
 public final class stream/video/GetCallStatsRequest : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/GetCallStatsRequest$Companion;
 	public fun <init> ()V
@@ -2818,7 +2422,6 @@ public final class stream/video/GetCallStatsRequest$Companion {
 }
 
 public final class stream/video/GetCallStatsResponse : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/GetCallStatsResponse$Companion;
 	public fun <init> ()V
@@ -2839,7 +2442,6 @@ public final class stream/video/GetCallStatsResponse$Companion {
 }
 
 public final class stream/video/GetRecordingsRequest : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/GetRecordingsRequest$Companion;
 	public fun <init> ()V
@@ -2858,7 +2460,6 @@ public final class stream/video/GetRecordingsRequest$Companion {
 }
 
 public final class stream/video/GetRecordingsResponse : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/GetRecordingsResponse$Companion;
 	public fun <init> ()V
@@ -2878,7 +2479,6 @@ public final class stream/video/GetRecordingsResponse$Companion {
 }
 
 public final class stream/video/GetRecordingsResponse$Recording : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/GetRecordingsResponse$Recording$Companion;
 	public fun <init> ()V
@@ -2902,7 +2502,6 @@ public final class stream/video/GetRecordingsResponse$Recording$Companion {
 }
 
 public final class stream/video/Grant : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/Grant$Companion;
 	public fun <init> ()V
@@ -2925,7 +2524,6 @@ public final class stream/video/Grant$Companion {
 }
 
 public final class stream/video/Healthcheck : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/Healthcheck$Companion;
 	public fun <init> ()V
@@ -2950,7 +2548,6 @@ public final class stream/video/Healthcheck$Companion {
 }
 
 public final class stream/video/HuaweiSettings : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/HuaweiSettings$Companion;
 	public fun <init> ()V
@@ -2971,7 +2568,6 @@ public final class stream/video/HuaweiSettings$Companion {
 }
 
 public final class stream/video/JoinCallRequest : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/JoinCallRequest$Companion;
 	public fun <init> ()V
@@ -2992,7 +2588,6 @@ public final class stream/video/JoinCallRequest$Companion {
 }
 
 public final class stream/video/JoinCallResponse : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/JoinCallResponse$Companion;
 	public fun <init> ()V
@@ -3016,7 +2611,6 @@ public final class stream/video/JoinCallResponse$Companion {
 }
 
 public final class stream/video/Latency : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/Latency$Companion;
 	public fun <init> ()V
@@ -3036,7 +2630,6 @@ public final class stream/video/Latency$Companion {
 }
 
 public final class stream/video/LeaveCallRequest : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/LeaveCallRequest$Companion;
 	public fun <init> ()V
@@ -3055,7 +2648,6 @@ public final class stream/video/LeaveCallRequest$Companion {
 }
 
 public final class stream/video/LeaveCallResponse : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/LeaveCallResponse$Companion;
 	public fun <init> ()V
@@ -3074,7 +2666,6 @@ public final class stream/video/LeaveCallResponse$Companion {
 }
 
 public final class stream/video/ListDevicesRequest : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/ListDevicesRequest$Companion;
 	public fun <init> ()V
@@ -3094,7 +2685,6 @@ public final class stream/video/ListDevicesRequest$Companion {
 }
 
 public final class stream/video/ListDevicesResponse : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/ListDevicesResponse$Companion;
 	public fun <init> ()V
@@ -3114,7 +2704,6 @@ public final class stream/video/ListDevicesResponse$Companion {
 }
 
 public final class stream/video/ListPermissionsRequest : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/ListPermissionsRequest$Companion;
 	public fun <init> ()V
@@ -3134,7 +2723,6 @@ public final class stream/video/ListPermissionsRequest$Companion {
 }
 
 public final class stream/video/ListPermissionsResponse : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/ListPermissionsResponse$Companion;
 	public fun <init> ()V
@@ -3154,7 +2742,6 @@ public final class stream/video/ListPermissionsResponse$Companion {
 }
 
 public final class stream/video/Participant : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/Participant$Companion;
 	public fun <init> ()V
@@ -3181,7 +2768,6 @@ public final class stream/video/Participant$Companion {
 }
 
 public final class stream/video/ParticipantCallStatEvent : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/ParticipantCallStatEvent$Companion;
 	public fun <init> ()V
@@ -3202,7 +2788,6 @@ public final class stream/video/ParticipantCallStatEvent$Companion {
 }
 
 public final class stream/video/ParticipantDeleted : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/ParticipantDeleted$Companion;
 	public fun <init> ()V
@@ -3223,7 +2808,6 @@ public final class stream/video/ParticipantDeleted$Companion {
 }
 
 public final class stream/video/ParticipantInvited : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/ParticipantInvited$Companion;
 	public fun <init> ()V
@@ -3244,7 +2828,6 @@ public final class stream/video/ParticipantInvited$Companion {
 }
 
 public final class stream/video/ParticipantJoined : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/ParticipantJoined$Companion;
 	public fun <init> ()V
@@ -3265,7 +2848,6 @@ public final class stream/video/ParticipantJoined$Companion {
 }
 
 public final class stream/video/ParticipantLeft : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/ParticipantLeft$Companion;
 	public fun <init> ()V
@@ -3286,7 +2868,6 @@ public final class stream/video/ParticipantLeft$Companion {
 }
 
 public final class stream/video/ParticipantRequest : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/ParticipantRequest$Companion;
 	public fun <init> ()V
@@ -3310,7 +2891,6 @@ public final class stream/video/ParticipantRequest$Companion {
 }
 
 public final class stream/video/ParticipantUpdated : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/ParticipantUpdated$Companion;
 	public fun <init> ()V
@@ -3331,7 +2911,6 @@ public final class stream/video/ParticipantUpdated$Companion {
 }
 
 public final class stream/video/Permission : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/Permission$Companion;
 	public fun <init> ()V
@@ -3356,7 +2935,6 @@ public final class stream/video/Permission$Companion {
 }
 
 public final class stream/video/Permissions : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/Permissions$Companion;
 	public fun <init> ()V
@@ -3376,7 +2954,6 @@ public final class stream/video/Permissions$Companion {
 }
 
 public final class stream/video/PushProvider : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/PushProvider$Companion;
 	public fun <init> ()V
@@ -3401,7 +2978,6 @@ public final class stream/video/PushProvider$Companion {
 }
 
 public final class stream/video/RTMPOptions : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/RTMPOptions$Companion;
 	public fun <init> ()V
@@ -3421,7 +2997,6 @@ public final class stream/video/RTMPOptions$Companion {
 }
 
 public final class stream/video/RecordBroadcast : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/RecordBroadcast$Companion;
 	public fun <init> ()V
@@ -3442,7 +3017,6 @@ public final class stream/video/RecordBroadcast$Companion {
 }
 
 public final class stream/video/RecordingStarted : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/RecordingStarted$Companion;
 	public fun <init> ()V
@@ -3462,7 +3036,6 @@ public final class stream/video/RecordingStarted$Companion {
 }
 
 public final class stream/video/RecordingStopped : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/RecordingStopped$Companion;
 	public fun <init> ()V
@@ -3496,7 +3069,6 @@ public final class stream/video/RecordingStorage$Companion {
 }
 
 public final class stream/video/RecordingStorageOptions : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/RecordingStorageOptions$Companion;
 	public fun <init> ()V
@@ -3521,7 +3093,6 @@ public final class stream/video/RecordingStorageOptions$Companion {
 }
 
 public final class stream/video/RemoveDeviceRequest : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/RemoveDeviceRequest$Companion;
 	public fun <init> ()V
@@ -3542,7 +3113,6 @@ public final class stream/video/RemoveDeviceRequest$Companion {
 }
 
 public final class stream/video/RemoveDeviceResponse : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/RemoveDeviceResponse$Companion;
 	public fun <init> ()V
@@ -3561,7 +3131,6 @@ public final class stream/video/RemoveDeviceResponse$Companion {
 }
 
 public final class stream/video/ReportCallStatsRequest : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/ReportCallStatsRequest$Companion;
 	public fun <init> ()V
@@ -3583,7 +3152,6 @@ public final class stream/video/ReportCallStatsRequest$Companion {
 }
 
 public final class stream/video/ReportCallStatsResponse : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/ReportCallStatsResponse$Companion;
 	public fun <init> ()V
@@ -3602,7 +3170,6 @@ public final class stream/video/ReportCallStatsResponse$Companion {
 }
 
 public final class stream/video/ReportIssueRequest : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/ReportIssueRequest$Companion;
 	public fun <init> ()V
@@ -3625,7 +3192,6 @@ public final class stream/video/ReportIssueRequest$Companion {
 }
 
 public final class stream/video/ReportIssueResponse : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/ReportIssueResponse$Companion;
 	public fun <init> ()V
@@ -3644,7 +3210,6 @@ public final class stream/video/ReportIssueResponse$Companion {
 }
 
 public final class stream/video/ReviewCallRequest : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/ReviewCallRequest$Companion;
 	public fun <init> ()V
@@ -3668,7 +3233,6 @@ public final class stream/video/ReviewCallRequest$Companion {
 }
 
 public final class stream/video/ReviewCallResponse : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/ReviewCallResponse$Companion;
 	public fun <init> ()V
@@ -3687,7 +3251,6 @@ public final class stream/video/ReviewCallResponse$Companion {
 }
 
 public final class stream/video/ScreenshareStarted : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/ScreenshareStarted$Companion;
 	public fun <init> ()V
@@ -3708,7 +3271,6 @@ public final class stream/video/ScreenshareStarted$Companion {
 }
 
 public final class stream/video/ScreenshareStopped : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/ScreenshareStopped$Companion;
 	public fun <init> ()V
@@ -3729,7 +3291,6 @@ public final class stream/video/ScreenshareStopped$Companion {
 }
 
 public final class stream/video/SelectEdgeServerRequest : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/SelectEdgeServerRequest$Companion;
 	public fun <init> ()V
@@ -3751,7 +3312,6 @@ public final class stream/video/SelectEdgeServerRequest$Companion {
 }
 
 public final class stream/video/SelectEdgeServerResponse : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/SelectEdgeServerResponse$Companion;
 	public fun <init> ()V
@@ -3772,7 +3332,6 @@ public final class stream/video/SelectEdgeServerResponse$Companion {
 }
 
 public final class stream/video/SendCustomEventRequest : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/SendCustomEventRequest$Companion;
 	public fun <init> ()V
@@ -3793,7 +3352,6 @@ public final class stream/video/SendCustomEventRequest$Companion {
 }
 
 public final class stream/video/SendCustomEventResponse : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/SendCustomEventResponse$Companion;
 	public fun <init> ()V
@@ -3812,7 +3370,6 @@ public final class stream/video/SendCustomEventResponse$Companion {
 }
 
 public final class stream/video/SendEventRequest : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/SendEventRequest$Companion;
 	public fun <init> ()V
@@ -3835,7 +3392,6 @@ public final class stream/video/SendEventRequest$Companion {
 }
 
 public final class stream/video/SendEventResponse : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/SendEventResponse$Companion;
 	public fun <init> ()V
@@ -3854,7 +3410,6 @@ public final class stream/video/SendEventResponse$Companion {
 }
 
 public final class stream/video/SqsSettings : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/SqsSettings$Companion;
 	public fun <init> ()V
@@ -3876,7 +3431,6 @@ public final class stream/video/SqsSettings$Companion {
 }
 
 public final class stream/video/StartBroadcastRequest : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/StartBroadcastRequest$Companion;
 	public fun <init> ()V
@@ -3899,7 +3453,6 @@ public final class stream/video/StartBroadcastRequest$Companion {
 }
 
 public final class stream/video/StartBroadcastResponse : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/StartBroadcastResponse$Companion;
 	public fun <init> ()V
@@ -3919,7 +3472,6 @@ public final class stream/video/StartBroadcastResponse$Companion {
 }
 
 public final class stream/video/StartRecordingRequest : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/StartRecordingRequest$Companion;
 	public fun <init> ()V
@@ -3940,7 +3492,6 @@ public final class stream/video/StartRecordingRequest$Companion {
 }
 
 public final class stream/video/StartRecordingResponse : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/StartRecordingResponse$Companion;
 	public fun <init> ()V
@@ -3959,7 +3510,6 @@ public final class stream/video/StartRecordingResponse$Companion {
 }
 
 public final class stream/video/StopBroadcastRequest : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/StopBroadcastRequest$Companion;
 	public fun <init> ()V
@@ -3978,7 +3528,6 @@ public final class stream/video/StopBroadcastRequest$Companion {
 }
 
 public final class stream/video/StopBroadcastResponse : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/StopBroadcastResponse$Companion;
 	public fun <init> ()V
@@ -3997,7 +3546,6 @@ public final class stream/video/StopBroadcastResponse$Companion {
 }
 
 public final class stream/video/StopRecordingRequest : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/StopRecordingRequest$Companion;
 	public fun <init> ()V
@@ -4018,7 +3566,6 @@ public final class stream/video/StopRecordingRequest$Companion {
 }
 
 public final class stream/video/StopRecordingResponse : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/StopRecordingResponse$Companion;
 	public fun <init> ()V
@@ -4038,7 +3585,6 @@ public final class stream/video/StopRecordingResponse$Companion {
 }
 
 public final class stream/video/StopTranscribeCallRequest : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/StopTranscribeCallRequest$Companion;
 	public fun <init> ()V
@@ -4057,7 +3603,6 @@ public final class stream/video/StopTranscribeCallRequest$Companion {
 }
 
 public final class stream/video/StopTranscribeCallResponse : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/StopTranscribeCallResponse$Companion;
 	public fun <init> ()V
@@ -4076,7 +3621,6 @@ public final class stream/video/StopTranscribeCallResponse$Companion {
 }
 
 public final class stream/video/StoreLatencyRequest : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/StoreLatencyRequest$Companion;
 	public fun <init> ()V
@@ -4095,7 +3639,6 @@ public final class stream/video/StoreLatencyRequest$Companion {
 }
 
 public final class stream/video/StoreLatencyResponse : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/StoreLatencyResponse$Companion;
 	public fun <init> ()V
@@ -4114,7 +3657,6 @@ public final class stream/video/StoreLatencyResponse$Companion {
 }
 
 public final class stream/video/TranscribeCallRequest : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/TranscribeCallRequest$Companion;
 	public fun <init> ()V
@@ -4133,7 +3675,6 @@ public final class stream/video/TranscribeCallRequest$Companion {
 }
 
 public final class stream/video/TranscribeCallResponse : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/TranscribeCallResponse$Companion;
 	public fun <init> ()V
@@ -4152,7 +3693,6 @@ public final class stream/video/TranscribeCallResponse$Companion {
 }
 
 public final class stream/video/TranscribeOptions : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/TranscribeOptions$Companion;
 	public fun <init> ()V
@@ -4171,7 +3711,6 @@ public final class stream/video/TranscribeOptions$Companion {
 }
 
 public final class stream/video/UpdateAppSettingsRequest : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/UpdateAppSettingsRequest$Companion;
 	public fun <init> ()V
@@ -4192,7 +3731,6 @@ public final class stream/video/UpdateAppSettingsRequest$Companion {
 }
 
 public final class stream/video/UpdateCallRequest : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/UpdateCallRequest$Companion;
 	public fun <init> ()V
@@ -4214,7 +3752,6 @@ public final class stream/video/UpdateCallRequest$Companion {
 }
 
 public final class stream/video/UpdateCallResponse : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/UpdateCallResponse$Companion;
 	public fun <init> ()V
@@ -4234,7 +3771,6 @@ public final class stream/video/UpdateCallResponse$Companion {
 }
 
 public final class stream/video/UpdatePushProviderRequest : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/UpdatePushProviderRequest$Companion;
 	public fun <init> ()V
@@ -4254,7 +3790,6 @@ public final class stream/video/UpdatePushProviderRequest$Companion {
 }
 
 public final class stream/video/User : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/User$Companion;
 	public fun <init> ()V
@@ -4281,7 +3816,6 @@ public final class stream/video/User$Companion {
 }
 
 public final class stream/video/UserCapability : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/UserCapability$Companion;
 	public fun <init> ()V
@@ -4319,7 +3853,6 @@ public final class stream/video/UserEventType$Companion {
 }
 
 public final class stream/video/UserRequest : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/UserRequest$Companion;
 	public fun <init> ()V
@@ -4344,7 +3877,6 @@ public final class stream/video/UserRequest$Companion {
 }
 
 public final class stream/video/UserUpdated : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/UserUpdated$Companion;
 	public fun <init> ()V
@@ -4364,7 +3896,6 @@ public final class stream/video/UserUpdated$Companion {
 }
 
 public final class stream/video/VideoStarted : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/VideoStarted$Companion;
 	public fun <init> ()V
@@ -4385,7 +3916,6 @@ public final class stream/video/VideoStarted$Companion {
 }
 
 public final class stream/video/VideoStopped : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/VideoStopped$Companion;
 	public fun <init> ()V
@@ -4406,7 +3936,6 @@ public final class stream/video/VideoStopped$Companion {
 }
 
 public final class stream/video/WebsocketEvent : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/WebsocketEvent$Companion;
 	public fun <init> ()V
@@ -4448,7 +3977,6 @@ public final class stream/video/WebsocketEvent$Companion {
 }
 
 public final class stream/video/XiaomiSettings : com/squareup/wire/Message {
-	public static final field $stable I
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/XiaomiSettings$Companion;
 	public fun <init> ()V

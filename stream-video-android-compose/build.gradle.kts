@@ -5,6 +5,7 @@ import io.getstream.video.android.Versions
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
+    id("binary-compatibility-validator")
 }
 
 android {

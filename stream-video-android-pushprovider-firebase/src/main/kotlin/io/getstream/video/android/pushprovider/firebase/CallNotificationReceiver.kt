@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.notifications
+package io.getstream.video.android.pushprovider.firebase
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -28,9 +28,8 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.res.ResourcesCompat
-import io.getstream.video.android.R
-import io.getstream.video.android.ui.EmptyActivity
-import io.getstream.video.android.ui.IncomingCallActivity
+import io.getstream.video.android.compose.ui.EmptyActivity
+import io.getstream.video.android.compose.ui.IncomingCallActivity
 
 public class CallNotificationReceiver : BroadcastReceiver() {
 
@@ -61,7 +60,13 @@ public class CallNotificationReceiver : BroadcastReceiver() {
 
         return NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(androidx.loader.R.drawable.notification_bg)
-            .setColor(ResourcesCompat.getColor(context.resources, com.google.android.material.R.color.abc_btn_colored_borderless_text_material, null))
+            .setColor(
+                ResourcesCompat.getColor(
+                    context.resources,
+                    com.google.android.material.R.color.abc_btn_colored_borderless_text_material,
+                    null
+                )
+            )
             .setContentTitle(context.getString(R.string.incoming_call_title))
             .setAutoCancel(true)
             .setContentIntent(contentPendingIntent)

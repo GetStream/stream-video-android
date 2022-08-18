@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.notifications
+package io.getstream.video.android.pushprovider.firebase
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -28,8 +28,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import io.getstream.video.android.R
-import io.getstream.video.android.ui.IncomingCallActivity
+import io.getstream.video.android.compose.ui.IncomingCallActivity
 
 public class CallService : FirebaseMessagingService() {
 
