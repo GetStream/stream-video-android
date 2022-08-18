@@ -27,7 +27,7 @@ internal fun OutgoingCallDetails(
     callType: CallType,
     participants: List<VideoParticipant>
 ) {
-    if (callType == CallType.VIDEO) {
+    if (callType is CallType.Video) {
         ParticipantAvatars(participants = participants)
     }
 

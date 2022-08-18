@@ -69,7 +69,7 @@ internal fun IncomingCallOptions(
             }
         )
 
-        if (callType == CallType.VIDEO) {
+        if (callType is CallType.Video) {
             IconButton(
                 modifier = Modifier
                     .background(
@@ -119,7 +119,7 @@ private fun IncomingCallOptionsPreview() {
     VideoTheme {
         IncomingCallOptions(
             callId = "",
-            callType = CallType.VIDEO,
+            callType = CallType.Video(isInComingCall = true),
             onDeclineCall = {},
             onAcceptCall = { _, _ -> }
         )

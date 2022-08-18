@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.model
 
-public enum class CallType {
-    VIDEO,
-    AUDIO;
+public sealed class CallType(isInComingCall: Boolean) {
+    public data class Video(val isInComingCall: Boolean) : CallType(isInComingCall)
+    public data class Audio(val isInComingCall: Boolean) : CallType(isInComingCall)
 }
