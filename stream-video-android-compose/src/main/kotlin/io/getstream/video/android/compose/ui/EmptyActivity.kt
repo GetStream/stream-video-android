@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.utils
+package io.getstream.video.android.compose.ui
 
-public fun enrichSocketURL(url: String): String {
-    if (url.startsWith("wss://")) return url
+import androidx.appcompat.app.AppCompatActivity
 
-    return "wss://$url"
-}
-
+public class EmptyActivity : AppCompatActivity()

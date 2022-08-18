@@ -62,10 +62,6 @@ android {
     }
 }
 
-tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
-    kotlinOptions.freeCompilerArgs += ["-Xexplicit-api=strict", "-Xjvm-default=enable"]
-}
-
 dependencies {
     implementation Dependencies.androidxCore
     implementation Dependencies.androidxAppcompat
@@ -88,16 +84,6 @@ dependencies {
     // A/V Calls
     implementation Dependencies.liveKit
     api Dependencies.webRTC
-
-    // Compose
-    implementation Dependencies.composeRuntime
-    implementation Dependencies.composeUi
-    implementation Dependencies.composeUiTooling
-    implementation Dependencies.composeFoundation
-    implementation Dependencies.composeMaterial
-    implementation Dependencies.activityCompose
-    implementation Dependencies.composeIconsExtended
-    implementation Dependencies.composeCoil
 
     // Notifications
     implementation platform('com.google.firebase:firebase-bom:30.3.1')

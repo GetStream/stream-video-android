@@ -46,7 +46,7 @@ android {
 }
 
 dependencies {
-    implementation project(":stream-video-android")
+    implementation project(":stream-video-android-compose")
 
     implementation Dependencies.androidxCore
     implementation Dependencies.androidxAppcompat
