@@ -18,7 +18,5 @@ package io.getstream.video.android.utils
 
 public fun enrichSocketURL(url: String): String {
     if (url.startsWith("wss://")) return url
-
     return "wss://$url"
 }
-

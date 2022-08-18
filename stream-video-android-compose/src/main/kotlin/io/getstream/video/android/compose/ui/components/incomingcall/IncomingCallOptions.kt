@@ -33,8 +33,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.R
-import io.getstream.video.android.model.CallType
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.model.CallType
 
 @Composable
 public fun IncomingCallOptions(

@@ -33,8 +33,8 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.utils.initialsGradient
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.utils.initialsGradient
 
 /**
  * Represents a special avatar case when we need to show the initials instead of an image. Usually happens when there
