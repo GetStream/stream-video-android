@@ -30,6 +30,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -75,6 +76,7 @@ internal fun IncomingCallOptions(
                         color = VideoTheme.colors.appBackground,
                         shape = VideoTheme.shapes.callButton
                     )
+                    .alpha(if (isVideoEnabled) 1.0f else 0.4f)
                     .size(VideoTheme.dimens.mediumButtonSize),
                 onClick = {
                     isVideoEnabled = !isVideoEnabled
