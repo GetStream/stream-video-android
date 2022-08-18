@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.incomingcall
+package io.getstream.video.android.compose.ui.components.outcomingcall
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -38,11 +38,10 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.model.CallType
 
 @Composable
-internal fun IncomingCallOptions(
+internal fun OutgoingCallOptions(
     callId: String,
     callType: CallType,
     onDeclineCall: () -> Unit,
-    onAcceptCall: (callId: String, isVideoEnabled: Boolean) -> Unit,
 ) {
     var isVideoEnabled by remember { mutableStateOf(true) }
 
@@ -91,23 +90,6 @@ internal fun IncomingCallOptions(
                 }
             )
         }
-
-        IconButton(
-            modifier = Modifier
-                .background(
-                    color = VideoTheme.colors.infoAccent,
-                    shape = VideoTheme.shapes.callButton
-                )
-                .size(VideoTheme.dimens.largeButtonSize),
-            onClick = { onAcceptCall(callId, isVideoEnabled) },
-            content = {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_call),
-                    tint = Color.White,
-                    contentDescription = "Accept call"
-                )
-            }
-        )
     }
 }
 
@@ -115,11 +97,10 @@ internal fun IncomingCallOptions(
 @Composable
 private fun IncomingCallOptionsPreview() {
     VideoTheme {
-        IncomingCallOptions(
+        OutgoingCallOptions(
             callId = "",
             callType = CallType.VIDEO,
-            onDeclineCall = {},
-            onAcceptCall = { _, _ -> }
+            onDeclineCall = {}
         )
     }
 }

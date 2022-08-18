@@ -14,18 +14,22 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.incomingcall
+package io.getstream.video.android.compose.ui.components.outcomingcall
 
 import androidx.compose.runtime.Composable
 import io.getstream.video.android.compose.ui.components.participants.ParticipantAvatars
 import io.getstream.video.android.compose.ui.components.participants.ParticipantInformation
+import io.getstream.video.android.model.CallType
 import io.getstream.video.android.model.VideoParticipant
 
 @Composable
-internal fun IncomingCallDetails(
+internal fun OutgoingCallDetails(
+    callType: CallType,
     participants: List<VideoParticipant>
 ) {
-    ParticipantAvatars(participants = participants)
+    if (callType == CallType.VIDEO) {
+        ParticipantAvatars(participants = participants)
+    }
 
     ParticipantInformation(participants = participants)
 }

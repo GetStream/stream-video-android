@@ -50,7 +50,7 @@ public data class StreamDimens(
             singleAvatarSize = 160.dp,
             headerElevation = 4.dp,
             largeButtonSize = 80.dp,
-            mediumButtonSize = 56.dp,
+            mediumButtonSize = 64.dp,
             smallButtonSize = 32.dp,
             directCallUserNameTextSize = 34.sp,
             groupCallUserNameTextSize = 24.sp

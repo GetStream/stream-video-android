@@ -39,12 +39,10 @@ public data class VideoParticipant(
     public val videoTracks: List<Pair<TrackPublication, Track?>>
         get() = value?.videoTracks ?: emptyList()
 
-    public
-    val sid: String?
+    public val sid: String?
         get() = value?.sid
 
-    public
-    val user: User?
+    public val user: User?
         get() = streamParticipant?.user
 
     public fun setCameraEnabled(isEnabled: Boolean) {
