@@ -899,6 +899,7 @@ public final class io/getstream/video/android/logging/LoggingLevel : java/lang/E
 
 public abstract class io/getstream/video/android/model/CallType {
 	public synthetic fun <init> (ZLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getInComingCall ()Z
 }
 
 public final class io/getstream/video/android/model/CallType$Audio : io/getstream/video/android/model/CallType {

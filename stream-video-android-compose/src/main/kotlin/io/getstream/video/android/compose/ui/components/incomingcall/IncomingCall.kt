@@ -36,7 +36,10 @@ public fun IncomingCall(
 ) {
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        IncomingCallDetails(participants = participants)
+        IncomingCallDetails(
+            callType = callType,
+            participants = participants
+        )
 
         Spacer(modifier = Modifier.height(150.dp))
 

@@ -31,5 +31,8 @@ internal fun OutgoingCallDetails(
         ParticipantAvatars(participants = participants)
     }
 
-    ParticipantInformation(participants = participants)
+    ParticipantInformation(
+        callType = callType,
+        participants = participants
+    )
 }
