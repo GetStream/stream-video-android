@@ -17,12 +17,14 @@
 package io.getstream.video.android.compose.ui.components.incomingcall
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import io.getstream.video.android.compose.ui.components.CallTopAppbar
 import io.getstream.video.android.model.CallType
 import io.getstream.video.android.model.VideoParticipant
 
@@ -38,10 +40,15 @@ public fun IncomingCall(
 
     Box(modifier = Modifier.fillMaxSize()) {
 
-        IncomingCallDetails(
-            modifier = Modifier.align(Alignment.Center),
-            participants = participants
-        )
+        Column {
+
+            CallTopAppbar()
+
+            IncomingCallDetails(
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+                participants = participants
+            )
+        }
 
         IncomingCallOptions(
             modifier = Modifier
