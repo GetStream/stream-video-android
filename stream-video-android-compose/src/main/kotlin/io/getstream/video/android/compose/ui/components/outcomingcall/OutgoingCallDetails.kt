@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.incomingcall
+package io.getstream.video.android.compose.ui.components.outcomingcall
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -29,21 +29,24 @@ import io.getstream.video.android.compose.ui.components.mock.mockParticipants
 import io.getstream.video.android.compose.ui.components.participants.ParticipantAvatars
 import io.getstream.video.android.compose.ui.components.participants.ParticipantInformation
 import io.getstream.video.android.model.CallStatus
+import io.getstream.video.android.model.CallType
 import io.getstream.video.android.model.VideoParticipant
 
 @Composable
-internal fun IncomingCallDetails(
+internal fun OutgoingCallDetails(
     modifier: Modifier = Modifier,
+    callType: CallType,
     participants: List<VideoParticipant>
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
+        if (callType == CallType.AUDIO) {
+            ParticipantAvatars(participants = participants)
 
-        ParticipantAvatars(participants = participants)
-
-        Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(32.dp))
+        }
 
         ParticipantInformation(
-            callStatus = CallStatus.INCOMING,
+            callStatus = CallStatus.OUTGOING,
             participants = participants
         )
     }
@@ -51,8 +54,11 @@ internal fun IncomingCallDetails(
 
 @Preview
 @Composable
-private fun IncomingCallDetailsPreview() {
+private fun OutgoingCallDetailsPreview() {
     VideoTheme {
-        IncomingCallDetails(participants = mockParticipants)
+        OutgoingCallDetails(
+            callType = CallType.VIDEO,
+            participants = mockParticipants
+        )
     }
 }

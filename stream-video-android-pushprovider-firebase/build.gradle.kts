@@ -26,7 +26,7 @@ android {
 }
 
 dependencies {
-    implementation(project(":stream-video-android-compose"))
+    api(project(":stream-video-android"))
 
     implementation(platform("com.google.firebase:firebase-bom:30.3.1"))
     implementation("com.google.firebase:firebase-messaging")

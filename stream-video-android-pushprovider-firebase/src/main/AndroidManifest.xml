@@ -3,11 +3,13 @@
     package="io.getstream.video.android.pushprovider.firebase">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application>
 
         <service
-            android:name=".CallService"
+            android:name=".CallFirebaseMessagingService"
             android:exported="false">
             <intent-filter android:priority="-1">
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
@@ -24,11 +26,6 @@
             </intent-filter>
         </receiver>
 
-        <activity android:name="io.getstream.video.android.compose.ui.EmptyActivity" />
-        <activity
-            android:name="io.getstream.video.android.compose.ui.IncomingCallActivity"
-            android:launchMode="singleTop"
-            android:showOnLockScreen="true" />
     </application>
 
 </manifest>

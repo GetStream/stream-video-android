@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.incomingcall
+package io.getstream.video.android.compose.ui.components.outcomingcall
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -31,43 +31,42 @@ import io.getstream.video.android.model.CallType
 import io.getstream.video.android.model.VideoParticipant
 
 @Composable
-public fun IncomingCall(
+public fun OutgoingCall(
     callId: String,
     callType: CallType,
     participants: List<VideoParticipant>,
-    onDeclineCall: (String) -> Unit,
-    onAcceptCall: (String, Boolean) -> Unit,
+    onCancelCall: (String) -> Unit,
+    onMicToggleChanged: (Boolean) -> Unit,
     onVideoToggleChanged: (Boolean) -> Unit,
 ) {
-
     CallBackground(participants = participants) {
 
         Column {
 
             CallTopAppbar()
 
-            val topPadding = if (participants.size == 1) {
+            val topPadding = if (participants.size == 1 || callType == CallType.VIDEO) {
                 VideoTheme.dimens.singleAvatarAppbarPadding
             } else {
                 VideoTheme.dimens.avatarAppbarPadding
             }
 
-            IncomingCallDetails(
+            OutgoingCallDetails(
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .padding(top = topPadding),
-                participants = participants
+                participants = participants,
+                callType = callType
             )
         }
 
-        IncomingCallOptions(
+        OutgoingCallOptions(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 44.dp),
             callId = callId,
-            callType = callType,
-            onDeclineCall = onDeclineCall,
-            onAcceptCall = onAcceptCall,
+            onCancelCall = onCancelCall,
+            onMicToggleChanged = onMicToggleChanged,
             onVideoToggleChanged = onVideoToggleChanged
         )
     }
@@ -75,15 +74,15 @@ public fun IncomingCall(
 
 @Preview
 @Composable
-private fun IncomingCallPreview() {
+private fun OutgoingCallPreview() {
     VideoTheme {
-        IncomingCall(
+        OutgoingCall(
             callId = "",
             callType = CallType.VIDEO,
             participants = mockParticipants,
-            onDeclineCall = { },
-            onAcceptCall = { _, _ -> },
-            onVideoToggleChanged = { }
+            onCancelCall = { },
+            onMicToggleChanged = { },
+            onVideoToggleChanged = { },
         )
     }
 }

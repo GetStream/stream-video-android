@@ -17,18 +17,33 @@
 package io.getstream.video.android.compose.ui.components.participants
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.mock.mockParticipants
+import io.getstream.video.android.model.CallStatus
 import io.getstream.video.android.model.VideoParticipant
 
 @Composable
 public fun ParticipantInformation(
+    callStatus: CallStatus,
     participants: List<VideoParticipant>
 ) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         val text = if (participants.size < 3) {
             buildSmallCallText(participants)
         } else {
@@ -42,17 +57,27 @@ public fun ParticipantInformation(
         }
 
         Text(
+            modifier = Modifier.padding(horizontal = VideoTheme.dimens.participantsTextPadding),
             text = text,
             fontSize = fontSize,
-            style = VideoTheme.typography.title3,
+            color = VideoTheme.colors.textHighEmphasis,
             textAlign = TextAlign.Center,
-            color = VideoTheme.colors.textHighEmphasis
         )
 
+        Spacer(modifier = Modifier.height(16.dp))
+
         Text(
-            text = "Incoming call...",
+            modifier = Modifier.alpha(VideoTheme.dimens.onCallStatusTextAlpha),
+            text = when (callStatus) {
+                CallStatus.INCOMING -> "Incoming call..."
+                CallStatus.OUTGOING -> "Calling..."
+                CallStatus.CALLING -> "0:33" // TODO - observe current calling time
+            },
             style = VideoTheme.typography.body,
-            color = VideoTheme.colors.textLowEmphasis
+            fontSize = VideoTheme.dimens.onCallStatusTextSize,
+            fontWeight = FontWeight.Bold,
+            color = VideoTheme.colors.textHighEmphasis,
+            textAlign = TextAlign.Center,
         )
     }
 }
@@ -72,4 +97,15 @@ private fun buildLargeCallText(participants: List<VideoParticipant>): String {
     val initial = buildSmallCallText(participants)
 
     return "$initial and +${participants.size - 2} more"
+}
+
+@Preview
+@Composable
+private fun ParticipantInformationPreview() {
+    VideoTheme {
+        ParticipantInformation(
+            callStatus = CallStatus.INCOMING,
+            participants = mockParticipants
+        )
+    }
 }

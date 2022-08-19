@@ -31,16 +31,16 @@ import io.getstream.video.android.compose.imageloading.StreamCoilImageLoaderFact
  * Local providers for various properties we connect to our components, for styling.
  */
 private val LocalColors = compositionLocalOf<StreamColors> {
-    error("No colors provided! Make sure to wrap all usages of Stream components in a ChatTheme.")
+    error("No colors provided! Make sure to wrap all usages of Stream components in a VideoTheme.")
 }
 private val LocalDimens = compositionLocalOf<StreamDimens> {
-    error("No dimens provided! Make sure to wrap all usages of Stream components in a ChatTheme.")
+    error("No dimens provided! Make sure to wrap all usages of Stream components in a VideoTheme.")
 }
 private val LocalTypography = compositionLocalOf<StreamTypography> {
-    error("No typography provided! Make sure to wrap all usages of Stream components in a ChatTheme.")
+    error("No typography provided! Make sure to wrap all usages of Stream components in a VideoTheme.")
 }
 private val LocalShapes = compositionLocalOf<StreamShapes> {
-    error("No shapes provided! Make sure to wrap all usages of Stream components in a ChatTheme.")
+    error("No shapes provided! Make sure to wrap all usages of Stream components in a VideoTheme.")
 }
 
 /**

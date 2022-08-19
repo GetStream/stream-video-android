@@ -28,8 +28,6 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.res.ResourcesCompat
-import io.getstream.video.android.compose.ui.EmptyActivity
-import io.getstream.video.android.compose.ui.IncomingCallActivity
 
 public class CallNotificationReceiver : BroadcastReceiver() {
 
@@ -50,11 +48,15 @@ public class CallNotificationReceiver : BroadcastReceiver() {
     }
 
     private fun createNotification(context: Context): Notification {
-        val contentIntent = Intent(context, EmptyActivity::class.java) // TODO - some content
+        val emptyActivity =
+            Class.forName("io.getstream.video.android.compose.ui.EmptyActivity")
+        val contentIntent = Intent(context, emptyActivity) // TODO - some content
         val contentPendingIntent =
             PendingIntent.getActivity(context, 0, contentIntent, PendingIntent.FLAG_IMMUTABLE)
 
-        val fullScreenIntent = Intent(context, IncomingCallActivity::class.java)
+        val incomingCallActivity =
+            Class.forName("io.getstream.video.android.compose.ui.IncomingCallActivity")
+        val fullScreenIntent = Intent(context, incomingCallActivity)
         val fullScreenPendingIntent =
             PendingIntent.getActivity(context, 0, fullScreenIntent, PendingIntent.FLAG_IMMUTABLE)
 

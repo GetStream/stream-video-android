@@ -48,7 +48,8 @@ public class IncomingCallActivity : AppCompatActivity() {
                 onDeclineCall = { finish() },
                 onAcceptCall = { callId, isVideoEnabled ->
                     joinCall(callId, isVideoEnabled)
-                }
+                },
+                onVideoToggleChanged = { }
             )
         }
     }

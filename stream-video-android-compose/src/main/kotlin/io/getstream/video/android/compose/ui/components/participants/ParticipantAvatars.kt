@@ -16,60 +16,71 @@
 
 package io.getstream.video.android.compose.ui.components.participants
 
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.InitialsAvatar
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
+import io.getstream.video.android.compose.ui.components.mock.mockParticipants
 import io.getstream.video.android.model.VideoParticipant
 
 @Composable
 public fun ParticipantAvatars(
     participants: List<VideoParticipant>
 ) {
-    if (participants.isNotEmpty()) {
-        if (participants.size == 1) {
-            val user = participants.first().user
-
-            UserAvatar(
-                modifier = Modifier.size(VideoTheme.dimens.singleAvatarSize),
-                user = user!!
-            )
-        } else {
-            Row(modifier = Modifier.fillMaxWidth()) {
-                val firstUser = participants[0]
+    Box(
+        modifier = Modifier.fillMaxWidth(),
+        contentAlignment = Alignment.Center
+    ) {
+        if (participants.isNotEmpty()) {
+            if (participants.size == 1) {
+                val user = participants.first().user
 
                 UserAvatar(
-                    modifier = Modifier.size(VideoTheme.dimens.callAvatarSize),
-                    user = firstUser.user!!
+                    modifier = Modifier.size(VideoTheme.dimens.singleAvatarSize),
+                    user = user!!
                 )
-
-                val secondUser = participants[1]
-
-                UserAvatar(
-                    modifier = Modifier.size(VideoTheme.dimens.callAvatarSize),
-                    user = secondUser.user!!
-                )
-
-                when (participants.size) {
-                    2 -> Unit
-                    3 -> {
+            } else {
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
+                    items(participants.take(2)) { participant ->
                         UserAvatar(
                             modifier = Modifier.size(VideoTheme.dimens.callAvatarSize),
-                            user = participants[2].user!!
+                            user = participant.user!!
                         )
                     }
-                    else -> {
-                        InitialsAvatar(
-                            modifier = Modifier.size(VideoTheme.dimens.callAvatarSize),
-                            initials = "+${participants.size - 2}"
-                        )
+
+                    item {
+                        if (participants.size == 3) {
+                            UserAvatar(
+                                modifier = Modifier.size(VideoTheme.dimens.callAvatarSize),
+                                user = participants[2].user!!
+                            )
+                        } else if (participants.size > 3) {
+                            InitialsAvatar(
+                                modifier = Modifier.size(VideoTheme.dimens.callAvatarSize),
+                                initials = "+${participants.size - 2}"
+                            )
+                        }
                     }
                 }
             }
         }
+    }
+}
+
+@Preview
+@Composable
+private fun ParticipantAvatarsPreview() {
+    VideoTheme {
+        ParticipantAvatars(participants = mockParticipants)
     }
 }

@@ -36,8 +36,17 @@ public data class StreamDimens(
     public val largeButtonSize: Dp,
     public val mediumButtonSize: Dp,
     public val smallButtonSize: Dp,
+    public val topAppbarHeightSize: Dp,
+    public val avatarAppbarPadding: Dp,
+    public val singleAvatarAppbarPadding: Dp,
+    public val participantsTextPadding: Dp,
     public val directCallUserNameTextSize: TextUnit,
-    public val groupCallUserNameTextSize: TextUnit
+    public val groupCallUserNameTextSize: TextUnit,
+    public val onCallStatusTextSize: TextUnit,
+    public val topAppbarTextSize: TextUnit,
+    public val onCallStatusTextAlpha: Float,
+    public val buttonToggleOnAlpha: Float,
+    public val buttonToggleOffAlpha: Float,
 ) {
     public companion object {
         /**
@@ -46,14 +55,23 @@ public data class StreamDimens(
          * @return A [StreamDimens] instance holding our default dimensions.
          */
         public fun defaultDimens(): StreamDimens = StreamDimens(
-            callAvatarSize = 40.dp,
+            callAvatarSize = 80.dp,
             singleAvatarSize = 160.dp,
             headerElevation = 4.dp,
             largeButtonSize = 80.dp,
-            mediumButtonSize = 56.dp,
+            mediumButtonSize = 64.dp,
             smallButtonSize = 32.dp,
+            topAppbarHeightSize = 64.dp,
+            avatarAppbarPadding = 100.dp,
+            singleAvatarAppbarPadding = 20.dp,
+            participantsTextPadding = 65.dp,
+            topAppbarTextSize = 17.sp,
             directCallUserNameTextSize = 34.sp,
-            groupCallUserNameTextSize = 24.sp
+            groupCallUserNameTextSize = 24.sp,
+            onCallStatusTextSize = 20.sp,
+            onCallStatusTextAlpha = 0.6f,
+            buttonToggleOnAlpha = 0.4f,
+            buttonToggleOffAlpha = 1.0f,
         )
     }
 }

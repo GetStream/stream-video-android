@@ -897,9 +897,18 @@ public final class io/getstream/video/android/logging/LoggingLevel : java/lang/E
 	public static fun values ()[Lio/getstream/video/android/logging/LoggingLevel;
 }
 
+public final class io/getstream/video/android/model/CallStatus : java/lang/Enum {
+	public static final field CALLING Lio/getstream/video/android/model/CallStatus;
+	public static final field INCOMING Lio/getstream/video/android/model/CallStatus;
+	public static final field OUTGOING Lio/getstream/video/android/model/CallStatus;
+	public static fun valueOf (Ljava/lang/String;)Lio/getstream/video/android/model/CallStatus;
+	public static fun values ()[Lio/getstream/video/android/model/CallStatus;
+}
+
 public final class io/getstream/video/android/model/CallType : java/lang/Enum {
 	public static final field AUDIO Lio/getstream/video/android/model/CallType;
 	public static final field VIDEO Lio/getstream/video/android/model/CallType;
+	public final fun getType ()Ljava/lang/String;
 	public static fun valueOf (Ljava/lang/String;)Lio/getstream/video/android/model/CallType;
 	public static fun values ()[Lio/getstream/video/android/model/CallType;
 }

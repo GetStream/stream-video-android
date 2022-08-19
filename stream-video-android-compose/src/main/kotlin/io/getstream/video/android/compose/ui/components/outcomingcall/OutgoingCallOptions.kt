@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.incomingcall
+package io.getstream.video.android.compose.ui.components.outcomingcall
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -34,53 +37,57 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.model.CallType
 
 @Composable
-internal fun IncomingCallOptions(
+internal fun OutgoingCallOptions(
     modifier: Modifier = Modifier,
     callId: String,
-    callType: CallType,
-    onDeclineCall: (String) -> Unit,
-    onAcceptCall: (callId: String, isVideoEnabled: Boolean) -> Unit,
-    onVideoToggleChanged: (Boolean) -> Unit
+    onCancelCall: (String) -> Unit,
+    onMicToggleChanged: (Boolean) -> Unit,
+    onVideoToggleChanged: (Boolean) -> Unit,
 ) {
+    var isMicEnabled by remember { mutableStateOf(true) }
     var isVideoEnabled by remember { mutableStateOf(true) }
 
-    Row(
+    Column(
         modifier = modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceEvenly
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        IconButton(
-            modifier = Modifier
-                .background(
-                    color = VideoTheme.colors.errorAccent,
-                    shape = VideoTheme.shapes.callButton
-                )
-                .size(VideoTheme.dimens.largeButtonSize),
-            onClick = { onDeclineCall(callId) },
-            content = {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_call_end),
-                    tint = Color.White,
-                    contentDescription = "End call"
-                )
-            }
-        )
-
-        if (callType == CallType.VIDEO) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
             IconButton(
                 modifier = Modifier
-                    .alpha(
-                        if (isVideoEnabled) {
-                            VideoTheme.dimens.buttonToggleOffAlpha
-                        } else {
-                            VideoTheme.dimens.buttonToggleOnAlpha
-                        }
+                    .alpha(if (isMicEnabled) 1.0f else 0.4f)
+                    .background(
+                        color = VideoTheme.colors.appBackground,
+                        shape = VideoTheme.shapes.callButton
                     )
+                    .size(VideoTheme.dimens.mediumButtonSize),
+                onClick = {
+                    isMicEnabled = !isMicEnabled
+                    onMicToggleChanged(isMicEnabled)
+                },
+                content = {
+                    val cameraIcon =
+                        if (isMicEnabled) R.drawable.ic_mic_on else R.drawable.ic_mic_off
+
+                    Icon(
+                        painter = painterResource(id = cameraIcon),
+                        contentDescription = "Toggle Video",
+                        tint = VideoTheme.colors.textHighEmphasis
+                    )
+                }
+            )
+
+            IconButton(
+                modifier = Modifier
+                    .alpha(if (isVideoEnabled) 1.0f else 0.4f)
                     .background(
                         color = VideoTheme.colors.appBackground,
                         shape = VideoTheme.shapes.callButton
@@ -103,19 +110,21 @@ internal fun IncomingCallOptions(
             )
         }
 
+        Spacer(modifier = Modifier.height(32.dp))
+
         IconButton(
             modifier = Modifier
                 .background(
-                    color = VideoTheme.colors.infoAccent,
+                    color = VideoTheme.colors.errorAccent,
                     shape = VideoTheme.shapes.callButton
                 )
                 .size(VideoTheme.dimens.largeButtonSize),
-            onClick = { onAcceptCall(callId, isVideoEnabled) },
+            onClick = { onCancelCall(callId) },
             content = {
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_call),
+                    painter = painterResource(id = R.drawable.ic_call_end),
                     tint = Color.White,
-                    contentDescription = "Accept call"
+                    contentDescription = "End call"
                 )
             }
         )
@@ -124,13 +133,12 @@ internal fun IncomingCallOptions(
 
 @Preview
 @Composable
-private fun IncomingCallOptionsPreview() {
+private fun OutgoingCallOptionsPreview() {
     VideoTheme {
-        IncomingCallOptions(
+        OutgoingCallOptions(
             callId = "",
-            callType = CallType.VIDEO,
-            onDeclineCall = {},
-            onAcceptCall = { _, _ -> },
+            onCancelCall = {},
+            onMicToggleChanged = {},
             onVideoToggleChanged = {}
         )
     }

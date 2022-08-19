@@ -77,6 +77,7 @@ import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.app.VideoApp
 import io.getstream.video.android.compose.ui.components.CallDetails
 import io.getstream.video.android.compose.ui.components.MainStage
+import io.getstream.video.android.model.CallType
 import io.getstream.video.android.model.VideoParticipantState
 import io.getstream.video.android.model.VideoRoom
 import io.getstream.video.android.utils.onError
@@ -325,7 +326,7 @@ class CallActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             val result = client.joinCall(
-                "video",
+                CallType.VIDEO.type,
                 id = callId,
                 participantIds = participants.toList()
             )
