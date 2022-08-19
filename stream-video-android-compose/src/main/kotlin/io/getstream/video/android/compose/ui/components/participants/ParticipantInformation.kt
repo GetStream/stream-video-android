@@ -20,11 +20,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -53,6 +55,7 @@ public fun ParticipantInformation(
         }
 
         Text(
+            modifier = Modifier.padding(horizontal = VideoTheme.dimens.participantsTextPadding),
             text = text,
             fontSize = fontSize,
             color = VideoTheme.colors.textHighEmphasis,
@@ -70,6 +73,7 @@ public fun ParticipantInformation(
             },
             style = VideoTheme.typography.body,
             fontSize = VideoTheme.dimens.onCallStatusTextSize,
+            fontWeight = FontWeight.Bold,
             color = VideoTheme.colors.textLowEmphasis,
             textAlign = TextAlign.Center,
         )
