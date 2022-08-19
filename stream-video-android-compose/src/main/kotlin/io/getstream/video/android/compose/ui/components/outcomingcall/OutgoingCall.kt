@@ -28,9 +28,10 @@ import io.getstream.video.android.model.VideoParticipant
 
 @Composable
 public fun OutgoingCall(
+    callId: String,
     callType: CallType,
     participants: List<VideoParticipant>,
-    onDeclineCall: () -> Unit,
+    onCancelCall: (String) -> Unit,
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         OutgoingCallDetails(participants = participants, callType = callType)
@@ -38,7 +39,8 @@ public fun OutgoingCall(
         Spacer(modifier = Modifier.height(150.dp))
 
         OutgoingCallOptions(
-            onDeclineCall = onDeclineCall
+            callId = callId,
+            onCancelCall = onCancelCall
         )
     }
 }

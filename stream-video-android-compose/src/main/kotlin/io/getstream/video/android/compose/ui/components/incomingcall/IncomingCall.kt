@@ -31,7 +31,7 @@ public fun IncomingCall(
     callId: String,
     callType: CallType,
     participants: List<VideoParticipant>,
-    onDeclineCall: () -> Unit,
+    onDeclineCall: (String) -> Unit,
     onAcceptCall: (String, Boolean) -> Unit
 ) {
 

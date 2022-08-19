@@ -42,7 +42,7 @@ import io.getstream.video.android.model.CallType
 internal fun IncomingCallOptions(
     callId: String,
     callType: CallType,
-    onDeclineCall: () -> Unit,
+    onDeclineCall: (String) -> Unit,
     onAcceptCall: (callId: String, isVideoEnabled: Boolean) -> Unit,
 ) {
     var isVideoEnabled by remember { mutableStateOf(true) }
@@ -59,7 +59,7 @@ internal fun IncomingCallOptions(
                     shape = VideoTheme.shapes.callButton
                 )
                 .size(VideoTheme.dimens.largeButtonSize),
-            onClick = onDeclineCall,
+            onClick = { onDeclineCall(callId) },
             content = {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_call_end),

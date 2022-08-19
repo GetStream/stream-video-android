@@ -43,7 +43,8 @@ import io.getstream.video.android.compose.theme.VideoTheme
 
 @Composable
 internal fun OutgoingCallOptions(
-    onDeclineCall: () -> Unit,
+    callId: String,
+    onCancelCall: (String) -> Unit,
 ) {
     var isMicEnabled by remember { mutableStateOf(true) }
     var isVideoEnabled by remember { mutableStateOf(true) }
@@ -112,7 +113,7 @@ internal fun OutgoingCallOptions(
                     shape = VideoTheme.shapes.callButton
                 )
                 .size(VideoTheme.dimens.largeButtonSize),
-            onClick = onDeclineCall,
+            onClick = { onCancelCall(callId) },
             content = {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_call_end),
@@ -129,7 +130,8 @@ internal fun OutgoingCallOptions(
 private fun OutgoingCallOptionsPreview() {
     VideoTheme {
         OutgoingCallOptions(
-            onDeclineCall = {}
+            callId = "",
+            onCancelCall = {}
         )
     }
 }
