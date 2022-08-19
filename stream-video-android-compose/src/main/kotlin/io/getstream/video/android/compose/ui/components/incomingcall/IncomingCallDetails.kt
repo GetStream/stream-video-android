@@ -43,7 +43,7 @@ internal fun IncomingCallDetails(
         Spacer(modifier = Modifier.height(32.dp))
 
         ParticipantInformation(
-            callStatus = CallStatus.INCOMING,
+            callStatus = CallStatus.Incoming,
             participants = participants
         )
     }

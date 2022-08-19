@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.compose.ui.components.background
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,8 +24,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import io.getstream.video.android.compose.R
 import io.getstream.video.android.model.VideoParticipant
 
 @Composable
@@ -36,19 +39,23 @@ public fun CallBackground(
     Box(
         modifier = modifier.fillMaxSize()
     ) {
-        if (participants.isNotEmpty()) {
+        if (participants.size == 1) {
             val firstUser = participants.first().user
-
             AsyncImage(
                 modifier = Modifier
                     .fillMaxSize()
                     .blur(20.dp),
-                contentScale = ContentScale.Crop,
                 model = firstUser?.image_url,
+                contentScale = ContentScale.Crop,
                 contentDescription = null
             )
         } else {
-            // TODO default background
+            Image(
+                modifier = Modifier.fillMaxSize(),
+                painter = painterResource(id = R.drawable.bg_call),
+                contentScale = ContentScale.FillBounds,
+                contentDescription = null
+            )
         }
 
         content()
