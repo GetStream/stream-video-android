@@ -14,41 +14,41 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.calling
+package io.getstream.video.android.compose.ui.components.calling.video
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import io.getstream.video.android.compose.ui.components.calling.audio.AudioCalling
-import io.getstream.video.android.compose.ui.components.calling.video.VideoCalling
-import io.getstream.video.android.model.CallType
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import io.getstream.video.android.compose.ui.components.CallTopAppbar
+import io.getstream.video.android.compose.ui.components.calling.audio.AudioCallingOptions
 import io.getstream.video.android.model.VideoParticipant
 
 @Composable
-public fun Calling(
+public fun VideoCalling(
     callId: String,
-    callType: CallType,
     participants: List<VideoParticipant>,
-    onCancelCall: (String) -> Unit = {},
+    onEndCall: (String) -> Unit,
     onChatMessagesExpand: () -> Unit = {},
-    onMicToggleChanged: (Boolean) -> Unit = {},
-    onVideoToggleChanged: (Boolean) -> Unit = {},
+    onMicToggleChanged: (Boolean) -> Unit,
+    onVideoToggleChanged: (Boolean) -> Unit,
     onCameraOrientationChanged: (Boolean) -> Unit = {},
 ) {
-    when (callType) {
-        CallType.AUDIO -> AudioCalling(
+
+    Box {
+
+        CallTopAppbar()
+
+        AudioCallingOptions(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 44.dp),
             callId = callId,
-            participants = participants,
-            onEndCall = onCancelCall,
+            onEndCall = onEndCall,
             onMicToggleChanged = onMicToggleChanged,
             onVideoToggleChanged = onVideoToggleChanged
-        )
-        CallType.VIDEO -> VideoCalling(
-            callId = callId,
-            participants = participants,
-            onEndCall = onCancelCall,
-            onChatMessagesExpand = onChatMessagesExpand,
-            onMicToggleChanged = onMicToggleChanged,
-            onVideoToggleChanged = onVideoToggleChanged,
-            onCameraOrientationChanged = onCameraOrientationChanged,
         )
     }
 }

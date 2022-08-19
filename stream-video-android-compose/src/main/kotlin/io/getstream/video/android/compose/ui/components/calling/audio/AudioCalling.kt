@@ -33,7 +33,7 @@ import io.getstream.video.android.model.VideoParticipant
 public fun AudioCalling(
     callId: String,
     participants: List<VideoParticipant>,
-    onCancelCall: (String) -> Unit,
+    onEndCall: (String) -> Unit,
     onMicToggleChanged: (Boolean) -> Unit,
     onVideoToggleChanged: (Boolean) -> Unit,
 ) {
@@ -63,7 +63,7 @@ public fun AudioCalling(
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 44.dp),
             callId = callId,
-            onCancelCall = onCancelCall,
+            onEndCall = onEndCall,
             onMicToggleChanged = onMicToggleChanged,
             onVideoToggleChanged = onVideoToggleChanged
         )
@@ -79,7 +79,7 @@ private fun AudioCallingPreview() {
             participants = mockParticipants,
             onMicToggleChanged = { },
             onVideoToggleChanged = { },
-            onCancelCall = { }
+            onEndCall = { }
         )
     }
 }

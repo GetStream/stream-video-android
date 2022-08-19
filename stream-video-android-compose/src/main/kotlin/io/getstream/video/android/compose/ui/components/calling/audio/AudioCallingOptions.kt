@@ -45,7 +45,7 @@ import io.getstream.video.android.compose.theme.VideoTheme
 internal fun AudioCallingOptions(
     modifier: Modifier = Modifier,
     callId: String,
-    onCancelCall: (String) -> Unit,
+    onEndCall: (String) -> Unit,
     onMicToggleChanged: (Boolean) -> Unit,
     onVideoToggleChanged: (Boolean) -> Unit,
 ) {
@@ -79,7 +79,7 @@ internal fun AudioCallingOptions(
 
                     Icon(
                         painter = painterResource(id = cameraIcon),
-                        contentDescription = "Toggle Video",
+                        contentDescription = "Toggle Mic",
                         tint = VideoTheme.colors.textHighEmphasis
                     )
                 }
@@ -119,7 +119,7 @@ internal fun AudioCallingOptions(
                     shape = VideoTheme.shapes.callButton
                 )
                 .size(VideoTheme.dimens.largeButtonSize),
-            onClick = { onCancelCall(callId) },
+            onClick = { onEndCall(callId) },
             content = {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_call_end),
@@ -137,7 +137,7 @@ private fun AudioCallingOptionsPreview() {
     VideoTheme {
         AudioCallingOptions(
             callId = "",
-            onCancelCall = {},
+            onEndCall = {},
             onMicToggleChanged = {},
             onVideoToggleChanged = {}
         )
