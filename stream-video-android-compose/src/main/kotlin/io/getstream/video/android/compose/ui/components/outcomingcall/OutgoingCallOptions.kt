@@ -43,13 +43,17 @@ import io.getstream.video.android.compose.theme.VideoTheme
 
 @Composable
 internal fun OutgoingCallOptions(
+    modifier: Modifier = Modifier,
     callId: String,
     onCancelCall: (String) -> Unit,
+    onMicToggleChanged: (Boolean) -> Unit,
+    onVideoToggleChanged: (Boolean) -> Unit,
 ) {
     var isMicEnabled by remember { mutableStateOf(true) }
     var isVideoEnabled by remember { mutableStateOf(true) }
 
     Column(
+        modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Row(
@@ -67,6 +71,7 @@ internal fun OutgoingCallOptions(
                     .size(VideoTheme.dimens.mediumButtonSize),
                 onClick = {
                     isMicEnabled = !isMicEnabled
+                    onMicToggleChanged(isMicEnabled)
                 },
                 content = {
                     val cameraIcon =
@@ -90,6 +95,7 @@ internal fun OutgoingCallOptions(
                     .size(VideoTheme.dimens.mediumButtonSize),
                 onClick = {
                     isVideoEnabled = !isVideoEnabled
+                    onVideoToggleChanged(isVideoEnabled)
                 },
                 content = {
                     val cameraIcon =
@@ -131,7 +137,9 @@ private fun OutgoingCallOptionsPreview() {
     VideoTheme {
         OutgoingCallOptions(
             callId = "",
-            onCancelCall = {}
+            onCancelCall = {},
+            onMicToggleChanged = {},
+            onVideoToggleChanged = {}
         )
     }
 }

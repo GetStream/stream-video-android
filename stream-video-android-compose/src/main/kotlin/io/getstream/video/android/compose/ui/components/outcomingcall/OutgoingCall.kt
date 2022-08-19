@@ -16,9 +16,9 @@
 
 package io.getstream.video.android.compose.ui.components.outcomingcall
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,15 +32,25 @@ public fun OutgoingCall(
     callType: CallType,
     participants: List<VideoParticipant>,
     onCancelCall: (String) -> Unit,
+    onMicToggleChanged: (Boolean) -> Unit,
+    onVideoToggleChanged: (Boolean) -> Unit,
 ) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        OutgoingCallDetails(participants = participants, callType = callType)
+    Box(modifier = Modifier.fillMaxSize()) {
 
-        Spacer(modifier = Modifier.height(150.dp))
+        OutgoingCallDetails(
+            modifier = Modifier.align(Alignment.Center),
+            participants = participants,
+            callType = callType
+        )
 
         OutgoingCallOptions(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 44.dp),
             callId = callId,
-            onCancelCall = onCancelCall
+            onCancelCall = onCancelCall,
+            onMicToggleChanged = onMicToggleChanged,
+            onVideoToggleChanged = onVideoToggleChanged
         )
     }
 }
