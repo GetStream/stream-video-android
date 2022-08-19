@@ -64,7 +64,7 @@ public fun ParticipantAvatars(
                                 modifier = Modifier.size(VideoTheme.dimens.callAvatarSize),
                                 user = participants[2].user!!
                             )
-                        } else {
+                        } else if (participants.size > 3) {
                             InitialsAvatar(
                                 modifier = Modifier.size(VideoTheme.dimens.callAvatarSize),
                                 initials = "+${participants.size - 2}"

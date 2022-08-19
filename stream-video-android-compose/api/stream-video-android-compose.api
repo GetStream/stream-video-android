@@ -287,6 +287,7 @@ public final class io/getstream/video/android/compose/ui/components/incomingcall
 public final class io/getstream/video/android/compose/ui/components/mock/MockUtilsKt {
 	public static final fun getMockParticipants ()Ljava/util/List;
 	public static final fun getMockUsers ()Ljava/util/List;
+	public static final fun getSingleParticipants ()Lio/getstream/video/android/model/VideoParticipant;
 }
 
 public final class io/getstream/video/android/compose/ui/components/outcomingcall/ComposableSingletons$OutgoingCallDetailsKt {
