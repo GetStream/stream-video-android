@@ -255,6 +255,41 @@ public final class io/getstream/video/android/compose/ui/components/background/C
 	public static final fun CallBackground (Landroidx/compose/ui/Modifier;Ljava/util/List;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;II)V
 }
 
+public final class io/getstream/video/android/compose/ui/components/calling/CallingKt {
+	public static final fun Calling (Ljava/lang/String;Lio/getstream/video/android/model/CallType;Ljava/util/List;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class io/getstream/video/android/compose/ui/components/calling/VideoCallingKt {
+	public static final fun VideoCalling (Ljava/lang/String;Ljava/util/List;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class io/getstream/video/android/compose/ui/components/calling/audio/AudioCallingKt {
+	public static final fun AudioCalling (Ljava/lang/String;Ljava/util/List;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class io/getstream/video/android/compose/ui/components/calling/audio/ComposableSingletons$AudioCallingDetailsKt {
+	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/calling/audio/ComposableSingletons$AudioCallingDetailsKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class io/getstream/video/android/compose/ui/components/calling/audio/ComposableSingletons$AudioCallingKt {
+	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/calling/audio/ComposableSingletons$AudioCallingKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class io/getstream/video/android/compose/ui/components/calling/audio/ComposableSingletons$AudioCallingOptionsKt {
+	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/calling/audio/ComposableSingletons$AudioCallingOptionsKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public static field lambda-2 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-2$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
+}
+
 public final class io/getstream/video/android/compose/ui/components/incomingcall/ComposableSingletons$IncomingCallDetailsKt {
 	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/incomingcall/ComposableSingletons$IncomingCallDetailsKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;

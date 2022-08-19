@@ -36,19 +36,27 @@ public fun CallBackground(
     Box(
         modifier = modifier.fillMaxSize()
     ) {
-        if (participants.isNotEmpty()) {
+        if (participants.size == 1) {
             val firstUser = participants.first().user
-
             AsyncImage(
                 modifier = Modifier
                     .fillMaxSize()
                     .blur(20.dp),
-                contentScale = ContentScale.Crop,
                 model = firstUser?.image_url,
+                contentScale = ContentScale.Crop,
                 contentDescription = null
             )
         } else {
-            // TODO default background
+            // TODO: Change the model to a default background image following design guidelines.
+            val firstUser = participants.first().user
+            AsyncImage(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .blur(20.dp),
+                model = firstUser?.image_url,
+                contentScale = ContentScale.Crop,
+                contentDescription = null
+            )
         }
 
         content()

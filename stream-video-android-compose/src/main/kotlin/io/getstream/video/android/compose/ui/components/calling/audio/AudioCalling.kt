@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.outcomingcall
+package io.getstream.video.android.compose.ui.components.calling.audio
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -27,13 +27,11 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.CallTopAppbar
 import io.getstream.video.android.compose.ui.components.background.CallBackground
 import io.getstream.video.android.compose.ui.components.mock.mockParticipants
-import io.getstream.video.android.model.CallType
 import io.getstream.video.android.model.VideoParticipant
 
 @Composable
-public fun OutgoingCall(
+public fun AudioCalling(
     callId: String,
-    callType: CallType,
     participants: List<VideoParticipant>,
     onCancelCall: (String) -> Unit,
     onMicToggleChanged: (Boolean) -> Unit,
@@ -46,22 +44,21 @@ public fun OutgoingCall(
 
             CallTopAppbar()
 
-            val topPadding = if (participants.size == 1 || callType == CallType.VIDEO) {
+            val topPadding = if (participants.size == 1) {
                 VideoTheme.dimens.singleAvatarAppbarPadding
             } else {
                 VideoTheme.dimens.avatarAppbarPadding
             }
 
-            OutgoingCallDetails(
+            AudioCallingDetails(
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .padding(top = topPadding),
-                participants = participants,
-                callType = callType
+                participants = participants
             )
         }
 
-        OutgoingCallOptions(
+        AudioCallingOptions(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 44.dp),
@@ -75,15 +72,14 @@ public fun OutgoingCall(
 
 @Preview
 @Composable
-private fun OutgoingCallPreview() {
+private fun AudioCallingPreview() {
     VideoTheme {
-        OutgoingCall(
+        AudioCalling(
             callId = "",
-            callType = CallType.VIDEO,
             participants = mockParticipants,
-            onCancelCall = { },
             onMicToggleChanged = { },
             onVideoToggleChanged = { },
+            onCancelCall = { }
         )
     }
 }

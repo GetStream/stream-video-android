@@ -14,10 +14,17 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.model
+package io.getstream.video.android.compose.ui.components.calling
 
-public sealed interface CallStatus {
-    public object Incoming : CallStatus
-    public object Outgoing : CallStatus
-    public data class Calling(public val duration: String) : CallStatus
+import androidx.compose.runtime.Composable
+import io.getstream.video.android.model.VideoParticipant
+
+@Composable
+public fun VideoCalling(
+    callId: String,
+    participants: List<VideoParticipant>,
+    onCancelCall: (String) -> Unit,
+    onMicToggleChanged: (Boolean) -> Unit,
+    onVideoToggleChanged: (Boolean) -> Unit,
+) {
 }

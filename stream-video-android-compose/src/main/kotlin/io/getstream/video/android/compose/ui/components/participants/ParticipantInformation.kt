@@ -69,9 +69,9 @@ public fun ParticipantInformation(
         Text(
             modifier = Modifier.alpha(VideoTheme.dimens.onCallStatusTextAlpha),
             text = when (callStatus) {
-                CallStatus.INCOMING -> "Incoming call..."
-                CallStatus.OUTGOING -> "Calling..."
-                CallStatus.CALLING -> "0:33" // TODO - observe current calling time
+                CallStatus.Incoming -> "Incoming call..."
+                CallStatus.Outgoing -> "Calling..."
+                is CallStatus.Calling -> callStatus.duration
             },
             style = VideoTheme.typography.body,
             fontSize = VideoTheme.dimens.onCallStatusTextSize,
@@ -104,7 +104,7 @@ private fun buildLargeCallText(participants: List<VideoParticipant>): String {
 private fun ParticipantInformationPreview() {
     VideoTheme {
         ParticipantInformation(
-            callStatus = CallStatus.INCOMING,
+            callStatus = CallStatus.Incoming,
             participants = mockParticipants
         )
     }
