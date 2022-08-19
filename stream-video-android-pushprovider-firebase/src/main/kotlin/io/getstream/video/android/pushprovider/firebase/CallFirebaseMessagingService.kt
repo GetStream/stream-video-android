@@ -28,9 +28,8 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import io.getstream.video.android.compose.ui.IncomingCallActivity
 
-public class CallService : FirebaseMessagingService() {
+public class CallFirebaseMessagingService : FirebaseMessagingService() {
 
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
@@ -48,14 +47,16 @@ public class CallService : FirebaseMessagingService() {
     }
 
     override fun onNewToken(token: String) {
-        // TODO
+        // TODO - register firebase token
     }
 
     private fun createNotification(context: Context): Notification {
-        val contentIntent = Intent(context, IncomingCallActivity::class.java) // TODO - some content
+        val incomingCallActivity =
+            Class.forName("io.getstream.video.android.compose.ui.IncomingCallActivity")
+        val contentIntent = Intent(context, incomingCallActivity) // TODO - some content
         val contentPendingIntent = PendingIntent.getActivity(context, 0, contentIntent, 0)
 
-        val fullScreenIntent = Intent(context, IncomingCallActivity::class.java)
+        val fullScreenIntent = Intent(context, incomingCallActivity)
         val fullScreenPendingIntent = PendingIntent.getActivity(context, 0, fullScreenIntent, 0)
 
         return NotificationCompat.Builder(context, CHANNEL_ID)
