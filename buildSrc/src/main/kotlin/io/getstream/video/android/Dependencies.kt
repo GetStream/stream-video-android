@@ -49,6 +49,8 @@ object Dependencies {
     const val material = "com.google.android.material:material:${Versions.MATERIAL}"
     const val androidxAppcompat = "androidx.appcompat:appcompat:${Versions.ANDROIDX_APPCOMPAT}"
     const val androidxCore = "androidx.core:core-ktx:${Versions.ANDROIDX_CORE}"
+    const val androidxLifecycleViewModel =
+        "androidx.lifecycle:lifecycle-viewmodel-ktx:${Versions.ANDROIDX_LIFECYCLE}"
     const val androidxLifecycleRuntime =
         "androidx.lifecycle:lifecycle-runtime-ktx:${Versions.ANDROIDX_LIFECYCLE}"
     const val androidxLifecycleProcess =

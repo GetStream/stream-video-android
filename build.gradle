@@ -20,6 +20,11 @@ buildscript {
 
 subprojects {
     apply from: "$rootDir/spotless/spotless.gradle"
+    if (it.name != "app") {
+        tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+            kotlinOptions.freeCompilerArgs += ["-Xexplicit-api=strict", "-Xjvm-default=enable"]
+        }
+    }
 }
 
 task clean(type: Delete) {

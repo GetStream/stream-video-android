@@ -50,10 +50,10 @@ import io.getstream.video.android.app.model.UserCredentials
 import io.getstream.video.android.app.ui.call.CallActivity
 import io.getstream.video.android.app.ui.components.UserList
 import io.getstream.video.android.app.utils.getUsers
+import io.getstream.video.android.compose.ui.IncomingCallActivity
 import io.getstream.video.android.events.CallCreatedEvent
 import io.getstream.video.android.events.VideoEvent
 import io.getstream.video.android.socket.SocketListener
-import io.getstream.video.android.ui.IncomingCallActivity
 
 class HomeActivity : AppCompatActivity() {
 

@@ -46,7 +46,8 @@ android {
 }
 
 dependencies {
-    implementation project(":stream-video-android")
+    implementation project(":stream-video-android-compose")
+    implementation project(":stream-video-android-pushprovider-firebase")
 
     implementation Dependencies.androidxCore
     implementation Dependencies.androidxAppcompat

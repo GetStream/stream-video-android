@@ -18,13 +18,5 @@ package io.getstream.video.android.utils
 
 public fun enrichSocketURL(url: String): String {
     if (url.startsWith("wss://")) return url
-
     return "wss://$url"
-}
-
-internal fun String.initials(): String {
-    return trim()
-        .split("\\s+".toRegex())
-        .take(2)
-        .joinToString(separator = "") { it.take(1).uppercase() }
 }

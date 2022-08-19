@@ -24,6 +24,7 @@ public class CallViewModelFactory(
     private val videoClient: VideoClient
 ) : ViewModelProvider.Factory {
 
+    @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return CallViewModel(videoClient) as T
     }

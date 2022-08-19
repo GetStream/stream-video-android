@@ -1,6 +1,5 @@
 import io.getstream.video.android.Configuration
 import io.getstream.video.android.Dependencies
-import io.getstream.video.android.Versions
 
 plugins {
     id 'com.android.library'
@@ -8,7 +7,6 @@ plugins {
     id 'org.jetbrains.kotlin.plugin.serialization'
     id 'com.squareup.wire'
     id 'binary-compatibility-validator'
-    id 'com.google.gms.google-services'
 }
 
 wire {
@@ -49,21 +47,9 @@ android {
         jvmTarget = '1.8'
     }
 
-    buildFeatures {
-        compose true
-    }
-
     lintOptions {
         abortOnError false
     }
-
-    composeOptions {
-        kotlinCompilerExtensionVersion Versions.COMPOSE_COMPILER
-    }
-}
-
-tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
-    kotlinOptions.freeCompilerArgs += ["-Xexplicit-api=strict", "-Xjvm-default=enable"]
 }
 
 dependencies {
@@ -74,6 +60,7 @@ dependencies {
     // lifecycle
     implementation Dependencies.androidxLifecycleRuntime
     implementation Dependencies.androidxLifecycleProcess
+    implementation Dependencies.androidxLifecycleViewModel
 
     // coroutines
     implementation Dependencies.coroutines
@@ -88,20 +75,6 @@ dependencies {
     // A/V Calls
     implementation Dependencies.liveKit
     api Dependencies.webRTC
-
-    // Compose
-    implementation Dependencies.composeRuntime
-    implementation Dependencies.composeUi
-    implementation Dependencies.composeUiTooling
-    implementation Dependencies.composeFoundation
-    implementation Dependencies.composeMaterial
-    implementation Dependencies.activityCompose
-    implementation Dependencies.composeIconsExtended
-    implementation Dependencies.composeCoil
-
-    // Notifications
-    implementation platform('com.google.firebase:firebase-bom:30.3.1')
-    implementation "com.google.firebase:firebase-messaging"
 
     // Unit Tests
     testImplementation 'junit:junit:4.13.2'

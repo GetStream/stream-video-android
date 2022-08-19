@@ -37,8 +37,8 @@ import io.getstream.video.android.app.VideoApp
 import io.getstream.video.android.app.ui.components.UserList
 import io.getstream.video.android.app.ui.home.HomeActivity
 import io.getstream.video.android.app.utils.getUsers
-import io.getstream.video.android.notifications.CallNotificationReceiver
-import io.getstream.video.android.notifications.CallNotificationReceiver.Companion.ACTION_CALL
+import io.getstream.video.android.pushprovider.firebase.CallNotificationReceiver
+import io.getstream.video.android.pushprovider.firebase.CallNotificationReceiver.Companion.ACTION_CALL
 import stream.video.User
 
 class LoginActivity : AppCompatActivity() {
@@ -96,7 +96,11 @@ class LoginActivity : AppCompatActivity() {
                 token = selectedUser.token,
                 apiKey = "key1"
             ),
-            user = User(id = selectedUser.id, name = selectedUser.name, image_url = selectedUser.image)
+            user = User(
+                id = selectedUser.id,
+                name = selectedUser.name,
+                image_url = selectedUser.image
+            )
         )
         startActivity(HomeActivity.getIntent(this))
         finish()

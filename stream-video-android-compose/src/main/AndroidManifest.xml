@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="io.getstream.video.android.compose">
+
+    <application>
+
+        <activity android:name="io.getstream.video.android.compose.ui.EmptyActivity" />
+
+        <activity
+            android:name="io.getstream.video.android.compose.ui.IncomingCallActivity"
+            android:launchMode="singleTop"
+            android:showOnLockScreen="true" />
+    </application>
+
+</manifest>
