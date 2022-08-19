@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.ui.components.CallTopAppbar
+import io.getstream.video.android.compose.utils.topAvatarPadding
 import io.getstream.video.android.model.CallType
 import io.getstream.video.android.model.VideoParticipant
 
@@ -44,7 +45,13 @@ public fun OutgoingCall(
             CallTopAppbar()
 
             OutgoingCallDetails(
-                modifier = Modifier.align(Alignment.CenterHorizontally),
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(
+                        top = participants.topAvatarPadding(
+                            callType = callType
+                        )
+                    ),
                 participants = participants,
                 callType = callType
             )

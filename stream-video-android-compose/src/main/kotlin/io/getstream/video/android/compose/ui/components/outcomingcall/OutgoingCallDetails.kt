@@ -39,7 +39,7 @@ internal fun OutgoingCallDetails(
     participants: List<VideoParticipant>
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
-        if (callType == CallType.VIDEO) {
+        if (callType == CallType.AUDIO) {
             ParticipantAvatars(participants = participants)
 
             Spacer(modifier = Modifier.height(32.dp))
