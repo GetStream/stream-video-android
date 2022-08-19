@@ -21,10 +21,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.CallTopAppbar
 import io.getstream.video.android.compose.ui.components.background.CallBackground
+import io.getstream.video.android.compose.ui.components.mock.mockParticipants
 import io.getstream.video.android.model.CallType
 import io.getstream.video.android.model.VideoParticipant
 
@@ -43,7 +45,7 @@ public fun OutgoingCall(
 
             CallTopAppbar()
 
-            val topPadding = if (participants.size == 1 && callType == CallType.AUDIO) {
+            val topPadding = if (participants.size == 1 || callType == CallType.VIDEO) {
                 VideoTheme.dimens.singleAvatarAppbarPadding
             } else {
                 VideoTheme.dimens.avatarAppbarPadding
@@ -66,6 +68,21 @@ public fun OutgoingCall(
             onCancelCall = onCancelCall,
             onMicToggleChanged = onMicToggleChanged,
             onVideoToggleChanged = onVideoToggleChanged
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun OutgoingCallPreview() {
+    VideoTheme {
+        OutgoingCall(
+            callId = "",
+            callType = CallType.VIDEO,
+            participants = mockParticipants,
+            onCancelCall = { },
+            onMicToggleChanged = { },
+            onVideoToggleChanged = { },
         )
     }
 }

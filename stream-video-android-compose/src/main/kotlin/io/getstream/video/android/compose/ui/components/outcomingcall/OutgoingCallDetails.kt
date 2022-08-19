@@ -54,7 +54,7 @@ internal fun OutgoingCallDetails(
 
 @Preview
 @Composable
-internal fun OutgoingCallDetailsPreview() {
+private fun OutgoingCallDetailsPreview() {
     VideoTheme {
         OutgoingCallDetails(
             callType = CallType.VIDEO,

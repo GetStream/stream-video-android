@@ -79,7 +79,7 @@ public fun ParticipantAvatars(
 
 @Preview
 @Composable
-internal fun ParticipantAvatarsPreview() {
+private fun ParticipantAvatarsPreview() {
     VideoTheme {
         ParticipantAvatars(participants = mockParticipants)
     }

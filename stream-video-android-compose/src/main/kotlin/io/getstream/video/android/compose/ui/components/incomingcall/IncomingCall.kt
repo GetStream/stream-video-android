@@ -21,10 +21,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.CallTopAppbar
 import io.getstream.video.android.compose.ui.components.background.CallBackground
+import io.getstream.video.android.compose.ui.components.mock.mockParticipants
 import io.getstream.video.android.model.CallType
 import io.getstream.video.android.model.VideoParticipant
 
@@ -67,6 +69,21 @@ public fun IncomingCall(
             onDeclineCall = onDeclineCall,
             onAcceptCall = onAcceptCall,
             onVideoToggleChanged = onVideoToggleChanged
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun IncomingCallPreview() {
+    VideoTheme {
+        IncomingCall(
+            callId = "",
+            callType = CallType.VIDEO,
+            participants = mockParticipants,
+            onDeclineCall = { },
+            onAcceptCall = { _, _ -> },
+            onVideoToggleChanged = { }
         )
     }
 }

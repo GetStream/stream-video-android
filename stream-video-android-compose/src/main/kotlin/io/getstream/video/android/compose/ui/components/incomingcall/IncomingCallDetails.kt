@@ -51,7 +51,7 @@ internal fun IncomingCallDetails(
 
 @Preview
 @Composable
-internal fun IncomingCallDetailsPreview() {
+private fun IncomingCallDetailsPreview() {
     VideoTheme {
         IncomingCallDetails(participants = mockParticipants)
     }

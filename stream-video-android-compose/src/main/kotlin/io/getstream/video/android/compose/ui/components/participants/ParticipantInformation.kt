@@ -28,8 +28,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.mock.mockParticipants
 import io.getstream.video.android.model.CallStatus
 import io.getstream.video.android.model.VideoParticipant
 
@@ -74,7 +76,7 @@ public fun ParticipantInformation(
             style = VideoTheme.typography.body,
             fontSize = VideoTheme.dimens.onCallStatusTextSize,
             fontWeight = FontWeight.Bold,
-            color = VideoTheme.colors.textLowEmphasis,
+            color = VideoTheme.colors.textHighEmphasis,
             textAlign = TextAlign.Center,
         )
     }
@@ -95,4 +97,15 @@ private fun buildLargeCallText(participants: List<VideoParticipant>): String {
     val initial = buildSmallCallText(participants)
 
     return "$initial and +${participants.size - 2} more"
+}
+
+@Preview
+@Composable
+private fun ParticipantInformationPreview() {
+    VideoTheme {
+        ParticipantInformation(
+            callStatus = CallStatus.INCOMING,
+            participants = mockParticipants
+        )
+    }
 }
