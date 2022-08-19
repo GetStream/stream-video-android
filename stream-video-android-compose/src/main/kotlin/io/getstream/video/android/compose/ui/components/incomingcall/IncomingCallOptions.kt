@@ -40,15 +40,17 @@ import io.getstream.video.android.model.CallType
 
 @Composable
 internal fun IncomingCallOptions(
+    modifier: Modifier = Modifier,
     callId: String,
     callType: CallType,
     onDeclineCall: (String) -> Unit,
     onAcceptCall: (callId: String, isVideoEnabled: Boolean) -> Unit,
+    onVideoToggleChanged: (Boolean) -> Unit
 ) {
     var isVideoEnabled by remember { mutableStateOf(true) }
 
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
@@ -72,14 +74,21 @@ internal fun IncomingCallOptions(
         if (callType == CallType.VIDEO) {
             IconButton(
                 modifier = Modifier
+                    .alpha(
+                        if (isVideoEnabled) {
+                            VideoTheme.dimens.buttonToggleOffAlpha
+                        } else {
+                            VideoTheme.dimens.buttonToggleOnAlpha
+                        }
+                    )
                     .background(
                         color = VideoTheme.colors.appBackground,
                         shape = VideoTheme.shapes.callButton
                     )
-                    .alpha(if (isVideoEnabled) 1.0f else 0.4f)
                     .size(VideoTheme.dimens.mediumButtonSize),
                 onClick = {
                     isVideoEnabled = !isVideoEnabled
+                    onVideoToggleChanged(isVideoEnabled)
                 },
                 content = {
                     val cameraIcon =
@@ -121,7 +130,8 @@ private fun IncomingCallOptionsPreview() {
             callId = "",
             callType = CallType.VIDEO,
             onDeclineCall = {},
-            onAcceptCall = { _, _ -> }
+            onAcceptCall = { _, _ -> },
+            onVideoToggleChanged = {}
         )
     }
 }
