@@ -47,6 +47,10 @@ public class CallService : FirebaseMessagingService() {
         }
     }
 
+    override fun onNewToken(token: String) {
+        // TODO
+    }
+
     private fun createNotification(context: Context): Notification {
         val contentIntent = Intent(context, IncomingCallActivity::class.java) // TODO - some content
         val contentPendingIntent = PendingIntent.getActivity(context, 0, contentIntent, 0)
