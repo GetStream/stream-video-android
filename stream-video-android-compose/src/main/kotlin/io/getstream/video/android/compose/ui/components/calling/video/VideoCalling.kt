@@ -23,7 +23,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.ui.components.CallTopAppbar
-import io.getstream.video.android.compose.ui.components.calling.audio.AudioCallingOptions
 import io.getstream.video.android.model.VideoParticipant
 
 @Composable
@@ -41,14 +40,20 @@ public fun VideoCalling(
 
         CallTopAppbar()
 
-        AudioCallingOptions(
+        VideoCallingDetails(
+            participants = participants
+        )
+
+        VideoCallingOptions(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 44.dp),
             callId = callId,
             onEndCall = onEndCall,
+            onChatMessagesExpand = onChatMessagesExpand,
             onMicToggleChanged = onMicToggleChanged,
-            onVideoToggleChanged = onVideoToggleChanged
+            onVideoToggleChanged = onVideoToggleChanged,
+            onCameraOrientationChanged = onCameraOrientationChanged
         )
     }
 }
