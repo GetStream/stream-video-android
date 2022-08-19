@@ -219,7 +219,14 @@ public final class io/getstream/video/android/compose/ui/components/CallDetailsK
 }
 
 public final class io/getstream/video/android/compose/ui/components/CallTopAppbarKt {
-	public static final fun CallTopAppbar (Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+	public static final fun CallTopAppbar (Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class io/getstream/video/android/compose/ui/components/ComposableSingletons$CallTopAppbarKt {
+	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/ComposableSingletons$CallTopAppbarKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class io/getstream/video/android/compose/ui/components/MainStageKt {
@@ -260,7 +267,7 @@ public final class io/getstream/video/android/compose/ui/components/calling/Call
 }
 
 public final class io/getstream/video/android/compose/ui/components/calling/audio/AudioCallingKt {
-	public static final fun AudioCalling (Ljava/lang/String;Ljava/util/List;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)V
+	public static final fun AudioCalling (Ljava/lang/String;Ljava/util/List;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/calling/audio/ComposableSingletons$AudioCallingDetailsKt {

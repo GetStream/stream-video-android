@@ -25,6 +25,7 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import io.getstream.video.android.compose.R
 import io.getstream.video.android.model.VideoParticipant
 
 @Composable
@@ -47,14 +48,10 @@ public fun CallBackground(
                 contentDescription = null
             )
         } else {
-            // TODO: Change the model to a default background image following design guidelines.
-            val firstUser = participants.first().user
             AsyncImage(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .blur(20.dp),
-                model = firstUser?.image_url,
-                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize(),
+                model = R.drawable.bg_call,
+                contentScale = ContentScale.FillBounds,
                 contentDescription = null
             )
         }

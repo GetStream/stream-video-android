@@ -33,9 +33,9 @@ import io.getstream.video.android.model.VideoParticipant
 public fun AudioCalling(
     callId: String,
     participants: List<VideoParticipant>,
-    onEndCall: (String) -> Unit,
-    onMicToggleChanged: (Boolean) -> Unit,
-    onVideoToggleChanged: (Boolean) -> Unit,
+    onEndCall: (String) -> Unit = {},
+    onMicToggleChanged: (Boolean) -> Unit = {},
+    onVideoToggleChanged: (Boolean) -> Unit = {},
 ) {
 
     CallBackground(participants = participants) {
