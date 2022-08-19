@@ -262,6 +262,13 @@ public final class io/getstream/video/android/compose/ui/components/incomingcall
 	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
 }
 
+public final class io/getstream/video/android/compose/ui/components/incomingcall/ComposableSingletons$IncomingCallKt {
+	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/incomingcall/ComposableSingletons$IncomingCallKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
+}
+
 public final class io/getstream/video/android/compose/ui/components/incomingcall/ComposableSingletons$IncomingCallOptionsKt {
 	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/incomingcall/ComposableSingletons$IncomingCallOptionsKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;
@@ -289,6 +296,13 @@ public final class io/getstream/video/android/compose/ui/components/outcomingcal
 	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
 }
 
+public final class io/getstream/video/android/compose/ui/components/outcomingcall/ComposableSingletons$OutgoingCallKt {
+	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/outcomingcall/ComposableSingletons$OutgoingCallKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
+}
+
 public final class io/getstream/video/android/compose/ui/components/outcomingcall/ComposableSingletons$OutgoingCallOptionsKt {
 	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/outcomingcall/ComposableSingletons$OutgoingCallOptionsKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;
@@ -304,6 +318,13 @@ public final class io/getstream/video/android/compose/ui/components/outcomingcal
 
 public final class io/getstream/video/android/compose/ui/components/participants/ComposableSingletons$ParticipantAvatarsKt {
 	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/participants/ComposableSingletons$ParticipantAvatarsKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class io/getstream/video/android/compose/ui/components/participants/ComposableSingletons$ParticipantInformationKt {
+	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/participants/ComposableSingletons$ParticipantInformationKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;
 	public fun <init> ()V
 	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
