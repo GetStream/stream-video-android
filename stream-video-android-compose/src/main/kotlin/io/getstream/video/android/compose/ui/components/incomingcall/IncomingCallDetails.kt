@@ -19,6 +19,7 @@ package io.getstream.video.android.compose.ui.components.incomingcall
 import androidx.compose.runtime.Composable
 import io.getstream.video.android.compose.ui.components.participants.ParticipantAvatars
 import io.getstream.video.android.compose.ui.components.participants.ParticipantInformation
+import io.getstream.video.android.model.CallStatus
 import io.getstream.video.android.model.CallType
 import io.getstream.video.android.model.VideoParticipant
 
@@ -30,7 +31,7 @@ internal fun IncomingCallDetails(
     ParticipantAvatars(participants = participants)
 
     ParticipantInformation(
-        callType = callType,
+        callStatus = CallStatus.INCOMING,
         participants = participants
     )
 }

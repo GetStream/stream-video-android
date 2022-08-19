@@ -897,31 +897,19 @@ public final class io/getstream/video/android/logging/LoggingLevel : java/lang/E
 	public static fun values ()[Lio/getstream/video/android/logging/LoggingLevel;
 }
 
-public abstract class io/getstream/video/android/model/CallType {
-	public synthetic fun <init> (ZLkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun getInComingCall ()Z
+public final class io/getstream/video/android/model/CallStatus : java/lang/Enum {
+	public static final field CALLING Lio/getstream/video/android/model/CallStatus;
+	public static final field INCOMING Lio/getstream/video/android/model/CallStatus;
+	public static final field OUTGOING Lio/getstream/video/android/model/CallStatus;
+	public static fun valueOf (Ljava/lang/String;)Lio/getstream/video/android/model/CallStatus;
+	public static fun values ()[Lio/getstream/video/android/model/CallStatus;
 }
 
-public final class io/getstream/video/android/model/CallType$Audio : io/getstream/video/android/model/CallType {
-	public fun <init> (Z)V
-	public final fun component1 ()Z
-	public final fun copy (Z)Lio/getstream/video/android/model/CallType$Audio;
-	public static synthetic fun copy$default (Lio/getstream/video/android/model/CallType$Audio;ZILjava/lang/Object;)Lio/getstream/video/android/model/CallType$Audio;
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public final fun isInComingCall ()Z
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/model/CallType$Video : io/getstream/video/android/model/CallType {
-	public fun <init> (Z)V
-	public final fun component1 ()Z
-	public final fun copy (Z)Lio/getstream/video/android/model/CallType$Video;
-	public static synthetic fun copy$default (Lio/getstream/video/android/model/CallType$Video;ZILjava/lang/Object;)Lio/getstream/video/android/model/CallType$Video;
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public final fun isInComingCall ()Z
-	public fun toString ()Ljava/lang/String;
+public final class io/getstream/video/android/model/CallType : java/lang/Enum {
+	public static final field AUDIO Lio/getstream/video/android/model/CallType;
+	public static final field VIDEO Lio/getstream/video/android/model/CallType;
+	public static fun valueOf (Ljava/lang/String;)Lio/getstream/video/android/model/CallType;
+	public static fun values ()[Lio/getstream/video/android/model/CallType;
 }
 
 public final class io/getstream/video/android/model/JoinCallResponse {

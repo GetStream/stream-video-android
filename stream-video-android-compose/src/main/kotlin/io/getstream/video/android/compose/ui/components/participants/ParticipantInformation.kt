@@ -22,12 +22,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.style.TextAlign
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.model.CallType
+import io.getstream.video.android.model.CallStatus
 import io.getstream.video.android.model.VideoParticipant
 
 @Composable
 public fun ParticipantInformation(
-    callType: CallType,
+    callStatus: CallStatus,
     participants: List<VideoParticipant>
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -52,7 +52,11 @@ public fun ParticipantInformation(
         )
 
         Text(
-            text = if (callType.inComingCall) "Incoming call..." else "Calling...",
+            text = when (callStatus) {
+                CallStatus.INCOMING -> "Incoming call..."
+                CallStatus.OUTGOING -> "Calling..."
+                CallStatus.CALLING -> "0:33" // TODO - observe current calling time
+            },
             style = VideoTheme.typography.body,
             color = VideoTheme.colors.textLowEmphasis
         )

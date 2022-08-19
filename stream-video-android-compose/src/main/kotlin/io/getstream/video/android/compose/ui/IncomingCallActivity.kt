@@ -43,7 +43,7 @@ public class IncomingCallActivity : AppCompatActivity() {
             // TODO - load the data from a getCall(GetCallRequest)
             IncomingCall(
                 callId = "",
-                callType = CallType.Video(isInComingCall = true),
+                callType = CallType.VIDEO,
                 participants = emptyList(),
                 onDeclineCall = { finish() },
                 onAcceptCall = { callId, isVideoEnabled ->

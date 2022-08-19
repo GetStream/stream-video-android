@@ -262,7 +262,7 @@ public final class io/getstream/video/android/compose/ui/components/participants
 }
 
 public final class io/getstream/video/android/compose/ui/components/participants/ParticipantInformationKt {
-	public static final fun ParticipantInformation (Lio/getstream/video/android/model/CallType;Ljava/util/List;Landroidx/compose/runtime/Composer;I)V
+	public static final fun ParticipantInformation (Lio/getstream/video/android/model/CallStatus;Ljava/util/List;Landroidx/compose/runtime/Composer;I)V
 }
 
 public final class io/getstream/video/android/compose/utils/ImageUtilsKt {

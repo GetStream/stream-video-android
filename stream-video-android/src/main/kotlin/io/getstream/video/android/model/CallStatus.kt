@@ -16,7 +16,8 @@
 
 package io.getstream.video.android.model
 
-public enum class CallType {
-    VIDEO,
-    AUDIO;
+public enum class CallStatus {
+    INCOMING,
+    OUTGOING,
+    CALLING
 }
