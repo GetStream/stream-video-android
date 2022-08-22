@@ -25,7 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.mock.mockParticipants
+import io.getstream.video.android.compose.ui.components.mock.mockParticipantList
 import io.getstream.video.android.compose.ui.components.participants.ParticipantAvatars
 import io.getstream.video.android.compose.ui.components.participants.ParticipantInformation
 import io.getstream.video.android.model.CallStatus
@@ -53,6 +53,6 @@ internal fun AudioCallingDetails(
 @Composable
 private fun AudioCallingDetailsPreview() {
     VideoTheme {
-        AudioCallingDetails(participants = mockParticipants)
+        AudioCallingDetails(participants = mockParticipantList)
     }
 }

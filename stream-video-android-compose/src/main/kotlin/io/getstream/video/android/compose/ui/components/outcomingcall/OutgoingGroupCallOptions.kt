@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.calling.audio
+package io.getstream.video.android.compose.ui.components.outcomingcall
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -33,6 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -42,12 +43,13 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.extensions.toggleAlpha
 
 @Composable
-internal fun AudioCallingOptions(
+internal fun OutgoingGroupCallOptions(
     modifier: Modifier = Modifier,
     callId: String,
-    onEndCall: (String) -> Unit,
-    onMicToggleChanged: (Boolean) -> Unit,
-    onVideoToggleChanged: (Boolean) -> Unit,
+    onCancelCall: (String) -> Unit = {},
+    onMicToggleChanged: (Boolean) -> Unit = {},
+    onVideoToggleChanged: (Boolean) -> Unit = {},
+    onCameraOrientationChanged: (Boolean) -> Unit = {},
 ) {
     var isMicEnabled by remember { mutableStateOf(true) }
     var isVideoEnabled by remember { mutableStateOf(true) }
@@ -56,6 +58,25 @@ internal fun AudioCallingOptions(
         modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        IconButton(
+            modifier = Modifier
+                .background(
+                    color = VideoTheme.colors.errorAccent,
+                    shape = VideoTheme.shapes.callButton
+                )
+                .size(VideoTheme.dimens.largeButtonSize),
+            onClick = { onCancelCall(callId) },
+            content = {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_call_end),
+                    tint = Color.White,
+                    contentDescription = "End call"
+                )
+            }
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
@@ -63,23 +84,17 @@ internal fun AudioCallingOptions(
         ) {
             IconButton(
                 modifier = Modifier
-                    .toggleAlpha(isMicEnabled)
+                    .alpha(VideoTheme.dimens.buttonToggleOnAlpha)
                     .background(
                         color = VideoTheme.colors.appBackground,
                         shape = VideoTheme.shapes.callButton
                     )
                     .size(VideoTheme.dimens.mediumButtonSize),
-                onClick = {
-                    isMicEnabled = !isMicEnabled
-                    onMicToggleChanged(isMicEnabled)
-                },
+                onClick = { onCameraOrientationChanged(false) },
                 content = {
-                    val cameraIcon =
-                        if (isMicEnabled) R.drawable.ic_mic_on else R.drawable.ic_mic_off
-
                     Icon(
-                        painter = painterResource(id = cameraIcon),
-                        contentDescription = "Toggle Mic",
+                        painter = painterResource(id = R.drawable.ic_camera_rotate),
+                        contentDescription = "Rotate Camera",
                         tint = VideoTheme.colors.textHighEmphasis
                     )
                 }
@@ -108,38 +123,36 @@ internal fun AudioCallingOptions(
                     )
                 }
             )
+
+            IconButton(
+                modifier = Modifier
+                    .toggleAlpha(isMicEnabled)
+                    .background(
+                        color = VideoTheme.colors.appBackground,
+                        shape = VideoTheme.shapes.callButton
+                    )
+                    .size(VideoTheme.dimens.mediumButtonSize),
+                onClick = {
+                    isMicEnabled = !isMicEnabled
+                    onMicToggleChanged(isMicEnabled)
+                },
+                content = {
+                    val cameraIcon =
+                        if (isMicEnabled) R.drawable.ic_mic_on else R.drawable.ic_mic_off
+
+                    Icon(
+                        painter = painterResource(id = cameraIcon),
+                        contentDescription = "Toggle Mic",
+                        tint = VideoTheme.colors.textHighEmphasis
+                    )
+                }
+            )
         }
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        IconButton(
-            modifier = Modifier
-                .background(
-                    color = VideoTheme.colors.errorAccent,
-                    shape = VideoTheme.shapes.callButton
-                )
-                .size(VideoTheme.dimens.largeButtonSize),
-            onClick = { onEndCall(callId) },
-            content = {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_call_end),
-                    tint = Color.White,
-                    contentDescription = "End call"
-                )
-            }
-        )
     }
 }
 
 @Preview
 @Composable
-private fun AudioCallingOptionsPreview() {
-    VideoTheme {
-        AudioCallingOptions(
-            callId = "",
-            onEndCall = {},
-            onMicToggleChanged = {},
-            onVideoToggleChanged = {}
-        )
-    }
+private fun OutgoingCallGroupOptions() {
+    VideoTheme { OutgoingGroupCallOptions(callId = "") }
 }

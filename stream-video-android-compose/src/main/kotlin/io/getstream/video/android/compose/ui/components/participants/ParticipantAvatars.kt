@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.InitialsAvatar
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
-import io.getstream.video.android.compose.ui.components.mock.mockParticipants
+import io.getstream.video.android.compose.ui.components.mock.mockParticipantList
 import io.getstream.video.android.model.VideoParticipant
 
 @Composable
@@ -83,6 +83,6 @@ public fun ParticipantAvatars(
 @Composable
 private fun ParticipantAvatarsPreview() {
     VideoTheme {
-        ParticipantAvatars(participants = mockParticipants)
+        ParticipantAvatars(participants = mockParticipantList)
     }
 }
