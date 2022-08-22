@@ -79,7 +79,7 @@ internal fun OutgoingSingleCallOptions(
 
                     Icon(
                         painter = painterResource(id = cameraIcon),
-                        contentDescription = "Toggle Video",
+                        contentDescription = "Toggle Mic",
                         tint = VideoTheme.colors.textHighEmphasis
                     )
                 }
