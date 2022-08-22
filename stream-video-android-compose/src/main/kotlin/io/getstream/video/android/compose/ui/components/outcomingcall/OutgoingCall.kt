@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.CallTopAppbar
 import io.getstream.video.android.compose.ui.components.background.CallBackground
-import io.getstream.video.android.compose.ui.components.mock.singleParticipant
+import io.getstream.video.android.compose.ui.components.mock.mockParticipant
 import io.getstream.video.android.model.CallType
 import io.getstream.video.android.model.VideoParticipant
 
@@ -35,9 +35,10 @@ public fun OutgoingCall(
     callId: String,
     callType: CallType,
     participants: List<VideoParticipant>,
-    onCancelCall: (String) -> Unit,
-    onMicToggleChanged: (Boolean) -> Unit,
-    onVideoToggleChanged: (Boolean) -> Unit,
+    onCancelCall: (String) -> Unit = {},
+    onMicToggleChanged: (Boolean) -> Unit = {},
+    onVideoToggleChanged: (Boolean) -> Unit = {},
+    onCameraOrientationChanged: (Boolean) -> Unit = {},
 ) {
 
     CallBackground(participants = participants) {
@@ -61,15 +62,28 @@ public fun OutgoingCall(
             )
         }
 
-        OutgoingSingleCallOptions(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 44.dp),
-            callId = callId,
-            onCancelCall = onCancelCall,
-            onMicToggleChanged = onMicToggleChanged,
-            onVideoToggleChanged = onVideoToggleChanged
-        )
+        if (participants.size == 1) {
+            OutgoingSingleCallOptions(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 44.dp),
+                callId = callId,
+                onCancelCall = onCancelCall,
+                onMicToggleChanged = onMicToggleChanged,
+                onVideoToggleChanged = onVideoToggleChanged
+            )
+        } else {
+            OutgoingGroupCallOptions(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 44.dp),
+                callId = callId,
+                onCancelCall = onCancelCall,
+                onMicToggleChanged = onMicToggleChanged,
+                onVideoToggleChanged = onVideoToggleChanged,
+                onCameraOrientationChanged = onCameraOrientationChanged
+            )
+        }
     }
 }
 
@@ -80,7 +94,7 @@ private fun OutgoingCallPreview() {
         OutgoingCall(
             callId = "",
             callType = CallType.VIDEO,
-            participants = listOf(singleParticipant),
+            participants = listOf(mockParticipant),
             onCancelCall = { },
             onMicToggleChanged = { },
             onVideoToggleChanged = { },

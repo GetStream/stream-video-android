@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.CallTopAppbar
 import io.getstream.video.android.compose.ui.components.background.CallBackground
-import io.getstream.video.android.compose.ui.components.mock.mockParticipants
+import io.getstream.video.android.compose.ui.components.mock.mockParticipantList
 import io.getstream.video.android.model.CallType
 import io.getstream.video.android.model.VideoParticipant
 
@@ -80,7 +80,7 @@ private fun IncomingCallPreview() {
         IncomingCall(
             callId = "",
             callType = CallType.VIDEO,
-            participants = mockParticipants,
+            participants = mockParticipantList,
             onDeclineCall = { },
             onAcceptCall = { _, _ -> },
             onVideoToggleChanged = { }

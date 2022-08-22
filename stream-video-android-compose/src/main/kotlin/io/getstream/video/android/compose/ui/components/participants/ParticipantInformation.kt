@@ -31,7 +31,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.mock.mockParticipants
+import io.getstream.video.android.compose.ui.components.mock.mockParticipantList
 import io.getstream.video.android.model.CallStatus
 import io.getstream.video.android.model.VideoParticipant
 
@@ -105,7 +105,7 @@ private fun ParticipantInformationPreview() {
     VideoTheme {
         ParticipantInformation(
             callStatus = CallStatus.Incoming,
-            participants = mockParticipants
+            participants = mockParticipantList
         )
     }
 }

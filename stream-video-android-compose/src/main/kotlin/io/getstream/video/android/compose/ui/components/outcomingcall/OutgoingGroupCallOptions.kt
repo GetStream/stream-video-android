@@ -83,7 +83,7 @@ internal fun OutgoingGroupCallOptions(
         ) {
             IconButton(
                 modifier = Modifier
-                    .alpha(0.15f)
+                    .alpha(0.4f)
                     .background(
                         color = VideoTheme.colors.appBackground,
                         shape = VideoTheme.shapes.callButton

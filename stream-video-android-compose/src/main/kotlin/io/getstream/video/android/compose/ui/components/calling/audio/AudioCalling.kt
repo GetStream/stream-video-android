@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.CallTopAppbar
-import io.getstream.video.android.compose.ui.components.mock.mockParticipants
+import io.getstream.video.android.compose.ui.components.mock.mockParticipantList
 import io.getstream.video.android.model.VideoParticipant
 
 @Composable
@@ -89,7 +89,7 @@ private fun AudioCallingPreview() {
     VideoTheme {
         AudioCalling(
             callId = "",
-            participants = mockParticipants,
+            participants = mockParticipantList,
             onMicToggleChanged = { },
             onVideoToggleChanged = { },
             onEndCall = { }

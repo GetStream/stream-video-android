@@ -382,7 +382,7 @@ public final class io/getstream/video/android/compose/ui/components/outcomingcal
 }
 
 public final class io/getstream/video/android/compose/ui/components/outcomingcall/OutgoingCallKt {
-	public static final fun OutgoingCall (Ljava/lang/String;Lio/getstream/video/android/model/CallType;Ljava/util/List;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)V
+	public static final fun OutgoingCall (Ljava/lang/String;Lio/getstream/video/android/model/CallType;Ljava/util/List;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/participants/ComposableSingletons$ParticipantAvatarsKt {
