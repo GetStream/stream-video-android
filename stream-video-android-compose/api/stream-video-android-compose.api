@@ -227,12 +227,13 @@ public final class io/getstream/video/android/compose/theme/VideoTheme {
 	public static final field INSTANCE Lio/getstream/video/android/compose/theme/VideoTheme;
 	public final fun getColors (Landroidx/compose/runtime/Composer;I)Lio/getstream/video/android/compose/theme/StreamColors;
 	public final fun getDimens (Landroidx/compose/runtime/Composer;I)Lio/getstream/video/android/compose/theme/StreamDimens;
+	public final fun getIcons (Landroidx/compose/runtime/Composer;I)Lio/getstream/video/android/compose/theme/StreamIcons;
 	public final fun getShapes (Landroidx/compose/runtime/Composer;I)Lio/getstream/video/android/compose/theme/StreamShapes;
 	public final fun getTypography (Landroidx/compose/runtime/Composer;I)Lio/getstream/video/android/compose/theme/StreamTypography;
 }
 
 public final class io/getstream/video/android/compose/theme/VideoThemeKt {
-	public static final fun VideoTheme (ZLio/getstream/video/android/compose/theme/StreamColors;Lio/getstream/video/android/compose/theme/StreamDimens;Lio/getstream/video/android/compose/theme/StreamTypography;Lio/getstream/video/android/compose/theme/StreamShapes;Landroidx/compose/material/ripple/RippleTheme;Lio/getstream/video/android/compose/imageloading/StreamCoilImageLoaderFactory;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun VideoTheme (ZLio/getstream/video/android/compose/theme/StreamColors;Lio/getstream/video/android/compose/theme/StreamDimens;Lio/getstream/video/android/compose/theme/StreamTypography;Lio/getstream/video/android/compose/theme/StreamShapes;Lio/getstream/video/android/compose/theme/StreamIcons;Landroidx/compose/material/ripple/RippleTheme;Lio/getstream/video/android/compose/imageloading/StreamCoilImageLoaderFactory;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/EmptyActivity : androidx/appcompat/app/AppCompatActivity {
