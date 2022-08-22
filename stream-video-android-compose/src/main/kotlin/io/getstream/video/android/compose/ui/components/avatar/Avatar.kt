@@ -21,12 +21,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalInspectionMode
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImagePainter
-import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.utils.rememberStreamImagePainter
 
@@ -61,7 +59,7 @@ public fun Avatar(
         ImageAvatar(
             modifier = modifier,
             shape = shape,
-            painter = painterResource(id = R.drawable.ic_preview_avatar),
+            painter = VideoTheme.icons.avatarPreview,
             contentDescription = contentDescription,
             onClick = onClick
         )
@@ -81,7 +79,7 @@ public fun Avatar(
 
     val painter = rememberStreamImagePainter(
         data = imageUrl,
-        placeholderPainter = painterResource(id = R.drawable.ic_preview_avatar)
+        placeholderPainter = VideoTheme.icons.avatarPreview
     )
 
     if (painter.state is AsyncImagePainter.State.Error) {
