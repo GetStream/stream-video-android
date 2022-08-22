@@ -1125,10 +1125,6 @@ public abstract interface class io/getstream/video/android/token/CredentialsProv
 	public abstract fun loadToken ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/utils/ColorUtilsKt {
-	public static final fun adjustColorBrightness (IF)I
-}
-
 public final class io/getstream/video/android/utils/Failure : io/getstream/video/android/utils/Result {
 	public fun <init> (Lio/getstream/video/android/errors/VideoError;)V
 	public final fun component1 ()Lio/getstream/video/android/errors/VideoError;
@@ -1157,10 +1153,6 @@ public final class io/getstream/video/android/utils/ResultKt {
 	public static final synthetic fun onErrorSuspend (Lio/getstream/video/android/utils/Result;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static final synthetic fun onSuccess (Lio/getstream/video/android/utils/Result;Lkotlin/jvm/functions/Function1;)Lio/getstream/video/android/utils/Result;
 	public static final synthetic fun onSuccessSuspend (Lio/getstream/video/android/utils/Result;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
-public final class io/getstream/video/android/utils/StringUtilsKt {
-	public static final fun enrichSocketURL (Ljava/lang/String;)Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/utils/Success : io/getstream/video/android/utils/Result {

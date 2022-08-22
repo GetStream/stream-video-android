@@ -344,9 +344,7 @@ public final class io/getstream/video/android/compose/ui/components/incomingcall
 }
 
 public final class io/getstream/video/android/compose/ui/components/mock/MockUtilsKt {
-	public static final fun getMockParticipants ()Ljava/util/List;
 	public static final fun getMockUsers ()Ljava/util/List;
-	public static final fun getSingleParticipants ()Lio/getstream/video/android/model/VideoParticipant;
 }
 
 public final class io/getstream/video/android/compose/ui/components/outcomingcall/ComposableSingletons$OutgoingCallDetailsKt {
@@ -396,6 +394,10 @@ public final class io/getstream/video/android/compose/ui/components/participants
 
 public final class io/getstream/video/android/compose/ui/components/participants/ParticipantInformationKt {
 	public static final fun ParticipantInformation (Lio/getstream/video/android/model/CallStatus;Ljava/util/List;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class io/getstream/video/android/compose/utils/ColorUtilsKt {
+	public static final fun adjustColorBrightness (IF)I
 }
 
 public final class io/getstream/video/android/compose/utils/ImageUtilsKt {

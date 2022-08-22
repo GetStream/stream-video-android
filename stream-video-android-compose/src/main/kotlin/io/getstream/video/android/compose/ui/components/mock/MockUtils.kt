@@ -20,14 +20,14 @@ import io.getstream.video.android.model.VideoParticipant
 import stream.video.Participant
 import stream.video.User
 
-public val singleParticipants: VideoParticipant
+internal val singleParticipant: VideoParticipant
     inline get() = VideoParticipant(
         streamParticipant = Participant(
             user = mockUsers[0]
         )
     )
 
-public val mockParticipants: List<VideoParticipant>
+internal val mockParticipants: List<VideoParticipant>
     inline get() = listOf(
         VideoParticipant(
             streamParticipant = Participant(
