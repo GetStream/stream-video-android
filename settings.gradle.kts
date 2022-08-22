@@ -1,3 +1,5 @@
+@file:Suppress("UnstableApiUsage")
+
 pluginManagement {
   repositories {
     gradlePluginPortal()
@@ -10,11 +12,11 @@ dependencyResolutionManagement {
   repositories {
     google()
     mavenCentral()
-    maven { url 'https://jitpack.io' }
+    maven(url = "https://jitpack.io")
   }
 }
 rootProject.name = "stream-video-android"
-include ':app'
-include ':stream-video-android'
-include ':stream-video-android-compose'
-include ':stream-video-android-pushprovider-firebase'
+include(":app")
+include(":stream-video-android")
+include(":stream-video-android-compose")
+include(":stream-video-android-pushprovider-firebase")
