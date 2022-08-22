@@ -35,10 +35,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.extensions.toggleAlpha
 
@@ -68,7 +66,7 @@ internal fun OutgoingGroupCallOptions(
             onClick = { onCancelCall(callId) },
             content = {
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_call_end),
+                    painter = VideoTheme.icons.callEnd,
                     tint = Color.White,
                     contentDescription = "End call"
                 )
@@ -93,7 +91,7 @@ internal fun OutgoingGroupCallOptions(
                 onClick = { onCameraOrientationChanged(false) },
                 content = {
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_camera_rotate),
+                        painter = VideoTheme.icons.cameraRotate,
                         contentDescription = "Rotate Camera",
                         tint = VideoTheme.colors.textHighEmphasis
                     )
@@ -114,10 +112,10 @@ internal fun OutgoingGroupCallOptions(
                 },
                 content = {
                     val cameraIcon =
-                        if (isVideoEnabled) R.drawable.ic_videocam else R.drawable.ic_videocam_off
+                        if (isVideoEnabled) VideoTheme.icons.videoCam else VideoTheme.icons.videoCamOff
 
                     Icon(
-                        painter = painterResource(id = cameraIcon),
+                        painter = cameraIcon,
                         contentDescription = "Toggle Video",
                         tint = VideoTheme.colors.textHighEmphasis
                     )
@@ -137,11 +135,11 @@ internal fun OutgoingGroupCallOptions(
                     onMicToggleChanged(isMicEnabled)
                 },
                 content = {
-                    val cameraIcon =
-                        if (isMicEnabled) R.drawable.ic_mic_on else R.drawable.ic_mic_off
+                    val micIcon =
+                        if (isMicEnabled) VideoTheme.icons.micOn else VideoTheme.icons.micOff
 
                     Icon(
-                        painter = painterResource(id = cameraIcon),
+                        painter = micIcon,
                         contentDescription = "Toggle Mic",
                         tint = VideoTheme.colors.textHighEmphasis
                     )

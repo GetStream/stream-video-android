@@ -29,11 +29,9 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.theme.VideoTheme
 
 @Composable
@@ -57,7 +55,7 @@ public fun CallTopAppbar(
                 modifier = Modifier
                     .padding(horizontal = 8.dp)
                     .clickable { onBackButtonClicked() },
-                painter = painterResource(id = R.drawable.ic_arrow_back),
+                painter = VideoTheme.icons.arrowBack,
                 contentDescription = "Back",
                 tint = VideoTheme.colors.textHighEmphasis
             )
@@ -77,7 +75,7 @@ public fun CallTopAppbar(
                 .padding(horizontal = 8.dp)
                 .align(Alignment.TopEnd)
                 .clickable { onParticipantsClicked() },
-            painter = painterResource(id = R.drawable.ic_participants),
+            painter = VideoTheme.icons.participants,
             contentDescription = "Participants",
             tint = VideoTheme.colors.textHighEmphasis
         )

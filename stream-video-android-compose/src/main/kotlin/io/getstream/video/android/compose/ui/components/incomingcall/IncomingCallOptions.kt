@@ -31,9 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
-import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.extensions.toggleAlpha
 import io.getstream.video.android.model.CallType
@@ -64,7 +62,7 @@ internal fun IncomingCallOptions(
             onClick = { onDeclineCall(callId) },
             content = {
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_call_end),
+                    painter = VideoTheme.icons.callEnd,
                     tint = Color.White,
                     contentDescription = "End call"
                 )
@@ -86,10 +84,10 @@ internal fun IncomingCallOptions(
                 },
                 content = {
                     val cameraIcon =
-                        if (isVideoEnabled) R.drawable.ic_videocam else R.drawable.ic_videocam_off
+                        if (isVideoEnabled) VideoTheme.icons.videoCam else VideoTheme.icons.videoCamOff
 
                     Icon(
-                        painter = painterResource(id = cameraIcon),
+                        painter = cameraIcon,
                         contentDescription = "Toggle Video",
                         tint = VideoTheme.colors.textHighEmphasis
                     )
@@ -107,7 +105,7 @@ internal fun IncomingCallOptions(
             onClick = { onAcceptCall(callId, isVideoEnabled) },
             content = {
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_call),
+                    painter = VideoTheme.icons.call,
                     tint = Color.White,
                     contentDescription = "Accept call"
                 )

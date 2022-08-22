@@ -42,6 +42,9 @@ private val LocalTypography = compositionLocalOf<StreamTypography> {
 private val LocalShapes = compositionLocalOf<StreamShapes> {
     error("No shapes provided! Make sure to wrap all usages of Stream components in a VideoTheme.")
 }
+private val LocalIcons = compositionLocalOf<StreamIcons> {
+    error("No icons provided! Make sure to wrap all usages of Stream components in a VideoTheme.")
+}
 
 /**
  * Our theme that provides all the important properties for styling to the user.
@@ -52,6 +55,7 @@ private val LocalShapes = compositionLocalOf<StreamShapes> {
  * @param dimens The set of dimens we provide, wrapped in [StreamDimens].
  * @param typography The set of typography styles we provide, wrapped in [StreamTypography].
  * @param shapes The set of shapes we provide, wrapped in [StreamShapes].
+ * @param icons The set of icons we provide, wrapped in [StreamIcons].
  * @param rippleTheme Defines the appearance for ripples.
  * @param content The content shown within the theme wrapper.
  */
@@ -62,6 +66,7 @@ public fun VideoTheme(
     dimens: StreamDimens = StreamDimens.defaultDimens(),
     typography: StreamTypography = StreamTypography.defaultTypography(),
     shapes: StreamShapes = StreamShapes.defaultShapes(),
+    icons: StreamIcons = StreamIcons.defaultIcons(),
     rippleTheme: RippleTheme = StreamRippleTheme,
     imageLoaderFactory: StreamCoilImageLoaderFactory = StreamCoilImageLoaderFactory.defaultFactory(),
     content: @Composable () -> Unit,
@@ -72,6 +77,7 @@ public fun VideoTheme(
         LocalDimens provides dimens,
         LocalTypography provides typography,
         LocalShapes provides shapes,
+        LocalIcons provides icons,
         LocalRippleTheme provides rippleTheme,
         LocalStreamImageLoader provides imageLoaderFactory.imageLoader(LocalContext.current),
     ) {
@@ -115,4 +121,12 @@ public object VideoTheme {
         @Composable
         @ReadOnlyComposable
         get() = LocalShapes.current
+
+    /**
+     * Retrieves the current [StreamIcons] at the call site's position in the hierarchy.
+     */
+    public val icons: StreamIcons
+        @Composable
+        @ReadOnlyComposable
+        get() = LocalIcons.current
 }
