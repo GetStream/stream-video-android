@@ -36,6 +36,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.extensions.toggleAlpha
 
 @Composable
 internal fun VideoCallingOptions(
@@ -74,7 +75,7 @@ internal fun VideoCallingOptions(
 
         IconButton(
             modifier = Modifier
-                .alpha(if (isVideoEnabled) 1.0f else 0.4f)
+                .toggleAlpha(isVideoEnabled)
                 .background(
                     color = VideoTheme.colors.appBackground,
                     shape = VideoTheme.shapes.callButton
@@ -98,7 +99,7 @@ internal fun VideoCallingOptions(
 
         IconButton(
             modifier = Modifier
-                .alpha(if (isMicEnabled) 1.0f else 0.4f)
+                .toggleAlpha(isMicEnabled)
                 .background(
                     color = VideoTheme.colors.appBackground,
                     shape = VideoTheme.shapes.callButton
@@ -122,7 +123,7 @@ internal fun VideoCallingOptions(
 
         IconButton(
             modifier = Modifier
-                .alpha(0.15f)
+                .alpha(VideoTheme.dimens.buttonToggleOnAlpha)
                 .background(
                     color = VideoTheme.colors.appBackground,
                     shape = VideoTheme.shapes.callButton

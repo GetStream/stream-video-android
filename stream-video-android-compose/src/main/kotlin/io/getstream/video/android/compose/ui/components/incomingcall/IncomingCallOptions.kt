@@ -30,12 +30,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.extensions.toggleAlpha
 import io.getstream.video.android.model.CallType
 
 @Composable
@@ -74,13 +74,7 @@ internal fun IncomingCallOptions(
         if (callType == CallType.VIDEO) {
             IconButton(
                 modifier = Modifier
-                    .alpha(
-                        if (isVideoEnabled) {
-                            VideoTheme.dimens.buttonToggleOffAlpha
-                        } else {
-                            VideoTheme.dimens.buttonToggleOnAlpha
-                        }
-                    )
+                    .toggleAlpha(isVideoEnabled)
                     .background(
                         color = VideoTheme.colors.appBackground,
                         shape = VideoTheme.shapes.callButton
