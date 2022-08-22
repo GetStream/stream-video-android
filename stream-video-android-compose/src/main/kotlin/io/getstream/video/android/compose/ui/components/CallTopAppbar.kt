@@ -39,6 +39,7 @@ import io.getstream.video.android.compose.theme.VideoTheme
 @Composable
 public fun CallTopAppbar(
     modifier: Modifier = Modifier,
+    title: String = "Messages",
     onBackButtonClicked: () -> Unit = {},
     onParticipantsClicked: () -> Unit = {},
 ) {
@@ -61,11 +62,10 @@ public fun CallTopAppbar(
                 tint = VideoTheme.colors.textHighEmphasis
             )
 
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(36.dp))
 
-            // TODO change content
             Text(
-                text = "Messages",
+                text = title,
                 fontSize = VideoTheme.dimens.topAppbarTextSize,
                 color = VideoTheme.colors.textHighEmphasis,
                 textAlign = TextAlign.Center,

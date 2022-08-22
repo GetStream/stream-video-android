@@ -41,10 +41,10 @@ import io.getstream.video.android.compose.theme.VideoTheme
 internal fun VideoCallingOptions(
     modifier: Modifier = Modifier,
     callId: String,
-    onEndCall: (String) -> Unit,
+    onEndCall: (String) -> Unit = {},
     onChatMessagesExpand: () -> Unit = {},
-    onMicToggleChanged: (Boolean) -> Unit,
-    onVideoToggleChanged: (Boolean) -> Unit,
+    onMicToggleChanged: (Boolean) -> Unit = {},
+    onVideoToggleChanged: (Boolean) -> Unit = {},
     onCameraOrientationChanged: (Boolean) -> Unit = {},
 ) {
     var isMicEnabled by remember { mutableStateOf(true) }

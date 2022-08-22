@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.CallTopAppbar
 import io.getstream.video.android.compose.ui.components.background.CallBackground
-import io.getstream.video.android.compose.ui.components.mock.mockParticipants
+import io.getstream.video.android.compose.ui.components.mock.singleParticipant
 import io.getstream.video.android.model.CallType
 import io.getstream.video.android.model.VideoParticipant
 
@@ -61,7 +61,7 @@ public fun OutgoingCall(
             )
         }
 
-        OutgoingCallOptions(
+        OutgoingSingleCallOptions(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 44.dp),
@@ -80,7 +80,7 @@ private fun OutgoingCallPreview() {
         OutgoingCall(
             callId = "",
             callType = CallType.VIDEO,
-            participants = mockParticipants,
+            participants = listOf(singleParticipant),
             onCancelCall = { },
             onMicToggleChanged = { },
             onVideoToggleChanged = { },
