@@ -30,7 +30,6 @@ import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.imageloading.LocalStreamImageLoader
-import io.getstream.video.android.compose.utils.adjustColorBrightness
 import kotlin.math.abs
 
 private const val GradientDarkerColorFactor = 1.3f
