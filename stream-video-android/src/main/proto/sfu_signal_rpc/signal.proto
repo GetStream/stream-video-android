@@ -1,0 +1,164 @@
+syntax = "proto3";
+
+package stream.video.sfu;
+
+option go_package = "github.com/GetStream/video-sfu/protobuf/sfu_signal_rpc";
+
+import "sfu_models/models.proto";
+
+service SignalServer {
+  // Join sets up the peer connection that is used to subscribe to A/V and the data channel for signaling
+  // in WebRTC terms, this contains the SDP offer for the user peer connection
+  rpc Join(JoinRequest) returns (JoinResponse);
+
+  // SetPublisher sends the WebRTC offer for the peer connection used to publish A/V
+  rpc SetPublisher(SetPublisherRequest) returns (SetPublisherResponse);
+
+  rpc SendAnswer(SendAnswerRequest) returns (SendAnswerResponse);
+
+  rpc SendIceCandidate(IceCandidateRequest) returns (IceCandidateResponse);
+
+  // UpdateSubscribers is used to notify the SFU about the list of video subscriptions
+  // TODO: sync subscriptions based on this + update tracks using the dimension info sent by the user
+  rpc UpdateSubscriptions(UpdateSubscriptionsRequest) returns (UpdateSubscriptionsResponse);
+
+  rpc UpdateMuteState(UpdateMuteStateRequest) returns (UpdateMuteStateResponse);
+
+  rpc RequestVideoQuality(UpdateVideoQualityRequest) returns (UpdateVideoQualityResponse);
+}
+
+message UpdateVideoQualityRequest{
+  repeated StreamQuality stream_qualities = 1;
+  string session_id = 2;
+}
+
+message UpdateVideoQualityResponse{
+
+}
+
+message UpdateMuteStateRequest{
+  string session_id = 1;
+  oneof mute {
+    AudioMuteChanged  audio_mute_changed = 2;
+    VideoMuteChanged  video_mute_changed = 3;
+  }
+}
+
+message UpdateMuteStateResponse{
+
+}
+
+message AudioMuteChanged {
+  bool muted = 1;
+}
+
+message VideoMuteChanged {
+  bool muted = 2;
+}
+
+message UpdateSubscriptionsRequest {
+  // maps stream user_ids to its size
+  map<string, VideoDimension> subscriptions = 1;
+  string session_id = 2;
+}
+
+message SendAnswerRequest {
+  PeerType peer_type = 1;
+  string sdp = 2;
+  string session_id = 4;
+}
+
+message SendAnswerResponse {
+
+}
+
+message IceCandidateRequest{
+  // TODO: use PeerTYPE!
+  bool publisher = 1;
+  string candidate = 2 ;
+  optional string sdpMid = 3;
+  optional uint32 sdpMLineIndex = 4;
+  optional string usernameFragment = 5;
+  string session_id = 7;
+}
+
+message IceCandidateResponse{
+
+}
+
+message UpdateSubscriptionsResponse {}
+
+message SetPublisherRequest {
+  // sdp offer
+  string sdp = 1;
+  string session_id = 3;
+}
+
+message SetPublisherResponse {
+  // sdp answer
+  string sdp = 1;
+  string session_id = 3;
+}
+
+message JoinRequest {
+  string subscriber_sdp_offer = 1;
+  string session_id = 3;
+
+  // TODO: we should know if this is going to be
+  // - publishing and subscribing, or just subscribing for future routing
+}
+
+message JoinResponse {
+  string sdp = 1;
+  CallState call_state = 2;
+  // TODO: include full list of participants with track and audio info
+}
+
+message ConnectRequest {
+  // peer connection sdp offer
+  string sdp_offer = 1;
+  // token used for authentication
+  string token = 2;
+}
+
+message ConnectResponse {
+  // sdp answer
+  string sdp_answer = 1;
+}
+
+// Signaling related payload, all these messages will be exchanged using signaling channel
+message SignalRequest {
+  oneof event_payload {
+    SubscribeRequest subscribe = 1;
+    PublishRequest publish = 2;
+  }
+}
+
+message SignalEvent {
+  oneof event_payload {
+    SubscribeResponse subscribe = 1;
+    PublishResponse publish = 2;
+  }
+}
+// SubscribeRequest
+message SubscribeRequest {
+  string token = 1;
+  string sdp_offer = 2;
+  // preferred quality
+  string quality = 3;
+}
+
+// SubscribeResponse
+message SubscribeResponse {
+  // preferred quality
+  string quality = 2;
+}
+
+message PublishRequest {
+  string token = 1;
+  string sdp_offer = 2;
+}
+
+message PublishResponse {
+  string sdp_answer = 2;
+}

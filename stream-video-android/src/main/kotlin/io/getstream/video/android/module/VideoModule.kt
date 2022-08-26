@@ -31,6 +31,10 @@ import io.getstream.video.android.socket.VideoSocketImpl
 import io.getstream.video.android.token.CredentialsManager
 import io.getstream.video.android.token.CredentialsManagerImpl
 import io.getstream.video.android.token.CredentialsProvider
+import io.getstream.video.android.webrtc.WebRTCClient
+import io.getstream.video.android.webrtc.signal.SignalClient
+import io.getstream.video.android.webrtc.signal.SignalClientImpl
+import io.getstream.video.android.webrtc.signal.SignalService
 import kotlinx.coroutines.CoroutineScope
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -81,6 +85,16 @@ internal class VideoModule(
         val service = retrofitClient.create(CallCoordinatorService::class.java)
 
         CallCoordinatorClientImpl(service, credentialsProvider)
+    }
+
+    private val signalClient: SignalClient by lazy {
+        val service = retrofitClient.create(SignalService::class.java)
+
+        SignalClientImpl(service)
+    }
+
+    private val webRTCClient: WebRTCClient by lazy {
+        WebRTCClient(credentialsProvider, signalClient)
     }
 
     /**

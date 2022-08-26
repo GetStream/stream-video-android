@@ -1,6 +1,8 @@
 package video_models
 
-import "github.com/GetStream/video/internal/validator"
+import (
+	"github.com/GetStream/video/pkg/validator"
+)
 
 func init() {
 	validator.Register[UserRequest](map[string]string{

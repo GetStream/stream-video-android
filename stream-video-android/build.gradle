@@ -74,7 +74,6 @@ dependencies {
 
     // A/V Calls
     implementation Dependencies.liveKit
-    api Dependencies.webRTC
 
     // Unit Tests
     testImplementation 'junit:junit:4.13.2'
