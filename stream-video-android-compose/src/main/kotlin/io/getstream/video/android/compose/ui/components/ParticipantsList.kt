@@ -25,10 +25,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.model.CallParticipant
+import io.getstream.video.android.model.VideoRoom
 
 @Composable
 public fun ParticipantsList(
-//    room: VideoRoom,
+    room: VideoRoom,
     participants: List<CallParticipant>,
     modifier: Modifier = Modifier,
     primarySpeaker: CallParticipant?
@@ -41,7 +42,7 @@ public fun ParticipantsList(
     ) {
         items(secondarySpeakers) { participant ->
             ParticipantItem(
-//                room,
+                room,
                 participant
             )
         }
@@ -50,7 +51,7 @@ public fun ParticipantsList(
 
 @Composable
 public fun ParticipantItem(
-//    room: VideoRoom,
+    room: VideoRoom,
     participant: CallParticipant
 ) {
     val track = participant.track
@@ -58,7 +59,7 @@ public fun ParticipantItem(
     if (track != null) {
         VideoRenderer(
             modifier = Modifier.size(150.dp),
-//            room = room.value,
+            videoRoom = room,
             videoTrack = track
         )
     }

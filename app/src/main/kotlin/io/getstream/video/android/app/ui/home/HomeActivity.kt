@@ -67,7 +67,7 @@ class HomeActivity : AppCompatActivity() {
             }
         )
 
-    private val callIdState: MutableState<String> = mutableStateOf("testroom")
+    private val callIdState: MutableState<String> = mutableStateOf("call:123")
 
     private val socketListener = object : SocketListener {
         override fun onEvent(event: VideoEvent) {

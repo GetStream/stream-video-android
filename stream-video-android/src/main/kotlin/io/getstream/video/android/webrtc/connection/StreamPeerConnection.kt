@@ -19,7 +19,6 @@ package io.getstream.video.android.webrtc.connection
 import io.getstream.video.android.dispatchers.DispatcherProvider
 import io.getstream.video.android.events.SfuDataEvent
 import io.getstream.video.android.utils.Result
-import io.getstream.video.android.webrtc.StreamPeerConnection
 import io.getstream.video.android.webrtc.signal.SignalClient
 import io.getstream.video.android.webrtc.utils.createValue
 import io.getstream.video.android.webrtc.utils.setValue
@@ -37,9 +36,9 @@ import org.webrtc.RtpTransceiver
 import org.webrtc.SessionDescription
 import stream.video.sfu.IceCandidateRequest
 
-private typealias StreamDataChannel = io.getstream.video.android.webrtc.datachannel.DataChannel
+private typealias StreamDataChannel = io.getstream.video.android.webrtc.datachannel.StreamDataChannel
 
-public class PeerConnection(
+public class StreamPeerConnection(
     private val sessionId: String,
     private val type: PeerConnectionType,
     private val signalClient: SignalClient,

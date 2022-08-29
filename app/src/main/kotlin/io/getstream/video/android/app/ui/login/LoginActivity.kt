@@ -102,7 +102,7 @@ class LoginActivity : AppCompatActivity() {
                 image_url = selectedUser.image
             )
         )
-        startActivity(SfuTestActivity.getIntent(this))
+        startActivity(SfuTestActivity.getIntent(this)) // TODO - move back to Home once it's re-implemented
         finish()
     }
 }

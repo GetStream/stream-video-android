@@ -26,11 +26,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.viewinterop.AndroidView
+import io.getstream.video.android.model.VideoRoom
 import org.webrtc.SurfaceViewRenderer
 import org.webrtc.VideoTrack
 
 @Composable
 public fun VideoRenderer(
+    videoRoom: VideoRoom,
     videoTrack: VideoTrack,
     modifier: Modifier = Modifier
 ) {
@@ -54,8 +56,8 @@ public fun VideoRenderer(
         boundVideoTrack = videoTrack
         // TODO - figure out remote vs local
         videoTrack.addSink(view)
-//        if (videoTrack is VideoTrack) {
-//            videoTrack.addRenderer(view, videoSinkVisibility)
+//        if (videoTrack is RemoteVideoTrack) {
+//            videoTrack.addSink(view, videoSinkVisibility)
 //        } else {
 //            videoTrack.addRenderer(view)
 //        }
@@ -77,7 +79,7 @@ public fun VideoRenderer(
     AndroidView(
         factory = { context ->
             SurfaceViewRenderer(context).apply {
-//                room.initVideoRenderer(this)
+                videoRoom.init(this)
                 setupVideoIfNeeded(videoTrack, this)
 
                 view = this

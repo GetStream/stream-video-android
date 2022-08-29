@@ -75,7 +75,8 @@ class SfuTestActivity : AppCompatActivity() {
     private fun updateVideoTrack(videoTrack: VideoTrack) {
         val renderer = findViewById<SurfaceViewRenderer>(R.id.surfaceView)
 
-        webRTCClient.startCapturingLocalVideo(renderer, LENS_FACING_FRONT)
+        webRTCClient.startCapturingLocalVideo(LENS_FACING_FRONT)
+        videoTrack.addSink(renderer)
     }
 
     companion object {

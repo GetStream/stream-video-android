@@ -20,6 +20,7 @@ import android.content.Context
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import android.hardware.camera2.CameraMetadata
+import android.media.AudioManager
 import android.util.Log
 import androidx.core.content.getSystemService
 import io.getstream.video.android.events.ChangePublishQualityEvent
@@ -37,8 +38,10 @@ import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Result
 import io.getstream.video.android.utils.Success
 import io.getstream.video.android.utils.updateValue
-import io.getstream.video.android.webrtc.connection.PeerConnectionFactory
 import io.getstream.video.android.webrtc.connection.PeerConnectionType
+import io.getstream.video.android.webrtc.connection.StreamPeerConnection
+import io.getstream.video.android.webrtc.connection.StreamPeerConnectionFactory
+import io.getstream.video.android.webrtc.datachannel.StreamDataChannel
 import io.getstream.video.android.webrtc.signal.SignalClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -62,7 +65,6 @@ import org.webrtc.PeerConnection
 import org.webrtc.RtpParameters
 import org.webrtc.SessionDescription
 import org.webrtc.SurfaceTextureHelper
-import org.webrtc.SurfaceViewRenderer
 import org.webrtc.VideoCapturer
 import org.webrtc.VideoTrack
 import stream.video.sfu.CodecSettings
@@ -75,9 +77,6 @@ import stream.video.sfu.UpdateSubscriptionsRequest
 import stream.video.sfu.VideoCodecs
 import stream.video.sfu.VideoDimension
 import java.util.concurrent.TimeUnit
-
-internal typealias StreamPeerConnection = io.getstream.video.android.webrtc.connection.PeerConnection
-internal typealias StreamDataChannel = io.getstream.video.android.webrtc.datachannel.DataChannel
 
 public class WebRTCClient(
     private val sessionId: String,
@@ -111,7 +110,7 @@ public class WebRTCClient(
     private var signalChannel: StreamDataChannel? = null
     private var signalChannelState: DataChannel.State = DataChannel.State.CLOSED
 
-    private val peerConnectionFactory by lazy { PeerConnectionFactory(context, signalClient) }
+    private val peerConnectionFactory by lazy { StreamPeerConnectionFactory(context, signalClient) }
     public val eglBase: EglBase by lazy { peerConnectionFactory.eglBase }
 
     /**
@@ -137,6 +136,28 @@ public class WebRTCClient(
             }
         }
     private var localAudioTrack: AudioTrack? = null
+
+    private val audioManager by lazy {
+        context.getSystemService<AudioManager>()
+    }
+
+    private val iceServers by lazy {
+        listOf(
+            PeerConnection.IceServer.builder("turn:openrelay.metered.ca:80")
+                .setUsername("openrelayproject")
+                .setPassword("openrelayproject")
+                .createIceServer(),
+
+            PeerConnection.IceServer.builder("turn:openrelay.metered.ca:443")
+                .setUsername("openrelayproject")
+                .setPassword("openrelayproject")
+                .createIceServer(),
+            PeerConnection.IceServer.builder("turn:openrelay.metered.ca:443?transport=tcp")
+                .setUsername("openrelayproject")
+                .setPassword("openrelayproject")
+                .createIceServer(),
+        )
+    }
 
     public var onLocalVideoTrackChange: (VideoTrack) -> Unit = {}
     public var onStreamAdded: (MediaStream) -> Unit = {}
@@ -177,6 +198,7 @@ public class WebRTCClient(
     private fun createConnection(): StreamPeerConnection {
         val connectionConfig = PeerConnection.RTCConfiguration(emptyList()).apply {
             this.sdpSemantics = PeerConnection.SdpSemantics.UNIFIED_PLAN
+            this.iceServers = this@WebRTCClient.iceServers
         }
 
         return peerConnectionFactory.makePeerConnection(
@@ -201,6 +223,14 @@ public class WebRTCClient(
     }
 
     private fun addStream(mediaStream: MediaStream) {
+        if (mediaStream.audioTracks.isNotEmpty()) {
+            Log.d("sfuConnectFlow", "AudioTracks received, ${mediaStream.audioTracks}")
+            mediaStream.audioTracks.forEach { it.setEnabled(true) }
+
+            audioManager?.mode = AudioManager.MODE_IN_COMMUNICATION
+            audioManager?.isSpeakerphoneOn = true
+        }
+
         Log.d("sfuConnectFlow", "StreamAdded, $mediaStream")
 
         val updatedList = _callParticipants.value.updateValue(
@@ -256,7 +286,8 @@ public class WebRTCClient(
     }
 
     private fun loadParticipants(data: JoinResponse): List<CallParticipant> {
-        return data.call_state?.participants?.map { it.toCallParticipant() } ?: emptyList()
+        return data.call_state?.participants?.map { it.toCallParticipant(currentUserId) }
+            ?: emptyList()
     }
 
     private suspend fun executeJoinRequest(data: SessionDescription): Result<JoinResponse> {
@@ -300,6 +331,7 @@ public class WebRTCClient(
     private fun createPublisher() {
         val connectionConfig = PeerConnection.RTCConfiguration(emptyList()).apply {
             this.sdpSemantics = PeerConnection.SdpSemantics.UNIFIED_PLAN
+            this.iceServers = this@WebRTCClient.iceServers
         }
 
         publisher = peerConnectionFactory.makePeerConnection(
@@ -448,10 +480,7 @@ public class WebRTCClient(
         return camera2Capturer
     }
 
-    public fun startCapturingLocalVideo(
-        renderer: SurfaceViewRenderer,
-        position: Int,
-    ) {
+    public fun startCapturingLocalVideo(position: Int) {
         val capturer = videoCapturer as? Camera2Capturer ?: return
         val enumerator = cameraEnumerator as? Camera2Enumerator ?: return
 
@@ -466,12 +495,13 @@ public class WebRTCClient(
         val supportedFormats = enumerator.getSupportedFormats(frontCamera) ?: emptyList()
 
         /**
-         * We pick the highest resolution.
+         * We pick the middle resolution.
          */
-        val resolution = supportedFormats.firstOrNull() ?: return
+        val middleResIndex = supportedFormats.count() / 2
+
+        val resolution = supportedFormats[middleResIndex] ?: return
 
         capturer.startCapture(resolution.width, resolution.height, resolution.framerate.max)
-        localVideoTrack?.addSink(renderer)
     }
 
     /**
@@ -546,7 +576,8 @@ public class WebRTCClient(
     }
 
     private fun addParticipant(event: SfuParticipantJoinedEvent) {
-        _callParticipants.value = _callParticipants.value + event.participant.toCallParticipant()
+        _callParticipants.value =
+            _callParticipants.value + event.participant.toCallParticipant(currentUserId)
     }
 
     private fun removeParticipant(event: SfuParticipantLeftEvent) {

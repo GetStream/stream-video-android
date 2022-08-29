@@ -25,9 +25,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.model.CallParticipant
+import io.getstream.video.android.model.VideoRoom
 
 @Composable
 public fun MainStage(
+    room: VideoRoom,
     speaker: CallParticipant?,
     modifier: Modifier = Modifier
 ) {
@@ -36,7 +38,8 @@ public fun MainStage(
     if (track != null) {
         VideoRenderer(
             modifier = modifier,
-            videoTrack = track
+            videoTrack = track,
+            videoRoom = room
         )
     } else {
         Box(

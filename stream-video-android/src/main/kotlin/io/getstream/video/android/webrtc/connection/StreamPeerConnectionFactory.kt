@@ -19,7 +19,6 @@ package io.getstream.video.android.webrtc.connection
 import android.content.Context
 import android.media.MediaCodecList
 import android.os.Build
-import io.getstream.video.android.webrtc.StreamPeerConnection
 import io.getstream.video.android.webrtc.signal.SignalClient
 import org.webrtc.AudioSource
 import org.webrtc.AudioTrack
@@ -30,12 +29,15 @@ import org.webrtc.MediaConstraints
 import org.webrtc.MediaStream
 import org.webrtc.PeerConnection
 import org.webrtc.PeerConnectionFactory
+import org.webrtc.SimulcastVideoEncoderFactory
+import org.webrtc.SoftwareVideoEncoderFactory
 import org.webrtc.VideoSource
 import org.webrtc.VideoTrack
+import org.webrtc.audio.JavaAudioDeviceModule
 import stream.video.sfu.Codec
 import java.util.*
 
-public class PeerConnectionFactory(
+public class StreamPeerConnectionFactory(
     private val context: Context,
     private val signalClient: SignalClient
 ) {
@@ -51,7 +53,8 @@ public class PeerConnectionFactory(
     }
 
     private val videoEncoderFactory by lazy {
-        HardwareVideoEncoderFactory(eglBase.eglBaseContext, true, false)
+        val hardwareEncoder = HardwareVideoEncoderFactory(eglBase.eglBaseContext, true, false)
+        SimulcastVideoEncoderFactory(hardwareEncoder, SoftwareVideoEncoderFactory())
     }
 
     private val factory by lazy {
@@ -65,6 +68,7 @@ public class PeerConnectionFactory(
             .setOptions(PeerConnectionFactory.Options())
             .setVideoDecoderFactory(videoDecoderFactory)
             .setVideoEncoderFactory(videoEncoderFactory)
+            .setAudioDeviceModule(JavaAudioDeviceModule.builder(context).createAudioDeviceModule())
             .createPeerConnectionFactory()
     }
 

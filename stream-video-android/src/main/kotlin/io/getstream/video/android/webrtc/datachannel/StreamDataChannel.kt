@@ -21,7 +21,7 @@ import okio.ByteString
 import org.webrtc.DataChannel
 import stream.video.sfu.SfuEvent
 
-public class DataChannel(
+public class StreamDataChannel(
     private val dataChannel: DataChannel,
     private val onMessage: (SfuDataEvent) -> Unit,
     private val onStateChange: (DataChannel.State) -> Unit

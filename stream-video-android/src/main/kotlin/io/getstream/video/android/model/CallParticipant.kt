@@ -24,19 +24,21 @@ public data class CallParticipant(
     public val role: String,
     public val name: String,
     public val profileImageURL: String?,
+    public val isLocal: Boolean,
     public var isOnline: Boolean,
     public var hasVideo: Boolean,
     public var hasAudio: Boolean,
     public var track: VideoTrack?,
-    public var trackSize: Pair<Int, Int>
+    public var trackSize: Pair<Int, Int>,
 )
 
-public fun Participant.toCallParticipant(): CallParticipant =
+public fun Participant.toCallParticipant(currentUserId: String): CallParticipant =
     CallParticipant(
         id = this.user?.id ?: "",
         name = this.user?.name ?: "",
         role = this.user?.role ?: "",
         profileImageURL = this.user?.image_url,
+        isLocal = currentUserId == this.user?.id,
         isOnline = true,
         hasVideo = video,
         hasAudio = audio,

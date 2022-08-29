@@ -79,16 +79,19 @@ import io.getstream.video.android.compose.ui.components.CallDetails
 import io.getstream.video.android.compose.ui.components.MainStage
 import io.getstream.video.android.model.CallParticipantState
 import io.getstream.video.android.model.CallType
+import io.getstream.video.android.model.VideoRoom
 import io.getstream.video.android.utils.onError
 import io.getstream.video.android.utils.onSuccessSuspend
 import io.getstream.video.android.viewmodel.CallViewModel
 import io.getstream.video.android.viewmodel.CallViewModelFactory
 import kotlinx.coroutines.launch
+import stream.video.Call
 
 class CallActivity : AppCompatActivity() {
 
     private val factory by lazy { CallViewModelFactory(VideoApp.videoClient) }
     private val callViewModel by viewModels<CallViewModel>(factoryProducer = { factory })
+    private val webRTCClient by lazy { VideoApp.videoClient.webRTCClient }
 
     @RequiresApi(M)
     private val permissionsContract = registerForActivityResult(
@@ -111,6 +114,8 @@ class CallActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        callViewModel.init(Call(), "", "")
+        callViewModel.startCapturingLocalVideo()
         setContent {
             VideoCallContent()
         }
@@ -163,11 +168,13 @@ class CallActivity : AppCompatActivity() {
                         modifier = Modifier
                             .weight(0.5f)
                             .fillMaxWidth(),
-                        speaker = currentSpeaker
+                        speaker = currentSpeaker,
+                        room = VideoRoom(webRTCClient.eglBase)
                     )
 
                     CallDetails(
                         modifier = Modifier.weight(0.5f),
+                        room = VideoRoom(webRTCClient.eglBase),
                         isCameraEnabled = isCameraEnabled,
                         isMicrophoneEnabled = isMicrophoneEnabled,
                         participants = participants,
