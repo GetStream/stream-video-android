@@ -30,6 +30,7 @@ import org.webrtc.PeerConnection
 import org.webrtc.PeerConnectionFactory
 import org.webrtc.VideoSource
 import org.webrtc.VideoTrack
+import stream.video.sfu.Codec
 import java.util.*
 
 public class PeerConnectionFactory(
@@ -50,6 +51,7 @@ public class PeerConnectionFactory(
     private val encoderFactory by lazy {
         HardwareVideoEncoderFactory(eglContext, false, false)
     }
+
     private val factory by lazy {
         PeerConnectionFactory.initialize(
             PeerConnectionFactory.InitializationOptions.builder(context)
@@ -66,6 +68,18 @@ public class PeerConnectionFactory(
             .setVideoDecoderFactory(decoderFactory)
             .setVideoEncoderFactory(encoderFactory)
             .createPeerConnectionFactory()
+    }
+
+    public fun getEncoderCodecs(): List<Codec> {
+        return decoderFactory.supportedCodecs.map {
+            Codec(it.name)
+        }
+    }
+
+    public fun getDecoderCodecs(): List<Codec> {
+        return encoderFactory.supportedCodecs.map {
+            Codec(it.name)
+        }
     }
 
     /**

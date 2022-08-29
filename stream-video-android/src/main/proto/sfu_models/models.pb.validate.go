@@ -1124,6 +1124,37 @@ func (m *Codec) validate(all bool) error {
 
 	// no validation rules for FmtpLine
 
+	// no validation rules for ClockRate
+
+	if all {
+		switch v := interface{}(m.GetChannels()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, CodecValidationError{
+					field:  "Channels",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, CodecValidationError{
+					field:  "Channels",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetChannels()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return CodecValidationError{
+				field:  "Channels",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
 	if len(errors) > 0 {
 		return CodecMultiError(errors)
 	}
@@ -1200,6 +1231,107 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = CodecValidationError{}
+
+// Validate checks the field values on Channels with the rules defined in the
+// proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *Channels) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on Channels with the rules defined in
+// the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in ChannelsMultiError, or nil
+// if none found.
+func (m *Channels) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *Channels) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Channels
+
+	if len(errors) > 0 {
+		return ChannelsMultiError(errors)
+	}
+
+	return nil
+}
+
+// ChannelsMultiError is an error wrapping multiple validation errors returned
+// by Channels.ValidateAll() if the designated constraints aren't met.
+type ChannelsMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ChannelsMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ChannelsMultiError) AllErrors() []error { return m }
+
+// ChannelsValidationError is the validation error returned by
+// Channels.Validate if the designated constraints aren't met.
+type ChannelsValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ChannelsValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ChannelsValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ChannelsValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ChannelsValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ChannelsValidationError) ErrorName() string { return "ChannelsValidationError" }
+
+// Error satisfies the builtin error interface
+func (e ChannelsValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sChannels.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ChannelsValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ChannelsValidationError{}
 
 // Validate checks the field values on SimulcastCodec with the rules defined in
 // the proto definition for this message. If any rules are violated, the first

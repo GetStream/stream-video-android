@@ -1674,6 +1674,74 @@ func (m *JoinRequest) validate(all bool) error {
 
 	// no validation rules for SessionId
 
+	for idx, item := range m.GetSenderCodecs() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, JoinRequestValidationError{
+						field:  fmt.Sprintf("SenderCodecs[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, JoinRequestValidationError{
+						field:  fmt.Sprintf("SenderCodecs[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return JoinRequestValidationError{
+					field:  fmt.Sprintf("SenderCodecs[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	for idx, item := range m.GetReceiverCodecs() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, JoinRequestValidationError{
+						field:  fmt.Sprintf("ReceiverCodecs[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, JoinRequestValidationError{
+						field:  fmt.Sprintf("ReceiverCodecs[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return JoinRequestValidationError{
+					field:  fmt.Sprintf("ReceiverCodecs[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
 	if len(errors) > 0 {
 		return JoinRequestMultiError(errors)
 	}

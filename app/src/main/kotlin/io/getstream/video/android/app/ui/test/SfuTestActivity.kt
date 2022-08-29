@@ -18,23 +18,28 @@ package io.getstream.video.android.app.ui.test
 
 import android.content.Context
 import android.content.Intent
+import android.hardware.camera2.CameraMetadata.LENS_FACING_FRONT
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import io.getstream.video.android.app.R
 import io.getstream.video.android.app.VideoApp
+import org.webrtc.SurfaceViewRenderer
 
 class SfuTestActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_sfu_test)
         testWebRTCClient()
-
-        // TODO - set content
     }
 
     private fun testWebRTCClient() {
         val client = VideoApp.videoClient.webRTCClient
 
         client.connect(true)
+        val renderer = findViewById<SurfaceViewRenderer>(R.id.surfaceView)
+
+        client.startCapturingLocalVideo(renderer, LENS_FACING_FRONT)
     }
 
     companion object {

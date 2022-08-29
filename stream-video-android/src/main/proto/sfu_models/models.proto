@@ -107,6 +107,12 @@ message SimulcastCodecInfo {
 message Codec {
   string mime = 1;
   string fmtp_line = 2;
+  uint32 clock_rate = 3;
+  channels channels =4 ;
+}
+
+message channels{
+  uint32 channels =1;
 }
 
 message SimulcastCodec {

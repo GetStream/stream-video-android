@@ -94,6 +94,7 @@ class LoginActivity : AppCompatActivity() {
         VideoApp.initializeClient(
             credentialsProvider = FakeCredentialsProvider(
                 token = selectedUser.token,
+                sfuToken = selectedUser.sfuToken,
                 apiKey = "key1"
             ),
             user = User(
