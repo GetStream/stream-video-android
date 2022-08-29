@@ -14,31 +14,10 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.token
+package io.getstream.video.android.model
 
-/**
- * Exposes a way to build a token provided that connects to custom implementation for
- * authentication.
- */
-public interface CredentialsProvider {
-
-    /**
-     * @return The user token backed by authentication services.
-     */
-    public fun loadToken(): String
-
-    /**
-     * @return The user token that's cached.
-     */
-    public fun getCachedToken(): String
-
-    public fun loadApiKey(): String
-
-    public fun getCachedApiKey(): String
-
-    /**
-     * TODO - will these tokens become the same as for coordinator.
-     */
-
-    public fun getSfuToken(): String
-}
+public class CallSettings(
+    public val audioOn: Boolean = true,
+    public val videoOn: Boolean = false,
+    public val speakerOn: Boolean = true
+)

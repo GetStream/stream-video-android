@@ -17,10 +17,22 @@
 package io.getstream.video.android.webrtc.signal
 
 import io.getstream.video.android.utils.Result
+import stream.video.sfu.IceCandidateRequest
+import stream.video.sfu.IceCandidateResponse
+import stream.video.sfu.JoinRequest
+import stream.video.sfu.JoinResponse
 import stream.video.sfu.SendAnswerRequest
 import stream.video.sfu.SendAnswerResponse
+import stream.video.sfu.SetPublisherRequest
+import stream.video.sfu.SetPublisherResponse
 
 public interface SignalClient {
 
-    public suspend fun sendAnswer(sendAnswerRequest: SendAnswerRequest): Result<SendAnswerResponse>
+    public suspend fun sendAnswer(request: SendAnswerRequest): Result<SendAnswerResponse>
+
+    public suspend fun sendIceCandidate(request: IceCandidateRequest): Result<IceCandidateResponse>
+
+    public suspend fun join(request: JoinRequest): Result<JoinResponse>
+
+    public suspend fun setPublisher(request: SetPublisherRequest): Result<SetPublisherResponse>
 }

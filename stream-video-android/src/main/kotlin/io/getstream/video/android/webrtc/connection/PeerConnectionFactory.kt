@@ -16,6 +16,8 @@
 
 package io.getstream.video.android.webrtc.connection
 
+import android.content.Context
+import io.getstream.video.android.webrtc.StreamPeerConnection
 import io.getstream.video.android.webrtc.signal.SignalClient
 import org.webrtc.AudioSource
 import org.webrtc.AudioTrack
@@ -30,9 +32,8 @@ import org.webrtc.VideoSource
 import org.webrtc.VideoTrack
 import java.util.*
 
-private typealias StreamPeerConnection = io.getstream.video.android.webrtc.connection.PeerConnection
-
 public class PeerConnectionFactory(
+    private val context: Context,
     private val signalClient: SignalClient
 ) {
 
@@ -50,6 +51,10 @@ public class PeerConnectionFactory(
         HardwareVideoEncoderFactory(eglContext, false, false)
     }
     private val factory by lazy {
+        PeerConnectionFactory.initialize(
+            PeerConnectionFactory.InitializationOptions.builder(context)
+                .createInitializationOptions()
+        )
         // TODO init SSL?
 
         PeerConnectionFactory.builder()
@@ -105,7 +110,7 @@ public class PeerConnectionFactory(
         UUID.randomUUID().toString(), source
     )
 
-    public fun makeAudioSource(constraints: MediaConstraints? = null): AudioSource =
+    public fun makeAudioSource(constraints: MediaConstraints = MediaConstraints()): AudioSource =
         factory.createAudioSource(constraints)
 
     public fun makeAudioTrack(source: AudioSource): AudioTrack =

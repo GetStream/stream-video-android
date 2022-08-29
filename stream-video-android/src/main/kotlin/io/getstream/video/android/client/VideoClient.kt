@@ -36,6 +36,7 @@ import io.getstream.video.android.utils.Result
 import io.getstream.video.android.utils.Success
 import io.getstream.video.android.utils.enrichSocketURL
 import io.getstream.video.android.utils.getLatencyMeasurements
+import io.getstream.video.android.webrtc.WebRTCClient
 import io.livekit.android.LiveKit
 import io.livekit.android.RoomOptions
 import io.livekit.android.room.Room
@@ -74,7 +75,8 @@ public class VideoClient(
     private val socket: VideoSocket,
     private val socketStateService: SocketStateService,
     private val userState: UserState,
-    private val callCoordinatorClient: CallCoordinatorClient
+    private val callCoordinatorClient: CallCoordinatorClient,
+    public val webRTCClient: WebRTCClient
 ) {
 
     /**
@@ -331,7 +333,8 @@ public class VideoClient(
                 socket = videoModule.socket(),
                 socketStateService = SocketStateService(),
                 userState = videoModule.userState(),
-                callCoordinatorClient = videoModule.callClient()
+                callCoordinatorClient = videoModule.callClient(),
+                webRTCClient = videoModule.webRTCClient()
             )
         }
     }

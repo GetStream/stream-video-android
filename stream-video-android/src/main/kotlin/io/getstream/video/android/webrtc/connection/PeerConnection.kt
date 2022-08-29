@@ -16,15 +16,28 @@
 
 package io.getstream.video.android.webrtc.connection
 
+import io.getstream.video.android.dispatchers.DispatcherProvider
 import io.getstream.video.android.utils.Result
+import io.getstream.video.android.webrtc.StreamPeerConnection
 import io.getstream.video.android.webrtc.signal.SignalClient
 import io.getstream.video.android.webrtc.utils.createValue
 import io.getstream.video.android.webrtc.utils.setValue
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import org.webrtc.DataChannel
 import org.webrtc.IceCandidate
+import org.webrtc.MediaConstraints
 import org.webrtc.MediaStream
+import org.webrtc.MediaStreamTrack
 import org.webrtc.PeerConnection
+import org.webrtc.RtpParameters
+import org.webrtc.RtpSender
+import org.webrtc.RtpTransceiver
 import org.webrtc.SessionDescription
+import stream.video.sfu.IceCandidateRequest
+import java.nio.ByteBuffer
+
+private typealias StreamDataChannel = io.getstream.video.android.webrtc.datachannel.DataChannel
 
 public class PeerConnection(
     private val sessionId: String,
@@ -32,9 +45,13 @@ public class PeerConnection(
     private val signalClient: SignalClient
 ) : PeerConnection.Observer {
 
-    private lateinit var connection: PeerConnection
+    private val coroutineScope = CoroutineScope(DispatcherProvider.IO)
 
-    public var onNegotiationNeeded: ((PeerConnection) -> Unit)? = null
+    private lateinit var connection: PeerConnection
+    private var transceiver: RtpTransceiver? = null
+
+    public var onNegotiationNeeded: ((StreamPeerConnection) -> Unit)? =
+        null
     public var onStreamAdded: ((MediaStream) -> Unit)? = null
     public var onStreamRemoved: ((MediaStream) -> Unit)? = null
 
@@ -42,48 +59,114 @@ public class PeerConnection(
         this.connection = peerConnection
     }
 
-    public fun createDataChannel(label: String, init: DataChannel.Init): DataChannel {
-        return connection.createDataChannel(label, init)
+    public fun createDataChannel(
+        label: String,
+        init: DataChannel.Init,
+        onMessage: (ByteBuffer) -> Unit,
+        onStateChange: (DataChannel.State) -> Unit
+    ): StreamDataChannel {
+        return StreamDataChannel(
+            connection.createDataChannel(label, init),
+            onMessage,
+            onStateChange
+        )
     }
 
     public suspend fun setRemoteDescription(sessionDescription: SessionDescription): Result<Unit> {
         return setValue { connection.setRemoteDescription(it, sessionDescription) }
     }
 
+    public suspend fun createAnswer(): Result<SessionDescription> {
+        return createValue { connection.createAnswer(it, MediaConstraints()) }
+    }
+
     public suspend fun createOffer(): Result<SessionDescription> {
-        return createValue { connection.createOffer(it, null) }
+        return createValue { connection.createOffer(it, MediaConstraints()) }
+    }
+
+    public suspend fun setLocalDescription(sessionDescription: SessionDescription): Result<Unit> {
+        return setValue { connection.setLocalDescription(it, sessionDescription) }
+    }
+
+    public fun addTrack(
+        mediaStreamTrack: MediaStreamTrack,
+        streamIds: List<String>
+    ): RtpSender {
+        return connection.addTrack(mediaStreamTrack, streamIds)
+    }
+
+    public fun addTransceiver(track: MediaStreamTrack, streamIds: List<String>) {
+        val fullQuality = RtpParameters.Encoding(
+            "f",
+            true,
+            1.0
+        ).apply {
+            maxBitrateBps = 1_200_000
+        }
+
+        val halfQuality = RtpParameters.Encoding(
+            "h",
+            true,
+            2.0
+        ).apply {
+            maxBitrateBps = 500_000
+        }
+
+        val quarterQuality = RtpParameters.Encoding(
+            "q",
+            true,
+            4.0
+        ).apply {
+            maxBitrateBps = 125_000
+        }
+
+        val encodings = listOf(fullQuality, halfQuality, quarterQuality)
+
+        val transceiverInit = RtpTransceiver.RtpTransceiverInit(
+            RtpTransceiver.RtpTransceiverDirection.SEND_ONLY,
+            streamIds,
+            encodings
+        )
+
+        transceiver = connection.addTransceiver(track, transceiverInit)
     }
 
     /**
      * Peer connection listeners.
      */
-    override fun onSignalingChange(p0: PeerConnection.SignalingState?) {
+
+    override fun onIceCandidate(candidate: IceCandidate?) {
+        if (candidate == null) return
+
+        val request = IceCandidateRequest(
+            publisher = type == PeerConnectionType.PUBLISHER,
+            candidate = candidate.sdp ?: "",
+            sdpMid = candidate.sdpMid ?: "",
+            sdpMLineIndex = candidate.sdpMLineIndex,
+            session_id = sessionId
+        )
+
+        coroutineScope.launch {
+            signalClient.sendIceCandidate(request)
+        }
     }
 
-    override fun onIceConnectionChange(p0: PeerConnection.IceConnectionState?) {
+    override fun onAddStream(stream: MediaStream?) {
+        stream?.let { it -> onStreamAdded?.invoke(it) }
     }
 
-    override fun onIceConnectionReceivingChange(p0: Boolean) {
-    }
-
-    override fun onIceGatheringChange(p0: PeerConnection.IceGatheringState?) {
-    }
-
-    override fun onIceCandidate(p0: IceCandidate?) {
-    }
-
-    override fun onIceCandidatesRemoved(p0: Array<out IceCandidate>?) {
-    }
-
-    override fun onAddStream(p0: MediaStream?) {
-    }
-
-    override fun onRemoveStream(p0: MediaStream?) {
-    }
-
-    override fun onDataChannel(p0: DataChannel?) {
+    override fun onRemoveStream(stream: MediaStream?) {
+        stream?.let { it -> onStreamRemoved?.invoke(it) }
     }
 
     override fun onRenegotiationNeeded() {
+        onNegotiationNeeded?.invoke(this)
     }
+
+    override fun onSignalingChange(p0: PeerConnection.SignalingState?): Unit = Unit
+    override fun onIceConnectionChange(p0: PeerConnection.IceConnectionState?): Unit = Unit
+    override fun onIceConnectionReceivingChange(p0: Boolean): Unit = Unit
+    override fun onIceGatheringChange(p0: PeerConnection.IceGatheringState?): Unit = Unit
+    override fun onIceCandidatesRemoved(p0: Array<out IceCandidate>?): Unit = Unit
+    override fun onDataChannel(channel: DataChannel?): Unit = Unit
 }

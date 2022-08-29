@@ -20,15 +20,41 @@ import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Result
 import io.getstream.video.android.utils.Success
+import stream.video.sfu.IceCandidateRequest
+import stream.video.sfu.IceCandidateResponse
+import stream.video.sfu.JoinRequest
+import stream.video.sfu.JoinResponse
 import stream.video.sfu.SendAnswerRequest
 import stream.video.sfu.SendAnswerResponse
+import stream.video.sfu.SetPublisherRequest
+import stream.video.sfu.SetPublisherResponse
 
 public class SignalClientImpl(
     private val signalService: SignalService
 ) : SignalClient {
-    override suspend fun sendAnswer(sendAnswerRequest: SendAnswerRequest): Result<SendAnswerResponse> =
+    override suspend fun sendAnswer(request: SendAnswerRequest): Result<SendAnswerResponse> =
         try {
-            Success(signalService.sendAnswer(sendAnswerRequest))
+            Success(signalService.sendAnswer(request))
+        } catch (error: Throwable) {
+            Failure(VideoError(error.message, error))
+        }
+
+    override suspend fun sendIceCandidate(request: IceCandidateRequest): Result<IceCandidateResponse> =
+        try {
+            Success(signalService.sendIceCandidate(request))
+        } catch (error: Throwable) {
+            Failure(VideoError(error.message, error))
+        }
+
+    override suspend fun join(request: JoinRequest): Result<JoinResponse> = try {
+        Success(signalService.join(request))
+    } catch (error: Throwable) {
+        Failure(VideoError(error.message, error))
+    }
+
+    override suspend fun setPublisher(request: SetPublisherRequest): Result<SetPublisherResponse> =
+        try {
+            Success(signalService.setPublisher(request))
         } catch (error: Throwable) {
             Failure(VideoError(error.message, error))
         }
