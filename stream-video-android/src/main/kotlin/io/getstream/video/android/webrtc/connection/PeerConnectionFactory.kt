@@ -17,10 +17,14 @@
 package io.getstream.video.android.webrtc.connection
 
 import android.content.Context
+import android.media.MediaCodecList
+import android.os.Build
 import io.getstream.video.android.webrtc.StreamPeerConnection
 import io.getstream.video.android.webrtc.signal.SignalClient
 import org.webrtc.AudioSource
 import org.webrtc.AudioTrack
+import org.webrtc.BuiltinAudioDecoderFactoryFactory
+import org.webrtc.BuiltinAudioEncoderFactoryFactory
 import org.webrtc.DefaultVideoDecoderFactory
 import org.webrtc.EglBase
 import org.webrtc.EglBase.CONFIG_RGBA
@@ -42,14 +46,22 @@ public class PeerConnectionFactory(
         EglBase.createEgl14(CONFIG_RGBA).eglBaseContext
     }
 
-    private val decoderFactory by lazy {
+    private val videoDecoderFactory by lazy {
         DefaultVideoDecoderFactory(
             eglContext
         )
     }
 
-    private val encoderFactory by lazy {
-        HardwareVideoEncoderFactory(eglContext, false, false)
+    private val videoEncoderFactory by lazy {
+        HardwareVideoEncoderFactory(eglContext, true, true)
+    }
+
+    private val audioDecoderFactory by lazy {
+        BuiltinAudioDecoderFactoryFactory()
+    }
+
+    private val audioEncoderFactory by lazy {
+        BuiltinAudioEncoderFactoryFactory()
     }
 
     private val factory by lazy {
@@ -65,20 +77,70 @@ public class PeerConnectionFactory(
                     // TODO - connection options
                 }
             )
-            .setVideoDecoderFactory(decoderFactory)
-            .setVideoEncoderFactory(encoderFactory)
+            .setVideoDecoderFactory(videoDecoderFactory)
+            .setVideoEncoderFactory(videoEncoderFactory)
+            .setAudioEncoderFactoryFactory(audioEncoderFactory)
+            .setAudioDecoderFactoryFactory(audioDecoderFactory)
             .createPeerConnectionFactory()
     }
 
-    public fun getEncoderCodecs(): List<Codec> {
-        return decoderFactory.supportedCodecs.map {
-            Codec(it.name)
+    private val systemCodecs by lazy {
+        (0 until MediaCodecList.getCodecCount()).map {
+            MediaCodecList.getCodecInfoAt(it)
         }
     }
 
-    public fun getDecoderCodecs(): List<Codec> {
-        return encoderFactory.supportedCodecs.map {
-            Codec(it.name)
+    public fun getVideoEncoderCodecs(): List<Codec> {
+        val factoryCodecs = videoEncoderFactory.supportedCodecs
+        val codecNames = factoryCodecs.map { it.name }
+
+        val supportedSystemCodecs = systemCodecs.filter {
+            it.isEncoder && codecNames.any { name ->
+                name.lowercase() in it.name.lowercase()
+            }
+        }
+
+        return factoryCodecs.map { codec ->
+            Codec(
+                mime = "video/${codec.name}",
+                hw_accelerated = supportedSystemCodecs.filter {
+                    codec.name.lowercase() in it.name.lowercase()
+                }.any {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        it.isHardwareAccelerated
+                    } else {
+                        false
+                    }
+                },
+                fmtp_line = codec.params.toString()
+            )
+        }
+    }
+
+    public fun getVideoDecoderCodecs(): List<Codec> {
+        val factoryCodecs = videoDecoderFactory.supportedCodecs
+        val codecNames = factoryCodecs.map { it.name }
+
+        val supportedSystemCodecs = systemCodecs.filter {
+            !it.isEncoder && codecNames.any { name ->
+                name.lowercase() in it.name.lowercase()
+            }
+        }
+
+        return factoryCodecs.map { codec ->
+            Codec(
+                mime = "video/${codec.name}",
+                hw_accelerated = supportedSystemCodecs.filter {
+                    codec.name.lowercase() in it.name.lowercase()
+                }.any {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        it.isHardwareAccelerated
+                    } else {
+                        false
+                    }
+                },
+                fmtp_line = codec.params.toString()
+            )
         }
     }
 

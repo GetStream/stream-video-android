@@ -89,12 +89,11 @@ message VideoDimension {
 
 message VideoLayer {
   // for tracks with a single layer, this should be HIGH
-  VideoQuality quality = 1;
+  string rid = 1;
   VideoDimension video_dimension = 2;
 
   // target bitrate, server will measure actual
   uint32 bitrate = 4;
-  uint32 ssrc = 5;
 }
 
 message SimulcastCodecInfo {
@@ -108,13 +107,21 @@ message Codec {
   string mime = 1;
   string fmtp_line = 2;
   uint32 clock_rate = 3;
-  channels channels =4 ;
+  bool hw_accelerated = 4;
 }
 
-message channels{
-  uint32 channels =1;
+message AudioCodecs {
+  repeated Codec encode = 1;
+  repeated Codec decode = 2;
 }
 
-message SimulcastCodec {
+message VideoCodecs {
+  repeated Codec encode = 1;
+  repeated Codec decode = 2;
+}
 
+message CodecSettings {
+  AudioCodecs audio = 1;
+  VideoCodecs video = 2;
+  repeated VideoLayer layers = 3;
 }

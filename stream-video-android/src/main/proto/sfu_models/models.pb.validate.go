@@ -845,7 +845,7 @@ func (m *VideoLayer) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for Quality
+	// no validation rules for Rid
 
 	if all {
 		switch v := interface{}(m.GetVideoDimension()).(type) {
@@ -877,8 +877,6 @@ func (m *VideoLayer) validate(all bool) error {
 	}
 
 	// no validation rules for Bitrate
-
-	// no validation rules for Ssrc
 
 	if len(errors) > 0 {
 		return VideoLayerMultiError(errors)
@@ -1126,34 +1124,7 @@ func (m *Codec) validate(all bool) error {
 
 	// no validation rules for ClockRate
 
-	if all {
-		switch v := interface{}(m.GetChannels()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, CodecValidationError{
-					field:  "Channels",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, CodecValidationError{
-					field:  "Channels",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetChannels()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return CodecValidationError{
-				field:  "Channels",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for HwAccelerated
 
 	if len(errors) > 0 {
 		return CodecMultiError(errors)
@@ -1232,143 +1203,109 @@ var _ interface {
 	ErrorName() string
 } = CodecValidationError{}
 
-// Validate checks the field values on Channels with the rules defined in the
-// proto definition for this message. If any rules are violated, the first
-// error encountered is returned, or nil if there are no violations.
-func (m *Channels) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on Channels with the rules defined in
-// the proto definition for this message. If any rules are violated, the
-// result is a list of violation errors wrapped in ChannelsMultiError, or nil
-// if none found.
-func (m *Channels) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *Channels) validate(all bool) error {
-	if m == nil {
-		return nil
-	}
-
-	var errors []error
-
-	// no validation rules for Channels
-
-	if len(errors) > 0 {
-		return ChannelsMultiError(errors)
-	}
-
-	return nil
-}
-
-// ChannelsMultiError is an error wrapping multiple validation errors returned
-// by Channels.ValidateAll() if the designated constraints aren't met.
-type ChannelsMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m ChannelsMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m ChannelsMultiError) AllErrors() []error { return m }
-
-// ChannelsValidationError is the validation error returned by
-// Channels.Validate if the designated constraints aren't met.
-type ChannelsValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e ChannelsValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e ChannelsValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e ChannelsValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e ChannelsValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e ChannelsValidationError) ErrorName() string { return "ChannelsValidationError" }
-
-// Error satisfies the builtin error interface
-func (e ChannelsValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sChannels.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = ChannelsValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = ChannelsValidationError{}
-
-// Validate checks the field values on SimulcastCodec with the rules defined in
+// Validate checks the field values on AudioCodecs with the rules defined in
 // the proto definition for this message. If any rules are violated, the first
 // error encountered is returned, or nil if there are no violations.
-func (m *SimulcastCodec) Validate() error {
+func (m *AudioCodecs) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on SimulcastCodec with the rules defined
-// in the proto definition for this message. If any rules are violated, the
-// result is a list of violation errors wrapped in SimulcastCodecMultiError,
-// or nil if none found.
-func (m *SimulcastCodec) ValidateAll() error {
+// ValidateAll checks the field values on AudioCodecs with the rules defined in
+// the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in AudioCodecsMultiError, or
+// nil if none found.
+func (m *AudioCodecs) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *SimulcastCodec) validate(all bool) error {
+func (m *AudioCodecs) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
 
 	var errors []error
 
+	for idx, item := range m.GetEncode() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, AudioCodecsValidationError{
+						field:  fmt.Sprintf("Encode[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, AudioCodecsValidationError{
+						field:  fmt.Sprintf("Encode[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return AudioCodecsValidationError{
+					field:  fmt.Sprintf("Encode[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	for idx, item := range m.GetDecode() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, AudioCodecsValidationError{
+						field:  fmt.Sprintf("Decode[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, AudioCodecsValidationError{
+						field:  fmt.Sprintf("Decode[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return AudioCodecsValidationError{
+					field:  fmt.Sprintf("Decode[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
 	if len(errors) > 0 {
-		return SimulcastCodecMultiError(errors)
+		return AudioCodecsMultiError(errors)
 	}
 
 	return nil
 }
 
-// SimulcastCodecMultiError is an error wrapping multiple validation errors
-// returned by SimulcastCodec.ValidateAll() if the designated constraints
-// aren't met.
-type SimulcastCodecMultiError []error
+// AudioCodecsMultiError is an error wrapping multiple validation errors
+// returned by AudioCodecs.ValidateAll() if the designated constraints aren't met.
+type AudioCodecsMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m SimulcastCodecMultiError) Error() string {
+func (m AudioCodecsMultiError) Error() string {
 	var msgs []string
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -1377,11 +1314,11 @@ func (m SimulcastCodecMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m SimulcastCodecMultiError) AllErrors() []error { return m }
+func (m AudioCodecsMultiError) AllErrors() []error { return m }
 
-// SimulcastCodecValidationError is the validation error returned by
-// SimulcastCodec.Validate if the designated constraints aren't met.
-type SimulcastCodecValidationError struct {
+// AudioCodecsValidationError is the validation error returned by
+// AudioCodecs.Validate if the designated constraints aren't met.
+type AudioCodecsValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -1389,22 +1326,22 @@ type SimulcastCodecValidationError struct {
 }
 
 // Field function returns field value.
-func (e SimulcastCodecValidationError) Field() string { return e.field }
+func (e AudioCodecsValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e SimulcastCodecValidationError) Reason() string { return e.reason }
+func (e AudioCodecsValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e SimulcastCodecValidationError) Cause() error { return e.cause }
+func (e AudioCodecsValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e SimulcastCodecValidationError) Key() bool { return e.key }
+func (e AudioCodecsValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e SimulcastCodecValidationError) ErrorName() string { return "SimulcastCodecValidationError" }
+func (e AudioCodecsValidationError) ErrorName() string { return "AudioCodecsValidationError" }
 
 // Error satisfies the builtin error interface
-func (e SimulcastCodecValidationError) Error() string {
+func (e AudioCodecsValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -1416,14 +1353,14 @@ func (e SimulcastCodecValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sSimulcastCodec.%s: %s%s",
+		"invalid %sAudioCodecs.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = SimulcastCodecValidationError{}
+var _ error = AudioCodecsValidationError{}
 
 var _ interface {
 	Field() string
@@ -1431,4 +1368,363 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = SimulcastCodecValidationError{}
+} = AudioCodecsValidationError{}
+
+// Validate checks the field values on VideoCodecs with the rules defined in
+// the proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *VideoCodecs) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on VideoCodecs with the rules defined in
+// the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in VideoCodecsMultiError, or
+// nil if none found.
+func (m *VideoCodecs) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *VideoCodecs) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	for idx, item := range m.GetEncode() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, VideoCodecsValidationError{
+						field:  fmt.Sprintf("Encode[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, VideoCodecsValidationError{
+						field:  fmt.Sprintf("Encode[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return VideoCodecsValidationError{
+					field:  fmt.Sprintf("Encode[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	for idx, item := range m.GetDecode() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, VideoCodecsValidationError{
+						field:  fmt.Sprintf("Decode[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, VideoCodecsValidationError{
+						field:  fmt.Sprintf("Decode[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return VideoCodecsValidationError{
+					field:  fmt.Sprintf("Decode[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if len(errors) > 0 {
+		return VideoCodecsMultiError(errors)
+	}
+
+	return nil
+}
+
+// VideoCodecsMultiError is an error wrapping multiple validation errors
+// returned by VideoCodecs.ValidateAll() if the designated constraints aren't met.
+type VideoCodecsMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m VideoCodecsMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m VideoCodecsMultiError) AllErrors() []error { return m }
+
+// VideoCodecsValidationError is the validation error returned by
+// VideoCodecs.Validate if the designated constraints aren't met.
+type VideoCodecsValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e VideoCodecsValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e VideoCodecsValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e VideoCodecsValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e VideoCodecsValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e VideoCodecsValidationError) ErrorName() string { return "VideoCodecsValidationError" }
+
+// Error satisfies the builtin error interface
+func (e VideoCodecsValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sVideoCodecs.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = VideoCodecsValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = VideoCodecsValidationError{}
+
+// Validate checks the field values on CodecSettings with the rules defined in
+// the proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *CodecSettings) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on CodecSettings with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in CodecSettingsMultiError, or
+// nil if none found.
+func (m *CodecSettings) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *CodecSettings) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetAudio()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, CodecSettingsValidationError{
+					field:  "Audio",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, CodecSettingsValidationError{
+					field:  "Audio",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetAudio()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return CodecSettingsValidationError{
+				field:  "Audio",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if all {
+		switch v := interface{}(m.GetVideo()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, CodecSettingsValidationError{
+					field:  "Video",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, CodecSettingsValidationError{
+					field:  "Video",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetVideo()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return CodecSettingsValidationError{
+				field:  "Video",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	for idx, item := range m.GetLayers() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, CodecSettingsValidationError{
+						field:  fmt.Sprintf("Layers[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, CodecSettingsValidationError{
+						field:  fmt.Sprintf("Layers[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return CodecSettingsValidationError{
+					field:  fmt.Sprintf("Layers[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if len(errors) > 0 {
+		return CodecSettingsMultiError(errors)
+	}
+
+	return nil
+}
+
+// CodecSettingsMultiError is an error wrapping multiple validation errors
+// returned by CodecSettings.ValidateAll() if the designated constraints
+// aren't met.
+type CodecSettingsMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m CodecSettingsMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m CodecSettingsMultiError) AllErrors() []error { return m }
+
+// CodecSettingsValidationError is the validation error returned by
+// CodecSettings.Validate if the designated constraints aren't met.
+type CodecSettingsValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e CodecSettingsValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e CodecSettingsValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e CodecSettingsValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e CodecSettingsValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e CodecSettingsValidationError) ErrorName() string { return "CodecSettingsValidationError" }
+
+// Error satisfies the builtin error interface
+func (e CodecSettingsValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sCodecSettings.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = CodecSettingsValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = CodecSettingsValidationError{}

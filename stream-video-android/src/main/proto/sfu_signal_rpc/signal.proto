@@ -103,10 +103,7 @@ message SetPublisherResponse {
 message JoinRequest {
   string subscriber_sdp_offer = 1;
   string session_id = 3;
-
-  repeated Codec sender_codecs = 4;
-  repeated Codec receiver_codecs = 5;
-
+  CodecSettings codec_settings = 4;
   // TODO: we should know if this is going to be
   // - publishing and subscribing, or just subscribing for future routing
 }

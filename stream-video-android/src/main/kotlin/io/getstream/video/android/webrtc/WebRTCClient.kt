@@ -46,6 +46,7 @@ import org.webrtc.SessionDescription
 import org.webrtc.SurfaceViewRenderer
 import org.webrtc.VideoCapturer
 import org.webrtc.VideoTrack
+import stream.video.sfu.CodecSettings
 import stream.video.sfu.JoinRequest
 import stream.video.sfu.JoinResponse
 import stream.video.sfu.Participant
@@ -53,6 +54,7 @@ import stream.video.sfu.PeerType
 import stream.video.sfu.SendAnswerRequest
 import stream.video.sfu.SetPublisherRequest
 import stream.video.sfu.SubscriberOffer
+import stream.video.sfu.VideoCodecs
 import java.nio.ByteBuffer
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -166,12 +168,12 @@ public class WebRTCClient(
                         Log.d("sfuConnectFlow", "ExecuteJoin, $callParticipants")
                     }
                     is Failure -> {
-                        // TODO - error handling
+                        Log.d("sfuConnectFlow", "JoinFailure", joinResponse.error.cause)
                     }
                 }
             }
             is Failure -> {
-                // TODO - error handling
+                Log.d("sfuConnectFlow", "OfferFailure", offer.error.cause)
             }
         }
     }
@@ -183,11 +185,18 @@ public class WebRTCClient(
     }
 
     private suspend fun executeJoinRequest(data: SessionDescription): Result<JoinResponse> {
+        val decoderCodecs = peerConnectionFactory.getVideoDecoderCodecs()
+        val encoderCodecs = peerConnectionFactory.getVideoEncoderCodecs()
+
         val request = JoinRequest(
             subscriber_sdp_offer = data.description,
             session_id = sessionId,
-            receiver_codecs = peerConnectionFactory.getDecoderCodecs(),
-            sender_codecs = peerConnectionFactory.getEncoderCodecs()
+            codec_settings = CodecSettings(
+                video = VideoCodecs(
+                    encode = encoderCodecs,
+                    decode = decoderCodecs
+                )
+            )
         )
 
         return signalClient.join(request)
