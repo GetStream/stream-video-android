@@ -53,6 +53,8 @@ android {
 }
 
 dependencies {
+    api Dependencies.webRTC
+
     implementation Dependencies.androidxCore
     implementation Dependencies.androidxAppcompat
     implementation Dependencies.material
@@ -71,9 +73,6 @@ dependencies {
     implementation Dependencies.retrofitWireConverter
     implementation Dependencies.okhttpLoggingInterceptor
     implementation Dependencies.kotlinSerializationJson
-
-    // A/V Calls
-    implementation Dependencies.liveKit
 
     // Unit Tests
     testImplementation 'junit:junit:4.13.2'

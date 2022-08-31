@@ -32,12 +32,12 @@ import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.CallTopAppbar
 import io.getstream.video.android.compose.ui.components.mock.mockParticipantList
-import io.getstream.video.android.model.VideoParticipant
+import io.getstream.video.android.model.CallParticipant
 
 @Composable
 public fun AudioCalling(
     callId: String,
-    participants: List<VideoParticipant>,
+    participants: List<CallParticipant>,
     onEndCall: (String) -> Unit = {},
     onMicToggleChanged: (Boolean) -> Unit = {},
     onVideoToggleChanged: (Boolean) -> Unit = {},

@@ -38,16 +38,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.model.VideoParticipant
-import io.getstream.video.android.model.VideoRoom
+import io.getstream.video.android.model.CallParticipant
 
 @Composable
 public fun CallDetails(
-    room: VideoRoom,
+//    room: VideoRoom,
     isMicrophoneEnabled: Boolean,
     isCameraEnabled: Boolean,
-    participants: List<VideoParticipant>,
-    primarySpeaker: VideoParticipant?,
+    participants: List<CallParticipant>,
+    primarySpeaker: CallParticipant?,
     onEndCall: () -> Unit,
     onCameraToggled: (Boolean) -> Unit,
     onMicrophoneToggled: (Boolean) -> Unit,
@@ -59,7 +58,7 @@ public fun CallDetails(
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(max = 150.dp),
-            room = room,
+//            room = room,
             participants = participants,
             primarySpeaker = primarySpeaker
         )

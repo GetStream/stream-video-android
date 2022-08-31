@@ -24,7 +24,6 @@ import io.getstream.video.android.client.user.UserState
 import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.model.JoinCallResponse
-import io.getstream.video.android.model.VideoRoom
 import io.getstream.video.android.module.VideoModule
 import io.getstream.video.android.socket.SocketListener
 import io.getstream.video.android.socket.SocketState
@@ -37,9 +36,6 @@ import io.getstream.video.android.utils.Success
 import io.getstream.video.android.utils.enrichSocketURL
 import io.getstream.video.android.utils.getLatencyMeasurements
 import io.getstream.video.android.webrtc.WebRTCClient
-import io.livekit.android.LiveKit
-import io.livekit.android.RoomOptions
-import io.livekit.android.room.Room
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -167,12 +163,6 @@ public class VideoClient(
 
                         Success(
                             JoinCallResponse(
-                                videoRoom = VideoRoom(
-                                    value = createRoom(),
-                                    videoSocket = socket
-                                ).apply {
-                                    updateParticipants(data.call_state?.participants ?: emptyList())
-                                },
                                 call = call,
                                 callUrl = enrichSocketURL(selectEdgeServerResult.data.edge_server?.url!!),
                                 userToken = selectEdgeServerResult.data.token
@@ -187,16 +177,6 @@ public class VideoClient(
         } else {
             return Failure((callResult as Failure).error)
         }
-    }
-
-    /**
-     * Creates a [Room] we can connect to and listen to events from.
-     */
-    private fun createRoom(): Room {
-        return LiveKit.create(
-            applicationContext,
-            RoomOptions()
-        )
     }
 
     /**

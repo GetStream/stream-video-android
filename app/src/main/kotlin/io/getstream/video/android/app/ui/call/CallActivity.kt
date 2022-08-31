@@ -77,9 +77,8 @@ import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.app.VideoApp
 import io.getstream.video.android.compose.ui.components.CallDetails
 import io.getstream.video.android.compose.ui.components.MainStage
+import io.getstream.video.android.model.CallParticipantState
 import io.getstream.video.android.model.CallType
-import io.getstream.video.android.model.VideoParticipantState
-import io.getstream.video.android.model.VideoRoom
 import io.getstream.video.android.utils.onError
 import io.getstream.video.android.utils.onSuccessSuspend
 import io.getstream.video.android.viewmodel.CallViewModel
@@ -119,7 +118,6 @@ class CallActivity : AppCompatActivity() {
 
     @Composable
     private fun VideoCallContent() {
-        val room by callViewModel.roomState.collectAsState(initial = null)
         val participants by callViewModel.participantList.collectAsState(initial = emptyList())
         val speaker by callViewModel.primarySpeaker.collectAsState(initial = null)
         val isCameraEnabled by callViewModel.isCameraEnabled.collectAsState(initial = false)
@@ -142,14 +140,13 @@ class CallActivity : AppCompatActivity() {
                 .fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            val currentRoom = room
             val currentSpeaker = speaker
 
             Column(modifier = Modifier.fillMaxSize()) {
 
                 CallActionBar(callState?.id ?: "")
 
-                if (currentRoom == null || currentSpeaker == null) {
+                if (currentSpeaker == null) {
                     Box(
                         modifier = Modifier
                             .height(250.dp)
@@ -166,13 +163,11 @@ class CallActivity : AppCompatActivity() {
                         modifier = Modifier
                             .weight(0.5f)
                             .fillMaxWidth(),
-                        room = currentRoom,
                         speaker = currentSpeaker
                     )
 
                     CallDetails(
                         modifier = Modifier.weight(0.5f),
-                        room = currentRoom,
                         isCameraEnabled = isCameraEnabled,
                         isMicrophoneEnabled = isMicrophoneEnabled,
                         participants = participants,
@@ -191,8 +186,8 @@ class CallActivity : AppCompatActivity() {
                 }
             }
 
-            if (isShowingParticipantsInfo && currentRoom != null) {
-                ParticipantsInfo(currentRoom)
+            if (isShowingParticipantsInfo) {
+                ParticipantsInfo(emptyList()) // TODO - pass in participants state
             }
         }
     }
@@ -203,8 +198,7 @@ class CallActivity : AppCompatActivity() {
     }
 
     @Composable
-    private fun ParticipantsInfo(room: VideoRoom) {
-        val participants by room.participantsState.collectAsState()
+    private fun ParticipantsInfo(participantsState: List<CallParticipantState>) {
 
         Box(
             modifier = Modifier
@@ -223,7 +217,7 @@ class CallActivity : AppCompatActivity() {
                 horizontalAlignment = Alignment.Start,
                 verticalArrangement = Arrangement.Center
             ) {
-                items(participants) {
+                items(participantsState) {
                     ParticipantInfoItem(it)
                 }
             }
@@ -231,7 +225,7 @@ class CallActivity : AppCompatActivity() {
     }
 
     @Composable
-    private fun ParticipantInfoItem(participant: VideoParticipantState) {
+    private fun ParticipantInfoItem(participant: CallParticipantState) {
         Row(
             modifier = Modifier.wrapContentWidth(),
             verticalAlignment = Alignment.CenterVertically,
@@ -331,8 +325,8 @@ class CallActivity : AppCompatActivity() {
                 participantIds = participants.toList()
             )
 
-            result.onSuccessSuspend { (room, call, url, token) ->
-                callViewModel.init(room, call, url, token)
+            result.onSuccessSuspend { (call, url, token) ->
+                callViewModel.init(call, url, token)
             }
 
             result.onError {

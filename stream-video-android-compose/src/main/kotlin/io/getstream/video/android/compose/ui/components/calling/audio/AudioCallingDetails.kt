@@ -28,13 +28,13 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.mock.mockParticipantList
 import io.getstream.video.android.compose.ui.components.participants.ParticipantAvatars
 import io.getstream.video.android.compose.ui.components.participants.ParticipantInformation
+import io.getstream.video.android.model.CallParticipant
 import io.getstream.video.android.model.CallStatus
-import io.getstream.video.android.model.VideoParticipant
 
 @Composable
 internal fun AudioCallingDetails(
     modifier: Modifier = Modifier,
-    participants: List<VideoParticipant>
+    participants: List<CallParticipant>
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
 

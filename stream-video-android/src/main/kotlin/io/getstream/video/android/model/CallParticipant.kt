@@ -16,10 +16,18 @@
 
 package io.getstream.video.android.model
 
-import stream.video.Call
+import org.webrtc.VideoTrack
 
-public data class JoinCallResponse(
-    public val call: Call,
-    public val callUrl: String,
-    public val userToken: String
+public data class CallParticipant(
+    public val id: String,
+    public val role: String,
+    public val name: String,
+    public val profileImageURL: String?,
+    public val isOnline: Boolean,
+    public val hasVideo: Boolean,
+    public val hasAudio: Boolean,
+    public val track: VideoTrack?,
+    public val trackSize: Pair<Float, Float>
 )
+
+// TODO - add mapping to/from SFU Participant

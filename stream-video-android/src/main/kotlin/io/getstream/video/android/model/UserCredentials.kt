@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.app.model
+package io.getstream.video.android.model
 
-data class UserCredentials(
+public data class UserCredentials(
     val id: String,
     val token: String,
     val name: String,

@@ -32,13 +32,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.mock.mockParticipantList
+import io.getstream.video.android.model.CallParticipant
 import io.getstream.video.android.model.CallStatus
-import io.getstream.video.android.model.VideoParticipant
 
 @Composable
 public fun ParticipantInformation(
     callStatus: CallStatus,
-    participants: List<VideoParticipant>
+    participants: List<CallParticipant>
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -83,8 +83,8 @@ public fun ParticipantInformation(
 }
 
 // TODO - localize all this
-private fun buildSmallCallText(participants: List<VideoParticipant>): String {
-    val names = participants.map { it.user!!.name }
+private fun buildSmallCallText(participants: List<CallParticipant>): String {
+    val names = participants.map { it.name }
 
     return if (names.size == 1) {
         names.first()
@@ -93,7 +93,7 @@ private fun buildSmallCallText(participants: List<VideoParticipant>): String {
     }
 }
 
-private fun buildLargeCallText(participants: List<VideoParticipant>): String {
+private fun buildLargeCallText(participants: List<CallParticipant>): String {
     val initial = buildSmallCallText(participants)
 
     return "$initial and +${participants.size - 2} more"

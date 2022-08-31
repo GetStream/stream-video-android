@@ -23,24 +23,19 @@ import androidx.compose.material.icons.filled.Call
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import io.getstream.video.android.model.VideoParticipant
-import io.getstream.video.android.model.VideoRoom
-import io.livekit.android.compose.VideoRenderer
-import io.livekit.android.room.track.VideoTrack
+import io.getstream.video.android.compose.ui.components.video.VideoRenderer
+import io.getstream.video.android.model.CallParticipant
 
 @Composable
 public fun MainStage(
-    room: VideoRoom,
-    speaker: VideoParticipant?,
+    speaker: CallParticipant?,
     modifier: Modifier = Modifier
 ) {
-    val track =
-        speaker?.value?.videoTracks?.firstOrNull { it.second is VideoTrack }?.second as? VideoTrack
+    val track = speaker?.track
 
     if (track != null) {
         VideoRenderer(
             modifier = modifier,
-            room = room.value,
             videoTrack = track
         )
     } else {

@@ -27,14 +27,14 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.CallTopAppbar
 import io.getstream.video.android.compose.ui.components.background.CallBackground
 import io.getstream.video.android.compose.ui.components.mock.mockParticipant
+import io.getstream.video.android.model.CallParticipant
 import io.getstream.video.android.model.CallType
-import io.getstream.video.android.model.VideoParticipant
 
 @Composable
 public fun OutgoingCall(
     callId: String,
     callType: CallType,
-    participants: List<VideoParticipant>,
+    participants: List<CallParticipant>,
     onCancelCall: (String) -> Unit = {},
     onMicToggleChanged: (Boolean) -> Unit = {},
     onVideoToggleChanged: (Boolean) -> Unit = {},

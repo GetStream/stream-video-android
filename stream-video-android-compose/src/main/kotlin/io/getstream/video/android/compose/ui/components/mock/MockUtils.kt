@@ -16,34 +16,26 @@
 
 package io.getstream.video.android.compose.ui.components.mock
 
-import io.getstream.video.android.model.VideoParticipant
-import stream.video.Participant
+import io.getstream.video.android.model.CallParticipant
 import stream.video.User
 
-internal val mockParticipant: VideoParticipant
-    inline get() = VideoParticipant(
-        streamParticipant = Participant(
-            user = mockUsers[0]
-        )
-    )
+internal val mockParticipant: CallParticipant
+    inline get() = mockUsers[0].toCallParticipant()
 
-internal val mockParticipantList: List<VideoParticipant>
-    inline get() = listOf(
-        VideoParticipant(
-            streamParticipant = Participant(
-                user = mockUsers[0]
-            )
-        ),
-        VideoParticipant(
-            streamParticipant = Participant(
-                user = mockUsers[1]
-            )
-        ),
-        VideoParticipant(
-            streamParticipant = Participant(
-                user = mockUsers[2]
-            )
-        )
+internal val mockParticipantList: List<CallParticipant>
+    inline get() = mockUsers.map { it.toCallParticipant() }
+
+private fun User.toCallParticipant() =
+    CallParticipant(
+        id = this.id,
+        name = this.name,
+        profileImageURL = this.image_url,
+        role = this.role,
+        hasAudio = false,
+        hasVideo = false,
+        isOnline = false,
+        track = null,
+        trackSize = 0f to 0f
     )
 
 @PublishedApi

@@ -19,13 +19,11 @@ package io.getstream.video.android.compose.ui.components
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
-import io.livekit.android.room.Room
-import io.livekit.android.room.track.VideoTrack
 import org.webrtc.SurfaceViewRenderer
+import org.webrtc.VideoTrack
 
 @Composable
 public fun VideoItem(
-    room: Room,
     videoTrack: VideoTrack,
     modifier: Modifier = Modifier
 ) {
@@ -33,14 +31,14 @@ public fun VideoItem(
         modifier = modifier,
         factory = { context ->
             SurfaceViewRenderer(context).apply {
-                room.initVideoRenderer(this)
-                videoTrack.addRenderer(this)
+//                room.initVideoRenderer(this)
+                videoTrack.addSink(this)
             }
         },
         update = { renderer ->
             renderer.release()
-            room.initVideoRenderer(renderer)
-            videoTrack.addRenderer(renderer)
+//            room.initVideoRenderer(renderer)
+            videoTrack.addSink(renderer)
         },
     )
 }

@@ -16,13 +16,14 @@
 
 package io.getstream.video.android.webrtc.datachannel
 
+import io.getstream.video.android.events.SfuDataEvent
 import okio.ByteString
 import org.webrtc.DataChannel
-import java.nio.ByteBuffer
+import stream.video.sfu.SfuEvent
 
 public class DataChannel(
     private val dataChannel: DataChannel,
-    private val onMessage: (ByteBuffer) -> Unit,
+    private val onMessage: (SfuDataEvent) -> Unit,
     private val onStateChange: (DataChannel.State) -> Unit
 ) : DataChannel.Observer {
 
@@ -35,15 +36,21 @@ public class DataChannel(
 
     override fun onMessage(buffer: DataChannel.Buffer?) {
         val bytes = buffer?.data ?: return
+        val byteArray = ByteArray(bytes.capacity())
+        bytes.get(byteArray)
 
-        this.onMessage(bytes)
+        try {
+            this.onMessage(RTCEventMapper.mapEvent(SfuEvent.ADAPTER.decode(byteArray)))
+        } catch (error: Throwable) {
+            error.printStackTrace()
+        }
     }
 
     public fun send(data: ByteString): Boolean {
         return dataChannel.send(
             DataChannel.Buffer(
                 data.asByteBuffer(),
-                true // TODO - check if this should be true
+                true
             )
         )
     }

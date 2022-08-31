@@ -16,10 +16,9 @@
 
 package io.getstream.video.android.model
 
-import stream.video.Call
-
-public data class JoinCallResponse(
-    public val call: Call,
-    public val callUrl: String,
-    public val userToken: String
+public data class CallParticipantState(
+    val userId: String,
+    val userName: String,
+    val isLocalAudioEnabled: Boolean,
+    val isLocalVideoEnabled: Boolean
 )

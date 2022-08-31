@@ -25,6 +25,8 @@ import stream.video.sfu.SendAnswerRequest
 import stream.video.sfu.SendAnswerResponse
 import stream.video.sfu.SetPublisherRequest
 import stream.video.sfu.SetPublisherResponse
+import stream.video.sfu.UpdateSubscriptionsRequest
+import stream.video.sfu.UpdateSubscriptionsResponse
 
 public interface SignalClient {
 
@@ -35,4 +37,6 @@ public interface SignalClient {
     public suspend fun join(request: JoinRequest): Result<JoinResponse>
 
     public suspend fun setPublisher(request: SetPublisherRequest): Result<SetPublisherResponse>
+
+    public suspend fun updateSubscriptions(request: UpdateSubscriptionsRequest): Result<UpdateSubscriptionsResponse>
 }

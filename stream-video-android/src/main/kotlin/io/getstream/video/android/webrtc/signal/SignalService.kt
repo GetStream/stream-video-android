@@ -27,6 +27,8 @@ import stream.video.sfu.SendAnswerRequest
 import stream.video.sfu.SendAnswerResponse
 import stream.video.sfu.SetPublisherRequest
 import stream.video.sfu.SetPublisherResponse
+import stream.video.sfu.UpdateSubscriptionsRequest
+import stream.video.sfu.UpdateSubscriptionsResponse
 
 public interface SignalService {
 
@@ -47,4 +49,8 @@ public interface SignalService {
     @Headers("Content-Type: application/protobuf")
     @POST("/twirp/stream.video.sfu.SignalServer/SetPublisher")
     public suspend fun setPublisher(@Body request: SetPublisherRequest): SetPublisherResponse
+
+    @Headers("Content-Type: application/protobuf")
+    @POST("/twirp/stream.video.sfu.SignalServer/UpdateSubscriptions")
+    public suspend fun updateSubscriptions(request: UpdateSubscriptionsRequest): UpdateSubscriptionsResponse
 }

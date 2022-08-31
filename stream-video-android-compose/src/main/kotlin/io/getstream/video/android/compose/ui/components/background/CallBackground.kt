@@ -28,24 +28,24 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import io.getstream.video.android.compose.R
-import io.getstream.video.android.model.VideoParticipant
+import io.getstream.video.android.model.CallParticipant
 
 @Composable
 public fun CallBackground(
     modifier: Modifier = Modifier,
-    participants: List<VideoParticipant>,
+    participants: List<CallParticipant>,
     content: @Composable BoxScope.() -> Unit
 ) {
     Box(
         modifier = modifier.fillMaxSize()
     ) {
         if (participants.size == 1) {
-            val firstUser = participants.first().user
+            val firstUser = participants.first()
             AsyncImage(
                 modifier = Modifier
                     .fillMaxSize()
                     .blur(20.dp),
-                model = firstUser?.image_url,
+                model = firstUser.profileImageURL,
                 contentScale = ContentScale.Crop,
                 contentDescription = null
             )

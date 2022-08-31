@@ -23,19 +23,17 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.model.VideoParticipant
-import io.getstream.video.android.model.VideoRoom
-import io.livekit.android.compose.VideoRenderer
-import io.livekit.android.room.track.VideoTrack
+import io.getstream.video.android.compose.ui.components.video.VideoRenderer
+import io.getstream.video.android.model.CallParticipant
 
 @Composable
 public fun ParticipantsList(
-    room: VideoRoom,
-    participants: List<VideoParticipant>,
+//    room: VideoRoom,
+    participants: List<CallParticipant>,
     modifier: Modifier = Modifier,
-    primarySpeaker: VideoParticipant?
+    primarySpeaker: CallParticipant?
 ) {
-    val secondarySpeakers = participants.filter { it.sid != primarySpeaker?.sid }
+    val secondarySpeakers = participants.filter { it.id != primarySpeaker?.id }
 
     LazyRow(
         modifier = modifier,
@@ -43,7 +41,7 @@ public fun ParticipantsList(
     ) {
         items(secondarySpeakers) { participant ->
             ParticipantItem(
-                room,
+//                room,
                 participant
             )
         }
@@ -51,13 +49,16 @@ public fun ParticipantsList(
 }
 
 @Composable
-public fun ParticipantItem(room: VideoRoom, participant: VideoParticipant) {
-    val track = participant.videoTracks.firstOrNull()?.second as? VideoTrack
+public fun ParticipantItem(
+//    room: VideoRoom,
+    participant: CallParticipant
+) {
+    val track = participant.track
 
     if (track != null) {
         VideoRenderer(
             modifier = Modifier.size(150.dp),
-            room = room.value,
+//            room = room.value,
             videoTrack = track
         )
     }

@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.app.utils
 
-import io.getstream.video.android.app.model.UserCredentials
+import io.getstream.video.android.model.UserCredentials
 
 fun getUsers(): List<UserCredentials> {
     return listOf(

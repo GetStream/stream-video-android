@@ -42,6 +42,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.wire.WireConverterFactory
 import stream.video.User
+import java.util.*
 
 /**
  * Serves as an internal DI framework that allows us to cache heavy components reused across the
@@ -102,7 +103,12 @@ internal class VideoModule(
     }
 
     private val webRTCClient: WebRTCClient by lazy {
-        WebRTCClient(appContext, credentialsProvider, signalClient)
+        WebRTCClient(
+            sessionId = "call:123",
+            context = appContext,
+            credentialsProvider = credentialsProvider,
+            signalClient = signalClient
+        )
     }
 
     /**
@@ -261,7 +267,7 @@ internal class VideoModule(
         private const val BASE_URL = "http://10.0.2.2:26991"
 
         @Suppress("RedundantNullableReturnType")
-        private val REDIRECT_SIGNAL_URL: String? = "https://66f3-89-172-225-195.eu.ngrok.io"
+        private val REDIRECT_SIGNAL_URL: String? = "https://c8e5-93-140-102-228.eu.ngrok.io"
 
         private const val SIGNAL_BASE_URL = "http://10.0.2.2:3031"
 

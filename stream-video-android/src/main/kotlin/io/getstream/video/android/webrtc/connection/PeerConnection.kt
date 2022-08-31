@@ -17,6 +17,7 @@
 package io.getstream.video.android.webrtc.connection
 
 import io.getstream.video.android.dispatchers.DispatcherProvider
+import io.getstream.video.android.events.SfuDataEvent
 import io.getstream.video.android.utils.Result
 import io.getstream.video.android.webrtc.StreamPeerConnection
 import io.getstream.video.android.webrtc.signal.SignalClient
@@ -35,7 +36,6 @@ import org.webrtc.RtpSender
 import org.webrtc.RtpTransceiver
 import org.webrtc.SessionDescription
 import stream.video.sfu.IceCandidateRequest
-import java.nio.ByteBuffer
 
 private typealias StreamDataChannel = io.getstream.video.android.webrtc.datachannel.DataChannel
 
@@ -62,7 +62,7 @@ public class PeerConnection(
     public fun createDataChannel(
         label: String,
         init: DataChannel.Init,
-        onMessage: (ByteBuffer) -> Unit,
+        onMessage: (SfuDataEvent) -> Unit,
         onStateChange: (DataChannel.State) -> Unit
     ): StreamDataChannel {
         return StreamDataChannel(

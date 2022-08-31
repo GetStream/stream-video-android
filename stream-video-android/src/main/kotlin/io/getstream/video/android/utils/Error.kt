@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.model
+package io.getstream.video.android.utils
 
-public data class VideoParticipantState(
-    val userId: String,
-    val userName: String,
-    val isLocalAudioEnabled: Boolean,
-    val isLocalVideoEnabled: Boolean
-)
+import io.getstream.video.android.errors.VideoError
+
+public inline fun <T : Any> fetchResult(call: () -> T): Result<T> = try {
+    Success(call())
+} catch (error: Throwable) {
+    Failure(VideoError(error.message, error))
+}
