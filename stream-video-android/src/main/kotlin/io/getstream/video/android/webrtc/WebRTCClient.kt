@@ -28,7 +28,9 @@ import io.getstream.video.android.events.SfuDataEvent
 import io.getstream.video.android.events.SfuParticipantJoinedEvent
 import io.getstream.video.android.events.SfuParticipantLeftEvent
 import io.getstream.video.android.events.SubscriberOfferEvent
+import io.getstream.video.android.model.CallParticipant
 import io.getstream.video.android.model.CallSettings
+import io.getstream.video.android.model.toCallParticipant
 import io.getstream.video.android.token.CredentialsProvider
 import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Result
@@ -58,7 +60,6 @@ import org.webrtc.VideoTrack
 import stream.video.sfu.CodecSettings
 import stream.video.sfu.JoinRequest
 import stream.video.sfu.JoinResponse
-import stream.video.sfu.Participant
 import stream.video.sfu.PeerType
 import stream.video.sfu.SendAnswerRequest
 import stream.video.sfu.SetPublisherRequest
@@ -81,7 +82,7 @@ public class WebRTCClient(
     private var subscriber: StreamPeerConnection? = null
     private var publisher: StreamPeerConnection? = null
 
-    private val callParticipants: MutableMap<String, Participant> = mutableMapOf()
+    private val callParticipants: MutableMap<String, CallParticipant> = mutableMapOf()
 
     private var signalChannel: StreamDataChannel? = null
     private var signalChannelState: DataChannel.State = DataChannel.State.CLOSED
@@ -116,14 +117,15 @@ public class WebRTCClient(
     public var onLocalVideoTrackChange: (VideoTrack) -> Unit = {}
     public var onStreamAdded: (MediaStream) -> Unit = {}
     public var onStreamRemoved: (MediaStream) -> Unit = {}
-    public var onParticipantsUpdated: (Map<String, Participant>) -> Unit = {}
+    public var onParticipantsUpdated: (Map<String, CallParticipant>) -> Unit = {}
 
     public fun connect(shouldPublish: Boolean) {
         val connection = createConnection()
+        subscriber = connection
         Log.d("sfuConnectFlow", connection.toString())
 
         coroutineScope.launch {
-            createSubscriber(connection)
+            createSignalingChannel(connection)
             Log.d("sfuConnectFlow", subscriber.toString())
 
             joinCall(connection)
@@ -146,23 +148,18 @@ public class WebRTCClient(
         }
 
         return peerConnectionFactory.makePeerConnection(
-            sessionId,
-            connectionConfig,
-            PeerConnectionType.SUBSCRIBER
-        ).apply {
-            onStreamAdded = ::addStream
+            sessionId = sessionId,
+            configuration = connectionConfig,
+            type = PeerConnectionType.SUBSCRIBER,
+            onStreamAdded = ::addStream,
             onStreamRemoved = ::removeStream
-        }
+        )
     }
 
-    private fun createSubscriber(connection: StreamPeerConnection) {
-        subscriber = connection
-
+    private fun createSignalingChannel(connection: StreamPeerConnection) {
         signalChannel = connection.createDataChannel(
             "signaling",
-            DataChannel.Init().apply {
-                // TODO - setup init data
-            },
+            DataChannel.Init(),
             onMessage = ::onMessage,
             onStateChange = { state ->
                 this.signalChannelState = state
@@ -193,6 +190,7 @@ public class WebRTCClient(
                         val sdp = joinResponse.data.sdp
 
                         callParticipants.putAll(loadParticipants(joinResponse.data))
+                        updateParticipantsSubscriptions()
                         Log.d("sfuConnectFlow", "ExecuteJoin, $callParticipants")
 
                         connection.setRemoteDescription(
@@ -210,9 +208,9 @@ public class WebRTCClient(
         }
     }
 
-    private fun loadParticipants(data: JoinResponse): Map<String, Participant> {
-        return data.call_state?.participants?.associateBy {
-            it.user?.id!!
+    private fun loadParticipants(data: JoinResponse): Map<String, CallParticipant> {
+        return data.call_state?.participants?.map { it.toCallParticipant() }?.associateBy {
+            it.id
         } ?: emptyMap()
     }
 
@@ -262,11 +260,11 @@ public class WebRTCClient(
         publisher = peerConnectionFactory.makePeerConnection(
             sessionId,
             connectionConfig,
-            PeerConnectionType.PUBLISHER
+            PeerConnectionType.PUBLISHER,
+            onNegotiationNeeded = ::handleNegotiationNeeded
         )
 
         Log.d("sfuConnectFlow", "CreatePublisher, $publisher")
-        publisher?.onNegotiationNeeded = ::handleNegotiationNeeded
     }
 
     private fun updateParticipantsSubscriptions() {
@@ -277,10 +275,9 @@ public class WebRTCClient(
             if (id != userId) {
                 Log.d("sfuConnectFlow", "Updating subscriptions for $id")
 
-                // TODO - fetch the track size
                 val dimension = VideoDimension(
-//                    height = user.trackSize.height,
-//                    width = user.trackSize.width
+                    width = user.trackSize.first,
+                    height = user.trackSize.second
                 )
                 subscriptions[id] = dimension
             }
@@ -291,7 +288,14 @@ public class WebRTCClient(
         )
 
         coroutineScope.launch {
-            signalClient.updateSubscriptions(request)
+            when (signalClient.updateSubscriptions(request)) {
+                is Success -> {
+                    Log.d("sfuConnectFlow", "Successful subscription update")
+                }
+                is Failure -> {
+                    Log.d("sfuConnectFlow", "Failed subscription update")
+                }
+            }
         }
     }
 
@@ -421,7 +425,7 @@ public class WebRTCClient(
     /**
      * Processes messages from the Data channel.
      */
-    private fun onMessage(event: SfuDataEvent) {
+    private fun onMessage(event: SfuDataEvent) { // TODO - handle missing events
         when (event) {
             is SubscriberOfferEvent -> setRemoteDescription(event.sdp)
             is SfuParticipantJoinedEvent -> addParticipant(event)
@@ -441,7 +445,7 @@ public class WebRTCClient(
     private fun addParticipant(event: SfuParticipantJoinedEvent) {
         val userId = event.participant.user?.id ?: return
 
-        callParticipants[userId] = event.participant
+        callParticipants[userId] = event.participant.toCallParticipant()
         onParticipantsUpdated(callParticipants)
         updateParticipantsSubscriptions()
     }

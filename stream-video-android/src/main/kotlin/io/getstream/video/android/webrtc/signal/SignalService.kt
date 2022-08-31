@@ -52,5 +52,5 @@ public interface SignalService {
 
     @Headers("Content-Type: application/protobuf")
     @POST("/twirp/stream.video.sfu.SignalServer/UpdateSubscriptions")
-    public suspend fun updateSubscriptions(request: UpdateSubscriptionsRequest): UpdateSubscriptionsResponse
+    public suspend fun updateSubscriptions(@Body request: UpdateSubscriptionsRequest): UpdateSubscriptionsResponse
 }

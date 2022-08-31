@@ -35,7 +35,7 @@ private fun User.toCallParticipant() =
         hasVideo = false,
         isOnline = false,
         track = null,
-        trackSize = 0f to 0f
+        trackSize = 0 to 0
     )
 
 @PublishedApi

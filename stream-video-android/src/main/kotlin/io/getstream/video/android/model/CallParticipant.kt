@@ -17,6 +17,7 @@
 package io.getstream.video.android.model
 
 import org.webrtc.VideoTrack
+import stream.video.sfu.Participant
 
 public data class CallParticipant(
     public val id: String,
@@ -27,7 +28,20 @@ public data class CallParticipant(
     public val hasVideo: Boolean,
     public val hasAudio: Boolean,
     public val track: VideoTrack?,
-    public val trackSize: Pair<Float, Float>
+    public val trackSize: Pair<Int, Int>
 )
+
+public fun Participant.toCallParticipant(): CallParticipant =
+    CallParticipant(
+        id = this.user?.id ?: "",
+        name = this.user?.name ?: "",
+        role = this.user?.role ?: "",
+        profileImageURL = this.user?.image_url,
+        isOnline = true,
+        hasVideo = video,
+        hasAudio = audio,
+        track = null,
+        trackSize = 0 to 0
+    )
 
 // TODO - add mapping to/from SFU Participant

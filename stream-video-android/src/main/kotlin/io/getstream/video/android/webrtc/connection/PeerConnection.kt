@@ -42,18 +42,16 @@ private typealias StreamDataChannel = io.getstream.video.android.webrtc.datachan
 public class PeerConnection(
     private val sessionId: String,
     private val type: PeerConnectionType,
-    private val signalClient: SignalClient
+    private val signalClient: SignalClient,
+    private val onStreamAdded: ((MediaStream) -> Unit)?,
+    private val onStreamRemoved: ((MediaStream) -> Unit)?,
+    private val onNegotiationNeeded: ((StreamPeerConnection) -> Unit)?
 ) : PeerConnection.Observer {
 
     private val coroutineScope = CoroutineScope(DispatcherProvider.IO)
 
     private lateinit var connection: PeerConnection
     private var transceiver: RtpTransceiver? = null
-
-    public var onNegotiationNeeded: ((StreamPeerConnection) -> Unit)? =
-        null
-    public var onStreamAdded: ((MediaStream) -> Unit)? = null
-    public var onStreamRemoved: ((MediaStream) -> Unit)? = null
 
     public fun initialize(peerConnection: PeerConnection) {
         this.connection = peerConnection

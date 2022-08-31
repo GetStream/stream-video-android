@@ -104,7 +104,7 @@ internal class VideoModule(
 
     private val webRTCClient: WebRTCClient by lazy {
         WebRTCClient(
-            sessionId = "call:123",
+            sessionId = UUID.randomUUID().toString(),
             context = appContext,
             credentialsProvider = credentialsProvider,
             signalClient = signalClient
@@ -267,7 +267,7 @@ internal class VideoModule(
         private const val BASE_URL = "http://10.0.2.2:26991"
 
         @Suppress("RedundantNullableReturnType")
-        private val REDIRECT_SIGNAL_URL: String? = "https://c8e5-93-140-102-228.eu.ngrok.io"
+        private val REDIRECT_SIGNAL_URL: String? = "https://11b0-93-140-102-228.eu.ngrok.io"
 
         private const val SIGNAL_BASE_URL = "http://10.0.2.2:3031"
 

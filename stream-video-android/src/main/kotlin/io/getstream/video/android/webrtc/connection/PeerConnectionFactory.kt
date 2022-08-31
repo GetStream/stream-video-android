@@ -29,6 +29,7 @@ import org.webrtc.DefaultVideoDecoderFactory
 import org.webrtc.EglBase
 import org.webrtc.HardwareVideoEncoderFactory
 import org.webrtc.MediaConstraints
+import org.webrtc.MediaStream
 import org.webrtc.PeerConnection
 import org.webrtc.PeerConnectionFactory
 import org.webrtc.VideoSource
@@ -52,7 +53,7 @@ public class PeerConnectionFactory(
     }
 
     private val videoEncoderFactory by lazy {
-        HardwareVideoEncoderFactory(eglBase.eglBaseContext, true, true)
+        HardwareVideoEncoderFactory(eglBase.eglBaseContext, true, false)
     }
 
     private val audioDecoderFactory by lazy {
@@ -149,12 +150,18 @@ public class PeerConnectionFactory(
     public fun makePeerConnection(
         sessionId: String,
         configuration: PeerConnection.RTCConfiguration,
-        type: PeerConnectionType
+        type: PeerConnectionType,
+        onStreamAdded: ((MediaStream) -> Unit)? = null,
+        onStreamRemoved: ((MediaStream) -> Unit)? = null,
+        onNegotiationNeeded: ((StreamPeerConnection) -> Unit)? = null
     ): StreamPeerConnection {
-        val peerConnection = PeerConnection(
+        val peerConnection = StreamPeerConnection(
             sessionId,
             type,
-            signalClient
+            signalClient,
+            onStreamAdded,
+            onStreamRemoved,
+            onNegotiationNeeded
         )
         val connection = makePeerConnectionInternal(
             configuration,
@@ -170,7 +177,7 @@ public class PeerConnectionFactory(
         return requireNotNull(
             factory.createPeerConnection(
                 configuration,
-                observer
+                observer,
             )
         )
     }
