@@ -27,7 +27,6 @@ import org.webrtc.BuiltinAudioDecoderFactoryFactory
 import org.webrtc.BuiltinAudioEncoderFactoryFactory
 import org.webrtc.DefaultVideoDecoderFactory
 import org.webrtc.EglBase
-import org.webrtc.EglBase.CONFIG_RGBA
 import org.webrtc.HardwareVideoEncoderFactory
 import org.webrtc.MediaConstraints
 import org.webrtc.PeerConnection
@@ -42,18 +41,18 @@ public class PeerConnectionFactory(
     private val signalClient: SignalClient
 ) {
 
-    private val eglContext by lazy {
-        EglBase.createEgl14(CONFIG_RGBA).eglBaseContext
+    public val eglBase: EglBase by lazy {
+        EglBase.create()
     }
 
     private val videoDecoderFactory by lazy {
         DefaultVideoDecoderFactory(
-            eglContext
+            eglBase.eglBaseContext
         )
     }
 
     private val videoEncoderFactory by lazy {
-        HardwareVideoEncoderFactory(eglContext, true, true)
+        HardwareVideoEncoderFactory(eglBase.eglBaseContext, true, true)
     }
 
     private val audioDecoderFactory by lazy {

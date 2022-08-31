@@ -261,7 +261,7 @@ internal class VideoModule(
         private const val BASE_URL = "http://10.0.2.2:26991"
 
         @Suppress("RedundantNullableReturnType")
-        private val REDIRECT_SIGNAL_URL: String? = "https://cdd5-89-172-225-195.eu.ngrok.io"
+        private val REDIRECT_SIGNAL_URL: String? = "https://66f3-89-172-225-195.eu.ngrok.io"
 
         private const val SIGNAL_BASE_URL = "http://10.0.2.2:3031"
 

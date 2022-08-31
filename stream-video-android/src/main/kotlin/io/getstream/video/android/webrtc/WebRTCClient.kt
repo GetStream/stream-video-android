@@ -30,6 +30,7 @@ import io.getstream.video.android.utils.Success
 import io.getstream.video.android.webrtc.connection.PeerConnectionFactory
 import io.getstream.video.android.webrtc.connection.PeerConnectionType
 import io.getstream.video.android.webrtc.signal.SignalClient
+import io.livekit.android.room.track.LocalVideoTrack.Companion.getCameraPosition
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -40,9 +41,11 @@ import org.webrtc.Camera2Capturer
 import org.webrtc.Camera2Enumerator
 import org.webrtc.CameraEnumerator
 import org.webrtc.DataChannel
+import org.webrtc.EglBase
 import org.webrtc.MediaConstraints
 import org.webrtc.PeerConnection
 import org.webrtc.SessionDescription
+import org.webrtc.SurfaceTextureHelper
 import org.webrtc.SurfaceViewRenderer
 import org.webrtc.VideoCapturer
 import org.webrtc.VideoTrack
@@ -81,6 +84,7 @@ public class WebRTCClient(
     private val sessionId: String = UUID.randomUUID().toString() // TODO - pass in to Client
 
     private val peerConnectionFactory by lazy { PeerConnectionFactory(context, signalClient) }
+    public val eglBase: EglBase by lazy { peerConnectionFactory.eglBase }
 
     /**
      * Video tracks
@@ -90,14 +94,23 @@ public class WebRTCClient(
     private val cameraEnumerator: CameraEnumerator by lazy {
         Camera2Enumerator(context)
     }
+    private val surfaceTextureHelper by lazy {
+        SurfaceTextureHelper.create(
+            "CaptureThread",
+            peerConnectionFactory.eglBase.eglBaseContext
+        )
+    }
 
     private var localVideoTrack: VideoTrack? = null
         set(value) {
-            // TODO - update local track
             field = value
+            if (value != null) {
+                onLocalVideoTrackChange(value)
+            }
         }
-
     private var localAudioTrack: AudioTrack? = null
+
+    public var onLocalVideoTrackChange: (VideoTrack) -> Unit = {}
 
     public fun connect(shouldPublish: Boolean) {
         val connection = createConnection()
@@ -303,15 +316,15 @@ public class WebRTCClient(
 
     private fun makeVideoTrack(isScreenShare: Boolean = false): VideoTrack {
         val videoSource = peerConnectionFactory.makeVideoSource(isScreenShare)
-        val videoTrack = peerConnectionFactory.makeVideoTrack(videoSource)
 
-        buildCameraCapturer()
+        val capturer = buildCameraCapturer()
+        capturer?.initialize(surfaceTextureHelper, context, videoSource.capturerObserver)
 
-        return videoTrack
+        return peerConnectionFactory.makeVideoTrack(videoSource)
     }
 
-    private fun buildCameraCapturer() {
-        val manager = cameraManager ?: return
+    private fun buildCameraCapturer(): VideoCapturer? {
+        val manager = cameraManager ?: return null
 
         val ids = manager.cameraIdList
         var foundCamera = false
@@ -331,33 +344,29 @@ public class WebRTCClient(
             cameraId = ids.first()
         }
 
-        // TODO - do we need to initialize?
-        videoCapturer = Camera2Capturer(context, cameraId, null)
+        val camera2Capturer = Camera2Capturer(context, cameraId, null)
+        videoCapturer = camera2Capturer
+        return camera2Capturer
     }
 
-    public fun startCapturingLocalVideo(renderer: SurfaceViewRenderer, position: Int) {
+    public fun startCapturingLocalVideo(
+        renderer: SurfaceViewRenderer,
+        position: Int,
+    ) {
         val capturer = videoCapturer as? Camera2Capturer ?: return
         val enumerator = cameraEnumerator as? Camera2Enumerator ?: return
-        val manager = cameraManager ?: return
 
-        val devices = manager.cameraIdList.map { id ->
-            id to manager.getCameraCharacteristics(id)
+        val frontCamera = enumerator.deviceNames.first {
+            enumerator.getCameraPosition(it)?.ordinal == position
         }
 
-        val frontCamera = devices.first { (_, characteristics) ->
-            characteristics[CameraCharacteristics.LENS_FACING] == position
-        }
-
-        val supportedFormats = enumerator.getSupportedFormats(frontCamera.first) ?: emptyList()
+        val supportedFormats = enumerator.getSupportedFormats(frontCamera) ?: emptyList()
 
         /**
          * We pick the highest resolution.
          */
         val resolution = supportedFormats.firstOrNull() ?: return
 
-        /**
-         * TODO - figure out how to render video on Android
-         */
         capturer.startCapture(resolution.width, resolution.height, resolution.framerate.max)
         localVideoTrack?.addSink(renderer)
     }

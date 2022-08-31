@@ -1354,6 +1354,9 @@ public final class io/getstream/video/android/viewmodel/CallViewModelFactory : a
 public final class io/getstream/video/android/webrtc/WebRTCClient {
 	public fun <init> (Landroid/content/Context;Lio/getstream/video/android/token/CredentialsProvider;Lio/getstream/video/android/webrtc/signal/SignalClient;)V
 	public final fun connect (Z)V
+	public final fun getEglBase ()Lorg/webrtc/EglBase;
+	public final fun getOnLocalVideoTrackChange ()Lkotlin/jvm/functions/Function1;
+	public final fun setOnLocalVideoTrackChange (Lkotlin/jvm/functions/Function1;)V
 	public final fun startCapturingLocalVideo (Lorg/webrtc/SurfaceViewRenderer;I)V
 }
 
@@ -1387,6 +1390,7 @@ public final class io/getstream/video/android/webrtc/connection/PeerConnection :
 
 public final class io/getstream/video/android/webrtc/connection/PeerConnectionFactory {
 	public fun <init> (Landroid/content/Context;Lio/getstream/video/android/webrtc/signal/SignalClient;)V
+	public final fun getEglBase ()Lorg/webrtc/EglBase;
 	public final fun getVideoDecoderCodecs ()Ljava/util/List;
 	public final fun getVideoEncoderCodecs ()Ljava/util/List;
 	public final fun makeAudioSource (Lorg/webrtc/MediaConstraints;)Lorg/webrtc/AudioSource;

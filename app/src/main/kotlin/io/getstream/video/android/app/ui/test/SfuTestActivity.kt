@@ -24,19 +24,31 @@ import androidx.appcompat.app.AppCompatActivity
 import io.getstream.video.android.app.R
 import io.getstream.video.android.app.VideoApp
 import org.webrtc.SurfaceViewRenderer
+import org.webrtc.VideoTrack
 
 class SfuTestActivity : AppCompatActivity() {
+
+    private val client by lazy {
+        VideoApp.videoClient.webRTCClient
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sfu_test)
+        val renderer = findViewById<SurfaceViewRenderer>(R.id.surfaceView)
+
+        renderer.init(client.eglBase.eglBaseContext, null)
+
         testWebRTCClient()
     }
 
     private fun testWebRTCClient() {
-        val client = VideoApp.videoClient.webRTCClient
+        client.onLocalVideoTrackChange = ::updateVideoTrack
 
         client.connect(true)
+    }
+
+    private fun updateVideoTrack(videoTrack: VideoTrack) {
         val renderer = findViewById<SurfaceViewRenderer>(R.id.surfaceView)
 
         client.startCapturingLocalVideo(renderer, LENS_FACING_FRONT)
