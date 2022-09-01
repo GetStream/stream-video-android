@@ -23,8 +23,6 @@ import io.getstream.video.android.webrtc.StreamPeerConnection
 import io.getstream.video.android.webrtc.signal.SignalClient
 import org.webrtc.AudioSource
 import org.webrtc.AudioTrack
-import org.webrtc.BuiltinAudioDecoderFactoryFactory
-import org.webrtc.BuiltinAudioEncoderFactoryFactory
 import org.webrtc.DefaultVideoDecoderFactory
 import org.webrtc.EglBase
 import org.webrtc.HardwareVideoEncoderFactory
@@ -56,14 +54,6 @@ public class PeerConnectionFactory(
         HardwareVideoEncoderFactory(eglBase.eglBaseContext, true, false)
     }
 
-    private val audioDecoderFactory by lazy {
-        BuiltinAudioDecoderFactoryFactory()
-    }
-
-    private val audioEncoderFactory by lazy {
-        BuiltinAudioEncoderFactoryFactory()
-    }
-
     private val factory by lazy {
         PeerConnectionFactory.initialize(
             PeerConnectionFactory.InitializationOptions.builder(context)
@@ -72,15 +62,9 @@ public class PeerConnectionFactory(
         // TODO init SSL?
 
         PeerConnectionFactory.builder()
-            .setOptions(
-                PeerConnectionFactory.Options().apply {
-                    // TODO - connection options
-                }
-            )
+            .setOptions(PeerConnectionFactory.Options())
             .setVideoDecoderFactory(videoDecoderFactory)
             .setVideoEncoderFactory(videoEncoderFactory)
-            .setAudioEncoderFactoryFactory(audioEncoderFactory)
-            .setAudioDecoderFactoryFactory(audioDecoderFactory)
             .createPeerConnectionFactory()
     }
 

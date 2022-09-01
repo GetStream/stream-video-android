@@ -482,7 +482,9 @@ public class WebRTCClient(
             is SubscriberOfferEvent -> setRemoteDescription(event.sdp)
             is SfuParticipantJoinedEvent -> addParticipant(event)
             is SfuParticipantLeftEvent -> removeParticipant(event)
-            is ChangePublishQualityEvent -> updatePublishQuality(event)
+            is ChangePublishQualityEvent -> {
+                // updatePublishQuality(event) -> TODO - re-enable once we send the proper quality (dimensions)
+            }
             is MuteStateChangeEvent -> updateMuteState(event)
             else -> Unit
         }
