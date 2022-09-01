@@ -24,11 +24,11 @@ public data class CallParticipant(
     public val role: String,
     public val name: String,
     public val profileImageURL: String?,
-    public val isOnline: Boolean,
-    public val hasVideo: Boolean,
-    public val hasAudio: Boolean,
-    public val track: VideoTrack?,
-    public val trackSize: Pair<Int, Int>
+    public var isOnline: Boolean,
+    public var hasVideo: Boolean,
+    public var hasAudio: Boolean,
+    public var track: VideoTrack?,
+    public var trackSize: Pair<Int, Int>
 )
 
 public fun Participant.toCallParticipant(): CallParticipant =

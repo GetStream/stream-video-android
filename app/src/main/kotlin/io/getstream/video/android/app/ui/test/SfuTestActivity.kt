@@ -21,37 +21,61 @@ import android.content.Intent
 import android.hardware.camera2.CameraMetadata.LENS_FACING_FRONT
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.app.R
 import io.getstream.video.android.app.VideoApp
+import kotlinx.coroutines.launch
 import org.webrtc.SurfaceViewRenderer
 import org.webrtc.VideoTrack
 
 class SfuTestActivity : AppCompatActivity() {
 
-    private val client by lazy {
-        VideoApp.videoClient.webRTCClient
+    private val videoClient by lazy {
+        VideoApp.videoClient
+    }
+
+    private val webRTCClient by lazy {
+        videoClient.webRTCClient
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sfu_test)
         val renderer = findViewById<SurfaceViewRenderer>(R.id.surfaceView)
+        val participantView = findViewById<SurfaceViewRenderer>(R.id.participantView)
 
-        renderer.init(client.eglBase.eglBaseContext, null)
+        renderer.init(webRTCClient.eglBase.eglBaseContext, null)
+        participantView.init(webRTCClient.eglBase.eglBaseContext, null)
 
+        observeParticipants()
         testWebRTCClient()
     }
 
-    private fun testWebRTCClient() {
-        client.onLocalVideoTrackChange = ::updateVideoTrack
+    private fun observeParticipants() {
+        lifecycleScope.launch {
+            webRTCClient.callParticipants.collect { participants ->
+                val user = videoClient.getUser()
+                val participant = participants.firstOrNull { it.track != null && it.id != user.id }
 
-        client.connect(true)
+                if (participant != null) {
+                    val participantView = findViewById<SurfaceViewRenderer>(R.id.participantView)
+
+                    participant.track?.addSink(participantView)
+                }
+            }
+        }
+    }
+
+    private fun testWebRTCClient() {
+        webRTCClient.onLocalVideoTrackChange = ::updateVideoTrack
+
+        webRTCClient.connect(true)
     }
 
     private fun updateVideoTrack(videoTrack: VideoTrack) {
         val renderer = findViewById<SurfaceViewRenderer>(R.id.surfaceView)
 
-        client.startCapturingLocalVideo(renderer, LENS_FACING_FRONT)
+        webRTCClient.startCapturingLocalVideo(renderer, LENS_FACING_FRONT)
     }
 
     companion object {

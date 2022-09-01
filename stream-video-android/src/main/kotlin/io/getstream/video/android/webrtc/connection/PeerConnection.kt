@@ -51,7 +51,8 @@ public class PeerConnection(
     private val coroutineScope = CoroutineScope(DispatcherProvider.IO)
 
     private lateinit var connection: PeerConnection
-    private var transceiver: RtpTransceiver? = null
+    public var transceiver: RtpTransceiver? = null
+        private set
 
     public fun initialize(peerConnection: PeerConnection) {
         this.connection = peerConnection

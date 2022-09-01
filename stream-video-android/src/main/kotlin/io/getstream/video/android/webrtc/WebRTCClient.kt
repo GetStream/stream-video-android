@@ -29,18 +29,25 @@ import io.getstream.video.android.events.SfuParticipantJoinedEvent
 import io.getstream.video.android.events.SfuParticipantLeftEvent
 import io.getstream.video.android.events.SubscriberOfferEvent
 import io.getstream.video.android.model.CallParticipant
+import io.getstream.video.android.model.CallParticipantState
 import io.getstream.video.android.model.CallSettings
 import io.getstream.video.android.model.toCallParticipant
 import io.getstream.video.android.token.CredentialsProvider
 import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Result
 import io.getstream.video.android.utils.Success
+import io.getstream.video.android.utils.updateValue
 import io.getstream.video.android.webrtc.connection.PeerConnectionFactory
 import io.getstream.video.android.webrtc.connection.PeerConnectionType
 import io.getstream.video.android.webrtc.signal.SignalClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import okio.ByteString.Companion.encode
 import org.webrtc.AudioTrack
@@ -52,6 +59,7 @@ import org.webrtc.EglBase
 import org.webrtc.MediaConstraints
 import org.webrtc.MediaStream
 import org.webrtc.PeerConnection
+import org.webrtc.RtpParameters
 import org.webrtc.SessionDescription
 import org.webrtc.SurfaceTextureHelper
 import org.webrtc.SurfaceViewRenderer
@@ -74,6 +82,7 @@ internal typealias StreamDataChannel = io.getstream.video.android.webrtc.datacha
 public class WebRTCClient(
     private val sessionId: String,
     private val context: Context,
+    private val currentUserId: String,
     private val credentialsProvider: CredentialsProvider,
     private val signalClient: SignalClient
 ) {
@@ -82,7 +91,22 @@ public class WebRTCClient(
     private var subscriber: StreamPeerConnection? = null
     private var publisher: StreamPeerConnection? = null
 
-    private val callParticipants: MutableMap<String, CallParticipant> = mutableMapOf()
+    private val _callParticipants: MutableStateFlow<List<CallParticipant>> =
+        MutableStateFlow(emptyList())
+
+    public val callParticipants: StateFlow<List<CallParticipant>> = _callParticipants
+
+    public val callParticipantState: Flow<List<CallParticipantState>>
+        get() = callParticipants.map { list ->
+            list.map {
+                CallParticipantState(
+                    it.id,
+                    it.name,
+                    it.hasAudio,
+                    it.hasVideo
+                )
+            }
+        }
 
     private var signalChannel: StreamDataChannel? = null
     private var signalChannelState: DataChannel.State = DataChannel.State.CLOSED
@@ -117,9 +141,9 @@ public class WebRTCClient(
     public var onLocalVideoTrackChange: (VideoTrack) -> Unit = {}
     public var onStreamAdded: (MediaStream) -> Unit = {}
     public var onStreamRemoved: (MediaStream) -> Unit = {}
-    public var onParticipantsUpdated: (Map<String, CallParticipant>) -> Unit = {}
 
     public fun connect(shouldPublish: Boolean) {
+        setupState()
         val connection = createConnection()
         subscriber = connection
         Log.d("sfuConnectFlow", connection.toString())
@@ -139,6 +163,14 @@ public class WebRTCClient(
                 createPublisher()
             }
             setupUserMedia(CallSettings(), shouldPublish)
+        }
+    }
+
+    private fun setupState() {
+        coroutineScope.launch {
+            _callParticipants.collectLatest {
+                updateParticipantsSubscriptions()
+            }
         }
     }
 
@@ -170,12 +202,28 @@ public class WebRTCClient(
 
     private fun addStream(mediaStream: MediaStream) {
         Log.d("sfuConnectFlow", "StreamAdded, $mediaStream")
-        onStreamAdded(mediaStream)
+
+        val updatedList = _callParticipants.value.updateValue(
+            predicate = { it.id in mediaStream.id },
+            transformer = {
+                it.copy(
+                    track = mediaStream.videoTracks?.firstOrNull()
+                )
+            }
+        )
+        _callParticipants.value = updatedList
     }
 
     private fun removeStream(mediaStream: MediaStream) {
         Log.d("sfuConnectFlow", "StreamRemoved, $mediaStream")
-        onStreamRemoved(mediaStream)
+        val updatedList = _callParticipants.value.updateValue(
+            predicate = { it.id in mediaStream.id },
+            transformer = {
+                it.copy(track = null, trackSize = 0 to 0)
+            }
+        )
+
+        _callParticipants.value = updatedList
     }
 
     private suspend fun joinCall(connection: StreamPeerConnection) {
@@ -189,9 +237,8 @@ public class WebRTCClient(
                         Log.d("sfuConnectFlow", "ExecuteJoin, ${joinResponse.data.sdp}")
                         val sdp = joinResponse.data.sdp
 
-                        callParticipants.putAll(loadParticipants(joinResponse.data))
-                        updateParticipantsSubscriptions()
-                        Log.d("sfuConnectFlow", "ExecuteJoin, $callParticipants")
+                        _callParticipants.value = loadParticipants(joinResponse.data)
+                        Log.d("sfuConnectFlow", "ExecuteJoin, $_callParticipants")
 
                         connection.setRemoteDescription(
                             SessionDescription(SessionDescription.Type.ANSWER, sdp)
@@ -208,10 +255,8 @@ public class WebRTCClient(
         }
     }
 
-    private fun loadParticipants(data: JoinResponse): Map<String, CallParticipant> {
-        return data.call_state?.participants?.map { it.toCallParticipant() }?.associateBy {
-            it.id
-        } ?: emptyMap()
+    private fun loadParticipants(data: JoinResponse): List<CallParticipant> {
+        return data.call_state?.participants?.map { it.toCallParticipant() } ?: emptyList()
     }
 
     private suspend fun executeJoinRequest(data: SessionDescription): Result<JoinResponse> {
@@ -271,15 +316,15 @@ public class WebRTCClient(
         val subscriptions = mutableMapOf<String, VideoDimension>()
         val userId = credentialsProvider.getUserCredentials().id
 
-        for ((id, user) in callParticipants) {
-            if (id != userId) {
-                Log.d("sfuConnectFlow", "Updating subscriptions for $id")
+        for (user in _callParticipants.value) {
+            if (user.id != userId) {
+                Log.d("sfuConnectFlow", "Updating subscriptions for ${user.id}")
 
                 val dimension = VideoDimension(
                     width = user.trackSize.first,
                     height = user.trackSize.second
                 )
-                subscriptions[id] = dimension
+                subscriptions[user.id] = dimension
             }
         }
         val request = UpdateSubscriptionsRequest(
@@ -351,6 +396,13 @@ public class WebRTCClient(
         if (shouldPublish) {
             publisher?.addTrack(audioTrack, listOf(sessionId))
             publisher?.addTransceiver(videoTrack, listOf(sessionId))
+
+            val updatedParticipants = _callParticipants.value.updateValue(
+                predicate = { it.id == currentUserId },
+                transformer = { it.copy(track = localVideoTrack) }
+            )
+
+            _callParticipants.value = updatedParticipants
         }
     }
 
@@ -425,7 +477,7 @@ public class WebRTCClient(
     /**
      * Processes messages from the Data channel.
      */
-    private fun onMessage(event: SfuDataEvent) { // TODO - handle missing events
+    private fun onMessage(event: SfuDataEvent) {
         when (event) {
             is SubscriberOfferEvent -> setRemoteDescription(event.sdp)
             is SfuParticipantJoinedEvent -> addParticipant(event)
@@ -437,23 +489,68 @@ public class WebRTCClient(
     }
 
     private fun updateMuteState(event: MuteStateChangeEvent) {
+        val currentParticipants = _callParticipants.value
+
+        val updatedList = currentParticipants.updateValue(
+            predicate = { it.id == event.userId },
+            transformer = {
+                it.copy(
+                    hasAudio = !event.audioMuted,
+                    hasVideo = !event.videoMuted
+                )
+            }
+        )
+
+        _callParticipants.value = updatedList
     }
 
     private fun updatePublishQuality(event: ChangePublishQualityEvent) {
+        val transceiver = publisher?.transceiver ?: return
+
+        val enabledRids = event.changePublishQuality.video_sender.firstOrNull()?.layers
+            ?.filter { it.active }
+            ?.map { it.name } ?: emptyList()
+
+        Log.d("sfuConnectFlow", "UpdateQuality, $enabledRids")
+        val params = transceiver.sender.parameters
+
+        val updatedEncodings = mutableListOf<RtpParameters.Encoding>()
+
+        var encodingChanged = false
+        Log.d("sfuConnectFlow", "CurrentQuality, $params")
+
+        for (encoding in params.encodings) {
+            if (encoding.rid != null) {
+                val shouldEnable = encoding.rid in enabledRids
+
+                if (shouldEnable && encoding.active) {
+                    updatedEncodings.add(encoding)
+                } else if (!shouldEnable && !encoding.active) {
+                    updatedEncodings.add(encoding)
+                } else {
+                    encodingChanged = true
+                    encoding.active = shouldEnable
+                    updatedEncodings.add(encoding)
+                }
+            }
+        }
+        if (encodingChanged) {
+            Log.d("sfuConnectFlow", "Updated encoding, $updatedEncodings")
+            params.encodings.clear()
+            params.encodings.addAll(updatedEncodings)
+
+            publisher?.transceiver?.sender?.parameters = params
+        }
     }
 
     private fun addParticipant(event: SfuParticipantJoinedEvent) {
-        val userId = event.participant.user?.id ?: return
-
-        callParticipants[userId] = event.participant.toCallParticipant()
-        onParticipantsUpdated(callParticipants)
-        updateParticipantsSubscriptions()
+        _callParticipants.value = _callParticipants.value + event.participant.toCallParticipant()
     }
 
     private fun removeParticipant(event: SfuParticipantLeftEvent) {
-        callParticipants.remove(event.participant.user?.id)
-        onParticipantsUpdated(callParticipants)
-        updateParticipantsSubscriptions()
+        val userId = event.participant.user?.id ?: return
+
+        _callParticipants.value = _callParticipants.value.filter { it.id != userId }
     }
 
     private fun setRemoteDescription(sdp: String) {

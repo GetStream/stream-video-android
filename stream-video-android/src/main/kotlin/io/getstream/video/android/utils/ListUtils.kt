@@ -16,8 +16,15 @@
 
 package io.getstream.video.android.utils
 
-public inline fun <T> List<T>.update(condition: (T) -> Boolean, transformer: (T) -> T): List<T> {
-    val itemIndex = this.indexOfFirst(condition)
+public inline fun <T> List<T>.updateValue(
+    predicate: (T) -> Boolean,
+    transformer: (T) -> T
+): List<T> {
+    val itemIndex = this.indexOfFirst(predicate)
+
+    if (itemIndex == -1) {
+        return this
+    }
 
     val mutableList = toMutableList()
     val updatedItem = transformer(this[itemIndex])
