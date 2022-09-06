@@ -31,7 +31,7 @@ import io.getstream.video.android.socket.VideoSocketImpl
 import io.getstream.video.android.token.CredentialsManager
 import io.getstream.video.android.token.CredentialsManagerImpl
 import io.getstream.video.android.token.CredentialsProvider
-import io.getstream.video.android.webrtc.WebRTCClient
+import io.getstream.video.android.webrtc.WebRTCClientImpl
 import io.getstream.video.android.webrtc.signal.SignalClient
 import io.getstream.video.android.webrtc.signal.SignalClientImpl
 import io.getstream.video.android.webrtc.signal.SignalService
@@ -42,7 +42,6 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.wire.WireConverterFactory
 import stream.video.User
-import java.util.*
 
 /**
  * Serves as an internal DI framework that allows us to cache heavy components reused across the
@@ -102,11 +101,9 @@ internal class VideoModule(
         SignalClientImpl(service)
     }
 
-    private val webRTCClient: WebRTCClient by lazy {
-        WebRTCClient(
-            sessionId = UUID.randomUUID().toString(),
+    private val webRTCClient: WebRTCClientImpl by lazy {
+        WebRTCClientImpl(
             context = appContext,
-            currentUserId = user.id,
             credentialsProvider = credentialsProvider,
             signalClient = signalClient
         )
@@ -219,9 +216,9 @@ internal class VideoModule(
     }
 
     /**
-     * @return The [WebRTCClient] used to communicate to the SFU.
+     * @return The [WebRTCClientImpl] used to communicate to the SFU.
      */
-    internal fun webRTCClient(): WebRTCClient {
+    internal fun webRTCClient(): WebRTCClientImpl {
         return webRTCClient
     }
 
@@ -268,7 +265,7 @@ internal class VideoModule(
         private const val BASE_URL = "http://10.0.2.2:26991"
 
         @Suppress("RedundantNullableReturnType")
-        private val REDIRECT_SIGNAL_URL: String? = "https://e264-78-1-63-22.eu.ngrok.io"
+        private val REDIRECT_SIGNAL_URL: String? = "https://50f4-93-140-69-216.eu.ngrok.io"
 
         private const val SIGNAL_BASE_URL = "http://10.0.2.2:3031"
 

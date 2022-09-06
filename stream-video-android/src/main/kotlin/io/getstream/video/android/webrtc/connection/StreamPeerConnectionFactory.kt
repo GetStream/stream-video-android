@@ -19,12 +19,12 @@ package io.getstream.video.android.webrtc.connection
 import android.content.Context
 import android.media.MediaCodecList
 import android.os.Build
-import io.getstream.video.android.webrtc.signal.SignalClient
 import org.webrtc.AudioSource
 import org.webrtc.AudioTrack
 import org.webrtc.DefaultVideoDecoderFactory
 import org.webrtc.EglBase
 import org.webrtc.HardwareVideoEncoderFactory
+import org.webrtc.IceCandidate
 import org.webrtc.MediaConstraints
 import org.webrtc.MediaStream
 import org.webrtc.PeerConnection
@@ -37,10 +37,7 @@ import org.webrtc.audio.JavaAudioDeviceModule
 import stream.video.sfu.Codec
 import java.util.*
 
-public class StreamPeerConnectionFactory(
-    private val context: Context,
-    private val signalClient: SignalClient
-) {
+public class StreamPeerConnectionFactory(private val context: Context) {
 
     public val eglBase: EglBase by lazy {
         EglBase.create()
@@ -136,20 +133,19 @@ public class StreamPeerConnectionFactory(
      * Peer connection.
      */
     public fun makePeerConnection(
-        sessionId: String,
         configuration: PeerConnection.RTCConfiguration,
         type: PeerConnectionType,
         onStreamAdded: ((MediaStream) -> Unit)? = null,
         onStreamRemoved: ((MediaStream) -> Unit)? = null,
-        onNegotiationNeeded: ((StreamPeerConnection) -> Unit)? = null
+        onNegotiationNeeded: ((StreamPeerConnection) -> Unit)? = null,
+        onIceCandidateRequest: ((IceCandidate, PeerConnectionType) -> Unit)? = null
     ): StreamPeerConnection {
         val peerConnection = StreamPeerConnection(
-            sessionId,
             type,
-            signalClient,
             onStreamAdded,
             onStreamRemoved,
-            onNegotiationNeeded
+            onNegotiationNeeded,
+            onIceCandidateRequest
         )
         val connection = makePeerConnectionInternal(
             configuration,

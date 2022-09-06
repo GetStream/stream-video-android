@@ -1237,6 +1237,19 @@ public final class io/getstream/video/android/model/JoinCallResponse {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class io/getstream/video/android/model/Room {
+	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/token/CredentialsProvider;Lorg/webrtc/EglBase;)V
+	public final fun getCallParticipantState ()Lkotlinx/coroutines/flow/Flow;
+	public final fun getCallParticipants ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getOnLocalVideoTrackChange ()Lkotlin/jvm/functions/Function1;
+	public final fun getOnStreamAdded ()Lkotlin/jvm/functions/Function1;
+	public final fun getOnStreamRemoved ()Lkotlin/jvm/functions/Function1;
+	public final fun initRenderer (Lorg/webrtc/SurfaceViewRenderer;)V
+	public final fun setOnLocalVideoTrackChange (Lkotlin/jvm/functions/Function1;)V
+	public final fun setOnStreamAdded (Lkotlin/jvm/functions/Function1;)V
+	public final fun setOnStreamRemoved (Lkotlin/jvm/functions/Function1;)V
+}
+
 public final class io/getstream/video/android/model/Track {
 	public fun <init> (Lio/getstream/video/android/model/Track;)V
 	public final fun component1 ()Lio/getstream/video/android/model/Track;
@@ -1268,11 +1281,6 @@ public final class io/getstream/video/android/model/UserCredentials {
 	public fun hashCode ()I
 	public final fun isSelected ()Z
 	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/model/VideoRoom {
-	public fun <init> (Lorg/webrtc/EglBase;)V
-	public final fun init (Lorg/webrtc/SurfaceViewRenderer;)V
 }
 
 public final class io/getstream/video/android/socket/ErrorResponse {
@@ -1435,6 +1443,7 @@ public final class io/getstream/video/android/viewmodel/CallViewModel : androidx
 	public final fun getParticipantList ()Lkotlinx/coroutines/flow/Flow;
 	public final fun getParticipantsState ()Lkotlinx/coroutines/flow/Flow;
 	public final fun getPrimarySpeaker ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getRoomState ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getTokenState ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getUrlState ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun hideParticipants ()V
@@ -1456,19 +1465,23 @@ public final class io/getstream/video/android/viewmodel/CallViewModelFactory : a
 	public fun create (Ljava/lang/Class;)Landroidx/lifecycle/ViewModel;
 }
 
-public final class io/getstream/video/android/webrtc/WebRTCClient {
-	public fun <init> (Ljava/lang/String;Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/token/CredentialsProvider;Lio/getstream/video/android/webrtc/signal/SignalClient;)V
-	public final fun connect (Z)V
-	public final fun getCallParticipantState ()Lkotlinx/coroutines/flow/Flow;
-	public final fun getCallParticipants ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun getEglBase ()Lorg/webrtc/EglBase;
-	public final fun getOnLocalVideoTrackChange ()Lkotlin/jvm/functions/Function1;
-	public final fun getOnStreamAdded ()Lkotlin/jvm/functions/Function1;
-	public final fun getOnStreamRemoved ()Lkotlin/jvm/functions/Function1;
-	public final fun setOnLocalVideoTrackChange (Lkotlin/jvm/functions/Function1;)V
-	public final fun setOnStreamAdded (Lkotlin/jvm/functions/Function1;)V
-	public final fun setOnStreamRemoved (Lkotlin/jvm/functions/Function1;)V
-	public final fun startCapturingLocalVideo (I)V
+public abstract interface class io/getstream/video/android/webrtc/WebRTCClient {
+	public abstract fun clear ()V
+	public abstract fun joinCall (Ljava/lang/String;Z)Lio/getstream/video/android/model/Room;
+	public abstract fun setCameraEnabled (Z)V
+	public abstract fun setMicrophoneEnabled (Z)V
+	public abstract fun startCall (Ljava/lang/String;Z)Lio/getstream/video/android/model/Room;
+	public abstract fun startCapturingLocalVideo (I)V
+}
+
+public final class io/getstream/video/android/webrtc/WebRTCClientImpl : io/getstream/video/android/webrtc/WebRTCClient {
+	public fun <init> (Landroid/content/Context;Lio/getstream/video/android/token/CredentialsProvider;Lio/getstream/video/android/webrtc/signal/SignalClient;)V
+	public fun clear ()V
+	public fun joinCall (Ljava/lang/String;Z)Lio/getstream/video/android/model/Room;
+	public fun setCameraEnabled (Z)V
+	public fun setMicrophoneEnabled (Z)V
+	public fun startCall (Ljava/lang/String;Z)Lio/getstream/video/android/model/Room;
+	public fun startCapturingLocalVideo (I)V
 }
 
 public final class io/getstream/video/android/webrtc/connection/PeerConnectionType : java/lang/Enum {
@@ -1479,16 +1492,18 @@ public final class io/getstream/video/android/webrtc/connection/PeerConnectionTy
 }
 
 public final class io/getstream/video/android/webrtc/connection/StreamPeerConnection : org/webrtc/PeerConnection$Observer {
-	public fun <init> (Ljava/lang/String;Lio/getstream/video/android/webrtc/connection/PeerConnectionType;Lio/getstream/video/android/webrtc/signal/SignalClient;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;)V
+	public fun <init> (Lio/getstream/video/android/webrtc/connection/PeerConnectionType;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;)V
 	public final fun addTrack (Lorg/webrtc/MediaStreamTrack;Ljava/util/List;)Lorg/webrtc/RtpSender;
 	public final fun addTransceiver (Lorg/webrtc/MediaStreamTrack;Ljava/util/List;)V
 	public final fun createAnswer (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun createDataChannel (Ljava/lang/String;Lorg/webrtc/DataChannel$Init;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;)Lio/getstream/video/android/webrtc/datachannel/StreamDataChannel;
+	public final fun createJoinOffer (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun createOffer (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun getConnection ()Lorg/webrtc/PeerConnection;
 	public final fun getTransceiver ()Lorg/webrtc/RtpTransceiver;
 	public final fun initialize (Lorg/webrtc/PeerConnection;)V
 	public fun onAddStream (Lorg/webrtc/MediaStream;)V
+	public final fun onCallJoined (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun onDataChannel (Lorg/webrtc/DataChannel;)V
 	public fun onIceCandidate (Lorg/webrtc/IceCandidate;)V
 	public fun onIceCandidatesRemoved ([Lorg/webrtc/IceCandidate;)V
@@ -1503,7 +1518,7 @@ public final class io/getstream/video/android/webrtc/connection/StreamPeerConnec
 }
 
 public final class io/getstream/video/android/webrtc/connection/StreamPeerConnectionFactory {
-	public fun <init> (Landroid/content/Context;Lio/getstream/video/android/webrtc/signal/SignalClient;)V
+	public fun <init> (Landroid/content/Context;)V
 	public final fun createLocalMediaStream ()Lorg/webrtc/MediaStream;
 	public final fun getEglBase ()Lorg/webrtc/EglBase;
 	public final fun getVideoDecoderCodecs ()Ljava/util/List;
@@ -1511,8 +1526,8 @@ public final class io/getstream/video/android/webrtc/connection/StreamPeerConnec
 	public final fun makeAudioSource (Lorg/webrtc/MediaConstraints;)Lorg/webrtc/AudioSource;
 	public static synthetic fun makeAudioSource$default (Lio/getstream/video/android/webrtc/connection/StreamPeerConnectionFactory;Lorg/webrtc/MediaConstraints;ILjava/lang/Object;)Lorg/webrtc/AudioSource;
 	public final fun makeAudioTrack (Lorg/webrtc/AudioSource;)Lorg/webrtc/AudioTrack;
-	public final fun makePeerConnection (Ljava/lang/String;Lorg/webrtc/PeerConnection$RTCConfiguration;Lio/getstream/video/android/webrtc/connection/PeerConnectionType;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;)Lio/getstream/video/android/webrtc/connection/StreamPeerConnection;
-	public static synthetic fun makePeerConnection$default (Lio/getstream/video/android/webrtc/connection/StreamPeerConnectionFactory;Ljava/lang/String;Lorg/webrtc/PeerConnection$RTCConfiguration;Lio/getstream/video/android/webrtc/connection/PeerConnectionType;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/getstream/video/android/webrtc/connection/StreamPeerConnection;
+	public final fun makePeerConnection (Lorg/webrtc/PeerConnection$RTCConfiguration;Lio/getstream/video/android/webrtc/connection/PeerConnectionType;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;)Lio/getstream/video/android/webrtc/connection/StreamPeerConnection;
+	public static synthetic fun makePeerConnection$default (Lio/getstream/video/android/webrtc/connection/StreamPeerConnectionFactory;Lorg/webrtc/PeerConnection$RTCConfiguration;Lio/getstream/video/android/webrtc/connection/PeerConnectionType;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)Lio/getstream/video/android/webrtc/connection/StreamPeerConnection;
 	public final fun makeVideoSource (Z)Lorg/webrtc/VideoSource;
 	public final fun makeVideoTrack (Lorg/webrtc/VideoSource;)Lorg/webrtc/VideoTrack;
 }

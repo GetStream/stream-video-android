@@ -23,11 +23,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.model.CallParticipant
-import io.getstream.video.android.model.VideoRoom
+import io.getstream.video.android.model.Room
 
 @Composable
 public fun ParticipantsContent(
-    room: VideoRoom,
+    room: Room,
     participants: List<CallParticipant>,
     modifier: Modifier = Modifier,
     localParticipant: CallParticipant

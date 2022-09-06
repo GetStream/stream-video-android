@@ -16,14 +16,13 @@
 
 package io.getstream.video.android.webrtc.connection
 
-import io.getstream.video.android.dispatchers.DispatcherProvider
+import android.util.Log
 import io.getstream.video.android.events.SfuDataEvent
+import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Result
-import io.getstream.video.android.webrtc.signal.SignalClient
+import io.getstream.video.android.utils.Success
 import io.getstream.video.android.webrtc.utils.createValue
 import io.getstream.video.android.webrtc.utils.setValue
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 import org.webrtc.DataChannel
 import org.webrtc.IceCandidate
 import org.webrtc.MediaConstraints
@@ -35,20 +34,16 @@ import org.webrtc.RtpSender
 import org.webrtc.RtpTransceiver
 import org.webrtc.RtpTransceiver.RtpTransceiverInit
 import org.webrtc.SessionDescription
-import stream.video.sfu.IceCandidateRequest
 
 private typealias StreamDataChannel = io.getstream.video.android.webrtc.datachannel.StreamDataChannel
 
 public class StreamPeerConnection(
-    private val sessionId: String,
     private val type: PeerConnectionType,
-    private val signalClient: SignalClient,
     private val onStreamAdded: ((MediaStream) -> Unit)?,
     private val onStreamRemoved: ((MediaStream) -> Unit)?,
-    private val onNegotiationNeeded: ((StreamPeerConnection) -> Unit)?
+    private val onNegotiationNeeded: ((StreamPeerConnection) -> Unit)?,
+    private val onIceCandidate: ((IceCandidate, PeerConnectionType) -> Unit)?
 ) : PeerConnection.Observer {
-
-    private val coroutineScope = CoroutineScope(DispatcherProvider.IO)
 
     public lateinit var connection: PeerConnection
         private set
@@ -131,6 +126,28 @@ public class StreamPeerConnection(
         transceiver = connection.addTransceiver(track, transceiverInit)
     }
 
+    public suspend fun createJoinOffer(): Result<SessionDescription> {
+        val offer = createOffer()
+
+        when (offer) {
+            is Success -> {
+                Log.d("sfuConnectFlow", "JoinCall, ${offer.data.description}")
+                setLocalDescription(offer.data)
+            }
+            is Failure -> {
+                Log.d("sfuConnectFlow", "OfferFailure", offer.error.cause)
+            }
+        }
+
+        return offer
+    }
+
+    public suspend fun onCallJoined(sdp: String) {
+        Log.d("sfuConnectFlow", "ExecuteJoin, $sdp")
+
+        setRemoteDescription(SessionDescription(SessionDescription.Type.ANSWER, sdp))
+    }
+
     /**
      * Peer connection listeners.
      */
@@ -138,17 +155,7 @@ public class StreamPeerConnection(
     override fun onIceCandidate(candidate: IceCandidate?) {
         if (candidate == null) return
 
-        val request = IceCandidateRequest(
-            publisher = type == PeerConnectionType.PUBLISHER,
-            candidate = candidate.sdp ?: "",
-            sdpMid = candidate.sdpMid ?: "",
-            sdpMLineIndex = candidate.sdpMLineIndex,
-            session_id = sessionId
-        )
-
-        coroutineScope.launch {
-            signalClient.sendIceCandidate(request)
-        }
+        onIceCandidate?.invoke(candidate, type)
     }
 
     override fun onAddStream(stream: MediaStream?) {

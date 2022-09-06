@@ -37,11 +37,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.model.VideoRoom
+import io.getstream.video.android.model.Room
 
 @Composable
 public fun CallDetails(
-    room: VideoRoom,
+    room: Room,
     isMicrophoneEnabled: Boolean,
     isCameraEnabled: Boolean,
     onEndCall: () -> Unit,

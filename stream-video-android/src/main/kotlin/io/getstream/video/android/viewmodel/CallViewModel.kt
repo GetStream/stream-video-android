@@ -21,18 +21,28 @@ import androidx.lifecycle.viewModelScope
 import io.getstream.video.android.client.VideoClient
 import io.getstream.video.android.model.CallParticipant
 import io.getstream.video.android.model.CallParticipantState
+import io.getstream.video.android.model.Room
+import io.getstream.video.android.webrtc.WebRTCClient
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import stream.video.Call
 import stream.video.UserEventType
+import java.util.*
 
 public class CallViewModel(private val videoClient: VideoClient) : ViewModel() {
+
+    private val webRTCClient: WebRTCClient
+        get() = videoClient.webRTCClient
+
+    private val _roomState: MutableStateFlow<Room?> = MutableStateFlow(null)
+    public val roomState: StateFlow<Room?> = _roomState
 
     private val _urlState: MutableStateFlow<String> = MutableStateFlow("")
     public val urlState: StateFlow<String> = _urlState
@@ -56,10 +66,10 @@ public class CallViewModel(private val videoClient: VideoClient) : ViewModel() {
     public val isMicrophoneEnabled: Flow<Boolean> = _isMicrophoneEnabled
 
     public val participantList: Flow<List<CallParticipant>> =
-        videoClient.webRTCClient.callParticipants
+        roomState.filterNotNull().flatMapLatest { it.callParticipants }
 
     public val participantsState: Flow<List<CallParticipantState>> =
-        videoClient.webRTCClient.callParticipantState
+        roomState.filterNotNull().flatMapLatest { it.callParticipantState }
 
     public val activeSpeakers: Flow<List<CallParticipant>> = participantList.map { list ->
         list.filter { participant -> participant.hasAudio }
@@ -70,8 +80,6 @@ public class CallViewModel(private val videoClient: VideoClient) : ViewModel() {
 
     private val _isShowingParticipantsInfo = MutableStateFlow(false)
     public val isShowingParticipantsInfo: StateFlow<Boolean> = _isShowingParticipantsInfo
-
-    // TODO - update the call view model to use the new SFU client and data
 
     public fun init(
         call: Call,
@@ -97,7 +105,8 @@ public class CallViewModel(private val videoClient: VideoClient) : ViewModel() {
                 }
         }
 
-        videoClient.webRTCClient.connect(true)
+        // TODO - session ID
+        _roomState.value = webRTCClient.joinCall(UUID.randomUUID().toString(), true)
     }
 
     private fun setupLocalParticipant(localParticipant: CallParticipant) {
@@ -152,7 +161,7 @@ public class CallViewModel(private val videoClient: VideoClient) : ViewModel() {
         val participant = _localParticipantState.value ?: return
 
         viewModelScope.launch {
-//            participant.setCameraEnabled(enabled)
+
             _isCameraEnabled.value = enabled
             val event =
                 if (enabled) UserEventType.USER_EVENT_TYPE_VIDEO_STARTED
@@ -228,6 +237,6 @@ public class CallViewModel(private val videoClient: VideoClient) : ViewModel() {
     }
 
     public fun startCapturingLocalVideo() {
-        videoClient.webRTCClient.startCapturingLocalVideo(0)
+        // videoClient.webRTCClient.startCapturingLocalVideo(0) TODO - call this on the room
     }
 }

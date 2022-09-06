@@ -26,13 +26,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.viewinterop.AndroidView
-import io.getstream.video.android.model.VideoRoom
+import io.getstream.video.android.model.Room
 import org.webrtc.SurfaceViewRenderer
 import org.webrtc.VideoTrack
 
 @Composable
 public fun VideoRenderer(
-    videoRoom: VideoRoom,
+    room: Room,
     videoTrack: VideoTrack,
     modifier: Modifier = Modifier
 ) {
@@ -79,7 +79,7 @@ public fun VideoRenderer(
     AndroidView(
         factory = { context ->
             SurfaceViewRenderer(context).apply {
-                videoRoom.init(this)
+                room.initRenderer(this)
                 setupVideoIfNeeded(videoTrack, this)
 
                 view = this

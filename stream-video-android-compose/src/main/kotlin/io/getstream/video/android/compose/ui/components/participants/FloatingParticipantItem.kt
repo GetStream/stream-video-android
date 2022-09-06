@@ -32,11 +32,11 @@ import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.model.CallParticipant
-import io.getstream.video.android.model.VideoRoom
+import io.getstream.video.android.model.Room
 
 @Composable
 public fun FloatingParticipantItem(
-    room: VideoRoom,
+    room: Room,
     callParticipant: CallParticipant,
     modifier: Modifier = Modifier
 ) {
@@ -50,7 +50,7 @@ public fun FloatingParticipantItem(
         if (videoTrack != null) {
             VideoRenderer(
                 modifier = Modifier.fillMaxSize(),
-                videoRoom = room,
+                room = room,
                 videoTrack = videoTrack
             )
         }

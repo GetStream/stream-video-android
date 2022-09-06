@@ -24,9 +24,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.app.R
 import io.getstream.video.android.app.VideoApp
+import io.getstream.video.android.model.Room
 import kotlinx.coroutines.launch
 import org.webrtc.SurfaceViewRenderer
 import org.webrtc.VideoTrack
+import java.util.*
 
 class SfuTestActivity : AppCompatActivity() {
 
@@ -38,22 +40,27 @@ class SfuTestActivity : AppCompatActivity() {
         videoClient.webRTCClient
     }
 
+    private lateinit var room: Room
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sfu_test)
+        testWebRTCClient()
+        initRenderers()
+        observeParticipants()
+    }
+
+    private fun initRenderers() {
         val renderer = findViewById<SurfaceViewRenderer>(R.id.surfaceView)
         val participantView = findViewById<SurfaceViewRenderer>(R.id.participantView)
 
-        renderer.init(webRTCClient.eglBase.eglBaseContext, null)
-        participantView.init(webRTCClient.eglBase.eglBaseContext, null)
-
-        observeParticipants()
-        testWebRTCClient()
+        room.initRenderer(renderer)
+        room.initRenderer(participantView)
     }
 
     private fun observeParticipants() {
         lifecycleScope.launch {
-            webRTCClient.callParticipants.collect { participants ->
+            room.callParticipants.collect { participants ->
                 val user = videoClient.getUser()
                 val participant = participants.firstOrNull { it.track != null && it.id != user.id }
 
@@ -67,9 +74,9 @@ class SfuTestActivity : AppCompatActivity() {
     }
 
     private fun testWebRTCClient() {
-        webRTCClient.onLocalVideoTrackChange = ::updateVideoTrack
-
-        webRTCClient.connect(true)
+        val room = webRTCClient.joinCall(UUID.randomUUID().toString(), true)
+        this.room = room
+        room.onLocalVideoTrackChange = ::updateVideoTrack
     }
 
     private fun updateVideoTrack(videoTrack: VideoTrack) {
