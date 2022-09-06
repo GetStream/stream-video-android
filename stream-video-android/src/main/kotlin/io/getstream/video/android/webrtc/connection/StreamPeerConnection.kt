@@ -33,6 +33,7 @@ import org.webrtc.PeerConnection
 import org.webrtc.RtpParameters
 import org.webrtc.RtpSender
 import org.webrtc.RtpTransceiver
+import org.webrtc.RtpTransceiver.RtpTransceiverInit
 import org.webrtc.SessionDescription
 import stream.video.sfu.IceCandidateRequest
 
@@ -49,7 +50,8 @@ public class StreamPeerConnection(
 
     private val coroutineScope = CoroutineScope(DispatcherProvider.IO)
 
-    private lateinit var connection: PeerConnection
+    public lateinit var connection: PeerConnection
+        private set
     public var transceiver: RtpTransceiver? = null
         private set
 
@@ -120,7 +122,7 @@ public class StreamPeerConnection(
 
         val encodings = listOf(fullQuality, halfQuality, quarterQuality)
 
-        val transceiverInit = RtpTransceiver.RtpTransceiverInit(
+        val transceiverInit = RtpTransceiverInit(
             RtpTransceiver.RtpTransceiverDirection.SEND_ONLY,
             streamIds,
             encodings

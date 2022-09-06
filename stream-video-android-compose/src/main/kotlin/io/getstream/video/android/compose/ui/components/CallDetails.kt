@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
@@ -38,7 +37,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.model.CallParticipant
 import io.getstream.video.android.model.VideoRoom
 
 @Composable
@@ -46,8 +44,6 @@ public fun CallDetails(
     room: VideoRoom,
     isMicrophoneEnabled: Boolean,
     isCameraEnabled: Boolean,
-    participants: List<CallParticipant>,
-    primarySpeaker: CallParticipant?,
     onEndCall: () -> Unit,
     onCameraToggled: (Boolean) -> Unit,
     onMicrophoneToggled: (Boolean) -> Unit,
@@ -55,15 +51,6 @@ public fun CallDetails(
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
-        ParticipantsList(
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(max = 150.dp),
-            room = room,
-            participants = participants,
-            primarySpeaker = primarySpeaker
-        )
-
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,

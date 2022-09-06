@@ -185,4 +185,8 @@ public class StreamPeerConnectionFactory(
 
     public fun makeAudioTrack(source: AudioSource): AudioTrack =
         factory.createAudioTrack(UUID.randomUUID().toString(), source)
+
+    public fun createLocalMediaStream(): MediaStream {
+        return factory.createLocalMediaStream(UUID.randomUUID().toString())
+    }
 }

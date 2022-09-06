@@ -23,6 +23,8 @@ import android.hardware.camera2.CameraMetadata
 import android.media.AudioManager
 import android.util.Log
 import androidx.core.content.getSystemService
+import io.getstream.video.android.audio.AudioHandler
+import io.getstream.video.android.audio.AudioSwitchHandler
 import io.getstream.video.android.events.ChangePublishQualityEvent
 import io.getstream.video.android.events.MuteStateChangeEvent
 import io.getstream.video.android.events.SfuDataEvent
@@ -83,9 +85,13 @@ public class WebRTCClient(
     private val context: Context,
     private val currentUserId: String,
     private val credentialsProvider: CredentialsProvider,
-    private val signalClient: SignalClient
+    private val signalClient: SignalClient,
 ) {
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
+
+    private val audioHandler: AudioHandler by lazy {
+        AudioSwitchHandler(context)
+    }
 
     private var subscriber: StreamPeerConnection? = null
     private var publisher: StreamPeerConnection? = null
@@ -322,6 +328,7 @@ public class WebRTCClient(
         }
 
         return if (connected) {
+            audioHandler.start()
             signalChannel?.send("ss".encode()) ?: false
         } else {
             throw IllegalStateException("Couldn't connect to data channel.")
@@ -418,6 +425,7 @@ public class WebRTCClient(
 
     private fun setupUserMedia(callSettings: CallSettings, shouldPublish: Boolean) {
         val audioTrack = makeAudioTrack()
+        audioTrack.setEnabled(true)
         localAudioTrack = audioTrack
         Log.d("sfuConnectFlow", "SetupMedia, $audioTrack")
 

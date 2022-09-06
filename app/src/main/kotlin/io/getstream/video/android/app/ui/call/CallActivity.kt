@@ -75,6 +75,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.app.VideoApp
+import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.CallDetails
 import io.getstream.video.android.compose.ui.components.MainStage
 import io.getstream.video.android.model.CallParticipantState
@@ -132,6 +133,8 @@ class CallActivity : AppCompatActivity() {
             false
         )
 
+        val participantsState by callViewModel.participantsState.collectAsState(initial = emptyList())
+
         BackHandler {
             if (isShowingParticipantsInfo) {
                 callViewModel.hideParticipants()
@@ -140,61 +143,62 @@ class CallActivity : AppCompatActivity() {
             }
         }
 
-        Box(
-            modifier = Modifier
-                .fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            val currentSpeaker = speaker
+        VideoTheme {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                val currentSpeaker = speaker
 
-            Column(modifier = Modifier.fillMaxSize()) {
+                Column(modifier = Modifier.fillMaxSize()) {
 
-                CallActionBar(callState?.id ?: "")
+                    CallActionBar(callState?.id ?: "")
 
-                if (currentSpeaker == null) {
-                    Box(
-                        modifier = Modifier
-                            .height(250.dp)
-                            .fillMaxWidth()
-                    ) {
-                        Image(
-                            modifier = Modifier.align(Alignment.Center),
-                            imageVector = Icons.Default.Call,
-                            contentDescription = null
+                    if (currentSpeaker == null) {
+                        Box(
+                            modifier = Modifier
+                                .height(250.dp)
+                                .fillMaxWidth()
+                        ) {
+                            Image(
+                                modifier = Modifier.align(Alignment.Center),
+                                imageVector = Icons.Default.Call,
+                                contentDescription = null
+                            )
+                        }
+                    } else {
+                        MainStage(
+                            modifier = Modifier
+                                .weight(0.5f)
+                                .fillMaxWidth(),
+                            localParticipant = currentSpeaker,
+                            room = VideoRoom(webRTCClient.eglBase),
+                            participants = participants
+                        )
+
+                        CallDetails(
+                            room = VideoRoom(webRTCClient.eglBase),
+                            isMicrophoneEnabled = isMicrophoneEnabled,
+                            isCameraEnabled = isCameraEnabled,
+                            onEndCall = {
+                                leaveCall()
+                            },
+                            onCameraToggled = { isEnabled -> callViewModel.toggleCamera(isEnabled) },
+                            onMicrophoneToggled = { isEnabled ->
+                                callViewModel.toggleMicrophone(
+                                    isEnabled
+                                )
+                            },
+                            onCameraFlipped = callViewModel::flipCamera,
+                            modifier = Modifier.weight(0.5f)
                         )
                     }
-                } else {
-                    MainStage(
-                        modifier = Modifier
-                            .weight(0.5f)
-                            .fillMaxWidth(),
-                        speaker = currentSpeaker,
-                        room = VideoRoom(webRTCClient.eglBase)
-                    )
-
-                    CallDetails(
-                        modifier = Modifier.weight(0.5f),
-                        room = VideoRoom(webRTCClient.eglBase),
-                        isCameraEnabled = isCameraEnabled,
-                        isMicrophoneEnabled = isMicrophoneEnabled,
-                        participants = participants,
-                        primarySpeaker = currentSpeaker,
-                        onEndCall = {
-                            leaveCall()
-                        },
-                        onCameraToggled = { isEnabled -> callViewModel.toggleCamera(isEnabled) },
-                        onMicrophoneToggled = { isEnabled ->
-                            callViewModel.toggleMicrophone(
-                                isEnabled
-                            )
-                        },
-                        onCameraFlipped = callViewModel::flipCamera
-                    )
                 }
-            }
 
-            if (isShowingParticipantsInfo) {
-                ParticipantsInfo(emptyList()) // TODO - pass in participants state
+                if (isShowingParticipantsInfo) {
+                    ParticipantsInfo(participantsState)
+                }
             }
         }
     }

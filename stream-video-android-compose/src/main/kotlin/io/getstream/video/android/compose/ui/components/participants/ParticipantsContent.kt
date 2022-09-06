@@ -14,36 +14,35 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components
+package io.getstream.video.android.compose.ui.components.participants
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import io.getstream.video.android.compose.ui.components.participants.FloatingParticipantItem
-import io.getstream.video.android.compose.ui.components.participants.ParticipantsContent
+import androidx.compose.ui.unit.dp
 import io.getstream.video.android.model.CallParticipant
 import io.getstream.video.android.model.VideoRoom
 
 @Composable
-public fun MainStage(
+public fun ParticipantsContent(
     room: VideoRoom,
-    localParticipant: CallParticipant,
     participants: List<CallParticipant>,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    localParticipant: CallParticipant
 ) {
-    Box(modifier = modifier) {
-        ParticipantsContent(
-            modifier = Modifier.fillMaxSize(),
-            room = room,
-            participants = participants,
-            localParticipant = localParticipant
-        )
+    val otherParticipants = participants.filter { it.id != localParticipant.id }
 
-        val localTrack = localParticipant.track
-
-        if (localTrack != null) {
-            FloatingParticipantItem(room, localParticipant)
+    LazyRow( // TODO - build a grid of first 4 participants
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(otherParticipants) { participant ->
+            ParticipantItem(
+                room,
+                participant
+            )
         }
     }
 }

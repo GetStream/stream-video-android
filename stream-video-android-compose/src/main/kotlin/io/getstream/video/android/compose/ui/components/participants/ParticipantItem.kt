@@ -14,40 +14,15 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components
+package io.getstream.video.android.compose.ui.components.participants
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.model.CallParticipant
 import io.getstream.video.android.model.VideoRoom
-
-@Composable
-public fun ParticipantsList(
-    room: VideoRoom,
-    participants: List<CallParticipant>,
-    modifier: Modifier = Modifier,
-    primarySpeaker: CallParticipant?
-) {
-    val secondarySpeakers = participants.filter { it.id != primarySpeaker?.id }
-
-    LazyRow(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        items(secondarySpeakers) { participant ->
-            ParticipantItem(
-                room,
-                participant
-            )
-        }
-    }
-}
 
 @Composable
 public fun ParticipantItem(

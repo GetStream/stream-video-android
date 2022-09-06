@@ -20,6 +20,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.getstream.video.android.client.VideoClient
 import io.getstream.video.android.model.CallParticipant
+import io.getstream.video.android.model.CallParticipantState
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -56,6 +57,9 @@ public class CallViewModel(private val videoClient: VideoClient) : ViewModel() {
 
     public val participantList: Flow<List<CallParticipant>> =
         videoClient.webRTCClient.callParticipants
+
+    public val participantsState: Flow<List<CallParticipantState>> =
+        videoClient.webRTCClient.callParticipantState
 
     public val activeSpeakers: Flow<List<CallParticipant>> = participantList.map { list ->
         list.filter { participant -> participant.hasAudio }

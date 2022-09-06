@@ -647,6 +647,91 @@ public abstract interface class io/getstream/video/android/api/CallCoordinatorSe
 	public abstract fun sendUserEvent (Lstream/video/SendEventRequest;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
+public abstract class io/getstream/video/android/audio/AudioDevice {
+	public abstract fun getName ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/audio/AudioDevice$BluetoothHeadset : io/getstream/video/android/audio/AudioDevice {
+	public fun <init> ()V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/audio/AudioDevice$BluetoothHeadset;
+	public static synthetic fun copy$default (Lio/getstream/video/android/audio/AudioDevice$BluetoothHeadset;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/audio/AudioDevice$BluetoothHeadset;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/audio/AudioDevice$Earpiece : io/getstream/video/android/audio/AudioDevice {
+	public fun <init> ()V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/audio/AudioDevice$Earpiece;
+	public static synthetic fun copy$default (Lio/getstream/video/android/audio/AudioDevice$Earpiece;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/audio/AudioDevice$Earpiece;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/audio/AudioDevice$Speakerphone : io/getstream/video/android/audio/AudioDevice {
+	public fun <init> ()V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/audio/AudioDevice$Speakerphone;
+	public static synthetic fun copy$default (Lio/getstream/video/android/audio/AudioDevice$Speakerphone;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/audio/AudioDevice$Speakerphone;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/audio/AudioDevice$WiredHeadset : io/getstream/video/android/audio/AudioDevice {
+	public fun <init> ()V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/audio/AudioDevice$WiredHeadset;
+	public static synthetic fun copy$default (Lio/getstream/video/android/audio/AudioDevice$WiredHeadset;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/audio/AudioDevice$WiredHeadset;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class io/getstream/video/android/audio/AudioHandler {
+	public abstract fun start ()V
+	public abstract fun stop ()V
+}
+
+public final class io/getstream/video/android/audio/AudioSwitch {
+	public static final field Companion Lio/getstream/video/android/audio/AudioSwitch$Companion;
+	public static final field VERSION Ljava/lang/String;
+	public final fun activate ()V
+	public final fun deactivate ()V
+	public final fun getAvailableAudioDevices ()Ljava/util/List;
+	public final fun getSelectedAudioDevice ()Lio/getstream/video/android/audio/AudioDevice;
+	public final fun selectDevice (Lio/getstream/video/android/audio/AudioDevice;)V
+	public final fun start (Lkotlin/jvm/functions/Function2;)V
+	public final fun stop ()V
+}
+
+public final class io/getstream/video/android/audio/AudioSwitch$Companion {
+}
+
+public final class io/getstream/video/android/audio/AudioSwitchHandler : io/getstream/video/android/audio/AudioHandler {
+	public static final field Companion Lio/getstream/video/android/audio/AudioSwitchHandler$Companion;
+	public fun <init> (Landroid/content/Context;)V
+	public final fun getAvailableAudioDevices ()Ljava/util/List;
+	public final fun getSelectedAudioDevice ()Lio/getstream/video/android/audio/AudioDevice;
+	public final fun selectDevice (Lio/getstream/video/android/audio/AudioDevice;)V
+	public fun start ()V
+	public fun stop ()V
+}
+
+public final class io/getstream/video/android/audio/AudioSwitchHandler$Companion {
+}
+
+public abstract interface class io/getstream/video/android/audio/PermissionsCheckStrategy {
+	public abstract fun hasPermissions ()Z
+}
+
 public final class io/getstream/video/android/client/VideoClient {
 	public fun <init> (Landroidx/lifecycle/Lifecycle;Landroid/content/Context;Lkotlinx/coroutines/CoroutineScope;Lio/getstream/video/android/token/CredentialsProvider;Lio/getstream/video/android/socket/VideoSocket;Lio/getstream/video/android/socket/SocketStateService;Lio/getstream/video/android/client/user/UserState;Lio/getstream/video/android/client/coordinator/CallCoordinatorClient;Lio/getstream/video/android/webrtc/WebRTCClient;)V
 	public final fun addSocketListener (Lio/getstream/video/android/socket/SocketListener;)V
@@ -1348,6 +1433,7 @@ public final class io/getstream/video/android/viewmodel/CallViewModel : androidx
 	public final fun getCallState ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getLocalParticipant ()Lkotlinx/coroutines/flow/Flow;
 	public final fun getParticipantList ()Lkotlinx/coroutines/flow/Flow;
+	public final fun getParticipantsState ()Lkotlinx/coroutines/flow/Flow;
 	public final fun getPrimarySpeaker ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getTokenState ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getUrlState ()Lkotlinx/coroutines/flow/StateFlow;
@@ -1399,6 +1485,7 @@ public final class io/getstream/video/android/webrtc/connection/StreamPeerConnec
 	public final fun createAnswer (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun createDataChannel (Ljava/lang/String;Lorg/webrtc/DataChannel$Init;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;)Lio/getstream/video/android/webrtc/datachannel/StreamDataChannel;
 	public final fun createOffer (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun getConnection ()Lorg/webrtc/PeerConnection;
 	public final fun getTransceiver ()Lorg/webrtc/RtpTransceiver;
 	public final fun initialize (Lorg/webrtc/PeerConnection;)V
 	public fun onAddStream (Lorg/webrtc/MediaStream;)V
@@ -1417,6 +1504,7 @@ public final class io/getstream/video/android/webrtc/connection/StreamPeerConnec
 
 public final class io/getstream/video/android/webrtc/connection/StreamPeerConnectionFactory {
 	public fun <init> (Landroid/content/Context;Lio/getstream/video/android/webrtc/signal/SignalClient;)V
+	public final fun createLocalMediaStream ()Lorg/webrtc/MediaStream;
 	public final fun getEglBase ()Lorg/webrtc/EglBase;
 	public final fun getVideoDecoderCodecs ()Ljava/util/List;
 	public final fun getVideoEncoderCodecs ()Ljava/util/List;
