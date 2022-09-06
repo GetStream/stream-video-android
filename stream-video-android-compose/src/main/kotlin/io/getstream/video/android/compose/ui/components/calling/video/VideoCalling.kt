@@ -23,12 +23,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.ui.components.CallTopAppbar
-import io.getstream.video.android.model.VideoParticipant
+import io.getstream.video.android.model.CallParticipant
 
 @Composable
 public fun VideoCalling(
     callId: String,
-    participants: List<VideoParticipant>,
+    participants: List<CallParticipant>,
     onEndCall: (String) -> Unit,
     onChatMessagesExpand: () -> Unit = {},
     onMicToggleChanged: (Boolean) -> Unit,

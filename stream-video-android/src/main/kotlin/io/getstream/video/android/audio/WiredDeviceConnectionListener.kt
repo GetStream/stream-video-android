@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.app.model
+package io.getstream.video.android.audio
 
-data class UserCredentials(
-    val id: String,
-    val token: String,
-    val name: String,
-    val image: String,
-    val isSelected: Boolean = false
-)
+internal interface WiredDeviceConnectionListener {
+    fun onDeviceConnected()
+
+    fun onDeviceDisconnected()
+}

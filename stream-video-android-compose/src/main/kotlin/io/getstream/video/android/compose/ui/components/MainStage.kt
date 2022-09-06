@@ -16,42 +16,34 @@
 
 package io.getstream.video.android.compose.ui.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Call
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import io.getstream.video.android.model.VideoParticipant
+import io.getstream.video.android.compose.ui.components.participants.FloatingParticipantItem
+import io.getstream.video.android.compose.ui.components.participants.ParticipantsContent
+import io.getstream.video.android.model.CallParticipant
 import io.getstream.video.android.model.VideoRoom
-import io.livekit.android.compose.VideoRenderer
-import io.livekit.android.room.track.VideoTrack
 
 @Composable
 public fun MainStage(
     room: VideoRoom,
-    speaker: VideoParticipant?,
+    localParticipant: CallParticipant,
+    participants: List<CallParticipant>,
     modifier: Modifier = Modifier
 ) {
-    val track =
-        speaker?.value?.videoTracks?.firstOrNull { it.second is VideoTrack }?.second as? VideoTrack
-
-    if (track != null) {
-        VideoRenderer(
-            modifier = modifier,
-            room = room.value,
-            videoTrack = track
+    Box(modifier = modifier) {
+        ParticipantsContent(
+            modifier = Modifier.fillMaxSize(),
+            room = room,
+            participants = participants,
+            localParticipant = localParticipant
         )
-    } else {
-        Box(
-            modifier = modifier
-        ) {
-            Image(
-                modifier = Modifier.align(Alignment.Center),
-                imageVector = Icons.Default.Call,
-                contentDescription = null
-            )
+
+        val localTrack = localParticipant.track
+
+        if (localTrack != null) {
+            FloatingParticipantItem(room, localParticipant)
         }
     }
 }

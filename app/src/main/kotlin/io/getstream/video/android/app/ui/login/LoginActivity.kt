@@ -35,7 +35,7 @@ import androidx.compose.ui.unit.sp
 import io.getstream.video.android.app.FakeCredentialsProvider
 import io.getstream.video.android.app.VideoApp
 import io.getstream.video.android.app.ui.components.UserList
-import io.getstream.video.android.app.ui.home.HomeActivity
+import io.getstream.video.android.app.ui.test.SfuTestActivity
 import io.getstream.video.android.app.utils.getUsers
 import io.getstream.video.android.pushprovider.firebase.CallNotificationReceiver
 import io.getstream.video.android.pushprovider.firebase.CallNotificationReceiver.Companion.ACTION_CALL
@@ -93,7 +93,7 @@ class LoginActivity : AppCompatActivity() {
 
         VideoApp.initializeClient(
             credentialsProvider = FakeCredentialsProvider(
-                token = selectedUser.token,
+                userCredentials = selectedUser,
                 apiKey = "key1"
             ),
             user = User(
@@ -102,7 +102,7 @@ class LoginActivity : AppCompatActivity() {
                 image_url = selectedUser.image
             )
         )
-        startActivity(HomeActivity.getIntent(this))
+        startActivity(SfuTestActivity.getIntent(this)) // TODO - move back to Home once it's re-implemented
         finish()
     }
 }

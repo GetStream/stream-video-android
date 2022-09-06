@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.utils.initials
+import io.getstream.video.android.model.CallParticipant
 import stream.video.User
 
 /**
@@ -43,7 +44,7 @@ import stream.video.User
  */
 @Composable
 public fun UserAvatar(
-    user: User,
+    user: CallParticipant,
     modifier: Modifier = Modifier,
     shape: Shape = VideoTheme.shapes.avatar,
     textStyle: TextStyle = VideoTheme.typography.title3Bold,
@@ -54,7 +55,7 @@ public fun UserAvatar(
     Box(modifier = modifier) {
         Avatar(
             modifier = Modifier.fillMaxSize(),
-            imageUrl = user.image_url,
+            imageUrl = user.profileImageURL ?: "",
             initials = user.name.initials(),
             textStyle = textStyle,
             shape = shape,

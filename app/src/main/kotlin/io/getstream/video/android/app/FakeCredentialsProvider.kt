@@ -16,19 +16,20 @@
 
 package io.getstream.video.android.app
 
+import io.getstream.video.android.model.UserCredentials
 import io.getstream.video.android.token.CredentialsProvider
 
 class FakeCredentialsProvider(
-    private val token: String,
-    private val apiKey: String
+    private val apiKey: String,
+    private val userCredentials: UserCredentials
 ) : CredentialsProvider {
 
     override fun loadToken(): String {
-        return token
+        return userCredentials.token
     }
 
     override fun getCachedToken(): String {
-        return token
+        return userCredentials.token
     }
 
     override fun getCachedApiKey(): String {
@@ -37,5 +38,13 @@ class FakeCredentialsProvider(
 
     override fun loadApiKey(): String {
         return apiKey
+    }
+
+    override fun getSfuToken(): String {
+        return userCredentials.sfuToken
+    }
+
+    override fun getUserCredentials(): UserCredentials {
+        return userCredentials
     }
 }

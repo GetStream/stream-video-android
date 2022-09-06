@@ -14,51 +14,35 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components
+package io.getstream.video.android.compose.ui.components.participants
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.model.VideoParticipant
+import io.getstream.video.android.model.CallParticipant
 import io.getstream.video.android.model.VideoRoom
-import io.livekit.android.compose.VideoRenderer
-import io.livekit.android.room.track.VideoTrack
 
 @Composable
-public fun ParticipantsList(
+public fun ParticipantsContent(
     room: VideoRoom,
-    participants: List<VideoParticipant>,
+    participants: List<CallParticipant>,
     modifier: Modifier = Modifier,
-    primarySpeaker: VideoParticipant?
+    localParticipant: CallParticipant
 ) {
-    val secondarySpeakers = participants.filter { it.sid != primarySpeaker?.sid }
+    val otherParticipants = participants.filter { it.id != localParticipant.id }
 
-    LazyRow(
+    LazyRow( // TODO - build a grid of first 4 participants
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items(secondarySpeakers) { participant ->
+        items(otherParticipants) { participant ->
             ParticipantItem(
                 room,
                 participant
             )
         }
-    }
-}
-
-@Composable
-public fun ParticipantItem(room: VideoRoom, participant: VideoParticipant) {
-    val track = participant.videoTracks.firstOrNull()?.second as? VideoTrack
-
-    if (track != null) {
-        VideoRenderer(
-            modifier = Modifier.size(150.dp),
-            room = room.value,
-            videoTrack = track
-        )
     }
 }

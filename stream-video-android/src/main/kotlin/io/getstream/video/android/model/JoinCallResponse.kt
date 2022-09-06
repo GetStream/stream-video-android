@@ -19,7 +19,6 @@ package io.getstream.video.android.model
 import stream.video.Call
 
 public data class JoinCallResponse(
-    public val videoRoom: VideoRoom,
     public val call: Call,
     public val callUrl: String,
     public val userToken: String

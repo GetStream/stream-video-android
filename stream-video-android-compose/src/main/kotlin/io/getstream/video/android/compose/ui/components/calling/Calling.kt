@@ -19,14 +19,14 @@ package io.getstream.video.android.compose.ui.components.calling
 import androidx.compose.runtime.Composable
 import io.getstream.video.android.compose.ui.components.calling.audio.AudioCalling
 import io.getstream.video.android.compose.ui.components.calling.video.VideoCalling
+import io.getstream.video.android.model.CallParticipant
 import io.getstream.video.android.model.CallType
-import io.getstream.video.android.model.VideoParticipant
 
 @Composable
 public fun Calling(
     callId: String,
     callType: CallType,
-    participants: List<VideoParticipant>,
+    participants: List<CallParticipant>,
     onCancelCall: (String) -> Unit = {},
     onChatMessagesExpand: () -> Unit = {},
     onMicToggleChanged: (Boolean) -> Unit = {},

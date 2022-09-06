@@ -1,6 +1,8 @@
 package video_coordinator_rpc
 
-import "github.com/GetStream/video/internal/validator"
+import (
+	"github.com/GetStream/video/pkg/validator"
+)
 
 func init() {
 	validator.Register[CreateCallRequest](map[string]string{

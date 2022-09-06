@@ -16,9 +16,11 @@
 
 package io.getstream.video.android.model
 
-public data class VideoParticipantState(
-    val userId: String,
-    val userName: String,
-    val isLocalAudioEnabled: Boolean,
-    val isLocalVideoEnabled: Boolean
+public data class UserCredentials(
+    val id: String,
+    val token: String,
+    val name: String,
+    val image: String,
+    val sfuToken: String,
+    val isSelected: Boolean = false
 )

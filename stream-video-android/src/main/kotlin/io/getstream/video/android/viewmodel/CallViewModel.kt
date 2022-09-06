@@ -19,16 +19,14 @@ package io.getstream.video.android.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.getstream.video.android.client.VideoClient
-import io.getstream.video.android.model.VideoParticipant
-import io.getstream.video.android.model.VideoRoom
+import io.getstream.video.android.model.CallParticipant
+import io.getstream.video.android.model.CallParticipantState
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import stream.video.Call
@@ -45,17 +43,11 @@ public class CallViewModel(private val videoClient: VideoClient) : ViewModel() {
     private val _callState: MutableStateFlow<Call?> = MutableStateFlow(null)
     public val callState: StateFlow<Call?> = _callState
 
-    private val _roomState: MutableStateFlow<VideoRoom?> = MutableStateFlow(null)
-    public val roomState: Flow<VideoRoom> = _roomState.filterNotNull()
-
-    private var _localParticipantState: MutableStateFlow<VideoParticipant?> = MutableStateFlow(null)
-    public val localParticipant: Flow<VideoParticipant> = _localParticipantState.filterNotNull()
+    private var _localParticipantState: MutableStateFlow<CallParticipant?> = MutableStateFlow(null)
+    public val localParticipant: Flow<CallParticipant> = _localParticipantState.filterNotNull()
 
     private var _isVideoInitialized: MutableStateFlow<Boolean> = MutableStateFlow(false)
     public val isVideoInitialized: StateFlow<Boolean> = _isVideoInitialized
-
-    public val activeSpeakers: Flow<List<VideoParticipant>> =
-        roomState.flatMapLatest { it.activeSpeakers }
 
     private val _isCameraEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
     public val isCameraEnabled: Flow<Boolean> = _isCameraEnabled
@@ -63,22 +55,25 @@ public class CallViewModel(private val videoClient: VideoClient) : ViewModel() {
     private val _isMicrophoneEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
     public val isMicrophoneEnabled: Flow<Boolean> = _isMicrophoneEnabled
 
-    public val participantList: Flow<List<VideoParticipant>> =
-        roomState
-            .flatMapLatest { it.remoteParticipants }
-            .combine(localParticipant) { remote, local -> remote to local }
-            .map { (remoteParticipants, localParticipant) ->
-                (listOf(localParticipant) + remoteParticipants.second)
-            }
+    public val participantList: Flow<List<CallParticipant>> =
+        videoClient.webRTCClient.callParticipants
 
-    private val _primarySpeaker = MutableStateFlow<VideoParticipant?>(null)
-    public val primarySpeaker: StateFlow<VideoParticipant?> = _primarySpeaker
+    public val participantsState: Flow<List<CallParticipantState>> =
+        videoClient.webRTCClient.callParticipantState
+
+    public val activeSpeakers: Flow<List<CallParticipant>> = participantList.map { list ->
+        list.filter { participant -> participant.hasAudio }
+    }
+
+    private val _primarySpeaker = MutableStateFlow<CallParticipant?>(null)
+    public val primarySpeaker: StateFlow<CallParticipant?> = _primarySpeaker
 
     private val _isShowingParticipantsInfo = MutableStateFlow(false)
     public val isShowingParticipantsInfo: StateFlow<Boolean> = _isShowingParticipantsInfo
 
+    // TODO - update the call view model to use the new SFU client and data
+
     public fun init(
-        videoRoom: VideoRoom,
         call: Call,
         url: String,
         token: String
@@ -88,55 +83,46 @@ public class CallViewModel(private val videoClient: VideoClient) : ViewModel() {
         this._callState.value = call
 
         viewModelScope.launch {
-            videoRoom.connect(url = url, token = token)
-
-            _roomState.value = videoRoom
-            _localParticipantState.value = videoRoom.localParticipant
             _isVideoInitialized.value = true
-
-            setupLocalParticipant(videoRoom.localParticipant)
-            handlePrimarySpeaker(emptyList(), emptyList(), videoRoom)
 
             combine(
                 participantList,
                 activeSpeakers,
-                roomState
-            ) { participants, speakers, roomState -> Triple(participants, speakers, roomState) }
-                .collect { (participants, speakers, roomState) ->
+            ) { participants, speakers -> participants to speakers }
+                .collect { (participants, speakers) ->
                     handlePrimarySpeaker(
                         participants,
                         speakers,
-                        roomState
                     )
                 }
         }
+
+        videoClient.webRTCClient.connect(true)
     }
 
-    private fun setupLocalParticipant(localParticipant: VideoParticipant) {
+    private fun setupLocalParticipant(localParticipant: CallParticipant) {
         viewModelScope.launch {
-            localParticipant.setMicrophoneEnabled(true)
+//            localParticipant.setMicrophoneEnabled(true)
             _isMicrophoneEnabled.value = true
             videoClient.sendUserEvent(UserEventType.USER_EVENT_TYPE_AUDIO_UNMUTED)
 
-            localParticipant.setCameraEnabled(true)
+//            localParticipant.setCameraEnabled(true)
             _isCameraEnabled.value = true
             videoClient.sendUserEvent(UserEventType.USER_EVENT_TYPE_VIDEO_STARTED)
         }
     }
 
     private fun handlePrimarySpeaker(
-        participantsList: List<VideoParticipant>,
-        speakers: List<VideoParticipant>,
-        room: VideoRoom?
+        participantsList: List<CallParticipant>,
+        speakers: List<CallParticipant>,
     ) {
 
         var speaker = _primarySpeaker.value
+        val localParticipant = participantsList.firstOrNull { it.isLocal }
 
-        // If speaker is local participant (due to defaults),
-        // attempt to find another remote speaker to replace with.
-        if (speaker?.isLocalParticipant() == true) {
+        if (speaker?.isLocal == true) {
             val remoteSpeaker = // Try not to display local participant as speaker.
-                participantsList.firstOrNull { it.isRemoteParticipant() }
+                participantsList.firstOrNull { !it.isLocal }
 
             if (remoteSpeaker != null) {
                 speaker = remoteSpeaker
@@ -146,13 +132,13 @@ public class CallViewModel(private val videoClient: VideoClient) : ViewModel() {
         // If previous primary speaker leaves
         if (!participantsList.contains(speaker)) {
             // Default to another person in room, or local participant.
-            speaker = participantsList.firstOrNull { it.isRemoteParticipant() }
-                ?: room?.localParticipant
+            speaker = participantsList.firstOrNull { !it.isLocal }
+                ?: localParticipant
         }
 
         if (speakers.isNotEmpty() && !speakers.contains(speaker)) {
             val remoteSpeaker = // Try not to display local participant as speaker.
-                speakers.firstOrNull { it.isRemoteParticipant() }
+                speakers.firstOrNull { !it.isLocal }
 
             if (remoteSpeaker != null) {
                 speaker = remoteSpeaker
@@ -166,7 +152,7 @@ public class CallViewModel(private val videoClient: VideoClient) : ViewModel() {
         val participant = _localParticipantState.value ?: return
 
         viewModelScope.launch {
-            participant.setCameraEnabled(enabled)
+//            participant.setCameraEnabled(enabled)
             _isCameraEnabled.value = enabled
             val event =
                 if (enabled) UserEventType.USER_EVENT_TYPE_VIDEO_STARTED
@@ -179,7 +165,7 @@ public class CallViewModel(private val videoClient: VideoClient) : ViewModel() {
         val participant = _localParticipantState.value ?: return
 
         viewModelScope.launch {
-            participant.setMicrophoneEnabled(enabled)
+//            participant.setMicrophoneEnabled(enabled)
             _isMicrophoneEnabled.value = enabled
 
             val event =
@@ -193,9 +179,9 @@ public class CallViewModel(private val videoClient: VideoClient) : ViewModel() {
      * Flips the camera for the current participant if possible.
      */
     public fun flipCamera() {
-        val room = _roomState.value ?: return
-
-        room.flipCamera()
+//        val room = _roomState.value ?: return
+//
+//        room.flipCamera()
     }
 
     /**
@@ -203,26 +189,26 @@ public class CallViewModel(private val videoClient: VideoClient) : ViewModel() {
      * jobs and finally reinitializing.
      */
     public fun reconnect() {
-        val room = _roomState.value ?: return
-
-        _primarySpeaker.value = null
-        room.disconnect()
-        viewModelScope.coroutineContext.cancelChildren()
-
-        viewModelScope.launch {
-            val call = _callState.value
-            val url = _urlState.value
-            val token = _tokenState.value
-
-            init(room, call!!, url, token)
-        }
+//        val room = _roomState.value ?: return
+//
+//        _primarySpeaker.value = null
+//        room.disconnect()
+//        viewModelScope.coroutineContext.cancelChildren()
+//
+//        viewModelScope.launch {
+//            val call = _callState.value
+//            val url = _urlState.value
+//            val token = _tokenState.value
+//
+//            init(room, call!!, url, token)
+//        }
     }
 
     override fun onCleared() {
         super.onCleared()
-        val room = _roomState.value ?: return
-
-        room.disconnect()
+//        val room = _roomState.value ?: return
+//
+//        room.disconnect()
     }
 
     public fun showParticipants() {
@@ -234,10 +220,14 @@ public class CallViewModel(private val videoClient: VideoClient) : ViewModel() {
     }
 
     public fun leaveCall() {
-        val currentRoom = _roomState.value
+//        val currentRoom = _roomState.value
 
-        currentRoom?.disconnect()
+//        currentRoom?.disconnect()
         this.videoClient.leaveCall()
         viewModelScope.cancel()
+    }
+
+    public fun startCapturingLocalVideo() {
+        videoClient.webRTCClient.startCapturingLocalVideo(0)
     }
 }

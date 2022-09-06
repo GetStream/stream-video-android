@@ -75,21 +75,24 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.app.VideoApp
+import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.CallDetails
 import io.getstream.video.android.compose.ui.components.MainStage
+import io.getstream.video.android.model.CallParticipantState
 import io.getstream.video.android.model.CallType
-import io.getstream.video.android.model.VideoParticipantState
 import io.getstream.video.android.model.VideoRoom
 import io.getstream.video.android.utils.onError
 import io.getstream.video.android.utils.onSuccessSuspend
 import io.getstream.video.android.viewmodel.CallViewModel
 import io.getstream.video.android.viewmodel.CallViewModelFactory
 import kotlinx.coroutines.launch
+import stream.video.Call
 
 class CallActivity : AppCompatActivity() {
 
     private val factory by lazy { CallViewModelFactory(VideoApp.videoClient) }
     private val callViewModel by viewModels<CallViewModel>(factoryProducer = { factory })
+    private val webRTCClient by lazy { VideoApp.videoClient.webRTCClient }
 
     @RequiresApi(M)
     private val permissionsContract = registerForActivityResult(
@@ -112,6 +115,8 @@ class CallActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        callViewModel.init(Call(), "", "")
+        callViewModel.startCapturingLocalVideo()
         setContent {
             VideoCallContent()
         }
@@ -119,7 +124,6 @@ class CallActivity : AppCompatActivity() {
 
     @Composable
     private fun VideoCallContent() {
-        val room by callViewModel.roomState.collectAsState(initial = null)
         val participants by callViewModel.participantList.collectAsState(initial = emptyList())
         val speaker by callViewModel.primarySpeaker.collectAsState(initial = null)
         val isCameraEnabled by callViewModel.isCameraEnabled.collectAsState(initial = false)
@@ -129,6 +133,8 @@ class CallActivity : AppCompatActivity() {
             false
         )
 
+        val participantsState by callViewModel.participantsState.collectAsState(initial = emptyList())
+
         BackHandler {
             if (isShowingParticipantsInfo) {
                 callViewModel.hideParticipants()
@@ -137,62 +143,62 @@ class CallActivity : AppCompatActivity() {
             }
         }
 
-        Box(
-            modifier = Modifier
-                .fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            val currentRoom = room
-            val currentSpeaker = speaker
+        VideoTheme {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                val currentSpeaker = speaker
 
-            Column(modifier = Modifier.fillMaxSize()) {
+                Column(modifier = Modifier.fillMaxSize()) {
 
-                CallActionBar(callState?.id ?: "")
+                    CallActionBar(callState?.id ?: "")
 
-                if (currentRoom == null || currentSpeaker == null) {
-                    Box(
-                        modifier = Modifier
-                            .height(250.dp)
-                            .fillMaxWidth()
-                    ) {
-                        Image(
-                            modifier = Modifier.align(Alignment.Center),
-                            imageVector = Icons.Default.Call,
-                            contentDescription = null
+                    if (currentSpeaker == null) {
+                        Box(
+                            modifier = Modifier
+                                .height(250.dp)
+                                .fillMaxWidth()
+                        ) {
+                            Image(
+                                modifier = Modifier.align(Alignment.Center),
+                                imageVector = Icons.Default.Call,
+                                contentDescription = null
+                            )
+                        }
+                    } else {
+                        MainStage(
+                            modifier = Modifier
+                                .weight(0.5f)
+                                .fillMaxWidth(),
+                            localParticipant = currentSpeaker,
+                            room = VideoRoom(webRTCClient.eglBase),
+                            participants = participants
+                        )
+
+                        CallDetails(
+                            room = VideoRoom(webRTCClient.eglBase),
+                            isMicrophoneEnabled = isMicrophoneEnabled,
+                            isCameraEnabled = isCameraEnabled,
+                            onEndCall = {
+                                leaveCall()
+                            },
+                            onCameraToggled = { isEnabled -> callViewModel.toggleCamera(isEnabled) },
+                            onMicrophoneToggled = { isEnabled ->
+                                callViewModel.toggleMicrophone(
+                                    isEnabled
+                                )
+                            },
+                            onCameraFlipped = callViewModel::flipCamera,
+                            modifier = Modifier.weight(0.5f)
                         )
                     }
-                } else {
-                    MainStage(
-                        modifier = Modifier
-                            .weight(0.5f)
-                            .fillMaxWidth(),
-                        room = currentRoom,
-                        speaker = currentSpeaker
-                    )
-
-                    CallDetails(
-                        modifier = Modifier.weight(0.5f),
-                        room = currentRoom,
-                        isCameraEnabled = isCameraEnabled,
-                        isMicrophoneEnabled = isMicrophoneEnabled,
-                        participants = participants,
-                        primarySpeaker = currentSpeaker,
-                        onEndCall = {
-                            leaveCall()
-                        },
-                        onCameraToggled = { isEnabled -> callViewModel.toggleCamera(isEnabled) },
-                        onMicrophoneToggled = { isEnabled ->
-                            callViewModel.toggleMicrophone(
-                                isEnabled
-                            )
-                        },
-                        onCameraFlipped = callViewModel::flipCamera
-                    )
                 }
-            }
 
-            if (isShowingParticipantsInfo && currentRoom != null) {
-                ParticipantsInfo(currentRoom)
+                if (isShowingParticipantsInfo) {
+                    ParticipantsInfo(participantsState)
+                }
             }
         }
     }
@@ -203,8 +209,7 @@ class CallActivity : AppCompatActivity() {
     }
 
     @Composable
-    private fun ParticipantsInfo(room: VideoRoom) {
-        val participants by room.participantsState.collectAsState()
+    private fun ParticipantsInfo(participantsState: List<CallParticipantState>) {
 
         Box(
             modifier = Modifier
@@ -223,7 +228,7 @@ class CallActivity : AppCompatActivity() {
                 horizontalAlignment = Alignment.Start,
                 verticalArrangement = Arrangement.Center
             ) {
-                items(participants) {
+                items(participantsState) {
                     ParticipantInfoItem(it)
                 }
             }
@@ -231,7 +236,7 @@ class CallActivity : AppCompatActivity() {
     }
 
     @Composable
-    private fun ParticipantInfoItem(participant: VideoParticipantState) {
+    private fun ParticipantInfoItem(participant: CallParticipantState) {
         Row(
             modifier = Modifier.wrapContentWidth(),
             verticalAlignment = Alignment.CenterVertically,
@@ -331,8 +336,8 @@ class CallActivity : AppCompatActivity() {
                 participantIds = participants.toList()
             )
 
-            result.onSuccessSuspend { (room, call, url, token) ->
-                callViewModel.init(room, call, url, token)
+            result.onSuccessSuspend { (call, url, token) ->
+                callViewModel.init(call, url, token)
             }
 
             result.onError {

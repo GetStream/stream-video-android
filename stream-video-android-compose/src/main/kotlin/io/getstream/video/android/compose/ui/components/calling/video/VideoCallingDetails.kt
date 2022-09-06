@@ -18,11 +18,11 @@ package io.getstream.video.android.compose.ui.components.calling.video
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import io.getstream.video.android.model.VideoParticipant
+import io.getstream.video.android.model.CallParticipant
 
 @Composable
 public fun VideoCallingDetails(
     modifier: Modifier = Modifier,
-    participants: List<VideoParticipant>,
+    participants: List<CallParticipant>,
 ) {
 }

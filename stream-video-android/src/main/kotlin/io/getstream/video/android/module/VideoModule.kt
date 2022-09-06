@@ -31,6 +31,10 @@ import io.getstream.video.android.socket.VideoSocketImpl
 import io.getstream.video.android.token.CredentialsManager
 import io.getstream.video.android.token.CredentialsManagerImpl
 import io.getstream.video.android.token.CredentialsProvider
+import io.getstream.video.android.webrtc.WebRTCClient
+import io.getstream.video.android.webrtc.signal.SignalClient
+import io.getstream.video.android.webrtc.signal.SignalClientImpl
+import io.getstream.video.android.webrtc.signal.SignalService
 import kotlinx.coroutines.CoroutineScope
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -38,6 +42,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.wire.WireConverterFactory
 import stream.video.User
+import java.util.*
 
 /**
  * Serves as an internal DI framework that allows us to cache heavy components reused across the
@@ -69,8 +74,16 @@ internal class VideoModule(
     private val retrofitClient: Retrofit by lazy {
         Retrofit.Builder()
             .client(okHttpClient)
-            .addConverterFactory(WireConverterFactory.create().apply {})
+            .addConverterFactory(WireConverterFactory.create())
             .baseUrl(REDIRECT_BASE_URL ?: BASE_URL)
+            .build()
+    }
+
+    private val signalRetrofitClient: Retrofit by lazy {
+        Retrofit.Builder()
+            .client(okHttpClient)
+            .addConverterFactory(WireConverterFactory.create())
+            .baseUrl(REDIRECT_SIGNAL_URL ?: SIGNAL_BASE_URL)
             .build()
     }
 
@@ -81,6 +94,22 @@ internal class VideoModule(
         val service = retrofitClient.create(CallCoordinatorService::class.java)
 
         CallCoordinatorClientImpl(service, credentialsProvider)
+    }
+
+    private val signalClient: SignalClient by lazy {
+        val service = signalRetrofitClient.create(SignalService::class.java)
+
+        SignalClientImpl(service)
+    }
+
+    private val webRTCClient: WebRTCClient by lazy {
+        WebRTCClient(
+            sessionId = UUID.randomUUID().toString(),
+            context = appContext,
+            currentUserId = user.id,
+            credentialsProvider = credentialsProvider,
+            signalClient = signalClient
+        )
     }
 
     /**
@@ -158,8 +187,14 @@ internal class VideoModule(
         credentialsProvider: CredentialsProvider
     ): Interceptor = Interceptor {
         val original = it.request()
+
+        val token = if (original.url.toString().contains("sfu")) {
+            credentialsProvider.getSfuToken()
+        } else {
+            credentialsProvider.getCachedToken()
+        }
         val updated = original.newBuilder()
-            .addHeader(HEADER_AUTHORIZATION, credentialsProvider.getCachedToken())
+            .addHeader(HEADER_AUTHORIZATION, token)
             .build()
 
         it.proceed(updated)
@@ -181,6 +216,13 @@ internal class VideoModule(
      */
     internal fun callClient(): CallCoordinatorClient {
         return callCoordinatorClient
+    }
+
+    /**
+     * @return The [WebRTCClient] used to communicate to the SFU.
+     */
+    internal fun webRTCClient(): WebRTCClient {
+        return webRTCClient
     }
 
     /**
@@ -224,6 +266,11 @@ internal class VideoModule(
          * The base URL of the API.
          */
         private const val BASE_URL = "http://10.0.2.2:26991"
+
+        @Suppress("RedundantNullableReturnType")
+        private val REDIRECT_SIGNAL_URL: String? = "https://e264-78-1-63-22.eu.ngrok.io"
+
+        private const val SIGNAL_BASE_URL = "http://10.0.2.2:3031"
 
         /**
          * Used for testing on devices and redirecting from a public realm to localhost.
