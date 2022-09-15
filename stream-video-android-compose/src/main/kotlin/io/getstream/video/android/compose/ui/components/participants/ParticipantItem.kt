@@ -16,10 +16,9 @@
 
 package io.getstream.video.android.compose.ui.components.participants
 
-import androidx.compose.foundation.layout.size
+import android.view.View
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.model.CallParticipant
 import io.getstream.video.android.model.Room
@@ -27,15 +26,18 @@ import io.getstream.video.android.model.Room
 @Composable
 public fun ParticipantItem(
     room: Room,
-    participant: CallParticipant
+    participant: CallParticipant,
+    modifier: Modifier = Modifier,
+    onRender: (View) -> Unit = {}
 ) {
     val track = participant.track
 
     if (track != null) {
         VideoRenderer(
-            modifier = Modifier.size(150.dp),
+            modifier = modifier,
             room = room,
-            videoTrack = track
+            videoTrack = track,
+            onRender = onRender
         )
     }
 }

@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.model
 
-import org.webrtc.VideoTrack
 import stream.video.sfu.Participant
 
 public data class CallParticipant(
@@ -45,5 +44,3 @@ public fun Participant.toCallParticipant(currentUserId: String): CallParticipant
         track = null,
         trackSize = 0 to 0
     )
-
-// TODO - add mapping to/from SFU Participant

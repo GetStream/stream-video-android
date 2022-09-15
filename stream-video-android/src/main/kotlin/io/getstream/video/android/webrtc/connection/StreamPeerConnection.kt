@@ -39,6 +39,7 @@ private typealias StreamDataChannel = io.getstream.video.android.webrtc.datachan
 
 public class StreamPeerConnection(
     private val type: PeerConnectionType,
+    private val mediaConstraints: MediaConstraints,
     private val onStreamAdded: ((MediaStream) -> Unit)?,
     private val onStreamRemoved: ((MediaStream) -> Unit)?,
     private val onNegotiationNeeded: ((StreamPeerConnection) -> Unit)?,
@@ -47,7 +48,9 @@ public class StreamPeerConnection(
 
     public lateinit var connection: PeerConnection
         private set
-    public var transceiver: RtpTransceiver? = null
+    public var videoTransceiver: RtpTransceiver? = null
+        private set
+    public var audioTransceiver: RtpTransceiver? = null
         private set
 
     public fun initialize(peerConnection: PeerConnection) {
@@ -72,7 +75,7 @@ public class StreamPeerConnection(
     }
 
     public suspend fun createAnswer(): Result<SessionDescription> {
-        return createValue { connection.createAnswer(it, MediaConstraints()) }
+        return createValue { connection.createAnswer(it, mediaConstraints) }
     }
 
     public suspend fun createOffer(): Result<SessionDescription> {
@@ -90,7 +93,27 @@ public class StreamPeerConnection(
         return connection.addTrack(mediaStreamTrack, streamIds)
     }
 
-    public fun addTransceiver(track: MediaStreamTrack, streamIds: List<String>) {
+    public fun addAudioTransceiver(track: MediaStreamTrack, streamIds: List<String>) {
+        val fullQuality = RtpParameters.Encoding(
+            "a",
+            true,
+            1.0
+        ).apply {
+            maxBitrateBps = 500_000
+        }
+
+        val encodings = listOf(fullQuality)
+
+        val transceiverInit = RtpTransceiverInit(
+            RtpTransceiver.RtpTransceiverDirection.SEND_ONLY,
+            streamIds,
+            encodings
+        )
+
+        audioTransceiver = connection.addTransceiver(track, transceiverInit)
+    }
+
+    public fun addVideoTransceiver(track: MediaStreamTrack, streamIds: List<String>) {
         val fullQuality = RtpParameters.Encoding(
             "f",
             true,
@@ -123,7 +146,7 @@ public class StreamPeerConnection(
             encodings
         )
 
-        transceiver = connection.addTransceiver(track, transceiverInit)
+        videoTransceiver = connection.addTransceiver(track, transceiverInit)
     }
 
     public suspend fun createJoinOffer(): Result<SessionDescription> {
@@ -159,15 +182,19 @@ public class StreamPeerConnection(
     }
 
     override fun onAddStream(stream: MediaStream?) {
-        stream?.let { it -> onStreamAdded?.invoke(it) }
-    }
-
-    override fun onRemoveStream(stream: MediaStream?) {
-        stream?.let { it -> onStreamRemoved?.invoke(it) }
+        if (stream != null) {
+            onStreamAdded?.invoke(stream)
+        }
     }
 
     override fun onRenegotiationNeeded() {
         onNegotiationNeeded?.invoke(this)
+    }
+
+    override fun onRemoveStream(stream: MediaStream?) {
+        if (stream != null) {
+            onStreamRemoved?.invoke(stream)
+        }
     }
 
     override fun onSignalingChange(p0: PeerConnection.SignalingState?): Unit = Unit

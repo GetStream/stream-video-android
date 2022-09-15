@@ -19,6 +19,7 @@ package io.getstream.video.android.model
 import android.content.Context
 import android.media.AudioManager
 import android.util.Log
+import android.view.View
 import androidx.core.content.getSystemService
 import io.getstream.video.android.audio.AudioHandler
 import io.getstream.video.android.audio.AudioSwitchHandler
@@ -32,16 +33,17 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import org.webrtc.EglBase
 import org.webrtc.MediaStream
+import org.webrtc.RendererCommon
 import org.webrtc.SurfaceViewRenderer
-import org.webrtc.VideoTrack
 import stream.video.sfu.CallState
 
 public class Room(
     private val context: Context,
-    private val sessionId: String,
+    public val sessionId: String,
     private val credentialsProvider: CredentialsProvider,
     private val eglBase: EglBase,
 ) {
@@ -69,28 +71,72 @@ public class Room(
             }
         }
 
+    private val _localParticipant: MutableStateFlow<CallParticipant?> = MutableStateFlow(null)
+
+    public val localParticipant: Flow<CallParticipant> =
+        _localParticipant.filterNotNull()
+
+    public val localParticipantId: String
+        get() = credentialsProvider.getUserCredentials().id
+
     private val audioManager by lazy {
         context.getSystemService<AudioManager>()
     }
 
-    public var onLocalVideoTrackChange: (VideoTrack) -> Unit = {}
+    public var onLocalVideoTrackChange: (org.webrtc.VideoTrack) -> Unit = {}
     public var onStreamAdded: (MediaStream) -> Unit = {}
     public var onStreamRemoved: (MediaStream) -> Unit = {}
 
     /**
      * Public API.
      */
-    public fun initRenderer(videoRenderer: SurfaceViewRenderer) {
-        videoRenderer.init(eglBase.eglBaseContext, null)
+    public fun initRenderer(
+        videoRenderer: SurfaceViewRenderer,
+        streamId: String,
+        onRender: (View) -> Unit = {}
+    ) {
+        videoRenderer.init(
+            eglBase.eglBaseContext,
+            object : RendererCommon.RendererEvents {
+                override fun onFirstFrameRendered() {
+                    updateParticipantTrackSize(
+                        streamId,
+                        videoRenderer.measuredWidth,
+                        videoRenderer.measuredHeight
+                    )
+                    onRender(videoRenderer)
+                }
+
+                override fun onFrameResolutionChanged(p0: Int, p1: Int, p2: Int) {
+                }
+            }
+        )
+    }
+
+    private fun updateParticipantTrackSize(
+        streamId: String,
+        measuredWidth: Int,
+        measuredHeight: Int
+    ) {
+        val oldState = _callParticipants.value
+
+        val newState = oldState.updateValue(
+            predicate = { it.id in streamId },
+            transformer = { it.copy(trackSize = measuredWidth to measuredHeight) }
+        )
+
+        _callParticipants.value = newState
     }
 
     internal fun addStream(mediaStream: MediaStream) {
         if (mediaStream.audioTracks.isNotEmpty()) {
             Log.d("sfuConnectFlow", "AudioTracks received, ${mediaStream.audioTracks}")
-            mediaStream.audioTracks.forEach { it.setEnabled(true) }
+            mediaStream.audioTracks.forEach {
+                it.setEnabled(true)
+                it.setVolume(100.0) // TODO - figure the audio out
+            }
 
-            audioManager?.mode = AudioManager.MODE_IN_COMMUNICATION
-            audioManager?.isSpeakerphoneOn = true
+            updateAudio()
         }
 
         Log.d("sfuConnectFlow", "StreamAdded, $mediaStream")
@@ -98,13 +144,51 @@ public class Room(
         val updatedList = _callParticipants.value.updateValue(
             predicate = { it.id in mediaStream.id },
             transformer = {
-                it.copy(
-                    track = mediaStream.videoTracks?.firstOrNull()
-                )
+                val track = replaceTrackIfNeeded(mediaStream, it.track?.streamId)
+
+                if (track != null) {
+                    it.copy(
+                        track = track
+                    )
+                } else {
+                    it
+                }
             }
         )
         _callParticipants.value = updatedList
         onStreamAdded(mediaStream)
+    }
+
+    private fun updateAudio() {
+        val switchHandler = audioHandler as? AudioSwitchHandler
+        if (switchHandler != null && switchHandler.availableAudioDevices.isNotEmpty()) {
+            val speaker = switchHandler.availableAudioDevices.firstOrNull {
+                it.name.contains(
+                    "speaker",
+                    true
+                )
+            }
+
+            if (speaker != null) {
+                switchHandler.selectDevice(speaker)
+            }
+
+            audioManager?.mode = AudioManager.MODE_IN_COMMUNICATION
+            audioManager?.isSpeakerphoneOn = true
+        }
+    }
+
+    private fun replaceTrackIfNeeded(mediaStream: MediaStream, streamId: String?): VideoTrack? {
+        if (streamId == null || streamId != mediaStream.id) {
+            return mediaStream.videoTracks?.firstOrNull()?.let { track ->
+                VideoTrack(
+                    streamId = mediaStream.id,
+                    video = track
+                )
+            }
+        } else {
+            return null
+        }
     }
 
     internal fun removeStream(mediaStream: MediaStream) {
@@ -121,10 +205,14 @@ public class Room(
     }
 
     internal fun loadParticipants(callState: CallState) {
-        this._callParticipants.value =
+        val allParticipants =
             callState.participants.map { it.toCallParticipant(credentialsProvider.getUserCredentials().id) }
 
-        Log.d("sfuConnectFlow", "ExecuteJoin, $_callParticipants")
+        this._callParticipants.value = allParticipants
+        Log.d("sfuConnectFlow", "ExecuteJoin, ${_callParticipants.value}")
+
+        this._localParticipant.value = allParticipants.firstOrNull { it.isLocal }
+        Log.d("sfuConnectFlow", "ExecuteJoin, Local: ${_localParticipant.value}")
     }
 
     internal fun updateMuteState(event: MuteStateChangeEvent) {
@@ -154,13 +242,28 @@ public class Room(
         _callParticipants.value = _callParticipants.value.filter { it.id != userId }
     }
 
-    internal fun updateLocalVideoTrack(localVideoTrack: VideoTrack) {
-        val updatedParticipants = _callParticipants.value.updateValue(
-            predicate = { it.id == credentialsProvider.getUserCredentials().id },
-            transformer = { it.copy(track = localVideoTrack) }
+    internal fun updateLocalVideoTrack(localVideoTrack: org.webrtc.VideoTrack) {
+        val localParticipant = _localParticipant.value ?: return
+        val allParticipants = callParticipants.value
+
+        val videoTrack = VideoTrack(
+            video = localVideoTrack,
+            streamId = "${credentialsProvider.getUserCredentials().id}:${localVideoTrack.id()}"
         )
 
-        _callParticipants.value = updatedParticipants
+        val updatedParticipant = localParticipant.copy(
+            track = videoTrack
+        )
+
+        val updated = allParticipants.updateValue(
+            predicate = { it.id == credentialsProvider.getUserCredentials().id },
+            transformer = {
+                it.copy(track = videoTrack)
+            }
+        )
+
+        _localParticipant.value = updatedParticipant
+        _callParticipants.value = updated
         onLocalVideoTrackChange(localVideoTrack)
     }
 
@@ -170,6 +273,38 @@ public class Room(
 
     internal fun disconnect() {
         audioHandler.stop()
+        _callParticipants.value.forEach { it.track?.video?.dispose() }
         _callParticipants.value = emptyList()
+    }
+
+    public fun getLocalParticipant(): CallParticipant? {
+        return _callParticipants.value.firstOrNull { it.isLocal }
+    }
+
+    // TODO - check if this is needed or if we can rely on the MuteEvent
+    public fun setCameraEnabled(isEnabled: Boolean) {
+        val localParticipant = _localParticipant.value
+        val updatedLocal = localParticipant?.copy(hasVideo = isEnabled)
+        _localParticipant.value = updatedLocal
+
+        val updatedList = _callParticipants.value.updateValue(
+            predicate = { it.id == credentialsProvider.getUserCredentials().id },
+            transformer = { it.copy(hasVideo = isEnabled) }
+        )
+
+        _callParticipants.value = updatedList
+    }
+
+    public fun setMicrophoneEnabled(isEnabled: Boolean) {
+        val localParticipant = _localParticipant.value
+        val updatedLocal = localParticipant?.copy(hasAudio = isEnabled)
+        _localParticipant.value = updatedLocal
+
+        val updatedList = _callParticipants.value.updateValue(
+            predicate = { it.id == credentialsProvider.getUserCredentials().id },
+            transformer = { it.copy(hasAudio = isEnabled) }
+        )
+
+        _callParticipants.value = updatedList
     }
 }

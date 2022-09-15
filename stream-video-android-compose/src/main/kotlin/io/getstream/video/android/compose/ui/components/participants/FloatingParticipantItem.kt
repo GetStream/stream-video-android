@@ -16,15 +16,17 @@
 
 package io.getstream.video.android.compose.ui.components.participants
 
-import androidx.compose.foundation.layout.Box
+import android.view.View
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
+import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
@@ -38,12 +40,12 @@ import io.getstream.video.android.model.Room
 public fun FloatingParticipantItem(
     room: Room,
     callParticipant: CallParticipant,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onRender: (View) -> Unit = {}
 ) {
-    Box(
-        modifier = modifier
-            .size(height = 100.dp, width = 75.dp)
-            .shadow(elevation = 8.dp, shape = RoundedCornerShape(16.dp))
+    Surface(
+        modifier = modifier.shadow(elevation = 8.dp),
+        elevation = 8.dp
     ) {
         val videoTrack = callParticipant.track
 
@@ -51,24 +53,35 @@ public fun FloatingParticipantItem(
             VideoRenderer(
                 modifier = Modifier.fillMaxSize(),
                 room = room,
-                videoTrack = videoTrack
+                videoTrack = videoTrack,
+                onRender = {
+                    it.elevation = 8f
+                }
             )
         }
 
-        Row(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.Bottom,
+            horizontalArrangement = Arrangement.Center
+        ) {
             val icons = VideoTheme.icons
             Icon(
-                modifier = Modifier.padding(8.dp),
+                modifier = Modifier
+                    .padding(4.dp)
+                    .size(24.dp),
                 painter = if (callParticipant.hasAudio) icons.micOn else icons.micOff,
                 contentDescription = "Audio enabled: ${callParticipant.hasAudio}",
                 tint = Color.White
             )
 
             Icon(
-                modifier = Modifier.padding(8.dp),
+                modifier = Modifier
+                    .padding(4.dp)
+                    .size(24.dp),
                 painter = if (callParticipant.hasVideo) icons.videoCam else icons.videoCamOff,
                 contentDescription = "Video enabled: ${callParticipant.hasVideo}",
-                tint = Color.White
+                tint = Color.White,
             )
         }
     }

@@ -16,6 +16,8 @@
 
 package io.getstream.video.android.dispatchers
 
+import io.getstream.video.android.dispatchers.DispatcherProvider.reset
+import io.getstream.video.android.dispatchers.DispatcherProvider.set
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainCoroutineDispatcher
@@ -54,6 +56,9 @@ public object DispatcherProvider {
      * Represents the IO coroutine dispatcher, which is usually tied to background work.
      */
     public var IO: CoroutineDispatcher = Dispatchers.IO
+        internal set
+
+    public var Default: CoroutineDispatcher = Dispatchers.Default
         internal set
 
     /**

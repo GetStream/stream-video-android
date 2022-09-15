@@ -252,7 +252,7 @@ public final class io/getstream/video/android/compose/ui/IncomingCallActivity$Co
 }
 
 public final class io/getstream/video/android/compose/ui/components/CallDetailsKt {
-	public static final fun CallDetails (Lio/getstream/video/android/model/Room;ZZLkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+	public static final fun CallDetails (Lio/getstream/video/android/model/Room;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/CallTopAppbarKt {
@@ -267,7 +267,7 @@ public final class io/getstream/video/android/compose/ui/components/ComposableSi
 }
 
 public final class io/getstream/video/android/compose/ui/components/MainStageKt {
-	public static final fun MainStage (Lio/getstream/video/android/model/Room;Lio/getstream/video/android/model/CallParticipant;Ljava/util/List;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+	public static final fun MainStage (Lio/getstream/video/android/model/Room;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/avatar/AvatarKt {
@@ -428,7 +428,7 @@ public final class io/getstream/video/android/compose/ui/components/participants
 }
 
 public final class io/getstream/video/android/compose/ui/components/participants/FloatingParticipantItemKt {
-	public static final fun FloatingParticipantItem (Lio/getstream/video/android/model/Room;Lio/getstream/video/android/model/CallParticipant;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+	public static final fun FloatingParticipantItem (Lio/getstream/video/android/model/Room;Lio/getstream/video/android/model/CallParticipant;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/participants/ParticipantAvatarsKt {
@@ -440,11 +440,11 @@ public final class io/getstream/video/android/compose/ui/components/participants
 }
 
 public final class io/getstream/video/android/compose/ui/components/participants/ParticipantItemKt {
-	public static final fun ParticipantItem (Lio/getstream/video/android/model/Room;Lio/getstream/video/android/model/CallParticipant;Landroidx/compose/runtime/Composer;I)V
+	public static final fun ParticipantItem (Lio/getstream/video/android/model/Room;Lio/getstream/video/android/model/CallParticipant;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/participants/ParticipantsContentKt {
-	public static final fun ParticipantsContent (Lio/getstream/video/android/model/Room;Ljava/util/List;Landroidx/compose/ui/Modifier;Lio/getstream/video/android/model/CallParticipant;Landroidx/compose/runtime/Composer;II)V
+	public static final fun ParticipantsContent (Lio/getstream/video/android/model/Room;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/video/ComposeVisibility : io/getstream/video/android/compose/ui/components/video/VideoSinkVisibility {
@@ -457,7 +457,7 @@ public final class io/getstream/video/android/compose/ui/components/video/Compos
 }
 
 public final class io/getstream/video/android/compose/ui/components/video/VideoRendererKt {
-	public static final fun VideoRenderer (Lio/getstream/video/android/model/Room;Lorg/webrtc/VideoTrack;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+	public static final fun VideoRenderer (Lio/getstream/video/android/model/Room;Lio/getstream/video/android/model/VideoTrack;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 
 public abstract class io/getstream/video/android/compose/ui/components/video/VideoSinkVisibility : java/util/Observable {

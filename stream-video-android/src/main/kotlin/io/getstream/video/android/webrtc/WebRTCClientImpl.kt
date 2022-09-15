@@ -23,6 +23,7 @@ import android.hardware.camera2.CameraMetadata
 import android.util.Log
 import androidx.core.content.getSystemService
 import io.getstream.video.android.dispatchers.DispatcherProvider
+import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.events.ChangePublishQualityEvent
 import io.getstream.video.android.events.MuteStateChangeEvent
 import io.getstream.video.android.events.SfuDataEvent
@@ -38,6 +39,7 @@ import io.getstream.video.android.utils.Result
 import io.getstream.video.android.utils.Success
 import io.getstream.video.android.utils.buildConnectionConfiguration
 import io.getstream.video.android.utils.buildIceServers
+import io.getstream.video.android.utils.buildMediaConstraints
 import io.getstream.video.android.utils.onSuccessSuspend
 import io.getstream.video.android.webrtc.connection.PeerConnectionType
 import io.getstream.video.android.webrtc.connection.StreamPeerConnection
@@ -64,6 +66,7 @@ import org.webrtc.SessionDescription
 import org.webrtc.SurfaceTextureHelper
 import org.webrtc.VideoCapturer
 import org.webrtc.VideoTrack
+import stream.video.sfu.AudioCodecs
 import stream.video.sfu.CodecSettings
 import stream.video.sfu.IceCandidateRequest
 import stream.video.sfu.JoinRequest
@@ -96,6 +99,10 @@ public class WebRTCClientImpl(
 
     private val connectionConfiguration: PeerConnection.RTCConfiguration by lazy {
         buildConnectionConfiguration(iceServers)
+    }
+
+    private val mediaConstraints: MediaConstraints by lazy {
+        buildMediaConstraints()
     }
 
     private var subscriber: StreamPeerConnection? = null
@@ -140,6 +147,8 @@ public class WebRTCClientImpl(
         room?.disconnect()
         room = null
 
+        subscriber?.connection?.close()
+        publisher?.connection?.close()
         subscriber = null
         publisher = null
 
@@ -150,11 +159,21 @@ public class WebRTCClientImpl(
     }
 
     override fun setCameraEnabled(isEnabled: Boolean) {
-        // TODO - update room state
+        coroutineScope.launch {
+            room?.setCameraEnabled(isEnabled)
+            localVideoTrack?.setEnabled(isEnabled)
+        }
     }
 
     override fun setMicrophoneEnabled(isEnabled: Boolean) {
-        // TODO - update room state
+        coroutineScope.launch {
+            room?.setMicrophoneEnabled(isEnabled)
+            localAudioTrack?.setEnabled(isEnabled)
+        }
+    }
+
+    override fun flipCamera() {
+        (videoCapturer as? Camera2Capturer)?.switchCamera(null)
     }
 
     override fun startCall(sessionId: String, shouldPublish: Boolean): Room {
@@ -200,7 +219,7 @@ public class WebRTCClientImpl(
             context = context,
             sessionId = sessionId,
             credentialsProvider = credentialsProvider,
-            eglBase = peerConnectionFactory.eglBase, // TODO - some kind of callback/handler
+            eglBase = peerConnectionFactory.eglBase,
         )
     }
 
@@ -213,17 +232,25 @@ public class WebRTCClientImpl(
             createSignalingChannel(connection)
             Log.d("sfuConnectFlow", subscriber.toString())
 
-            connectToCall(connection)
+            val joinResult = connectToCall(connection)
 
-            val isConnectionOpen = listenForConnectionOpened()
-            Log.d("sfuConnectFlow", "ConnectionOpen, $isConnectionOpen")
+            if (joinResult is Success) {
+                val isConnectionOpen = listenForConnectionOpened(joinResult.data)
+                Log.d("sfuConnectFlow", "ConnectionOpen, $isConnectionOpen")
 
-            if (!isConnectionOpen) return@launch
+                if (!isConnectionOpen) {
+                    clear()
+                    return@launch // TODO error handling
+                }
 
-            if (shouldPublish) {
-                createPublisher()
+                if (shouldPublish) {
+                    createPublisher()
+                }
+                setupUserMedia(CallSettings(), shouldPublish)
+            } else {
+                clear()
+                // TODO error handling
             }
-            setupUserMedia(CallSettings(), shouldPublish)
         }
     }
 
@@ -231,6 +258,7 @@ public class WebRTCClientImpl(
         return peerConnectionFactory.makePeerConnection(
             configuration = connectionConfiguration,
             type = PeerConnectionType.SUBSCRIBER,
+            mediaConstraints = mediaConstraints,
             onStreamAdded = { room?.addStream(it) },
             onStreamRemoved = { room?.removeStream(it) },
             onIceCandidateRequest = ::sendIceCandidate
@@ -263,15 +291,20 @@ public class WebRTCClientImpl(
         Log.d("sfuConnectFlow", signalChannel.toString())
     }
 
-    private suspend fun connectToCall(connection: StreamPeerConnection) {
-        connection.createJoinOffer().onSuccessSuspend {
-            val joinResponse = executeJoinRequest(it)
+    private suspend fun connectToCall(connection: StreamPeerConnection): Result<JoinResponse> {
+        val offerResult = connection.createJoinOffer()
+        return if (offerResult is Success) {
+            val joinResponse = executeJoinRequest(offerResult.data)
 
             joinResponse.onSuccessSuspend { response ->
-
-                room?.loadParticipants(requireNotNull(response.call_state))
                 connection.onCallJoined(response.sdp)
             }
+
+            return joinResponse
+        } else {
+            val error = offerResult as? Failure
+
+            Failure(error?.error ?: VideoError())
         }
     }
 
@@ -286,6 +319,10 @@ public class WebRTCClientImpl(
                 video = VideoCodecs(
                     encode = encoderCodecs,
                     decode = decoderCodecs
+                ),
+                audio = AudioCodecs(
+                    encode = peerConnectionFactory.getAudioEncoderCoders(),
+                    decode = peerConnectionFactory.getAudioDecoderCoders()
                 )
             )
         )
@@ -293,7 +330,7 @@ public class WebRTCClientImpl(
         return signalClient.join(request)
     }
 
-    private suspend fun listenForConnectionOpened(): Boolean {
+    private suspend fun listenForConnectionOpened(response: JoinResponse): Boolean {
         var connected = signalChannelState == DataChannel.State.OPEN
 
         val timeoutTime = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(30)
@@ -307,7 +344,7 @@ public class WebRTCClientImpl(
         }
 
         return if (connected) {
-            room?.startAudio()
+            room?.loadParticipants(requireNotNull(response.call_state))
             signalChannel?.send("ss".encode()) ?: false
         } else {
             throw IllegalStateException("Couldn't connect to data channel.")
@@ -318,6 +355,7 @@ public class WebRTCClientImpl(
         publisher = peerConnectionFactory.makePeerConnection(
             connectionConfiguration,
             PeerConnectionType.PUBLISHER,
+            mediaConstraints = MediaConstraints(),
             onNegotiationNeeded = ::negotiate
         )
 
@@ -358,8 +396,8 @@ public class WebRTCClientImpl(
         Log.d("sfuConnectFlow", "SetupMedia, $videoTrack")
 
         if (shouldPublish) {
-            publisher?.addTrack(audioTrack, listOf(sessionId))
-            publisher?.addTransceiver(videoTrack, listOf(sessionId))
+            publisher?.addAudioTransceiver(audioTrack, listOf(sessionId))
+            publisher?.addVideoTransceiver(videoTrack, listOf(sessionId))
         }
     }
 
@@ -393,14 +431,11 @@ public class WebRTCClientImpl(
 
         val supportedFormats = enumerator.getSupportedFormats(frontCamera) ?: emptyList()
 
-        /**
-         * We pick the middle resolution.
-         */
-        val middleResIndex = supportedFormats.count() / 2
+        val resolution = supportedFormats.firstOrNull {
+            (it.width == 1080 || it.width == 720 || it.width == 480)
+        } ?: return
 
-        val resolution = supportedFormats[middleResIndex] ?: return
-
-        capturer.startCapture(resolution.width, resolution.height, resolution.framerate.max)
+        capturer.startCapture(resolution.width, resolution.height, 30)
     }
 
     private fun buildCameraCapturer(): VideoCapturer? {
@@ -430,7 +465,7 @@ public class WebRTCClientImpl(
     }
 
     private fun updatePublishQuality(event: ChangePublishQualityEvent) {
-        val transceiver = publisher?.transceiver ?: return
+        val transceiver = publisher?.videoTransceiver ?: return
 
         val enabledRids = event.changePublishQuality.video_sender.firstOrNull()?.layers
             ?.filter { it.active }
@@ -464,7 +499,7 @@ public class WebRTCClientImpl(
             params.encodings.clear()
             params.encodings.addAll(updatedEncodings)
 
-            publisher?.transceiver?.sender?.parameters = params
+            publisher?.videoTransceiver?.sender?.parameters = params
         }
     }
 

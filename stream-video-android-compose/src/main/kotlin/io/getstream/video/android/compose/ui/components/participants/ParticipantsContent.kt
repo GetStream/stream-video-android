@@ -16,33 +16,130 @@
 
 package io.getstream.video.android.compose.ui.components.participants
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import android.view.View
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import io.getstream.video.android.model.CallParticipant
+import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.model.Room
 
 @Composable
 public fun ParticipantsContent(
     room: Room,
-    participants: List<CallParticipant>,
     modifier: Modifier = Modifier,
-    localParticipant: CallParticipant
+    onRender: (View) -> Unit = {}
 ) {
-    val otherParticipants = participants.filter { it.id != localParticipant.id }
+    val participants by room.callParticipants.collectAsState(emptyList())
+    val otherParticipants = participants.filter { !it.isLocal }
 
-    LazyRow( // TODO - build a grid of first 4 participants
-        modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        items(otherParticipants) { participant ->
-            ParticipantItem(
-                room,
-                participant
-            )
+    when (otherParticipants.size) {
+        0 -> {
+            Box(modifier = modifier) {
+                Icon(
+                    modifier = Modifier.align(Alignment.Center),
+                    painter = VideoTheme.icons.call,
+                    contentDescription = null
+                )
+            }
+        }
+        1 -> ParticipantItem(
+            modifier = modifier,
+            room = room,
+            participant = otherParticipants.first(),
+            onRender = onRender
+        )
+        2 -> {
+            val firstParticipant = otherParticipants[0]
+            val secondParticipant = otherParticipants[1]
+
+            Column(modifier) {
+                ParticipantItem(
+                    modifier = Modifier.weight(1f),
+                    room = room,
+                    participant = firstParticipant
+                )
+
+                ParticipantItem(
+                    modifier = Modifier.weight(1f),
+                    room = room,
+                    participant = secondParticipant,
+                    onRender = onRender
+                )
+            }
+        }
+        3 -> {
+            val firstParticipant = otherParticipants[0]
+            val secondParticipant = otherParticipants[1]
+            val thirdParticipant = otherParticipants[2]
+
+            Column(modifier) {
+                ParticipantItem(
+                    modifier = Modifier.weight(1f),
+                    room = room,
+                    participant = firstParticipant
+                )
+
+                Row(modifier = Modifier.weight(1f)) {
+                    ParticipantItem(
+                        modifier = Modifier.weight(1f),
+                        room = room,
+                        participant = secondParticipant
+                    )
+
+                    ParticipantItem(
+                        modifier = Modifier.weight(1f),
+                        room = room,
+                        participant = thirdParticipant,
+                        onRender = onRender
+                    )
+                }
+            }
+        }
+        else -> {
+            /**
+             * More than three participants, we only show the first four.
+             */
+            val firstParticipant = otherParticipants[0]
+            val secondParticipant = otherParticipants[1]
+            val thirdParticipant = otherParticipants[2]
+            val fourthParticipant = otherParticipants[3]
+
+            Column(modifier) {
+                Row(modifier = Modifier.weight(1f)) {
+                    ParticipantItem(
+                        modifier = Modifier.weight(1f),
+                        room = room,
+                        participant = firstParticipant
+                    )
+
+                    ParticipantItem(
+                        modifier = Modifier.weight(1f),
+                        room = room,
+                        participant = secondParticipant
+                    )
+                }
+
+                Row(modifier = Modifier.weight(1f)) {
+                    ParticipantItem(
+                        modifier = Modifier.weight(1f),
+                        room = room,
+                        participant = thirdParticipant
+                    )
+
+                    ParticipantItem(
+                        modifier = Modifier.weight(1f),
+                        room = room,
+                        participant = fourthParticipant,
+                        onRender = onRender
+                    )
+                }
+            }
         }
     }
 }

@@ -16,8 +16,24 @@
 
 package io.getstream.video.android.model
 
-public data class Track(
-    val track: Track
-)
+import org.webrtc.VideoTrack
 
-// TODO - expose required properties
+public data class VideoTrack(
+    public val streamId: String,
+    public val video: VideoTrack,
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as io.getstream.video.android.model.VideoTrack
+
+        if (streamId != other.streamId) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return streamId.hashCode()
+    }
+}

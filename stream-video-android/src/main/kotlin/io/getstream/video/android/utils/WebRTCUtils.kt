@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.utils
 
+import org.webrtc.MediaConstraints
 import org.webrtc.PeerConnection
 
 internal fun buildIceServers(): List<PeerConnection.IceServer> {
@@ -40,5 +41,16 @@ internal fun buildConnectionConfiguration(iceServers: List<PeerConnection.IceSer
     return PeerConnection.RTCConfiguration(emptyList()).apply {
         this.sdpSemantics = PeerConnection.SdpSemantics.UNIFIED_PLAN
         this.iceServers = iceServers
+    }
+}
+
+internal fun buildMediaConstraints(): MediaConstraints {
+    return MediaConstraints().apply {
+        mandatory.addAll(
+            listOf(
+                MediaConstraints.KeyValuePair("OfferToReceiveAudio", "true"),
+                MediaConstraints.KeyValuePair("OfferToReceiveVideo", "true")
+            )
+        )
     }
 }

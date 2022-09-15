@@ -46,16 +46,7 @@ class SfuTestActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sfu_test)
         testWebRTCClient()
-        initRenderers()
         observeParticipants()
-    }
-
-    private fun initRenderers() {
-        val renderer = findViewById<SurfaceViewRenderer>(R.id.surfaceView)
-        val participantView = findViewById<SurfaceViewRenderer>(R.id.participantView)
-
-        room.initRenderer(renderer)
-        room.initRenderer(participantView)
     }
 
     private fun observeParticipants() {
@@ -63,11 +54,13 @@ class SfuTestActivity : AppCompatActivity() {
             room.callParticipants.collect { participants ->
                 val user = videoClient.getUser()
                 val participant = participants.firstOrNull { it.track != null && it.id != user.id }
+                val videoTrack = participant?.track
 
-                if (participant != null) {
+                if (videoTrack != null) {
                     val participantView = findViewById<SurfaceViewRenderer>(R.id.participantView)
 
-                    participant.track?.addSink(participantView)
+                    room.initRenderer(participantView, videoTrack.streamId)
+                    videoTrack.video.addSink(participantView)
                 }
             }
         }
@@ -81,6 +74,7 @@ class SfuTestActivity : AppCompatActivity() {
 
     private fun updateVideoTrack(videoTrack: VideoTrack) {
         val renderer = findViewById<SurfaceViewRenderer>(R.id.surfaceView)
+        room.initRenderer(renderer, videoTrack.id())
 
         webRTCClient.startCapturingLocalVideo(LENS_FACING_FRONT)
         videoTrack.addSink(renderer)

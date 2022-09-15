@@ -16,57 +16,34 @@
 
 package io.getstream.video.android.compose.ui.components.video
 
+import android.view.View
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.currentCompositeKeyHash
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.viewinterop.AndroidView
 import io.getstream.video.android.model.Room
+import io.getstream.video.android.model.VideoTrack
 import org.webrtc.SurfaceViewRenderer
-import org.webrtc.VideoTrack
 
 @Composable
 public fun VideoRenderer(
     room: Room,
     videoTrack: VideoTrack,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onRender: (View) -> Unit = {}
 ) {
-
-    val videoSinkVisibility = remember(videoTrack) { ComposeVisibility() }
-    var boundVideoTrack by remember { mutableStateOf<VideoTrack?>(null) }
+    val boundVideoTrack: MutableState<VideoTrack?> = remember { mutableStateOf(null) }
     var view: SurfaceViewRenderer? by remember { mutableStateOf(null) }
 
-    fun cleanupVideoTrack() {
-        view?.let { boundVideoTrack?.removeSink(it) }
-        boundVideoTrack = null
-    }
-
-    fun setupVideoIfNeeded(videoTrack: VideoTrack, view: SurfaceViewRenderer) {
-        if (boundVideoTrack == videoTrack) {
-            return
-        }
-
-        cleanupVideoTrack()
-
-        boundVideoTrack = videoTrack
-        // TODO - figure out remote vs local
-        videoTrack.addSink(view)
-//        if (videoTrack is RemoteVideoTrack) {
-//            videoTrack.addSink(view, videoSinkVisibility)
-//        } else {
-//            videoTrack.addRenderer(view)
-//        }
-    }
-
-    DisposableEffect(videoTrack) {
+    DisposableEffect(room, videoTrack) {
         onDispose {
-            videoSinkVisibility.onDispose()
-            cleanupVideoTrack()
+            cleanupVideoTrack(view, boundVideoTrack)
         }
     }
 
@@ -79,14 +56,40 @@ public fun VideoRenderer(
     AndroidView(
         factory = { context ->
             SurfaceViewRenderer(context).apply {
-                room.initRenderer(this)
-                setupVideoIfNeeded(videoTrack, this)
+                this.setZOrderOnTop(false) // TODO - test if we can add the Surface View to the Android View after it's ready
+                this.setZOrderMediaOverlay(false)
+                room.initRenderer(this, videoTrack.streamId, onRender)
+                setupVideoIfNeeded(boundVideoTrack, videoTrack, this)
 
                 view = this
             }
         },
-        update = { v -> setupVideoIfNeeded(videoTrack, v) },
-        modifier = modifier
-            .onGloballyPositioned { videoSinkVisibility.onGloballyPositioned(it) },
+        update = { v ->
+            setupVideoIfNeeded(boundVideoTrack, videoTrack, v)
+        },
+        modifier = modifier,
     )
+}
+
+private fun cleanupVideoTrack(
+    view: SurfaceViewRenderer?,
+    boundVideoTrack: MutableState<VideoTrack?>
+) {
+    view?.let { boundVideoTrack.value?.video?.removeSink(it) }
+    boundVideoTrack.value = null
+}
+
+private fun setupVideoIfNeeded(
+    boundVideoTrack: MutableState<VideoTrack?>,
+    videoTrack: VideoTrack,
+    view: SurfaceViewRenderer
+) {
+    if (boundVideoTrack.value == videoTrack) {
+        return
+    }
+
+    cleanupVideoTrack(view, boundVideoTrack)
+
+    boundVideoTrack.value = videoTrack
+    videoTrack.video.addSink(view)
 }

@@ -26,64 +26,23 @@ import android.os.Build.VERSION_CODES.M
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
-import androidx.activity.compose.BackHandler
+import android.view.View
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Call
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Videocam
-import androidx.compose.material.icons.filled.VideocamOff
-import androidx.compose.material.icons.filled.VolumeOff
-import androidx.compose.material.icons.filled.VolumeUp
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Alignment.Companion.CenterEnd
-import androidx.compose.ui.Alignment.Companion.CenterStart
-import androidx.compose.ui.Alignment.Companion.TopEnd
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
+import io.getstream.video.android.R
 import io.getstream.video.android.app.VideoApp
-import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.CallDetails
-import io.getstream.video.android.compose.ui.components.MainStage
-import io.getstream.video.android.model.CallParticipantState
-import io.getstream.video.android.model.CallType
-import io.getstream.video.android.utils.onError
-import io.getstream.video.android.utils.onSuccessSuspend
+import io.getstream.video.android.app.ui.call.content.VideoCallContent
+import io.getstream.video.android.ui.ParticipantContentView
+import io.getstream.video.android.ui.ParticipantItemView
 import io.getstream.video.android.viewmodel.CallViewModel
 import io.getstream.video.android.viewmodel.CallViewModelFactory
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import stream.video.Call
 
@@ -113,91 +72,46 @@ class CallActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        callViewModel.init(Call(), "", "")
-        callViewModel.startCapturingLocalVideo()
+        // setupViews() // XML variant
+
         setContent {
-            VideoCallContent()
+            VideoCallContent(callViewModel, onLeaveCall = ::leaveCall)
         }
     }
 
-    @Composable
-    private fun VideoCallContent() {
-        val room by callViewModel.roomState.collectAsState(initial = null)
-        val participants by callViewModel.participantList.collectAsState(initial = emptyList())
-        val speaker by callViewModel.primarySpeaker.collectAsState(initial = null)
-        val isCameraEnabled by callViewModel.isCameraEnabled.collectAsState(initial = false)
-        val isMicrophoneEnabled by callViewModel.isMicrophoneEnabled.collectAsState(initial = false)
-        val callState by callViewModel.callState.collectAsState(null)
-        val isShowingParticipantsInfo by callViewModel.isShowingParticipantsInfo.collectAsState(
-            false
-        )
+    private fun setupViews() {
+        setContentView(R.layout.activity_call)
 
-        val participantsState by callViewModel.participantsState.collectAsState(initial = emptyList())
+        lifecycleScope.launch {
+            val view = findViewById<ParticipantContentView>(R.id.participantContent)
 
-        BackHandler {
-            if (isShowingParticipantsInfo) {
-                callViewModel.hideParticipants()
-            } else {
-                leaveCall()
+            callViewModel.roomState.filterNotNull().collectLatest { room ->
+                Log.d("RoomState", room.toString())
+                room.callParticipants.collectLatest { participants ->
+                    Log.d("RoomState", participants.toString())
+                    view.renderParticipants(room, participants)
+                }
             }
         }
 
-        VideoTheme {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                val currentSpeaker = speaker
-                val roomState = room
+        lifecycleScope.launch {
+            val view = findViewById<ParticipantItemView>(R.id.floatingParticipantView)
 
-                Column(modifier = Modifier.fillMaxSize()) {
+            callViewModel.roomState.filterNotNull().collectLatest { room ->
+                room.localParticipant.collectLatest { participant ->
+                    val track = participant.track
+                    val video = track?.video
 
-                    CallActionBar(callState?.id ?: "")
-
-                    if (currentSpeaker == null || roomState == null) {
-                        Box(
-                            modifier = Modifier
-                                .height(250.dp)
-                                .fillMaxWidth()
-                        ) {
-                            Image(
-                                modifier = Modifier.align(Alignment.Center),
-                                imageVector = Icons.Default.Call,
-                                contentDescription = null
-                            )
+                    if (track != null && video != null) {
+                        view.visibility = View.VISIBLE
+                        view.initialize(room, track.streamId) {
+                            lifecycleScope.launch {
+                                view.elevation = 10f
+                                view.bringToFront()
+                            }
                         }
-                    } else {
-                        MainStage(
-                            modifier = Modifier
-                                .weight(0.5f)
-                                .fillMaxWidth(),
-                            localParticipant = currentSpeaker,
-                            room = roomState,
-                            participants = participants
-                        )
-
-                        CallDetails(
-                            room = roomState,
-                            isMicrophoneEnabled = isMicrophoneEnabled,
-                            isCameraEnabled = isCameraEnabled,
-                            onEndCall = {
-                                leaveCall()
-                            },
-                            onCameraToggled = { isEnabled -> callViewModel.toggleCamera(isEnabled) },
-                            onMicrophoneToggled = { isEnabled ->
-                                callViewModel.toggleMicrophone(
-                                    isEnabled
-                                )
-                            },
-                            onCameraFlipped = callViewModel::flipCamera,
-                            modifier = Modifier.weight(0.5f)
-                        )
+                        view.bindTrack(video)
                     }
-                }
-
-                if (isShowingParticipantsInfo) {
-                    ParticipantsInfo(participantsState)
                 }
             }
         }
@@ -206,101 +120,6 @@ class CallActivity : AppCompatActivity() {
     private fun leaveCall() {
         callViewModel.leaveCall()
         finish()
-    }
-
-    @Composable
-    private fun ParticipantsInfo(participantsState: List<CallParticipantState>) {
-
-        Box(
-            modifier = Modifier
-                .background(color = Color.LightGray.copy(alpha = 0.7f))
-                .fillMaxSize()
-                .clickable { callViewModel.hideParticipants() }
-        ) {
-            LazyColumn(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .heightIn(max = 200.dp)
-                    .widthIn(max = 200.dp)
-                    .align(TopEnd)
-                    .background(color = Color.White, shape = RoundedCornerShape(16.dp)),
-                contentPadding = PaddingValues(16.dp),
-                horizontalAlignment = Alignment.Start,
-                verticalArrangement = Arrangement.Center
-            ) {
-                items(participantsState) {
-                    ParticipantInfoItem(it)
-                }
-            }
-        }
-    }
-
-    @Composable
-    private fun ParticipantInfoItem(participant: CallParticipantState) {
-        Row(
-            modifier = Modifier.wrapContentWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start
-        ) {
-            val isAudioEnabled = participant.isLocalAudioEnabled
-            Icon(
-                imageVector = if (isAudioEnabled) Icons.Default.VolumeUp else Icons.Default.VolumeOff,
-                contentDescription = "User Audio"
-            )
-
-            val isVideoEnabled = participant.isLocalVideoEnabled
-            Icon(
-                imageVector = if (isVideoEnabled) Icons.Default.Videocam else Icons.Default.VideocamOff,
-                contentDescription = "User Video"
-            )
-
-            val userName = when {
-                participant.userName.isNotBlank() -> participant.userName
-                participant.userId.isNotBlank() -> participant.userId
-                else -> "Unknown"
-            }
-
-            Text(
-                text = userName,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.SemiBold,
-                maxLines = 1
-            )
-        }
-    }
-
-    @Composable
-    private fun CallActionBar(callId: String) {
-        val title = if (callId.isBlank()) "Joining call..." else "Call ID: $callId"
-
-        Box(
-            modifier = Modifier
-                .height(56.dp)
-                .fillMaxWidth()
-                .background(MaterialTheme.colors.primary)
-        ) {
-            Text(
-                modifier = Modifier
-                    .align(CenterStart)
-                    .padding(horizontal = 8.dp, vertical = 4.dp),
-                text = title,
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White
-            )
-
-            Icon(
-                modifier = Modifier
-                    .align(CenterEnd)
-                    .clickable {
-                        callViewModel.showParticipants()
-                    }
-                    .padding(8.dp),
-                imageVector = Icons.Default.Menu,
-                contentDescription = "Participants info",
-                tint = Color.White
-            )
-        }
     }
 
     override fun onResume() {
@@ -330,19 +149,19 @@ class CallActivity : AppCompatActivity() {
         val participants = intent.getStringArrayExtra(KEY_PARTICIPANTS) ?: emptyArray()
 
         lifecycleScope.launch {
-            val result = client.joinCall(
-                CallType.VIDEO.type,
-                id = callId,
-                participantIds = participants.toList()
-            )
+//            val result = client.joinCall(
+//                CallType.VIDEO.type,
+//                id = callId,
+//                participantIds = participants.toList()
+//            )
+//
+//            result.onSuccessSuspend { (call, url, token) ->
+            callViewModel.init(Call(id = callId), "", "") //  since CallCoordinator isn't ready
+//            }
 
-            result.onSuccessSuspend { (call, url, token) ->
-                callViewModel.init(call, url, token)
-            }
-
-            result.onError {
-                Log.d("Couldn't select server", it.message ?: "")
-            }
+//            result.onError {
+//                Log.d("Couldn't select server", it.message ?: "")
+//            }
         }
     }
 

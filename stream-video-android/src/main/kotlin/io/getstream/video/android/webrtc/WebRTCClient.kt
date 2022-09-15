@@ -26,9 +26,11 @@ public interface WebRTCClient {
 
     public fun joinCall(sessionId: String, shouldPublish: Boolean): Room
 
+    public fun startCapturingLocalVideo(position: Int)
+
     public fun setCameraEnabled(isEnabled: Boolean)
 
     public fun setMicrophoneEnabled(isEnabled: Boolean)
 
-    public fun startCapturingLocalVideo(position: Int)
+    public fun flipCamera()
 }

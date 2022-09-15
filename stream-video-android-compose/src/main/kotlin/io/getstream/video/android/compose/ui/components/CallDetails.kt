@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Audiotrack
@@ -33,8 +34,11 @@ import androidx.compose.material.icons.filled.CallEnd
 import androidx.compose.material.icons.filled.Camera
 import androidx.compose.material.icons.filled.Flip
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.model.Room
@@ -42,15 +46,21 @@ import io.getstream.video.android.model.Room
 @Composable
 public fun CallDetails(
     room: Room,
-    isMicrophoneEnabled: Boolean,
-    isCameraEnabled: Boolean,
     onEndCall: () -> Unit,
     onCameraToggled: (Boolean) -> Unit,
     onMicrophoneToggled: (Boolean) -> Unit,
     onCameraFlipped: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier) {
+    val participant by room.localParticipant.collectAsState(initial = null)
+    val isMicrophoneEnabled = participant?.hasAudio ?: false
+    val isCameraEnabled = participant?.hasVideo ?: false
+
+    val cardShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+
+    Column(
+        modifier = modifier.clip(cardShape)
+    ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,

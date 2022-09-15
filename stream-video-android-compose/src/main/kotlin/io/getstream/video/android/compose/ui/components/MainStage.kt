@@ -18,32 +18,44 @@ package io.getstream.video.android.compose.ui.components
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.ui.components.participants.FloatingParticipantItem
 import io.getstream.video.android.compose.ui.components.participants.ParticipantsContent
-import io.getstream.video.android.model.CallParticipant
 import io.getstream.video.android.model.Room
 
 @Composable
 public fun MainStage(
     room: Room,
-    localParticipant: CallParticipant,
-    participants: List<CallParticipant>,
     modifier: Modifier = Modifier
 ) {
     Box(modifier = modifier) {
         ParticipantsContent(
             modifier = Modifier.fillMaxSize(),
-            room = room,
-            participants = participants,
-            localParticipant = localParticipant
+            room = room
         )
 
-        val localTrack = localParticipant.track
+        val localParticipantState by room.localParticipant.collectAsState(initial = null)
+        val currentLocal = localParticipantState
 
-        if (localTrack != null) {
-            FloatingParticipantItem(room, localParticipant)
+        if (currentLocal != null) {
+            FloatingParticipantItem(
+                room = room,
+                callParticipant = currentLocal,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .size(height = 150.dp, width = 125.dp)
+                    .padding(16.dp)
+                    .clip(RoundedCornerShape(16.dp))
+            )
         }
     }
 }

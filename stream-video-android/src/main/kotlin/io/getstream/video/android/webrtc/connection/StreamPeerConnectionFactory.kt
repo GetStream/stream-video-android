@@ -21,6 +21,8 @@ import android.media.MediaCodecList
 import android.os.Build
 import org.webrtc.AudioSource
 import org.webrtc.AudioTrack
+import org.webrtc.BuiltinAudioDecoderFactoryFactory
+import org.webrtc.BuiltinAudioEncoderFactoryFactory
 import org.webrtc.DefaultVideoDecoderFactory
 import org.webrtc.EglBase
 import org.webrtc.HardwareVideoEncoderFactory
@@ -54,6 +56,14 @@ public class StreamPeerConnectionFactory(private val context: Context) {
         SimulcastVideoEncoderFactory(hardwareEncoder, SoftwareVideoEncoderFactory())
     }
 
+    private val audioDecoderFactoryFactory by lazy {
+        BuiltinAudioDecoderFactoryFactory()
+    }
+
+    private val audioEncoderFactoryFactory by lazy {
+        BuiltinAudioEncoderFactoryFactory()
+    }
+
     private val factory by lazy {
         PeerConnectionFactory.initialize(
             PeerConnectionFactory.InitializationOptions.builder(context)
@@ -65,7 +75,15 @@ public class StreamPeerConnectionFactory(private val context: Context) {
             .setOptions(PeerConnectionFactory.Options())
             .setVideoDecoderFactory(videoDecoderFactory)
             .setVideoEncoderFactory(videoEncoderFactory)
-            .setAudioDeviceModule(JavaAudioDeviceModule.builder(context).createAudioDeviceModule())
+            .setAudioEncoderFactoryFactory(audioEncoderFactoryFactory)
+            .setAudioDecoderFactoryFactory(audioDecoderFactoryFactory)
+            .setAudioDeviceModule(
+
+                JavaAudioDeviceModule
+                    .builder(context)
+                    .setUseStereoOutput(true)
+                    .createAudioDeviceModule()
+            )
             .createPeerConnectionFactory()
     }
 
@@ -129,12 +147,47 @@ public class StreamPeerConnectionFactory(private val context: Context) {
         }
     }
 
+    public fun getAudioEncoderCoders(): List<Codec> {
+        val supportedSystemCodecs = systemCodecs.filter {
+            it.isEncoder && it.supportedTypes.any { type -> type.contains("audio") }
+        }
+
+        return supportedSystemCodecs.map { codec ->
+            Codec(
+                mime = codec.supportedTypes.firstOrNull() ?: "audio",
+                hw_accelerated = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    codec.isHardwareAccelerated
+                } else {
+                    false
+                }
+            )
+        }
+    }
+
+    public fun getAudioDecoderCoders(): List<Codec> {
+        val supportedSystemCodecs = systemCodecs.filter {
+            !it.isEncoder && it.supportedTypes.any { type -> type.contains("audio") }
+        }
+
+        return supportedSystemCodecs.map { codec ->
+            Codec(
+                mime = codec.supportedTypes.firstOrNull() ?: "audio",
+                hw_accelerated = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    codec.isHardwareAccelerated
+                } else {
+                    false
+                }
+            )
+        }
+    }
+
     /**
      * Peer connection.
      */
     public fun makePeerConnection(
         configuration: PeerConnection.RTCConfiguration,
         type: PeerConnectionType,
+        mediaConstraints: MediaConstraints,
         onStreamAdded: ((MediaStream) -> Unit)? = null,
         onStreamRemoved: ((MediaStream) -> Unit)? = null,
         onNegotiationNeeded: ((StreamPeerConnection) -> Unit)? = null,
@@ -142,6 +195,7 @@ public class StreamPeerConnectionFactory(private val context: Context) {
     ): StreamPeerConnection {
         val peerConnection = StreamPeerConnection(
             type,
+            mediaConstraints,
             onStreamAdded,
             onStreamRemoved,
             onNegotiationNeeded,
