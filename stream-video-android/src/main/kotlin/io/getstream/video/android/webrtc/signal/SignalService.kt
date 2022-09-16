@@ -32,6 +32,9 @@ import stream.video.sfu.UpdateSubscriptionsResponse
 
 public interface SignalService {
 
+    /**
+     * TODO - when local remove /rpc"
+     */
     @Headers("Content-Type: application/protobuf")
     @POST("/twirp/stream.video.sfu.SignalServer/SendAnswer")
     public suspend fun sendAnswer(

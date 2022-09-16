@@ -20,6 +20,9 @@ import android.content.Context
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import android.hardware.camera2.CameraMetadata
+import android.media.AudioAttributes.ALLOW_CAPTURE_BY_ALL
+import android.media.AudioManager
+import android.os.Build
 import android.util.Log
 import androidx.core.content.getSystemService
 import io.getstream.video.android.dispatchers.DispatcherProvider
@@ -33,6 +36,7 @@ import io.getstream.video.android.events.SubscriberOfferEvent
 import io.getstream.video.android.model.CallParticipant
 import io.getstream.video.android.model.CallSettings
 import io.getstream.video.android.model.Room
+import io.getstream.video.android.module.VideoModule
 import io.getstream.video.android.token.CredentialsProvider
 import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Result
@@ -40,6 +44,7 @@ import io.getstream.video.android.utils.Success
 import io.getstream.video.android.utils.buildConnectionConfiguration
 import io.getstream.video.android.utils.buildIceServers
 import io.getstream.video.android.utils.buildMediaConstraints
+import io.getstream.video.android.utils.buildRemoteIceServers
 import io.getstream.video.android.utils.onSuccessSuspend
 import io.getstream.video.android.webrtc.connection.PeerConnectionType
 import io.getstream.video.android.webrtc.connection.StreamPeerConnection
@@ -95,7 +100,13 @@ public class WebRTCClientImpl(
      * Connection and WebRTC.
      */
     private val peerConnectionFactory by lazy { StreamPeerConnectionFactory(context) }
-    private val iceServers by lazy { buildIceServers() }
+    private val iceServers by lazy {
+        if (VideoModule.HOST_BASE != null) {
+            buildRemoteIceServers(VideoModule.HOST_BASE)
+        } else {
+            buildIceServers()
+        }
+    }
 
     private val connectionConfiguration: PeerConnection.RTCConfiguration by lazy {
         buildConnectionConfiguration(iceServers)
@@ -240,7 +251,7 @@ public class WebRTCClientImpl(
 
                 if (!isConnectionOpen) {
                     clear()
-                    return@launch // TODO error handling
+                    return@launch
                 }
 
                 if (shouldPublish) {
@@ -249,7 +260,6 @@ public class WebRTCClientImpl(
                 setupUserMedia(CallSettings(), shouldPublish)
             } else {
                 clear()
-                // TODO error handling
             }
         }
     }
@@ -344,6 +354,7 @@ public class WebRTCClientImpl(
         }
 
         return if (connected) {
+            room?.startAudio()
             room?.loadParticipants(requireNotNull(response.call_state))
             signalChannel?.send("ss".encode()) ?: false
         } else {
@@ -386,6 +397,11 @@ public class WebRTCClientImpl(
     }
 
     private fun setupUserMedia(callSettings: CallSettings, shouldPublish: Boolean) {
+        val manager = context.getSystemService<AudioManager>()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            manager?.allowedCapturePolicy = ALLOW_CAPTURE_BY_ALL
+        }
+
         val audioTrack = makeAudioTrack()
         audioTrack.setEnabled(true)
         localAudioTrack = audioTrack

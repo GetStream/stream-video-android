@@ -37,6 +37,17 @@ internal fun buildIceServers(): List<PeerConnection.IceServer> {
     )
 }
 
+internal fun buildRemoteIceServers(hostUrl: String): List<PeerConnection.IceServer> {
+    return listOf(
+        PeerConnection.IceServer.builder("stun:stun.l.google.com:19302")
+            .createIceServer(),
+        PeerConnection.IceServer.builder("turn:$hostUrl:3478")
+            .setUsername("video")
+            .setPassword("video")
+            .createIceServer(),
+    )
+}
+
 internal fun buildConnectionConfiguration(iceServers: List<PeerConnection.IceServer>): PeerConnection.RTCConfiguration {
     return PeerConnection.RTCConfiguration(emptyList()).apply {
         this.sdpSemantics = PeerConnection.SdpSemantics.UNIFIED_PLAN

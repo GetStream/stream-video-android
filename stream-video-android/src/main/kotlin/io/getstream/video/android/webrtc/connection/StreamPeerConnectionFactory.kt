@@ -19,10 +19,9 @@ package io.getstream.video.android.webrtc.connection
 import android.content.Context
 import android.media.MediaCodecList
 import android.os.Build
+import android.util.Log
 import org.webrtc.AudioSource
 import org.webrtc.AudioTrack
-import org.webrtc.BuiltinAudioDecoderFactoryFactory
-import org.webrtc.BuiltinAudioEncoderFactoryFactory
 import org.webrtc.DefaultVideoDecoderFactory
 import org.webrtc.EglBase
 import org.webrtc.HardwareVideoEncoderFactory
@@ -56,32 +55,81 @@ public class StreamPeerConnectionFactory(private val context: Context) {
         SimulcastVideoEncoderFactory(hardwareEncoder, SoftwareVideoEncoderFactory())
     }
 
-    private val audioDecoderFactoryFactory by lazy {
-        BuiltinAudioDecoderFactoryFactory()
-    }
-
-    private val audioEncoderFactoryFactory by lazy {
-        BuiltinAudioEncoderFactoryFactory()
-    }
-
     private val factory by lazy {
         PeerConnectionFactory.initialize(
             PeerConnectionFactory.InitializationOptions.builder(context)
                 .createInitializationOptions()
         )
-        // TODO init SSL?
 
         PeerConnectionFactory.builder()
-            .setOptions(PeerConnectionFactory.Options())
+            .setOptions(
+                PeerConnectionFactory.Options().apply {
+                    this.disableEncryption = false
+                    this.disableNetworkMonitor = false
+                }
+            )
             .setVideoDecoderFactory(videoDecoderFactory)
             .setVideoEncoderFactory(videoEncoderFactory)
-            .setAudioEncoderFactoryFactory(audioEncoderFactoryFactory)
-            .setAudioDecoderFactoryFactory(audioDecoderFactoryFactory)
             .setAudioDeviceModule(
-
                 JavaAudioDeviceModule
                     .builder(context)
-                    .setUseStereoOutput(true)
+                    .setUseHardwareAcousticEchoCanceler(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+                    .setUseHardwareNoiseSuppressor(
+                        Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
+                    )
+                    .setOutputSampleRate(48_000)
+                    .setAudioRecordErrorCallback(object :
+                            JavaAudioDeviceModule.AudioRecordErrorCallback {
+                            override fun onWebRtcAudioRecordInitError(p0: String?) {
+                                Log.d("AudioTrackCallback", p0 ?: "")
+                            }
+
+                            override fun onWebRtcAudioRecordStartError(
+                                p0: JavaAudioDeviceModule.AudioRecordStartErrorCode?,
+                                p1: String?
+                            ) {
+                                Log.d("AudioTrackCallback", p1 ?: "")
+                            }
+
+                            override fun onWebRtcAudioRecordError(p0: String?) {
+                                Log.d("AudioTrackCallback", p0 ?: "")
+                            }
+                        })
+                    .setAudioTrackErrorCallback(object :
+                            JavaAudioDeviceModule.AudioTrackErrorCallback {
+                            override fun onWebRtcAudioTrackInitError(p0: String?) {
+                                Log.d("AudioTrackCallback", p0 ?: "")
+                            }
+
+                            override fun onWebRtcAudioTrackStartError(
+                                p0: JavaAudioDeviceModule.AudioTrackStartErrorCode?,
+                                p1: String?
+                            ) {
+                                Log.d("AudioTrackCallback", p1 ?: "")
+                            }
+
+                            override fun onWebRtcAudioTrackError(p0: String?) {
+                                Log.d("AudioTrackCallback", p0 ?: "")
+                            }
+                        })
+                    .setAudioRecordStateCallback(object :
+                            JavaAudioDeviceModule.AudioRecordStateCallback {
+                            override fun onWebRtcAudioRecordStart() {
+                            }
+
+                            override fun onWebRtcAudioRecordStop() {
+                            }
+                        })
+                    .setAudioTrackStateCallback(object :
+                            JavaAudioDeviceModule.AudioTrackStateCallback {
+                            override fun onWebRtcAudioTrackStart() {
+                                Log.d("AudioTrackCallback", "Track starting")
+                            }
+
+                            override fun onWebRtcAudioTrackStop() {
+                                Log.d("AudioTrackCallback", "Track stopping")
+                            }
+                        })
                     .createAudioDeviceModule()
             )
             .createPeerConnectionFactory()

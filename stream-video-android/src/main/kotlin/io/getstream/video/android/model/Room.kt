@@ -17,7 +17,9 @@
 package io.getstream.video.android.model
 
 import android.content.Context
+import android.media.AudioDeviceInfo.TYPE_BUILTIN_SPEAKER
 import android.media.AudioManager
+import android.os.Build
 import android.util.Log
 import android.view.View
 import androidx.core.content.getSystemService
@@ -35,6 +37,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
+import org.webrtc.AudioTrack
 import org.webrtc.EglBase
 import org.webrtc.MediaStream
 import org.webrtc.RendererCommon
@@ -50,7 +53,7 @@ public class Room(
 
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
 
-    private val audioHandler: AudioHandler by lazy {
+    internal val audioHandler: AudioHandler by lazy {
         AudioSwitchHandler(context)
     }
 
@@ -82,6 +85,8 @@ public class Room(
     private val audioManager by lazy {
         context.getSystemService<AudioManager>()
     }
+
+    private val remoteAudioTracks = mutableListOf<AudioTrack>()
 
     public var onLocalVideoTrackChange: (org.webrtc.VideoTrack) -> Unit = {}
     public var onStreamAdded: (MediaStream) -> Unit = {}
@@ -131,10 +136,11 @@ public class Room(
     internal fun addStream(mediaStream: MediaStream) {
         if (mediaStream.audioTracks.isNotEmpty()) {
             Log.d("sfuConnectFlow", "AudioTracks received, ${mediaStream.audioTracks}")
-            mediaStream.audioTracks.forEach {
-                it.setEnabled(true)
-                it.setVolume(100.0) // TODO - figure the audio out
+            mediaStream.audioTracks.forEach { track ->
+                track.setEnabled(true)
             }
+
+            remoteAudioTracks.addAll(mediaStream.audioTracks)
 
             updateAudio()
         }
@@ -172,10 +178,16 @@ public class Room(
             if (speaker != null) {
                 switchHandler.selectDevice(speaker)
             }
-
-            audioManager?.mode = AudioManager.MODE_IN_COMMUNICATION
-            audioManager?.isSpeakerphoneOn = true
         }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val devices = audioManager?.availableCommunicationDevices ?: return
+            val speaker = devices.firstOrNull { it.type == TYPE_BUILTIN_SPEAKER } ?: return
+
+            Log.d("EnablingSpeaker", audioManager?.setCommunicationDevice(speaker).toString())
+        }
+        audioManager?.mode = AudioManager.MODE_IN_COMMUNICATION
+        audioManager?.isSpeakerphoneOn = true
     }
 
     private fun replaceTrackIfNeeded(mediaStream: MediaStream, streamId: String?): VideoTrack? {

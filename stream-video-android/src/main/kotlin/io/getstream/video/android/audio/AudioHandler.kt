@@ -20,6 +20,7 @@ import android.content.Context
 import android.media.AudioManager
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 
 public interface AudioHandler {
     /**
@@ -49,7 +50,8 @@ public class AudioSwitchHandler constructor(private val context: Context) : Audi
             handler.post {
                 val switch = AudioSwitch(
                     context = context,
-                    audioFocusChangeListener = onAudioFocusChangeListener ?: defaultOnAudioFocusChangeListener,
+                    audioFocusChangeListener = onAudioFocusChangeListener
+                        ?: defaultOnAudioFocusChangeListener,
                     preferredDeviceList = preferredDeviceList ?: defaultPreferredDeviceList
                 )
                 audioSwitch = switch
@@ -83,7 +85,11 @@ public class AudioSwitchHandler constructor(private val context: Context) : Audi
         }
         private val defaultAudioDeviceChangeListener by lazy(LazyThreadSafetyMode.NONE) {
             object : AudioDeviceChangeListener {
-                override fun invoke(audioDevices: List<AudioDevice>, selectedAudioDevice: AudioDevice?) {
+                override fun invoke(
+                    audioDevices: List<AudioDevice>,
+                    selectedAudioDevice: AudioDevice?
+                ) {
+                    Log.d("AudioChanging", selectedAudioDevice.toString())
                 }
             }
         }
