@@ -30,13 +30,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Button
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Call
@@ -54,8 +57,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.getstream.video.android.audio.AudioDevice
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.CallDetails
+import io.getstream.video.android.compose.ui.components.CallOptions
 import io.getstream.video.android.compose.ui.components.MainStage
 import io.getstream.video.android.model.CallParticipantState
 import io.getstream.video.android.viewmodel.CallViewModel
@@ -71,11 +75,15 @@ internal fun VideoCallContent(
         false
     )
 
+    val isShowingSettings by callViewModel.isShowingSettings.collectAsState(
+        false
+    )
+
     val participantsState by callViewModel.participantsState.collectAsState(initial = emptyList())
 
     BackHandler {
-        if (isShowingParticipantsInfo) {
-            callViewModel.hideParticipants()
+        if (isShowingParticipantsInfo || isShowingSettings) {
+            callViewModel.dismissOptions()
         } else {
             onLeaveCall()
         }
@@ -113,7 +121,7 @@ internal fun VideoCallContent(
                             room = roomState
                         )
 
-                        CallDetails(
+                        CallOptions(
                             modifier = Modifier
                                 .align(Alignment.BottomCenter)
                                 .fillMaxWidth()
@@ -132,7 +140,8 @@ internal fun VideoCallContent(
                                     isEnabled
                                 )
                             },
-                            onCameraFlipped = callViewModel::flipCamera
+                            onCameraFlipped = callViewModel::flipCamera,
+                            onShowSettings = callViewModel::showSettings
                         )
                     }
                 }
@@ -140,6 +149,10 @@ internal fun VideoCallContent(
 
             if (isShowingParticipantsInfo) {
                 ParticipantsInfo(callViewModel, participantsState)
+            }
+
+            if (isShowingSettings) {
+                CallSettingsMenu(callViewModel)
             }
         }
     }
@@ -154,7 +167,7 @@ private fun ParticipantsInfo(
         modifier = Modifier
             .background(color = Color.LightGray.copy(alpha = 0.7f))
             .fillMaxSize()
-            .clickable { callViewModel.hideParticipants() }
+            .clickable { callViewModel.dismissOptions() }
     ) {
         LazyColumn(
             modifier = Modifier
@@ -172,6 +185,60 @@ private fun ParticipantsInfo(
             }
         }
     }
+}
+
+@Composable
+private fun CallSettingsMenu(callViewModel: CallViewModel) {
+    val devices = callViewModel.getAudioDevices()
+
+    Box(
+        modifier = Modifier
+            .background(color = Color.LightGray.copy(alpha = 0.7f))
+            .fillMaxSize()
+            .clickable { callViewModel.dismissOptions() }
+    ) {
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            modifier = Modifier
+                .width(200.dp)
+                .align(Alignment.Center),
+            color = Color.White
+        ) {
+
+            Column(
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+
+                Text(text = "Choose audio device")
+
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentPadding = PaddingValues(horizontal = 6.dp),
+                    verticalArrangement = Arrangement.SpaceAround
+                ) {
+                    items(devices) {
+                        AudioDeviceItem(it) { device ->
+                            callViewModel.selectAudioDevice(device)
+                            callViewModel.dismissOptions()
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AudioDeviceItem(
+    device: AudioDevice,
+    onDeviceSelected: (AudioDevice) -> Unit
+) {
+    Button(
+        modifier = Modifier.fillMaxWidth(),
+        content = { Text(text = device.name) },
+        onClick = { onDeviceSelected(device) }
+    )
 }
 
 @Composable

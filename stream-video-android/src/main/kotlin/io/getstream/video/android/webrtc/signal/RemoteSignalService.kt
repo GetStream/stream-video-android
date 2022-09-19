@@ -17,6 +17,8 @@
 package io.getstream.video.android.webrtc.signal
 
 import retrofit2.http.Body
+import retrofit2.http.Headers
+import retrofit2.http.POST
 import stream.video.sfu.IceCandidateRequest
 import stream.video.sfu.IceCandidateResponse
 import stream.video.sfu.JoinRequest
@@ -28,17 +30,27 @@ import stream.video.sfu.SetPublisherResponse
 import stream.video.sfu.UpdateSubscriptionsRequest
 import stream.video.sfu.UpdateSubscriptionsResponse
 
-public interface SignalService {
+public interface RemoteSignalService : SignalService {
 
-    public suspend fun sendAnswer(
+    @Headers("Content-Type: application/protobuf")
+    @POST("/rpc/twirp/stream.video.sfu.SignalServer/SendAnswer")
+    public override suspend fun sendAnswer(
         @Body answerRequest: SendAnswerRequest,
     ): SendAnswerResponse
 
-    public suspend fun sendIceCandidate(@Body request: IceCandidateRequest): IceCandidateResponse
+    @Headers("Content-Type: application/protobuf")
+    @POST("/rpc/twirp/stream.video.sfu.SignalServer/SendIceCandidate")
+    public override suspend fun sendIceCandidate(@Body request: IceCandidateRequest): IceCandidateResponse
 
-    public suspend fun join(@Body joinRequest: JoinRequest): JoinResponse
+    @Headers("Content-Type: application/protobuf")
+    @POST("/rpc/twirp/stream.video.sfu.SignalServer/Join")
+    public override suspend fun join(@Body joinRequest: JoinRequest): JoinResponse
 
-    public suspend fun setPublisher(@Body request: SetPublisherRequest): SetPublisherResponse
+    @Headers("Content-Type: application/protobuf")
+    @POST("/rpc/twirp/stream.video.sfu.SignalServer/SetPublisher")
+    public override suspend fun setPublisher(@Body request: SetPublisherRequest): SetPublisherResponse
 
-    public suspend fun updateSubscriptions(@Body request: UpdateSubscriptionsRequest): UpdateSubscriptionsResponse
+    @Headers("Content-Type: application/protobuf")
+    @POST("/rpc/twirp/stream.video.sfu.SignalServer/UpdateSubscriptions")
+    public override suspend fun updateSubscriptions(@Body request: UpdateSubscriptionsRequest): UpdateSubscriptionsResponse
 }

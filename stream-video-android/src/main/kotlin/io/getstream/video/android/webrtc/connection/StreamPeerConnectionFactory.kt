@@ -51,7 +51,7 @@ public class StreamPeerConnectionFactory(private val context: Context) {
     }
 
     private val videoEncoderFactory by lazy {
-        val hardwareEncoder = HardwareVideoEncoderFactory(eglBase.eglBaseContext, true, false)
+        val hardwareEncoder = HardwareVideoEncoderFactory(eglBase.eglBaseContext, false, false)
         SimulcastVideoEncoderFactory(hardwareEncoder, SoftwareVideoEncoderFactory())
     }
 
@@ -62,22 +62,13 @@ public class StreamPeerConnectionFactory(private val context: Context) {
         )
 
         PeerConnectionFactory.builder()
-            .setOptions(
-                PeerConnectionFactory.Options().apply {
-                    this.disableEncryption = false
-                    this.disableNetworkMonitor = false
-                }
-            )
             .setVideoDecoderFactory(videoDecoderFactory)
             .setVideoEncoderFactory(videoEncoderFactory)
             .setAudioDeviceModule(
                 JavaAudioDeviceModule
                     .builder(context)
                     .setUseHardwareAcousticEchoCanceler(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
-                    .setUseHardwareNoiseSuppressor(
-                        Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
-                    )
-                    .setOutputSampleRate(48_000)
+                    .setUseHardwareNoiseSuppressor(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
                     .setAudioRecordErrorCallback(object :
                             JavaAudioDeviceModule.AudioRecordErrorCallback {
                             override fun onWebRtcAudioRecordInitError(p0: String?) {
@@ -115,9 +106,11 @@ public class StreamPeerConnectionFactory(private val context: Context) {
                     .setAudioRecordStateCallback(object :
                             JavaAudioDeviceModule.AudioRecordStateCallback {
                             override fun onWebRtcAudioRecordStart() {
+                                Log.d("AudioTrackCallback", "Record start")
                             }
 
                             override fun onWebRtcAudioRecordStop() {
+                                Log.d("AudioTrackCallback", "Record stop")
                             }
                         })
                     .setAudioTrackStateCallback(object :
@@ -274,17 +267,23 @@ public class StreamPeerConnectionFactory(private val context: Context) {
     public fun makeVideoSource(isScreencast: Boolean): VideoSource =
         factory.createVideoSource(isScreencast)
 
-    public fun makeVideoTrack(source: VideoSource): VideoTrack = factory.createVideoTrack(
-        UUID.randomUUID().toString(), source
-    )
+    public fun makeVideoTrack(
+        source: VideoSource,
+        trackId: String = UUID.randomUUID().toString()
+    ): VideoTrack = factory.createVideoTrack(trackId, source)
 
     public fun makeAudioSource(constraints: MediaConstraints = MediaConstraints()): AudioSource =
         factory.createAudioSource(constraints)
 
-    public fun makeAudioTrack(source: AudioSource): AudioTrack =
-        factory.createAudioTrack(UUID.randomUUID().toString(), source)
+    public fun makeAudioTrack(
+        source: AudioSource,
+        trackId: String = UUID.randomUUID().toString()
+    ): AudioTrack =
+        factory.createAudioTrack(trackId, source)
 
-    public fun createLocalMediaStream(): MediaStream {
-        return factory.createLocalMediaStream(UUID.randomUUID().toString())
+    public fun createLocalMediaStream(
+        streamId: String = UUID.randomUUID().toString()
+    ): MediaStream {
+        return factory.createLocalMediaStream(streamId)
     }
 }

@@ -243,6 +243,8 @@ class HomeActivity : AppCompatActivity() {
     }
 
     companion object {
-        fun getIntent(context: Context): Intent = Intent(context, HomeActivity::class.java)
+        fun getIntent(context: Context): Intent = Intent(context, HomeActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
     }
 }

@@ -24,12 +24,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Text
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.getstream.video.android.app.FakeCredentialsProvider
@@ -37,6 +39,7 @@ import io.getstream.video.android.app.VideoApp
 import io.getstream.video.android.app.ui.components.UserList
 import io.getstream.video.android.app.ui.home.HomeActivity
 import io.getstream.video.android.app.utils.getUsers
+import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.pushprovider.firebase.CallNotificationReceiver
 import io.getstream.video.android.pushprovider.firebase.CallNotificationReceiver.Companion.ACTION_CALL
 import stream.video.User
@@ -53,39 +56,57 @@ class LoginActivity : AppCompatActivity() {
         )
 
         setContent {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    modifier = Modifier.padding(4.dp),
-                    text = "Select a user to log in!",
-                    fontSize = 18.sp
-                )
-
-                val loginItems by remember { loginItemsState }
-
-                UserList(
+            VideoTheme {
+                Column(
                     modifier = Modifier.fillMaxWidth(),
-                    userItems = loginItems,
-                    onClick = { credentials ->
-                        val updated = loginItemsState.value.map {
-                            it.copy(isSelected = it.token == credentials.token)
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        modifier = Modifier.padding(4.dp),
+                        text = "Select a user to log in!",
+                        fontSize = 18.sp
+                    )
+
+                    val loginItems by remember { loginItemsState }
+
+                    UserList(
+                        modifier = Modifier.fillMaxWidth(),
+                        userItems = loginItems,
+                        onClick = { credentials ->
+                            val updated = loginItemsState.value.map {
+                                it.copy(isSelected = it.token == credentials.token)
+                            }
+
+                            loginItemsState.value = updated
                         }
+                    )
 
-                        loginItemsState.value = updated
-                    }
-                )
+                    val isDataValid = loginItemsState.value.any { it.isSelected }
 
-                val isDataValid = loginItemsState.value.any { it.isSelected }
+                    Button(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 32.dp),
+                        enabled = isDataValid,
+                        onClick = { logIn() },
+                        content = { Text(text = "Log In") }
+                    )
 
-                Button(
-                    enabled = isDataValid,
-                    onClick = { logIn() },
-                    content = { Text(text = "Log In") }
-                )
+                    Button(
+                        colors = ButtonDefaults.buttonColors(backgroundColor = VideoTheme.colors.infoAccent),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 32.dp),
+                        onClick = { startCustomLogin() },
+                        content = { Text(text = "Custom Log In", color = Color.White) }
+                    )
+                }
             }
         }
+    }
+
+    private fun startCustomLogin() {
+        startActivity(CustomLoginActivity.getIntent(this))
     }
 
     private fun logIn() {
@@ -102,7 +123,6 @@ class LoginActivity : AppCompatActivity() {
                 image_url = selectedUser.image
             )
         )
-        startActivity(HomeActivity.getIntent(this)) // TODO - move back to Home once it's re-implemented
-        finish()
+        startActivity(HomeActivity.getIntent(this))
     }
 }

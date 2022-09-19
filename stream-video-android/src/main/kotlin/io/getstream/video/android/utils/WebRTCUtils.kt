@@ -19,7 +19,7 @@ package io.getstream.video.android.utils
 import org.webrtc.MediaConstraints
 import org.webrtc.PeerConnection
 
-internal fun buildIceServers(): List<PeerConnection.IceServer> {
+internal fun buildLocalIceServers(): List<PeerConnection.IceServer> {
     return listOf(
         PeerConnection.IceServer.builder("turn:openrelay.metered.ca:80")
             .setUsername("openrelayproject")
@@ -63,5 +63,33 @@ internal fun buildMediaConstraints(): MediaConstraints {
                 MediaConstraints.KeyValuePair("OfferToReceiveVideo", "true")
             )
         )
+
+        val items = listOf(
+            MediaConstraints.KeyValuePair(
+                "googEchoCancellation",
+                true.toString()
+            ),
+            MediaConstraints.KeyValuePair(
+                "googAutoGainControl",
+                true.toString()
+            ),
+            MediaConstraints.KeyValuePair(
+                "googHighpassFilter",
+                true.toString()
+            ),
+            MediaConstraints.KeyValuePair(
+                "googNoiseSuppression",
+                true.toString()
+            ),
+            MediaConstraints.KeyValuePair(
+                "googTypingNoiseDetection",
+                true.toString()
+            ),
+        )
+
+        with(optional) {
+            add(MediaConstraints.KeyValuePair("DtlsSrtpKeyAgreement", "true"))
+            addAll(items)
+        }
     }
 }

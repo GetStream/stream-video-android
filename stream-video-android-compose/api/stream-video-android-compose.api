@@ -251,8 +251,8 @@ public final class io/getstream/video/android/compose/ui/IncomingCallActivity$Co
 	public final fun getLaunchIntent (Landroid/content/Context;)Landroid/content/Intent;
 }
 
-public final class io/getstream/video/android/compose/ui/components/CallDetailsKt {
-	public static final fun CallDetails (Lio/getstream/video/android/model/Room;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+public final class io/getstream/video/android/compose/ui/components/CallOptionsKt {
+	public static final fun CallOptions (Lio/getstream/video/android/model/Room;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/CallTopAppbarKt {

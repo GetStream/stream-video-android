@@ -19,6 +19,7 @@ package io.getstream.video.android.viewmodel
 import android.hardware.camera2.CameraMetadata
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import io.getstream.video.android.audio.AudioDevice
 import io.getstream.video.android.client.VideoClient
 import io.getstream.video.android.model.CallParticipant
 import io.getstream.video.android.model.CallParticipantState
@@ -80,6 +81,9 @@ public class CallViewModel(private val videoClient: VideoClient) : ViewModel() {
 
     private val _isShowingParticipantsInfo = MutableStateFlow(false)
     public val isShowingParticipantsInfo: StateFlow<Boolean> = _isShowingParticipantsInfo
+
+    private val _isShowingSettings = MutableStateFlow(false)
+    public val isShowingSettings: StateFlow<Boolean> = _isShowingSettings
 
     public fun init(
         call: Call,
@@ -163,6 +167,10 @@ public class CallViewModel(private val videoClient: VideoClient) : ViewModel() {
         webRTCClient.flipCamera()
     }
 
+    public fun showSettings() {
+        _isShowingSettings.value = true
+    }
+
     /**
      * Attempts to reconnect to the video room, by cleaning the state, disconnecting, canceling any
      * jobs and finally reinitializing.
@@ -192,12 +200,12 @@ public class CallViewModel(private val videoClient: VideoClient) : ViewModel() {
         this._isShowingParticipantsInfo.value = true
     }
 
-    public fun hideParticipants() {
-        this._isShowingParticipantsInfo.value = false
-    }
-
     public fun leaveCall() {
         clearState()
+    }
+
+    public fun getAudioDevices(): List<AudioDevice> {
+        return webRTCClient.getAudioDevices()
     }
 
     private fun clearState() {
@@ -207,5 +215,14 @@ public class CallViewModel(private val videoClient: VideoClient) : ViewModel() {
         videoClient.leaveCall()
         webRTCClient.clear()
         viewModelScope.cancel()
+    }
+
+    public fun dismissOptions() {
+        this._isShowingSettings.value = false
+        this._isShowingParticipantsInfo.value = false
+    }
+
+    public fun selectAudioDevice(device: AudioDevice) {
+        webRTCClient.selectAudioDevice(device)
     }
 }

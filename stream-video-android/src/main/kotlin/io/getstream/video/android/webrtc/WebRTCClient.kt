@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.webrtc
 
+import io.getstream.video.android.audio.AudioDevice
 import io.getstream.video.android.model.Room
 
 public interface WebRTCClient {
@@ -33,4 +34,8 @@ public interface WebRTCClient {
     public fun setMicrophoneEnabled(isEnabled: Boolean)
 
     public fun flipCamera()
+
+    public fun getAudioDevices(): List<AudioDevice>
+
+    public fun selectAudioDevice(device: AudioDevice)
 }

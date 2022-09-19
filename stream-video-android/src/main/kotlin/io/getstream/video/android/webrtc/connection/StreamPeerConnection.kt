@@ -171,6 +171,10 @@ public class StreamPeerConnection(
         setRemoteDescription(SessionDescription(SessionDescription.Type.ANSWER, sdp))
     }
 
+    public fun addLocalStream(mediaStream: MediaStream) {
+        connection.addStream(mediaStream)
+    }
+
     /**
      * Peer connection listeners.
      */

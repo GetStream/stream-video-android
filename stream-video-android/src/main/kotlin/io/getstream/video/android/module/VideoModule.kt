@@ -32,9 +32,10 @@ import io.getstream.video.android.token.CredentialsManager
 import io.getstream.video.android.token.CredentialsManagerImpl
 import io.getstream.video.android.token.CredentialsProvider
 import io.getstream.video.android.webrtc.WebRTCClientImpl
+import io.getstream.video.android.webrtc.signal.LocalSignalService
+import io.getstream.video.android.webrtc.signal.RemoteSignalService
 import io.getstream.video.android.webrtc.signal.SignalClient
 import io.getstream.video.android.webrtc.signal.SignalClientImpl
-import io.getstream.video.android.webrtc.signal.SignalService
 import kotlinx.coroutines.CoroutineScope
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -96,7 +97,13 @@ internal class VideoModule(
     }
 
     private val signalClient: SignalClient by lazy {
-        val service = signalRetrofitClient.create(SignalService::class.java)
+        val targetService = if (REDIRECT_SIGNAL_URL != null) {
+            LocalSignalService::class.java
+        } else {
+            RemoteSignalService::class.java
+        }
+
+        val service = signalRetrofitClient.create(targetService)
 
         SignalClientImpl(service)
     }
@@ -265,12 +272,12 @@ internal class VideoModule(
         private const val BASE_URL = "http://10.0.2.2:26991"
 
         @Suppress("RedundantNullableReturnType")
-        internal val HOST_BASE: String? = null // "sfu2.fra1.gtstrm.com"
+        internal val REDIRECT_SIGNAL_URL: String? = null // "https://6dd4-78-1-28-238.eu.ngrok.io"
 
-        @Suppress("RedundantNullableReturnType")
-        internal val REDIRECT_SIGNAL_URL: String? = "https://76c9-78-1-28-151.eu.ngrok.io"
+        internal const val SIGNAL_HOST_BASE: String =
+            "sfu2.fra1.gtstrm.com" // "sfu2.fra1.gtstrm.com"
 
-        private const val SIGNAL_BASE_URL = "http://10.0.2.2:3031"
+        private const val SIGNAL_BASE_URL = "https://$SIGNAL_HOST_BASE"
 
         /**
          * Used for testing on devices and redirecting from a public realm to localhost.

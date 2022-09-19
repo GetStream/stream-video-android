@@ -25,6 +25,8 @@ import android.media.AudioManager
 import android.os.Build
 import android.util.Log
 import androidx.core.content.getSystemService
+import io.getstream.video.android.audio.AudioDevice
+import io.getstream.video.android.audio.AudioSwitchHandler
 import io.getstream.video.android.dispatchers.DispatcherProvider
 import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.events.ChangePublishQualityEvent
@@ -42,7 +44,7 @@ import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Result
 import io.getstream.video.android.utils.Success
 import io.getstream.video.android.utils.buildConnectionConfiguration
-import io.getstream.video.android.utils.buildIceServers
+import io.getstream.video.android.utils.buildLocalIceServers
 import io.getstream.video.android.utils.buildMediaConstraints
 import io.getstream.video.android.utils.buildRemoteIceServers
 import io.getstream.video.android.utils.onSuccessSuspend
@@ -65,6 +67,7 @@ import org.webrtc.CameraEnumerator
 import org.webrtc.DataChannel
 import org.webrtc.IceCandidate
 import org.webrtc.MediaConstraints
+import org.webrtc.MediaStream
 import org.webrtc.PeerConnection
 import org.webrtc.RtpParameters
 import org.webrtc.SessionDescription
@@ -101,10 +104,10 @@ public class WebRTCClientImpl(
      */
     private val peerConnectionFactory by lazy { StreamPeerConnectionFactory(context) }
     private val iceServers by lazy {
-        if (VideoModule.HOST_BASE != null) {
-            buildRemoteIceServers(VideoModule.HOST_BASE)
+        if (VideoModule.REDIRECT_SIGNAL_URL == null) {
+            buildRemoteIceServers(VideoModule.SIGNAL_HOST_BASE)
         } else {
-            buildIceServers()
+            buildLocalIceServers()
         }
     }
 
@@ -127,6 +130,8 @@ public class WebRTCClientImpl(
             }
         }
     private var localAudioTrack: AudioTrack? = null
+
+    private var localMediaStream: MediaStream? = null
 
     /**
      * Data channels.
@@ -185,6 +190,22 @@ public class WebRTCClientImpl(
 
     override fun flipCamera() {
         (videoCapturer as? Camera2Capturer)?.switchCamera(null)
+    }
+
+    private fun getAudioHandler(): AudioSwitchHandler? {
+        return room?.audioHandler as? AudioSwitchHandler
+    }
+
+    override fun getAudioDevices(): List<AudioDevice> {
+        val handler = getAudioHandler() ?: return emptyList()
+
+        return handler.availableAudioDevices
+    }
+
+    override fun selectAudioDevice(device: AudioDevice) {
+        val handler = getAudioHandler() ?: return
+
+        handler.selectDevice(device)
     }
 
     override fun startCall(sessionId: String, shouldPublish: Boolean): Room {
@@ -402,13 +423,18 @@ public class WebRTCClientImpl(
             manager?.allowedCapturePolicy = ALLOW_CAPTURE_BY_ALL
         }
 
+        val mediaStream = peerConnectionFactory.createLocalMediaStream()
+        localMediaStream = mediaStream
+
         val audioTrack = makeAudioTrack()
         audioTrack.setEnabled(true)
         localAudioTrack = audioTrack
+        localMediaStream?.addTrack(audioTrack)
         Log.d("sfuConnectFlow", "SetupMedia, $audioTrack")
 
         val videoTrack = makeVideoTrack()
         localVideoTrack = videoTrack
+        localMediaStream?.addTrack(videoTrack)
         Log.d("sfuConnectFlow", "SetupMedia, $videoTrack")
 
         if (shouldPublish) {
@@ -582,6 +608,10 @@ public class WebRTCClientImpl(
                 subscriptions[user.id] = dimension
             }
         }
+        if (subscriptions.isEmpty()) {
+            return
+        }
+
         val request = UpdateSubscriptionsRequest(
             session_id = sessionId,
             subscriptions = subscriptions

@@ -33,6 +33,7 @@ import androidx.compose.material.icons.filled.Audiotrack
 import androidx.compose.material.icons.filled.CallEnd
 import androidx.compose.material.icons.filled.Camera
 import androidx.compose.material.icons.filled.Flip
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -44,12 +45,13 @@ import androidx.compose.ui.unit.dp
 import io.getstream.video.android.model.Room
 
 @Composable
-public fun CallDetails(
+public fun CallOptions(
     room: Room,
     onEndCall: () -> Unit,
     onCameraToggled: (Boolean) -> Unit,
     onMicrophoneToggled: (Boolean) -> Unit,
     onCameraFlipped: () -> Unit,
+    onShowSettings: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val participant by room.localParticipant.collectAsState(initial = null)
@@ -122,6 +124,20 @@ public fun CallDetails(
                     .clickable { onCameraFlipped() },
                 tint = Color.White,
                 imageVector = Icons.Default.Flip,
+                contentDescription = null
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Icon(
+                modifier = Modifier
+                    .background(
+                        color = Color.Black,
+                        shape = CircleShape
+                    )
+                    .padding(4.dp)
+                    .clickable { onShowSettings() },
+                tint = Color.White,
+                imageVector = Icons.Default.Settings,
                 contentDescription = null
             )
             Spacer(modifier = Modifier.width(16.dp))
