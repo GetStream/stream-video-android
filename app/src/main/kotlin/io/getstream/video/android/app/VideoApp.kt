@@ -17,6 +17,8 @@
 package io.getstream.video.android.app
 
 import android.app.Application
+import io.getstream.video.android.app.user.UserPreferences
+import io.getstream.video.android.app.user.UserPreferencesImpl
 import io.getstream.video.android.client.VideoClient
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.token.CredentialsProvider
@@ -31,6 +33,12 @@ class VideoApp : Application() {
 
     companion object {
         lateinit var instance: VideoApp
+
+        val userPreferences: UserPreferences by lazy {
+            UserPreferencesImpl(
+                instance.getSharedPreferences(KEY_PREFERENCES, MODE_PRIVATE)
+            )
+        }
 
         lateinit var videoClient: VideoClient
             private set
@@ -53,5 +61,10 @@ class VideoApp : Application() {
 
             return videoClient
         }
+
+        /**
+         * Preferences file name.
+         */
+        private const val KEY_PREFERENCES = "video-prefs"
     }
 }

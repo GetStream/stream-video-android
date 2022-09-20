@@ -1277,6 +1277,7 @@ public final class io/getstream/video/android/model/UserCredentials {
 	public final fun getToken ()Ljava/lang/String;
 	public fun hashCode ()I
 	public final fun isSelected ()Z
+	public final fun isValid ()Z
 	public fun toString ()Ljava/lang/String;
 }
 

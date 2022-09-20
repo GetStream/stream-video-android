@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.model
+package io.getstream.video.android.app.user
 
-public data class UserCredentials(
-    val id: String,
-    val token: String,
-    val name: String,
-    val sfuToken: String,
-    val image: String = "",
-    val isSelected: Boolean = false
-) {
-    public fun isValid(): Boolean {
-        return id.isNotEmpty() && token.isNotEmpty() && sfuToken.isNotEmpty() && name.isNotEmpty()
-    }
+import io.getstream.video.android.model.UserCredentials
+
+interface UserPreferences {
+
+    fun getCachedCredentials(): UserCredentials
+
+    fun storeUserCredentials(userCredentials: UserCredentials)
 }

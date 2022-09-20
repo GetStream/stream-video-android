@@ -86,6 +86,8 @@ class CustomLoginActivity : AppCompatActivity() {
     }
 
     private fun logIn(selectedUser: UserCredentials) {
+        VideoApp.userPreferences.storeUserCredentials(selectedUser)
+
         VideoApp.initializeClient(
             credentialsProvider = FakeCredentialsProvider(
                 userCredentials = selectedUser,

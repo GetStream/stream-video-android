@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,6 +41,7 @@ import io.getstream.video.android.app.ui.components.UserList
 import io.getstream.video.android.app.ui.home.HomeActivity
 import io.getstream.video.android.app.utils.getUsers
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.model.UserCredentials
 import io.getstream.video.android.pushprovider.firebase.CallNotificationReceiver
 import io.getstream.video.android.pushprovider.firebase.CallNotificationReceiver.Companion.ACTION_CALL
 import stream.video.User
@@ -55,53 +57,76 @@ class LoginActivity : AppCompatActivity() {
             IntentFilter(ACTION_CALL)
         )
 
+        checkIfUserLoggedIn()
+
         setContent {
             VideoTheme {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        modifier = Modifier.padding(4.dp),
-                        text = "Select a user to log in!",
-                        fontSize = 18.sp
-                    )
-
-                    val loginItems by remember { loginItemsState }
-
-                    UserList(
-                        modifier = Modifier.fillMaxWidth(),
-                        userItems = loginItems,
-                        onClick = { credentials ->
-                            val updated = loginItemsState.value.map {
-                                it.copy(isSelected = it.token == credentials.token)
-                            }
-
-                            loginItemsState.value = updated
-                        }
-                    )
-
-                    val isDataValid = loginItemsState.value.any { it.isSelected }
-
-                    Button(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 32.dp),
-                        enabled = isDataValid,
-                        onClick = { logIn() },
-                        content = { Text(text = "Log In") }
-                    )
-
-                    Button(
-                        colors = ButtonDefaults.buttonColors(backgroundColor = VideoTheme.colors.infoAccent),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 32.dp),
-                        onClick = { startCustomLogin() },
-                        content = { Text(text = "Custom Log In", color = Color.White) }
-                    )
-                }
+                LoginContent()
             }
+        }
+    }
+
+    private fun checkIfUserLoggedIn() {
+        val preferences = VideoApp.userPreferences
+
+        val credentials = preferences.getCachedCredentials()
+
+        if (credentials.isValid()) {
+            logIn(credentials)
+        }
+    }
+
+    @Composable
+    private fun LoginContent() {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                modifier = Modifier.padding(4.dp),
+                text = "Select a user to log in!",
+                fontSize = 18.sp
+            )
+
+            val loginItems by remember { loginItemsState }
+
+            UserList(
+                modifier = Modifier.fillMaxWidth(),
+                userItems = loginItems,
+                onClick = { credentials ->
+                    val updated = loginItemsState.value.map {
+                        it.copy(isSelected = it.token == credentials.token)
+                    }
+
+                    loginItemsState.value = updated
+                }
+            )
+
+            val isDataValid = loginItemsState.value.any { it.isSelected }
+
+            Button(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 32.dp),
+                enabled = isDataValid,
+                onClick = {
+                    val user = loginItemsState.value.firstOrNull { it.isSelected }
+
+                    if (user != null) {
+                        logIn(user)
+                    }
+                },
+                content = { Text(text = "Log In") }
+            )
+
+            Button(
+                colors = ButtonDefaults.buttonColors(backgroundColor = VideoTheme.colors.infoAccent),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 32.dp),
+                onClick = { startCustomLogin() },
+                content = { Text(text = "Custom Log In", color = Color.White) }
+            )
         }
     }
 
@@ -109,8 +134,8 @@ class LoginActivity : AppCompatActivity() {
         startActivity(CustomLoginActivity.getIntent(this))
     }
 
-    private fun logIn() {
-        val selectedUser = loginItemsState.value.firstOrNull { it.isSelected } ?: return
+    private fun logIn(selectedUser: UserCredentials) {
+        VideoApp.userPreferences.storeUserCredentials(selectedUser)
 
         VideoApp.initializeClient(
             credentialsProvider = FakeCredentialsProvider(
