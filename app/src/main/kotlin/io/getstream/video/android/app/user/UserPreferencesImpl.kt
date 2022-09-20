@@ -48,6 +48,10 @@ class UserPreferencesImpl(
         editor.apply()
     }
 
+    override fun clear() {
+        sharedPreferences.edit().clear().apply()
+    }
+
     internal companion object {
         private const val KEY_ID = "id"
         private const val KEY_TOKEN = "token"

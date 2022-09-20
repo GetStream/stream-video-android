@@ -23,4 +23,6 @@ interface UserPreferences {
     fun getCachedCredentials(): UserCredentials
 
     fun storeUserCredentials(userCredentials: UserCredentials)
+
+    fun clear()
 }

@@ -26,8 +26,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
@@ -48,7 +50,9 @@ import io.getstream.video.android.app.VideoApp
 import io.getstream.video.android.app.model.HomeScreenOption
 import io.getstream.video.android.app.ui.call.CallActivity
 import io.getstream.video.android.app.ui.components.UserList
+import io.getstream.video.android.app.ui.login.LoginActivity
 import io.getstream.video.android.app.utils.getUsers
+import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.IncomingCallActivity
 import io.getstream.video.android.events.CallCreatedEvent
 import io.getstream.video.android.events.VideoEvent
@@ -81,7 +85,9 @@ class HomeActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         VideoApp.videoClient.addSocketListener(socketListener)
         setContent {
-            HomeScreen()
+            VideoTheme {
+                HomeScreen()
+            }
         }
     }
 
@@ -103,8 +109,29 @@ class HomeActivity : AppCompatActivity() {
                 } else {
                     JoinCallContent()
                 }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Button(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 32.dp),
+                    onClick = ::logOut,
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = VideoTheme.colors.errorAccent,
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text(text = "Log Out")
+                }
             }
         }
+    }
+
+    private fun logOut() {
+        VideoApp.userPreferences.clear()
+        startActivity(Intent(this, LoginActivity::class.java))
+        finish()
     }
 
     @Composable
