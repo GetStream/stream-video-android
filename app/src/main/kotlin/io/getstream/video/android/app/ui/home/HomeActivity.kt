@@ -35,6 +35,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
@@ -82,6 +83,8 @@ class HomeActivity : AppCompatActivity() {
         )
 
     private val callIdState: MutableState<String> = mutableStateOf("call:123")
+
+    private val loadingState: MutableState<Boolean> = mutableStateOf(false)
 
     private val socketListener = object : SocketListener {
         override fun onEvent(event: VideoEvent) {
@@ -133,6 +136,14 @@ class HomeActivity : AppCompatActivity() {
                     )
                 ) {
                     Text(text = "Log Out")
+                }
+
+                val isLoading by loadingState
+
+                if (isLoading) {
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    CircularProgressIndicator(modifier = Modifier.align(CenterHorizontally))
                 }
             }
         }
@@ -196,6 +207,8 @@ class HomeActivity : AppCompatActivity() {
 
     private fun joinCall(callId: String, participants: List<String> = emptyList()) {
         lifecycleScope.launch {
+            loadingState.value = true
+
             val result = client.joinCall(
                 "default", // TODO - hardcoded for now
                 id = callId,
@@ -203,11 +216,13 @@ class HomeActivity : AppCompatActivity() {
             )
 
             result.onSuccessSuspend { response ->
+                loadingState.value = false
                 navigateToCall(response.call.call_cid, response.callUrl, response.userToken)
             }
             result.onError {
                 Log.d("Couldn't select server", it.message ?: "")
                 Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
+                loadingState.value = false
             }
         }
     }
