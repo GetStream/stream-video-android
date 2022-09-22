@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package stream.video.coordinator.app_v1;
+
+option go_package = "app_v1";
+
+message App {
+  int64 id = 1;
+  WebhookSettings webhook = 2;
+}
+
+// Keep in sync with stream.config.webhook.AppSettings
+message WebhookSettings {
+  HttpWebhook http = 1;
+  SqsWebhook sqs = 2;
+}
+
+message HttpWebhook {
+  string url = 1;
+}
+
+message SqsWebhook {
+  string url = 1;
+  string key = 2;
+  string secret = 3;
+}

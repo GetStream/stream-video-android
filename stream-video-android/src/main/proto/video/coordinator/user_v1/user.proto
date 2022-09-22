@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package stream.video.coordinator.user_v1;
+
+import "google/protobuf/timestamp.proto";
+import "validate/validate.proto";
+
+option go_package = "user_v1";
+
+message User {
+  string id = 1 [(validate.rules).string.min_len = 1];
+  repeated string teams = 2;
+  string role = 3;
+  bytes custom_json = 4;
+  string name = 5;
+  string image_url = 6;
+
+  // User creation date
+  google.protobuf.Timestamp created_at = 7;
+
+  // User last update date.
+  google.protobuf.Timestamp updated_at = 8;
+}
+
+// A message that is used in User requests to create and modify user data
+message UserInput {
+  // A human-readable name of the user
+  string name = 1;
+  // User role, as defined by permission settings
+  string role = 2;
+  // List of user teams for multi-tenant applications
+  repeated string teams = 3;
+  // A URL that points to a user image
+  string image_url = 4;
+  // A JSON object with custom user information
+  bytes custom_json = 5;
+}

@@ -24,6 +24,8 @@ class FakeCredentialsProvider(
     private val userCredentials: UserCredentials
 ) : CredentialsProvider {
 
+    private var sfuToken: String? = null
+
     override fun loadToken(): String {
         return userCredentials.token
     }
@@ -40,8 +42,12 @@ class FakeCredentialsProvider(
         return apiKey
     }
 
+    override fun setSfuToken(token: String?) {
+        this.sfuToken = token
+    }
+
     override fun getSfuToken(): String {
-        return userCredentials.sfuToken
+        return sfuToken ?: ""
     }
 
     override fun getUserCredentials(): UserCredentials {

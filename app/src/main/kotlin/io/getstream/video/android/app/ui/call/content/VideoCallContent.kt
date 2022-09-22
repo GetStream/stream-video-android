@@ -70,7 +70,6 @@ internal fun VideoCallContent(
     onLeaveCall: () -> Unit
 ) {
     val room by callViewModel.roomState.collectAsState(initial = null)
-    val callState by callViewModel.callState.collectAsState(null)
     val isShowingParticipantsInfo by callViewModel.isShowingParticipantsInfo.collectAsState(
         false
     )
@@ -99,7 +98,7 @@ internal fun VideoCallContent(
 
             Column(modifier = Modifier.fillMaxSize()) {
 
-                CallActionBar(callViewModel, callState?.id ?: "")
+                CallActionBar(callViewModel, "TODO - Call ID") // TODO -
 
                 if (roomState == null) {
                     Box(

@@ -16,17 +16,11 @@
 
 package io.getstream.video.android.socket
 
-import io.getstream.video.android.events.AudioMutedEvent
-import io.getstream.video.android.events.AudioUnmutedEvent
 import io.getstream.video.android.events.CallCreatedEvent
 import io.getstream.video.android.events.HealthCheckEvent
-import io.getstream.video.android.events.ParticipantJoinedEvent
-import io.getstream.video.android.events.ParticipantLeftEvent
 import io.getstream.video.android.events.UnknownEvent
 import io.getstream.video.android.events.VideoEvent
-import io.getstream.video.android.events.VideoStartedEvent
-import io.getstream.video.android.events.VideoStoppedEvent
-import stream.video.WebsocketEvent
+import stream.video.coordinator.client_v1_rpc.WebsocketEvent
 
 internal object EventMapper {
 
@@ -37,37 +31,38 @@ internal object EventMapper {
      * @return [VideoEvent] representation of the data.
      */
     internal fun mapEvent(socketEvent: WebsocketEvent): VideoEvent = when {
-        socketEvent.health_check != null -> with(socketEvent.health_check) {
+        socketEvent.healthcheck != null -> with(socketEvent.healthcheck) {
             HealthCheckEvent(userId = user_id, clientId = client_id)
         }
 
         socketEvent.call_created != null -> with(socketEvent.call_created) {
-            CallCreatedEvent(call!!)
+            CallCreatedEvent(call_cid, call_member_user_ids)
         }
 
-        socketEvent.audio_muted != null -> with(socketEvent.audio_muted) {
-            AudioMutedEvent(user_id ?: "", call!!, all_users ?: false)
-        }
-
-        socketEvent.audio_unmuted != null -> with(socketEvent.audio_unmuted) {
-            AudioUnmutedEvent(user_id, call!!)
-        }
-
-        socketEvent.video_started != null -> with(socketEvent.video_started) {
-            VideoStartedEvent(user_id, call!!)
-        }
-
-        socketEvent.video_stopped != null -> with(socketEvent.video_stopped) {
-            VideoStoppedEvent(user_id, call!!)
-        }
-
-        socketEvent.participant_joined != null -> with(socketEvent.participant_joined) {
-            ParticipantJoinedEvent(participant!!)
-        }
-
-        socketEvent.participant_left != null -> with(socketEvent.participant_left) {
-            ParticipantLeftEvent(participant!!)
-        }
+//        TODO - do we remove these?
+//        socketEvent.audio_muted != null -> with(socketEvent.audio_muted) {
+//            AudioMutedEvent(user_id ?: "", call!!, all_users ?: false)
+//        }
+//
+//        socketEvent.audio_unmuted != null -> with(socketEvent.audio_unmuted) {
+//            AudioUnmutedEvent(user_id, call!!)
+//        }
+//
+//        socketEvent.video_started != null -> with(socketEvent.video_started) {
+//            VideoStartedEvent(user_id, call!!)
+//        }
+//
+//        socketEvent.video_stopped != null -> with(socketEvent.video_stopped) {
+//            VideoStoppedEvent(user_id, call!!)
+//        }
+//
+//        socketEvent.participant_joined != null -> with(socketEvent.participant_joined) {
+//            ParticipantJoinedEvent(participant!!)
+//        }
+//
+//        socketEvent.participant_left != null -> with(socketEvent.participant_left) {
+//            ParticipantLeftEvent(participant!!)
+//        }
 
         else -> UnknownEvent
     }

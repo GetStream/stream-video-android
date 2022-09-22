@@ -18,7 +18,7 @@ package io.getstream.video.android.client.user
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import stream.video.User
+import stream.video.sfu.User
 
 public class UserState {
 

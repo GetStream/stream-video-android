@@ -38,7 +38,8 @@ import io.getstream.video.android.events.SubscriberOfferEvent
 import io.getstream.video.android.model.CallParticipant
 import io.getstream.video.android.model.CallSettings
 import io.getstream.video.android.model.Room
-import io.getstream.video.android.module.VideoModule
+import io.getstream.video.android.module.WebRTCModule.Companion.REDIRECT_SIGNAL_URL
+import io.getstream.video.android.module.WebRTCModule.Companion.SIGNAL_HOST_BASE
 import io.getstream.video.android.token.CredentialsProvider
 import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Result
@@ -104,8 +105,8 @@ public class WebRTCClientImpl(
      */
     private val peerConnectionFactory by lazy { StreamPeerConnectionFactory(context) }
     private val iceServers by lazy {
-        if (VideoModule.REDIRECT_SIGNAL_URL == null) {
-            buildRemoteIceServers(VideoModule.SIGNAL_HOST_BASE)
+        if (REDIRECT_SIGNAL_URL == null) {
+            buildRemoteIceServers(SIGNAL_HOST_BASE)
         } else {
             buildLocalIceServers()
         }

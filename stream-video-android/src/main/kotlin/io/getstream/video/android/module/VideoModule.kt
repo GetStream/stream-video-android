@@ -31,18 +31,12 @@ import io.getstream.video.android.socket.VideoSocketImpl
 import io.getstream.video.android.token.CredentialsManager
 import io.getstream.video.android.token.CredentialsManagerImpl
 import io.getstream.video.android.token.CredentialsProvider
-import io.getstream.video.android.webrtc.WebRTCClientImpl
-import io.getstream.video.android.webrtc.signal.LocalSignalService
-import io.getstream.video.android.webrtc.signal.RemoteSignalService
-import io.getstream.video.android.webrtc.signal.SignalClient
-import io.getstream.video.android.webrtc.signal.SignalClientImpl
 import kotlinx.coroutines.CoroutineScope
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.wire.WireConverterFactory
-import stream.video.User
+import stream.video.sfu.User
 
 /**
  * Serves as an internal DI framework that allows us to cache heavy components reused across the
@@ -52,21 +46,14 @@ import stream.video.User
  * @property credentialsProvider Provider of user-tokens.
  * @property appContext The context of the app, used for Android-based dependencies.
  * @property lifecycle The lifecycle of the process.
- * @property loggingLevel Log level used for all HTTP requests towards the API.
  */
 internal class VideoModule(
     private val user: User,
     private val credentialsProvider: CredentialsProvider,
     private val appContext: Context,
     private val lifecycle: Lifecycle,
-    private val loggingLevel: HttpLoggingInterceptor.Level
+    private val okHttpClient: OkHttpClient
 ) {
-    /**
-     * Cached instance of the HTTP client.
-     */
-    private val okHttpClient: OkHttpClient by lazy {
-        buildOkHttpClient(credentialsProvider)
-    }
 
     /**
      * Cached instance of the Retrofit client that builds API services.
@@ -79,14 +66,6 @@ internal class VideoModule(
             .build()
     }
 
-    private val signalRetrofitClient: Retrofit by lazy {
-        Retrofit.Builder()
-            .client(okHttpClient)
-            .addConverterFactory(WireConverterFactory.create())
-            .baseUrl(REDIRECT_SIGNAL_URL ?: SIGNAL_BASE_URL)
-            .build()
-    }
-
     /**
      * Cached instance of the CallCoordinator service client for API calls.
      */
@@ -94,26 +73,6 @@ internal class VideoModule(
         val service = retrofitClient.create(CallCoordinatorService::class.java)
 
         CallCoordinatorClientImpl(service, credentialsProvider)
-    }
-
-    private val signalClient: SignalClient by lazy {
-        val targetService = if (REDIRECT_SIGNAL_URL != null) {
-            LocalSignalService::class.java
-        } else {
-            RemoteSignalService::class.java
-        }
-
-        val service = signalRetrofitClient.create(targetService)
-
-        SignalClientImpl(service)
-    }
-
-    private val webRTCClient: WebRTCClientImpl by lazy {
-        WebRTCClientImpl(
-            context = appContext,
-            credentialsProvider = credentialsProvider,
-            signalClient = signalClient
-        )
     }
 
     /**
@@ -159,50 +118,12 @@ internal class VideoModule(
     // TODO - build notification handler/provider
 
     /**
-     * Builds the [OkHttpClient] used for all API calls.
-     *
-     * @param credentialsProvider The user-token and API key provider used to attach authorization
-     * headers.
-     * @return [OkHttpClient] that allows us API calls.
-     */
-    private fun buildOkHttpClient(credentialsProvider: CredentialsProvider): OkHttpClient {
-        return OkHttpClient.Builder()
-            .addInterceptor(
-                buildInterceptor(
-                    credentialsProvider = credentialsProvider
-                )
-            )
-            .addInterceptor(
-                HttpLoggingInterceptor().apply {
-                    level = loggingLevel
-                }
-            )
-            .build()
-    }
-
-    /**
      * Builds the HTTP interceptor that adds headers to all API calls.
      *
      * @param credentialsProvider Provider of the user token and API key.
      *
      * @return [Interceptor] which adds headers.
      */
-    private fun buildInterceptor(
-        credentialsProvider: CredentialsProvider
-    ): Interceptor = Interceptor {
-        val original = it.request()
-
-        val token = if (original.url.toString().contains("sfu")) {
-            credentialsProvider.getSfuToken()
-        } else {
-            credentialsProvider.getCachedToken()
-        }
-        val updated = original.newBuilder()
-            .addHeader(HEADER_AUTHORIZATION, token)
-            .build()
-
-        it.proceed(updated)
-    }
 
     /**
      * Public providers used to set up other components.
@@ -220,13 +141,6 @@ internal class VideoModule(
      */
     internal fun callClient(): CallCoordinatorClient {
         return callCoordinatorClient
-    }
-
-    /**
-     * @return The [WebRTCClientImpl] used to communicate to the SFU.
-     */
-    internal fun webRTCClient(): WebRTCClientImpl {
-        return webRTCClient
     }
 
     /**
@@ -252,11 +166,6 @@ internal class VideoModule(
 
     internal companion object {
         /**
-         * Key used to prove authorization to the API.
-         */
-        private const val HEADER_AUTHORIZATION = "authorization"
-
-        /**
          * Used for testing on devices and redirecting from a public realm to localhost.
          *
          * Will only be used if the value is non-null, so if you're able to test locally, just
@@ -264,20 +173,12 @@ internal class VideoModule(
          */
         @Suppress("RedundantNullableReturnType")
         private val REDIRECT_BASE_URL: String? =
-            "https://e65b-83-131-245-5.eu.ngrok.io" // e.g. "https://dc54-83-131-252-51.eu.ngrok.io"
+            "https://38d2-89-172-235-70.eu.ngrok.io" // e.g. "https://dc54-83-131-252-51.eu.ngrok.io"
 
         /**
          * The base URL of the API.
          */
         private const val BASE_URL = "http://10.0.2.2:26991"
-
-        @Suppress("RedundantNullableReturnType")
-        internal val REDIRECT_SIGNAL_URL: String? = null // "https://6dd4-78-1-28-238.eu.ngrok.io"
-
-        internal const val SIGNAL_HOST_BASE: String =
-            "sfu2.fra1.gtstrm.com" // "sfu2.fra1.gtstrm.com"
-
-        private const val SIGNAL_BASE_URL = "https://$SIGNAL_HOST_BASE"
 
         /**
          * Used for testing on devices and redirecting from a public realm to localhost.
@@ -287,7 +188,7 @@ internal class VideoModule(
          */
         @Suppress("RedundantNullableReturnType")
         internal val REDIRECT_PING_URL: String? =
-            "https://ee3c-83-131-245-5.eu.ngrok.io/ping" // "<redirect-url>/ping"
+            "https://ecef-89-172-235-70.eu.ngrok.io/ping" // "<redirect-url>/ping"
 
         /**
          * Used for testing on devices and redirecting from a public realm to localhost.
@@ -297,7 +198,7 @@ internal class VideoModule(
          */
         @Suppress("RedundantNullableReturnType")
         private val REDIRECT_WS_BASE_URL: String? =
-            "ws://7.tcp.eu.ngrok.io:12624" // e.g. "ws://4.tcp.eu.ngrok.io:12265"
+            "ws://4.tcp.eu.ngrok.io:12921" // e.g. "ws://4.tcp.eu.ngrok.io:12265"
         private const val WS_BASE_URL = "ws://localhost:8989/"
     }
 }

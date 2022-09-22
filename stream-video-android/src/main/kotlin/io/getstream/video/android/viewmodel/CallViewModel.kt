@@ -24,6 +24,7 @@ import io.getstream.video.android.client.VideoClient
 import io.getstream.video.android.model.CallParticipant
 import io.getstream.video.android.model.CallParticipantState
 import io.getstream.video.android.model.Room
+import io.getstream.video.android.token.CredentialsProvider
 import io.getstream.video.android.webrtc.WebRTCClient
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
@@ -34,22 +35,17 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import stream.video.Call
+import stream.video.coordinator.call_v1.Call
 import java.util.*
 
-public class CallViewModel(private val videoClient: VideoClient) : ViewModel() {
-
+public class CallViewModel(
+    private val credentialsProvider: CredentialsProvider,
+    private val videoClient: VideoClient,
     private val webRTCClient: WebRTCClient
-        get() = videoClient.webRTCClient
+) : ViewModel() {
 
     private val _roomState: MutableStateFlow<Room?> = MutableStateFlow(null)
     public val roomState: StateFlow<Room?> = _roomState
-
-    private val _urlState: MutableStateFlow<String> = MutableStateFlow("")
-    public val urlState: StateFlow<String> = _urlState
-
-    private val _tokenState: MutableStateFlow<String> = MutableStateFlow("")
-    public val tokenState: StateFlow<String> = _tokenState
 
     private val _callState: MutableStateFlow<Call?> = MutableStateFlow(null)
     public val callState: StateFlow<Call?> = _callState
@@ -85,14 +81,8 @@ public class CallViewModel(private val videoClient: VideoClient) : ViewModel() {
     private val _isShowingSettings = MutableStateFlow(false)
     public val isShowingSettings: StateFlow<Boolean> = _isShowingSettings
 
-    public fun init(
-        call: Call,
-        url: String,
-        token: String
-    ) {
-        this._urlState.value = url
-        this._tokenState.value = token
-        this._callState.value = call
+    public fun init(callId: String) {
+        // this._callState.value = videoClient.getCall(callId) TODO - load details
 
         viewModelScope.launch {
             _isVideoInitialized.value = true
@@ -209,12 +199,12 @@ public class CallViewModel(private val videoClient: VideoClient) : ViewModel() {
     }
 
     private fun clearState() {
+        credentialsProvider.setSfuToken(null)
+        webRTCClient.clear()
+        viewModelScope.cancel()
         val room = _roomState.value ?: return
 
         room.disconnect()
-        videoClient.leaveCall()
-        webRTCClient.clear()
-        viewModelScope.cancel()
     }
 
     public fun dismissOptions() {

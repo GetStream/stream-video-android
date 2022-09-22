@@ -38,9 +38,7 @@ public interface CredentialsProvider {
 
     public fun getCachedApiKey(): String
 
-    /**
-     * TODO - will these tokens become the same as for coordinator.
-     */
+    public fun setSfuToken(token: String?)
 
     public fun getSfuToken(): String
 

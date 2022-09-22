@@ -22,7 +22,7 @@ import io.getstream.video.android.app.user.UserPreferencesImpl
 import io.getstream.video.android.client.VideoClient
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.token.CredentialsProvider
-import stream.video.User
+import stream.video.sfu.User
 
 class VideoApp : Application() {
 
@@ -40,6 +40,9 @@ class VideoApp : Application() {
             )
         }
 
+        lateinit var credentialsProvider: CredentialsProvider
+            private set
+
         lateinit var videoClient: VideoClient
             private set
 
@@ -50,7 +53,9 @@ class VideoApp : Application() {
             credentialsProvider: CredentialsProvider,
             user: User
         ): VideoClient {
-            videoClient = VideoClient
+            this.credentialsProvider = credentialsProvider
+
+            this.videoClient = VideoClient
                 .Builder(
                     appContext = instance,
                     user = user,

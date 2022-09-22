@@ -32,10 +32,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import stream.video.AuthPayload
-import stream.video.Call
-import stream.video.CreateUserRequest
-import stream.video.Healthcheck
+import stream.video.coordinator.call_v1.Call
+import stream.video.coordinator.client_v1_rpc.WebsocketAuthRequest
+import stream.video.coordinator.client_v1_rpc.WebsocketHealthcheck
+import stream.video.coordinator.user_v1.UserInput
 import kotlin.math.pow
 import kotlin.properties.Delegates
 
@@ -81,7 +81,7 @@ internal class VideoSocketImpl(
             override fun check() {
                 (state as? State.Connected)?.let {
                     sendPing(
-                        Healthcheck(
+                        WebsocketHealthcheck(
                             user_id = userState.user.value.id,
                             client_id = clientId,
                             call_type = call?.type ?: "",
@@ -210,8 +210,8 @@ internal class VideoSocketImpl(
         val user = userState.user.value
 
         socket?.authenticate(
-            AuthPayload(
-                user = CreateUserRequest(id = user.id, name = user.name),
+            WebsocketAuthRequest(
+                user = UserInput(name = user.name, image_url = user.image_url, role = user.role),
                 token = credentialsManager.getToken(),
                 api_key = credentialsManager.getApiKey()
             )
@@ -253,7 +253,7 @@ internal class VideoSocketImpl(
         callListeners { listener -> listener.onEvent(event) }
     }
 
-    internal fun sendPing(state: Healthcheck) {
+    internal fun sendPing(state: WebsocketHealthcheck) {
         socket?.ping(state)
     }
 

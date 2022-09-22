@@ -19,6 +19,8 @@ package io.getstream.video.android.app.ui.home
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Arrangement
@@ -46,6 +48,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.app.VideoApp
 import io.getstream.video.android.app.model.HomeScreenOption
 import io.getstream.video.android.app.ui.call.CallActivity
@@ -58,8 +61,15 @@ import io.getstream.video.android.events.CallCreatedEvent
 import io.getstream.video.android.events.VideoEvent
 import io.getstream.video.android.model.UserCredentials
 import io.getstream.video.android.socket.SocketListener
+import io.getstream.video.android.utils.onError
+import io.getstream.video.android.utils.onSuccessSuspend
+import kotlinx.coroutines.launch
 
 class HomeActivity : AppCompatActivity() {
+
+    private val client by lazy {
+        VideoApp.videoClient
+    }
 
     private val selectedOption: MutableState<HomeScreenOption> =
         mutableStateOf(HomeScreenOption.CREATE_CALL)
@@ -149,7 +159,7 @@ class HomeActivity : AppCompatActivity() {
                 .align(CenterHorizontally),
             enabled = isDataValid,
             onClick = {
-                navigateToCall(
+                joinCall(
                     callId = callIdState.value,
                     participants = participantsOptions.value.filter { it.isSelected }.map { it.id }
                 )
@@ -172,11 +182,34 @@ class HomeActivity : AppCompatActivity() {
                 .padding(horizontal = 32.dp)
                 .align(CenterHorizontally),
             enabled = isDataValid,
-            onClick = { navigateToCall(callId = callIdState.value) },
+            onClick = {
+                joinCall(
+                    callId = callIdState.value,
+                    participants = participantsOptions.value.filter { it.isSelected }.map { it.id }
+                )
+            },
             content = {
                 Text(text = "Join call")
             }
         )
+    }
+
+    private fun joinCall(callId: String, participants: List<String> = emptyList()) {
+        lifecycleScope.launch {
+            val result = client.joinCall(
+                "default", // TODO - hardcoded for now
+                id = callId,
+                participantIds = participants.toList()
+            )
+
+            result.onSuccessSuspend { response ->
+                navigateToCall(response.call.call_cid, response.callUrl, response.userToken)
+            }
+            result.onError {
+                Log.d("Couldn't select server", it.message ?: "")
+                Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     @Composable
@@ -248,9 +281,10 @@ class HomeActivity : AppCompatActivity() {
 
     private fun navigateToCall(
         callId: String,
-        participants: List<String> = emptyList()
+        signalUrl: String,
+        userToken: String
     ) {
-        val intent = CallActivity.getIntent(this, callId, participants)
+        val intent = CallActivity.getIntent(this, callId, signalUrl, userToken)
         startActivity(intent)
     }
 

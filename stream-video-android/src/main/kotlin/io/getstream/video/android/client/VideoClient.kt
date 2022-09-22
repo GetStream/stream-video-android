@@ -24,6 +24,7 @@ import io.getstream.video.android.client.user.UserState
 import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.model.JoinCallResponse
+import io.getstream.video.android.module.HttpModule
 import io.getstream.video.android.module.VideoModule
 import io.getstream.video.android.socket.SocketListener
 import io.getstream.video.android.socket.SocketState
@@ -33,25 +34,24 @@ import io.getstream.video.android.token.CredentialsProvider
 import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Result
 import io.getstream.video.android.utils.Success
-import io.getstream.video.android.utils.enrichSocketURL
+import io.getstream.video.android.utils.enrichSFUURL
 import io.getstream.video.android.utils.getLatencyMeasurements
-import io.getstream.video.android.webrtc.WebRTCClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.logging.HttpLoggingInterceptor
-import stream.video.CreateCallRequest
-import stream.video.CreateCallResponse
-import stream.video.Device
-import stream.video.Edge
-import stream.video.JoinCallRequest
-import stream.video.Latency
-import stream.video.SelectEdgeServerRequest
-import stream.video.SelectEdgeServerResponse
-import stream.video.SendEventRequest
-import stream.video.User
-import stream.video.UserEventType
+import stream.video.coordinator.client_v1_rpc.CreateCallInput
+import stream.video.coordinator.client_v1_rpc.CreateCallRequest
+import stream.video.coordinator.client_v1_rpc.CreateCallResponse
+import stream.video.coordinator.client_v1_rpc.GetCallEdgeServerRequest
+import stream.video.coordinator.client_v1_rpc.GetCallEdgeServerResponse
+import stream.video.coordinator.client_v1_rpc.JoinCallRequest
+import stream.video.coordinator.client_v1_rpc.MemberInput
+import stream.video.coordinator.edge_v1.Latency
+import stream.video.coordinator.edge_v1.LatencyMeasurements
+import stream.video.coordinator.push_v1.Device
+import stream.video.sfu.User
 
 /**
  * The core client that handles all API and socket communication and acts as a central place to
@@ -71,8 +71,7 @@ public class VideoClient(
     private val socket: VideoSocket,
     private val socketStateService: SocketStateService,
     private val userState: UserState,
-    private val callCoordinatorClient: CallCoordinatorClient,
-    public val webRTCClient: WebRTCClient
+    private val callCoordinatorClient: CallCoordinatorClient
 ) {
 
     /**
@@ -100,7 +99,7 @@ public class VideoClient(
      * Start region - API calls.
      */
 
-    public suspend fun registerDevice(device: Device) {
+    public fun registerDevice(device: Device) {
     }
 
     /**
@@ -111,11 +110,15 @@ public class VideoClient(
         id: String,
         participantIds: List<String> = emptyList()
     ): Result<JoinCallResponse> {
-        val createCallResult = callCoordinatorClient.createCall(
+        val createCallResult = callCoordinatorClient.getOrCreateCall(
             CreateCallRequest(
                 type = type,
                 id = id,
-                participant_ids = participantIds
+                input = CreateCallInput(
+                    members = participantIds.associateWith {
+                        MemberInput(role = "admin")
+                    }
+                )
             )
         )
 
@@ -130,10 +133,10 @@ public class VideoClient(
      * and choosing the correct one.
      *
      * @param response Information about the newly created call.
-     * @return [Result] wrapper around [SelectEdgeServerResponse] once the correct server is chosen.
+     * @return [Result] wrapper around [JoinCallResponse] once the correct server is chosen.
      */
     private suspend fun joinCreatedCall(response: CreateCallResponse): Result<JoinCallResponse> {
-        val call = response.call!!
+        val call = response.call?.call!!
 
         val callResult = callCoordinatorClient.joinCall(
             JoinCallRequest(
@@ -146,26 +149,28 @@ public class VideoClient(
             val data = callResult.data
 
             return try {
-                val latencyResults = data.edges.associate {
-                    it.latency_url to measureLatency(it)
-                }
+                val latencyResults = data.latency_claim?.endpoints?.associate {
+                    it.url to measureLatency(it.url)
+                } ?: emptyMap()
 
                 val selectEdgeServerResult = selectEdgeServer(
-                    request = SelectEdgeServerRequest(
-                        call_id = call.id,
-                        latency_by_edge = latencyResults
+                    request = GetCallEdgeServerRequest(
+                        call_cid = call.call_cid,
+                        measurements = LatencyMeasurements(measurements = latencyResults)
                     )
                 )
 
                 when (selectEdgeServerResult) {
                     is Success -> {
                         socket.updateCallState(call)
+                        val credentials = selectEdgeServerResult.data.credentials
+                        val url = credentials?.server?.url
 
                         Success(
                             JoinCallResponse(
                                 call = call,
-                                callUrl = enrichSocketURL(selectEdgeServerResult.data.edge_server?.url!!),
-                                userToken = selectEdgeServerResult.data.token
+                                callUrl = enrichSFUURL(url!!),
+                                userToken = credentials.token
                             )
                         )
                     }
@@ -182,11 +187,11 @@ public class VideoClient(
     /**
      * Measures and prepares the latency which describes how much time it takes to ping the server.
      *
-     * @param edge The edge we want to measure.
+     * @param edgeUrl The edge we want to measure.
      * @return [Latency] which contains measurements from ping connections.
      */
-    private suspend fun measureLatency(edge: Edge): Latency = withContext(Dispatchers.IO) {
-        val measurements = getLatencyMeasurements(edge.latency_url)
+    private suspend fun measureLatency(edgeUrl: String): Latency = withContext(Dispatchers.IO) {
+        val measurements = getLatencyMeasurements(edgeUrl)
 
         Latency(measurements_seconds = measurements)
     }
@@ -194,26 +199,26 @@ public class VideoClient(
     /**
      * @see CallCoordinatorClient.selectEdgeServer for details.
      */
-    public suspend fun selectEdgeServer(request: SelectEdgeServerRequest): Result<SelectEdgeServerResponse> {
+    public suspend fun selectEdgeServer(request: GetCallEdgeServerRequest): Result<GetCallEdgeServerResponse> {
         return callCoordinatorClient.selectEdgeServer(request)
     }
 
     /**
-     * @see CallCoordinatorClient.sendUserEvent for details.
+     * @see CallCoordinatorClient.sendUserEvent for details. TODO - fix this
      */
-    public suspend fun sendUserEvent(userEventType: UserEventType): Result<Boolean> {
-        val call = socket.getCallState()
-            ?: return Failure(error = VideoError(message = "No call is active!"))
-
-        return callCoordinatorClient.sendUserEvent(
-            SendEventRequest(
-                user_id = userState.user.value.id,
-                call_id = call.id,
-                call_type = call.type,
-                event_type = userEventType
-            )
-        )
-    }
+//    public suspend fun sendUserEvent(userEventType: UserEventType): Result<Boolean> {
+//        val call = socket.getCallState()
+//            ?: return Failure(error = VideoError(message = "No call is active!"))
+//
+//        return callCoordinatorClient.sendUserEvent(
+//            SendEventRequest(
+//                user_id = userState.user.value.id,
+//                call_id = call.id,
+//                call_type = call.type,
+//                event_type = userEventType
+//            )
+//        )
+//    }
 
     /**
      * End region - API calls.
@@ -297,12 +302,14 @@ public class VideoClient(
 
             val lifecycle = ProcessLifecycleOwner.get().lifecycle
 
+            val httpModule = HttpModule.getOrCreate(loggingLevel, credentialsProvider)
+
             val videoModule = VideoModule(
                 user = user,
                 credentialsProvider = credentialsProvider,
                 appContext = appContext,
                 lifecycle = lifecycle,
-                loggingLevel = loggingLevel
+                okHttpClient = httpModule.okHttpClient
             )
 
             return VideoClient(
@@ -313,8 +320,7 @@ public class VideoClient(
                 socket = videoModule.socket(),
                 socketStateService = SocketStateService(),
                 userState = videoModule.userState(),
-                callCoordinatorClient = videoModule.callClient(),
-                webRTCClient = videoModule.webRTCClient()
+                callCoordinatorClient = videoModule.callClient()
             )
         }
     }

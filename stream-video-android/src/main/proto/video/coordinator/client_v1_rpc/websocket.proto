@@ -1,0 +1,76 @@
+syntax = "proto3";
+
+package stream.video.coordinator.client_v1_rpc;
+
+import "video/coordinator/push_v1/push.proto";
+import "video/coordinator/call_v1/call.proto";
+import "video/coordinator/user_v1/user.proto";
+import "video/coordinator/event_v1/event.proto";
+
+option go_package = "client_v1_rpc";
+
+// WebsocketEvent only includes events that are sent to the client via websocket connection
+// This is not an exhaustive list of events, since not all of them are sent via websocket
+message WebsocketEvent {
+  // All users mentioned in the event payload, indexed by User.id
+  map<string, user_v1.User> users = 1;
+  // All calls mentioned in the event payload, indexed by Call.call_cid
+  map<string, call_v1.Call> calls = 2;
+  // All calls envelopes for calls mentioned in the event payload, indexed by Call.call_cid
+  // The envelope may not contain some of the entities (like, members), but the message is guaranteed to be present if there's a matching Call in calls map
+  map<string, call_v1.CallDetails> call_details = 3;
+
+  // reserved field numbers for more entities
+  reserved 4 to 19;
+
+  oneof event {
+    WebsocketHealthcheck healthcheck = 20;
+    event_v1.CallCreated call_created = 21;
+    event_v1.CallUpdated call_updated = 22;
+    event_v1.CallEnded call_ended = 23;
+    event_v1.CallDeleted call_deleted = 24;
+    event_v1.CallRinging call_ringing = 25;
+    event_v1.UserUpdated user_updated = 26;
+    event_v1.BroadcastStarted broadcast_started = 27;
+    event_v1.BroadcastEnded broadcast_ended = 28;
+    event_v1.RecordingStarted recording_started = 29;
+    event_v1.RecordingStopped recording_stopped = 30;
+    event_v1.CallMembersUpdated call_members_updated = 31;
+    event_v1.CallMembersDeleted call_members_deleted = 32;
+  }
+}
+
+// WebsocketClientEvent contains all events that client is allowed to send to the server
+// When clients sends any of mentioned events, they should be wrapped into ClientEvent
+message WebsocketClientEvent {
+  oneof event {
+    WebsocketHealthcheck healthcheck = 1;
+    WebsocketAuthRequest auth_request = 2;
+  }
+}
+
+// A payload that is sent through websocket to authenticate a connection
+message WebsocketAuthRequest {
+  // Application API key that matches a secret is used to sign a token
+  string api_key = 1;
+  // A client JWT token
+  string token = 2;
+  // Optional UserInput. When present, it is used to create or update user information.
+  // If contains some changes, a permission check will be performed
+  stream.video.coordinator.user_v1.UserInput user = 3;
+  // Optional DeviceInput. When present, a device will be created for a user. If device
+  // already exists, nothing will happen
+  stream.video.coordinator.push_v1.DeviceInput device = 4;
+}
+
+// Healthckeck is sent back and forth between websocket client and server
+// When server sends a healthcheck, it is wrapped into WebsocketEvent
+// When client sends healthcheck, it should be wrapped into WebsocketClientEvent
+message WebsocketHealthcheck {
+  string user_id = 1;
+  string client_id = 2;
+  string call_type = 3;
+  string call_id = 4;
+  bool video = 5;
+  bool audio = 6;
+}

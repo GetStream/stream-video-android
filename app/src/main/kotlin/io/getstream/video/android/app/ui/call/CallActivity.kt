@@ -41,14 +41,22 @@ import io.getstream.video.android.ui.ParticipantContentView
 import io.getstream.video.android.ui.ParticipantItemView
 import io.getstream.video.android.viewmodel.CallViewModel
 import io.getstream.video.android.viewmodel.CallViewModelFactory
+import io.getstream.video.android.webrtc.WebRTCClient
+import io.getstream.video.android.webrtc.builder.WebRTCClientBuilder
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
-import stream.video.Call
 
 class CallActivity : AppCompatActivity() {
 
-    private val factory by lazy { CallViewModelFactory(VideoApp.videoClient) }
+    private val factory by lazy {
+        CallViewModelFactory(
+            VideoApp.credentialsProvider,
+            VideoApp.videoClient,
+            buildWebRTCClient()
+        )
+    }
+
     private val callViewModel by viewModels<CallViewModel>(factoryProducer = { factory })
 
     @RequiresApi(M)
@@ -118,6 +126,7 @@ class CallActivity : AppCompatActivity() {
     }
 
     private fun leaveCall() {
+        VideoApp.videoClient.leaveCall()
         callViewModel.leaveCall()
         finish()
     }
@@ -144,25 +153,26 @@ class CallActivity : AppCompatActivity() {
         val isInitialized = callViewModel.isVideoInitialized.value
         if (isInitialized) return
 
-        val client = VideoApp.videoClient
-        val callId = intent.getStringExtra(KEY_CALL_ID) ?: return
-        val participants = intent.getStringArrayExtra(KEY_PARTICIPANTS) ?: emptyArray()
+        val callId = requireNotNull(intent.getStringExtra(KEY_CALL_ID))
 
-        lifecycleScope.launch {
-//            val result = client.joinCall(
-//                CallType.VIDEO.type,
-//                id = callId,
-//                participantIds = participants.toList()
-//            )
-//
-//            result.onSuccessSuspend { (call, url, token) ->
-            callViewModel.init(Call(id = callId), "", "") //  since CallCoordinator isn't ready
-//            }
+        callViewModel.init(callId)
+    }
 
-//            result.onError {
-//                Log.d("Couldn't select server", it.message ?: "")
-//            }
-        }
+    private fun buildWebRTCClient(): WebRTCClient {
+        val credentialsProvider = VideoApp.credentialsProvider
+
+        val signalUrl = requireNotNull(intent.getStringExtra(KEY_SIGNAL_URL))
+        val userToken = requireNotNull(intent.getStringExtra(KEY_USER_TOKEN))
+
+        credentialsProvider.setSfuToken(userToken)
+
+        val module = WebRTCClientBuilder(
+            this,
+            VideoApp.credentialsProvider,
+            signalUrl
+        )
+
+        return module.build()
     }
 
     @RequiresApi(M)
@@ -222,16 +232,19 @@ class CallActivity : AppCompatActivity() {
 
     companion object {
         private const val KEY_CALL_ID = "call_id"
-        private const val KEY_PARTICIPANTS = "participants"
+        private const val KEY_SIGNAL_URL = "participants"
+        private const val KEY_USER_TOKEN = "user_token"
 
         internal fun getIntent(
             context: Context,
-            callId: String,
-            participants: List<String>
+            callCid: String,
+            signalUrl: String,
+            userToken: String,
         ): Intent {
             return Intent(context, CallActivity::class.java).apply {
-                putExtra(KEY_CALL_ID, callId)
-                putExtra(KEY_PARTICIPANTS, participants.toTypedArray())
+                putExtra(KEY_CALL_ID, callCid)
+                putExtra(KEY_SIGNAL_URL, signalUrl)
+                putExtra(KEY_USER_TOKEN, userToken)
             }
         }
     }

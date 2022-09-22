@@ -19,7 +19,7 @@ package io.getstream.video.android.socket
 import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.events.ConnectedEvent
 import io.getstream.video.android.events.VideoEvent
-import stream.video.Call
+import stream.video.coordinator.call_v1.Call
 
 public interface VideoSocket {
 

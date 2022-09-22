@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.utils.initials
 import io.getstream.video.android.model.CallParticipant
-import stream.video.User
+import stream.video.coordinator.user_v1.User
 
 /**
  * Represents the [User] avatar that's shown on the Messages screen or in headers of DMs.

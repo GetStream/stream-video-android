@@ -43,7 +43,7 @@ import io.getstream.video.android.app.ui.home.HomeActivity
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.model.UserCredentials
 import io.getstream.video.android.utils.generateSFUToken
-import stream.video.User
+import stream.video.sfu.User
 
 class CustomLoginActivity : AppCompatActivity() {
 
@@ -112,8 +112,7 @@ class CustomLoginActivity : AppCompatActivity() {
         return UserCredentials(
             id = userId,
             name = userName,
-            token = token,
-            sfuToken = token
+            token = token
         )
     }
 

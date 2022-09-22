@@ -29,7 +29,6 @@ class UserPreferencesImpl(
             token = sharedPreferences.getString(KEY_TOKEN, "") ?: "",
             image = sharedPreferences.getString(KEY_IMAGE, "") ?: "",
             name = sharedPreferences.getString(KEY_NAME, "") ?: "",
-            sfuToken = sharedPreferences.getString(KEY_SFU_TOKEN, "") ?: ""
         )
     }
 
@@ -40,10 +39,6 @@ class UserPreferencesImpl(
         editor.putString(KEY_TOKEN, userCredentials.token)
         editor.putString(KEY_IMAGE, userCredentials.image)
         editor.putString(KEY_NAME, userCredentials.name)
-        editor.putString(
-            KEY_SFU_TOKEN,
-            userCredentials.sfuToken
-        ) // TODO - we might remove this once the flow is impl
 
         editor.apply()
     }
@@ -57,6 +52,5 @@ class UserPreferencesImpl(
         private const val KEY_TOKEN = "token"
         private const val KEY_IMAGE = "image"
         private const val KEY_NAME = "name"
-        private const val KEY_SFU_TOKEN = "sfu_token"
     }
 }

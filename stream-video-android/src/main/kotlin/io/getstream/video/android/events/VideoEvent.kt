@@ -16,8 +16,8 @@
 
 package io.getstream.video.android.events
 
-import stream.video.Call
-import stream.video.Participant
+import stream.video.coordinator.participant_v1.Participant
+import stream.video.sfu.Call
 
 /**
  * Represents the events coming in from the socket.
@@ -43,7 +43,8 @@ public data class HealthCheckEvent(
  * Sent when someone creates a call and invites another person to participate.
  */
 public data class CallCreatedEvent(
-    val call: Call
+    val callId: String,
+    val callMembersIds: List<String>
 ) : VideoEvent()
 
 /**

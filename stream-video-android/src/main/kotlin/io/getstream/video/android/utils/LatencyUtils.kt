@@ -27,8 +27,8 @@ import java.net.URL
  * @param latencyUrl The URL of the server where we ping a connection.
  * @return A [List] of [Float] values representing the portion of a second it takes to connect.
  */
-public fun getLatencyMeasurements(latencyUrl: String): List<Float> {
-    val measurements = mutableListOf<Float>()
+public fun getLatencyMeasurements(latencyUrl: String): List<Double> {
+    val measurements = mutableListOf<Double>()
 
     /**
      * Used for setting up testing on devices.
@@ -49,7 +49,7 @@ public fun getLatencyMeasurements(latencyUrl: String): List<Float> {
 
         val end = System.currentTimeMillis()
 
-        val seconds = (end - start) / 1000f
+        val seconds = (end - start) / 1000.0
         measurements.add(seconds)
     }
 

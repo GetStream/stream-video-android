@@ -24,7 +24,7 @@ import io.getstream.video.android.events.HealthCheckEvent
 import okhttp3.Response
 import okhttp3.WebSocket
 import okio.ByteString
-import stream.video.WebsocketEvent
+import stream.video.coordinator.client_v1_rpc.WebsocketEvent
 
 @Suppress("TooManyFunctions")
 internal class EventsParser(
