@@ -51,7 +51,7 @@ internal class WebRTCModule(
 
     companion object {
         @Suppress("RedundantNullableReturnType")
-        val REDIRECT_SIGNAL_URL: String? = null // "https://6dd4-78-1-28-238.eu.ngrok.io"
+        val REDIRECT_SIGNAL_URL: String? = "https://cabf-78-1-60-5.eu.ngrok.io" // "https://6dd4-78-1-28-238.eu.ngrok.io"
 
         internal const val SIGNAL_HOST_BASE: String =
             "sfu2.fra1.gtstrm.com" // "sfu2.fra1.gtstrm.com"

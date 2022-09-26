@@ -68,7 +68,6 @@ import org.webrtc.CameraEnumerator
 import org.webrtc.DataChannel
 import org.webrtc.IceCandidate
 import org.webrtc.MediaConstraints
-import org.webrtc.MediaStream
 import org.webrtc.PeerConnection
 import org.webrtc.RtpParameters
 import org.webrtc.SessionDescription
@@ -131,8 +130,6 @@ public class WebRTCClientImpl(
             }
         }
     private var localAudioTrack: AudioTrack? = null
-
-    private var localMediaStream: MediaStream? = null
 
     /**
      * Data channels.
@@ -424,18 +421,13 @@ public class WebRTCClientImpl(
             manager?.allowedCapturePolicy = ALLOW_CAPTURE_BY_ALL
         }
 
-        val mediaStream = peerConnectionFactory.createLocalMediaStream()
-        localMediaStream = mediaStream
-
         val audioTrack = makeAudioTrack()
         audioTrack.setEnabled(true)
         localAudioTrack = audioTrack
-        localMediaStream?.addTrack(audioTrack)
         Log.d("sfuConnectFlow", "SetupMedia, $audioTrack")
 
         val videoTrack = makeVideoTrack()
         localVideoTrack = videoTrack
-        localMediaStream?.addTrack(videoTrack)
         Log.d("sfuConnectFlow", "SetupMedia, $videoTrack")
 
         if (shouldPublish) {

@@ -35,10 +35,10 @@ public fun ParticipantsContent(
     modifier: Modifier = Modifier,
     onRender: (View) -> Unit = {}
 ) {
-    val participants by room.callParticipants.collectAsState(emptyList())
-    val otherParticipants = participants.filter { !it.isLocal }
+    val roomParticipants by room.callParticipants.collectAsState(emptyList())
+    val participants = roomParticipants.distinctBy { it.id }
 
-    when (otherParticipants.size) {
+    when (participants.size) {
         0 -> {
             Box(modifier = modifier) {
                 Icon(
@@ -51,12 +51,12 @@ public fun ParticipantsContent(
         1 -> ParticipantItem(
             modifier = modifier,
             room = room,
-            participant = otherParticipants.first(),
+            participant = participants.first(),
             onRender = onRender
         )
         2 -> {
-            val firstParticipant = otherParticipants[0]
-            val secondParticipant = otherParticipants[1]
+            val firstParticipant = participants.first { !it.isLocal }
+            val secondParticipant = participants.first { it.isLocal }
 
             Column(modifier) {
                 ParticipantItem(
@@ -74,9 +74,11 @@ public fun ParticipantsContent(
             }
         }
         3 -> {
-            val firstParticipant = otherParticipants[0]
-            val secondParticipant = otherParticipants[1]
-            val thirdParticipant = otherParticipants[2]
+            val nonLocal = participants.filter { !it.isLocal }
+
+            val firstParticipant = nonLocal[0]
+            val secondParticipant = nonLocal[1]
+            val thirdParticipant = participants.first { it.isLocal }
 
             Column(modifier) {
                 ParticipantItem(
@@ -105,10 +107,12 @@ public fun ParticipantsContent(
             /**
              * More than three participants, we only show the first four.
              */
-            val firstParticipant = otherParticipants[0]
-            val secondParticipant = otherParticipants[1]
-            val thirdParticipant = otherParticipants[2]
-            val fourthParticipant = otherParticipants[3]
+            val nonLocal = participants.filter { !it.isLocal }.take(3)
+
+            val firstParticipant = nonLocal[0]
+            val secondParticipant = nonLocal[1]
+            val thirdParticipant = nonLocal[2]
+            val fourthParticipant = participants.first { it.isLocal }
 
             Column(modifier) {
                 Row(modifier = Modifier.weight(1f)) {

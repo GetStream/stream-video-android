@@ -56,7 +56,7 @@ public fun VideoRenderer(
     AndroidView(
         factory = { context ->
             SurfaceViewRenderer(context).apply {
-                this.setZOrderOnTop(false) // TODO - test if we can add the Surface View to the Android View after it's ready
+                this.setZOrderOnTop(false)
                 this.setZOrderMediaOverlay(false)
                 room.initRenderer(this, videoTrack.streamId, onRender)
                 setupVideoIfNeeded(boundVideoTrack, videoTrack, this)

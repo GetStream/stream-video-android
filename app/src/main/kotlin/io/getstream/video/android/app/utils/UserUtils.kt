@@ -24,19 +24,19 @@ fun getUsers(): List<UserCredentials> {
             id = "filip",
             name = "Filip",
             image = "https://avatars.githubusercontent.com/u/17215808?v=4",
-            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci9maWxpcCIsImV4cCI6MTY2MzgzNjczOSwiaWF0IjoxNjYzNzUwMzM5LCJ1c2VyX2lkIjoiZmlsaXAifQ.RWUl_J0nLnEa7dDiiJBFJ76CyC6sraHfyOyrknPU0nA"
+            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci9maWxpcCIsImlhdCI6MTY2Mzg0NzIyMiwidXNlcl9pZCI6ImZpbGlwIn0.JukNises1LAqh7KIVrY1L2Qk8hjZI0Rrx2hVWH1ypQ4"
         ),
         UserCredentials(
             id = "thierry",
             name = "Thierry",
             image = "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Mile_Kitic_from_BISO0675.jpg/300px-Mile_Kitic_from_BISO0675.jpg",
-            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci90aGllcnJ5IiwiZXhwIjoxNjYzODM2OTQwLCJpYXQiOjE2NjM3NTA1NDAsInVzZXJfaWQiOiJ0aGllcnJ5In0.Dld5KbGYv0UuotGRp426GNv97SziSydzyE2DmGj3c_U"
+            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci90aGllcnJ5IiwiaWF0IjoxNjYzODQ3MjA0LCJ1c2VyX2lkIjoidGhpZXJyeSJ9.uNL9PhAjl5GrodPITO89YLamyymPzzwUf7qsye_bHCA"
         ),
         UserCredentials(
             id = "martin",
             name = "Martin",
             image = "https://upload.wikimedia.org/wikipedia/commons/d/da/Toma_Zdravkovi%C4%87.jpg",
-            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci9tYXJ0aW4iLCJleHAiOjE2NjM4MzY5NTcsImlhdCI6MTY2Mzc1MDU1NywidXNlcl9pZCI6Im1hcnRpbiJ9.uFPhRUHYzzkhTRxZ424hrnyHJj9HS_2Jcg7QIqsyzyE"
+            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci9tYXJ0aW4iLCJpYXQiOjE2NjM4NDcxNzcsInVzZXJfaWQiOiJtYXJ0aW4ifQ.Eu6c5zowVOzmWpvs0fR3uecPxs8QxylbNYFHcQHkceA"
         )
     )
 }

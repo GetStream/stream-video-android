@@ -173,7 +173,7 @@ internal class VideoModule(
          */
         @Suppress("RedundantNullableReturnType")
         private val REDIRECT_BASE_URL: String? =
-            "https://38d2-89-172-235-70.eu.ngrok.io" // e.g. "https://dc54-83-131-252-51.eu.ngrok.io"
+            "https://8cb9-78-1-60-5.eu.ngrok.io" // e.g. "https://dc54-83-131-252-51.eu.ngrok.io"
 
         /**
          * The base URL of the API.
@@ -188,7 +188,7 @@ internal class VideoModule(
          */
         @Suppress("RedundantNullableReturnType")
         internal val REDIRECT_PING_URL: String? =
-            "https://ecef-89-172-235-70.eu.ngrok.io/ping" // "<redirect-url>/ping"
+            "https://1aaf-78-1-60-5.eu.ngrok.io/ping" // "<redirect-url>/ping"
 
         /**
          * Used for testing on devices and redirecting from a public realm to localhost.
@@ -198,7 +198,7 @@ internal class VideoModule(
          */
         @Suppress("RedundantNullableReturnType")
         private val REDIRECT_WS_BASE_URL: String? =
-            "ws://4.tcp.eu.ngrok.io:12921" // e.g. "ws://4.tcp.eu.ngrok.io:12265"
+            "ws://2.tcp.eu.ngrok.io:12120/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect" // e.g. "ws://4.tcp.eu.ngrok.io:12265"
         private const val WS_BASE_URL = "ws://localhost:8989/"
     }
 }

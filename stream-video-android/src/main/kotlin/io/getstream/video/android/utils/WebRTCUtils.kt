@@ -48,9 +48,12 @@ internal fun buildRemoteIceServers(hostUrl: String): List<PeerConnection.IceServ
     )
 }
 
-internal fun buildConnectionConfiguration(iceServers: List<PeerConnection.IceServer>): PeerConnection.RTCConfiguration {
+internal fun buildConnectionConfiguration(
+    iceServers: List<PeerConnection.IceServer>,
+    sdpSemantics: PeerConnection.SdpSemantics = PeerConnection.SdpSemantics.UNIFIED_PLAN
+): PeerConnection.RTCConfiguration {
     return PeerConnection.RTCConfiguration(emptyList()).apply {
-        this.sdpSemantics = PeerConnection.SdpSemantics.UNIFIED_PLAN
+        this.sdpSemantics = sdpSemantics
         this.iceServers = iceServers
     }
 }
