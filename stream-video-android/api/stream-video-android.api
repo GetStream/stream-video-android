@@ -663,6 +663,12 @@ public final class io/getstream/video/android/StreamCalls$DefaultImpls {
 	public static synthetic fun createCall$default (Lio/getstream/video/android/StreamCalls;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 }
 
+public final class io/getstream/video/android/StreamCallsBuilder {
+	public fun <init> (Landroid/content/Context;Lio/getstream/video/android/token/CredentialsProvider;Lio/getstream/video/android/logging/LoggingLevel;)V
+	public synthetic fun <init> (Landroid/content/Context;Lio/getstream/video/android/token/CredentialsProvider;Lio/getstream/video/android/logging/LoggingLevel;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun build ()Lio/getstream/video/android/StreamCalls;
+}
+
 public final class io/getstream/video/android/StreamCallsImpl : io/getstream/video/android/StreamCalls {
 	public fun <init> (Landroid/content/Context;Landroidx/lifecycle/Lifecycle;Lio/getstream/video/android/logging/LoggingLevel;Lio/getstream/video/android/client/CallClient;Lio/getstream/video/android/token/CredentialsProvider;Lio/getstream/video/android/socket/VideoSocket;Lio/getstream/video/android/socket/SocketStateService;Lio/getstream/video/android/client/user/UserState;)V
 	public fun addSocketListener (Lio/getstream/video/android/socket/SocketListener;)V
@@ -680,12 +686,6 @@ public final class io/getstream/video/android/StreamCallsImpl : io/getstream/vid
 	public fun setCameraEnabled (Z)V
 	public fun setMicrophoneEnabled (Z)V
 	public fun startCapturingLocalVideo (I)V
-}
-
-public final class io/getstream/video/android/StreamCallsImpl$Builder {
-	public fun <init> (Landroid/content/Context;Lio/getstream/video/android/token/CredentialsProvider;Lio/getstream/video/android/logging/LoggingLevel;)V
-	public synthetic fun <init> (Landroid/content/Context;Lio/getstream/video/android/token/CredentialsProvider;Lio/getstream/video/android/logging/LoggingLevel;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun build ()Lio/getstream/video/android/StreamCalls;
 }
 
 public abstract interface class io/getstream/video/android/api/CallCoordinatorService {
