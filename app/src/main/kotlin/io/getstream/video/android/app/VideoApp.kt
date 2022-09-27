@@ -18,7 +18,7 @@ package io.getstream.video.android.app
 
 import android.app.Application
 import io.getstream.video.android.StreamCalls
-import io.getstream.video.android.StreamCallsImpl
+import io.getstream.video.android.StreamCallsBuilder
 import io.getstream.video.android.app.user.UserPreferences
 import io.getstream.video.android.app.user.UserPreferencesImpl
 import io.getstream.video.android.logging.LoggingLevel
@@ -55,7 +55,7 @@ class VideoApp : Application() {
         ): StreamCalls {
             this.credentialsProvider = credentialsProvider
 
-            this.streamCalls = StreamCallsImpl.Builder(
+            this.streamCalls = StreamCallsBuilder(
                 context = instance,
                 credentialsProvider = credentialsProvider,
                 loggingLevel = loggingLevel

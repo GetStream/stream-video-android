@@ -18,7 +18,6 @@ package io.getstream.video.android
 
 import android.content.Context
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.ProcessLifecycleOwner
 import io.getstream.video.android.audio.AudioDevice
 import io.getstream.video.android.client.CallClient
 import io.getstream.video.android.client.LifecycleHandler
@@ -30,7 +29,6 @@ import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.domain.CallMetadata
 import io.getstream.video.android.model.domain.JoinedCall
 import io.getstream.video.android.model.domain.User
-import io.getstream.video.android.module.CallsModule
 import io.getstream.video.android.socket.SocketListener
 import io.getstream.video.android.socket.SocketState
 import io.getstream.video.android.socket.SocketStateService
@@ -200,44 +198,5 @@ public class StreamCallsImpl(
                 "Cannot connect to a call without a WebRTC Client. " +
                     "Make sure to initialize the client first, using `createCallClient`"
             )
-    }
-
-    public class Builder(
-        private val context: Context,
-        private val credentialsProvider: CredentialsProvider,
-        private val loggingLevel: LoggingLevel = LoggingLevel.NONE
-    ) {
-
-        public fun build(): StreamCalls {
-            val lifecycle = ProcessLifecycleOwner.get().lifecycle
-
-            val module = CallsModule(
-                appContext = context,
-                credentialsProvider = credentialsProvider
-            )
-
-            val socket = module.socket()
-            val userState = module.userState()
-
-            val callClient = CallClient.Builder(
-                appContext = context,
-                credentialsProvider = credentialsProvider,
-                loggingLevel = loggingLevel,
-                userState = userState,
-                socket = socket,
-                lifecycle = lifecycle
-            )
-
-            return StreamCallsImpl(
-                context = context,
-                loggingLevel = loggingLevel,
-                callClient = callClient.build(),
-                credentialsProvider = credentialsProvider,
-                lifecycle = lifecycle,
-                socket = socket,
-                socketStateService = module.socketStateService(),
-                userState = userState
-            )
-        }
     }
 }
