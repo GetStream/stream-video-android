@@ -19,7 +19,7 @@ package io.getstream.video.android.ui
 import android.content.Context
 import android.util.AttributeSet
 import android.view.View
-import io.getstream.video.android.model.Room
+import io.getstream.video.android.model.Call
 import org.webrtc.SurfaceViewRenderer
 import org.webrtc.VideoTrack
 
@@ -43,8 +43,8 @@ public class ParticipantItemView : SurfaceViewRenderer {
         this.track = null
     }
 
-    public fun initialize(room: Room, streamId: String, onRender: (View) -> Unit = {}) {
-        room.initRenderer(this, streamId, onRender)
+    public fun initialize(call: Call, streamId: String, onRender: (View) -> Unit = {}) {
+        call.initRenderer(this, streamId, onRender)
         this.isInitialized = true
     }
 }

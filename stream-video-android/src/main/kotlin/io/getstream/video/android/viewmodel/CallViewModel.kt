@@ -19,13 +19,12 @@ package io.getstream.video.android.viewmodel
 import android.hardware.camera2.CameraMetadata
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import io.getstream.video.android.StreamCalls
 import io.getstream.video.android.audio.AudioDevice
-import io.getstream.video.android.client.VideoClient
+import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.CallParticipant
 import io.getstream.video.android.model.CallParticipantState
-import io.getstream.video.android.model.Room
 import io.getstream.video.android.token.CredentialsProvider
-import io.getstream.video.android.webrtc.WebRTCClient
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,19 +34,15 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import stream.video.coordinator.call_v1.Call
 import java.util.*
 
 public class CallViewModel(
-    private val credentialsProvider: CredentialsProvider,
-    private val videoClient: VideoClient,
-    private val webRTCClient: WebRTCClient
+    private val streamCalls: StreamCalls,
+    private val credentialsProvider: CredentialsProvider
 ) : ViewModel() {
 
-    private val _roomState: MutableStateFlow<Room?> = MutableStateFlow(null)
-    public val roomState: StateFlow<Room?> = _roomState
-
-    private val _callState: MutableStateFlow<Call?> = MutableStateFlow(null)
+    private val _callState: MutableStateFlow<Call?> =
+        MutableStateFlow(null)
     public val callState: StateFlow<Call?> = _callState
 
     private var _isVideoInitialized: MutableStateFlow<Boolean> = MutableStateFlow(false)
@@ -60,17 +55,17 @@ public class CallViewModel(
     public val isMicrophoneEnabled: Flow<Boolean> = _isMicrophoneEnabled
 
     public val participantList: Flow<List<CallParticipant>> =
-        roomState.filterNotNull().flatMapLatest { it.callParticipants }
+        callState.filterNotNull().flatMapLatest { it.callParticipants }
 
     public val participantsState: Flow<List<CallParticipantState>> =
-        roomState.filterNotNull().flatMapLatest { it.callParticipantState }
+        callState.filterNotNull().flatMapLatest { it.callParticipantState }
 
     public val activeSpeakers: Flow<List<CallParticipant>> = participantList.map { list ->
         list.filter { participant -> participant.hasAudio }
     }
 
     public val localParticipant: Flow<CallParticipant> =
-        roomState.filterNotNull().flatMapLatest { it.localParticipant }
+        callState.filterNotNull().flatMapLatest { it.localParticipant }
 
     private val _primarySpeaker = MutableStateFlow<CallParticipant?>(null)
     public val primarySpeaker: StateFlow<CallParticipant?> = _primarySpeaker
@@ -81,8 +76,10 @@ public class CallViewModel(
     private val _isShowingSettings = MutableStateFlow(false)
     public val isShowingSettings: StateFlow<Boolean> = _isShowingSettings
 
-    public fun init(callId: String) {
+    public fun init(callId: String, sfuUrl: String, userToken: String) {
         // this._callState.value = videoClient.getCall(callId) TODO - load details
+
+        streamCalls.createCallClient(sfuUrl, userToken, credentialsProvider)
 
         viewModelScope.launch {
             _isVideoInitialized.value = true
@@ -99,12 +96,12 @@ public class CallViewModel(
                 }
         }
 
-        val room = webRTCClient.joinCall(UUID.randomUUID().toString(), true)
+        val call = streamCalls.connectToCall(UUID.randomUUID().toString())
 
-        room.onLocalVideoTrackChange = {
-            webRTCClient.startCapturingLocalVideo(CameraMetadata.LENS_FACING_FRONT)
+        call.onLocalVideoTrackChange = {
+            streamCalls.startCapturingLocalVideo(CameraMetadata.LENS_FACING_FRONT)
         }
-        _roomState.value = room
+        _callState.value = call
     }
 
     private fun handlePrimarySpeaker(
@@ -143,18 +140,18 @@ public class CallViewModel(
     }
 
     public fun toggleCamera(enabled: Boolean) {
-        webRTCClient.setCameraEnabled(enabled)
+        streamCalls.setCameraEnabled(enabled)
     }
 
     public fun toggleMicrophone(enabled: Boolean) {
-        webRTCClient.setMicrophoneEnabled(enabled)
+        streamCalls.setMicrophoneEnabled(enabled)
     }
 
     /**
      * Flips the camera for the current participant if possible.
      */
     public fun flipCamera() {
-        webRTCClient.flipCamera()
+        streamCalls.flipCamera()
     }
 
     public fun showSettings() {
@@ -195,14 +192,13 @@ public class CallViewModel(
     }
 
     public fun getAudioDevices(): List<AudioDevice> {
-        return webRTCClient.getAudioDevices()
+        return streamCalls.getAudioDevices()
     }
 
     private fun clearState() {
-        credentialsProvider.setSfuToken(null)
-        webRTCClient.clear()
+        streamCalls.leaveCall()
         viewModelScope.cancel()
-        val room = _roomState.value ?: return
+        val room = _callState.value ?: return
 
         room.disconnect()
     }
@@ -213,6 +209,6 @@ public class CallViewModel(
     }
 
     public fun selectAudioDevice(device: AudioDevice) {
-        webRTCClient.selectAudioDevice(device)
+        streamCalls.selectAudioDevice(device)
     }
 }

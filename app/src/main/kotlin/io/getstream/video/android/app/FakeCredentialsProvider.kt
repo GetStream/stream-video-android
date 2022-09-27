@@ -17,6 +17,7 @@
 package io.getstream.video.android.app
 
 import io.getstream.video.android.model.UserCredentials
+import io.getstream.video.android.model.domain.User
 import io.getstream.video.android.token.CredentialsProvider
 
 class FakeCredentialsProvider(
@@ -50,7 +51,7 @@ class FakeCredentialsProvider(
         return sfuToken ?: ""
     }
 
-    override fun getUserCredentials(): UserCredentials {
-        return userCredentials
+    override fun getUserCredentials(): User {
+        return userCredentials.toUser()
     }
 }

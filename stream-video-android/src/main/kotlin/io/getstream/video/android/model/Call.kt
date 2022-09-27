@@ -30,8 +30,6 @@ import io.getstream.video.android.events.SfuParticipantJoinedEvent
 import io.getstream.video.android.events.SfuParticipantLeftEvent
 import io.getstream.video.android.token.CredentialsProvider
 import io.getstream.video.android.utils.updateValue
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -44,14 +42,12 @@ import org.webrtc.RendererCommon
 import org.webrtc.SurfaceViewRenderer
 import stream.video.sfu.CallState
 
-public class Room(
+public class Call(
     private val context: Context,
     public val sessionId: String,
     private val credentialsProvider: CredentialsProvider,
     private val eglBase: EglBase,
 ) {
-
-    private val coroutineScope = CoroutineScope(Dispatchers.Main)
 
     internal val audioHandler: AudioHandler by lazy {
         AudioSwitchHandler(context)

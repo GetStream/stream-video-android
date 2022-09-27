@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.token
 
-import io.getstream.video.android.model.UserCredentials
+import io.getstream.video.android.model.domain.User
 
 /**
  * Exposes a way to build a token provided that connects to custom implementation for
@@ -42,5 +42,5 @@ public interface CredentialsProvider {
 
     public fun getSfuToken(): String
 
-    public fun getUserCredentials(): UserCredentials
+    public fun getUserCredentials(): User
 }

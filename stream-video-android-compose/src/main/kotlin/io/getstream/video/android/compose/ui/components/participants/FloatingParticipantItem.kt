@@ -33,12 +33,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
+import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.CallParticipant
-import io.getstream.video.android.model.Room
 
 @Composable
 public fun FloatingParticipantItem(
-    room: Room,
+    call: Call,
     callParticipant: CallParticipant,
     modifier: Modifier = Modifier,
     onRender: (View) -> Unit = {}
@@ -52,7 +52,7 @@ public fun FloatingParticipantItem(
         if (videoTrack != null) {
             VideoRenderer(
                 modifier = Modifier.fillMaxSize(),
-                room = room,
+                call = call,
                 videoTrack = videoTrack,
                 onRender = {
                     it.elevation = 8f

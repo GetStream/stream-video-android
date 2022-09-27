@@ -41,8 +41,6 @@ import io.getstream.video.android.ui.ParticipantContentView
 import io.getstream.video.android.ui.ParticipantItemView
 import io.getstream.video.android.viewmodel.CallViewModel
 import io.getstream.video.android.viewmodel.CallViewModelFactory
-import io.getstream.video.android.webrtc.WebRTCClient
-import io.getstream.video.android.webrtc.builder.WebRTCClientBuilder
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
@@ -50,11 +48,7 @@ import kotlinx.coroutines.launch
 class CallActivity : AppCompatActivity() {
 
     private val factory by lazy {
-        CallViewModelFactory(
-            VideoApp.credentialsProvider,
-            VideoApp.videoClient,
-            buildWebRTCClient()
-        )
+        CallViewModelFactory(VideoApp.streamCalls, VideoApp.credentialsProvider)
     }
 
     private val callViewModel by viewModels<CallViewModel>(factoryProducer = { factory })
@@ -93,7 +87,7 @@ class CallActivity : AppCompatActivity() {
         lifecycleScope.launch {
             val view = findViewById<ParticipantContentView>(R.id.participantContent)
 
-            callViewModel.roomState.filterNotNull().collectLatest { room ->
+            callViewModel.callState.filterNotNull().collectLatest { room ->
                 Log.d("RoomState", room.toString())
                 room.callParticipants.collectLatest { participants ->
                     Log.d("RoomState", participants.toString())
@@ -105,7 +99,7 @@ class CallActivity : AppCompatActivity() {
         lifecycleScope.launch {
             val view = findViewById<ParticipantItemView>(R.id.floatingParticipantView)
 
-            callViewModel.roomState.filterNotNull().collectLatest { room ->
+            callViewModel.callState.filterNotNull().collectLatest { room ->
                 room.localParticipant.collectLatest { participant ->
                     val track = participant.track
                     val video = track?.video
@@ -126,7 +120,6 @@ class CallActivity : AppCompatActivity() {
     }
 
     private fun leaveCall() {
-        VideoApp.videoClient.leaveCall()
         callViewModel.leaveCall()
         finish()
     }
@@ -153,26 +146,11 @@ class CallActivity : AppCompatActivity() {
         val isInitialized = callViewModel.isVideoInitialized.value
         if (isInitialized) return
 
+        val userToken = requireNotNull(intent.getStringExtra(KEY_USER_TOKEN))
+        val sfuUrl = requireNotNull(intent.getStringExtra(KEY_SFU_URL))
         val callId = requireNotNull(intent.getStringExtra(KEY_CALL_ID))
 
-        callViewModel.init(callId)
-    }
-
-    private fun buildWebRTCClient(): WebRTCClient {
-        val credentialsProvider = VideoApp.credentialsProvider
-
-        val signalUrl = requireNotNull(intent.getStringExtra(KEY_SIGNAL_URL))
-        val userToken = requireNotNull(intent.getStringExtra(KEY_USER_TOKEN))
-
-        credentialsProvider.setSfuToken(userToken)
-
-        val module = WebRTCClientBuilder(
-            this,
-            VideoApp.credentialsProvider,
-            signalUrl
-        )
-
-        return module.build()
+        callViewModel.init(callId, sfuUrl, userToken)
     }
 
     @RequiresApi(M)
@@ -232,7 +210,7 @@ class CallActivity : AppCompatActivity() {
 
     companion object {
         private const val KEY_CALL_ID = "call_id"
-        private const val KEY_SIGNAL_URL = "participants"
+        private const val KEY_SFU_URL = "signal_url"
         private const val KEY_USER_TOKEN = "user_token"
 
         internal fun getIntent(
@@ -243,7 +221,7 @@ class CallActivity : AppCompatActivity() {
         ): Intent {
             return Intent(context, CallActivity::class.java).apply {
                 putExtra(KEY_CALL_ID, callCid)
-                putExtra(KEY_SIGNAL_URL, signalUrl)
+                putExtra(KEY_SFU_URL, signalUrl)
                 putExtra(KEY_USER_TOKEN, userToken)
             }
         }

@@ -14,26 +14,13 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.webrtc
+package io.getstream.video.android.model.domain
 
-import io.getstream.video.android.audio.AudioDevice
-import io.getstream.video.android.model.Call
+import kotlinx.serialization.Serializable
 
-internal interface WebRTCClient {
-
-    fun clear()
-
-    fun connectToCall(sessionId: String, autoPublish: Boolean): Call
-
-    fun startCapturingLocalVideo(position: Int)
-
-    fun setCameraEnabled(isEnabled: Boolean)
-
-    fun setMicrophoneEnabled(isEnabled: Boolean)
-
-    fun flipCamera()
-
-    fun getAudioDevices(): List<AudioDevice>
-
-    fun selectAudioDevice(device: AudioDevice)
-}
+@Serializable
+public data class JoinedCall(
+    val call: CallMetadata,
+    val callUrl: String,
+    val userToken: String
+)

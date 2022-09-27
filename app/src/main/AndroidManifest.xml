@@ -24,13 +24,9 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ui.login.CustomLoginActivity" />
-
         <activity android:name=".ui.home.HomeActivity" />
 
         <activity android:name=".ui.call.CallActivity" />
-
-        <activity android:name=".ui.test.SfuTestActivity" />
     </application>
 
 </manifest>

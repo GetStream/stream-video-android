@@ -22,12 +22,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
+import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.CallParticipant
-import io.getstream.video.android.model.Room
 
 @Composable
 public fun ParticipantItem(
-    room: Room,
+    call: Call,
     participant: CallParticipant,
     modifier: Modifier = Modifier,
     onRender: (View) -> Unit = {}
@@ -37,7 +37,7 @@ public fun ParticipantItem(
     if (track != null && track.video.enabled()) {
         VideoRenderer(
             modifier = modifier,
-            room = room,
+            call = call,
             videoTrack = track,
             onRender = onRender
         )

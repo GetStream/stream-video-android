@@ -17,26 +17,18 @@
 package io.getstream.video.android.module
 
 import android.content.Context
-import android.net.ConnectivityManager
 import androidx.lifecycle.Lifecycle
 import io.getstream.video.android.api.CallCoordinatorService
 import io.getstream.video.android.client.coordinator.CallCoordinatorClient
 import io.getstream.video.android.client.coordinator.CallCoordinatorClientImpl
-import io.getstream.video.android.client.user.UserState
 import io.getstream.video.android.dispatchers.DispatcherProvider
-import io.getstream.video.android.network.NetworkStateProvider
-import io.getstream.video.android.socket.SocketFactory
-import io.getstream.video.android.socket.VideoSocket
-import io.getstream.video.android.socket.VideoSocketImpl
-import io.getstream.video.android.token.CredentialsManager
-import io.getstream.video.android.token.CredentialsManagerImpl
+import io.getstream.video.android.model.domain.User
 import io.getstream.video.android.token.CredentialsProvider
 import kotlinx.coroutines.CoroutineScope
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.wire.WireConverterFactory
-import stream.video.sfu.User
 
 /**
  * Serves as an internal DI framework that allows us to cache heavy components reused across the
@@ -47,7 +39,7 @@ import stream.video.sfu.User
  * @property appContext The context of the app, used for Android-based dependencies.
  * @property lifecycle The lifecycle of the process.
  */
-internal class VideoModule(
+internal class CallClientModule(
     private val user: User,
     private val credentialsProvider: CredentialsProvider,
     private val appContext: Context,
@@ -80,41 +72,6 @@ internal class VideoModule(
      */
     private val scope = CoroutineScope(DispatcherProvider.IO)
 
-    /**
-     * User state that provides the information about the current user.
-     */
-    private val userState: UserState by lazy {
-        UserState().apply {
-            setUser(this@VideoModule.user)
-        }
-    }
-
-    /**
-     * Cached user token manager.
-     */
-    private val credentialsManager: CredentialsManager by lazy {
-        CredentialsManagerImpl().apply {
-            setCredentialsProvider(credentialsProvider)
-        }
-    }
-
-    /**
-     * Factory for providing sockets based on the connected user.
-     */
-    private val socketFactory: SocketFactory by lazy {
-        SocketFactory()
-    }
-
-    /**
-     * Provider that handles connectivity and listens to state changes, exposing them to listeners.
-     */
-    private val networkStateProvider: NetworkStateProvider by lazy {
-        NetworkStateProvider(
-            connectivityManager = appContext
-                .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        )
-    }
-
     // TODO - build notification handler/provider
 
     /**
@@ -139,29 +96,8 @@ internal class VideoModule(
     /**
      * @return The [CallCoordinatorClient] used to communicate to the API.
      */
-    internal fun callClient(): CallCoordinatorClient {
+    internal fun callCoordinatorClient(): CallCoordinatorClient {
         return callCoordinatorClient
-    }
-
-    /**
-     * @return The WebSocket handler that is used to connect to different calls.
-     */
-    internal fun socket(): VideoSocket {
-        return VideoSocketImpl(
-            wssUrl = REDIRECT_WS_BASE_URL ?: WS_BASE_URL,
-            credentialsManager = credentialsManager,
-            socketFactory = socketFactory,
-            networkStateProvider = networkStateProvider,
-            userState = userState,
-            coroutineScope = scope
-        )
-    }
-
-    /**
-     * @return The [UserState] that serves us information about the currently logged in user.
-     */
-    internal fun userState(): UserState {
-        return userState
     }
 
     internal companion object {
@@ -173,7 +109,7 @@ internal class VideoModule(
          */
         @Suppress("RedundantNullableReturnType")
         private val REDIRECT_BASE_URL: String? =
-            "https://8cb9-78-1-60-5.eu.ngrok.io" // e.g. "https://dc54-83-131-252-51.eu.ngrok.io"
+            "https://da56-93-140-102-35.eu.ngrok.io" // e.g. "https://dc54-83-131-252-51.eu.ngrok.io"
 
         /**
          * The base URL of the API.
@@ -188,17 +124,6 @@ internal class VideoModule(
          */
         @Suppress("RedundantNullableReturnType")
         internal val REDIRECT_PING_URL: String? =
-            "https://1aaf-78-1-60-5.eu.ngrok.io/ping" // "<redirect-url>/ping"
-
-        /**
-         * Used for testing on devices and redirecting from a public realm to localhost.
-         *
-         * Will only be used if the value is non-null, so if you're able to test locally, just
-         * leave it as-is.
-         */
-        @Suppress("RedundantNullableReturnType")
-        private val REDIRECT_WS_BASE_URL: String? =
-            "ws://2.tcp.eu.ngrok.io:12120/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect" // e.g. "ws://4.tcp.eu.ngrok.io:12265"
-        private const val WS_BASE_URL = "ws://localhost:8989/"
+            "https://7a9d-93-140-102-35.eu.ngrok.io/ping" // "<redirect-url>/ping"
     }
 }

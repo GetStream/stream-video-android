@@ -17,12 +17,12 @@
 package io.getstream.video.android.app
 
 import android.app.Application
+import io.getstream.video.android.StreamCalls
+import io.getstream.video.android.StreamCallsImpl
 import io.getstream.video.android.app.user.UserPreferences
 import io.getstream.video.android.app.user.UserPreferencesImpl
-import io.getstream.video.android.client.VideoClient
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.token.CredentialsProvider
-import stream.video.sfu.User
 
 class VideoApp : Application() {
 
@@ -43,28 +43,25 @@ class VideoApp : Application() {
         lateinit var credentialsProvider: CredentialsProvider
             private set
 
-        lateinit var videoClient: VideoClient
+        lateinit var streamCalls: StreamCalls
             private set
 
         /**
-         * Sets up and returns the [videoClient] required to connect to the API.
+         * Sets up and returns the [streamCalls] required to connect to the API.
          */
-        fun initializeClient(
+        fun initializeController(
             credentialsProvider: CredentialsProvider,
-            user: User
-        ): VideoClient {
+            loggingLevel: LoggingLevel
+        ): StreamCalls {
             this.credentialsProvider = credentialsProvider
 
-            this.videoClient = VideoClient
-                .Builder(
-                    appContext = instance,
-                    user = user,
-                    credentialsProvider = credentialsProvider
-                )
-                .loggingLevel(LoggingLevel.BODY)
-                .build()
+            this.streamCalls = StreamCallsImpl.Builder(
+                context = instance,
+                credentialsProvider = credentialsProvider,
+                loggingLevel = loggingLevel
+            ).build()
 
-            return videoClient
+            return streamCalls
         }
 
         /**

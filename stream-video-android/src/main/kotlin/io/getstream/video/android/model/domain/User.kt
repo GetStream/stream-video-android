@@ -14,31 +14,13 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.model
+package io.getstream.video.android.model.domain
 
-import io.getstream.video.android.model.domain.User
-
-// TODO - internal sample app, clean up once full auth/login is set up
-public data class UserCredentials(
+public data class User(
     val id: String,
     val role: String,
-    val token: String,
     val name: String,
-    val image: String = "",
-    val isSelected: Boolean = false
-) {
-    public fun isValid(): Boolean {
-        return id.isNotEmpty() && token.isNotEmpty() && name.isNotEmpty()
-    }
-
-    public fun toUser(): User {
-        return User(
-            id = id,
-            role = role,
-            name = name,
-            imageUrl = image,
-            teams = emptyList(),
-            extraData = emptyMap()
-        )
-    }
-}
+    val imageUrl: String?,
+    val teams: List<String>,
+    val extraData: Map<String, String>
+)

@@ -112,7 +112,7 @@ internal class CallCoordinatorClientImpl(
 
     /**
      * Sends a user-based event to the API to notify if we've changed something in the state of the
-     * call. The events can be any of the [stream.video.UserEventType].
+     * call.
      *
      * @param sendEventRequest The request holding information about the event type and the call.
      * @return a [Result] wrapper if the call succeeded or not.

@@ -17,7 +17,7 @@
 package io.getstream.video.android.webrtc.builder
 
 import android.content.Context
-import io.getstream.video.android.client.VideoClient
+import io.getstream.video.android.client.CallClient
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.module.HttpModule
 import io.getstream.video.android.module.WebRTCModule
@@ -26,7 +26,7 @@ import io.getstream.video.android.webrtc.WebRTCClient
 import io.getstream.video.android.webrtc.WebRTCClientImpl
 import okhttp3.logging.HttpLoggingInterceptor
 
-public class WebRTCClientBuilder(
+internal class WebRTCClientBuilder(
     private val context: Context,
     private val credentialsProvider: CredentialsProvider,
     private val signalUrl: String
@@ -39,17 +39,17 @@ public class WebRTCClientBuilder(
      *
      * @param loggingLevel The level of information to log.
      */
-    public fun loggingLevel(loggingLevel: LoggingLevel): WebRTCClientBuilder {
+    fun loggingLevel(loggingLevel: LoggingLevel): WebRTCClientBuilder {
         this.loggingLevel = loggingLevel.httpLoggingLevel
 
         return this
     }
 
     /**
-     * Builds the [VideoClient] and its respective dependencies, used to set up all the business
+     * Builds the [CallClient] and its respective dependencies, used to set up all the business
      * logic of the SDK.
      */
-    public fun build(): WebRTCClient {
+    fun build(): WebRTCClient {
         val user = credentialsProvider.getUserCredentials()
         if (credentialsProvider.loadApiKey().isBlank() ||
             user.id.isBlank() ||

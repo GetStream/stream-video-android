@@ -21,18 +21,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import io.getstream.video.android.compose.ui.components.participants.ParticipantsContent
-import io.getstream.video.android.model.Room
+import io.getstream.video.android.model.Call
 import org.webrtc.SurfaceViewRenderer
 
 @Composable
 public fun MainStage(
-    room: Room,
+    call: Call,
     modifier: Modifier = Modifier
 ) {
     Box(modifier = modifier) {
         ParticipantsContent(
             modifier = Modifier.fillMaxSize(),
-            room = room,
+            call = call,
             onRender = {
                 (it as? SurfaceViewRenderer)?.apply {
                     setZOrderMediaOverlay(false) // TODO - these functions don't exist, we need to find better impl

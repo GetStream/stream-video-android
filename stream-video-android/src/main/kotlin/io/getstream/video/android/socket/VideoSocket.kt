@@ -19,7 +19,7 @@ package io.getstream.video.android.socket
 import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.events.ConnectedEvent
 import io.getstream.video.android.events.VideoEvent
-import stream.video.coordinator.call_v1.Call
+import io.getstream.video.android.model.domain.CallMetadata
 
 public interface VideoSocket {
 
@@ -43,14 +43,14 @@ public interface VideoSocket {
      *
      * @param call The call that holds the necessary data.
      */
-    public fun updateCallState(call: Call?)
+    public fun updateCallState(call: CallMetadata?)
 
     /**
      * Gets the current call state, if it exists.
      *
-     * @return [Call] If it exists, or null otherwise.
+     * @return [CallMetadata] If it exists, or null otherwise.
      */
-    public fun getCallState(): Call?
+    public fun getCallState(): CallMetadata?
 
     /**
      * Triggered when an error happens with the socket connection or events parsing.

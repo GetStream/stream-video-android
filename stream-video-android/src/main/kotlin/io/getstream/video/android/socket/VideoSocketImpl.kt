@@ -26,13 +26,13 @@ import io.getstream.video.android.errors.VideoErrorCode
 import io.getstream.video.android.errors.VideoNetworkError
 import io.getstream.video.android.events.ConnectedEvent
 import io.getstream.video.android.events.VideoEvent
+import io.getstream.video.android.model.domain.CallMetadata
 import io.getstream.video.android.network.NetworkStateProvider
 import io.getstream.video.android.token.CredentialsManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import stream.video.coordinator.call_v1.Call
 import stream.video.coordinator.client_v1_rpc.WebsocketAuthRequest
 import stream.video.coordinator.client_v1_rpc.WebsocketHealthcheck
 import stream.video.coordinator.user_v1.UserInput
@@ -68,7 +68,7 @@ internal class VideoSocketImpl(
     /**
      * Call related state.
      */
-    private var call: Call? = null
+    private var call: CallMetadata? = null
 
     private val healthMonitor = HealthMonitor(
         object : HealthMonitor.HealthCallback {
@@ -211,7 +211,11 @@ internal class VideoSocketImpl(
 
         socket?.authenticate(
             WebsocketAuthRequest(
-                user = UserInput(name = user.name, image_url = user.image_url, role = user.role),
+                user = UserInput(
+                    name = user.name,
+                    image_url = user.imageUrl ?: "",
+                    role = user.role
+                ),
                 token = credentialsManager.getToken(),
                 api_key = credentialsManager.getApiKey()
             )
@@ -233,11 +237,11 @@ internal class VideoSocketImpl(
         networkStateProvider.subscribe(networkStateListener)
     }
 
-    override fun updateCallState(call: Call?) {
+    override fun updateCallState(call: CallMetadata?) {
         this.call = call
     }
 
-    override fun getCallState(): Call? = call
+    override fun getCallState(): CallMetadata? = call
 
     override fun releaseConnection() {
         state = State.DisconnectedByRequest

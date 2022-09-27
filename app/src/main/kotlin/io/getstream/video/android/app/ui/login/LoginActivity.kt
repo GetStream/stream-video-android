@@ -39,10 +39,10 @@ import io.getstream.video.android.app.ui.components.UserList
 import io.getstream.video.android.app.ui.home.HomeActivity
 import io.getstream.video.android.app.utils.getUsers
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.model.UserCredentials
 import io.getstream.video.android.pushprovider.firebase.CallNotificationReceiver
 import io.getstream.video.android.pushprovider.firebase.CallNotificationReceiver.Companion.ACTION_CALL
-import stream.video.sfu.User
 
 class LoginActivity : AppCompatActivity() {
 
@@ -116,35 +116,18 @@ class LoginActivity : AppCompatActivity() {
                 },
                 content = { Text(text = "Log In") }
             )
-
-//            Button( TODO - define a way to build custom users from just an ID/name (generate token)
-//                colors = ButtonDefaults.buttonColors(backgroundColor = VideoTheme.colors.infoAccent),
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .padding(horizontal = 32.dp),
-//                onClick = { startCustomLogin() },
-//                content = { Text(text = "Custom Log In", color = Color.White) }
-//            )
         }
-    }
-
-    private fun startCustomLogin() {
-        startActivity(CustomLoginActivity.getIntent(this))
     }
 
     private fun logIn(selectedUser: UserCredentials) {
         VideoApp.userPreferences.storeUserCredentials(selectedUser)
 
-        VideoApp.initializeClient(
+        VideoApp.initializeController(
             credentialsProvider = FakeCredentialsProvider(
                 userCredentials = selectedUser,
                 apiKey = "key1"
             ),
-            user = User(
-                id = selectedUser.id,
-                name = selectedUser.name,
-                image_url = selectedUser.image
-            )
+            loggingLevel = LoggingLevel.BODY
         )
         startActivity(HomeActivity.getIntent(this))
     }

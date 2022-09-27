@@ -68,8 +68,8 @@ import kotlinx.coroutines.launch
 
 class HomeActivity : AppCompatActivity() {
 
-    private val client by lazy {
-        VideoApp.videoClient
+    private val controller by lazy {
+        VideoApp.streamCalls
     }
 
     private val selectedOption: MutableState<HomeScreenOption> =
@@ -78,7 +78,7 @@ class HomeActivity : AppCompatActivity() {
     private val participantsOptions: MutableState<List<UserCredentials>> =
         mutableStateOf(
             getUsers().filter {
-                it.id != VideoApp.videoClient.getUser().id
+                it.id != controller.getUser().id
             }
         )
 
@@ -96,7 +96,7 @@ class HomeActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        VideoApp.videoClient.addSocketListener(socketListener)
+        controller.addSocketListener(socketListener)
         setContent {
             VideoTheme {
                 HomeScreen()
@@ -105,7 +105,7 @@ class HomeActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        VideoApp.videoClient.removeSocketListener(socketListener)
+        controller.removeSocketListener(socketListener)
         super.onDestroy()
     }
 
@@ -209,17 +209,17 @@ class HomeActivity : AppCompatActivity() {
         lifecycleScope.launch {
             loadingState.value = true
 
-            val result = client.joinCall(
+            val createCallResult = controller.createAndJoinCall(
                 "default", // TODO - hardcoded for now
                 id = callId,
                 participantIds = participants.toList()
             )
 
-            result.onSuccessSuspend { response ->
+            createCallResult.onSuccessSuspend { response ->
                 loadingState.value = false
-                navigateToCall(response.call.call_cid, response.callUrl, response.userToken)
+                navigateToCall(response.call.cid, response.callUrl, response.userToken)
             }
-            result.onError {
+            createCallResult.onError {
                 Log.d("Couldn't select server", it.message ?: "")
                 Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
                 loadingState.value = false

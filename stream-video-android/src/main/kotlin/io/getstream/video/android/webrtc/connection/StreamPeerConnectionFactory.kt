@@ -59,7 +59,7 @@ public class StreamPeerConnectionFactory(private val context: Context) {
     private val factory by lazy {
         PeerConnectionFactory.initialize(
             PeerConnectionFactory.InitializationOptions.builder(context)
-                .setInjectableLogger({ message, severity, label ->
+                .setInjectableLogger({ message, _, label ->
                     if (message.contains("audio", true)) {
                         Log.i("WebRTC", "$label: $message")
                     }
