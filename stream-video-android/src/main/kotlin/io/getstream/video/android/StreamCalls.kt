@@ -47,6 +47,8 @@ public interface StreamCalls {
         participantIds: List<String> = emptyList()
     ): Result<CallMetadata>
 
+    // TODO - get call?
+
     /**
      * Creates a call with given information and then authenticates the user to join the said [CallMetadata].
      *
