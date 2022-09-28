@@ -49,7 +49,7 @@ class VideoApp : Application() {
         /**
          * Sets up and returns the [streamCalls] required to connect to the API.
          */
-        fun initializeController(
+        fun initializeStream(
             credentialsProvider: CredentialsProvider,
             loggingLevel: LoggingLevel
         ): StreamCalls {

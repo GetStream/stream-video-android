@@ -67,7 +67,7 @@ public interface CallCoordinatorService {
 
     @Headers("Content-Type: application/protobuf")
     @POST("/rpc/stream.video.coordinator.client_v1_rpc.ClientRPC/SendEvent")
-    public suspend fun sendCustomEvent(
+    public suspend fun sendCustomEvent( // TODO - do we need this?
         @Body sendEventRequest: SendCustomEventRequest,
         @Query(QUERY_API_KEY) apiKey: String
     ): SendCustomEventRequest

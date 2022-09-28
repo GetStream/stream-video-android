@@ -81,7 +81,7 @@ class DeeplinkingActivity : AppCompatActivity() {
     private fun logIn() {
         val selectedUser = VideoApp.userPreferences.getCachedCredentials()
 
-        VideoApp.initializeController(
+        VideoApp.initializeStream(
             credentialsProvider = FakeCredentialsProvider(
                 userCredentials = selectedUser,
                 apiKey = "key1"

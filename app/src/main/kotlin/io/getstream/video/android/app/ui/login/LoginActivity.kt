@@ -122,7 +122,7 @@ class LoginActivity : AppCompatActivity() {
     private fun logIn(selectedUser: UserCredentials) {
         VideoApp.userPreferences.storeUserCredentials(selectedUser)
 
-        VideoApp.initializeController(
+        VideoApp.initializeStream(
             credentialsProvider = FakeCredentialsProvider(
                 userCredentials = selectedUser,
                 apiKey = "key1"
