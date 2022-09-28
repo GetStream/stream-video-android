@@ -43,8 +43,7 @@ public data class HealthCheckEvent(
  * Sent when someone creates a call and invites another person to participate.
  */
 public data class CallCreatedEvent(
-    val callId: String,
-    val callMembersIds: List<String>
+    val callId: String
 ) : VideoEvent()
 
 /**

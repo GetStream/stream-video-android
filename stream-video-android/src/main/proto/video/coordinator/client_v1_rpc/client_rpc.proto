@@ -2,20 +2,17 @@ syntax = "proto3";
 
 package stream.video.coordinator.client_v1_rpc;
 
-import "google/protobuf/duration.proto";
 import "google/protobuf/struct.proto";
-import "google/protobuf/timestamp.proto";
-import "video/coordinator/client_v1_rpc/envelopes.proto";
 import "video/coordinator/call_v1/call.proto";
+import "video/coordinator/client_v1_rpc/envelopes.proto";
 import "video/coordinator/edge_v1/edge.proto";
 import "video/coordinator/push_v1/push.proto";
-import "video/coordinator/stat_v1/stat.proto";
 import "video/coordinator/utils_v1/utils.proto";
 
 option go_package = "client_v1_rpc";
 
 service ClientRPC {
-//  rpc GetCall(GetCallRequest) returns (GetCallResponse);
+  //  rpc GetCall(GetCallRequest) returns (GetCallResponse);
   rpc CreateCall(CreateCallRequest) returns (CreateCallResponse);
   rpc GetOrCreateCall(GetOrCreateCallRequest) returns (GetOrCreateCallResponse);
   // JoinCall acts as GetOrCreateCall, but additionally returns list of datacenters to measure latency
@@ -24,7 +21,7 @@ service ClientRPC {
   rpc GetCallEdgeServer(GetCallEdgeServerRequest) returns (GetCallEdgeServerResponse);
 
   rpc UpdateCall(UpdateCallRequest) returns (UpdateCallResponse);
-//  rpc EndCall();
+  //  rpc EndCall();
 
   rpc QueryCalls(QueryCallsRequest) returns (QueryCallsResponse);
 
@@ -44,8 +41,6 @@ service ClientRPC {
   // DeleteMembers deletes members from a room.
   // TODO: response with room data
   rpc DeleteCallMembers(DeleteCallMembersRequest) returns (DeleteCallMembersResponse);
-
-  rpc QueryCallTimelineEvents(QueryCallTimelineEventsRequest) returns (QueryCallTimelineEventsResponse);
 
   rpc SendCustomEvent(SendCustomEventRequest) returns (SendCustomEventResponse);
 
@@ -150,7 +145,7 @@ message JoinCallResponse {
   // Whether a call was created
   bool created = 2;
   // A list of endpoints to measure latency
-  edge_v1.LatencyMeasurementClaim latency_claim = 3;
+  repeated edge_v1.Edge edges = 3;
 }
 
 // Represents all updatable room fields
@@ -214,30 +209,6 @@ message GetCallEdgeServerResponse {
   CallEnvelope call = 1;
   // Call edge server credentials
   edge_v1.Credentials credentials = 2;
-}
-
-// A request message for the QueryCallTimelineEvents endpoint
-// Specifies a subset of events to request
-message QueryCallTimelineEventsRequest {
-  // The call type.
-  string type = 1;
-  // The call id.
-  string id = 2;
-  // Limits event timespan of the response. Default: 10m, max: 30m
-  google.protobuf.Duration duration = 3;
-  // since which date to query events. Default: time of the first event of the call
-  google.protobuf.Timestamp since = 4;
-}
-
-message QueryCallTimelineEventsResponse {
-  // timeline inclusive start time
-  google.protobuf.Timestamp start = 1;
-  // timeline inclusive end time
-  google.protobuf.Timestamp end = 2;
-  // contains cursor to use to request the next page
-  google.protobuf.Timestamp next = 3;
-  // list of events for each participant from requested time period
-  repeated stat_v1.CallParticipantTimeline participant_events = 4;
 }
 
 message CreateDeviceRequest {

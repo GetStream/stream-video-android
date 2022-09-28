@@ -114,6 +114,8 @@ message CreateCallRequest {
   string id = 2;
   // List of SFUs that are used for this call
   repeated string cascading_sfus_hostnames = 3;
+  // The token the SFU can use to participate in the gossip protocol
+  string gossip_rpc_auth_token = 4;
 }
 
 // A response message for CreateCall endpoint

@@ -82,7 +82,7 @@ internal class CallCoordinatorClientImpl(
         try {
             val response = callCoordinatorService.joinCall(
                 joinCallRequest = request,
-                apiKey = credentialsProvider.getCachedApiKey()
+                apiKey = credentialsProvider.getCachedApiKey(),
             )
 
             Success(response)

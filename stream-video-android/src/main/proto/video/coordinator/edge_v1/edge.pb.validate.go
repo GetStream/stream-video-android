@@ -35,216 +35,6 @@ var (
 	_ = sort.Sort
 )
 
-// Validate checks the field values on LatencyEndpoint with the rules defined
-// in the proto definition for this message. If any rules are violated, the
-// first error encountered is returned, or nil if there are no violations.
-func (m *LatencyEndpoint) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on LatencyEndpoint with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// LatencyEndpointMultiError, or nil if none found.
-func (m *LatencyEndpoint) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *LatencyEndpoint) validate(all bool) error {
-	if m == nil {
-		return nil
-	}
-
-	var errors []error
-
-	// no validation rules for Id
-
-	// no validation rules for Url
-
-	// no validation rules for Proximity
-
-	// no validation rules for Latency
-
-	if len(errors) > 0 {
-		return LatencyEndpointMultiError(errors)
-	}
-
-	return nil
-}
-
-// LatencyEndpointMultiError is an error wrapping multiple validation errors
-// returned by LatencyEndpoint.ValidateAll() if the designated constraints
-// aren't met.
-type LatencyEndpointMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m LatencyEndpointMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m LatencyEndpointMultiError) AllErrors() []error { return m }
-
-// LatencyEndpointValidationError is the validation error returned by
-// LatencyEndpoint.Validate if the designated constraints aren't met.
-type LatencyEndpointValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e LatencyEndpointValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e LatencyEndpointValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e LatencyEndpointValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e LatencyEndpointValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e LatencyEndpointValidationError) ErrorName() string { return "LatencyEndpointValidationError" }
-
-// Error satisfies the builtin error interface
-func (e LatencyEndpointValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sLatencyEndpoint.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = LatencyEndpointValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = LatencyEndpointValidationError{}
-
-// Validate checks the field values on Server with the rules defined in the
-// proto definition for this message. If any rules are violated, the first
-// error encountered is returned, or nil if there are no violations.
-func (m *Server) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on Server with the rules defined in the
-// proto definition for this message. If any rules are violated, the result is
-// a list of violation errors wrapped in ServerMultiError, or nil if none found.
-func (m *Server) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *Server) validate(all bool) error {
-	if m == nil {
-		return nil
-	}
-
-	var errors []error
-
-	// no validation rules for Id
-
-	// no validation rules for Url
-
-	if len(errors) > 0 {
-		return ServerMultiError(errors)
-	}
-
-	return nil
-}
-
-// ServerMultiError is an error wrapping multiple validation errors returned by
-// Server.ValidateAll() if the designated constraints aren't met.
-type ServerMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m ServerMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m ServerMultiError) AllErrors() []error { return m }
-
-// ServerValidationError is the validation error returned by Server.Validate if
-// the designated constraints aren't met.
-type ServerValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e ServerValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e ServerValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e ServerValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e ServerValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e ServerValidationError) ErrorName() string { return "ServerValidationError" }
-
-// Error satisfies the builtin error interface
-func (e ServerValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sServer.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = ServerValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = ServerValidationError{}
-
 // Validate checks the field values on Credentials with the rules defined in
 // the proto definition for this message. If any rules are violated, the first
 // error encountered is returned, or nil if there are no violations.
@@ -316,6 +106,40 @@ func (m *Credentials) validate(all bool) error {
 			return err
 		}
 		errors = append(errors, err)
+	}
+
+	for idx, item := range m.GetIceServers() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, CredentialsValidationError{
+						field:  fmt.Sprintf("IceServers[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, CredentialsValidationError{
+						field:  fmt.Sprintf("IceServers[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return CredentialsValidationError{
+					field:  fmt.Sprintf("IceServers[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
 	}
 
 	if len(errors) > 0 {
@@ -394,142 +218,6 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = CredentialsValidationError{}
-
-// Validate checks the field values on LatencyMeasurementClaim with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the first error encountered is returned, or nil if there are no violations.
-func (m *LatencyMeasurementClaim) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on LatencyMeasurementClaim with the
-// rules defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// LatencyMeasurementClaimMultiError, or nil if none found.
-func (m *LatencyMeasurementClaim) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *LatencyMeasurementClaim) validate(all bool) error {
-	if m == nil {
-		return nil
-	}
-
-	var errors []error
-
-	for idx, item := range m.GetEndpoints() {
-		_, _ = idx, item
-
-		if all {
-			switch v := interface{}(item).(type) {
-			case interface{ ValidateAll() error }:
-				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, LatencyMeasurementClaimValidationError{
-						field:  fmt.Sprintf("Endpoints[%v]", idx),
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			case interface{ Validate() error }:
-				if err := v.Validate(); err != nil {
-					errors = append(errors, LatencyMeasurementClaimValidationError{
-						field:  fmt.Sprintf("Endpoints[%v]", idx),
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			}
-		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return LatencyMeasurementClaimValidationError{
-					field:  fmt.Sprintf("Endpoints[%v]", idx),
-					reason: "embedded message failed validation",
-					cause:  err,
-				}
-			}
-		}
-
-	}
-
-	if len(errors) > 0 {
-		return LatencyMeasurementClaimMultiError(errors)
-	}
-
-	return nil
-}
-
-// LatencyMeasurementClaimMultiError is an error wrapping multiple validation
-// errors returned by LatencyMeasurementClaim.ValidateAll() if the designated
-// constraints aren't met.
-type LatencyMeasurementClaimMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m LatencyMeasurementClaimMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m LatencyMeasurementClaimMultiError) AllErrors() []error { return m }
-
-// LatencyMeasurementClaimValidationError is the validation error returned by
-// LatencyMeasurementClaim.Validate if the designated constraints aren't met.
-type LatencyMeasurementClaimValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e LatencyMeasurementClaimValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e LatencyMeasurementClaimValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e LatencyMeasurementClaimValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e LatencyMeasurementClaimValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e LatencyMeasurementClaimValidationError) ErrorName() string {
-	return "LatencyMeasurementClaimValidationError"
-}
-
-// Error satisfies the builtin error interface
-func (e LatencyMeasurementClaimValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sLatencyMeasurementClaim.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = LatencyMeasurementClaimValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = LatencyMeasurementClaimValidationError{}
 
 // Validate checks the field values on LatencyMeasurements with the rules
 // defined in the proto definition for this message. If any rules are
@@ -777,6 +465,109 @@ var _ interface {
 	ErrorName() string
 } = LatencyValidationError{}
 
+// Validate checks the field values on Coordinates with the rules defined in
+// the proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *Coordinates) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on Coordinates with the rules defined in
+// the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in CoordinatesMultiError, or
+// nil if none found.
+func (m *Coordinates) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *Coordinates) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Lat
+
+	// no validation rules for Long
+
+	if len(errors) > 0 {
+		return CoordinatesMultiError(errors)
+	}
+
+	return nil
+}
+
+// CoordinatesMultiError is an error wrapping multiple validation errors
+// returned by Coordinates.ValidateAll() if the designated constraints aren't met.
+type CoordinatesMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m CoordinatesMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m CoordinatesMultiError) AllErrors() []error { return m }
+
+// CoordinatesValidationError is the validation error returned by
+// Coordinates.Validate if the designated constraints aren't met.
+type CoordinatesValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e CoordinatesValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e CoordinatesValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e CoordinatesValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e CoordinatesValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e CoordinatesValidationError) ErrorName() string { return "CoordinatesValidationError" }
+
+// Error satisfies the builtin error interface
+func (e CoordinatesValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sCoordinates.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = CoordinatesValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = CoordinatesValidationError{}
+
 // Validate checks the field values on Edge with the rules defined in the proto
 // definition for this message. If any rules are violated, the first error
 // encountered is returned, or nil if there are no violations.
@@ -818,6 +609,35 @@ func (m *Edge) validate(all bool) error {
 			return err
 		}
 		errors = append(errors, err)
+	}
+
+	if all {
+		switch v := interface{}(m.GetCoordinates()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, EdgeValidationError{
+					field:  "Coordinates",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, EdgeValidationError{
+					field:  "Coordinates",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetCoordinates()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return EdgeValidationError{
+				field:  "Coordinates",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
 	}
 
 	if len(errors) > 0 {
@@ -897,6 +717,109 @@ var _ interface {
 	ErrorName() string
 } = EdgeValidationError{}
 
+// Validate checks the field values on ICEServer with the rules defined in the
+// proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *ICEServer) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ICEServer with the rules defined in
+// the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in ICEServerMultiError, or nil
+// if none found.
+func (m *ICEServer) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ICEServer) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Username
+
+	// no validation rules for Password
+
+	if len(errors) > 0 {
+		return ICEServerMultiError(errors)
+	}
+
+	return nil
+}
+
+// ICEServerMultiError is an error wrapping multiple validation errors returned
+// by ICEServer.ValidateAll() if the designated constraints aren't met.
+type ICEServerMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ICEServerMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ICEServerMultiError) AllErrors() []error { return m }
+
+// ICEServerValidationError is the validation error returned by
+// ICEServer.Validate if the designated constraints aren't met.
+type ICEServerValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ICEServerValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ICEServerValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ICEServerValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ICEServerValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ICEServerValidationError) ErrorName() string { return "ICEServerValidationError" }
+
+// Error satisfies the builtin error interface
+func (e ICEServerValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sICEServer.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ICEServerValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ICEServerValidationError{}
+
 // Validate checks the field values on EdgeServer with the rules defined in the
 // proto definition for this message. If any rules are violated, the first
 // error encountered is returned, or nil if there are no violations.
@@ -920,6 +843,8 @@ func (m *EdgeServer) validate(all bool) error {
 	var errors []error
 
 	// no validation rules for Url
+
+	// no validation rules for EdgeName
 
 	if len(errors) > 0 {
 		return EdgeServerMultiError(errors)
@@ -997,109 +922,3 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = EdgeServerValidationError{}
-
-// Validate checks the field values on EdgeServer_Coordinates with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the first error encountered is returned, or nil if there are no violations.
-func (m *EdgeServer_Coordinates) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on EdgeServer_Coordinates with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// EdgeServer_CoordinatesMultiError, or nil if none found.
-func (m *EdgeServer_Coordinates) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *EdgeServer_Coordinates) validate(all bool) error {
-	if m == nil {
-		return nil
-	}
-
-	var errors []error
-
-	// no validation rules for Lat
-
-	// no validation rules for Long
-
-	if len(errors) > 0 {
-		return EdgeServer_CoordinatesMultiError(errors)
-	}
-
-	return nil
-}
-
-// EdgeServer_CoordinatesMultiError is an error wrapping multiple validation
-// errors returned by EdgeServer_Coordinates.ValidateAll() if the designated
-// constraints aren't met.
-type EdgeServer_CoordinatesMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m EdgeServer_CoordinatesMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m EdgeServer_CoordinatesMultiError) AllErrors() []error { return m }
-
-// EdgeServer_CoordinatesValidationError is the validation error returned by
-// EdgeServer_Coordinates.Validate if the designated constraints aren't met.
-type EdgeServer_CoordinatesValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e EdgeServer_CoordinatesValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e EdgeServer_CoordinatesValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e EdgeServer_CoordinatesValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e EdgeServer_CoordinatesValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e EdgeServer_CoordinatesValidationError) ErrorName() string {
-	return "EdgeServer_CoordinatesValidationError"
-}
-
-// Error satisfies the builtin error interface
-func (e EdgeServer_CoordinatesValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sEdgeServer_Coordinates.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = EdgeServer_CoordinatesValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = EdgeServer_CoordinatesValidationError{}

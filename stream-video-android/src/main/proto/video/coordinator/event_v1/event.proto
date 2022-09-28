@@ -4,34 +4,6 @@ package stream.video.coordinator.event_v1;
 
 option go_package = "event_v1";
 
-/**
-CallRinging is fired when a call is created with the ring=true option
-Or when you manually call call.ring()
- */
-message CallRinging {
-  string call_id = 1;
-}
-
-/**
-CallCreated is fired when a call is created
- */
-message CallCreated {
-  string call_cid = 1;
-  repeated string call_member_user_ids = 2;
-}
-
-message CallUpdated {
-  string call_cid = 1;
-}
-
-message CallEnded {
-  string call_cid = 1;
-}
-
-message CallDeleted {
-  string call_cid = 1;
-}
-
 message RecordingStarted {
   string call_cid = 1;
 }
@@ -52,14 +24,33 @@ message BroadcastEnded {
   string call_cid = 1;
 }
 
+
 message CallMembersUpdated {
   string call_cid = 1;
-  repeated string call_member_user_ids = 2;
 }
 
 message CallMembersDeleted {
   string call_cid = 1;
-  repeated string call_member_user_ids = 2;
+}
+
+message CallCreated {
+  string call_cid = 1;
+}
+
+message CallUpdated {
+  string call_cid = 1;
+}
+
+message CallStarted {
+  string call_cid = 1;
+}
+
+message CallEnded {
+  string call_cid = 1;
+}
+
+message CallDeleted {
+  string call_cid = 1;
 }
 
 // Events

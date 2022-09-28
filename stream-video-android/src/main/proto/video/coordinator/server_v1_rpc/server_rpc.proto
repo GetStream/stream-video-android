@@ -2,11 +2,14 @@ syntax = "proto3";
 
 package stream.video.coordinator.server_v1_rpc;
 
+import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
 import "google/protobuf/wrappers.proto";
 import "video/coordinator/app_v1/app.proto";
 import "video/coordinator/broadcast_v1/broadcast.proto";
-import "video/coordinator/push_v1/push.proto";
 import "video/coordinator/call_v1/call.proto";
+import "video/coordinator/push_v1/push.proto";
+import "video/coordinator/stat_v1/stat.proto";
 import "video/coordinator/user_v1/user.proto";
 
 option go_package = "server_v1_rpc";
@@ -31,13 +34,6 @@ service ServerRPC {
   rpc UpdatePushProvider(UpdatePushProviderRequest) returns (UpdatePushProviderResponse);
   // deletes an existing push provider
   rpc DeletePushProvider(DeletePushProviderRequest) returns (DeletePushProviderResponse);
-  // recording a call or transcribing a call can be
-  // A. Enabled by default for a call type
-  // B. Enabled when creating the call per the default call type settings
-  // C. Configured differently for that specific call
-  // D. Enabled during the call
-  rpc TranscribeCall(TranscribeCallRequest) returns (TranscribeCallResponse);
-  rpc StopTranscribeCall(StopTranscribeCallRequest) returns (StopTranscribeCallResponse);
 
   // starts broadcast to HLS and/or RTMP, replaces existing settings if broadcasting is already started
   rpc StartBroadcast(StartBroadcastRequest) returns (StartBroadcastResponse);
@@ -47,6 +43,9 @@ service ServerRPC {
   rpc StartRecording(StartRecordingRequest) returns (StartRecordingResponse);
   rpc StopRecording(StopRecordingRequest) returns (StopRecordingResponse);
   rpc GetRecordings(GetRecordingsRequest) returns (GetRecordingsResponse);
+  rpc DeleteRecording(DeleteRecordingRequest) returns (DeleteRecordingResponse);
+
+  rpc QueryCallTimelineEvents(QueryCallTimelineEventsRequest) returns (QueryCallTimelineEventsResponse);
 
   //  rpc CreateOrUpdateCalls(CreateOrUpdateCallsRequest) returns (CreateOrUpdateCallsResponse);
   //  rpc CreateOrUpdateUsers(CreateOrUpdateUsersRequest) returns (CreateOrUpdateUsersResponse);
@@ -56,6 +55,7 @@ service ServerRPC {
   rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
   rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse);
   rpc ExportUser(ExportUserRequest) returns (ExportUserResponse);
+
   // This requires having some sort of user/team level concept
 
   // endpoints needed to build a good dashboard experience
@@ -196,17 +196,11 @@ message CreateCallRequest {
   // Request video to be forwarded to a list of RTMP servers.
   broadcast_v1.RTMPOptions rtmp = 7;
 
-  // Transcription, overrides the default call type setting if provided.
-  google.protobuf.BoolValue transcribe = 8;
-
-  // The transcription options for this call, only relevant if transcribe is enabled.
-  //  feature_v1.TranscribeOptions transcribe_options = 9;
-
   // The recording option, overrides the default call type setting if provided.
-  google.protobuf.BoolValue recording = 10;
+  google.protobuf.BoolValue recording = 8;
 
   // The ring option, overrides the default call type setting if provided.
-  google.protobuf.BoolValue notify = 11;
+  google.protobuf.BoolValue notify = 9;
 }
 
 message CreateUserRequest {
@@ -281,19 +275,6 @@ message StopBroadcastRequest {
 message StopBroadcastResponse {
 }
 
-message TranscribeCallRequest {
-  // TODO: research what options we need here
-}
-
-message TranscribeCallResponse {
-}
-
-message StopTranscribeCallRequest {
-}
-
-message StopTranscribeCallResponse {
-}
-
 message StoreLatencyRequest {
 }
 
@@ -334,3 +315,32 @@ message GetRecordingsResponse {
 
   repeated Recording recordings = 1;
 }
+
+message DeleteRecordingRequest {}
+
+message DeleteRecordingResponse {}
+
+// A request message for the QueryCallTimelineEvents endpoint
+// Specifies a subset of events to request
+message QueryCallTimelineEventsRequest {
+  // The call type.
+  string type = 1;
+  // The call id.
+  string id = 2;
+  // Limits event timespan of the response. Default: 10m, max: 30m
+  google.protobuf.Duration duration = 3;
+  // since which date to query events. Default: time of the first event of the call
+  google.protobuf.Timestamp since = 4;
+}
+
+message QueryCallTimelineEventsResponse {
+  // timeline inclusive start time
+  google.protobuf.Timestamp start = 1;
+  // timeline inclusive end time
+  google.protobuf.Timestamp end = 2;
+  // contains cursor to use to request the next page
+  google.protobuf.Timestamp next = 3;
+  // list of events for each participant from requested time period
+  repeated stat_v1.CallParticipantTimeline participant_events = 4;
+}
+

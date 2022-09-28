@@ -2,10 +2,10 @@ syntax = "proto3";
 
 package stream.video.coordinator.client_v1_rpc;
 
-import "video/coordinator/push_v1/push.proto";
 import "video/coordinator/call_v1/call.proto";
-import "video/coordinator/user_v1/user.proto";
 import "video/coordinator/event_v1/event.proto";
+import "video/coordinator/push_v1/push.proto";
+import "video/coordinator/user_v1/user.proto";
 
 option go_package = "client_v1_rpc";
 
@@ -16,8 +16,9 @@ message WebsocketEvent {
   map<string, user_v1.User> users = 1;
   // All calls mentioned in the event payload, indexed by Call.call_cid
   map<string, call_v1.Call> calls = 2;
-  // All calls envelopes for calls mentioned in the event payload, indexed by Call.call_cid
-  // The envelope may not contain some of the entities (like, members), but the message is guaranteed to be present if there's a matching Call in calls map
+  // All calls details for calls mentioned in the event payload, indexed by Call.call_cid
+  // Call details cotnain contextual data. For example, for MembersDeleted event, call_details[cid].Members will contain a list of
+  // members that were deleted.
   map<string, call_v1.CallDetails> call_details = 3;
 
   // reserved field numbers for more entities
@@ -25,18 +26,20 @@ message WebsocketEvent {
 
   oneof event {
     WebsocketHealthcheck healthcheck = 20;
-    event_v1.CallCreated call_created = 21;
-    event_v1.CallUpdated call_updated = 22;
-    event_v1.CallEnded call_ended = 23;
-    event_v1.CallDeleted call_deleted = 24;
-    event_v1.CallRinging call_ringing = 25;
-    event_v1.UserUpdated user_updated = 26;
-    event_v1.BroadcastStarted broadcast_started = 27;
-    event_v1.BroadcastEnded broadcast_ended = 28;
-    event_v1.RecordingStarted recording_started = 29;
-    event_v1.RecordingStopped recording_stopped = 30;
-    event_v1.CallMembersUpdated call_members_updated = 31;
-    event_v1.CallMembersDeleted call_members_deleted = 32;
+
+    // Call events
+
+    event_v1.CallCreated call_created = 30;
+    event_v1.CallUpdated call_updated = 31;
+    event_v1.CallDeleted call_deleted = 32;
+    event_v1.CallMembersUpdated call_members_updated = 33;
+    event_v1.CallMembersDeleted call_members_deleted = 34;
+    event_v1.CallStarted call_started = 35;
+    event_v1.CallEnded call_ended = 36;
+
+    // User events
+
+    event_v1.UserUpdated user_updated = 40;
   }
 }
 

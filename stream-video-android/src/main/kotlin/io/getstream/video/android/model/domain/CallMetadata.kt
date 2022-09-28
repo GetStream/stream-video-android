@@ -28,6 +28,5 @@ public data class CallMetadata(
     val updatedAt: Long,
     val recordingEnabled: Boolean,
     val broadcastingEnabled: Boolean,
-    val transcriptionEnabled: Boolean,
     val extraData: Map<String, String>?,
 )

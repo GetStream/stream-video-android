@@ -21,147 +21,23 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type LatencyEndpoint struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Id        string  `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Url       string  `protobuf:"bytes,2,opt,name=url,proto3" json:"url,omitempty"`
-	Proximity float64 `protobuf:"fixed64,3,opt,name=proximity,proto3" json:"proximity,omitempty"`
-	Latency   float64 `protobuf:"fixed64,4,opt,name=latency,proto3" json:"latency,omitempty"`
-}
-
-func (x *LatencyEndpoint) Reset() {
-	*x = LatencyEndpoint{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_video_coordinator_edge_v1_edge_proto_msgTypes[0]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *LatencyEndpoint) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*LatencyEndpoint) ProtoMessage() {}
-
-func (x *LatencyEndpoint) ProtoReflect() protoreflect.Message {
-	mi := &file_video_coordinator_edge_v1_edge_proto_msgTypes[0]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use LatencyEndpoint.ProtoReflect.Descriptor instead.
-func (*LatencyEndpoint) Descriptor() ([]byte, []int) {
-	return file_video_coordinator_edge_v1_edge_proto_rawDescGZIP(), []int{0}
-}
-
-func (x *LatencyEndpoint) GetId() string {
-	if x != nil {
-		return x.Id
-	}
-	return ""
-}
-
-func (x *LatencyEndpoint) GetUrl() string {
-	if x != nil {
-		return x.Url
-	}
-	return ""
-}
-
-func (x *LatencyEndpoint) GetProximity() float64 {
-	if x != nil {
-		return x.Proximity
-	}
-	return 0
-}
-
-func (x *LatencyEndpoint) GetLatency() float64 {
-	if x != nil {
-		return x.Latency
-	}
-	return 0
-}
-
-type Server struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Id  string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Url string `protobuf:"bytes,2,opt,name=url,proto3" json:"url,omitempty"`
-}
-
-func (x *Server) Reset() {
-	*x = Server{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_video_coordinator_edge_v1_edge_proto_msgTypes[1]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *Server) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*Server) ProtoMessage() {}
-
-func (x *Server) ProtoReflect() protoreflect.Message {
-	mi := &file_video_coordinator_edge_v1_edge_proto_msgTypes[1]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use Server.ProtoReflect.Descriptor instead.
-func (*Server) Descriptor() ([]byte, []int) {
-	return file_video_coordinator_edge_v1_edge_proto_rawDescGZIP(), []int{1}
-}
-
-func (x *Server) GetId() string {
-	if x != nil {
-		return x.Id
-	}
-	return ""
-}
-
-func (x *Server) GetUrl() string {
-	if x != nil {
-		return x.Url
-	}
-	return ""
-}
-
 type Credentials struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
 	// Edge server to connect to
-	Server *Server `protobuf:"bytes,1,opt,name=server,proto3" json:"server,omitempty"`
+	Server *EdgeServer `protobuf:"bytes,1,opt,name=server,proto3" json:"server,omitempty"`
 	// The auth token needed to authenticate to the edge server
 	Token string `protobuf:"bytes,2,opt,name=token,proto3" json:"token,omitempty"`
+	// The list of ICE servers
+	IceServers []*ICEServer `protobuf:"bytes,3,rep,name=ice_servers,json=iceServers,proto3" json:"ice_servers,omitempty"`
 }
 
 func (x *Credentials) Reset() {
 	*x = Credentials{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_video_coordinator_edge_v1_edge_proto_msgTypes[2]
+		mi := &file_video_coordinator_edge_v1_edge_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -174,7 +50,7 @@ func (x *Credentials) String() string {
 func (*Credentials) ProtoMessage() {}
 
 func (x *Credentials) ProtoReflect() protoreflect.Message {
-	mi := &file_video_coordinator_edge_v1_edge_proto_msgTypes[2]
+	mi := &file_video_coordinator_edge_v1_edge_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -187,10 +63,10 @@ func (x *Credentials) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Credentials.ProtoReflect.Descriptor instead.
 func (*Credentials) Descriptor() ([]byte, []int) {
-	return file_video_coordinator_edge_v1_edge_proto_rawDescGZIP(), []int{2}
+	return file_video_coordinator_edge_v1_edge_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *Credentials) GetServer() *Server {
+func (x *Credentials) GetServer() *EdgeServer {
 	if x != nil {
 		return x.Server
 	}
@@ -204,50 +80,9 @@ func (x *Credentials) GetToken() string {
 	return ""
 }
 
-// TODO: better name for this
-type LatencyMeasurementClaim struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Endpoints []*LatencyEndpoint `protobuf:"bytes,1,rep,name=endpoints,proto3" json:"endpoints,omitempty"`
-}
-
-func (x *LatencyMeasurementClaim) Reset() {
-	*x = LatencyMeasurementClaim{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_video_coordinator_edge_v1_edge_proto_msgTypes[3]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *LatencyMeasurementClaim) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*LatencyMeasurementClaim) ProtoMessage() {}
-
-func (x *LatencyMeasurementClaim) ProtoReflect() protoreflect.Message {
-	mi := &file_video_coordinator_edge_v1_edge_proto_msgTypes[3]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use LatencyMeasurementClaim.ProtoReflect.Descriptor instead.
-func (*LatencyMeasurementClaim) Descriptor() ([]byte, []int) {
-	return file_video_coordinator_edge_v1_edge_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *LatencyMeasurementClaim) GetEndpoints() []*LatencyEndpoint {
+func (x *Credentials) GetIceServers() []*ICEServer {
 	if x != nil {
-		return x.Endpoints
+		return x.IceServers
 	}
 	return nil
 }
@@ -263,7 +98,7 @@ type LatencyMeasurements struct {
 func (x *LatencyMeasurements) Reset() {
 	*x = LatencyMeasurements{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_video_coordinator_edge_v1_edge_proto_msgTypes[4]
+		mi := &file_video_coordinator_edge_v1_edge_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -276,7 +111,7 @@ func (x *LatencyMeasurements) String() string {
 func (*LatencyMeasurements) ProtoMessage() {}
 
 func (x *LatencyMeasurements) ProtoReflect() protoreflect.Message {
-	mi := &file_video_coordinator_edge_v1_edge_proto_msgTypes[4]
+	mi := &file_video_coordinator_edge_v1_edge_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -289,7 +124,7 @@ func (x *LatencyMeasurements) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LatencyMeasurements.ProtoReflect.Descriptor instead.
 func (*LatencyMeasurements) Descriptor() ([]byte, []int) {
-	return file_video_coordinator_edge_v1_edge_proto_rawDescGZIP(), []int{4}
+	return file_video_coordinator_edge_v1_edge_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *LatencyMeasurements) GetMeasurements() map[string]*Latency {
@@ -310,7 +145,7 @@ type Latency struct {
 func (x *Latency) Reset() {
 	*x = Latency{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_video_coordinator_edge_v1_edge_proto_msgTypes[5]
+		mi := &file_video_coordinator_edge_v1_edge_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -323,7 +158,7 @@ func (x *Latency) String() string {
 func (*Latency) ProtoMessage() {}
 
 func (x *Latency) ProtoReflect() protoreflect.Message {
-	mi := &file_video_coordinator_edge_v1_edge_proto_msgTypes[5]
+	mi := &file_video_coordinator_edge_v1_edge_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -336,7 +171,7 @@ func (x *Latency) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Latency.ProtoReflect.Descriptor instead.
 func (*Latency) Descriptor() ([]byte, []int) {
-	return file_video_coordinator_edge_v1_edge_proto_rawDescGZIP(), []int{5}
+	return file_video_coordinator_edge_v1_edge_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *Latency) GetMeasurementsSeconds() []float64 {
@@ -346,20 +181,76 @@ func (x *Latency) GetMeasurementsSeconds() []float64 {
 	return nil
 }
 
+type Coordinates struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Lat  float32 `protobuf:"fixed32,1,opt,name=lat,proto3" json:"lat,omitempty"`
+	Long float32 `protobuf:"fixed32,2,opt,name=long,proto3" json:"long,omitempty"`
+}
+
+func (x *Coordinates) Reset() {
+	*x = Coordinates{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_video_coordinator_edge_v1_edge_proto_msgTypes[3]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Coordinates) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Coordinates) ProtoMessage() {}
+
+func (x *Coordinates) ProtoReflect() protoreflect.Message {
+	mi := &file_video_coordinator_edge_v1_edge_proto_msgTypes[3]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Coordinates.ProtoReflect.Descriptor instead.
+func (*Coordinates) Descriptor() ([]byte, []int) {
+	return file_video_coordinator_edge_v1_edge_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *Coordinates) GetLat() float32 {
+	if x != nil {
+		return x.Lat
+	}
+	return 0
+}
+
+func (x *Coordinates) GetLong() float32 {
+	if x != nil {
+		return x.Long
+	}
+	return 0
+}
+
 // Edges are where we deploy video servers
 type Edge struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Name       string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	LatencyUrl string `protobuf:"bytes,2,opt,name=latency_url,json=latencyUrl,proto3" json:"latency_url,omitempty"`
+	Name        string       `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	LatencyUrl  string       `protobuf:"bytes,2,opt,name=latency_url,json=latencyUrl,proto3" json:"latency_url,omitempty"`
+	Coordinates *Coordinates `protobuf:"bytes,3,opt,name=coordinates,proto3" json:"coordinates,omitempty"`
 }
 
 func (x *Edge) Reset() {
 	*x = Edge{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_video_coordinator_edge_v1_edge_proto_msgTypes[6]
+		mi := &file_video_coordinator_edge_v1_edge_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -372,7 +263,7 @@ func (x *Edge) String() string {
 func (*Edge) ProtoMessage() {}
 
 func (x *Edge) ProtoReflect() protoreflect.Message {
-	mi := &file_video_coordinator_edge_v1_edge_proto_msgTypes[6]
+	mi := &file_video_coordinator_edge_v1_edge_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -385,7 +276,7 @@ func (x *Edge) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Edge.ProtoReflect.Descriptor instead.
 func (*Edge) Descriptor() ([]byte, []int) {
-	return file_video_coordinator_edge_v1_edge_proto_rawDescGZIP(), []int{6}
+	return file_video_coordinator_edge_v1_edge_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *Edge) GetName() string {
@@ -402,19 +293,89 @@ func (x *Edge) GetLatencyUrl() string {
 	return ""
 }
 
-// Edges are where we deploy video servers
+func (x *Edge) GetCoordinates() *Coordinates {
+	if x != nil {
+		return x.Coordinates
+	}
+	return nil
+}
+
+type ICEServer struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Urls     []string `protobuf:"bytes,1,rep,name=urls,proto3" json:"urls,omitempty"`
+	Username string   `protobuf:"bytes,2,opt,name=username,proto3" json:"username,omitempty"`
+	Password string   `protobuf:"bytes,3,opt,name=password,proto3" json:"password,omitempty"`
+}
+
+func (x *ICEServer) Reset() {
+	*x = ICEServer{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_video_coordinator_edge_v1_edge_proto_msgTypes[5]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ICEServer) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ICEServer) ProtoMessage() {}
+
+func (x *ICEServer) ProtoReflect() protoreflect.Message {
+	mi := &file_video_coordinator_edge_v1_edge_proto_msgTypes[5]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ICEServer.ProtoReflect.Descriptor instead.
+func (*ICEServer) Descriptor() ([]byte, []int) {
+	return file_video_coordinator_edge_v1_edge_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *ICEServer) GetUrls() []string {
+	if x != nil {
+		return x.Urls
+	}
+	return nil
+}
+
+func (x *ICEServer) GetUsername() string {
+	if x != nil {
+		return x.Username
+	}
+	return ""
+}
+
+func (x *ICEServer) GetPassword() string {
+	if x != nil {
+		return x.Password
+	}
+	return ""
+}
+
 type EdgeServer struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Url string `protobuf:"bytes,1,opt,name=url,proto3" json:"url,omitempty"`
+	Url      string `protobuf:"bytes,1,opt,name=url,proto3" json:"url,omitempty"`
+	EdgeName string `protobuf:"bytes,2,opt,name=edge_name,json=edgeName,proto3" json:"edge_name,omitempty"`
 }
 
 func (x *EdgeServer) Reset() {
 	*x = EdgeServer{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_video_coordinator_edge_v1_edge_proto_msgTypes[7]
+		mi := &file_video_coordinator_edge_v1_edge_proto_msgTypes[6]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -427,7 +388,7 @@ func (x *EdgeServer) String() string {
 func (*EdgeServer) ProtoMessage() {}
 
 func (x *EdgeServer) ProtoReflect() protoreflect.Message {
-	mi := &file_video_coordinator_edge_v1_edge_proto_msgTypes[7]
+	mi := &file_video_coordinator_edge_v1_edge_proto_msgTypes[6]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -440,7 +401,7 @@ func (x *EdgeServer) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EdgeServer.ProtoReflect.Descriptor instead.
 func (*EdgeServer) Descriptor() ([]byte, []int) {
-	return file_video_coordinator_edge_v1_edge_proto_rawDescGZIP(), []int{7}
+	return file_video_coordinator_edge_v1_edge_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *EdgeServer) GetUrl() string {
@@ -450,60 +411,11 @@ func (x *EdgeServer) GetUrl() string {
 	return ""
 }
 
-// Returns information about the server location
-type EdgeServer_Coordinates struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Lat  float32 `protobuf:"fixed32,1,opt,name=lat,proto3" json:"lat,omitempty"`
-	Long float32 `protobuf:"fixed32,2,opt,name=long,proto3" json:"long,omitempty"`
-}
-
-func (x *EdgeServer_Coordinates) Reset() {
-	*x = EdgeServer_Coordinates{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_video_coordinator_edge_v1_edge_proto_msgTypes[9]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *EdgeServer_Coordinates) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*EdgeServer_Coordinates) ProtoMessage() {}
-
-func (x *EdgeServer_Coordinates) ProtoReflect() protoreflect.Message {
-	mi := &file_video_coordinator_edge_v1_edge_proto_msgTypes[9]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use EdgeServer_Coordinates.ProtoReflect.Descriptor instead.
-func (*EdgeServer_Coordinates) Descriptor() ([]byte, []int) {
-	return file_video_coordinator_edge_v1_edge_proto_rawDescGZIP(), []int{7, 0}
-}
-
-func (x *EdgeServer_Coordinates) GetLat() float32 {
+func (x *EdgeServer) GetEdgeName() string {
 	if x != nil {
-		return x.Lat
+		return x.EdgeName
 	}
-	return 0
-}
-
-func (x *EdgeServer_Coordinates) GetLong() float32 {
-	if x != nil {
-		return x.Long
-	}
-	return 0
+	return ""
 }
 
 var File_video_coordinator_edge_v1_edge_proto protoreflect.FileDescriptor
@@ -515,61 +427,62 @@ var file_video_coordinator_edge_v1_edge_proto_rawDesc = []byte{
 	0x69, 0x64, 0x65, 0x6f, 0x2e, 0x63, 0x6f, 0x6f, 0x72, 0x64, 0x69, 0x6e, 0x61, 0x74, 0x6f, 0x72,
 	0x2e, 0x65, 0x64, 0x67, 0x65, 0x5f, 0x76, 0x31, 0x1a, 0x17, 0x76, 0x61, 0x6c, 0x69, 0x64, 0x61,
 	0x74, 0x65, 0x2f, 0x76, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74,
-	0x6f, 0x22, 0x6b, 0x0a, 0x0f, 0x4c, 0x61, 0x74, 0x65, 0x6e, 0x63, 0x79, 0x45, 0x6e, 0x64, 0x70,
-	0x6f, 0x69, 0x6e, 0x74, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09,
-	0x52, 0x02, 0x69, 0x64, 0x12, 0x10, 0x0a, 0x03, 0x75, 0x72, 0x6c, 0x18, 0x02, 0x20, 0x01, 0x28,
-	0x09, 0x52, 0x03, 0x75, 0x72, 0x6c, 0x12, 0x1c, 0x0a, 0x09, 0x70, 0x72, 0x6f, 0x78, 0x69, 0x6d,
-	0x69, 0x74, 0x79, 0x18, 0x03, 0x20, 0x01, 0x28, 0x01, 0x52, 0x09, 0x70, 0x72, 0x6f, 0x78, 0x69,
-	0x6d, 0x69, 0x74, 0x79, 0x12, 0x18, 0x0a, 0x07, 0x6c, 0x61, 0x74, 0x65, 0x6e, 0x63, 0x79, 0x18,
-	0x04, 0x20, 0x01, 0x28, 0x01, 0x52, 0x07, 0x6c, 0x61, 0x74, 0x65, 0x6e, 0x63, 0x79, 0x22, 0x2a,
-	0x0a, 0x06, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01,
-	0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64, 0x12, 0x10, 0x0a, 0x03, 0x75, 0x72, 0x6c, 0x18,
-	0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x75, 0x72, 0x6c, 0x22, 0x78, 0x0a, 0x0b, 0x43, 0x72,
-	0x65, 0x64, 0x65, 0x6e, 0x74, 0x69, 0x61, 0x6c, 0x73, 0x12, 0x4a, 0x0a, 0x06, 0x73, 0x65, 0x72,
-	0x76, 0x65, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x28, 0x2e, 0x73, 0x74, 0x72, 0x65,
+	0x6f, 0x22, 0xca, 0x01, 0x0a, 0x0b, 0x43, 0x72, 0x65, 0x64, 0x65, 0x6e, 0x74, 0x69, 0x61, 0x6c,
+	0x73, 0x12, 0x4e, 0x0a, 0x06, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x0b, 0x32, 0x2c, 0x2e, 0x73, 0x74, 0x72, 0x65, 0x61, 0x6d, 0x2e, 0x76, 0x69, 0x64, 0x65, 0x6f,
+	0x2e, 0x63, 0x6f, 0x6f, 0x72, 0x64, 0x69, 0x6e, 0x61, 0x74, 0x6f, 0x72, 0x2e, 0x65, 0x64, 0x67,
+	0x65, 0x5f, 0x76, 0x31, 0x2e, 0x45, 0x64, 0x67, 0x65, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x42,
+	0x08, 0xfa, 0x42, 0x05, 0x8a, 0x01, 0x02, 0x10, 0x01, 0x52, 0x06, 0x73, 0x65, 0x72, 0x76, 0x65,
+	0x72, 0x12, 0x1d, 0x0a, 0x05, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09,
+	0x42, 0x07, 0xfa, 0x42, 0x04, 0x72, 0x02, 0x10, 0x01, 0x52, 0x05, 0x74, 0x6f, 0x6b, 0x65, 0x6e,
+	0x12, 0x4c, 0x0a, 0x0b, 0x69, 0x63, 0x65, 0x5f, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x73, 0x18,
+	0x03, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x2b, 0x2e, 0x73, 0x74, 0x72, 0x65, 0x61, 0x6d, 0x2e, 0x76,
+	0x69, 0x64, 0x65, 0x6f, 0x2e, 0x63, 0x6f, 0x6f, 0x72, 0x64, 0x69, 0x6e, 0x61, 0x74, 0x6f, 0x72,
+	0x2e, 0x65, 0x64, 0x67, 0x65, 0x5f, 0x76, 0x31, 0x2e, 0x49, 0x43, 0x45, 0x53, 0x65, 0x72, 0x76,
+	0x65, 0x72, 0x52, 0x0a, 0x69, 0x63, 0x65, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x73, 0x22, 0xee,
+	0x01, 0x0a, 0x13, 0x4c, 0x61, 0x74, 0x65, 0x6e, 0x63, 0x79, 0x4d, 0x65, 0x61, 0x73, 0x75, 0x72,
+	0x65, 0x6d, 0x65, 0x6e, 0x74, 0x73, 0x12, 0x6b, 0x0a, 0x0c, 0x6d, 0x65, 0x61, 0x73, 0x75, 0x72,
+	0x65, 0x6d, 0x65, 0x6e, 0x74, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x47, 0x2e, 0x73,
+	0x74, 0x72, 0x65, 0x61, 0x6d, 0x2e, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x2e, 0x63, 0x6f, 0x6f, 0x72,
+	0x64, 0x69, 0x6e, 0x61, 0x74, 0x6f, 0x72, 0x2e, 0x65, 0x64, 0x67, 0x65, 0x5f, 0x76, 0x31, 0x2e,
+	0x4c, 0x61, 0x74, 0x65, 0x6e, 0x63, 0x79, 0x4d, 0x65, 0x61, 0x73, 0x75, 0x72, 0x65, 0x6d, 0x65,
+	0x6e, 0x74, 0x73, 0x2e, 0x4d, 0x65, 0x61, 0x73, 0x75, 0x72, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x73,
+	0x45, 0x6e, 0x74, 0x72, 0x79, 0x52, 0x0c, 0x6d, 0x65, 0x61, 0x73, 0x75, 0x72, 0x65, 0x6d, 0x65,
+	0x6e, 0x74, 0x73, 0x1a, 0x6a, 0x0a, 0x11, 0x4d, 0x65, 0x61, 0x73, 0x75, 0x72, 0x65, 0x6d, 0x65,
+	0x6e, 0x74, 0x73, 0x45, 0x6e, 0x74, 0x72, 0x79, 0x12, 0x10, 0x0a, 0x03, 0x6b, 0x65, 0x79, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x6b, 0x65, 0x79, 0x12, 0x3f, 0x0a, 0x05, 0x76, 0x61,
+	0x6c, 0x75, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x29, 0x2e, 0x73, 0x74, 0x72, 0x65,
 	0x61, 0x6d, 0x2e, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x2e, 0x63, 0x6f, 0x6f, 0x72, 0x64, 0x69, 0x6e,
-	0x61, 0x74, 0x6f, 0x72, 0x2e, 0x65, 0x64, 0x67, 0x65, 0x5f, 0x76, 0x31, 0x2e, 0x53, 0x65, 0x72,
-	0x76, 0x65, 0x72, 0x42, 0x08, 0xfa, 0x42, 0x05, 0x8a, 0x01, 0x02, 0x10, 0x01, 0x52, 0x06, 0x73,
-	0x65, 0x72, 0x76, 0x65, 0x72, 0x12, 0x1d, 0x0a, 0x05, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x18, 0x02,
-	0x20, 0x01, 0x28, 0x09, 0x42, 0x07, 0xfa, 0x42, 0x04, 0x72, 0x02, 0x10, 0x01, 0x52, 0x05, 0x74,
-	0x6f, 0x6b, 0x65, 0x6e, 0x22, 0x6a, 0x0a, 0x17, 0x4c, 0x61, 0x74, 0x65, 0x6e, 0x63, 0x79, 0x4d,
-	0x65, 0x61, 0x73, 0x75, 0x72, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x43, 0x6c, 0x61, 0x69, 0x6d, 0x12,
-	0x4f, 0x0a, 0x09, 0x65, 0x6e, 0x64, 0x70, 0x6f, 0x69, 0x6e, 0x74, 0x73, 0x18, 0x01, 0x20, 0x03,
-	0x28, 0x0b, 0x32, 0x31, 0x2e, 0x73, 0x74, 0x72, 0x65, 0x61, 0x6d, 0x2e, 0x76, 0x69, 0x64, 0x65,
-	0x6f, 0x2e, 0x63, 0x6f, 0x6f, 0x72, 0x64, 0x69, 0x6e, 0x61, 0x74, 0x6f, 0x72, 0x2e, 0x65, 0x64,
-	0x67, 0x65, 0x5f, 0x76, 0x31, 0x2e, 0x4c, 0x61, 0x74, 0x65, 0x6e, 0x63, 0x79, 0x45, 0x6e, 0x64,
-	0x70, 0x6f, 0x69, 0x6e, 0x74, 0x52, 0x09, 0x65, 0x6e, 0x64, 0x70, 0x6f, 0x69, 0x6e, 0x74, 0x73,
-	0x22, 0xee, 0x01, 0x0a, 0x13, 0x4c, 0x61, 0x74, 0x65, 0x6e, 0x63, 0x79, 0x4d, 0x65, 0x61, 0x73,
-	0x75, 0x72, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x73, 0x12, 0x6b, 0x0a, 0x0c, 0x6d, 0x65, 0x61, 0x73,
-	0x75, 0x72, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x47,
-	0x2e, 0x73, 0x74, 0x72, 0x65, 0x61, 0x6d, 0x2e, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x2e, 0x63, 0x6f,
-	0x6f, 0x72, 0x64, 0x69, 0x6e, 0x61, 0x74, 0x6f, 0x72, 0x2e, 0x65, 0x64, 0x67, 0x65, 0x5f, 0x76,
-	0x31, 0x2e, 0x4c, 0x61, 0x74, 0x65, 0x6e, 0x63, 0x79, 0x4d, 0x65, 0x61, 0x73, 0x75, 0x72, 0x65,
-	0x6d, 0x65, 0x6e, 0x74, 0x73, 0x2e, 0x4d, 0x65, 0x61, 0x73, 0x75, 0x72, 0x65, 0x6d, 0x65, 0x6e,
-	0x74, 0x73, 0x45, 0x6e, 0x74, 0x72, 0x79, 0x52, 0x0c, 0x6d, 0x65, 0x61, 0x73, 0x75, 0x72, 0x65,
-	0x6d, 0x65, 0x6e, 0x74, 0x73, 0x1a, 0x6a, 0x0a, 0x11, 0x4d, 0x65, 0x61, 0x73, 0x75, 0x72, 0x65,
-	0x6d, 0x65, 0x6e, 0x74, 0x73, 0x45, 0x6e, 0x74, 0x72, 0x79, 0x12, 0x10, 0x0a, 0x03, 0x6b, 0x65,
-	0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x6b, 0x65, 0x79, 0x12, 0x3f, 0x0a, 0x05,
-	0x76, 0x61, 0x6c, 0x75, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x29, 0x2e, 0x73, 0x74,
-	0x72, 0x65, 0x61, 0x6d, 0x2e, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x2e, 0x63, 0x6f, 0x6f, 0x72, 0x64,
-	0x69, 0x6e, 0x61, 0x74, 0x6f, 0x72, 0x2e, 0x65, 0x64, 0x67, 0x65, 0x5f, 0x76, 0x31, 0x2e, 0x4c,
-	0x61, 0x74, 0x65, 0x6e, 0x63, 0x79, 0x52, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x3a, 0x02, 0x38,
-	0x01, 0x22, 0x3c, 0x0a, 0x07, 0x4c, 0x61, 0x74, 0x65, 0x6e, 0x63, 0x79, 0x12, 0x31, 0x0a, 0x14,
-	0x6d, 0x65, 0x61, 0x73, 0x75, 0x72, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x73, 0x5f, 0x73, 0x65, 0x63,
-	0x6f, 0x6e, 0x64, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x01, 0x52, 0x13, 0x6d, 0x65, 0x61, 0x73,
-	0x75, 0x72, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x73, 0x53, 0x65, 0x63, 0x6f, 0x6e, 0x64, 0x73, 0x22,
-	0x4d, 0x0a, 0x04, 0x45, 0x64, 0x67, 0x65, 0x12, 0x1b, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18,
-	0x01, 0x20, 0x01, 0x28, 0x09, 0x42, 0x07, 0xfa, 0x42, 0x04, 0x72, 0x02, 0x10, 0x01, 0x52, 0x04,
-	0x6e, 0x61, 0x6d, 0x65, 0x12, 0x28, 0x0a, 0x0b, 0x6c, 0x61, 0x74, 0x65, 0x6e, 0x63, 0x79, 0x5f,
-	0x75, 0x72, 0x6c, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x42, 0x07, 0xfa, 0x42, 0x04, 0x72, 0x02,
-	0x10, 0x01, 0x52, 0x0a, 0x6c, 0x61, 0x74, 0x65, 0x6e, 0x63, 0x79, 0x55, 0x72, 0x6c, 0x22, 0x53,
-	0x0a, 0x0a, 0x45, 0x64, 0x67, 0x65, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x12, 0x10, 0x0a, 0x03,
-	0x75, 0x72, 0x6c, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x75, 0x72, 0x6c, 0x1a, 0x33,
-	0x0a, 0x0b, 0x43, 0x6f, 0x6f, 0x72, 0x64, 0x69, 0x6e, 0x61, 0x74, 0x65, 0x73, 0x12, 0x10, 0x0a,
-	0x03, 0x6c, 0x61, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x02, 0x52, 0x03, 0x6c, 0x61, 0x74, 0x12,
-	0x12, 0x0a, 0x04, 0x6c, 0x6f, 0x6e, 0x67, 0x18, 0x02, 0x20, 0x01, 0x28, 0x02, 0x52, 0x04, 0x6c,
-	0x6f, 0x6e, 0x67, 0x42, 0x09, 0x5a, 0x07, 0x65, 0x64, 0x67, 0x65, 0x5f, 0x76, 0x31, 0x62, 0x06,
-	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x61, 0x74, 0x6f, 0x72, 0x2e, 0x65, 0x64, 0x67, 0x65, 0x5f, 0x76, 0x31, 0x2e, 0x4c, 0x61, 0x74,
+	0x65, 0x6e, 0x63, 0x79, 0x52, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x3a, 0x02, 0x38, 0x01, 0x22,
+	0x3c, 0x0a, 0x07, 0x4c, 0x61, 0x74, 0x65, 0x6e, 0x63, 0x79, 0x12, 0x31, 0x0a, 0x14, 0x6d, 0x65,
+	0x61, 0x73, 0x75, 0x72, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x73, 0x5f, 0x73, 0x65, 0x63, 0x6f, 0x6e,
+	0x64, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x01, 0x52, 0x13, 0x6d, 0x65, 0x61, 0x73, 0x75, 0x72,
+	0x65, 0x6d, 0x65, 0x6e, 0x74, 0x73, 0x53, 0x65, 0x63, 0x6f, 0x6e, 0x64, 0x73, 0x22, 0x33, 0x0a,
+	0x0b, 0x43, 0x6f, 0x6f, 0x72, 0x64, 0x69, 0x6e, 0x61, 0x74, 0x65, 0x73, 0x12, 0x10, 0x0a, 0x03,
+	0x6c, 0x61, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x02, 0x52, 0x03, 0x6c, 0x61, 0x74, 0x12, 0x12,
+	0x0a, 0x04, 0x6c, 0x6f, 0x6e, 0x67, 0x18, 0x02, 0x20, 0x01, 0x28, 0x02, 0x52, 0x04, 0x6c, 0x6f,
+	0x6e, 0x67, 0x22, 0x9e, 0x01, 0x0a, 0x04, 0x45, 0x64, 0x67, 0x65, 0x12, 0x1b, 0x0a, 0x04, 0x6e,
+	0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x42, 0x07, 0xfa, 0x42, 0x04, 0x72, 0x02,
+	0x10, 0x01, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x28, 0x0a, 0x0b, 0x6c, 0x61, 0x74, 0x65,
+	0x6e, 0x63, 0x79, 0x5f, 0x75, 0x72, 0x6c, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x42, 0x07, 0xfa,
+	0x42, 0x04, 0x72, 0x02, 0x10, 0x01, 0x52, 0x0a, 0x6c, 0x61, 0x74, 0x65, 0x6e, 0x63, 0x79, 0x55,
+	0x72, 0x6c, 0x12, 0x4f, 0x0a, 0x0b, 0x63, 0x6f, 0x6f, 0x72, 0x64, 0x69, 0x6e, 0x61, 0x74, 0x65,
+	0x73, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x2d, 0x2e, 0x73, 0x74, 0x72, 0x65, 0x61, 0x6d,
+	0x2e, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x2e, 0x63, 0x6f, 0x6f, 0x72, 0x64, 0x69, 0x6e, 0x61, 0x74,
+	0x6f, 0x72, 0x2e, 0x65, 0x64, 0x67, 0x65, 0x5f, 0x76, 0x31, 0x2e, 0x43, 0x6f, 0x6f, 0x72, 0x64,
+	0x69, 0x6e, 0x61, 0x74, 0x65, 0x73, 0x52, 0x0b, 0x63, 0x6f, 0x6f, 0x72, 0x64, 0x69, 0x6e, 0x61,
+	0x74, 0x65, 0x73, 0x22, 0x57, 0x0a, 0x09, 0x49, 0x43, 0x45, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72,
+	0x12, 0x12, 0x0a, 0x04, 0x75, 0x72, 0x6c, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x09, 0x52, 0x04,
+	0x75, 0x72, 0x6c, 0x73, 0x12, 0x1a, 0x0a, 0x08, 0x75, 0x73, 0x65, 0x72, 0x6e, 0x61, 0x6d, 0x65,
+	0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x75, 0x73, 0x65, 0x72, 0x6e, 0x61, 0x6d, 0x65,
+	0x12, 0x1a, 0x0a, 0x08, 0x70, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x18, 0x03, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x08, 0x70, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x22, 0x3b, 0x0a, 0x0a,
+	0x45, 0x64, 0x67, 0x65, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x12, 0x10, 0x0a, 0x03, 0x75, 0x72,
+	0x6c, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x75, 0x72, 0x6c, 0x12, 0x1b, 0x0a, 0x09,
+	0x65, 0x64, 0x67, 0x65, 0x5f, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x08, 0x65, 0x64, 0x67, 0x65, 0x4e, 0x61, 0x6d, 0x65, 0x42, 0x09, 0x5a, 0x07, 0x65, 0x64, 0x67,
+	0x65, 0x5f, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -584,29 +497,28 @@ func file_video_coordinator_edge_v1_edge_proto_rawDescGZIP() []byte {
 	return file_video_coordinator_edge_v1_edge_proto_rawDescData
 }
 
-var file_video_coordinator_edge_v1_edge_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_video_coordinator_edge_v1_edge_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_video_coordinator_edge_v1_edge_proto_goTypes = []interface{}{
-	(*LatencyEndpoint)(nil),         // 0: stream.video.coordinator.edge_v1.LatencyEndpoint
-	(*Server)(nil),                  // 1: stream.video.coordinator.edge_v1.Server
-	(*Credentials)(nil),             // 2: stream.video.coordinator.edge_v1.Credentials
-	(*LatencyMeasurementClaim)(nil), // 3: stream.video.coordinator.edge_v1.LatencyMeasurementClaim
-	(*LatencyMeasurements)(nil),     // 4: stream.video.coordinator.edge_v1.LatencyMeasurements
-	(*Latency)(nil),                 // 5: stream.video.coordinator.edge_v1.Latency
-	(*Edge)(nil),                    // 6: stream.video.coordinator.edge_v1.Edge
-	(*EdgeServer)(nil),              // 7: stream.video.coordinator.edge_v1.EdgeServer
-	nil,                             // 8: stream.video.coordinator.edge_v1.LatencyMeasurements.MeasurementsEntry
-	(*EdgeServer_Coordinates)(nil),  // 9: stream.video.coordinator.edge_v1.EdgeServer.Coordinates
+	(*Credentials)(nil),         // 0: stream.video.coordinator.edge_v1.Credentials
+	(*LatencyMeasurements)(nil), // 1: stream.video.coordinator.edge_v1.LatencyMeasurements
+	(*Latency)(nil),             // 2: stream.video.coordinator.edge_v1.Latency
+	(*Coordinates)(nil),         // 3: stream.video.coordinator.edge_v1.Coordinates
+	(*Edge)(nil),                // 4: stream.video.coordinator.edge_v1.Edge
+	(*ICEServer)(nil),           // 5: stream.video.coordinator.edge_v1.ICEServer
+	(*EdgeServer)(nil),          // 6: stream.video.coordinator.edge_v1.EdgeServer
+	nil,                         // 7: stream.video.coordinator.edge_v1.LatencyMeasurements.MeasurementsEntry
 }
 var file_video_coordinator_edge_v1_edge_proto_depIdxs = []int32{
-	1, // 0: stream.video.coordinator.edge_v1.Credentials.server:type_name -> stream.video.coordinator.edge_v1.Server
-	0, // 1: stream.video.coordinator.edge_v1.LatencyMeasurementClaim.endpoints:type_name -> stream.video.coordinator.edge_v1.LatencyEndpoint
-	8, // 2: stream.video.coordinator.edge_v1.LatencyMeasurements.measurements:type_name -> stream.video.coordinator.edge_v1.LatencyMeasurements.MeasurementsEntry
-	5, // 3: stream.video.coordinator.edge_v1.LatencyMeasurements.MeasurementsEntry.value:type_name -> stream.video.coordinator.edge_v1.Latency
-	4, // [4:4] is the sub-list for method output_type
-	4, // [4:4] is the sub-list for method input_type
-	4, // [4:4] is the sub-list for extension type_name
-	4, // [4:4] is the sub-list for extension extendee
-	0, // [0:4] is the sub-list for field type_name
+	6, // 0: stream.video.coordinator.edge_v1.Credentials.server:type_name -> stream.video.coordinator.edge_v1.EdgeServer
+	5, // 1: stream.video.coordinator.edge_v1.Credentials.ice_servers:type_name -> stream.video.coordinator.edge_v1.ICEServer
+	7, // 2: stream.video.coordinator.edge_v1.LatencyMeasurements.measurements:type_name -> stream.video.coordinator.edge_v1.LatencyMeasurements.MeasurementsEntry
+	3, // 3: stream.video.coordinator.edge_v1.Edge.coordinates:type_name -> stream.video.coordinator.edge_v1.Coordinates
+	2, // 4: stream.video.coordinator.edge_v1.LatencyMeasurements.MeasurementsEntry.value:type_name -> stream.video.coordinator.edge_v1.Latency
+	5, // [5:5] is the sub-list for method output_type
+	5, // [5:5] is the sub-list for method input_type
+	5, // [5:5] is the sub-list for extension type_name
+	5, // [5:5] is the sub-list for extension extendee
+	0, // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_video_coordinator_edge_v1_edge_proto_init() }
@@ -616,30 +528,6 @@ func file_video_coordinator_edge_v1_edge_proto_init() {
 	}
 	if !protoimpl.UnsafeEnabled {
 		file_video_coordinator_edge_v1_edge_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*LatencyEndpoint); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_video_coordinator_edge_v1_edge_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Server); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_video_coordinator_edge_v1_edge_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*Credentials); i {
 			case 0:
 				return &v.state
@@ -651,19 +539,7 @@ func file_video_coordinator_edge_v1_edge_proto_init() {
 				return nil
 			}
 		}
-		file_video_coordinator_edge_v1_edge_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*LatencyMeasurementClaim); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_video_coordinator_edge_v1_edge_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+		file_video_coordinator_edge_v1_edge_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*LatencyMeasurements); i {
 			case 0:
 				return &v.state
@@ -675,7 +551,7 @@ func file_video_coordinator_edge_v1_edge_proto_init() {
 				return nil
 			}
 		}
-		file_video_coordinator_edge_v1_edge_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
+		file_video_coordinator_edge_v1_edge_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*Latency); i {
 			case 0:
 				return &v.state
@@ -687,7 +563,19 @@ func file_video_coordinator_edge_v1_edge_proto_init() {
 				return nil
 			}
 		}
-		file_video_coordinator_edge_v1_edge_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+		file_video_coordinator_edge_v1_edge_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Coordinates); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_video_coordinator_edge_v1_edge_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*Edge); i {
 			case 0:
 				return &v.state
@@ -699,8 +587,8 @@ func file_video_coordinator_edge_v1_edge_proto_init() {
 				return nil
 			}
 		}
-		file_video_coordinator_edge_v1_edge_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*EdgeServer); i {
+		file_video_coordinator_edge_v1_edge_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ICEServer); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -711,8 +599,8 @@ func file_video_coordinator_edge_v1_edge_proto_init() {
 				return nil
 			}
 		}
-		file_video_coordinator_edge_v1_edge_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*EdgeServer_Coordinates); i {
+		file_video_coordinator_edge_v1_edge_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*EdgeServer); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -730,7 +618,7 @@ func file_video_coordinator_edge_v1_edge_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_video_coordinator_edge_v1_edge_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   10,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

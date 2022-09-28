@@ -2,9 +2,9 @@ syntax = "proto3";
 
 package stream.video.coordinator.call_v1;
 
-import "video/coordinator/member_v1/member.proto";
 import "google/protobuf/timestamp.proto";
 import "validate/validate.proto";
+import "video/coordinator/member_v1/member.proto";
 
 option go_package = "call_v1";
 
@@ -59,7 +59,6 @@ message CallDetails {
 message CallOptions {
   RecordingOptions recording = 1;
   BroadcastingOptions broadcasting = 2;
-  TranscriptionOptions transcription = 3;
 }
 
 // Contains all options regarding to call recording
@@ -72,13 +71,6 @@ message RecordingOptions {
 // Contains all options regarding to call broadcasting
 message BroadcastingOptions {
   // Whether broadcasting feature is enabled
-  // Default: false
-  optional bool enabled = 1;
-}
-
-// Contains all options regarding to call transcription
-message TranscriptionOptions {
-  // Whether transcription feature is enabled
   // Default: false
   optional bool enabled = 1;
 }

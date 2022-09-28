@@ -30,7 +30,6 @@ internal fun stream.video.coordinator.call_v1.Call.toCall(): CallMetadata {
         updatedAt = updated_at?.epochSecond ?: 0,
         recordingEnabled = options?.recording?.enabled ?: false,
         broadcastingEnabled = options?.broadcasting?.enabled ?: false,
-        transcriptionEnabled = options?.transcription?.enabled ?: false,
         extraData = emptyMap() // Json.decodeFromString<Map<String, String>>(extraDataJson)
     )
 }

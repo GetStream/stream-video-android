@@ -119,7 +119,8 @@ public class CallClient(
         val callResult = callCoordinatorClient.joinCall(
             JoinCallRequest(
                 id = call.id,
-                type = call.type
+                type = call.type,
+                datacenter_id = "milan"
             )
         )
 
@@ -127,9 +128,9 @@ public class CallClient(
             val data = callResult.data
 
             return try {
-                val latencyResults = data.latency_claim?.endpoints?.associate {
-                    it.url to measureLatency(it.url)
-                } ?: emptyMap()
+                val latencyResults = data.edges.associate {
+                    it.latency_url to measureLatency(it.latency_url)
+                }
 
                 val selectEdgeServerResult = selectEdgeServer(
                     request = GetCallEdgeServerRequest(

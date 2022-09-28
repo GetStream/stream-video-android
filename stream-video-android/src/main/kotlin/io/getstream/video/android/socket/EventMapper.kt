@@ -36,7 +36,7 @@ internal object EventMapper {
         }
 
         socketEvent.call_created != null -> with(socketEvent.call_created) {
-            CallCreatedEvent(call_cid, call_member_user_ids)
+            CallCreatedEvent(call_cid)
         }
 
 //        TODO - do we remove these?
