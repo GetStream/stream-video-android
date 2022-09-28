@@ -17,13 +17,14 @@
 package io.getstream.video.android.client.coordinator
 
 import io.getstream.video.android.utils.Result
-import stream.video.CreateCallRequest
-import stream.video.CreateCallResponse
-import stream.video.JoinCallRequest
-import stream.video.JoinCallResponse
-import stream.video.SelectEdgeServerRequest
-import stream.video.SelectEdgeServerResponse
-import stream.video.SendEventRequest
+import stream.video.coordinator.call_v1.Call
+import stream.video.coordinator.client_v1_rpc.CreateCallRequest
+import stream.video.coordinator.client_v1_rpc.CreateCallResponse
+import stream.video.coordinator.client_v1_rpc.GetCallEdgeServerRequest
+import stream.video.coordinator.client_v1_rpc.GetCallEdgeServerResponse
+import stream.video.coordinator.client_v1_rpc.JoinCallRequest
+import stream.video.coordinator.client_v1_rpc.JoinCallResponse
+import stream.video.coordinator.client_v1_rpc.SendCustomEventRequest
 
 public interface CallCoordinatorClient {
 
@@ -31,9 +32,18 @@ public interface CallCoordinatorClient {
      * Creates a new call that users can connect to and communicate in.
      *
      * @param createCallRequest The information used to describe the call.
-     * @return [CreateCallResponse] which holds the newly created [stream.video.Call].
+     * @return [CreateCallResponse] which holds the newly created [Call].
      */
     public suspend fun createCall(createCallRequest: CreateCallRequest): Result<CreateCallResponse>
+
+    /**
+     * Does the same as [createCall] but if the call exists, it fetches the existing instance rather
+     * than creating a brand new call.
+     *
+     * @param createCallRequest The information used to describe the call.
+     * @return [CreateCallResponse] which holds the cached or newly created [Call].
+     */
+    public suspend fun getOrCreateCall(createCallRequest: CreateCallRequest): Result<CreateCallResponse>
 
     /**
      * Asks the server to join a call. This gives the user information which servers they can
@@ -48,16 +58,16 @@ public interface CallCoordinatorClient {
      * Asks the API for a correct edge server that can handle a connection for the given request.
      *
      * @param request The set of information used to find the server.
-     * @return a [Result] wrapper of the [SelectEdgeServerResponse], based on the API response.
+     * @return a [Result] wrapper of the [GetCallEdgeServerRequest], based on the API response.
      */
-    public suspend fun selectEdgeServer(request: SelectEdgeServerRequest): Result<SelectEdgeServerResponse>
+    public suspend fun selectEdgeServer(request: GetCallEdgeServerRequest): Result<GetCallEdgeServerResponse>
 
     /**
      * Sends a user-based event to the API to notify if we've changed something in the state of the
-     * call. The events can be any of the [stream.video.UserEventType].
+     * call.
      *
      * @param sendEventRequest The request holding information about the event type and the call.
      * @return a [Result] wrapper if the call succeeded or not.
      */
-    public suspend fun sendUserEvent(sendEventRequest: SendEventRequest): Result<Boolean>
+    public suspend fun sendUserEvent(sendEventRequest: SendCustomEventRequest): Result<Boolean>
 }

@@ -24,13 +24,28 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ui.login.CustomLoginActivity" />
-
         <activity android:name=".ui.home.HomeActivity" />
 
         <activity android:name=".ui.call.CallActivity" />
 
-        <activity android:name=".ui.test.SfuTestActivity" />
+        <activity
+            android:name=".ui.DeeplinkingActivity"
+            android:exported="true">
+            <intent-filter
+                android:autoVerify="true"
+                android:label="@string/filter_call_link">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <!-- Accepts URIs that begin with "http://www.example.com/gizmos” -->
+                <data
+                    android:host="stream-video.com"
+                    android:pathPrefix="/"
+                    android:scheme="https" />
+                <!-- note that the leading "/" is required for pathPrefix-->
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

@@ -19,25 +19,33 @@ package io.getstream.video.android.compose.ui.components.participants
 import android.view.View
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.RectangleShape
+import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
+import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.CallParticipant
-import io.getstream.video.android.model.Room
 
 @Composable
 public fun ParticipantItem(
-    room: Room,
+    call: Call,
     participant: CallParticipant,
     modifier: Modifier = Modifier,
     onRender: (View) -> Unit = {}
 ) {
     val track = participant.track
 
-    if (track != null) {
+    if (track != null && track.video.enabled()) {
         VideoRenderer(
             modifier = modifier,
-            room = room,
+            call = call,
             videoTrack = track,
             onRender = onRender
+        )
+    } else {
+        UserAvatar(
+            modifier = modifier,
+            shape = RectangleShape,
+            user = participant
         )
     }
 }

@@ -16,15 +16,29 @@
 
 package io.getstream.video.android.model
 
+import io.getstream.video.android.model.domain.User
+
+// TODO - internal sample app, clean up once full auth/login is set up
 public data class UserCredentials(
     val id: String,
+    val role: String,
     val token: String,
     val name: String,
-    val sfuToken: String,
     val image: String = "",
     val isSelected: Boolean = false
 ) {
     public fun isValid(): Boolean {
-        return id.isNotEmpty() && token.isNotEmpty() && sfuToken.isNotEmpty() && name.isNotEmpty()
+        return id.isNotEmpty() && token.isNotEmpty() && name.isNotEmpty()
+    }
+
+    public fun toUser(): User {
+        return User(
+            id = id,
+            role = role,
+            name = name,
+            imageUrl = image,
+            teams = emptyList(),
+            extraData = emptyMap()
+        )
     }
 }

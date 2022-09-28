@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.utils
 
-import io.getstream.video.android.module.VideoModule
+import io.getstream.video.android.module.CallClientModule
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.URL
@@ -27,13 +27,13 @@ import java.net.URL
  * @param latencyUrl The URL of the server where we ping a connection.
  * @return A [List] of [Float] values representing the portion of a second it takes to connect.
  */
-public fun getLatencyMeasurements(latencyUrl: String): List<Float> {
-    val measurements = mutableListOf<Float>()
+public fun getLatencyMeasurements(latencyUrl: String): List<Double> {
+    val measurements = mutableListOf<Double>()
 
     /**
      * Used for setting up testing on devices.
      */
-    val url = VideoModule.REDIRECT_PING_URL ?: prepareUrl(latencyUrl)
+    val url = CallClientModule.REDIRECT_PING_URL ?: prepareUrl(latencyUrl)
 
     repeat(3) {
         val request = URL(url)
@@ -49,7 +49,7 @@ public fun getLatencyMeasurements(latencyUrl: String): List<Float> {
 
         val end = System.currentTimeMillis()
 
-        val seconds = (end - start) / 1000f
+        val seconds = (end - start) / 1000.0
         measurements.add(seconds)
     }
 

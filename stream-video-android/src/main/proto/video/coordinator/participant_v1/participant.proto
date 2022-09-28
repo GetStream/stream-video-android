@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package stream.video.coordinator.participant_v1;
+
+import "google/protobuf/timestamp.proto";
+import "video/coordinator/user_v1/user.proto";
+
+option go_package = "participant_v1";
+
+// those who are online in the call
+message Participant {
+  stream.video.coordinator.user_v1.User user = 1;
+  string role = 2;
+  bool online = 3;
+  bytes custom_json = 4;
+  bool video = 5;
+  bool audio = 6;
+
+  // Call creation date.
+  google.protobuf.Timestamp created_at = 7;
+
+  // Call last update date.
+  google.protobuf.Timestamp updated_at = 8;
+}
+
+message ParticipantRequest {
+  string user_id = 1;
+  string role = 2;
+
+  // Call custom data
+  bytes custom_json = 3;
+
+  // Call creation date.
+  google.protobuf.Timestamp created_at = 4;
+
+  // Call last update date.
+  google.protobuf.Timestamp updated_at = 5;
+}

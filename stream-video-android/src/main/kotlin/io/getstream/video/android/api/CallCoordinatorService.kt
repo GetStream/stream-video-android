@@ -20,15 +20,13 @@ import retrofit2.http.Body
 import retrofit2.http.Headers
 import retrofit2.http.POST
 import retrofit2.http.Query
-import stream.video.CreateCallRequest
-import stream.video.CreateCallResponse
-import stream.video.JoinCallRequest
-import stream.video.JoinCallResponse
-import stream.video.SelectEdgeServerRequest
-import stream.video.SelectEdgeServerResponse
-import stream.video.SendEventRequest
-import stream.video.SendEventResponse
-
+import stream.video.coordinator.client_v1_rpc.CreateCallRequest
+import stream.video.coordinator.client_v1_rpc.CreateCallResponse
+import stream.video.coordinator.client_v1_rpc.GetCallEdgeServerRequest
+import stream.video.coordinator.client_v1_rpc.GetCallEdgeServerResponse
+import stream.video.coordinator.client_v1_rpc.JoinCallRequest
+import stream.video.coordinator.client_v1_rpc.JoinCallResponse
+import stream.video.coordinator.client_v1_rpc.SendCustomEventRequest
 /**
  * Main service used to communicate with our API regarding video services.
  *
@@ -40,32 +38,39 @@ import stream.video.SendEventResponse
 public interface CallCoordinatorService {
 
     @Headers("Content-Type: application/protobuf")
-    @POST("/stream.video.CallCoordinatorService/CreateCall")
+    @POST("/rpc/stream.video.coordinator.client_v1_rpc.ClientRPC/CreateCall")
     public suspend fun createCall(
         @Body createCallRequest: CreateCallRequest,
         @Query(QUERY_API_KEY) apiKey: String
     ): CreateCallResponse
 
     @Headers("Content-Type: application/protobuf")
-    @POST("/stream.video.CallCoordinatorService/JoinCall")
+    @POST("/rpc/stream.video.coordinator.client_v1_rpc.ClientRPC/GetOrCreateCall")
+    public suspend fun getOrCreateCall(
+        @Body createCallRequest: CreateCallRequest,
+        @Query(QUERY_API_KEY) apiKey: String
+    ): CreateCallResponse
+
+    @Headers("Content-Type: application/protobuf")
+    @POST("/rpc/stream.video.coordinator.client_v1_rpc.ClientRPC/JoinCall")
     public suspend fun joinCall(
         @Body joinCallRequest: JoinCallRequest,
         @Query(QUERY_API_KEY) apiKey: String
     ): JoinCallResponse
 
     @Headers("Content-Type: application/protobuf")
-    @POST("/stream.video.CallCoordinatorService/SelectEdgeServer")
-    public suspend fun selectEdgeServer(
-        @Body selectEdgeServerRequest: SelectEdgeServerRequest,
+    @POST("/rpc/stream.video.coordinator.client_v1_rpc.ClientRPC/GetCallEdgeServer")
+    public suspend fun getCallEdgeServer(
+        @Body selectEdgeServerRequest: GetCallEdgeServerRequest,
         @Query(QUERY_API_KEY) apiKey: String
-    ): SelectEdgeServerResponse
+    ): GetCallEdgeServerResponse
 
     @Headers("Content-Type: application/protobuf")
-    @POST("/stream.video.CallCoordinatorService/SendEvent")
-    public suspend fun sendUserEvent(
-        @Body sendEventRequest: SendEventRequest,
+    @POST("/rpc/stream.video.coordinator.client_v1_rpc.ClientRPC/SendEvent")
+    public suspend fun sendCustomEvent( // TODO - do we need this?
+        @Body sendEventRequest: SendCustomEventRequest,
         @Query(QUERY_API_KEY) apiKey: String
-    ): SendEventResponse
+    ): SendCustomEventRequest
 }
 
 /**

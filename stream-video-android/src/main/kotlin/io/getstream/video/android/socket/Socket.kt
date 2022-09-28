@@ -18,8 +18,9 @@ package io.getstream.video.android.socket
 
 import com.squareup.wire.Message
 import okhttp3.WebSocket
-import stream.video.AuthPayload
-import stream.video.Healthcheck
+import stream.video.coordinator.client_v1_rpc.WebsocketAuthRequest
+import stream.video.coordinator.client_v1_rpc.WebsocketClientEvent
+import stream.video.coordinator.client_v1_rpc.WebsocketHealthcheck
 
 /**
  * Wrapper around the [WebSocket] that lets you send different types of events.
@@ -32,8 +33,8 @@ internal class Socket(private val socket: WebSocket) {
      * Sends the [authPayload] as a Binary message to the socket, attempting to authenticate the
      * currently logged in user.
      */
-    fun authenticate(authPayload: AuthPayload) {
-        socket.send(authPayload.encodeByteString())
+    fun authenticate(authPayload: WebsocketAuthRequest) {
+        socket.send(WebsocketClientEvent(auth_request = authPayload).encodeByteString())
     }
 
     /**
@@ -50,7 +51,7 @@ internal class Socket(private val socket: WebSocket) {
      *
      * @param state The state of the connection.
      */
-    fun ping(state: Healthcheck) {
+    fun ping(state: WebsocketHealthcheck) {
         socket.send(state.encodeByteString())
     }
 

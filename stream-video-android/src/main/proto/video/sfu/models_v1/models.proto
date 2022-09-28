@@ -1,0 +1,94 @@
+syntax = "proto3";
+
+package stream.video.sfu.models_v1;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "models_v1";
+
+enum PeerType {
+  PEER_TYPE_PUBLISHER_UNSPECIFIED = 0;
+  PEER_TYPE_SUBSCRIBER = 1;
+}
+
+enum ConnectionQuality {
+  CONNECTION_QUALITY_BAD_UNSPECIFIED = 0;
+  CONNECTION_QUALITY_POOR = 1;
+  CONNECTION_QUALITY_GOOD = 2;
+}
+
+enum VideoQuality {
+  VIDEO_QUALITY_LOW_UNSPECIFIED = 0;
+  VIDEO_QUALITY_MID = 1;
+  VIDEO_QUALITY_HIGH = 2;
+}
+
+message CallState {
+  repeated Participant participants = 1;
+}
+
+message Call {
+  // Unique call ID as identified by Coordinator
+  string id = 1;
+  // A timestamp of the call start. The timestamp is set when first participant connects
+  google.protobuf.Timestamp created_at = 2;
+}
+
+// those who are online in the call
+message Participant {
+  string user_id = 1;
+  string session_id = 2;
+
+  bool video = 3;
+  bool audio = 4;
+  google.protobuf.Timestamp connected_at = 5;
+}
+
+message StreamQuality {
+  VideoQuality video_quality = 1;
+  string user_id = 2;
+}
+
+message VideoDimension {
+  uint32 width = 1;
+  uint32 height = 2;
+}
+
+message VideoLayer {
+  // for tracks with a single layer, this should be HIGH
+  string rid = 1;
+  VideoDimension video_dimension = 2;
+
+  // target bitrate, server will measure actual
+  uint32 bitrate = 4;
+}
+
+message SimulcastCodecInfo {
+  string mime_type = 1;
+  string mid = 2;
+  string cid = 3;
+  repeated VideoLayer layers = 4;
+}
+
+message Codec {
+  string mime = 1;
+  string fmtp_line = 2;
+  uint32 clock_rate = 3;
+  bool hw_accelerated = 4;
+}
+
+message AudioCodecs {
+  repeated Codec encodes = 1;
+  repeated Codec decodes = 2;
+}
+
+message VideoCodecs {
+  repeated Codec encodes = 1;
+  repeated Codec decodes = 2;
+}
+
+message CodecSettings {
+  AudioCodecs audio = 1;
+  VideoCodecs video = 2;
+  repeated VideoLayer layers = 3;
+}

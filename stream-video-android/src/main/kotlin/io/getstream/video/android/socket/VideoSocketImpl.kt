@@ -26,16 +26,16 @@ import io.getstream.video.android.errors.VideoErrorCode
 import io.getstream.video.android.errors.VideoNetworkError
 import io.getstream.video.android.events.ConnectedEvent
 import io.getstream.video.android.events.VideoEvent
+import io.getstream.video.android.model.domain.CallMetadata
 import io.getstream.video.android.network.NetworkStateProvider
 import io.getstream.video.android.token.CredentialsManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import stream.video.AuthPayload
-import stream.video.Call
-import stream.video.CreateUserRequest
-import stream.video.Healthcheck
+import stream.video.coordinator.client_v1_rpc.WebsocketAuthRequest
+import stream.video.coordinator.client_v1_rpc.WebsocketHealthcheck
+import stream.video.coordinator.user_v1.UserInput
 import kotlin.math.pow
 import kotlin.properties.Delegates
 
@@ -68,7 +68,7 @@ internal class VideoSocketImpl(
     /**
      * Call related state.
      */
-    private var call: Call? = null
+    private var call: CallMetadata? = null
 
     private val healthMonitor = HealthMonitor(
         object : HealthMonitor.HealthCallback {
@@ -81,7 +81,7 @@ internal class VideoSocketImpl(
             override fun check() {
                 (state as? State.Connected)?.let {
                     sendPing(
-                        Healthcheck(
+                        WebsocketHealthcheck(
                             user_id = userState.user.value.id,
                             client_id = clientId,
                             call_type = call?.type ?: "",
@@ -210,8 +210,12 @@ internal class VideoSocketImpl(
         val user = userState.user.value
 
         socket?.authenticate(
-            AuthPayload(
-                user = CreateUserRequest(id = user.id, name = user.name),
+            WebsocketAuthRequest(
+                user = UserInput(
+                    name = user.name,
+                    image_url = user.imageUrl ?: "",
+                    role = user.role
+                ),
                 token = credentialsManager.getToken(),
                 api_key = credentialsManager.getApiKey()
             )
@@ -233,11 +237,11 @@ internal class VideoSocketImpl(
         networkStateProvider.subscribe(networkStateListener)
     }
 
-    override fun updateCallState(call: Call?) {
+    override fun updateCallState(call: CallMetadata?) {
         this.call = call
     }
 
-    override fun getCallState(): Call? = call
+    override fun getCallState(): CallMetadata? = call
 
     override fun releaseConnection() {
         state = State.DisconnectedByRequest
@@ -253,7 +257,7 @@ internal class VideoSocketImpl(
         callListeners { listener -> listener.onEvent(event) }
     }
 
-    internal fun sendPing(state: Healthcheck) {
+    internal fun sendPing(state: WebsocketHealthcheck) {
         socket?.ping(state)
     }
 

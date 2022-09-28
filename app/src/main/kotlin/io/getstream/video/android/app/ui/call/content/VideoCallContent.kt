@@ -69,8 +69,7 @@ internal fun VideoCallContent(
     callViewModel: CallViewModel,
     onLeaveCall: () -> Unit
 ) {
-    val room by callViewModel.roomState.collectAsState(initial = null)
-    val callState by callViewModel.callState.collectAsState(null)
+    val room by callViewModel.callState.collectAsState(initial = null)
     val isShowingParticipantsInfo by callViewModel.isShowingParticipantsInfo.collectAsState(
         false
     )
@@ -99,7 +98,7 @@ internal fun VideoCallContent(
 
             Column(modifier = Modifier.fillMaxSize()) {
 
-                CallActionBar(callViewModel, callState?.id ?: "")
+                CallActionBar(callViewModel, "TODO - Call ID") // TODO -
 
                 if (roomState == null) {
                     Box(
@@ -118,7 +117,7 @@ internal fun VideoCallContent(
                         MainStage(
                             modifier = Modifier
                                 .fillMaxSize(),
-                            room = roomState
+                            call = roomState
                         )
 
                         CallOptions(
@@ -126,7 +125,7 @@ internal fun VideoCallContent(
                                 .align(Alignment.BottomCenter)
                                 .fillMaxWidth()
                                 .height(56.dp),
-                            room = roomState,
+                            call = roomState,
                             onEndCall = {
                                 onLeaveCall()
                             },

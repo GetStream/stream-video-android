@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package stream.video.coordinator.utils_v1;
+
+option go_package = "utils_v1";
+
+enum Direction {
+  DIRECTION_UNSPECIFIED = 0;
+  DIRECTION_DESC = -1;
+  DIRECTION_ASC = 1;
+}
+message Sort {
+  string field = 1;
+  Direction direction = 2;
+}

@@ -26,6 +26,7 @@ import org.webrtc.DefaultVideoDecoderFactory
 import org.webrtc.EglBase
 import org.webrtc.HardwareVideoEncoderFactory
 import org.webrtc.IceCandidate
+import org.webrtc.Logging
 import org.webrtc.MediaConstraints
 import org.webrtc.MediaStream
 import org.webrtc.PeerConnection
@@ -58,6 +59,11 @@ public class StreamPeerConnectionFactory(private val context: Context) {
     private val factory by lazy {
         PeerConnectionFactory.initialize(
             PeerConnectionFactory.InitializationOptions.builder(context)
+                .setInjectableLogger({ message, _, label ->
+                    if (message.contains("audio", true)) {
+                        Log.i("WebRTC", "$label: $message")
+                    }
+                }, Logging.Severity.LS_VERBOSE)
                 .createInitializationOptions()
         )
 

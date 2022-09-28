@@ -27,13 +27,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
-import io.getstream.video.android.model.Room
+import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.VideoTrack
 import org.webrtc.SurfaceViewRenderer
 
 @Composable
 public fun VideoRenderer(
-    room: Room,
+    call: Call,
     videoTrack: VideoTrack,
     modifier: Modifier = Modifier,
     onRender: (View) -> Unit = {}
@@ -41,7 +41,7 @@ public fun VideoRenderer(
     val boundVideoTrack: MutableState<VideoTrack?> = remember { mutableStateOf(null) }
     var view: SurfaceViewRenderer? by remember { mutableStateOf(null) }
 
-    DisposableEffect(room, videoTrack) {
+    DisposableEffect(call, videoTrack) {
         onDispose {
             cleanupVideoTrack(view, boundVideoTrack)
         }
@@ -56,9 +56,9 @@ public fun VideoRenderer(
     AndroidView(
         factory = { context ->
             SurfaceViewRenderer(context).apply {
-                this.setZOrderOnTop(false) // TODO - test if we can add the Surface View to the Android View after it's ready
+                this.setZOrderOnTop(false)
                 this.setZOrderMediaOverlay(false)
-                room.initRenderer(this, videoTrack.streamId, onRender)
+                call.initRenderer(this, videoTrack.streamId, onRender)
                 setupVideoIfNeeded(boundVideoTrack, videoTrack, this)
 
                 view = this

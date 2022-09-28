@@ -1,0 +1,318 @@
+syntax = "proto3";
+
+package stream.video.coordinator.client_v1_rpc;
+
+import "google/protobuf/duration.proto";
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+import "video/coordinator/client_v1_rpc/envelopes.proto";
+import "video/coordinator/call_v1/call.proto";
+import "video/coordinator/edge_v1/edge.proto";
+import "video/coordinator/push_v1/push.proto";
+import "video/coordinator/stat_v1/stat.proto";
+import "video/coordinator/utils_v1/utils.proto";
+
+option go_package = "client_v1_rpc";
+
+service ClientRPC {
+//  rpc GetCall(GetCallRequest) returns (GetCallResponse);
+  rpc CreateCall(CreateCallRequest) returns (CreateCallResponse);
+  rpc GetOrCreateCall(GetOrCreateCallRequest) returns (GetOrCreateCallResponse);
+  // JoinCall acts as GetOrCreateCall, but additionally returns list of datacenters to measure latency
+  rpc JoinCall(JoinCallRequest) returns (JoinCallResponse);
+  // GetCallSFU returns SFU information that is required to establish a connection
+  rpc GetCallEdgeServer(GetCallEdgeServerRequest) returns (GetCallEdgeServerResponse);
+
+  rpc UpdateCall(UpdateCallRequest) returns (UpdateCallResponse);
+//  rpc EndCall();
+
+  rpc QueryCalls(QueryCallsRequest) returns (QueryCallsResponse);
+
+  // QueryMembers gets a list of members that match your query criteria
+  rpc QueryMembers(QueryMembersRequest) returns (QueryMembersResponse);
+
+  rpc CreateDevice(CreateDeviceRequest) returns (CreateDeviceResponse);
+  rpc DeleteDevice(DeleteDeviceRequest) returns (DeleteDeviceResponse);
+  rpc QueryDevices(QueryDevicesRequest) returns (QueryDevicesResponse);
+
+  // UNSTABLE ENDPOINTS BELOW
+
+  // UpdateMembers creates or updates members in a room.
+  // If a member is not found, It will be created.
+  // TODO: response with room data
+  rpc UpdateCallMembers(UpdateCallMembersRequest) returns (UpdateCallMembersResponse);
+  // DeleteMembers deletes members from a room.
+  // TODO: response with room data
+  rpc DeleteCallMembers(DeleteCallMembersRequest) returns (DeleteCallMembersResponse);
+
+  rpc QueryCallTimelineEvents(QueryCallTimelineEventsRequest) returns (QueryCallTimelineEventsResponse);
+
+  rpc SendCustomEvent(SendCustomEventRequest) returns (SendCustomEventResponse);
+
+  // room is a confusing name. better to call it breakout room
+  // breakout rooms have their own audio/video track
+  // breakout rooms have their own chat
+  /**
+  TODO
+  rpc CreateBreakoutRoom(CreateBreakoutRoomRequest) returns (CreateBreakoutRoomResponse);
+  rpc JoinBreakoutRoom() returns ();
+  rpc LeaveBreakoutRoom() returns ();
+  rpc DeleteBreakoutRoom() returns ();
+  */
+
+  // endpoint for storing stats (perhaps we should move this to the SFU layer though)
+  rpc ReportCallStats(ReportCallStatsRequest) returns (ReportCallStatsResponse);
+  // endpoint for reviewing/rating the quality of calls
+  rpc ReviewCall(ReviewCallRequest) returns (ReviewCallResponse);
+  // endpoint for users to report issues with a call
+  rpc ReportIssue(ReportIssueRequest) returns (ReportIssueResponse);
+}
+
+message GetCallRequest {
+  string call_cid = 1;
+}
+
+message GetCallResponse {
+  CallEnvelope call = 1;
+}
+
+message MemberInput {
+  string role = 1;
+  bytes custom_json = 2;
+}
+
+enum MemberField {
+  MEMBER_FIELD_UNSPECIFIED = 0;
+  MEMBER_FIELD_ROLE = 1;
+  MEMBER_FIELD_CUSTOM = 2;
+}
+
+message UpdateCallMembersRequest {
+  string call_cid = 1;
+  map<string, MemberInput> members = 2;
+  repeated MemberField fields = 3;
+}
+
+message UpdateCallMembersResponse {
+}
+
+message DeleteCallMembersRequest {
+  string call_cid = 1;
+  repeated string user_ids = 2;
+}
+
+message DeleteCallMembersResponse {
+}
+
+// A message that carries data for call creation
+message CreateCallInput {
+  // Call properties to set
+  CallInput call = 1;
+  // Members to add to the created call
+  map<string, MemberInput> members = 2;
+}
+
+// A request message for GetOrCreateCall endpoint
+message CreateCallRequest {
+  // Call type
+  string type = 1;
+  // Call ID. If empty, will be generated as UUIDv4
+  optional string id = 2;
+  // Call creation input, only used if the call does not exist
+  CreateCallInput input = 3;
+}
+
+// A request message for GetOrCreateCall endpoint
+message GetOrCreateCallRequest {
+  // Call type
+  string type = 1;
+  // Call ID
+  string id = 2;
+  // Call creation input, only used if the call does not exist
+  CreateCallInput input = 3;
+}
+
+// A request message for JoinCall endpoint
+message JoinCallRequest {
+  // Call type
+  string type = 1;
+  // Call ID
+  string id = 2;
+
+  CreateCallInput input = 3;
+  // Preferred client datacenter. This is optional and when set, preferred datacenter selection is not guaranteed
+  string datacenter_id = 4;
+}
+
+// A request message for GetOrCreateCall endpoint
+message JoinCallResponse {
+  CallEnvelope call = 1;
+  // Whether a call was created
+  bool created = 2;
+  // A list of endpoints to measure latency
+  edge_v1.LatencyMeasurementClaim latency_claim = 3;
+}
+
+// Represents all updatable room fields
+message CallInput {
+  // Custom JSON object that is stored in this call
+  // All users with read permissions will have access to this object
+  bytes custom_json = 1;
+  // Call options to set
+  call_v1.CallOptions options = 2;
+}
+
+message GetOrCreateCallResponse {
+  CallEnvelope call = 1;
+  // Whether a call was created
+  bool created = 2;
+}
+
+message UpdateCallRequest {
+  string call_cid = 1;
+  CallInput input = 2;
+}
+
+message UpdateCallResponse {
+  CallEnvelope call = 1;
+}
+
+message CreateCallResponse {
+  CallEnvelope call = 1;
+}
+
+message QueryCallsRequest {
+  bytes mq_json = 1;
+  optional int32 limit = 2;
+  repeated utils_v1.Sort sorts = 3;
+}
+
+message QueryCallsResponse {
+  CallsEnvelope calls = 1;
+}
+
+message QueryMembersRequest {
+  bytes mq_json = 1;
+  optional int32 limit = 2;
+  repeated utils_v1.Sort sorts = 3;
+}
+
+message QueryMembersResponse {
+  MembersEnvelope members = 1;
+}
+
+// A request message for GetCallEdgeServer endpoint
+message GetCallEdgeServerRequest {
+  // Call CID to get SFU for
+  string call_cid = 1;
+  // Latency measurement results
+  // Optional
+  edge_v1.LatencyMeasurements measurements = 2;
+}
+
+message GetCallEdgeServerResponse {
+  CallEnvelope call = 1;
+  // Call edge server credentials
+  edge_v1.Credentials credentials = 2;
+}
+
+// A request message for the QueryCallTimelineEvents endpoint
+// Specifies a subset of events to request
+message QueryCallTimelineEventsRequest {
+  // The call type.
+  string type = 1;
+  // The call id.
+  string id = 2;
+  // Limits event timespan of the response. Default: 10m, max: 30m
+  google.protobuf.Duration duration = 3;
+  // since which date to query events. Default: time of the first event of the call
+  google.protobuf.Timestamp since = 4;
+}
+
+message QueryCallTimelineEventsResponse {
+  // timeline inclusive start time
+  google.protobuf.Timestamp start = 1;
+  // timeline inclusive end time
+  google.protobuf.Timestamp end = 2;
+  // contains cursor to use to request the next page
+  google.protobuf.Timestamp next = 3;
+  // list of events for each participant from requested time period
+  repeated stat_v1.CallParticipantTimeline participant_events = 4;
+}
+
+message CreateDeviceRequest {
+  stream.video.coordinator.push_v1.DeviceInput input = 1;
+}
+
+message CreateDeviceResponse {
+  stream.video.coordinator.push_v1.Device device = 1;
+}
+
+message DeleteDeviceRequest {
+  string id = 1;
+}
+
+message DeleteDeviceResponse {
+}
+
+message QueryDevicesRequest {
+}
+
+message QueryDevicesResponse {
+  repeated stream.video.coordinator.push_v1.Device devices = 1;
+}
+
+message SendCustomEventRequest {
+  string type = 1;
+  bytes data = 2;
+}
+
+message SendCustomEventResponse {
+}
+
+message ReportCallStatsRequest {
+  // The call type
+  string call_type = 1;
+  // The call id
+  string call_id = 2;
+  // A WebRTC Stats report, as defined in https://www.w3.org/TR/webrtc/#dom-rtcstatsreport
+  google.protobuf.Struct stats = 3;
+}
+
+message ReportCallStatsResponse {
+}
+
+message GetCallStatsRequest {
+  string call_type = 1;
+  string call_id = 2;
+}
+
+message ReportIssueRequest {
+  string call_type = 1;
+  string call_id = 2;
+
+  // Optional description.
+  string description = 3;
+
+  bytes custom_json = 4;
+}
+
+message ReportIssueResponse {
+}
+
+message ReviewCallRequest {
+  string call_type = 1;
+  string call_id = 2;
+
+  // Rating between 0 and 5 stars.
+  float stars = 3;
+
+  // Optional description.
+  string description = 4;
+
+  // Optional custom data.
+  bytes custom_json = 5;
+}
+
+message ReviewCallResponse {
+}

@@ -1,0 +1,62 @@
+syntax = "proto3";
+
+package stream.video.coordinator.edge_v1;
+
+import "validate/validate.proto";
+
+option go_package = "edge_v1";
+
+message LatencyEndpoint {
+  string id = 1;
+  string url = 2;
+  double proximity = 3;
+  double latency = 4;
+}
+
+message Server {
+  string id = 1;
+  string url = 2;
+}
+
+message Credentials {
+  // Edge server to connect to
+  Server server = 1 [(validate.rules).message.required = true];
+  // The auth token needed to authenticate to the edge server
+  string token = 2 [(validate.rules).string.min_len = 1];
+}
+
+// TODO: better name for this
+message LatencyMeasurementClaim {
+  repeated LatencyEndpoint endpoints = 1;
+}
+
+message LatencyMeasurements {
+  map<string, edge_v1.Latency> measurements = 1;
+}
+
+message Latency {
+  repeated double measurements_seconds = 1;
+}
+
+// Edges are where we deploy video servers
+message Edge {
+  string name = 1 [(validate.rules).string.min_len = 1];
+  string latency_url = 2 [(validate.rules).string.min_len = 1];
+}
+
+// TODO: to discuss. do we keep a log per call of
+// - people joining
+// - reactions
+// - etc?
+// - maybe it only makes sense when you transcribe the call
+
+// Edges are where we deploy video servers
+message EdgeServer {
+  string url = 1;
+
+  // Returns information about the server location
+  message Coordinates {
+    float lat = 1;
+    float long = 2;
+  }
+}

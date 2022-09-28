@@ -42,11 +42,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.model.Room
+import io.getstream.video.android.model.Call
 
 @Composable
 public fun CallOptions(
-    room: Room,
+    call: Call,
     onEndCall: () -> Unit,
     onCameraToggled: (Boolean) -> Unit,
     onMicrophoneToggled: (Boolean) -> Unit,
@@ -54,7 +54,7 @@ public fun CallOptions(
     onShowSettings: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val participant by room.localParticipant.collectAsState(initial = null)
+    val participant by call.localParticipant.collectAsState(initial = null)
     val isMicrophoneEnabled = participant?.hasAudio ?: false
     val isCameraEnabled = participant?.hasVideo ?: false
 

@@ -35,14 +35,16 @@ import io.getstream.video.android.events.SfuDataEvent
 import io.getstream.video.android.events.SfuParticipantJoinedEvent
 import io.getstream.video.android.events.SfuParticipantLeftEvent
 import io.getstream.video.android.events.SubscriberOfferEvent
+import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.CallParticipant
 import io.getstream.video.android.model.CallSettings
-import io.getstream.video.android.model.Room
-import io.getstream.video.android.module.VideoModule
+import io.getstream.video.android.module.WebRTCModule.Companion.REDIRECT_SIGNAL_URL
+import io.getstream.video.android.module.WebRTCModule.Companion.SIGNAL_HOST_BASE
 import io.getstream.video.android.token.CredentialsProvider
 import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Result
 import io.getstream.video.android.utils.Success
+import io.getstream.video.android.utils.buildAudioConstraints
 import io.getstream.video.android.utils.buildConnectionConfiguration
 import io.getstream.video.android.utils.buildLocalIceServers
 import io.getstream.video.android.utils.buildMediaConstraints
@@ -67,7 +69,6 @@ import org.webrtc.CameraEnumerator
 import org.webrtc.DataChannel
 import org.webrtc.IceCandidate
 import org.webrtc.MediaConstraints
-import org.webrtc.MediaStream
 import org.webrtc.PeerConnection
 import org.webrtc.RtpParameters
 import org.webrtc.SessionDescription
@@ -87,14 +88,14 @@ import stream.video.sfu.VideoCodecs
 import stream.video.sfu.VideoDimension
 import java.util.concurrent.TimeUnit
 
-public class WebRTCClientImpl(
+internal class WebRTCClientImpl(
     private val context: Context,
     private val credentialsProvider: CredentialsProvider,
     private val signalClient: SignalClient,
 ) : WebRTCClient {
 
     private var sessionId: String = ""
-    private var room: Room? = null
+    private var call: Call? = null
 
     private val supervisorJob = SupervisorJob()
     private val coroutineScope = CoroutineScope(DispatcherProvider.IO + supervisorJob)
@@ -104,8 +105,8 @@ public class WebRTCClientImpl(
      */
     private val peerConnectionFactory by lazy { StreamPeerConnectionFactory(context) }
     private val iceServers by lazy {
-        if (VideoModule.REDIRECT_SIGNAL_URL == null) {
-            buildRemoteIceServers(VideoModule.SIGNAL_HOST_BASE)
+        if (REDIRECT_SIGNAL_URL == null) {
+            buildRemoteIceServers(SIGNAL_HOST_BASE)
         } else {
             buildLocalIceServers()
         }
@@ -119,6 +120,10 @@ public class WebRTCClientImpl(
         buildMediaConstraints()
     }
 
+    private val audioConstraints: MediaConstraints by lazy {
+        buildAudioConstraints()
+    }
+
     private var subscriber: StreamPeerConnection? = null
     private var publisher: StreamPeerConnection? = null
 
@@ -126,12 +131,10 @@ public class WebRTCClientImpl(
         set(value) {
             field = value
             if (value != null) {
-                room?.updateLocalVideoTrack(value)
+                call?.updateLocalVideoTrack(value)
             }
         }
     private var localAudioTrack: AudioTrack? = null
-
-    private var localMediaStream: MediaStream? = null
 
     /**
      * Data channels.
@@ -160,8 +163,8 @@ public class WebRTCClientImpl(
 
         sessionId = ""
 
-        room?.disconnect()
-        room = null
+        call?.disconnect()
+        call = null
 
         subscriber?.connection?.close()
         publisher?.connection?.close()
@@ -176,14 +179,14 @@ public class WebRTCClientImpl(
 
     override fun setCameraEnabled(isEnabled: Boolean) {
         coroutineScope.launch {
-            room?.setCameraEnabled(isEnabled)
+            call?.setCameraEnabled(isEnabled)
             localVideoTrack?.setEnabled(isEnabled)
         }
     }
 
     override fun setMicrophoneEnabled(isEnabled: Boolean) {
         coroutineScope.launch {
-            room?.setMicrophoneEnabled(isEnabled)
+            call?.setMicrophoneEnabled(isEnabled)
             localAudioTrack?.setEnabled(isEnabled)
         }
     }
@@ -193,7 +196,7 @@ public class WebRTCClientImpl(
     }
 
     private fun getAudioHandler(): AudioSwitchHandler? {
-        return room?.audioHandler as? AudioSwitchHandler
+        return call?.audioHandler as? AudioSwitchHandler
     }
 
     override fun getAudioDevices(): List<AudioDevice> {
@@ -208,19 +211,8 @@ public class WebRTCClientImpl(
         handler.selectDevice(device)
     }
 
-    override fun startCall(sessionId: String, shouldPublish: Boolean): Room {
-        val room = createRoom(sessionId)
-        this.room = room
-        this.sessionId = sessionId
-
-        listenToParticipants()
-        initializeCall(shouldPublish)
-
-        return room
-    }
-
     private fun listenToParticipants() {
-        val room = room ?: throw IllegalStateException("Room is in incorrect state, null!")
+        val room = call ?: throw IllegalStateException("Room is in incorrect state, null!")
 
         coroutineScope.launch {
             room.callParticipants.collectLatest { participants ->
@@ -229,25 +221,25 @@ public class WebRTCClientImpl(
         }
     }
 
-    override fun joinCall(sessionId: String, shouldPublish: Boolean): Room {
+    override fun connectToCall(sessionId: String, autoPublish: Boolean): Call {
         val room = createRoom(sessionId)
-        this.room = room
+        this.call = room
         this.sessionId = sessionId
 
         listenToParticipants()
-        initializeCall(shouldPublish)
+        initializeCall(autoPublish)
 
         return room
     }
 
-    private fun createRoom(sessionId: String): Room {
+    private fun createRoom(sessionId: String): Call {
         this.sessionId = sessionId
 
         return buildRoom(sessionId)
     }
 
-    private fun buildRoom(sessionId: String): Room {
-        return Room(
+    private fun buildRoom(sessionId: String): Call {
+        return Call(
             context = context,
             sessionId = sessionId,
             credentialsProvider = credentialsProvider,
@@ -255,7 +247,7 @@ public class WebRTCClientImpl(
         )
     }
 
-    private fun initializeCall(shouldPublish: Boolean) {
+    private fun initializeCall(autoPublish: Boolean) {
         val connection = createConnection()
         subscriber = connection
         Log.d("sfuConnectFlow", connection.toString())
@@ -275,10 +267,10 @@ public class WebRTCClientImpl(
                     return@launch
                 }
 
-                if (shouldPublish) {
+                if (autoPublish) {
                     createPublisher()
                 }
-                setupUserMedia(CallSettings(), shouldPublish)
+                setupUserMedia(CallSettings(), autoPublish)
             } else {
                 clear()
             }
@@ -290,8 +282,8 @@ public class WebRTCClientImpl(
             configuration = connectionConfiguration,
             type = PeerConnectionType.SUBSCRIBER,
             mediaConstraints = mediaConstraints,
-            onStreamAdded = { room?.addStream(it) },
-            onStreamRemoved = { room?.removeStream(it) },
+            onStreamAdded = { call?.addStream(it) },
+            onStreamRemoved = { call?.removeStream(it) },
             onIceCandidateRequest = ::sendIceCandidate
         )
     }
@@ -346,7 +338,7 @@ public class WebRTCClientImpl(
         val request = JoinRequest(
             subscriber_sdp_offer = data.description,
             session_id = sessionId,
-            codec_settings = CodecSettings(
+            codec_settings = CodecSettings( // TODO - layers
                 video = VideoCodecs(
                     encode = encoderCodecs,
                     decode = decoderCodecs
@@ -375,8 +367,8 @@ public class WebRTCClientImpl(
         }
 
         return if (connected) {
-            room?.startAudio()
-            room?.loadParticipants(requireNotNull(response.call_state))
+            call?.startAudio()
+            call?.loadParticipants(requireNotNull(response.call_state))
             signalChannel?.send("ss".encode()) ?: false
         } else {
             throw IllegalStateException("Couldn't connect to data channel.")
@@ -423,18 +415,13 @@ public class WebRTCClientImpl(
             manager?.allowedCapturePolicy = ALLOW_CAPTURE_BY_ALL
         }
 
-        val mediaStream = peerConnectionFactory.createLocalMediaStream()
-        localMediaStream = mediaStream
-
         val audioTrack = makeAudioTrack()
         audioTrack.setEnabled(true)
         localAudioTrack = audioTrack
-        localMediaStream?.addTrack(audioTrack)
         Log.d("sfuConnectFlow", "SetupMedia, $audioTrack")
 
         val videoTrack = makeVideoTrack()
         localVideoTrack = videoTrack
-        localMediaStream?.addTrack(videoTrack)
         Log.d("sfuConnectFlow", "SetupMedia, $videoTrack")
 
         if (shouldPublish) {
@@ -444,8 +431,7 @@ public class WebRTCClientImpl(
     }
 
     private fun makeAudioTrack(): AudioTrack {
-        val audioConstrains = MediaConstraints()
-        val audioSource = peerConnectionFactory.makeAudioSource(audioConstrains)
+        val audioSource = peerConnectionFactory.makeAudioSource(audioConstraints)
 
         return peerConnectionFactory.makeAudioTrack(audioSource)
     }
@@ -551,12 +537,12 @@ public class WebRTCClientImpl(
     private fun onMessage(event: SfuDataEvent) {
         when (event) {
             is SubscriberOfferEvent -> setRemoteDescription(event.sdp)
-            is SfuParticipantJoinedEvent -> room?.addParticipant(event)
-            is SfuParticipantLeftEvent -> room?.removeParticipant(event)
+            is SfuParticipantJoinedEvent -> call?.addParticipant(event)
+            is SfuParticipantLeftEvent -> call?.removeParticipant(event)
             is ChangePublishQualityEvent -> {
                 // updatePublishQuality(event) -> TODO - re-enable once we send the proper quality (dimensions)
             }
-            is MuteStateChangeEvent -> room?.updateMuteState(event)
+            is MuteStateChangeEvent -> call?.updateMuteState(event)
             else -> Unit
         }
     }

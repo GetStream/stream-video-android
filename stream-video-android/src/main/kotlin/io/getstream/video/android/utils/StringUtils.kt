@@ -16,7 +16,11 @@
 
 package io.getstream.video.android.utils
 
-internal fun enrichSocketURL(url: String): String {
-    if (url.startsWith("wss://")) return url
-    return "wss://$url"
+import io.getstream.video.android.module.WebRTCModule.Companion.REDIRECT_SIGNAL_URL
+import io.getstream.video.android.module.WebRTCModule.Companion.SIGNAL_BASE_URL
+
+internal fun enrichSFUURL(url: String): String {
+    return if (url.contains("localhost")) {
+        REDIRECT_SIGNAL_URL ?: SIGNAL_BASE_URL
+    } else url
 }

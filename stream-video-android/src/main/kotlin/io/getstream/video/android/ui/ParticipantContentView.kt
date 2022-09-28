@@ -24,8 +24,8 @@ import android.view.View
 import android.widget.LinearLayout
 import io.getstream.video.android.R
 import io.getstream.video.android.dispatchers.DispatcherProvider
+import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.CallParticipant
-import io.getstream.video.android.model.Room
 import io.getstream.video.android.model.VideoTrack
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -61,21 +61,21 @@ public class ParticipantContentView : LinearLayout {
         LayoutInflater.from(context).inflate(R.layout.content_participant, this, true)
     }
 
-    public fun renderParticipants(room: Room, participants: List<CallParticipant>) {
+    public fun renderParticipants(call: Call, participants: List<CallParticipant>) {
         val otherParticipants = participants.filter { !it.isLocal }
         Log.d("RoomState", otherParticipants.toString())
 
         when (otherParticipants.size) {
-            1 -> renderSingleParticipant(room, otherParticipants[0])
-            2 -> renderTwoParticipants(room, otherParticipants[0], otherParticipants[1])
+            1 -> renderSingleParticipant(call, otherParticipants[0])
+            2 -> renderTwoParticipants(call, otherParticipants[0], otherParticipants[1])
             3 -> renderThreeParticipants(
-                room,
+                call,
                 otherParticipants[0],
                 otherParticipants[1],
                 otherParticipants[2]
             )
             4 -> renderFourParticipants(
-                room,
+                call,
                 otherParticipants[0],
                 otherParticipants[1],
                 otherParticipants[2],
@@ -84,7 +84,7 @@ public class ParticipantContentView : LinearLayout {
         }
     }
 
-    private fun renderSingleParticipant(room: Room, callParticipant: CallParticipant) {
+    private fun renderSingleParticipant(call: Call, callParticipant: CallParticipant) {
         Log.d("RoomState", "Rendering single, $callParticipant")
 
         cleanUpViews()
@@ -92,12 +92,12 @@ public class ParticipantContentView : LinearLayout {
 
         renderTrack(
             findViewById(R.id.firstParticipant),
-            room,
+            call,
             callParticipant.track
         )
     }
 
-    private fun renderTwoParticipants(room: Room, first: CallParticipant, second: CallParticipant) {
+    private fun renderTwoParticipants(call: Call, first: CallParticipant, second: CallParticipant) {
         Log.d("RoomState", "Rendering two, $first $second")
 
         cleanUpViews()
@@ -105,19 +105,19 @@ public class ParticipantContentView : LinearLayout {
 
         renderTrack(
             findViewById(R.id.firstParticipant),
-            room,
+            call,
             first.track
         )
 
         renderTrack(
             findViewById(R.id.secondParticipant),
-            room,
+            call,
             second.track
         )
     }
 
     private fun renderThreeParticipants(
-        room: Room,
+        call: Call,
         first: CallParticipant,
         second: CallParticipant,
         third: CallParticipant
@@ -127,25 +127,25 @@ public class ParticipantContentView : LinearLayout {
 
         renderTrack(
             findViewById(R.id.firstParticipant),
-            room,
+            call,
             first.track
         )
 
         renderTrack(
             findViewById(R.id.secondParticipant),
-            room,
+            call,
             second.track
         )
 
         renderTrack(
             findViewById(R.id.thirdParticipant),
-            room,
+            call,
             third.track
         )
     }
 
     private fun renderFourParticipants(
-        room: Room,
+        call: Call,
         first: CallParticipant,
         second: CallParticipant,
         third: CallParticipant,
@@ -156,32 +156,32 @@ public class ParticipantContentView : LinearLayout {
 
         renderTrack(
             findViewById(R.id.firstParticipant),
-            room,
+            call,
             first.track
         )
 
         renderTrack(
             findViewById(R.id.secondParticipant),
-            room,
+            call,
             second.track
         )
 
         renderTrack(
             findViewById(R.id.thirdParticipant),
-            room,
+            call,
             third.track
         )
 
         renderTrack(
             findViewById(R.id.fourthParticipant),
-            room,
+            call,
             fourth.track
         )
     }
 
     private fun renderTrack(
         participantItemView: ParticipantItemView,
-        room: Room,
+        call: Call,
         track: VideoTrack?
     ) {
         val video = track?.video
@@ -190,7 +190,7 @@ public class ParticipantContentView : LinearLayout {
             participantItemView.visibility = View.VISIBLE
 
             if (!participantItemView.isInitialized) {
-                participantItemView.initialize(room, track.streamId) {
+                participantItemView.initialize(call, track.streamId) {
                     CoroutineScope(DispatcherProvider.Main).launch {
                         participantItemView.z = -10f
                         participantItemView.elevation = 0f

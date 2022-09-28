@@ -17,25 +17,23 @@
 package io.getstream.video.android.webrtc
 
 import io.getstream.video.android.audio.AudioDevice
-import io.getstream.video.android.model.Room
+import io.getstream.video.android.model.Call
 
-public interface WebRTCClient {
+internal interface WebRTCClient {
 
-    public fun clear()
+    fun clear()
 
-    public fun startCall(sessionId: String, shouldPublish: Boolean): Room
+    fun connectToCall(sessionId: String, autoPublish: Boolean): Call
 
-    public fun joinCall(sessionId: String, shouldPublish: Boolean): Room
+    fun startCapturingLocalVideo(position: Int)
 
-    public fun startCapturingLocalVideo(position: Int)
+    fun setCameraEnabled(isEnabled: Boolean)
 
-    public fun setCameraEnabled(isEnabled: Boolean)
+    fun setMicrophoneEnabled(isEnabled: Boolean)
 
-    public fun setMicrophoneEnabled(isEnabled: Boolean)
+    fun flipCamera()
 
-    public fun flipCamera()
+    fun getAudioDevices(): List<AudioDevice>
 
-    public fun getAudioDevices(): List<AudioDevice>
-
-    public fun selectAudioDevice(device: AudioDevice)
+    fun selectAudioDevice(device: AudioDevice)
 }

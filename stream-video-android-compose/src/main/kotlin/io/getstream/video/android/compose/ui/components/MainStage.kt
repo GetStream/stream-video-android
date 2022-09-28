@@ -18,44 +18,48 @@ package io.getstream.video.android.compose.ui.components
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.ui.components.participants.FloatingParticipantItem
 import io.getstream.video.android.compose.ui.components.participants.ParticipantsContent
-import io.getstream.video.android.model.Room
+import io.getstream.video.android.model.Call
+import org.webrtc.SurfaceViewRenderer
 
 @Composable
 public fun MainStage(
-    room: Room,
+    call: Call,
     modifier: Modifier = Modifier
 ) {
     Box(modifier = modifier) {
         ParticipantsContent(
             modifier = Modifier.fillMaxSize(),
-            room = room
+            call = call,
+            onRender = {
+                (it as? SurfaceViewRenderer)?.apply {
+                    setZOrderMediaOverlay(false) // TODO - these functions don't exist, we need to find better impl
+                    setZOrderOnTop(false)
+                }
+            }
         )
 
-        val localParticipantState by room.localParticipant.collectAsState(initial = null)
-        val currentLocal = localParticipantState
-
-        if (currentLocal != null) {
-            FloatingParticipantItem(
-                room = room,
-                callParticipant = currentLocal,
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .size(height = 150.dp, width = 125.dp)
-                    .padding(16.dp)
-                    .clip(RoundedCornerShape(16.dp))
-            )
-        }
+//        val localParticipantState by room.localParticipant.collectAsState(initial = null)
+//        val currentLocal = localParticipantState
+//
+//        if (currentLocal != null) { // TODO - fix once we import correct Surface views
+//            FloatingParticipantItem(
+//                room = room,
+//                callParticipant = currentLocal,
+//                modifier = Modifier
+//                    .align(Alignment.TopEnd)
+//                    .size(height = 150.dp, width = 125.dp)
+//                    .padding(16.dp)
+//                    .clip(RoundedCornerShape(16.dp)),
+//                onRender = {
+//                    (it as? SurfaceViewRenderer)?.apply {
+//                        setZOrderOnTop(true)
+//                        setZOrderMediaOverlay(true)
+//                    }
+//                }
+//            )
+//        }
     }
 }

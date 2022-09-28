@@ -44,11 +44,13 @@ import io.getstream.video.android.viewmodel.CallViewModelFactory
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
-import stream.video.Call
 
 class CallActivity : AppCompatActivity() {
 
-    private val factory by lazy { CallViewModelFactory(VideoApp.videoClient) }
+    private val factory by lazy {
+        CallViewModelFactory(VideoApp.streamCalls, VideoApp.credentialsProvider)
+    }
+
     private val callViewModel by viewModels<CallViewModel>(factoryProducer = { factory })
 
     @RequiresApi(M)
@@ -85,7 +87,7 @@ class CallActivity : AppCompatActivity() {
         lifecycleScope.launch {
             val view = findViewById<ParticipantContentView>(R.id.participantContent)
 
-            callViewModel.roomState.filterNotNull().collectLatest { room ->
+            callViewModel.callState.filterNotNull().collectLatest { room ->
                 Log.d("RoomState", room.toString())
                 room.callParticipants.collectLatest { participants ->
                     Log.d("RoomState", participants.toString())
@@ -97,7 +99,7 @@ class CallActivity : AppCompatActivity() {
         lifecycleScope.launch {
             val view = findViewById<ParticipantItemView>(R.id.floatingParticipantView)
 
-            callViewModel.roomState.filterNotNull().collectLatest { room ->
+            callViewModel.callState.filterNotNull().collectLatest { room ->
                 room.localParticipant.collectLatest { participant ->
                     val track = participant.track
                     val video = track?.video
@@ -144,25 +146,11 @@ class CallActivity : AppCompatActivity() {
         val isInitialized = callViewModel.isVideoInitialized.value
         if (isInitialized) return
 
-        val client = VideoApp.videoClient
-        val callId = intent.getStringExtra(KEY_CALL_ID) ?: return
-        val participants = intent.getStringArrayExtra(KEY_PARTICIPANTS) ?: emptyArray()
+        val userToken = requireNotNull(intent.getStringExtra(KEY_USER_TOKEN))
+        val sfuUrl = requireNotNull(intent.getStringExtra(KEY_SFU_URL))
+        val callId = requireNotNull(intent.getStringExtra(KEY_CALL_ID))
 
-        lifecycleScope.launch {
-//            val result = client.joinCall(
-//                CallType.VIDEO.type,
-//                id = callId,
-//                participantIds = participants.toList()
-//            )
-//
-//            result.onSuccessSuspend { (call, url, token) ->
-            callViewModel.init(Call(id = callId), "", "") //  since CallCoordinator isn't ready
-//            }
-
-//            result.onError {
-//                Log.d("Couldn't select server", it.message ?: "")
-//            }
-        }
+        callViewModel.init(callId, sfuUrl, userToken)
     }
 
     @RequiresApi(M)
@@ -222,16 +210,19 @@ class CallActivity : AppCompatActivity() {
 
     companion object {
         private const val KEY_CALL_ID = "call_id"
-        private const val KEY_PARTICIPANTS = "participants"
+        private const val KEY_SFU_URL = "signal_url"
+        private const val KEY_USER_TOKEN = "user_token"
 
         internal fun getIntent(
             context: Context,
-            callId: String,
-            participants: List<String>
+            callCid: String,
+            signalUrl: String,
+            userToken: String,
         ): Intent {
             return Intent(context, CallActivity::class.java).apply {
-                putExtra(KEY_CALL_ID, callId)
-                putExtra(KEY_PARTICIPANTS, participants.toTypedArray())
+                putExtra(KEY_CALL_ID, callCid)
+                putExtra(KEY_SFU_URL, signalUrl)
+                putExtra(KEY_USER_TOKEN, userToken)
             }
         }
     }

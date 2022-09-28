@@ -1,0 +1,84 @@
+syntax = "proto3";
+
+package stream.video.coordinator.call_v1;
+
+import "video/coordinator/member_v1/member.proto";
+import "google/protobuf/timestamp.proto";
+import "validate/validate.proto";
+
+option go_package = "call_v1";
+
+message CallType {
+  // The unique name for the call type.
+  string name = 1;
+
+  CallOptions options = 2;
+
+  google.protobuf.Timestamp created_at = 3;
+  google.protobuf.Timestamp updated_at = 4;
+}
+
+message Call {
+  // The call type.
+  string type = 1 [(validate.rules).string.min_len = 1];
+
+  // The call id.
+  string id = 2 [(validate.rules).string.min_len = 1];
+
+  // A concatenation of call type and call id with ":" inbetween
+  string call_cid = 3;
+
+  // The id of the user that created this room.
+  string created_by_user_id = 4 [(validate.rules).string.min_len = 1];
+
+  bytes custom_json = 5;
+
+  // Room options that are set explicitly in this room
+  // This set of options does not include RoomType options
+  CallOptions options = 6;
+
+  google.protobuf.Timestamp created_at = 7;
+
+  google.protobuf.Timestamp updated_at = 8;
+}
+
+// CallDetails contains call additional details
+message CallDetails {
+  // Call options merged with CallType options
+  call_v1.CallOptions options = 1;
+  // Ordered list of member user IDs
+  repeated string member_user_ids = 2;
+  // Room members map indexed by Member.user_id
+  // Cannot have more than 100 members
+  map<string, member_v1.Member> members = 3;
+}
+
+// CallOptions contains all options available to change for the RoomType
+// Options can also be set on the room level where they will be merged with RoomType options using `proto.Merge`
+// To make sure options can be overriden on the room level, all underlying option fields should be optional
+message CallOptions {
+  RecordingOptions recording = 1;
+  BroadcastingOptions broadcasting = 2;
+  TranscriptionOptions transcription = 3;
+}
+
+// Contains all options regarding to call recording
+message RecordingOptions {
+  // Whether recording feature is enabled
+  // Default: false
+  optional bool enabled = 1;
+}
+
+// Contains all options regarding to call broadcasting
+message BroadcastingOptions {
+  // Whether broadcasting feature is enabled
+  // Default: false
+  optional bool enabled = 1;
+}
+
+// Contains all options regarding to call transcription
+message TranscriptionOptions {
+  // Whether transcription feature is enabled
+  // Default: false
+  optional bool enabled = 1;
+}

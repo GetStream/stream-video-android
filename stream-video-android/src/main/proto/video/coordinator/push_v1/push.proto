@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+package stream.video.coordinator.push_v1;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "push_v1";
+
+// Keep in sync with stream.config.push.PushProvider
+message PushProvider {
+  string id = 1;
+  bool disabled = 2;
+  string disabled_reason = 3;
+  google.protobuf.Timestamp created_at = 4;
+  google.protobuf.Timestamp updated_at = 5;
+  oneof credentials {
+    ApnCredentials apn = 6;
+    FirebaseCredentials firebase = 7;
+    HuaweiCredentials huawei = 8;
+    XiaomiCredentials xiaomi = 9;
+  }
+}
+
+message ApnCredentials {
+  string auth_key = 1;
+  string key_id = 2;
+  string apn_topic = 3;
+  string team_id = 4;
+  bool development = 5;
+}
+
+message FirebaseCredentials {
+  string server_key = 1;
+  string credentials_json = 2;
+}
+
+message HuaweiCredentials {
+  string id = 1;
+  string secret = 2;
+}
+
+message XiaomiCredentials {
+  string package_name = 1;
+  string secret = 2;
+}
+
+message Device {
+  string user_id = 1;
+  string id = 2;
+  bool disabled = 3;
+  string disabled_reason = 4;
+  string push_provider_name = 5;
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp updated_at = 7;
+}
+
+// An object that is used in requests to create or update a device
+message DeviceInput {
+  // Unique device ID, specific to a provider
+  string id = 1;
+  // Push provider ID, as configured in application push notification settings
+  // Refers to a set of credentials and templates of one of the supported push providers
+  string push_provider_id = 2;
+}

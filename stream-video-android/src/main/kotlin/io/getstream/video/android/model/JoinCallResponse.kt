@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.model
 
-import stream.video.Call
+import stream.video.coordinator.call_v1.Call
 
 public data class JoinCallResponse(
     public val call: Call,

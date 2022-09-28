@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package stream.video.coordinator.recording_v1;
+
+option go_package = "recording_v1";
+
+message File {
+  string type = 1;
+  bool composite = 2;
+  string user_id = 3;
+  string url = 4;
+}
+
+message RecordBroadcast {
+  // If true merge all audio and video, if false split them.
+  bool composite = 1;
+
+  // List of recorded files.
+  repeated File files = 2;
+}
+
+enum RecordingStorage {
+  RECORDING_STORAGE_S3_UNSPECIFIED = 0;
+}
+
+message RecordingStorageOptions {
+  RecordingStorage storage = 1;
+  string access_key = 2;
+  string secret_key = 3;
+  string bucket_name = 4;
+  string region = 5;
+  string path = 6;
+}

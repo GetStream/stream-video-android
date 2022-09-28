@@ -74,12 +74,12 @@ public class StreamPeerConnection(
         return setValue { connection.setRemoteDescription(it, sessionDescription) }
     }
 
-    public suspend fun createAnswer(): Result<SessionDescription> {
-        return createValue { connection.createAnswer(it, mediaConstraints) }
+    public suspend fun createOffer(): Result<SessionDescription> {
+        return createValue { connection.createOffer(it, MediaConstraints()) } // TODO we should send mediaConstraints here too, but BE crashes
     }
 
-    public suspend fun createOffer(): Result<SessionDescription> {
-        return createValue { connection.createOffer(it, MediaConstraints()) }
+    public suspend fun createAnswer(): Result<SessionDescription> {
+        return createValue { connection.createAnswer(it, mediaConstraints) }
     }
 
     public suspend fun setLocalDescription(sessionDescription: SessionDescription): Result<Unit> {

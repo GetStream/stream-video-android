@@ -22,13 +22,14 @@ import io.getstream.video.android.token.CredentialsProvider
 import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Result
 import io.getstream.video.android.utils.Success
-import stream.video.CreateCallRequest
-import stream.video.CreateCallResponse
-import stream.video.JoinCallRequest
-import stream.video.JoinCallResponse
-import stream.video.SelectEdgeServerRequest
-import stream.video.SelectEdgeServerResponse
-import stream.video.SendEventRequest
+import stream.video.coordinator.call_v1.Call
+import stream.video.coordinator.client_v1_rpc.CreateCallRequest
+import stream.video.coordinator.client_v1_rpc.CreateCallResponse
+import stream.video.coordinator.client_v1_rpc.GetCallEdgeServerRequest
+import stream.video.coordinator.client_v1_rpc.GetCallEdgeServerResponse
+import stream.video.coordinator.client_v1_rpc.JoinCallRequest
+import stream.video.coordinator.client_v1_rpc.JoinCallResponse
+import stream.video.coordinator.client_v1_rpc.SendCustomEventRequest
 
 /**
  * An accessor that allows us to communicate with the API around video calls.
@@ -39,7 +40,7 @@ internal class CallCoordinatorClientImpl(
 ) : CallCoordinatorClient {
 
     /**
-     * Attempts to create a new [stream.video.Call].
+     * Attempts to create a new [Call].
      *
      * @param createCallRequest The information used to create a call.
      * @return [Result] wrapper around the response from the server, or an error if something went
@@ -57,8 +58,20 @@ internal class CallCoordinatorClientImpl(
             Failure(VideoError(error.message, error))
         }
 
+    override suspend fun getOrCreateCall(createCallRequest: CreateCallRequest): Result<CreateCallResponse> =
+        try {
+            val response = callCoordinatorService.getOrCreateCall(
+                createCallRequest = createCallRequest,
+                apiKey = credentialsProvider.getCachedApiKey()
+            )
+
+            Success(response)
+        } catch (error: Throwable) {
+            Failure(VideoError(error.message, error))
+        }
+
     /**
-     * Attempts to join a [stream.video.Call]. If successful, gives us more information about the
+     * Attempts to join a [Call]. If successful, gives us more information about the
      * user and the call itself.
      *
      * @param request The details of the call, like the ID and its type.
@@ -85,9 +98,9 @@ internal class CallCoordinatorClientImpl(
      * @return [Result] wrapper around the response from the server, or an error if something went
      * wrong.
      */
-    override suspend fun selectEdgeServer(request: SelectEdgeServerRequest): Result<SelectEdgeServerResponse> =
+    override suspend fun selectEdgeServer(request: GetCallEdgeServerRequest): Result<GetCallEdgeServerResponse> =
         try {
-            val response = callCoordinatorService.selectEdgeServer(
+            val response = callCoordinatorService.getCallEdgeServer(
                 selectEdgeServerRequest = request,
                 apiKey = credentialsProvider.getCachedApiKey()
             )
@@ -99,14 +112,14 @@ internal class CallCoordinatorClientImpl(
 
     /**
      * Sends a user-based event to the API to notify if we've changed something in the state of the
-     * call. The events can be any of the [stream.video.UserEventType].
+     * call.
      *
      * @param sendEventRequest The request holding information about the event type and the call.
      * @return a [Result] wrapper if the call succeeded or not.
      */
-    override suspend fun sendUserEvent(sendEventRequest: SendEventRequest): Result<Boolean> =
+    override suspend fun sendUserEvent(sendEventRequest: SendCustomEventRequest): Result<Boolean> =
         try {
-            callCoordinatorService.sendUserEvent(
+            callCoordinatorService.sendCustomEvent(
                 sendEventRequest = sendEventRequest,
                 apiKey = credentialsProvider.getCachedApiKey()
             )

@@ -19,6 +19,8 @@ package io.getstream.video.android.app.ui.home
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Arrangement
@@ -33,6 +35,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
@@ -46,6 +49,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.app.VideoApp
 import io.getstream.video.android.app.model.HomeScreenOption
 import io.getstream.video.android.app.ui.call.CallActivity
@@ -58,8 +62,15 @@ import io.getstream.video.android.events.CallCreatedEvent
 import io.getstream.video.android.events.VideoEvent
 import io.getstream.video.android.model.UserCredentials
 import io.getstream.video.android.socket.SocketListener
+import io.getstream.video.android.utils.onError
+import io.getstream.video.android.utils.onSuccessSuspend
+import kotlinx.coroutines.launch
 
 class HomeActivity : AppCompatActivity() {
+
+    private val controller by lazy {
+        VideoApp.streamCalls
+    }
 
     private val selectedOption: MutableState<HomeScreenOption> =
         mutableStateOf(HomeScreenOption.CREATE_CALL)
@@ -67,11 +78,13 @@ class HomeActivity : AppCompatActivity() {
     private val participantsOptions: MutableState<List<UserCredentials>> =
         mutableStateOf(
             getUsers().filter {
-                it.id != VideoApp.videoClient.getUser().id
+                it.id != controller.getUser().id
             }
         )
 
     private val callIdState: MutableState<String> = mutableStateOf("call:123")
+
+    private val loadingState: MutableState<Boolean> = mutableStateOf(false)
 
     private val socketListener = object : SocketListener {
         override fun onEvent(event: VideoEvent) {
@@ -83,7 +96,7 @@ class HomeActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        VideoApp.videoClient.addSocketListener(socketListener)
+        controller.addSocketListener(socketListener)
         setContent {
             VideoTheme {
                 HomeScreen()
@@ -92,7 +105,7 @@ class HomeActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        VideoApp.videoClient.removeSocketListener(socketListener)
+        controller.removeSocketListener(socketListener)
         super.onDestroy()
     }
 
@@ -124,6 +137,14 @@ class HomeActivity : AppCompatActivity() {
                 ) {
                     Text(text = "Log Out")
                 }
+
+                val isLoading by loadingState
+
+                if (isLoading) {
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    CircularProgressIndicator(modifier = Modifier.align(CenterHorizontally))
+                }
             }
         }
     }
@@ -149,7 +170,7 @@ class HomeActivity : AppCompatActivity() {
                 .align(CenterHorizontally),
             enabled = isDataValid,
             onClick = {
-                navigateToCall(
+                joinCall(
                     callId = callIdState.value,
                     participants = participantsOptions.value.filter { it.isSelected }.map { it.id }
                 )
@@ -172,11 +193,38 @@ class HomeActivity : AppCompatActivity() {
                 .padding(horizontal = 32.dp)
                 .align(CenterHorizontally),
             enabled = isDataValid,
-            onClick = { navigateToCall(callId = callIdState.value) },
+            onClick = {
+                joinCall(
+                    callId = callIdState.value,
+                    participants = participantsOptions.value.filter { it.isSelected }.map { it.id }
+                )
+            },
             content = {
                 Text(text = "Join call")
             }
         )
+    }
+
+    private fun joinCall(callId: String, participants: List<String> = emptyList()) {
+        lifecycleScope.launch {
+            loadingState.value = true
+
+            val createCallResult = controller.createAndJoinCall(
+                "default", // TODO - hardcoded for now
+                id = callId,
+                participantIds = participants.toList()
+            )
+
+            createCallResult.onSuccessSuspend { response ->
+                loadingState.value = false
+                navigateToCall(response.call.cid, response.callUrl, response.userToken)
+            }
+            createCallResult.onError {
+                Log.d("Couldn't select server", it.message ?: "")
+                Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
+                loadingState.value = false
+            }
+        }
     }
 
     @Composable
@@ -248,9 +296,10 @@ class HomeActivity : AppCompatActivity() {
 
     private fun navigateToCall(
         callId: String,
-        participants: List<String> = emptyList()
+        signalUrl: String,
+        userToken: String
     ) {
-        val intent = CallActivity.getIntent(this, callId, participants)
+        val intent = CallActivity.getIntent(this, callId, signalUrl, userToken)
         startActivity(intent)
     }
 
