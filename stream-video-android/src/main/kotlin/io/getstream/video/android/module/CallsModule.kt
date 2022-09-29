@@ -110,8 +110,7 @@ internal class CallsModule(
          * leave it as-is.
          */
         @Suppress("RedundantNullableReturnType")
-        internal val REDIRECT_WS_BASE_URL: String? =
-            "ws://5.tcp.eu.ngrok.io:18411/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect" // e.g. "ws://4.tcp.eu.ngrok.io:12265"
+        internal val REDIRECT_WS_BASE_URL: String? = null // e.g. "ws://4.tcp.eu.ngrok.io:12265"
         internal const val WS_BASE_URL = "ws://10.0.2.2:8989/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect"
     }
 }

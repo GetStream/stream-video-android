@@ -20,7 +20,7 @@ import io.getstream.video.android.module.WebRTCModule.Companion.REDIRECT_SIGNAL_
 import io.getstream.video.android.module.WebRTCModule.Companion.SIGNAL_BASE_URL
 
 internal fun enrichSFUURL(url: String): String {
-    return if (url.contains("localhost")) {
+    return if (url.contains("localhost") || url.contains("127.0.0.1")) {
         REDIRECT_SIGNAL_URL ?: SIGNAL_BASE_URL
     } else url
 }

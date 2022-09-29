@@ -547,7 +547,7 @@ internal class WebRTCClientImpl(
         }
     }
 
-    private fun setRemoteDescription(sdp: String) {
+    private fun setRemoteDescription(sdp: String) { // TODO - check with iOS if the SDP communication is correct
         val subscriber = subscriber ?: return
 
         val sessionDescription = SessionDescription(
