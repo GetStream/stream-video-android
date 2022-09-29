@@ -129,7 +129,7 @@ public class CallClient(
 
             return try {
                 val latencyResults = data.edges.associate {
-                    it.latency_url to measureLatency(it.latency_url)
+                    it.name to measureLatency(it.latency_url)
                 }
 
                 val selectEdgeServerResult = selectEdgeServer(
