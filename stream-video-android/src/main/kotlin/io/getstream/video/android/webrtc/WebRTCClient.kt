@@ -18,12 +18,14 @@ package io.getstream.video.android.webrtc
 
 import io.getstream.video.android.audio.AudioDevice
 import io.getstream.video.android.model.Call
+import io.getstream.video.android.model.CallSettings
+import io.getstream.video.android.utils.Result
 
 internal interface WebRTCClient {
 
     fun clear()
 
-    fun connectToCall(sessionId: String, autoPublish: Boolean): Call
+    suspend fun connectToCall(sessionId: String, autoPublish: Boolean, callSettings: CallSettings): Result<Call>
 
     fun startCapturingLocalVideo(position: Int)
 

@@ -642,7 +642,7 @@ public final class io/getstream/video/android/BuildConfig {
 
 public abstract interface class io/getstream/video/android/StreamCalls {
 	public abstract fun addSocketListener (Lio/getstream/video/android/socket/SocketListener;)V
-	public abstract fun connectToCall (Ljava/lang/String;Z)Lio/getstream/video/android/model/Call;
+	public abstract fun connectToCall (Ljava/lang/String;ZLio/getstream/video/android/model/CallSettings;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun createAndJoinCall (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun createCall (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun createCallClient (Ljava/lang/String;Ljava/lang/String;Lio/getstream/video/android/token/CredentialsProvider;)V
@@ -659,7 +659,7 @@ public abstract interface class io/getstream/video/android/StreamCalls {
 }
 
 public final class io/getstream/video/android/StreamCalls$DefaultImpls {
-	public static synthetic fun connectToCall$default (Lio/getstream/video/android/StreamCalls;Ljava/lang/String;ZILjava/lang/Object;)Lio/getstream/video/android/model/Call;
+	public static synthetic fun connectToCall$default (Lio/getstream/video/android/StreamCalls;Ljava/lang/String;ZLio/getstream/video/android/model/CallSettings;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public static synthetic fun createCall$default (Lio/getstream/video/android/StreamCalls;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 }
 
@@ -672,7 +672,7 @@ public final class io/getstream/video/android/StreamCallsBuilder {
 public final class io/getstream/video/android/StreamCallsImpl : io/getstream/video/android/StreamCalls {
 	public fun <init> (Landroid/content/Context;Landroidx/lifecycle/Lifecycle;Lio/getstream/video/android/logging/LoggingLevel;Lio/getstream/video/android/client/CallClient;Lio/getstream/video/android/token/CredentialsProvider;Lio/getstream/video/android/socket/VideoSocket;Lio/getstream/video/android/socket/SocketStateService;Lio/getstream/video/android/client/user/UserState;)V
 	public fun addSocketListener (Lio/getstream/video/android/socket/SocketListener;)V
-	public fun connectToCall (Ljava/lang/String;Z)Lio/getstream/video/android/model/Call;
+	public fun connectToCall (Ljava/lang/String;ZLio/getstream/video/android/model/CallSettings;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun createAndJoinCall (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun createCall (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun createCallClient (Ljava/lang/String;Ljava/lang/String;Lio/getstream/video/android/token/CredentialsProvider;)V
@@ -1180,7 +1180,6 @@ public final class io/getstream/video/android/model/Call {
 	public final fun getLocalParticipant ()Lio/getstream/video/android/model/CallParticipant;
 	public final fun getLocalParticipant ()Lkotlinx/coroutines/flow/Flow;
 	public final fun getLocalParticipantId ()Ljava/lang/String;
-	public final fun getOnLocalVideoTrackChange ()Lkotlin/jvm/functions/Function1;
 	public final fun getOnStreamAdded ()Lkotlin/jvm/functions/Function1;
 	public final fun getOnStreamRemoved ()Lkotlin/jvm/functions/Function1;
 	public final fun getSessionId ()Ljava/lang/String;
@@ -1188,7 +1187,6 @@ public final class io/getstream/video/android/model/Call {
 	public static synthetic fun initRenderer$default (Lio/getstream/video/android/model/Call;Lorg/webrtc/SurfaceViewRenderer;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public final fun setCameraEnabled (Z)V
 	public final fun setMicrophoneEnabled (Z)V
-	public final fun setOnLocalVideoTrackChange (Lkotlin/jvm/functions/Function1;)V
 	public final fun setOnStreamAdded (Lkotlin/jvm/functions/Function1;)V
 	public final fun setOnStreamRemoved (Lkotlin/jvm/functions/Function1;)V
 }
@@ -1627,7 +1625,7 @@ public final class io/getstream/video/android/viewmodel/CallViewModel : androidx
 	public final fun getParticipantList ()Lkotlinx/coroutines/flow/Flow;
 	public final fun getParticipantsState ()Lkotlinx/coroutines/flow/Flow;
 	public final fun getPrimarySpeaker ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun init (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun init (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lio/getstream/video/android/model/CallSettings;)V
 	public final fun isCameraEnabled ()Lkotlinx/coroutines/flow/Flow;
 	public final fun isMicrophoneEnabled ()Lkotlinx/coroutines/flow/Flow;
 	public final fun isShowingParticipantsInfo ()Lkotlinx/coroutines/flow/StateFlow;
@@ -1669,6 +1667,7 @@ public final class io/getstream/video/android/webrtc/connection/StreamPeerConnec
 	public final fun getVideoTransceiver ()Lorg/webrtc/RtpTransceiver;
 	public final fun initialize (Lorg/webrtc/PeerConnection;)V
 	public fun onAddStream (Lorg/webrtc/MediaStream;)V
+	public fun onAddTrack (Lorg/webrtc/RtpReceiver;[Lorg/webrtc/MediaStream;)V
 	public final fun onCallJoined (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun onDataChannel (Lorg/webrtc/DataChannel;)V
 	public fun onIceCandidate (Lorg/webrtc/IceCandidate;)V
@@ -1765,6 +1764,14 @@ public abstract interface class io/getstream/video/android/webrtc/signal/SignalS
 	public abstract fun sendIceCandidate (Lstream/video/sfu/IceCandidateRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun setPublisher (Lstream/video/sfu/SetPublisherRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun updateSubscriptions (Lstream/video/sfu/UpdateSubscriptionsRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class io/getstream/video/android/webrtc/state/ConnectionState : java/lang/Enum {
+	public static final field CONNECTED Lio/getstream/video/android/webrtc/state/ConnectionState;
+	public static final field CONNECTING Lio/getstream/video/android/webrtc/state/ConnectionState;
+	public static final field DISCONNECTED Lio/getstream/video/android/webrtc/state/ConnectionState;
+	public static fun valueOf (Ljava/lang/String;)Lio/getstream/video/android/webrtc/state/ConnectionState;
+	public static fun values ()[Lio/getstream/video/android/webrtc/state/ConnectionState;
 }
 
 public final class io/getstream/video/android/webrtc/utils/SDPUtilsKt {

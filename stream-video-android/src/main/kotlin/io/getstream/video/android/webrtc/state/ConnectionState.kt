@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.model
+package io.getstream.video.android.webrtc.state
 
-public class CallSettings(
-    public val audioOn: Boolean = true,
-    public val videoOn: Boolean = true,
-    public val speakerOn: Boolean = true
-)
+public enum class ConnectionState {
+    DISCONNECTED,
+    CONNECTING,
+    CONNECTED
+}

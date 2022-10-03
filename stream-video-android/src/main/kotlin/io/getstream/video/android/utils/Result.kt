@@ -23,7 +23,7 @@ import io.getstream.video.android.errors.VideoError
  */
 public sealed class Result<out T : Any>
 
-public data class Success<T : Any>(val data: T) : Result<T>()
+public data class Success<out T : Any>(val data: T) : Result<T>()
 
 public data class Failure(val error: VideoError) : Result<Nothing>()
 

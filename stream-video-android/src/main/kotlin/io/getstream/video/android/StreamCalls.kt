@@ -18,6 +18,7 @@ package io.getstream.video.android
 
 import io.getstream.video.android.audio.AudioDevice
 import io.getstream.video.android.model.Call
+import io.getstream.video.android.model.CallSettings
 import io.getstream.video.android.model.domain.CallMetadata
 import io.getstream.video.android.model.domain.JoinedCall
 import io.getstream.video.android.model.domain.User
@@ -116,7 +117,11 @@ public interface StreamCalls {
         credentialsProvider: CredentialsProvider
     )
 
-    public fun connectToCall(sessionId: String, autoPublish: Boolean = true): Call
+    public suspend fun connectToCall(
+        sessionId: String,
+        autoPublish: Boolean = true,
+        callSettings: CallSettings
+    ): Result<Call>
 
     public fun startCapturingLocalVideo(position: Int)
 

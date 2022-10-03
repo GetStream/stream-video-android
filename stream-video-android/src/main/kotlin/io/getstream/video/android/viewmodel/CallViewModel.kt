@@ -24,7 +24,10 @@ import io.getstream.video.android.audio.AudioDevice
 import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.CallParticipant
 import io.getstream.video.android.model.CallParticipantState
+import io.getstream.video.android.model.CallSettings
 import io.getstream.video.android.token.CredentialsProvider
+import io.getstream.video.android.utils.Failure
+import io.getstream.video.android.utils.Success
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -76,7 +79,12 @@ public class CallViewModel(
     private val _isShowingSettings = MutableStateFlow(false)
     public val isShowingSettings: StateFlow<Boolean> = _isShowingSettings
 
-    public fun init(callId: String, sfuUrl: String, userToken: String) {
+    public fun init(
+        callId: String,
+        sfuUrl: String,
+        userToken: String,
+        callSettings: CallSettings
+    ) {
         // this._callState.value = videoClient.getCall(callId) TODO - load details
 
         streamCalls.createCallClient(sfuUrl, userToken, credentialsProvider)
@@ -96,12 +104,31 @@ public class CallViewModel(
                 }
         }
 
-        val call = streamCalls.connectToCall(UUID.randomUUID().toString())
+        connectToCall(callSettings)
+    }
 
-        call.onLocalVideoTrackChange = {
-            streamCalls.startCapturingLocalVideo(CameraMetadata.LENS_FACING_FRONT)
+    private fun connectToCall(callSettings: CallSettings) {
+        viewModelScope.launch {
+            val callResult = streamCalls.connectToCall(
+                UUID.randomUUID().toString(),
+                true,
+                callSettings
+            )
+
+            when (callResult) {
+                is Success -> {
+                    val call = callResult.data
+                    _callState.value = call
+
+                    if (callSettings.videoOn) {
+                        streamCalls.startCapturingLocalVideo(CameraMetadata.LENS_FACING_FRONT)
+                    }
+                }
+                is Failure -> {
+                    // TODO - show error to user
+                }
+            }
         }
-        _callState.value = call
     }
 
     private fun handlePrimarySpeaker(
