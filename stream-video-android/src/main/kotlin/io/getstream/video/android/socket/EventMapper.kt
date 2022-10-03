@@ -20,6 +20,9 @@ import io.getstream.video.android.events.CallCreatedEvent
 import io.getstream.video.android.events.HealthCheckEvent
 import io.getstream.video.android.events.UnknownEvent
 import io.getstream.video.android.events.VideoEvent
+import io.getstream.video.android.events.model.toCallInfo
+import io.getstream.video.android.events.model.toCallDetails
+import io.getstream.video.android.events.model.toCallUsers
 import stream.video.coordinator.client_v1_rpc.WebsocketEvent
 
 internal object EventMapper {
@@ -36,7 +39,12 @@ internal object EventMapper {
         }
 
         socketEvent.call_created != null -> with(socketEvent.call_created) {
-            CallCreatedEvent(call_cid)
+            CallCreatedEvent(
+                callId = call_cid,
+                users = socketEvent.users.toCallUsers(),
+                info = socketEvent.calls[call_cid]?.toCallInfo(),
+                details = socketEvent.call_details[call_cid]?.toCallDetails(),
+            )
         }
 
 //        TODO - do we remove these?

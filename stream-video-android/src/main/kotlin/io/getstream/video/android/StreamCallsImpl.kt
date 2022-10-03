@@ -18,6 +18,7 @@ package io.getstream.video.android
 
 import android.content.Context
 import androidx.lifecycle.Lifecycle
+import io.getstream.logging.StreamLog
 import io.getstream.video.android.audio.AudioDevice
 import io.getstream.video.android.client.CallClient
 import io.getstream.video.android.client.LifecycleHandler
@@ -59,6 +60,8 @@ public class StreamCallsImpl(
     private val userState: UserState
 ) : StreamCalls {
 
+    private val logger = StreamLog.getLogger("StreamCalls")
+
     private val scope = CoroutineScope(DispatcherProvider.IO)
 
     /**
@@ -90,6 +93,7 @@ public class StreamCallsImpl(
         id: String,
         participantIds: List<String>
     ): Result<CallMetadata> {
+        logger.d { "[createCall] type: $type, id: $id, participantIds: $participantIds" }
         return when (val result = callClient.createCall(type, id, participantIds)) {
             is Success -> Success(result.data.call?.call?.toCall()!!)
             is Failure -> Failure(result.error)
@@ -101,10 +105,12 @@ public class StreamCallsImpl(
         id: String,
         participantIds: List<String>
     ): Result<JoinedCall> {
+        logger.d { "[createAndJoinCall] type: $type, id: $id, participantIds: $participantIds" }
         return callClient.createAndJoinCall(type, id, participantIds)
     }
 
     override suspend fun joinCall(call: CallMetadata): Result<JoinedCall> {
+        logger.d { "[joinCall] call: $call" }
         return callClient.joinCall(call)
     }
 

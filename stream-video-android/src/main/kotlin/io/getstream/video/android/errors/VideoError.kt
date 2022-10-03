@@ -45,4 +45,9 @@ public open class VideoError(
         result = 31 * result + (cause?.hashCode() ?: 0)
         return result
     }
+
+    override fun toString(): String {
+        return "VideoError(message=$message, cause=$cause)"
+    }
+
 }

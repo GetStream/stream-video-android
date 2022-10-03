@@ -24,6 +24,7 @@ import android.view.WindowManager
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.incomingcall.IncomingCall
 import io.getstream.video.android.model.CallType
 import kotlinx.coroutines.delay
@@ -41,16 +42,18 @@ public class IncomingCallActivity : AppCompatActivity() {
         }
         setContent {
             // TODO - load the data from a getCall(GetCallRequest)
-            IncomingCall(
-                callId = "",
-                callType = CallType.VIDEO,
-                participants = emptyList(),
-                onDeclineCall = { finish() },
-                onAcceptCall = { callId, isVideoEnabled ->
-                    joinCall(callId, isVideoEnabled)
-                },
-                onVideoToggleChanged = { }
-            )
+            VideoTheme {
+                IncomingCall(
+                    callId = "",
+                    callType = CallType.VIDEO,
+                    participants = emptyList(),
+                    onDeclineCall = { finish() },
+                    onAcceptCall = { callId, isVideoEnabled ->
+                        joinCall(callId, isVideoEnabled)
+                    },
+                    onVideoToggleChanged = { }
+                )
+            }
         }
     }
 

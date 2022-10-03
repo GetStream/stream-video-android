@@ -16,13 +16,14 @@
 
 package io.getstream.video.android.webrtc.connection
 
-import android.util.Log
+import io.getstream.logging.StreamLog
 import io.getstream.video.android.events.SfuDataEvent
 import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Result
 import io.getstream.video.android.utils.Success
 import io.getstream.video.android.webrtc.utils.createValue
 import io.getstream.video.android.webrtc.utils.setValue
+import io.getstream.video.android.webrtc.utils.stringify
 import org.webrtc.DataChannel
 import org.webrtc.IceCandidate
 import org.webrtc.MediaConstraints
@@ -47,6 +48,8 @@ public class StreamPeerConnection(
     private val onIceCandidate: ((IceCandidate, PeerConnectionType) -> Unit)?
 ) : PeerConnection.Observer {
 
+    private val logger = StreamLog.getLogger("Call:PeerConnection")
+
     public lateinit var connection: PeerConnection
         private set
     public var videoTransceiver: RtpTransceiver? = null
@@ -54,7 +57,12 @@ public class StreamPeerConnection(
     public var audioTransceiver: RtpTransceiver? = null
         private set
 
+    init {
+        logger.i { "<init> #sfu; type: $type, mediaConstraints: $mediaConstraints" }
+    }
+
     public fun initialize(peerConnection: PeerConnection) {
+        logger.d { "[initialize] #sfu; peerConnection: $peerConnection" }
         this.connection = peerConnection
     }
 
@@ -72,18 +80,22 @@ public class StreamPeerConnection(
     }
 
     public suspend fun createOffer(): Result<SessionDescription> {
+        logger.d { "[createOffer] #sfu; no args" }
         return createValue { connection.createOffer(it, MediaConstraints()) } // TODO we should send mediaConstraints here too, but BE crashes
     }
 
     public suspend fun createAnswer(): Result<SessionDescription> {
+        logger.d { "[createAnswer] #sfu; no args" }
         return createValue { connection.createAnswer(it, mediaConstraints) }
     }
 
     public suspend fun setRemoteDescription(sessionDescription: SessionDescription): Result<Unit> {
+        logger.d { "[setRemoteDescription] #sfu; answerSdp: ${sessionDescription.stringify()}" }
         return setValue { connection.setRemoteDescription(it, sessionDescription) }
     }
 
     public suspend fun setLocalDescription(sessionDescription: SessionDescription): Result<Unit> {
+        logger.d { "[setLocalDescription] #sfu; offerSdp: ${sessionDescription.stringify()}" }
         return setValue { connection.setLocalDescription(it, sessionDescription) }
     }
 
@@ -91,10 +103,12 @@ public class StreamPeerConnection(
         mediaStreamTrack: MediaStreamTrack,
         streamIds: List<String>
     ): RtpSender {
+        logger.i { "[addTrack] #sfu; track: ${mediaStreamTrack.stringify()}, streamIds: $streamIds" }
         return connection.addTrack(mediaStreamTrack, streamIds)
     }
 
     public fun addAudioTransceiver(track: MediaStreamTrack, streamIds: List<String>) {
+        logger.i { "[addAudioTransceiver] #sfu; track: ${track.stringify()}, streamIds: $streamIds" }
         val fullQuality = RtpParameters.Encoding(
             "a",
             true,
@@ -115,6 +129,7 @@ public class StreamPeerConnection(
     }
 
     public fun addVideoTransceiver(track: MediaStreamTrack, streamIds: List<String>) {
+        logger.d { "[addVideoTransceiver] #sfu; track: ${track.stringify()}, streamIds: $streamIds" }
         val fullQuality = RtpParameters.Encoding(
             "f",
             true,
@@ -151,15 +166,17 @@ public class StreamPeerConnection(
     }
 
     public suspend fun createJoinOffer(): Result<SessionDescription> {
+        logger.d { "[createJoinOffer] #sfu; no args" }
         val offer = createOffer()
+
 
         when (offer) {
             is Success -> {
-                Log.d("sfuConnectFlow", "JoinCall, ${offer.data.description}")
+                logger.v { "[createJoinOffer] #sfu; offerSdp: ${offer.data}" }
                 setLocalDescription(offer.data)
             }
             is Failure -> {
-                Log.d("sfuConnectFlow", "OfferFailure", offer.error.cause)
+                logger.e { "[createJoinOffer] #sfu; failed: ${offer.error.cause}" }
             }
         }
 
@@ -167,12 +184,13 @@ public class StreamPeerConnection(
     }
 
     public suspend fun onCallJoined(sdp: String) {
-        Log.d("sfuConnectFlow", "ExecuteJoin, $sdp")
+        logger.d { "[onCallJoined] #sfu; answerSdp: $sdp" }
 
         setRemoteDescription(SessionDescription(SessionDescription.Type.ANSWER, sdp))
     }
 
     public fun addLocalStream(mediaStream: MediaStream) {
+        logger.i { "[addLocalStream] #sfu; mediaStream: $mediaStream" }
         connection.addStream(mediaStream)
     }
 
@@ -181,32 +199,44 @@ public class StreamPeerConnection(
      */
 
     override fun onIceCandidate(candidate: IceCandidate?) {
+        logger.d { "[onIceCandidate] #sfu; candidate: $candidate" }
         if (candidate == null) return
 
         onIceCandidate?.invoke(candidate, type)
     }
 
     override fun onAddStream(stream: MediaStream?) {
+        logger.i { "[onAddStream] #sfu; stream: $stream" }
         if (stream != null) {
             onStreamAdded?.invoke(stream)
         }
     }
 
     override fun onAddTrack(receiver: RtpReceiver?, mediaStreams: Array<out MediaStream>?) {
-        super.onAddTrack(receiver, mediaStreams)
-        mediaStreams?.forEach {
-            onStreamAdded?.invoke(it)
+        logger.i { "[onAddTrack] receiver: $receiver, mediaStreams: $mediaStreams" }
+        mediaStreams?.forEach { mediaStream ->
+            logger.v { "[onAddTrack] mediaStream: $mediaStream" }
+            mediaStream.audioTracks?.forEach { remoteAudioTrack ->
+                logger.v { "[onAddTrack] remoteAudioTrack: ${remoteAudioTrack.stringify()}" }
+            }
+            onStreamAdded?.invoke(mediaStream)
         }
     }
 
     override fun onRenegotiationNeeded() {
+        logger.d { "[onRenegotiationNeeded] #sfu; no args" }
         onNegotiationNeeded?.invoke(this)
     }
 
     override fun onRemoveStream(stream: MediaStream?) {
+        logger.i { "[onRemoveStream] #sfu; stream: $stream" }
         if (stream != null) {
             onStreamRemoved?.invoke(stream)
         }
+    }
+
+    override fun onRemoveTrack(receiver: RtpReceiver?) {
+        logger.i { "[onRemoveTrack] receiver: $receiver" }
     }
 
     override fun onSignalingChange(p0: PeerConnection.SignalingState?): Unit = Unit

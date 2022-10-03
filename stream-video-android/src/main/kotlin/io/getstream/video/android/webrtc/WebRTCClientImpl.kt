@@ -23,8 +23,8 @@ import android.hardware.camera2.CameraMetadata
 import android.media.AudioAttributes.ALLOW_CAPTURE_BY_ALL
 import android.media.AudioManager
 import android.os.Build
-import android.util.Log
 import androidx.core.content.getSystemService
+import io.getstream.logging.StreamLog
 import io.getstream.video.android.audio.AudioDevice
 import io.getstream.video.android.audio.AudioSwitchHandler
 import io.getstream.video.android.dispatchers.DispatcherProvider
@@ -50,12 +50,14 @@ import io.getstream.video.android.utils.buildLocalIceServers
 import io.getstream.video.android.utils.buildMediaConstraints
 import io.getstream.video.android.utils.buildRemoteIceServers
 import io.getstream.video.android.utils.onSuccessSuspend
+import io.getstream.video.android.utils.stringify
 import io.getstream.video.android.webrtc.connection.PeerConnectionType
 import io.getstream.video.android.webrtc.connection.StreamPeerConnection
 import io.getstream.video.android.webrtc.connection.StreamPeerConnectionFactory
 import io.getstream.video.android.webrtc.datachannel.StreamDataChannel
 import io.getstream.video.android.webrtc.signal.SignalClient
 import io.getstream.video.android.webrtc.state.ConnectionState
+import io.getstream.video.android.webrtc.utils.stringify
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelChildren
@@ -95,6 +97,8 @@ internal class WebRTCClientImpl(
     private val credentialsProvider: CredentialsProvider,
     private val signalClient: SignalClient,
 ) : WebRTCClient {
+
+    private val logger = StreamLog.getLogger("Call:WebRtcClient")
 
     private var connectionState: ConnectionState = ConnectionState.DISCONNECTED
     private var sessionId: String = ""
@@ -163,6 +167,7 @@ internal class WebRTCClientImpl(
     private var isCapturingVideo: Boolean = false
 
     override fun clear() {
+        logger.d { "[clear] #sfu; no args" }
         supervisorJob.cancelChildren()
 
         connectionState = ConnectionState.DISCONNECTED
@@ -184,6 +189,7 @@ internal class WebRTCClientImpl(
     }
 
     override fun setCameraEnabled(isEnabled: Boolean) {
+        logger.d { "[setCameraEnabled] #sfu; isEnabled: $isEnabled" }
         coroutineScope.launch {
             if (!isCapturingVideo && isEnabled) {
                 startCapturingLocalVideo(CameraMetadata.LENS_FACING_FRONT)
@@ -194,6 +200,7 @@ internal class WebRTCClientImpl(
     }
 
     override fun setMicrophoneEnabled(isEnabled: Boolean) {
+        logger.d { "[setMicrophoneEnabled] #sfu; isEnabled: $isEnabled" }
         coroutineScope.launch {
             call?.setMicrophoneEnabled(isEnabled)
             localAudioTrack?.setEnabled(isEnabled)
@@ -201,6 +208,7 @@ internal class WebRTCClientImpl(
     }
 
     override fun flipCamera() {
+        logger.d { "[flipCamera] #sfu; no args" }
         (videoCapturer as? Camera2Capturer)?.switchCamera(null)
     }
 
@@ -209,12 +217,14 @@ internal class WebRTCClientImpl(
     }
 
     override fun getAudioDevices(): List<AudioDevice> {
+        logger.d { "[getAudioDevices] #sfu; no args" }
         val handler = getAudioHandler() ?: return emptyList()
 
         return handler.availableAudioDevices
     }
 
     override fun selectAudioDevice(device: AudioDevice) {
+        logger.d { "[selectAudioDevice] #sfu; device: $device" }
         val handler = getAudioHandler() ?: return
 
         handler.selectDevice(device)
@@ -235,6 +245,7 @@ internal class WebRTCClientImpl(
         autoPublish: Boolean,
         callSettings: CallSettings
     ): Result<Call> {
+        logger.d { "[connectToCall] #sfu; sessionId: $sessionId, autoPublish: $autoPublish" }
         if (connectionState != ConnectionState.DISCONNECTED) {
             return Failure(
                 VideoError("Already connected or connecting to a call with the session ID: $sessionId")
@@ -265,12 +276,14 @@ internal class WebRTCClientImpl(
     }
 
     private fun createCall(sessionId: String): Call {
+        logger.d { "[createCall] #sfu; sessionId: $sessionId" }
         this.sessionId = sessionId
 
         return buildCall(sessionId)
     }
 
     private fun buildCall(sessionId: String): Call {
+        logger.d { "[buildCall] #sfu; sessionId: $sessionId" }
         return Call(
             context = context,
             sessionId = sessionId,
@@ -288,15 +301,15 @@ internal class WebRTCClientImpl(
     private suspend fun initializeCall(autoPublish: Boolean): Result<JoinResponse> {
         val subscriber = createSubscriber()
         this.subscriber = subscriber
-        Log.d("sfuConnectFlow", subscriber.toString())
+        logger.d { "[initializeCall] #sfu; autoPublish: $autoPublish" }
 
         createSignalingChannel(subscriber)
-        Log.d("sfuConnectFlow", this@WebRTCClientImpl.subscriber.toString())
+        logger.v { "[initializeCall] #sfu; subscriber: $subscriber" }
 
         when (val joinResult = connectToCall(subscriber)) {
             is Success -> {
                 val isConnectionOpen = listenForConnectionOpened()
-                Log.d("sfuConnectFlow", "ConnectionOpen, $isConnectionOpen")
+                logger.v { "[initializeCall] #sfu; isConnectionOpen: $isConnectionOpen" }
 
                 if (!isConnectionOpen) {
                     clear()
@@ -346,6 +359,7 @@ internal class WebRTCClientImpl(
     }
 
     private fun createSignalingChannel(connection: StreamPeerConnection) {
+        logger.d { "[createSignalingChannel] #sfu; connection: $connection" }
         signalChannel = connection.createDataChannel(
             "signaling",
             DataChannel.Init(),
@@ -354,27 +368,31 @@ internal class WebRTCClientImpl(
                 this.signalChannelState = state
             }
         )
-        Log.d("sfuConnectFlow", signalChannel.toString())
+        logger.v { "[initializeCall] #sfu; signalChannel: $signalChannel" }
     }
 
     private suspend fun connectToCall(connection: StreamPeerConnection): Result<JoinResponse> {
+        logger.d { "[connectToCall] #sfu; connection: $connection" }
         val offerResult = connection.createJoinOffer()
+        logger.v { "[connectToCall] #sfu; offerResult: ${offerResult.stringify { it.stringify() }}" }
         return if (offerResult is Success) {
             val joinResponse = executeJoinRequest(offerResult.data)
 
             joinResponse.onSuccessSuspend { response ->
                 connection.onCallJoined(response.sdp)
             }
-
+            logger.v { "[connectToCall] #sfu; completed" }
             return joinResponse
         } else {
             val error = offerResult as? Failure
+            logger.e { "[connectToCall] #sfu; failed: $error" }
 
             Failure(error?.error ?: VideoError())
         }
     }
 
     private suspend fun executeJoinRequest(data: SessionDescription): Result<JoinResponse> {
+        logger.d { "[executeJoinRequest] #sfu; offerSdp: ${data.stringify()}" }
         val decoderCodecs = peerConnectionFactory.getVideoDecoderCodecs()
         val encoderCodecs = peerConnectionFactory.getVideoEncoderCodecs()
 
@@ -393,7 +411,9 @@ internal class WebRTCClientImpl(
             )
         )
 
-        return signalClient.join(request)
+        return signalClient.join(request).also {
+            logger.v { "[executeJoinRequest] #sfu; result: $it" }
+        }
     }
 
     private suspend fun listenForConnectionOpened(): Boolean {
@@ -423,14 +443,14 @@ internal class WebRTCClientImpl(
             mediaConstraints = MediaConstraints(),
             onNegotiationNeeded = ::negotiate
         )
-
-        Log.d("sfuConnectFlow", "CreatePublisher, $publisher")
+        logger.d { "[createPublisher] #sfu; publisher: $publisher" }
     }
 
     private fun negotiate(peerConnection: StreamPeerConnection) {
+        logger.d { "[negotiate] #sfu; peerConnection: $peerConnection" }
         coroutineScope.launch {
             peerConnection.createOffer().onSuccessSuspend { data ->
-                Log.d("sfuConnectFlow", "Negotiate, ${data.description}")
+                logger.v { "[negotiate] #sfu; offerSdp: $data" }
 
                 peerConnection.setLocalDescription(data)
 
@@ -440,7 +460,7 @@ internal class WebRTCClientImpl(
                 )
 
                 signalClient.setPublisher(request).onSuccessSuspend {
-                    Log.d("sfuConnectFlow", "SetPublisher, ${it.sdp}")
+                    logger.v { "[negotiate] #sfu; answerSdp: $it" }
 
                     peerConnection.setRemoteDescription(
                         SessionDescription(SessionDescription.Type.ANSWER, it.sdp)
@@ -451,6 +471,7 @@ internal class WebRTCClientImpl(
     }
 
     private fun setupUserMedia(callSettings: CallSettings, shouldPublish: Boolean) {
+        logger.d { "[setupUserMedia] #sfu; shouldPublish: $shouldPublish, callSettings: $callSettings" }
         val manager = context.getSystemService<AudioManager>()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             manager?.allowedCapturePolicy = ALLOW_CAPTURE_BY_ALL
@@ -458,15 +479,17 @@ internal class WebRTCClientImpl(
 
         val audioTrack = makeAudioTrack()
         audioTrack.setEnabled(true)
+        //audioTrack.setVolume(1.0)
         localAudioTrack = audioTrack
-        Log.d("sfuConnectFlow", "SetupMedia, $audioTrack")
+        logger.v { "[setupUserMedia] #sfu; audioTrack: ${audioTrack.stringify()}" }
 
         val videoTrack = makeVideoTrack()
         localVideoTrack = videoTrack
         videoTrack.setEnabled(callSettings.videoOn)
-        Log.d("sfuConnectFlow", "SetupMedia, $videoTrack")
+        logger.v { "[setupUserMedia] #sfu; videoTrack: ${videoTrack.stringify()}" }
 
         if (shouldPublish) {
+            //publisher?.addTrack(audioTrack, listOf(sessionId))
             publisher?.addAudioTransceiver(audioTrack, listOf(sessionId))
             publisher?.addVideoTransceiver(videoTrack, listOf(sessionId))
         }
@@ -475,7 +498,7 @@ internal class WebRTCClientImpl(
     private fun makeAudioTrack(): AudioTrack {
         val audioSource = peerConnectionFactory.makeAudioSource(audioConstraints)
 
-        return peerConnectionFactory.makeAudioTrack(audioSource)
+        return peerConnectionFactory.makeAudioTrack(audioSource, trackId = "tpa-audio")
     }
 
     private fun makeVideoTrack(isScreenShare: Boolean = false): VideoTrack {
@@ -542,13 +565,13 @@ internal class WebRTCClientImpl(
             ?.filter { it.active }
             ?.map { it.name } ?: emptyList()
 
-        Log.d("sfuConnectFlow", "UpdateQuality, $enabledRids")
+        logger.v { "[updatePublishQuality] #sfu; updateQuality: $enabledRids" }
         val params = transceiver.sender.parameters
 
         val updatedEncodings = mutableListOf<RtpParameters.Encoding>()
 
         var encodingChanged = false
-        Log.d("sfuConnectFlow", "CurrentQuality, $params")
+        logger.v { "[updatePublishQuality] #sfu; currentQuality: $params" }
 
         for (encoding in params.encodings) {
             if (encoding.rid != null) {
@@ -566,7 +589,7 @@ internal class WebRTCClientImpl(
             }
         }
         if (encodingChanged) {
-            Log.d("sfuConnectFlow", "Updated encoding, $updatedEncodings")
+            logger.v { "[updatePublishQuality] #sfu; updatedEncodings: $updatedEncodings" }
             params.encodings.clear()
             params.encodings.addAll(updatedEncodings)
 
@@ -578,6 +601,7 @@ internal class WebRTCClientImpl(
      * Processes messages from the Data channel.
      */
     private fun onMessage(event: SfuDataEvent) {
+        logger.v { "[onMessage] #sfu; event: $event" }
         when (event) {
             is SubscriberOfferEvent -> setRemoteDescription(event.sdp)
             is SfuParticipantJoinedEvent -> call?.addParticipant(event)
@@ -591,6 +615,7 @@ internal class WebRTCClientImpl(
     }
 
     private fun setRemoteDescription(sdp: String) { // TODO - check with iOS if the SDP communication is correct
+        logger.d { "[setRemoteDescription] #sfu; offerSdp: $sdp" }
         val subscriber = subscriber ?: return
 
         val sessionDescription = SessionDescription(
@@ -611,6 +636,7 @@ internal class WebRTCClientImpl(
     }
 
     private fun sendAnswer(description: String) {
+        logger.d { "[sendAnswer] #sfu; answerSdp: $description" }
         val sendAnswerRequest = SendAnswerRequest(
             session_id = sessionId,
             peer_type = PeerType.SUBSCRIBER,
@@ -628,7 +654,7 @@ internal class WebRTCClientImpl(
 
         for (user in participants) {
             if (user.id != userId) {
-                Log.d("sfuConnectFlow", "Updating subscriptions for ${user.id}")
+                logger.d { "[updateParticipantsSubscriptions] #sfu; user.id: ${user.id}" }
 
                 val dimension = VideoDimension(
                     width = user.trackSize.first,
@@ -647,12 +673,12 @@ internal class WebRTCClientImpl(
         )
 
         coroutineScope.launch {
-            when (signalClient.updateSubscriptions(request)) {
+            when (val result = signalClient.updateSubscriptions(request)) {
                 is Success -> {
-                    Log.d("sfuConnectFlow", "Successful subscription update")
+                    logger.v { "[updateParticipantsSubscriptions] #sfu; succeed" }
                 }
                 is Failure -> {
-                    Log.d("sfuConnectFlow", "Failed subscription update")
+                    logger.e { "[updateParticipantsSubscriptions] #sfu; failed: $result" }
                 }
             }
         }

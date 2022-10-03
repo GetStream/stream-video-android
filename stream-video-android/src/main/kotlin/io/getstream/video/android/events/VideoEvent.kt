@@ -16,6 +16,9 @@
 
 package io.getstream.video.android.events
 
+import io.getstream.video.android.events.model.CallDetails
+import io.getstream.video.android.events.model.CallInfo
+import io.getstream.video.android.events.model.CallUser
 import stream.video.coordinator.participant_v1.Participant
 import stream.video.sfu.Call
 
@@ -43,7 +46,10 @@ public data class HealthCheckEvent(
  * Sent when someone creates a call and invites another person to participate.
  */
 public data class CallCreatedEvent(
-    val callId: String
+    val callId: String,
+    val users: Map<String, CallUser>,
+    val info: CallInfo?,
+    val details: CallDetails?
 ) : VideoEvent()
 
 /**
