@@ -17,11 +17,16 @@
 package io.getstream.video.android.socket
 
 import io.getstream.video.android.events.CallCreatedEvent
+import io.getstream.video.android.events.CallEndedEvent
+import io.getstream.video.android.events.CallMembersDeletedEvent
+import io.getstream.video.android.events.CallMembersUpdatedEvent
+import io.getstream.video.android.events.CallStartedEvent
+import io.getstream.video.android.events.CallUpdatedEvent
 import io.getstream.video.android.events.HealthCheckEvent
 import io.getstream.video.android.events.UnknownEvent
 import io.getstream.video.android.events.VideoEvent
-import io.getstream.video.android.events.model.toCallInfo
 import io.getstream.video.android.events.model.toCallDetails
+import io.getstream.video.android.events.model.toCallInfo
 import io.getstream.video.android.events.model.toCallUsers
 import stream.video.coordinator.client_v1_rpc.WebsocketEvent
 
@@ -40,6 +45,51 @@ internal object EventMapper {
 
         socketEvent.call_created != null -> with(socketEvent.call_created) {
             CallCreatedEvent(
+                callId = call_cid,
+                users = socketEvent.users.toCallUsers(),
+                info = socketEvent.calls[call_cid]?.toCallInfo(),
+                details = socketEvent.call_details[call_cid]?.toCallDetails(),
+            )
+        }
+
+        socketEvent.call_started != null -> with(socketEvent.call_started) {
+            CallStartedEvent(
+                callId = call_cid,
+                users = socketEvent.users.toCallUsers(),
+                info = socketEvent.calls[call_cid]?.toCallInfo(),
+                details = socketEvent.call_details[call_cid]?.toCallDetails(),
+            )
+        }
+
+        socketEvent.call_updated != null -> with(socketEvent.call_updated) {
+            CallUpdatedEvent(
+                callId = call_cid,
+                users = socketEvent.users.toCallUsers(),
+                info = socketEvent.calls[call_cid]?.toCallInfo(),
+                details = socketEvent.call_details[call_cid]?.toCallDetails(),
+            )
+        }
+
+        socketEvent.call_ended != null -> with(socketEvent.call_ended) {
+            CallEndedEvent(
+                callId = call_cid,
+                users = socketEvent.users.toCallUsers(),
+                info = socketEvent.calls[call_cid]?.toCallInfo(),
+                details = socketEvent.call_details[call_cid]?.toCallDetails(),
+            )
+        }
+
+        socketEvent.call_members_updated != null -> with(socketEvent.call_members_updated) {
+            CallMembersUpdatedEvent(
+                callId = call_cid,
+                users = socketEvent.users.toCallUsers(),
+                info = socketEvent.calls[call_cid]?.toCallInfo(),
+                details = socketEvent.call_details[call_cid]?.toCallDetails(),
+            )
+        }
+
+        socketEvent.call_members_deleted != null -> with(socketEvent.call_members_deleted) {
+            CallMembersDeletedEvent(
                 callId = call_cid,
                 users = socketEvent.users.toCallUsers(),
                 info = socketEvent.calls[call_cid]?.toCallInfo(),

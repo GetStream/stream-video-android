@@ -53,6 +53,56 @@ public data class CallCreatedEvent(
 ) : VideoEvent()
 
 /**
+ * Sent when a call gets started.
+ */
+public data class CallStartedEvent(
+    val callId: String,
+    val users: Map<String, CallUser>,
+    val info: CallInfo?,
+    val details: CallDetails?
+) : VideoEvent()
+
+/**
+ * Sent when a call gets updated.
+ */
+public data class CallUpdatedEvent(
+    val callId: String,
+    val users: Map<String, CallUser>,
+    val info: CallInfo?,
+    val details: CallDetails?
+) : VideoEvent()
+
+/**
+ * Sent when a calls gets ended.
+ */
+public data class CallEndedEvent(
+    val callId: String,
+    val users: Map<String, CallUser>,
+    val info: CallInfo?,
+    val details: CallDetails?
+) : VideoEvent()
+
+/**
+ * Sent when call members get updated.
+ */
+public data class CallMembersUpdatedEvent(
+    val callId: String,
+    val users: Map<String, CallUser>,
+    val info: CallInfo?,
+    val details: CallDetails?
+) : VideoEvent()
+
+/**
+ * Sent when call members get updated.
+ */
+public data class CallMembersDeletedEvent(
+    val callId: String,
+    val users: Map<String, CallUser>,
+    val info: CallInfo?,
+    val details: CallDetails?
+) : VideoEvent()
+
+/**
  * Triggered whenever a user's audio is unmuted or started.
  */
 public data class AudioUnmutedEvent(

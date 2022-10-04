@@ -49,5 +49,4 @@ public open class VideoError(
     override fun toString(): String {
         return "VideoError(message=$message, cause=$cause)"
     }
-
 }

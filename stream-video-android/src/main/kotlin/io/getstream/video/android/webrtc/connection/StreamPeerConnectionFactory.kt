@@ -19,7 +19,8 @@ package io.getstream.video.android.webrtc.connection
 import android.content.Context
 import android.media.MediaCodecList
 import android.os.Build
-import android.util.Log
+import io.getstream.logging.StreamLog
+import kotlinx.coroutines.CoroutineScope
 import org.webrtc.AudioSource
 import org.webrtc.AudioTrack
 import org.webrtc.DefaultVideoDecoderFactory
@@ -41,6 +42,9 @@ import java.util.*
 
 public class StreamPeerConnectionFactory(private val context: Context) {
 
+    private val webRtcLogger = StreamLog.getLogger("Call:WebRTC")
+    private val audioLogger = StreamLog.getLogger("Call:AudioTrackCallback")
+
     public val eglBase: EglBase by lazy {
         EglBase.create()
     }
@@ -61,7 +65,7 @@ public class StreamPeerConnectionFactory(private val context: Context) {
             PeerConnectionFactory.InitializationOptions.builder(context)
                 .setInjectableLogger({ message, _, label ->
                     if (message.contains("audio", true)) {
-                        Log.i("WebRTC", "$label: $message")
+                        webRtcLogger.i { "[onLogMessage] label: $label, message: $message" }
                     }
                 }, Logging.Severity.LS_VERBOSE)
                 .createInitializationOptions()
@@ -78,55 +82,55 @@ public class StreamPeerConnectionFactory(private val context: Context) {
                     .setAudioRecordErrorCallback(object :
                             JavaAudioDeviceModule.AudioRecordErrorCallback {
                             override fun onWebRtcAudioRecordInitError(p0: String?) {
-                                Log.d("AudioTrackCallback", p0 ?: "")
+                                audioLogger.w { "[onWebRtcAudioRecordInitError] $p0" }
                             }
 
                             override fun onWebRtcAudioRecordStartError(
                                 p0: JavaAudioDeviceModule.AudioRecordStartErrorCode?,
                                 p1: String?
                             ) {
-                                Log.d("AudioTrackCallback", p1 ?: "")
+                                audioLogger.w { "[onWebRtcAudioRecordInitError] $p1" }
                             }
 
                             override fun onWebRtcAudioRecordError(p0: String?) {
-                                Log.d("AudioTrackCallback", p0 ?: "")
+                                audioLogger.w { "[onWebRtcAudioRecordError] $p0" }
                             }
                         })
                     .setAudioTrackErrorCallback(object :
                             JavaAudioDeviceModule.AudioTrackErrorCallback {
                             override fun onWebRtcAudioTrackInitError(p0: String?) {
-                                Log.d("AudioTrackCallback", p0 ?: "")
+                                audioLogger.w { "[onWebRtcAudioTrackInitError] $p0" }
                             }
 
                             override fun onWebRtcAudioTrackStartError(
                                 p0: JavaAudioDeviceModule.AudioTrackStartErrorCode?,
                                 p1: String?
                             ) {
-                                Log.d("AudioTrackCallback", p1 ?: "")
+                                audioLogger.w { "[onWebRtcAudioTrackStartError] $p0" }
                             }
 
                             override fun onWebRtcAudioTrackError(p0: String?) {
-                                Log.d("AudioTrackCallback", p0 ?: "")
+                                audioLogger.w { "[onWebRtcAudioTrackError] $p0" }
                             }
                         })
                     .setAudioRecordStateCallback(object :
                             JavaAudioDeviceModule.AudioRecordStateCallback {
                             override fun onWebRtcAudioRecordStart() {
-                                Log.d("AudioTrackCallback", "Record start")
+                                audioLogger.d { "[onWebRtcAudioRecordStart] no args" }
                             }
 
                             override fun onWebRtcAudioRecordStop() {
-                                Log.d("AudioTrackCallback", "Record stop")
+                                audioLogger.d { "[onWebRtcAudioRecordStop] no args" }
                             }
                         })
                     .setAudioTrackStateCallback(object :
                             JavaAudioDeviceModule.AudioTrackStateCallback {
                             override fun onWebRtcAudioTrackStart() {
-                                Log.d("AudioTrackCallback", "Track starting")
+                                audioLogger.d { "[onWebRtcAudioTrackStart] no args" }
                             }
 
                             override fun onWebRtcAudioTrackStop() {
-                                Log.d("AudioTrackCallback", "Track stopping")
+                                audioLogger.d { "[onWebRtcAudioTrackStop] no args" }
                             }
                         })
                     .createAudioDeviceModule()
@@ -232,6 +236,7 @@ public class StreamPeerConnectionFactory(private val context: Context) {
      * Peer connection.
      */
     public fun makePeerConnection(
+        coroutineScope: CoroutineScope,
         configuration: PeerConnection.RTCConfiguration,
         type: PeerConnectionType,
         mediaConstraints: MediaConstraints,
@@ -241,6 +246,7 @@ public class StreamPeerConnectionFactory(private val context: Context) {
         onIceCandidateRequest: ((IceCandidate, PeerConnectionType) -> Unit)? = null
     ): StreamPeerConnection {
         val peerConnection = StreamPeerConnection(
+            coroutineScope,
             type,
             mediaConstraints,
             onStreamAdded,

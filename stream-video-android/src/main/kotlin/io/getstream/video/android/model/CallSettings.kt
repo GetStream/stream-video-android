@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.model
 
-public class CallSettings(
+public data class CallSettings(
     public val audioOn: Boolean = true,
     public val videoOn: Boolean = true,
     public val speakerOn: Boolean = true
