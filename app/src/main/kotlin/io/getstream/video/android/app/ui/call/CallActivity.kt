@@ -37,6 +37,7 @@ import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.R
 import io.getstream.video.android.app.VideoApp
 import io.getstream.video.android.app.ui.call.content.VideoCallContent
+import io.getstream.video.android.model.CallSettings
 import io.getstream.video.android.ui.ParticipantContentView
 import io.getstream.video.android.ui.ParticipantItemView
 import io.getstream.video.android.viewmodel.CallViewModel
@@ -150,7 +151,15 @@ class CallActivity : AppCompatActivity() {
         val sfuUrl = requireNotNull(intent.getStringExtra(KEY_SFU_URL))
         val callId = requireNotNull(intent.getStringExtra(KEY_CALL_ID))
 
-        callViewModel.init(callId, sfuUrl, userToken)
+        callViewModel.init(
+            callId = callId,
+            sfuUrl = sfuUrl,
+            userToken = userToken,
+            callSettings = CallSettings(
+                audioOn = false,
+                videoOn = false
+            )
+        )
     }
 
     @RequiresApi(M)

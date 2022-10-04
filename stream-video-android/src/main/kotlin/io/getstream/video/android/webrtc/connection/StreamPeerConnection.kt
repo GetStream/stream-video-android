@@ -30,6 +30,7 @@ import org.webrtc.MediaStream
 import org.webrtc.MediaStreamTrack
 import org.webrtc.PeerConnection
 import org.webrtc.RtpParameters
+import org.webrtc.RtpReceiver
 import org.webrtc.RtpSender
 import org.webrtc.RtpTransceiver
 import org.webrtc.RtpTransceiver.RtpTransceiverInit
@@ -70,16 +71,16 @@ public class StreamPeerConnection(
         )
     }
 
-    public suspend fun setRemoteDescription(sessionDescription: SessionDescription): Result<Unit> {
-        return setValue { connection.setRemoteDescription(it, sessionDescription) }
-    }
-
     public suspend fun createOffer(): Result<SessionDescription> {
         return createValue { connection.createOffer(it, MediaConstraints()) } // TODO we should send mediaConstraints here too, but BE crashes
     }
 
     public suspend fun createAnswer(): Result<SessionDescription> {
         return createValue { connection.createAnswer(it, mediaConstraints) }
+    }
+
+    public suspend fun setRemoteDescription(sessionDescription: SessionDescription): Result<Unit> {
+        return setValue { connection.setRemoteDescription(it, sessionDescription) }
     }
 
     public suspend fun setLocalDescription(sessionDescription: SessionDescription): Result<Unit> {
@@ -188,6 +189,13 @@ public class StreamPeerConnection(
     override fun onAddStream(stream: MediaStream?) {
         if (stream != null) {
             onStreamAdded?.invoke(stream)
+        }
+    }
+
+    override fun onAddTrack(receiver: RtpReceiver?, mediaStreams: Array<out MediaStream>?) {
+        super.onAddTrack(receiver, mediaStreams)
+        mediaStreams?.forEach {
+            onStreamAdded?.invoke(it)
         }
     }
 

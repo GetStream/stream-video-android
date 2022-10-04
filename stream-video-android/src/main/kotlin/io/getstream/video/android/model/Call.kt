@@ -82,9 +82,8 @@ public class Call(
         context.getSystemService<AudioManager>()
     }
 
-    private val remoteAudioTracks = mutableListOf<AudioTrack>()
+    private val remoteAudioTracks = mutableSetOf<AudioTrack>()
 
-    public var onLocalVideoTrackChange: (org.webrtc.VideoTrack) -> Unit = {}
     public var onStreamAdded: (MediaStream) -> Unit = {}
     public var onStreamRemoved: (MediaStream) -> Unit = {}
 
@@ -137,6 +136,7 @@ public class Call(
             }
 
             remoteAudioTracks.addAll(mediaStream.audioTracks)
+            Log.d("AudioTrackState", "$remoteAudioTracks")
 
             updateAudio()
         }
@@ -149,9 +149,7 @@ public class Call(
                 val track = replaceTrackIfNeeded(mediaStream, it.track?.streamId)
 
                 if (track != null) {
-                    it.copy(
-                        track = track
-                    )
+                    it.copy(track = track)
                 } else {
                     it
                 }
@@ -212,9 +210,18 @@ public class Call(
         onStreamRemoved(mediaStream)
     }
 
-    internal fun loadParticipants(callState: CallState) {
+    internal fun loadParticipants(callState: CallState, callSettings: CallSettings) {
         val allParticipants =
-            callState.participants.map { it.toCallParticipant(credentialsProvider.getUserCredentials().id) }
+            callState.participants.map {
+                val user = it.toCallParticipant(credentialsProvider.getUserCredentials().id)
+
+                if (it.user?.id == credentialsProvider.getUserCredentials().id) {
+                    user.hasAudio = callSettings.audioOn
+                    user.hasVideo = callSettings.videoOn
+                }
+
+                user
+            }
 
         this._callParticipants.value = allParticipants
         Log.d("sfuConnectFlow", "ExecuteJoin, ${_callParticipants.value}")
@@ -272,10 +279,9 @@ public class Call(
 
         _localParticipant.value = updatedParticipant
         _callParticipants.value = updated
-        onLocalVideoTrackChange(localVideoTrack)
     }
 
-    internal fun startAudio() {
+    internal fun setupAudio() {
         audioHandler.start()
     }
 

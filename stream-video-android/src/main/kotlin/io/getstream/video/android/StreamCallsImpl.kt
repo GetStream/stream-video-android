@@ -26,6 +26,7 @@ import io.getstream.video.android.client.user.UserState
 import io.getstream.video.android.dispatchers.DispatcherProvider
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.model.Call
+import io.getstream.video.android.model.CallSettings
 import io.getstream.video.android.model.domain.CallMetadata
 import io.getstream.video.android.model.domain.JoinedCall
 import io.getstream.video.android.model.domain.User
@@ -150,10 +151,14 @@ public class StreamCallsImpl(
         this.webRTCClient = builder.build()
     }
 
-    override fun connectToCall(sessionId: String, autoPublish: Boolean): Call {
+    override suspend fun connectToCall(
+        sessionId: String,
+        autoPublish: Boolean,
+        callSettings: CallSettings
+    ): Result<Call> {
         val client = requireClient()
 
-        return client.connectToCall(sessionId, autoPublish)
+        return client.connectToCall(sessionId, autoPublish, callSettings)
     }
 
     override fun startCapturingLocalVideo(position: Int) {

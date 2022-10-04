@@ -55,6 +55,7 @@ import io.getstream.video.android.webrtc.connection.StreamPeerConnection
 import io.getstream.video.android.webrtc.connection.StreamPeerConnectionFactory
 import io.getstream.video.android.webrtc.datachannel.StreamDataChannel
 import io.getstream.video.android.webrtc.signal.SignalClient
+import io.getstream.video.android.webrtc.state.ConnectionState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelChildren
@@ -76,6 +77,7 @@ import org.webrtc.SurfaceTextureHelper
 import org.webrtc.VideoCapturer
 import org.webrtc.VideoTrack
 import stream.video.sfu.AudioCodecs
+import stream.video.sfu.CallState
 import stream.video.sfu.CodecSettings
 import stream.video.sfu.IceCandidateRequest
 import stream.video.sfu.JoinRequest
@@ -94,6 +96,7 @@ internal class WebRTCClientImpl(
     private val signalClient: SignalClient,
 ) : WebRTCClient {
 
+    private var connectionState: ConnectionState = ConnectionState.DISCONNECTED
     private var sessionId: String = ""
     private var call: Call? = null
 
@@ -157,10 +160,12 @@ internal class WebRTCClientImpl(
     }
 
     private var videoCapturer: VideoCapturer? = null
+    private var isCapturingVideo: Boolean = false
 
     override fun clear() {
         supervisorJob.cancelChildren()
 
+        connectionState = ConnectionState.DISCONNECTED
         sessionId = ""
 
         call?.disconnect()
@@ -175,10 +180,14 @@ internal class WebRTCClientImpl(
         signalChannelState = DataChannel.State.CLOSED
 
         videoCapturer = null
+        isCapturingVideo = false
     }
 
     override fun setCameraEnabled(isEnabled: Boolean) {
         coroutineScope.launch {
+            if (!isCapturingVideo && isEnabled) {
+                startCapturingLocalVideo(CameraMetadata.LENS_FACING_FRONT)
+            }
             call?.setCameraEnabled(isEnabled)
             localVideoTrack?.setEnabled(isEnabled)
         }
@@ -212,7 +221,7 @@ internal class WebRTCClientImpl(
     }
 
     private fun listenToParticipants() {
-        val room = call ?: throw IllegalStateException("Room is in incorrect state, null!")
+        val room = call ?: throw IllegalStateException("Call is in an incorrect state, null!")
 
         coroutineScope.launch {
             room.callParticipants.collectLatest { participants ->
@@ -221,24 +230,47 @@ internal class WebRTCClientImpl(
         }
     }
 
-    override fun connectToCall(sessionId: String, autoPublish: Boolean): Call {
-        val room = createRoom(sessionId)
-        this.call = room
+    override suspend fun connectToCall(
+        sessionId: String,
+        autoPublish: Boolean,
+        callSettings: CallSettings
+    ): Result<Call> {
+        if (connectionState != ConnectionState.DISCONNECTED) {
+            return Failure(
+                VideoError("Already connected or connecting to a call with the session ID: $sessionId")
+            )
+        }
+
+        connectionState = ConnectionState.CONNECTING
         this.sessionId = sessionId
 
-        listenToParticipants()
-        initializeCall(autoPublish)
+        when (val initializeResult = initializeCall(autoPublish)) {
+            is Success -> {
+                connectionState = ConnectionState.CONNECTED
 
-        return room
+                val call = createCall(sessionId)
+                this.call = call
+
+                call.setupAudio()
+                listenToParticipants()
+                loadParticipantsData(initializeResult.data.call_state, callSettings)
+                setupUserMedia(callSettings, autoPublish)
+
+                return Success(call)
+            }
+            is Failure -> {
+                return initializeResult
+            }
+        }
     }
 
-    private fun createRoom(sessionId: String): Call {
+    private fun createCall(sessionId: String): Call {
         this.sessionId = sessionId
 
-        return buildRoom(sessionId)
+        return buildCall(sessionId)
     }
 
-    private fun buildRoom(sessionId: String): Call {
+    private fun buildCall(sessionId: String): Call {
         return Call(
             context = context,
             sessionId = sessionId,
@@ -247,37 +279,48 @@ internal class WebRTCClientImpl(
         )
     }
 
-    private fun initializeCall(autoPublish: Boolean) {
-        val connection = createConnection()
-        subscriber = connection
-        Log.d("sfuConnectFlow", connection.toString())
+    private fun loadParticipantsData(callState: CallState?, callSettings: CallSettings) {
+        if (callState != null) {
+            call?.loadParticipants(callState, callSettings)
+        }
+    }
 
-        coroutineScope.launch {
-            createSignalingChannel(connection)
-            Log.d("sfuConnectFlow", subscriber.toString())
+    private suspend fun initializeCall(autoPublish: Boolean): Result<JoinResponse> {
+        val subscriber = createSubscriber()
+        this.subscriber = subscriber
+        Log.d("sfuConnectFlow", subscriber.toString())
 
-            val joinResult = connectToCall(connection)
+        createSignalingChannel(subscriber)
+        Log.d("sfuConnectFlow", this@WebRTCClientImpl.subscriber.toString())
 
-            if (joinResult is Success) {
-                val isConnectionOpen = listenForConnectionOpened(joinResult.data)
+        when (val joinResult = connectToCall(subscriber)) {
+            is Success -> {
+                val isConnectionOpen = listenForConnectionOpened()
                 Log.d("sfuConnectFlow", "ConnectionOpen, $isConnectionOpen")
 
                 if (!isConnectionOpen) {
                     clear()
-                    return@launch
+                    return Failure(VideoError("Couldn't connect to the data channel."))
                 }
 
                 if (autoPublish) {
                     createPublisher()
                 }
-                setupUserMedia(CallSettings(), autoPublish)
-            } else {
+                return Success(joinResult.data)
+            }
+            is Failure -> {
                 clear()
+                return Failure(
+                    VideoError(
+                        "Couldn't connect to call. Join request failed.",
+                        joinResult.error.cause
+                    )
+                )
             }
         }
     }
 
-    private fun createConnection(): StreamPeerConnection {
+    private fun createSubscriber(): StreamPeerConnection {
         return peerConnectionFactory.makePeerConnection(
             configuration = connectionConfiguration,
             type = PeerConnectionType.SUBSCRIBER,
@@ -353,7 +396,7 @@ internal class WebRTCClientImpl(
         return signalClient.join(request)
     }
 
-    private suspend fun listenForConnectionOpened(response: JoinResponse): Boolean {
+    private suspend fun listenForConnectionOpened(): Boolean {
         var connected = signalChannelState == DataChannel.State.OPEN
 
         val timeoutTime = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(30)
@@ -367,11 +410,9 @@ internal class WebRTCClientImpl(
         }
 
         return if (connected) {
-            call?.startAudio()
-            call?.loadParticipants(requireNotNull(response.call_state))
             signalChannel?.send("ss".encode()) ?: false
         } else {
-            throw IllegalStateException("Couldn't connect to data channel.")
+            false
         }
     }
 
@@ -422,6 +463,7 @@ internal class WebRTCClientImpl(
 
         val videoTrack = makeVideoTrack()
         localVideoTrack = videoTrack
+        videoTrack.setEnabled(callSettings.videoOn)
         Log.d("sfuConnectFlow", "SetupMedia, $videoTrack")
 
         if (shouldPublish) {
@@ -464,6 +506,7 @@ internal class WebRTCClientImpl(
         } ?: return
 
         capturer.startCapture(resolution.width, resolution.height, 30)
+        isCapturingVideo = true
     }
 
     private fun buildCameraCapturer(): VideoCapturer? {
