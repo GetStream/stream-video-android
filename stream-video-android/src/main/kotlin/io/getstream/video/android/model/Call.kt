@@ -144,7 +144,7 @@ public class Call(
             }
 
             remoteAudioTracks.addAll(mediaStream.audioTracks)
-            Log.d("AudioTrackState", "$remoteAudioTracks")
+            logger.d { "[addStream] #sfu; remoteAudioTracks: $remoteAudioTracks" }
 
             updateAudio()
         }
