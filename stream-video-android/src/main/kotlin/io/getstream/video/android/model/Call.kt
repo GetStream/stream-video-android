@@ -20,9 +20,9 @@ import android.content.Context
 import android.media.AudioDeviceInfo.TYPE_BUILTIN_SPEAKER
 import android.media.AudioManager
 import android.os.Build
-import android.util.Log
 import android.view.View
 import androidx.core.content.getSystemService
+import io.getstream.logging.StreamLog
 import io.getstream.video.android.audio.AudioHandler
 import io.getstream.video.android.audio.AudioSwitchHandler
 import io.getstream.video.android.events.MuteStateChangeEvent
@@ -30,6 +30,7 @@ import io.getstream.video.android.events.SfuParticipantJoinedEvent
 import io.getstream.video.android.events.SfuParticipantLeftEvent
 import io.getstream.video.android.token.CredentialsProvider
 import io.getstream.video.android.utils.updateValue
+import io.getstream.video.android.webrtc.utils.stringify
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -48,6 +49,8 @@ public class Call(
     private val credentialsProvider: CredentialsProvider,
     private val eglBase: EglBase,
 ) {
+
+    private val logger = StreamLog.getLogger("Call:Room")
 
     internal val audioHandler: AudioHandler by lazy {
         AudioSwitchHandler(context)
@@ -95,10 +98,12 @@ public class Call(
         streamId: String,
         onRender: (View) -> Unit = {}
     ) {
+        logger.d { "[initRenderer] #sfu; streamId: $streamId" }
         videoRenderer.init(
             eglBase.eglBaseContext,
             object : RendererCommon.RendererEvents {
                 override fun onFirstFrameRendered() {
+                    logger.v { "[initRenderer.onFirstFrameRendered] #sfu; streamId: $streamId" }
                     updateParticipantTrackSize(
                         streamId,
                         videoRenderer.measuredWidth,
@@ -108,6 +113,7 @@ public class Call(
                 }
 
                 override fun onFrameResolutionChanged(p0: Int, p1: Int, p2: Int) {
+                    logger.v { "[initRenderer.onFrameResolutionChanged] #sfu; streamId: $streamId" }
                 }
             }
         )
@@ -129,19 +135,19 @@ public class Call(
     }
 
     internal fun addStream(mediaStream: MediaStream) {
+        logger.i { "[addStream] #sfu; mediaStream: $mediaStream" }
         if (mediaStream.audioTracks.isNotEmpty()) {
-            Log.d("sfuConnectFlow", "AudioTracks received, ${mediaStream.audioTracks}")
             mediaStream.audioTracks.forEach { track ->
+                logger.v { "[addStream] #sfu; audioTrack: ${track.stringify()}" }
                 track.setEnabled(true)
+                track.setVolume(15.0)
             }
 
             remoteAudioTracks.addAll(mediaStream.audioTracks)
-            Log.d("AudioTrackState", "$remoteAudioTracks")
+            logger.d { "[addStream] #sfu; remoteAudioTracks: $remoteAudioTracks" }
 
             updateAudio()
         }
-
-        Log.d("sfuConnectFlow", "StreamAdded, $mediaStream")
 
         val updatedList = _callParticipants.value.updateValue(
             predicate = { it.id in mediaStream.id },
@@ -178,7 +184,8 @@ public class Call(
             val devices = audioManager?.availableCommunicationDevices ?: return
             val speaker = devices.firstOrNull { it.type == TYPE_BUILTIN_SPEAKER } ?: return
 
-            Log.d("EnablingSpeaker", audioManager?.setCommunicationDevice(speaker).toString())
+            val isCommunicationDeviceSet = audioManager?.setCommunicationDevice(speaker)
+            logger.d { "[updateAudio] #sfu; isCommunicationDeviceSet: $isCommunicationDeviceSet" }
         }
         audioManager?.mode = AudioManager.MODE_IN_COMMUNICATION
         audioManager?.isSpeakerphoneOn = true
@@ -198,7 +205,7 @@ public class Call(
     }
 
     internal fun removeStream(mediaStream: MediaStream) {
-        Log.d("sfuConnectFlow", "StreamRemoved, $mediaStream")
+        logger.d { "[removeStream] #sfu; mediaStream: $mediaStream" }
         val updatedList = _callParticipants.value.updateValue(
             predicate = { it.id in mediaStream.id },
             transformer = {
@@ -224,13 +231,14 @@ public class Call(
             }
 
         this._callParticipants.value = allParticipants
-        Log.d("sfuConnectFlow", "ExecuteJoin, ${_callParticipants.value}")
+        logger.d { "[loadParticipants] #sfu; allParticipants: ${_callParticipants.value}" }
 
         this._localParticipant.value = allParticipants.firstOrNull { it.isLocal }
-        Log.d("sfuConnectFlow", "ExecuteJoin, Local: ${_localParticipant.value}")
+        logger.v { "[loadParticipants] #sfu; localParticipants: ${_localParticipant.value}" }
     }
 
     internal fun updateMuteState(event: MuteStateChangeEvent) {
+        logger.d { "[updateMuteState] #sfu; event: $event" }
         val currentParticipants = _callParticipants.value
 
         val updatedList = currentParticipants.updateValue(
@@ -247,17 +255,20 @@ public class Call(
     }
 
     internal fun addParticipant(event: SfuParticipantJoinedEvent) {
+        logger.d { "[addParticipant] #sfu; event: $event" }
         _callParticipants.value =
             _callParticipants.value + event.participant.toCallParticipant(credentialsProvider.getUserCredentials().id)
     }
 
     internal fun removeParticipant(event: SfuParticipantLeftEvent) {
+        logger.d { "[removeParticipant] #sfu; event: $event" }
         val userId = event.participant.user?.id ?: return
 
         _callParticipants.value = _callParticipants.value.filter { it.id != userId }
     }
 
     internal fun updateLocalVideoTrack(localVideoTrack: org.webrtc.VideoTrack) {
+        logger.d { "[updateLocalVideoTrack] #sfu; localVideoTrack: $localVideoTrack" }
         val localParticipant = _localParticipant.value ?: return
         val allParticipants = callParticipants.value
 
@@ -282,10 +293,12 @@ public class Call(
     }
 
     internal fun setupAudio() {
+        logger.d { "[setupAudio] #sfu; no args" }
         audioHandler.start()
     }
 
     internal fun disconnect() {
+        logger.d { "[disconnect] #sfu; no args" }
         audioHandler.stop()
         _callParticipants.value.forEach { it.track?.video?.dispose() }
         _callParticipants.value = emptyList()
@@ -297,6 +310,7 @@ public class Call(
 
     // TODO - check if this is needed or if we can rely on the MuteEvent
     public fun setCameraEnabled(isEnabled: Boolean) {
+        logger.d { "[setCameraEnabled] #sfu; isEnabled: $isEnabled" }
         val localParticipant = _localParticipant.value
         val updatedLocal = localParticipant?.copy(hasVideo = isEnabled)
         _localParticipant.value = updatedLocal
@@ -310,6 +324,7 @@ public class Call(
     }
 
     public fun setMicrophoneEnabled(isEnabled: Boolean) {
+        logger.d { "[setMicrophoneEnabled] #sfu; isEnabled: $isEnabled" }
         val localParticipant = _localParticipant.value
         val updatedLocal = localParticipant?.copy(hasAudio = isEnabled)
         _localParticipant.value = updatedLocal

@@ -17,6 +17,8 @@
 package io.getstream.video.android.app
 
 import android.app.Application
+import io.getstream.logging.StreamLog
+import io.getstream.logging.android.AndroidStreamLogger
 import io.getstream.video.android.StreamCalls
 import io.getstream.video.android.StreamCallsBuilder
 import io.getstream.video.android.app.user.UserPreferences
@@ -28,6 +30,10 @@ class VideoApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        if (BuildConfig.DEBUG) {
+            StreamLog.setValidator { _, _ -> true }
+            StreamLog.setLogger(AndroidStreamLogger())
+        }
         instance = this
     }
 

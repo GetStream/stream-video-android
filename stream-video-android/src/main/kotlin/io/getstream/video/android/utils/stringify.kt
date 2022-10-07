@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.model
+package io.getstream.video.android.utils
 
-public data class CallSettings(
-    public val audioOn: Boolean = true,
-    public val videoOn: Boolean = true,
-    public val speakerOn: Boolean = true
-)
+public fun <T : Any> Result<T>.stringify(toString: (T) -> String): String = when (this) {
+    is Success -> "Success(data=${toString(data)})"
+    is Failure -> toString()
+}
