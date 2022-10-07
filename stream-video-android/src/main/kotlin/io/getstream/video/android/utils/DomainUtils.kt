@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.utils
 
-import io.getstream.video.android.model.domain.CallMetadata
+import io.getstream.video.android.model.CallMetadata
 
 internal fun stream.video.coordinator.call_v1.Call.toCall(): CallMetadata {
     // val extraDataJson = custom_json.toByteArray().decodeToString() // TODO - check this

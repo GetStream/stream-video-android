@@ -35,6 +35,7 @@ public fun ParticipantsContent(
     modifier: Modifier = Modifier,
     onRender: (View) -> Unit = {}
 ) {
+    val primarySpeaker by call.primarySpeaker.collectAsState(initial = null)
     val roomParticipants by call.callParticipants.collectAsState(emptyList())
     val participants = roomParticipants.distinctBy { it.id }
 
@@ -48,12 +49,17 @@ public fun ParticipantsContent(
                 )
             }
         }
-        1 -> ParticipantItem(
-            modifier = modifier,
-            call = call,
-            participant = participants.first(),
-            onRender = onRender
-        )
+        1 -> {
+            val participant = participants.first()
+
+            ParticipantItem(
+                modifier = modifier,
+                call = call,
+                participant = participant,
+                onRender = onRender,
+                isFocused = primarySpeaker?.id == participant.id
+            )
+        }
         2 -> {
             val firstParticipant = participants.first { !it.isLocal }
             val secondParticipant = participants.first { it.isLocal }
@@ -62,14 +68,16 @@ public fun ParticipantsContent(
                 ParticipantItem(
                     modifier = Modifier.weight(1f),
                     call = call,
-                    participant = firstParticipant
+                    participant = firstParticipant,
+                    isFocused = primarySpeaker?.id == firstParticipant.id
                 )
 
                 ParticipantItem(
                     modifier = Modifier.weight(1f),
                     call = call,
                     participant = secondParticipant,
-                    onRender = onRender
+                    onRender = onRender,
+                    isFocused = primarySpeaker?.id == secondParticipant.id
                 )
             }
         }
@@ -84,21 +92,24 @@ public fun ParticipantsContent(
                 ParticipantItem(
                     modifier = Modifier.weight(1f),
                     call = call,
-                    participant = firstParticipant
+                    participant = firstParticipant,
+                    isFocused = primarySpeaker?.id == firstParticipant.id
                 )
 
                 Row(modifier = Modifier.weight(1f)) {
                     ParticipantItem(
                         modifier = Modifier.weight(1f),
                         call = call,
-                        participant = secondParticipant
+                        participant = secondParticipant,
+                        isFocused = primarySpeaker?.id == secondParticipant.id
                     )
 
                     ParticipantItem(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = thirdParticipant,
-                        onRender = onRender
+                        onRender = onRender,
+                        isFocused = primarySpeaker?.id == thirdParticipant.id
                     )
                 }
             }
@@ -119,13 +130,15 @@ public fun ParticipantsContent(
                     ParticipantItem(
                         modifier = Modifier.weight(1f),
                         call = call,
-                        participant = firstParticipant
+                        participant = firstParticipant,
+                        isFocused = primarySpeaker?.id == firstParticipant.id
                     )
 
                     ParticipantItem(
                         modifier = Modifier.weight(1f),
                         call = call,
-                        participant = secondParticipant
+                        participant = secondParticipant,
+                        isFocused = primarySpeaker?.id == secondParticipant.id
                     )
                 }
 
@@ -133,14 +146,16 @@ public fun ParticipantsContent(
                     ParticipantItem(
                         modifier = Modifier.weight(1f),
                         call = call,
-                        participant = thirdParticipant
+                        participant = thirdParticipant,
+                        isFocused = primarySpeaker?.id == thirdParticipant.id
                     )
 
                     ParticipantItem(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = fourthParticipant,
-                        onRender = onRender
+                        onRender = onRender,
+                        isFocused = primarySpeaker?.id == fourthParticipant.id
                     )
                 }
             }

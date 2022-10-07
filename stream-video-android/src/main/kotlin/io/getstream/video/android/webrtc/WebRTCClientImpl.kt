@@ -29,6 +29,7 @@ import io.getstream.video.android.audio.AudioDevice
 import io.getstream.video.android.audio.AudioSwitchHandler
 import io.getstream.video.android.dispatchers.DispatcherProvider
 import io.getstream.video.android.errors.VideoError
+import io.getstream.video.android.events.AudioLevelChangedEvent
 import io.getstream.video.android.events.ChangePublishQualityEvent
 import io.getstream.video.android.events.MuteStateChangeEvent
 import io.getstream.video.android.events.SfuDataEvent
@@ -267,13 +268,12 @@ internal class WebRTCClientImpl(
     private fun createCall(sessionId: String): Call {
         this.sessionId = sessionId
 
-        return buildCall(sessionId)
+        return buildCall()
     }
 
-    private fun buildCall(sessionId: String): Call {
+    private fun buildCall(): Call {
         return Call(
             context = context,
-            sessionId = sessionId,
             credentialsProvider = credentialsProvider,
             eglBase = peerConnectionFactory.eglBase,
         )
@@ -585,6 +585,7 @@ internal class WebRTCClientImpl(
             is ChangePublishQualityEvent -> {
                 // updatePublishQuality(event) -> TODO - re-enable once we send the proper quality (dimensions)
             }
+            is AudioLevelChangedEvent -> call?.updateAudioLevel(event)
             is MuteStateChangeEvent -> call?.updateMuteState(event)
             else -> Unit
         }

@@ -16,10 +16,11 @@
 
 package io.getstream.video.android.model
 
-import stream.video.coordinator.call_v1.Call
-
-public data class JoinCallResponse(
-    public val call: Call,
-    public val callUrl: String,
-    public val userToken: String
+public data class User(
+    val id: String,
+    val role: String,
+    val name: String,
+    val imageUrl: String?,
+    val teams: List<String>,
+    val extraData: Map<String, String>
 )

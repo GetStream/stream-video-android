@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.model.domain
+package io.getstream.video.android.model
 
-public data class User(
-    val id: String,
-    val role: String,
-    val name: String,
-    val imageUrl: String?,
-    val teams: List<String>,
-    val extraData: Map<String, String>
+import kotlinx.serialization.Serializable
+
+@Serializable
+public data class JoinedCall(
+    val call: CallMetadata,
+    val callUrl: String,
+    val userToken: String
 )

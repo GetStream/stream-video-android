@@ -32,10 +32,8 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.util.*
 
@@ -63,15 +61,11 @@ public class CallViewModel(
     public val participantsState: Flow<List<CallParticipantState>> =
         callState.filterNotNull().flatMapLatest { it.callParticipantState }
 
-    public val activeSpeakers: Flow<List<CallParticipant>> = participantList.map { list ->
-        list.filter { participant -> participant.hasAudio }
-    }
+    public val activeSpeakers: Flow<List<CallParticipant>> =
+        callState.filterNotNull().flatMapLatest { it.activeSpeakers }
 
     public val localParticipant: Flow<CallParticipant> =
         callState.filterNotNull().flatMapLatest { it.localParticipant }
-
-    private val _primarySpeaker = MutableStateFlow<CallParticipant?>(null)
-    public val primarySpeaker: StateFlow<CallParticipant?> = _primarySpeaker
 
     private val _isShowingParticipantsInfo = MutableStateFlow(false)
     public val isShowingParticipantsInfo: StateFlow<Boolean> = _isShowingParticipantsInfo
@@ -88,21 +82,7 @@ public class CallViewModel(
         // this._callState.value = videoClient.getCall(callId) TODO - load details
 
         streamCalls.createCallClient(sfuUrl, userToken, credentialsProvider)
-
-        viewModelScope.launch {
-            _isVideoInitialized.value = true
-
-            combine(
-                participantList,
-                activeSpeakers,
-            ) { participants, speakers -> participants to speakers }
-                .collect { (participants, speakers) ->
-                    handlePrimarySpeaker(
-                        participants,
-                        speakers,
-                    )
-                }
-        }
+        _isVideoInitialized.value = true
 
         connectToCall(callSettings)
     }
@@ -129,41 +109,6 @@ public class CallViewModel(
                 }
             }
         }
-    }
-
-    private fun handlePrimarySpeaker(
-        participantsList: List<CallParticipant>,
-        speakers: List<CallParticipant>,
-    ) {
-        var speaker = _primarySpeaker.value
-        val localParticipant = participantsList.firstOrNull { it.isLocal }
-
-        if (speaker?.isLocal == true) {
-            val remoteSpeaker = // Try not to display local participant as speaker.
-                participantsList.firstOrNull { !it.isLocal }
-
-            if (remoteSpeaker != null) {
-                speaker = remoteSpeaker
-            }
-        }
-
-        // If previous primary speaker leaves
-        if (!participantsList.contains(speaker)) {
-            // Default to another person in room, or local participant.
-            speaker = participantsList.firstOrNull { !it.isLocal }
-                ?: localParticipant
-        }
-
-        if (speakers.isNotEmpty() && !speakers.contains(speaker)) {
-            val remoteSpeaker = // Try not to display local participant as speaker.
-                speakers.firstOrNull { !it.isLocal }
-
-            if (remoteSpeaker != null) {
-                speaker = remoteSpeaker
-            }
-        }
-
-        _primarySpeaker.value = speaker
     }
 
     public fun toggleCamera(enabled: Boolean) {

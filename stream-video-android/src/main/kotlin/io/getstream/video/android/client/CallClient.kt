@@ -22,10 +22,9 @@ import io.getstream.video.android.client.coordinator.CallCoordinatorClient
 import io.getstream.video.android.client.user.UserState
 import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.logging.LoggingLevel
-import io.getstream.video.android.model.JoinCallResponse
-import io.getstream.video.android.model.domain.CallMetadata
-import io.getstream.video.android.model.domain.JoinedCall
-import io.getstream.video.android.model.domain.User
+import io.getstream.video.android.model.CallMetadata
+import io.getstream.video.android.model.JoinedCall
+import io.getstream.video.android.model.User
 import io.getstream.video.android.module.CallClientModule
 import io.getstream.video.android.module.HttpModule
 import io.getstream.video.android.socket.VideoSocket
@@ -113,7 +112,7 @@ public class CallClient(
      * and choosing the correct one.
      *
      * @param call Information about the call.
-     * @return [Result] wrapper around [JoinCallResponse] once the correct server is chosen.
+     * @return [Result] wrapper around [JoinedCall] once the correct server is chosen.
      */
     public suspend fun joinCall(call: CallMetadata): Result<JoinedCall> {
         val callResult = callCoordinatorClient.joinCall(

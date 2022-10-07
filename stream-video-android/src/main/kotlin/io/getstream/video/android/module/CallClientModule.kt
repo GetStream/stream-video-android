@@ -22,7 +22,7 @@ import io.getstream.video.android.api.CallCoordinatorService
 import io.getstream.video.android.client.coordinator.CallCoordinatorClient
 import io.getstream.video.android.client.coordinator.CallCoordinatorClientImpl
 import io.getstream.video.android.dispatchers.DispatcherProvider
-import io.getstream.video.android.model.domain.User
+import io.getstream.video.android.model.User
 import io.getstream.video.android.token.CredentialsProvider
 import kotlinx.coroutines.CoroutineScope
 import okhttp3.Interceptor

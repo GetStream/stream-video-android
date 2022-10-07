@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.model.domain
+package io.getstream.video.android.model
 
 import kotlinx.serialization.Serializable
 

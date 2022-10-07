@@ -440,7 +440,7 @@ public final class io/getstream/video/android/compose/ui/components/participants
 }
 
 public final class io/getstream/video/android/compose/ui/components/participants/ParticipantItemKt {
-	public static final fun ParticipantItem (Lio/getstream/video/android/model/Call;Lio/getstream/video/android/model/CallParticipant;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+	public static final fun ParticipantItem (Lio/getstream/video/android/model/Call;Lio/getstream/video/android/model/CallParticipant;Landroidx/compose/ui/Modifier;ZLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/participants/ParticipantsContentKt {

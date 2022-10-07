@@ -19,7 +19,7 @@ package io.getstream.video.android.socket
 import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.events.ConnectedEvent
 import io.getstream.video.android.events.VideoEvent
-import io.getstream.video.android.model.domain.CallMetadata
+import io.getstream.video.android.model.CallMetadata
 
 public interface VideoSocket {
 

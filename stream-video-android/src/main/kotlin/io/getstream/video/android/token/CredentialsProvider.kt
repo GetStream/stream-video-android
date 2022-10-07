@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.token
 
-import io.getstream.video.android.model.domain.User
+import io.getstream.video.android.model.User
 
 /**
  * Exposes a way to build a token provided that connects to custom implementation for

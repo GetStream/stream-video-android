@@ -26,10 +26,10 @@ import io.getstream.video.android.client.user.UserState
 import io.getstream.video.android.dispatchers.DispatcherProvider
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.model.Call
+import io.getstream.video.android.model.CallMetadata
 import io.getstream.video.android.model.CallSettings
-import io.getstream.video.android.model.domain.CallMetadata
-import io.getstream.video.android.model.domain.JoinedCall
-import io.getstream.video.android.model.domain.User
+import io.getstream.video.android.model.JoinedCall
+import io.getstream.video.android.model.User
 import io.getstream.video.android.socket.SocketListener
 import io.getstream.video.android.socket.SocketState
 import io.getstream.video.android.socket.SocketStateService
