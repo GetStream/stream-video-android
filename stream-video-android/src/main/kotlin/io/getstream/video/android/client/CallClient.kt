@@ -25,6 +25,7 @@ import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.model.CallMetadata
 import io.getstream.video.android.model.JoinedCall
 import io.getstream.video.android.model.User
+import io.getstream.video.android.model.toIceServer
 import io.getstream.video.android.module.CallClientModule
 import io.getstream.video.android.module.HttpModule
 import io.getstream.video.android.socket.VideoSocket
@@ -119,7 +120,7 @@ public class CallClient(
             JoinCallRequest(
                 id = call.id,
                 type = call.type,
-                datacenter_id = "milan"
+                datacenter_id = ""
             )
         )
 
@@ -143,12 +144,16 @@ public class CallClient(
                         socket.updateCallState(call)
                         val credentials = selectEdgeServerResult.data.credentials
                         val url = credentials?.server?.url
+                        val iceServers =
+                            selectEdgeServerResult.data.credentials?.ice_servers?.map { it.toIceServer() }
+                                ?: emptyList()
 
                         Success(
                             JoinedCall(
                                 call = call,
-                                callUrl = enrichSFUURL(url!!), // TODO - once the SFU and coord are fully published, won't need this
-                                userToken = credentials.token
+                                callUrl = enrichSFUURL(url!!),
+                                userToken = credentials.token,
+                                iceServers = iceServers
                             )
                         )
                     }

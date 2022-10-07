@@ -33,24 +33,24 @@ import stream.video.sfu.UpdateSubscriptionsResponse
 public interface RemoteSignalService : SignalService {
 
     @Headers("Content-Type: application/protobuf")
-    @POST("/rpc/twirp/stream.video.sfu.SignalServer/SendAnswer")
+    @POST("/twirp/stream.video.sfu.SignalServer/SendAnswer")
     public override suspend fun sendAnswer(
         @Body answerRequest: SendAnswerRequest,
     ): SendAnswerResponse
 
     @Headers("Content-Type: application/protobuf")
-    @POST("/rpc/twirp/stream.video.sfu.SignalServer/SendIceCandidate")
+    @POST("/twirp/stream.video.sfu.SignalServer/SendIceCandidate")
     public override suspend fun sendIceCandidate(@Body request: IceCandidateRequest): IceCandidateResponse
 
     @Headers("Content-Type: application/protobuf")
-    @POST("/rpc/twirp/stream.video.sfu.SignalServer/Join")
+    @POST("/twirp/stream.video.sfu.SignalServer/Join")
     public override suspend fun join(@Body joinRequest: JoinRequest): JoinResponse
 
     @Headers("Content-Type: application/protobuf")
-    @POST("/rpc/twirp/stream.video.sfu.SignalServer/SetPublisher")
+    @POST("/twirp/stream.video.sfu.SignalServer/SetPublisher")
     public override suspend fun setPublisher(@Body request: SetPublisherRequest): SetPublisherResponse
 
     @Headers("Content-Type: application/protobuf")
-    @POST("/rpc/twirp/stream.video.sfu.SignalServer/UpdateSubscriptions")
+    @POST("/twirp/stream.video.sfu.SignalServer/UpdateSubscriptions")
     public override suspend fun updateSubscriptions(@Body request: UpdateSubscriptionsRequest): UpdateSubscriptionsResponse
 }

@@ -38,6 +38,8 @@ import io.getstream.video.android.R
 import io.getstream.video.android.app.VideoApp
 import io.getstream.video.android.app.ui.call.content.VideoCallContent
 import io.getstream.video.android.model.CallSettings
+import io.getstream.video.android.model.IceServer
+import io.getstream.video.android.model.IceServerConfig
 import io.getstream.video.android.ui.ParticipantContentView
 import io.getstream.video.android.ui.ParticipantItemView
 import io.getstream.video.android.viewmodel.CallViewModel
@@ -150,11 +152,14 @@ class CallActivity : AppCompatActivity() {
         val userToken = requireNotNull(intent.getStringExtra(KEY_USER_TOKEN))
         val sfuUrl = requireNotNull(intent.getStringExtra(KEY_SFU_URL))
         val callId = requireNotNull(intent.getStringExtra(KEY_CALL_ID))
+        val iceServers =
+            requireNotNull(intent.getSerializableExtra(KEY_ICE_SERVERS)) as? IceServerConfig
 
         callViewModel.init(
             callId = callId,
             sfuUrl = sfuUrl,
             userToken = userToken,
+            iceServers = iceServers?.iceServers ?: emptyList(),
             callSettings = CallSettings(
                 audioOn = false,
                 videoOn = false
@@ -221,17 +226,20 @@ class CallActivity : AppCompatActivity() {
         private const val KEY_CALL_ID = "call_id"
         private const val KEY_SFU_URL = "signal_url"
         private const val KEY_USER_TOKEN = "user_token"
+        private const val KEY_ICE_SERVERS = "ice_servers"
 
         internal fun getIntent(
             context: Context,
             callCid: String,
             signalUrl: String,
             userToken: String,
+            iceServers: List<IceServer>,
         ): Intent {
             return Intent(context, CallActivity::class.java).apply {
                 putExtra(KEY_CALL_ID, callCid)
                 putExtra(KEY_SFU_URL, signalUrl)
                 putExtra(KEY_USER_TOKEN, userToken)
+                putExtra(KEY_ICE_SERVERS, IceServerConfig(iceServers))
             }
         }
     }

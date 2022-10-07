@@ -25,7 +25,6 @@ import io.getstream.video.android.dispatchers.DispatcherProvider
 import io.getstream.video.android.model.User
 import io.getstream.video.android.token.CredentialsProvider
 import kotlinx.coroutines.CoroutineScope
-import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.wire.WireConverterFactory
@@ -75,14 +74,6 @@ internal class CallClientModule(
     // TODO - build notification handler/provider
 
     /**
-     * Builds the HTTP interceptor that adds headers to all API calls.
-     *
-     * @param credentialsProvider Provider of the user token and API key.
-     *
-     * @return [Interceptor] which adds headers.
-     */
-
-    /**
      * Public providers used to set up other components.
      */
 
@@ -114,7 +105,7 @@ internal class CallClientModule(
         /**
          * The base URL of the API.
          */
-        private const val BASE_URL = "http://10.0.2.2:26991"
+        private const val BASE_URL = "https://rpc-video-coordinator.oregon-v1.stream-io-video.com/"
 
         /**
          * Used for testing on devices and redirecting from a public realm to localhost.

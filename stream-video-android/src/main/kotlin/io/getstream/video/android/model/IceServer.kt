@@ -16,9 +16,21 @@
 
 package io.getstream.video.android.model
 
-public data class JoinedCall(
-    val call: CallMetadata,
-    val callUrl: String,
-    val userToken: String,
+import stream.video.coordinator.edge_v1.ICEServer
+import java.io.Serializable
+
+public data class IceServerConfig(
     val iceServers: List<IceServer>
-)
+) : Serializable
+
+public data class IceServer(
+    val urls: List<String>,
+    val username: String,
+    val password: String
+) : Serializable
+
+internal fun ICEServer.toIceServer(): IceServer {
+    return IceServer(
+        urls, username, password
+    )
+}

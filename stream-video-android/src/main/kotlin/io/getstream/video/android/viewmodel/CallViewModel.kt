@@ -25,6 +25,7 @@ import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.CallParticipant
 import io.getstream.video.android.model.CallParticipantState
 import io.getstream.video.android.model.CallSettings
+import io.getstream.video.android.model.IceServer
 import io.getstream.video.android.token.CredentialsProvider
 import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Success
@@ -77,11 +78,17 @@ public class CallViewModel(
         callId: String,
         sfuUrl: String,
         userToken: String,
+        iceServers: List<IceServer>,
         callSettings: CallSettings
     ) {
         // this._callState.value = videoClient.getCall(callId) TODO - load details
 
-        streamCalls.createCallClient(sfuUrl, userToken, credentialsProvider)
+        streamCalls.createCallClient(
+            sfuUrl.removeSuffix("/twirp"),
+            userToken,
+            iceServers,
+            credentialsProvider
+        )
         _isVideoInitialized.value = true
 
         connectToCall(callSettings)

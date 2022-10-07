@@ -20,6 +20,7 @@ import io.getstream.video.android.audio.AudioDevice
 import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.CallMetadata
 import io.getstream.video.android.model.CallSettings
+import io.getstream.video.android.model.IceServer
 import io.getstream.video.android.model.JoinedCall
 import io.getstream.video.android.model.User
 import io.getstream.video.android.socket.SocketListener
@@ -114,6 +115,7 @@ public interface StreamCalls {
     public fun createCallClient(
         signalUrl: String,
         userToken: String,
+        iceServers: List<IceServer>,
         credentialsProvider: CredentialsProvider
     )
 

@@ -125,7 +125,7 @@ class LoginActivity : AppCompatActivity() {
         VideoApp.initializeStream(
             credentialsProvider = FakeCredentialsProvider(
                 userCredentials = selectedUser,
-                apiKey = "key1"
+                apiKey = "key10"
             ),
             loggingLevel = LoggingLevel.BODY
         )

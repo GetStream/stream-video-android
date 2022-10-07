@@ -19,6 +19,7 @@ package io.getstream.video.android.webrtc.builder
 import android.content.Context
 import io.getstream.video.android.client.CallClient
 import io.getstream.video.android.logging.LoggingLevel
+import io.getstream.video.android.model.IceServer
 import io.getstream.video.android.module.HttpModule
 import io.getstream.video.android.module.WebRTCModule
 import io.getstream.video.android.token.CredentialsProvider
@@ -29,7 +30,8 @@ import okhttp3.logging.HttpLoggingInterceptor
 internal class WebRTCClientBuilder(
     private val context: Context,
     private val credentialsProvider: CredentialsProvider,
-    private val signalUrl: String
+    private val signalUrl: String,
+    private val iceServers: List<IceServer>
 ) {
     private var loggingLevel: HttpLoggingInterceptor.Level =
         HttpLoggingInterceptor.Level.NONE
@@ -69,7 +71,8 @@ internal class WebRTCClientBuilder(
         return WebRTCClientImpl(
             context = context,
             credentialsProvider = credentialsProvider,
-            signalClient = webRTCModule.signalClient
+            signalClient = webRTCModule.signalClient,
+            servers = iceServers
         )
     }
 }

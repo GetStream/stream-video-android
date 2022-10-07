@@ -39,17 +39,15 @@ import io.getstream.video.android.events.SubscriberOfferEvent
 import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.CallParticipant
 import io.getstream.video.android.model.CallSettings
-import io.getstream.video.android.module.WebRTCModule.Companion.REDIRECT_SIGNAL_URL
-import io.getstream.video.android.module.WebRTCModule.Companion.SIGNAL_HOST_BASE
+import io.getstream.video.android.model.IceServer
 import io.getstream.video.android.token.CredentialsProvider
 import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Result
 import io.getstream.video.android.utils.Success
 import io.getstream.video.android.utils.buildAudioConstraints
 import io.getstream.video.android.utils.buildConnectionConfiguration
-import io.getstream.video.android.utils.buildLocalIceServers
+import io.getstream.video.android.utils.buildIceServers
 import io.getstream.video.android.utils.buildMediaConstraints
-import io.getstream.video.android.utils.buildRemoteIceServers
 import io.getstream.video.android.utils.onSuccessSuspend
 import io.getstream.video.android.webrtc.connection.PeerConnectionType
 import io.getstream.video.android.webrtc.connection.StreamPeerConnection
@@ -95,6 +93,7 @@ internal class WebRTCClientImpl(
     private val context: Context,
     private val credentialsProvider: CredentialsProvider,
     private val signalClient: SignalClient,
+    servers: List<IceServer>?
 ) : WebRTCClient {
 
     private var connectionState: ConnectionState = ConnectionState.DISCONNECTED
@@ -109,11 +108,7 @@ internal class WebRTCClientImpl(
      */
     private val peerConnectionFactory by lazy { StreamPeerConnectionFactory(context) }
     private val iceServers by lazy {
-        if (REDIRECT_SIGNAL_URL == null) {
-            buildRemoteIceServers(SIGNAL_HOST_BASE)
-        } else {
-            buildLocalIceServers()
-        }
+        buildIceServers(servers)
     }
 
     private val connectionConfiguration: PeerConnection.RTCConfiguration by lazy {
