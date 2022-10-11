@@ -17,29 +17,31 @@ message WebsocketEvent {
   // All calls mentioned in the event payload, indexed by Call.call_cid
   map<string, call_v1.Call> calls = 2;
   // All calls details for calls mentioned in the event payload, indexed by Call.call_cid
-  // Call details cotnain contextual data. For example, for MembersDeleted event, call_details[cid].Members will contain a list of
+  // Call details contain contextual data. For example, for MembersDeleted event, call_details[cid].Members will contain a list of
   // members that were deleted.
   map<string, call_v1.CallDetails> call_details = 3;
-
-  // reserved field numbers for more entities
-  reserved 4 to 19;
+  // The ID of the user sending the event, this field is populated only for events that are initiated by users
+  // such as accepting, rejecting or canceling a call
+  string event_sender_id = 4;
 
   oneof event {
     WebsocketHealthcheck healthcheck = 20;
 
     // Call events
-
     event_v1.CallCreated call_created = 30;
     event_v1.CallUpdated call_updated = 31;
     event_v1.CallDeleted call_deleted = 32;
     event_v1.CallMembersUpdated call_members_updated = 33;
     event_v1.CallMembersDeleted call_members_deleted = 34;
-    event_v1.CallStarted call_started = 35;
     event_v1.CallEnded call_ended = 36;
 
-    // User events
+    // User initiated call events
+    event_v1.CallAccepted call_accepted = 40;
+    event_v1.CallRejected call_rejected = 41;
+    event_v1.CallCancelled call_cancelled = 42;
 
-    event_v1.UserUpdated user_updated = 40;
+    // User events
+    event_v1.UserUpdated user_updated = 50;
   }
 }
 
@@ -66,7 +68,7 @@ message WebsocketAuthRequest {
   stream.video.coordinator.push_v1.DeviceInput device = 4;
 }
 
-// Healthckeck is sent back and forth between websocket client and server
+// Healthcheck is sent back and forth between websocket client and server
 // When server sends a healthcheck, it is wrapped into WebsocketEvent
 // When client sends healthcheck, it should be wrapped into WebsocketClientEvent
 message WebsocketHealthcheck {

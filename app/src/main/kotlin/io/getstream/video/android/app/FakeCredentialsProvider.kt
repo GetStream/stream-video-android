@@ -16,8 +16,8 @@
 
 package io.getstream.video.android.app
 
+import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserCredentials
-import io.getstream.video.android.model.domain.User
 import io.getstream.video.android.token.CredentialsProvider
 
 class FakeCredentialsProvider(

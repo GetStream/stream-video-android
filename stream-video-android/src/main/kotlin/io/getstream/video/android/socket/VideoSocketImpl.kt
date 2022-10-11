@@ -26,7 +26,7 @@ import io.getstream.video.android.errors.VideoErrorCode
 import io.getstream.video.android.errors.VideoNetworkError
 import io.getstream.video.android.events.ConnectedEvent
 import io.getstream.video.android.events.VideoEvent
-import io.getstream.video.android.model.domain.CallMetadata
+import io.getstream.video.android.model.CallMetadata
 import io.getstream.video.android.network.NetworkStateProvider
 import io.getstream.video.android.token.CredentialsManager
 import kotlinx.coroutines.CoroutineScope

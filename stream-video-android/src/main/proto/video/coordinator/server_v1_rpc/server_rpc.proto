@@ -9,6 +9,8 @@ import "video/coordinator/app_v1/app.proto";
 import "video/coordinator/broadcast_v1/broadcast.proto";
 import "video/coordinator/call_v1/call.proto";
 import "video/coordinator/push_v1/push.proto";
+import "video/coordinator/recording_v1/recording.proto";
+import "video/coordinator/server_v1_rpc/envelopes.proto";
 import "video/coordinator/stat_v1/stat.proto";
 import "video/coordinator/user_v1/user.proto";
 
@@ -228,6 +230,8 @@ message CreateOrUpdateUsersResponse {
 
 message DeleteUserRequest {
   string id = 1;
+  bool delete_call_history = 2;
+  bool delete_recordings = 3;
 }
 
 // TODO: do we support both soft and hard delete
@@ -235,9 +239,8 @@ message ExportUserRequest {
   string id = 1;
 }
 
-// TODO: talk about what data we should export on the GDPR endpoints for a user
 message ExportUserResponse {
-  string id = 1;
+  server_v1_rpc.ExportUserEnvelope export_user = 1;
 }
 
 message DeleteUserResponse {
@@ -305,20 +308,14 @@ message GetRecordingsRequest {
 }
 
 message GetRecordingsResponse {
-  message Recording {
-    string call_type = 1;
-    string call_id = 2;
-    string s3_file_url = 3;
-    string start_time = 4;
-    string stop_time = 5;
-  }
-
-  repeated Recording recordings = 1;
+  repeated recording_v1.Recording recordings = 1;
 }
 
-message DeleteRecordingRequest {}
+message DeleteRecordingRequest {
+}
 
-message DeleteRecordingResponse {}
+message DeleteRecordingResponse {
+}
 
 // A request message for the QueryCallTimelineEvents endpoint
 // Specifies a subset of events to request

@@ -16,8 +16,6 @@
 
 package io.getstream.video.android.model
 
-import io.getstream.video.android.model.domain.User
-
 // TODO - internal sample app, clean up once full auth/login is set up
 public data class UserCredentials(
     val id: String,

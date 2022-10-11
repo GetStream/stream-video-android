@@ -20,7 +20,7 @@ import io.getstream.logging.StreamLog
 import io.getstream.video.android.events.SfuDataEvent
 import okio.ByteString
 import org.webrtc.DataChannel
-import stream.video.sfu.SfuEvent
+import stream.video.sfu.event.SfuEvent
 
 public class StreamDataChannel(
     private val dataChannel: DataChannel,

@@ -16,8 +16,35 @@
 
 package io.getstream.video.android.utils
 
+import io.getstream.video.android.model.IceServer
+import io.getstream.video.android.module.WebRTCModule
 import org.webrtc.MediaConstraints
 import org.webrtc.PeerConnection
+
+internal fun buildIceServers(servers: List<IceServer>?): List<PeerConnection.IceServer> {
+    return if (servers != null && servers.isNotEmpty()) {
+        servers.map {
+            PeerConnection.IceServer.builder(it.urls.first())
+                .setUsername(it.username)
+                .setPassword(it.password)
+                .createIceServer()
+        }
+    } else {
+        if (WebRTCModule.REDIRECT_SIGNAL_URL == null) {
+            buildRemoteIceServers(WebRTCModule.SIGNAL_HOST_BASE)
+        } else {
+            buildLocalIceServers()
+        }
+    }
+}
+
+internal fun buildTestIceServers(): List<PeerConnection.IceServer> {
+    return if (WebRTCModule.REDIRECT_SIGNAL_URL == null) {
+        buildRemoteIceServers(WebRTCModule.SIGNAL_HOST_BASE)
+    } else {
+        buildLocalIceServers()
+    }
+}
 
 internal fun buildLocalIceServers(): List<PeerConnection.IceServer> {
     return listOf(

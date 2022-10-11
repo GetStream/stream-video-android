@@ -60,6 +60,7 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.IncomingCallActivity
 import io.getstream.video.android.events.CallCreatedEvent
 import io.getstream.video.android.events.VideoEvent
+import io.getstream.video.android.model.IceServer
 import io.getstream.video.android.model.UserCredentials
 import io.getstream.video.android.socket.SocketListener
 import io.getstream.video.android.utils.onError
@@ -217,7 +218,12 @@ class HomeActivity : AppCompatActivity() {
 
             createCallResult.onSuccessSuspend { response ->
                 loadingState.value = false
-                navigateToCall(response.call.cid, response.callUrl, response.userToken)
+                navigateToCall(
+                    response.call.cid,
+                    response.callUrl,
+                    response.userToken,
+                    response.iceServers
+                )
             }
             createCallResult.onError {
                 Log.d("Couldn't select server", it.message ?: "")
@@ -297,9 +303,10 @@ class HomeActivity : AppCompatActivity() {
     private fun navigateToCall(
         callId: String,
         signalUrl: String,
-        userToken: String
+        userToken: String,
+        iceServers: List<IceServer>
     ) {
-        val intent = CallActivity.getIntent(this, callId, signalUrl, userToken)
+        val intent = CallActivity.getIntent(this, callId, signalUrl, userToken, iceServers)
         startActivity(intent)
     }
 

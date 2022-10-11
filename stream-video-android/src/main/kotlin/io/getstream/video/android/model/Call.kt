@@ -25,6 +25,7 @@ import androidx.core.content.getSystemService
 import io.getstream.logging.StreamLog
 import io.getstream.video.android.audio.AudioHandler
 import io.getstream.video.android.audio.AudioSwitchHandler
+import io.getstream.video.android.events.AudioLevelChangedEvent
 import io.getstream.video.android.events.MuteStateChangeEvent
 import io.getstream.video.android.events.SfuParticipantJoinedEvent
 import io.getstream.video.android.events.SfuParticipantLeftEvent
@@ -34,18 +35,19 @@ import io.getstream.video.android.webrtc.utils.stringify
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import org.webrtc.AudioTrack
 import org.webrtc.EglBase
 import org.webrtc.MediaStream
 import org.webrtc.RendererCommon
 import org.webrtc.SurfaceViewRenderer
-import stream.video.sfu.CallState
+import stream.video.sfu.models.CallState
 
 public class Call(
     private val context: Context,
-    public val sessionId: String,
     private val credentialsProvider: CredentialsProvider,
     private val eglBase: EglBase,
 ) {
@@ -77,6 +79,21 @@ public class Call(
 
     public val localParticipant: Flow<CallParticipant> =
         _localParticipant.filterNotNull()
+
+    public val activeSpeakers: Flow<List<CallParticipant>> = callParticipants.map { list ->
+        list.filter { participant -> participant.hasAudio }
+    }
+
+    private var lastPrimarySpeaker: CallParticipant? = null
+
+    private val _primarySpeaker: Flow<CallParticipant?> =
+        callParticipants.combine(activeSpeakers) { participants, speakers ->
+            selectPrimaryParticipant(participants, speakers)
+        }.onEach {
+            lastPrimarySpeaker = it
+        }
+
+    public val primarySpeaker: Flow<CallParticipant?> = _primarySpeaker
 
     public val localParticipantId: String
         get() = credentialsProvider.getUserCredentials().id
@@ -267,6 +284,41 @@ public class Call(
         _callParticipants.value = _callParticipants.value.filter { it.id != userId }
     }
 
+    private fun selectPrimaryParticipant(
+        participantsList: List<CallParticipant>,
+        speakers: List<CallParticipant>,
+    ): CallParticipant? {
+        var speaker = lastPrimarySpeaker
+        val localParticipant = participantsList.firstOrNull { it.isLocal }
+
+        if (speaker?.isLocal == true) {
+            val remoteSpeaker = // Try not to display local participant as speaker.
+                participantsList.filter { !it.isLocal }.maxByOrNull { it.audioLevel }
+
+            if (remoteSpeaker != null) {
+                speaker = remoteSpeaker
+            }
+        }
+
+        // If previous primary speaker leaves
+        if (!participantsList.contains(speaker)) {
+            // Default to another person in room, or local participant.
+            speaker = participantsList.filter { !it.isLocal }.maxByOrNull { it.audioLevel }
+                ?: localParticipant
+        }
+
+        if (speakers.isNotEmpty() && !speakers.contains(speaker)) {
+            val remoteSpeaker = // Try not to display local participant as speaker.
+                participantsList.filter { !it.isLocal }.maxByOrNull { it.audioLevel }
+
+            if (remoteSpeaker != null) {
+                speaker = remoteSpeaker
+            }
+        }
+
+        return speaker
+    }
+
     internal fun updateLocalVideoTrack(localVideoTrack: org.webrtc.VideoTrack) {
         logger.d { "[updateLocalVideoTrack] #sfu; localVideoTrack: $localVideoTrack" }
         val localParticipant = _localParticipant.value ?: return
@@ -335,5 +387,21 @@ public class Call(
         )
 
         _callParticipants.value = updatedList
+    }
+
+    internal fun updateAudioLevel(event: AudioLevelChangedEvent) {
+        val current = _callParticipants.value.toMutableList()
+
+        event.levels.forEach { (userId, level) ->
+            val index = current.indexOfFirst { it.id == userId }
+
+            if (index != -1) {
+                val updatedUser = current[index].copy(audioLevel = level)
+                current.removeAt(index)
+                current.add(index, updatedUser)
+            }
+        }
+
+        _callParticipants.value = current.sortedByDescending { it.audioLevel }
     }
 }

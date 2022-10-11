@@ -2,7 +2,6 @@ syntax = "proto3";
 
 package stream.video.coordinator.client_v1_rpc;
 
-import "google/protobuf/struct.proto";
 import "video/coordinator/call_v1/call.proto";
 import "video/coordinator/client_v1_rpc/envelopes.proto";
 import "video/coordinator/edge_v1/edge.proto";
@@ -41,6 +40,8 @@ service ClientRPC {
   // DeleteMembers deletes members from a room.
   // TODO: response with room data
   rpc DeleteCallMembers(DeleteCallMembersRequest) returns (DeleteCallMembersResponse);
+
+  rpc SendEvent(SendEventRequest) returns (SendEventResponse);
 
   rpc SendCustomEvent(SendCustomEventRequest) returns (SendCustomEventResponse);
 
@@ -105,6 +106,8 @@ message CreateCallInput {
   CallInput call = 1;
   // Members to add to the created call
   map<string, MemberInput> members = 2;
+  // Ringing option, used to signal to clients' UI
+  optional bool ring = 4;
 }
 
 // A request message for GetOrCreateCall endpoint
@@ -133,7 +136,7 @@ message JoinCallRequest {
   string type = 1;
   // Call ID
   string id = 2;
-
+  // Call creation input, only used if the call does not exist
   CreateCallInput input = 3;
   // Preferred client datacenter. This is optional and when set, preferred datacenter selection is not guaranteed
   string datacenter_id = 4;
@@ -233,6 +236,25 @@ message QueryDevicesResponse {
   repeated stream.video.coordinator.push_v1.Device devices = 1;
 }
 
+enum UserEventType {
+  USER_EVENT_TYPE_UNSPECIFIED = 0;
+  USER_EVENT_TYPE_ACCEPTED_CALL = 1;
+  USER_EVENT_TYPE_REJECTED_CALL = 2;
+  USER_EVENT_TYPE_CANCELLED_CALL = 3;
+}
+
+message SendEventRequest {
+  // The call type
+  string call_type = 1;
+  // The call id
+  string call_id = 2;
+  // The event type
+  UserEventType event_type = 3;
+}
+
+message SendEventResponse {
+}
+
 message SendCustomEventRequest {
   string type = 1;
   bytes data = 2;
@@ -246,8 +268,8 @@ message ReportCallStatsRequest {
   string call_type = 1;
   // The call id
   string call_id = 2;
-  // A WebRTC Stats report, as defined in https://www.w3.org/TR/webrtc/#dom-rtcstatsreport
-  google.protobuf.Struct stats = 3;
+  // A WebRTC Stats report encoded as a JSON string, as defined in https://www.w3.org/TR/webrtc/#dom-rtcstatsreport
+  bytes stats_json = 3;
 }
 
 message ReportCallStatsResponse {

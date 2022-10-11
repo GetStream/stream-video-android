@@ -60,6 +60,13 @@ internal class HttpModule(
             .build()
     }
 
+    /**
+     * Builds the HTTP interceptor that adds headers to all API calls.
+     *
+     * @param credentialsProvider Provider of the user token and API key.
+     *
+     * @return [Interceptor] which adds headers.
+     */
     private fun buildInterceptor(
         credentialsProvider: CredentialsProvider
     ): Interceptor = Interceptor {

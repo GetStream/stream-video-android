@@ -23,10 +23,10 @@ import io.getstream.video.android.client.coordinator.CallCoordinatorClient
 import io.getstream.video.android.client.user.UserState
 import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.logging.LoggingLevel
-import io.getstream.video.android.model.JoinCallResponse
-import io.getstream.video.android.model.domain.CallMetadata
-import io.getstream.video.android.model.domain.JoinedCall
-import io.getstream.video.android.model.domain.User
+import io.getstream.video.android.model.CallMetadata
+import io.getstream.video.android.model.JoinedCall
+import io.getstream.video.android.model.User
+import io.getstream.video.android.model.toIceServer
 import io.getstream.video.android.module.CallClientModule
 import io.getstream.video.android.module.HttpModule
 import io.getstream.video.android.socket.VideoSocket
@@ -118,7 +118,7 @@ public class CallClient(
      * and choosing the correct one.
      *
      * @param call Information about the call.
-     * @return [Result] wrapper around [JoinCallResponse] once the correct server is chosen.
+     * @return [Result] wrapper around [JoinedCall] once the correct server is chosen.
      */
     public suspend fun joinCall(call: CallMetadata): Result<JoinedCall> {
         logger.d { "[joinCall] call: $call" }
@@ -126,7 +126,7 @@ public class CallClient(
             JoinCallRequest(
                 id = call.id,
                 type = call.type,
-                datacenter_id = "milan"
+                datacenter_id = ""
             )
         )
         logger.v { "[joinCall] callResult: $callResult" }
@@ -151,12 +151,16 @@ public class CallClient(
                         socket.updateCallState(call)
                         val credentials = selectEdgeServerResult.data.credentials
                         val url = credentials?.server?.url
+                        val iceServers =
+                            selectEdgeServerResult.data.credentials?.ice_servers?.map { it.toIceServer() }
+                                ?: emptyList()
 
                         Success(
                             JoinedCall(
                                 call = call,
-                                callUrl = enrichSFUURL(url!!), // TODO - once the SFU and coord are fully published, won't need this
-                                userToken = credentials.token
+                                callUrl = enrichSFUURL(url!!),
+                                userToken = credentials.token,
+                                iceServers = iceServers
                             )
                         )
                     }

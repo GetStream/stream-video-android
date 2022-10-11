@@ -17,9 +17,13 @@
 package io.getstream.video.android.compose.ui.components.participants
 
 import android.view.View
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.unit.dp
+import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.model.Call
@@ -30,20 +34,24 @@ public fun ParticipantItem(
     call: Call,
     participant: CallParticipant,
     modifier: Modifier = Modifier,
+    isFocused: Boolean = false,
     onRender: (View) -> Unit = {}
 ) {
     val track = participant.track
 
+    val containerModifier =
+        if (isFocused) modifier.border(BorderStroke(3.dp, VideoTheme.colors.infoAccent)) else modifier
+
     if (track != null && track.video.enabled()) {
         VideoRenderer(
-            modifier = modifier,
+            modifier = containerModifier,
             call = call,
             videoTrack = track,
             onRender = onRender
         )
     } else {
         UserAvatar(
-            modifier = modifier,
+            modifier = containerModifier,
             shape = RectangleShape,
             user = participant
         )

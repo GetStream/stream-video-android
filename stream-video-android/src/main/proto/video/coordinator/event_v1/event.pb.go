@@ -355,6 +355,7 @@ type CallCreated struct {
 	unknownFields protoimpl.UnknownFields
 
 	CallCid string `protobuf:"bytes,1,opt,name=call_cid,json=callCid,proto3" json:"call_cid,omitempty"`
+	Ringing bool   `protobuf:"varint,2,opt,name=ringing,proto3" json:"ringing,omitempty"`
 }
 
 func (x *CallCreated) Reset() {
@@ -394,6 +395,13 @@ func (x *CallCreated) GetCallCid() string {
 		return x.CallCid
 	}
 	return ""
+}
+
+func (x *CallCreated) GetRinging() bool {
+	if x != nil {
+		return x.Ringing
+	}
+	return false
 }
 
 type CallUpdated struct {
@@ -443,53 +451,6 @@ func (x *CallUpdated) GetCallCid() string {
 	return ""
 }
 
-type CallStarted struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	CallCid string `protobuf:"bytes,1,opt,name=call_cid,json=callCid,proto3" json:"call_cid,omitempty"`
-}
-
-func (x *CallStarted) Reset() {
-	*x = CallStarted{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_video_coordinator_event_v1_event_proto_msgTypes[9]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *CallStarted) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*CallStarted) ProtoMessage() {}
-
-func (x *CallStarted) ProtoReflect() protoreflect.Message {
-	mi := &file_video_coordinator_event_v1_event_proto_msgTypes[9]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use CallStarted.ProtoReflect.Descriptor instead.
-func (*CallStarted) Descriptor() ([]byte, []int) {
-	return file_video_coordinator_event_v1_event_proto_rawDescGZIP(), []int{9}
-}
-
-func (x *CallStarted) GetCallCid() string {
-	if x != nil {
-		return x.CallCid
-	}
-	return ""
-}
-
 type CallEnded struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -501,7 +462,7 @@ type CallEnded struct {
 func (x *CallEnded) Reset() {
 	*x = CallEnded{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_video_coordinator_event_v1_event_proto_msgTypes[10]
+		mi := &file_video_coordinator_event_v1_event_proto_msgTypes[9]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -514,7 +475,7 @@ func (x *CallEnded) String() string {
 func (*CallEnded) ProtoMessage() {}
 
 func (x *CallEnded) ProtoReflect() protoreflect.Message {
-	mi := &file_video_coordinator_event_v1_event_proto_msgTypes[10]
+	mi := &file_video_coordinator_event_v1_event_proto_msgTypes[9]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -527,7 +488,7 @@ func (x *CallEnded) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CallEnded.ProtoReflect.Descriptor instead.
 func (*CallEnded) Descriptor() ([]byte, []int) {
-	return file_video_coordinator_event_v1_event_proto_rawDescGZIP(), []int{10}
+	return file_video_coordinator_event_v1_event_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *CallEnded) GetCallCid() string {
@@ -548,7 +509,7 @@ type CallDeleted struct {
 func (x *CallDeleted) Reset() {
 	*x = CallDeleted{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_video_coordinator_event_v1_event_proto_msgTypes[11]
+		mi := &file_video_coordinator_event_v1_event_proto_msgTypes[10]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -561,7 +522,7 @@ func (x *CallDeleted) String() string {
 func (*CallDeleted) ProtoMessage() {}
 
 func (x *CallDeleted) ProtoReflect() protoreflect.Message {
-	mi := &file_video_coordinator_event_v1_event_proto_msgTypes[11]
+	mi := &file_video_coordinator_event_v1_event_proto_msgTypes[10]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -574,7 +535,7 @@ func (x *CallDeleted) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CallDeleted.ProtoReflect.Descriptor instead.
 func (*CallDeleted) Descriptor() ([]byte, []int) {
-	return file_video_coordinator_event_v1_event_proto_rawDescGZIP(), []int{11}
+	return file_video_coordinator_event_v1_event_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *CallDeleted) GetCallCid() string {
@@ -582,6 +543,120 @@ func (x *CallDeleted) GetCallCid() string {
 		return x.CallCid
 	}
 	return ""
+}
+
+type CallAccepted struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *CallAccepted) Reset() {
+	*x = CallAccepted{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_video_coordinator_event_v1_event_proto_msgTypes[11]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *CallAccepted) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CallAccepted) ProtoMessage() {}
+
+func (x *CallAccepted) ProtoReflect() protoreflect.Message {
+	mi := &file_video_coordinator_event_v1_event_proto_msgTypes[11]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CallAccepted.ProtoReflect.Descriptor instead.
+func (*CallAccepted) Descriptor() ([]byte, []int) {
+	return file_video_coordinator_event_v1_event_proto_rawDescGZIP(), []int{11}
+}
+
+type CallRejected struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *CallRejected) Reset() {
+	*x = CallRejected{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_video_coordinator_event_v1_event_proto_msgTypes[12]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *CallRejected) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CallRejected) ProtoMessage() {}
+
+func (x *CallRejected) ProtoReflect() protoreflect.Message {
+	mi := &file_video_coordinator_event_v1_event_proto_msgTypes[12]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CallRejected.ProtoReflect.Descriptor instead.
+func (*CallRejected) Descriptor() ([]byte, []int) {
+	return file_video_coordinator_event_v1_event_proto_rawDescGZIP(), []int{12}
+}
+
+type CallCancelled struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *CallCancelled) Reset() {
+	*x = CallCancelled{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_video_coordinator_event_v1_event_proto_msgTypes[13]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *CallCancelled) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CallCancelled) ProtoMessage() {}
+
+func (x *CallCancelled) ProtoReflect() protoreflect.Message {
+	mi := &file_video_coordinator_event_v1_event_proto_msgTypes[13]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CallCancelled.ProtoReflect.Descriptor instead.
+func (*CallCancelled) Descriptor() ([]byte, []int) {
+	return file_video_coordinator_event_v1_event_proto_rawDescGZIP(), []int{13}
 }
 
 var File_video_coordinator_event_v1_event_proto protoreflect.FileDescriptor
@@ -612,21 +687,23 @@ var file_video_coordinator_event_v1_event_proto_rawDesc = []byte{
 	0x0a, 0x12, 0x43, 0x61, 0x6c, 0x6c, 0x4d, 0x65, 0x6d, 0x62, 0x65, 0x72, 0x73, 0x44, 0x65, 0x6c,
 	0x65, 0x74, 0x65, 0x64, 0x12, 0x19, 0x0a, 0x08, 0x63, 0x61, 0x6c, 0x6c, 0x5f, 0x63, 0x69, 0x64,
 	0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x63, 0x61, 0x6c, 0x6c, 0x43, 0x69, 0x64, 0x22,
-	0x28, 0x0a, 0x0b, 0x43, 0x61, 0x6c, 0x6c, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x12, 0x19,
+	0x42, 0x0a, 0x0b, 0x43, 0x61, 0x6c, 0x6c, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x12, 0x19,
 	0x0a, 0x08, 0x63, 0x61, 0x6c, 0x6c, 0x5f, 0x63, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09,
-	0x52, 0x07, 0x63, 0x61, 0x6c, 0x6c, 0x43, 0x69, 0x64, 0x22, 0x28, 0x0a, 0x0b, 0x43, 0x61, 0x6c,
-	0x6c, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x64, 0x12, 0x19, 0x0a, 0x08, 0x63, 0x61, 0x6c, 0x6c,
-	0x5f, 0x63, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x63, 0x61, 0x6c, 0x6c,
-	0x43, 0x69, 0x64, 0x22, 0x28, 0x0a, 0x0b, 0x43, 0x61, 0x6c, 0x6c, 0x53, 0x74, 0x61, 0x72, 0x74,
+	0x52, 0x07, 0x63, 0x61, 0x6c, 0x6c, 0x43, 0x69, 0x64, 0x12, 0x18, 0x0a, 0x07, 0x72, 0x69, 0x6e,
+	0x67, 0x69, 0x6e, 0x67, 0x18, 0x02, 0x20, 0x01, 0x28, 0x08, 0x52, 0x07, 0x72, 0x69, 0x6e, 0x67,
+	0x69, 0x6e, 0x67, 0x22, 0x28, 0x0a, 0x0b, 0x43, 0x61, 0x6c, 0x6c, 0x55, 0x70, 0x64, 0x61, 0x74,
 	0x65, 0x64, 0x12, 0x19, 0x0a, 0x08, 0x63, 0x61, 0x6c, 0x6c, 0x5f, 0x63, 0x69, 0x64, 0x18, 0x01,
 	0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x63, 0x61, 0x6c, 0x6c, 0x43, 0x69, 0x64, 0x22, 0x26, 0x0a,
 	0x09, 0x43, 0x61, 0x6c, 0x6c, 0x45, 0x6e, 0x64, 0x65, 0x64, 0x12, 0x19, 0x0a, 0x08, 0x63, 0x61,
 	0x6c, 0x6c, 0x5f, 0x63, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x63, 0x61,
 	0x6c, 0x6c, 0x43, 0x69, 0x64, 0x22, 0x28, 0x0a, 0x0b, 0x43, 0x61, 0x6c, 0x6c, 0x44, 0x65, 0x6c,
 	0x65, 0x74, 0x65, 0x64, 0x12, 0x19, 0x0a, 0x08, 0x63, 0x61, 0x6c, 0x6c, 0x5f, 0x63, 0x69, 0x64,
-	0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x63, 0x61, 0x6c, 0x6c, 0x43, 0x69, 0x64, 0x42,
-	0x0a, 0x5a, 0x08, 0x65, 0x76, 0x65, 0x6e, 0x74, 0x5f, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f,
-	0x74, 0x6f, 0x33,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x63, 0x61, 0x6c, 0x6c, 0x43, 0x69, 0x64, 0x22,
+	0x0e, 0x0a, 0x0c, 0x43, 0x61, 0x6c, 0x6c, 0x41, 0x63, 0x63, 0x65, 0x70, 0x74, 0x65, 0x64, 0x22,
+	0x0e, 0x0a, 0x0c, 0x43, 0x61, 0x6c, 0x6c, 0x52, 0x65, 0x6a, 0x65, 0x63, 0x74, 0x65, 0x64, 0x22,
+	0x0f, 0x0a, 0x0d, 0x43, 0x61, 0x6c, 0x6c, 0x43, 0x61, 0x6e, 0x63, 0x65, 0x6c, 0x6c, 0x65, 0x64,
+	0x42, 0x0a, 0x5a, 0x08, 0x65, 0x76, 0x65, 0x6e, 0x74, 0x5f, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72,
+	0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -641,7 +718,7 @@ func file_video_coordinator_event_v1_event_proto_rawDescGZIP() []byte {
 	return file_video_coordinator_event_v1_event_proto_rawDescData
 }
 
-var file_video_coordinator_event_v1_event_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
+var file_video_coordinator_event_v1_event_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_video_coordinator_event_v1_event_proto_goTypes = []interface{}{
 	(*RecordingStarted)(nil),   // 0: stream.video.coordinator.event_v1.RecordingStarted
 	(*RecordingStopped)(nil),   // 1: stream.video.coordinator.event_v1.RecordingStopped
@@ -652,9 +729,11 @@ var file_video_coordinator_event_v1_event_proto_goTypes = []interface{}{
 	(*CallMembersDeleted)(nil), // 6: stream.video.coordinator.event_v1.CallMembersDeleted
 	(*CallCreated)(nil),        // 7: stream.video.coordinator.event_v1.CallCreated
 	(*CallUpdated)(nil),        // 8: stream.video.coordinator.event_v1.CallUpdated
-	(*CallStarted)(nil),        // 9: stream.video.coordinator.event_v1.CallStarted
-	(*CallEnded)(nil),          // 10: stream.video.coordinator.event_v1.CallEnded
-	(*CallDeleted)(nil),        // 11: stream.video.coordinator.event_v1.CallDeleted
+	(*CallEnded)(nil),          // 9: stream.video.coordinator.event_v1.CallEnded
+	(*CallDeleted)(nil),        // 10: stream.video.coordinator.event_v1.CallDeleted
+	(*CallAccepted)(nil),       // 11: stream.video.coordinator.event_v1.CallAccepted
+	(*CallRejected)(nil),       // 12: stream.video.coordinator.event_v1.CallRejected
+	(*CallCancelled)(nil),      // 13: stream.video.coordinator.event_v1.CallCancelled
 }
 var file_video_coordinator_event_v1_event_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
@@ -779,18 +858,6 @@ func file_video_coordinator_event_v1_event_proto_init() {
 			}
 		}
 		file_video_coordinator_event_v1_event_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*CallStarted); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_video_coordinator_event_v1_event_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*CallEnded); i {
 			case 0:
 				return &v.state
@@ -802,8 +869,44 @@ func file_video_coordinator_event_v1_event_proto_init() {
 				return nil
 			}
 		}
-		file_video_coordinator_event_v1_event_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
+		file_video_coordinator_event_v1_event_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*CallDeleted); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_video_coordinator_event_v1_event_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*CallAccepted); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_video_coordinator_event_v1_event_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*CallRejected); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_video_coordinator_event_v1_event_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*CallCancelled); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -821,7 +924,7 @@ func file_video_coordinator_event_v1_event_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_video_coordinator_event_v1_event_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   12,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

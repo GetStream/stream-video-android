@@ -29,6 +29,7 @@ import io.getstream.video.android.audio.AudioDevice
 import io.getstream.video.android.audio.AudioSwitchHandler
 import io.getstream.video.android.dispatchers.DispatcherProvider
 import io.getstream.video.android.errors.VideoError
+import io.getstream.video.android.events.AudioLevelChangedEvent
 import io.getstream.video.android.events.ChangePublishQualityEvent
 import io.getstream.video.android.events.MuteStateChangeEvent
 import io.getstream.video.android.events.SfuDataEvent
@@ -38,17 +39,15 @@ import io.getstream.video.android.events.SubscriberOfferEvent
 import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.CallParticipant
 import io.getstream.video.android.model.CallSettings
-import io.getstream.video.android.module.WebRTCModule.Companion.REDIRECT_SIGNAL_URL
-import io.getstream.video.android.module.WebRTCModule.Companion.SIGNAL_HOST_BASE
+import io.getstream.video.android.model.IceServer
 import io.getstream.video.android.token.CredentialsProvider
 import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Result
 import io.getstream.video.android.utils.Success
 import io.getstream.video.android.utils.buildAudioConstraints
 import io.getstream.video.android.utils.buildConnectionConfiguration
-import io.getstream.video.android.utils.buildLocalIceServers
+import io.getstream.video.android.utils.buildIceServers
 import io.getstream.video.android.utils.buildMediaConstraints
-import io.getstream.video.android.utils.buildRemoteIceServers
 import io.getstream.video.android.utils.onError
 import io.getstream.video.android.utils.onSuccessSuspend
 import io.getstream.video.android.utils.stringify
@@ -79,18 +78,18 @@ import org.webrtc.SessionDescription
 import org.webrtc.SurfaceTextureHelper
 import org.webrtc.VideoCapturer
 import org.webrtc.VideoTrack
-import stream.video.sfu.AudioCodecs
-import stream.video.sfu.CallState
-import stream.video.sfu.CodecSettings
-import stream.video.sfu.IceCandidateRequest
-import stream.video.sfu.JoinRequest
-import stream.video.sfu.JoinResponse
-import stream.video.sfu.PeerType
-import stream.video.sfu.SendAnswerRequest
-import stream.video.sfu.SetPublisherRequest
-import stream.video.sfu.UpdateSubscriptionsRequest
-import stream.video.sfu.VideoCodecs
-import stream.video.sfu.VideoDimension
+import stream.video.sfu.models.AudioCodecs
+import stream.video.sfu.models.CallState
+import stream.video.sfu.models.CodecSettings
+import stream.video.sfu.models.PeerType
+import stream.video.sfu.models.VideoCodecs
+import stream.video.sfu.models.VideoDimension
+import stream.video.sfu.signal.IceCandidateRequest
+import stream.video.sfu.signal.JoinRequest
+import stream.video.sfu.signal.JoinResponse
+import stream.video.sfu.signal.SendAnswerRequest
+import stream.video.sfu.signal.SetPublisherRequest
+import stream.video.sfu.signal.UpdateSubscriptionsRequest
 import java.util.concurrent.TimeUnit
 import kotlin.math.absoluteValue
 import kotlin.random.Random
@@ -99,6 +98,7 @@ internal class WebRTCClientImpl(
     private val context: Context,
     private val credentialsProvider: CredentialsProvider,
     private val signalClient: SignalClient,
+    servers: List<IceServer>?
 ) : WebRTCClient {
 
     private val logger = StreamLog.getLogger("Call:WebRtcClient")
@@ -115,11 +115,7 @@ internal class WebRTCClientImpl(
      */
     private val peerConnectionFactory by lazy { StreamPeerConnectionFactory(context) }
     private val iceServers by lazy {
-        if (REDIRECT_SIGNAL_URL == null) {
-            buildRemoteIceServers(SIGNAL_HOST_BASE)
-        } else {
-            buildLocalIceServers()
-        }
+        buildIceServers(servers)
     }
 
     private val connectionConfiguration: PeerConnection.RTCConfiguration by lazy {
@@ -282,14 +278,13 @@ internal class WebRTCClientImpl(
         logger.d { "[createCall] #sfu; sessionId: $sessionId" }
         this.sessionId = sessionId
 
-        return buildCall(sessionId)
+        return buildCall()
     }
 
-    private fun buildCall(sessionId: String): Call {
+    private fun buildCall(): Call {
         logger.d { "[buildCall] #sfu; sessionId: $sessionId" }
         return Call(
             context = context,
-            sessionId = sessionId,
             credentialsProvider = credentialsProvider,
             eglBase = peerConnectionFactory.eglBase,
         )
@@ -618,6 +613,7 @@ internal class WebRTCClientImpl(
             is ChangePublishQualityEvent -> {
                 // updatePublishQuality(event) -> TODO - re-enable once we send the proper quality (dimensions)
             }
+            is AudioLevelChangedEvent -> call?.updateAudioLevel(event)
             is MuteStateChangeEvent -> call?.updateMuteState(event)
             else -> Unit
         }

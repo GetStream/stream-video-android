@@ -63,6 +63,85 @@ func (RecordingStorage) EnumDescriptor() ([]byte, []int) {
 	return file_video_coordinator_recording_v1_recording_proto_rawDescGZIP(), []int{0}
 }
 
+type Recording struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	CallType  string `protobuf:"bytes,1,opt,name=call_type,json=callType,proto3" json:"call_type,omitempty"`
+	CallId    string `protobuf:"bytes,2,opt,name=call_id,json=callId,proto3" json:"call_id,omitempty"`
+	S3FileUrl string `protobuf:"bytes,3,opt,name=s3_file_url,json=s3FileUrl,proto3" json:"s3_file_url,omitempty"`
+	StartTime string `protobuf:"bytes,4,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
+	StopTime  string `protobuf:"bytes,5,opt,name=stop_time,json=stopTime,proto3" json:"stop_time,omitempty"`
+}
+
+func (x *Recording) Reset() {
+	*x = Recording{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_video_coordinator_recording_v1_recording_proto_msgTypes[0]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Recording) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Recording) ProtoMessage() {}
+
+func (x *Recording) ProtoReflect() protoreflect.Message {
+	mi := &file_video_coordinator_recording_v1_recording_proto_msgTypes[0]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Recording.ProtoReflect.Descriptor instead.
+func (*Recording) Descriptor() ([]byte, []int) {
+	return file_video_coordinator_recording_v1_recording_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *Recording) GetCallType() string {
+	if x != nil {
+		return x.CallType
+	}
+	return ""
+}
+
+func (x *Recording) GetCallId() string {
+	if x != nil {
+		return x.CallId
+	}
+	return ""
+}
+
+func (x *Recording) GetS3FileUrl() string {
+	if x != nil {
+		return x.S3FileUrl
+	}
+	return ""
+}
+
+func (x *Recording) GetStartTime() string {
+	if x != nil {
+		return x.StartTime
+	}
+	return ""
+}
+
+func (x *Recording) GetStopTime() string {
+	if x != nil {
+		return x.StopTime
+	}
+	return ""
+}
+
 type File struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -77,7 +156,7 @@ type File struct {
 func (x *File) Reset() {
 	*x = File{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_video_coordinator_recording_v1_recording_proto_msgTypes[0]
+		mi := &file_video_coordinator_recording_v1_recording_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -90,7 +169,7 @@ func (x *File) String() string {
 func (*File) ProtoMessage() {}
 
 func (x *File) ProtoReflect() protoreflect.Message {
-	mi := &file_video_coordinator_recording_v1_recording_proto_msgTypes[0]
+	mi := &file_video_coordinator_recording_v1_recording_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -103,7 +182,7 @@ func (x *File) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use File.ProtoReflect.Descriptor instead.
 func (*File) Descriptor() ([]byte, []int) {
-	return file_video_coordinator_recording_v1_recording_proto_rawDescGZIP(), []int{0}
+	return file_video_coordinator_recording_v1_recording_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *File) GetType() string {
@@ -148,7 +227,7 @@ type RecordBroadcast struct {
 func (x *RecordBroadcast) Reset() {
 	*x = RecordBroadcast{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_video_coordinator_recording_v1_recording_proto_msgTypes[1]
+		mi := &file_video_coordinator_recording_v1_recording_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -161,7 +240,7 @@ func (x *RecordBroadcast) String() string {
 func (*RecordBroadcast) ProtoMessage() {}
 
 func (x *RecordBroadcast) ProtoReflect() protoreflect.Message {
-	mi := &file_video_coordinator_recording_v1_recording_proto_msgTypes[1]
+	mi := &file_video_coordinator_recording_v1_recording_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -174,7 +253,7 @@ func (x *RecordBroadcast) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RecordBroadcast.ProtoReflect.Descriptor instead.
 func (*RecordBroadcast) Descriptor() ([]byte, []int) {
-	return file_video_coordinator_recording_v1_recording_proto_rawDescGZIP(), []int{1}
+	return file_video_coordinator_recording_v1_recording_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *RecordBroadcast) GetComposite() bool {
@@ -207,7 +286,7 @@ type RecordingStorageOptions struct {
 func (x *RecordingStorageOptions) Reset() {
 	*x = RecordingStorageOptions{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_video_coordinator_recording_v1_recording_proto_msgTypes[2]
+		mi := &file_video_coordinator_recording_v1_recording_proto_msgTypes[3]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -220,7 +299,7 @@ func (x *RecordingStorageOptions) String() string {
 func (*RecordingStorageOptions) ProtoMessage() {}
 
 func (x *RecordingStorageOptions) ProtoReflect() protoreflect.Message {
-	mi := &file_video_coordinator_recording_v1_recording_proto_msgTypes[2]
+	mi := &file_video_coordinator_recording_v1_recording_proto_msgTypes[3]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -233,7 +312,7 @@ func (x *RecordingStorageOptions) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RecordingStorageOptions.ProtoReflect.Descriptor instead.
 func (*RecordingStorageOptions) Descriptor() ([]byte, []int) {
-	return file_video_coordinator_recording_v1_recording_proto_rawDescGZIP(), []int{2}
+	return file_video_coordinator_recording_v1_recording_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *RecordingStorageOptions) GetStorage() RecordingStorage {
@@ -286,7 +365,17 @@ var file_video_coordinator_recording_v1_recording_proto_rawDesc = []byte{
 	0x2f, 0x72, 0x65, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x6e, 0x67, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f,
 	0x12, 0x25, 0x73, 0x74, 0x72, 0x65, 0x61, 0x6d, 0x2e, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x2e, 0x63,
 	0x6f, 0x6f, 0x72, 0x64, 0x69, 0x6e, 0x61, 0x74, 0x6f, 0x72, 0x2e, 0x72, 0x65, 0x63, 0x6f, 0x72,
-	0x64, 0x69, 0x6e, 0x67, 0x5f, 0x76, 0x31, 0x22, 0x63, 0x0a, 0x04, 0x46, 0x69, 0x6c, 0x65, 0x12,
+	0x64, 0x69, 0x6e, 0x67, 0x5f, 0x76, 0x31, 0x22, 0x9d, 0x01, 0x0a, 0x09, 0x52, 0x65, 0x63, 0x6f,
+	0x72, 0x64, 0x69, 0x6e, 0x67, 0x12, 0x1b, 0x0a, 0x09, 0x63, 0x61, 0x6c, 0x6c, 0x5f, 0x74, 0x79,
+	0x70, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x63, 0x61, 0x6c, 0x6c, 0x54, 0x79,
+	0x70, 0x65, 0x12, 0x17, 0x0a, 0x07, 0x63, 0x61, 0x6c, 0x6c, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x06, 0x63, 0x61, 0x6c, 0x6c, 0x49, 0x64, 0x12, 0x1e, 0x0a, 0x0b, 0x73,
+	0x33, 0x5f, 0x66, 0x69, 0x6c, 0x65, 0x5f, 0x75, 0x72, 0x6c, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x09, 0x73, 0x33, 0x46, 0x69, 0x6c, 0x65, 0x55, 0x72, 0x6c, 0x12, 0x1d, 0x0a, 0x0a, 0x73,
+	0x74, 0x61, 0x72, 0x74, 0x5f, 0x74, 0x69, 0x6d, 0x65, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x09, 0x73, 0x74, 0x61, 0x72, 0x74, 0x54, 0x69, 0x6d, 0x65, 0x12, 0x1b, 0x0a, 0x09, 0x73, 0x74,
+	0x6f, 0x70, 0x5f, 0x74, 0x69, 0x6d, 0x65, 0x18, 0x05, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x73,
+	0x74, 0x6f, 0x70, 0x54, 0x69, 0x6d, 0x65, 0x22, 0x63, 0x0a, 0x04, 0x46, 0x69, 0x6c, 0x65, 0x12,
 	0x12, 0x0a, 0x04, 0x74, 0x79, 0x70, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x74,
 	0x79, 0x70, 0x65, 0x12, 0x1c, 0x0a, 0x09, 0x63, 0x6f, 0x6d, 0x70, 0x6f, 0x73, 0x69, 0x74, 0x65,
 	0x18, 0x02, 0x20, 0x01, 0x28, 0x08, 0x52, 0x09, 0x63, 0x6f, 0x6d, 0x70, 0x6f, 0x73, 0x69, 0x74,
@@ -336,15 +425,16 @@ func file_video_coordinator_recording_v1_recording_proto_rawDescGZIP() []byte {
 }
 
 var file_video_coordinator_recording_v1_recording_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_video_coordinator_recording_v1_recording_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_video_coordinator_recording_v1_recording_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_video_coordinator_recording_v1_recording_proto_goTypes = []interface{}{
 	(RecordingStorage)(0),           // 0: stream.video.coordinator.recording_v1.RecordingStorage
-	(*File)(nil),                    // 1: stream.video.coordinator.recording_v1.File
-	(*RecordBroadcast)(nil),         // 2: stream.video.coordinator.recording_v1.RecordBroadcast
-	(*RecordingStorageOptions)(nil), // 3: stream.video.coordinator.recording_v1.RecordingStorageOptions
+	(*Recording)(nil),               // 1: stream.video.coordinator.recording_v1.Recording
+	(*File)(nil),                    // 2: stream.video.coordinator.recording_v1.File
+	(*RecordBroadcast)(nil),         // 3: stream.video.coordinator.recording_v1.RecordBroadcast
+	(*RecordingStorageOptions)(nil), // 4: stream.video.coordinator.recording_v1.RecordingStorageOptions
 }
 var file_video_coordinator_recording_v1_recording_proto_depIdxs = []int32{
-	1, // 0: stream.video.coordinator.recording_v1.RecordBroadcast.files:type_name -> stream.video.coordinator.recording_v1.File
+	2, // 0: stream.video.coordinator.recording_v1.RecordBroadcast.files:type_name -> stream.video.coordinator.recording_v1.File
 	0, // 1: stream.video.coordinator.recording_v1.RecordingStorageOptions.storage:type_name -> stream.video.coordinator.recording_v1.RecordingStorage
 	2, // [2:2] is the sub-list for method output_type
 	2, // [2:2] is the sub-list for method input_type
@@ -360,7 +450,7 @@ func file_video_coordinator_recording_v1_recording_proto_init() {
 	}
 	if !protoimpl.UnsafeEnabled {
 		file_video_coordinator_recording_v1_recording_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*File); i {
+			switch v := v.(*Recording); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -372,7 +462,7 @@ func file_video_coordinator_recording_v1_recording_proto_init() {
 			}
 		}
 		file_video_coordinator_recording_v1_recording_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RecordBroadcast); i {
+			switch v := v.(*File); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -384,6 +474,18 @@ func file_video_coordinator_recording_v1_recording_proto_init() {
 			}
 		}
 		file_video_coordinator_recording_v1_recording_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*RecordBroadcast); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_video_coordinator_recording_v1_recording_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*RecordingStorageOptions); i {
 			case 0:
 				return &v.state
@@ -402,7 +504,7 @@ func file_video_coordinator_recording_v1_recording_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_video_coordinator_recording_v1_recording_proto_rawDesc,
 			NumEnums:      1,
-			NumMessages:   3,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

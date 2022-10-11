@@ -22,10 +22,9 @@ import io.getstream.video.android.api.CallCoordinatorService
 import io.getstream.video.android.client.coordinator.CallCoordinatorClient
 import io.getstream.video.android.client.coordinator.CallCoordinatorClientImpl
 import io.getstream.video.android.dispatchers.DispatcherProvider
-import io.getstream.video.android.model.domain.User
+import io.getstream.video.android.model.User
 import io.getstream.video.android.token.CredentialsProvider
 import kotlinx.coroutines.CoroutineScope
-import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.wire.WireConverterFactory
@@ -75,14 +74,6 @@ internal class CallClientModule(
     // TODO - build notification handler/provider
 
     /**
-     * Builds the HTTP interceptor that adds headers to all API calls.
-     *
-     * @param credentialsProvider Provider of the user token and API key.
-     *
-     * @return [Interceptor] which adds headers.
-     */
-
-    /**
      * Public providers used to set up other components.
      */
 
@@ -108,13 +99,13 @@ internal class CallClientModule(
          * leave it as-is.
          */
         @Suppress("RedundantNullableReturnType")
-        private val REDIRECT_BASE_URL: String? =
-            null // e.g. "https://dc54-83-131-252-51.eu.ngrok.io"
+        private val REDIRECT_BASE_URL: String? = "https://acda-93-140-102-133.eu.ngrok.io"
+        // e.g. "https://dc54-83-131-252-51.eu.ngrok.io"
 
         /**
          * The base URL of the API.
          */
-        private const val BASE_URL = "http://10.0.2.2:26991"
+        private const val BASE_URL = "https://rpc-video-coordinator.oregon-v1.stream-io-video.com/"
 
         /**
          * Used for testing on devices and redirecting from a public realm to localhost.
@@ -123,6 +114,6 @@ internal class CallClientModule(
          * leave it as-is.
          */
         @Suppress("RedundantNullableReturnType")
-        internal val REDIRECT_PING_URL: String? = null // "<redirect-url>/ping"
+        internal val REDIRECT_PING_URL: String? = "https://7c18-93-140-102-133.eu.ngrok.io/ping" // "<redirect-url>/ping"
     }
 }

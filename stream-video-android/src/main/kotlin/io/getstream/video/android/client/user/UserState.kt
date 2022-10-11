@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.client.user
 
-import io.getstream.video.android.model.domain.User
+import io.getstream.video.android.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 

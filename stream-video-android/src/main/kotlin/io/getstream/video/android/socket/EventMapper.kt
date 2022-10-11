@@ -20,7 +20,6 @@ import io.getstream.video.android.events.CallCreatedEvent
 import io.getstream.video.android.events.CallEndedEvent
 import io.getstream.video.android.events.CallMembersDeletedEvent
 import io.getstream.video.android.events.CallMembersUpdatedEvent
-import io.getstream.video.android.events.CallStartedEvent
 import io.getstream.video.android.events.CallUpdatedEvent
 import io.getstream.video.android.events.HealthCheckEvent
 import io.getstream.video.android.events.UnknownEvent
@@ -52,14 +51,15 @@ internal object EventMapper {
             )
         }
 
-        socketEvent.call_started != null -> with(socketEvent.call_started) {
-            CallStartedEvent(
-                callId = call_cid,
-                users = socketEvent.users.toCallUsers(),
-                info = socketEvent.calls[call_cid]?.toCallInfo(),
-                details = socketEvent.call_details[call_cid]?.toCallDetails(),
-            )
-        }
+        // TODO - this is broken with new proto update, check
+//        socketEvent.call_started != null -> with(socketEvent.call_started) {
+//            CallStartedEvent(
+//                callId = call_cid,
+//                users = socketEvent.users.toCallUsers(),
+//                info = socketEvent.calls[call_cid]?.toCallInfo(),
+//                details = socketEvent.call_details[call_cid]?.toCallDetails(),
+//            )
+//        }
 
         socketEvent.call_updated != null -> with(socketEvent.call_updated) {
             CallUpdatedEvent(

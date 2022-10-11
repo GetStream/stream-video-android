@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.model
 
-import stream.video.sfu.Participant
+import stream.video.sfu.models.Participant
 
 public data class CallParticipant(
     public val id: String,
@@ -29,6 +29,7 @@ public data class CallParticipant(
     public var hasAudio: Boolean,
     public var track: VideoTrack?,
     public var trackSize: Pair<Int, Int>,
+    public var audioLevel: Float
 )
 
 public fun Participant.toCallParticipant(currentUserId: String): CallParticipant =
@@ -42,5 +43,6 @@ public fun Participant.toCallParticipant(currentUserId: String): CallParticipant
         hasVideo = video,
         hasAudio = audio,
         track = null,
-        trackSize = 0 to 0
+        trackSize = 0 to 0,
+        audioLevel = 0f
     )

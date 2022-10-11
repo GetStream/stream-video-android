@@ -18,10 +18,11 @@ package io.getstream.video.android
 
 import io.getstream.video.android.audio.AudioDevice
 import io.getstream.video.android.model.Call
+import io.getstream.video.android.model.CallMetadata
 import io.getstream.video.android.model.CallSettings
-import io.getstream.video.android.model.domain.CallMetadata
-import io.getstream.video.android.model.domain.JoinedCall
-import io.getstream.video.android.model.domain.User
+import io.getstream.video.android.model.IceServer
+import io.getstream.video.android.model.JoinedCall
+import io.getstream.video.android.model.User
 import io.getstream.video.android.socket.SocketListener
 import io.getstream.video.android.token.CredentialsProvider
 import io.getstream.video.android.utils.Result
@@ -114,6 +115,7 @@ public interface StreamCalls {
     public fun createCallClient(
         signalUrl: String,
         userToken: String,
+        iceServers: List<IceServer>,
         credentialsProvider: CredentialsProvider
     )
 
