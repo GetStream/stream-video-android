@@ -1,10 +1,10 @@
 syntax = "proto3";
 
-package stream.video.sfu;
+package stream.video.sfu.event;
 
-import "sfu_models/models.proto";
+import "video/sfu/models/models.proto";
 
-option go_package = "github.com/GetStream/video-sfu/protobuf/sfu_events";
+option go_package = "sfu_events";
 
 message SfuEvent {
   oneof event_payload {
@@ -25,14 +25,14 @@ message SfuEvent {
 
 // ParticipantJoined is fired when a user joins a call
 message ParticipantJoined {
-  Call call = 1;
-  Participant participant = 2;
+  models.Call call = 1;
+  models.Participant participant = 2;
 }
 
 // ParticipantJoined is fired when a user leaves a call
 message ParticipantLeft {
-  Call call = 1;
-  Participant participant = 2;
+  models.Call call = 1;
+  models.Participant participant = 2;
 }
 
 message MuteStateChanged{
@@ -41,9 +41,8 @@ message MuteStateChanged{
   bool video_muted = 3;
 }
 
-//TODO batch these messages
 message VideoQualityChanged{
-  repeated StreamQuality stream_qualities = 1;
+  repeated models.StreamQuality stream_qualities = 1;
 }
 
 // SubscriberOffer is sent when the SFU adds tracks to a subscription
@@ -65,7 +64,7 @@ message ICECandidateTrickle {
 // eg. thierry's connection is not good -> render a red icon Zoom style
 message ConnectionQualityChanged {
   string user_id = 1;
-  ConnectionQuality connection_quality = 2;
+  models.ConnectionQuality connection_quality = 2;
 }
 
 // DominantSpeakerChanged is sent by the SFU to notify when there is a new dominant speaker in the call
@@ -94,7 +93,7 @@ message AudioMediaRequest {
 
 message AudioSender {
   AudioMediaRequest mediaRequest = 1;
-  Codec codec = 2;
+  models.Codec codec = 2;
   repeated AudioLayerSetting layers = 3;
 }
 
@@ -118,12 +117,12 @@ message VideoLayerSetting {
     VERY_LOW = 3;
   }
   Priority priority = 5;
-  Codec codec = 6;
+  models.Codec codec = 6;
 }
 
 message VideoSender {
   VideoMediaRequest mediaRequest = 1;
-  Codec codec = 2;
+  models.Codec codec = 2;
   repeated VideoLayerSetting layers = 3;
 }
 

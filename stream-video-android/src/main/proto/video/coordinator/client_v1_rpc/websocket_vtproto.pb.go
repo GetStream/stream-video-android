@@ -64,6 +64,13 @@ func (m *WebsocketEvent) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 			}
 		}
 	}
+	if len(m.EventSenderId) > 0 {
+		i -= len(m.EventSenderId)
+		copy(dAtA[i:], m.EventSenderId)
+		i = encodeVarint(dAtA, i, uint64(len(m.EventSenderId)))
+		i--
+		dAtA[i] = 0x22
+	}
 	if len(m.CallDetails) > 0 {
 		for k := range m.CallDetails {
 			v := m.CallDetails[k]
@@ -355,39 +362,6 @@ func (m *WebsocketEvent_CallMembersDeleted) MarshalToSizedBufferVT(dAtA []byte) 
 	}
 	return len(dAtA) - i, nil
 }
-func (m *WebsocketEvent_CallStarted) MarshalToVT(dAtA []byte) (int, error) {
-	size := m.SizeVT()
-	return m.MarshalToSizedBufferVT(dAtA[:size])
-}
-
-func (m *WebsocketEvent_CallStarted) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	if m.CallStarted != nil {
-		if marshalto, ok := interface{}(m.CallStarted).(interface {
-			MarshalToSizedBufferVT([]byte) (int, error)
-		}); ok {
-			size, err := marshalto.MarshalToSizedBufferVT(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarint(dAtA, i, uint64(size))
-		} else {
-			encoded, err := proto.Marshal(m.CallStarted)
-			if err != nil {
-				return 0, err
-			}
-			i -= len(encoded)
-			copy(dAtA[i:], encoded)
-			i = encodeVarint(dAtA, i, uint64(len(encoded)))
-		}
-		i--
-		dAtA[i] = 0x2
-		i--
-		dAtA[i] = 0x9a
-	}
-	return len(dAtA) - i, nil
-}
 func (m *WebsocketEvent_CallEnded) MarshalToVT(dAtA []byte) (int, error) {
 	size := m.SizeVT()
 	return m.MarshalToSizedBufferVT(dAtA[:size])
@@ -421,6 +395,105 @@ func (m *WebsocketEvent_CallEnded) MarshalToSizedBufferVT(dAtA []byte) (int, err
 	}
 	return len(dAtA) - i, nil
 }
+func (m *WebsocketEvent_CallAccepted) MarshalToVT(dAtA []byte) (int, error) {
+	size := m.SizeVT()
+	return m.MarshalToSizedBufferVT(dAtA[:size])
+}
+
+func (m *WebsocketEvent_CallAccepted) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.CallAccepted != nil {
+		if marshalto, ok := interface{}(m.CallAccepted).(interface {
+			MarshalToSizedBufferVT([]byte) (int, error)
+		}); ok {
+			size, err := marshalto.MarshalToSizedBufferVT(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarint(dAtA, i, uint64(size))
+		} else {
+			encoded, err := proto.Marshal(m.CallAccepted)
+			if err != nil {
+				return 0, err
+			}
+			i -= len(encoded)
+			copy(dAtA[i:], encoded)
+			i = encodeVarint(dAtA, i, uint64(len(encoded)))
+		}
+		i--
+		dAtA[i] = 0x2
+		i--
+		dAtA[i] = 0xc2
+	}
+	return len(dAtA) - i, nil
+}
+func (m *WebsocketEvent_CallRejected) MarshalToVT(dAtA []byte) (int, error) {
+	size := m.SizeVT()
+	return m.MarshalToSizedBufferVT(dAtA[:size])
+}
+
+func (m *WebsocketEvent_CallRejected) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.CallRejected != nil {
+		if marshalto, ok := interface{}(m.CallRejected).(interface {
+			MarshalToSizedBufferVT([]byte) (int, error)
+		}); ok {
+			size, err := marshalto.MarshalToSizedBufferVT(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarint(dAtA, i, uint64(size))
+		} else {
+			encoded, err := proto.Marshal(m.CallRejected)
+			if err != nil {
+				return 0, err
+			}
+			i -= len(encoded)
+			copy(dAtA[i:], encoded)
+			i = encodeVarint(dAtA, i, uint64(len(encoded)))
+		}
+		i--
+		dAtA[i] = 0x2
+		i--
+		dAtA[i] = 0xca
+	}
+	return len(dAtA) - i, nil
+}
+func (m *WebsocketEvent_CallCancelled) MarshalToVT(dAtA []byte) (int, error) {
+	size := m.SizeVT()
+	return m.MarshalToSizedBufferVT(dAtA[:size])
+}
+
+func (m *WebsocketEvent_CallCancelled) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.CallCancelled != nil {
+		if marshalto, ok := interface{}(m.CallCancelled).(interface {
+			MarshalToSizedBufferVT([]byte) (int, error)
+		}); ok {
+			size, err := marshalto.MarshalToSizedBufferVT(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarint(dAtA, i, uint64(size))
+		} else {
+			encoded, err := proto.Marshal(m.CallCancelled)
+			if err != nil {
+				return 0, err
+			}
+			i -= len(encoded)
+			copy(dAtA[i:], encoded)
+			i = encodeVarint(dAtA, i, uint64(len(encoded)))
+		}
+		i--
+		dAtA[i] = 0x2
+		i--
+		dAtA[i] = 0xd2
+	}
+	return len(dAtA) - i, nil
+}
 func (m *WebsocketEvent_UserUpdated) MarshalToVT(dAtA []byte) (int, error) {
 	size := m.SizeVT()
 	return m.MarshalToSizedBufferVT(dAtA[:size])
@@ -448,9 +521,9 @@ func (m *WebsocketEvent_UserUpdated) MarshalToSizedBufferVT(dAtA []byte) (int, e
 			i = encodeVarint(dAtA, i, uint64(len(encoded)))
 		}
 		i--
-		dAtA[i] = 0x2
+		dAtA[i] = 0x3
 		i--
-		dAtA[i] = 0xc2
+		dAtA[i] = 0x92
 	}
 	return len(dAtA) - i, nil
 }
@@ -772,6 +845,10 @@ func (m *WebsocketEvent) SizeVT() (n int) {
 			n += mapEntrySize + 1 + sov(uint64(mapEntrySize))
 		}
 	}
+	l = len(m.EventSenderId)
+	if l > 0 {
+		n += 1 + l + sov(uint64(l))
+	}
 	if vtmsg, ok := m.Event.(interface{ SizeVT() int }); ok {
 		n += vtmsg.SizeVT()
 	}
@@ -883,24 +960,6 @@ func (m *WebsocketEvent_CallMembersDeleted) SizeVT() (n int) {
 	}
 	return n
 }
-func (m *WebsocketEvent_CallStarted) SizeVT() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.CallStarted != nil {
-		if size, ok := interface{}(m.CallStarted).(interface {
-			SizeVT() int
-		}); ok {
-			l = size.SizeVT()
-		} else {
-			l = proto.Size(m.CallStarted)
-		}
-		n += 2 + l + sov(uint64(l))
-	}
-	return n
-}
 func (m *WebsocketEvent_CallEnded) SizeVT() (n int) {
 	if m == nil {
 		return 0
@@ -914,6 +973,60 @@ func (m *WebsocketEvent_CallEnded) SizeVT() (n int) {
 			l = size.SizeVT()
 		} else {
 			l = proto.Size(m.CallEnded)
+		}
+		n += 2 + l + sov(uint64(l))
+	}
+	return n
+}
+func (m *WebsocketEvent_CallAccepted) SizeVT() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.CallAccepted != nil {
+		if size, ok := interface{}(m.CallAccepted).(interface {
+			SizeVT() int
+		}); ok {
+			l = size.SizeVT()
+		} else {
+			l = proto.Size(m.CallAccepted)
+		}
+		n += 2 + l + sov(uint64(l))
+	}
+	return n
+}
+func (m *WebsocketEvent_CallRejected) SizeVT() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.CallRejected != nil {
+		if size, ok := interface{}(m.CallRejected).(interface {
+			SizeVT() int
+		}); ok {
+			l = size.SizeVT()
+		} else {
+			l = proto.Size(m.CallRejected)
+		}
+		n += 2 + l + sov(uint64(l))
+	}
+	return n
+}
+func (m *WebsocketEvent_CallCancelled) SizeVT() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.CallCancelled != nil {
+		if size, ok := interface{}(m.CallCancelled).(interface {
+			SizeVT() int
+		}); ok {
+			l = size.SizeVT()
+		} else {
+			l = proto.Size(m.CallCancelled)
 		}
 		n += 2 + l + sov(uint64(l))
 	}
@@ -1490,6 +1603,38 @@ func (m *WebsocketEvent) UnmarshalVT(dAtA []byte) error {
 			}
 			m.CallDetails[mapkey] = mapvalue
 			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field EventSenderId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflow
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLength
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLength
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.EventSenderId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
 		case 20:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Healthcheck", wireType)
@@ -1816,63 +1961,6 @@ func (m *WebsocketEvent) UnmarshalVT(dAtA []byte) error {
 				m.Event = &WebsocketEvent_CallMembersDeleted{v}
 			}
 			iNdEx = postIndex
-		case 35:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field CallStarted", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflow
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLength
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLength
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if oneof, ok := m.Event.(*WebsocketEvent_CallStarted); ok {
-				if unmarshal, ok := interface{}(oneof.CallStarted).(interface {
-					UnmarshalVT([]byte) error
-				}); ok {
-					if err := unmarshal.UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
-						return err
-					}
-				} else {
-					if err := proto.Unmarshal(dAtA[iNdEx:postIndex], oneof.CallStarted); err != nil {
-						return err
-					}
-				}
-			} else {
-				v := &event_v1.CallStarted{}
-				if unmarshal, ok := interface{}(v).(interface {
-					UnmarshalVT([]byte) error
-				}); ok {
-					if err := unmarshal.UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
-						return err
-					}
-				} else {
-					if err := proto.Unmarshal(dAtA[iNdEx:postIndex], v); err != nil {
-						return err
-					}
-				}
-				m.Event = &WebsocketEvent_CallStarted{v}
-			}
-			iNdEx = postIndex
 		case 36:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field CallEnded", wireType)
@@ -1931,6 +2019,177 @@ func (m *WebsocketEvent) UnmarshalVT(dAtA []byte) error {
 			}
 			iNdEx = postIndex
 		case 40:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CallAccepted", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflow
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLength
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLength
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if oneof, ok := m.Event.(*WebsocketEvent_CallAccepted); ok {
+				if unmarshal, ok := interface{}(oneof.CallAccepted).(interface {
+					UnmarshalVT([]byte) error
+				}); ok {
+					if err := unmarshal.UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
+						return err
+					}
+				} else {
+					if err := proto.Unmarshal(dAtA[iNdEx:postIndex], oneof.CallAccepted); err != nil {
+						return err
+					}
+				}
+			} else {
+				v := &event_v1.CallAccepted{}
+				if unmarshal, ok := interface{}(v).(interface {
+					UnmarshalVT([]byte) error
+				}); ok {
+					if err := unmarshal.UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
+						return err
+					}
+				} else {
+					if err := proto.Unmarshal(dAtA[iNdEx:postIndex], v); err != nil {
+						return err
+					}
+				}
+				m.Event = &WebsocketEvent_CallAccepted{v}
+			}
+			iNdEx = postIndex
+		case 41:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CallRejected", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflow
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLength
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLength
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if oneof, ok := m.Event.(*WebsocketEvent_CallRejected); ok {
+				if unmarshal, ok := interface{}(oneof.CallRejected).(interface {
+					UnmarshalVT([]byte) error
+				}); ok {
+					if err := unmarshal.UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
+						return err
+					}
+				} else {
+					if err := proto.Unmarshal(dAtA[iNdEx:postIndex], oneof.CallRejected); err != nil {
+						return err
+					}
+				}
+			} else {
+				v := &event_v1.CallRejected{}
+				if unmarshal, ok := interface{}(v).(interface {
+					UnmarshalVT([]byte) error
+				}); ok {
+					if err := unmarshal.UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
+						return err
+					}
+				} else {
+					if err := proto.Unmarshal(dAtA[iNdEx:postIndex], v); err != nil {
+						return err
+					}
+				}
+				m.Event = &WebsocketEvent_CallRejected{v}
+			}
+			iNdEx = postIndex
+		case 42:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CallCancelled", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflow
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLength
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLength
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if oneof, ok := m.Event.(*WebsocketEvent_CallCancelled); ok {
+				if unmarshal, ok := interface{}(oneof.CallCancelled).(interface {
+					UnmarshalVT([]byte) error
+				}); ok {
+					if err := unmarshal.UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
+						return err
+					}
+				} else {
+					if err := proto.Unmarshal(dAtA[iNdEx:postIndex], oneof.CallCancelled); err != nil {
+						return err
+					}
+				}
+			} else {
+				v := &event_v1.CallCancelled{}
+				if unmarshal, ok := interface{}(v).(interface {
+					UnmarshalVT([]byte) error
+				}); ok {
+					if err := unmarshal.UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
+						return err
+					}
+				} else {
+					if err := proto.Unmarshal(dAtA[iNdEx:postIndex], v); err != nil {
+						return err
+					}
+				}
+				m.Event = &WebsocketEvent_CallCancelled{v}
+			}
+			iNdEx = postIndex
+		case 50:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field UserUpdated", wireType)
 			}

@@ -75,18 +75,18 @@ import org.webrtc.SessionDescription
 import org.webrtc.SurfaceTextureHelper
 import org.webrtc.VideoCapturer
 import org.webrtc.VideoTrack
-import stream.video.sfu.AudioCodecs
-import stream.video.sfu.CallState
-import stream.video.sfu.CodecSettings
-import stream.video.sfu.IceCandidateRequest
-import stream.video.sfu.JoinRequest
-import stream.video.sfu.JoinResponse
-import stream.video.sfu.PeerType
-import stream.video.sfu.SendAnswerRequest
-import stream.video.sfu.SetPublisherRequest
-import stream.video.sfu.UpdateSubscriptionsRequest
-import stream.video.sfu.VideoCodecs
-import stream.video.sfu.VideoDimension
+import stream.video.sfu.models.AudioCodecs
+import stream.video.sfu.models.CallState
+import stream.video.sfu.models.CodecSettings
+import stream.video.sfu.models.PeerType
+import stream.video.sfu.models.VideoCodecs
+import stream.video.sfu.models.VideoDimension
+import stream.video.sfu.signal.IceCandidateRequest
+import stream.video.sfu.signal.JoinRequest
+import stream.video.sfu.signal.JoinResponse
+import stream.video.sfu.signal.SendAnswerRequest
+import stream.video.sfu.signal.SetPublisherRequest
+import stream.video.sfu.signal.UpdateSubscriptionsRequest
 import java.util.concurrent.TimeUnit
 
 internal class WebRTCClientImpl(

@@ -29,7 +29,7 @@ import io.getstream.video.android.events.SfuParticipantLeftEvent
 import io.getstream.video.android.events.SubscriberCandidateEvent
 import io.getstream.video.android.events.SubscriberOfferEvent
 import io.getstream.video.android.events.VideoQualityChangedEvent
-import stream.video.sfu.SfuEvent
+import stream.video.sfu.event.SfuEvent
 
 public object RTCEventMapper {
 

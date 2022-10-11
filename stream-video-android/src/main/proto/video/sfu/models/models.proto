@@ -1,9 +1,10 @@
 syntax = "proto3";
 
-package stream.video.sfu;
+package stream.video.sfu.models;
 import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
 
-option go_package = "github.com/GetStream/video-sfu/protobuf/sfu_models";
+option go_package = "sfu_models";
 
 enum PeerType {
   PUBLISHER = 0;
@@ -29,24 +30,15 @@ message CallState {
 message Call {
   // the call type
   string type = 1;
-
   // the call id
   string id = 2;
-
   // the id of the user that created this call
   string created_by_user_id = 3;
-
   // the id of the current host for this call
   string host_user_id = 4;
-
   google.protobuf.Struct custom = 5;
-
-  // call creation date as RFC3339 string
-  string created_at = 6;
-
-  // call last update date as RFC3339 string
-  string updated_at = 7 ;
-
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp updated_at = 7;
 }
 
 // those who are online in the call
@@ -57,11 +49,8 @@ message Participant {
   google.protobuf.Struct custom = 4 ;
   bool video = 5;
   bool audio = 6;
-  // call creation date as RFC3339 string
-  string created_at = 7;
-
-  // call last update date as RFC3339 string
-  string updated_at = 8;
+  google.protobuf.Timestamp created_at = 7;
+  google.protobuf.Timestamp updated_at = 8;
 }
 
 message User {
@@ -71,9 +60,7 @@ message User {
   google.protobuf.Struct custom = 4;
   string name = 5;
   string image_url = 6;
-  // user creation date as RFC3339 string
   string created_at = 7;
-  // user last update date as RFC3339 string
   string updated_at = 8;
 }
 
@@ -91,7 +78,6 @@ message VideoLayer {
   // for tracks with a single layer, this should be HIGH
   string rid = 1;
   VideoDimension video_dimension = 2;
-
   // target bitrate, server will measure actual
   uint32 bitrate = 4;
 }

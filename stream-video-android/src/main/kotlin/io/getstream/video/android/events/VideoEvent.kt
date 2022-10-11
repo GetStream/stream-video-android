@@ -17,7 +17,7 @@
 package io.getstream.video.android.events
 
 import stream.video.coordinator.participant_v1.Participant
-import stream.video.sfu.Call
+import stream.video.sfu.models.Call
 
 /**
  * Represents the events coming in from the socket.

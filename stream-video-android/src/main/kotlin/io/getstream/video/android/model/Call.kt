@@ -43,7 +43,7 @@ import org.webrtc.EglBase
 import org.webrtc.MediaStream
 import org.webrtc.RendererCommon
 import org.webrtc.SurfaceViewRenderer
-import stream.video.sfu.CallState
+import stream.video.sfu.models.CallState
 
 public class Call(
     private val context: Context,

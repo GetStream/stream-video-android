@@ -1,11 +1,11 @@
 syntax = "proto3";
 
-package stream.video.sfu.remote_control_v1;
+package stream.video.sfu.remote_control;
 
 import "google/protobuf/timestamp.proto";
-import "video/sfu/models_v1/models.proto";
+import "video/sfu/models/models.proto";
 
-option go_package = "remote_control_v1_rpc";
+option go_package = "remote_control_rpc";
 
 // RemoteControlRPC is an internal RPC to control SFU from the Coordinator
 // TODO: better naming ideas?
@@ -68,7 +68,7 @@ message MuteParticipantsRequest {
   // App PK
   int64 app_pk = 1;
   // List of part
-  repeated models_v1.Participant participants = 2;
+  repeated models.Participant participants = 2;
 }
 
 // A message that tells which participant to mute
@@ -101,9 +101,9 @@ message GetCallRequest {
 // A response message for GetCall endpoint
 message GetCallResponse {
   // Call model
-  models_v1.Call call = 1;
+  models.Call call = 1;
   // Call state
-  models_v1.CallState state = 2;
+  models.CallState state = 2;
 }
 
 // A request message for CreateCall endpoint
@@ -121,7 +121,7 @@ message CreateCallRequest {
 // A response message for CreateCall endpoint
 message CreateCallResponse {
   // A model of created call
-  models_v1.Call call = 1;
+  models.Call call = 1;
 }
 
 // A request message for EndCall endpoint
@@ -137,6 +137,6 @@ message EndCallRequest {
 // A response message for EndCall endpoint
 message EndCallResponse {
   // A model of a call
-  models_v1.Call call = 1;
+  models.Call call = 1;
   // TODO: return some call stats?
 }

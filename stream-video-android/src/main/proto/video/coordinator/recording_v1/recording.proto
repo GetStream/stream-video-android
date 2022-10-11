@@ -4,6 +4,14 @@ package stream.video.coordinator.recording_v1;
 
 option go_package = "recording_v1";
 
+message Recording {
+  string call_type = 1;
+  string call_id = 2;
+  string s3_file_url = 3;
+  string start_time = 4;
+  string stop_time = 5;
+}
+
 message File {
   string type = 1;
   bool composite = 2;

@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.model
 
-import stream.video.sfu.Participant
+import stream.video.sfu.models.Participant
 
 public data class CallParticipant(
     public val id: String,

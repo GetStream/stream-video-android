@@ -24,7 +24,6 @@ message BroadcastEnded {
   string call_cid = 1;
 }
 
-
 message CallMembersUpdated {
   string call_cid = 1;
 }
@@ -35,13 +34,10 @@ message CallMembersDeleted {
 
 message CallCreated {
   string call_cid = 1;
+  bool ringing = 2;
 }
 
 message CallUpdated {
-  string call_cid = 1;
-}
-
-message CallStarted {
   string call_cid = 1;
 }
 
@@ -51,6 +47,15 @@ message CallEnded {
 
 message CallDeleted {
   string call_cid = 1;
+}
+
+message CallAccepted {
+}
+
+message CallRejected {
+}
+
+message CallCancelled {
 }
 
 // Events

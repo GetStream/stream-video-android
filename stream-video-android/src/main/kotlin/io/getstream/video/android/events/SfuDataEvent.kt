@@ -16,11 +16,11 @@
 
 package io.getstream.video.android.events
 
-import stream.video.sfu.Call
-import stream.video.sfu.ChangePublishQuality
-import stream.video.sfu.ConnectionQuality
-import stream.video.sfu.Participant
-import stream.video.sfu.VideoQuality
+import stream.video.sfu.event.ChangePublishQuality
+import stream.video.sfu.models.Call
+import stream.video.sfu.models.ConnectionQuality
+import stream.video.sfu.models.Participant
+import stream.video.sfu.models.VideoQuality
 
 public sealed class SfuDataEvent
 

@@ -17,16 +17,16 @@
 package io.getstream.video.android.webrtc.signal
 
 import retrofit2.http.Body
-import stream.video.sfu.IceCandidateRequest
-import stream.video.sfu.IceCandidateResponse
-import stream.video.sfu.JoinRequest
-import stream.video.sfu.JoinResponse
-import stream.video.sfu.SendAnswerRequest
-import stream.video.sfu.SendAnswerResponse
-import stream.video.sfu.SetPublisherRequest
-import stream.video.sfu.SetPublisherResponse
-import stream.video.sfu.UpdateSubscriptionsRequest
-import stream.video.sfu.UpdateSubscriptionsResponse
+import stream.video.sfu.signal.IceCandidateRequest
+import stream.video.sfu.signal.IceCandidateResponse
+import stream.video.sfu.signal.JoinRequest
+import stream.video.sfu.signal.JoinResponse
+import stream.video.sfu.signal.SendAnswerRequest
+import stream.video.sfu.signal.SendAnswerResponse
+import stream.video.sfu.signal.SetPublisherRequest
+import stream.video.sfu.signal.SetPublisherResponse
+import stream.video.sfu.signal.UpdateSubscriptionsRequest
+import stream.video.sfu.signal.UpdateSubscriptionsResponse
 
 public interface SignalService {
 

@@ -1,10 +1,10 @@
 syntax = "proto3";
 
-package stream.video.sfu;
+package stream.video.sfu.signal;
 
-option go_package = "github.com/GetStream/video-sfu/protobuf/sfu_signal_rpc";
+option go_package = "sfu_signal_rpc";
 
-import "sfu_models/models.proto";
+import "video/sfu/models/models.proto";
 
 service SignalServer {
   // Join sets up the peer connection that is used to subscribe to A/V and the data channel for signaling
@@ -28,7 +28,7 @@ service SignalServer {
 }
 
 message UpdateVideoQualityRequest{
-  repeated StreamQuality stream_qualities = 1;
+  repeated stream.video.sfu.models.StreamQuality stream_qualities = 1;
   string session_id = 2;
 }
 
@@ -58,12 +58,12 @@ message VideoMuteChanged {
 
 message UpdateSubscriptionsRequest {
   // maps stream user_ids to its size
-  map<string, VideoDimension> subscriptions = 1;
+  map<string, stream.video.sfu.models.VideoDimension> subscriptions = 1;
   string session_id = 2;
 }
 
 message SendAnswerRequest {
-  PeerType peer_type = 1;
+  stream.video.sfu.models.PeerType peer_type = 1;
   string sdp = 2;
   string session_id = 4;
 }
@@ -103,14 +103,14 @@ message SetPublisherResponse {
 message JoinRequest {
   string subscriber_sdp_offer = 1;
   string session_id = 3;
-  CodecSettings codec_settings = 4;
+  stream.video.sfu.models.CodecSettings codec_settings = 4;
   // TODO: we should know if this is going to be
   // - publishing and subscribing, or just subscribing for future routing
 }
 
 message JoinResponse {
   string sdp = 1;
-  CallState call_state = 2;
+  stream.video.sfu.models.CallState call_state = 2;
   // TODO: include full list of participants with track and audio info
 }
 

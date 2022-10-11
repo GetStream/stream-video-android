@@ -36,7 +36,7 @@ import org.webrtc.SoftwareVideoEncoderFactory
 import org.webrtc.VideoSource
 import org.webrtc.VideoTrack
 import org.webrtc.audio.JavaAudioDeviceModule
-import stream.video.sfu.Codec
+import stream.video.sfu.models.Codec
 import java.util.*
 
 public class StreamPeerConnectionFactory(private val context: Context) {

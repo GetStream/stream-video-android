@@ -19,38 +19,38 @@ package io.getstream.video.android.webrtc.signal
 import retrofit2.http.Body
 import retrofit2.http.Headers
 import retrofit2.http.POST
-import stream.video.sfu.IceCandidateRequest
-import stream.video.sfu.IceCandidateResponse
-import stream.video.sfu.JoinRequest
-import stream.video.sfu.JoinResponse
-import stream.video.sfu.SendAnswerRequest
-import stream.video.sfu.SendAnswerResponse
-import stream.video.sfu.SetPublisherRequest
-import stream.video.sfu.SetPublisherResponse
-import stream.video.sfu.UpdateSubscriptionsRequest
-import stream.video.sfu.UpdateSubscriptionsResponse
+import stream.video.sfu.signal.IceCandidateRequest
+import stream.video.sfu.signal.IceCandidateResponse
+import stream.video.sfu.signal.JoinRequest
+import stream.video.sfu.signal.JoinResponse
+import stream.video.sfu.signal.SendAnswerRequest
+import stream.video.sfu.signal.SendAnswerResponse
+import stream.video.sfu.signal.SetPublisherRequest
+import stream.video.sfu.signal.SetPublisherResponse
+import stream.video.sfu.signal.UpdateSubscriptionsRequest
+import stream.video.sfu.signal.UpdateSubscriptionsResponse
 
 public interface RemoteSignalService : SignalService {
 
     @Headers("Content-Type: application/protobuf")
-    @POST("/twirp/stream.video.sfu.SignalServer/SendAnswer")
+    @POST("/twirp/stream.video.sfu.signal.SignalServer/SendAnswer")
     public override suspend fun sendAnswer(
         @Body answerRequest: SendAnswerRequest,
     ): SendAnswerResponse
 
     @Headers("Content-Type: application/protobuf")
-    @POST("/twirp/stream.video.sfu.SignalServer/SendIceCandidate")
+    @POST("/twirp/stream.video.sfu.signal.SignalServer/SendIceCandidate")
     public override suspend fun sendIceCandidate(@Body request: IceCandidateRequest): IceCandidateResponse
 
     @Headers("Content-Type: application/protobuf")
-    @POST("/twirp/stream.video.sfu.SignalServer/Join")
+    @POST("/twirp/stream.video.sfu.signal.SignalServer/Join")
     public override suspend fun join(@Body joinRequest: JoinRequest): JoinResponse
 
     @Headers("Content-Type: application/protobuf")
-    @POST("/twirp/stream.video.sfu.SignalServer/SetPublisher")
+    @POST("/twirp/stream.video.sfu.signal.SignalServer/SetPublisher")
     public override suspend fun setPublisher(@Body request: SetPublisherRequest): SetPublisherResponse
 
     @Headers("Content-Type: application/protobuf")
-    @POST("/twirp/stream.video.sfu.SignalServer/UpdateSubscriptions")
+    @POST("/twirp/stream.video.sfu.signal.SignalServer/UpdateSubscriptions")
     public override suspend fun updateSubscriptions(@Body request: UpdateSubscriptionsRequest): UpdateSubscriptionsResponse
 }
