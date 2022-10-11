@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.webrtc.datachannel
 
+import io.getstream.logging.StreamLog
 import io.getstream.video.android.events.SfuDataEvent
 import okio.ByteString
 import org.webrtc.DataChannel
@@ -26,6 +27,8 @@ public class StreamDataChannel(
     private val onMessage: (SfuDataEvent) -> Unit,
     private val onStateChange: (DataChannel.State) -> Unit
 ) : DataChannel.Observer {
+
+    private val logger = StreamLog.getLogger("Call:SFU-Events")
 
     init {
         dataChannel.registerObserver(this)
@@ -40,8 +43,12 @@ public class StreamDataChannel(
         bytes.get(byteArray)
 
         try {
-            this.onMessage(RTCEventMapper.mapEvent(SfuEvent.ADAPTER.decode(byteArray)))
+            val rawEvent = SfuEvent.ADAPTER.decode(byteArray)
+            logger.v { "[onMessage] rawEvent: $rawEvent" }
+            val message = RTCEventMapper.mapEvent(rawEvent)
+            this.onMessage(message)
         } catch (error: Throwable) {
+            logger.e { "[onMessage] failed: $error" }
             error.printStackTrace()
         }
     }

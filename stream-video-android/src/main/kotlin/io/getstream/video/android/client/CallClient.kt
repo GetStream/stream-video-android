@@ -18,6 +18,7 @@ package io.getstream.video.android.client
 
 import android.content.Context
 import androidx.lifecycle.Lifecycle
+import io.getstream.logging.StreamLog
 import io.getstream.video.android.client.coordinator.CallCoordinatorClient
 import io.getstream.video.android.client.user.UserState
 import io.getstream.video.android.errors.VideoError
@@ -66,6 +67,8 @@ public class CallClient(
     private val socket: VideoSocket
 ) {
 
+    private val logger = StreamLog.getLogger("Call:Client")
+
     /**
      * Start region - API calls.
      */
@@ -81,6 +84,7 @@ public class CallClient(
         id: String,
         participantIds: List<String>
     ): Result<CreateCallResponse> {
+        logger.d { "[createCall] type: $type, id: $id, participantIds: $participantIds" }
         return callCoordinatorClient.getOrCreateCall(
             CreateCallRequest(
                 type = type,
@@ -91,7 +95,7 @@ public class CallClient(
                     }
                 )
             )
-        )
+        ).also { logger.v { "[createCall] result: $it" } }
     }
 
     /**
@@ -102,10 +106,11 @@ public class CallClient(
         id: String,
         participantIds: List<String> = emptyList()
     ): Result<JoinedCall> {
+        logger.d { "[createAndJoinCall] type: $type, id: $id, participantIds: $participantIds" }
         return when (val createCallResult = createCall(type, id, participantIds)) {
             is Success -> this.joinCall(createCallResult.data.call?.call?.toCall()!!)
             is Failure -> return Failure(createCallResult.error)
-        }
+        }.also { logger.v { "[createAndJoinCall] result: $it" } }
     }
 
     /**
@@ -116,6 +121,7 @@ public class CallClient(
      * @return [Result] wrapper around [JoinedCall] once the correct server is chosen.
      */
     public suspend fun joinCall(call: CallMetadata): Result<JoinedCall> {
+        logger.d { "[joinCall] call: $call" }
         val callResult = callCoordinatorClient.joinCall(
             JoinCallRequest(
                 id = call.id,
@@ -123,6 +129,7 @@ public class CallClient(
                 datacenter_id = ""
             )
         )
+        logger.v { "[joinCall] callResult: $callResult" }
 
         if (callResult is Success) {
             val data = callResult.data
@@ -161,9 +168,11 @@ public class CallClient(
                 }
             } catch (error: Throwable) {
                 Failure(VideoError(error.message, error))
-            }
+            }.also { logger.v { "[joinCall] result: $it" } }
         } else {
-            return Failure((callResult as Failure).error)
+            return Failure((callResult as Failure).error).also {
+                logger.e { "[joinCall] failed: $it" }
+            }
         }
     }
 

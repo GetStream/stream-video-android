@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.socket
 
+import io.getstream.logging.StreamLog
 import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.errors.VideoErrorCode
 import io.getstream.video.android.errors.VideoNetworkError
@@ -31,6 +32,8 @@ internal class EventsParser(
     private val videoSocket: VideoSocket,
 ) : okhttp3.WebSocketListener() {
 
+    private val logger = StreamLog.getLogger("Call:WS-Events")
+
     private var connectionEventReceived = false
     private var closedByClient = true
 
@@ -45,7 +48,9 @@ internal class EventsParser(
         super.onMessage(webSocket, bytes)
         try {
             val rawEvent = WebsocketEvent.ADAPTER.decode(bytes)
+            logger.v { "[onMessage] rawEvent: $rawEvent" }
             val processedEvent = EventMapper.mapEvent(rawEvent)
+            logger.v { "[onMessage] processedEvent: $processedEvent" }
 
             // TODO - We could get the Connected event here instead
             if (!connectionEventReceived && processedEvent is HealthCheckEvent) {
@@ -55,7 +60,7 @@ internal class EventsParser(
                 videoSocket.onEvent(processedEvent)
             }
         } catch (error: Throwable) {
-            error.printStackTrace()
+            logger.e(error) { "[onMessage] failed: $error" }
         }
     }
 

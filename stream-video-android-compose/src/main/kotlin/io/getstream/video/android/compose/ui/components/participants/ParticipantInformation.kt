@@ -86,7 +86,9 @@ public fun ParticipantInformation(
 private fun buildSmallCallText(participants: List<CallParticipant>): String {
     val names = participants.map { it.name }
 
-    return if (names.size == 1) {
+    return if (names.isEmpty()) {
+        "none"
+    } else if (names.size == 1) {
         names.first()
     } else {
         "${names[0]} and ${names[1]}"
@@ -94,7 +96,9 @@ private fun buildSmallCallText(participants: List<CallParticipant>): String {
 }
 
 private fun buildLargeCallText(participants: List<CallParticipant>): String {
+    if (participants.isEmpty()) return "No participants"
     val initial = buildSmallCallText(participants)
+    if (participants.size == 1) return initial
 
     return "$initial and +${participants.size - 2} more"
 }

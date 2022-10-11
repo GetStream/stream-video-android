@@ -25,6 +25,7 @@ object Versions {
     internal const val OKHTTP = "4.10.0"
 
     internal const val WEBRTC = "104.5112.01"
+    internal const val STREAM = "5.8.0"
 }
 
 object Dependencies {
@@ -72,4 +73,7 @@ object Dependencies {
         "com.squareup.okhttp3:logging-interceptor:${Versions.OKHTTP}"
 
     const val webRTC = "com.github.webrtc-sdk:android:${Versions.WEBRTC}"
+
+    const val streamLogger = "io.getstream:stream-logger:${Versions.STREAM}"
+    const val streamLoggerAndroid = "io.getstream:stream-logger-android:${Versions.STREAM}"
 }
