@@ -29,8 +29,10 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import org.webrtc.CandidatePairChangeEvent
 import org.webrtc.DataChannel
 import org.webrtc.IceCandidate
+import org.webrtc.IceCandidateErrorEvent
 import org.webrtc.MediaConstraints
 import org.webrtc.MediaStream
 import org.webrtc.MediaStreamTrack
@@ -208,7 +210,7 @@ public class StreamPeerConnection(
      */
 
     override fun onIceCandidate(candidate: IceCandidate?) {
-        logger.d { "[onIceCandidate] #sfu; #$typeTag; candidate: $candidate" }
+        logger.i { "[onIceCandidate] #sfu; #$typeTag; candidate: $candidate" }
         if (candidate == null) return
 
         onIceCandidate?.invoke(candidate, type)
@@ -227,6 +229,8 @@ public class StreamPeerConnection(
             logger.v { "[onAddTrack] #sfu; #$typeTag; mediaStream: $mediaStream" }
             mediaStream.audioTracks?.forEach { remoteAudioTrack ->
                 logger.v { "[onAddTrack] #sfu; #$typeTag; remoteAudioTrack: ${remoteAudioTrack.stringify()}" }
+                remoteAudioTrack.setVolume(15.6)
+                remoteAudioTrack.setEnabled(true)
             }
             onStreamAdded?.invoke(mediaStream)
         }
@@ -252,7 +256,7 @@ public class StreamPeerConnection(
         logger.d { "[onSignalingChange] #sfu; #$typeTag; newState: $newState" }
     }
     override fun onIceConnectionChange(newState: PeerConnection.IceConnectionState?) {
-        logger.d { "[onIceConnectionChange] #sfu; #$typeTag; newState: $newState" }
+        logger.i { "[onIceConnectionChange] #sfu; #$typeTag; newState: $newState" }
         when (newState) {
             PeerConnection.IceConnectionState.CLOSED,
             PeerConnection.IceConnectionState.FAILED,
@@ -276,12 +280,35 @@ public class StreamPeerConnection(
     }
 
     override fun onIceConnectionReceivingChange(receiving: Boolean) {
-        logger.d { "[onIceConnectionReceivingChange] #sfu; #$typeTag; receiving: $receiving" }
+        logger.i { "[onIceConnectionReceivingChange] #sfu; #$typeTag; receiving: $receiving" }
     }
-    override fun onIceGatheringChange(p0: PeerConnection.IceGatheringState?): Unit = Unit
+    override fun onIceGatheringChange(newState: PeerConnection.IceGatheringState?) {
+        logger.i { "[onIceGatheringChange] #sfu; #$typeTag; newState: $newState" }
+    }
     override fun onIceCandidatesRemoved(iceCandidates: Array<out IceCandidate>?) {
-        logger.d { "[onIceCandidatesRemoved] #sfu; #$typeTag; iceCandidates: $iceCandidates" }
+        logger.i { "[onIceCandidatesRemoved] #sfu; #$typeTag; iceCandidates: $iceCandidates" }
     }
+
+    override fun onIceCandidateError(event: IceCandidateErrorEvent?) {
+        logger.e { "[onIceCandidateError] #sfu; #$typeTag; event: ${event?.stringify()}" }
+    }
+
+    override fun onStandardizedIceConnectionChange(newState: PeerConnection.IceConnectionState?) {
+        super.onStandardizedIceConnectionChange(newState)
+    }
+
+    override fun onConnectionChange(newState: PeerConnection.PeerConnectionState?) {
+        logger.i { "[onConnectionChange] #sfu; #$typeTag; newState: $newState" }
+    }
+
+    override fun onSelectedCandidatePairChanged(event: CandidatePairChangeEvent?) {
+        logger.i { "[onSelectedCandidatePairChanged] #sfu; #$typeTag; event: $event" }
+    }
+
+    override fun onTrack(transceiver: RtpTransceiver?) {
+        logger.i { "[onTrack] #sfu; #$typeTag; transceiver: $transceiver" }
+    }
+
     override fun onDataChannel(channel: DataChannel?): Unit = Unit
 
     override fun toString(): String = "StreamPeerConnection(type='$typeTag', constraints=$mediaConstraints)"

@@ -16,11 +16,22 @@
 
 package io.getstream.video.android.webrtc.utils
 
+import org.webrtc.IceCandidateErrorEvent
 import org.webrtc.MediaStreamTrack
 import org.webrtc.SessionDescription
+import org.webrtc.audio.JavaAudioDeviceModule
 
 internal fun SessionDescription.stringify(): String = "SessionDescription(type=$type, description=$description)"
 
 internal fun MediaStreamTrack.stringify(): String {
     return "MediaStreamTrack(id=${id()}, kind=${kind()}, enabled: ${enabled()}, state=${state()})"
+}
+
+internal fun IceCandidateErrorEvent.stringify(): String {
+    return "IceCandidateErrorEvent(errorCode=$errorCode, $errorText, address=$address, port=$port, url=$url)"
+}
+
+internal fun JavaAudioDeviceModule.AudioSamples.stringify(): String {
+    return "AudioSamples(audioFormat=$audioFormat, channelCount=$channelCount" +
+        ", sampleRate=$sampleRate, data.size=${data.size})"
 }

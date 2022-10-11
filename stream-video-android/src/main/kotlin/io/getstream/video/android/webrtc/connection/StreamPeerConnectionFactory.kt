@@ -20,6 +20,7 @@ import android.content.Context
 import android.media.MediaCodecList
 import android.os.Build
 import io.getstream.logging.StreamLog
+import io.getstream.video.android.webrtc.record.RecordedAudioToFileController
 import kotlinx.coroutines.CoroutineScope
 import org.webrtc.AudioSource
 import org.webrtc.AudioTrack
@@ -45,6 +46,8 @@ public class StreamPeerConnectionFactory(private val context: Context) {
     private val webRtcLogger = StreamLog.getLogger("Call:WebRTC")
     private val audioLogger = StreamLog.getLogger("Call:AudioTrackCallback")
 
+    private val samplesReadyCallback = RecordedAudioToFileController()
+
     public val eglBase: EglBase by lazy {
         EglBase.create()
     }
@@ -63,9 +66,14 @@ public class StreamPeerConnectionFactory(private val context: Context) {
     private val factory by lazy {
         PeerConnectionFactory.initialize(
             PeerConnectionFactory.InitializationOptions.builder(context)
-                .setInjectableLogger({ message, _, label ->
-                    if (message.contains("audio", true)) {
-                        webRtcLogger.i { "[onLogMessage] label: $label, message: $message" }
+                .setInjectableLogger({ message, severity, label ->
+                    when (severity) {
+                        Logging.Severity.LS_VERBOSE -> { webRtcLogger.v { "[onLogMessage] label: $label, message: $message" } }
+                        Logging.Severity.LS_INFO -> { webRtcLogger.i { "[onLogMessage] label: $label, message: $message" } }
+                        Logging.Severity.LS_WARNING -> { webRtcLogger.w { "[onLogMessage] label: $label, message: $message" } }
+                        Logging.Severity.LS_ERROR -> { webRtcLogger.e { "[onLogMessage] label: $label, message: $message" } }
+                        Logging.Severity.LS_NONE -> { webRtcLogger.d { "[onLogMessage] label: $label, message: $message" } }
+                        else -> {}
                     }
                 }, Logging.Severity.LS_VERBOSE)
                 .createInitializationOptions()
@@ -133,7 +141,11 @@ public class StreamPeerConnectionFactory(private val context: Context) {
                                 audioLogger.d { "[onWebRtcAudioTrackStop] no args" }
                             }
                         })
-                    .createAudioDeviceModule()
+                    .setSamplesReadyCallback(samplesReadyCallback)
+                    .createAudioDeviceModule().also {
+                        it.setMicrophoneMute(false)
+                        it.setSpeakerMute(false)
+                    }
             )
             .createPeerConnectionFactory()
     }
@@ -212,6 +224,8 @@ public class StreamPeerConnectionFactory(private val context: Context) {
                     false
                 }
             )
+        }.also {
+            audioLogger.i { "[getAudioEncoderCoders] codecs: $it" }
         }
     }
 
@@ -229,6 +243,8 @@ public class StreamPeerConnectionFactory(private val context: Context) {
                     false
                 }
             )
+        }.also {
+            audioLogger.i { "[getAudioDecoderCoders] codecs: $it" }
         }
     }
 
@@ -258,6 +274,7 @@ public class StreamPeerConnectionFactory(private val context: Context) {
             configuration,
             peerConnection
         )
+        samplesReadyCallback.start()
         return peerConnection.apply { initialize(connection) }
     }
 
@@ -297,5 +314,9 @@ public class StreamPeerConnectionFactory(private val context: Context) {
         streamId: String = UUID.randomUUID().toString()
     ): MediaStream {
         return factory.createLocalMediaStream(streamId)
+    }
+
+    internal fun reset() {
+        samplesReadyCallback.stop()
     }
 }

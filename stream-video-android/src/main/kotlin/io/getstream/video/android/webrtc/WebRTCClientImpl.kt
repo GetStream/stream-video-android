@@ -63,6 +63,9 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.forEach
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import okio.ByteString.Companion.encode
 import org.webrtc.AudioTrack
@@ -167,6 +170,7 @@ internal class WebRTCClientImpl(
 
     override fun clear() {
         logger.i { "[clear] #sfu; no args" }
+        peerConnectionFactory.reset()
         supervisorJob.cancelChildren()
 
         connectionState = ConnectionState.DISCONNECTED
@@ -347,6 +351,7 @@ internal class WebRTCClientImpl(
     }
 
     private fun sendIceCandidate(candidate: IceCandidate, type: PeerConnectionType) {
+        logger.d { "[sendIceCandidate] #sfu; type: $type, candidate: $candidate" }
         val request = IceCandidateRequest(
             publisher = type == PeerConnectionType.PUBLISHER,
             candidate = candidate.sdp ?: "",
@@ -356,7 +361,9 @@ internal class WebRTCClientImpl(
         )
 
         coroutineScope.launch {
-            signalClient.sendIceCandidate(request)
+            logger.v { "[sendIceCandidate] #sfu; type: $type, candidate is about to be sent" }
+            val result = signalClient.sendIceCandidate(request)
+            logger.v { "[sendIceCandidate] #sfu; type: $type, result: $result" }
         }
     }
 
@@ -485,6 +492,7 @@ internal class WebRTCClientImpl(
 
         val audioTrack = makeAudioTrack()
         audioTrack.setEnabled(true)
+        audioTrack.setVolume(17.5)
         localAudioTrack = audioTrack
         logger.v { "[setupUserMedia] #sfu; audioTrack: ${audioTrack.stringify()}" }
 

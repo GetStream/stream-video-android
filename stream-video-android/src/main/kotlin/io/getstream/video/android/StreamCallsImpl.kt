@@ -66,6 +66,11 @@ public class StreamCallsImpl(
     private val scope = CoroutineScope(DispatcherProvider.IO)
 
     /**
+     * Domain - WebRTC.
+     */
+    private var webRTCClient: WebRTCClient? = null
+
+    /**
      * Observes the app lifecycle and attempts to reconnect/release the socket connection.
      */
     private val lifecycleObserver = StreamLifecycleObserver(
@@ -139,11 +144,6 @@ public class StreamCallsImpl(
 
     override fun removeSocketListener(socketListener: SocketListener): Unit =
         socket.removeListener(socketListener)
-
-    /**
-     * Domain - WebRTC.
-     */
-    private var webRTCClient: WebRTCClient? = null
 
     override fun createCallClient(
         signalUrl: String,
