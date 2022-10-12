@@ -25,7 +25,7 @@ import stream.video.sfu.models.Call
 /**
  * Represents the events coming in from the socket.
  */
-public sealed class VideoEvent
+public sealed class VideoEvent : java.io.Serializable
 
 /**
  * Triggered when a user gets connected to the WS.

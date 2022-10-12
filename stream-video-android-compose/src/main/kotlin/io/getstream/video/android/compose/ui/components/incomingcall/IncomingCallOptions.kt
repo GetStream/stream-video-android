@@ -34,15 +34,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.extensions.toggleAlpha
+import io.getstream.video.android.events.model.CallInfo
 import io.getstream.video.android.model.CallType
 
 @Composable
 internal fun IncomingCallOptions(
     modifier: Modifier = Modifier,
-    callId: String,
-    callType: CallType,
-    onDeclineCall: (String) -> Unit,
-    onAcceptCall: (callId: String, isVideoEnabled: Boolean) -> Unit,
+    callInfo: CallInfo,
+    onDeclineCall: (CallInfo) -> Unit,
+    onAcceptCall: (CallInfo) -> Unit,
     onVideoToggleChanged: (Boolean) -> Unit
 ) {
     var isVideoEnabled by remember { mutableStateOf(true) }
@@ -59,7 +59,7 @@ internal fun IncomingCallOptions(
                     shape = VideoTheme.shapes.callButton
                 )
                 .size(VideoTheme.dimens.largeButtonSize),
-            onClick = { onDeclineCall(callId) },
+            onClick = { onDeclineCall(callInfo) },
             content = {
                 Icon(
                     painter = VideoTheme.icons.callEnd,
@@ -69,7 +69,7 @@ internal fun IncomingCallOptions(
             }
         )
 
-        if (callType == CallType.VIDEO) {
+        if (callInfo.type == CallType.VIDEO.type) {
             IconButton(
                 modifier = Modifier
                     .toggleAlpha(isVideoEnabled)
@@ -102,7 +102,7 @@ internal fun IncomingCallOptions(
                     shape = VideoTheme.shapes.callButton
                 )
                 .size(VideoTheme.dimens.largeButtonSize),
-            onClick = { onAcceptCall(callId, isVideoEnabled) },
+            onClick = { onAcceptCall(callInfo) },
             content = {
                 Icon(
                     painter = VideoTheme.icons.call,
@@ -119,10 +119,9 @@ internal fun IncomingCallOptions(
 private fun IncomingCallOptionsPreview() {
     VideoTheme {
         IncomingCallOptions(
-            callId = "",
-            callType = CallType.VIDEO,
+            callInfo = CallInfo("", "", "", null, null),
             onDeclineCall = {},
-            onAcceptCall = { _, _ -> },
+            onAcceptCall = {},
             onVideoToggleChanged = {}
         )
     }

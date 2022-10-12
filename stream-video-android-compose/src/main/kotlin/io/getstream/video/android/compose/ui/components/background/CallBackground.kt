@@ -28,12 +28,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import io.getstream.video.android.compose.R
-import io.getstream.video.android.model.CallParticipant
+import io.getstream.video.android.events.model.CallUser
 
 @Composable
 public fun CallBackground(
     modifier: Modifier = Modifier,
-    participants: List<CallParticipant>,
+    participants: List<CallUser>,
     content: @Composable BoxScope.() -> Unit
 ) {
     Box(
@@ -45,7 +45,7 @@ public fun CallBackground(
                 modifier = Modifier
                     .fillMaxSize()
                     .blur(20.dp),
-                model = firstUser.profileImageURL,
+                model = firstUser.imageUrl,
                 contentScale = ContentScale.Crop,
                 contentDescription = null
             )

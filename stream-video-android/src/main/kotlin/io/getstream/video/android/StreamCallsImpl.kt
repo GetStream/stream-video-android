@@ -46,6 +46,7 @@ import io.getstream.video.android.webrtc.builder.WebRTCClientBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import stream.video.coordinator.client_v1_rpc.UserEventType
 
 /**
  * @param lifecycle The lifecycle used to observe changes in the process. // TODO - docs
@@ -97,10 +98,11 @@ public class StreamCallsImpl(
     override suspend fun createCall(
         type: String,
         id: String,
-        participantIds: List<String>
+        participantIds: List<String>,
+        ringing: Boolean
     ): Result<CallMetadata> {
         logger.d { "[createCall] type: $type, id: $id, participantIds: $participantIds" }
-        return when (val result = callClient.createCall(type, id, participantIds)) {
+        return when (val result = callClient.getOrCreateCall(type, id, participantIds, ringing)) {
             is Success -> Success(result.data.call?.call?.toCall()!!)
             is Failure -> Failure(result.error)
         }
@@ -109,15 +111,43 @@ public class StreamCallsImpl(
     override suspend fun createAndJoinCall(
         type: String,
         id: String,
-        participantIds: List<String>
+        participantIds: List<String>,
+        ringing: Boolean
     ): Result<JoinedCall> {
         logger.d { "[createAndJoinCall] type: $type, id: $id, participantIds: $participantIds" }
-        return callClient.createAndJoinCall(type, id, participantIds)
+        return callClient.createAndJoinCall(type, id, participantIds, ringing)
+    }
+
+    override suspend fun joinCall(type: String, id: String): Result<JoinedCall> {
+        logger.d { "[joinCall] type: $type, id: $id" }
+
+        return when (val callResult = callClient.getOrCreateCall(type, id, emptyList(), false)) {
+            is Success -> callClient.joinCall(callResult.data.call?.call?.toCall()!!)
+            is Failure -> callResult
+        }
     }
 
     override suspend fun joinCall(call: CallMetadata): Result<JoinedCall> {
         logger.d { "[joinCall] call: $call" }
         return callClient.joinCall(call)
+    }
+
+    override suspend fun sendEvent(
+        callId: String,
+        callType: String,
+        userEventType: UserEventType
+    ): Result<Boolean> {
+        logger.d { "[sendEvent] event type: $userEventType" }
+        return callClient.sendUserEvent(
+            userEventType = userEventType,
+            callId = callId,
+            callType = callType,
+        )
+    }
+
+    override suspend fun sendEvent(userEventType: UserEventType): Result<Boolean> {
+        logger.d { "[sendEvent] event type: $userEventType" }
+        return callClient.sendUserEvent(userEventType)
     }
 
     override fun leaveCall() {

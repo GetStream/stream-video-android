@@ -54,10 +54,10 @@ import io.getstream.video.android.app.VideoApp
 import io.getstream.video.android.app.model.HomeScreenOption
 import io.getstream.video.android.app.ui.call.CallActivity
 import io.getstream.video.android.app.ui.components.UserList
+import io.getstream.video.android.app.ui.incoming.IncomingCallActivity
 import io.getstream.video.android.app.ui.login.LoginActivity
 import io.getstream.video.android.app.utils.getUsers
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.IncomingCallActivity
 import io.getstream.video.android.events.CallCreatedEvent
 import io.getstream.video.android.events.VideoEvent
 import io.getstream.video.android.model.IceServer
@@ -90,7 +90,12 @@ class HomeActivity : AppCompatActivity() {
     private val socketListener = object : SocketListener {
         override fun onEvent(event: VideoEvent) {
             if (event is CallCreatedEvent) {
-                startActivity(IncomingCallActivity.getLaunchIntent(this@HomeActivity))
+                startActivity(
+                    IncomingCallActivity.getLaunchIntent(
+                        this@HomeActivity,
+                        event
+                    )
+                )
             }
         }
     }
@@ -213,7 +218,8 @@ class HomeActivity : AppCompatActivity() {
             val createCallResult = controller.createAndJoinCall(
                 "default", // TODO - hardcoded for now
                 id = callId,
-                participantIds = participants.toList()
+                participantIds = participants.toList(),
+                ringing = participants.isNotEmpty()
             )
 
             createCallResult.onSuccessSuspend { response ->

@@ -57,11 +57,17 @@ class DeeplinkingActivity : AppCompatActivity() {
             val createCallResult = controller.createAndJoinCall(
                 "default", // TODO - hardcoded for now
                 id = callId,
-                participantIds = emptyList()
+                participantIds = emptyList(),
+                false
             )
 
             createCallResult.onSuccessSuspend { response ->
-                navigateToCall(response.call.cid, response.callUrl, response.userToken, response.iceServers)
+                navigateToCall(
+                    response.call.cid,
+                    response.callUrl,
+                    response.userToken,
+                    response.iceServers
+                )
             }
             createCallResult.onError {
                 Log.d("Couldn't select server", it.message ?: "")
