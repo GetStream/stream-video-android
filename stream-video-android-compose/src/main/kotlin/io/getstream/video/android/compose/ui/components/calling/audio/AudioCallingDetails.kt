@@ -28,6 +28,7 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.mock.mockParticipantList
 import io.getstream.video.android.compose.ui.components.participants.ParticipantAvatars
 import io.getstream.video.android.compose.ui.components.participants.ParticipantInformation
+import io.getstream.video.android.events.model.CallUser
 import io.getstream.video.android.model.CallParticipant
 import io.getstream.video.android.model.CallStatus
 
@@ -44,7 +45,9 @@ internal fun AudioCallingDetails(
 
         ParticipantInformation(
             callStatus = CallStatus.Calling("0:33"),
-            participants = participants
+            participants = participants.map {
+                CallUser(it.id, it.name, it.role, it.profileImageURL ?: "", null, null)
+            }
         )
     }
 }

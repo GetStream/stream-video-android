@@ -26,6 +26,7 @@ import io.getstream.video.android.model.User
 import io.getstream.video.android.socket.SocketListener
 import io.getstream.video.android.token.CredentialsProvider
 import io.getstream.video.android.utils.Result
+import stream.video.coordinator.client_v1_rpc.UserEventType
 
 public interface StreamCalls {
 
@@ -46,7 +47,8 @@ public interface StreamCalls {
     public suspend fun createCall(
         type: String,
         id: String,
-        participantIds: List<String> = emptyList()
+        participantIds: List<String> = emptyList(),
+        ringing: Boolean
     ): Result<CallMetadata>
 
     // TODO - get call?
@@ -64,8 +66,20 @@ public interface StreamCalls {
     public suspend fun createAndJoinCall(
         type: String,
         id: String,
-        participantIds: List<String>
+        participantIds: List<String>,
+        ringing: Boolean
     ): Result<JoinedCall>
+
+    /**
+     * Authenticates the user to join a given [CallMetadata].
+     *
+     * @param type The call type.
+     * @param id The call ID.
+     *
+     * @return [Result] which contains the [JoinedCall] with the auth information required to fully
+     * connect.
+     */
+    public suspend fun joinCall(type: String, id: String): Result<JoinedCall>
 
     /**
      * Authenticates the user to join a given [CallMetadata].
@@ -76,6 +90,26 @@ public interface StreamCalls {
      * connect.
      */
     public suspend fun joinCall(call: CallMetadata): Result<JoinedCall>
+
+    /**
+     * Sends a specific event related to an active [Call].
+     *
+     * @param userEventType The event type, such as accepting or declining a call.
+     * @return [Result] which contains if the event was successfully sent.
+     */
+    public suspend fun sendEvent(
+        callId: String,
+        callType: String,
+        userEventType: UserEventType
+    ): Result<Boolean>
+
+    /**
+     * Sends a specific event related to an active [Call].
+     *
+     * @param userEventType The event type, such as accepting or declining a call.
+     * @return [Result] which contains if the event was successfully sent.
+     */
+    public suspend fun sendEvent(userEventType: UserEventType): Result<Boolean>
 
     /**
      * Leaves the currently active call and clears up all connections to it.

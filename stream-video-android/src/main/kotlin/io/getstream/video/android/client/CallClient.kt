@@ -47,6 +47,8 @@ import stream.video.coordinator.client_v1_rpc.GetCallEdgeServerRequest
 import stream.video.coordinator.client_v1_rpc.GetCallEdgeServerResponse
 import stream.video.coordinator.client_v1_rpc.JoinCallRequest
 import stream.video.coordinator.client_v1_rpc.MemberInput
+import stream.video.coordinator.client_v1_rpc.SendEventRequest
+import stream.video.coordinator.client_v1_rpc.UserEventType
 import stream.video.coordinator.edge_v1.Latency
 import stream.video.coordinator.edge_v1.LatencyMeasurements
 import stream.video.coordinator.push_v1.Device
@@ -79,10 +81,11 @@ public class CallClient(
     /**
      * @see CallCoordinatorClient.createCall for details.
      */
-    public suspend fun createCall(
+    public suspend fun getOrCreateCall(
         type: String,
         id: String,
-        participantIds: List<String>
+        participantIds: List<String>,
+        ringing: Boolean
     ): Result<CreateCallResponse> {
         logger.d { "[createCall] type: $type, id: $id, participantIds: $participantIds" }
         return callCoordinatorClient.getOrCreateCall(
@@ -92,7 +95,8 @@ public class CallClient(
                 input = CreateCallInput(
                     members = participantIds.associateWith {
                         MemberInput(role = "admin")
-                    }
+                    },
+                    ring = ringing
                 )
             )
         ).also { logger.v { "[createCall] result: $it" } }
@@ -104,10 +108,11 @@ public class CallClient(
     public suspend fun createAndJoinCall(
         type: String,
         id: String,
-        participantIds: List<String> = emptyList()
+        participantIds: List<String> = emptyList(),
+        ringing: Boolean = true
     ): Result<JoinedCall> {
         logger.d { "[createAndJoinCall] type: $type, id: $id, participantIds: $participantIds" }
-        return when (val createCallResult = createCall(type, id, participantIds)) {
+        return when (val createCallResult = getOrCreateCall(type, id, participantIds, ringing)) {
             is Success -> this.joinCall(createCallResult.data.call?.call?.toCall()!!)
             is Failure -> return Failure(createCallResult.error)
         }.also { logger.v { "[createAndJoinCall] result: $it" } }
@@ -196,21 +201,37 @@ public class CallClient(
     }
 
     /**
-     * @see CallCoordinatorClient.sendUserEvent for details. TODO - fix this
+     * @see CallCoordinatorClient.sendUserEvent for details.
      */
-//    public suspend fun sendUserEvent(userEventType: UserEventType): Result<Boolean> {
-//        val call = socket.getCallState()
-//            ?: return Failure(error = VideoError(message = "No call is active!"))
-//
-//        return callCoordinatorClient.sendUserEvent(
-//            SendEventRequest(
-//                user_id = userState.user.value.id,
-//                call_id = call.id,
-//                call_type = call.type,
-//                event_type = userEventType
-//            )
-//        )
-//    }
+    public suspend fun sendUserEvent(
+        userEventType: UserEventType,
+        callId: String,
+        callType: String
+    ): Result<Boolean> {
+        return callCoordinatorClient.sendUserEvent(
+            SendEventRequest(
+                call_id = callId,
+                call_type = callType,
+                event_type = userEventType
+            )
+        )
+    }
+
+    /**
+     * @see CallCoordinatorClient.sendUserEvent for details.
+     */
+    public suspend fun sendUserEvent(userEventType: UserEventType): Result<Boolean> {
+        val call = socket.getCallState()
+            ?: return Failure(error = VideoError(message = "No call is active!"))
+
+        return callCoordinatorClient.sendUserEvent(
+            SendEventRequest(
+                call_id = call.id,
+                call_type = call.type,
+                event_type = userEventType
+            )
+        )
+    }
 
     /**
      * End region - API calls.

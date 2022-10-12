@@ -241,16 +241,6 @@ public final class io/getstream/video/android/compose/ui/EmptyActivity : android
 	public fun <init> ()V
 }
 
-public final class io/getstream/video/android/compose/ui/IncomingCallActivity : androidx/appcompat/app/AppCompatActivity {
-	public static final field $stable I
-	public static final field Companion Lio/getstream/video/android/compose/ui/IncomingCallActivity$Companion;
-	public fun <init> ()V
-}
-
-public final class io/getstream/video/android/compose/ui/IncomingCallActivity$Companion {
-	public final fun getLaunchIntent (Landroid/content/Context;)Landroid/content/Intent;
-}
-
 public final class io/getstream/video/android/compose/ui/components/CallOptionsKt {
 	public static final fun CallOptions (Lio/getstream/video/android/model/Call;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
 }
@@ -368,7 +358,7 @@ public final class io/getstream/video/android/compose/ui/components/incomingcall
 }
 
 public final class io/getstream/video/android/compose/ui/components/incomingcall/IncomingCallKt {
-	public static final fun IncomingCall (Ljava/lang/String;Lio/getstream/video/android/model/CallType;Ljava/util/List;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)V
+	public static final fun IncomingCall (Lio/getstream/video/android/events/model/CallInfo;Ljava/util/List;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/mock/MockUtilsKt {

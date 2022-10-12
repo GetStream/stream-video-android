@@ -643,16 +643,19 @@ public final class io/getstream/video/android/BuildConfig {
 public abstract interface class io/getstream/video/android/StreamCalls {
 	public abstract fun addSocketListener (Lio/getstream/video/android/socket/SocketListener;)V
 	public abstract fun connectToCall (Ljava/lang/String;ZLio/getstream/video/android/model/CallSettings;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun createAndJoinCall (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun createCall (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun createAndJoinCall (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun createCall (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun createCallClient (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lio/getstream/video/android/token/CredentialsProvider;)V
 	public abstract fun flipCamera ()V
 	public abstract fun getAudioDevices ()Ljava/util/List;
 	public abstract fun getUser ()Lio/getstream/video/android/model/User;
 	public abstract fun joinCall (Lio/getstream/video/android/model/CallMetadata;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun joinCall (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun leaveCall ()V
 	public abstract fun removeSocketListener (Lio/getstream/video/android/socket/SocketListener;)V
 	public abstract fun selectAudioDevice (Lio/getstream/video/android/audio/AudioDevice;)V
+	public abstract fun sendEvent (Ljava/lang/String;Ljava/lang/String;Lstream/video/coordinator/client_v1_rpc/UserEventType;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun sendEvent (Lstream/video/coordinator/client_v1_rpc/UserEventType;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun setCameraEnabled (Z)V
 	public abstract fun setMicrophoneEnabled (Z)V
 	public abstract fun startCapturingLocalVideo (I)V
@@ -660,7 +663,7 @@ public abstract interface class io/getstream/video/android/StreamCalls {
 
 public final class io/getstream/video/android/StreamCalls$DefaultImpls {
 	public static synthetic fun connectToCall$default (Lio/getstream/video/android/StreamCalls;Ljava/lang/String;ZLio/getstream/video/android/model/CallSettings;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public static synthetic fun createCall$default (Lio/getstream/video/android/StreamCalls;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static synthetic fun createCall$default (Lio/getstream/video/android/StreamCalls;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 }
 
 public final class io/getstream/video/android/StreamCallsBuilder {
@@ -673,16 +676,19 @@ public final class io/getstream/video/android/StreamCallsImpl : io/getstream/vid
 	public fun <init> (Landroid/content/Context;Landroidx/lifecycle/Lifecycle;Lio/getstream/video/android/logging/LoggingLevel;Lio/getstream/video/android/client/CallClient;Lio/getstream/video/android/token/CredentialsProvider;Lio/getstream/video/android/socket/VideoSocket;Lio/getstream/video/android/socket/SocketStateService;Lio/getstream/video/android/client/user/UserState;)V
 	public fun addSocketListener (Lio/getstream/video/android/socket/SocketListener;)V
 	public fun connectToCall (Ljava/lang/String;ZLio/getstream/video/android/model/CallSettings;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun createAndJoinCall (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun createCall (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun createAndJoinCall (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun createCall (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun createCallClient (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lio/getstream/video/android/token/CredentialsProvider;)V
 	public fun flipCamera ()V
 	public fun getAudioDevices ()Ljava/util/List;
 	public fun getUser ()Lio/getstream/video/android/model/User;
 	public fun joinCall (Lio/getstream/video/android/model/CallMetadata;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun joinCall (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun leaveCall ()V
 	public fun removeSocketListener (Lio/getstream/video/android/socket/SocketListener;)V
 	public fun selectAudioDevice (Lio/getstream/video/android/audio/AudioDevice;)V
+	public fun sendEvent (Ljava/lang/String;Ljava/lang/String;Lstream/video/coordinator/client_v1_rpc/UserEventType;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun sendEvent (Lstream/video/coordinator/client_v1_rpc/UserEventType;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun setCameraEnabled (Z)V
 	public fun setMicrophoneEnabled (Z)V
 	public fun startCapturingLocalVideo (I)V
@@ -693,7 +699,7 @@ public abstract interface class io/getstream/video/android/api/CallCoordinatorSe
 	public abstract fun getCallEdgeServer (Lstream/video/coordinator/client_v1_rpc/GetCallEdgeServerRequest;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun getOrCreateCall (Lstream/video/coordinator/client_v1_rpc/CreateCallRequest;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun joinCall (Lstream/video/coordinator/client_v1_rpc/JoinCallRequest;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun sendCustomEvent (Lstream/video/coordinator/client_v1_rpc/SendCustomEventRequest;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun sendUserEvent (Lstream/video/coordinator/client_v1_rpc/SendEventRequest;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public abstract class io/getstream/video/android/audio/AudioDevice {
@@ -783,12 +789,14 @@ public abstract interface class io/getstream/video/android/audio/PermissionsChec
 
 public final class io/getstream/video/android/client/CallClient {
 	public fun <init> (Lkotlinx/coroutines/CoroutineScope;Lio/getstream/video/android/client/user/UserState;Lio/getstream/video/android/client/coordinator/CallCoordinatorClient;Lio/getstream/video/android/socket/VideoSocket;)V
-	public final fun createAndJoinCall (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun createAndJoinCall$default (Lio/getstream/video/android/client/CallClient;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public final fun createCall (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun createAndJoinCall (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun createAndJoinCall$default (Lio/getstream/video/android/client/CallClient;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun getOrCreateCall (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun getUser ()Lio/getstream/video/android/model/User;
 	public final fun joinCall (Lio/getstream/video/android/model/CallMetadata;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun registerDevice (Lstream/video/coordinator/push_v1/Device;)V
+	public final fun sendUserEvent (Lstream/video/coordinator/client_v1_rpc/UserEventType;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun sendUserEvent (Lstream/video/coordinator/client_v1_rpc/UserEventType;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class io/getstream/video/android/client/CallClient$Builder {
@@ -801,7 +809,7 @@ public abstract interface class io/getstream/video/android/client/coordinator/Ca
 	public abstract fun getOrCreateCall (Lstream/video/coordinator/client_v1_rpc/CreateCallRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun joinCall (Lstream/video/coordinator/client_v1_rpc/JoinCallRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun selectEdgeServer (Lstream/video/coordinator/client_v1_rpc/GetCallEdgeServerRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun sendUserEvent (Lstream/video/coordinator/client_v1_rpc/SendCustomEventRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun sendUserEvent (Lstream/video/coordinator/client_v1_rpc/SendEventRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class io/getstream/video/android/client/user/UserState {
@@ -1217,7 +1225,7 @@ public final class io/getstream/video/android/events/UnknownEvent : io/getstream
 	public static final field INSTANCE Lio/getstream/video/android/events/UnknownEvent;
 }
 
-public abstract class io/getstream/video/android/events/VideoEvent {
+public abstract class io/getstream/video/android/events/VideoEvent : java/io/Serializable {
 }
 
 public final class io/getstream/video/android/events/VideoQualityChangedEvent : io/getstream/video/android/events/SfuDataEvent {
@@ -1257,7 +1265,7 @@ public final class io/getstream/video/android/events/VideoStoppedEvent : io/gets
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/events/model/CallDetails {
+public final class io/getstream/video/android/events/model/CallDetails : java/io/Serializable {
 	public fun <init> (Ljava/util/List;Ljava/util/Map;)V
 	public final fun component1 ()Ljava/util/List;
 	public final fun component2 ()Ljava/util/Map;
@@ -1270,7 +1278,7 @@ public final class io/getstream/video/android/events/model/CallDetails {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/events/model/CallInfo {
+public final class io/getstream/video/android/events/model/CallInfo : java/io/Serializable {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Date;Ljava/util/Date;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
@@ -1289,7 +1297,7 @@ public final class io/getstream/video/android/events/model/CallInfo {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/events/model/CallMember {
+public final class io/getstream/video/android/events/model/CallMember : java/io/Serializable {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Date;Ljava/util/Date;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
@@ -1308,7 +1316,7 @@ public final class io/getstream/video/android/events/model/CallMember {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/events/model/CallUser {
+public final class io/getstream/video/android/events/model/CallUser : java/io/Serializable {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Date;Ljava/util/Date;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;

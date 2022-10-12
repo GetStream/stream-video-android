@@ -16,7 +16,8 @@
 
 package io.getstream.video.android.events.model
 
-import java.util.Date
+import java.io.Serializable
+import java.util.*
 import stream.video.coordinator.call_v1.Call as ProtoCall
 import stream.video.coordinator.call_v1.CallDetails as ProtoCallDetails
 import stream.video.coordinator.member_v1.Member as ProtoMember
@@ -29,7 +30,7 @@ public data class CallUser(
     val imageUrl: String,
     val createdAt: Date?,
     val updatedAt: Date?
-)
+) : Serializable
 
 public data class CallMember(
     val callId: String,
@@ -37,7 +38,7 @@ public data class CallMember(
     val userId: String,
     val createdAt: Date?,
     val updatedAt: Date?
-)
+) : Serializable
 
 public data class CallInfo(
     val callId: String,
@@ -45,16 +46,17 @@ public data class CallInfo(
     val createdByUserId: String,
     val createdAt: Date?,
     val updatedAt: Date?
-)
+) : Serializable
 
 public data class CallDetails(
     val memberUserIds: List<String>,
     val members: Map<String, CallMember>
-)
+) : Serializable
 
-public fun Map<String, ProtoUser>.toCallUsers(): Map<String, CallUser> = map { (userId, protoUser) ->
-    userId to protoUser.toCallUser()
-}.toMap()
+public fun Map<String, ProtoUser>.toCallUsers(): Map<String, CallUser> =
+    map { (userId, protoUser) ->
+        userId to protoUser.toCallUser()
+    }.toMap()
 
 public fun ProtoUser.toCallUser(): CallUser = CallUser(
     id = id,
