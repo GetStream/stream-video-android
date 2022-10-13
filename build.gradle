@@ -14,13 +14,13 @@ buildscript {
         classpath Dependencies.spotlessGradlePlugin
         classpath Dependencies.kotlinBinaryValidator
         classpath Dependencies.dokka
-        classpath 'com.google.gms:google-services:4.3.13'
+        classpath 'com.google.gms:google-services:4.3.14'
     }
 }
 
 subprojects {
     apply from: "$rootDir/spotless/spotless.gradle"
-    if (it.name != "app") {
+    if (it.name != "app" && it.name != "dogfooding") {
         tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
             kotlinOptions.freeCompilerArgs += ["-Xexplicit-api=strict", "-Xjvm-default=enable"]
         }
