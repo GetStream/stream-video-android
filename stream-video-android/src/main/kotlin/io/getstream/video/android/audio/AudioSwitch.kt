@@ -277,8 +277,10 @@ public class AudioSwitch internal constructor(
     }
 
     private fun addAvailableAudioDevices(bluetoothHeadsetName: String?) {
-        logger.d { "[addAvailableAudioDevices] wiredHeadsetAvailable: $wiredHeadsetAvailable, " +
-            "bluetoothHeadsetName: $bluetoothHeadsetName" }
+        logger.d {
+            "[addAvailableAudioDevices] wiredHeadsetAvailable: $wiredHeadsetAvailable, " +
+                "bluetoothHeadsetName: $bluetoothHeadsetName"
+        }
         mutableAudioDevices.clear()
         preferredDeviceList.forEach { audioDevice ->
             logger.v { "[addAvailableAudioDevices] audioDevice: ${audioDevice.simpleName}" }
@@ -308,8 +310,10 @@ public class AudioSwitch internal constructor(
                 }
                 Earpiece::class.java -> {
                     val hasEarpiece = audioDeviceManager.hasEarpiece()
-                    logger.v { "[addAvailableAudioDevices] #Earpiece; hasEarpiece: $hasEarpiece, " +
-                        "wiredHeadsetAvailable: $wiredHeadsetAvailable" }
+                    logger.v {
+                        "[addAvailableAudioDevices] #Earpiece; hasEarpiece: $hasEarpiece, " +
+                            "wiredHeadsetAvailable: $wiredHeadsetAvailable"
+                    }
                     if (hasEarpiece && !wiredHeadsetAvailable) {
                         mutableAudioDevices.add(Earpiece())
                     }

@@ -85,7 +85,7 @@ class VideoApp : Application() {
             credentialsProvider = credentialsProvider,
             loggingLevel = loggingLevel
         ).build().also {
-            //TODO can we initialize streamCalls directly in VideoApp?
+            // TODO can we initialize streamCalls directly in VideoApp?
             streamCalls = it
             observeState()
             StreamLog.v(TAG) { "[initializeStreamCalls] completed" }
@@ -121,9 +121,7 @@ class VideoApp : Application() {
         }
     }
 
-    private
-
-    companion object {
+    private companion object {
         /**
          * Preferences file name.
          */

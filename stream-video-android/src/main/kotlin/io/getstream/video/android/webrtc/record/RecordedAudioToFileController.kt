@@ -1,18 +1,24 @@
 /*
- *  Copyright 2018 The WebRTC project authors. All Rights Reserved.
+ * Copyright (c) 2014-2018 Stream.io Inc. All rights reserved.
  *
- *  Use of this source code is governed by a BSD-style license
- *  that can be found in the LICENSE file in the root of the source
- *  tree. An additional intellectual property rights grant can be found
- *  in the file PATENTS.  All contributing project authors may
- *  be found in the AUTHORS file in the root of the source tree.
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package io.getstream.video.android.webrtc.record
 
 import android.media.AudioFormat
 import android.os.Environment
 import io.getstream.logging.StreamLog
-import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.webrtc.utils.stringify
 import org.webrtc.audio.JavaAudioDeviceModule
 import java.io.File
@@ -92,9 +98,11 @@ internal class RecordedAudioToFileController : JavaAudioDeviceModule.SamplesRead
     // information so that the file can be played using an external file player.
     // Example: /sdcard/recorded_audio_16bits_48000Hz_mono.pcm.
     private fun openRawAudioOutputFile(sampleRate: Int, channelCount: Int) {
-        val fileName = (Environment.getExternalStorageDirectory().path + File.separator
-            + "stream_recorded_audio_16bits_${sampleRate}Hz"
-            + (if (channelCount == 1) "_mono" else "_stereo") + ".pcm")
+        val fileName = (
+            Environment.getExternalStorageDirectory().path + File.separator +
+                "stream_recorded_audio_16bits_${sampleRate}Hz" +
+                (if (channelCount == 1) "_mono" else "_stereo") + ".pcm"
+            )
         val outputFile = File(fileName)
         try {
             rawAudioFileOutputStream = FileOutputStream(outputFile)

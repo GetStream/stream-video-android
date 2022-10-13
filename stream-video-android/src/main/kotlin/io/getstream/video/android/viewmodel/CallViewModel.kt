@@ -90,11 +90,13 @@ public class CallViewModel(
         )
         _isVideoInitialized.value = true
 
-        connectToCall(callSettings = CallSettings(
-            audioOn = true,
-            videoOn = false,
-            speakerOn = true
-        ))
+        connectToCall(
+            callSettings = CallSettings(
+                audioOn = true,
+                videoOn = false,
+                speakerOn = true
+            )
+        )
     }
 
     private fun connectToCall(callSettings: CallSettings) {

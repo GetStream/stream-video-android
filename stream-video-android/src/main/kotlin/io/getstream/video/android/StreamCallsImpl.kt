@@ -47,7 +47,6 @@ import io.getstream.video.android.webrtc.WebRTCClient
 import io.getstream.video.android.webrtc.builder.WebRTCClientBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import stream.video.coordinator.client_v1_rpc.UserEventType

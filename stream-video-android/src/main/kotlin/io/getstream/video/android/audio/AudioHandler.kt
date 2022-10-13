@@ -123,8 +123,6 @@ public class AudioSwitchHandler constructor(private val context: Context) : Audi
                 }
                 StreamLog.i(TAG) { "[onAudioFocusChange] focusChange: $typeOfChange" }
             }
-
         }
     }
 }
-

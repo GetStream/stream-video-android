@@ -36,7 +36,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
@@ -49,10 +48,8 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
-import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Alignment.Companion.TopStart
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -64,13 +61,11 @@ import io.getstream.logging.StreamLog
 import io.getstream.video.android.app.model.HomeScreenOption
 import io.getstream.video.android.app.ui.call.CallActivity
 import io.getstream.video.android.app.ui.components.UserList
-import io.getstream.video.android.app.ui.incoming.IncomingCallActivity
 import io.getstream.video.android.app.ui.login.LoginActivity
 import io.getstream.video.android.app.utils.getUsers
 import io.getstream.video.android.app.videoApp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.Avatar
-import io.getstream.video.android.events.CallCreatedEvent
 import io.getstream.video.android.events.VideoEvent
 import io.getstream.video.android.model.IceServer
 import io.getstream.video.android.model.UserCredentials
@@ -98,7 +93,6 @@ class HomeActivity : AppCompatActivity() {
             }
         )
     }
-
 
     private val callIdState: MutableState<String> = mutableStateOf("call:123")
 
