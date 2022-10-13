@@ -28,36 +28,77 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import io.getstream.video.android.compose.R
+import io.getstream.video.android.model.CallType
 import io.getstream.video.android.model.CallUser
 
 @Composable
 public fun CallBackground(
-    modifier: Modifier = Modifier,
     participants: List<CallUser>,
+    callType: CallType,
+    isIncoming: Boolean,
+    modifier: Modifier = Modifier,
     content: @Composable BoxScope.() -> Unit
 ) {
     Box(
         modifier = modifier.fillMaxSize()
     ) {
-        if (participants.size == 1) {
-            val firstUser = participants.first()
-            AsyncImage(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .blur(20.dp),
-                model = firstUser.imageUrl,
-                contentScale = ContentScale.Crop,
-                contentDescription = null
-            )
+        if (isIncoming) {
+            IncomingCallBackground(participants)
         } else {
-            Image(
-                modifier = Modifier.fillMaxSize(),
-                painter = painterResource(id = R.drawable.bg_call),
-                contentScale = ContentScale.FillBounds,
-                contentDescription = null
-            )
+            OutgoingCallBackground(participants, callType)
         }
 
         content()
     }
+}
+
+@Composable
+private fun IncomingCallBackground(participants: List<CallUser>) {
+    if (participants.size == 1) {
+        ParticipantImageBackground(participants = participants, modifier = Modifier.blur(20.dp))
+    } else {
+        DefaultCallBackground()
+    }
+}
+
+@Composable
+private fun OutgoingCallBackground(participants: List<CallUser>, callType: CallType) {
+    if (callType == CallType.AUDIO) {
+        if (participants.size == 1) {
+            ParticipantImageBackground(participants, modifier = Modifier.blur(20.dp))
+        } else {
+            DefaultCallBackground()
+        }
+    } else {
+        ParticipantImageBackground(participants = participants)
+    }
+}
+
+@Composable
+private fun ParticipantImageBackground(
+    participants: List<CallUser>,
+    modifier: Modifier = Modifier
+) {
+    val firstUser = participants.first()
+
+    if (firstUser.imageUrl.isNotEmpty()) {
+        AsyncImage(
+            modifier = modifier.fillMaxSize(),
+            model = firstUser.imageUrl,
+            contentScale = ContentScale.Crop,
+            contentDescription = null
+        )
+    } else {
+        DefaultCallBackground()
+    }
+}
+
+@Composable
+private fun DefaultCallBackground() {
+    Image(
+        modifier = Modifier.fillMaxSize(),
+        painter = painterResource(id = R.drawable.bg_call),
+        contentScale = ContentScale.FillBounds,
+        contentDescription = null
+    )
 }

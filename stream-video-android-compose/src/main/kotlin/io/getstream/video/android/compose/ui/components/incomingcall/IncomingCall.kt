@@ -28,18 +28,24 @@ import io.getstream.video.android.compose.ui.components.CallTopAppbar
 import io.getstream.video.android.compose.ui.components.background.CallBackground
 import io.getstream.video.android.compose.ui.components.mock.mockParticipantList
 import io.getstream.video.android.model.CallInfo
+import io.getstream.video.android.model.CallType
 import io.getstream.video.android.model.CallUser
 
 @Composable
 public fun IncomingCall(
     callInfo: CallInfo,
+    callType: CallType,
     participants: List<CallUser>,
     onDeclineCall: (CallInfo) -> Unit,
     onAcceptCall: (CallInfo) -> Unit,
     onVideoToggleChanged: (Boolean) -> Unit,
 ) {
 
-    CallBackground(participants = participants) {
+    CallBackground(
+        participants = participants,
+        callType = callType,
+        isIncoming = true
+    ) {
 
         Column {
 
@@ -87,6 +93,7 @@ private fun IncomingCallPreview() {
                     imageUrl = it.profileImageURL ?: ""
                 )
             },
+            callType = CallType.VIDEO,
             onDeclineCall = { },
             onAcceptCall = { },
             onVideoToggleChanged = { }

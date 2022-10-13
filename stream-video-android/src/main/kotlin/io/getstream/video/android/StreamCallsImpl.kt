@@ -42,6 +42,7 @@ import io.getstream.video.android.token.CredentialsProvider
 import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Result
 import io.getstream.video.android.utils.Success
+import io.getstream.video.android.utils.onSuccessSuspend
 import io.getstream.video.android.utils.toCall
 import io.getstream.video.android.webrtc.WebRTCClient
 import io.getstream.video.android.webrtc.builder.WebRTCClientBuilder
@@ -111,7 +112,9 @@ public class StreamCallsImpl(
     ): Result<CallMetadata> {
         logger.d { "[createCall] type: $type, id: $id, participantIds: $participantIds" }
         return when (val result = callClient.getOrCreateCall(type, id, participantIds, ringing)) {
-            is Success -> Success(result.data.call?.call?.toCall()!!)
+            is Success -> {
+                Success(result.data.call?.toCall()!!)
+            }
             is Failure -> Failure(result.error)
         }
     }
@@ -130,14 +133,22 @@ public class StreamCallsImpl(
         logger.d { "[joinCall] type: $type, id: $id" }
 
         return when (val callResult = callClient.getOrCreateCall(type, id, emptyList(), false)) {
-            is Success -> callClient.joinCall(callResult.data.call?.call?.toCall()!!)
+            is Success -> {
+                val metadata = callResult.data.call?.toCall()!!
+
+                joinCall(metadata)
+            }
             is Failure -> callResult
         }
     }
 
     override suspend fun joinCall(call: CallMetadata): Result<JoinedCall> {
         logger.d { "[joinCall] call: $call" }
-        return callClient.joinCall(call)
+        return callClient.joinCall(call).also {
+            it.onSuccessSuspend { data ->
+                engine.onCallJoined(data)
+            }
+        }
     }
 
     override suspend fun sendEvent(
@@ -161,6 +172,7 @@ public class StreamCallsImpl(
     override fun leaveCall() {
         credentialsProvider.setSfuToken(null)
         socket.updateCallState(null)
+        engine.onLeaveCall()
         webRTCClient?.clear()
     }
 

@@ -17,19 +17,36 @@
 package io.getstream.video.android.utils
 
 import io.getstream.video.android.model.CallMetadata
+import io.getstream.video.android.model.CallUser
+import stream.video.coordinator.client_v1_rpc.CallEnvelope
+import java.util.*
 
-internal fun stream.video.coordinator.call_v1.Call.toCall(): CallMetadata {
+internal fun CallEnvelope.toCall(): CallMetadata {
     // val extraDataJson = custom_json.toByteArray().decodeToString() // TODO - check this
 
-    return CallMetadata(
-        cid = call_cid,
-        id = id,
-        type = type,
-        createdBy = created_by_user_id,
-        createdAt = created_at?.epochSecond ?: 0,
-        updatedAt = updated_at?.epochSecond ?: 0,
-        recordingEnabled = options?.recording?.enabled ?: false,
-        broadcastingEnabled = options?.broadcasting?.enabled ?: false,
-        extraData = emptyMap() // Json.decodeFromString<Map<String, String>>(extraDataJson)
-    )
+    val call = call!!
+
+    return with(call) {
+        CallMetadata(
+            cid = call_cid,
+            id = id,
+            type = type,
+            createdBy = created_by_user_id,
+            createdAt = created_at?.epochSecond ?: 0,
+            updatedAt = updated_at?.epochSecond ?: 0,
+            recordingEnabled = options?.recording?.enabled ?: false,
+            broadcastingEnabled = options?.broadcasting?.enabled ?: false,
+            users = users.mapValues { (_, it) ->
+                CallUser(
+                    it.id,
+                    it.name,
+                    it.role,
+                    it.image_url,
+                    it.created_at?.let { Date(it.toEpochMilli()) },
+                    it.updated_at?.let { Date(it.toEpochMilli()) }
+                )
+            },
+            extraData = emptyMap() // Json.decodeFromString<Map<String, String>>(extraDataJson)
+        )
+    }
 }

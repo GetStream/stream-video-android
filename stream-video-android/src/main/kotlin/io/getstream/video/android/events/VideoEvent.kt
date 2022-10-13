@@ -53,16 +53,6 @@ public data class CallCreatedEvent(
 ) : VideoEvent()
 
 /**
- * Sent when a call gets started.
- */
-public data class CallStartedEvent(
-    val callId: String,
-    val users: Map<String, CallUser>,
-    val info: CallInfo?,
-    val details: CallDetails?
-) : VideoEvent()
-
-/**
  * Sent when a call gets updated.
  */
 public data class CallUpdatedEvent(
@@ -149,6 +139,12 @@ public data class ParticipantJoinedEvent(
 public data class ParticipantLeftEvent(
     val participant: Participant
 ) : VideoEvent()
+
+public object CallAcceptedEvent : VideoEvent()
+
+public object CallRejectedEvent : VideoEvent()
+
+public object CallCanceledEvent : VideoEvent()
 
 public object UnknownEvent : VideoEvent()
 

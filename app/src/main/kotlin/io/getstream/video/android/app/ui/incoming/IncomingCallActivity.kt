@@ -32,6 +32,8 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.incomingcall.IncomingCall
 import io.getstream.video.android.events.CallCreatedEvent
 import io.getstream.video.android.model.CallInfo
+import io.getstream.video.android.model.CallType
+import io.getstream.video.android.model.callId
 import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Success
 import kotlinx.coroutines.delay
@@ -47,7 +49,6 @@ class IncomingCallActivity : AppCompatActivity() {
         showWhenLockedAndTurnScreenOn()
         super.onCreate(savedInstanceState)
         val data = intent.getSerializableExtra(KEY_EVENT_DATA) as? CallCreatedEvent
-
         lifecycleScope.launchWhenCreated {
             delay(10000)
             finish()
@@ -56,12 +57,16 @@ class IncomingCallActivity : AppCompatActivity() {
         if (data == null) {
             finish()
         } else {
+            val callType = CallType.fromType(data.info?.type ?: "")
+
             setContent {
                 VideoTheme {
                     IncomingCall(
                         callInfo = data.info!!,
-                        participants = data.users.values.toList(),
-                        onDeclineCall = { finish() },
+                        participants = data.users.values.toList()
+                            .filter { it.id != streamCalls.getUser().id },
+                        callType = callType,
+                        onDeclineCall = { declineCall(data.info!!) },
                         onAcceptCall = { event ->
                             acceptCall(event)
                         },
@@ -81,6 +86,7 @@ class IncomingCallActivity : AppCompatActivity() {
                 callInfo.type,
                 UserEventType.USER_EVENT_TYPE_REJECTED_CALL
             )
+            streamCalls.leaveCall()
 
             logger.d { "[declineCall] $result" }
             finish()
@@ -89,8 +95,7 @@ class IncomingCallActivity : AppCompatActivity() {
 
     private fun acceptCall(callInfo: CallInfo) {
         lifecycleScope.launch {
-            val callId =
-                callInfo.callId.replace("${callInfo.type}:", "") // TODO - we have cid here, not call ID
+            val callId = callInfo.callId
 
             val eventResult = streamCalls.sendEvent(
                 callId,
@@ -106,7 +111,7 @@ class IncomingCallActivity : AppCompatActivity() {
                     startActivity(
                         CallActivity.getIntent(
                             this@IncomingCallActivity,
-                            callCid = callInfo.callId,
+                            callCid = callInfo.cid,
                             signalUrl = data.callUrl,
                             userToken = data.userToken,
                             iceServers = data.iceServers

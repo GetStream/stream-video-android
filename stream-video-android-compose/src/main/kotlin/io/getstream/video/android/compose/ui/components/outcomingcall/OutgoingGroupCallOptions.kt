@@ -33,7 +33,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -47,7 +46,6 @@ internal fun OutgoingGroupCallOptions(
     onCancelCall: (String) -> Unit = {},
     onMicToggleChanged: (Boolean) -> Unit = {},
     onVideoToggleChanged: (Boolean) -> Unit = {},
-    onCameraOrientationChanged: (Boolean) -> Unit = {},
 ) {
     var isMicEnabled by remember { mutableStateOf(true) }
     var isVideoEnabled by remember { mutableStateOf(true) }
@@ -80,24 +78,6 @@ internal fun OutgoingGroupCallOptions(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            IconButton(
-                modifier = Modifier
-                    .alpha(VideoTheme.dimens.buttonToggleOnAlpha)
-                    .background(
-                        color = VideoTheme.colors.appBackground,
-                        shape = VideoTheme.shapes.callButton
-                    )
-                    .size(VideoTheme.dimens.mediumButtonSize),
-                onClick = { onCameraOrientationChanged(false) },
-                content = {
-                    Icon(
-                        painter = VideoTheme.icons.cameraRotate,
-                        contentDescription = "Rotate Camera",
-                        tint = VideoTheme.colors.textHighEmphasis
-                    )
-                }
-            )
-
             IconButton(
                 modifier = Modifier
                     .toggleAlpha(isVideoEnabled)

@@ -62,6 +62,7 @@ import io.getstream.video.android.app.model.HomeScreenOption
 import io.getstream.video.android.app.ui.call.CallActivity
 import io.getstream.video.android.app.ui.components.UserList
 import io.getstream.video.android.app.ui.login.LoginActivity
+import io.getstream.video.android.app.ui.outgoing.OutgoingCallActivity
 import io.getstream.video.android.app.utils.getUsers
 import io.getstream.video.android.app.videoApp
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -71,6 +72,7 @@ import io.getstream.video.android.model.IceServer
 import io.getstream.video.android.model.UserCredentials
 import io.getstream.video.android.socket.SocketListener
 import io.getstream.video.android.utils.onError
+import io.getstream.video.android.utils.onSuccess
 import io.getstream.video.android.utils.onSuccessSuspend
 import kotlinx.coroutines.launch
 
@@ -100,14 +102,6 @@ class HomeActivity : AppCompatActivity() {
 
     private val socketListener = object : SocketListener {
         override fun onEvent(event: VideoEvent) {
-            /*if (event is CallCreatedEvent) {
-                startActivity(
-                    IncomingCallActivity.getLaunchIntent(
-                        this@HomeActivity,
-                        event
-                    )
-                )
-            }*/
         }
     }
 
@@ -233,28 +227,47 @@ class HomeActivity : AppCompatActivity() {
     private fun joinCall(callId: String, participants: List<String> = emptyList()) {
         lifecycleScope.launch {
             loadingState.value = true
+            val isRinging = participants.isNotEmpty()
 
-            val createCallResult = controller.createAndJoinCall(
-                "default", // TODO - hardcoded for now
-                id = callId,
-                participantIds = participants.toList(),
-                ringing = participants.isNotEmpty()
+            if (isRinging) {
+                val createdCall = controller.createCall("default", callId, participants, true)
+
+                createdCall.onSuccess { callMetadata ->
+                    loadingState.value = false
+                    startActivity(
+                        OutgoingCallActivity.getIntent(
+                            this@HomeActivity,
+                            callMetadata
+                        )
+                    )
+                }
+            } else {
+                joinMeetingCall(callId, participants)
+            }
+        }
+    }
+
+    private suspend fun joinMeetingCall(callId: String, participants: List<String>) {
+        val createCallResult = controller.createAndJoinCall(
+            "default", // TODO - hardcoded for now
+            id = callId,
+            participantIds = participants.toList(),
+            ringing = false
+        )
+
+        createCallResult.onSuccessSuspend { response ->
+            loadingState.value = false
+            navigateToCall(
+                response.call.cid,
+                response.callUrl,
+                response.userToken,
+                response.iceServers
             )
-
-            createCallResult.onSuccessSuspend { response ->
-                loadingState.value = false
-                navigateToCall(
-                    response.call.cid,
-                    response.callUrl,
-                    response.userToken,
-                    response.iceServers
-                )
-            }
-            createCallResult.onError {
-                Log.d("Couldn't select server", it.message ?: "")
-                Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
-                loadingState.value = false
-            }
+        }
+        createCallResult.onError {
+            Log.d("Couldn't select server", it.message ?: "")
+            Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
+            loadingState.value = false
         }
     }
 
@@ -342,7 +355,8 @@ class HomeActivity : AppCompatActivity() {
                 Avatar(
                     imageUrl = user.imageUrl.orEmpty(),
                     initials = user.name,
-                    modifier = Modifier.size(40.dp)
+                    modifier = Modifier
+                        .size(40.dp)
                         .align(Center)
                 )
             }

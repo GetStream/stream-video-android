@@ -100,7 +100,7 @@ class VideoApp : Application() {
 
                         val input = state.run {
                             /**
-                             * [IncomingCallVieModel] will be listening to [streamCalls.callState] as well.
+                             * [IncomingCallViewModel] will be listening to [streamCalls.callState] as well.
                              * So [IncomingCallActivity] won't need to any input except [callId]
                              */
                             CallCreatedEvent(
@@ -111,7 +111,7 @@ class VideoApp : Application() {
                             )
                         }
                         val intent = IncomingCallActivity.getLaunchIntent(applicationContext, input).apply {
-                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                         }
                         startActivity(intent)
                     }

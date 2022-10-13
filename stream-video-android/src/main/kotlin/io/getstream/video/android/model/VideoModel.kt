@@ -41,12 +41,20 @@ public data class CallMember(
 ) : Serializable
 
 public data class CallInfo(
-    val callId: String,
+    val cid: String,
     val type: String,
     val createdByUserId: String,
     val createdAt: Date?,
     val updatedAt: Date?
 ) : Serializable
+
+public val CallInfo.callId: String
+    get() {
+        return cid.replace(
+            "$type:",
+            ""
+        )
+    }
 
 public data class CallDetails(
     val memberUserIds: List<String>,
@@ -83,7 +91,7 @@ public fun ProtoCallDetails.toCallDetails(): CallDetails = CallDetails(
 )
 
 public fun ProtoCall.toCallInfo(): CallInfo = CallInfo(
-    callId = call_cid,
+    cid = call_cid,
     type = type,
     createdByUserId = created_by_user_id,
     createdAt = created_at?.let { Date(it.toEpochMilli()) },

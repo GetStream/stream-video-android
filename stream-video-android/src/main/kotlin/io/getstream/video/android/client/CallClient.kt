@@ -113,7 +113,7 @@ public class CallClient(
     ): Result<JoinedCall> {
         logger.d { "[createAndJoinCall] type: $type, id: $id, participantIds: $participantIds" }
         return when (val createCallResult = getOrCreateCall(type, id, participantIds, ringing)) {
-            is Success -> this.joinCall(createCallResult.data.call?.call?.toCall()!!)
+            is Success -> this.joinCall(createCallResult.data.call?.toCall()!!)
             is Failure -> return Failure(createCallResult.error)
         }.also { logger.v { "[createAndJoinCall] result: $it" } }
     }

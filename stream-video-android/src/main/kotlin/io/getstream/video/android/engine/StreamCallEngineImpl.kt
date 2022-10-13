@@ -19,11 +19,13 @@ package io.getstream.video.android.engine
 import io.getstream.logging.StreamLog
 import io.getstream.video.android.events.AudioMutedEvent
 import io.getstream.video.android.events.AudioUnmutedEvent
+import io.getstream.video.android.events.CallAcceptedEvent
+import io.getstream.video.android.events.CallCanceledEvent
 import io.getstream.video.android.events.CallCreatedEvent
 import io.getstream.video.android.events.CallEndedEvent
 import io.getstream.video.android.events.CallMembersDeletedEvent
 import io.getstream.video.android.events.CallMembersUpdatedEvent
-import io.getstream.video.android.events.CallStartedEvent
+import io.getstream.video.android.events.CallRejectedEvent
 import io.getstream.video.android.events.CallUpdatedEvent
 import io.getstream.video.android.events.ConnectedEvent
 import io.getstream.video.android.events.HealthCheckEvent
@@ -33,6 +35,7 @@ import io.getstream.video.android.events.UnknownEvent
 import io.getstream.video.android.events.VideoEvent
 import io.getstream.video.android.events.VideoStartedEvent
 import io.getstream.video.android.events.VideoStoppedEvent
+import io.getstream.video.android.model.JoinedCall
 import io.getstream.video.android.model.state.StreamCallState
 import io.getstream.video.android.socket.SocketListener
 import kotlinx.coroutines.CoroutineScope
@@ -71,11 +74,13 @@ internal class StreamCallEngineImpl(
                 is AudioMutedEvent -> {}
                 is AudioUnmutedEvent -> {}
                 is CallCreatedEvent -> onCallCreated(event)
-                is CallEndedEvent -> {}
                 is CallMembersDeletedEvent -> {}
                 is CallMembersUpdatedEvent -> {}
-                is CallStartedEvent -> {}
                 is CallUpdatedEvent -> {}
+                is CallAcceptedEvent -> {}
+                is CallRejectedEvent -> {}
+                is CallEndedEvent -> onCallFinished()
+                is CallCanceledEvent -> onCallFinished()
                 is ConnectedEvent -> {}
                 is HealthCheckEvent -> {}
                 is ParticipantJoinedEvent -> {}
@@ -84,6 +89,20 @@ internal class StreamCallEngineImpl(
                 is VideoStoppedEvent -> {}
                 is UnknownEvent -> {}
             }
+        }
+    }
+
+    override suspend fun onCallJoined(joinedCall: JoinedCall) {
+        _callState.emit(StreamCallState.InCall(joinedCall))
+    }
+
+    private suspend fun onCallFinished() {
+        _callState.emit(StreamCallState.Idle)
+    }
+
+    override fun onLeaveCall() {
+        scope.launchWithLock(mutex) {
+            _callState.emit(StreamCallState.Idle)
         }
     }
 

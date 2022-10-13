@@ -51,6 +51,8 @@
             android:name=".ui.incoming.IncomingCallActivity"
             android:launchMode="singleTop"
             android:showOnLockScreen="true" />
+
+        <activity android:name=".ui.outgoing.OutgoingCallActivity" />
     </application>
 
 </manifest>

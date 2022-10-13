@@ -38,10 +38,13 @@ public fun OutgoingCall(
     onCancelCall: (String) -> Unit = {},
     onMicToggleChanged: (Boolean) -> Unit = {},
     onVideoToggleChanged: (Boolean) -> Unit = {},
-    onCameraOrientationChanged: (Boolean) -> Unit = {},
 ) {
 
-    CallBackground(participants = participants) {
+    CallBackground(
+        participants = participants,
+        callType = callType,
+        isIncoming = false
+    ) {
 
         Column {
 
@@ -81,7 +84,6 @@ public fun OutgoingCall(
                 onCancelCall = onCancelCall,
                 onMicToggleChanged = onMicToggleChanged,
                 onVideoToggleChanged = onVideoToggleChanged,
-                onCameraOrientationChanged = onCameraOrientationChanged
             )
         }
     }

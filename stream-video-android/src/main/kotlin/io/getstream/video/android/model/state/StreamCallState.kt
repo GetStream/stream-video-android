@@ -19,15 +19,27 @@ package io.getstream.video.android.model.state
 import io.getstream.video.android.model.CallDetails
 import io.getstream.video.android.model.CallInfo
 import io.getstream.video.android.model.CallUser
+import io.getstream.video.android.model.JoinedCall
 
 public sealed interface StreamCallState {
 
     public object Idle : StreamCallState
+
+    public data class Outgoing(
+        val callId: String,
+        val users: Map<String, CallUser>,
+        val info: CallInfo?,
+        val details: CallDetails?
+    )
 
     public data class Incoming(
         val callId: String,
         val users: Map<String, CallUser>,
         val info: CallInfo?,
         val details: CallDetails?
+    ) : StreamCallState
+
+    public data class InCall(
+        val joinedCall: JoinedCall
     ) : StreamCallState
 }
