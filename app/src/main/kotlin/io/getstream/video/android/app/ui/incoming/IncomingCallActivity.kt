@@ -26,12 +26,12 @@ import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import io.getstream.logging.StreamLog
-import io.getstream.video.android.app.VideoApp
 import io.getstream.video.android.app.ui.call.CallActivity
+import io.getstream.video.android.app.videoApp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.incomingcall.IncomingCall
 import io.getstream.video.android.events.CallCreatedEvent
-import io.getstream.video.android.events.model.CallInfo
+import io.getstream.video.android.model.CallInfo
 import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Success
 import kotlinx.coroutines.delay
@@ -40,7 +40,7 @@ import stream.video.coordinator.client_v1_rpc.UserEventType
 
 class IncomingCallActivity : AppCompatActivity() {
 
-    private val streamCalls by lazy { VideoApp.streamCalls }
+    private val streamCalls by lazy { videoApp.streamCalls }
     private val logger by lazy { StreamLog.getLogger("IncomingCallActivity") }
 
     override fun onCreate(savedInstanceState: Bundle?) {

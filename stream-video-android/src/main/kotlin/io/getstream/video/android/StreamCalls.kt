@@ -23,12 +23,16 @@ import io.getstream.video.android.model.CallSettings
 import io.getstream.video.android.model.IceServer
 import io.getstream.video.android.model.JoinedCall
 import io.getstream.video.android.model.User
+import io.getstream.video.android.model.state.StreamCallState
 import io.getstream.video.android.socket.SocketListener
 import io.getstream.video.android.token.CredentialsProvider
 import io.getstream.video.android.utils.Result
+import kotlinx.coroutines.flow.StateFlow
 import stream.video.coordinator.client_v1_rpc.UserEventType
 
 public interface StreamCalls {
+
+    public val callState: StateFlow<StreamCallState>
 
     /**
      * Domain - Call CRUD.

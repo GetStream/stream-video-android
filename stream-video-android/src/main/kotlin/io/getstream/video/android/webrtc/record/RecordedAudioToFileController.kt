@@ -37,7 +37,7 @@ internal class RecordedAudioToFileController : JavaAudioDeviceModule.SamplesRead
     private var isRunning = false
     private var fileSizeInBytes: Long = 0
 
-    private val isEnabled = BuildConfig.DEBUG
+    private val isEnabled = false
 
     init {
         logger.d { "<init> ctor" }

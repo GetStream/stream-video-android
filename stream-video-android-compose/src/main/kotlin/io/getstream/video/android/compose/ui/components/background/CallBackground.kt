@@ -28,7 +28,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import io.getstream.video.android.compose.R
-import io.getstream.video.android.events.model.CallUser
+import io.getstream.video.android.model.CallUser
 
 @Composable
 public fun CallBackground(

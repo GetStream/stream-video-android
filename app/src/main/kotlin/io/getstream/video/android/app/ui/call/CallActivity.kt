@@ -35,9 +35,8 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.R
-import io.getstream.video.android.app.VideoApp
 import io.getstream.video.android.app.ui.call.content.VideoCallContent
-import io.getstream.video.android.model.CallSettings
+import io.getstream.video.android.app.videoApp
 import io.getstream.video.android.model.IceServer
 import io.getstream.video.android.model.IceServerConfig
 import io.getstream.video.android.ui.ParticipantContentView
@@ -50,8 +49,18 @@ import kotlinx.coroutines.launch
 
 class CallActivity : AppCompatActivity() {
 
+    private val input: CallViewModel.CallInput by lazy {
+        CallViewModel.CallInput(
+            callId = requireNotNull(intent.getStringExtra(KEY_CALL_ID)),
+            userToken = requireNotNull(intent.getStringExtra(KEY_USER_TOKEN)),
+            sfuUrl = requireNotNull(intent.getStringExtra(KEY_SFU_URL)),
+            iceServers = (requireNotNull(intent.getSerializableExtra(KEY_ICE_SERVERS)) as? IceServerConfig)?.iceServers
+                ?: emptyList()
+        )
+    }
+
     private val factory by lazy {
-        CallViewModelFactory(VideoApp.streamCalls, VideoApp.credentialsProvider)
+        CallViewModelFactory(input, videoApp.streamCalls, videoApp.credentialsProvider)
     }
 
     private val callViewModel by viewModels<CallViewModel>(factoryProducer = { factory })
@@ -148,23 +157,7 @@ class CallActivity : AppCompatActivity() {
     private fun startVideoFlow() {
         val isInitialized = callViewModel.isVideoInitialized.value
         if (isInitialized) return
-
-        val userToken = requireNotNull(intent.getStringExtra(KEY_USER_TOKEN))
-        val sfuUrl = requireNotNull(intent.getStringExtra(KEY_SFU_URL))
-        val callId = requireNotNull(intent.getStringExtra(KEY_CALL_ID))
-        val iceServers =
-            requireNotNull(intent.getSerializableExtra(KEY_ICE_SERVERS)) as? IceServerConfig
-
-        callViewModel.init(
-            callId = callId,
-            sfuUrl = sfuUrl,
-            userToken = userToken,
-            iceServers = iceServers?.iceServers ?: emptyList(),
-            callSettings = CallSettings(
-                audioOn = false,
-                videoOn = false
-            )
-        )
+        callViewModel.createCall()
     }
 
     @RequiresApi(M)

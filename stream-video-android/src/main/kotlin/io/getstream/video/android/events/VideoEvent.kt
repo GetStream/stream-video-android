@@ -16,9 +16,9 @@
 
 package io.getstream.video.android.events
 
-import io.getstream.video.android.events.model.CallDetails
-import io.getstream.video.android.events.model.CallInfo
-import io.getstream.video.android.events.model.CallUser
+import io.getstream.video.android.model.CallDetails
+import io.getstream.video.android.model.CallInfo
+import io.getstream.video.android.model.CallUser
 import stream.video.coordinator.participant_v1.Participant
 import stream.video.sfu.models.Call
 

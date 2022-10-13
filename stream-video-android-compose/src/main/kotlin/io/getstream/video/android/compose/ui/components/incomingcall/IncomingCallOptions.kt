@@ -34,7 +34,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.extensions.toggleAlpha
-import io.getstream.video.android.events.model.CallInfo
+import io.getstream.video.android.model.CallInfo
 import io.getstream.video.android.model.CallType
 
 @Composable

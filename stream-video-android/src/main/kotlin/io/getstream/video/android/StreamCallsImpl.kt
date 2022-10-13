@@ -25,6 +25,7 @@ import io.getstream.video.android.client.LifecycleHandler
 import io.getstream.video.android.client.StreamLifecycleObserver
 import io.getstream.video.android.client.user.UserState
 import io.getstream.video.android.dispatchers.DispatcherProvider
+import io.getstream.video.android.engine.StreamCallEngineImpl
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.CallMetadata
@@ -32,6 +33,7 @@ import io.getstream.video.android.model.CallSettings
 import io.getstream.video.android.model.IceServer
 import io.getstream.video.android.model.JoinedCall
 import io.getstream.video.android.model.User
+import io.getstream.video.android.model.state.StreamCallState
 import io.getstream.video.android.socket.SocketListener
 import io.getstream.video.android.socket.SocketState
 import io.getstream.video.android.socket.SocketStateService
@@ -45,6 +47,8 @@ import io.getstream.video.android.webrtc.WebRTCClient
 import io.getstream.video.android.webrtc.builder.WebRTCClientBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import stream.video.coordinator.client_v1_rpc.UserEventType
 
@@ -66,6 +70,8 @@ public class StreamCallsImpl(
 
     private val scope = CoroutineScope(DispatcherProvider.IO)
 
+    private val engine = StreamCallEngineImpl(scope)
+
     /**
      * Domain - WebRTC.
      */
@@ -85,12 +91,15 @@ public class StreamCallsImpl(
     )
 
     init {
+        socket.addListener(engine)
         scope.launch(Dispatchers.Main.immediate) {
             lifecycleObserver.observe()
         }
 
         socket.connectSocket()
     }
+
+    override val callState: StateFlow<StreamCallState> = engine.callState
 
     /**
      * Domain - Coordinator.

@@ -27,7 +27,7 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.CallTopAppbar
 import io.getstream.video.android.compose.ui.components.background.CallBackground
 import io.getstream.video.android.compose.ui.components.mock.mockParticipant
-import io.getstream.video.android.events.model.CallUser
+import io.getstream.video.android.model.CallUser
 import io.getstream.video.android.model.CallType
 
 @Composable

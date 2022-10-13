@@ -22,9 +22,10 @@ import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import io.getstream.logging.StreamLog
 import io.getstream.video.android.app.FakeCredentialsProvider
-import io.getstream.video.android.app.VideoApp
 import io.getstream.video.android.app.ui.call.CallActivity
+import io.getstream.video.android.app.videoApp
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.model.IceServer
 import io.getstream.video.android.utils.onError
@@ -33,11 +34,14 @@ import kotlinx.coroutines.launch
 
 class DeeplinkingActivity : AppCompatActivity() {
 
+    private val logger = StreamLog.getLogger("Call:DeeplinkView")
+
     private val controller by lazy {
-        VideoApp.streamCalls
+        videoApp.streamCalls
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        logger.d { "[onCreate] savedInstanceState: $savedInstanceState" }
         super.onCreate(savedInstanceState)
 
         val data: Uri = intent?.data ?: return
@@ -87,12 +91,12 @@ class DeeplinkingActivity : AppCompatActivity() {
     }
 
     private fun logIn() {
-        val selectedUser = VideoApp.userPreferences.getCachedCredentials()
-
-        VideoApp.initializeStream(
+        val selectedUser = videoApp.userPreferences.getCachedCredentials()
+        logger.d { "[logIn] selectedUser: $selectedUser" }
+        videoApp.initializeStreamCalls(
             credentialsProvider = FakeCredentialsProvider(
                 userCredentials = selectedUser,
-                apiKey = "key10"
+                apiKey = "key1"
             ),
             loggingLevel = LoggingLevel.BODY
         )

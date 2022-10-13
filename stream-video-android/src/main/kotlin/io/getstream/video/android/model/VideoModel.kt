@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.events.model
+package io.getstream.video.android.model
 
 import java.io.Serializable
 import java.util.*

@@ -19,6 +19,7 @@ package io.getstream.video.android.viewmodel
 import android.hardware.camera2.CameraMetadata
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import io.getstream.logging.StreamLog
 import io.getstream.video.android.StreamCalls
 import io.getstream.video.android.audio.AudioDevice
 import io.getstream.video.android.model.Call
@@ -39,9 +40,12 @@ import kotlinx.coroutines.launch
 import java.util.*
 
 public class CallViewModel(
+    private val input: CallInput,
     private val streamCalls: StreamCalls,
     private val credentialsProvider: CredentialsProvider
 ) : ViewModel() {
+
+    private val logger = StreamLog.getLogger("Call:ViewModel")
 
     private val _callState: MutableStateFlow<Call?> =
         MutableStateFlow(null)
@@ -74,31 +78,30 @@ public class CallViewModel(
     private val _isShowingSettings = MutableStateFlow(false)
     public val isShowingSettings: StateFlow<Boolean> = _isShowingSettings
 
-    public fun init(
-        callId: String,
-        sfuUrl: String,
-        userToken: String,
-        iceServers: List<IceServer>,
-        callSettings: CallSettings
-    ) {
+    public fun createCall() {
+        logger.d { "[createCall] input: $input" }
         // this._callState.value = videoClient.getCall(callId) TODO - load details
 
         streamCalls.createCallClient(
-            sfuUrl.removeSuffix("/twirp"),
-            userToken,
-            iceServers,
+            input.sfuUrl.removeSuffix("/twirp"),
+            input.userToken,
+            input.iceServers,
             credentialsProvider
         )
         _isVideoInitialized.value = true
 
-        connectToCall(callSettings)
+        connectToCall(callSettings = CallSettings(
+            audioOn = true,
+            videoOn = false,
+            speakerOn = true
+        ))
     }
 
     private fun connectToCall(callSettings: CallSettings) {
         viewModelScope.launch {
             val callResult = streamCalls.connectToCall(
                 UUID.randomUUID().toString(),
-                true,
+                true/*false*/,
                 callSettings
             )
 
@@ -190,4 +193,11 @@ public class CallViewModel(
     public fun selectAudioDevice(device: AudioDevice) {
         streamCalls.selectAudioDevice(device)
     }
+
+    public data class CallInput(
+        internal val callId: String,
+        internal val sfuUrl: String,
+        internal val userToken: String,
+        internal val iceServers: List<IceServer>,
+    )
 }

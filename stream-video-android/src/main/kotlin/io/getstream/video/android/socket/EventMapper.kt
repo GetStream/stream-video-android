@@ -24,9 +24,9 @@ import io.getstream.video.android.events.CallUpdatedEvent
 import io.getstream.video.android.events.HealthCheckEvent
 import io.getstream.video.android.events.UnknownEvent
 import io.getstream.video.android.events.VideoEvent
-import io.getstream.video.android.events.model.toCallDetails
-import io.getstream.video.android.events.model.toCallInfo
-import io.getstream.video.android.events.model.toCallUsers
+import io.getstream.video.android.model.toCallDetails
+import io.getstream.video.android.model.toCallInfo
+import io.getstream.video.android.model.toCallUsers
 import stream.video.coordinator.client_v1_rpc.WebsocketEvent
 
 internal object EventMapper {

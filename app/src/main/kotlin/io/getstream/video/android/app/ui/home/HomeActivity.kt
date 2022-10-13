@@ -23,8 +23,10 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -33,6 +35,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.CircularProgressIndicator
@@ -44,20 +49,27 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
+import androidx.compose.ui.Alignment.Companion.CenterVertically
+import androidx.compose.ui.Alignment.Companion.TopStart
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
-import io.getstream.video.android.app.VideoApp
+import io.getstream.logging.StreamLog
 import io.getstream.video.android.app.model.HomeScreenOption
 import io.getstream.video.android.app.ui.call.CallActivity
 import io.getstream.video.android.app.ui.components.UserList
 import io.getstream.video.android.app.ui.incoming.IncomingCallActivity
 import io.getstream.video.android.app.ui.login.LoginActivity
 import io.getstream.video.android.app.utils.getUsers
+import io.getstream.video.android.app.videoApp
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.avatar.Avatar
 import io.getstream.video.android.events.CallCreatedEvent
 import io.getstream.video.android.events.VideoEvent
 import io.getstream.video.android.model.IceServer
@@ -69,19 +81,24 @@ import kotlinx.coroutines.launch
 
 class HomeActivity : AppCompatActivity() {
 
+    private val logger = StreamLog.getLogger("Call:HomeView")
+
     private val controller by lazy {
-        VideoApp.streamCalls
+        logger.d { "[initController] no args" }
+        videoApp.streamCalls
     }
 
     private val selectedOption: MutableState<HomeScreenOption> =
         mutableStateOf(HomeScreenOption.CREATE_CALL)
 
-    private val participantsOptions: MutableState<List<UserCredentials>> =
+    private val participantsOptions: MutableState<List<UserCredentials>> by lazy {
         mutableStateOf(
             getUsers().filter {
                 it.id != controller.getUser().id
             }
         )
+    }
+
 
     private val callIdState: MutableState<String> = mutableStateOf("call:123")
 
@@ -89,18 +106,23 @@ class HomeActivity : AppCompatActivity() {
 
     private val socketListener = object : SocketListener {
         override fun onEvent(event: VideoEvent) {
-            if (event is CallCreatedEvent) {
+            /*if (event is CallCreatedEvent) {
                 startActivity(
                     IncomingCallActivity.getLaunchIntent(
                         this@HomeActivity,
                         event
                     )
                 )
-            }
+            }*/
         }
     }
 
+    init {
+        logger.i { "<init> this: $this" }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        logger.d { "[onCreate] savedInstanceState: $savedInstanceState" }
         super.onCreate(savedInstanceState)
         controller.addSocketListener(socketListener)
         setContent {
@@ -118,6 +140,7 @@ class HomeActivity : AppCompatActivity() {
     @Composable
     private fun HomeScreen() {
         Box(modifier = Modifier.fillMaxSize()) {
+            UserIcon()
             Column(modifier = Modifier.fillMaxSize()) {
                 CallOptions()
 
@@ -134,7 +157,7 @@ class HomeActivity : AppCompatActivity() {
                 Button(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 32.dp),
+                        .padding(horizontal = 16.dp),
                     onClick = ::logOut,
                     colors = ButtonDefaults.buttonColors(
                         backgroundColor = VideoTheme.colors.errorAccent,
@@ -156,7 +179,7 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun logOut() {
-        VideoApp.userPreferences.clear()
+        videoApp.userPreferences.clear()
         startActivity(Intent(this, LoginActivity::class.java))
         finish()
     }
@@ -169,10 +192,12 @@ class HomeActivity : AppCompatActivity() {
 
         val isDataValid = callIdState.value.isNotBlank()
 
+        Spacer(modifier = Modifier.height(16.dp))
+
         Button(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 32.dp)
+                .padding(horizontal = 16.dp)
                 .align(CenterHorizontally),
             enabled = isDataValid,
             onClick = {
@@ -304,6 +329,30 @@ class HomeActivity : AppCompatActivity() {
         UserList(userItems = users, onClick = { user ->
             toggleSelectState(user, users)
         })
+    }
+
+    @Composable
+    fun BoxScope.UserIcon() {
+        val user = videoApp.credentialsProvider.getUserCredentials()
+        Box(
+            modifier = Modifier
+                .padding(top = 8.dp, start = 8.dp)
+                .align(TopStart)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(46.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colors.secondary)
+            ) {
+                Avatar(
+                    imageUrl = user.imageUrl.orEmpty(),
+                    initials = user.name,
+                    modifier = Modifier.size(40.dp)
+                        .align(Center)
+                )
+            }
+        }
     }
 
     private fun navigateToCall(

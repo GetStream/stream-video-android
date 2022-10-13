@@ -27,8 +27,8 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.CallTopAppbar
 import io.getstream.video.android.compose.ui.components.background.CallBackground
 import io.getstream.video.android.compose.ui.components.mock.mockParticipantList
-import io.getstream.video.android.events.model.CallInfo
-import io.getstream.video.android.events.model.CallUser
+import io.getstream.video.android.model.CallInfo
+import io.getstream.video.android.model.CallUser
 
 @Composable
 public fun IncomingCall(
