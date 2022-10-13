@@ -24,7 +24,7 @@ internal interface StreamCallEngine {
 
     val callState: StateFlow<StreamCallState>
 
-    suspend fun onCallJoined(joinedCall: JoinedCall)
+    fun onCallJoined(joinedCall: JoinedCall)
 
-    fun onLeaveCall()
+    fun onCallLeaved()
 }

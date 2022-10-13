@@ -68,49 +68,45 @@ internal class StreamCallEngineImpl(
     override val callState: StateFlow<StreamCallState> = _callState
 
     override fun onEvent(event: VideoEvent) {
-        scope.launchWithLock(mutex) {
-            logger.v { "[onEvent] event: $event" }
-            when (event) {
-                is AudioMutedEvent -> {}
-                is AudioUnmutedEvent -> {}
-                is CallCreatedEvent -> onCallCreated(event)
-                is CallMembersDeletedEvent -> {}
-                is CallMembersUpdatedEvent -> {}
-                is CallUpdatedEvent -> {}
-                is CallAcceptedEvent -> {}
-                is CallRejectedEvent -> {}
-                is CallEndedEvent -> onCallFinished()
-                is CallCanceledEvent -> onCallFinished()
-                is ConnectedEvent -> {}
-                is HealthCheckEvent -> {}
-                is ParticipantJoinedEvent -> {}
-                is ParticipantLeftEvent -> {}
-                is VideoStartedEvent -> {}
-                is VideoStoppedEvent -> {}
-                is UnknownEvent -> {}
-            }
+        logger.v { "[onEvent] event: $event" }
+        when (event) {
+            is AudioMutedEvent -> {}
+            is AudioUnmutedEvent -> {}
+            is CallCreatedEvent -> onCallCreated(event)
+            is CallMembersDeletedEvent -> {}
+            is CallMembersUpdatedEvent -> {}
+            is CallUpdatedEvent -> {}
+            is CallAcceptedEvent -> {}
+            is CallRejectedEvent -> {}
+            is CallEndedEvent -> onCallFinished()
+            is CallCanceledEvent -> onCallFinished()
+            is ConnectedEvent -> {}
+            is HealthCheckEvent -> {}
+            is ParticipantJoinedEvent -> {}
+            is ParticipantLeftEvent -> {}
+            is VideoStartedEvent -> {}
+            is VideoStoppedEvent -> {}
+            is UnknownEvent -> {}
         }
     }
 
-    override suspend fun onCallJoined(joinedCall: JoinedCall) {
+    override fun onCallJoined(joinedCall: JoinedCall) = scope.launchWithLock(mutex) {
         _callState.emit(StreamCallState.InCall(joinedCall))
     }
 
-    private suspend fun onCallFinished() {
+    override fun onCallLeaved() = scope.launchWithLock(mutex) {
         _callState.emit(StreamCallState.Idle)
     }
 
-    override fun onLeaveCall() {
-        scope.launchWithLock(mutex) {
-            _callState.emit(StreamCallState.Idle)
-        }
+    private fun onCallFinished() = scope.launchWithLock(mutex) {
+        _callState.emit(StreamCallState.Idle)
     }
 
-    private suspend fun onCallCreated(event: CallCreatedEvent) {
+    private fun onCallCreated(event: CallCreatedEvent) = scope.launchWithLock(mutex) {
         val state = _callState.value
         if (state !is StreamCallState.Idle) {
             logger.w { "[onCallCreated] rejected (state is not Idle): $state" }
-            return
+            return@launchWithLock
         }
         _callState.emit(
             event.run {
@@ -128,8 +124,10 @@ internal class StreamCallEngineImpl(
 private fun CoroutineScope.launchWithLock(
     mutex: Mutex,
     action: suspend CoroutineScope.() -> Unit
-) = launch {
-    mutex.withLock {
-        action()
+) {
+    launch {
+        mutex.withLock {
+            action()
+        }
     }
 }

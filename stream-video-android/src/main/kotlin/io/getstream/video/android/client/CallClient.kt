@@ -79,7 +79,7 @@ public class CallClient(
     }
 
     /**
-     * @see CallCoordinatorClient.createCall for details.
+     * @see CallCoordinatorClient.getOrCreateCall for details.
      */
     public suspend fun getOrCreateCall(
         type: String,
@@ -87,7 +87,7 @@ public class CallClient(
         participantIds: List<String>,
         ringing: Boolean
     ): Result<CreateCallResponse> {
-        logger.d { "[createCall] type: $type, id: $id, participantIds: $participantIds" }
+        logger.d { "[getOrCreateCall] type: $type, id: $id, participantIds: $participantIds" }
         return callCoordinatorClient.getOrCreateCall(
             CreateCallRequest(
                 type = type,
@@ -99,7 +99,7 @@ public class CallClient(
                     ring = ringing
                 )
             )
-        ).also { logger.v { "[createCall] result: $it" } }
+        ).also { logger.v { "[getOrCreateCall] result: $it" } }
     }
 
     /**

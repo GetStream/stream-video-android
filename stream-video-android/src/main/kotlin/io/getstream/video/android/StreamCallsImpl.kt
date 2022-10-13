@@ -42,7 +42,7 @@ import io.getstream.video.android.token.CredentialsProvider
 import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Result
 import io.getstream.video.android.utils.Success
-import io.getstream.video.android.utils.onSuccessSuspend
+import io.getstream.video.android.utils.onSuccess
 import io.getstream.video.android.utils.toCall
 import io.getstream.video.android.webrtc.WebRTCClient
 import io.getstream.video.android.webrtc.builder.WebRTCClientBuilder
@@ -104,7 +104,7 @@ public class StreamCallsImpl(
     /**
      * Domain - Coordinator.
      */
-    override suspend fun createCall(
+    override suspend fun getOrCreateCall(
         type: String,
         id: String,
         participantIds: List<String>,
@@ -129,23 +129,43 @@ public class StreamCallsImpl(
         return callClient.createAndJoinCall(type, id, participantIds, ringing)
     }
 
-    override suspend fun joinCall(type: String, id: String): Result<JoinedCall> {
-        logger.d { "[joinCall] type: $type, id: $id" }
-
-        return when (val callResult = callClient.getOrCreateCall(type, id, emptyList(), false)) {
-            is Success -> {
-                val metadata = callResult.data.call?.toCall()!!
-
-                joinCall(metadata)
+    override suspend fun acceptCall(type: String, id: String): Result<JoinedCall> {
+        logger.d { "[acceptCall] type: $type, id: $id" }
+        // TODO engine.onCallAccepting()
+        val eventResult = sendEvent(id, type, UserEventType.USER_EVENT_TYPE_ACCEPTED_CALL)
+        logger.v { "[acceptCall] eventResult: $eventResult" }
+        return when (eventResult) {
+            is Failure -> eventResult.also {
+                // TODO engine.onCallJoinFailed()
             }
-            is Failure -> callResult
+            is Success -> {
+                val getOrCreateResult = callClient.getOrCreateCall(type, id, emptyList(), false)
+                logger.v { "[acceptCall] getOrCreateResult: $getOrCreateResult" }
+                when (getOrCreateResult) {
+                    is Success -> {
+                        val metadata = getOrCreateResult.data.call?.toCall()
+                            ?: error("[acceptCall] no CallEnvelope found")
+                        callClient.joinCall(metadata).also { joinResult ->
+                            when (joinResult) {
+                                is Success -> engine.onCallJoined(joinResult.data)
+                                is Failure -> {
+                                    // TODO engine.onCallJoinFailed()
+                                }
+                            }
+                        }
+                    }
+                    is Failure -> getOrCreateResult.also {
+                        // TODO engine.onCallJoinFailed()
+                    }
+                }
+            }
         }
     }
 
     override suspend fun joinCall(call: CallMetadata): Result<JoinedCall> {
         logger.d { "[joinCall] call: $call" }
         return callClient.joinCall(call).also {
-            it.onSuccessSuspend { data ->
+            it.onSuccess { data ->
                 engine.onCallJoined(data)
             }
         }
@@ -172,7 +192,7 @@ public class StreamCallsImpl(
     override fun leaveCall() {
         credentialsProvider.setSfuToken(null)
         socket.updateCallState(null)
-        engine.onLeaveCall()
+        engine.onCallLeaved()
         webRTCClient?.clear()
     }
 

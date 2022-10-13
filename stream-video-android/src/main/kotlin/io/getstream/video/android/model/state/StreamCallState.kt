@@ -25,21 +25,36 @@ public sealed interface StreamCallState {
 
     public object Idle : StreamCallState
 
+    public data class Drop(
+        val reason: DropReason
+    ) : StreamCallState
+
+    public data class Creating(
+        val users: Map<String, CallUser>,
+    ) : StreamCallState
+
+    public interface Created : StreamCallState
+
     public data class Outgoing(
         val callId: String,
         val users: Map<String, CallUser>,
-        val info: CallInfo?,
-        val details: CallDetails?
-    )
+        val info: CallInfo,
+        val details: CallDetails
+    ) : Created
 
     public data class Incoming(
         val callId: String,
         val users: Map<String, CallUser>,
-        val info: CallInfo?,
-        val details: CallDetails?
-    ) : StreamCallState
+        val info: CallInfo,
+        val details: CallDetails
+    ) : Created
 
     public data class InCall(
         val joinedCall: JoinedCall
-    ) : StreamCallState
+    ) : Created
+}
+
+public sealed class DropReason {
+    public object Cancelled : DropReason()
+    public object Timeout : DropReason()
 }

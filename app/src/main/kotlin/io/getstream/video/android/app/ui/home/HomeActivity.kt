@@ -19,7 +19,6 @@ package io.getstream.video.android.app.ui.home
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
@@ -73,7 +72,6 @@ import io.getstream.video.android.model.UserCredentials
 import io.getstream.video.android.socket.SocketListener
 import io.getstream.video.android.utils.onError
 import io.getstream.video.android.utils.onSuccess
-import io.getstream.video.android.utils.onSuccessSuspend
 import kotlinx.coroutines.launch
 
 class HomeActivity : AppCompatActivity() {
@@ -189,7 +187,7 @@ class HomeActivity : AppCompatActivity() {
                 .align(CenterHorizontally),
             enabled = isDataValid,
             onClick = {
-                joinCall(
+                dial(
                     callId = callIdState.value,
                     participants = participantsOptions.value.filter { it.isSelected }.map { it.id }
                 )
@@ -209,14 +207,11 @@ class HomeActivity : AppCompatActivity() {
         Button(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 32.dp)
+                .padding(horizontal = 16.dp)
                 .align(CenterHorizontally),
             enabled = isDataValid,
             onClick = {
-                joinCall(
-                    callId = callIdState.value,
-                    participants = participantsOptions.value.filter { it.isSelected }.map { it.id }
-                )
+                joinCall(callId = callIdState.value)
             },
             content = {
                 Text(text = "Join call")
@@ -224,50 +219,57 @@ class HomeActivity : AppCompatActivity() {
         )
     }
 
-    private fun joinCall(callId: String, participants: List<String> = emptyList()) {
+    private fun dial(callId: String, participants: List<String> = emptyList()) {
         lifecycleScope.launch {
+            logger.d { "[dial] callId: $callId, participants: $participants" }
+            if (participants.isEmpty()) {
+                logger.d { "[dial] rejected (no participants)" }
+                Toast.makeText(this@HomeActivity, "Please select participants", Toast.LENGTH_SHORT).show()
+                return@launch
+            }
             loadingState.value = true
-            val isRinging = participants.isNotEmpty()
-
-            if (isRinging) {
-                val createdCall = controller.createCall("default", callId, participants, true)
-
-                createdCall.onSuccess { callMetadata ->
-                    loadingState.value = false
-                    startActivity(
-                        OutgoingCallActivity.getIntent(
-                            this@HomeActivity,
-                            callMetadata
-                        )
+            val result = controller.getOrCreateCall("default", callId, participants, true)
+            result.onSuccess { callMetadata ->
+                logger.v { "[dial] succeed: $callMetadata" }
+                loadingState.value = false
+                startActivity(
+                    OutgoingCallActivity.getIntent(
+                        this@HomeActivity,
+                        callMetadata
                     )
-                }
-            } else {
-                joinMeetingCall(callId, participants)
+                )
+            }
+            result.onError {
+                logger.e { "[dial] failed: $it" }
+                Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
             }
         }
     }
 
-    private suspend fun joinMeetingCall(callId: String, participants: List<String>) {
-        val createCallResult = controller.createAndJoinCall(
-            "default", // TODO - hardcoded for now
-            id = callId,
-            participantIds = participants.toList(),
-            ringing = false
-        )
-
-        createCallResult.onSuccessSuspend { response ->
-            loadingState.value = false
-            navigateToCall(
-                response.call.cid,
-                response.callUrl,
-                response.userToken,
-                response.iceServers
+    private fun joinCall(callId: String) {
+        lifecycleScope.launch {
+            logger.d { "[joinCall] callId: $callId" }
+            loadingState.value = true
+            val result = controller.createAndJoinCall(
+                "default", // TODO - hardcoded for now
+                id = callId,
+                participantIds = emptyList(),
+                ringing = false
             )
-        }
-        createCallResult.onError {
-            Log.d("Couldn't select server", it.message ?: "")
-            Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
             loadingState.value = false
+            result.onSuccess {
+                logger.v { "[joinCall] succeed: $it" }
+                navigateToCall(
+                    it.call.cid,
+                    it.callUrl,
+                    it.userToken,
+                    it.iceServers
+                )
+            }
+            result.onError {
+                logger.e { "[joinCall] failed: $it" }
+                Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
+            }
         }
     }
 

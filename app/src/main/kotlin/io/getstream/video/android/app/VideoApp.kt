@@ -28,7 +28,6 @@ import io.getstream.video.android.app.lifecycle.StreamActivityLifecycleCallbacks
 import io.getstream.video.android.app.ui.incoming.IncomingCallActivity
 import io.getstream.video.android.app.user.UserPreferences
 import io.getstream.video.android.app.user.UserPreferencesImpl
-import io.getstream.video.android.events.CallCreatedEvent
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.model.state.StreamCallState
 import io.getstream.video.android.token.CredentialsProvider
@@ -97,20 +96,7 @@ class VideoApp : Application() {
             streamCalls.callState.collect { state ->
                 when (state) {
                     is StreamCallState.Incoming -> {
-
-                        val input = state.run {
-                            /**
-                             * [IncomingCallViewModel] will be listening to [streamCalls.callState] as well.
-                             * So [IncomingCallActivity] won't need to any input except [callId]
-                             */
-                            CallCreatedEvent(
-                                callId = callId,
-                                users = users,
-                                info = info,
-                                details = details
-                            )
-                        }
-                        val intent = IncomingCallActivity.getLaunchIntent(applicationContext, input).apply {
+                        val intent = IncomingCallActivity.getLaunchIntent(applicationContext).apply {
                             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                         }
                         startActivity(intent)

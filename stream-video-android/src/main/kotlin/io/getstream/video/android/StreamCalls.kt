@@ -48,7 +48,7 @@ public interface StreamCalls {
      *
      * @return [Result] which contains the [CallMetadata] and its information.
      */
-    public suspend fun createCall(
+    public suspend fun getOrCreateCall(
         type: String,
         id: String,
         participantIds: List<String> = emptyList(),
@@ -83,7 +83,7 @@ public interface StreamCalls {
      * @return [Result] which contains the [JoinedCall] with the auth information required to fully
      * connect.
      */
-    public suspend fun joinCall(type: String, id: String): Result<JoinedCall>
+    public suspend fun acceptCall(type: String, id: String): Result<JoinedCall>
 
     /**
      * Authenticates the user to join a given [CallMetadata].
