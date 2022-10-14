@@ -49,8 +49,8 @@ internal object EventMapper {
             CallCreatedEvent(
                 callId = call_cid,
                 users = socketEvent.users.toCallUsers(),
-                info = socketEvent.calls[call_cid]?.toCallInfo(),
-                details = socketEvent.call_details[call_cid]?.toCallDetails(),
+                info = socketEvent.calls[call_cid].toCallInfo(),
+                details = socketEvent.call_details[call_cid].toCallDetails(),
             )
         }
 
@@ -58,8 +58,8 @@ internal object EventMapper {
             CallUpdatedEvent(
                 callId = call_cid,
                 users = socketEvent.users.toCallUsers(),
-                info = socketEvent.calls[call_cid]?.toCallInfo(),
-                details = socketEvent.call_details[call_cid]?.toCallDetails(),
+                info = socketEvent.calls[call_cid].toCallInfo(),
+                details = socketEvent.call_details[call_cid].toCallDetails(),
             )
         }
 
@@ -67,8 +67,8 @@ internal object EventMapper {
             CallEndedEvent(
                 callId = call_cid,
                 users = socketEvent.users.toCallUsers(),
-                info = socketEvent.calls[call_cid]?.toCallInfo(),
-                details = socketEvent.call_details[call_cid]?.toCallDetails(),
+                info = socketEvent.calls[call_cid].toCallInfo(),
+                details = socketEvent.call_details[call_cid].toCallDetails(),
             )
         }
 
@@ -76,8 +76,8 @@ internal object EventMapper {
             CallMembersUpdatedEvent(
                 callId = call_cid,
                 users = socketEvent.users.toCallUsers(),
-                info = socketEvent.calls[call_cid]?.toCallInfo(),
-                details = socketEvent.call_details[call_cid]?.toCallDetails(),
+                info = socketEvent.calls[call_cid].toCallInfo(),
+                details = socketEvent.call_details[call_cid].toCallDetails(),
             )
         }
 
@@ -85,8 +85,8 @@ internal object EventMapper {
             CallMembersDeletedEvent(
                 callId = call_cid,
                 users = socketEvent.users.toCallUsers(),
-                info = socketEvent.calls[call_cid]?.toCallInfo(),
-                details = socketEvent.call_details[call_cid]?.toCallDetails(),
+                info = socketEvent.calls[call_cid].toCallInfo(),
+                details = socketEvent.call_details[call_cid].toCallDetails(),
             )
         }
 

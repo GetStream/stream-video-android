@@ -24,10 +24,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import io.getstream.logging.StreamLog
 import io.getstream.video.android.app.FakeCredentialsProvider
-import io.getstream.video.android.app.ui.call.CallActivity
+import io.getstream.video.android.app.router.StreamRouterImpl
 import io.getstream.video.android.app.videoApp
 import io.getstream.video.android.logging.LoggingLevel
-import io.getstream.video.android.model.IceServer
+import io.getstream.video.android.model.CallInput
+import io.getstream.video.android.router.StreamRouter
 import io.getstream.video.android.utils.onError
 import io.getstream.video.android.utils.onSuccessSuspend
 import kotlinx.coroutines.launch
@@ -39,6 +40,8 @@ class DeeplinkingActivity : AppCompatActivity() {
     private val controller by lazy {
         videoApp.streamCalls
     }
+
+    private val router: StreamRouter by lazy { StreamRouterImpl(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         logger.d { "[onCreate] savedInstanceState: $savedInstanceState" }
@@ -57,20 +60,17 @@ class DeeplinkingActivity : AppCompatActivity() {
 
     private fun joinCall(callId: String) {
         lifecycleScope.launch {
-
-            val createCallResult = controller.createAndJoinCall(
-                "default", // TODO - hardcoded for now
-                id = callId,
-                participantIds = emptyList(),
-                false
-            )
+            val createCallResult = controller.joinCall("default", callId)
 
             createCallResult.onSuccessSuspend { response ->
-                navigateToCall(
-                    response.call.cid,
-                    response.callUrl,
-                    response.userToken,
-                    response.iceServers
+                router.navigateToCall(
+                    CallInput(
+                        response.call.id,
+                        response.callUrl,
+                        response.userToken,
+                        response.iceServers
+                    ),
+                    finishCurrent = true
                 )
             }
             createCallResult.onError {
@@ -80,23 +80,13 @@ class DeeplinkingActivity : AppCompatActivity() {
         }
     }
 
-    private fun navigateToCall(
-        callId: String,
-        signalUrl: String,
-        userToken: String,
-        iceServers: List<IceServer>
-    ) {
-        val intent = CallActivity.getIntent(this, callId, signalUrl, userToken, iceServers)
-        startActivity(intent)
-    }
-
     private fun logIn() {
         val selectedUser = videoApp.userPreferences.getCachedCredentials()
         logger.d { "[logIn] selectedUser: $selectedUser" }
         videoApp.initializeStreamCalls(
             credentialsProvider = FakeCredentialsProvider(
                 userCredentials = selectedUser,
-                apiKey = "key1"
+                apiKey = "key10"
             ),
             loggingLevel = LoggingLevel.BODY
         )

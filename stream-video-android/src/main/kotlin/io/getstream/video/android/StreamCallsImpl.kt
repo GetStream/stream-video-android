@@ -42,7 +42,8 @@ import io.getstream.video.android.token.CredentialsProvider
 import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Result
 import io.getstream.video.android.utils.Success
-import io.getstream.video.android.utils.onSuccessSuspend
+import io.getstream.video.android.utils.onError
+import io.getstream.video.android.utils.onSuccess
 import io.getstream.video.android.utils.toCall
 import io.getstream.video.android.webrtc.WebRTCClient
 import io.getstream.video.android.webrtc.builder.WebRTCClientBuilder
@@ -71,11 +72,6 @@ public class StreamCallsImpl(
     private val scope = CoroutineScope(DispatcherProvider.IO)
 
     private val engine = StreamCallEngineImpl(scope)
-
-    /**
-     * Domain - WebRTC.
-     */
-    private var webRTCClient: WebRTCClient? = null
 
     /**
      * Observes the app lifecycle and attempts to reconnect/release the socket connection.
@@ -111,9 +107,30 @@ public class StreamCallsImpl(
         ringing: Boolean
     ): Result<CallMetadata> {
         logger.d { "[createCall] type: $type, id: $id, participantIds: $participantIds" }
-        return when (val result = callClient.getOrCreateCall(type, id, participantIds, ringing)) {
+        return when (val result = callClient.createCall(type, id, participantIds, ringing)) {
             is Success -> {
                 Success(result.data.call?.toCall()!!)
+            }
+            is Failure -> Failure(result.error)
+        }
+    }
+
+    override suspend fun getOrCreateCall(
+        type: String,
+        id: String,
+        participantIds: List<String>,
+        ringing: Boolean
+    ): Result<CallMetadata> {
+        logger.d { "[createCall] type: $type, id: $id, participantIds: $participantIds" }
+        return when (val result = callClient.getOrCreateCall(type, id, participantIds, ringing)) {
+            is Success -> {
+                val callMetadata = result.data.call?.toCall()!!
+
+                Success(callMetadata).also {
+                    if (ringing) {
+                        engine.onOutgoingCall(callMetadata)
+                    }
+                }
             }
             is Failure -> Failure(result.error)
         }
@@ -131,23 +148,28 @@ public class StreamCallsImpl(
 
     override suspend fun joinCall(type: String, id: String): Result<JoinedCall> {
         logger.d { "[joinCall] type: $type, id: $id" }
+        engine.onConnecting()
 
-        return when (val callResult = callClient.getOrCreateCall(type, id, emptyList(), false)) {
+        val getOrCreateResult = callClient.getOrCreateCall(type, id, emptyList(), false)
+        logger.v { "[joinCall] getOrCreateResult: $getOrCreateResult" }
+        return when (getOrCreateResult) {
             is Success -> {
-                val metadata = callResult.data.call?.toCall()!!
+                val metadata = getOrCreateResult.data.call?.toCall()
+                    ?: error("[joinCall] no CallEnvelope found")
 
                 joinCall(metadata)
             }
-            is Failure -> callResult
+            is Failure -> getOrCreateResult.also {
+                engine.resetCallState()
+            }
         }
     }
 
     override suspend fun joinCall(call: CallMetadata): Result<JoinedCall> {
         logger.d { "[joinCall] call: $call" }
         return callClient.joinCall(call).also {
-            it.onSuccessSuspend { data ->
-                engine.onCallJoined(data)
-            }
+            it.onSuccess { data -> engine.onCallJoined(data) }
+            it.onError { engine.resetCallState() }
         }
     }
 
@@ -164,15 +186,10 @@ public class StreamCallsImpl(
         )
     }
 
-    override suspend fun sendEvent(userEventType: UserEventType): Result<Boolean> {
-        logger.d { "[sendEvent] event type: $userEventType" }
-        return callClient.sendUserEvent(userEventType)
-    }
-
-    override fun leaveCall() {
+    override fun clearCallState() {
         credentialsProvider.setSfuToken(null)
         socket.updateCallState(null)
-        engine.onLeaveCall()
+        engine.resetCallState()
         webRTCClient?.clear()
     }
 
@@ -194,6 +211,11 @@ public class StreamCallsImpl(
 
     override fun removeSocketListener(socketListener: SocketListener): Unit =
         socket.removeListener(socketListener)
+
+    /**
+     * Domain - WebRTC.
+     */
+    private var webRTCClient: WebRTCClient? = null
 
     override fun createCallClient(
         signalUrl: String,

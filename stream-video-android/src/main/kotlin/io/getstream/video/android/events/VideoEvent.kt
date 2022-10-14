@@ -48,8 +48,8 @@ public data class HealthCheckEvent(
 public data class CallCreatedEvent(
     val callId: String,
     val users: Map<String, CallUser>,
-    val info: CallInfo?,
-    val details: CallDetails?
+    val info: CallInfo,
+    val details: CallDetails
 ) : VideoEvent()
 
 /**
@@ -58,8 +58,8 @@ public data class CallCreatedEvent(
 public data class CallUpdatedEvent(
     val callId: String,
     val users: Map<String, CallUser>,
-    val info: CallInfo?,
-    val details: CallDetails?
+    val info: CallInfo,
+    val details: CallDetails
 ) : VideoEvent()
 
 /**
@@ -68,8 +68,8 @@ public data class CallUpdatedEvent(
 public data class CallEndedEvent(
     val callId: String,
     val users: Map<String, CallUser>,
-    val info: CallInfo?,
-    val details: CallDetails?
+    val info: CallInfo,
+    val details: CallDetails
 ) : VideoEvent()
 
 /**
@@ -78,8 +78,8 @@ public data class CallEndedEvent(
 public data class CallMembersUpdatedEvent(
     val callId: String,
     val users: Map<String, CallUser>,
-    val info: CallInfo?,
-    val details: CallDetails?
+    val info: CallInfo,
+    val details: CallDetails
 ) : VideoEvent()
 
 /**
@@ -88,8 +88,8 @@ public data class CallMembersUpdatedEvent(
 public data class CallMembersDeletedEvent(
     val callId: String,
     val users: Map<String, CallUser>,
-    val info: CallInfo?,
-    val details: CallDetails?
+    val info: CallInfo,
+    val details: CallDetails
 ) : VideoEvent()
 
 /**

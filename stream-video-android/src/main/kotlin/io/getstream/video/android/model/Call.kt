@@ -157,7 +157,6 @@ public class Call(
             mediaStream.audioTracks.forEach { track ->
                 logger.v { "[addStream] #sfu; audioTrack: ${track.stringify()}" }
                 track.setEnabled(true)
-                track.setVolume(16.5)
             }
 
             remoteAudioTracks.addAll(mediaStream.audioTracks)

@@ -14,22 +14,26 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.engine
+package io.getstream.video.android.router
 
-import io.getstream.video.android.model.CallMetadata
-import io.getstream.video.android.model.JoinedCall
-import io.getstream.video.android.model.state.StreamCallState
-import kotlinx.coroutines.flow.StateFlow
+import io.getstream.video.android.model.CallInput
+import io.getstream.video.android.model.IncomingCallData
+import io.getstream.video.android.model.OutgoingCallData
 
-internal interface StreamCallEngine {
+public interface StreamRouter {
 
-    val callState: StateFlow<StreamCallState>
+    public fun navigateToCall(
+        callInput: CallInput,
+        finishCurrent: Boolean
+    )
 
-    fun onCallJoined(joinedCall: JoinedCall)
+    public fun onIncomingCall(callData: IncomingCallData)
 
-    fun onCallConnecting()
+    public fun onOutgoingCall(callData: OutgoingCallData)
 
-    fun onOutgoingCall(callMetadata: CallMetadata)
+    public fun finish()
 
-    fun resetCallState()
+    public fun onCallFailed(reason: String?)
+
+    public fun onUserLoggedOut()
 }

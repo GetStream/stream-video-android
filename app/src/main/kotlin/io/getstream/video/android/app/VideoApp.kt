@@ -19,18 +19,14 @@ package io.getstream.video.android.app
 import android.app.Activity
 import android.app.Application
 import android.content.Context
-import android.content.Intent
 import io.getstream.logging.StreamLog
 import io.getstream.logging.android.AndroidStreamLogger
 import io.getstream.video.android.StreamCalls
 import io.getstream.video.android.StreamCallsBuilder
 import io.getstream.video.android.app.lifecycle.StreamActivityLifecycleCallbacks
-import io.getstream.video.android.app.ui.incoming.IncomingCallActivity
 import io.getstream.video.android.app.user.UserPreferences
 import io.getstream.video.android.app.user.UserPreferencesImpl
-import io.getstream.video.android.events.CallCreatedEvent
 import io.getstream.video.android.logging.LoggingLevel
-import io.getstream.video.android.model.state.StreamCallState
 import io.getstream.video.android.token.CredentialsProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -85,7 +81,6 @@ class VideoApp : Application() {
             credentialsProvider = credentialsProvider,
             loggingLevel = loggingLevel
         ).build().also {
-            // TODO can we initialize streamCalls directly in VideoApp?
             streamCalls = it
             observeState()
             StreamLog.v(TAG) { "[initializeStreamCalls] completed" }
@@ -95,28 +90,7 @@ class VideoApp : Application() {
     private fun observeState() {
         appScope.launch {
             streamCalls.callState.collect { state ->
-                when (state) {
-                    is StreamCallState.Incoming -> {
-
-                        val input = state.run {
-                            /**
-                             * [IncomingCallViewModel] will be listening to [streamCalls.callState] as well.
-                             * So [IncomingCallActivity] won't need to any input except [callId]
-                             */
-                            CallCreatedEvent(
-                                callId = callId,
-                                users = users,
-                                info = info,
-                                details = details
-                            )
-                        }
-                        val intent = IncomingCallActivity.getLaunchIntent(applicationContext, input).apply {
-                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        }
-                        startActivity(intent)
-                    }
-                    else -> {}
-                }
+                // TODO - do we need any custom impl here? (useful for users to expose)
             }
         }
     }

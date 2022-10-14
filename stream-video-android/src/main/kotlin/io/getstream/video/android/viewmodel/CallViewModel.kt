@@ -23,10 +23,10 @@ import io.getstream.logging.StreamLog
 import io.getstream.video.android.StreamCalls
 import io.getstream.video.android.audio.AudioDevice
 import io.getstream.video.android.model.Call
+import io.getstream.video.android.model.CallInput
 import io.getstream.video.android.model.CallParticipant
 import io.getstream.video.android.model.CallParticipantState
 import io.getstream.video.android.model.CallSettings
-import io.getstream.video.android.model.IceServer
 import io.getstream.video.android.token.CredentialsProvider
 import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Success
@@ -78,12 +78,12 @@ public class CallViewModel(
     private val _isShowingSettings = MutableStateFlow(false)
     public val isShowingSettings: StateFlow<Boolean> = _isShowingSettings
 
-    public fun createCall() {
+    public fun connectToCall() {
         logger.d { "[createCall] input: $input" }
         // this._callState.value = videoClient.getCall(callId) TODO - load details
 
         streamCalls.createCallClient(
-            input.sfuUrl.removeSuffix("/twirp"),
+            input.callUrl.removeSuffix("/twirp"),
             input.userToken,
             input.iceServers,
             credentialsProvider
@@ -180,7 +180,7 @@ public class CallViewModel(
     }
 
     private fun clearState() {
-        streamCalls.leaveCall()
+        streamCalls.clearCallState()
         viewModelScope.cancel()
         val room = _callState.value ?: return
 
@@ -195,11 +195,4 @@ public class CallViewModel(
     public fun selectAudioDevice(device: AudioDevice) {
         streamCalls.selectAudioDevice(device)
     }
-
-    public data class CallInput(
-        internal val callId: String,
-        internal val sfuUrl: String,
-        internal val userToken: String,
-        internal val iceServers: List<IceServer>,
-    )
 }

@@ -83,17 +83,23 @@ public fun ProtoMember.toCallMember(): CallMember = CallMember(
     updatedAt = updated_at?.let { Date(it.toEpochMilli()) },
 )
 
-public fun ProtoCallDetails.toCallDetails(): CallDetails = CallDetails(
-    memberUserIds = member_user_ids,
-    members = members.map { (userId, protoMember) ->
-        userId to protoMember.toCallMember()
-    }.toMap()
-)
+public fun ProtoCallDetails?.toCallDetails(): CallDetails {
+    this ?: error("CallDetails is not provided")
+    return CallDetails(
+        memberUserIds = member_user_ids,
+        members = members.map { (userId, protoMember) ->
+            userId to protoMember.toCallMember()
+        }.toMap()
+    )
+}
 
-public fun ProtoCall.toCallInfo(): CallInfo = CallInfo(
-    cid = call_cid,
-    type = type,
-    createdByUserId = created_by_user_id,
-    createdAt = created_at?.let { Date(it.toEpochMilli()) },
-    updatedAt = updated_at?.let { Date(it.toEpochMilli()) },
-)
+public fun ProtoCall?.toCallInfo(): CallInfo {
+    this ?: error("CallInfo is not provided")
+    return CallInfo(
+        cid = call_cid,
+        type = type,
+        createdByUserId = created_by_user_id,
+        createdAt = created_at?.let { Date(it.toEpochMilli()) },
+        updatedAt = updated_at?.let { Date(it.toEpochMilli()) },
+    )
+}

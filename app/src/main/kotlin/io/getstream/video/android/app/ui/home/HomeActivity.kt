@@ -19,11 +19,9 @@ package io.getstream.video.android.app.ui.home
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -42,13 +40,14 @@ import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment.Companion.Center
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Alignment.Companion.TopStart
 import androidx.compose.ui.Modifier
@@ -59,31 +58,37 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
 import io.getstream.logging.StreamLog
 import io.getstream.video.android.app.model.HomeScreenOption
-import io.getstream.video.android.app.ui.call.CallActivity
+import io.getstream.video.android.app.router.StreamRouterImpl
 import io.getstream.video.android.app.ui.components.UserList
-import io.getstream.video.android.app.ui.login.LoginActivity
-import io.getstream.video.android.app.ui.outgoing.OutgoingCallActivity
 import io.getstream.video.android.app.utils.getUsers
 import io.getstream.video.android.app.videoApp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.Avatar
+import io.getstream.video.android.events.CallCreatedEvent
 import io.getstream.video.android.events.VideoEvent
-import io.getstream.video.android.model.IceServer
+import io.getstream.video.android.model.CallInfo
+import io.getstream.video.android.model.CallInput
+import io.getstream.video.android.model.CallType
+import io.getstream.video.android.model.IncomingCallData
+import io.getstream.video.android.model.OutgoingCallData
 import io.getstream.video.android.model.UserCredentials
+import io.getstream.video.android.router.StreamRouter
 import io.getstream.video.android.socket.SocketListener
 import io.getstream.video.android.utils.onError
 import io.getstream.video.android.utils.onSuccess
-import io.getstream.video.android.utils.onSuccessSuspend
 import kotlinx.coroutines.launch
+import java.util.*
 
 class HomeActivity : AppCompatActivity() {
 
     private val logger = StreamLog.getLogger("Call:HomeView")
 
-    private val controller by lazy {
-        logger.d { "[initController] no args" }
+    private val streamCalls by lazy {
+        logger.d { "[initStreamCalls] no args" }
         videoApp.streamCalls
     }
+
+    private val router: StreamRouter by lazy { StreamRouterImpl(this) }
 
     private val selectedOption: MutableState<HomeScreenOption> =
         mutableStateOf(HomeScreenOption.CREATE_CALL)
@@ -91,7 +96,7 @@ class HomeActivity : AppCompatActivity() {
     private val participantsOptions: MutableState<List<UserCredentials>> by lazy {
         mutableStateOf(
             getUsers().filter {
-                it.id != controller.getUser().id
+                it.id != streamCalls.getUser().id
             }
         )
     }
@@ -100,8 +105,20 @@ class HomeActivity : AppCompatActivity() {
 
     private val loadingState: MutableState<Boolean> = mutableStateOf(false)
 
+    private val ringingState: MutableState<Boolean> = mutableStateOf(true)
+
     private val socketListener = object : SocketListener {
         override fun onEvent(event: VideoEvent) {
+            if (event is CallCreatedEvent) {
+                // TODO - viewModel ?
+                router.onIncomingCall(
+                    IncomingCallData(
+                        callInfo = event.info,
+                        callType = CallType.fromType(event.info.type),
+                        participants = event.users.values.toList()
+                    )
+                )
+            }
         }
     }
 
@@ -112,7 +129,7 @@ class HomeActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         logger.d { "[onCreate] savedInstanceState: $savedInstanceState" }
         super.onCreate(savedInstanceState)
-        controller.addSocketListener(socketListener)
+        streamCalls.addSocketListener(socketListener)
         setContent {
             VideoTheme {
                 HomeScreen()
@@ -121,7 +138,7 @@ class HomeActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        controller.removeSocketListener(socketListener)
+        streamCalls.removeSocketListener(socketListener)
         super.onDestroy()
     }
 
@@ -148,8 +165,7 @@ class HomeActivity : AppCompatActivity() {
                         .padding(horizontal = 16.dp),
                     onClick = ::logOut,
                     colors = ButtonDefaults.buttonColors(
-                        backgroundColor = VideoTheme.colors.errorAccent,
-                        contentColor = Color.White
+                        backgroundColor = VideoTheme.colors.errorAccent, contentColor = Color.White
                     )
                 ) {
                     Text(text = "Log Out")
@@ -168,8 +184,7 @@ class HomeActivity : AppCompatActivity() {
 
     private fun logOut() {
         videoApp.userPreferences.clear()
-        startActivity(Intent(this, LoginActivity::class.java))
-        finish()
+        router.onUserLoggedOut()
     }
 
     @Composable
@@ -182,6 +197,21 @@ class HomeActivity : AppCompatActivity() {
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        val isRinging by remember { ringingState }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(text = "Call ringing")
+
+            Switch(checked = isRinging, onCheckedChange = { isRinging ->
+                ringingState.value = isRinging
+            })
+        }
+
         Button(
             modifier = Modifier
                 .fillMaxWidth()
@@ -189,15 +219,15 @@ class HomeActivity : AppCompatActivity() {
                 .align(CenterHorizontally),
             enabled = isDataValid,
             onClick = {
-                joinCall(
+                createCall(
                     callId = callIdState.value,
-                    participants = participantsOptions.value.filter { it.isSelected }.map { it.id }
+                    participants = participantsOptions.value.filter { it.isSelected }.map { it.id },
+                    isRinging
                 )
-            },
-            content = {
-                Text(text = "Create call")
             }
-        )
+        ) {
+            Text(text = if (isRinging) "Create call" else "Create meeting")
+        }
     }
 
     @Composable
@@ -209,65 +239,125 @@ class HomeActivity : AppCompatActivity() {
         Button(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 32.dp)
+                .padding(horizontal = 16.dp)
                 .align(CenterHorizontally),
             enabled = isDataValid,
             onClick = {
-                joinCall(
-                    callId = callIdState.value,
-                    participants = participantsOptions.value.filter { it.isSelected }.map { it.id }
-                )
-            },
-            content = {
-                Text(text = "Join call")
+                joinCall(callId = callIdState.value)
             }
-        )
+        ) {
+            Text(text = "Join call")
+        }
     }
 
-    private fun joinCall(callId: String, participants: List<String> = emptyList()) {
+    private fun createCall(
+        callId: String,
+        participants: List<String> = emptyList(),
+        ringing: Boolean
+    ) {
+        if (ringing) {
+            dialUsers(callId, participants)
+        } else {
+            createMeeting(callId, participants)
+        }
+    }
+
+    private fun createMeeting(callId: String, participants: List<String>) {
         lifecycleScope.launch {
+            logger.d { "[createMeeting] callId: $callId, participants: $participants" }
+
             loadingState.value = true
-            val isRinging = participants.isNotEmpty()
+            val result = streamCalls.createAndJoinCall(
+                "default",
+                callId,
+                participants,
+                false
+            )
 
-            if (isRinging) {
-                val createdCall = controller.createCall("default", callId, participants, true)
+            result.onSuccess { data ->
+                logger.v { "[createMeeting] successful: $data" }
+                loadingState.value = false
 
-                createdCall.onSuccess { callMetadata ->
-                    loadingState.value = false
-                    startActivity(
-                        OutgoingCallActivity.getIntent(
-                            this@HomeActivity,
-                            callMetadata
-                        )
-                    )
-                }
-            } else {
-                joinMeetingCall(callId, participants)
+                router.navigateToCall(
+                    callInput = CallInput(
+                        data.call.id,
+                        data.callUrl,
+                        data.userToken,
+                        data.iceServers
+                    ),
+                    finishCurrent = false
+                )
+            }
+
+            result.onError {
+                logger.e { "[createMeeting] failed: $it" }
+                Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
             }
         }
     }
 
-    private suspend fun joinMeetingCall(callId: String, participants: List<String>) {
-        val createCallResult = controller.createAndJoinCall(
-            "default", // TODO - hardcoded for now
-            id = callId,
-            participantIds = participants.toList(),
-            ringing = false
-        )
+    private fun dialUsers(callId: String, participants: List<String>) {
+        lifecycleScope.launch {
+            logger.d { "[dialUsers] callId: $callId, participants: $participants" }
 
-        createCallResult.onSuccessSuspend { response ->
-            loadingState.value = false
-            navigateToCall(
-                response.call.cid,
-                response.callUrl,
-                response.userToken,
-                response.iceServers
+            loadingState.value = true
+            val result = streamCalls.getOrCreateCall(
+                "default",
+                callId,
+                participants,
+                true
             )
+
+            result.onSuccess { metadata ->
+                logger.v { "[dialUsers] successful: $metadata" }
+                loadingState.value = false
+
+                router.onOutgoingCall(
+                    OutgoingCallData(
+                        callType = CallType.fromType(metadata.type),
+                        callInfo = CallInfo(
+                            metadata.cid,
+                            metadata.type,
+                            metadata.createdBy,
+                            Date(metadata.createdAt),
+                            Date(metadata.updatedAt)
+                        ),
+                        participants = metadata.users.values.toList()
+                    )
+                )
+            }
+
+            result.onError {
+                logger.e { "[dialUsers] failed: $it" }
+                Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
+            }
         }
-        createCallResult.onError {
-            Log.d("Couldn't select server", it.message ?: "")
-            Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun joinCall(callId: String) {
+        lifecycleScope.launch {
+            logger.d { "[joinCall] callId: $callId" }
+            loadingState.value = true
+            val result = streamCalls.createAndJoinCall(
+                "default",
+                id = callId,
+                participantIds = emptyList(),
+                ringing = false
+            )
             loadingState.value = false
+            result.onSuccess {
+                logger.v { "[joinCall] succeed: $it" }
+                router.navigateToCall(
+                    callInput = CallInput(
+                        it.call.id, it.callUrl, it.userToken, it.iceServers
+                    ),
+                    finishCurrent = false
+                )
+            }
+            result.onError {
+                logger.e { "[joinCall] failed: $it" }
+                Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -294,8 +384,7 @@ class HomeActivity : AppCompatActivity() {
         val selectedOption by remember { selectedOption }
 
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center
+            modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center
         ) {
             Button(
                 modifier = Modifier.padding(8.dp),
@@ -341,36 +430,16 @@ class HomeActivity : AppCompatActivity() {
     @Composable
     fun BoxScope.UserIcon() {
         val user = videoApp.credentialsProvider.getUserCredentials()
-        Box(
+        Avatar(
+            // TODO - check if this looks good
             modifier = Modifier
+                .size(40.dp)
                 .padding(top = 8.dp, start = 8.dp)
                 .align(TopStart)
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(46.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colors.secondary)
-            ) {
-                Avatar(
-                    imageUrl = user.imageUrl.orEmpty(),
-                    initials = user.name,
-                    modifier = Modifier
-                        .size(40.dp)
-                        .align(Center)
-                )
-            }
-        }
-    }
-
-    private fun navigateToCall(
-        callId: String,
-        signalUrl: String,
-        userToken: String,
-        iceServers: List<IceServer>
-    ) {
-        val intent = CallActivity.getIntent(this, callId, signalUrl, userToken, iceServers)
-        startActivity(intent)
+                .clip(CircleShape),
+            imageUrl = user.imageUrl.orEmpty(),
+            initials = user.name,
+        )
     }
 
     private fun toggleSelectState(user: UserCredentials, users: List<UserCredentials>) {

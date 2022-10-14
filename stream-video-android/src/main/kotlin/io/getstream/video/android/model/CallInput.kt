@@ -14,22 +14,11 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.engine
+package io.getstream.video.android.model
 
-import io.getstream.video.android.model.CallMetadata
-import io.getstream.video.android.model.JoinedCall
-import io.getstream.video.android.model.state.StreamCallState
-import kotlinx.coroutines.flow.StateFlow
-
-internal interface StreamCallEngine {
-
-    val callState: StateFlow<StreamCallState>
-
-    fun onCallJoined(joinedCall: JoinedCall)
-
-    fun onCallConnecting()
-
-    fun onOutgoingCall(callMetadata: CallMetadata)
-
-    fun resetCallState()
-}
+public data class CallInput(
+    internal val callId: String,
+    internal val callUrl: String,
+    internal val userToken: String,
+    internal val iceServers: List<IceServer>,
+) : java.io.Serializable
