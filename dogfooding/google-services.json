@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "347024607410-dvrrufibprhpjmkg5mt5g3khago6ggim.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "io.getstream.chat.android.dogfooding",
+            "certificate_hash": "21b0959c583df5e95fb65a8cd50a672dfe66812b"
+          }
+        },
+        {
           "client_id": "347024607410-ett7cjt6ah9aj6s6k20p5fissj80d9la.apps.googleusercontent.com",
           "client_type": 3
         }

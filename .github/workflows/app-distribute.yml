@@ -28,11 +28,11 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: dogfooding-release
-          path: dogfooding/build/outputs/apk/demo/release/
+          path: dogfooding/build/outputs/apk/release/
       - name: Upload artifact to Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@v1
         with:
           appId: ${{secrets.FIREBASE_DOGFOODING_SAMPLE_APP_ID}}
           token: ${{secrets.FIREBASE_TOKEN}}
           groups: stream-testers
-          file: dogfooding/build/outputs/apk/demo/release/dogfooding-release.apk
+          file: dogfooding/build/outputs/apk/release/dogfooding-release.apk
