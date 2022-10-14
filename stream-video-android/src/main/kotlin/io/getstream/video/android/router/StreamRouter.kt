@@ -22,15 +22,14 @@ import io.getstream.video.android.model.OutgoingCallData
 
 public interface StreamRouter {
 
-    public fun navigateToCall(callInput: CallInput)
+    public fun navigateToCall(
+        callInput: CallInput,
+        finishCurrent: Boolean
+    )
 
     public fun onIncomingCall(callData: IncomingCallData)
 
     public fun onOutgoingCall(callData: OutgoingCallData)
-
-    public fun onCallAccepted()
-
-    public fun onCallRejected()
 
     public fun finish()
 

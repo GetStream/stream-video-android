@@ -33,8 +33,14 @@ class StreamRouterImpl(
     private val context: Context
 ) : StreamRouter {
 
-    override fun navigateToCall(callInput: CallInput) {
+    override fun navigateToCall(
+        callInput: CallInput,
+        finishCurrent: Boolean
+    ) {
         context.startActivity(CallActivity.getIntent(context, callInput))
+        if (finishCurrent) {
+            finish()
+        }
     }
 
     override fun onIncomingCall(callData: IncomingCallData) {
@@ -50,14 +56,6 @@ class StreamRouterImpl(
                 callData
             )
         )
-    }
-
-    override fun onCallAccepted() {
-        TODO("Not yet implemented")
-    }
-
-    override fun onCallRejected() {
-        TODO("Not yet implemented")
     }
 
     override fun onCallFailed(reason: String?) {

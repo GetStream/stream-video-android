@@ -105,7 +105,7 @@ class HomeActivity : AppCompatActivity() {
 
     private val loadingState: MutableState<Boolean> = mutableStateOf(false)
 
-    private val ringingState: MutableState<Boolean> = mutableStateOf(false)
+    private val ringingState: MutableState<Boolean> = mutableStateOf(true)
 
     private val socketListener = object : SocketListener {
         override fun onEvent(event: VideoEvent) {
@@ -279,7 +279,13 @@ class HomeActivity : AppCompatActivity() {
                 loadingState.value = false
 
                 router.navigateToCall(
-                    CallInput(data.call.id, data.callUrl, data.userToken, data.iceServers)
+                    callInput = CallInput(
+                        data.call.id,
+                        data.callUrl,
+                        data.userToken,
+                        data.iceServers
+                    ),
+                    finishCurrent = false
                 )
             }
 
@@ -342,9 +348,10 @@ class HomeActivity : AppCompatActivity() {
             result.onSuccess {
                 logger.v { "[joinCall] succeed: $it" }
                 router.navigateToCall(
-                    CallInput(
+                    callInput = CallInput(
                         it.call.id, it.callUrl, it.userToken, it.iceServers
-                    )
+                    ),
+                    finishCurrent = false
                 )
             }
             result.onError {

@@ -105,12 +105,13 @@ class OutgoingCallViewModel(
 
             joinResult.onSuccessSuspend { response ->
                 streamRouter.navigateToCall(
-                    CallInput(
+                    callInput = CallInput(
                         response.call.id,
                         response.callUrl,
                         response.userToken,
                         response.iceServers
-                    )
+                    ),
+                    finishCurrent = true
                 )
             }
             joinResult.onError {

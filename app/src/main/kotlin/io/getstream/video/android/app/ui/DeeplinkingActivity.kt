@@ -69,7 +69,8 @@ class DeeplinkingActivity : AppCompatActivity() {
                         response.callUrl,
                         response.userToken,
                         response.iceServers
-                    )
+                    ),
+                    finishCurrent = true
                 )
             }
             createCallResult.onError {

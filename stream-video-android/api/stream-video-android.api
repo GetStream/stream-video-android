@@ -1732,10 +1732,8 @@ public final class io/getstream/video/android/model/state/StreamCallState$Outgoi
 
 public abstract interface class io/getstream/video/android/router/StreamRouter {
 	public abstract fun finish ()V
-	public abstract fun navigateToCall (Lio/getstream/video/android/model/CallInput;)V
-	public abstract fun onCallAccepted ()V
+	public abstract fun navigateToCall (Lio/getstream/video/android/model/CallInput;Z)V
 	public abstract fun onCallFailed (Ljava/lang/String;)V
-	public abstract fun onCallRejected ()V
 	public abstract fun onIncomingCall (Lio/getstream/video/android/model/IncomingCallData;)V
 	public abstract fun onOutgoingCall (Lio/getstream/video/android/model/OutgoingCallData;)V
 	public abstract fun onUserLoggedOut ()V
