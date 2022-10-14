@@ -105,6 +105,7 @@ class OutgoingCallViewModel(
             joinResult.onSuccessSuspend { response ->
                 streamRouter.navigateToCall(
                     callInput = CallInput(
+                        response.call.type,
                         response.call.id,
                         response.callUrl,
                         response.userToken,

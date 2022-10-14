@@ -287,6 +287,7 @@ class HomeActivity : AppCompatActivity() {
 
                 router.navigateToCall(
                     callInput = CallInput(
+                        data.call.type,
                         data.call.id,
                         data.callUrl,
                         data.userToken,
@@ -357,7 +358,7 @@ class HomeActivity : AppCompatActivity() {
                 logger.v { "[joinCall] succeed: $it" }
                 router.navigateToCall(
                     callInput = CallInput(
-                        it.call.id, it.callUrl, it.userToken, it.iceServers
+                        it.call.type, it.call.id, it.callUrl, it.userToken, it.iceServers
                     ),
                     finishCurrent = false
                 )

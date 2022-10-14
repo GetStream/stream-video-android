@@ -106,7 +106,10 @@ public class StreamCallsImpl(
         ringing: Boolean
     ): Result<CallMetadata> {
         logger.d { "[createCall] type: $type, id: $id, participantIds: $participantIds" }
+        engine.onCallStarting(type, id, participantIds, ringing, forcedNewCall = true)
         return callClient.createCall(type, id, participantIds, ringing)
+            .onSuccess { engine.onCallStarted(it.call) }
+            .onError { engine.onCallFailed(it) }
             .map { it.call }
             .also { logger.v { "[createCall] result: $it" } }
     }
@@ -117,14 +120,22 @@ public class StreamCallsImpl(
         participantIds: List<String>,
         ringing: Boolean
     ): Result<CallMetadata> {
-        logger.d { "[createCall] type: $type, id: $id, participantIds: $participantIds" }
+        logger.d { "[getOrCreateCall] type: $type, id: $id, participantIds: $participantIds" }
+        engine.onCallStarting(type, id, participantIds, ringing, forcedNewCall = false)
         return callClient.getOrCreateCall(type, id, participantIds, ringing)
+            .onSuccess { engine.onCallStarted(it.call) }
+            .onError { engine.onCallFailed(it) }
             .map { it.call }
-            .onSuccess {
-                if (ringing) {
-                    engine.onOutgoingCall(it)
-                }
-            }
+            .also { logger.v { "[getOrCreateCall] result: $it" } }
+    }
+
+    override suspend fun joinCall(call: CallMetadata): Result<JoinedCall> {
+        logger.d { "[joinCallOnly] call: $call" }
+        engine.onCallJoining(call)
+        return callClient.joinCall(call)
+            .onSuccess { data -> engine.onCallJoined(data) }
+            .onError { engine.onCallFailed(it) }
+            .also { logger.v { "[joinCallOnly] result: $it" } }
     }
 
     override suspend fun createAndJoinCall(
@@ -134,35 +145,30 @@ public class StreamCallsImpl(
         ringing: Boolean
     ): Result<JoinedCall> {
         logger.d { "[getOrCreateAndJoinCall] type: $type, id: $id, participantIds: $participantIds" }
-        return callClient.getOrCreateCall(type, id, participantIds, ringing = ringing)
+        engine.onCallStarting(type, id, participantIds, ringing, forcedNewCall = false)
+        return callClient.getOrCreateCall(type, id, participantIds, ringing)
+            .onSuccess { engine.onCallStarted(it.call) }
+            .onSuccess { engine.onCallJoining(it.call) }
             .flatMap { callClient.joinCall(it.call) }
+            .onSuccess { engine.onCallJoined(it) }
+            .onError { engine.onCallFailed(it) }
             .also { logger.v { "[getOrCreateAndJoinCall] result: $it" } }
     }
 
     override suspend fun joinCall(type: String, id: String): Result<JoinedCall> {
         logger.d { "[joinCall] type: $type, id: $id" }
-        engine.onCallConnecting()
-        return callClient.getOrCreateCall(type, id, emptyList(), ringing = false)
-            .flatMap { callClient.joinCall(it.call) }
-            .onSuccess { }
-            .onError { engine.resetCallState() }
+        return createAndJoinCall(type, id, participantIds = emptyList(), ringing = false)
             .also { logger.v { "[joinCall] result: $it" } }
-    }
-
-    override suspend fun joinCall(call: CallMetadata): Result<JoinedCall> {
-        logger.d { "[joinCall] call: $call" }
-        return callClient.joinCall(call).also {
-            it.onSuccess { data -> engine.onCallJoined(data) }
-            it.onError { engine.resetCallState() }
-        }
     }
 
     override suspend fun sendEvent(
         callId: String,
         callType: String,
+        // TODO replace UserEventType with domain model
         userEventType: UserEventType
     ): Result<Boolean> {
         logger.d { "[sendEvent] event type: $userEventType" }
+        engine.onCallSendEvent(callType, callId, userEventType)
         return callClient.sendUserEvent(
             userEventType = userEventType,
             callId = callId,
@@ -173,7 +179,6 @@ public class StreamCallsImpl(
     override fun clearCallState() {
         credentialsProvider.setSfuToken(null)
         socket.updateCallState(null)
-        engine.resetCallState()
         webRTCClient?.clear()
     }
 

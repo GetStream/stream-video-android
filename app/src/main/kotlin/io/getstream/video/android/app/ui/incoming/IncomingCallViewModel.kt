@@ -80,6 +80,7 @@ class IncomingCallViewModel(
 
                 streamRouter.navigateToCall(
                     callInput = CallInput(
+                        callType = joinData.call.type,
                         callId = joinData.call.id,
                         callUrl = joinData.callUrl,
                         userToken = joinData.userToken,
