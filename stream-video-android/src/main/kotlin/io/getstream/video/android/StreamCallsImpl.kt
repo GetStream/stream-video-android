@@ -25,6 +25,7 @@ import io.getstream.video.android.client.LifecycleHandler
 import io.getstream.video.android.client.StreamLifecycleObserver
 import io.getstream.video.android.client.user.UserState
 import io.getstream.video.android.dispatchers.DispatcherProvider
+import io.getstream.video.android.engine.StreamCallEngineImpl
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.CallMetadata
@@ -32,6 +33,7 @@ import io.getstream.video.android.model.CallSettings
 import io.getstream.video.android.model.IceServer
 import io.getstream.video.android.model.JoinedCall
 import io.getstream.video.android.model.User
+import io.getstream.video.android.model.state.StreamCallState
 import io.getstream.video.android.socket.SocketListener
 import io.getstream.video.android.socket.SocketState
 import io.getstream.video.android.socket.SocketStateService
@@ -40,12 +42,16 @@ import io.getstream.video.android.token.CredentialsProvider
 import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Result
 import io.getstream.video.android.utils.Success
+import io.getstream.video.android.utils.onError
+import io.getstream.video.android.utils.onSuccess
 import io.getstream.video.android.utils.toCall
 import io.getstream.video.android.webrtc.WebRTCClient
 import io.getstream.video.android.webrtc.builder.WebRTCClientBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import stream.video.coordinator.client_v1_rpc.UserEventType
 
 /**
  * @param lifecycle The lifecycle used to observe changes in the process. // TODO - docs
@@ -65,6 +71,8 @@ public class StreamCallsImpl(
 
     private val scope = CoroutineScope(DispatcherProvider.IO)
 
+    private val engine = StreamCallEngineImpl(scope)
+
     /**
      * Observes the app lifecycle and attempts to reconnect/release the socket connection.
      */
@@ -79,6 +87,7 @@ public class StreamCallsImpl(
     )
 
     init {
+        socket.addListener(engine)
         scope.launch(Dispatchers.Main.immediate) {
             lifecycleObserver.observe()
         }
@@ -86,17 +95,43 @@ public class StreamCallsImpl(
         socket.connectSocket()
     }
 
+    override val callState: StateFlow<StreamCallState> = engine.callState
+
     /**
      * Domain - Coordinator.
      */
     override suspend fun createCall(
         type: String,
         id: String,
-        participantIds: List<String>
+        participantIds: List<String>,
+        ringing: Boolean
     ): Result<CallMetadata> {
         logger.d { "[createCall] type: $type, id: $id, participantIds: $participantIds" }
-        return when (val result = callClient.createCall(type, id, participantIds)) {
-            is Success -> Success(result.data.call?.call?.toCall()!!)
+        return when (val result = callClient.createCall(type, id, participantIds, ringing)) {
+            is Success -> {
+                Success(result.data.call?.toCall()!!)
+            }
+            is Failure -> Failure(result.error)
+        }
+    }
+
+    override suspend fun getOrCreateCall(
+        type: String,
+        id: String,
+        participantIds: List<String>,
+        ringing: Boolean
+    ): Result<CallMetadata> {
+        logger.d { "[createCall] type: $type, id: $id, participantIds: $participantIds" }
+        return when (val result = callClient.getOrCreateCall(type, id, participantIds, ringing)) {
+            is Success -> {
+                val callMetadata = result.data.call?.toCall()!!
+
+                Success(callMetadata).also {
+                    if (ringing) {
+                        engine.onOutgoingCall(callMetadata)
+                    }
+                }
+            }
             is Failure -> Failure(result.error)
         }
     }
@@ -104,20 +139,57 @@ public class StreamCallsImpl(
     override suspend fun createAndJoinCall(
         type: String,
         id: String,
-        participantIds: List<String>
+        participantIds: List<String>,
+        ringing: Boolean
     ): Result<JoinedCall> {
         logger.d { "[createAndJoinCall] type: $type, id: $id, participantIds: $participantIds" }
-        return callClient.createAndJoinCall(type, id, participantIds)
+        return callClient.createAndJoinCall(type, id, participantIds, ringing)
+    }
+
+    override suspend fun joinCall(type: String, id: String): Result<JoinedCall> {
+        logger.d { "[joinCall] type: $type, id: $id" }
+        engine.onConnecting()
+
+        val getOrCreateResult = callClient.getOrCreateCall(type, id, emptyList(), false)
+        logger.v { "[joinCall] getOrCreateResult: $getOrCreateResult" }
+        return when (getOrCreateResult) {
+            is Success -> {
+                val metadata = getOrCreateResult.data.call?.toCall()
+                    ?: error("[joinCall] no CallEnvelope found")
+
+                joinCall(metadata)
+            }
+            is Failure -> getOrCreateResult.also {
+                engine.resetCallState()
+            }
+        }
     }
 
     override suspend fun joinCall(call: CallMetadata): Result<JoinedCall> {
         logger.d { "[joinCall] call: $call" }
-        return callClient.joinCall(call)
+        return callClient.joinCall(call).also {
+            it.onSuccess { data -> engine.onCallJoined(data) }
+            it.onError { engine.resetCallState() }
+        }
     }
 
-    override fun leaveCall() {
+    override suspend fun sendEvent(
+        callId: String,
+        callType: String,
+        userEventType: UserEventType
+    ): Result<Boolean> {
+        logger.d { "[sendEvent] event type: $userEventType" }
+        return callClient.sendUserEvent(
+            userEventType = userEventType,
+            callId = callId,
+            callType = callType,
+        )
+    }
+
+    override fun clearCallState() {
         credentialsProvider.setSfuToken(null)
         socket.updateCallState(null)
+        engine.resetCallState()
         webRTCClient?.clear()
     }
 

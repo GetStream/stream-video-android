@@ -21,7 +21,9 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
 import androidx.compose.material.Text
@@ -33,11 +35,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.getstream.logging.StreamLog
 import io.getstream.video.android.app.FakeCredentialsProvider
-import io.getstream.video.android.app.VideoApp
 import io.getstream.video.android.app.ui.components.UserList
 import io.getstream.video.android.app.ui.home.HomeActivity
 import io.getstream.video.android.app.utils.getUsers
+import io.getstream.video.android.app.videoApp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.model.UserCredentials
@@ -46,7 +49,13 @@ import io.getstream.video.android.pushprovider.firebase.CallNotificationReceiver
 
 class LoginActivity : AppCompatActivity() {
 
+    private val logger = StreamLog.getLogger("Call:LoginView")
+
     private val loginItemsState = mutableStateOf(getUsers())
+
+    init {
+        logger.i { "<init> this: $this" }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,7 +74,7 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun checkIfUserLoggedIn() {
-        val preferences = VideoApp.userPreferences
+        val preferences = videoApp.userPreferences
 
         val credentials = preferences.getCachedCredentials()
 
@@ -81,7 +90,7 @@ class LoginActivity : AppCompatActivity() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                modifier = Modifier.padding(4.dp),
+                modifier = Modifier.padding(8.dp),
                 text = "Select a user to log in!",
                 fontSize = 18.sp
             )
@@ -102,10 +111,12 @@ class LoginActivity : AppCompatActivity() {
 
             val isDataValid = loginItemsState.value.any { it.isSelected }
 
+            Spacer(modifier = Modifier.height(16.dp))
+
             Button(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 32.dp),
+                    .padding(horizontal = 16.dp),
                 enabled = isDataValid,
                 onClick = {
                     val user = loginItemsState.value.firstOrNull { it.isSelected }
@@ -120,9 +131,9 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun logIn(selectedUser: UserCredentials) {
-        VideoApp.userPreferences.storeUserCredentials(selectedUser)
-
-        VideoApp.initializeStream(
+        videoApp.userPreferences.storeUserCredentials(selectedUser)
+        logger.i { "[logIn] selectedUser: $selectedUser" }
+        videoApp.initializeStreamCalls(
             credentialsProvider = FakeCredentialsProvider(
                 userCredentials = selectedUser,
                 apiKey = "key10"

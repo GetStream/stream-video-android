@@ -78,7 +78,7 @@ internal class HttpModule(
             credentialsProvider.getCachedToken()
         }
         val updated = original.newBuilder()
-            .addHeader(HEADER_AUTHORIZATION, token)
+            .addHeader(HEADER_AUTHORIZATION, "Bearer $token")
             .build()
 
         it.proceed(updated)

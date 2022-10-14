@@ -18,9 +18,12 @@ package io.getstream.video.android.app.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.material.Divider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import io.getstream.video.android.model.UserCredentials
 
 @Composable
@@ -34,7 +37,10 @@ fun UserList(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceEvenly
     ) {
-        for (credentials in userItems) {
+        userItems.forEachIndexed { index, credentials ->
+            if (index > 0) {
+                Divider(startIndent = 16.dp, thickness = 0.5.dp, color = Color.LightGray)
+            }
             UserItem(credentials = credentials, onClick = onClick)
         }
     }

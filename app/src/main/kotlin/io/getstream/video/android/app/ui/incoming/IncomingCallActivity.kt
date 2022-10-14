@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui
+package io.getstream.video.android.app.ui.incoming
 
 import android.content.Context
 import android.content.Intent
@@ -22,44 +22,40 @@ import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
+import io.getstream.video.android.app.router.StreamRouterImpl
+import io.getstream.video.android.app.videoApp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.incomingcall.IncomingCall
-import io.getstream.video.android.model.CallType
-import kotlinx.coroutines.delay
+import io.getstream.video.android.model.IncomingCallData
 
-public class IncomingCallActivity : AppCompatActivity() {
+class IncomingCallActivity : AppCompatActivity() {
 
-    // TODO - Build a ViewModel for this
+    private val viewModel by viewModels<IncomingCallViewModel> {
+        IncomingCallViewModelFactory(
+            videoApp.streamCalls,
+            StreamRouterImpl(this),
+            requireNotNull(intent.getSerializableExtra(KEY_CALL_DATA) as? IncomingCallData)
+        )
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         showWhenLockedAndTurnScreenOn()
         super.onCreate(savedInstanceState)
-        lifecycleScope.launchWhenCreated {
-            delay(10000)
-            finish()
-        }
+
         setContent {
-            // TODO - load the data from a getCall(GetCallRequest)
             VideoTheme {
                 IncomingCall(
-                    callId = "",
-                    callType = CallType.VIDEO,
-                    participants = emptyList(),
-                    onDeclineCall = { finish() },
-                    onAcceptCall = { callId, isVideoEnabled ->
-                        joinCall(callId, isVideoEnabled)
-                    },
+                    callInfo = viewModel.callData.callInfo,
+                    participants = viewModel.callData.participants,
+                    callType = viewModel.callData.callType,
+                    onDeclineCall = { viewModel.declineCall() },
+                    onAcceptCall = { viewModel.acceptCall() },
                     onVideoToggleChanged = { }
                 )
             }
         }
-    }
-
-    private fun joinCall(callId: String, videoEnabled: Boolean) {
-        // TODO - do we start an activity here or do we trigger some handler in the VideoClient that lets the user decide what to do?
-        finish()
     }
 
     private fun showWhenLockedAndTurnScreenOn() {
@@ -68,16 +64,20 @@ public class IncomingCallActivity : AppCompatActivity() {
             setTurnScreenOn(true)
         } else {
             window.addFlags(
-                WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
-                    or WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+                WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
             )
         }
     }
 
-    public companion object {
-        public fun getLaunchIntent(context: Context): Intent {
+    companion object {
+        private const val KEY_CALL_DATA = "call_data"
+
+        fun getLaunchIntent(
+            context: Context,
+            incomingCallData: IncomingCallData
+        ): Intent {
             return Intent(context, IncomingCallActivity::class.java).apply {
-                // TODO - maybe set data
+                putExtra(KEY_CALL_DATA, incomingCallData)
             }
         }
     }

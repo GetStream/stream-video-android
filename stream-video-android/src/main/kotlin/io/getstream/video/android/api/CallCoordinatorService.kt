@@ -27,6 +27,8 @@ import stream.video.coordinator.client_v1_rpc.GetCallEdgeServerResponse
 import stream.video.coordinator.client_v1_rpc.JoinCallRequest
 import stream.video.coordinator.client_v1_rpc.JoinCallResponse
 import stream.video.coordinator.client_v1_rpc.SendCustomEventRequest
+import stream.video.coordinator.client_v1_rpc.SendEventRequest
+
 /**
  * Main service used to communicate with our API regarding video services.
  *
@@ -67,8 +69,8 @@ public interface CallCoordinatorService {
 
     @Headers("Content-Type: application/protobuf")
     @POST("/rpc/stream.video.coordinator.client_v1_rpc.ClientRPC/SendEvent")
-    public suspend fun sendCustomEvent( // TODO - do we need this?
-        @Body sendEventRequest: SendCustomEventRequest,
+    public suspend fun sendUserEvent(
+        @Body sendEventRequest: SendEventRequest,
         @Query(QUERY_API_KEY) apiKey: String
     ): SendCustomEventRequest
 }

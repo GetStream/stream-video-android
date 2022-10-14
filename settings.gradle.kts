@@ -17,6 +17,7 @@ dependencyResolutionManagement {
 }
 rootProject.name = "stream-video-android"
 include(":app")
+include(":dogfooding")
 include(":stream-video-android")
 include(":stream-video-android-compose")
 include(":stream-video-android-pushprovider-firebase")

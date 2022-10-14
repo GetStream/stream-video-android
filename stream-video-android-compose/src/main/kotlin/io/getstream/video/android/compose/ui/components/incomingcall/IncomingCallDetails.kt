@@ -30,15 +30,32 @@ import io.getstream.video.android.compose.ui.components.participants.Participant
 import io.getstream.video.android.compose.ui.components.participants.ParticipantInformation
 import io.getstream.video.android.model.CallParticipant
 import io.getstream.video.android.model.CallStatus
+import io.getstream.video.android.model.CallUser
 
 @Composable
 internal fun IncomingCallDetails(
     modifier: Modifier = Modifier,
-    participants: List<CallParticipant>
+    participants: List<CallUser>
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
 
-        ParticipantAvatars(participants = participants)
+        ParticipantAvatars(
+            participants = participants.map {
+                CallParticipant(
+                    it.id,
+                    it.role,
+                    it.name,
+                    it.imageUrl,
+                    false,
+                    true,
+                    true,
+                    true,
+                    null,
+                    Pair(0, 0),
+                    audioLevel = 0f
+                )
+            }
+        )
 
         Spacer(modifier = Modifier.height(32.dp))
 
@@ -53,6 +70,17 @@ internal fun IncomingCallDetails(
 @Composable
 private fun IncomingCallDetailsPreview() {
     VideoTheme {
-        IncomingCallDetails(participants = mockParticipantList)
+        IncomingCallDetails(
+            participants = mockParticipantList.map {
+                CallUser(
+                    it.id,
+                    it.name,
+                    it.role,
+                    it.profileImageURL ?: "",
+                    null,
+                    null
+                )
+            }
+        )
     }
 }

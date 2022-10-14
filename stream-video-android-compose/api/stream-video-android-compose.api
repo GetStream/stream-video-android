@@ -241,16 +241,6 @@ public final class io/getstream/video/android/compose/ui/EmptyActivity : android
 	public fun <init> ()V
 }
 
-public final class io/getstream/video/android/compose/ui/IncomingCallActivity : androidx/appcompat/app/AppCompatActivity {
-	public static final field $stable I
-	public static final field Companion Lio/getstream/video/android/compose/ui/IncomingCallActivity$Companion;
-	public fun <init> ()V
-}
-
-public final class io/getstream/video/android/compose/ui/IncomingCallActivity$Companion {
-	public final fun getLaunchIntent (Landroid/content/Context;)Landroid/content/Intent;
-}
-
 public final class io/getstream/video/android/compose/ui/components/CallOptionsKt {
 	public static final fun CallOptions (Lio/getstream/video/android/model/Call;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
 }
@@ -287,7 +277,7 @@ public final class io/getstream/video/android/compose/ui/components/avatar/UserA
 }
 
 public final class io/getstream/video/android/compose/ui/components/background/CallBackgroundKt {
-	public static final fun CallBackground (Landroidx/compose/ui/Modifier;Ljava/util/List;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;II)V
+	public static final fun CallBackground (Ljava/util/List;Lio/getstream/video/android/model/CallType;ZLandroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/calling/CallingKt {
@@ -368,7 +358,7 @@ public final class io/getstream/video/android/compose/ui/components/incomingcall
 }
 
 public final class io/getstream/video/android/compose/ui/components/incomingcall/IncomingCallKt {
-	public static final fun IncomingCall (Ljava/lang/String;Lio/getstream/video/android/model/CallType;Ljava/util/List;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)V
+	public static final fun IncomingCall (Lio/getstream/video/android/model/CallInfo;Lio/getstream/video/android/model/CallType;Ljava/util/List;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/mock/MockUtilsKt {
@@ -393,11 +383,9 @@ public final class io/getstream/video/android/compose/ui/components/outcomingcal
 	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/outcomingcall/ComposableSingletons$OutgoingGroupCallOptionsKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;
 	public static field lambda-2 Lkotlin/jvm/functions/Function2;
-	public static field lambda-3 Lkotlin/jvm/functions/Function2;
 	public fun <init> ()V
 	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda-2$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda-3$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class io/getstream/video/android/compose/ui/components/outcomingcall/ComposableSingletons$OutgoingSingleCallOptionsKt {
@@ -410,7 +398,7 @@ public final class io/getstream/video/android/compose/ui/components/outcomingcal
 }
 
 public final class io/getstream/video/android/compose/ui/components/outcomingcall/OutgoingCallKt {
-	public static final fun OutgoingCall (Ljava/lang/String;Lio/getstream/video/android/model/CallType;Ljava/util/List;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+	public static final fun OutgoingCall (Ljava/lang/String;Lio/getstream/video/android/model/CallType;Ljava/util/List;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/participants/ComposableSingletons$ParticipantAvatarsKt {

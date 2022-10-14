@@ -16,9 +16,8 @@
 
 package io.getstream.video.android.model
 
-import kotlinx.serialization.Serializable
+import java.util.*
 
-@Serializable
 public data class CallMetadata(
     val cid: String,
     val id: String,
@@ -28,5 +27,27 @@ public data class CallMetadata(
     val updatedAt: Long,
     val recordingEnabled: Boolean,
     val broadcastingEnabled: Boolean,
+    val users: Map<String, CallUser>,
     val extraData: Map<String, String>?,
+) : java.io.Serializable
+
+public fun CallMetadata.toInfo(): CallInfo = CallInfo(
+    cid,
+    type,
+    createdBy,
+    Date(createdAt),
+    Date(updatedAt)
+)
+
+public fun CallMetadata.toDetails(): CallDetails = CallDetails(
+    members = users.mapValues { (_, value) ->
+        CallMember(
+            callId = id,
+            userId = value.id,
+            role = value.role,
+            createdAt = Date(createdAt),
+            updatedAt = Date(updatedAt)
+        )
+    },
+    memberUserIds = users.keys.toList()
 )

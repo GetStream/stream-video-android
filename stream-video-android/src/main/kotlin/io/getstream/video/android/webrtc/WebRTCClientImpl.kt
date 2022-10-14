@@ -167,6 +167,7 @@ internal class WebRTCClientImpl(
 
     override fun clear() {
         logger.i { "[clear] #sfu; no args" }
+        peerConnectionFactory.reset()
         supervisorJob.cancelChildren()
 
         connectionState = ConnectionState.DISCONNECTED
@@ -347,6 +348,7 @@ internal class WebRTCClientImpl(
     }
 
     private fun sendIceCandidate(candidate: IceCandidate, type: PeerConnectionType) {
+        logger.d { "[sendIceCandidate] #sfu; type: $type, candidate: $candidate" }
         val request = IceCandidateRequest(
             publisher = type == PeerConnectionType.PUBLISHER,
             candidate = candidate.sdp ?: "",
@@ -356,7 +358,9 @@ internal class WebRTCClientImpl(
         )
 
         coroutineScope.launch {
-            signalClient.sendIceCandidate(request)
+            logger.v { "[sendIceCandidate] #sfu; type: $type, candidate is about to be sent" }
+            val result = signalClient.sendIceCandidate(request)
+            logger.v { "[sendIceCandidate] #sfu; type: $type, result: $result" }
         }
     }
 

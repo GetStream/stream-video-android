@@ -32,13 +32,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.mock.mockParticipantList
-import io.getstream.video.android.model.CallParticipant
 import io.getstream.video.android.model.CallStatus
+import io.getstream.video.android.model.CallUser
 
 @Composable
 public fun ParticipantInformation(
     callStatus: CallStatus,
-    participants: List<CallParticipant>
+    participants: List<CallUser>
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -83,7 +83,7 @@ public fun ParticipantInformation(
 }
 
 // TODO - localize all this
-private fun buildSmallCallText(participants: List<CallParticipant>): String {
+private fun buildSmallCallText(participants: List<CallUser>): String {
     val names = participants.map { it.name }
 
     return if (names.isEmpty()) {
@@ -95,7 +95,7 @@ private fun buildSmallCallText(participants: List<CallParticipant>): String {
     }
 }
 
-private fun buildLargeCallText(participants: List<CallParticipant>): String {
+private fun buildLargeCallText(participants: List<CallUser>): String {
     if (participants.isEmpty()) return "No participants"
     val initial = buildSmallCallText(participants)
     if (participants.size == 1) return initial
@@ -109,7 +109,16 @@ private fun ParticipantInformationPreview() {
     VideoTheme {
         ParticipantInformation(
             callStatus = CallStatus.Incoming,
-            participants = mockParticipantList
+            participants = mockParticipantList.map {
+                CallUser(
+                    it.id,
+                    it.role,
+                    it.name,
+                    it.profileImageURL ?: "",
+                    null,
+                    null
+                )
+            }
         )
     }
 }

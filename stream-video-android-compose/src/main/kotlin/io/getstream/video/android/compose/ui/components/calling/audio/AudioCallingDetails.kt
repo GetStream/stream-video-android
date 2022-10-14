@@ -30,6 +30,7 @@ import io.getstream.video.android.compose.ui.components.participants.Participant
 import io.getstream.video.android.compose.ui.components.participants.ParticipantInformation
 import io.getstream.video.android.model.CallParticipant
 import io.getstream.video.android.model.CallStatus
+import io.getstream.video.android.model.CallUser
 
 @Composable
 internal fun AudioCallingDetails(
@@ -44,7 +45,9 @@ internal fun AudioCallingDetails(
 
         ParticipantInformation(
             callStatus = CallStatus.Calling("0:33"),
-            participants = participants
+            participants = participants.map {
+                CallUser(it.id, it.name, it.role, it.profileImageURL ?: "", null, null)
+            }
         )
     }
 }

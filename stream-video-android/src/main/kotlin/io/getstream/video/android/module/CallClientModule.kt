@@ -99,7 +99,7 @@ internal class CallClientModule(
          * leave it as-is.
          */
         @Suppress("RedundantNullableReturnType")
-        private val REDIRECT_BASE_URL: String? = "https://acda-93-140-102-133.eu.ngrok.io"
+        private val REDIRECT_BASE_URL: String? = null // "https://a769-93-140-102-246.eu.ngrok.io"
         // e.g. "https://dc54-83-131-252-51.eu.ngrok.io"
 
         /**
@@ -114,6 +114,6 @@ internal class CallClientModule(
          * leave it as-is.
          */
         @Suppress("RedundantNullableReturnType")
-        internal val REDIRECT_PING_URL: String? = "https://7c18-93-140-102-133.eu.ngrok.io/ping" // "<redirect-url>/ping"
+        internal val REDIRECT_PING_URL: String? = null // "https://c99c-93-140-102-246.eu.ngrok.io/ping" // "<redirect-url>/ping"
     }
 }

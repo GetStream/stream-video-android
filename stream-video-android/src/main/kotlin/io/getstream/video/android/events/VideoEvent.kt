@@ -16,16 +16,16 @@
 
 package io.getstream.video.android.events
 
-import io.getstream.video.android.events.model.CallDetails
-import io.getstream.video.android.events.model.CallInfo
-import io.getstream.video.android.events.model.CallUser
+import io.getstream.video.android.model.CallDetails
+import io.getstream.video.android.model.CallInfo
+import io.getstream.video.android.model.CallUser
 import stream.video.coordinator.participant_v1.Participant
 import stream.video.sfu.models.Call
 
 /**
  * Represents the events coming in from the socket.
  */
-public sealed class VideoEvent
+public sealed class VideoEvent : java.io.Serializable
 
 /**
  * Triggered when a user gets connected to the WS.
@@ -48,18 +48,8 @@ public data class HealthCheckEvent(
 public data class CallCreatedEvent(
     val callId: String,
     val users: Map<String, CallUser>,
-    val info: CallInfo?,
-    val details: CallDetails?
-) : VideoEvent()
-
-/**
- * Sent when a call gets started.
- */
-public data class CallStartedEvent(
-    val callId: String,
-    val users: Map<String, CallUser>,
-    val info: CallInfo?,
-    val details: CallDetails?
+    val info: CallInfo,
+    val details: CallDetails
 ) : VideoEvent()
 
 /**
@@ -68,8 +58,8 @@ public data class CallStartedEvent(
 public data class CallUpdatedEvent(
     val callId: String,
     val users: Map<String, CallUser>,
-    val info: CallInfo?,
-    val details: CallDetails?
+    val info: CallInfo,
+    val details: CallDetails
 ) : VideoEvent()
 
 /**
@@ -78,8 +68,8 @@ public data class CallUpdatedEvent(
 public data class CallEndedEvent(
     val callId: String,
     val users: Map<String, CallUser>,
-    val info: CallInfo?,
-    val details: CallDetails?
+    val info: CallInfo,
+    val details: CallDetails
 ) : VideoEvent()
 
 /**
@@ -88,8 +78,8 @@ public data class CallEndedEvent(
 public data class CallMembersUpdatedEvent(
     val callId: String,
     val users: Map<String, CallUser>,
-    val info: CallInfo?,
-    val details: CallDetails?
+    val info: CallInfo,
+    val details: CallDetails
 ) : VideoEvent()
 
 /**
@@ -98,8 +88,8 @@ public data class CallMembersUpdatedEvent(
 public data class CallMembersDeletedEvent(
     val callId: String,
     val users: Map<String, CallUser>,
-    val info: CallInfo?,
-    val details: CallDetails?
+    val info: CallInfo,
+    val details: CallDetails
 ) : VideoEvent()
 
 /**
@@ -149,6 +139,12 @@ public data class ParticipantJoinedEvent(
 public data class ParticipantLeftEvent(
     val participant: Participant
 ) : VideoEvent()
+
+public object CallAcceptedEvent : VideoEvent()
+
+public object CallRejectedEvent : VideoEvent()
+
+public object CallCanceledEvent : VideoEvent()
 
 public object UnknownEvent : VideoEvent()
 

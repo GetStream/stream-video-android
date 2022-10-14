@@ -27,20 +27,25 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.CallTopAppbar
 import io.getstream.video.android.compose.ui.components.background.CallBackground
 import io.getstream.video.android.compose.ui.components.mock.mockParticipantList
-import io.getstream.video.android.model.CallParticipant
+import io.getstream.video.android.model.CallInfo
 import io.getstream.video.android.model.CallType
+import io.getstream.video.android.model.CallUser
 
 @Composable
 public fun IncomingCall(
-    callId: String,
+    callInfo: CallInfo,
     callType: CallType,
-    participants: List<CallParticipant>,
-    onDeclineCall: (String) -> Unit,
-    onAcceptCall: (String, Boolean) -> Unit,
+    participants: List<CallUser>,
+    onDeclineCall: (CallInfo) -> Unit,
+    onAcceptCall: (CallInfo) -> Unit,
     onVideoToggleChanged: (Boolean) -> Unit,
 ) {
 
-    CallBackground(participants = participants) {
+    CallBackground(
+        participants = participants,
+        callType = callType,
+        isIncoming = true
+    ) {
 
         Column {
 
@@ -64,8 +69,7 @@ public fun IncomingCall(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 44.dp),
-            callId = callId,
-            callType = callType,
+            callInfo = callInfo,
             onDeclineCall = onDeclineCall,
             onAcceptCall = onAcceptCall,
             onVideoToggleChanged = onVideoToggleChanged
@@ -78,11 +82,20 @@ public fun IncomingCall(
 private fun IncomingCallPreview() {
     VideoTheme {
         IncomingCall(
-            callId = "",
+            callInfo = CallInfo("", "video", "", null, null),
+            participants = mockParticipantList.map {
+                CallUser(
+                    id = it.id,
+                    name = it.name,
+                    role = it.role,
+                    createdAt = null,
+                    updatedAt = null,
+                    imageUrl = it.profileImageURL ?: ""
+                )
+            },
             callType = CallType.VIDEO,
-            participants = mockParticipantList,
             onDeclineCall = { },
-            onAcceptCall = { _, _ -> },
+            onAcceptCall = { },
             onVideoToggleChanged = { }
         )
     }

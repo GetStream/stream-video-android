@@ -23,15 +23,38 @@ import io.getstream.video.android.model.CallSettings
 import io.getstream.video.android.model.IceServer
 import io.getstream.video.android.model.JoinedCall
 import io.getstream.video.android.model.User
+import io.getstream.video.android.model.state.StreamCallState
 import io.getstream.video.android.socket.SocketListener
 import io.getstream.video.android.token.CredentialsProvider
 import io.getstream.video.android.utils.Result
+import kotlinx.coroutines.flow.StateFlow
+import stream.video.coordinator.client_v1_rpc.UserEventType
 
 public interface StreamCalls {
+
+    public val callState: StateFlow<StreamCallState>
 
     /**
      * Domain - Call CRUD.
      */
+
+    /**
+     * Creates a call with given information. You can then use the [CallMetadata] and join it and get auth
+     * information to fully connect. This is different from [getOrCreateCall] because if the
+     * call already exists, we'll return an error.
+     *
+     * @param type The call type.
+     * @param id The call ID.
+     * @param participantIds List of other people to invite to the call.
+     *
+     * @return [Result] which contains the [CallMetadata] and its information.
+     */
+    public suspend fun createCall(
+        type: String,
+        id: String,
+        participantIds: List<String> = emptyList(),
+        ringing: Boolean
+    ): Result<CallMetadata>
 
     /**
      * Creates a call with given information. You can then use the [CallMetadata] and join it and get auth
@@ -43,13 +66,12 @@ public interface StreamCalls {
      *
      * @return [Result] which contains the [CallMetadata] and its information.
      */
-    public suspend fun createCall(
+    public suspend fun getOrCreateCall(
         type: String,
         id: String,
-        participantIds: List<String> = emptyList()
+        participantIds: List<String> = emptyList(),
+        ringing: Boolean
     ): Result<CallMetadata>
-
-    // TODO - get call?
 
     /**
      * Creates a call with given information and then authenticates the user to join the said [CallMetadata].
@@ -64,13 +86,25 @@ public interface StreamCalls {
     public suspend fun createAndJoinCall(
         type: String,
         id: String,
-        participantIds: List<String>
+        participantIds: List<String>,
+        ringing: Boolean
     ): Result<JoinedCall>
 
     /**
-     * Authenticates the user to join a given [CallMetadata].
+     * Authenticates the user to join a given Call based on the [type] and [id].
      *
-     * @param call The existing call or room which can be joined.
+     * @param type The call type.
+     * @param id The call ID.
+     *
+     * @return [Result] which contains the [JoinedCall] with the auth information required to fully
+     * connect.
+     */
+    public suspend fun joinCall(type: String, id: String): Result<JoinedCall>
+
+    /**
+     * Authenticates the user to join a given Call using the [CallMetadata].
+     *
+     * @param call The existing call or room metadata which is used to join a Call.
      *
      * @return [Result] which contains the [JoinedCall] with the auth information required to fully
      * connect.
@@ -78,9 +112,21 @@ public interface StreamCalls {
     public suspend fun joinCall(call: CallMetadata): Result<JoinedCall>
 
     /**
+     * Sends a specific event related to an active [Call].
+     *
+     * @param userEventType The event type, such as accepting or declining a call.
+     * @return [Result] which contains if the event was successfully sent.
+     */
+    public suspend fun sendEvent(
+        callId: String,
+        callType: String,
+        userEventType: UserEventType
+    ): Result<Boolean>
+
+    /**
      * Leaves the currently active call and clears up all connections to it.
      */
-    public fun leaveCall()
+    public fun clearCallState()
 
     /**
      * Gets the current user information.

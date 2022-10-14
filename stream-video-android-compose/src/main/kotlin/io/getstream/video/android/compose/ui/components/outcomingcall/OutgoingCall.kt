@@ -27,21 +27,24 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.CallTopAppbar
 import io.getstream.video.android.compose.ui.components.background.CallBackground
 import io.getstream.video.android.compose.ui.components.mock.mockParticipant
-import io.getstream.video.android.model.CallParticipant
 import io.getstream.video.android.model.CallType
+import io.getstream.video.android.model.CallUser
 
 @Composable
 public fun OutgoingCall(
     callId: String,
     callType: CallType,
-    participants: List<CallParticipant>,
+    participants: List<CallUser>,
     onCancelCall: (String) -> Unit = {},
     onMicToggleChanged: (Boolean) -> Unit = {},
     onVideoToggleChanged: (Boolean) -> Unit = {},
-    onCameraOrientationChanged: (Boolean) -> Unit = {},
 ) {
 
-    CallBackground(participants = participants) {
+    CallBackground(
+        participants = participants,
+        callType = callType,
+        isIncoming = false
+    ) {
 
         Column {
 
@@ -81,7 +84,6 @@ public fun OutgoingCall(
                 onCancelCall = onCancelCall,
                 onMicToggleChanged = onMicToggleChanged,
                 onVideoToggleChanged = onVideoToggleChanged,
-                onCameraOrientationChanged = onCameraOrientationChanged
             )
         }
     }
@@ -94,7 +96,11 @@ private fun OutgoingCallPreview() {
         OutgoingCall(
             callId = "",
             callType = CallType.VIDEO,
-            participants = listOf(mockParticipant),
+            participants = listOf(
+                mockParticipant.let {
+                    CallUser(it.id, it.name, it.role, it.profileImageURL ?: "", null, null)
+                }
+            ),
             onCancelCall = { },
             onMicToggleChanged = { },
             onVideoToggleChanged = { },

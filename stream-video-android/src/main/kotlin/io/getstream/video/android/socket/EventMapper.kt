@@ -16,17 +16,20 @@
 
 package io.getstream.video.android.socket
 
+import io.getstream.video.android.events.CallAcceptedEvent
+import io.getstream.video.android.events.CallCanceledEvent
 import io.getstream.video.android.events.CallCreatedEvent
 import io.getstream.video.android.events.CallEndedEvent
 import io.getstream.video.android.events.CallMembersDeletedEvent
 import io.getstream.video.android.events.CallMembersUpdatedEvent
+import io.getstream.video.android.events.CallRejectedEvent
 import io.getstream.video.android.events.CallUpdatedEvent
 import io.getstream.video.android.events.HealthCheckEvent
 import io.getstream.video.android.events.UnknownEvent
 import io.getstream.video.android.events.VideoEvent
-import io.getstream.video.android.events.model.toCallDetails
-import io.getstream.video.android.events.model.toCallInfo
-import io.getstream.video.android.events.model.toCallUsers
+import io.getstream.video.android.model.toCallDetails
+import io.getstream.video.android.model.toCallInfo
+import io.getstream.video.android.model.toCallUsers
 import stream.video.coordinator.client_v1_rpc.WebsocketEvent
 
 internal object EventMapper {
@@ -46,27 +49,17 @@ internal object EventMapper {
             CallCreatedEvent(
                 callId = call_cid,
                 users = socketEvent.users.toCallUsers(),
-                info = socketEvent.calls[call_cid]?.toCallInfo(),
-                details = socketEvent.call_details[call_cid]?.toCallDetails(),
+                info = socketEvent.calls[call_cid].toCallInfo(),
+                details = socketEvent.call_details[call_cid].toCallDetails(),
             )
         }
-
-        // TODO - this is broken with new proto update, check
-//        socketEvent.call_started != null -> with(socketEvent.call_started) {
-//            CallStartedEvent(
-//                callId = call_cid,
-//                users = socketEvent.users.toCallUsers(),
-//                info = socketEvent.calls[call_cid]?.toCallInfo(),
-//                details = socketEvent.call_details[call_cid]?.toCallDetails(),
-//            )
-//        }
 
         socketEvent.call_updated != null -> with(socketEvent.call_updated) {
             CallUpdatedEvent(
                 callId = call_cid,
                 users = socketEvent.users.toCallUsers(),
-                info = socketEvent.calls[call_cid]?.toCallInfo(),
-                details = socketEvent.call_details[call_cid]?.toCallDetails(),
+                info = socketEvent.calls[call_cid].toCallInfo(),
+                details = socketEvent.call_details[call_cid].toCallDetails(),
             )
         }
 
@@ -74,8 +67,8 @@ internal object EventMapper {
             CallEndedEvent(
                 callId = call_cid,
                 users = socketEvent.users.toCallUsers(),
-                info = socketEvent.calls[call_cid]?.toCallInfo(),
-                details = socketEvent.call_details[call_cid]?.toCallDetails(),
+                info = socketEvent.calls[call_cid].toCallInfo(),
+                details = socketEvent.call_details[call_cid].toCallDetails(),
             )
         }
 
@@ -83,8 +76,8 @@ internal object EventMapper {
             CallMembersUpdatedEvent(
                 callId = call_cid,
                 users = socketEvent.users.toCallUsers(),
-                info = socketEvent.calls[call_cid]?.toCallInfo(),
-                details = socketEvent.call_details[call_cid]?.toCallDetails(),
+                info = socketEvent.calls[call_cid].toCallInfo(),
+                details = socketEvent.call_details[call_cid].toCallDetails(),
             )
         }
 
@@ -92,10 +85,16 @@ internal object EventMapper {
             CallMembersDeletedEvent(
                 callId = call_cid,
                 users = socketEvent.users.toCallUsers(),
-                info = socketEvent.calls[call_cid]?.toCallInfo(),
-                details = socketEvent.call_details[call_cid]?.toCallDetails(),
+                info = socketEvent.calls[call_cid].toCallInfo(),
+                details = socketEvent.call_details[call_cid].toCallDetails(),
             )
         }
+
+        socketEvent.call_accepted != null -> CallAcceptedEvent
+
+        socketEvent.call_rejected != null -> CallRejectedEvent
+
+        socketEvent.call_cancelled != null -> CallCanceledEvent
 
 //        TODO - do we remove these?
 //        socketEvent.audio_muted != null -> with(socketEvent.audio_muted) {

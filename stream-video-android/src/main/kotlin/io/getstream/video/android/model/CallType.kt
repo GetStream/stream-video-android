@@ -19,4 +19,16 @@ package io.getstream.video.android.model
 public enum class CallType(public val type: String) {
     VIDEO("video"),
     AUDIO("audio");
+
+    public companion object {
+        public fun fromType(type: String): CallType {
+            val values = values().map { it.type to it }
+
+            val callType = values.firstOrNull { (typeName, _) ->
+                typeName == type
+            }
+
+            return callType?.second ?: VIDEO
+        }
+    }
 }

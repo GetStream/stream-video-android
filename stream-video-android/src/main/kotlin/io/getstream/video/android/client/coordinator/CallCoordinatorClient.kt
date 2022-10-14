@@ -24,7 +24,7 @@ import stream.video.coordinator.client_v1_rpc.GetCallEdgeServerRequest
 import stream.video.coordinator.client_v1_rpc.GetCallEdgeServerResponse
 import stream.video.coordinator.client_v1_rpc.JoinCallRequest
 import stream.video.coordinator.client_v1_rpc.JoinCallResponse
-import stream.video.coordinator.client_v1_rpc.SendCustomEventRequest
+import stream.video.coordinator.client_v1_rpc.SendEventRequest
 
 public interface CallCoordinatorClient {
 
@@ -69,5 +69,5 @@ public interface CallCoordinatorClient {
      * @param sendEventRequest The request holding information about the event type and the call.
      * @return a [Result] wrapper if the call succeeded or not.
      */
-    public suspend fun sendUserEvent(sendEventRequest: SendCustomEventRequest): Result<Boolean>
+    public suspend fun sendUserEvent(sendEventRequest: SendEventRequest): Result<Boolean>
 }

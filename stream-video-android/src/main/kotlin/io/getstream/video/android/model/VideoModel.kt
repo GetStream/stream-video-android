@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.events.model
+package io.getstream.video.android.model
 
-import java.util.Date
+import java.io.Serializable
+import java.util.*
 import stream.video.coordinator.call_v1.Call as ProtoCall
 import stream.video.coordinator.call_v1.CallDetails as ProtoCallDetails
 import stream.video.coordinator.member_v1.Member as ProtoMember
@@ -29,7 +30,7 @@ public data class CallUser(
     val imageUrl: String,
     val createdAt: Date?,
     val updatedAt: Date?
-)
+) : Serializable
 
 public data class CallMember(
     val callId: String,
@@ -37,24 +38,33 @@ public data class CallMember(
     val userId: String,
     val createdAt: Date?,
     val updatedAt: Date?
-)
+) : Serializable
 
 public data class CallInfo(
-    val callId: String,
+    val cid: String,
     val type: String,
     val createdByUserId: String,
     val createdAt: Date?,
     val updatedAt: Date?
-)
+) : Serializable
+
+public val CallInfo.callId: String
+    get() {
+        return cid.replace(
+            "$type:",
+            ""
+        )
+    }
 
 public data class CallDetails(
     val memberUserIds: List<String>,
     val members: Map<String, CallMember>
-)
+) : Serializable
 
-public fun Map<String, ProtoUser>.toCallUsers(): Map<String, CallUser> = map { (userId, protoUser) ->
-    userId to protoUser.toCallUser()
-}.toMap()
+public fun Map<String, ProtoUser>.toCallUsers(): Map<String, CallUser> =
+    map { (userId, protoUser) ->
+        userId to protoUser.toCallUser()
+    }.toMap()
 
 public fun ProtoUser.toCallUser(): CallUser = CallUser(
     id = id,
@@ -73,17 +83,23 @@ public fun ProtoMember.toCallMember(): CallMember = CallMember(
     updatedAt = updated_at?.let { Date(it.toEpochMilli()) },
 )
 
-public fun ProtoCallDetails.toCallDetails(): CallDetails = CallDetails(
-    memberUserIds = member_user_ids,
-    members = members.map { (userId, protoMember) ->
-        userId to protoMember.toCallMember()
-    }.toMap()
-)
+public fun ProtoCallDetails?.toCallDetails(): CallDetails {
+    this ?: error("CallDetails is not provided")
+    return CallDetails(
+        memberUserIds = member_user_ids,
+        members = members.map { (userId, protoMember) ->
+            userId to protoMember.toCallMember()
+        }.toMap()
+    )
+}
 
-public fun ProtoCall.toCallInfo(): CallInfo = CallInfo(
-    callId = call_cid,
-    type = type,
-    createdByUserId = created_by_user_id,
-    createdAt = created_at?.let { Date(it.toEpochMilli()) },
-    updatedAt = updated_at?.let { Date(it.toEpochMilli()) },
-)
+public fun ProtoCall?.toCallInfo(): CallInfo {
+    this ?: error("CallInfo is not provided")
+    return CallInfo(
+        cid = call_cid,
+        type = type,
+        createdByUserId = created_by_user_id,
+        createdAt = created_at?.let { Date(it.toEpochMilli()) },
+        updatedAt = updated_at?.let { Date(it.toEpochMilli()) },
+    )
+}
