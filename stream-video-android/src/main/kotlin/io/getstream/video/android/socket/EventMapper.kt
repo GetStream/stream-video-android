@@ -47,7 +47,8 @@ internal object EventMapper {
 
         socketEvent.call_created != null -> with(socketEvent.call_created) {
             CallCreatedEvent(
-                callId = call_cid,
+                callCid = call_cid,
+                ringing = ringing,
                 users = socketEvent.users.toCallUsers(),
                 info = socketEvent.calls[call_cid].toCallInfo(),
                 details = socketEvent.call_details[call_cid].toCallDetails(),
@@ -56,7 +57,7 @@ internal object EventMapper {
 
         socketEvent.call_updated != null -> with(socketEvent.call_updated) {
             CallUpdatedEvent(
-                callId = call_cid,
+                callCid = call_cid,
                 users = socketEvent.users.toCallUsers(),
                 info = socketEvent.calls[call_cid].toCallInfo(),
                 details = socketEvent.call_details[call_cid].toCallDetails(),
@@ -65,7 +66,7 @@ internal object EventMapper {
 
         socketEvent.call_ended != null -> with(socketEvent.call_ended) {
             CallEndedEvent(
-                callId = call_cid,
+                callCid = call_cid,
                 users = socketEvent.users.toCallUsers(),
                 info = socketEvent.calls[call_cid].toCallInfo(),
                 details = socketEvent.call_details[call_cid].toCallDetails(),
@@ -74,7 +75,7 @@ internal object EventMapper {
 
         socketEvent.call_members_updated != null -> with(socketEvent.call_members_updated) {
             CallMembersUpdatedEvent(
-                callId = call_cid,
+                callCid = call_cid,
                 users = socketEvent.users.toCallUsers(),
                 info = socketEvent.calls[call_cid].toCallInfo(),
                 details = socketEvent.call_details[call_cid].toCallDetails(),
@@ -83,7 +84,7 @@ internal object EventMapper {
 
         socketEvent.call_members_deleted != null -> with(socketEvent.call_members_deleted) {
             CallMembersDeletedEvent(
-                callId = call_cid,
+                callCid = call_cid,
                 users = socketEvent.users.toCallUsers(),
                 info = socketEvent.calls[call_cid].toCallInfo(),
                 details = socketEvent.call_details[call_cid].toCallDetails(),

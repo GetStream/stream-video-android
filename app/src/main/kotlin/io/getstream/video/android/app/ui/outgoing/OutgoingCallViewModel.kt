@@ -26,7 +26,6 @@ import io.getstream.video.android.events.CallRejectedEvent
 import io.getstream.video.android.events.VideoEvent
 import io.getstream.video.android.model.CallInput
 import io.getstream.video.android.model.OutgoingCallData
-import io.getstream.video.android.model.callId
 import io.getstream.video.android.model.toMetadata
 import io.getstream.video.android.router.StreamRouter
 import io.getstream.video.android.socket.SocketListener
@@ -87,9 +86,9 @@ class OutgoingCallViewModel(
 
         viewModelScope.launch {
             streamCalls.sendEvent(
-                callId = data.callId,
+                callId = data.id,
                 callType = data.type,
-                UserEventType.USER_EVENT_TYPE_CANCELLED_CALL
+                userEventType = UserEventType.USER_EVENT_TYPE_CANCELLED_CALL
             )
 
             streamCalls.clearCallState()

@@ -25,7 +25,6 @@ import io.getstream.video.android.events.VideoEvent
 import io.getstream.video.android.model.CallInput
 import io.getstream.video.android.model.IncomingCallData
 import io.getstream.video.android.model.JoinedCall
-import io.getstream.video.android.model.callId
 import io.getstream.video.android.router.StreamRouter
 import io.getstream.video.android.socket.SocketListener
 import io.getstream.video.android.utils.Failure
@@ -57,7 +56,7 @@ class IncomingCallViewModel(
     fun acceptCall() {
         val data = callData
         val callType = data.callInfo.type
-        val callId = data.callInfo.callId
+        val callId = data.callInfo.id
         logger.d { "[acceptCall] callType: $callType, callId: $callId" }
 
         viewModelScope.launch {
@@ -99,9 +98,9 @@ class IncomingCallViewModel(
         val data = callData
         viewModelScope.launch {
             val result = streamCalls.sendEvent(
-                data.callInfo.callId,
-                data.callInfo.type,
-                UserEventType.USER_EVENT_TYPE_REJECTED_CALL
+                callId = data.callInfo.id,
+                callType = data.callInfo.type,
+                userEventType = UserEventType.USER_EVENT_TYPE_REJECTED_CALL
             )
             logger.d { "[declineCall] result: $result" }
 

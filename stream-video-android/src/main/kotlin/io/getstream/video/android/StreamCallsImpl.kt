@@ -39,12 +39,11 @@ import io.getstream.video.android.socket.SocketState
 import io.getstream.video.android.socket.SocketStateService
 import io.getstream.video.android.socket.VideoSocket
 import io.getstream.video.android.token.CredentialsProvider
-import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Result
-import io.getstream.video.android.utils.Success
+import io.getstream.video.android.utils.flatMap
+import io.getstream.video.android.utils.map
 import io.getstream.video.android.utils.onError
 import io.getstream.video.android.utils.onSuccess
-import io.getstream.video.android.utils.toCall
 import io.getstream.video.android.webrtc.WebRTCClient
 import io.getstream.video.android.webrtc.builder.WebRTCClientBuilder
 import kotlinx.coroutines.CoroutineScope
@@ -67,7 +66,7 @@ public class StreamCallsImpl(
     private val userState: UserState
 ) : StreamCalls {
 
-    private val logger = StreamLog.getLogger("StreamCalls")
+    private val logger = StreamLog.getLogger("Call:StreamCalls")
 
     private val scope = CoroutineScope(DispatcherProvider.IO)
 
@@ -107,12 +106,9 @@ public class StreamCallsImpl(
         ringing: Boolean
     ): Result<CallMetadata> {
         logger.d { "[createCall] type: $type, id: $id, participantIds: $participantIds" }
-        return when (val result = callClient.createCall(type, id, participantIds, ringing)) {
-            is Success -> {
-                Success(result.data.call?.toCall()!!)
-            }
-            is Failure -> Failure(result.error)
-        }
+        return callClient.createCall(type, id, participantIds, ringing)
+            .map { it.call }
+            .also { logger.v { "[createCall] result: $it" } }
     }
 
     override suspend fun getOrCreateCall(
@@ -122,18 +118,13 @@ public class StreamCallsImpl(
         ringing: Boolean
     ): Result<CallMetadata> {
         logger.d { "[createCall] type: $type, id: $id, participantIds: $participantIds" }
-        return when (val result = callClient.getOrCreateCall(type, id, participantIds, ringing)) {
-            is Success -> {
-                val callMetadata = result.data.call?.toCall()!!
-
-                Success(callMetadata).also {
-                    if (ringing) {
-                        engine.onOutgoingCall(callMetadata)
-                    }
+        return callClient.getOrCreateCall(type, id, participantIds, ringing)
+            .map { it.call }
+            .onSuccess {
+                if (ringing) {
+                    engine.onOutgoingCall(it)
                 }
             }
-            is Failure -> Failure(result.error)
-        }
     }
 
     override suspend fun createAndJoinCall(
@@ -142,27 +133,20 @@ public class StreamCallsImpl(
         participantIds: List<String>,
         ringing: Boolean
     ): Result<JoinedCall> {
-        logger.d { "[createAndJoinCall] type: $type, id: $id, participantIds: $participantIds" }
-        return callClient.createAndJoinCall(type, id, participantIds, ringing)
+        logger.d { "[getOrCreateAndJoinCall] type: $type, id: $id, participantIds: $participantIds" }
+        return callClient.getOrCreateCall(type, id, participantIds, ringing = ringing)
+            .flatMap { callClient.joinCall(it.call) }
+            .also { logger.v { "[getOrCreateAndJoinCall] result: $it" } }
     }
 
     override suspend fun joinCall(type: String, id: String): Result<JoinedCall> {
         logger.d { "[joinCall] type: $type, id: $id" }
-        engine.onConnecting()
-
-        val getOrCreateResult = callClient.getOrCreateCall(type, id, emptyList(), false)
-        logger.v { "[joinCall] getOrCreateResult: $getOrCreateResult" }
-        return when (getOrCreateResult) {
-            is Success -> {
-                val metadata = getOrCreateResult.data.call?.toCall()
-                    ?: error("[joinCall] no CallEnvelope found")
-
-                joinCall(metadata)
-            }
-            is Failure -> getOrCreateResult.also {
-                engine.resetCallState()
-            }
-        }
+        engine.onCallConnecting()
+        return callClient.getOrCreateCall(type, id, emptyList(), ringing = false)
+            .flatMap { callClient.joinCall(it.call) }
+            .onSuccess { }
+            .onError { engine.resetCallState() }
+            .also { logger.v { "[joinCall] result: $it" } }
     }
 
     override suspend fun joinCall(call: CallMetadata): Result<JoinedCall> {

@@ -117,7 +117,7 @@ internal class StreamCallEngineImpl(
         }
         _callState.emit(
             StreamCallState.Outgoing(
-                callId = callMetadata.id,
+                callCid = callMetadata.cid,
                 users = callMetadata.users,
                 info = callMetadata.toInfo(),
                 details = callMetadata.toDetails()
@@ -134,7 +134,7 @@ internal class StreamCallEngineImpl(
         _callState.emit(
             event.run {
                 StreamCallState.Incoming(
-                    callId = callId,
+                    callCid = callCid,
                     users = users,
                     info = info,
                     details = details

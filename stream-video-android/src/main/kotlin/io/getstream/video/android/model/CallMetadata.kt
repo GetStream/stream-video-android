@@ -22,7 +22,7 @@ public data class CallMetadata(
     val cid: String,
     val id: String,
     val type: String,
-    val createdBy: String,
+    val createdByUserId: String,
     val createdAt: Long,
     val updatedAt: Long,
     val recordingEnabled: Boolean,
@@ -32,11 +32,12 @@ public data class CallMetadata(
 ) : java.io.Serializable
 
 public fun CallMetadata.toInfo(): CallInfo = CallInfo(
-    cid,
-    type,
-    createdBy,
-    Date(createdAt),
-    Date(updatedAt)
+    cid = cid,
+    id = id,
+    type = type,
+    createdByUserId = createdByUserId,
+    createdAt = Date(createdAt),
+    updatedAt = Date(updatedAt)
 )
 
 public fun CallMetadata.toDetails(): CallDetails = CallDetails(

@@ -24,13 +24,13 @@ public data class IncomingCallData(
 
 public fun IncomingCallData.toMetadata(): CallMetadata =
     CallMetadata(
-        id = callInfo.callId,
         cid = callInfo.cid,
+        id = callInfo.id,
         type = callInfo.type,
         users = participants.associateBy { it.id },
         createdAt = callInfo.createdAt?.time ?: 0,
         updatedAt = callInfo.updatedAt?.time ?: 0,
-        createdBy = callInfo.createdByUserId,
+        createdByUserId = callInfo.createdByUserId,
         broadcastingEnabled = false,
         recordingEnabled = false,
         extraData = emptyMap()
