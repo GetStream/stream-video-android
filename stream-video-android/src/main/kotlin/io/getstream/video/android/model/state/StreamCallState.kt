@@ -32,14 +32,14 @@ public sealed interface StreamCallState : java.io.Serializable {
     ) : StreamCallState
 
     public data class Outgoing(
-        val callId: String,
+        val callCid: String,
         val users: Map<String, CallUser>,
         val info: CallInfo,
         val details: CallDetails
     ) : StreamCallState
 
     public data class Incoming(
-        val callId: String,
+        val callCid: String,
         val users: Map<String, CallUser>,
         val info: CallInfo,
         val details: CallDetails
