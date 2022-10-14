@@ -32,15 +32,11 @@ import io.getstream.video.android.model.IncomingCallData
 
 class IncomingCallActivity : AppCompatActivity() {
 
-    private val callData by lazy {
-        requireNotNull(intent.getSerializableExtra(KEY_CALL_DATA) as? IncomingCallData)
-    }
-
     private val viewModel by viewModels<IncomingCallViewModel> {
         IncomingCallViewModelFactory(
             videoApp.streamCalls,
             StreamRouterImpl(this),
-            callData
+            requireNotNull(intent.getSerializableExtra(KEY_CALL_DATA) as? IncomingCallData)
         )
     }
 
