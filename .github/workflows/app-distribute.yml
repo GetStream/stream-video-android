@@ -3,7 +3,7 @@ name: App Distribute CI
 on:
   push:
     branches:
-      - task/dogfooding
+      - main
 
 jobs:
   build_dogfooding_sample_app:
