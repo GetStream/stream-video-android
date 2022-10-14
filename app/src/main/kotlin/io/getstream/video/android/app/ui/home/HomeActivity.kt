@@ -94,9 +94,11 @@ class HomeActivity : AppCompatActivity() {
         mutableStateOf(HomeScreenOption.CREATE_CALL)
 
     private val participantsOptions: MutableState<List<UserCredentials>> by lazy {
-        mutableStateOf(getUsers().filter {
-            it.id != streamCalls.getUser().id
-        })
+        mutableStateOf(
+            getUsers().filter {
+                it.id != streamCalls.getUser().id
+            }
+        )
     }
 
     private val callIdState: MutableState<String> = mutableStateOf("call:123")
@@ -366,7 +368,8 @@ class HomeActivity : AppCompatActivity() {
             },
             label = {
                 Text(text = "Enter the call ID")
-            })
+            }
+        )
     }
 
     @Composable
@@ -376,7 +379,8 @@ class HomeActivity : AppCompatActivity() {
         Row(
             modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center
         ) {
-            Button(modifier = Modifier.padding(8.dp),
+            Button(
+                modifier = Modifier.padding(8.dp),
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = if (selectedOption == HomeScreenOption.CREATE_CALL) MaterialTheme.colors.primary else Color.LightGray,
                     contentColor = Color.White
@@ -384,9 +388,11 @@ class HomeActivity : AppCompatActivity() {
                 onClick = { this@HomeActivity.selectedOption.value = HomeScreenOption.CREATE_CALL },
                 content = {
                     Text(text = "Create Call")
-                })
+                }
+            )
 
-            Button(modifier = Modifier.padding(8.dp),
+            Button(
+                modifier = Modifier.padding(8.dp),
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = if (selectedOption == HomeScreenOption.JOIN_CALL) MaterialTheme.colors.primary else Color.LightGray,
                     contentColor = Color.White
@@ -394,7 +400,8 @@ class HomeActivity : AppCompatActivity() {
                 onClick = { this@HomeActivity.selectedOption.value = HomeScreenOption.JOIN_CALL },
                 content = {
                     Text(text = "Join Call")
-                })
+                }
+            )
         }
     }
 

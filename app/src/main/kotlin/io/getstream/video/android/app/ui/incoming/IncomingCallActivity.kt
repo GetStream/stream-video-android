@@ -60,7 +60,6 @@ class IncomingCallActivity : AppCompatActivity() {
                 )
             }
         }
-
     }
 
     private fun showWhenLockedAndTurnScreenOn() {

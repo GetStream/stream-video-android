@@ -115,7 +115,6 @@ public class StreamCallsImpl(
         }
     }
 
-
     override suspend fun getOrCreateCall(
         type: String,
         id: String,
@@ -282,7 +281,7 @@ public class StreamCallsImpl(
         return webRTCClient
             ?: throw IllegalStateException(
                 "Cannot connect to a call without a WebRTC Client. " +
-                        "Make sure to initialize the client first, using `createCallClient`"
+                    "Make sure to initialize the client first, using `createCallClient`"
             )
     }
 }
