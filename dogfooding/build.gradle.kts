@@ -1,6 +1,8 @@
 import io.getstream.video.android.Configuration
 import io.getstream.video.android.Dependencies
 import io.getstream.video.android.Versions
+import java.io.FileInputStream
+import java.util.*
 
 plugins {
     id("com.android.application")
@@ -34,6 +36,40 @@ android {
             )
         }
     }
+
+    val signFile: File = rootProject.file(".sign/keystore.properties")
+    if (signFile.exists()) {
+        val properties = Properties()
+        properties.load(FileInputStream(signFile))
+
+        signingConfigs {
+            create("release") {
+                keyAlias = properties["keyAlias"] as? String
+                keyPassword = properties["keyPassword"] as? String
+                storeFile = file(properties["keystore"] as String)
+                storePassword = properties["storePassword"] as? String
+            }
+        }
+    } else {
+        signingConfigs {
+            create("release") {
+                keyAlias = "androiddebugkey"
+                keyPassword = "android"
+                storeFile = rootProject.file(".sign/debug.keystore")
+                storePassword = "android"
+            }
+        }
+    }
+
+    signingConfigs {
+        getByName("debug") {
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+            storeFile = rootProject.file(".sign/debug.keystore")
+            storePassword = "android"
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -65,7 +101,7 @@ dependencies {
     implementation(Dependencies.streamLogger)
     implementation(Dependencies.streamLoggerAndroid)
 
-            implementation(Dependencies.androidxCore)
+    implementation(Dependencies.androidxCore)
     implementation(Dependencies.androidxLifecycleRuntime)
     implementation(Dependencies.material)
 
