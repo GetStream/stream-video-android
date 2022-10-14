@@ -35,8 +35,11 @@ import io.getstream.video.android.events.UnknownEvent
 import io.getstream.video.android.events.VideoEvent
 import io.getstream.video.android.events.VideoStartedEvent
 import io.getstream.video.android.events.VideoStoppedEvent
+import io.getstream.video.android.model.CallMetadata
 import io.getstream.video.android.model.JoinedCall
 import io.getstream.video.android.model.state.StreamCallState
+import io.getstream.video.android.model.toDetails
+import io.getstream.video.android.model.toInfo
 import io.getstream.video.android.socket.SocketListener
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -94,12 +97,32 @@ internal class StreamCallEngineImpl(
         _callState.emit(StreamCallState.InCall(joinedCall))
     }
 
-    override fun onCallLeaved() = scope.launchWithLock(mutex) {
+    override fun onCallConnecting() = scope.launchWithLock(mutex) {
+        _callState.emit(StreamCallState.Connecting)
+    }
+
+    override fun resetCallState() = scope.launchWithLock(mutex) {
         _callState.emit(StreamCallState.Idle)
     }
 
     private fun onCallFinished() = scope.launchWithLock(mutex) {
         _callState.emit(StreamCallState.Idle)
+    }
+
+    override fun onOutgoingCall(callMetadata: CallMetadata) = scope.launchWithLock(mutex) {
+        val state = _callState.value
+        if (state !is StreamCallState.Idle) {
+            logger.w { "[onOutgoingCall] rejected (state is not Idle): $state" }
+            return@launchWithLock
+        }
+        _callState.emit(
+            StreamCallState.Outgoing(
+                callId = callMetadata.id,
+                users = callMetadata.users,
+                info = callMetadata.toInfo(),
+                details = callMetadata.toDetails()
+            )
+        )
     }
 
     private fun onCallCreated(event: CallCreatedEvent) = scope.launchWithLock(mutex) {

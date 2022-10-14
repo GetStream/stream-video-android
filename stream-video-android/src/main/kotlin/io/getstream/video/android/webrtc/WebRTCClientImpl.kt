@@ -63,7 +63,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import okio.ByteString.Companion.encode
 import org.webrtc.AudioTrack
@@ -490,7 +489,6 @@ internal class WebRTCClientImpl(
 
         val audioTrack = makeAudioTrack()
         audioTrack.setEnabled(true)
-        audioTrack.setVolume(17.5)
         localAudioTrack = audioTrack
         logger.v { "[setupUserMedia] #sfu; audioTrack: ${audioTrack.stringify()}" }
 

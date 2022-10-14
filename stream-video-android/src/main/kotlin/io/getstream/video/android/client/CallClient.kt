@@ -79,6 +79,30 @@ public class CallClient(
     }
 
     /**
+     * @see CallCoordinatorClient.createCall for details.
+     */
+    public suspend fun createCall(
+        type: String,
+        id: String,
+        participantIds: List<String>,
+        ringing: Boolean
+    ): Result<CreateCallResponse> {
+        logger.d { "[getOrCreateCall] type: $type, id: $id, participantIds: $participantIds" }
+        return callCoordinatorClient.createCall(
+            CreateCallRequest(
+                type = type,
+                id = id,
+                input = CreateCallInput(
+                    members = participantIds.associateWith {
+                        MemberInput(role = "admin")
+                    },
+                    ring = ringing
+                )
+            )
+        ).also { logger.v { "[getOrCreateCall] result: $it" } }
+    }
+
+    /**
      * @see CallCoordinatorClient.getOrCreateCall for details.
      */
     public suspend fun getOrCreateCall(
@@ -212,22 +236,6 @@ public class CallClient(
             SendEventRequest(
                 call_id = callId,
                 call_type = callType,
-                event_type = userEventType
-            )
-        )
-    }
-
-    /**
-     * @see CallCoordinatorClient.sendUserEvent for details.
-     */
-    public suspend fun sendUserEvent(userEventType: UserEventType): Result<Boolean> {
-        val call = socket.getCallState()
-            ?: return Failure(error = VideoError(message = "No call is active!"))
-
-        return callCoordinatorClient.sendUserEvent(
-            SendEventRequest(
-                call_id = call.id,
-                call_type = call.type,
                 event_type = userEventType
             )
         )

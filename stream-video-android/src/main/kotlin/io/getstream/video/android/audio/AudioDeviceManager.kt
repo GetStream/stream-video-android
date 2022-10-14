@@ -68,7 +68,7 @@ internal class AudioDeviceManager(
     @SuppressLint("NewApi")
     fun setAudioFocus() {
         // Request audio focus before making any device switch.
-        if (/*Build.VERSION.SDK_INT >= Build.VERSION_CODES.O*/false) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             audioRequest = audioFocusRequest.buildRequest(audioFocusChangeListener)
             audioRequest?.let {
                 val result = audioManager.requestAudioFocus(it)

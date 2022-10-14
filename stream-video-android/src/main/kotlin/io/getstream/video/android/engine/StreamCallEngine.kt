@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.engine
 
+import io.getstream.video.android.model.CallMetadata
 import io.getstream.video.android.model.JoinedCall
 import io.getstream.video.android.model.state.StreamCallState
 import kotlinx.coroutines.flow.StateFlow
@@ -26,5 +27,9 @@ internal interface StreamCallEngine {
 
     fun onCallJoined(joinedCall: JoinedCall)
 
-    fun onCallLeaved()
+    fun onCallConnecting()
+
+    fun onOutgoingCall(callMetadata: CallMetadata)
+
+    fun resetCallState()
 }

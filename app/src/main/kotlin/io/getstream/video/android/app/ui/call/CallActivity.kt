@@ -25,38 +25,22 @@ import android.os.Build
 import android.os.Build.VERSION_CODES.M
 import android.os.Bundle
 import android.provider.Settings
-import android.util.Log
-import android.view.View
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
-import io.getstream.video.android.R
 import io.getstream.video.android.app.ui.call.content.VideoCallContent
 import io.getstream.video.android.app.videoApp
-import io.getstream.video.android.model.IceServer
-import io.getstream.video.android.model.IceServerConfig
-import io.getstream.video.android.ui.ParticipantContentView
-import io.getstream.video.android.ui.ParticipantItemView
+import io.getstream.video.android.model.CallInput
 import io.getstream.video.android.viewmodel.CallViewModel
 import io.getstream.video.android.viewmodel.CallViewModelFactory
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.launch
 
 class CallActivity : AppCompatActivity() {
 
-    private val input: CallViewModel.CallInput by lazy {
-        CallViewModel.CallInput(
-            callId = requireNotNull(intent.getStringExtra(KEY_CALL_ID)),
-            userToken = requireNotNull(intent.getStringExtra(KEY_USER_TOKEN)),
-            sfuUrl = requireNotNull(intent.getStringExtra(KEY_SFU_URL)),
-            iceServers = (requireNotNull(intent.getSerializableExtra(KEY_ICE_SERVERS)) as? IceServerConfig)?.iceServers
-                ?: emptyList()
-        )
+    private val input: CallInput by lazy {
+        requireNotNull(intent.getSerializableExtra(KEY_CALL_INPUT) as? CallInput)
     }
 
     private val factory by lazy {
@@ -86,48 +70,9 @@ class CallActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // setupViews() // XML variant
 
         setContent {
             VideoCallContent(callViewModel, onLeaveCall = ::leaveCall)
-        }
-    }
-
-    private fun setupViews() {
-        setContentView(R.layout.activity_call)
-
-        lifecycleScope.launch {
-            val view = findViewById<ParticipantContentView>(R.id.participantContent)
-
-            callViewModel.callState.filterNotNull().collectLatest { room ->
-                Log.d("RoomState", room.toString())
-                room.callParticipants.collectLatest { participants ->
-                    Log.d("RoomState", participants.toString())
-                    view.renderParticipants(room, participants)
-                }
-            }
-        }
-
-        lifecycleScope.launch {
-            val view = findViewById<ParticipantItemView>(R.id.floatingParticipantView)
-
-            callViewModel.callState.filterNotNull().collectLatest { room ->
-                room.localParticipant.collectLatest { participant ->
-                    val track = participant.track
-                    val video = track?.video
-
-                    if (track != null && video != null) {
-                        view.visibility = View.VISIBLE
-                        view.initialize(room, track.streamId) {
-                            lifecycleScope.launch {
-                                view.elevation = 10f
-                                view.bringToFront()
-                            }
-                        }
-                        view.bindTrack(video)
-                    }
-                }
-            }
         }
     }
 
@@ -157,7 +102,7 @@ class CallActivity : AppCompatActivity() {
     private fun startVideoFlow() {
         val isInitialized = callViewModel.isVideoInitialized.value
         if (isInitialized) return
-        callViewModel.createCall()
+        callViewModel.connectToCall()
     }
 
     @RequiresApi(M)
@@ -216,23 +161,14 @@ class CallActivity : AppCompatActivity() {
     }
 
     companion object {
-        private const val KEY_CALL_ID = "call_id"
-        private const val KEY_SFU_URL = "signal_url"
-        private const val KEY_USER_TOKEN = "user_token"
-        private const val KEY_ICE_SERVERS = "ice_servers"
+        private const val KEY_CALL_INPUT = "call_input"
 
         internal fun getIntent(
             context: Context,
-            callCid: String,
-            signalUrl: String,
-            userToken: String,
-            iceServers: List<IceServer>,
+            callInput: CallInput
         ): Intent {
             return Intent(context, CallActivity::class.java).apply {
-                putExtra(KEY_CALL_ID, callCid)
-                putExtra(KEY_SFU_URL, signalUrl)
-                putExtra(KEY_USER_TOKEN, userToken)
-                putExtra(KEY_ICE_SERVERS, IceServerConfig(iceServers))
+                putExtra(KEY_CALL_INPUT, callInput)
             }
         }
     }

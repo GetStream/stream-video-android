@@ -40,6 +40,24 @@ public interface StreamCalls {
 
     /**
      * Creates a call with given information. You can then use the [CallMetadata] and join it and get auth
+     * information to fully connect. This is different from [getOrCreateCall] because if the
+     * call already exists, we'll return an error.
+     *
+     * @param type The call type.
+     * @param id The call ID.
+     * @param participantIds List of other people to invite to the call.
+     *
+     * @return [Result] which contains the [CallMetadata] and its information.
+     */
+    public suspend fun createCall(
+        type: String,
+        id: String,
+        participantIds: List<String> = emptyList(),
+        ringing: Boolean
+    ): Result<CallMetadata>
+
+    /**
+     * Creates a call with given information. You can then use the [CallMetadata] and join it and get auth
      * information to fully connect.
      *
      * @param type The call type.
@@ -54,8 +72,6 @@ public interface StreamCalls {
         participantIds: List<String> = emptyList(),
         ringing: Boolean
     ): Result<CallMetadata>
-
-    // TODO - get call?
 
     /**
      * Creates a call with given information and then authenticates the user to join the said [CallMetadata].
@@ -75,7 +91,7 @@ public interface StreamCalls {
     ): Result<JoinedCall>
 
     /**
-     * Authenticates the user to join a given [CallMetadata].
+     * Authenticates the user to join a given Call based on the [type] and [id].
      *
      * @param type The call type.
      * @param id The call ID.
@@ -83,12 +99,12 @@ public interface StreamCalls {
      * @return [Result] which contains the [JoinedCall] with the auth information required to fully
      * connect.
      */
-    public suspend fun acceptCall(type: String, id: String): Result<JoinedCall>
+    public suspend fun joinCall(type: String, id: String): Result<JoinedCall>
 
     /**
-     * Authenticates the user to join a given [CallMetadata].
+     * Authenticates the user to join a given Call using the [CallMetadata].
      *
-     * @param call The existing call or room which can be joined.
+     * @param call The existing call or room metadata which is used to join a Call.
      *
      * @return [Result] which contains the [JoinedCall] with the auth information required to fully
      * connect.
@@ -108,17 +124,9 @@ public interface StreamCalls {
     ): Result<Boolean>
 
     /**
-     * Sends a specific event related to an active [Call].
-     *
-     * @param userEventType The event type, such as accepting or declining a call.
-     * @return [Result] which contains if the event was successfully sent.
-     */
-    public suspend fun sendEvent(userEventType: UserEventType): Result<Boolean>
-
-    /**
      * Leaves the currently active call and clears up all connections to it.
      */
-    public fun leaveCall()
+    public fun clearCallState()
 
     /**
      * Gets the current user information.

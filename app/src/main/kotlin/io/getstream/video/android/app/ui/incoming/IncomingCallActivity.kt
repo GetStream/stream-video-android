@@ -21,32 +21,46 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
-import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
-import io.getstream.logging.StreamLog
-import io.getstream.video.android.app.ui.call.CallActivity
+import io.getstream.video.android.app.router.StreamRouterImpl
 import io.getstream.video.android.app.videoApp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.incomingcall.IncomingCall
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.filterNotNull
+import io.getstream.video.android.model.IncomingCallData
 
 class IncomingCallActivity : AppCompatActivity() {
 
-    private val logger by lazy { StreamLog.getLogger("Call:Incoming-View") }
-    private val viewModel by viewModels<IncomingViewModel> { IncomingViewModelFactory(videoApp.streamCalls) }
+    private val callData by lazy {
+        requireNotNull(intent.getSerializableExtra(KEY_CALL_DATA) as? IncomingCallData)
+    }
+
+    private val viewModel by viewModels<IncomingCallViewModel> {
+        IncomingCallViewModelFactory(
+            videoApp.streamCalls,
+            StreamRouterImpl(this),
+            callData
+        )
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         showWhenLockedAndTurnScreenOn()
         super.onCreate(savedInstanceState)
 
-        observeIncomingCall()
-        observeAcceptedCall()
-        observeError()
-        observeDrop()
+        setContent {
+            VideoTheme {
+                IncomingCall(
+                    callInfo = callData.callInfo,
+                    participants = callData.participants,
+                    callType = callData.callType,
+                    onDeclineCall = { viewModel.declineCall() },
+                    onAcceptCall = { viewModel.acceptCall() },
+                    onVideoToggleChanged = { }
+                )
+            }
+        }
+
     }
 
     private fun showWhenLockedAndTurnScreenOn() {
@@ -55,76 +69,21 @@ class IncomingCallActivity : AppCompatActivity() {
             setTurnScreenOn(true)
         } else {
             window.addFlags(
-                WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
-                    or WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+                WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
             )
         }
     }
 
-    private fun observeIncomingCall() {
-        lifecycleScope.launchWhenCreated {
-            viewModel.incomingData.filterNotNull().collectLatest { data ->
-                logger.d { "[observeIncomingCall] data: $data" }
-                setContent {
-                    VideoTheme {
-                        IncomingCall(
-                            callInfo = data.callInfo,
-                            participants = data.participants,
-                            callType = data.callType,
-                            onDeclineCall = { viewModel.hangUp() },
-                            onAcceptCall = { viewModel.pickUp() },
-                            onVideoToggleChanged = { }
-                        )
-                    }
-                }
-            }
-        }
-    }
-
-    private fun observeAcceptedCall() {
-        lifecycleScope.launchWhenCreated {
-            viewModel.acceptedEvent.collectLatest { data ->
-                logger.d { "[observeAcceptedCall] data: $data" }
-                startActivity(
-                    CallActivity.getIntent(
-                        this@IncomingCallActivity,
-                        callCid = data.callCid,
-                        signalUrl = data.signalUrl,
-                        userToken = data.userToken,
-                        iceServers = data.iceServers
-                    )
-                )
-            }
-        }
-    }
-
-    private fun observeError() {
-        lifecycleScope.launchWhenCreated {
-            viewModel.errorEvent.collectLatest {
-                logger.e { "[observeError] no args" }
-                Toast.makeText(
-                    this@IncomingCallActivity,
-                    "Unable to accept call!",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-        }
-    }
-
-    private fun observeDrop() {
-        lifecycleScope.launchWhenCreated {
-            viewModel.dropEvent.collectLatest {
-                logger.i { "[observeDrop] no args" }
-                finish()
-            }
-        }
-    }
-
     companion object {
+        private const val KEY_CALL_DATA = "call_data"
+
         fun getLaunchIntent(
-            context: Context
+            context: Context,
+            incomingCallData: IncomingCallData
         ): Intent {
-            return Intent(context, IncomingCallActivity::class.java)
+            return Intent(context, IncomingCallActivity::class.java).apply {
+                putExtra(KEY_CALL_DATA, incomingCallData)
+            }
         }
     }
 }

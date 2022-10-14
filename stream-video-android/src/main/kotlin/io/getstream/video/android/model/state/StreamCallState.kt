@@ -21,40 +21,31 @@ import io.getstream.video.android.model.CallInfo
 import io.getstream.video.android.model.CallUser
 import io.getstream.video.android.model.JoinedCall
 
-public sealed interface StreamCallState {
+public sealed interface StreamCallState : java.io.Serializable {
 
     public object Idle : StreamCallState
 
-    public data class Drop(
-        val reason: DropReason
-    ) : StreamCallState
+    public object Connecting : StreamCallState
 
-    public data class Creating(
+    public data class Creating( // TODO - will this be useful to our users since we have an outgoing state?
         val users: Map<String, CallUser>,
     ) : StreamCallState
-
-    public interface Created : StreamCallState
 
     public data class Outgoing(
         val callId: String,
         val users: Map<String, CallUser>,
         val info: CallInfo,
         val details: CallDetails
-    ) : Created
+    ) : StreamCallState
 
     public data class Incoming(
         val callId: String,
         val users: Map<String, CallUser>,
         val info: CallInfo,
         val details: CallDetails
-    ) : Created
+    ) : StreamCallState
 
     public data class InCall(
         val joinedCall: JoinedCall
-    ) : Created
-}
-
-public sealed class DropReason {
-    public object Cancelled : DropReason()
-    public object Timeout : DropReason()
+    ) : StreamCallState
 }

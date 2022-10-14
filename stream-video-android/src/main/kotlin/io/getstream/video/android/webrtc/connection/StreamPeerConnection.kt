@@ -93,7 +93,12 @@ public class StreamPeerConnection(
 
     public suspend fun createOffer(): Result<SessionDescription> {
         logger.d { "[createOffer] #sfu; #$typeTag; no args" }
-        return createValue { connection.createOffer(it, MediaConstraints()) } // TODO we should send mediaConstraints here too, but BE crashes
+        return createValue {
+            connection.createOffer(
+                it,
+                MediaConstraints()
+            )
+        } // TODO we should send mediaConstraints here too, but BE crashes
     }
 
     public suspend fun createAnswer(): Result<SessionDescription> {
@@ -229,7 +234,6 @@ public class StreamPeerConnection(
             logger.v { "[onAddTrack] #sfu; #$typeTag; mediaStream: $mediaStream" }
             mediaStream.audioTracks?.forEach { remoteAudioTrack ->
                 logger.v { "[onAddTrack] #sfu; #$typeTag; remoteAudioTrack: ${remoteAudioTrack.stringify()}" }
-                remoteAudioTrack.setVolume(15.6)
                 remoteAudioTrack.setEnabled(true)
             }
             onStreamAdded?.invoke(mediaStream)
@@ -255,6 +259,7 @@ public class StreamPeerConnection(
     override fun onSignalingChange(newState: PeerConnection.SignalingState?) {
         logger.d { "[onSignalingChange] #sfu; #$typeTag; newState: $newState" }
     }
+
     override fun onIceConnectionChange(newState: PeerConnection.IceConnectionState?) {
         logger.i { "[onIceConnectionChange] #sfu; #$typeTag; newState: $newState" }
         when (newState) {
@@ -282,9 +287,11 @@ public class StreamPeerConnection(
     override fun onIceConnectionReceivingChange(receiving: Boolean) {
         logger.i { "[onIceConnectionReceivingChange] #sfu; #$typeTag; receiving: $receiving" }
     }
+
     override fun onIceGatheringChange(newState: PeerConnection.IceGatheringState?) {
         logger.i { "[onIceGatheringChange] #sfu; #$typeTag; newState: $newState" }
     }
+
     override fun onIceCandidatesRemoved(iceCandidates: Array<out IceCandidate>?) {
         logger.i { "[onIceCandidatesRemoved] #sfu; #$typeTag; iceCandidates: $iceCandidates" }
     }
@@ -311,5 +318,6 @@ public class StreamPeerConnection(
 
     override fun onDataChannel(channel: DataChannel?): Unit = Unit
 
-    override fun toString(): String = "StreamPeerConnection(type='$typeTag', constraints=$mediaConstraints)"
+    override fun toString(): String =
+        "StreamPeerConnection(type='$typeTag', constraints=$mediaConstraints)"
 }

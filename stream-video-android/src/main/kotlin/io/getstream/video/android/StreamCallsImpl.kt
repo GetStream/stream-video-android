@@ -42,6 +42,7 @@ import io.getstream.video.android.token.CredentialsProvider
 import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Result
 import io.getstream.video.android.utils.Success
+import io.getstream.video.android.utils.onError
 import io.getstream.video.android.utils.onSuccess
 import io.getstream.video.android.utils.toCall
 import io.getstream.video.android.webrtc.WebRTCClient
@@ -73,11 +74,6 @@ public class StreamCallsImpl(
     private val engine = StreamCallEngineImpl(scope)
 
     /**
-     * Domain - WebRTC.
-     */
-    private var webRTCClient: WebRTCClient? = null
-
-    /**
      * Observes the app lifecycle and attempts to reconnect/release the socket connection.
      */
     private val lifecycleObserver = StreamLifecycleObserver(
@@ -104,6 +100,22 @@ public class StreamCallsImpl(
     /**
      * Domain - Coordinator.
      */
+    override suspend fun createCall(
+        type: String,
+        id: String,
+        participantIds: List<String>,
+        ringing: Boolean
+    ): Result<CallMetadata> {
+        logger.d { "[createCall] type: $type, id: $id, participantIds: $participantIds" }
+        return when (val result = callClient.createCall(type, id, participantIds, ringing)) {
+            is Success -> {
+                Success(result.data.call?.toCall()!!)
+            }
+            is Failure -> Failure(result.error)
+        }
+    }
+
+
     override suspend fun getOrCreateCall(
         type: String,
         id: String,
@@ -113,7 +125,13 @@ public class StreamCallsImpl(
         logger.d { "[createCall] type: $type, id: $id, participantIds: $participantIds" }
         return when (val result = callClient.getOrCreateCall(type, id, participantIds, ringing)) {
             is Success -> {
-                Success(result.data.call?.toCall()!!)
+                val callMetadata = result.data.call?.toCall()!!
+
+                Success(callMetadata).also {
+                    if (ringing) {
+                        engine.onOutgoingCall(callMetadata)
+                    }
+                }
             }
             is Failure -> Failure(result.error)
         }
@@ -129,35 +147,21 @@ public class StreamCallsImpl(
         return callClient.createAndJoinCall(type, id, participantIds, ringing)
     }
 
-    override suspend fun acceptCall(type: String, id: String): Result<JoinedCall> {
-        logger.d { "[acceptCall] type: $type, id: $id" }
-        // TODO engine.onCallAccepting()
-        val eventResult = sendEvent(id, type, UserEventType.USER_EVENT_TYPE_ACCEPTED_CALL)
-        logger.v { "[acceptCall] eventResult: $eventResult" }
-        return when (eventResult) {
-            is Failure -> eventResult.also {
-                // TODO engine.onCallJoinFailed()
-            }
+    override suspend fun joinCall(type: String, id: String): Result<JoinedCall> {
+        logger.d { "[joinCall] type: $type, id: $id" }
+        engine.onConnecting()
+
+        val getOrCreateResult = callClient.getOrCreateCall(type, id, emptyList(), false)
+        logger.v { "[joinCall] getOrCreateResult: $getOrCreateResult" }
+        return when (getOrCreateResult) {
             is Success -> {
-                val getOrCreateResult = callClient.getOrCreateCall(type, id, emptyList(), false)
-                logger.v { "[acceptCall] getOrCreateResult: $getOrCreateResult" }
-                when (getOrCreateResult) {
-                    is Success -> {
-                        val metadata = getOrCreateResult.data.call?.toCall()
-                            ?: error("[acceptCall] no CallEnvelope found")
-                        callClient.joinCall(metadata).also { joinResult ->
-                            when (joinResult) {
-                                is Success -> engine.onCallJoined(joinResult.data)
-                                is Failure -> {
-                                    // TODO engine.onCallJoinFailed()
-                                }
-                            }
-                        }
-                    }
-                    is Failure -> getOrCreateResult.also {
-                        // TODO engine.onCallJoinFailed()
-                    }
-                }
+                val metadata = getOrCreateResult.data.call?.toCall()
+                    ?: error("[joinCall] no CallEnvelope found")
+
+                joinCall(metadata)
+            }
+            is Failure -> getOrCreateResult.also {
+                engine.resetCallState()
             }
         }
     }
@@ -165,9 +169,8 @@ public class StreamCallsImpl(
     override suspend fun joinCall(call: CallMetadata): Result<JoinedCall> {
         logger.d { "[joinCall] call: $call" }
         return callClient.joinCall(call).also {
-            it.onSuccess { data ->
-                engine.onCallJoined(data)
-            }
+            it.onSuccess { data -> engine.onCallJoined(data) }
+            it.onError { engine.resetCallState() }
         }
     }
 
@@ -184,15 +187,10 @@ public class StreamCallsImpl(
         )
     }
 
-    override suspend fun sendEvent(userEventType: UserEventType): Result<Boolean> {
-        logger.d { "[sendEvent] event type: $userEventType" }
-        return callClient.sendUserEvent(userEventType)
-    }
-
-    override fun leaveCall() {
+    override fun clearCallState() {
         credentialsProvider.setSfuToken(null)
         socket.updateCallState(null)
-        engine.onCallLeaved()
+        engine.resetCallState()
         webRTCClient?.clear()
     }
 
@@ -214,6 +212,11 @@ public class StreamCallsImpl(
 
     override fun removeSocketListener(socketListener: SocketListener): Unit =
         socket.removeListener(socketListener)
+
+    /**
+     * Domain - WebRTC.
+     */
+    private var webRTCClient: WebRTCClient? = null
 
     override fun createCallClient(
         signalUrl: String,
@@ -279,7 +282,7 @@ public class StreamCallsImpl(
         return webRTCClient
             ?: throw IllegalStateException(
                 "Cannot connect to a call without a WebRTC Client. " +
-                    "Make sure to initialize the client first, using `createCallClient`"
+                        "Make sure to initialize the client first, using `createCallClient`"
             )
     }
 }

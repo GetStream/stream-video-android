@@ -19,10 +19,11 @@ package io.getstream.video.android.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import io.getstream.video.android.StreamCalls
+import io.getstream.video.android.model.CallInput
 import io.getstream.video.android.token.CredentialsProvider
 
 public class CallViewModelFactory(
-    private val input: CallViewModel.CallInput,
+    private val input: CallInput,
     private val streamCalls: StreamCalls,
     private val credentialsProvider: CredentialsProvider
 ) : ViewModelProvider.Factory {
