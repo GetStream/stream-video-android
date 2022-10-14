@@ -18,7 +18,6 @@ jobs:
           java-version: 11
       - name: Prepare environment
         run: |
-          git fetch --unshallow
           echo "${{ secrets.RELEASE_KEYSTORE }}" > .sign/release.keystore.asc
           gpg -d --passphrase "${{ secrets.PASSPHRASE }}" --batch .sign/release.keystore.asc > .sign/release.keystore
           echo "${{ secrets.RELEASE_KEYSTORE_PROPERTIES }}" > .sign/keystore.properties.asc
