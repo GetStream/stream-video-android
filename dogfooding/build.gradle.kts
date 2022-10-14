@@ -27,16 +27,6 @@ android {
         }
     }
 
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-        }
-    }
-
     val signFile: File = rootProject.file(".sign/keystore.properties")
     if (signFile.exists()) {
         val properties = Properties()
@@ -55,7 +45,7 @@ android {
             create("release") {
                 keyAlias = "androiddebugkey"
                 keyPassword = "android"
-                storeFile = rootProject.file(".sign/debug.keystore")
+                storeFile = rootProject.file(".sign/debug.keystore.jks")
                 storePassword = "android"
             }
         }
@@ -65,8 +55,24 @@ android {
         getByName("debug") {
             keyAlias = "androiddebugkey"
             keyPassword = "android"
-            storeFile = rootProject.file(".sign/debug.keystore")
+            storeFile = rootProject.file(".sign/debug.keystore.jks")
             storePassword = "android"
+        }
+    }
+
+    buildTypes {
+        getByName("debug") {
+            versionNameSuffix = "-DEBUG"
+            applicationIdSuffix = ".debug"
+            signingConfig = signingConfigs.getByName("debug")
+        }
+        getByName("release") {
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 
