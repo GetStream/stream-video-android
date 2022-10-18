@@ -8,7 +8,9 @@ import androidx.compose.runtime.Composable
 import androidx.lifecycle.lifecycleScope
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
+import com.google.firebase.auth.FirebaseAuth
 import io.getstream.video.android.logging.LoggingLevel
+import io.getstream.video.android.model.User
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.json.JSONArray
@@ -43,10 +45,9 @@ class LoginActivity : ComponentActivity() {
         )
 
         // Create and launch sign-in intent
-        val signInIntent = AuthUI.getInstance()
-            .createSignInIntentBuilder()
-            .setAvailableProviders(providers)
-            .build()
+        val signInIntent =
+            AuthUI.getInstance().createSignInIntentBuilder().setAvailableProviders(providers)
+                .build()
         signInLauncher.launch(signInIntent)
     }
 
@@ -71,17 +72,25 @@ class LoginActivity : ComponentActivity() {
     private fun logIn(response: String) {
         val jsonArray = JSONArray(response)
         val user = jsonArray.get(0) as? JSONObject
+        val authUser = FirebaseAuth.getInstance().currentUser
 
         if (user != null) {
             val token = user.getString("token")
 
-            dogfoodingApp.initializeStreamCalls( // TODO - start home
+            dogfoodingApp.initializeStreamCalls(
                 AuthCredentialsProvider(
-                    "key10",
-                    token
-                ),
-                loggingLevel = LoggingLevel.BODY
+                    "key10", token,
+                    user = User(
+                        authUser?.uid ?: "",
+                        "admin",
+                        authUser?.displayName ?: "",
+                        authUser?.photoUrl?.toString() ?: "",
+                        emptyList(),
+                        emptyMap()
+                    )
+                ), loggingLevel = LoggingLevel.BODY
             )
+            startActivity(HomeActivity.getIntent(this))
         }
     }
 
