@@ -19,8 +19,6 @@ package io.getstream.chat.android.dogfooding
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
 import androidx.lifecycle.lifecycleScope
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
@@ -114,9 +112,4 @@ class LoginActivity : ComponentActivity() {
     private fun onSignInFailed() {
         Toast.makeText(this, "Verification failed!", Toast.LENGTH_SHORT).show()
     }
-}
-
-@Composable
-fun Greeting(name: String) {
-    Text(text = "Hello $name!")
 }
