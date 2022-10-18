@@ -35,6 +35,7 @@ public data class UserCredentials(
             role = role,
             name = name,
             imageUrl = image,
+            token = token,
             teams = emptyList(),
             extraData = emptyMap()
         )

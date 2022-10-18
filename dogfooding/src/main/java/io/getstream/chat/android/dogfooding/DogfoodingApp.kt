@@ -35,6 +35,12 @@ class DogfoodingApp : Application() {
     val streamCalls: StreamCalls
         get() = requireNotNull(calls)
 
+    val userPreferences: UserPreferences by lazy {
+        UserPreferencesImpl(
+            getSharedPreferences(KEY_PREFERENCES, MODE_PRIVATE)
+        )
+    }
+
     /**
      * Sets up and returns the [streamCalls] required to connect to the API.
      */
@@ -56,6 +62,10 @@ class DogfoodingApp : Application() {
     fun logOut() {
         FirebaseAuth.getInstance().signOut()
         credentialsProvider
+    }
+
+    companion object {
+        private const val KEY_PREFERENCES = "dogfooding-prefs"
     }
 }
 

@@ -19,12 +19,20 @@ package io.getstream.chat.android.dogfooding
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Button
+import androidx.compose.material.Text
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.google.firebase.auth.FirebaseAuth
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.model.User
+import io.getstream.video.android.model.toCredentials
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.json.JSONArray
@@ -54,6 +62,31 @@ class LoginActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val user = dogfoodingApp.userPreferences.getCachedCredentials()
+
+        if (user.id.isNotEmpty() && user.token.isNotEmpty()) {
+            startHome(
+                user.token,
+                user.toUser()
+            )
+            finish()
+        }
+
+        setContent {
+            Button(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(32.dp),
+                content = {
+                    Text(text = "Authenticate")
+                },
+                onClick = ::authenticate
+            )
+        }
+    }
+
+    private fun authenticate() {
         val providers = arrayListOf(
             AuthUI.IdpConfig.GoogleBuilder().build()
         )
@@ -85,28 +118,38 @@ class LoginActivity : ComponentActivity() {
 
     private fun logIn(response: String) {
         val jsonArray = JSONArray(response)
-        val user = jsonArray.get(0) as? JSONObject
+        val userJSON = jsonArray.get(0) as? JSONObject
         val authUser = FirebaseAuth.getInstance().currentUser
 
-        if (user != null) {
-            val token = user.getString("token")
-
-            dogfoodingApp.initializeStreamCalls(
-                AuthCredentialsProvider(
-                    "key10", token,
-                    user = User(
-                        authUser?.email ?: "",
-                        "admin",
-                        authUser?.displayName ?: "",
-                        authUser?.photoUrl?.toString() ?: "",
-                        emptyList(),
-                        emptyMap()
-                    )
-                ),
-                loggingLevel = LoggingLevel.BODY
+        if (userJSON != null) {
+            val token = userJSON.getString("token")
+            val user = User(
+                authUser?.email ?: "",
+                "admin",
+                authUser?.displayName ?: "",
+                token,
+                authUser?.photoUrl?.toString() ?: "",
+                emptyList(),
+                emptyMap()
             )
-            startActivity(HomeActivity.getIntent(this))
+
+            startHome(token, user)
         }
+    }
+
+    private fun startHome(
+        token: String,
+        user: User
+    ) {
+        dogfoodingApp.initializeStreamCalls(
+            AuthCredentialsProvider(
+                "key10", token,
+                user = user
+            ),
+            loggingLevel = LoggingLevel.BODY
+        )
+        dogfoodingApp.userPreferences.storeUserCredentials(user.toCredentials())
+        startActivity(HomeActivity.getIntent(this))
     }
 
     private fun onSignInFailed() {
