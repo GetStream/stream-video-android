@@ -17,7 +17,7 @@
 package io.getstream.video.android.model
 
 import java.io.Serializable
-import java.util.*
+import java.util.Date
 import stream.video.coordinator.call_v1.Call as ProtoCall
 import stream.video.coordinator.call_v1.CallDetails as ProtoCallDetails
 import stream.video.coordinator.member_v1.Member as ProtoMember
@@ -42,19 +42,12 @@ public data class CallMember(
 
 public data class CallInfo(
     val cid: String,
+    val id: String,
     val type: String,
     val createdByUserId: String,
     val createdAt: Date?,
     val updatedAt: Date?
 ) : Serializable
-
-public val CallInfo.callId: String
-    get() {
-        return cid.replace(
-            "$type:",
-            ""
-        )
-    }
 
 public data class CallDetails(
     val memberUserIds: List<String>,
@@ -97,6 +90,7 @@ public fun ProtoCall?.toCallInfo(): CallInfo {
     this ?: error("CallInfo is not provided")
     return CallInfo(
         cid = call_cid,
+        id = id,
         type = type,
         createdByUserId = created_by_user_id,
         createdAt = created_at?.let { Date(it.toEpochMilli()) },

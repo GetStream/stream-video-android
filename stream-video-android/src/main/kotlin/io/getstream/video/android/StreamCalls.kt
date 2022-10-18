@@ -83,6 +83,8 @@ public interface StreamCalls {
      * @return [Result] which contains the [JoinedCall] with the auth information required to fully
      * connect.
      */
+    // TODO createAndJoin is misleading, because internally it uses getOrCreate and then join
+    //  we might need to choose a better name
     public suspend fun createAndJoinCall(
         type: String,
         id: String,

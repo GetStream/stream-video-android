@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.model.state
 
+import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.model.CallDetails
 import io.getstream.video.android.model.CallInfo
 import io.getstream.video.android.model.CallUser
@@ -25,27 +26,38 @@ public sealed interface StreamCallState : java.io.Serializable {
 
     public object Idle : StreamCallState
 
-    public object Connecting : StreamCallState
+    public interface Active : StreamCallState
 
-    public data class Creating( // TODO - will this be useful to our users since we have an outgoing state?
+    public data class Starting(
         val users: Map<String, CallUser>,
-    ) : StreamCallState
+    ) : Active
 
     public data class Outgoing(
-        val callId: String,
+        val callCid: String,
         val users: Map<String, CallUser>,
         val info: CallInfo,
         val details: CallDetails
-    ) : StreamCallState
+    ) : Active
 
     public data class Incoming(
-        val callId: String,
+        val callCid: String,
         val users: Map<String, CallUser>,
         val info: CallInfo,
         val details: CallDetails
-    ) : StreamCallState
+    ) : Active
 
     public data class InCall(
         val joinedCall: JoinedCall
+    ) : Active
+
+    public data class Drop(
+        val reason: DropReason
     ) : StreamCallState
+}
+
+public sealed class DropReason {
+    public data class Timeout(val waitMillis: Long) : DropReason()
+    public data class Failure(val error: VideoError) : DropReason()
+    public object Rejected : DropReason()
+    public object Cancelled : DropReason()
 }

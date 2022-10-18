@@ -27,7 +27,6 @@ import io.getstream.video.android.app.videoApp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.outcomingcall.OutgoingCall
 import io.getstream.video.android.model.OutgoingCallData
-import io.getstream.video.android.model.callId
 
 class OutgoingCallActivity : AppCompatActivity() {
 
@@ -49,7 +48,7 @@ class OutgoingCallActivity : AppCompatActivity() {
         setContent {
             VideoTheme {
                 OutgoingCall(
-                    callId = callData.callInfo.callId,
+                    callId = callData.callInfo.id,
                     callType = callData.callType,
                     participants = callData.participants
                         .filter { it.id != viewModel.getUserId() },

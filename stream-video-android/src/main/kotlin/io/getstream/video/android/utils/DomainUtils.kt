@@ -31,7 +31,7 @@ internal fun CallEnvelope.toCall(): CallMetadata {
             cid = call_cid,
             id = id,
             type = type,
-            createdBy = created_by_user_id,
+            createdByUserId = created_by_user_id,
             createdAt = created_at?.epochSecond ?: 0,
             updatedAt = updated_at?.epochSecond ?: 0,
             recordingEnabled = options?.recording?.enabled ?: false,

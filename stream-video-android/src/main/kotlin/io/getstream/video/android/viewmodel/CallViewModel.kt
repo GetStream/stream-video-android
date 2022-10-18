@@ -172,6 +172,11 @@ public class CallViewModel(
     }
 
     public fun leaveCall() {
+        /* TODO we probably need to notify that we are leaving the call
+        input.run {
+            streamCalls.sendEvent(callId, callType, UserEventType.USER_EVENT_TYPE_LEFT_CALL)
+        }
+        */
         clearState()
     }
 

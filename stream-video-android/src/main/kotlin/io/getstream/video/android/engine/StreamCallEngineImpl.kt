@@ -17,6 +17,7 @@
 package io.getstream.video.android.engine
 
 import io.getstream.logging.StreamLog
+import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.events.AudioMutedEvent
 import io.getstream.video.android.events.AudioUnmutedEvent
 import io.getstream.video.android.events.CallAcceptedEvent
@@ -37,7 +38,7 @@ import io.getstream.video.android.events.VideoStartedEvent
 import io.getstream.video.android.events.VideoStoppedEvent
 import io.getstream.video.android.model.CallMetadata
 import io.getstream.video.android.model.JoinedCall
-import io.getstream.video.android.model.state.StreamCallState
+import io.getstream.video.android.model.state.DropReason
 import io.getstream.video.android.model.toDetails
 import io.getstream.video.android.model.toInfo
 import io.getstream.video.android.socket.SocketListener
@@ -51,6 +52,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import stream.video.coordinator.client_v1_rpc.UserEventType
+import io.getstream.video.android.model.state.StreamCallState as State
 
 /**
  * Should be written in pure kotlin.
@@ -66,12 +69,14 @@ internal class StreamCallEngineImpl(
 
     private val scope = parentScope + Job(parentScope.coroutineContext.job) + Dispatchers.Default
 
-    private val _callState = MutableStateFlow<StreamCallState>(StreamCallState.Idle)
+    private val _callState = MutableStateFlow<State>(State.Idle)
 
-    override val callState: StateFlow<StreamCallState> = _callState
+    override val callState: StateFlow<State> = _callState
 
     override fun onEvent(event: VideoEvent) {
-        logger.v { "[onEvent] event: $event" }
+        if (event !is HealthCheckEvent) {
+            logger.v { "[onEvent] event: $event" }
+        }
         when (event) {
             is AudioMutedEvent -> {}
             is AudioUnmutedEvent -> {}
@@ -79,10 +84,10 @@ internal class StreamCallEngineImpl(
             is CallMembersDeletedEvent -> {}
             is CallMembersUpdatedEvent -> {}
             is CallUpdatedEvent -> {}
-            is CallAcceptedEvent -> {}
-            is CallRejectedEvent -> {}
+            is CallAcceptedEvent -> onCallAccepted()
+            is CallRejectedEvent -> onCallRejected()
             is CallEndedEvent -> onCallFinished()
-            is CallCanceledEvent -> onCallFinished()
+            is CallCanceledEvent -> onCallCancelled()
             is ConnectedEvent -> {}
             is HealthCheckEvent -> {}
             is ParticipantJoinedEvent -> {}
@@ -93,54 +98,123 @@ internal class StreamCallEngineImpl(
         }
     }
 
+    private fun onCallAccepted() = scope.launchWithLock(mutex) {
+        logger.d { "[onCallAccepted] no args" }
+    }
+
+    private fun onCallRejected() = scope.launchWithLock(mutex) {
+        logger.d { "[onCallRejected] no args" }
+        val state = _callState.value
+        if (state is State.Idle) {
+            return@launchWithLock
+        }
+        _callState.post(State.Drop(reason = DropReason.Rejected))
+        _callState.post(State.Idle)
+    }
+
     override fun onCallJoined(joinedCall: JoinedCall) = scope.launchWithLock(mutex) {
-        _callState.emit(StreamCallState.InCall(joinedCall))
+        logger.d { "[onCallJoined] joinedCall: $joinedCall" }
+        _callState.post(
+            State.InCall(joinedCall)
+        )
     }
 
-    override fun onCallConnecting() = scope.launchWithLock(mutex) {
-        _callState.emit(StreamCallState.Connecting)
+    override fun onCallStarting(
+        type: String,
+        id: String,
+        participantIds: List<String>,
+        ringing: Boolean,
+        forcedNewCall: Boolean
+    ) = scope.launchWithLock(mutex) {
+        logger.d {
+            "[onCallStarting] type: $type, id: $id, ringing: $ringing, " +
+                "forcedNewCall: $forcedNewCall, participantIds: $participantIds"
+        }
+        // _callState.emit(StreamCallState.Starting)
     }
 
-    override fun resetCallState() = scope.launchWithLock(mutex) {
-        _callState.emit(StreamCallState.Idle)
+    override fun onCallStarted(call: CallMetadata) = scope.launchWithLock(mutex) {
+        logger.d { "[onCallStarted] call: $call" }
+    }
+
+    override fun onCallSendEvent(type: String, id: String, event: UserEventType) = scope.launchWithLock(mutex) {
+        logger.d { "[onCallSendEvent] type: $type, id: $id, event: $UserEventType" }
+    }
+
+    override fun onCallJoining(call: CallMetadata) = scope.launchWithLock(mutex) {
+        logger.d { "[onCallJoining] call: $call" }
+    }
+
+    override fun onCallFailed(error: VideoError) = scope.launchWithLock(mutex) {
+        logger.e { "[onCallFailed] error: $error" }
+        val state = _callState.value
+        if (state is State.Idle) {
+            return@launchWithLock
+        }
+        _callState.post(State.Drop(reason = DropReason.Failure(error)))
+        _callState.post(State.Idle)
     }
 
     private fun onCallFinished() = scope.launchWithLock(mutex) {
-        _callState.emit(StreamCallState.Idle)
-    }
-
-    override fun onOutgoingCall(callMetadata: CallMetadata) = scope.launchWithLock(mutex) {
         val state = _callState.value
-        if (state !is StreamCallState.Idle) {
-            logger.w { "[onOutgoingCall] rejected (state is not Idle): $state" }
+        logger.d { "[onCallFinished] state: $state" }
+        if (state is State.Idle) {
             return@launchWithLock
         }
-        _callState.emit(
-            StreamCallState.Outgoing(
-                callId = callMetadata.id,
-                users = callMetadata.users,
-                info = callMetadata.toInfo(),
-                details = callMetadata.toDetails()
+        _callState.post(State.Idle)
+    }
+
+    private fun onCallCancelled() = scope.launchWithLock(mutex) {
+        val state = _callState.value
+        logger.d { "[onCallCancelled] state: $state" }
+        if (state is State.Idle) {
+            return@launchWithLock
+        }
+        _callState.post(State.Drop(reason = DropReason.Cancelled))
+        _callState.post(State.Idle)
+    }
+
+    override fun onOutgoingCall(call: CallMetadata) = scope.launchWithLock(mutex) {
+        val state = _callState.value
+        logger.w { "[onOutgoingCall] rejected (state is not Idle): $state" }
+        if (state !is State.Idle) {
+            return@launchWithLock
+        }
+        _callState.post(
+            State.Outgoing(
+                callCid = call.cid,
+                users = call.users,
+                info = call.toInfo(),
+                details = call.toDetails()
             )
         )
     }
 
     private fun onCallCreated(event: CallCreatedEvent) = scope.launchWithLock(mutex) {
         val state = _callState.value
-        if (state !is StreamCallState.Idle) {
+        if (state !is State.Idle) {
             logger.w { "[onCallCreated] rejected (state is not Idle): $state" }
             return@launchWithLock
         }
-        _callState.emit(
+        _callState.post(
             event.run {
-                StreamCallState.Incoming(
-                    callId = callId,
+                State.Incoming(
+                    callCid = callCid,
                     users = users,
                     info = info,
                     details = details
                 )
             }
         )
+    }
+
+    private fun MutableStateFlow<State>.post(state: State) {
+        if (state == value) {
+            logger.w { "[post] rejected (duplicate state): $state" }
+            return
+        }
+        logger.i { "[post] $state <= $value" }
+        value = state
     }
 }
 

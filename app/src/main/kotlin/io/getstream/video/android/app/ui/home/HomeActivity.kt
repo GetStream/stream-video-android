@@ -34,7 +34,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.CircularProgressIndicator
@@ -111,13 +113,15 @@ class HomeActivity : AppCompatActivity() {
         override fun onEvent(event: VideoEvent) {
             if (event is CallCreatedEvent) {
                 // TODO - viewModel ?
-                router.onIncomingCall(
-                    IncomingCallData(
-                        callInfo = event.info,
-                        callType = CallType.fromType(event.info.type),
-                        participants = event.users.values.toList()
+                if (event.ringing) {
+                    router.onIncomingCall(
+                        IncomingCallData(
+                            callInfo = event.info,
+                            callType = CallType.fromType(event.info.type),
+                            participants = event.users.values.toList()
+                        )
                     )
-                )
+                }
             }
         }
     }
@@ -146,7 +150,10 @@ class HomeActivity : AppCompatActivity() {
     private fun HomeScreen() {
         Box(modifier = Modifier.fillMaxSize()) {
             UserIcon()
-            Column(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier.fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+            ) {
                 CallOptions()
 
                 val selectedOption by remember { selectedOption }
@@ -280,6 +287,7 @@ class HomeActivity : AppCompatActivity() {
 
                 router.navigateToCall(
                     callInput = CallInput(
+                        data.call.type,
                         data.call.id,
                         data.callUrl,
                         data.userToken,
@@ -305,7 +313,7 @@ class HomeActivity : AppCompatActivity() {
                 "default",
                 callId,
                 participants,
-                true
+                ringing = true
             )
 
             result.onSuccess { metadata ->
@@ -316,11 +324,12 @@ class HomeActivity : AppCompatActivity() {
                     OutgoingCallData(
                         callType = CallType.fromType(metadata.type),
                         callInfo = CallInfo(
-                            metadata.cid,
-                            metadata.type,
-                            metadata.createdBy,
-                            Date(metadata.createdAt),
-                            Date(metadata.updatedAt)
+                            cid = metadata.cid,
+                            id = metadata.id,
+                            type = metadata.type,
+                            createdByUserId = metadata.createdByUserId,
+                            createdAt = Date(metadata.createdAt),
+                            updatedAt = Date(metadata.updatedAt)
                         ),
                         participants = metadata.users.values.toList()
                     )
@@ -349,7 +358,7 @@ class HomeActivity : AppCompatActivity() {
                 logger.v { "[joinCall] succeed: $it" }
                 router.navigateToCall(
                     callInput = CallInput(
-                        it.call.id, it.callUrl, it.userToken, it.iceServers
+                        it.call.type, it.call.id, it.callUrl, it.userToken, it.iceServers
                     ),
                     finishCurrent = false
                 )

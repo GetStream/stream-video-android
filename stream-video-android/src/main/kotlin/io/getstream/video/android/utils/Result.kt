@@ -90,3 +90,39 @@ public suspend inline fun <T : Any> Result<T>.onErrorSuspend(
         errorSideEffect(error)
     }
 }
+
+/**
+ * Returns a transformed [Result] of applying the given [mapper] function if the [Result]
+ * contains a successful data payload.
+ * Returns an original [Result] if the [Result] contains an error payload.
+ *
+ * @param mapper A lambda for mapping [T] to [K].
+ *
+ * @return A transformed instance of the [Result] or the original instance of the [Result].
+ */
+@JvmSynthetic
+public inline fun <T : Any, K : Any> Result<T>.map(mapper: (T) -> K): Result<K> {
+    return when (this) {
+        is Success -> Success(mapper(data))
+        is Failure -> this
+    }
+}
+
+/**
+ * Returns a transformed [Result] of applying the given suspending [mapper] function if the [Result]
+ * contains a successful data payload.
+ * Returns an original [Result] if the [Result] contains an error payload.
+ *
+ * @param mapper A suspending lambda for mapping [T] to [Result] of [K].
+ *
+ * @return A transformed instance of the [Result] or the original instance of the [Result].
+ */
+@JvmSynthetic
+public suspend inline fun <T : Any, K : Any> Result<T>.flatMap(
+    crossinline mapper: suspend (T) -> Result<K>
+): Result<K> {
+    return when (this) {
+        is Success -> mapper(data)
+        is Failure -> this
+    }
+}
