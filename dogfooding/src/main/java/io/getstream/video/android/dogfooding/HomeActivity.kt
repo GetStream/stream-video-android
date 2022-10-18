@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.chat.android.dogfooding
+package io.getstream.video.android.dogfooding
 
 import android.content.Context
 import android.content.Intent

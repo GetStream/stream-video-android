@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.chat.android.dogfooding
+package io.getstream.video.android.dogfooding
 
 import android.os.Bundle
 import android.widget.Toast

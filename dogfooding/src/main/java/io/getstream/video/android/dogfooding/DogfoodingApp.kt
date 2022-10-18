@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.chat.android.dogfooding
+package io.getstream.video.android.dogfooding
 
 import android.app.Application
 import android.content.Context
@@ -61,7 +61,8 @@ class DogfoodingApp : Application() {
 
     fun logOut() {
         FirebaseAuth.getInstance().signOut()
-        credentialsProvider
+        streamCalls.clearCallState()
+        userPreferences.clear()
     }
 
     companion object {

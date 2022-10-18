@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Dogfooding</string>
+    <string name="filter_call_link">call_link</string>
 </resources>

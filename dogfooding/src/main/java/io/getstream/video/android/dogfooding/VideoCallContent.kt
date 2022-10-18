@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.chat.android.dogfooding
+package io.getstream.video.android.dogfooding
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
@@ -69,7 +69,7 @@ internal fun VideoCallContent(
     callViewModel: CallViewModel,
     onLeaveCall: () -> Unit
 ) {
-    val room by callViewModel.callState.collectAsState(initial = null)
+    val call by callViewModel.callState.collectAsState(initial = null)
     val isShowingParticipantsInfo by callViewModel.isShowingParticipantsInfo.collectAsState(
         false
     )
@@ -94,7 +94,7 @@ internal fun VideoCallContent(
                 .fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            val roomState = room
+            val roomState = call
 
             Column(modifier = Modifier.fillMaxSize()) {
 

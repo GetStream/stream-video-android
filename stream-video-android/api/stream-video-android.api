@@ -1597,15 +1597,16 @@ public final class io/getstream/video/android/model/OutgoingCallDataKt {
 }
 
 public final class io/getstream/video/android/model/User {
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()Ljava/lang/String;
 	public final fun component4 ()Ljava/lang/String;
-	public final fun component5 ()Ljava/util/List;
-	public final fun component6 ()Ljava/util/Map;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;)Lio/getstream/video/android/model/User;
-	public static synthetic fun copy$default (Lio/getstream/video/android/model/User;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;ILjava/lang/Object;)Lio/getstream/video/android/model/User;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Ljava/util/List;
+	public final fun component7 ()Ljava/util/Map;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;)Lio/getstream/video/android/model/User;
+	public static synthetic fun copy$default (Lio/getstream/video/android/model/User;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;ILjava/lang/Object;)Lio/getstream/video/android/model/User;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getExtraData ()Ljava/util/Map;
 	public final fun getId ()Ljava/lang/String;
@@ -1613,6 +1614,7 @@ public final class io/getstream/video/android/model/User {
 	public final fun getName ()Ljava/lang/String;
 	public final fun getRole ()Ljava/lang/String;
 	public final fun getTeams ()Ljava/util/List;
+	public final fun getToken ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -1639,6 +1641,10 @@ public final class io/getstream/video/android/model/UserCredentials {
 	public final fun isValid ()Z
 	public fun toString ()Ljava/lang/String;
 	public final fun toUser ()Lio/getstream/video/android/model/User;
+}
+
+public final class io/getstream/video/android/model/UserKt {
+	public static final fun toCredentials (Lio/getstream/video/android/model/User;)Lio/getstream/video/android/model/UserCredentials;
 }
 
 public final class io/getstream/video/android/model/VideoModelKt {

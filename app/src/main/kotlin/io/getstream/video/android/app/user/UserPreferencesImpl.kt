@@ -17,6 +17,7 @@
 package io.getstream.video.android.app.user
 
 import android.content.SharedPreferences
+import androidx.core.content.edit
 import io.getstream.video.android.model.UserCredentials
 
 class UserPreferencesImpl(
@@ -34,15 +35,13 @@ class UserPreferencesImpl(
     }
 
     override fun storeUserCredentials(userCredentials: UserCredentials) {
-        val editor = sharedPreferences.edit()
-
-        editor.putString(KEY_ID, userCredentials.id)
-        editor.putString(KEY_TOKEN, userCredentials.token)
-        editor.putString(KEY_IMAGE, userCredentials.image)
-        editor.putString(KEY_NAME, userCredentials.name)
-        editor.putString(KEY_ROLE, userCredentials.role)
-
-        editor.apply()
+        sharedPreferences.edit {
+            putString(KEY_ID, userCredentials.id)
+            putString(KEY_TOKEN, userCredentials.token)
+            putString(KEY_IMAGE, userCredentials.image)
+            putString(KEY_NAME, userCredentials.name)
+            putString(KEY_ROLE, userCredentials.role)
+        }
     }
 
     override fun clear() {
