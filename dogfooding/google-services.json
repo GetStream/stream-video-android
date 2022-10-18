@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "347024607410-16hmheahc18ija54mobt0u610j6al3gr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "io.getstream.chat.android.dogfooding",
+            "certificate_hash": "0cebe7750cde7c0cb6817a31aee92e35e13d59c4"
+          }
+        },
+        {
           "client_id": "347024607410-2lq1bk64kgdrk8p8nu3ske69ve7giee2.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
@@ -64,6 +72,22 @@
           "android_info": {
             "package_name": "io.getstream.chat.android.dogfooding.debug",
             "certificate_hash": "fe9176d4a93cd07404632ffb44fc18488bce879c"
+          }
+        },
+        {
+          "client_id": "347024607410-2d6u5b6e7rg9487r93o6ae9a2l6v0dvn.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "io.getstream.chat.android.dogfooding.debug",
+            "certificate_hash": "0cebe7750cde7c0cb6817a31aee92e35e13d59c4"
+          }
+        },
+        {
+          "client_id": "347024607410-phoa9r5he574b7aifja6rs1h482153en.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "io.getstream.chat.android.dogfooding.debug",
+            "certificate_hash": "21b0959c583df5e95fb65a8cd50a672dfe66812b"
           }
         },
         {

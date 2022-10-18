@@ -64,6 +64,9 @@ android {
         getByName("debug") {
             versionNameSuffix = "-DEBUG"
             applicationIdSuffix = ".debug"
+            isDebuggable = true
+            isMinifyEnabled = false
+            isShrinkResources = false
             signingConfig = signingConfigs.getByName("debug")
         }
         getByName("release") {
@@ -108,6 +111,7 @@ dependencies {
     implementation(Dependencies.streamLoggerAndroid)
 
     implementation(Dependencies.androidxCore)
+    implementation(Dependencies.androidxAppcompat)
     implementation(Dependencies.androidxLifecycleRuntime)
     implementation(Dependencies.material)
 
