@@ -75,7 +75,7 @@ class OutgoingCallViewModel(
     private fun onCallRejected() {
         callRejectionCount += 1
         logger.d { "[onCallRejected] rejected call count $callRejectionCount" }
-        if (callRejectionCount == (callData.participants.count() - 1)) {
+        if (callRejectionCount == (callData.users.count() - 1)) {
             logger.d { "[onCallRejected] Hanging up call" }
             hangUpCall()
         }
@@ -88,7 +88,7 @@ class OutgoingCallViewModel(
             streamCalls.sendEvent(
                 callId = data.id,
                 callType = data.type,
-                userEventType = UserEventType.USER_EVENT_TYPE_CANCELLED_CALL
+                eventType = UserEventType.USER_EVENT_TYPE_CANCELLED_CALL
             )
 
             streamCalls.clearCallState()

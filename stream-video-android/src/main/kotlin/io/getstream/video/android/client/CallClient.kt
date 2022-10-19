@@ -218,7 +218,7 @@ public class CallClient(
      * @see CallCoordinatorClient.sendUserEvent for details.
      */
     public suspend fun sendUserEvent(
-        userEventType: UserEventType,
+        eventType: UserEventType,
         callId: String,
         callType: String
     ): Result<Boolean> {
@@ -226,7 +226,7 @@ public class CallClient(
             SendEventRequest(
                 call_id = callId,
                 call_type = callType,
-                event_type = userEventType
+                event_type = eventType
             )
         )
     }

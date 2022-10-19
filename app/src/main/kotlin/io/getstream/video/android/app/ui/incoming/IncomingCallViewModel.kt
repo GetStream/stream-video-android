@@ -73,9 +73,9 @@ class IncomingCallViewModel(
                 val joinData = joinResult.data
 
                 streamCalls.sendEvent(
-                    joinData.call.id,
-                    joinData.call.type,
-                    UserEventType.USER_EVENT_TYPE_ACCEPTED_CALL
+                    callId = joinData.call.id,
+                    callType = joinData.call.type,
+                    eventType = UserEventType.USER_EVENT_TYPE_ACCEPTED_CALL
                 )
 
                 streamRouter.navigateToCall(
@@ -99,9 +99,9 @@ class IncomingCallViewModel(
         val data = callData
         viewModelScope.launch {
             val result = streamCalls.sendEvent(
-                callId = data.callInfo.id,
                 callType = data.callInfo.type,
-                userEventType = UserEventType.USER_EVENT_TYPE_REJECTED_CALL
+                callId = data.callInfo.id,
+                eventType = UserEventType.USER_EVENT_TYPE_REJECTED_CALL
             )
             logger.d { "[declineCall] result: $result" }
 

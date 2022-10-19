@@ -50,7 +50,7 @@ class OutgoingCallActivity : AppCompatActivity() {
                 OutgoingCall(
                     callId = callData.callInfo.id,
                     callType = callData.callType,
-                    participants = callData.participants
+                    participants = callData.users
                         .filter { it.id != viewModel.getUserId() },
                     onCancelCall = { viewModel.hangUpCall() },
                     onMicToggleChanged = { isMicrophoneEnabled ->

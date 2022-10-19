@@ -33,7 +33,7 @@ public data class CallUser(
 ) : Serializable
 
 public data class CallMember(
-    val callId: String,
+    val callCid: String,
     val role: String,
     val userId: String,
     val createdAt: Date?,
@@ -45,13 +45,17 @@ public data class CallInfo(
     val id: String,
     val type: String,
     val createdByUserId: String,
+    val broadcastingEnabled: Boolean,
+    val recordingEnabled: Boolean,
     val createdAt: Date?,
     val updatedAt: Date?
 ) : Serializable
 
 public data class CallDetails(
     val memberUserIds: List<String>,
-    val members: Map<String, CallMember>
+    val members: Map<String, CallMember>,
+    val broadcastingEnabled: Boolean,
+    val recordingEnabled: Boolean,
 ) : Serializable
 
 public fun Map<String, ProtoUser>.toCallUsers(): Map<String, CallUser> =
@@ -68,8 +72,12 @@ public fun ProtoUser.toCallUser(): CallUser = CallUser(
     updatedAt = updated_at?.let { Date(it.toEpochMilli()) },
 )
 
+public fun Map<String, ProtoMember>.toCallMembers(): Map<String, CallMember> = map { (userId, protoMember) ->
+    userId to protoMember.toCallMember()
+}.toMap()
+
 public fun ProtoMember.toCallMember(): CallMember = CallMember(
-    callId = call_cid,
+    callCid = call_cid,
     role = role,
     userId = user_id,
     createdAt = created_at?.let { Date(it.toEpochMilli()) },
@@ -80,9 +88,9 @@ public fun ProtoCallDetails?.toCallDetails(): CallDetails {
     this ?: error("CallDetails is not provided")
     return CallDetails(
         memberUserIds = member_user_ids,
-        members = members.map { (userId, protoMember) ->
-            userId to protoMember.toCallMember()
-        }.toMap()
+        members = members.toCallMembers(),
+        broadcastingEnabled = options?.broadcasting?.enabled ?: false,
+        recordingEnabled = options?.recording?.enabled ?: false
     )
 }
 
@@ -93,6 +101,8 @@ public fun ProtoCall?.toCallInfo(): CallInfo {
         id = id,
         type = type,
         createdByUserId = created_by_user_id,
+        broadcastingEnabled = options?.broadcasting?.enabled ?: false,
+        recordingEnabled = options?.recording?.enabled ?: false,
         createdAt = created_at?.let { Date(it.toEpochMilli()) },
         updatedAt = updated_at?.let { Date(it.toEpochMilli()) },
     )

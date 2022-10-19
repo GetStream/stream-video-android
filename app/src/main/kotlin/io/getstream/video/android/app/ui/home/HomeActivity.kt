@@ -111,17 +111,16 @@ class HomeActivity : AppCompatActivity() {
 
     private val socketListener = object : SocketListener {
         override fun onEvent(event: VideoEvent) {
-            if (event is CallCreatedEvent) {
+            if (event is CallCreatedEvent && event.ringing) {
                 // TODO - viewModel ?
-                if (event.ringing) {
-                    router.onIncomingCall(
-                        IncomingCallData(
-                            callInfo = event.info,
-                            callType = CallType.fromType(event.info.type),
-                            participants = event.users.values.toList()
-                        )
+                router.onIncomingCall(
+                    IncomingCallData(
+                        callInfo = event.info,
+                        callType = CallType.fromType(event.info.type),
+                        users = event.users.values.toList(),
+                        members = event.details.members.values.toList()
                     )
-                }
+                )
             }
         }
     }
@@ -262,6 +261,11 @@ class HomeActivity : AppCompatActivity() {
         participants: List<String> = emptyList(),
         ringing: Boolean
     ) {
+        // ringing with no participants doesn't make sense
+        if (ringing && participants.isEmpty()) {
+            Toast.makeText(this, "Please select participants", Toast.LENGTH_SHORT).show()
+            return
+        }
         if (ringing) {
             dialUsers(callId, participants)
         } else {
@@ -328,10 +332,13 @@ class HomeActivity : AppCompatActivity() {
                             id = metadata.id,
                             type = metadata.type,
                             createdByUserId = metadata.createdByUserId,
+                            broadcastingEnabled = metadata.broadcastingEnabled,
+                            recordingEnabled = metadata.recordingEnabled,
                             createdAt = Date(metadata.createdAt),
                             updatedAt = Date(metadata.updatedAt)
                         ),
-                        participants = metadata.users.values.toList()
+                        users = metadata.users.values.toList(),
+                        members = metadata.members.values.toList()
                     )
                 )
             }

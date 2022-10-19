@@ -17,7 +17,8 @@
 package io.getstream.video.android.utils
 
 import io.getstream.video.android.model.CallMetadata
-import io.getstream.video.android.model.CallUser
+import io.getstream.video.android.model.toCallDetails
+import io.getstream.video.android.model.toCallUsers
 import stream.video.coordinator.client_v1_rpc.CallEnvelope
 import java.util.*
 
@@ -36,16 +37,8 @@ internal fun CallEnvelope.toCall(): CallMetadata {
             updatedAt = updated_at?.epochSecond ?: 0,
             recordingEnabled = options?.recording?.enabled ?: false,
             broadcastingEnabled = options?.broadcasting?.enabled ?: false,
-            users = users.mapValues { (_, it) ->
-                CallUser(
-                    it.id,
-                    it.name,
-                    it.role,
-                    it.image_url,
-                    it.created_at?.let { Date(it.toEpochMilli()) },
-                    it.updated_at?.let { Date(it.toEpochMilli()) }
-                )
-            },
+            users = users.toCallUsers(),
+            members = details.toCallDetails().members,
             extraData = emptyMap() // Json.decodeFromString<Map<String, String>>(extraDataJson)
         )
     }

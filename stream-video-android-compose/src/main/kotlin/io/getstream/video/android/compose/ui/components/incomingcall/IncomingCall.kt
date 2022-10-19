@@ -82,7 +82,7 @@ public fun IncomingCall(
 private fun IncomingCallPreview() {
     VideoTheme {
         IncomingCall(
-            callInfo = CallInfo("", "", "video", "", null, null),
+            callInfo = CallInfo("", "", "video", "", false, false, null, null),
             participants = mockParticipantList.map {
                 CallUser(
                     id = it.id,

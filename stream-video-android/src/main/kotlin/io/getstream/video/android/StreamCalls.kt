@@ -116,13 +116,13 @@ public interface StreamCalls {
     /**
      * Sends a specific event related to an active [Call].
      *
-     * @param userEventType The event type, such as accepting or declining a call.
+     * @param eventType The event type, such as accepting or declining a call.
      * @return [Result] which contains if the event was successfully sent.
      */
     public suspend fun sendEvent(
-        callId: String,
         callType: String,
-        userEventType: UserEventType
+        callId: String,
+        eventType: UserEventType
     ): Result<Boolean>
 
     /**

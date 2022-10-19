@@ -119,7 +119,7 @@ internal fun IncomingCallOptions(
 private fun IncomingCallOptionsPreview() {
     VideoTheme {
         IncomingCallOptions(
-            callInfo = CallInfo("", "", "", "", null, null),
+            callInfo = CallInfo("", "", "", "", false, false, null, null),
             onDeclineCall = {},
             onAcceptCall = {},
             onVideoToggleChanged = {}

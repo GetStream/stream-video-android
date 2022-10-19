@@ -28,6 +28,7 @@ public data class CallMetadata(
     val recordingEnabled: Boolean,
     val broadcastingEnabled: Boolean,
     val users: Map<String, CallUser>,
+    val members: Map<String, CallMember>,
     val extraData: Map<String, String>?,
 ) : java.io.Serializable
 
@@ -36,19 +37,25 @@ public fun CallMetadata.toInfo(): CallInfo = CallInfo(
     id = id,
     type = type,
     createdByUserId = createdByUserId,
+    broadcastingEnabled = broadcastingEnabled,
+    recordingEnabled = recordingEnabled,
     createdAt = Date(createdAt),
     updatedAt = Date(updatedAt)
 )
 
 public fun CallMetadata.toDetails(): CallDetails = CallDetails(
-    members = users.mapValues { (_, value) ->
-        CallMember(
-            callId = id,
-            userId = value.id,
-            role = value.role,
-            createdAt = Date(createdAt),
-            updatedAt = Date(updatedAt)
-        )
-    },
-    memberUserIds = users.keys.toList()
+    members = users.toMembers(cid),
+    memberUserIds = users.keys.toList(),
+    broadcastingEnabled = broadcastingEnabled,
+    recordingEnabled = recordingEnabled
 )
+
+public fun Map<String, CallUser>.toMembers(callCid: String): Map<String, CallMember> = mapValues { (_, value) ->
+    CallMember(
+        callCid = callCid,
+        userId = value.id,
+        role = value.role,
+        createdAt = value.createdAt,
+        updatedAt = value.updatedAt
+    )
+}

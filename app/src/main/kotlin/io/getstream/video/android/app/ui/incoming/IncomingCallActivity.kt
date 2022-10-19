@@ -48,7 +48,7 @@ class IncomingCallActivity : AppCompatActivity() {
             VideoTheme {
                 IncomingCall(
                     callInfo = viewModel.callData.callInfo,
-                    participants = viewModel.callData.participants,
+                    participants = viewModel.callData.users,
                     callType = viewModel.callData.callType,
                     onDeclineCall = { viewModel.declineCall() },
                     onAcceptCall = { viewModel.acceptCall() },

@@ -70,7 +70,9 @@ public class StreamCallsImpl(
 
     private val scope = CoroutineScope(DispatcherProvider.IO)
 
-    private val engine = StreamCallEngineImpl(scope)
+    private val engine = StreamCallEngineImpl(scope) {
+        credentialsProvider.getUserCredentials()
+    }
 
     /**
      * Observes the app lifecycle and attempts to reconnect/release the socket connection.
@@ -114,6 +116,7 @@ public class StreamCallsImpl(
             .also { logger.v { "[createCall] result: $it" } }
     }
 
+    // caller: DIAL and wait answer
     override suspend fun getOrCreateCall(
         type: String,
         id: String,
@@ -129,6 +132,7 @@ public class StreamCallsImpl(
             .also { logger.v { "[getOrCreateCall] result: $it" } }
     }
 
+    // caller: JOIN after accepting incoming call by callee
     override suspend fun joinCall(call: CallMetadata): Result<JoinedCall> {
         logger.d { "[joinCallOnly] call: $call" }
         engine.onCallJoining(call)
@@ -138,6 +142,7 @@ public class StreamCallsImpl(
             .also { logger.v { "[joinCallOnly] result: $it" } }
     }
 
+    // caller/callee: CREATE/JOIN meeting
     override suspend fun createAndJoinCall(
         type: String,
         id: String,
@@ -147,7 +152,6 @@ public class StreamCallsImpl(
         logger.d { "[getOrCreateAndJoinCall] type: $type, id: $id, participantIds: $participantIds" }
         engine.onCallStarting(type, id, participantIds, ringing, forcedNewCall = false)
         return callClient.getOrCreateCall(type, id, participantIds, ringing)
-            .onSuccess { engine.onCallStarted(it.call) }
             .onSuccess { engine.onCallJoining(it.call) }
             .flatMap { callClient.joinCall(it.call) }
             .onSuccess { engine.onCallJoined(it) }
@@ -155,25 +159,25 @@ public class StreamCallsImpl(
             .also { logger.v { "[getOrCreateAndJoinCall] result: $it" } }
     }
 
+    // callee: ACCEPT incoming call
     override suspend fun joinCall(type: String, id: String): Result<JoinedCall> {
         logger.d { "[joinCall] type: $type, id: $id" }
         return createAndJoinCall(type, id, participantIds = emptyList(), ringing = false)
             .also { logger.v { "[joinCall] result: $it" } }
     }
 
+    // callee: SEND Accepted or Rejected
     override suspend fun sendEvent(
-        callId: String,
         callType: String,
+        callId: String,
         // TODO replace UserEventType with domain model
-        userEventType: UserEventType
+        eventType: UserEventType
     ): Result<Boolean> {
-        logger.d { "[sendEvent] event type: $userEventType" }
-        engine.onCallSendEvent(callType, callId, userEventType)
-        return callClient.sendUserEvent(
-            userEventType = userEventType,
-            callId = callId,
-            callType = callType,
-        )
+        logger.d { "[sendEvent] callType: $callType, callId: $callId, eventType: $eventType" }
+        engine.onCallEventSending(callType, callId, eventType)
+        return callClient.sendUserEvent(callType = callType, callId = callId, eventType = eventType)
+            .onSuccess { engine.onCallEventSent(callType, callId, eventType) }
+            .also { logger.v { "[sendEvent] result: $it" } }
     }
 
     override fun clearCallState() {
