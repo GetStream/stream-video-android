@@ -51,9 +51,8 @@ internal class EventsParser(
 
             if (rawEvent.healthcheck == null) logger.v { "[onMessage] rawEvent: $rawEvent" }
             val processedEvent = EventMapper.mapEvent(rawEvent)
-            if (rawEvent.healthcheck == null) logger.v { "[onMessage] processedEvent: $processedEvent" }
+            logger.v { "[onMessage] processedEvent: $processedEvent" }
 
-            // TODO - We could get the Connected event here instead
             if (!connectionEventReceived && processedEvent is HealthCheckEvent) {
                 connectionEventReceived = true
                 videoSocket.onConnectionResolved(ConnectedEvent(processedEvent.clientId))

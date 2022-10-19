@@ -108,7 +108,7 @@ internal class StreamCallEngineImpl(
             logger.w { "[onCallAccepted] rejected (state is not Outgoing): $state" }
             return@launchWithLock
         }
-        logger.d { "[onCallRejected] state: $state" }
+        logger.d { "[onCallAccepted] state: $state" }
         _callState.post(
             state.copy(
                 acceptedByCallee = true
@@ -122,8 +122,7 @@ internal class StreamCallEngineImpl(
             return@launchWithLock
         }
         logger.d { "[onCallRejected] no args" }
-        _callState.post(State.Drop(state.callGuid, DropReason.Rejected))
-        _callState.post(State.Idle)
+        dropCall(State.Drop(state.callGuid, DropReason.Rejected))
     }
 
     override fun onCallJoined(joinedCall: JoinedCall) = scope.launchWithLock(mutex) {
@@ -229,18 +228,20 @@ internal class StreamCallEngineImpl(
         )
     }
 
-    override fun onCallEventSending(type: String, id: String, eventType: UserEventType) = scope.launchWithLock(mutex) {
-        logger.d { "[onCallEventSending] type: $type, id: $id, eventType: $UserEventType" }
-    }
+    override fun onCallEventSending(type: String, id: String, eventType: UserEventType) =
+        scope.launchWithLock(mutex) {
+            logger.d { "[onCallEventSending] type: $type, id: $id, eventType: $UserEventType" }
+        }
 
-    override fun onCallEventSent(type: String, id: String, eventType: UserEventType) = scope.launchWithLock(mutex) {
-        logger.d { "[onCallEventSent] type: $type, id: $id, eventType: $UserEventType" }
-    }
+    override fun onCallEventSent(type: String, id: String, eventType: UserEventType) =
+        scope.launchWithLock(mutex) {
+            logger.d { "[onCallEventSent] type: $type, id: $id, eventType: $UserEventType" }
+        }
 
     override fun onCallJoining(call: CallMetadata) = scope.launchWithLock(mutex) {
         val state = _callState.value
         if (state !is State.Starting && state !is State.Outgoing && state !is State.Incoming) {
-            logger.w { "[onCallStarting] rejected (state is not Starting/Outgoing/Accepting): $state" }
+            logger.w { "[onCallJoining] rejected (state is not Starting/Outgoing/Accepting): $state" }
             return@launchWithLock
         }
         logger.d { "[onCallJoining] call: $call, state: $state" }
@@ -266,8 +267,7 @@ internal class StreamCallEngineImpl(
         if (state !is State.Active) {
             return@launchWithLock
         }
-        _callState.post(State.Drop(state.callGuid, DropReason.Failure(error)))
-        _callState.post(State.Idle)
+        dropCall(State.Drop(state.callGuid, DropReason.Failure(error)))
     }
 
     private fun onCallFinished() = scope.launchWithLock(mutex) {
@@ -286,8 +286,7 @@ internal class StreamCallEngineImpl(
             return@launchWithLock
         }
         logger.d { "[onCallCancelled] state: $state" }
-        _callState.post(State.Drop(state.callGuid, DropReason.Cancelled))
-        _callState.post(State.Idle)
+        dropCall(State.Drop(state.callGuid, DropReason.Cancelled))
     }
 
     private fun onCallCreated(event: CallCreatedEvent) = scope.launchWithLock(mutex) {
@@ -317,6 +316,14 @@ internal class StreamCallEngineImpl(
                 )
             }
         )
+    }
+
+    /**
+     * Used for setting the state to a dropped call and then immediately switching to Idle.
+     */
+    private fun dropCall(state: State.Drop) {
+        _callState.post(state)
+        _callState.post(State.Idle)
     }
 
     private fun MutableStateFlow<State>.post(state: State) {

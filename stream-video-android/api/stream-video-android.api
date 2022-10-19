@@ -644,11 +644,12 @@ public abstract interface class io/getstream/video/android/StreamCalls {
 	public abstract fun addSocketListener (Lio/getstream/video/android/socket/SocketListener;)V
 	public abstract fun clearCallState ()V
 	public abstract fun connectToCall (Ljava/lang/String;ZLio/getstream/video/android/model/CallSettings;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun createAndJoinCall (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun createCall (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun createCallClient (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lio/getstream/video/android/token/CredentialsProvider;)V
 	public abstract fun flipCamera ()V
 	public abstract fun getAudioDevices ()Ljava/util/List;
 	public abstract fun getCallState ()Lkotlinx/coroutines/flow/StateFlow;
-	public abstract fun getOrCreateAndJoinCall (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun getOrCreateCall (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun getUser ()Lio/getstream/video/android/model/User;
 	public abstract fun joinCall (Lio/getstream/video/android/model/CallMetadata;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -663,6 +664,7 @@ public abstract interface class io/getstream/video/android/StreamCalls {
 
 public final class io/getstream/video/android/StreamCalls$DefaultImpls {
 	public static synthetic fun connectToCall$default (Lio/getstream/video/android/StreamCalls;Ljava/lang/String;ZLio/getstream/video/android/model/CallSettings;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static synthetic fun createCall$default (Lio/getstream/video/android/StreamCalls;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public static synthetic fun getOrCreateCall$default (Lio/getstream/video/android/StreamCalls;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 }
 
@@ -677,11 +679,12 @@ public final class io/getstream/video/android/StreamCallsImpl : io/getstream/vid
 	public fun addSocketListener (Lio/getstream/video/android/socket/SocketListener;)V
 	public fun clearCallState ()V
 	public fun connectToCall (Ljava/lang/String;ZLio/getstream/video/android/model/CallSettings;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun createAndJoinCall (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun createCall (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun createCallClient (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lio/getstream/video/android/token/CredentialsProvider;)V
 	public fun flipCamera ()V
 	public fun getAudioDevices ()Ljava/util/List;
 	public fun getCallState ()Lkotlinx/coroutines/flow/StateFlow;
-	public fun getOrCreateAndJoinCall (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun getOrCreateCall (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun getUser ()Lio/getstream/video/android/model/User;
 	public fun joinCall (Lio/getstream/video/android/model/CallMetadata;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
