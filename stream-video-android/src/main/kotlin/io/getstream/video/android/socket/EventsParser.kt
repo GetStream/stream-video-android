@@ -48,11 +48,11 @@ internal class EventsParser(
         super.onMessage(webSocket, bytes)
         try {
             val rawEvent = WebsocketEvent.ADAPTER.decode(bytes)
-            logger.v { "[onMessage] rawEvent: $rawEvent" }
+
+            if (rawEvent.healthcheck == null) logger.v { "[onMessage] rawEvent: $rawEvent" }
             val processedEvent = EventMapper.mapEvent(rawEvent)
             logger.v { "[onMessage] processedEvent: $processedEvent" }
 
-            // TODO - We could get the Connected event here instead
             if (!connectionEventReceived && processedEvent is HealthCheckEvent) {
                 connectionEventReceived = true
                 videoSocket.onConnectionResolved(ConnectedEvent(processedEvent.clientId))

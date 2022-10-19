@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.model
+package io.getstream.video.android.dogfooding
 
-public data class CallInput(
-    internal val callType: String,
-    internal val callId: String,
-    internal val callUrl: String,
-    internal val userToken: String,
-    internal val iceServers: List<IceServer>,
-) : java.io.Serializable
+import io.getstream.video.android.model.UserCredentials
+
+interface UserPreferences {
+
+    fun getCachedCredentials(): UserCredentials
+
+    fun storeUserCredentials(userCredentials: UserCredentials)
+
+    fun clear()
+}

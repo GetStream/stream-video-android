@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.app.ui
+package io.getstream.video.android.dogfooding
 
 import android.net.Uri
 import android.os.Bundle
@@ -23,12 +23,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import io.getstream.logging.StreamLog
-import io.getstream.video.android.app.FakeCredentialsProvider
-import io.getstream.video.android.app.router.StreamRouterImpl
-import io.getstream.video.android.app.videoApp
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.model.CallInput
-import io.getstream.video.android.router.StreamRouter
 import io.getstream.video.android.utils.onError
 import io.getstream.video.android.utils.onSuccessSuspend
 import kotlinx.coroutines.launch
@@ -38,10 +34,8 @@ class DeeplinkingActivity : AppCompatActivity() {
     private val logger = StreamLog.getLogger("Call:DeeplinkView")
 
     private val controller by lazy {
-        videoApp.streamCalls
+        dogfoodingApp.streamCalls
     }
-
-    private val router: StreamRouter by lazy { StreamRouterImpl(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         logger.d { "[onCreate] savedInstanceState: $savedInstanceState" }
@@ -63,14 +57,14 @@ class DeeplinkingActivity : AppCompatActivity() {
             val createCallResult = controller.joinCall("default", callId)
 
             createCallResult.onSuccessSuspend { response ->
-                router.navigateToCall(
+                navigateToCall(
                     CallInput(
+                        response.call.type,
                         response.call.id,
                         response.callUrl,
                         response.userToken,
                         response.iceServers
-                    ),
-                    finishCurrent = true
+                    )
                 )
             }
             createCallResult.onError {
@@ -80,12 +74,18 @@ class DeeplinkingActivity : AppCompatActivity() {
         }
     }
 
+    private fun navigateToCall(callInput: CallInput) {
+        startActivity(CallActivity.getIntent(this, callInput))
+        finish()
+    }
+
     private fun logIn() {
-        val selectedUser = videoApp.userPreferences.getCachedCredentials()
+        val selectedUser = dogfoodingApp.userPreferences.getCachedCredentials()
         logger.d { "[logIn] selectedUser: $selectedUser" }
-        videoApp.initializeStreamCalls(
-            credentialsProvider = FakeCredentialsProvider(
-                userCredentials = selectedUser,
+        dogfoodingApp.initializeStreamCalls(
+            credentialsProvider = AuthCredentialsProvider(
+                user = selectedUser.toUser(),
+                userToken = selectedUser.token,
                 apiKey = "key10"
             ),
             loggingLevel = LoggingLevel.BODY

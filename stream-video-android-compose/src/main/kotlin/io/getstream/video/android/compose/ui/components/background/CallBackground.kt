@@ -70,7 +70,11 @@ private fun OutgoingCallBackground(participants: List<CallUser>, callType: CallT
             DefaultCallBackground()
         }
     } else {
-        ParticipantImageBackground(participants = participants)
+        if (participants.isNotEmpty()) {
+            ParticipantImageBackground(participants = participants)
+        } else {
+            DefaultCallBackground()
+        }
     }
 }
 

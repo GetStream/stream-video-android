@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.app.user
+package io.getstream.video.android.dogfooding
 
 import android.content.SharedPreferences
 import androidx.core.content.edit

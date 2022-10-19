@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-package io.getstream.chat.android.dogfooding
+package io.getstream.video.android.dogfooding
 
 import io.getstream.video.android.model.User
 import io.getstream.video.android.token.CredentialsProvider
 
 class AuthCredentialsProvider(
     private val apiKey: String,
-    private val userToken: String
+    private val userToken: String,
+    private val user: User
 ) : CredentialsProvider {
 
     private var sfuToken: String? = null
@@ -51,13 +52,6 @@ class AuthCredentialsProvider(
     }
 
     override fun getUserCredentials(): User {
-        return User( // TODO
-            id = "",
-            role = "",
-            name = "",
-            imageUrl = "",
-            teams = emptyList(),
-            extraData = emptyMap()
-        )
+        return user
     }
 }

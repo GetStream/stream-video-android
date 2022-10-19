@@ -20,7 +20,7 @@ import io.getstream.video.android.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-public class UserState() {
+public class UserState {
 
     /**
      * Represents the internal Flow that caches the last user instance and emits it to all
@@ -39,6 +39,6 @@ public class UserState() {
     }
 
     public companion object {
-        private val EMPTY_USER = User("", "", "", "", emptyList(), emptyMap())
+        private val EMPTY_USER = User("", "", "", "", "", emptyList(), emptyMap())
     }
 }

@@ -19,18 +19,20 @@ package io.getstream.video.android.model
 public data class OutgoingCallData(
     val callType: CallType,
     val callInfo: CallInfo,
-    val participants: List<CallUser>
+    val users: List<CallUser>,
+    val members: List<CallMember>
 ) : java.io.Serializable
 
 public fun OutgoingCallData.toMetadata(): CallMetadata =
     CallMetadata(
-        id = callInfo.callId,
         cid = callInfo.cid,
+        id = callInfo.id,
         type = callInfo.type,
-        users = participants.associateBy { it.id },
+        users = users.associateBy { it.id },
+        members = members.associateBy { it.userId },
         createdAt = callInfo.createdAt?.time ?: 0,
         updatedAt = callInfo.updatedAt?.time ?: 0,
-        createdBy = callInfo.createdByUserId,
+        createdByUserId = callInfo.createdByUserId,
         broadcastingEnabled = false,
         recordingEnabled = false,
         extraData = emptyMap()

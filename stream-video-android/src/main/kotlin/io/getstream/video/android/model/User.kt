@@ -20,7 +20,18 @@ public data class User(
     val id: String,
     val role: String,
     val name: String,
+    val token: String,
     val imageUrl: String?,
     val teams: List<String>,
     val extraData: Map<String, String>
 )
+
+public fun User.toCredentials(): UserCredentials {
+    return UserCredentials(
+        id = id,
+        role = role,
+        name = name,
+        image = imageUrl ?: "",
+        token = token
+    )
+}

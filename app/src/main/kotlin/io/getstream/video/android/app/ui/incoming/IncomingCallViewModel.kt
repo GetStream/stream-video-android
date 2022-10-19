@@ -25,7 +25,6 @@ import io.getstream.video.android.events.VideoEvent
 import io.getstream.video.android.model.CallInput
 import io.getstream.video.android.model.IncomingCallData
 import io.getstream.video.android.model.JoinedCall
-import io.getstream.video.android.model.callId
 import io.getstream.video.android.router.StreamRouter
 import io.getstream.video.android.socket.SocketListener
 import io.getstream.video.android.utils.Failure
@@ -57,7 +56,7 @@ class IncomingCallViewModel(
     fun acceptCall() {
         val data = callData
         val callType = data.callInfo.type
-        val callId = data.callInfo.callId
+        val callId = data.callInfo.id
         logger.d { "[acceptCall] callType: $callType, callId: $callId" }
 
         viewModelScope.launch {
@@ -74,13 +73,14 @@ class IncomingCallViewModel(
                 val joinData = joinResult.data
 
                 streamCalls.sendEvent(
-                    joinData.call.id,
-                    joinData.call.type,
-                    UserEventType.USER_EVENT_TYPE_ACCEPTED_CALL
+                    callId = joinData.call.id,
+                    callType = joinData.call.type,
+                    eventType = UserEventType.USER_EVENT_TYPE_ACCEPTED_CALL
                 )
 
                 streamRouter.navigateToCall(
                     callInput = CallInput(
+                        callType = joinData.call.type,
                         callId = joinData.call.id,
                         callUrl = joinData.callUrl,
                         userToken = joinData.userToken,
@@ -99,9 +99,9 @@ class IncomingCallViewModel(
         val data = callData
         viewModelScope.launch {
             val result = streamCalls.sendEvent(
-                data.callInfo.callId,
-                data.callInfo.type,
-                UserEventType.USER_EVENT_TYPE_REJECTED_CALL
+                callType = data.callInfo.type,
+                callId = data.callInfo.id,
+                eventType = UserEventType.USER_EVENT_TYPE_REJECTED_CALL
             )
             logger.d { "[declineCall] result: $result" }
 

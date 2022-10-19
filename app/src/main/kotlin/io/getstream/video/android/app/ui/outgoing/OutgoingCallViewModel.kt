@@ -26,7 +26,6 @@ import io.getstream.video.android.events.CallRejectedEvent
 import io.getstream.video.android.events.VideoEvent
 import io.getstream.video.android.model.CallInput
 import io.getstream.video.android.model.OutgoingCallData
-import io.getstream.video.android.model.callId
 import io.getstream.video.android.model.toMetadata
 import io.getstream.video.android.router.StreamRouter
 import io.getstream.video.android.socket.SocketListener
@@ -76,7 +75,7 @@ class OutgoingCallViewModel(
     private fun onCallRejected() {
         callRejectionCount += 1
         logger.d { "[onCallRejected] rejected call count $callRejectionCount" }
-        if (callRejectionCount == (callData.participants.count() - 1)) {
+        if (callRejectionCount == (callData.users.count() - 1)) {
             logger.d { "[onCallRejected] Hanging up call" }
             hangUpCall()
         }
@@ -87,9 +86,9 @@ class OutgoingCallViewModel(
 
         viewModelScope.launch {
             streamCalls.sendEvent(
-                callId = data.callId,
+                callId = data.id,
                 callType = data.type,
-                UserEventType.USER_EVENT_TYPE_CANCELLED_CALL
+                eventType = UserEventType.USER_EVENT_TYPE_CANCELLED_CALL
             )
 
             streamCalls.clearCallState()
@@ -106,6 +105,7 @@ class OutgoingCallViewModel(
             joinResult.onSuccessSuspend { response ->
                 streamRouter.navigateToCall(
                     callInput = CallInput(
+                        response.call.type,
                         response.call.id,
                         response.callUrl,
                         response.userToken,

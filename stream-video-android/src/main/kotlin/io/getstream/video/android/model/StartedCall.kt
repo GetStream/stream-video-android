@@ -16,28 +16,7 @@
 
 package io.getstream.video.android.model
 
-// TODO - internal sample app, clean up once full auth/login is set up
-public data class UserCredentials(
-    val id: String,
-    val role: String,
-    val token: String,
-    val name: String,
-    val image: String = "",
-    val isSelected: Boolean = false
-) {
-    public fun isValid(): Boolean {
-        return id.isNotEmpty() && token.isNotEmpty() && name.isNotEmpty()
-    }
-
-    public fun toUser(): User {
-        return User(
-            id = id,
-            role = role,
-            name = name,
-            imageUrl = image,
-            token = token,
-            teams = emptyList(),
-            extraData = emptyMap()
-        )
-    }
-}
+// named started because it used as result of `getOrCreate` function
+public data class StartedCall(
+    val call: CallMetadata
+)

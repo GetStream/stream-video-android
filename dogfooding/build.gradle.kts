@@ -11,11 +11,11 @@ plugins {
 }
 
 android {
-    namespace = "io.getstream.chat.android.dogfooding"
+    namespace = "io.getstream.video.android.dogfooding"
     compileSdk = Configuration.compileSdk
 
     defaultConfig {
-        applicationId = "io.getstream.chat.android.dogfooding"
+        applicationId = "io.getstream.video.android.dogfooding"
         minSdk = Configuration.minSdk
         targetSdk = Configuration.targetSdk
         versionCode = 1
@@ -64,6 +64,9 @@ android {
         getByName("debug") {
             versionNameSuffix = "-DEBUG"
             applicationIdSuffix = ".debug"
+            isDebuggable = true
+            isMinifyEnabled = false
+            isShrinkResources = false
             signingConfig = signingConfigs.getByName("debug")
         }
         getByName("release") {
@@ -108,6 +111,7 @@ dependencies {
     implementation(Dependencies.streamLoggerAndroid)
 
     implementation(Dependencies.androidxCore)
+    implementation(Dependencies.androidxAppcompat)
     implementation(Dependencies.androidxLifecycleRuntime)
     implementation(Dependencies.material)
 

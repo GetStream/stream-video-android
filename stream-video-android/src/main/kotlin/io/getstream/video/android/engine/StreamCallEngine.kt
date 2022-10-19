@@ -16,10 +16,12 @@
 
 package io.getstream.video.android.engine
 
+import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.model.CallMetadata
 import io.getstream.video.android.model.JoinedCall
 import io.getstream.video.android.model.state.StreamCallState
 import kotlinx.coroutines.flow.StateFlow
+import stream.video.coordinator.client_v1_rpc.UserEventType
 
 internal interface StreamCallEngine {
 
@@ -27,9 +29,21 @@ internal interface StreamCallEngine {
 
     fun onCallJoined(joinedCall: JoinedCall)
 
-    fun onCallConnecting()
+    fun onCallStarting(
+        type: String,
+        id: String,
+        participantIds: List<String>,
+        ringing: Boolean,
+        forcedNewCall: Boolean
+    )
 
-    fun onOutgoingCall(callMetadata: CallMetadata)
+    fun onCallStarted(call: CallMetadata)
 
-    fun resetCallState()
+    fun onCallJoining(call: CallMetadata)
+
+    fun onCallFailed(error: VideoError)
+
+    fun onCallEventSending(type: String, id: String, eventType: UserEventType)
+
+    fun onCallEventSent(type: String, id: String, eventType: UserEventType)
 }

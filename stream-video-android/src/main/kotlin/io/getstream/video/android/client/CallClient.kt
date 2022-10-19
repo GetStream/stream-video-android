@@ -25,6 +25,7 @@ import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.model.CallMetadata
 import io.getstream.video.android.model.JoinedCall
+import io.getstream.video.android.model.StartedCall
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.toIceServer
 import io.getstream.video.android.module.CallClientModule
@@ -36,13 +37,13 @@ import io.getstream.video.android.utils.Result
 import io.getstream.video.android.utils.Success
 import io.getstream.video.android.utils.enrichSFUURL
 import io.getstream.video.android.utils.getLatencyMeasurements
+import io.getstream.video.android.utils.map
 import io.getstream.video.android.utils.toCall
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import stream.video.coordinator.client_v1_rpc.CreateCallInput
 import stream.video.coordinator.client_v1_rpc.CreateCallRequest
-import stream.video.coordinator.client_v1_rpc.CreateCallResponse
 import stream.video.coordinator.client_v1_rpc.GetCallEdgeServerRequest
 import stream.video.coordinator.client_v1_rpc.GetCallEdgeServerResponse
 import stream.video.coordinator.client_v1_rpc.JoinCallRequest
@@ -86,8 +87,8 @@ public class CallClient(
         id: String,
         participantIds: List<String>,
         ringing: Boolean
-    ): Result<CreateCallResponse> {
-        logger.d { "[getOrCreateCall] type: $type, id: $id, participantIds: $participantIds" }
+    ): Result<StartedCall> {
+        logger.d { "[createCall] type: $type, id: $id, participantIds: $participantIds" }
         return callCoordinatorClient.createCall(
             CreateCallRequest(
                 type = type,
@@ -99,7 +100,11 @@ public class CallClient(
                     ring = ringing
                 )
             )
-        ).also { logger.v { "[getOrCreateCall] result: $it" } }
+        ).map {
+            StartedCall(
+                call = it.call?.toCall() ?: error("CreateCallResponse has no call object")
+            )
+        }.also { logger.v { "[createCall] result: $it" } }
     }
 
     /**
@@ -110,7 +115,7 @@ public class CallClient(
         id: String,
         participantIds: List<String>,
         ringing: Boolean
-    ): Result<CreateCallResponse> {
+    ): Result<StartedCall> {
         logger.d { "[getOrCreateCall] type: $type, id: $id, participantIds: $participantIds" }
         return callCoordinatorClient.getOrCreateCall(
             CreateCallRequest(
@@ -123,23 +128,11 @@ public class CallClient(
                     ring = ringing
                 )
             )
-        ).also { logger.v { "[getOrCreateCall] result: $it" } }
-    }
-
-    /**
-     * @see CallCoordinatorClient.joinCall for details.
-     */
-    public suspend fun createAndJoinCall(
-        type: String,
-        id: String,
-        participantIds: List<String> = emptyList(),
-        ringing: Boolean = true
-    ): Result<JoinedCall> {
-        logger.d { "[createAndJoinCall] type: $type, id: $id, participantIds: $participantIds" }
-        return when (val createCallResult = getOrCreateCall(type, id, participantIds, ringing)) {
-            is Success -> this.joinCall(createCallResult.data.call?.toCall()!!)
-            is Failure -> return Failure(createCallResult.error)
-        }.also { logger.v { "[createAndJoinCall] result: $it" } }
+        ).map {
+            StartedCall(
+                call = it.call?.toCall() ?: error("CreateCallResponse has no call object")
+            )
+        }.also { logger.v { "[getOrCreateCall] result: $it" } }
     }
 
     /**
@@ -150,58 +143,55 @@ public class CallClient(
      * @return [Result] wrapper around [JoinedCall] once the correct server is chosen.
      */
     public suspend fun joinCall(call: CallMetadata): Result<JoinedCall> {
-        logger.d { "[joinCall] call: $call" }
-        val callResult = callCoordinatorClient.joinCall(
-            JoinCallRequest(
-                id = call.id,
-                type = call.type,
-                datacenter_id = ""
-            )
-        )
-        logger.v { "[joinCall] callResult: $callResult" }
-
-        if (callResult is Success) {
-            val data = callResult.data
-
-            return try {
-                val latencyResults = data.edges.associate {
-                    it.name to measureLatency(it.latency_url)
-                }
-
-                val selectEdgeServerResult = selectEdgeServer(
-                    request = GetCallEdgeServerRequest(
-                        call_cid = call.cid,
-                        measurements = LatencyMeasurements(measurements = latencyResults)
-                    )
+        return try {
+            logger.d { "[joinCall] call: $call" }
+            val joinResult = callCoordinatorClient.joinCall(
+                JoinCallRequest(
+                    id = call.id,
+                    type = call.type,
+                    datacenter_id = ""
                 )
-
-                when (selectEdgeServerResult) {
-                    is Success -> {
-                        socket.updateCallState(call)
-                        val credentials = selectEdgeServerResult.data.credentials
-                        val url = credentials?.server?.url
-                        val iceServers =
-                            selectEdgeServerResult.data.credentials?.ice_servers?.map { it.toIceServer() }
-                                ?: emptyList()
-
-                        Success(
-                            JoinedCall(
-                                call = call,
-                                callUrl = enrichSFUURL(url!!),
-                                userToken = credentials.token,
-                                iceServers = iceServers
-                            )
-                        )
-                    }
-                    is Failure -> Failure(selectEdgeServerResult.error)
-                }
-            } catch (error: Throwable) {
-                Failure(VideoError(error.message, error))
-            }.also { logger.v { "[joinCall] result: $it" } }
-        } else {
-            return Failure((callResult as Failure).error).also {
-                logger.e { "[joinCall] failed: $it" }
+            )
+            if (joinResult !is Success) {
+                logger.e { "[joinCall] failed joinResult: $joinResult" }
+                return joinResult as Failure
             }
+            logger.v { "[joinCall] joinResult: $joinResult" }
+
+            val latencyResults = joinResult.data.edges.associate {
+                it.name to measureLatency(it.latency_url)
+            }
+
+            val selectEdgeServerResult = selectEdgeServer(
+                request = GetCallEdgeServerRequest(
+                    call_cid = call.cid,
+                    measurements = LatencyMeasurements(measurements = latencyResults)
+                )
+            )
+            logger.v { "[joinCall] selectEdgeServerResult: $selectEdgeServerResult" }
+            when (selectEdgeServerResult) {
+                is Success -> {
+                    socket.updateCallState(call)
+                    val credentials = selectEdgeServerResult.data.credentials
+                    val url = credentials?.server?.url
+                    val iceServers =
+                        selectEdgeServerResult.data.credentials?.ice_servers?.map { it.toIceServer() }
+                            ?: emptyList()
+
+                    Success(
+                        JoinedCall(
+                            call = call,
+                            callUrl = enrichSFUURL(url!!),
+                            userToken = credentials.token,
+                            iceServers = iceServers
+                        )
+                    )
+                }
+                is Failure -> Failure(selectEdgeServerResult.error)
+            }
+        } catch (error: Throwable) {
+            logger.e { "[joinCall] failed: $error" }
+            Failure(VideoError(error.message, error))
         }
     }
 
@@ -228,7 +218,7 @@ public class CallClient(
      * @see CallCoordinatorClient.sendUserEvent for details.
      */
     public suspend fun sendUserEvent(
-        userEventType: UserEventType,
+        eventType: UserEventType,
         callId: String,
         callType: String
     ): Result<Boolean> {
@@ -236,7 +226,7 @@ public class CallClient(
             SendEventRequest(
                 call_id = callId,
                 call_type = callType,
-                event_type = userEventType
+                event_type = eventType
             )
         )
     }

@@ -39,12 +39,11 @@ import io.getstream.video.android.socket.SocketState
 import io.getstream.video.android.socket.SocketStateService
 import io.getstream.video.android.socket.VideoSocket
 import io.getstream.video.android.token.CredentialsProvider
-import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Result
-import io.getstream.video.android.utils.Success
+import io.getstream.video.android.utils.flatMap
+import io.getstream.video.android.utils.map
 import io.getstream.video.android.utils.onError
 import io.getstream.video.android.utils.onSuccess
-import io.getstream.video.android.utils.toCall
 import io.getstream.video.android.webrtc.WebRTCClient
 import io.getstream.video.android.webrtc.builder.WebRTCClientBuilder
 import kotlinx.coroutines.CoroutineScope
@@ -67,11 +66,13 @@ public class StreamCallsImpl(
     private val userState: UserState
 ) : StreamCalls {
 
-    private val logger = StreamLog.getLogger("StreamCalls")
+    private val logger = StreamLog.getLogger("Call:StreamCalls")
 
     private val scope = CoroutineScope(DispatcherProvider.IO)
 
-    private val engine = StreamCallEngineImpl(scope)
+    private val engine = StreamCallEngineImpl(scope) {
+        credentialsProvider.getUserCredentials()
+    }
 
     /**
      * Observes the app lifecycle and attempts to reconnect/release the socket connection.
@@ -107,89 +108,81 @@ public class StreamCallsImpl(
         ringing: Boolean
     ): Result<CallMetadata> {
         logger.d { "[createCall] type: $type, id: $id, participantIds: $participantIds" }
-        return when (val result = callClient.createCall(type, id, participantIds, ringing)) {
-            is Success -> {
-                Success(result.data.call?.toCall()!!)
-            }
-            is Failure -> Failure(result.error)
-        }
+        engine.onCallStarting(type, id, participantIds, ringing, forcedNewCall = true)
+        return callClient.createCall(type, id, participantIds, ringing)
+            .onSuccess { engine.onCallStarted(it.call) }
+            .onError { engine.onCallFailed(it) }
+            .map { it.call }
+            .also { logger.v { "[createCall] result: $it" } }
     }
 
+    // caller: DIAL and wait answer
     override suspend fun getOrCreateCall(
         type: String,
         id: String,
         participantIds: List<String>,
         ringing: Boolean
     ): Result<CallMetadata> {
-        logger.d { "[createCall] type: $type, id: $id, participantIds: $participantIds" }
-        return when (val result = callClient.getOrCreateCall(type, id, participantIds, ringing)) {
-            is Success -> {
-                val callMetadata = result.data.call?.toCall()!!
-
-                Success(callMetadata).also {
-                    if (ringing) {
-                        engine.onOutgoingCall(callMetadata)
-                    }
-                }
-            }
-            is Failure -> Failure(result.error)
-        }
+        logger.d { "[getOrCreateCall] type: $type, id: $id, participantIds: $participantIds" }
+        engine.onCallStarting(type, id, participantIds, ringing, forcedNewCall = false)
+        return callClient.getOrCreateCall(type, id, participantIds, ringing)
+            .onSuccess { engine.onCallStarted(it.call) }
+            .onError { engine.onCallFailed(it) }
+            .map { it.call }
+            .also { logger.v { "[getOrCreateCall] result: $it" } }
     }
 
+    // caller: JOIN after accepting incoming call by callee
+    override suspend fun joinCall(call: CallMetadata): Result<JoinedCall> {
+        logger.d { "[joinCallOnly] call: $call" }
+        engine.onCallJoining(call)
+        return callClient.joinCall(call)
+            .onSuccess { data -> engine.onCallJoined(data) }
+            .onError { engine.onCallFailed(it) }
+            .also { logger.v { "[joinCallOnly] result: $it" } }
+    }
+
+    // caller/callee: CREATE/JOIN meeting
     override suspend fun createAndJoinCall(
         type: String,
         id: String,
         participantIds: List<String>,
         ringing: Boolean
     ): Result<JoinedCall> {
-        logger.d { "[createAndJoinCall] type: $type, id: $id, participantIds: $participantIds" }
-        return callClient.createAndJoinCall(type, id, participantIds, ringing)
+        logger.d { "[getOrCreateAndJoinCall] type: $type, id: $id, participantIds: $participantIds" }
+        engine.onCallStarting(type, id, participantIds, ringing, forcedNewCall = false)
+        return callClient.getOrCreateCall(type, id, participantIds, ringing)
+            .onSuccess { engine.onCallJoining(it.call) }
+            .flatMap { callClient.joinCall(it.call) }
+            .onSuccess { engine.onCallJoined(it) }
+            .onError { engine.onCallFailed(it) }
+            .also { logger.v { "[getOrCreateAndJoinCall] result: $it" } }
     }
 
+    // callee: ACCEPT incoming call
     override suspend fun joinCall(type: String, id: String): Result<JoinedCall> {
         logger.d { "[joinCall] type: $type, id: $id" }
-        engine.onConnecting()
-
-        val getOrCreateResult = callClient.getOrCreateCall(type, id, emptyList(), false)
-        logger.v { "[joinCall] getOrCreateResult: $getOrCreateResult" }
-        return when (getOrCreateResult) {
-            is Success -> {
-                val metadata = getOrCreateResult.data.call?.toCall()
-                    ?: error("[joinCall] no CallEnvelope found")
-
-                joinCall(metadata)
-            }
-            is Failure -> getOrCreateResult.also {
-                engine.resetCallState()
-            }
-        }
+        return createAndJoinCall(type, id, participantIds = emptyList(), ringing = false)
+            .also { logger.v { "[joinCall] result: $it" } }
     }
 
-    override suspend fun joinCall(call: CallMetadata): Result<JoinedCall> {
-        logger.d { "[joinCall] call: $call" }
-        return callClient.joinCall(call).also {
-            it.onSuccess { data -> engine.onCallJoined(data) }
-            it.onError { engine.resetCallState() }
-        }
-    }
-
+    // callee: SEND Accepted or Rejected
     override suspend fun sendEvent(
-        callId: String,
         callType: String,
-        userEventType: UserEventType
+        callId: String,
+        // TODO replace UserEventType with domain model
+        eventType: UserEventType
     ): Result<Boolean> {
-        logger.d { "[sendEvent] event type: $userEventType" }
-        return callClient.sendUserEvent(
-            userEventType = userEventType,
-            callId = callId,
-            callType = callType,
-        )
+        logger.d { "[sendEvent] callType: $callType, callId: $callId, eventType: $eventType" }
+        engine.onCallEventSending(callType, callId, eventType)
+        return callClient.sendUserEvent(callType = callType, callId = callId, eventType = eventType)
+            .onSuccess { engine.onCallEventSent(callType, callId, eventType) }
+            .also { logger.v { "[sendEvent] result: $it" } }
     }
 
     override fun clearCallState() {
         credentialsProvider.setSfuToken(null)
         socket.updateCallState(null)
-        engine.resetCallState()
         webRTCClient?.clear()
     }
 
