@@ -91,11 +91,26 @@ internal object EventMapper {
             )
         }
 
-        socketEvent.call_accepted != null -> CallAcceptedEvent
+        socketEvent.call_accepted != null -> CallAcceptedEvent(
+            sentByUserId = socketEvent.event_sender_id,
+            users = socketEvent.users.toCallUsers(),
+            info = socketEvent.calls.mapValues { (_, value) -> value.toCallInfo() },
+            details = socketEvent.call_details.mapValues { (_, value) -> value.toCallDetails() },
+        )
 
-        socketEvent.call_rejected != null -> CallRejectedEvent
+        socketEvent.call_rejected != null -> CallRejectedEvent(
+            sentByUserId = socketEvent.event_sender_id,
+            users = socketEvent.users.toCallUsers(),
+            info = socketEvent.calls.mapValues { (_, value) -> value.toCallInfo() },
+            details = socketEvent.call_details.mapValues { (_, value) -> value.toCallDetails() },
+        )
 
-        socketEvent.call_cancelled != null -> CallCanceledEvent
+        socketEvent.call_cancelled != null -> CallCanceledEvent(
+            sentByUserId = socketEvent.event_sender_id,
+            users = socketEvent.users.toCallUsers(),
+            info = socketEvent.calls.mapValues { (_, value) -> value.toCallInfo() },
+            details = socketEvent.call_details.mapValues { (_, value) -> value.toCallDetails() },
+        )
 
 //        TODO - do we remove these?
 //        socketEvent.audio_muted != null -> with(socketEvent.audio_muted) {

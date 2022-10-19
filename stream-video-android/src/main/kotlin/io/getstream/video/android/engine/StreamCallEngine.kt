@@ -17,11 +17,11 @@
 package io.getstream.video.android.engine
 
 import io.getstream.video.android.errors.VideoError
+import io.getstream.video.android.model.CallEventType
 import io.getstream.video.android.model.CallMetadata
 import io.getstream.video.android.model.JoinedCall
 import io.getstream.video.android.model.state.StreamCallState
 import kotlinx.coroutines.flow.StateFlow
-import stream.video.coordinator.client_v1_rpc.UserEventType
 
 internal interface StreamCallEngine {
 
@@ -43,7 +43,7 @@ internal interface StreamCallEngine {
 
     fun onCallFailed(error: VideoError)
 
-    fun onCallEventSending(cid: String, eventType: UserEventType)
+    fun onCallEventSending(callCid: String, eventType: CallEventType)
 
-    fun onCallEventSent(cid: String, eventType: UserEventType)
+    fun onCallEventSent(callCid: String, eventType: CallEventType)
 }

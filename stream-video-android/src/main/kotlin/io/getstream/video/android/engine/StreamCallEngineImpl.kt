@@ -36,6 +36,11 @@ import io.getstream.video.android.events.UnknownEvent
 import io.getstream.video.android.events.VideoEvent
 import io.getstream.video.android.events.VideoStartedEvent
 import io.getstream.video.android.events.VideoStoppedEvent
+import io.getstream.video.android.model.CallEventType
+import io.getstream.video.android.model.CallEventType.ACCEPTED
+import io.getstream.video.android.model.CallEventType.CANCELLED
+import io.getstream.video.android.model.CallEventType.REJECTED
+import io.getstream.video.android.model.CallEventType.UNDEFINED
 import io.getstream.video.android.model.CallMetadata
 import io.getstream.video.android.model.JoinedCall
 import io.getstream.video.android.model.User
@@ -52,7 +57,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import stream.video.coordinator.client_v1_rpc.UserEventType
 import io.getstream.video.android.model.StreamCallCid as CallCid
 import io.getstream.video.android.model.StreamCallId as CallId
 import io.getstream.video.android.model.StreamCallType as CallType
@@ -68,6 +72,8 @@ internal class StreamCallEngineImpl(
 ) : StreamCallEngine, SocketListener {
 
     private val logger = StreamLog.getLogger("Call:Engine")
+
+    private val getCurrentUserId = { getCurrentUser().id }
 
     private val mutex = Mutex()
 
@@ -91,7 +97,7 @@ internal class StreamCallEngineImpl(
             is CallAcceptedEvent -> onCallAccepted(event)
             is CallRejectedEvent -> onCallRejected(event)
             is CallEndedEvent -> onCallFinished()
-            is CallCanceledEvent -> onCallCancelled()
+            is CallCanceledEvent -> onCallCancelled(event)
             is ConnectedEvent -> {}
             is HealthCheckEvent -> {}
             is ParticipantJoinedEvent -> {}
@@ -108,6 +114,10 @@ internal class StreamCallEngineImpl(
             logger.w { "[onCallAccepted] rejected (state is not Outgoing): $state" }
             return@launchWithLock
         }
+        if (!state.members.contains(event.sentByUserId)) {
+            logger.w { "[onCallAccepted] rejected (accepted by non-Member): $event" }
+            return@launchWithLock
+        }
         logger.d { "[onCallAccepted] state: $state" }
         _callState.post(
             state.copy(
@@ -118,11 +128,16 @@ internal class StreamCallEngineImpl(
 
     private fun onCallRejected(event: CallRejectedEvent) = scope.launchWithLock(mutex) {
         val state = _callState.value
-        if (state !is State.Active) {
+        if (state !is State.Started) {
+            logger.w { "[onCallRejected] rejected (state is not Started): $state" }
+            return@launchWithLock
+        }
+        if (!state.members.contains(event.sentByUserId)) {
+            logger.w { "[onCallRejected] rejected (rejected by non-Member): $event" }
             return@launchWithLock
         }
         logger.d { "[onCallRejected] no args" }
-        dropCall(State.Drop(state.callGuid, DropReason.Rejected))
+        dropCall(State.Drop(state.callGuid, DropReason.Rejected(event.sentByUserId)))
     }
 
     override fun onCallJoined(joinedCall: JoinedCall) = scope.launchWithLock(mutex) {
@@ -134,7 +149,7 @@ internal class StreamCallEngineImpl(
         logger.d { "[onCallJoined] joinedCall: $joinedCall, state: $state" }
         _callState.post(
             joinedCall.run {
-                // TODO it should be Connecting until a Connected state from ICE candidates
+                // TODO it should be Connecting until a Connected state from ICE candidates comes
                 State.Connected(
                     callGuid = CallGuid(
                         type = call.type,
@@ -228,20 +243,53 @@ internal class StreamCallEngineImpl(
         )
     }
 
-    override fun onCallEventSending(cid: String, eventType: UserEventType) =
-        scope.launchWithLock(mutex) {
-            logger.d { "[onCallEventSending] cid: $cid, eventType: $UserEventType" }
+    override fun onCallEventSending(callCid: String, eventType: CallEventType) = scope.launchWithLock(mutex) {
+        val state = _callState.value
+        if (state !is State.Active) {
+            logger.w { "[onCallEventSending] $eventType rejected (state is not Active): $state" }
+            return@launchWithLock
         }
+        if (state.callGuid.cid != callCid) {
+            logger.w {
+                "[onCallEventSending] $eventType rejected (callCid is not valid);" +
+                    " expected: ${state.callGuid.cid}, actual: $callCid"
+            }
+            return@launchWithLock
+        }
+        if (eventType == ACCEPTED && state !is State.Incoming) {
+            logger.w { "[onCallEventSending] $eventType rejected (state is not Incoming): $state" }
+            return@launchWithLock
+        }
+        logger.d { "[onCallEventSending] callCid: $callCid, eventType: $eventType, state: $state" }
+        when (eventType) {
+            REJECTED -> dropCall(State.Drop(state.callGuid, DropReason.Rejected(getCurrentUserId())))
+            CANCELLED -> dropCall(State.Drop(state.callGuid, DropReason.Cancelled(getCurrentUserId())))
+            ACCEPTED -> if (state is State.Incoming) {
+                _callState.post(state.copy(acceptedByMe = true))
+            }
+            UNDEFINED -> Unit
+        }
+    }
 
-    override fun onCallEventSent(cid: String, eventType: UserEventType) =
-        scope.launchWithLock(mutex) {
-            logger.d { "[onCallEventSent] cid: $cid, eventType: $UserEventType" }
-        }
+    override fun onCallEventSent(
+        callCid: String,
+        eventType: CallEventType
+    ) = scope.launchWithLock(mutex) {
+        val state = _callState.value
+        logger.d { "[onCallEventSent] callCid: $callCid, eventType: $eventType, state: $state" }
+    }
 
     override fun onCallJoining(call: CallMetadata) = scope.launchWithLock(mutex) {
         val state = _callState.value
-        if (state !is State.Starting && state !is State.Outgoing && state !is State.Incoming) {
-            logger.w { "[onCallJoining] rejected (state is not Starting/Outgoing/Accepting): $state" }
+        if (state !is State.Joinable) {
+            logger.w { "[onCallJoining] rejected (state is not Joinable): $state" }
+            return@launchWithLock
+        }
+        if (state.callGuid.cid != call.cid) {
+            logger.w {
+                "[onCallJoining] rejected (callCid is not valid);" +
+                    " expected: ${state.callGuid.cid}, actual: $${call.cid}"
+            }
             return@launchWithLock
         }
         logger.d { "[onCallJoining] call: $call, state: $state" }
@@ -262,11 +310,12 @@ internal class StreamCallEngineImpl(
     }
 
     override fun onCallFailed(error: VideoError) = scope.launchWithLock(mutex) {
-        logger.e { "[onCallFailed] error: $error" }
         val state = _callState.value
         if (state !is State.Active) {
+            logger.w { "[onCallFailed] rejected (state is not Active): $state" }
             return@launchWithLock
         }
+        logger.e { "[onCallFailed] error: $error, state: $state" }
         dropCall(State.Drop(state.callGuid, DropReason.Failure(error)))
     }
 
@@ -279,14 +328,14 @@ internal class StreamCallEngineImpl(
         _callState.post(State.Idle)
     }
 
-    private fun onCallCancelled() = scope.launchWithLock(mutex) {
+    private fun onCallCancelled(event: CallCanceledEvent) = scope.launchWithLock(mutex) {
         val state = _callState.value
         if (state !is State.Active) {
             logger.w { "[onCallCancelled] rejected (state is not Active): $state" }
             return@launchWithLock
         }
-        logger.d { "[onCallCancelled] state: $state" }
-        dropCall(State.Drop(state.callGuid, DropReason.Cancelled))
+        logger.d { "[onCallCancelled] event: $event, state: $state" }
+        dropCall(State.Drop(state.callGuid, DropReason.Cancelled(event.sentByUserId)))
     }
 
     private fun onCallCreated(event: CallCreatedEvent) = scope.launchWithLock(mutex) {
@@ -299,6 +348,7 @@ internal class StreamCallEngineImpl(
             logger.w { "[onCallCreated] rejected (ringing is False): $event" }
             return@launchWithLock
         }
+        logger.d { "[onCallCreated] event: $event, state: $state" }
         _callState.post(
             event.run {
                 State.Incoming(

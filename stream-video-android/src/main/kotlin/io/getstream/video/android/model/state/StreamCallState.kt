@@ -26,9 +26,13 @@ import io.getstream.video.android.model.StreamCallType as CallType
 
 public sealed interface StreamCallState : java.io.Serializable {
 
-    public object Idle : StreamCallState
+    public object Idle : StreamCallState { override fun toString(): String = "Idle" }
 
-    public interface Active : StreamCallState {
+    public sealed class Active : StreamCallState {
+        public abstract val callGuid: CallGuid
+    }
+
+    public sealed interface Joinable : StreamCallState {
         public val callGuid: CallGuid
     }
 
@@ -36,46 +40,49 @@ public sealed interface StreamCallState : java.io.Serializable {
         override val callGuid: CallGuid,
         val memberUserIds: List<String>,
         val ringing: Boolean
-    ) : Active
+    ) : Active(), Joinable
+
+    public sealed class Started : Active() {
+        public abstract val createdByUserId: String
+        public abstract val broadcastingEnabled: Boolean
+        public abstract val recordingEnabled: Boolean
+        public abstract val users: Map<String, CallUser>
+        public abstract val members: Map<String, CallMember>
+    }
 
     public data class Outgoing(
         override val callGuid: CallGuid,
-        val createdByUserId: String,
-        val broadcastingEnabled: Boolean,
-        val recordingEnabled: Boolean,
-        val users: Map<String, CallUser>,
-        val members: Map<String, CallMember>,
+        override val createdByUserId: String,
+        override val broadcastingEnabled: Boolean,
+        override val recordingEnabled: Boolean,
+        override val users: Map<String, CallUser>,
+        override val members: Map<String, CallMember>,
         val acceptedByCallee: Boolean
-    ) : Active
+    ) : Started(), Joinable
 
     public data class Incoming(
         override val callGuid: CallGuid,
-        val createdByUserId: String,
-        val broadcastingEnabled: Boolean,
-        val recordingEnabled: Boolean,
-        val users: Map<String, CallUser>,
-        val members: Map<String, CallMember>,
+        override val createdByUserId: String,
+        override val broadcastingEnabled: Boolean,
+        override val recordingEnabled: Boolean,
+        override val users: Map<String, CallUser>,
+        override val members: Map<String, CallMember>,
         val acceptedByMe: Boolean
-    ) : Active
+    ) : Started(), Joinable
 
     public data class Joining(
         override val callGuid: CallGuid,
-        val createdByUserId: String,
-        val broadcastingEnabled: Boolean,
-        val recordingEnabled: Boolean,
-        val users: Map<String, CallUser>,
-        val members: Map<String, CallMember>
-    ) : Active
+        override val createdByUserId: String,
+        override val broadcastingEnabled: Boolean,
+        override val recordingEnabled: Boolean,
+        override val users: Map<String, CallUser>,
+        override val members: Map<String, CallMember>
+    ) : Started()
 
-    public interface InCall : Active {
-        public val createdByUserId: String
-        public val broadcastingEnabled: Boolean
-        public val recordingEnabled: Boolean
-        public val users: Map<String, CallUser>
-        public val members: Map<String, CallMember>
-        public val callUrl: String
-        public val userToken: String
-        public val iceServers: List<IceServer>
+    public sealed class InCall : Started() {
+        public abstract val callUrl: String
+        public abstract val userToken: String
+        public abstract val iceServers: List<IceServer>
     }
 
     public data class Connected(
@@ -88,7 +95,7 @@ public sealed interface StreamCallState : java.io.Serializable {
         override val callUrl: String,
         override val userToken: String,
         override val iceServers: List<IceServer>
-    ) : InCall
+    ) : InCall()
 
     public data class Connecting(
         override val callGuid: CallGuid,
@@ -100,19 +107,19 @@ public sealed interface StreamCallState : java.io.Serializable {
         override val callUrl: String,
         override val userToken: String,
         override val iceServers: List<IceServer>
-    ) : InCall
+    ) : InCall()
 
     public data class Drop(
         override val callGuid: CallGuid,
-        val reason: DropReason
-    ) : Active
+        val reason: DropReason,
+    ) : Active()
 }
 
 public sealed class DropReason {
     public data class Timeout(val waitMillis: Long) : DropReason()
     public data class Failure(val error: VideoError) : DropReason()
-    public object Rejected : DropReason()
-    public object Cancelled : DropReason()
+    public data class Rejected(val byUserId: String) : DropReason()
+    public data class Cancelled(val byUserId: String) : DropReason()
 }
 
 public data class CallGuid(

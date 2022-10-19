@@ -62,6 +62,7 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.CallOptions
 import io.getstream.video.android.compose.ui.components.MainStage
 import io.getstream.video.android.model.CallParticipantState
+import io.getstream.video.android.model.state.StreamCallState
 import io.getstream.video.android.viewmodel.CallViewModel
 
 @Composable
@@ -70,6 +71,7 @@ internal fun VideoCallContent(
     onLeaveCall: () -> Unit
 ) {
     val room by callViewModel.callState.collectAsState(initial = null)
+    val callState by callViewModel.streamCallState.collectAsState(initial = StreamCallState.Idle)
     val isShowingParticipantsInfo by callViewModel.isShowingParticipantsInfo.collectAsState(
         false
     )
@@ -97,8 +99,11 @@ internal fun VideoCallContent(
             val roomState = room
 
             Column(modifier = Modifier.fillMaxSize()) {
-
-                CallActionBar(callViewModel, "TODO - Call ID") // TODO -
+                val callId = when (val state = callState) {
+                    is StreamCallState.Active -> state.callGuid.cid
+                    else -> "No Call Id"
+                }
+                CallActionBar(callViewModel, callId)
 
                 if (roomState == null) {
                     Box(
