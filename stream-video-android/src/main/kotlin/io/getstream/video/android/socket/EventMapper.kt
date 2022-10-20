@@ -91,7 +91,7 @@ internal object EventMapper {
             )
         }
 
-        socketEvent.call_accepted != null -> with (socketEvent.call_accepted) {
+        socketEvent.call_accepted != null -> with(socketEvent.call_accepted) {
             CallAcceptedEvent(
                 callCid = call!!.call_cid,
                 sentByUserId = sender_user_id,

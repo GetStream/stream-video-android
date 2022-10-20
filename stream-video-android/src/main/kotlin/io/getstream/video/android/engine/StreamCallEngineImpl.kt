@@ -115,8 +115,10 @@ internal class StreamCallEngineImpl(
             return@launchWithLock
         }
         if (state.callGuid.cid != event.callCid) {
-            logger.w { "[onCallAccepted] rejected (callCid is not valid);" +
-                " expected: ${state.callGuid.cid}, actual: ${event.callCid}" }
+            logger.w {
+                "[onCallAccepted] rejected (callCid is not valid);" +
+                    " expected: ${state.callGuid.cid}, actual: ${event.callCid}"
+            }
             return@launchWithLock
         }
         if (!state.members.contains(event.sentByUserId)) {
@@ -138,8 +140,10 @@ internal class StreamCallEngineImpl(
             return@launchWithLock
         }
         if (state.callGuid.cid != event.callCid) {
-            logger.w { "[onCallRejected] rejected (callCid is not valid);" +
-                    " expected: ${state.callGuid.cid}, actual: ${event.callCid}" }
+            logger.w {
+                "[onCallRejected] rejected (callCid is not valid);" +
+                    " expected: ${state.callGuid.cid}, actual: ${event.callCid}"
+            }
             return@launchWithLock
         }
         if (!state.members.contains(event.sentByUserId)) {
@@ -337,8 +341,10 @@ internal class StreamCallEngineImpl(
             return@launchWithLock
         }
         if (state.callGuid.cid != event.callCid) {
-            logger.w { "[onCallFinished] rejected (callCid is not valid);" +
-                " expected: ${state.callGuid.cid}, actual: ${event.callCid}" }
+            logger.w {
+                "[onCallFinished] rejected (callCid is not valid);" +
+                    " expected: ${state.callGuid.cid}, actual: ${event.callCid}"
+            }
             return@launchWithLock
         }
         dropCall(State.Drop(state.callGuid, DropReason.Ended))
@@ -351,8 +357,10 @@ internal class StreamCallEngineImpl(
             return@launchWithLock
         }
         if (state.callGuid.cid != event.callCid) {
-            logger.w { "[onCallCancelled] rejected (callCid is not valid);" +
-                " expected: ${state.callGuid.cid}, actual: ${event.callCid}" }
+            logger.w {
+                "[onCallCancelled] rejected (callCid is not valid);" +
+                    " expected: ${state.callGuid.cid}, actual: ${event.callCid}"
+            }
             return@launchWithLock
         }
         logger.d { "[onCallCancelled] event: $event, state: $state" }
