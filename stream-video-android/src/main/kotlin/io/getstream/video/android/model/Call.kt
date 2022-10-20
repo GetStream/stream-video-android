@@ -98,6 +98,9 @@ public class Call(
     public val localParticipantId: String
         get() = credentialsProvider.getUserCredentials().id
 
+    public val localParticipantIdPrefix: String
+        get() = _localParticipant.value?.idPrefix ?: ""
+
     private val audioManager by lazy {
         context.getSystemService<AudioManager>()
     }

@@ -57,7 +57,8 @@ public class StreamCallsBuilder(
             lifecycle = lifecycle,
             socket = socket,
             socketStateService = module.socketStateService(),
-            userState = userState
+            userState = userState,
+            networkStateProvider = module.networkStateProvider()
         )
     }
 }

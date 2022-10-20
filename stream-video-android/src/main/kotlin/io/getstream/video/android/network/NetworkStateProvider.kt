@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  * @property connectivityManager Android manager which provides information about the current
  * connection state.
  */
-internal class NetworkStateProvider(private val connectivityManager: ConnectivityManager) {
+public class NetworkStateProvider(private val connectivityManager: ConnectivityManager) {
 
     private val lock: Any = Any()
 
@@ -77,7 +77,7 @@ internal class NetworkStateProvider(private val connectivityManager: Connectivit
      *
      * @return If the device is connected or not.
      */
-    fun isConnected(): Boolean {
+    public fun isConnected(): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             runCatching {
                 connectivityManager.run {
@@ -97,7 +97,7 @@ internal class NetworkStateProvider(private val connectivityManager: Connectivit
      *
      * @param listener Handler which receives connection change events.
      */
-    fun subscribe(listener: NetworkStateListener) {
+    public fun subscribe(listener: NetworkStateListener) {
         synchronized(lock) {
             listeners = listeners + listener
             if (isRegistered.compareAndSet(false, true)) {
@@ -114,7 +114,7 @@ internal class NetworkStateProvider(private val connectivityManager: Connectivit
      *
      * @param listener Handler to be removed.
      */
-    fun unsubscribe(listener: NetworkStateListener) {
+    public fun unsubscribe(listener: NetworkStateListener) {
         synchronized(lock) {
             listeners = (listeners - listener).also {
                 if (it.isEmpty() && isRegistered.compareAndSet(true, false)) {
@@ -127,9 +127,9 @@ internal class NetworkStateProvider(private val connectivityManager: Connectivit
     /**
      * Listener which is used to listen and react to network state changes.
      */
-    interface NetworkStateListener {
-        fun onConnected()
+    public interface NetworkStateListener {
+        public fun onConnected()
 
-        fun onDisconnected()
+        public fun onDisconnected()
     }
 }

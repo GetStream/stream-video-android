@@ -18,10 +18,8 @@ package io.getstream.video.android.webrtc.signal
 
 import io.getstream.video.android.utils.Result
 import io.getstream.video.android.utils.fetchResult
-import stream.video.sfu.signal.IceCandidateRequest
-import stream.video.sfu.signal.IceCandidateResponse
-import stream.video.sfu.signal.JoinRequest
-import stream.video.sfu.signal.JoinResponse
+import stream.video.sfu.models.ICETrickle
+import stream.video.sfu.signal.ICETrickleResponse
 import stream.video.sfu.signal.SendAnswerRequest
 import stream.video.sfu.signal.SendAnswerResponse
 import stream.video.sfu.signal.SetPublisherRequest
@@ -35,12 +33,8 @@ public class SignalClientImpl(
     override suspend fun sendAnswer(request: SendAnswerRequest): Result<SendAnswerResponse> =
         fetchResult { signalService.sendAnswer(request) }
 
-    override suspend fun sendIceCandidate(request: IceCandidateRequest): Result<IceCandidateResponse> =
+    override suspend fun sendIceCandidate(request: ICETrickle): Result<ICETrickleResponse> =
         fetchResult { signalService.sendIceCandidate(request) }
-
-    override suspend fun join(request: JoinRequest): Result<JoinResponse> = fetchResult {
-        signalService.join(request)
-    }
 
     override suspend fun setPublisher(request: SetPublisherRequest): Result<SetPublisherResponse> =
         fetchResult { signalService.setPublisher(request) }

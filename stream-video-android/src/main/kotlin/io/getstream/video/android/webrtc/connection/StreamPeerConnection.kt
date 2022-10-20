@@ -17,7 +17,8 @@
 package io.getstream.video.android.webrtc.connection
 
 import io.getstream.logging.StreamLog
-import io.getstream.video.android.events.SfuDataEvent
+import io.getstream.video.android.model.IceCandidate
+import io.getstream.video.android.model.toCandidate
 import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Result
 import io.getstream.video.android.utils.Success
@@ -31,7 +32,6 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.webrtc.CandidatePairChangeEvent
 import org.webrtc.DataChannel
-import org.webrtc.IceCandidate
 import org.webrtc.IceCandidateErrorEvent
 import org.webrtc.MediaConstraints
 import org.webrtc.MediaStream
@@ -43,17 +43,16 @@ import org.webrtc.RtpSender
 import org.webrtc.RtpTransceiver
 import org.webrtc.RtpTransceiver.RtpTransceiverInit
 import org.webrtc.SessionDescription
-
-private typealias StreamDataChannel = io.getstream.video.android.webrtc.datachannel.StreamDataChannel
+import stream.video.sfu.models.PeerType
 
 public class StreamPeerConnection(
     private val coroutineScope: CoroutineScope,
-    private val type: PeerConnectionType,
+    private val type: PeerType,
     private val mediaConstraints: MediaConstraints,
     private val onStreamAdded: ((MediaStream) -> Unit)?,
     private val onStreamRemoved: ((MediaStream) -> Unit)?,
     private val onNegotiationNeeded: ((StreamPeerConnection) -> Unit)?,
-    private val onIceCandidate: ((IceCandidate, PeerConnectionType) -> Unit)?
+    private val onIceCandidate: ((IceCandidate, PeerType) -> Unit)?
 ) : PeerConnection.Observer {
 
     private val typeTag = type.toString().lowercase()
@@ -76,19 +75,6 @@ public class StreamPeerConnection(
     public fun initialize(peerConnection: PeerConnection) {
         logger.d { "[initialize] #sfu; #$typeTag; peerConnection: $peerConnection" }
         this.connection = peerConnection
-    }
-
-    public fun createDataChannel(
-        label: String,
-        init: DataChannel.Init,
-        onMessage: (SfuDataEvent) -> Unit,
-        onStateChange: (DataChannel.State) -> Unit
-    ): StreamDataChannel {
-        return StreamDataChannel(
-            connection.createDataChannel(label, init),
-            onMessage,
-            onStateChange
-        )
     }
 
     public suspend fun createOffer(): Result<SessionDescription> {
@@ -214,11 +200,11 @@ public class StreamPeerConnection(
      * Peer connection listeners.
      */
 
-    override fun onIceCandidate(candidate: IceCandidate?) {
+    override fun onIceCandidate(candidate: org.webrtc.IceCandidate?) {
         logger.i { "[onIceCandidate] #sfu; #$typeTag; candidate: $candidate" }
         if (candidate == null) return
 
-        onIceCandidate?.invoke(candidate, type)
+        onIceCandidate?.invoke(candidate.toCandidate(), type)
     }
 
     override fun onAddStream(stream: MediaStream?) {
@@ -292,7 +278,7 @@ public class StreamPeerConnection(
         logger.i { "[onIceGatheringChange] #sfu; #$typeTag; newState: $newState" }
     }
 
-    override fun onIceCandidatesRemoved(iceCandidates: Array<out IceCandidate>?) {
+    override fun onIceCandidatesRemoved(iceCandidates: Array<out org.webrtc.IceCandidate>?) {
         logger.i { "[onIceCandidatesRemoved] #sfu; #$typeTag; iceCandidates: $iceCandidates" }
     }
 

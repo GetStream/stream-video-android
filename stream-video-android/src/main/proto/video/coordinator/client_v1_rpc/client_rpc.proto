@@ -244,20 +244,22 @@ enum UserEventType {
 }
 
 message SendEventRequest {
-  // The call type
-  string call_type = 1;
-  // The call id
-  string call_id = 2;
-  // The event type
-  UserEventType event_type = 3;
+  // The call cid
+  string call_cid = 1;
+  // The type of event
+  UserEventType event_type = 2;
 }
 
 message SendEventResponse {
 }
 
 message SendCustomEventRequest {
-  string type = 1;
-  bytes data = 2;
+  // The call cid
+  string call_cid = 1;
+  // The type of event
+  string type = 2;
+  // The data of the event
+  bytes data_json = 3;
 }
 
 message SendCustomEventResponse {

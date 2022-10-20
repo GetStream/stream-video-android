@@ -86,8 +86,7 @@ class OutgoingCallViewModel(
 
         viewModelScope.launch {
             streamCalls.sendEvent(
-                callId = data.id,
-                callType = data.type,
+                callCid = data.cid,
                 eventType = UserEventType.USER_EVENT_TYPE_CANCELLED_CALL
             )
 

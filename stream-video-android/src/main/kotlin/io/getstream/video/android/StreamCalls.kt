@@ -120,8 +120,7 @@ public interface StreamCalls {
      * @return [Result] which contains if the event was successfully sent.
      */
     public suspend fun sendEvent(
-        callType: String,
-        callId: String,
+        callCid: String,
         eventType: UserEventType
     ): Result<Boolean>
 

@@ -2,7 +2,6 @@ syntax = "proto3";
 
 package stream.video.coordinator.client_v1_rpc;
 
-import "video/coordinator/call_v1/call.proto";
 import "video/coordinator/event_v1/event.proto";
 import "video/coordinator/push_v1/push.proto";
 import "video/coordinator/user_v1/user.proto";
@@ -14,15 +13,6 @@ option go_package = "client_v1_rpc";
 message WebsocketEvent {
   // All users mentioned in the event payload, indexed by User.id
   map<string, user_v1.User> users = 1;
-  // All calls mentioned in the event payload, indexed by Call.call_cid
-  map<string, call_v1.Call> calls = 2;
-  // All calls details for calls mentioned in the event payload, indexed by Call.call_cid
-  // Call details contain contextual data. For example, for MembersDeleted event, call_details[cid].Members will contain a list of
-  // members that were deleted.
-  map<string, call_v1.CallDetails> call_details = 3;
-  // The ID of the user sending the event, this field is populated only for events that are initiated by users
-  // such as accepting, rejecting or canceling a call
-  string event_sender_id = 4;
 
   oneof event {
     WebsocketHealthcheck healthcheck = 20;
@@ -39,9 +29,11 @@ message WebsocketEvent {
     event_v1.CallAccepted call_accepted = 40;
     event_v1.CallRejected call_rejected = 41;
     event_v1.CallCancelled call_cancelled = 42;
-
     // User events
     event_v1.UserUpdated user_updated = 50;
+
+    // Custom event
+    event_v1.CallCustom call_custom = 99;
   }
 }
 

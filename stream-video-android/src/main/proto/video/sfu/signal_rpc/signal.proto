@@ -2,21 +2,20 @@ syntax = "proto3";
 
 package stream.video.sfu.signal;
 
-option go_package = "sfu_signal_rpc";
-
 import "video/sfu/models/models.proto";
 
+option go_package = "sfu_signal_rpc";
+
 service SignalServer {
-  // Join sets up the peer connection that is used to subscribe to A/V and the data channel for signaling
-  // in WebRTC terms, this contains the SDP offer for the user peer connection
-  rpc Join(JoinRequest) returns (JoinResponse);
 
   // SetPublisher sends the WebRTC offer for the peer connection used to publish A/V
   rpc SetPublisher(SetPublisherRequest) returns (SetPublisherResponse);
 
+  // answer is sent by the client to the SFU after receiving a subscriber_offer.
   rpc SendAnswer(SendAnswerRequest) returns (SendAnswerResponse);
 
-  rpc SendIceCandidate(IceCandidateRequest) returns (IceCandidateResponse);
+  // SendICECandidate sends an ICE candidate to the client
+  rpc IceTrickle(models.ICETrickle) returns (ICETrickleResponse);
 
   // UpdateSubscribers is used to notify the SFU about the list of video subscriptions
   // TODO: sync subscriptions based on this + update tracks using the dimension info sent by the user
@@ -76,17 +75,18 @@ message IceCandidateRequest{
   // TODO: use PeerTYPE!
   bool publisher = 1;
   string candidate = 2 ;
-  optional string sdpMid = 3;
-  optional uint32 sdpMLineIndex = 4;
-  optional string usernameFragment = 5;
+  optional string sdp_mid = 3;
+  optional uint32 sdp_mline_index = 4;
+  optional string username_fragment = 5;
   string session_id = 7;
 }
 
-message IceCandidateResponse{
+message ICETrickleResponse{
 
 }
 
-message UpdateSubscriptionsResponse {}
+message UpdateSubscriptionsResponse {
+}
 
 message SetPublisherRequest {
   // sdp offer
@@ -98,20 +98,6 @@ message SetPublisherResponse {
   // sdp answer
   string sdp = 1;
   string session_id = 3;
-}
-
-message JoinRequest {
-  string subscriber_sdp_offer = 1;
-  string session_id = 3;
-  stream.video.sfu.models.CodecSettings codec_settings = 4;
-  // TODO: we should know if this is going to be
-  // - publishing and subscribing, or just subscribing for future routing
-}
-
-message JoinResponse {
-  string sdp = 1;
-  stream.video.sfu.models.CallState call_state = 2;
-  // TODO: include full list of participants with track and audio info
 }
 
 message ConnectRequest {

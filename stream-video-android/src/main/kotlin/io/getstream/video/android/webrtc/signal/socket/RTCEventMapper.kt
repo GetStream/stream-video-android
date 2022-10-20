@@ -14,19 +14,20 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.webrtc.datachannel
+package io.getstream.video.android.webrtc.signal.socket
 
 import io.getstream.video.android.events.AudioLevelChangedEvent
 import io.getstream.video.android.events.ChangePublishQualityEvent
 import io.getstream.video.android.events.ConnectionQualityChangeEvent
 import io.getstream.video.android.events.DominantSpeakerChangedEvent
+import io.getstream.video.android.events.HealthcheckResponseEvent
+import io.getstream.video.android.events.ICETrickleEvent
+import io.getstream.video.android.events.JoinCallResponseEvent
 import io.getstream.video.android.events.LocalDeviceChangeEvent
 import io.getstream.video.android.events.MuteStateChangeEvent
-import io.getstream.video.android.events.PublisherCandidateEvent
 import io.getstream.video.android.events.SfuDataEvent
 import io.getstream.video.android.events.SfuParticipantJoinedEvent
 import io.getstream.video.android.events.SfuParticipantLeftEvent
-import io.getstream.video.android.events.SubscriberCandidateEvent
 import io.getstream.video.android.events.SubscriberOfferEvent
 import io.getstream.video.android.events.VideoQualityChangedEvent
 import stream.video.sfu.event.SfuEvent
@@ -45,10 +46,7 @@ public object RTCEventMapper {
             event.audio_level_changed != null -> AudioLevelChangedEvent(
                 event.audio_level_changed.audio_levels.associate { it.user_id to it.level }
             )
-            event.subscriber_candidate != null -> SubscriberCandidateEvent(
-                event.subscriber_candidate.candidate
-            )
-            event.publisher_candidate != null -> PublisherCandidateEvent(event.publisher_candidate.candidate)
+
             event.change_publish_quality != null -> ChangePublishQualityEvent(event.change_publish_quality)
             event.local_device_change != null -> LocalDeviceChangeEvent(event.local_device_change.type)
             event.mute_state_changed != null -> with(event.mute_state_changed) {
@@ -70,6 +68,17 @@ public object RTCEventMapper {
                 SfuParticipantLeftEvent(participant!!, call!!)
             }
             event.dominant_speaker_changed != null -> DominantSpeakerChangedEvent(event.dominant_speaker_changed.user_id)
+
+            event.health_check_response != null -> HealthcheckResponseEvent(event.health_check_response.session_id)
+            event.join_response != null -> with(event.join_response) {
+                JoinCallResponseEvent(
+                    call_state!!,
+                    own_session_id
+                )
+            }
+            event.ice_trickle != null -> with(event.ice_trickle) {
+                ICETrickleEvent(ice_candidate, peer_type)
+            }
             else -> throw IllegalStateException("Unknown event")
         }
     }

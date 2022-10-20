@@ -19,10 +19,8 @@ package io.getstream.video.android.webrtc.signal
 import retrofit2.http.Body
 import retrofit2.http.Headers
 import retrofit2.http.POST
-import stream.video.sfu.signal.IceCandidateRequest
-import stream.video.sfu.signal.IceCandidateResponse
-import stream.video.sfu.signal.JoinRequest
-import stream.video.sfu.signal.JoinResponse
+import stream.video.sfu.models.ICETrickle
+import stream.video.sfu.signal.ICETrickleResponse
 import stream.video.sfu.signal.SendAnswerRequest
 import stream.video.sfu.signal.SendAnswerResponse
 import stream.video.sfu.signal.SetPublisherRequest
@@ -39,12 +37,8 @@ public interface LocalSignalService : SignalService {
     ): SendAnswerResponse
 
     @Headers("Content-Type: application/protobuf")
-    @POST("/twirp/stream.video.sfu.signal.SignalServer/SendIceCandidate")
-    public override suspend fun sendIceCandidate(@Body request: IceCandidateRequest): IceCandidateResponse
-
-    @Headers("Content-Type: application/protobuf")
-    @POST("/twirp/stream.video.sfu.signal.SignalServer/Join")
-    public override suspend fun join(@Body joinRequest: JoinRequest): JoinResponse
+    @POST("/twirp/stream.video.sfu.signal.SignalServer/IceTrickle")
+    public override suspend fun sendIceCandidate(@Body request: ICETrickle): ICETrickleResponse
 
     @Headers("Content-Type: application/protobuf")
     @POST("/twirp/stream.video.sfu.signal.SignalServer/SetPublisher")

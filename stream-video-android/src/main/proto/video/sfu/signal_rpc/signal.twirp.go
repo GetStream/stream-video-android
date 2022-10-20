@@ -16,6 +16,8 @@ import proto "google.golang.org/protobuf/proto"
 import twirp "github.com/twitchtv/twirp"
 import ctxsetters "github.com/twitchtv/twirp/ctxsetters"
 
+import stream_video_sfu_models "github.com/GetStream/video-proto/protobuf/video/sfu/models"
+
 import bytes "bytes"
 import errors "errors"
 import io "io"
@@ -33,16 +35,14 @@ const _ = twirp.TwirpPackageMinVersion_8_1_0
 // ======================
 
 type SignalServer interface {
-	// Join sets up the peer connection that is used to subscribe to A/V and the data channel for signaling
-	// in WebRTC terms, this contains the SDP offer for the user peer connection
-	Join(context.Context, *JoinRequest) (*JoinResponse, error)
-
 	// SetPublisher sends the WebRTC offer for the peer connection used to publish A/V
 	SetPublisher(context.Context, *SetPublisherRequest) (*SetPublisherResponse, error)
 
+	// answer is sent by the client to the SFU after receiving a subscriber_offer.
 	SendAnswer(context.Context, *SendAnswerRequest) (*SendAnswerResponse, error)
 
-	SendIceCandidate(context.Context, *IceCandidateRequest) (*IceCandidateResponse, error)
+	// SendICECandidate sends an ICE candidate to the client
+	IceTrickle(context.Context, *stream_video_sfu_models.ICETrickle) (*ICETrickleResponse, error)
 
 	// UpdateSubscribers is used to notify the SFU about the list of video subscriptions
 	// TODO: sync subscriptions based on this + update tracks using the dimension info sent by the user
@@ -59,7 +59,7 @@ type SignalServer interface {
 
 type signalServerProtobufClient struct {
 	client      HTTPClient
-	urls        [7]string
+	urls        [6]string
 	interceptor twirp.Interceptor
 	opts        twirp.ClientOptions
 }
@@ -87,11 +87,10 @@ func NewSignalServerProtobufClient(baseURL string, client HTTPClient, opts ...tw
 	// Build method URLs: <baseURL>[<prefix>]/<package>.<Service>/<Method>
 	serviceURL := sanitizeBaseURL(baseURL)
 	serviceURL += baseServicePath(pathPrefix, "stream.video.sfu.signal", "SignalServer")
-	urls := [7]string{
-		serviceURL + "Join",
+	urls := [6]string{
 		serviceURL + "SetPublisher",
 		serviceURL + "SendAnswer",
-		serviceURL + "SendIceCandidate",
+		serviceURL + "IceTrickle",
 		serviceURL + "UpdateSubscriptions",
 		serviceURL + "UpdateMuteState",
 		serviceURL + "RequestVideoQuality",
@@ -103,52 +102,6 @@ func NewSignalServerProtobufClient(baseURL string, client HTTPClient, opts ...tw
 		interceptor: twirp.ChainInterceptors(clientOpts.Interceptors...),
 		opts:        clientOpts,
 	}
-}
-
-func (c *signalServerProtobufClient) Join(ctx context.Context, in *JoinRequest) (*JoinResponse, error) {
-	ctx = ctxsetters.WithPackageName(ctx, "stream.video.sfu.signal")
-	ctx = ctxsetters.WithServiceName(ctx, "SignalServer")
-	ctx = ctxsetters.WithMethodName(ctx, "Join")
-	caller := c.callJoin
-	if c.interceptor != nil {
-		caller = func(ctx context.Context, req *JoinRequest) (*JoinResponse, error) {
-			resp, err := c.interceptor(
-				func(ctx context.Context, req interface{}) (interface{}, error) {
-					typedReq, ok := req.(*JoinRequest)
-					if !ok {
-						return nil, twirp.InternalError("failed type assertion req.(*JoinRequest) when calling interceptor")
-					}
-					return c.callJoin(ctx, typedReq)
-				},
-			)(ctx, req)
-			if resp != nil {
-				typedResp, ok := resp.(*JoinResponse)
-				if !ok {
-					return nil, twirp.InternalError("failed type assertion resp.(*JoinResponse) when calling interceptor")
-				}
-				return typedResp, err
-			}
-			return nil, err
-		}
-	}
-	return caller(ctx, in)
-}
-
-func (c *signalServerProtobufClient) callJoin(ctx context.Context, in *JoinRequest) (*JoinResponse, error) {
-	out := new(JoinResponse)
-	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[0], in, out)
-	if err != nil {
-		twerr, ok := err.(twirp.Error)
-		if !ok {
-			twerr = twirp.InternalErrorWith(err)
-		}
-		callClientError(ctx, c.opts.Hooks, twerr)
-		return nil, err
-	}
-
-	callClientResponseReceived(ctx, c.opts.Hooks)
-
-	return out, nil
 }
 
 func (c *signalServerProtobufClient) SetPublisher(ctx context.Context, in *SetPublisherRequest) (*SetPublisherResponse, error) {
@@ -182,7 +135,7 @@ func (c *signalServerProtobufClient) SetPublisher(ctx context.Context, in *SetPu
 
 func (c *signalServerProtobufClient) callSetPublisher(ctx context.Context, in *SetPublisherRequest) (*SetPublisherResponse, error) {
 	out := new(SetPublisherResponse)
-	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[1], in, out)
+	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[0], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
 		if !ok {
@@ -228,7 +181,7 @@ func (c *signalServerProtobufClient) SendAnswer(ctx context.Context, in *SendAns
 
 func (c *signalServerProtobufClient) callSendAnswer(ctx context.Context, in *SendAnswerRequest) (*SendAnswerResponse, error) {
 	out := new(SendAnswerResponse)
-	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[2], in, out)
+	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[1], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
 		if !ok {
@@ -243,26 +196,26 @@ func (c *signalServerProtobufClient) callSendAnswer(ctx context.Context, in *Sen
 	return out, nil
 }
 
-func (c *signalServerProtobufClient) SendIceCandidate(ctx context.Context, in *IceCandidateRequest) (*IceCandidateResponse, error) {
+func (c *signalServerProtobufClient) IceTrickle(ctx context.Context, in *stream_video_sfu_models.ICETrickle) (*ICETrickleResponse, error) {
 	ctx = ctxsetters.WithPackageName(ctx, "stream.video.sfu.signal")
 	ctx = ctxsetters.WithServiceName(ctx, "SignalServer")
-	ctx = ctxsetters.WithMethodName(ctx, "SendIceCandidate")
-	caller := c.callSendIceCandidate
+	ctx = ctxsetters.WithMethodName(ctx, "IceTrickle")
+	caller := c.callIceTrickle
 	if c.interceptor != nil {
-		caller = func(ctx context.Context, req *IceCandidateRequest) (*IceCandidateResponse, error) {
+		caller = func(ctx context.Context, req *stream_video_sfu_models.ICETrickle) (*ICETrickleResponse, error) {
 			resp, err := c.interceptor(
 				func(ctx context.Context, req interface{}) (interface{}, error) {
-					typedReq, ok := req.(*IceCandidateRequest)
+					typedReq, ok := req.(*stream_video_sfu_models.ICETrickle)
 					if !ok {
-						return nil, twirp.InternalError("failed type assertion req.(*IceCandidateRequest) when calling interceptor")
+						return nil, twirp.InternalError("failed type assertion req.(*stream_video_sfu_models.ICETrickle) when calling interceptor")
 					}
-					return c.callSendIceCandidate(ctx, typedReq)
+					return c.callIceTrickle(ctx, typedReq)
 				},
 			)(ctx, req)
 			if resp != nil {
-				typedResp, ok := resp.(*IceCandidateResponse)
+				typedResp, ok := resp.(*ICETrickleResponse)
 				if !ok {
-					return nil, twirp.InternalError("failed type assertion resp.(*IceCandidateResponse) when calling interceptor")
+					return nil, twirp.InternalError("failed type assertion resp.(*ICETrickleResponse) when calling interceptor")
 				}
 				return typedResp, err
 			}
@@ -272,9 +225,9 @@ func (c *signalServerProtobufClient) SendIceCandidate(ctx context.Context, in *I
 	return caller(ctx, in)
 }
 
-func (c *signalServerProtobufClient) callSendIceCandidate(ctx context.Context, in *IceCandidateRequest) (*IceCandidateResponse, error) {
-	out := new(IceCandidateResponse)
-	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[3], in, out)
+func (c *signalServerProtobufClient) callIceTrickle(ctx context.Context, in *stream_video_sfu_models.ICETrickle) (*ICETrickleResponse, error) {
+	out := new(ICETrickleResponse)
+	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[2], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
 		if !ok {
@@ -320,7 +273,7 @@ func (c *signalServerProtobufClient) UpdateSubscriptions(ctx context.Context, in
 
 func (c *signalServerProtobufClient) callUpdateSubscriptions(ctx context.Context, in *UpdateSubscriptionsRequest) (*UpdateSubscriptionsResponse, error) {
 	out := new(UpdateSubscriptionsResponse)
-	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[4], in, out)
+	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[3], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
 		if !ok {
@@ -366,7 +319,7 @@ func (c *signalServerProtobufClient) UpdateMuteState(ctx context.Context, in *Up
 
 func (c *signalServerProtobufClient) callUpdateMuteState(ctx context.Context, in *UpdateMuteStateRequest) (*UpdateMuteStateResponse, error) {
 	out := new(UpdateMuteStateResponse)
-	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[5], in, out)
+	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[4], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
 		if !ok {
@@ -412,7 +365,7 @@ func (c *signalServerProtobufClient) RequestVideoQuality(ctx context.Context, in
 
 func (c *signalServerProtobufClient) callRequestVideoQuality(ctx context.Context, in *UpdateVideoQualityRequest) (*UpdateVideoQualityResponse, error) {
 	out := new(UpdateVideoQualityResponse)
-	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[6], in, out)
+	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[5], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
 		if !ok {
@@ -433,7 +386,7 @@ func (c *signalServerProtobufClient) callRequestVideoQuality(ctx context.Context
 
 type signalServerJSONClient struct {
 	client      HTTPClient
-	urls        [7]string
+	urls        [6]string
 	interceptor twirp.Interceptor
 	opts        twirp.ClientOptions
 }
@@ -461,11 +414,10 @@ func NewSignalServerJSONClient(baseURL string, client HTTPClient, opts ...twirp.
 	// Build method URLs: <baseURL>[<prefix>]/<package>.<Service>/<Method>
 	serviceURL := sanitizeBaseURL(baseURL)
 	serviceURL += baseServicePath(pathPrefix, "stream.video.sfu.signal", "SignalServer")
-	urls := [7]string{
-		serviceURL + "Join",
+	urls := [6]string{
 		serviceURL + "SetPublisher",
 		serviceURL + "SendAnswer",
-		serviceURL + "SendIceCandidate",
+		serviceURL + "IceTrickle",
 		serviceURL + "UpdateSubscriptions",
 		serviceURL + "UpdateMuteState",
 		serviceURL + "RequestVideoQuality",
@@ -477,52 +429,6 @@ func NewSignalServerJSONClient(baseURL string, client HTTPClient, opts ...twirp.
 		interceptor: twirp.ChainInterceptors(clientOpts.Interceptors...),
 		opts:        clientOpts,
 	}
-}
-
-func (c *signalServerJSONClient) Join(ctx context.Context, in *JoinRequest) (*JoinResponse, error) {
-	ctx = ctxsetters.WithPackageName(ctx, "stream.video.sfu.signal")
-	ctx = ctxsetters.WithServiceName(ctx, "SignalServer")
-	ctx = ctxsetters.WithMethodName(ctx, "Join")
-	caller := c.callJoin
-	if c.interceptor != nil {
-		caller = func(ctx context.Context, req *JoinRequest) (*JoinResponse, error) {
-			resp, err := c.interceptor(
-				func(ctx context.Context, req interface{}) (interface{}, error) {
-					typedReq, ok := req.(*JoinRequest)
-					if !ok {
-						return nil, twirp.InternalError("failed type assertion req.(*JoinRequest) when calling interceptor")
-					}
-					return c.callJoin(ctx, typedReq)
-				},
-			)(ctx, req)
-			if resp != nil {
-				typedResp, ok := resp.(*JoinResponse)
-				if !ok {
-					return nil, twirp.InternalError("failed type assertion resp.(*JoinResponse) when calling interceptor")
-				}
-				return typedResp, err
-			}
-			return nil, err
-		}
-	}
-	return caller(ctx, in)
-}
-
-func (c *signalServerJSONClient) callJoin(ctx context.Context, in *JoinRequest) (*JoinResponse, error) {
-	out := new(JoinResponse)
-	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[0], in, out)
-	if err != nil {
-		twerr, ok := err.(twirp.Error)
-		if !ok {
-			twerr = twirp.InternalErrorWith(err)
-		}
-		callClientError(ctx, c.opts.Hooks, twerr)
-		return nil, err
-	}
-
-	callClientResponseReceived(ctx, c.opts.Hooks)
-
-	return out, nil
 }
 
 func (c *signalServerJSONClient) SetPublisher(ctx context.Context, in *SetPublisherRequest) (*SetPublisherResponse, error) {
@@ -556,7 +462,7 @@ func (c *signalServerJSONClient) SetPublisher(ctx context.Context, in *SetPublis
 
 func (c *signalServerJSONClient) callSetPublisher(ctx context.Context, in *SetPublisherRequest) (*SetPublisherResponse, error) {
 	out := new(SetPublisherResponse)
-	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[1], in, out)
+	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[0], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
 		if !ok {
@@ -602,7 +508,7 @@ func (c *signalServerJSONClient) SendAnswer(ctx context.Context, in *SendAnswerR
 
 func (c *signalServerJSONClient) callSendAnswer(ctx context.Context, in *SendAnswerRequest) (*SendAnswerResponse, error) {
 	out := new(SendAnswerResponse)
-	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[2], in, out)
+	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[1], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
 		if !ok {
@@ -617,26 +523,26 @@ func (c *signalServerJSONClient) callSendAnswer(ctx context.Context, in *SendAns
 	return out, nil
 }
 
-func (c *signalServerJSONClient) SendIceCandidate(ctx context.Context, in *IceCandidateRequest) (*IceCandidateResponse, error) {
+func (c *signalServerJSONClient) IceTrickle(ctx context.Context, in *stream_video_sfu_models.ICETrickle) (*ICETrickleResponse, error) {
 	ctx = ctxsetters.WithPackageName(ctx, "stream.video.sfu.signal")
 	ctx = ctxsetters.WithServiceName(ctx, "SignalServer")
-	ctx = ctxsetters.WithMethodName(ctx, "SendIceCandidate")
-	caller := c.callSendIceCandidate
+	ctx = ctxsetters.WithMethodName(ctx, "IceTrickle")
+	caller := c.callIceTrickle
 	if c.interceptor != nil {
-		caller = func(ctx context.Context, req *IceCandidateRequest) (*IceCandidateResponse, error) {
+		caller = func(ctx context.Context, req *stream_video_sfu_models.ICETrickle) (*ICETrickleResponse, error) {
 			resp, err := c.interceptor(
 				func(ctx context.Context, req interface{}) (interface{}, error) {
-					typedReq, ok := req.(*IceCandidateRequest)
+					typedReq, ok := req.(*stream_video_sfu_models.ICETrickle)
 					if !ok {
-						return nil, twirp.InternalError("failed type assertion req.(*IceCandidateRequest) when calling interceptor")
+						return nil, twirp.InternalError("failed type assertion req.(*stream_video_sfu_models.ICETrickle) when calling interceptor")
 					}
-					return c.callSendIceCandidate(ctx, typedReq)
+					return c.callIceTrickle(ctx, typedReq)
 				},
 			)(ctx, req)
 			if resp != nil {
-				typedResp, ok := resp.(*IceCandidateResponse)
+				typedResp, ok := resp.(*ICETrickleResponse)
 				if !ok {
-					return nil, twirp.InternalError("failed type assertion resp.(*IceCandidateResponse) when calling interceptor")
+					return nil, twirp.InternalError("failed type assertion resp.(*ICETrickleResponse) when calling interceptor")
 				}
 				return typedResp, err
 			}
@@ -646,9 +552,9 @@ func (c *signalServerJSONClient) SendIceCandidate(ctx context.Context, in *IceCa
 	return caller(ctx, in)
 }
 
-func (c *signalServerJSONClient) callSendIceCandidate(ctx context.Context, in *IceCandidateRequest) (*IceCandidateResponse, error) {
-	out := new(IceCandidateResponse)
-	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[3], in, out)
+func (c *signalServerJSONClient) callIceTrickle(ctx context.Context, in *stream_video_sfu_models.ICETrickle) (*ICETrickleResponse, error) {
+	out := new(ICETrickleResponse)
+	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[2], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
 		if !ok {
@@ -694,7 +600,7 @@ func (c *signalServerJSONClient) UpdateSubscriptions(ctx context.Context, in *Up
 
 func (c *signalServerJSONClient) callUpdateSubscriptions(ctx context.Context, in *UpdateSubscriptionsRequest) (*UpdateSubscriptionsResponse, error) {
 	out := new(UpdateSubscriptionsResponse)
-	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[4], in, out)
+	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[3], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
 		if !ok {
@@ -740,7 +646,7 @@ func (c *signalServerJSONClient) UpdateMuteState(ctx context.Context, in *Update
 
 func (c *signalServerJSONClient) callUpdateMuteState(ctx context.Context, in *UpdateMuteStateRequest) (*UpdateMuteStateResponse, error) {
 	out := new(UpdateMuteStateResponse)
-	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[5], in, out)
+	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[4], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
 		if !ok {
@@ -786,7 +692,7 @@ func (c *signalServerJSONClient) RequestVideoQuality(ctx context.Context, in *Up
 
 func (c *signalServerJSONClient) callRequestVideoQuality(ctx context.Context, in *UpdateVideoQualityRequest) (*UpdateVideoQualityResponse, error) {
 	out := new(UpdateVideoQualityResponse)
-	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[6], in, out)
+	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[5], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
 		if !ok {
@@ -898,17 +804,14 @@ func (s *signalServerServer) ServeHTTP(resp http.ResponseWriter, req *http.Reque
 	}
 
 	switch method {
-	case "Join":
-		s.serveJoin(ctx, resp, req)
-		return
 	case "SetPublisher":
 		s.serveSetPublisher(ctx, resp, req)
 		return
 	case "SendAnswer":
 		s.serveSendAnswer(ctx, resp, req)
 		return
-	case "SendIceCandidate":
-		s.serveSendIceCandidate(ctx, resp, req)
+	case "IceTrickle":
+		s.serveIceTrickle(ctx, resp, req)
 		return
 	case "UpdateSubscriptions":
 		s.serveUpdateSubscriptions(ctx, resp, req)
@@ -924,186 +827,6 @@ func (s *signalServerServer) ServeHTTP(resp http.ResponseWriter, req *http.Reque
 		s.writeError(ctx, resp, badRouteError(msg, req.Method, req.URL.Path))
 		return
 	}
-}
-
-func (s *signalServerServer) serveJoin(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
-	header := req.Header.Get("Content-Type")
-	i := strings.Index(header, ";")
-	if i == -1 {
-		i = len(header)
-	}
-	switch strings.TrimSpace(strings.ToLower(header[:i])) {
-	case "application/json":
-		s.serveJoinJSON(ctx, resp, req)
-	case "application/protobuf":
-		s.serveJoinProtobuf(ctx, resp, req)
-	default:
-		msg := fmt.Sprintf("unexpected Content-Type: %q", req.Header.Get("Content-Type"))
-		twerr := badRouteError(msg, req.Method, req.URL.Path)
-		s.writeError(ctx, resp, twerr)
-	}
-}
-
-func (s *signalServerServer) serveJoinJSON(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
-	var err error
-	ctx = ctxsetters.WithMethodName(ctx, "Join")
-	ctx, err = callRequestRouted(ctx, s.hooks)
-	if err != nil {
-		s.writeError(ctx, resp, err)
-		return
-	}
-
-	d := json.NewDecoder(req.Body)
-	rawReqBody := json.RawMessage{}
-	if err := d.Decode(&rawReqBody); err != nil {
-		s.handleRequestBodyError(ctx, resp, "the json request could not be decoded", err)
-		return
-	}
-	reqContent := new(JoinRequest)
-	unmarshaler := protojson.UnmarshalOptions{DiscardUnknown: true}
-	if err = unmarshaler.Unmarshal(rawReqBody, reqContent); err != nil {
-		s.handleRequestBodyError(ctx, resp, "the json request could not be decoded", err)
-		return
-	}
-
-	handler := s.SignalServer.Join
-	if s.interceptor != nil {
-		handler = func(ctx context.Context, req *JoinRequest) (*JoinResponse, error) {
-			resp, err := s.interceptor(
-				func(ctx context.Context, req interface{}) (interface{}, error) {
-					typedReq, ok := req.(*JoinRequest)
-					if !ok {
-						return nil, twirp.InternalError("failed type assertion req.(*JoinRequest) when calling interceptor")
-					}
-					return s.SignalServer.Join(ctx, typedReq)
-				},
-			)(ctx, req)
-			if resp != nil {
-				typedResp, ok := resp.(*JoinResponse)
-				if !ok {
-					return nil, twirp.InternalError("failed type assertion resp.(*JoinResponse) when calling interceptor")
-				}
-				return typedResp, err
-			}
-			return nil, err
-		}
-	}
-
-	// Call service method
-	var respContent *JoinResponse
-	func() {
-		defer ensurePanicResponses(ctx, resp, s.hooks)
-		respContent, err = handler(ctx, reqContent)
-	}()
-
-	if err != nil {
-		s.writeError(ctx, resp, err)
-		return
-	}
-	if respContent == nil {
-		s.writeError(ctx, resp, twirp.InternalError("received a nil *JoinResponse and nil error while calling Join. nil responses are not supported"))
-		return
-	}
-
-	ctx = callResponsePrepared(ctx, s.hooks)
-
-	marshaler := &protojson.MarshalOptions{UseProtoNames: !s.jsonCamelCase, EmitUnpopulated: !s.jsonSkipDefaults}
-	respBytes, err := marshaler.Marshal(respContent)
-	if err != nil {
-		s.writeError(ctx, resp, wrapInternal(err, "failed to marshal json response"))
-		return
-	}
-
-	ctx = ctxsetters.WithStatusCode(ctx, http.StatusOK)
-	resp.Header().Set("Content-Type", "application/json")
-	resp.Header().Set("Content-Length", strconv.Itoa(len(respBytes)))
-	resp.WriteHeader(http.StatusOK)
-
-	if n, err := resp.Write(respBytes); err != nil {
-		msg := fmt.Sprintf("failed to write response, %d of %d bytes written: %s", n, len(respBytes), err.Error())
-		twerr := twirp.NewError(twirp.Unknown, msg)
-		ctx = callError(ctx, s.hooks, twerr)
-	}
-	callResponseSent(ctx, s.hooks)
-}
-
-func (s *signalServerServer) serveJoinProtobuf(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
-	var err error
-	ctx = ctxsetters.WithMethodName(ctx, "Join")
-	ctx, err = callRequestRouted(ctx, s.hooks)
-	if err != nil {
-		s.writeError(ctx, resp, err)
-		return
-	}
-
-	buf, err := ioutil.ReadAll(req.Body)
-	if err != nil {
-		s.handleRequestBodyError(ctx, resp, "failed to read request body", err)
-		return
-	}
-	reqContent := new(JoinRequest)
-	if err = reqContent.UnmarshalVT(buf); err != nil {
-		s.writeError(ctx, resp, malformedRequestError("the protobuf request could not be decoded"))
-		return
-	}
-
-	handler := s.SignalServer.Join
-	if s.interceptor != nil {
-		handler = func(ctx context.Context, req *JoinRequest) (*JoinResponse, error) {
-			resp, err := s.interceptor(
-				func(ctx context.Context, req interface{}) (interface{}, error) {
-					typedReq, ok := req.(*JoinRequest)
-					if !ok {
-						return nil, twirp.InternalError("failed type assertion req.(*JoinRequest) when calling interceptor")
-					}
-					return s.SignalServer.Join(ctx, typedReq)
-				},
-			)(ctx, req)
-			if resp != nil {
-				typedResp, ok := resp.(*JoinResponse)
-				if !ok {
-					return nil, twirp.InternalError("failed type assertion resp.(*JoinResponse) when calling interceptor")
-				}
-				return typedResp, err
-			}
-			return nil, err
-		}
-	}
-
-	// Call service method
-	var respContent *JoinResponse
-	func() {
-		defer ensurePanicResponses(ctx, resp, s.hooks)
-		respContent, err = handler(ctx, reqContent)
-	}()
-
-	if err != nil {
-		s.writeError(ctx, resp, err)
-		return
-	}
-	if respContent == nil {
-		s.writeError(ctx, resp, twirp.InternalError("received a nil *JoinResponse and nil error while calling Join. nil responses are not supported"))
-		return
-	}
-
-	ctx = callResponsePrepared(ctx, s.hooks)
-
-	respBytes, err := respContent.MarshalVT()
-	if err != nil {
-		s.writeError(ctx, resp, wrapInternal(err, "failed to marshal proto response"))
-		return
-	}
-
-	ctx = ctxsetters.WithStatusCode(ctx, http.StatusOK)
-	resp.Header().Set("Content-Type", "application/protobuf")
-	resp.Header().Set("Content-Length", strconv.Itoa(len(respBytes)))
-	resp.WriteHeader(http.StatusOK)
-	if n, err := resp.Write(respBytes); err != nil {
-		msg := fmt.Sprintf("failed to write response, %d of %d bytes written: %s", n, len(respBytes), err.Error())
-		twerr := twirp.NewError(twirp.Unknown, msg)
-		ctx = callError(ctx, s.hooks, twerr)
-	}
-	callResponseSent(ctx, s.hooks)
 }
 
 func (s *signalServerServer) serveSetPublisher(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
@@ -1466,7 +1189,7 @@ func (s *signalServerServer) serveSendAnswerProtobuf(ctx context.Context, resp h
 	callResponseSent(ctx, s.hooks)
 }
 
-func (s *signalServerServer) serveSendIceCandidate(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+func (s *signalServerServer) serveIceTrickle(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
 	header := req.Header.Get("Content-Type")
 	i := strings.Index(header, ";")
 	if i == -1 {
@@ -1474,9 +1197,9 @@ func (s *signalServerServer) serveSendIceCandidate(ctx context.Context, resp htt
 	}
 	switch strings.TrimSpace(strings.ToLower(header[:i])) {
 	case "application/json":
-		s.serveSendIceCandidateJSON(ctx, resp, req)
+		s.serveIceTrickleJSON(ctx, resp, req)
 	case "application/protobuf":
-		s.serveSendIceCandidateProtobuf(ctx, resp, req)
+		s.serveIceTrickleProtobuf(ctx, resp, req)
 	default:
 		msg := fmt.Sprintf("unexpected Content-Type: %q", req.Header.Get("Content-Type"))
 		twerr := badRouteError(msg, req.Method, req.URL.Path)
@@ -1484,9 +1207,9 @@ func (s *signalServerServer) serveSendIceCandidate(ctx context.Context, resp htt
 	}
 }
 
-func (s *signalServerServer) serveSendIceCandidateJSON(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+func (s *signalServerServer) serveIceTrickleJSON(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
 	var err error
-	ctx = ctxsetters.WithMethodName(ctx, "SendIceCandidate")
+	ctx = ctxsetters.WithMethodName(ctx, "IceTrickle")
 	ctx, err = callRequestRouted(ctx, s.hooks)
 	if err != nil {
 		s.writeError(ctx, resp, err)
@@ -1499,29 +1222,29 @@ func (s *signalServerServer) serveSendIceCandidateJSON(ctx context.Context, resp
 		s.handleRequestBodyError(ctx, resp, "the json request could not be decoded", err)
 		return
 	}
-	reqContent := new(IceCandidateRequest)
+	reqContent := new(stream_video_sfu_models.ICETrickle)
 	unmarshaler := protojson.UnmarshalOptions{DiscardUnknown: true}
 	if err = unmarshaler.Unmarshal(rawReqBody, reqContent); err != nil {
 		s.handleRequestBodyError(ctx, resp, "the json request could not be decoded", err)
 		return
 	}
 
-	handler := s.SignalServer.SendIceCandidate
+	handler := s.SignalServer.IceTrickle
 	if s.interceptor != nil {
-		handler = func(ctx context.Context, req *IceCandidateRequest) (*IceCandidateResponse, error) {
+		handler = func(ctx context.Context, req *stream_video_sfu_models.ICETrickle) (*ICETrickleResponse, error) {
 			resp, err := s.interceptor(
 				func(ctx context.Context, req interface{}) (interface{}, error) {
-					typedReq, ok := req.(*IceCandidateRequest)
+					typedReq, ok := req.(*stream_video_sfu_models.ICETrickle)
 					if !ok {
-						return nil, twirp.InternalError("failed type assertion req.(*IceCandidateRequest) when calling interceptor")
+						return nil, twirp.InternalError("failed type assertion req.(*stream_video_sfu_models.ICETrickle) when calling interceptor")
 					}
-					return s.SignalServer.SendIceCandidate(ctx, typedReq)
+					return s.SignalServer.IceTrickle(ctx, typedReq)
 				},
 			)(ctx, req)
 			if resp != nil {
-				typedResp, ok := resp.(*IceCandidateResponse)
+				typedResp, ok := resp.(*ICETrickleResponse)
 				if !ok {
-					return nil, twirp.InternalError("failed type assertion resp.(*IceCandidateResponse) when calling interceptor")
+					return nil, twirp.InternalError("failed type assertion resp.(*ICETrickleResponse) when calling interceptor")
 				}
 				return typedResp, err
 			}
@@ -1530,7 +1253,7 @@ func (s *signalServerServer) serveSendIceCandidateJSON(ctx context.Context, resp
 	}
 
 	// Call service method
-	var respContent *IceCandidateResponse
+	var respContent *ICETrickleResponse
 	func() {
 		defer ensurePanicResponses(ctx, resp, s.hooks)
 		respContent, err = handler(ctx, reqContent)
@@ -1541,7 +1264,7 @@ func (s *signalServerServer) serveSendIceCandidateJSON(ctx context.Context, resp
 		return
 	}
 	if respContent == nil {
-		s.writeError(ctx, resp, twirp.InternalError("received a nil *IceCandidateResponse and nil error while calling SendIceCandidate. nil responses are not supported"))
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *ICETrickleResponse and nil error while calling IceTrickle. nil responses are not supported"))
 		return
 	}
 
@@ -1567,9 +1290,9 @@ func (s *signalServerServer) serveSendIceCandidateJSON(ctx context.Context, resp
 	callResponseSent(ctx, s.hooks)
 }
 
-func (s *signalServerServer) serveSendIceCandidateProtobuf(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+func (s *signalServerServer) serveIceTrickleProtobuf(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
 	var err error
-	ctx = ctxsetters.WithMethodName(ctx, "SendIceCandidate")
+	ctx = ctxsetters.WithMethodName(ctx, "IceTrickle")
 	ctx, err = callRequestRouted(ctx, s.hooks)
 	if err != nil {
 		s.writeError(ctx, resp, err)
@@ -1581,28 +1304,28 @@ func (s *signalServerServer) serveSendIceCandidateProtobuf(ctx context.Context, 
 		s.handleRequestBodyError(ctx, resp, "failed to read request body", err)
 		return
 	}
-	reqContent := new(IceCandidateRequest)
+	reqContent := new(stream_video_sfu_models.ICETrickle)
 	if err = reqContent.UnmarshalVT(buf); err != nil {
 		s.writeError(ctx, resp, malformedRequestError("the protobuf request could not be decoded"))
 		return
 	}
 
-	handler := s.SignalServer.SendIceCandidate
+	handler := s.SignalServer.IceTrickle
 	if s.interceptor != nil {
-		handler = func(ctx context.Context, req *IceCandidateRequest) (*IceCandidateResponse, error) {
+		handler = func(ctx context.Context, req *stream_video_sfu_models.ICETrickle) (*ICETrickleResponse, error) {
 			resp, err := s.interceptor(
 				func(ctx context.Context, req interface{}) (interface{}, error) {
-					typedReq, ok := req.(*IceCandidateRequest)
+					typedReq, ok := req.(*stream_video_sfu_models.ICETrickle)
 					if !ok {
-						return nil, twirp.InternalError("failed type assertion req.(*IceCandidateRequest) when calling interceptor")
+						return nil, twirp.InternalError("failed type assertion req.(*stream_video_sfu_models.ICETrickle) when calling interceptor")
 					}
-					return s.SignalServer.SendIceCandidate(ctx, typedReq)
+					return s.SignalServer.IceTrickle(ctx, typedReq)
 				},
 			)(ctx, req)
 			if resp != nil {
-				typedResp, ok := resp.(*IceCandidateResponse)
+				typedResp, ok := resp.(*ICETrickleResponse)
 				if !ok {
-					return nil, twirp.InternalError("failed type assertion resp.(*IceCandidateResponse) when calling interceptor")
+					return nil, twirp.InternalError("failed type assertion resp.(*ICETrickleResponse) when calling interceptor")
 				}
 				return typedResp, err
 			}
@@ -1611,7 +1334,7 @@ func (s *signalServerServer) serveSendIceCandidateProtobuf(ctx context.Context, 
 	}
 
 	// Call service method
-	var respContent *IceCandidateResponse
+	var respContent *ICETrickleResponse
 	func() {
 		defer ensurePanicResponses(ctx, resp, s.hooks)
 		respContent, err = handler(ctx, reqContent)
@@ -1622,7 +1345,7 @@ func (s *signalServerServer) serveSendIceCandidateProtobuf(ctx context.Context, 
 		return
 	}
 	if respContent == nil {
-		s.writeError(ctx, resp, twirp.InternalError("received a nil *IceCandidateResponse and nil error while calling SendIceCandidate. nil responses are not supported"))
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *ICETrickleResponse and nil error while calling IceTrickle. nil responses are not supported"))
 		return
 	}
 
@@ -2767,72 +2490,67 @@ func callClientError(ctx context.Context, h *twirp.ClientHooks, err twirp.Error)
 }
 
 var twirpFileDescriptor0 = []byte{
-	// 1070 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x57, 0x4b, 0x6f, 0xdb, 0x46,
-	0x10, 0x0e, 0xe5, 0xa7, 0xc6, 0x96, 0x2c, 0xaf, 0x85, 0xc4, 0x91, 0x63, 0x20, 0x21, 0xfa, 0x70,
-	0xda, 0x46, 0x36, 0xe4, 0x1e, 0x8a, 0x02, 0x2d, 0x60, 0x29, 0x71, 0xed, 0xa0, 0x46, 0x13, 0xb2,
-	0x2d, 0xd0, 0x5e, 0x08, 0x9a, 0x1c, 0x3b, 0x84, 0xa9, 0x25, 0xc3, 0x5d, 0xba, 0xd5, 0xa5, 0xe8,
-	0xa1, 0x87, 0x5e, 0x7a, 0xeb, 0xad, 0xa7, 0xfe, 0x80, 0x02, 0xfd, 0x73, 0xbd, 0x17, 0xcb, 0x5d,
-	0x5a, 0xe4, 0x4a, 0x94, 0xec, 0x9c, 0xc4, 0x9d, 0x9d, 0xf9, 0xe6, 0xdb, 0x6f, 0x66, 0x1f, 0x82,
-	0x27, 0xd7, 0x81, 0x8f, 0xd1, 0x3e, 0xbb, 0x48, 0xf7, 0x59, 0x70, 0x49, 0xdd, 0xd0, 0x49, 0x62,
-	0x4f, 0x7d, 0x76, 0xe3, 0x24, 0xe2, 0x11, 0x79, 0xc0, 0x78, 0x82, 0xee, 0xb0, 0x9b, 0x79, 0x76,
-	0xd9, 0x45, 0xda, 0x95, 0xd3, 0x9d, 0xdd, 0x71, 0xec, 0x30, 0xf2, 0x31, 0x64, 0xea, 0x47, 0xc6,
-	0x99, 0x7f, 0x18, 0xf0, 0xf0, 0xbb, 0xd8, 0x77, 0x39, 0x7e, 0x2f, 0xfc, 0x5e, 0xa7, 0x6e, 0x18,
-	0xf0, 0x91, 0x85, 0x6f, 0x53, 0x64, 0x9c, 0xbc, 0x86, 0x96, 0xc4, 0x75, 0xde, 0x66, 0x13, 0x01,
-	0xb2, 0x6d, 0xe3, 0xf1, 0xc2, 0xde, 0x5a, 0xef, 0x83, 0xee, 0x44, 0x42, 0x85, 0x6b, 0x67, 0xf6,
-	0x1c, 0x68, 0x83, 0x15, 0x86, 0x01, 0x32, 0xb2, 0x0b, 0xc0, 0x90, 0xb1, 0x20, 0xa2, 0x4e, 0xe0,
-	0x6f, 0xd7, 0x1e, 0x1b, 0x7b, 0x75, 0xab, 0xae, 0x2c, 0xa7, 0xbe, 0xf9, 0x08, 0x3a, 0xd3, 0xe8,
-	0xb0, 0x38, 0xa2, 0x0c, 0xcd, 0xff, 0x0c, 0xb8, 0x2f, 0xa7, 0xcf, 0x52, 0x8e, 0x36, 0x77, 0x39,
-	0xe6, 0x54, 0xcb, 0xb8, 0x86, 0x86, 0x4b, 0x7e, 0x00, 0xe2, 0xa6, 0x7e, 0x10, 0x39, 0xc3, 0x94,
-	0xa3, 0xe3, 0xbd, 0x71, 0xe9, 0x25, 0xca, 0xf4, 0x6b, 0xbd, 0xa7, 0xdd, 0x0a, 0xf1, 0xba, 0x47,
-	0x22, 0x44, 0xa4, 0x1a, 0xc8, 0x80, 0x93, 0x7b, 0x56, 0xcb, 0xd5, 0x6c, 0x02, 0x3a, 0x0b, 0x2c,
-	0x43, 0x2f, 0xcc, 0x81, 0xce, 0xd6, 0xa7, 0x41, 0x5f, 0x6b, 0xb6, 0xfe, 0x32, 0x2c, 0x0a, 0x50,
-	0xf3, 0x21, 0x3c, 0x98, 0x58, 0xb6, 0x92, 0x64, 0x0f, 0x5a, 0x3a, 0x4b, 0xd2, 0x86, 0x25, 0x11,
-	0x26, 0x65, 0x58, 0xb5, 0xe4, 0x40, 0x78, 0xea, 0x49, 0xc7, 0x9e, 0xb5, 0xa2, 0xe7, 0x9f, 0xb5,
-	0xbc, 0x0a, 0x76, 0x7a, 0xce, 0xbc, 0x24, 0x88, 0x79, 0x10, 0x51, 0x96, 0x4b, 0x1d, 0x42, 0x83,
-	0x15, 0xed, 0xaa, 0x25, 0x8e, 0x2b, 0xd7, 0x5a, 0x8d, 0xd5, 0x2d, 0x19, 0x5f, 0x50, 0x9e, 0x8c,
-	0xac, 0x32, 0xf8, 0x9c, 0x86, 0xe9, 0x04, 0x40, 0x26, 0x31, 0x48, 0x0b, 0x16, 0xae, 0x70, 0xa4,
-	0xda, 0x40, 0x7c, 0x92, 0x2f, 0x60, 0xe9, 0xda, 0x0d, 0x53, 0x54, 0x35, 0xff, 0xb0, 0xb2, 0x7f,
-	0x33, 0x8d, 0x9e, 0x07, 0x43, 0xa4, 0x22, 0x83, 0x25, 0xa3, 0x3e, 0xaf, 0x7d, 0x66, 0x98, 0xbf,
-	0x19, 0xb0, 0x69, 0x23, 0xf5, 0x8f, 0x28, 0xfb, 0x09, 0x93, 0x5c, 0x8d, 0x2f, 0xa1, 0x1e, 0x23,
-	0x26, 0x0e, 0x1f, 0xc5, 0x98, 0x25, 0x6c, 0xf6, 0x9e, 0x54, 0x82, 0xbf, 0x42, 0x4c, 0xbe, 0x1d,
-	0xc5, 0x68, 0xad, 0xc6, 0xea, 0x4b, 0x50, 0x65, 0x7e, 0xac, 0x16, 0x26, 0x3e, 0xb5, 0x15, 0x2f,
-	0xea, 0x5b, 0xa4, 0x0d, 0xa4, 0xc8, 0x42, 0xf5, 0xc1, 0x5f, 0x35, 0xd8, 0x3a, 0xf5, 0x70, 0xe0,
-	0x52, 0x3f, 0xf0, 0x0b, 0xfb, 0xe2, 0x11, 0xd4, 0xe3, 0xf4, 0x3c, 0x0c, 0xd8, 0x1b, 0x4c, 0x54,
-	0x3f, 0x8c, 0x0d, 0x62, 0xd6, 0xcb, 0x23, 0x72, 0x6d, 0x6f, 0x0c, 0x64, 0x07, 0x96, 0x99, 0x1f,
-	0x9f, 0x05, 0xb2, 0x9b, 0xeb, 0x27, 0xf7, 0x2c, 0x35, 0xfe, 0xdd, 0x30, 0xc8, 0x53, 0x68, 0x88,
-	0xc1, 0xd7, 0x01, 0xc5, 0x53, 0xea, 0xe3, 0xcf, 0x19, 0xd1, 0xc6, 0x89, 0x61, 0x95, 0xcd, 0xc2,
-	0x75, 0x1f, 0x5a, 0x29, 0xc3, 0x84, 0xba, 0x43, 0x3c, 0x4e, 0xdc, 0xcb, 0x21, 0x52, 0xbe, 0xbd,
-	0x94, 0x21, 0xd6, 0xac, 0x89, 0x19, 0x11, 0x50, 0x56, 0x60, 0x45, 0x53, 0xa0, 0x5f, 0x87, 0x15,
-	0x47, 0x12, 0xe9, 0xb7, 0xa0, 0xe9, 0x94, 0xf2, 0xf5, 0xb7, 0x60, 0xd3, 0xd1, 0x31, 0xcd, 0xfb,
-	0xd0, 0x2e, 0x8b, 0xa3, 0x54, 0xdb, 0x85, 0x9d, 0xa9, 0xcd, 0xa9, 0xa6, 0x8f, 0x61, 0xcb, 0x46,
-	0xfe, 0x2a, 0x97, 0x2b, 0xd7, 0x54, 0x95, 0xcc, 0xa8, 0x2a, 0xd9, 0x82, 0x5e, 0xb2, 0xaf, 0xa0,
-	0x5d, 0xc6, 0x91, 0xf8, 0x77, 0x07, 0xfa, 0xc7, 0x80, 0xb5, 0x97, 0x51, 0x40, 0x73, 0x26, 0x07,
-	0xd0, 0x56, 0xbb, 0xe5, 0x1c, 0x13, 0x21, 0x84, 0x13, 0x5d, 0x5c, 0xa8, 0x42, 0xd7, 0x2d, 0x32,
-	0x9e, 0xb3, 0xfd, 0xf8, 0x1b, 0x31, 0x33, 0x27, 0x01, 0x39, 0x83, 0xa6, 0x17, 0xf9, 0xe8, 0x39,
-	0x0c, 0x39, 0x0f, 0xe8, 0x25, 0xcb, 0xca, 0x3a, 0xeb, 0xbc, 0x1f, 0x08, 0x77, 0x5b, 0x79, 0x5b,
-	0x0d, 0xaf, 0x38, 0x34, 0x3d, 0x58, 0x97, 0x74, 0x2b, 0x17, 0x7c, 0x04, 0xe0, 0xb9, 0x61, 0xe8,
-	0x30, 0x9e, 0xb7, 0xe0, 0x5a, 0xcf, 0xac, 0x4e, 0xe6, 0x86, 0xa1, 0x3c, 0xff, 0xea, 0x5e, 0xfe,
-	0x69, 0x0e, 0xa0, 0x39, 0x88, 0x28, 0x45, 0x8f, 0xe7, 0xb2, 0xec, 0x40, 0x5d, 0xd7, 0x62, 0x95,
-	0xe5, 0x0a, 0xb4, 0x61, 0x89, 0x47, 0x57, 0x48, 0x55, 0xbf, 0xcb, 0x81, 0x79, 0x00, 0x1b, 0x37,
-	0x20, 0x8a, 0xac, 0x90, 0xca, 0x8f, 0x1d, 0x37, 0xdb, 0x68, 0x37, 0x57, 0x8a, 0x1f, 0xcb, 0x9d,
-	0x67, 0xfe, 0x6b, 0x40, 0xc3, 0xce, 0x0e, 0xb8, 0x3c, 0xed, 0x29, 0xd4, 0x6f, 0x14, 0xcf, 0xfc,
-	0x67, 0x5d, 0x00, 0x76, 0xee, 0xa9, 0xa2, 0x4f, 0xee, 0x59, 0xe3, 0x68, 0x32, 0x80, 0x15, 0xb5,
-	0x4b, 0xab, 0x0f, 0x2c, 0x05, 0xa4, 0xda, 0x6a, 0x0c, 0x93, 0x47, 0xf6, 0x37, 0xa0, 0x81, 0xd7,
-	0x48, 0xb9, 0x13, 0xbb, 0xa3, 0x30, 0x72, 0x7d, 0x41, 0x79, 0x4d, 0x52, 0x7e, 0x21, 0xec, 0xe4,
-	0xe5, 0x24, 0xe1, 0x8f, 0x6e, 0x43, 0x58, 0x0a, 0x54, 0x66, 0xfc, 0x5c, 0x67, 0xbc, 0x37, 0x9f,
-	0xf1, 0x0d, 0x4e, 0x35, 0x65, 0x07, 0x5a, 0xba, 0x52, 0xe3, 0x0a, 0x1a, 0x85, 0x0a, 0x96, 0x8b,
-	0x5e, 0xd3, 0x8a, 0xbe, 0x0d, 0x2b, 0xf2, 0x09, 0x33, 0x52, 0x3d, 0x9f, 0x0f, 0xcd, 0x67, 0xb0,
-	0x39, 0xb1, 0xb2, 0xa2, 0x7b, 0xad, 0xec, 0x3e, 0x80, 0x66, 0x59, 0xf0, 0x77, 0x60, 0x23, 0x9a,
-	0x4d, 0xd3, 0x40, 0x6b, 0xb6, 0x9a, 0xd6, 0x6c, 0xbd, 0xbf, 0x97, 0x61, 0x5d, 0x56, 0xce, 0xc6,
-	0xe4, 0x1a, 0x13, 0x62, 0xc3, 0xa2, 0xd8, 0x59, 0xe4, 0xbd, 0x4a, 0x95, 0x0b, 0xe7, 0x44, 0xe7,
-	0xfd, 0x39, 0x5e, 0x8a, 0xc4, 0x15, 0xac, 0x17, 0xcf, 0x29, 0xf2, 0x49, 0x75, 0x33, 0x4c, 0x1e,
-	0x8b, 0x9d, 0x67, 0xb7, 0xf4, 0x56, 0xc9, 0x10, 0x60, 0x7c, 0x8f, 0x91, 0x19, 0x7d, 0xa7, 0x5f,
-	0xb9, 0x9d, 0x8f, 0x6f, 0xe5, 0xab, 0xd2, 0x44, 0xd0, 0x12, 0xd6, 0xe2, 0xf1, 0x3f, 0x63, 0x5d,
-	0x53, 0xae, 0xd0, 0x19, 0xeb, 0x9a, 0x76, 0xa7, 0x90, 0x5f, 0x0d, 0xd8, 0x9a, 0x72, 0xa9, 0x90,
-	0xc3, 0x77, 0x78, 0x1f, 0x75, 0x3e, 0xbd, 0x5b, 0x90, 0xa2, 0xc0, 0x61, 0x43, 0x7b, 0x2f, 0x92,
-	0xfd, 0x39, 0x40, 0xfa, 0x83, 0xba, 0x73, 0x70, 0xfb, 0x00, 0x95, 0xf5, 0x17, 0xd8, 0x52, 0xc1,
-	0xc5, 0xc7, 0x3b, 0xe9, 0xcd, 0x01, 0x9a, 0xf2, 0xc7, 0xa3, 0x73, 0x78, 0xa7, 0x18, 0x99, 0xbf,
-	0xdf, 0xfa, 0xb1, 0xc9, 0x2e, 0x52, 0x67, 0xfc, 0x17, 0xe9, 0x7c, 0x39, 0xfb, 0x93, 0x73, 0xf8,
-	0x7f, 0x00, 0x00, 0x00, 0xff, 0xff, 0x00, 0x6e, 0x46, 0xde, 0x41, 0x0d, 0x00, 0x00,
+	// 989 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x56, 0xcf, 0x6e, 0xdb, 0xc6,
+	0x13, 0x36, 0xe5, 0xf8, 0x8f, 0xc6, 0x91, 0x25, 0xaf, 0x8d, 0x5f, 0x1c, 0xc5, 0x06, 0x12, 0xfd,
+	0x80, 0xd6, 0x6d, 0x1a, 0xd9, 0x90, 0x7b, 0x28, 0x0a, 0xb4, 0x40, 0xa4, 0xd8, 0xb5, 0x0a, 0x04,
+	0x4d, 0xa8, 0xb4, 0x40, 0x7b, 0x28, 0x41, 0x6b, 0x47, 0xce, 0xc2, 0xd2, 0x92, 0xe1, 0x2e, 0xd5,
+	0xea, 0x52, 0xf4, 0xd0, 0x43, 0x2f, 0xbd, 0xf5, 0x0d, 0xfa, 0x02, 0xbd, 0xf7, 0xb9, 0x7a, 0x2f,
+	0x96, 0xbb, 0x34, 0xc9, 0x95, 0x69, 0xd9, 0x39, 0x49, 0x3b, 0x3b, 0xf3, 0xcd, 0xb7, 0xdf, 0xcc,
+	0x2c, 0x17, 0x9e, 0x4c, 0x19, 0xc5, 0xe0, 0x50, 0x8c, 0xe2, 0x43, 0xc1, 0x2e, 0xb8, 0x3f, 0xf6,
+	0xa2, 0x70, 0x68, 0xfe, 0xb6, 0xc3, 0x28, 0x90, 0x01, 0x79, 0x20, 0x64, 0x84, 0xfe, 0xa4, 0x9d,
+	0x78, 0xb6, 0xc5, 0x28, 0x6e, 0xeb, 0xed, 0xe6, 0x7e, 0x16, 0x3b, 0x09, 0x28, 0x8e, 0x85, 0xf9,
+	0xd1, 0x71, 0xad, 0x3f, 0x1c, 0x78, 0xf8, 0x6d, 0x48, 0x7d, 0x89, 0xdf, 0x29, 0xbf, 0xd7, 0xb1,
+	0x3f, 0x66, 0x72, 0xe6, 0xe2, 0xbb, 0x18, 0x85, 0x24, 0xaf, 0xa1, 0xa1, 0x71, 0xbd, 0x77, 0xc9,
+	0x06, 0x43, 0xb1, 0xeb, 0x3c, 0x5e, 0x3e, 0xd8, 0xe8, 0x7c, 0xd0, 0x9e, 0x4b, 0x68, 0x70, 0x07,
+	0x89, 0x3d, 0x05, 0xaa, 0x8b, 0xdc, 0x92, 0xa1, 0x20, 0xfb, 0x00, 0x02, 0x85, 0x60, 0x01, 0xf7,
+	0x18, 0xdd, 0xad, 0x3c, 0x76, 0x0e, 0xaa, 0x6e, 0xd5, 0x58, 0xfa, 0xb4, 0xb5, 0x07, 0xcd, 0xeb,
+	0xe8, 0x88, 0x30, 0xe0, 0x02, 0x5b, 0xff, 0x3a, 0xf0, 0x3f, 0xbd, 0xfd, 0x32, 0x96, 0x38, 0x90,
+	0xbe, 0xc4, 0x94, 0x6a, 0x11, 0xd7, 0xb1, 0x70, 0xc9, 0xf7, 0x40, 0xfc, 0x98, 0xb2, 0xc0, 0x9b,
+	0xc4, 0x12, 0xbd, 0xe1, 0x5b, 0x9f, 0x5f, 0xa0, 0x4e, 0xbf, 0xd1, 0xf9, 0xa8, 0x5d, 0x22, 0x5e,
+	0xfb, 0xb9, 0x0a, 0x51, 0xa9, 0x7a, 0x3a, 0xe0, 0x6c, 0xc9, 0x6d, 0xf8, 0x96, 0x4d, 0x41, 0x27,
+	0x81, 0x45, 0xe8, 0xe5, 0x05, 0xd0, 0xc9, 0xf9, 0x2c, 0xe8, 0xa9, 0x65, 0xeb, 0xae, 0xc2, 0x3d,
+	0x05, 0xda, 0x7a, 0x08, 0x0f, 0xe6, 0x8e, 0x6d, 0x24, 0x39, 0x80, 0x86, 0xcd, 0x92, 0xec, 0xc0,
+	0x8a, 0x0a, 0xd3, 0x32, 0xac, 0xbb, 0x7a, 0xa1, 0x3c, 0xed, 0xa4, 0x99, 0x67, 0x25, 0xef, 0xf9,
+	0x67, 0x25, 0xad, 0xc2, 0x20, 0x3e, 0x17, 0xc3, 0x88, 0x85, 0x92, 0x05, 0x5c, 0xa4, 0x52, 0x8f,
+	0xa1, 0x26, 0xf2, 0x76, 0xd3, 0x12, 0xa7, 0xa5, 0x67, 0x2d, 0xc7, 0x6a, 0x17, 0x8c, 0x27, 0x5c,
+	0x46, 0x33, 0xb7, 0x08, 0xbe, 0xa0, 0x61, 0x9a, 0x0c, 0xc8, 0x3c, 0x06, 0x69, 0xc0, 0xf2, 0x25,
+	0xce, 0x4c, 0x1b, 0xa8, 0xbf, 0xe4, 0x0b, 0x58, 0x99, 0xfa, 0xe3, 0x18, 0x4d, 0xcd, 0x3f, 0x2c,
+	0xed, 0xdf, 0x44, 0xa3, 0x17, 0x6c, 0x82, 0x5c, 0x65, 0x70, 0x75, 0xd4, 0xe7, 0x95, 0xcf, 0x9c,
+	0xd6, 0x6f, 0x0e, 0x6c, 0x0d, 0x90, 0xd3, 0xe7, 0x5c, 0xfc, 0x84, 0x51, 0xaa, 0xc6, 0x97, 0x50,
+	0x0d, 0x11, 0x23, 0x4f, 0xce, 0x42, 0x4c, 0x12, 0x6e, 0x76, 0x9e, 0x94, 0x82, 0xbf, 0x42, 0x8c,
+	0xde, 0xcc, 0x42, 0x74, 0xd7, 0x43, 0xf3, 0x4f, 0x51, 0x15, 0x34, 0x34, 0x07, 0x53, 0x7f, 0xad,
+	0x13, 0xdf, 0xb3, 0x47, 0x64, 0x07, 0x48, 0x9e, 0x85, 0xe9, 0x83, 0xbf, 0x2a, 0xb0, 0xdd, 0x1f,
+	0x62, 0xcf, 0xe7, 0x94, 0xd1, 0xdc, 0x5c, 0xec, 0x41, 0x35, 0x8c, 0xcf, 0xc7, 0x4c, 0xbc, 0xc5,
+	0xc8, 0xf4, 0x43, 0x66, 0x50, 0xbb, 0xc3, 0x34, 0x22, 0xd5, 0xf6, 0xca, 0x40, 0xf6, 0x60, 0x4d,
+	0xd0, 0xd0, 0x9b, 0x30, 0xdd, 0xce, 0xd5, 0xb3, 0x25, 0x77, 0x55, 0xd0, 0xf0, 0x25, 0xa3, 0xbf,
+	0x3b, 0x0e, 0x79, 0x0a, 0xf5, 0x64, 0x77, 0xcc, 0x38, 0x7a, 0x8c, 0x53, 0xfc, 0x39, 0xe1, 0x5a,
+	0x3b, 0x73, 0xdc, 0x9a, 0xf2, 0x52, 0xf6, 0xbe, 0x32, 0x2b, 0xe7, 0x23, 0xd8, 0x8a, 0x05, 0x46,
+	0xdc, 0x9f, 0xa0, 0x37, 0x8a, 0xfc, 0x8b, 0x09, 0x72, 0xb9, 0xbb, 0x92, 0x80, 0x56, 0xdc, 0x46,
+	0xba, 0x75, 0x6a, 0x76, 0x54, 0x44, 0x51, 0x85, 0x35, 0x4b, 0x85, 0x2e, 0xc0, 0xba, 0x67, 0xc8,
+	0x75, 0x09, 0x34, 0x3c, 0x8b, 0x4a, 0x77, 0x07, 0x88, 0x37, 0x97, 0x51, 0x69, 0xd7, 0xef, 0x9d,
+	0xbc, 0x89, 0xd8, 0xf0, 0x72, 0x9c, 0xcd, 0xd0, 0x3e, 0x3c, 0xba, 0xb6, 0x45, 0xcd, 0xf6, 0x29,
+	0x6c, 0x0f, 0x50, 0xbe, 0x4a, 0x45, 0x4b, 0x95, 0x35, 0x85, 0x73, 0xca, 0x0a, 0xb7, 0x6c, 0x17,
+	0xee, 0x2b, 0xd8, 0x29, 0xe2, 0x68, 0xfc, 0xbb, 0x03, 0xf5, 0x60, 0xb3, 0x17, 0x70, 0x8e, 0x43,
+	0x99, 0x72, 0x79, 0x04, 0x55, 0x25, 0x40, 0x30, 0x1a, 0x99, 0x2a, 0x57, 0xdd, 0x75, 0x41, 0xc3,
+	0x6f, 0xd4, 0x5a, 0x0d, 0xb9, 0x0c, 0x2e, 0x91, 0x9b, 0x02, 0xeb, 0x45, 0xeb, 0x08, 0xea, 0x57,
+	0x20, 0x86, 0x88, 0x4a, 0x4b, 0x43, 0xcf, 0x4f, 0x3a, 0xeb, 0xea, 0x0e, 0xa5, 0xa1, 0x6e, 0xb5,
+	0xd6, 0xdf, 0x0e, 0xd4, 0x06, 0xc9, 0x44, 0xa7, 0x69, 0xfb, 0x50, 0x35, 0xc3, 0x7a, 0xae, 0x7b,
+	0xff, 0xa6, 0x1b, 0x6f, 0x90, 0x7a, 0x9a, 0xe8, 0xb3, 0x25, 0x37, 0x8b, 0x26, 0x3d, 0x58, 0x33,
+	0x6d, 0x59, 0x3e, 0xa1, 0x06, 0xc8, 0x28, 0x98, 0xc1, 0xa4, 0x91, 0xdd, 0x3a, 0xd4, 0x70, 0x8a,
+	0x5c, 0x7a, 0xa1, 0x3f, 0x1b, 0x07, 0x3e, 0x55, 0x94, 0x37, 0x34, 0xe5, 0x13, 0x65, 0x27, 0x5f,
+	0xcf, 0x13, 0xfe, 0xf8, 0x36, 0x84, 0xb5, 0x40, 0x45, 0xc6, 0x2f, 0x6c, 0xc6, 0x07, 0x8b, 0x19,
+	0x5f, 0xe1, 0x94, 0x53, 0xf6, 0xa0, 0x61, 0x2b, 0x95, 0x55, 0xd0, 0xc9, 0x55, 0xb0, 0x58, 0xf4,
+	0x8a, 0x55, 0xf4, 0x5d, 0x58, 0xd3, 0xdf, 0xec, 0x99, 0xe9, 0x9f, 0x74, 0xd9, 0x7a, 0x06, 0x5b,
+	0x73, 0x27, 0xcb, 0xbb, 0x57, 0x8a, 0xee, 0x3d, 0xd8, 0x2c, 0x0a, 0xfe, 0x1e, 0x6c, 0x54, 0xb3,
+	0x59, 0x1a, 0x58, 0xcd, 0x56, 0xb1, 0x9a, 0xad, 0xf3, 0xcf, 0x0a, 0xdc, 0xd7, 0x95, 0x1b, 0x60,
+	0x34, 0xc5, 0x88, 0x5c, 0xc2, 0xfd, 0xfc, 0xf4, 0x90, 0x4f, 0xca, 0xeb, 0x36, 0x3f, 0xac, 0xcd,
+	0x67, 0xb7, 0xf4, 0x36, 0xe4, 0x10, 0x20, 0xbb, 0x63, 0xc9, 0x0d, 0x2d, 0x62, 0x7f, 0x0e, 0x9a,
+	0x4f, 0x6f, 0xe5, 0x6b, 0xd2, 0xfc, 0x08, 0xd0, 0x1f, 0xa2, 0xb9, 0x8e, 0xc8, 0xff, 0x4b, 0x3f,
+	0x1b, 0xd9, 0x9d, 0x75, 0x03, 0xfe, 0xfc, 0xc5, 0x46, 0x7e, 0x75, 0x60, 0xfb, 0x9a, 0x9b, 0x8d,
+	0x1c, 0xbf, 0xc7, 0xa7, 0xba, 0xf9, 0xe9, 0xdd, 0x82, 0x0c, 0x05, 0x09, 0x75, 0xeb, 0xe9, 0x42,
+	0x0e, 0x17, 0x00, 0xd9, 0x6f, 0xbb, 0xe6, 0xd1, 0xed, 0x03, 0x4c, 0xd6, 0x5f, 0x60, 0xdb, 0x04,
+	0xe7, 0xdf, 0x91, 0xa4, 0xb3, 0x00, 0xe8, 0x9a, 0x37, 0x70, 0xf3, 0xf8, 0x4e, 0x31, 0x3a, 0x7f,
+	0xb7, 0xf1, 0xc3, 0xa6, 0x18, 0xc5, 0x5e, 0xf6, 0x5a, 0x3f, 0x5f, 0x4d, 0xde, 0xdb, 0xc7, 0xff,
+	0x05, 0x00, 0x00, 0xff, 0xff, 0xf7, 0xb0, 0x1c, 0xe5, 0xcc, 0x0b, 0x00, 0x00,
 }

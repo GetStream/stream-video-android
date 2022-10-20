@@ -29,7 +29,8 @@ public data class CallParticipant(
     public var hasAudio: Boolean,
     public var track: VideoTrack?,
     public var trackSize: Pair<Int, Int>,
-    public var audioLevel: Float
+    public var audioLevel: Float,
+    public val idPrefix: String
 )
 
 public fun Participant.toCallParticipant(currentUserId: String): CallParticipant =
@@ -44,5 +45,6 @@ public fun Participant.toCallParticipant(currentUserId: String): CallParticipant
         hasAudio = audio,
         track = null,
         trackSize = 0 to 0,
-        audioLevel = 0f
+        audioLevel = 0f,
+        idPrefix = track_lookup_prefix
     )

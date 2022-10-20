@@ -6,13 +6,14 @@ import "video/sfu/models/models.proto";
 
 option go_package = "sfu_events";
 
+// SFUEvent is a message that is sent from the SFU to the client.
 message SfuEvent {
   oneof event_payload {
     SubscriberOffer subscriber_offer = 1;
+    PublisherAnswer publisher_answer = 14;
     ConnectionQualityChanged connection_quality_changed = 2;
     AudioLevelChanged audio_level_changed = 3;
-    ICECandidateTrickle subscriber_candidate = 4;
-    ICECandidateTrickle publisher_candidate = 5;
+    models.ICETrickle ice_trickle = 4;
     ChangePublishQuality change_publish_quality = 6;
     LocalDeviceChange local_device_change = 7;
     MuteStateChanged mute_state_changed = 8;
@@ -20,7 +21,40 @@ message SfuEvent {
     ParticipantJoined participant_joined = 10;
     ParticipantLeft participant_left = 11;
     DominantSpeakerChanged dominant_speaker_changed = 12;
+    JoinResponse join_response = 13;
+    HealthCheckResponse health_check_response = 15;
   }
+}
+
+// SfuRequest is a message that is sent from the client to the SFU.
+message SfuRequest {
+  oneof request_payload {
+   JoinRequest join_request = 1;
+   HealthCheckRequest health_check_request = 2;
+  }
+}
+
+message HealthCheckRequest {
+  string session_id = 1;
+}
+
+message HealthCheckResponse {
+  string session_id = 1;
+}
+
+message JoinRequest {
+  string token = 1;
+  string session_id = 2;
+  bool publish = 3;
+  models.CodecSettings codec_settings = 4;
+  // TODO: we should know if this is going to be
+  // - publishing and subscribing, or just subscribing for future routing
+}
+
+message JoinResponse {
+    models.CallState call_state = 1;
+    string own_session_id = 2;
+    // TODO: include full list of participants with track and audio info
 }
 
 // ParticipantJoined is fired when a user joins a call
@@ -50,6 +84,11 @@ message VideoQualityChanged{
 message SubscriberOffer {
   string sdp = 1;
 }
+
+message PublisherAnswer {
+  string sdp = 1;
+}
+
 
 message LocalDeviceChange {
   string type = 1;
@@ -88,19 +127,19 @@ message AudioLayerSetting {
 }
 
 message AudioMediaRequest {
-  int32 channelCount = 1;
+  int32 channel_count = 1;
 }
 
 message AudioSender {
-  AudioMediaRequest mediaRequest = 1;
+  AudioMediaRequest media_request = 1;
   models.Codec codec = 2;
   repeated AudioLayerSetting layers = 3;
 }
 
 message VideoMediaRequest {
-  int32 idealHeight = 1;
-  int32 idealWidth = 2;
-  int32 idealFrameRate = 3;
+  int32 ideal_height = 1;
+  int32 ideal_width = 2;
+  int32 ideal_frame_rate = 3;
 
 }
 
@@ -108,26 +147,26 @@ message VideoMediaRequest {
 message VideoLayerSetting {
   string name = 1;
   bool active = 2;
-  int32 maxBitrate = 3;
-  float scaleResolutionDownBy = 4;
+  int32 max_bitrate = 3;
+  float scale_resolution_down_by = 4;
   enum Priority {
-    HIGH = 0;
-    LOW = 1;
-    MEDIUM = 2;
-    VERY_LOW = 3;
+    PRIORITY_HIGH_UNSPECIFIED = 0;
+    PRIORITY_LOW = 1;
+    PRIORITY_MEDIUM = 2;
+    PRIORITY_VERY_LOW = 3;
   }
   Priority priority = 5;
   models.Codec codec = 6;
 }
 
 message VideoSender {
-  VideoMediaRequest mediaRequest = 1;
+  VideoMediaRequest media_request = 1;
   models.Codec codec = 2;
   repeated VideoLayerSetting layers = 3;
 }
 
 // sent to users when they need to change the quality of their video
 message ChangePublishQuality {
-  repeated AudioSender audio_sender = 1;
-  repeated VideoSender video_sender = 2;
+  repeated AudioSender audio_senders = 1;
+  repeated VideoSender video_senders = 2;
 }

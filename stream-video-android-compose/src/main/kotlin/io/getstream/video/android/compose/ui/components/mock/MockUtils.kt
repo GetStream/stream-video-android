@@ -37,7 +37,8 @@ private fun User.toCallParticipant() =
         track = null,
         trackSize = 0 to 0,
         isLocal = false,
-        audioLevel = 0f
+        audioLevel = 0f,
+        idPrefix = ""
     )
 
 @PublishedApi
