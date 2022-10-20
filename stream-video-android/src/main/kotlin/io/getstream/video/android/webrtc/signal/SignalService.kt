@@ -17,10 +17,8 @@
 package io.getstream.video.android.webrtc.signal
 
 import retrofit2.http.Body
-import stream.video.sfu.signal.IceCandidateRequest
-import stream.video.sfu.signal.IceCandidateResponse
-import stream.video.sfu.signal.JoinRequest
-import stream.video.sfu.signal.JoinResponse
+import stream.video.sfu.models.ICETrickle
+import stream.video.sfu.signal.ICETrickleResponse
 import stream.video.sfu.signal.SendAnswerRequest
 import stream.video.sfu.signal.SendAnswerResponse
 import stream.video.sfu.signal.SetPublisherRequest
@@ -34,9 +32,7 @@ public interface SignalService {
         @Body answerRequest: SendAnswerRequest,
     ): SendAnswerResponse
 
-    public suspend fun sendIceCandidate(@Body request: IceCandidateRequest): IceCandidateResponse
-
-    public suspend fun join(@Body joinRequest: JoinRequest): JoinResponse
+    public suspend fun sendIceCandidate(@Body request: ICETrickle): ICETrickleResponse
 
     public suspend fun setPublisher(@Body request: SetPublisherRequest): SetPublisherResponse
 

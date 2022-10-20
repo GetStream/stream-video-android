@@ -101,6 +101,8 @@ internal class CallsModule(
 
     internal fun socketStateService(): SocketStateService = socketStateService
 
+    internal fun networkStateProvider(): NetworkStateProvider = networkStateProvider
+
     internal companion object {
 
         /**

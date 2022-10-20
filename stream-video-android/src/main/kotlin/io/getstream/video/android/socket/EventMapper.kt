@@ -47,47 +47,47 @@ internal object EventMapper {
 
         socketEvent.call_created != null -> with(socketEvent.call_created) {
             CallCreatedEvent(
-                callCid = call_cid,
+                callCid = call!!.call_cid,
                 ringing = ringing,
                 users = socketEvent.users.toCallUsers(),
-                info = socketEvent.calls[call_cid].toCallInfo(),
-                details = socketEvent.call_details[call_cid].toCallDetails(),
+                info = call.toCallInfo(),
+                details = call_details.toCallDetails(),
             )
         }
 
         socketEvent.call_updated != null -> with(socketEvent.call_updated) {
             CallUpdatedEvent(
-                callCid = call_cid,
+                callCid = call!!.call_cid,
                 users = socketEvent.users.toCallUsers(),
-                info = socketEvent.calls[call_cid].toCallInfo(),
-                details = socketEvent.call_details[call_cid].toCallDetails(),
+                info = call.toCallInfo(),
+                details = call_details.toCallDetails(),
             )
         }
 
         socketEvent.call_ended != null -> with(socketEvent.call_ended) {
             CallEndedEvent(
-                callCid = call_cid,
+                callCid = call!!.call_cid,
                 users = socketEvent.users.toCallUsers(),
-                info = socketEvent.calls[call_cid].toCallInfo(),
-                details = socketEvent.call_details[call_cid].toCallDetails(),
+                info = call.toCallInfo(),
+                details = call_details.toCallDetails(),
             )
         }
 
         socketEvent.call_members_updated != null -> with(socketEvent.call_members_updated) {
             CallMembersUpdatedEvent(
-                callCid = call_cid,
+                callCid = call!!.call_cid,
                 users = socketEvent.users.toCallUsers(),
-                info = socketEvent.calls[call_cid].toCallInfo(),
-                details = socketEvent.call_details[call_cid].toCallDetails(),
+                info = call.toCallInfo(),
+                details = call_details.toCallDetails(),
             )
         }
 
         socketEvent.call_members_deleted != null -> with(socketEvent.call_members_deleted) {
             CallMembersDeletedEvent(
-                callCid = call_cid,
+                callCid = call!!.call_cid,
                 users = socketEvent.users.toCallUsers(),
-                info = socketEvent.calls[call_cid].toCallInfo(),
-                details = socketEvent.call_details[call_cid].toCallDetails(),
+                info = call.toCallInfo(),
+                details = call_details.toCallDetails(),
             )
         }
 

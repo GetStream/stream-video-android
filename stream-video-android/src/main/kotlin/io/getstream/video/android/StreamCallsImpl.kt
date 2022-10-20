@@ -34,6 +34,7 @@ import io.getstream.video.android.model.IceServer
 import io.getstream.video.android.model.JoinedCall
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.state.StreamCallState
+import io.getstream.video.android.network.NetworkStateProvider
 import io.getstream.video.android.socket.SocketListener
 import io.getstream.video.android.socket.SocketState
 import io.getstream.video.android.socket.SocketStateService
@@ -63,7 +64,8 @@ public class StreamCallsImpl(
     private val credentialsProvider: CredentialsProvider,
     private val socket: VideoSocket,
     private val socketStateService: SocketStateService,
-    private val userState: UserState
+    private val userState: UserState,
+    private val networkStateProvider: NetworkStateProvider
 ) : StreamCalls {
 
     private val logger = StreamLog.getLogger("Call:StreamCalls")
@@ -168,15 +170,14 @@ public class StreamCallsImpl(
 
     // callee: SEND Accepted or Rejected
     override suspend fun sendEvent(
-        callType: String,
-        callId: String,
+        callCid: String,
         // TODO replace UserEventType with domain model
         eventType: UserEventType
     ): Result<Boolean> {
-        logger.d { "[sendEvent] callType: $callType, callId: $callId, eventType: $eventType" }
-        engine.onCallEventSending(callType, callId, eventType)
-        return callClient.sendUserEvent(callType = callType, callId = callId, eventType = eventType)
-            .onSuccess { engine.onCallEventSent(callType, callId, eventType) }
+        logger.d { "[sendEvent] callCid: $callCid, eventType: $eventType" }
+        engine.onCallEventSending(callCid, eventType)
+        return callClient.sendUserEvent(callCid = callCid, eventType = eventType)
+            .onSuccess { engine.onCallEventSent(callCid, eventType) }
             .also { logger.v { "[sendEvent] result: $it" } }
     }
 
@@ -217,7 +218,13 @@ public class StreamCallsImpl(
         credentialsProvider: CredentialsProvider
     ) {
         credentialsProvider.setSfuToken(userToken)
-        val builder = WebRTCClientBuilder(context, credentialsProvider, signalUrl, iceServers)
+        val builder = WebRTCClientBuilder(
+            context = context,
+            credentialsProvider = credentialsProvider,
+            networkStateProvider = networkStateProvider,
+            signalUrl = signalUrl,
+            iceServers = iceServers
+        )
 
         builder.loggingLevel(loggingLevel)
 

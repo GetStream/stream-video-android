@@ -12,7 +12,7 @@ message Subscription {
 
 message Participant {
   string user_id = 1;
-  repeated Subscription subscription = 2;
+  repeated Subscription subscriptions = 2;
 }
 
 message CallState {
@@ -26,19 +26,22 @@ message JoinCallRequest {
 }
 
 message JoinCallResponse {
-  repeated string sfu_address = 1;
+  repeated string sfu_addresses = 1;
   CallState local_state = 2;
 }
 
-message GetCallStateRequest {}
+message GetCallStateRequest {
+}
 
 message GetCallStateResponse {
   CallState local_state = 1;
 }
 
-message AudioMuteChanged {}
+message AudioMuteChanged {
+}
 
-message VideoMuteChanged {}
+message VideoMuteChanged {
+}
 
 message SendEventRequest {
   // sequence is specific to the local state of the SFU sending the event
@@ -47,8 +50,8 @@ message SendEventRequest {
   string call_cid = 1;
   int64 sequence = 2;
   oneof event {
-      AudioMuteChanged audio_mute_changed = 3;
-      VideoMuteChanged video_mute_changed = 4;
+    AudioMuteChanged audio_mute_changed = 3;
+    VideoMuteChanged video_mute_changed = 4;
       // add participant (marcelo joins the call)
       // remove participant (marcelo leaves the call)
       // add publisher track (marcelo starts audio or video track)
@@ -57,11 +60,13 @@ message SendEventRequest {
       // remove subscription (marcelo unsubscribes from tommaso)
       // change subscription (marcelo changes the subscription to Tommaso from high to medium)
       // audio levels - TODO: this does not change anything, its just a user event we want to forward to all clients
-      // dominant speaker changed - TODO: this one is tricky because you need to analyze all audio levels from all clients, perhaps sharing audio levels is enough
+      // dominant speaker changed - TODO: this one is tricky because you need to analyze all audio levels from all clients,
+      // perhaps sharing audio levels is enough
   }
 }
 
-message SendEventResponse {}
+message SendEventResponse {
+}
 
 // GossipRPC is used by SFUs to synchronize state for cascading
 service GossipRPC {

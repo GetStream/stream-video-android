@@ -2,14 +2,18 @@ syntax = "proto3";
 
 package stream.video.coordinator.event_v1;
 
+import "video/coordinator/call_v1/call.proto";
+
 option go_package = "event_v1";
 
 message RecordingStarted {
-  string call_cid = 1;
+  call_v1.Call call = 1;
+  call_v1.CallDetails call_details = 2;
 }
 
 message RecordingStopped {
-  string call_cid = 1;
+  call_v1.Call call = 1;
+  call_v1.CallDetails call_details = 2;
 }
 
 message UserUpdated {
@@ -17,45 +21,74 @@ message UserUpdated {
 }
 
 message BroadcastStarted {
-  string call_cid = 1;
+  call_v1.Call call = 1;
+  call_v1.CallDetails call_details = 2;
 }
 
 message BroadcastEnded {
-  string call_cid = 1;
+  call_v1.Call call = 1;
+  call_v1.CallDetails call_details = 2;
 }
 
 message CallMembersUpdated {
-  string call_cid = 1;
+  call_v1.Call call = 1;
+  call_v1.CallDetails call_details = 2;
 }
 
 message CallMembersDeleted {
-  string call_cid = 1;
+  call_v1.Call call = 1;
+  call_v1.CallDetails call_details = 2;
 }
 
 message CallCreated {
-  string call_cid = 1;
-  bool ringing = 2;
+  call_v1.Call call = 1;
+  call_v1.CallDetails call_details = 2;
+  bool ringing = 3;
 }
 
 message CallUpdated {
-  string call_cid = 1;
+  call_v1.Call call = 1;
+  call_v1.CallDetails call_details = 2;
 }
 
 message CallEnded {
-  string call_cid = 1;
+  call_v1.Call call = 1;
+  call_v1.CallDetails call_details = 2;
 }
 
 message CallDeleted {
-  string call_cid = 1;
+  call_v1.Call call = 1;
+  call_v1.CallDetails call_details = 2;
 }
 
 message CallAccepted {
+  call_v1.Call call = 1;
+  call_v1.CallDetails call_details = 2;
+  // The ID of the user sending the event
+  string sender_user_id = 3;
 }
 
 message CallRejected {
+  call_v1.Call call = 1;
+  call_v1.CallDetails call_details = 2;
+  string sender_user_id = 3;
 }
 
 message CallCancelled {
+  call_v1.Call call = 1;
+  call_v1.CallDetails call_details = 2;
+  string sender_user_id = 3;
+}
+
+// A custom event type
+message CallCustom {
+  call_v1.Call call = 1;
+  call_v1.CallDetails call_details = 2;
+  string sender_user_id = 3;
+  // The type of the event
+  string type = 4;
+  // The data in the event
+  bytes data_json = 5;
 }
 
 // Events

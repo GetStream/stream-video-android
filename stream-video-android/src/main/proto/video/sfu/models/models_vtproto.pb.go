@@ -223,6 +223,20 @@ func (m *Participant) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 		i -= len(m.unknownFields)
 		copy(dAtA[i:], m.unknownFields)
 	}
+	if len(m.TrackLookupPrefix) > 0 {
+		i -= len(m.TrackLookupPrefix)
+		copy(dAtA[i:], m.TrackLookupPrefix)
+		i = encodeVarint(dAtA, i, uint64(len(m.TrackLookupPrefix)))
+		i--
+		dAtA[i] = 0x52
+	}
+	if len(m.SessionId) > 0 {
+		i -= len(m.SessionId)
+		copy(dAtA[i:], m.SessionId)
+		i = encodeVarint(dAtA, i, uint64(len(m.SessionId)))
+		i--
+		dAtA[i] = 0x4a
+	}
 	if m.UpdatedAt != nil {
 		if marshalto, ok := interface{}(m.UpdatedAt).(interface {
 			MarshalToSizedBufferVT([]byte) (int, error)
@@ -746,9 +760,9 @@ func (m *AudioCodecs) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 		i -= len(m.unknownFields)
 		copy(dAtA[i:], m.unknownFields)
 	}
-	if len(m.Decode) > 0 {
-		for iNdEx := len(m.Decode) - 1; iNdEx >= 0; iNdEx-- {
-			size, err := m.Decode[iNdEx].MarshalToSizedBufferVT(dAtA[:i])
+	if len(m.Decodes) > 0 {
+		for iNdEx := len(m.Decodes) - 1; iNdEx >= 0; iNdEx-- {
+			size, err := m.Decodes[iNdEx].MarshalToSizedBufferVT(dAtA[:i])
 			if err != nil {
 				return 0, err
 			}
@@ -758,9 +772,9 @@ func (m *AudioCodecs) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 			dAtA[i] = 0x12
 		}
 	}
-	if len(m.Encode) > 0 {
-		for iNdEx := len(m.Encode) - 1; iNdEx >= 0; iNdEx-- {
-			size, err := m.Encode[iNdEx].MarshalToSizedBufferVT(dAtA[:i])
+	if len(m.Encodes) > 0 {
+		for iNdEx := len(m.Encodes) - 1; iNdEx >= 0; iNdEx-- {
+			size, err := m.Encodes[iNdEx].MarshalToSizedBufferVT(dAtA[:i])
 			if err != nil {
 				return 0, err
 			}
@@ -803,9 +817,9 @@ func (m *VideoCodecs) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 		i -= len(m.unknownFields)
 		copy(dAtA[i:], m.unknownFields)
 	}
-	if len(m.Decode) > 0 {
-		for iNdEx := len(m.Decode) - 1; iNdEx >= 0; iNdEx-- {
-			size, err := m.Decode[iNdEx].MarshalToSizedBufferVT(dAtA[:i])
+	if len(m.Decodes) > 0 {
+		for iNdEx := len(m.Decodes) - 1; iNdEx >= 0; iNdEx-- {
+			size, err := m.Decodes[iNdEx].MarshalToSizedBufferVT(dAtA[:i])
 			if err != nil {
 				return 0, err
 			}
@@ -815,9 +829,9 @@ func (m *VideoCodecs) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 			dAtA[i] = 0x12
 		}
 	}
-	if len(m.Encode) > 0 {
-		for iNdEx := len(m.Encode) - 1; iNdEx >= 0; iNdEx-- {
-			size, err := m.Encode[iNdEx].MarshalToSizedBufferVT(dAtA[:i])
+	if len(m.Encodes) > 0 {
+		for iNdEx := len(m.Encodes) - 1; iNdEx >= 0; iNdEx-- {
+			size, err := m.Encodes[iNdEx].MarshalToSizedBufferVT(dAtA[:i])
 			if err != nil {
 				return 0, err
 			}
@@ -891,6 +905,58 @@ func (m *CodecSettings) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 		i = encodeVarint(dAtA, i, uint64(size))
 		i--
 		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *ICETrickle) MarshalVT() (dAtA []byte, err error) {
+	if m == nil {
+		return nil, nil
+	}
+	size := m.SizeVT()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBufferVT(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ICETrickle) MarshalToVT(dAtA []byte) (int, error) {
+	size := m.SizeVT()
+	return m.MarshalToSizedBufferVT(dAtA[:size])
+}
+
+func (m *ICETrickle) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
+	if m == nil {
+		return 0, nil
+	}
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.unknownFields != nil {
+		i -= len(m.unknownFields)
+		copy(dAtA[i:], m.unknownFields)
+	}
+	if len(m.SessionId) > 0 {
+		i -= len(m.SessionId)
+		copy(dAtA[i:], m.SessionId)
+		i = encodeVarint(dAtA, i, uint64(len(m.SessionId)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.IceCandidate) > 0 {
+		i -= len(m.IceCandidate)
+		copy(dAtA[i:], m.IceCandidate)
+		i = encodeVarint(dAtA, i, uint64(len(m.IceCandidate)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if m.PeerType != 0 {
+		i = encodeVarint(dAtA, i, uint64(m.PeerType))
+		i--
+		dAtA[i] = 0x8
 	}
 	return len(dAtA) - i, nil
 }
@@ -1033,6 +1099,14 @@ func (m *Participant) SizeVT() (n int) {
 		} else {
 			l = proto.Size(m.UpdatedAt)
 		}
+		n += 1 + l + sov(uint64(l))
+	}
+	l = len(m.SessionId)
+	if l > 0 {
+		n += 1 + l + sov(uint64(l))
+	}
+	l = len(m.TrackLookupPrefix)
+	if l > 0 {
 		n += 1 + l + sov(uint64(l))
 	}
 	if m.unknownFields != nil {
@@ -1215,14 +1289,14 @@ func (m *AudioCodecs) SizeVT() (n int) {
 	}
 	var l int
 	_ = l
-	if len(m.Encode) > 0 {
-		for _, e := range m.Encode {
+	if len(m.Encodes) > 0 {
+		for _, e := range m.Encodes {
 			l = e.SizeVT()
 			n += 1 + l + sov(uint64(l))
 		}
 	}
-	if len(m.Decode) > 0 {
-		for _, e := range m.Decode {
+	if len(m.Decodes) > 0 {
+		for _, e := range m.Decodes {
 			l = e.SizeVT()
 			n += 1 + l + sov(uint64(l))
 		}
@@ -1239,14 +1313,14 @@ func (m *VideoCodecs) SizeVT() (n int) {
 	}
 	var l int
 	_ = l
-	if len(m.Encode) > 0 {
-		for _, e := range m.Encode {
+	if len(m.Encodes) > 0 {
+		for _, e := range m.Encodes {
 			l = e.SizeVT()
 			n += 1 + l + sov(uint64(l))
 		}
 	}
-	if len(m.Decode) > 0 {
-		for _, e := range m.Decode {
+	if len(m.Decodes) > 0 {
+		for _, e := range m.Decodes {
 			l = e.SizeVT()
 			n += 1 + l + sov(uint64(l))
 		}
@@ -1276,6 +1350,29 @@ func (m *CodecSettings) SizeVT() (n int) {
 			l = e.SizeVT()
 			n += 1 + l + sov(uint64(l))
 		}
+	}
+	if m.unknownFields != nil {
+		n += len(m.unknownFields)
+	}
+	return n
+}
+
+func (m *ICETrickle) SizeVT() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.PeerType != 0 {
+		n += 1 + sov(uint64(m.PeerType))
+	}
+	l = len(m.IceCandidate)
+	if l > 0 {
+		n += 1 + l + sov(uint64(l))
+	}
+	l = len(m.SessionId)
+	if l > 0 {
+		n += 1 + l + sov(uint64(l))
 	}
 	if m.unknownFields != nil {
 		n += len(m.unknownFields)
@@ -1973,6 +2070,70 @@ func (m *Participant) UnmarshalVT(dAtA []byte) error {
 					return err
 				}
 			}
+			iNdEx = postIndex
+		case 9:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field SessionId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflow
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLength
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLength
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.SessionId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 10:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field TrackLookupPrefix", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflow
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLength
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLength
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.TrackLookupPrefix = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
@@ -3010,7 +3171,7 @@ func (m *AudioCodecs) UnmarshalVT(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Encode", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Encodes", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -3037,14 +3198,14 @@ func (m *AudioCodecs) UnmarshalVT(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Encode = append(m.Encode, &Codec{})
-			if err := m.Encode[len(m.Encode)-1].UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
+			m.Encodes = append(m.Encodes, &Codec{})
+			if err := m.Encodes[len(m.Encodes)-1].UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Decode", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Decodes", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -3071,8 +3232,8 @@ func (m *AudioCodecs) UnmarshalVT(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Decode = append(m.Decode, &Codec{})
-			if err := m.Decode[len(m.Decode)-1].UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
+			m.Decodes = append(m.Decodes, &Codec{})
+			if err := m.Decodes[len(m.Decodes)-1].UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -3129,7 +3290,7 @@ func (m *VideoCodecs) UnmarshalVT(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Encode", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Encodes", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -3156,14 +3317,14 @@ func (m *VideoCodecs) UnmarshalVT(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Encode = append(m.Encode, &Codec{})
-			if err := m.Encode[len(m.Encode)-1].UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
+			m.Encodes = append(m.Encodes, &Codec{})
+			if err := m.Encodes[len(m.Encodes)-1].UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Decode", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Decodes", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -3190,8 +3351,8 @@ func (m *VideoCodecs) UnmarshalVT(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Decode = append(m.Decode, &Codec{})
-			if err := m.Decode[len(m.Decode)-1].UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
+			m.Decodes = append(m.Decodes, &Codec{})
+			if err := m.Decodes[len(m.Decodes)-1].UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -3351,6 +3512,140 @@ func (m *CodecSettings) UnmarshalVT(dAtA []byte) error {
 			if err := m.Layers[len(m.Layers)-1].UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skip(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLength
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.unknownFields = append(m.unknownFields, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ICETrickle) UnmarshalVT(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflow
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ICETrickle: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ICETrickle: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field PeerType", wireType)
+			}
+			m.PeerType = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflow
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.PeerType |= PeerType(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field IceCandidate", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflow
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLength
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLength
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.IceCandidate = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field SessionId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflow
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLength
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLength
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.SessionId = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex

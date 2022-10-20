@@ -39,6 +39,7 @@ import org.webrtc.VideoSource
 import org.webrtc.VideoTrack
 import org.webrtc.audio.JavaAudioDeviceModule
 import stream.video.sfu.models.Codec
+import stream.video.sfu.models.PeerType
 import java.util.*
 
 public class StreamPeerConnectionFactory(private val context: Context) {
@@ -68,11 +69,21 @@ public class StreamPeerConnectionFactory(private val context: Context) {
             PeerConnectionFactory.InitializationOptions.builder(context)
                 .setInjectableLogger({ message, severity, label ->
                     when (severity) {
-                        Logging.Severity.LS_VERBOSE -> { webRtcLogger.v { "[onLogMessage] label: $label, message: $message" } }
-                        Logging.Severity.LS_INFO -> { webRtcLogger.i { "[onLogMessage] label: $label, message: $message" } }
-                        Logging.Severity.LS_WARNING -> { webRtcLogger.w { "[onLogMessage] label: $label, message: $message" } }
-                        Logging.Severity.LS_ERROR -> { webRtcLogger.e { "[onLogMessage] label: $label, message: $message" } }
-                        Logging.Severity.LS_NONE -> { webRtcLogger.d { "[onLogMessage] label: $label, message: $message" } }
+                        Logging.Severity.LS_VERBOSE -> {
+                            webRtcLogger.v { "[onLogMessage] label: $label, message: $message" }
+                        }
+                        Logging.Severity.LS_INFO -> {
+                            webRtcLogger.i { "[onLogMessage] label: $label, message: $message" }
+                        }
+                        Logging.Severity.LS_WARNING -> {
+                            webRtcLogger.w { "[onLogMessage] label: $label, message: $message" }
+                        }
+                        Logging.Severity.LS_ERROR -> {
+                            webRtcLogger.e { "[onLogMessage] label: $label, message: $message" }
+                        }
+                        Logging.Severity.LS_NONE -> {
+                            webRtcLogger.d { "[onLogMessage] label: $label, message: $message" }
+                        }
                         else -> {}
                     }
                 }, Logging.Severity.LS_VERBOSE)
@@ -254,12 +265,12 @@ public class StreamPeerConnectionFactory(private val context: Context) {
     public fun makePeerConnection(
         coroutineScope: CoroutineScope,
         configuration: PeerConnection.RTCConfiguration,
-        type: PeerConnectionType,
+        type: PeerType,
         mediaConstraints: MediaConstraints,
         onStreamAdded: ((MediaStream) -> Unit)? = null,
         onStreamRemoved: ((MediaStream) -> Unit)? = null,
         onNegotiationNeeded: ((StreamPeerConnection) -> Unit)? = null,
-        onIceCandidateRequest: ((IceCandidate, PeerConnectionType) -> Unit)? = null
+        onIceCandidateRequest: ((IceCandidate, PeerType) -> Unit)? = null
     ): StreamPeerConnection {
         val peerConnection = StreamPeerConnection(
             coroutineScope,

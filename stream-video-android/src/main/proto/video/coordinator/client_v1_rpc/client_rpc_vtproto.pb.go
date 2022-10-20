@@ -1590,19 +1590,12 @@ func (m *SendEventRequest) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 	if m.EventType != 0 {
 		i = encodeVarint(dAtA, i, uint64(m.EventType))
 		i--
-		dAtA[i] = 0x18
+		dAtA[i] = 0x10
 	}
-	if len(m.CallId) > 0 {
-		i -= len(m.CallId)
-		copy(dAtA[i:], m.CallId)
-		i = encodeVarint(dAtA, i, uint64(len(m.CallId)))
-		i--
-		dAtA[i] = 0x12
-	}
-	if len(m.CallType) > 0 {
-		i -= len(m.CallType)
-		copy(dAtA[i:], m.CallType)
-		i = encodeVarint(dAtA, i, uint64(len(m.CallType)))
+	if len(m.CallCid) > 0 {
+		i -= len(m.CallCid)
+		copy(dAtA[i:], m.CallCid)
+		i = encodeVarint(dAtA, i, uint64(len(m.CallCid)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -1672,17 +1665,24 @@ func (m *SendCustomEventRequest) MarshalToSizedBufferVT(dAtA []byte) (int, error
 		i -= len(m.unknownFields)
 		copy(dAtA[i:], m.unknownFields)
 	}
-	if len(m.Data) > 0 {
-		i -= len(m.Data)
-		copy(dAtA[i:], m.Data)
-		i = encodeVarint(dAtA, i, uint64(len(m.Data)))
+	if len(m.DataJson) > 0 {
+		i -= len(m.DataJson)
+		copy(dAtA[i:], m.DataJson)
+		i = encodeVarint(dAtA, i, uint64(len(m.DataJson)))
 		i--
-		dAtA[i] = 0x12
+		dAtA[i] = 0x1a
 	}
 	if len(m.Type) > 0 {
 		i -= len(m.Type)
 		copy(dAtA[i:], m.Type)
 		i = encodeVarint(dAtA, i, uint64(len(m.Type)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.CallCid) > 0 {
+		i -= len(m.CallCid)
+		copy(dAtA[i:], m.CallCid)
+		i = encodeVarint(dAtA, i, uint64(len(m.CallCid)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -2680,11 +2680,7 @@ func (m *SendEventRequest) SizeVT() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.CallType)
-	if l > 0 {
-		n += 1 + l + sov(uint64(l))
-	}
-	l = len(m.CallId)
+	l = len(m.CallCid)
 	if l > 0 {
 		n += 1 + l + sov(uint64(l))
 	}
@@ -2715,11 +2711,15 @@ func (m *SendCustomEventRequest) SizeVT() (n int) {
 	}
 	var l int
 	_ = l
+	l = len(m.CallCid)
+	if l > 0 {
+		n += 1 + l + sov(uint64(l))
+	}
 	l = len(m.Type)
 	if l > 0 {
 		n += 1 + l + sov(uint64(l))
 	}
-	l = len(m.Data)
+	l = len(m.DataJson)
 	if l > 0 {
 		n += 1 + l + sov(uint64(l))
 	}
@@ -6291,7 +6291,7 @@ func (m *SendEventRequest) UnmarshalVT(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field CallType", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field CallCid", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -6319,41 +6319,9 @@ func (m *SendEventRequest) UnmarshalVT(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.CallType = string(dAtA[iNdEx:postIndex])
+			m.CallCid = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field CallId", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflow
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLength
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLength
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.CallId = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 3:
 			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field EventType", wireType)
 			}
@@ -6476,6 +6444,38 @@ func (m *SendCustomEventRequest) UnmarshalVT(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CallCid", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflow
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLength
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLength
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.CallCid = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Type", wireType)
 			}
 			var stringLen uint64
@@ -6506,9 +6506,9 @@ func (m *SendCustomEventRequest) UnmarshalVT(dAtA []byte) error {
 			}
 			m.Type = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
-		case 2:
+		case 3:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Data", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field DataJson", wireType)
 			}
 			var byteLen int
 			for shift := uint(0); ; shift += 7 {
@@ -6535,9 +6535,9 @@ func (m *SendCustomEventRequest) UnmarshalVT(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Data = append(m.Data[:0], dAtA[iNdEx:postIndex]...)
-			if m.Data == nil {
-				m.Data = []byte{}
+			m.DataJson = append(m.DataJson[:0], dAtA[iNdEx:postIndex]...)
+			if m.DataJson == nil {
+				m.DataJson = []byte{}
 			}
 			iNdEx = postIndex
 		default:

@@ -17,7 +17,6 @@
 package io.getstream.video.android.webrtc.connection
 
 import io.getstream.logging.StreamLog
-import io.getstream.video.android.events.SfuDataEvent
 import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Result
 import io.getstream.video.android.utils.Success
@@ -43,17 +42,16 @@ import org.webrtc.RtpSender
 import org.webrtc.RtpTransceiver
 import org.webrtc.RtpTransceiver.RtpTransceiverInit
 import org.webrtc.SessionDescription
-
-private typealias StreamDataChannel = io.getstream.video.android.webrtc.datachannel.StreamDataChannel
+import stream.video.sfu.models.PeerType
 
 public class StreamPeerConnection(
     private val coroutineScope: CoroutineScope,
-    private val type: PeerConnectionType,
+    private val type: PeerType,
     private val mediaConstraints: MediaConstraints,
     private val onStreamAdded: ((MediaStream) -> Unit)?,
     private val onStreamRemoved: ((MediaStream) -> Unit)?,
     private val onNegotiationNeeded: ((StreamPeerConnection) -> Unit)?,
-    private val onIceCandidate: ((IceCandidate, PeerConnectionType) -> Unit)?
+    private val onIceCandidate: ((IceCandidate, PeerType) -> Unit)?
 ) : PeerConnection.Observer {
 
     private val typeTag = type.toString().lowercase()
@@ -76,19 +74,6 @@ public class StreamPeerConnection(
     public fun initialize(peerConnection: PeerConnection) {
         logger.d { "[initialize] #sfu; #$typeTag; peerConnection: $peerConnection" }
         this.connection = peerConnection
-    }
-
-    public fun createDataChannel(
-        label: String,
-        init: DataChannel.Init,
-        onMessage: (SfuDataEvent) -> Unit,
-        onStateChange: (DataChannel.State) -> Unit
-    ): StreamDataChannel {
-        return StreamDataChannel(
-            connection.createDataChannel(label, init),
-            onMessage,
-            onStateChange
-        )
     }
 
     public suspend fun createOffer(): Result<SessionDescription> {

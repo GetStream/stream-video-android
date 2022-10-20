@@ -20,9 +20,15 @@ import stream.video.sfu.event.ChangePublishQuality
 import stream.video.sfu.models.Call
 import stream.video.sfu.models.ConnectionQuality
 import stream.video.sfu.models.Participant
+import stream.video.sfu.models.PeerType
 import stream.video.sfu.models.VideoQuality
 
 public sealed class SfuDataEvent
+
+public data class ICETrickleEvent(
+    val candidate: String,
+    val peerType: PeerType
+) : SfuDataEvent()
 
 public data class SubscriberOfferEvent(
     val sdp: String

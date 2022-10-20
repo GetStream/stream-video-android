@@ -43,7 +43,7 @@ internal interface StreamCallEngine {
 
     fun onCallFailed(error: VideoError)
 
-    fun onCallEventSending(type: String, id: String, eventType: UserEventType)
+    fun onCallEventSending(cid: String, eventType: UserEventType)
 
-    fun onCallEventSent(type: String, id: String, eventType: UserEventType)
+    fun onCallEventSent(cid: String, eventType: UserEventType)
 }

@@ -219,13 +219,11 @@ public class CallClient(
      */
     public suspend fun sendUserEvent(
         eventType: UserEventType,
-        callId: String,
-        callType: String
+        callCid: String
     ): Result<Boolean> {
         return callCoordinatorClient.sendUserEvent(
             SendEventRequest(
-                call_id = callId,
-                call_type = callType,
+                call_cid = callCid,
                 event_type = eventType
             )
         )

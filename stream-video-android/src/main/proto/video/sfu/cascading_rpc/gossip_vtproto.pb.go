@@ -102,9 +102,9 @@ func (m *Participant) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 		i -= len(m.unknownFields)
 		copy(dAtA[i:], m.unknownFields)
 	}
-	if len(m.Subscription) > 0 {
-		for iNdEx := len(m.Subscription) - 1; iNdEx >= 0; iNdEx-- {
-			size, err := m.Subscription[iNdEx].MarshalToSizedBufferVT(dAtA[:i])
+	if len(m.Subscriptions) > 0 {
+		for iNdEx := len(m.Subscriptions) - 1; iNdEx >= 0; iNdEx-- {
+			size, err := m.Subscriptions[iNdEx].MarshalToSizedBufferVT(dAtA[:i])
 			if err != nil {
 				return 0, err
 			}
@@ -264,11 +264,11 @@ func (m *JoinCallResponse) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x12
 	}
-	if len(m.SfuAddress) > 0 {
-		for iNdEx := len(m.SfuAddress) - 1; iNdEx >= 0; iNdEx-- {
-			i -= len(m.SfuAddress[iNdEx])
-			copy(dAtA[i:], m.SfuAddress[iNdEx])
-			i = encodeVarint(dAtA, i, uint64(len(m.SfuAddress[iNdEx])))
+	if len(m.SfuAddresses) > 0 {
+		for iNdEx := len(m.SfuAddresses) - 1; iNdEx >= 0; iNdEx-- {
+			i -= len(m.SfuAddresses[iNdEx])
+			copy(dAtA[i:], m.SfuAddresses[iNdEx])
+			i = encodeVarint(dAtA, i, uint64(len(m.SfuAddresses[iNdEx])))
 			i--
 			dAtA[i] = 0xa
 		}
@@ -591,8 +591,8 @@ func (m *Participant) SizeVT() (n int) {
 	if l > 0 {
 		n += 1 + l + sov(uint64(l))
 	}
-	if len(m.Subscription) > 0 {
-		for _, e := range m.Subscription {
+	if len(m.Subscriptions) > 0 {
+		for _, e := range m.Subscriptions {
 			l = e.SizeVT()
 			n += 1 + l + sov(uint64(l))
 		}
@@ -650,8 +650,8 @@ func (m *JoinCallResponse) SizeVT() (n int) {
 	}
 	var l int
 	_ = l
-	if len(m.SfuAddress) > 0 {
-		for _, s := range m.SfuAddress {
+	if len(m.SfuAddresses) > 0 {
+		for _, s := range m.SfuAddresses {
 			l = len(s)
 			n += 1 + l + sov(uint64(l))
 		}
@@ -992,7 +992,7 @@ func (m *Participant) UnmarshalVT(dAtA []byte) error {
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Subscription", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Subscriptions", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -1019,8 +1019,8 @@ func (m *Participant) UnmarshalVT(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Subscription = append(m.Subscription, &Subscription{})
-			if err := m.Subscription[len(m.Subscription)-1].UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
+			m.Subscriptions = append(m.Subscriptions, &Subscription{})
+			if err := m.Subscriptions[len(m.Subscriptions)-1].UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -1300,7 +1300,7 @@ func (m *JoinCallResponse) UnmarshalVT(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field SfuAddress", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field SfuAddresses", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -1328,7 +1328,7 @@ func (m *JoinCallResponse) UnmarshalVT(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.SfuAddress = append(m.SfuAddress, string(dAtA[iNdEx:postIndex]))
+			m.SfuAddresses = append(m.SfuAddresses, string(dAtA[iNdEx:postIndex]))
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {

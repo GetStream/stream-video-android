@@ -7,20 +7,20 @@ import "google/protobuf/timestamp.proto";
 option go_package = "sfu_models";
 
 enum PeerType {
-  PUBLISHER = 0;
-  SUBSCRIBER = 1;
+  PEER_TYPE_PUBLISHER_UNSPECIFIED = 0;
+  PEER_TYPE_SUBSCRIBER = 1;
 }
 
 enum ConnectionQuality {
-  BAD = 0;
-  POOR = 1;
-  GOOD = 2;
+  CONNECTION_QUALITY_BAD_UNSPECIFIED = 0;
+  CONNECTION_QUALITY_POOR = 1;
+  CONNECTION_QUALITY_GOOD = 2;
 }
 
 enum VideoQuality {
-  LOW = 0;
-  MID = 1;
-  HIGH = 2;
+  VIDEO_QUALITY_LOW_UNSPECIFIED = 0;
+  VIDEO_QUALITY_MID = 1;
+  VIDEO_QUALITY_HIGH = 2;
 }
 
 message CallState {
@@ -51,6 +51,8 @@ message Participant {
   bool audio = 6;
   google.protobuf.Timestamp created_at = 7;
   google.protobuf.Timestamp updated_at = 8;
+  string session_id = 9;
+  string track_lookup_prefix = 10;
 }
 
 message User {
@@ -97,17 +99,23 @@ message Codec {
 }
 
 message AudioCodecs {
-  repeated Codec encode = 1;
-  repeated Codec decode = 2;
+  repeated Codec encodes = 1;
+  repeated Codec decodes = 2;
 }
 
 message VideoCodecs {
-  repeated Codec encode = 1;
-  repeated Codec decode = 2;
+  repeated Codec encodes = 1;
+  repeated Codec decodes = 2;
 }
 
 message CodecSettings {
   AudioCodecs audio = 1;
   VideoCodecs video = 2;
   repeated VideoLayer layers = 3;
+}
+
+message ICETrickle {
+  PeerType peer_type = 1;
+  string ice_candidate = 2;
+  string session_id = 3;
 }

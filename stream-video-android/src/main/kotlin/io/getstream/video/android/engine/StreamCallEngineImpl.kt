@@ -228,14 +228,14 @@ internal class StreamCallEngineImpl(
         )
     }
 
-    override fun onCallEventSending(type: String, id: String, eventType: UserEventType) =
+    override fun onCallEventSending(cid: String, eventType: UserEventType) =
         scope.launchWithLock(mutex) {
-            logger.d { "[onCallEventSending] type: $type, id: $id, eventType: $UserEventType" }
+            logger.d { "[onCallEventSending] cid: $cid, eventType: $UserEventType" }
         }
 
-    override fun onCallEventSent(type: String, id: String, eventType: UserEventType) =
+    override fun onCallEventSent(cid: String, eventType: UserEventType) =
         scope.launchWithLock(mutex) {
-            logger.d { "[onCallEventSent] type: $type, id: $id, eventType: $UserEventType" }
+            logger.d { "[onCallEventSent] cid: $cid, eventType: $UserEventType" }
         }
 
     override fun onCallJoining(call: CallMetadata) = scope.launchWithLock(mutex) {

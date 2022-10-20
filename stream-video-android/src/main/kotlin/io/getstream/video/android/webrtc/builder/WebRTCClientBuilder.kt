@@ -22,14 +22,20 @@ import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.model.IceServer
 import io.getstream.video.android.module.HttpModule
 import io.getstream.video.android.module.WebRTCModule
+import io.getstream.video.android.network.NetworkStateProvider
 import io.getstream.video.android.token.CredentialsProvider
 import io.getstream.video.android.webrtc.WebRTCClient
 import io.getstream.video.android.webrtc.WebRTCClientImpl
+import io.getstream.video.android.webrtc.signal.socket.SignalSocketFactory
+import io.getstream.video.android.webrtc.signal.socket.SignalSocketImpl
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import okhttp3.logging.HttpLoggingInterceptor
 
 internal class WebRTCClientBuilder(
     private val context: Context,
     private val credentialsProvider: CredentialsProvider,
+    private val networkStateProvider: NetworkStateProvider,
     private val signalUrl: String,
     private val iceServers: List<IceServer>
 ) {
@@ -68,11 +74,19 @@ internal class WebRTCClientBuilder(
             signalUrl = signalUrl
         )
 
+        val socketFactory = SignalSocketFactory()
+
         return WebRTCClientImpl(
             context = context,
             credentialsProvider = credentialsProvider,
             signalClient = webRTCModule.signalClient,
-            servers = iceServers
+            servers = iceServers,
+            signalSocket = SignalSocketImpl(
+                wssUrl = signalUrl,
+                networkStateProvider = networkStateProvider,
+                coroutineScope = CoroutineScope(Dispatchers.IO), // TODO
+                signalSocketFactory = socketFactory
+            )
         )
     }
 }
