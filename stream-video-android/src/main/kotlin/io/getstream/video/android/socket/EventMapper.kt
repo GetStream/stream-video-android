@@ -91,26 +91,35 @@ internal object EventMapper {
             )
         }
 
-        socketEvent.call_accepted != null -> CallAcceptedEvent(
-            sentByUserId = socketEvent.event_sender_id,
-            users = socketEvent.users.toCallUsers(),
-            info = socketEvent.calls.mapValues { (_, value) -> value.toCallInfo() },
-            details = socketEvent.call_details.mapValues { (_, value) -> value.toCallDetails() },
-        )
+        socketEvent.call_accepted != null -> with (socketEvent.call_accepted) {
+            CallAcceptedEvent(
+                callCid = call!!.call_cid,
+                sentByUserId = sender_user_id,
+                users = socketEvent.users.toCallUsers(),
+                info = call.toCallInfo(),
+                details = call_details.toCallDetails(),
+            )
+        }
 
-        socketEvent.call_rejected != null -> CallRejectedEvent(
-            sentByUserId = socketEvent.event_sender_id,
-            users = socketEvent.users.toCallUsers(),
-            info = socketEvent.calls.mapValues { (_, value) -> value.toCallInfo() },
-            details = socketEvent.call_details.mapValues { (_, value) -> value.toCallDetails() },
-        )
+        socketEvent.call_rejected != null -> with(socketEvent.call_rejected) {
+            CallRejectedEvent(
+                callCid = call!!.call_cid,
+                sentByUserId = sender_user_id,
+                users = socketEvent.users.toCallUsers(),
+                info = call.toCallInfo(),
+                details = call_details.toCallDetails(),
+            )
+        }
 
-        socketEvent.call_cancelled != null -> CallCanceledEvent(
-            sentByUserId = socketEvent.event_sender_id,
-            users = socketEvent.users.toCallUsers(),
-            info = socketEvent.calls.mapValues { (_, value) -> value.toCallInfo() },
-            details = socketEvent.call_details.mapValues { (_, value) -> value.toCallDetails() },
-        )
+        socketEvent.call_cancelled != null -> with(socketEvent.call_cancelled) {
+            CallCanceledEvent(
+                callCid = call!!.call_cid,
+                sentByUserId = sender_user_id,
+                users = socketEvent.users.toCallUsers(),
+                info = call.toCallInfo(),
+                details = call_details.toCallDetails(),
+            )
+        }
 
 //        TODO - do we remove these?
 //        socketEvent.audio_muted != null -> with(socketEvent.audio_muted) {

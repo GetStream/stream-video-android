@@ -96,7 +96,7 @@ internal class StreamCallEngineImpl(
             is CallUpdatedEvent -> {}
             is CallAcceptedEvent -> onCallAccepted(event)
             is CallRejectedEvent -> onCallRejected(event)
-            is CallEndedEvent -> onCallFinished()
+            is CallEndedEvent -> onCallFinished(event)
             is CallCanceledEvent -> onCallCancelled(event)
             is ConnectedEvent -> {}
             is HealthCheckEvent -> {}
@@ -112,6 +112,11 @@ internal class StreamCallEngineImpl(
         val state = _callState.value
         if (state !is State.Outgoing) {
             logger.w { "[onCallAccepted] rejected (state is not Outgoing): $state" }
+            return@launchWithLock
+        }
+        if (state.callGuid.cid != event.callCid) {
+            logger.w { "[onCallAccepted] rejected (callCid is not valid);" +
+                " expected: ${state.callGuid.cid}, actual: ${event.callCid}" }
             return@launchWithLock
         }
         if (!state.members.contains(event.sentByUserId)) {
@@ -130,6 +135,11 @@ internal class StreamCallEngineImpl(
         val state = _callState.value
         if (state !is State.Started) {
             logger.w { "[onCallRejected] rejected (state is not Started): $state" }
+            return@launchWithLock
+        }
+        if (state.callGuid.cid != event.callCid) {
+            logger.w { "[onCallRejected] rejected (callCid is not valid);" +
+                    " expected: ${state.callGuid.cid}, actual: ${event.callCid}" }
             return@launchWithLock
         }
         if (!state.members.contains(event.sentByUserId)) {
@@ -319,19 +329,30 @@ internal class StreamCallEngineImpl(
         dropCall(State.Drop(state.callGuid, DropReason.Failure(error)))
     }
 
-    private fun onCallFinished() = scope.launchWithLock(mutex) {
+    private fun onCallFinished(event: CallEndedEvent) = scope.launchWithLock(mutex) {
         val state = _callState.value
         logger.d { "[onCallFinished] state: $state" }
-        if (state is State.Idle) {
+        if (state !is State.Active) {
+            logger.w { "[onCallFinished] rejected (state is not Active): $state" }
             return@launchWithLock
         }
-        _callState.post(State.Idle)
+        if (state.callGuid.cid != event.callCid) {
+            logger.w { "[onCallFinished] rejected (callCid is not valid);" +
+                " expected: ${state.callGuid.cid}, actual: ${event.callCid}" }
+            return@launchWithLock
+        }
+        dropCall(State.Drop(state.callGuid, DropReason.Ended))
     }
 
     private fun onCallCancelled(event: CallCanceledEvent) = scope.launchWithLock(mutex) {
         val state = _callState.value
         if (state !is State.Active) {
             logger.w { "[onCallCancelled] rejected (state is not Active): $state" }
+            return@launchWithLock
+        }
+        if (state.callGuid.cid != event.callCid) {
+            logger.w { "[onCallCancelled] rejected (callCid is not valid);" +
+                " expected: ${state.callGuid.cid}, actual: ${event.callCid}" }
             return@launchWithLock
         }
         logger.d { "[onCallCancelled] event: $event, state: $state" }

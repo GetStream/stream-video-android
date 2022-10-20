@@ -120,6 +120,7 @@ public sealed class DropReason {
     public data class Failure(val error: VideoError) : DropReason()
     public data class Rejected(val byUserId: String) : DropReason()
     public data class Cancelled(val byUserId: String) : DropReason()
+    public object Ended : DropReason() { override fun toString(): String = "Ended" }
 }
 
 public data class CallGuid(

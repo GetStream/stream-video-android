@@ -192,7 +192,7 @@ public class CallViewModel(
     public fun leaveCall() {
         viewModelScope.launch {
             logger.d { "[leaveCall] no args" }
-            streamCalls.sendEvent(input.callType, input.callId, CallEventType.CANCELLED)
+            streamCalls.sendEvent(input.callCid, CallEventType.CANCELLED)
             clearState()
         }
     }

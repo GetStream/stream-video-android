@@ -109,6 +109,7 @@ class IncomingCallViewModel(
     }
 
     private fun JoinedCall.toCallInput() = CallInput(
+        callCid = call.cid,
         callType = call.type,
         callId = call.id,
         callUrl = callUrl,

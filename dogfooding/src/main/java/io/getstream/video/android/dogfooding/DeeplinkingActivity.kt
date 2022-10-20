@@ -59,6 +59,7 @@ class DeeplinkingActivity : AppCompatActivity() {
             createCallResult.onSuccessSuspend { response ->
                 navigateToCall(
                     CallInput(
+                        response.call.cid,
                         response.call.type,
                         response.call.id,
                         response.callUrl,

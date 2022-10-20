@@ -142,24 +142,27 @@ public data class ParticipantLeftEvent(
 ) : VideoEvent()
 
 public data class CallAcceptedEvent(
+    val callCid: String,
     val sentByUserId: String,
     val users: Map<String, CallUser>,
-    val info: Map<String, CallInfo>,
-    val details: Map<String, CallDetails>
+    val info: CallInfo,
+    val details: CallDetails
 ) : VideoEvent()
 
 public data class CallRejectedEvent(
+    val callCid: String,
     val sentByUserId: String,
     val users: Map<String, CallUser>,
-    val info: Map<String, CallInfo>,
-    val details: Map<String, CallDetails>
+    val info: CallInfo,
+    val details: CallDetails
 ) : VideoEvent()
 
 public data class CallCanceledEvent(
+    val callCid: String,
     val sentByUserId: String,
     val users: Map<String, CallUser>,
-    val info: Map<String, CallInfo>,
-    val details: Map<String, CallDetails>
+    val info: CallInfo,
+    val details: CallDetails
 ) : VideoEvent()
 
 public object UnknownEvent : VideoEvent()
