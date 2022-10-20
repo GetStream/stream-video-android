@@ -20,13 +20,14 @@ import io.getstream.logging.StreamLog
 import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.errors.VideoErrorCode
 import io.getstream.video.android.errors.VideoNetworkError
+import io.getstream.video.android.events.ConnectedEvent
 import okhttp3.Response
 import okhttp3.WebSocket
 import okio.ByteString
 import stream.video.sfu.event.SfuEvent
 
 internal class SignalEventsParser(
-    private val signalSocket: SignalSocketImpl,
+    private val signalSocket: SignalSocket,
 ) : okhttp3.WebSocketListener() {
 
     private val logger = StreamLog.getLogger("Call:WS-Events")
@@ -38,7 +39,7 @@ internal class SignalEventsParser(
         connectionEventReceived = false
         closedByClient = false
 
-        // TODO - events
+        signalSocket.onConnectionResolved(ConnectedEvent(""))
     }
 
     override fun onMessage(webSocket: WebSocket, bytes: ByteString) {

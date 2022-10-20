@@ -103,7 +103,7 @@ class HomeActivity : AppCompatActivity() {
         )
     }
 
-    private val callIdState: MutableState<String> = mutableStateOf("call:123")
+    private val callIdState: MutableState<String> = mutableStateOf("call123")
 
     private val loadingState: MutableState<Boolean> = mutableStateOf(false)
 

@@ -31,6 +31,8 @@ import io.getstream.video.android.socket.Socket
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import stream.video.sfu.event.HealthCheckRequest
+import stream.video.sfu.event.JoinRequest
 import kotlin.properties.Delegates
 
 internal class SignalSocketImpl(
@@ -46,6 +48,7 @@ internal class SignalSocketImpl(
     private var socket: Socket? = null
     private var eventsParser: SignalEventsParser? = null
     private var clientId: String = ""
+    private var sessionId: String = ""
 
     private var socketConnectionJob: Job? = null
     private val eventUiHandler = Handler(Looper.getMainLooper())
@@ -60,7 +63,9 @@ internal class SignalSocketImpl(
 
             override fun check() {
                 (state as? State.Connected)?.let {
-                    // TODO - send a ping - proto called HealthcheckRequest
+                    socket?.pingCall(
+                        HealthCheckRequest(sessionId)
+                    )
                 }
             }
         }
@@ -137,6 +142,11 @@ internal class SignalSocketImpl(
         connect(SignalSocketFactory.ConnectionConf(wssUrl))
     }
 
+    override fun sendJoinRequest(request: JoinRequest) {
+        this.sessionId = request.session_id
+        socket?.joinCall(request)
+    }
+
     override fun reconnect() {
         reconnect(SignalSocketFactory.ConnectionConf(wssUrl))
     }
@@ -157,7 +167,6 @@ internal class SignalSocketImpl(
     }
 
     override fun onConnectionResolved(event: ConnectedEvent) {
-        this.clientId = event.clientId
         state = State.Connected(event)
     }
 
@@ -176,8 +185,10 @@ internal class SignalSocketImpl(
             null -> State.DisconnectedPermanently(null)
             else -> {
                 socketConnectionJob = coroutineScope.launch {
-                    socket =
-                        signalSocketFactory.createSocket(createNewEventsParser(), connectionConf)
+                    socket = signalSocketFactory.createSocket(
+                        createNewEventsParser(),
+                        connectionConf
+                    )
                 }
                 State.Connecting
             }

@@ -18,6 +18,7 @@ package io.getstream.video.android.events
 
 import stream.video.sfu.event.ChangePublishQuality
 import stream.video.sfu.models.Call
+import stream.video.sfu.models.CallState
 import stream.video.sfu.models.ConnectionQuality
 import stream.video.sfu.models.Participant
 import stream.video.sfu.models.PeerType
@@ -81,4 +82,11 @@ public data class SfuParticipantLeftEvent(
 
 public data class DominantSpeakerChangedEvent(
     val userId: String
+) : SfuDataEvent()
+
+public data class HealthcheckResponseEvent(val sessionId: String) : SfuDataEvent()
+
+public data class JoinCallResponseEvent(
+    val callState: CallState,
+    val ownSessionId: String
 ) : SfuDataEvent()

@@ -37,7 +37,7 @@ public interface LocalSignalService : SignalService {
     ): SendAnswerResponse
 
     @Headers("Content-Type: application/protobuf")
-    @POST("/twirp/stream.video.sfu.signal.SignalServer/SendIceCandidate")
+    @POST("/twirp/stream.video.sfu.signal.SignalServer/IceTrickle")
     public override suspend fun sendIceCandidate(@Body request: ICETrickle): ICETrickleResponse
 
     @Headers("Content-Type: application/protobuf")

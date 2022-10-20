@@ -21,6 +21,9 @@ import okhttp3.WebSocket
 import stream.video.coordinator.client_v1_rpc.WebsocketAuthRequest
 import stream.video.coordinator.client_v1_rpc.WebsocketClientEvent
 import stream.video.coordinator.client_v1_rpc.WebsocketHealthcheck
+import stream.video.sfu.event.HealthCheckRequest
+import stream.video.sfu.event.JoinRequest
+import stream.video.sfu.event.SfuRequest
 
 /**
  * Wrapper around the [WebSocket] that lets you send different types of events.
@@ -35,6 +38,10 @@ internal class Socket(private val socket: WebSocket) {
      */
     fun authenticate(authPayload: WebsocketAuthRequest) {
         socket.send(WebsocketClientEvent(auth_request = authPayload).encodeByteString())
+    }
+
+    fun joinCall(joinRequest: JoinRequest) {
+        socket.send(SfuRequest(join_request = joinRequest).encodeByteString())
     }
 
     /**
@@ -53,6 +60,10 @@ internal class Socket(private val socket: WebSocket) {
      */
     fun ping(state: WebsocketHealthcheck) {
         socket.send(state.encodeByteString())
+    }
+
+    fun pingCall(healthCheckRequest: HealthCheckRequest) {
+        socket.send(SfuRequest(health_check_request = healthCheckRequest).encodeByteString())
     }
 
     /**

@@ -17,6 +17,8 @@
 package io.getstream.video.android.webrtc.connection
 
 import io.getstream.logging.StreamLog
+import io.getstream.video.android.model.IceCandidate
+import io.getstream.video.android.model.toCandidate
 import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Result
 import io.getstream.video.android.utils.Success
@@ -30,7 +32,6 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.webrtc.CandidatePairChangeEvent
 import org.webrtc.DataChannel
-import org.webrtc.IceCandidate
 import org.webrtc.IceCandidateErrorEvent
 import org.webrtc.MediaConstraints
 import org.webrtc.MediaStream
@@ -199,11 +200,11 @@ public class StreamPeerConnection(
      * Peer connection listeners.
      */
 
-    override fun onIceCandidate(candidate: IceCandidate?) {
+    override fun onIceCandidate(candidate: org.webrtc.IceCandidate?) {
         logger.i { "[onIceCandidate] #sfu; #$typeTag; candidate: $candidate" }
         if (candidate == null) return
 
-        onIceCandidate?.invoke(candidate, type)
+        onIceCandidate?.invoke(candidate.toCandidate(), type)
     }
 
     override fun onAddStream(stream: MediaStream?) {
@@ -277,7 +278,7 @@ public class StreamPeerConnection(
         logger.i { "[onIceGatheringChange] #sfu; #$typeTag; newState: $newState" }
     }
 
-    override fun onIceCandidatesRemoved(iceCandidates: Array<out IceCandidate>?) {
+    override fun onIceCandidatesRemoved(iceCandidates: Array<out org.webrtc.IceCandidate>?) {
         logger.i { "[onIceCandidatesRemoved] #sfu; #$typeTag; iceCandidates: $iceCandidates" }
     }
 

@@ -20,6 +20,7 @@ import android.content.Context
 import android.media.MediaCodecList
 import android.os.Build
 import io.getstream.logging.StreamLog
+import io.getstream.video.android.model.IceCandidate
 import io.getstream.video.android.webrtc.record.RecordedAudioToFileController
 import kotlinx.coroutines.CoroutineScope
 import org.webrtc.AudioSource
@@ -27,7 +28,6 @@ import org.webrtc.AudioTrack
 import org.webrtc.DefaultVideoDecoderFactory
 import org.webrtc.EglBase
 import org.webrtc.HardwareVideoEncoderFactory
-import org.webrtc.IceCandidate
 import org.webrtc.Logging
 import org.webrtc.MediaConstraints
 import org.webrtc.MediaStream
@@ -40,7 +40,6 @@ import org.webrtc.VideoTrack
 import org.webrtc.audio.JavaAudioDeviceModule
 import stream.video.sfu.models.Codec
 import stream.video.sfu.models.PeerType
-import java.util.*
 
 public class StreamPeerConnectionFactory(private val context: Context) {
 
@@ -60,7 +59,7 @@ public class StreamPeerConnectionFactory(private val context: Context) {
     }
 
     private val videoEncoderFactory by lazy {
-        val hardwareEncoder = HardwareVideoEncoderFactory(eglBase.eglBaseContext, false, false)
+        val hardwareEncoder = HardwareVideoEncoderFactory(eglBase.eglBaseContext, true, true)
         SimulcastVideoEncoderFactory(hardwareEncoder, SoftwareVideoEncoderFactory())
     }
 
@@ -152,7 +151,6 @@ public class StreamPeerConnectionFactory(private val context: Context) {
                                 audioLogger.d { "[onWebRtcAudioTrackStop] no args" }
                             }
                         })
-                    .setSamplesReadyCallback(samplesReadyCallback)
                     .createAudioDeviceModule().also {
                         it.setMicrophoneMute(false)
                         it.setSpeakerMute(false)
@@ -168,7 +166,11 @@ public class StreamPeerConnectionFactory(private val context: Context) {
     }
 
     public fun getVideoEncoderCodecs(): List<Codec> {
-        val factoryCodecs = videoEncoderFactory.supportedCodecs
+        val factoryCodecs = try {
+            videoEncoderFactory.supportedCodecs
+        } catch (error: Throwable) {
+            emptyArray()
+        }
         val codecNames = factoryCodecs.map { it.name }
 
         val supportedSystemCodecs = systemCodecs.filter {
@@ -195,7 +197,12 @@ public class StreamPeerConnectionFactory(private val context: Context) {
     }
 
     public fun getVideoDecoderCodecs(): List<Codec> {
-        val factoryCodecs = videoDecoderFactory.supportedCodecs
+        val factoryCodecs = try {
+            videoDecoderFactory.supportedCodecs
+        } catch (error: Throwable) {
+            emptyArray()
+        }
+
         val codecNames = factoryCodecs.map { it.name }
 
         val supportedSystemCodecs = systemCodecs.filter {
@@ -285,7 +292,6 @@ public class StreamPeerConnectionFactory(private val context: Context) {
             configuration,
             peerConnection
         )
-        samplesReadyCallback.start()
         return peerConnection.apply { initialize(connection) }
     }
 
@@ -309,7 +315,7 @@ public class StreamPeerConnectionFactory(private val context: Context) {
 
     public fun makeVideoTrack(
         source: VideoSource,
-        trackId: String = UUID.randomUUID().toString()
+        trackId: String
     ): VideoTrack = factory.createVideoTrack(trackId, source)
 
     public fun makeAudioSource(constraints: MediaConstraints = MediaConstraints()): AudioSource =
@@ -317,17 +323,10 @@ public class StreamPeerConnectionFactory(private val context: Context) {
 
     public fun makeAudioTrack(
         source: AudioSource,
-        trackId: String = UUID.randomUUID().toString()
+        trackId: String
     ): AudioTrack =
         factory.createAudioTrack(trackId, source)
 
-    public fun createLocalMediaStream(
-        streamId: String = UUID.randomUUID().toString()
-    ): MediaStream {
-        return factory.createLocalMediaStream(streamId)
-    }
-
     internal fun reset() {
-        samplesReadyCallback.stop()
     }
 }

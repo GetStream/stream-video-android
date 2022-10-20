@@ -54,7 +54,8 @@ internal fun OutgoingCallDetails(
                         true,
                         null,
                         Pair(0, 0),
-                        audioLevel = 0f
+                        audioLevel = 0f,
+                        idPrefix = ""
                     )
                 }
             )

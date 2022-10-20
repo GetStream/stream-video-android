@@ -24,7 +24,7 @@ object Versions {
     internal const val RETROFIT = "2.9.0"
     internal const val OKHTTP = "4.10.0"
 
-    internal const val WEBRTC = "104.5112.01"
+    internal const val WEBRTC = "104.5112.03"
     internal const val STREAM = "5.8.0"
 }
 

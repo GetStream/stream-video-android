@@ -19,6 +19,7 @@ package io.getstream.video.android.webrtc.signal.socket
 import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.events.ConnectedEvent
 import io.getstream.video.android.events.SfuDataEvent
+import stream.video.sfu.event.JoinRequest
 
 internal interface SignalSocket {
 
@@ -26,6 +27,11 @@ internal interface SignalSocket {
      * Initializes the socket connection.
      */
     fun connectSocket()
+
+    /**
+     * Sends a request to join the call.
+     */
+    fun sendJoinRequest(request: JoinRequest)
 
     /**
      * Attempts to reconnect the socket.
@@ -62,7 +68,6 @@ internal interface SignalSocket {
      * Attaches a listener to the socket that receives events.
      */
     fun addListener(signalSocketListener: SignalSocketListener)
-
     /**
      * Detaches a listener from the socket to stop receiving events.
      */
