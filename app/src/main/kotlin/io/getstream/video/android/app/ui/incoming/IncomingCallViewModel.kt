@@ -73,7 +73,7 @@ class IncomingCallViewModel(
                 val joinData = joinResult.data
 
                 streamCalls.sendEvent(
-                    callCid = joinData.call.type,
+                    callCid = joinData.call.cid,
                     eventType = UserEventType.USER_EVENT_TYPE_ACCEPTED_CALL
                 )
 
@@ -98,7 +98,7 @@ class IncomingCallViewModel(
         val data = callData
         viewModelScope.launch {
             val result = streamCalls.sendEvent(
-                callCid = data.callInfo.type,
+                callCid = data.callInfo.cid,
                 eventType = UserEventType.USER_EVENT_TYPE_REJECTED_CALL
             )
             logger.d { "[declineCall] result: $result" }
