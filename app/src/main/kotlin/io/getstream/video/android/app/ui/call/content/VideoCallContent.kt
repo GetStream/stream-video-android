@@ -100,7 +100,7 @@ internal fun VideoCallContent(
 
             Column(modifier = Modifier.fillMaxSize()) {
                 val callId = when (val state = callState) {
-                    is StreamCallState.Active -> state.callGuid.cid
+                    is StreamCallState.Active -> state.callGuid.id
                     else -> "No Call Id"
                 }
                 CallActionBar(callViewModel, callId)

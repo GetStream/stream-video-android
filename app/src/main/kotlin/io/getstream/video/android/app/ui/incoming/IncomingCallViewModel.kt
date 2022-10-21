@@ -29,6 +29,7 @@ import io.getstream.video.android.model.JoinedCall
 import io.getstream.video.android.router.StreamRouter
 import io.getstream.video.android.socket.SocketListener
 import io.getstream.video.android.utils.flatMap
+import io.getstream.video.android.utils.map
 import io.getstream.video.android.utils.onError
 import io.getstream.video.android.utils.onSuccess
 import kotlinx.coroutines.delay
@@ -66,12 +67,11 @@ class IncomingCallViewModel(
                     streamCalls.sendEvent(
                         callCid = joined.call.cid,
                         eventType = CallEventType.ACCEPTED
-                    ).also {
-                        streamRouter.navigateToCall(callInput = joined.toCallInput(), finishCurrent = true)
-                    }
+                    ).map { joined }
                 }
                 .onSuccess {
                     logger.v { "[acceptCall] completed: $it" }
+                    streamRouter.navigateToCall(callInput = it.toCallInput(), finishCurrent = true)
                 }
                 .onError {
                     logger.e { "[acceptCall] failed: $it" }
