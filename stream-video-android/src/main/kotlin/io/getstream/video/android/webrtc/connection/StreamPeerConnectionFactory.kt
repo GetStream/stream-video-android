@@ -21,7 +21,6 @@ import android.media.MediaCodecList
 import android.os.Build
 import io.getstream.logging.StreamLog
 import io.getstream.video.android.model.IceCandidate
-import io.getstream.video.android.webrtc.record.RecordedAudioToFileController
 import kotlinx.coroutines.CoroutineScope
 import org.webrtc.AudioSource
 import org.webrtc.AudioTrack
@@ -45,8 +44,6 @@ public class StreamPeerConnectionFactory(private val context: Context) {
 
     private val webRtcLogger = StreamLog.getLogger("Call:WebRTC")
     private val audioLogger = StreamLog.getLogger("Call:AudioTrackCallback")
-
-    private val samplesReadyCallback = RecordedAudioToFileController()
 
     public val eglBase: EglBase by lazy {
         EglBase.create()

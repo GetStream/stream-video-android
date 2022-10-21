@@ -169,60 +169,6 @@ internal class WebRTCClientImpl(
         signalSocket.connectSocket()
     }
 
-    private val publisherCandidates = mutableListOf<ICETrickleEvent>()
-    private val subscriberCandidates = mutableListOf<ICETrickleEvent>()
-
-    override fun onEvent(event: SfuDataEvent) {
-        super.onEvent(event)
-
-        when (event) {
-            is ICETrickleEvent -> handleTrickle(event)
-            is SubscriberOfferEvent -> setRemoteDescription(event.sdp)
-            is SfuParticipantJoinedEvent -> call?.addParticipant(event)
-            is SfuParticipantLeftEvent -> call?.removeParticipant(event)
-            is ChangePublishQualityEvent -> {
-                // updatePublishQuality(event) -> TODO - re-enable once we send the proper quality (dimensions)
-            }
-            is AudioLevelChangedEvent -> call?.updateAudioLevel(event)
-            is MuteStateChangeEvent -> call?.updateMuteState(event)
-            else -> Unit
-        }
-    }
-
-    private fun handleTrickle(event: ICETrickleEvent) {
-        logger.d { "[handleTrickle] candidate: ${event.candidate}" }
-
-        if (event.peerType == PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED) {
-            handlePublisherTrickle(event)
-        } else {
-            handleSubscriberTrickle(event)
-        }
-    }
-
-    private fun handleSubscriberTrickle(iceTrickle: ICETrickleEvent) {
-        if (subscriber?.connection?.remoteDescription != null) {
-            val iceCandidate: IceCandidate = Json.decodeFromString(iceTrickle.candidate)
-
-            subscriber?.connection?.addIceCandidate(
-                iceCandidate.toCandidate()
-            )
-        } else {
-            subscriberCandidates.add(iceTrickle)
-        }
-    }
-
-    private fun handlePublisherTrickle(iceTrickle: ICETrickleEvent) {
-        if (publisher?.connection?.remoteDescription != null) {
-            val iceCandidate: IceCandidate = Json.decodeFromString(iceTrickle.candidate)
-
-            publisher?.connection?.addIceCandidate(
-                iceCandidate.toCandidate()
-            )
-        } else {
-            publisherCandidates.add(iceTrickle)
-        }
-    }
-
     override fun clear() {
         logger.i { "[clear] #sfu; no args" }
         peerConnectionFactory.reset()
@@ -350,17 +296,16 @@ internal class WebRTCClientImpl(
     ): Result<JoinResponse> {
         logger.d { "[initializeCall] #sfu; autoPublish: $autoPublish" }
 
+        val call = createCall(sessionId)
+        this.call = call
+        listenToParticipants()
+        createPeerConnections(autoPublish)
+
         return when (val result = connectToCall()) {
             is Success -> {
-                val call = createCall(sessionId)
-                this.call = call
                 loadParticipantsData(result.data.call_state, callSettings)
-
                 createUserTracks(callSettings, autoPublish)
-
                 call.setupAudio()
-                listenToParticipants()
-                createPeerConnections(autoPublish)
 
                 result
             }
@@ -375,9 +320,6 @@ internal class WebRTCClientImpl(
 
         if (autoPublish) {
             createPublisher()
-
-            publisher?.addAudioTransceiver(localAudioTrack!!, listOf(sessionId))
-            publisher?.addVideoTransceiver(localVideoTrack!!, listOf(sessionId))
         }
     }
 
@@ -416,7 +358,7 @@ internal class WebRTCClientImpl(
         joinResponse.onSuccessSuspend { response ->
             // connection.onCallJoined(response.own_session_id) TODO
         }
-        logger.v { "[connectToCall] #sfu; completed" }
+        logger.v { "[connectToCall] #sfu; completed $joinResponse" }
         return joinResponse
     }
 
@@ -441,7 +383,7 @@ internal class WebRTCClientImpl(
         var isSuccessful = false
 
         coroutineScope.launch {
-            delay(15000)
+            delay(30000)
 
             if (!isSuccessful) {
                 throw IllegalStateException("Join request failed to respond!")
@@ -488,6 +430,60 @@ internal class WebRTCClientImpl(
         logger.d { "[createPublisher] #sfu; publisher: $publisher" }
     }
 
+    private val publisherCandidates = mutableListOf<ICETrickleEvent>()
+    private val subscriberCandidates = mutableListOf<ICETrickleEvent>()
+
+    override fun onEvent(event: SfuDataEvent) {
+        super.onEvent(event)
+
+        when (event) {
+            is ICETrickleEvent -> handleTrickle(event)
+            is SubscriberOfferEvent -> setRemoteDescription(event.sdp)
+            is SfuParticipantJoinedEvent -> call?.addParticipant(event)
+            is SfuParticipantLeftEvent -> call?.removeParticipant(event)
+            is ChangePublishQualityEvent -> {
+                // updatePublishQuality(event) -> TODO - re-enable once we send the proper quality (dimensions)
+            }
+            is AudioLevelChangedEvent -> call?.updateAudioLevel(event)
+            is MuteStateChangeEvent -> call?.updateMuteState(event)
+            else -> Unit
+        }
+    }
+
+    private fun handleTrickle(event: ICETrickleEvent) {
+        logger.d { "[handleTrickle] candidate: ${event.candidate}" }
+
+        if (event.peerType == PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED) {
+            handlePublisherTrickle(event)
+        } else {
+            handleSubscriberTrickle(event)
+        }
+    }
+
+    private fun handleSubscriberTrickle(iceTrickle: ICETrickleEvent) {
+        if (subscriber?.connection?.remoteDescription != null) {
+            val iceCandidate: IceCandidate = Json.decodeFromString(iceTrickle.candidate)
+
+            subscriber?.connection?.addIceCandidate(
+                iceCandidate.toCandidate()
+            )
+        } else {
+            subscriberCandidates.add(iceTrickle)
+        }
+    }
+
+    private fun handlePublisherTrickle(iceTrickle: ICETrickleEvent) {
+        if (publisher?.connection?.remoteDescription != null) {
+            val iceCandidate: IceCandidate = Json.decodeFromString(iceTrickle.candidate)
+
+            publisher?.connection?.addIceCandidate(
+                iceCandidate.toCandidate()
+            )
+        } else {
+            publisherCandidates.add(iceTrickle)
+        }
+    }
+
     private fun onNegotiationNeeded(peerConnection: StreamPeerConnection) {
         val id = Random.nextInt().absoluteValue
         logger.d { "[negotiate] #$id; #sfu; peerConnection: $peerConnection" }
@@ -526,8 +522,8 @@ internal class WebRTCClientImpl(
         publisherCandidates.clear()
     }
 
-    private fun createUserTracks(callSettings: CallSettings, shouldPublish: Boolean) {
-        logger.d { "[setupUserMedia] #sfu; shouldPublish: $shouldPublish, callSettings: $callSettings" }
+    private fun createUserTracks(callSettings: CallSettings, autoPublish: Boolean) {
+        logger.d { "[createUserTracks] #sfu; shouldPublish: $autoPublish, callSettings: $callSettings" }
         val manager = context.getSystemService<AudioManager>()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             manager?.allowedCapturePolicy = ALLOW_CAPTURE_BY_ALL
@@ -536,12 +532,17 @@ internal class WebRTCClientImpl(
         val audioTrack = makeAudioTrack()
         audioTrack.setEnabled(true)
         localAudioTrack = audioTrack
-        logger.v { "[setupUserMedia] #sfu; audioTrack: ${audioTrack.stringify()}" }
+        logger.v { "[createUserTracks] #sfu; audioTrack: ${audioTrack.stringify()}" }
 
         val videoTrack = makeVideoTrack()
         localVideoTrack = videoTrack
         videoTrack.setEnabled(callSettings.videoOn)
-        logger.v { "[setupUserMedia] #sfu; videoTrack: ${videoTrack.stringify()}" }
+        logger.v { "[createUserTracks] #sfu; videoTrack: ${videoTrack.stringify()}" }
+
+        if (autoPublish) {
+            publisher?.addAudioTransceiver(localAudioTrack!!, listOf(sessionId))
+            publisher?.addVideoTransceiver(localVideoTrack!!, listOf(sessionId))
+        }
     }
 
     private fun makeAudioTrack(): AudioTrack {

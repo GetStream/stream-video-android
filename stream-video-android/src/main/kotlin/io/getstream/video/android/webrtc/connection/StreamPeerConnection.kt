@@ -19,9 +19,7 @@ package io.getstream.video.android.webrtc.connection
 import io.getstream.logging.StreamLog
 import io.getstream.video.android.model.IceCandidate
 import io.getstream.video.android.model.toCandidate
-import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Result
-import io.getstream.video.android.utils.Success
 import io.getstream.video.android.webrtc.utils.createValue
 import io.getstream.video.android.webrtc.utils.setValue
 import io.getstream.video.android.webrtc.utils.stringify
@@ -84,7 +82,7 @@ public class StreamPeerConnection(
                 it,
                 MediaConstraints()
             )
-        } // TODO we should send mediaConstraints here too, but BE crashes
+        }
     }
 
     public suspend fun createAnswer(): Result<SessionDescription> {
@@ -166,23 +164,6 @@ public class StreamPeerConnection(
         )
 
         videoTransceiver = connection.addTransceiver(track, transceiverInit)
-    }
-
-    public suspend fun createJoinOffer(): Result<SessionDescription> {
-        logger.d { "[createJoinOffer] #sfu; #$typeTag; no args" }
-        val offer = createOffer()
-
-        when (offer) {
-            is Success -> {
-                logger.v { "[createJoinOffer] #sfu; #$typeTag; offerSdp: ${offer.data}" }
-                setLocalDescription(offer.data)
-            }
-            is Failure -> {
-                logger.e { "[createJoinOffer] #sfu; #$typeTag; failed: ${offer.error.cause}" }
-            }
-        }
-
-        return offer
     }
 
     public suspend fun onCallJoined(sdp: String) {
