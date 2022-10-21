@@ -169,17 +169,21 @@ public class Call(
         }
 
         val updatedList = _callParticipants.value.updateValue(
-            predicate = { it.id in mediaStream.id },
+            predicate = { it.idPrefix in mediaStream.id },
             transformer = {
                 val track = replaceTrackIfNeeded(mediaStream, it.track?.streamId)
 
                 if (track != null) {
+                    logger.d { "[addStream] updating users with track $track" }
+                    track.video.setEnabled(true)
                     it.copy(track = track)
                 } else {
                     it
                 }
             }
         )
+
+        logger.d { "[addStream] updated list $updatedList" }
         _callParticipants.value = updatedList
         onStreamAdded(mediaStream)
     }
