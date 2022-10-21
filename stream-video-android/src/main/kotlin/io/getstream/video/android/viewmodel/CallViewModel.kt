@@ -23,10 +23,12 @@ import io.getstream.logging.StreamLog
 import io.getstream.video.android.StreamCalls
 import io.getstream.video.android.audio.AudioDevice
 import io.getstream.video.android.model.Call
+import io.getstream.video.android.model.CallEventType
 import io.getstream.video.android.model.CallInput
 import io.getstream.video.android.model.CallParticipant
 import io.getstream.video.android.model.CallParticipantState
 import io.getstream.video.android.model.CallSettings
+import io.getstream.video.android.model.state.StreamCallState
 import io.getstream.video.android.token.CredentialsProvider
 import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Success
@@ -34,6 +36,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
@@ -77,6 +80,21 @@ public class CallViewModel(
 
     private val _isShowingSettings = MutableStateFlow(false)
     public val isShowingSettings: StateFlow<Boolean> = _isShowingSettings
+
+    public val streamCallState: StateFlow<StreamCallState> get() = streamCalls.callState
+
+    init {
+        viewModelScope.launch {
+            streamCalls.callState.collect {
+                when (it) {
+                    is StreamCallState.Drop -> {
+                        clearState()
+                    }
+                    else -> { /* no-op */ }
+                }
+            }
+        }
+    }
 
     public fun connectToCall() {
         logger.d { "[createCall] input: $input" }
@@ -172,12 +190,11 @@ public class CallViewModel(
     }
 
     public fun leaveCall() {
-        /* TODO we probably need to notify that we are leaving the call
-        input.run {
-            streamCalls.sendEvent(callId, callType, UserEventType.USER_EVENT_TYPE_LEFT_CALL)
+        viewModelScope.launch {
+            logger.d { "[leaveCall] no args" }
+            streamCalls.sendEvent(input.callCid, CallEventType.CANCELLED)
+            clearState()
         }
-        */
-        clearState()
     }
 
     public fun getAudioDevices(): List<AudioDevice> {
@@ -185,6 +202,7 @@ public class CallViewModel(
     }
 
     private fun clearState() {
+        logger.i { "[leaveCall] no args" }
         streamCalls.clearCallState()
         viewModelScope.cancel()
         val room = _callState.value ?: return

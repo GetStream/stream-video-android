@@ -156,8 +156,9 @@ class HomeActivity : AppCompatActivity() {
                     CallActivity.getIntent(
                         this@HomeActivity,
                         CallInput(
-                            callType = "default",
-                            callId = it.call.cid,
+                            callCid = it.call.cid,
+                            callType = it.call.type,
+                            callId = it.call.id,
                             callUrl = it.callUrl,
                             userToken = it.userToken,
                             iceServers = it.iceServers

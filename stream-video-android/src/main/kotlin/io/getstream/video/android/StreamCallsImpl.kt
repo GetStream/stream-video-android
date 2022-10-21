@@ -28,6 +28,7 @@ import io.getstream.video.android.dispatchers.DispatcherProvider
 import io.getstream.video.android.engine.StreamCallEngineImpl
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.model.Call
+import io.getstream.video.android.model.CallEventType
 import io.getstream.video.android.model.CallMetadata
 import io.getstream.video.android.model.CallSettings
 import io.getstream.video.android.model.IceServer
@@ -51,7 +52,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import stream.video.coordinator.client_v1_rpc.UserEventType
 
 /**
  * @param lifecycle The lifecycle used to observe changes in the process. // TODO - docs
@@ -171,8 +171,7 @@ public class StreamCallsImpl(
     // callee: SEND Accepted or Rejected
     override suspend fun sendEvent(
         callCid: String,
-        // TODO replace UserEventType with domain model
-        eventType: UserEventType
+        eventType: CallEventType
     ): Result<Boolean> {
         logger.d { "[sendEvent] callCid: $callCid, eventType: $eventType" }
         engine.onCallEventSending(callCid, eventType)
@@ -182,6 +181,7 @@ public class StreamCallsImpl(
     }
 
     override fun clearCallState() {
+        logger.i { "[clearCallState] no args" }
         credentialsProvider.setSfuToken(null)
         socket.updateCallState(null)
         webRTCClient?.clear()

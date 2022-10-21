@@ -18,6 +18,7 @@ package io.getstream.video.android
 
 import io.getstream.video.android.audio.AudioDevice
 import io.getstream.video.android.model.Call
+import io.getstream.video.android.model.CallEventType
 import io.getstream.video.android.model.CallMetadata
 import io.getstream.video.android.model.CallSettings
 import io.getstream.video.android.model.IceServer
@@ -28,7 +29,6 @@ import io.getstream.video.android.socket.SocketListener
 import io.getstream.video.android.token.CredentialsProvider
 import io.getstream.video.android.utils.Result
 import kotlinx.coroutines.flow.StateFlow
-import stream.video.coordinator.client_v1_rpc.UserEventType
 
 public interface StreamCalls {
 
@@ -121,12 +121,14 @@ public interface StreamCalls {
      */
     public suspend fun sendEvent(
         callCid: String,
-        eventType: UserEventType
+        eventType: CallEventType
     ): Result<Boolean>
 
     /**
      * Leaves the currently active call and clears up all connections to it.
      */
+    // TODO
+    //  can be called internally when [StreamCallState.Idle] comes into the place.
     public fun clearCallState()
 
     /**

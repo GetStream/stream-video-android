@@ -17,6 +17,7 @@
 package io.getstream.video.android.model
 
 public data class CallInput(
+    internal val callCid: String,
     internal val callType: String,
     internal val callId: String,
     internal val callUrl: String,

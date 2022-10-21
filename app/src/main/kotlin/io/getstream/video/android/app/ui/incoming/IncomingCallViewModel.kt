@@ -22,17 +22,18 @@ import io.getstream.logging.StreamLog
 import io.getstream.video.android.StreamCalls
 import io.getstream.video.android.events.CallCanceledEvent
 import io.getstream.video.android.events.VideoEvent
+import io.getstream.video.android.model.CallEventType
 import io.getstream.video.android.model.CallInput
 import io.getstream.video.android.model.IncomingCallData
 import io.getstream.video.android.model.JoinedCall
 import io.getstream.video.android.router.StreamRouter
 import io.getstream.video.android.socket.SocketListener
-import io.getstream.video.android.utils.Failure
-import io.getstream.video.android.utils.Result
-import io.getstream.video.android.utils.Success
+import io.getstream.video.android.utils.flatMap
+import io.getstream.video.android.utils.map
+import io.getstream.video.android.utils.onError
+import io.getstream.video.android.utils.onSuccess
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import stream.video.coordinator.client_v1_rpc.UserEventType
 
 class IncomingCallViewModel(
     private val streamCalls: StreamCalls,
@@ -60,37 +61,22 @@ class IncomingCallViewModel(
         logger.d { "[acceptCall] callType: $callType, callId: $callId" }
 
         viewModelScope.launch {
-            val joinResult = streamCalls.joinCall(callType, callId)
-            logger.v { "[acceptCall] join result: $joinResult" }
-
-            onJoinResult(joinResult)
-        }
-    }
-
-    private suspend fun onJoinResult(joinResult: Result<JoinedCall>) {
-        when (joinResult) {
-            is Success -> {
-                val joinData = joinResult.data
-
-                streamCalls.sendEvent(
-                    callCid = joinData.call.cid,
-                    eventType = UserEventType.USER_EVENT_TYPE_ACCEPTED_CALL
-                )
-
-                streamRouter.navigateToCall(
-                    callInput = CallInput(
-                        callType = joinData.call.type,
-                        callId = joinData.call.id,
-                        callUrl = joinData.callUrl,
-                        userToken = joinData.userToken,
-                        iceServers = joinData.iceServers
-                    ),
-                    finishCurrent = true
-                )
-            }
-            is Failure -> {
-                declineCall()
-            }
+            streamCalls.joinCall(callType, callId)
+                .flatMap { joined ->
+                    logger.v { "[acceptCall] joined: $joined" }
+                    streamCalls.sendEvent(
+                        callCid = joined.call.cid,
+                        eventType = CallEventType.ACCEPTED
+                    ).map { joined }
+                }
+                .onSuccess {
+                    logger.v { "[acceptCall] completed: $it" }
+                    streamRouter.navigateToCall(callInput = it.toCallInput(), finishCurrent = true)
+                }
+                .onError {
+                    logger.e { "[acceptCall] failed: $it" }
+                    declineCall()
+                }
         }
     }
 
@@ -99,7 +85,7 @@ class IncomingCallViewModel(
         viewModelScope.launch {
             val result = streamCalls.sendEvent(
                 callCid = data.callInfo.cid,
-                eventType = UserEventType.USER_EVENT_TYPE_REJECTED_CALL
+                eventType = CallEventType.REJECTED
             )
             logger.d { "[declineCall] result: $result" }
 
@@ -121,4 +107,13 @@ class IncomingCallViewModel(
         streamCalls.removeSocketListener(this)
         super.onCleared()
     }
+
+    private fun JoinedCall.toCallInput() = CallInput(
+        callCid = call.cid,
+        callType = call.type,
+        callId = call.id,
+        callUrl = callUrl,
+        userToken = userToken,
+        iceServers = iceServers
+    )
 }

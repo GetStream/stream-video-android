@@ -31,9 +31,11 @@ import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.app.ui.call.content.VideoCallContent
 import io.getstream.video.android.app.videoApp
 import io.getstream.video.android.model.CallInput
+import io.getstream.video.android.model.state.StreamCallState
 import io.getstream.video.android.viewmodel.CallViewModel
 import io.getstream.video.android.viewmodel.CallViewModelFactory
 
@@ -72,13 +74,16 @@ class CallActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            VideoCallContent(callViewModel, onLeaveCall = ::leaveCall)
+            VideoCallContent(callViewModel, onLeaveCall = callViewModel::leaveCall)
         }
-    }
 
-    private fun leaveCall() {
-        callViewModel.leaveCall()
-        finish()
+        lifecycleScope.launchWhenCreated {
+            callViewModel.streamCallState.collect {
+                if (it is StreamCallState.Idle) {
+                    finish()
+                }
+            }
+        }
     }
 
     override fun onResume() {

@@ -24,6 +24,7 @@ import io.getstream.video.android.StreamCalls
 import io.getstream.video.android.events.CallAcceptedEvent
 import io.getstream.video.android.events.CallRejectedEvent
 import io.getstream.video.android.events.VideoEvent
+import io.getstream.video.android.model.CallEventType
 import io.getstream.video.android.model.CallInput
 import io.getstream.video.android.model.OutgoingCallData
 import io.getstream.video.android.model.toMetadata
@@ -35,7 +36,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import stream.video.coordinator.client_v1_rpc.UserEventType
 
 class OutgoingCallViewModel(
     private val streamCalls: StreamCalls,
@@ -87,7 +87,7 @@ class OutgoingCallViewModel(
         viewModelScope.launch {
             streamCalls.sendEvent(
                 callCid = data.cid,
-                eventType = UserEventType.USER_EVENT_TYPE_CANCELLED_CALL
+                eventType = CallEventType.CANCELLED
             )
 
             streamCalls.clearCallState()
@@ -104,6 +104,7 @@ class OutgoingCallViewModel(
             joinResult.onSuccessSuspend { response ->
                 streamRouter.navigateToCall(
                     callInput = CallInput(
+                        response.call.cid,
                         response.call.type,
                         response.call.id,
                         response.callUrl,

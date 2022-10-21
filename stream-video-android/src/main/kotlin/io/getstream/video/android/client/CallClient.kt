@@ -23,11 +23,13 @@ import io.getstream.video.android.client.coordinator.CallCoordinatorClient
 import io.getstream.video.android.client.user.UserState
 import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.logging.LoggingLevel
+import io.getstream.video.android.model.CallEventType
 import io.getstream.video.android.model.CallMetadata
 import io.getstream.video.android.model.JoinedCall
 import io.getstream.video.android.model.StartedCall
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.toIceServer
+import io.getstream.video.android.model.toUserEventType
 import io.getstream.video.android.module.CallClientModule
 import io.getstream.video.android.module.HttpModule
 import io.getstream.video.android.socket.VideoSocket
@@ -49,7 +51,6 @@ import stream.video.coordinator.client_v1_rpc.GetCallEdgeServerResponse
 import stream.video.coordinator.client_v1_rpc.JoinCallRequest
 import stream.video.coordinator.client_v1_rpc.MemberInput
 import stream.video.coordinator.client_v1_rpc.SendEventRequest
-import stream.video.coordinator.client_v1_rpc.UserEventType
 import stream.video.coordinator.edge_v1.Latency
 import stream.video.coordinator.edge_v1.LatencyMeasurements
 import stream.video.coordinator.push_v1.Device
@@ -218,13 +219,13 @@ public class CallClient(
      * @see CallCoordinatorClient.sendUserEvent for details.
      */
     public suspend fun sendUserEvent(
-        eventType: UserEventType,
+        eventType: CallEventType,
         callCid: String
     ): Result<Boolean> {
         return callCoordinatorClient.sendUserEvent(
             SendEventRequest(
                 call_cid = callCid,
-                event_type = eventType
+                event_type = eventType.toUserEventType()
             )
         )
     }
