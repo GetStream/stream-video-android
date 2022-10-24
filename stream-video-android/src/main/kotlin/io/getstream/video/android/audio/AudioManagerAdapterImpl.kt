@@ -25,14 +25,14 @@ import android.media.AudioManager
 import android.os.Build
 import io.getstream.logging.StreamLog
 
-internal class AudioDeviceManager(
+internal class AudioManagerAdapterImpl(
     private val context: Context,
     private val audioManager: AudioManager,
     private val audioFocusRequest: AudioFocusRequestWrapper = AudioFocusRequestWrapper(),
     private val audioFocusChangeListener: AudioManager.OnAudioFocusChangeListener
-) {
+) : AudioManagerAdapter {
 
-    private val logger = StreamLog.getLogger("Call:AudioDeviceManager")
+    private val logger = StreamLog.getLogger("Call:AudioManager")
 
     private var savedAudioMode = 0
     private var savedIsMicrophoneMuted = false
@@ -43,12 +43,12 @@ internal class AudioDeviceManager(
         logger.i { "<init> audioFocusChangeListener: $audioFocusChangeListener" }
     }
 
-    fun hasEarpiece(): Boolean {
+    override fun hasEarpiece(): Boolean {
         return context.packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)
     }
 
     @SuppressLint("NewApi")
-    fun hasSpeakerphone(): Boolean {
+    override fun hasSpeakerphone(): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
             context.packageManager
                 .hasSystemFeature(PackageManager.FEATURE_AUDIO_OUTPUT)
@@ -66,7 +66,7 @@ internal class AudioDeviceManager(
     }
 
     @SuppressLint("NewApi")
-    fun setAudioFocus() {
+    override fun setAudioFocus() {
         // Request audio focus before making any device switch.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             audioRequest = audioFocusRequest.buildRequest(audioFocusChangeListener)
@@ -91,23 +91,23 @@ internal class AudioDeviceManager(
         audioManager.mode = AudioManager.MODE_IN_COMMUNICATION
     }
 
-    fun enableBluetoothSco(enable: Boolean) {
+    override fun enableBluetoothSco(enable: Boolean) {
         logger.i { "[enableBluetoothSco] enable: $enable" }
         audioManager.run { if (enable) startBluetoothSco() else stopBluetoothSco() }
     }
 
-    fun enableSpeakerphone(enable: Boolean) {
+    override fun enableSpeakerphone(enable: Boolean) {
         logger.i { "[enableSpeakerphone] enable: $enable" }
         audioManager.isSpeakerphoneOn = enable
     }
 
-    fun mute(mute: Boolean) {
+    override fun mute(mute: Boolean) {
         logger.i { "[mute] mute: $mute" }
         audioManager.isMicrophoneMute = mute
     }
 
     // TODO Consider persisting audio state in the event of process death
-    fun cacheAudioState() {
+    override fun cacheAudioState() {
         logger.i { "[cacheAudioState] no args" }
         savedAudioMode = audioManager.mode
         savedIsMicrophoneMuted = audioManager.isMicrophoneMute
@@ -115,7 +115,7 @@ internal class AudioDeviceManager(
     }
 
     @SuppressLint("NewApi")
-    fun restoreAudioState() {
+    override fun restoreAudioState() {
         logger.i { "[cacheAudioState] no args" }
         audioManager.mode = savedAudioMode
         mute(savedIsMicrophoneMuted)

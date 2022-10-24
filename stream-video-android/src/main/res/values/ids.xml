@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <item type="id" name="stream_call_notification" />
+    <string name="stream_call_notification_channel_id" translatable="false">stream_call_GetStreamClient</string>
+    <string name="stream_call_notification_channel_name">Stream Call</string>
+
+</resources>

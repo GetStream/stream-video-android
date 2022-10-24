@@ -277,6 +277,27 @@ public class StreamCallsImpl(
         client.selectAudioDevice(device)
     }
 
+    override suspend fun acceptCall(type: String, id: String): Result<JoinedCall> {
+        logger.d { "[acceptCall] type: $type, id: $id" }
+        return joinCall(type = type, id = id)
+            .flatMap { joined ->
+                sendEvent(
+                    callCid = joined.call.cid,
+                    eventType = CallEventType.ACCEPTED
+                ).map { joined }
+            }.also { logger.v { "[acceptCall] result: $it" } }
+    }
+
+    override suspend fun rejectCall(cid: String): Result<Boolean> {
+        logger.d { "[rejectCall] cid: $cid" }
+        return sendEvent(callCid = cid, CallEventType.REJECTED)
+    }
+
+    override suspend fun cancelCall(cid: String): Result<Boolean> {
+        logger.d { "[rejectCall] cid: $cid" }
+        return sendEvent(callCid = cid, CallEventType.REJECTED)
+    }
+
     private fun requireClient(): WebRTCClient {
         return webRTCClient
             ?: throw IllegalStateException(

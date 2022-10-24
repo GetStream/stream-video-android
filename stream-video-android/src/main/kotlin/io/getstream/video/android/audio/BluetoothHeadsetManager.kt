@@ -41,7 +41,7 @@ internal class BluetoothHeadsetManager
 internal constructor(
     private val context: Context,
     private val bluetoothAdapter: BluetoothAdapter,
-    audioDeviceManager: AudioDeviceManager,
+    audioDeviceManager: AudioManagerAdapter,
     var headsetListener: BluetoothHeadsetConnectionListener? = null,
     bluetoothScoHandler: Handler = Handler(Looper.getMainLooper()),
     private val bluetoothIntentProcessor: BluetoothIntentProcessor = BluetoothIntentProcessorImpl(),
@@ -73,7 +73,7 @@ internal constructor(
         internal fun newInstance(
             context: Context,
             bluetoothAdapter: BluetoothAdapter?,
-            audioDeviceManager: AudioDeviceManager
+            audioDeviceManager: AudioManagerAdapter
         ): BluetoothHeadsetManager? {
             return bluetoothAdapter?.let { adapter ->
                 BluetoothHeadsetManager(context, adapter, audioDeviceManager)
@@ -287,12 +287,12 @@ internal constructor(
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     internal inner class EnableBluetoothScoJob(
-        private val audioDeviceManager: AudioDeviceManager,
+        private val audioManager: AudioManagerAdapter,
         bluetoothScoHandler: Handler,
     ) : BluetoothScoJob(bluetoothScoHandler) {
 
         override fun scoAction() {
-            audioDeviceManager.enableBluetoothSco(true)
+            audioManager.enableBluetoothSco(true)
             headsetState = AudioActivating
         }
 
@@ -304,12 +304,12 @@ internal constructor(
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     internal inner class DisableBluetoothScoJob(
-        private val audioDeviceManager: AudioDeviceManager,
+        private val audioManager: AudioManagerAdapter,
         bluetoothScoHandler: Handler,
     ) : BluetoothScoJob(bluetoothScoHandler) {
 
         override fun scoAction() {
-            audioDeviceManager.enableBluetoothSco(false)
+            audioManager.enableBluetoothSco(false)
             headsetState = Connected
         }
 

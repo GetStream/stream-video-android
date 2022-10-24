@@ -20,24 +20,25 @@ import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.model.CallMember
 import io.getstream.video.android.model.CallUser
 import io.getstream.video.android.model.IceServer
+import java.io.Serializable
 import io.getstream.video.android.model.StreamCallCid as CallCid
 import io.getstream.video.android.model.StreamCallId as CallId
 import io.getstream.video.android.model.StreamCallType as CallType
 
-public sealed interface StreamCallState : java.io.Serializable {
+public sealed interface StreamCallState : Serializable {
 
     public object Idle : StreamCallState { override fun toString(): String = "Idle" }
 
     public sealed class Active : StreamCallState {
-        public abstract val callGuid: CallGuid
+        public abstract val callGuid: StreamCallGuid
     }
 
     public sealed interface Joinable : StreamCallState {
-        public val callGuid: CallGuid
+        public val callGuid: StreamCallGuid
     }
 
     public data class Starting(
-        override val callGuid: CallGuid,
+        override val callGuid: StreamCallGuid,
         val memberUserIds: List<String>,
         val ringing: Boolean
     ) : Active(), Joinable
@@ -51,7 +52,7 @@ public sealed interface StreamCallState : java.io.Serializable {
     }
 
     public data class Outgoing(
-        override val callGuid: CallGuid,
+        override val callGuid: StreamCallGuid,
         override val createdByUserId: String,
         override val broadcastingEnabled: Boolean,
         override val recordingEnabled: Boolean,
@@ -61,7 +62,7 @@ public sealed interface StreamCallState : java.io.Serializable {
     ) : Started(), Joinable
 
     public data class Incoming(
-        override val callGuid: CallGuid,
+        override val callGuid: StreamCallGuid,
         override val createdByUserId: String,
         override val broadcastingEnabled: Boolean,
         override val recordingEnabled: Boolean,
@@ -71,7 +72,7 @@ public sealed interface StreamCallState : java.io.Serializable {
     ) : Started(), Joinable
 
     public data class Joining(
-        override val callGuid: CallGuid,
+        override val callGuid: StreamCallGuid,
         override val createdByUserId: String,
         override val broadcastingEnabled: Boolean,
         override val recordingEnabled: Boolean,
@@ -86,7 +87,7 @@ public sealed interface StreamCallState : java.io.Serializable {
     }
 
     public data class Connected(
-        override val callGuid: CallGuid,
+        override val callGuid: StreamCallGuid,
         override val createdByUserId: String,
         override val broadcastingEnabled: Boolean,
         override val recordingEnabled: Boolean,
@@ -98,7 +99,7 @@ public sealed interface StreamCallState : java.io.Serializable {
     ) : InCall()
 
     public data class Connecting(
-        override val callGuid: CallGuid,
+        override val callGuid: StreamCallGuid,
         override val createdByUserId: String,
         override val broadcastingEnabled: Boolean,
         override val recordingEnabled: Boolean,
@@ -110,12 +111,12 @@ public sealed interface StreamCallState : java.io.Serializable {
     ) : InCall()
 
     public data class Drop(
-        override val callGuid: CallGuid,
+        override val callGuid: StreamCallGuid,
         val reason: DropReason,
     ) : Active()
 }
 
-public sealed class DropReason {
+public sealed class DropReason : Serializable {
     public data class Timeout(val waitMillis: Long) : DropReason()
     public data class Failure(val error: VideoError) : DropReason()
     public data class Rejected(val byUserId: String) : DropReason()
@@ -123,8 +124,8 @@ public sealed class DropReason {
     public object Ended : DropReason() { override fun toString(): String = "Ended" }
 }
 
-public data class CallGuid(
+public data class StreamCallGuid(
     val type: CallType,
     val id: CallId,
     val cid: CallCid
-)
+) : Serializable

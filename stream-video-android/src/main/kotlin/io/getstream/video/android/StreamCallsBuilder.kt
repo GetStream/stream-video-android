@@ -26,6 +26,7 @@ import io.getstream.video.android.token.CredentialsProvider
 public class StreamCallsBuilder(
     private val context: Context,
     private val credentialsProvider: CredentialsProvider,
+    private val config: StreamCallsConfig = StreamCallsConfigDummy,
     private val loggingLevel: LoggingLevel = LoggingLevel.NONE
 ) {
 
