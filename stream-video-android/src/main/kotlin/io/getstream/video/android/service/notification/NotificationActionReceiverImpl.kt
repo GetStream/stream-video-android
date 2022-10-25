@@ -14,19 +14,24 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.app.ui.call
+package io.getstream.video.android.service.notification
 
 import android.content.Context
-import io.getstream.video.android.StreamCalls
-import io.getstream.video.android.app.videoApp
-import io.getstream.video.android.service.StreamCallService
+import io.getstream.video.android.utils.registerReceiverAsFlow
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
-class CallService : StreamCallService() {
+internal class NotificationActionReceiverImpl(
+    private val context: Context
+) : NotificationActionReceiver {
 
-    override fun getStreamCalls(context: Context): StreamCalls = videoApp.streamCalls
-
-    companion object {
-        fun start(context: Context) = start<CallService>(context)
-        fun stop(context: Context) = stop<CallService>(context)
+    override suspend fun registerAsFlow(): Flow<NotificationAction> {
+        return context.registerReceiverAsFlow(
+            NotificationAction.Accept.NAME,
+            NotificationAction.Reject.NAME,
+            NotificationAction.Cancel.NAME
+        ).map {
+            it.extractNotificationAction()
+        }
     }
 }

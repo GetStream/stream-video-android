@@ -44,8 +44,8 @@ import io.getstream.video.android.model.CallEventType.UNDEFINED
 import io.getstream.video.android.model.CallMetadata
 import io.getstream.video.android.model.JoinedCall
 import io.getstream.video.android.model.User
-import io.getstream.video.android.model.state.StreamCallGuid
 import io.getstream.video.android.model.state.DropReason
+import io.getstream.video.android.model.state.StreamCallGuid
 import io.getstream.video.android.socket.SocketListener
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

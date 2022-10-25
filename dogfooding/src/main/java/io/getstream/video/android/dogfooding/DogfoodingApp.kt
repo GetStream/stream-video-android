@@ -53,7 +53,7 @@ class DogfoodingApp : Application() {
         return StreamCallsBuilder(
             context = this,
             credentialsProvider = credentialsProvider,
-            loggingLevel = loggingLevel
+            loggingLevel = loggingLevel,
         ).build().also {
             calls = it
         }

@@ -14,19 +14,25 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.app.ui.call
+package io.getstream.video.android.service.notification
 
-import android.content.Context
-import io.getstream.video.android.StreamCalls
-import io.getstream.video.android.app.videoApp
-import io.getstream.video.android.service.StreamCallService
+import androidx.core.app.NotificationCompat
+import io.getstream.video.android.model.state.StreamCallGuid
 
-class CallService : StreamCallService() {
+internal interface NotificationActionBuilder {
 
-    override fun getStreamCalls(context: Context): StreamCalls = videoApp.streamCalls
+    fun createAcceptAction(
+        notificationId: Int,
+        guid: StreamCallGuid
+    ): NotificationCompat.Action
 
-    companion object {
-        fun start(context: Context) = start<CallService>(context)
-        fun stop(context: Context) = stop<CallService>(context)
-    }
+    fun createRejectAction(
+        notificationId: Int,
+        guid: StreamCallGuid
+    ): NotificationCompat.Action
+
+    fun createCancelAction(
+        notificationId: Int,
+        guid: StreamCallGuid
+    ): NotificationCompat.Action
 }

@@ -24,7 +24,6 @@ import io.getstream.video.android.client.CallClient
 import io.getstream.video.android.client.LifecycleHandler
 import io.getstream.video.android.client.StreamLifecycleObserver
 import io.getstream.video.android.client.user.UserState
-import io.getstream.video.android.dispatchers.DispatcherProvider
 import io.getstream.video.android.engine.StreamCallEngineImpl
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.model.Call
@@ -58,6 +57,7 @@ import kotlinx.coroutines.launch
  */
 public class StreamCallsImpl(
     private val context: Context,
+    private val scope: CoroutineScope,
     private val lifecycle: Lifecycle,
     private val loggingLevel: LoggingLevel,
     private val callClient: CallClient,
@@ -69,8 +69,6 @@ public class StreamCallsImpl(
 ) : StreamCalls {
 
     private val logger = StreamLog.getLogger("Call:StreamCalls")
-
-    private val scope = CoroutineScope(DispatcherProvider.IO)
 
     private val engine = StreamCallEngineImpl(scope) {
         credentialsProvider.getUserCredentials()

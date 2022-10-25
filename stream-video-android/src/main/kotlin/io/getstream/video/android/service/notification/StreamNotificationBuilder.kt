@@ -14,19 +14,20 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.app.ui.call
+package io.getstream.video.android.service.notification
 
-import android.content.Context
-import io.getstream.video.android.StreamCalls
-import io.getstream.video.android.app.videoApp
-import io.getstream.video.android.service.StreamCallService
+import android.app.Notification
+import io.getstream.video.android.model.state.StreamCallState
 
-class CallService : StreamCallService() {
+/**
+ * Handler responsible for showing and dismissing notification.
+ */
+public interface StreamNotificationBuilder {
 
-    override fun getStreamCalls(context: Context): StreamCalls = videoApp.streamCalls
-
-    companion object {
-        fun start(context: Context) = start<CallService>(context)
-        fun stop(context: Context) = stop<CallService>(context)
-    }
+    /**
+     * Shows a notification for the given [state].
+     */
+    public fun build(state: StreamCallState.Active): IdentifiedNotification
 }
+
+public data class IdentifiedNotification(val id: Int, val value: Notification)

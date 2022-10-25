@@ -191,5 +191,4 @@ public interface StreamCalls {
     public suspend fun rejectCall(cid: String): Result<Boolean>
 
     public suspend fun cancelCall(cid: String): Result<Boolean>
-
 }
