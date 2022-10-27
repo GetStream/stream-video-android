@@ -34,6 +34,10 @@
             android:showOnLockScreen="true" />
 
         <activity android:name=".ui.outgoing.OutgoingCallActivity" />
+
+        <service android:name=".ui.call.CallService"
+            android:enabled="true"
+            android:exported="false" />
     </application>
 
 </manifest>

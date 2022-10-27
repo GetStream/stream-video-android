@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="stream_call_notification_action_accept">Accept</string>
+    <string name="stream_call_notification_action_reject">Reject</string>
+    <string name="stream_call_notification_action_cancel">Cancel</string>
+
+</resources>

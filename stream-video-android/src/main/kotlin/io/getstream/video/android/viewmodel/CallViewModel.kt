@@ -23,7 +23,6 @@ import io.getstream.logging.StreamLog
 import io.getstream.video.android.StreamCalls
 import io.getstream.video.android.audio.AudioDevice
 import io.getstream.video.android.model.Call
-import io.getstream.video.android.model.CallEventType
 import io.getstream.video.android.model.CallInput
 import io.getstream.video.android.model.CallParticipant
 import io.getstream.video.android.model.CallParticipantState
@@ -87,7 +86,8 @@ public class CallViewModel(
         viewModelScope.launch {
             streamCalls.callState.collect {
                 when (it) {
-                    is StreamCallState.Drop -> {
+                    is StreamCallState.Idle -> {
+                        logger.i { "[observeState] state: Idle" }
                         clearState()
                     }
                     else -> { /* no-op */ }
@@ -192,8 +192,7 @@ public class CallViewModel(
     public fun leaveCall() {
         viewModelScope.launch {
             logger.d { "[leaveCall] no args" }
-            streamCalls.sendEvent(input.callCid, CallEventType.CANCELLED)
-            clearState()
+            streamCalls.cancelCall(input.callCid)
         }
     }
 

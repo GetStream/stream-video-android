@@ -24,7 +24,6 @@ import io.getstream.video.android.client.CallClient
 import io.getstream.video.android.client.LifecycleHandler
 import io.getstream.video.android.client.StreamLifecycleObserver
 import io.getstream.video.android.client.user.UserState
-import io.getstream.video.android.dispatchers.DispatcherProvider
 import io.getstream.video.android.engine.StreamCallEngineImpl
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.model.Call
@@ -34,6 +33,7 @@ import io.getstream.video.android.model.CallSettings
 import io.getstream.video.android.model.IceServer
 import io.getstream.video.android.model.JoinedCall
 import io.getstream.video.android.model.User
+import io.getstream.video.android.model.state.DropReason
 import io.getstream.video.android.model.state.StreamCallState
 import io.getstream.video.android.network.NetworkStateProvider
 import io.getstream.video.android.socket.SocketListener
@@ -51,6 +51,7 @@ import io.getstream.video.android.webrtc.builder.WebRTCClientBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 /**
@@ -58,6 +59,8 @@ import kotlinx.coroutines.launch
  */
 public class StreamCallsImpl(
     private val context: Context,
+    private val scope: CoroutineScope,
+    private val config: StreamCallsConfig,
     private val lifecycle: Lifecycle,
     private val loggingLevel: LoggingLevel,
     private val callClient: CallClient,
@@ -70,10 +73,24 @@ public class StreamCallsImpl(
 
     private val logger = StreamLog.getLogger("Call:StreamCalls")
 
-    private val scope = CoroutineScope(DispatcherProvider.IO)
-
-    private val engine = StreamCallEngineImpl(scope) {
+    private val engine = StreamCallEngineImpl(scope, config) {
         credentialsProvider.getUserCredentials()
+    }
+
+    init {
+        scope.launch {
+            engine.callState.collect { state ->
+                when (state) {
+                    is StreamCallState.Drop -> {
+                        if (state.reason is DropReason.Timeout) {
+                            logger.i { "[observeState] call dropped by timeout" }
+                            cancelCall(state.callGuid.cid)
+                        }
+                    }
+                    else -> { /* no-op */ }
+                }
+            }
+        }
     }
 
     /**
@@ -275,6 +292,27 @@ public class StreamCallsImpl(
         val client = requireClient()
 
         client.selectAudioDevice(device)
+    }
+
+    override suspend fun acceptCall(type: String, id: String): Result<JoinedCall> {
+        logger.d { "[acceptCall] type: $type, id: $id" }
+        return joinCall(type = type, id = id)
+            .flatMap { joined ->
+                sendEvent(
+                    callCid = joined.call.cid,
+                    eventType = CallEventType.ACCEPTED
+                ).map { joined }
+            }.also { logger.v { "[acceptCall] result: $it" } }
+    }
+
+    override suspend fun rejectCall(cid: String): Result<Boolean> {
+        logger.d { "[rejectCall] cid: $cid" }
+        return sendEvent(callCid = cid, CallEventType.REJECTED)
+    }
+
+    override suspend fun cancelCall(cid: String): Result<Boolean> {
+        logger.d { "[cancelCall] cid: $cid" }
+        return sendEvent(callCid = cid, CallEventType.CANCELLED)
     }
 
     private fun requireClient(): WebRTCClient {

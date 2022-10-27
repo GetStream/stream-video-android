@@ -32,7 +32,7 @@ public class AudioSwitch internal constructor(
     context: Context,
     audioFocusChangeListener: AudioManager.OnAudioFocusChangeListener,
     preferredDeviceList: List<Class<out AudioDevice>>,
-    private val audioDeviceManager: AudioDeviceManager = AudioDeviceManager(
+    private val audioManager: AudioManagerAdapter = AudioManagerAdapterImpl(
         context,
         context.getSystemService(Context.AUDIO_SERVICE) as AudioManager,
         audioFocusChangeListener = audioFocusChangeListener
@@ -41,7 +41,7 @@ public class AudioSwitch internal constructor(
     headsetManager: BluetoothHeadsetManager? = BluetoothHeadsetManager.newInstance(
         context,
         BluetoothAdapter.getDefaultAdapter(),
-        audioDeviceManager
+        audioManager
     )
 ) {
 
@@ -161,11 +161,11 @@ public class AudioSwitch internal constructor(
         logger.d { "[activate] state: $state" }
         when (state) {
             STARTED -> {
-                audioDeviceManager.cacheAudioState()
+                audioManager.cacheAudioState()
 
                 // Always set mute to false for WebRTC
-                audioDeviceManager.mute(false)
-                audioDeviceManager.setAudioFocus()
+                audioManager.mute(false)
+                audioManager.setAudioFocus()
                 selectedDevice?.let { activate(it) }
                 state = ACTIVATED
             }
@@ -185,7 +185,7 @@ public class AudioSwitch internal constructor(
                 bluetoothHeadsetManager?.deactivate()
 
                 // Restore stored audio state
-                audioDeviceManager.restoreAudioState()
+                audioManager.restoreAudioState()
                 state = STARTED
             }
             STARTED, STOPPED -> {
@@ -214,15 +214,15 @@ public class AudioSwitch internal constructor(
         logger.d { "[activate] audioDevice: $audioDevice" }
         when (audioDevice) {
             is BluetoothHeadset -> {
-                audioDeviceManager.enableSpeakerphone(false)
+                audioManager.enableSpeakerphone(false)
                 bluetoothHeadsetManager?.activate()
             }
             is Earpiece, is WiredHeadset -> {
-                audioDeviceManager.enableSpeakerphone(false)
+                audioManager.enableSpeakerphone(false)
                 bluetoothHeadsetManager?.deactivate()
             }
             is Speakerphone -> {
-                audioDeviceManager.enableSpeakerphone(true)
+                audioManager.enableSpeakerphone(true)
                 bluetoothHeadsetManager?.deactivate()
             }
         }
@@ -309,7 +309,7 @@ public class AudioSwitch internal constructor(
                     }
                 }
                 Earpiece::class.java -> {
-                    val hasEarpiece = audioDeviceManager.hasEarpiece()
+                    val hasEarpiece = audioManager.hasEarpiece()
                     logger.v {
                         "[addAvailableAudioDevices] #Earpiece; hasEarpiece: $hasEarpiece, " +
                             "wiredHeadsetAvailable: $wiredHeadsetAvailable"
@@ -319,7 +319,7 @@ public class AudioSwitch internal constructor(
                     }
                 }
                 Speakerphone::class.java -> {
-                    val hasSpeakerphone = audioDeviceManager.hasSpeakerphone()
+                    val hasSpeakerphone = audioManager.hasSpeakerphone()
                     logger.v { "[addAvailableAudioDevices] #Speakerphone; hasSpeakerphone: $hasSpeakerphone" }
                     if (hasSpeakerphone) {
                         mutableAudioDevices.add(Speakerphone())

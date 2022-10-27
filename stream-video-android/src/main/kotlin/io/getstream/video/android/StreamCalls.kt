@@ -185,4 +185,10 @@ public interface StreamCalls {
     public fun getAudioDevices(): List<AudioDevice>
 
     public fun selectAudioDevice(device: AudioDevice)
+
+    public suspend fun acceptCall(type: String, id: String): Result<JoinedCall>
+
+    public suspend fun rejectCall(cid: String): Result<Boolean>
+
+    public suspend fun cancelCall(cid: String): Result<Boolean>
 }

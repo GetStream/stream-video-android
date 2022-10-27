@@ -24,8 +24,10 @@ import io.getstream.logging.android.AndroidStreamLogger
 import io.getstream.video.android.StreamCalls
 import io.getstream.video.android.StreamCallsBuilder
 import io.getstream.video.android.app.lifecycle.StreamActivityLifecycleCallbacks
+import io.getstream.video.android.app.ui.call.CallService
 import io.getstream.video.android.app.user.UserPreferences
 import io.getstream.video.android.app.user.UserPreferencesImpl
+import io.getstream.video.android.input.CallServiceInput
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.token.CredentialsProvider
 import kotlinx.coroutines.CoroutineScope
@@ -79,6 +81,7 @@ class VideoApp : Application() {
         return StreamCallsBuilder(
             context = this,
             credentialsProvider = credentialsProvider,
+            serviceInput = CallServiceInput.forClass(CallService::class),
             loggingLevel = loggingLevel
         ).build().also {
             streamCalls = it

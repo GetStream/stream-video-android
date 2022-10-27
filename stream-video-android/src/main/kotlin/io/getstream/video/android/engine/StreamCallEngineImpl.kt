@@ -17,6 +17,7 @@
 package io.getstream.video.android.engine
 
 import io.getstream.logging.StreamLog
+import io.getstream.video.android.StreamCallsConfig
 import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.events.AudioMutedEvent
 import io.getstream.video.android.events.AudioUnmutedEvent
@@ -44,12 +45,13 @@ import io.getstream.video.android.model.CallEventType.UNDEFINED
 import io.getstream.video.android.model.CallMetadata
 import io.getstream.video.android.model.JoinedCall
 import io.getstream.video.android.model.User
-import io.getstream.video.android.model.state.CallGuid
 import io.getstream.video.android.model.state.DropReason
+import io.getstream.video.android.model.state.StreamCallGuid
 import io.getstream.video.android.socket.SocketListener
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.job
@@ -68,7 +70,8 @@ import io.getstream.video.android.model.state.StreamCallState as State
  */
 internal class StreamCallEngineImpl(
     parentScope: CoroutineScope,
-    private val getCurrentUser: () -> User
+    private val config: StreamCallsConfig,
+    private val getCurrentUser: () -> User,
 ) : StreamCallEngine, SocketListener {
 
     private val logger = StreamLog.getLogger("Call:Engine")
@@ -165,7 +168,7 @@ internal class StreamCallEngineImpl(
             joinedCall.run {
                 // TODO it should be Connecting until a Connected state from ICE candidates comes
                 State.Connected(
-                    callGuid = CallGuid(
+                    callGuid = StreamCallGuid(
                         type = call.type,
                         id = call.id,
                         cid = call.cid,
@@ -209,7 +212,7 @@ internal class StreamCallEngineImpl(
         if (state is State.Idle) {
             _callState.post(
                 State.Starting(
-                    callGuid = CallGuid(
+                    callGuid = StreamCallGuid(
                         type = type,
                         id = id,
                         cid = CallCid(type, id),
@@ -242,7 +245,7 @@ internal class StreamCallEngineImpl(
         logger.d { "[onCallStarted] call: $call, state: $state" }
         _callState.post(
             State.Outgoing(
-                callGuid = CallGuid(
+                callGuid = StreamCallGuid(
                     type = call.type,
                     id = call.id,
                     cid = call.cid,
@@ -255,6 +258,25 @@ internal class StreamCallEngineImpl(
                 acceptedByCallee = false
             )
         )
+        if (state.ringing) {
+            waitForCallToBeAccepted()
+        }
+    }
+
+    private fun waitForCallToBeAccepted() {
+        scope.launch {
+            logger.d { "[waitForCallToBeAccepted] dropTimeout: ${config.dropTimeout}" }
+            delay(config.dropTimeout)
+            mutex.withLock {
+                val state = _callState.value
+                if (state is State.Outgoing && !state.acceptedByCallee) {
+                    logger.w { "[waitForCallToBeAccepted] timed out (call is not accepted)" }
+                    dropCall(State.Drop(state.callGuid, DropReason.Timeout(config.dropTimeout)))
+                } else {
+                    logger.v { "[waitForCallToBeAccepted] call was accepted" }
+                }
+            }
+        }
     }
 
     override fun onCallEventSending(callCid: String, eventType: CallEventType) = scope.launchWithLock(mutex) {
@@ -309,7 +331,7 @@ internal class StreamCallEngineImpl(
         logger.d { "[onCallJoining] call: $call, state: $state" }
         _callState.post(
             State.Joining(
-                callGuid = CallGuid(
+                callGuid = StreamCallGuid(
                     type = call.type,
                     id = call.id,
                     cid = call.cid,
@@ -381,7 +403,7 @@ internal class StreamCallEngineImpl(
         _callState.post(
             event.run {
                 State.Incoming(
-                    callGuid = CallGuid(
+                    callGuid = StreamCallGuid(
                         type = info.type,
                         id = info.id,
                         cid = info.cid,
