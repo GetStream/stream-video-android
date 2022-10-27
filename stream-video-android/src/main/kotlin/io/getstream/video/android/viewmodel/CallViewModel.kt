@@ -23,7 +23,6 @@ import io.getstream.logging.StreamLog
 import io.getstream.video.android.StreamCalls
 import io.getstream.video.android.audio.AudioDevice
 import io.getstream.video.android.model.Call
-import io.getstream.video.android.model.CallEventType
 import io.getstream.video.android.model.CallInput
 import io.getstream.video.android.model.CallParticipant
 import io.getstream.video.android.model.CallParticipantState

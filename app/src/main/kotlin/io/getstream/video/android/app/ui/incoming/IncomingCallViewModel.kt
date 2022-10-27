@@ -20,7 +20,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.getstream.logging.StreamLog
 import io.getstream.video.android.StreamCalls
-import io.getstream.video.android.events.CallCanceledEvent
 import io.getstream.video.android.events.VideoEvent
 import io.getstream.video.android.model.CallEventType
 import io.getstream.video.android.model.CallInput
@@ -33,7 +32,6 @@ import io.getstream.video.android.utils.flatMap
 import io.getstream.video.android.utils.map
 import io.getstream.video.android.utils.onError
 import io.getstream.video.android.utils.onSuccess
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 

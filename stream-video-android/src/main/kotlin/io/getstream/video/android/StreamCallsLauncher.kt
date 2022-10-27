@@ -52,5 +52,4 @@ internal class StreamCallsLauncher(
         if (!config.launchCallServiceInternally) return
         StreamCallService.start(applicationContext, input)
     }
-
 }
