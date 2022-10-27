@@ -67,7 +67,7 @@ internal class NotificationActionBuilderImpl(
     ): PendingIntent = PendingIntent.getBroadcast(
         context,
         notificationId,
-        createNotifyIntent(context, NotificationAction.Accept(guid)),
+        Intent().setNotificationAction(NotificationAction.Accept(guid)),
         IMMUTABLE_PENDING_INTENT_FLAGS,
     )
 
@@ -77,7 +77,7 @@ internal class NotificationActionBuilderImpl(
     ): PendingIntent = PendingIntent.getBroadcast(
         context,
         notificationId,
-        createNotifyIntent(context, NotificationAction.Reject(guid)),
+        Intent().setNotificationAction(NotificationAction.Reject(guid)),
         IMMUTABLE_PENDING_INTENT_FLAGS,
     )
 
@@ -87,13 +87,9 @@ internal class NotificationActionBuilderImpl(
     ): PendingIntent = PendingIntent.getBroadcast(
         context,
         notificationId,
-        createNotifyIntent(context, NotificationAction.Cancel(guid)),
+        Intent().setNotificationAction(NotificationAction.Cancel(guid)),
         IMMUTABLE_PENDING_INTENT_FLAGS,
     )
-
-    private fun createNotifyIntent(context: Context, action: NotificationAction) =
-        Intent(context, NotificationActionReceiverImpl::class.java)
-            .setNotificationAction(action)
 
     private companion object {
         private val IMMUTABLE_PENDING_INTENT_FLAGS =

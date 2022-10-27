@@ -26,6 +26,7 @@ import io.getstream.video.android.model.CallEventType
 import io.getstream.video.android.model.CallInput
 import io.getstream.video.android.model.IncomingCallData
 import io.getstream.video.android.model.JoinedCall
+import io.getstream.video.android.model.state.StreamCallState
 import io.getstream.video.android.router.StreamRouter
 import io.getstream.video.android.socket.SocketListener
 import io.getstream.video.android.utils.flatMap
@@ -33,6 +34,7 @@ import io.getstream.video.android.utils.map
 import io.getstream.video.android.utils.onError
 import io.getstream.video.android.utils.onSuccess
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class IncomingCallViewModel(
@@ -44,13 +46,18 @@ class IncomingCallViewModel(
     private val logger = StreamLog.getLogger("Call:Incoming-VM")
 
     init {
-        scheduleTimer()
         streamCalls.addSocketListener(this)
-    }
-
-    private fun scheduleTimer() {
         viewModelScope.launch {
-            delay(timeMillis = 10_000) // TODO - we'll have to provide some config here
+            streamCalls.callState.collect { state ->
+                when (state) {
+                    is StreamCallState.Idle -> {
+                        logger.i { "[observeState] state: Idle" }
+                        streamCalls.clearCallState()
+                        streamRouter.finish()
+                    }
+                    is StreamCallState.Active -> {}
+                }
+            }
         }
     }
 
@@ -81,26 +88,15 @@ class IncomingCallViewModel(
     }
 
     fun declineCall() {
-        val data = callData
         viewModelScope.launch {
-            val result = streamCalls.sendEvent(
-                callCid = data.callInfo.cid,
-                eventType = CallEventType.REJECTED
-            )
+            val result = streamCalls.rejectCall(callData.callInfo.cid)
             logger.d { "[declineCall] result: $result" }
-
-            streamCalls.clearCallState()
-            streamRouter.onCallFailed(reason = "Call rejected!")
         }
     }
 
     override fun onEvent(event: VideoEvent) {
         super.onEvent(event)
         logger.d { "[onEvent] $event" }
-        if (event is CallCanceledEvent) {
-            streamCalls.clearCallState()
-            streamRouter.onCallFailed(reason = "Call canceled!")
-        }
     }
 
     override fun onCleared() {

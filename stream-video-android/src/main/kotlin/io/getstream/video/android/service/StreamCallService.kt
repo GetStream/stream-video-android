@@ -18,15 +18,19 @@ package io.getstream.video.android.service
 
 import android.app.NotificationManager
 import android.app.Service
+import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.IBinder
 import androidx.core.content.ContextCompat
 import io.getstream.logging.StreamLog
+import io.getstream.video.android.R
 import io.getstream.video.android.StreamCalls
 import io.getstream.video.android.dispatchers.DispatcherProvider
 import io.getstream.video.android.input.CallServiceInput
+import io.getstream.video.android.service.notification.NotificationAction
 import io.getstream.video.android.service.notification.StreamNotificationBuilder
 import io.getstream.video.android.service.notification.StreamNotificationBuilderImpl
 import io.getstream.video.android.service.vibro.StreamVibroManager
@@ -58,7 +62,9 @@ public abstract class StreamCallService : Service() {
     protected abstract fun getStreamCalls(context: Context): StreamCalls
 
     protected open fun createNotificationBuilder(context: Context): StreamNotificationBuilder =
-        StreamNotificationBuilderImpl(context, streamCalls, scope)
+        StreamNotificationBuilderImpl(context, streamCalls, scope) {
+            R.id.stream_call_notification
+        }
 
     protected open fun createVibroManager(context: Context): StreamVibroManager =
         StreamVibroManagerImpl(context)

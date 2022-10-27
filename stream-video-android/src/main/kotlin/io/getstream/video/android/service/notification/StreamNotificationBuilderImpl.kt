@@ -35,7 +35,8 @@ import io.getstream.video.android.model.state.StreamCallState as State
 internal class StreamNotificationBuilderImpl(
     private val context: Context,
     private val streamCalls: StreamCalls,
-    private val scope: CoroutineScope
+    private val scope: CoroutineScope,
+    private val getNotificationId: () -> Int
 ) : StreamNotificationBuilder {
 
     private val logger = StreamLog.getLogger("Call:NtfBuilder")
@@ -69,7 +70,7 @@ internal class StreamNotificationBuilderImpl(
     }
 
     override fun build(state: State.Active): IdentifiedNotification {
-        val notificationId = R.id.stream_call_notification
+        val notificationId = getNotificationId()
         val notification = getNotificationBuilder(
             contentTitle = getContentTitle(state),
             contentText = getContentText(state),
@@ -101,7 +102,7 @@ internal class StreamNotificationBuilderImpl(
     }
 
     private fun getContentTitle(state: State.Active): String {
-        return when (state) {
+        return "${state.callGuid.id}: " + when (state) {
             is State.Starting -> "Starting call of ${state.memberUserIds.size} people"
             is State.Outgoing -> "Outgoing Call"
             is State.Incoming -> "Incoming"
@@ -114,13 +115,9 @@ internal class StreamNotificationBuilderImpl(
 
     private fun getContentText(state: State.Active): String {
         return when (state) {
-            is State.Starting -> "Starting"
-            is State.Outgoing -> "Outgoing"
-            is State.Incoming -> "Incoming"
-            is State.Joining -> "Joining"
-            is State.Connected -> "Connected"
-            is State.Connecting -> "Connecting"
-            is State.Drop -> "Drop"
+            is State.Starting -> state.memberUserIds.joinToString()
+            is State.Started -> state.users.values.filter { it.id != state.createdByUserId }.joinToString { it.name }
+            is State.Drop -> ""
         }
     }
 

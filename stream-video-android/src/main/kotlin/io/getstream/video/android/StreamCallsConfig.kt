@@ -18,9 +18,11 @@ package io.getstream.video.android
 
 public interface StreamCallsConfig {
 
+    public val dropTimeout: Long
     public val launchCallServiceInternally: Boolean
 }
 
 public object StreamCallsConfigDefault : StreamCallsConfig {
+    override val dropTimeout: Long = 10_000L
     override val launchCallServiceInternally: Boolean = true
 }

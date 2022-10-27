@@ -87,7 +87,8 @@ public class CallViewModel(
         viewModelScope.launch {
             streamCalls.callState.collect {
                 when (it) {
-                    is StreamCallState.Drop -> {
+                    is StreamCallState.Idle -> {
+                        logger.i { "[observeState] state: Idle" }
                         clearState()
                     }
                     else -> { /* no-op */ }
@@ -192,8 +193,7 @@ public class CallViewModel(
     public fun leaveCall() {
         viewModelScope.launch {
             logger.d { "[leaveCall] no args" }
-            streamCalls.sendEvent(input.callCid, CallEventType.CANCELLED)
-            clearState()
+            streamCalls.cancelCall(input.callCid)
         }
     }
 

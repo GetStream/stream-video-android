@@ -27,6 +27,7 @@ import io.getstream.video.android.events.VideoEvent
 import io.getstream.video.android.model.CallEventType
 import io.getstream.video.android.model.CallInput
 import io.getstream.video.android.model.OutgoingCallData
+import io.getstream.video.android.model.state.StreamCallState
 import io.getstream.video.android.model.toMetadata
 import io.getstream.video.android.router.StreamRouter
 import io.getstream.video.android.socket.SocketListener
@@ -35,6 +36,7 @@ import io.getstream.video.android.utils.onSuccessSuspend
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class OutgoingCallViewModel(
@@ -56,10 +58,17 @@ class OutgoingCallViewModel(
 
     init {
         streamCalls.addSocketListener(this)
-
         viewModelScope.launch {
-            delay(10000)
-            hangUpCall()
+            streamCalls.callState.collect { state ->
+                when (state) {
+                    is StreamCallState.Idle -> {
+                        logger.i { "[observeState] state: Idle" }
+                        streamCalls.clearCallState()
+                        streamRouter.finish()
+                    }
+                    is StreamCallState.Active -> {}
+                }
+            }
         }
     }
 
@@ -82,16 +91,8 @@ class OutgoingCallViewModel(
     }
 
     fun hangUpCall() {
-        val data = callData.callInfo
-
         viewModelScope.launch {
-            streamCalls.sendEvent(
-                callCid = data.cid,
-                eventType = CallEventType.CANCELLED
-            )
-
-            streamCalls.clearCallState()
-            streamRouter.finish()
+            streamCalls.cancelCall(callData.callInfo.cid)
         }
     }
 

@@ -35,12 +35,12 @@ internal fun Intent.extractNotificationAction(): NotificationAction {
 
 internal fun Intent.setNotificationAction(action: NotificationAction): Intent {
     putExtra(KEY_TYPE, action.guid.type)
-    putExtra(KEY_CID, action.guid.id)
-    putExtra(KEY_TYPE, action.guid.cid)
+    putExtra(KEY_ID, action.guid.id)
+    putExtra(KEY_CID, action.guid.cid)
     this.action = when (action) {
         is NotificationAction.Accept -> NotificationAction.Accept.NAME
-        is NotificationAction.Cancel -> NotificationAction.Reject.NAME
-        is NotificationAction.Reject -> NotificationAction.Cancel.NAME
+        is NotificationAction.Reject -> NotificationAction.Reject.NAME
+        is NotificationAction.Cancel -> NotificationAction.Cancel.NAME
     }
     return this
 }

@@ -58,6 +58,7 @@ public class StreamCallsBuilder(
         return StreamCallsImpl(
             context = context,
             scope = scope,
+            config = config,
             loggingLevel = loggingLevel,
             callClient = callClient.build(),
             credentialsProvider = credentialsProvider,

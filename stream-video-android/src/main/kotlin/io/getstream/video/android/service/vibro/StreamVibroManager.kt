@@ -21,6 +21,7 @@ import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import androidx.annotation.RequiresApi
+import io.getstream.logging.StreamLog
 import io.getstream.video.android.utils.vibrator
 import io.getstream.video.android.utils.vibratorManager
 
@@ -34,13 +35,14 @@ public class StreamVibroManagerImpl(
     private val context: Context
 ) : StreamVibroManager {
 
+    private val logger = StreamLog.getLogger("Call:VibroManager")
+
     private val incomingPattern = longArrayOf(0, 100, 200, 300, 400)
 
     public override fun vibrateIncoming(): Unit = with(context) {
+        logger.d { "[vibrateIncoming] no args" }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             vibratorManager.defaultVibrator.vibrateCompat(incomingPattern, REPEAT_FROM_ZERO_INDEX)
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            vibrator.vibrateCompat(incomingPattern, REPEAT_FROM_ZERO_INDEX)
         } else {
             vibrator.vibrateCompat(incomingPattern, REPEAT_FROM_ZERO_INDEX)
         }
@@ -58,6 +60,7 @@ public class StreamVibroManagerImpl(
 
     private fun Vibrator.vibrateCompat(pattern: LongArray, repeat: Int) {
         if (!hasVibrator()) {
+            logger.w { "[vibrateCompat] rejected (no vibrator)" }
             return
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
