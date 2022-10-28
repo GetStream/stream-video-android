@@ -95,8 +95,11 @@ public class CallClient(
                 type = type,
                 id = id,
                 input = CreateCallInput(
-                    members = participantIds.associateWith {
-                        MemberInput(role = "admin")
+                    members = participantIds.map {
+                        MemberInput(
+                            user_id = it,
+                            role = "admin"
+                        )
                     },
                     ring = ringing
                 )
@@ -123,8 +126,11 @@ public class CallClient(
                 type = type,
                 id = id,
                 input = CreateCallInput(
-                    members = participantIds.associateWith {
-                        MemberInput(role = "admin")
+                    members = participantIds.map {
+                        MemberInput(
+                            user_id = it,
+                            role = "admin"
+                        )
                     },
                     ring = ringing
                 )

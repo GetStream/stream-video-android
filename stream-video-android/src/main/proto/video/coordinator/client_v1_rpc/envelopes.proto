@@ -7,6 +7,9 @@ import "video/coordinator/member_v1/member.proto";
 import "video/coordinator/user_v1/user.proto";
 
 option go_package = "client_v1_rpc";
+//option java_multiple_files = true;
+option java_outer_classname = "ClientV1Envelopes";
+option csharp_namespace = "Stream.Video.v1.Coordinator";
 
 // CallEnvelope contains Call and all related information to it
 // Only used in reponse types that return a single call

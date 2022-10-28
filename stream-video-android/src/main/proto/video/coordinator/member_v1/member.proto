@@ -6,6 +6,9 @@ import "google/protobuf/timestamp.proto";
 import "validate/validate.proto";
 
 option go_package = "member_v1";
+option java_multiple_files = true;
+option java_outer_classname = "MemberV1";
+option csharp_namespace = "Stream.Video.v1.Coordinator";
 
 message Member {
   // The CID of the Call this member belongs to

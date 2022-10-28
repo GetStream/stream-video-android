@@ -108,8 +108,9 @@ public abstract class StreamCallService : Service() {
             is State.Active -> {
                 updateNotification(state)
                 when (state) {
-                    is State.Incoming -> {
-                        vibroManager.vibrateIncoming()
+                    is State.Incoming -> when (!state.acceptedByMe) {
+                        true -> vibroManager.vibrateIncoming()
+                        else -> vibroManager.cancel()
                     }
                     else -> {}
                 }

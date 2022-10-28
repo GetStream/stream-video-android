@@ -220,6 +220,39 @@ func (m *WebsocketEvent_CallDeleted) MarshalToSizedBufferVT(dAtA []byte) (int, e
 	}
 	return len(dAtA) - i, nil
 }
+func (m *WebsocketEvent_CallMembersCreated) MarshalToVT(dAtA []byte) (int, error) {
+	size := m.SizeVT()
+	return m.MarshalToSizedBufferVT(dAtA[:size])
+}
+
+func (m *WebsocketEvent_CallMembersCreated) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.CallMembersCreated != nil {
+		if marshalto, ok := interface{}(m.CallMembersCreated).(interface {
+			MarshalToSizedBufferVT([]byte) (int, error)
+		}); ok {
+			size, err := marshalto.MarshalToSizedBufferVT(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarint(dAtA, i, uint64(size))
+		} else {
+			encoded, err := proto.Marshal(m.CallMembersCreated)
+			if err != nil {
+				return 0, err
+			}
+			i -= len(encoded)
+			copy(dAtA[i:], encoded)
+			i = encodeVarint(dAtA, i, uint64(len(encoded)))
+		}
+		i--
+		dAtA[i] = 0x2
+		i--
+		dAtA[i] = 0x8a
+	}
+	return len(dAtA) - i, nil
+}
 func (m *WebsocketEvent_CallMembersUpdated) MarshalToVT(dAtA []byte) (int, error) {
 	size := m.SizeVT()
 	return m.MarshalToSizedBufferVT(dAtA[:size])
@@ -249,7 +282,7 @@ func (m *WebsocketEvent_CallMembersUpdated) MarshalToSizedBufferVT(dAtA []byte) 
 		i--
 		dAtA[i] = 0x2
 		i--
-		dAtA[i] = 0x8a
+		dAtA[i] = 0x92
 	}
 	return len(dAtA) - i, nil
 }
@@ -282,7 +315,7 @@ func (m *WebsocketEvent_CallMembersDeleted) MarshalToSizedBufferVT(dAtA []byte) 
 		i--
 		dAtA[i] = 0x2
 		i--
-		dAtA[i] = 0x92
+		dAtA[i] = 0x9a
 	}
 	return len(dAtA) - i, nil
 }
@@ -834,6 +867,24 @@ func (m *WebsocketEvent_CallDeleted) SizeVT() (n int) {
 			l = size.SizeVT()
 		} else {
 			l = proto.Size(m.CallDeleted)
+		}
+		n += 2 + l + sov(uint64(l))
+	}
+	return n
+}
+func (m *WebsocketEvent_CallMembersCreated) SizeVT() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.CallMembersCreated != nil {
+		if size, ok := interface{}(m.CallMembersCreated).(interface {
+			SizeVT() int
+		}); ok {
+			l = size.SizeVT()
+		} else {
+			l = proto.Size(m.CallMembersCreated)
 		}
 		n += 2 + l + sov(uint64(l))
 	}
@@ -1476,6 +1527,63 @@ func (m *WebsocketEvent) UnmarshalVT(dAtA []byte) error {
 			iNdEx = postIndex
 		case 33:
 			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CallMembersCreated", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflow
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLength
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLength
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if oneof, ok := m.Event.(*WebsocketEvent_CallMembersCreated); ok {
+				if unmarshal, ok := interface{}(oneof.CallMembersCreated).(interface {
+					UnmarshalVT([]byte) error
+				}); ok {
+					if err := unmarshal.UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
+						return err
+					}
+				} else {
+					if err := proto.Unmarshal(dAtA[iNdEx:postIndex], oneof.CallMembersCreated); err != nil {
+						return err
+					}
+				}
+			} else {
+				v := &event_v1.CallMembersCreated{}
+				if unmarshal, ok := interface{}(v).(interface {
+					UnmarshalVT([]byte) error
+				}); ok {
+					if err := unmarshal.UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
+						return err
+					}
+				} else {
+					if err := proto.Unmarshal(dAtA[iNdEx:postIndex], v); err != nil {
+						return err
+					}
+				}
+				m.Event = &WebsocketEvent_CallMembersCreated{v}
+			}
+			iNdEx = postIndex
+		case 34:
+			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field CallMembersUpdated", wireType)
 			}
 			var msglen int
@@ -1531,7 +1639,7 @@ func (m *WebsocketEvent) UnmarshalVT(dAtA []byte) error {
 				m.Event = &WebsocketEvent_CallMembersUpdated{v}
 			}
 			iNdEx = postIndex
-		case 34:
+		case 35:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field CallMembersDeleted", wireType)
 			}

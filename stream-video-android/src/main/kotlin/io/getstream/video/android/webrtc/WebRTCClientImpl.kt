@@ -28,6 +28,7 @@ import io.getstream.logging.StreamLog
 import io.getstream.video.android.audio.AudioDevice
 import io.getstream.video.android.audio.AudioSwitchHandler
 import io.getstream.video.android.dispatchers.DispatcherProvider
+import io.getstream.video.android.errors.DisconnectCause
 import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.events.AudioLevelChangedEvent
 import io.getstream.video.android.events.ChangePublishQualityEvent
@@ -45,14 +46,16 @@ import io.getstream.video.android.model.CallSettings
 import io.getstream.video.android.model.IceCandidate
 import io.getstream.video.android.model.IceServer
 import io.getstream.video.android.model.toCandidate
+import io.getstream.video.android.module.WebRTCModule
 import io.getstream.video.android.token.CredentialsProvider
 import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Result
 import io.getstream.video.android.utils.Success
 import io.getstream.video.android.utils.buildAudioConstraints
 import io.getstream.video.android.utils.buildConnectionConfiguration
-import io.getstream.video.android.utils.buildIceServers
+import io.getstream.video.android.utils.buildLocalIceServers
 import io.getstream.video.android.utils.buildMediaConstraints
+import io.getstream.video.android.utils.buildRemoteIceServers
 import io.getstream.video.android.utils.onError
 import io.getstream.video.android.utils.onSuccessSuspend
 import io.getstream.video.android.webrtc.connection.StreamPeerConnection
@@ -65,10 +68,12 @@ import io.getstream.video.android.webrtc.utils.stringify
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelChildren
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -95,7 +100,6 @@ import stream.video.sfu.models.VideoDimension
 import stream.video.sfu.signal.SendAnswerRequest
 import stream.video.sfu.signal.SetPublisherRequest
 import stream.video.sfu.signal.UpdateSubscriptionsRequest
-import kotlin.coroutines.resume
 import kotlin.math.absoluteValue
 import kotlin.random.Random
 
@@ -121,7 +125,11 @@ internal class WebRTCClientImpl(
      */
     private val peerConnectionFactory by lazy { StreamPeerConnectionFactory(context) }
     private val iceServers by lazy {
-        buildIceServers(servers)
+        if (WebRTCModule.REDIRECT_SIGNAL_URL == null) {
+            buildRemoteIceServers(WebRTCModule.SIGNAL_HOST_BASE)
+        } else {
+            buildLocalIceServers()
+        }
     }
 
     private val connectionConfiguration: PeerConnection.RTCConfiguration by lazy {
@@ -147,6 +155,9 @@ internal class WebRTCClientImpl(
             }
         }
     private var localAudioTrack: AudioTrack? = null
+
+    private val isConnected = MutableStateFlow(value = false)
+    private val sfuEvents = MutableSharedFlow<SfuDataEvent>()
 
     /**
      * Video track helpers.
@@ -285,6 +296,7 @@ internal class WebRTCClientImpl(
     }
 
     private fun loadParticipantsData(callState: CallState?, callSettings: CallSettings) {
+        logger.d { "[loadParticipantsData] #sfu; callState: $callState, callSettings: $callSettings" }
         if (callState != null) {
             call?.loadParticipants(callState, callSettings)
         }
@@ -300,8 +312,9 @@ internal class WebRTCClientImpl(
         this.call = call
         listenToParticipants()
         createPeerConnections(autoPublish)
-
-        return when (val result = connectToCall()) {
+        val result = connectToCall()
+        logger.v { "[initializeCall] #sfu; result: $result" }
+        return when (result) {
             is Success -> {
                 loadParticipantsData(result.data.call_state, callSettings)
                 createUserTracks(callSettings, autoPublish)
@@ -353,10 +366,11 @@ internal class WebRTCClientImpl(
     }
 
     private suspend fun connectToCall(): Result<JoinResponse> {
+        logger.d { "[connectToCall] #sfu; no args" }
         val joinResponse = executeJoinRequest()
 
         joinResponse.onSuccessSuspend { response ->
-            // connection.onCallJoined(response.own_session_id) TODO
+            // subscriber?.onCallJoined(response.own_session_id) // TODO
         }
         logger.v { "[connectToCall] #sfu; completed $joinResponse" }
         return joinResponse
@@ -379,42 +393,25 @@ internal class WebRTCClientImpl(
             ),
             token = credentialsProvider.getSfuToken()
         )
+        logger.d { "[executeJoinRequest] request: $request" }
 
-        var isSuccessful = false
-
-        coroutineScope.launch {
-            delay(30000)
-
-            if (!isSuccessful) {
-                throw IllegalStateException("Join request failed to respond!")
+        return try {
+            withTimeout(TIMEOUT) {
+                isConnected.first { it }
+                signalSocket.sendJoinRequest(request)
+                logger.v { "[executeJoinRequest] request is sent" }
+                val event = sfuEvents.first { it is JoinCallResponseEvent } as JoinCallResponseEvent
+                logger.v { "[executeJoinRequest] completed: $event" }
+                Success(
+                    JoinResponse(
+                        event.callState,
+                        event.ownSessionId
+                    )
+                )
             }
-        }
-
-        return suspendCancellableCoroutine { continuation ->
-            val observer = object : SignalSocketListener {
-
-                override fun onConnected(event: ConnectedEvent) {
-                    super.onConnected(event)
-                    signalSocket.sendJoinRequest(request)
-                }
-
-                override fun onEvent(event: SfuDataEvent) {
-                    super.onEvent(event)
-                    if (event is JoinCallResponseEvent) {
-                        isSuccessful = true
-                        continuation.resume(
-                            Success(
-                                JoinResponse(
-                                    event.callState,
-                                    event.ownSessionId
-                                )
-                            )
-                        )
-                    }
-                }
-            }
-
-            signalSocket.addListener(observer)
+        } catch (e: Throwable) {
+            logger.e { "[executeJoinRequest] failed: $e" }
+            Failure(VideoError(e.message, e))
         }
     }
 
@@ -433,25 +430,54 @@ internal class WebRTCClientImpl(
     private val publisherCandidates = mutableListOf<ICETrickleEvent>()
     private val subscriberCandidates = mutableListOf<ICETrickleEvent>()
 
-    override fun onEvent(event: SfuDataEvent) {
-        super.onEvent(event)
+    override fun onConnecting() {
+        coroutineScope.launch {
+            logger.i { "[onConnecting] no args" }
+            isConnected.value = false
+        }
+    }
 
-        when (event) {
-            is ICETrickleEvent -> handleTrickle(event)
-            is SubscriberOfferEvent -> setRemoteDescription(event.sdp)
-            is SfuParticipantJoinedEvent -> call?.addParticipant(event)
-            is SfuParticipantLeftEvent -> call?.removeParticipant(event)
-            is ChangePublishQualityEvent -> {
-                // updatePublishQuality(event) -> TODO - re-enable once we send the proper quality (dimensions)
+    override fun onConnected(event: ConnectedEvent) {
+        coroutineScope.launch {
+            logger.i { "[onConnected] event: $event" }
+            isConnected.value = true
+        }
+    }
+
+    override fun onDisconnected(cause: DisconnectCause) {
+        coroutineScope.launch {
+            logger.i { "[onDisconnected] cause: $cause" }
+            isConnected.value = false
+        }
+    }
+
+    override fun onError(error: VideoError) {
+        coroutineScope.launch {
+            logger.e { "[onError] cause: $error" }
+        }
+    }
+
+    override fun onEvent(event: SfuDataEvent) {
+        coroutineScope.launch {
+            logger.v { "[onEvent] event: $event" }
+            sfuEvents.emit(event)
+            when (event) {
+                is ICETrickleEvent -> handleTrickle(event)
+                is SubscriberOfferEvent -> setRemoteDescription(event.sdp)
+                is SfuParticipantJoinedEvent -> call?.addParticipant(event)
+                is SfuParticipantLeftEvent -> call?.removeParticipant(event)
+                is ChangePublishQualityEvent -> {
+                    // updatePublishQuality(event) -> TODO - re-enable once we send the proper quality (dimensions)
+                }
+                is AudioLevelChangedEvent -> call?.updateAudioLevel(event)
+                is MuteStateChangeEvent -> call?.updateMuteState(event)
+                else -> Unit
             }
-            is AudioLevelChangedEvent -> call?.updateAudioLevel(event)
-            is MuteStateChangeEvent -> call?.updateMuteState(event)
-            else -> Unit
         }
     }
 
     private fun handleTrickle(event: ICETrickleEvent) {
-        logger.d { "[handleTrickle] candidate: ${event.candidate}" }
+        logger.d { "[handleTrickle] peerType: ${event.peerType}, candidate: ${event.candidate}" }
 
         if (event.peerType == PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED) {
             handlePublisherTrickle(event)
@@ -523,7 +549,7 @@ internal class WebRTCClientImpl(
     }
 
     private fun createUserTracks(callSettings: CallSettings, autoPublish: Boolean) {
-        logger.d { "[createUserTracks] #sfu; shouldPublish: $autoPublish, callSettings: $callSettings" }
+        logger.d { "[createUserTracks] #sfu; autoPublish: $autoPublish, callSettings: $callSettings" }
         val manager = context.getSystemService<AudioManager>()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             manager?.allowedCapturePolicy = ALLOW_CAPTURE_BY_ALL
@@ -732,5 +758,6 @@ internal class WebRTCClientImpl(
         private const val TRACK_TYPE_VIDEO = "v"
         private const val TRACK_TYPE_AUDIO = "a"
         private const val TRACK_TYPE_SCREEN_SHARE = "s"
+        private const val TIMEOUT = 30_000L
     }
 }

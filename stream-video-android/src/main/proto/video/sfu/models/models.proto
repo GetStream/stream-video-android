@@ -5,6 +5,9 @@ import "google/protobuf/struct.proto";
 import "google/protobuf/timestamp.proto";
 
 option go_package = "sfu_models";
+option java_multiple_files = true;
+option java_outer_classname = "SfuModelsV1";
+option csharp_namespace = "Stream.Video.v1.Sfu";
 
 enum PeerType {
   PEER_TYPE_PUBLISHER_UNSPECIFIED = 0;

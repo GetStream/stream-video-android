@@ -2,13 +2,19 @@ syntax = "proto3";
 
 package stream.video.coordinator.client_v1_rpc;
 
+import "google/protobuf/timestamp.proto";
 import "video/coordinator/call_v1/call.proto";
 import "video/coordinator/client_v1_rpc/envelopes.proto";
 import "video/coordinator/edge_v1/edge.proto";
 import "video/coordinator/push_v1/push.proto";
+import "video/coordinator/stat_v1/stat.proto";
 import "video/coordinator/utils_v1/utils.proto";
 
 option go_package = "client_v1_rpc";
+// TODO: handle provider generation once
+// option java_multiple_files = true;
+option java_outer_classname = "ClientV1RPC";
+option csharp_namespace = "Stream.Video.v1.Coordinator";
 
 service ClientRPC {
   //  rpc GetCall(GetCallRequest) returns (GetCallResponse);
@@ -34,11 +40,10 @@ service ClientRPC {
   // UNSTABLE ENDPOINTS BELOW
 
   // UpdateMembers creates or updates members in a room.
-  // If a member is not found, It will be created.
-  // TODO: response with room data
-  rpc UpdateCallMembers(UpdateCallMembersRequest) returns (UpdateCallMembersResponse);
+
+  // Adds members to a call
+  rpc UpsertCallMembers(UpsertCallMembersRequest) returns (UpsertCallMembersResponse);
   // DeleteMembers deletes members from a room.
-  // TODO: response with room data
   rpc DeleteCallMembers(DeleteCallMembersRequest) returns (DeleteCallMembersResponse);
 
   rpc SendEvent(SendEventRequest) returns (SendEventResponse);
@@ -58,6 +63,8 @@ service ClientRPC {
 
   // endpoint for storing stats (perhaps we should move this to the SFU layer though)
   rpc ReportCallStats(ReportCallStatsRequest) returns (ReportCallStatsResponse);
+  // endpoint for storing stat-related events raised by the client
+  rpc ReportCallStatEvent(ReportCallStatEventRequest) returns (ReportCallStatEventResponse);
   // endpoint for reviewing/rating the quality of calls
   rpc ReviewCall(ReviewCallRequest) returns (ReviewCallResponse);
   // endpoint for users to report issues with a call
@@ -73,23 +80,19 @@ message GetCallResponse {
 }
 
 message MemberInput {
-  string role = 1;
-  bytes custom_json = 2;
+  string user_id = 1;
+  string role = 2;
+  bytes custom_json = 3;
 }
 
-enum MemberField {
-  MEMBER_FIELD_UNSPECIFIED = 0;
-  MEMBER_FIELD_ROLE = 1;
-  MEMBER_FIELD_CUSTOM = 2;
-}
-
-message UpdateCallMembersRequest {
+message UpsertCallMembersRequest {
   string call_cid = 1;
-  map<string, MemberInput> members = 2;
-  repeated MemberField fields = 3;
+  repeated MemberInput members = 2;
+  // Ringing option, used to signal to clients' UI
+  bool ring = 3;
 }
 
-message UpdateCallMembersResponse {
+message UpsertCallMembersResponse {
 }
 
 message DeleteCallMembersRequest {
@@ -105,7 +108,7 @@ message CreateCallInput {
   // Call properties to set
   CallInput call = 1;
   // Members to add to the created call
-  map<string, MemberInput> members = 2;
+  repeated MemberInput members = 2;
   // Ringing option, used to signal to clients' UI
   optional bool ring = 4;
 }
@@ -266,47 +269,60 @@ message SendCustomEventResponse {
 }
 
 message ReportCallStatsRequest {
-  // The call type
-  string call_type = 1;
-  // The call id
-  string call_id = 2;
+  // A concatenation of call type and call id with ":" as delimiter
+  string call_cid = 1;
   // A WebRTC Stats report encoded as a JSON string, as defined in https://www.w3.org/TR/webrtc/#dom-rtcstatsreport
-  bytes stats_json = 3;
+  bytes stats_json = 2;
 }
 
 message ReportCallStatsResponse {
 }
 
+message ReportCallStatEventRequest {
+  // A concatenation of call type and call id with ":" as delimiter
+  string call_cid = 1;
+
+  // Event timestamp as RFC3339 string.
+  google.protobuf.Timestamp timestamp = 2;
+
+  oneof event {
+    stat_v1.MediaStateChanged media_state_changed = 3;
+  }
+}
+
+message ReportCallStatEventResponse {
+}
+
 message GetCallStatsRequest {
-  string call_type = 1;
-  string call_id = 2;
+  // A concatenation of call type and call id with ":" as delimiter
+  string call_cid = 1;
 }
 
 message ReportIssueRequest {
-  string call_type = 1;
-  string call_id = 2;
+  // A concatenation of call type and call id with ":" as delimiter
+  string call_cid = 1;
 
   // Optional description.
-  string description = 3;
+  string description = 2;
 
-  bytes custom_json = 4;
+  bytes custom_json = 3;
 }
 
 message ReportIssueResponse {
 }
 
 message ReviewCallRequest {
-  string call_type = 1;
-  string call_id = 2;
+  // A concatenation of call type and call id with ":" as delimiter
+  string call_cid = 1;
 
   // Rating between 0 and 5 stars.
-  float stars = 3;
+  float stars = 2;
 
   // Optional description.
-  string description = 4;
+  string description = 3;
 
   // Optional custom data.
-  bytes custom_json = 5;
+  bytes custom_json = 4;
 }
 
 message ReviewCallResponse {

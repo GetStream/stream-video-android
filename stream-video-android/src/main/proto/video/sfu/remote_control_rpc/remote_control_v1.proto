@@ -8,6 +8,16 @@ import "video/sfu/models/models.proto";
 option go_package = "remote_control_rpc";
 
 // RemoteControlRPC is an internal RPC to control SFU from the Coordinator
+
+
+// Marcelo joins the call
+// coordinator picks SFU A for the call
+// CreateCall RPC call to SFU A
+// Tommaso joins the call
+// coordinator picks SFU B for the call
+// CreateCall RPC call to SFU B and sends cascading_sfus=[A]
+// SFU B calls GossipRPC.JoinCall on SFU A
+
 // TODO: better naming ideas?
 service RemoteControlRPC {
   // DisconnectUser closes all user network connections, essentially kicking a user from the call.
