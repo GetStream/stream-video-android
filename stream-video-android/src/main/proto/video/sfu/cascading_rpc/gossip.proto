@@ -40,6 +40,9 @@ message GetCallStateResponse {
 message AudioMuteChanged {
 }
 
+message Healthcheck {
+}
+
 message VideoMuteChanged {
 }
 
@@ -50,18 +53,19 @@ message SendEventRequest {
   string call_cid = 1;
   int64 sequence = 2;
   oneof event {
-    AudioMuteChanged audio_mute_changed = 3;
-    VideoMuteChanged video_mute_changed = 4;
-      // add participant (marcelo joins the call)
-      // remove participant (marcelo leaves the call)
-      // add publisher track (marcelo starts audio or video track)
-      // remove publisher track (marcelo stops audio or video track)
-      // add subscription (marcelo subscribes to tommaso high-quality track)
-      // remove subscription (marcelo unsubscribes from tommaso)
-      // change subscription (marcelo changes the subscription to Tommaso from high to medium)
-      // audio levels - TODO: this does not change anything, its just a user event we want to forward to all clients
-      // dominant speaker changed - TODO: this one is tricky because you need to analyze all audio levels from all clients,
-      // perhaps sharing audio levels is enough
+    Healthcheck health_check = 3;
+    AudioMuteChanged audio_mute_changed = 4;
+    VideoMuteChanged video_mute_changed = 5;
+    // add participant (marcelo joins the call)
+    // remove participant (marcelo leaves the call)
+    // add publisher track (marcelo starts audio or video track)
+    // remove publisher track (marcelo stops audio or video track)
+    // add subscription (marcelo subscribes to tommaso high-quality track)
+    // remove subscription (marcelo unsubscribes from tommaso)
+    // change subscription (marcelo changes the subscription to Tommaso from high to medium)
+    // audio levels - TODO: this does not change anything, its just a user event we want to forward to all clients
+    // dominant speaker changed - TODO: this one is tricky because you need to analyze all audio levels from all clients,
+    // perhaps sharing audio levels is enough
   }
 }
 

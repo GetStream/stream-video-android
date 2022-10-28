@@ -3,6 +3,9 @@ syntax = "proto3";
 package stream.video.coordinator.recording_v1;
 
 option go_package = "recording_v1";
+option java_multiple_files = true;
+option java_outer_classname = "RecordingV1";
+option csharp_namespace = "Stream.Video.v1.Coordinator";
 
 message Recording {
   string call_type = 1;

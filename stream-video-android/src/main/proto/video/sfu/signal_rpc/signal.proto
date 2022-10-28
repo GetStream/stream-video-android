@@ -5,6 +5,9 @@ package stream.video.sfu.signal;
 import "video/sfu/models/models.proto";
 
 option go_package = "sfu_signal_rpc";
+option java_multiple_files = true;
+option java_outer_classname = "SfuSignalV1";
+option csharp_namespace = "Stream.Video.v1.Sfu";
 
 service SignalServer {
 

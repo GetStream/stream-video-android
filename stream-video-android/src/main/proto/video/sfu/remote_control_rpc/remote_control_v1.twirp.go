@@ -32,7 +32,6 @@ const _ = twirp.TwirpPackageMinVersion_8_1_0
 // RemoteControlRPC Interface
 // ==========================
 
-// RemoteControlRPC is an internal RPC to control SFU from the Coordinator
 // TODO: better naming ideas?
 type RemoteControlRPC interface {
 	// DisconnectUser closes all user network connections, essentially kicking a user from the call.

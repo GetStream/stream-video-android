@@ -3,6 +3,9 @@ syntax = "proto3";
 package stream.video.coordinator.broadcast_v1;
 
 option go_package = "broadcast_v1";
+option java_multiple_files = true;
+option java_outer_classname = "BroadcastV1";
+option csharp_namespace = "Stream.Video.v1.Coordinator";
 
 enum Codec {
   CODEC_H264_UNSPECIFIED = 0;

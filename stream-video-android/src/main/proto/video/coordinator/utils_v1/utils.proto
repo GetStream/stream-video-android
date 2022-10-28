@@ -3,6 +3,9 @@ syntax = "proto3";
 package stream.video.coordinator.utils_v1;
 
 option go_package = "utils_v1";
+option java_multiple_files = true;
+option java_outer_classname = "UtilsV1";
+option csharp_namespace = "Stream.Video.v1.Coordinator";
 
 enum Direction {
   DIRECTION_UNSPECIFIED = 0;

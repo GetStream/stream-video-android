@@ -5,6 +5,9 @@ package stream.video.coordinator.edge_v1;
 import "validate/validate.proto";
 
 option go_package = "edge_v1";
+option java_multiple_files = true;
+option java_outer_classname = "EdgeV1";
+option csharp_namespace = "Stream.Video.v1.Coordinator";
 
 message Credentials {
   // Edge server to connect to

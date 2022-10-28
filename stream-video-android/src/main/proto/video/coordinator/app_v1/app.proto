@@ -3,6 +3,9 @@ syntax = "proto3";
 package stream.video.coordinator.app_v1;
 
 option go_package = "app_v1";
+option java_multiple_files = true;
+option java_outer_classname = "AppV1";
+option csharp_namespace = "Stream.Video.v1.Coordinator";
 
 message App {
   int64 id = 1;

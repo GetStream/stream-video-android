@@ -5,6 +5,9 @@ package stream.video.sfu.event;
 import "video/sfu/models/models.proto";
 
 option go_package = "sfu_events";
+option java_multiple_files = true;
+option java_outer_classname = "SfuEventsV1";
+option csharp_namespace = "Stream.Video.v1.Sfu";
 
 // SFUEvent is a message that is sent from the SFU to the client.
 message SfuEvent {
@@ -29,8 +32,8 @@ message SfuEvent {
 // SfuRequest is a message that is sent from the client to the SFU.
 message SfuRequest {
   oneof request_payload {
-   JoinRequest join_request = 1;
-   HealthCheckRequest health_check_request = 2;
+    JoinRequest join_request = 1;
+    HealthCheckRequest health_check_request = 2;
   }
 }
 
@@ -52,9 +55,9 @@ message JoinRequest {
 }
 
 message JoinResponse {
-    models.CallState call_state = 1;
-    string own_session_id = 2;
-    // TODO: include full list of participants with track and audio info
+  models.CallState call_state = 1;
+  string own_session_id = 2;
+  // TODO: include full list of participants with track and audio info
 }
 
 // ParticipantJoined is fired when a user joins a call
