@@ -23,6 +23,8 @@ import stream.video.sfu.signal.SendAnswerRequest
 import stream.video.sfu.signal.SendAnswerResponse
 import stream.video.sfu.signal.SetPublisherRequest
 import stream.video.sfu.signal.SetPublisherResponse
+import stream.video.sfu.signal.UpdateMuteStateRequest
+import stream.video.sfu.signal.UpdateMuteStateResponse
 import stream.video.sfu.signal.UpdateSubscriptionsRequest
 import stream.video.sfu.signal.UpdateSubscriptionsResponse
 
@@ -35,4 +37,6 @@ public interface SignalClient {
     public suspend fun setPublisher(request: SetPublisherRequest): Result<SetPublisherResponse>
 
     public suspend fun updateSubscriptions(request: UpdateSubscriptionsRequest): Result<UpdateSubscriptionsResponse>
+
+    public suspend fun updateMuteState(muteStateRequest: UpdateMuteStateRequest): Result<UpdateMuteStateResponse>
 }

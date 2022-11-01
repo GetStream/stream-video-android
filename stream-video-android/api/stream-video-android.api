@@ -717,7 +717,7 @@ public final class io/getstream/video/android/StreamCallsImpl : io/getstream/vid
 public abstract interface class io/getstream/video/android/api/CallCoordinatorService {
 	public abstract fun createCall (Lstream/video/coordinator/client_v1_rpc/CreateCallRequest;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun getCallEdgeServer (Lstream/video/coordinator/client_v1_rpc/GetCallEdgeServerRequest;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun getOrCreateCall (Lstream/video/coordinator/client_v1_rpc/CreateCallRequest;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun getOrCreateCall (Lstream/video/coordinator/client_v1_rpc/GetOrCreateCallRequest;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun joinCall (Lstream/video/coordinator/client_v1_rpc/JoinCallRequest;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun sendUserEvent (Lstream/video/coordinator/client_v1_rpc/SendEventRequest;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
@@ -824,7 +824,7 @@ public final class io/getstream/video/android/client/CallClient$Builder {
 
 public abstract interface class io/getstream/video/android/client/coordinator/CallCoordinatorClient {
 	public abstract fun createCall (Lstream/video/coordinator/client_v1_rpc/CreateCallRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun getOrCreateCall (Lstream/video/coordinator/client_v1_rpc/CreateCallRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun getOrCreateCall (Lstream/video/coordinator/client_v1_rpc/GetOrCreateCallRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun joinCall (Lstream/video/coordinator/client_v1_rpc/JoinCallRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun selectEdgeServer (Lstream/video/coordinator/client_v1_rpc/GetCallEdgeServerRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun sendUserEvent (Lstream/video/coordinator/client_v1_rpc/SendEventRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -2451,24 +2451,11 @@ public final class io/getstream/video/android/webrtc/listener/SdpListener : org/
 	public fun onSetSuccess ()V
 }
 
-public abstract interface class io/getstream/video/android/webrtc/signal/LocalSignalService : io/getstream/video/android/webrtc/signal/SignalService {
-	public abstract fun sendAnswer (Lstream/video/sfu/signal/SendAnswerRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun sendIceCandidate (Lstream/video/sfu/models/ICETrickle;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun setPublisher (Lstream/video/sfu/signal/SetPublisherRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun updateSubscriptions (Lstream/video/sfu/signal/UpdateSubscriptionsRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
-public abstract interface class io/getstream/video/android/webrtc/signal/RemoteSignalService : io/getstream/video/android/webrtc/signal/SignalService {
-	public abstract fun sendAnswer (Lstream/video/sfu/signal/SendAnswerRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun sendIceCandidate (Lstream/video/sfu/models/ICETrickle;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun setPublisher (Lstream/video/sfu/signal/SetPublisherRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun updateSubscriptions (Lstream/video/sfu/signal/UpdateSubscriptionsRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
 public abstract interface class io/getstream/video/android/webrtc/signal/SignalClient {
 	public abstract fun sendAnswer (Lstream/video/sfu/signal/SendAnswerRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun sendIceCandidate (Lstream/video/sfu/models/ICETrickle;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun setPublisher (Lstream/video/sfu/signal/SetPublisherRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun updateMuteState (Lstream/video/sfu/signal/UpdateMuteStateRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun updateSubscriptions (Lstream/video/sfu/signal/UpdateSubscriptionsRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
@@ -2477,6 +2464,7 @@ public final class io/getstream/video/android/webrtc/signal/SignalClientImpl : i
 	public fun sendAnswer (Lstream/video/sfu/signal/SendAnswerRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun sendIceCandidate (Lstream/video/sfu/models/ICETrickle;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun setPublisher (Lstream/video/sfu/signal/SetPublisherRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun updateMuteState (Lstream/video/sfu/signal/UpdateMuteStateRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun updateSubscriptions (Lstream/video/sfu/signal/UpdateSubscriptionsRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
@@ -2484,6 +2472,7 @@ public abstract interface class io/getstream/video/android/webrtc/signal/SignalS
 	public abstract fun sendAnswer (Lstream/video/sfu/signal/SendAnswerRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun sendIceCandidate (Lstream/video/sfu/models/ICETrickle;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun setPublisher (Lstream/video/sfu/signal/SetPublisherRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun updateMuteState (Lstream/video/sfu/signal/UpdateMuteStateRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun updateSubscriptions (Lstream/video/sfu/signal/UpdateSubscriptionsRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 

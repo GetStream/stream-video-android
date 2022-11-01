@@ -16,10 +16,9 @@
 
 package io.getstream.video.android.module
 
-import io.getstream.video.android.webrtc.signal.LocalSignalService
-import io.getstream.video.android.webrtc.signal.RemoteSignalService
 import io.getstream.video.android.webrtc.signal.SignalClient
 import io.getstream.video.android.webrtc.signal.SignalClientImpl
+import io.getstream.video.android.webrtc.signal.SignalService
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.wire.WireConverterFactory
@@ -38,20 +37,15 @@ internal class WebRTCModule(
     }
 
     internal val signalClient: SignalClient by lazy {
-        val targetService = if (REDIRECT_SIGNAL_URL != null) {
-            LocalSignalService::class.java
-        } else {
-            RemoteSignalService::class.java
-        }
-
-        val service = signalRetrofitClient.create(targetService)
+        val service = signalRetrofitClient.create(SignalService::class.java)
 
         SignalClientImpl(service)
     }
 
     companion object {
         @Suppress("RedundantNullableReturnType")
-        val REDIRECT_SIGNAL_URL: String? = null // "https://46f3-93-140-102-246.eu.ngrok.io" // "https://6dd4-78-1-28-238.eu.ngrok.io"
+        val REDIRECT_SIGNAL_URL: String? =
+            "https://0611-93-140-69-118.eu.ngrok.io" // "https://46f3-93-140-102-246.eu.ngrok.io" // "https://6dd4-78-1-28-238.eu.ngrok.io"
 
         internal const val SIGNAL_HOST_BASE: String =
             "10.0.2.2:3031" // "sfu2.fra1.gtstrm.com"

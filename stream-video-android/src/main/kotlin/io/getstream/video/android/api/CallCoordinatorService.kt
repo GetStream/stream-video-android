@@ -24,6 +24,8 @@ import stream.video.coordinator.client_v1_rpc.CreateCallRequest
 import stream.video.coordinator.client_v1_rpc.CreateCallResponse
 import stream.video.coordinator.client_v1_rpc.GetCallEdgeServerRequest
 import stream.video.coordinator.client_v1_rpc.GetCallEdgeServerResponse
+import stream.video.coordinator.client_v1_rpc.GetOrCreateCallRequest
+import stream.video.coordinator.client_v1_rpc.GetOrCreateCallResponse
 import stream.video.coordinator.client_v1_rpc.JoinCallRequest
 import stream.video.coordinator.client_v1_rpc.JoinCallResponse
 import stream.video.coordinator.client_v1_rpc.SendCustomEventRequest
@@ -49,9 +51,9 @@ public interface CallCoordinatorService {
     @Headers("Content-Type: application/protobuf")
     @POST("/rpc/stream.video.coordinator.client_v1_rpc.ClientRPC/GetOrCreateCall")
     public suspend fun getOrCreateCall(
-        @Body createCallRequest: CreateCallRequest,
+        @Body getOrCreateCallRequest: GetOrCreateCallRequest,
         @Query(QUERY_API_KEY) apiKey: String
-    ): CreateCallResponse
+    ): GetOrCreateCallResponse
 
     @Headers("Content-Type: application/protobuf")
     @POST("/rpc/stream.video.coordinator.client_v1_rpc.ClientRPC/JoinCall")

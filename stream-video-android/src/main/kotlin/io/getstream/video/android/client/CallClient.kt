@@ -48,6 +48,7 @@ import stream.video.coordinator.client_v1_rpc.CreateCallInput
 import stream.video.coordinator.client_v1_rpc.CreateCallRequest
 import stream.video.coordinator.client_v1_rpc.GetCallEdgeServerRequest
 import stream.video.coordinator.client_v1_rpc.GetCallEdgeServerResponse
+import stream.video.coordinator.client_v1_rpc.GetOrCreateCallRequest
 import stream.video.coordinator.client_v1_rpc.JoinCallRequest
 import stream.video.coordinator.client_v1_rpc.MemberInput
 import stream.video.coordinator.client_v1_rpc.SendEventRequest
@@ -122,7 +123,7 @@ public class CallClient(
     ): Result<StartedCall> {
         logger.d { "[getOrCreateCall] type: $type, id: $id, participantIds: $participantIds" }
         return callCoordinatorClient.getOrCreateCall(
-            CreateCallRequest(
+            GetOrCreateCallRequest(
                 type = type,
                 id = id,
                 input = CreateCallInput(

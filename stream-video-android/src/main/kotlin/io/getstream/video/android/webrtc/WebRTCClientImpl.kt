@@ -97,9 +97,13 @@ import stream.video.sfu.models.ICETrickle
 import stream.video.sfu.models.PeerType
 import stream.video.sfu.models.VideoCodecs
 import stream.video.sfu.models.VideoDimension
+import stream.video.sfu.signal.AudioMuteChanged
 import stream.video.sfu.signal.SendAnswerRequest
 import stream.video.sfu.signal.SetPublisherRequest
+import stream.video.sfu.signal.UpdateMuteStateRequest
+import stream.video.sfu.signal.UpdateMuteStateResponse
 import stream.video.sfu.signal.UpdateSubscriptionsRequest
+import stream.video.sfu.signal.VideoMuteChanged
 import kotlin.math.absoluteValue
 import kotlin.random.Random
 
@@ -208,17 +212,35 @@ internal class WebRTCClientImpl(
             if (!isCapturingVideo && isEnabled) {
                 startCapturingLocalVideo(CameraMetadata.LENS_FACING_FRONT)
             }
-            call?.setCameraEnabled(isEnabled)
-            localVideoTrack?.setEnabled(isEnabled)
+            val request = UpdateMuteStateRequest(
+                sessionId,
+                video_mute_changed = VideoMuteChanged(muted = !isEnabled)
+            )
+
+            updateMuteState(request).onSuccessSuspend {
+                call?.setCameraEnabled(isEnabled)
+                localVideoTrack?.setEnabled(isEnabled)
+            }
         }
     }
 
     override fun setMicrophoneEnabled(isEnabled: Boolean) {
         logger.d { "[setMicrophoneEnabled] #sfu; isEnabled: $isEnabled" }
         coroutineScope.launch {
-            call?.setMicrophoneEnabled(isEnabled)
-            localAudioTrack?.setEnabled(isEnabled)
+            val request = UpdateMuteStateRequest(
+                sessionId,
+                audio_mute_changed = AudioMuteChanged(muted = !isEnabled),
+            )
+
+            updateMuteState(request).onSuccessSuspend {
+                call?.setMicrophoneEnabled(isEnabled)
+                localAudioTrack?.setEnabled(isEnabled)
+            }
         }
+    }
+
+    private suspend fun updateMuteState(muteStateRequest: UpdateMuteStateRequest): Result<UpdateMuteStateResponse> {
+        return signalClient.updateMuteState(muteStateRequest)
     }
 
     override fun flipCamera() {

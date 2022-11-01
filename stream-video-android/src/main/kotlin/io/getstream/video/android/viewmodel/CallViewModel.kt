@@ -111,7 +111,7 @@ public class CallViewModel(
         connectToCall(
             callSettings = CallSettings(
                 audioOn = true,
-                videoOn = false,
+                videoOn = true,
                 speakerOn = true
             )
         )

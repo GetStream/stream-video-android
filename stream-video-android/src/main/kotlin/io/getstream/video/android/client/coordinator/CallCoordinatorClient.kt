@@ -22,6 +22,8 @@ import stream.video.coordinator.client_v1_rpc.CreateCallRequest
 import stream.video.coordinator.client_v1_rpc.CreateCallResponse
 import stream.video.coordinator.client_v1_rpc.GetCallEdgeServerRequest
 import stream.video.coordinator.client_v1_rpc.GetCallEdgeServerResponse
+import stream.video.coordinator.client_v1_rpc.GetOrCreateCallRequest
+import stream.video.coordinator.client_v1_rpc.GetOrCreateCallResponse
 import stream.video.coordinator.client_v1_rpc.JoinCallRequest
 import stream.video.coordinator.client_v1_rpc.JoinCallResponse
 import stream.video.coordinator.client_v1_rpc.SendEventRequest
@@ -40,10 +42,10 @@ public interface CallCoordinatorClient {
      * Does the same as [createCall] but if the call exists, it fetches the existing instance rather
      * than creating a brand new call.
      *
-     * @param createCallRequest The information used to describe the call.
+     * @param getOrCreateCallRequest The information used to describe the call.
      * @return [CreateCallResponse] which holds the cached or newly created [Call].
      */
-    public suspend fun getOrCreateCall(createCallRequest: CreateCallRequest): Result<CreateCallResponse>
+    public suspend fun getOrCreateCall(getOrCreateCallRequest: GetOrCreateCallRequest): Result<GetOrCreateCallResponse>
 
     /**
      * Asks the server to join a call. This gives the user information which servers they can

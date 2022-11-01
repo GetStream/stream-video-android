@@ -17,24 +17,40 @@
 package io.getstream.video.android.webrtc.signal
 
 import retrofit2.http.Body
+import retrofit2.http.Headers
+import retrofit2.http.POST
 import stream.video.sfu.models.ICETrickle
 import stream.video.sfu.signal.ICETrickleResponse
 import stream.video.sfu.signal.SendAnswerRequest
 import stream.video.sfu.signal.SendAnswerResponse
 import stream.video.sfu.signal.SetPublisherRequest
 import stream.video.sfu.signal.SetPublisherResponse
+import stream.video.sfu.signal.UpdateMuteStateRequest
+import stream.video.sfu.signal.UpdateMuteStateResponse
 import stream.video.sfu.signal.UpdateSubscriptionsRequest
 import stream.video.sfu.signal.UpdateSubscriptionsResponse
 
 public interface SignalService {
 
+    @Headers("Content-Type: application/protobuf")
+    @POST("/twirp/stream.video.sfu.signal.SignalServer/SendAnswer")
     public suspend fun sendAnswer(
         @Body answerRequest: SendAnswerRequest,
     ): SendAnswerResponse
 
+    @Headers("Content-Type: application/protobuf")
+    @POST("/twirp/stream.video.sfu.signal.SignalServer/IceTrickle")
     public suspend fun sendIceCandidate(@Body request: ICETrickle): ICETrickleResponse
 
+    @Headers("Content-Type: application/protobuf")
+    @POST("/twirp/stream.video.sfu.signal.SignalServer/SetPublisher")
     public suspend fun setPublisher(@Body request: SetPublisherRequest): SetPublisherResponse
 
+    @Headers("Content-Type: application/protobuf")
+    @POST("/twirp/stream.video.sfu.signal.SignalServer/UpdateSubscriptions")
     public suspend fun updateSubscriptions(@Body request: UpdateSubscriptionsRequest): UpdateSubscriptionsResponse
+
+    @Headers("Content-Type: application/protobuf")
+    @POST("/twirp/stream.video.sfu.signal.SignalServer/UpdateMuteState")
+    public suspend fun updateMuteState(@Body muteStateRequest: UpdateMuteStateRequest): UpdateMuteStateResponse
 }

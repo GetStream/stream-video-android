@@ -27,6 +27,8 @@ import stream.video.coordinator.client_v1_rpc.CreateCallRequest
 import stream.video.coordinator.client_v1_rpc.CreateCallResponse
 import stream.video.coordinator.client_v1_rpc.GetCallEdgeServerRequest
 import stream.video.coordinator.client_v1_rpc.GetCallEdgeServerResponse
+import stream.video.coordinator.client_v1_rpc.GetOrCreateCallRequest
+import stream.video.coordinator.client_v1_rpc.GetOrCreateCallResponse
 import stream.video.coordinator.client_v1_rpc.JoinCallRequest
 import stream.video.coordinator.client_v1_rpc.JoinCallResponse
 import stream.video.coordinator.client_v1_rpc.SendEventRequest
@@ -58,10 +60,10 @@ internal class CallCoordinatorClientImpl(
             Failure(VideoError(error.message, error))
         }
 
-    override suspend fun getOrCreateCall(createCallRequest: CreateCallRequest): Result<CreateCallResponse> =
+    override suspend fun getOrCreateCall(getOrCreateCallRequest: GetOrCreateCallRequest): Result<GetOrCreateCallResponse> =
         try {
             val response = callCoordinatorService.getOrCreateCall(
-                createCallRequest = createCallRequest,
+                getOrCreateCallRequest = getOrCreateCallRequest,
                 apiKey = credentialsProvider.getCachedApiKey()
             )
 
