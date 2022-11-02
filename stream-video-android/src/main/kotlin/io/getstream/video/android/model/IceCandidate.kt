@@ -16,21 +16,23 @@
 
 package io.getstream.video.android.model
 
+import org.webrtc.IceCandidate as RtcIceCandidate
+
 @kotlinx.serialization.Serializable()
-public class IceCandidate(
+public data class IceCandidate(
     internal val sdpMid: String,
     internal val sdpMLineIndex: Int,
     internal val candidate: String,
     internal val usernameFragment: String?
 )
 
-internal fun org.webrtc.IceCandidate.toCandidate(): IceCandidate {
+internal fun RtcIceCandidate.toDomainCandidate(): IceCandidate {
     return IceCandidate(
         sdpMid, sdpMLineIndex, sdp, ""
     )
 }
 
-internal fun IceCandidate.toCandidate(): org.webrtc.IceCandidate {
+internal fun IceCandidate.toRtcCandidate(): RtcIceCandidate {
     return org.webrtc.IceCandidate(
         sdpMid, sdpMLineIndex, candidate
     )

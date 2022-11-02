@@ -17,9 +17,13 @@
 package io.getstream.video.android.webrtc.connection
 
 import io.getstream.logging.StreamLog
+import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.model.IceCandidate
-import io.getstream.video.android.model.toCandidate
+import io.getstream.video.android.model.toDomainCandidate
+import io.getstream.video.android.model.toRtcCandidate
+import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Result
+import io.getstream.video.android.webrtc.utils.addRtcIceCandidate
 import io.getstream.video.android.webrtc.utils.createValue
 import io.getstream.video.android.webrtc.utils.setValue
 import io.getstream.video.android.webrtc.utils.stringify
@@ -28,6 +32,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.webrtc.CandidatePairChangeEvent
 import org.webrtc.DataChannel
 import org.webrtc.IceCandidateErrorEvent
@@ -42,6 +48,7 @@ import org.webrtc.RtpTransceiver
 import org.webrtc.RtpTransceiver.RtpTransceiverInit
 import org.webrtc.SessionDescription
 import stream.video.sfu.models.PeerType
+import org.webrtc.IceCandidate as RtcIceCandidate
 
 public class StreamPeerConnection(
     private val coroutineScope: CoroutineScope,
@@ -53,7 +60,7 @@ public class StreamPeerConnection(
     private val onIceCandidate: ((IceCandidate, PeerType) -> Unit)?
 ) : PeerConnection.Observer {
 
-    private val typeTag = type.toString().lowercase()
+    private val typeTag = type.stringify()
 
     private val logger = StreamLog.getLogger("Call:PeerConnection")
 
@@ -65,6 +72,9 @@ public class StreamPeerConnection(
         private set
 
     private var statsJob: Job? = null
+
+    private val pendingIceMutex = Mutex()
+    private val pendingIceCandidates = mutableListOf<IceCandidate>()
 
     init {
         logger.i { "<init> #sfu; #$typeTag; mediaConstraints: $mediaConstraints" }
@@ -92,12 +102,36 @@ public class StreamPeerConnection(
 
     public suspend fun setRemoteDescription(sessionDescription: SessionDescription): Result<Unit> {
         logger.d { "[setRemoteDescription] #sfu; #$typeTag; answerSdp: ${sessionDescription.stringify()}" }
-        return setValue { connection.setRemoteDescription(it, sessionDescription) }
+        return setValue { connection.setRemoteDescription(it, sessionDescription) }.also {
+            pendingIceMutex.withLock {
+                pendingIceCandidates.forEach { iceCandidate ->
+                    val rtcIceCandidate = iceCandidate.toRtcCandidate()
+                    logger.i { "[setRemoteDescription] #sfu; #subscriber; pendingRtcIceCandidate: $rtcIceCandidate" }
+                    connection.addRtcIceCandidate(rtcIceCandidate)
+                }
+                pendingIceCandidates.clear()
+            }
+        }
     }
 
     public suspend fun setLocalDescription(sessionDescription: SessionDescription): Result<Unit> {
         logger.d { "[setLocalDescription] #sfu; #$typeTag; offerSdp: ${sessionDescription.stringify()}" }
         return setValue { connection.setLocalDescription(it, sessionDescription) }
+    }
+
+    public suspend fun addIceCandidate(iceCandidate: IceCandidate): Result<Unit> {
+        if (connection.remoteDescription == null) {
+            logger.w { "[addIceCandidate] #sfu; #$typeTag; postponed (no remoteDescription): $iceCandidate" }
+            pendingIceMutex.withLock {
+                pendingIceCandidates.add(iceCandidate)
+            }
+            return Failure(VideoError(message = "RemoteDescription is not set"))
+        }
+        val rtcIceCandidate = iceCandidate.toRtcCandidate()
+        logger.d { "[addIceCandidate] #sfu; #$typeTag; rtcIceCandidate: $rtcIceCandidate" }
+        return connection.addRtcIceCandidate(rtcIceCandidate).also {
+            logger.v { "[addIceCandidate] #sfu; #$typeTag; completed: $it" }
+        }
     }
 
     public fun addTrack(
@@ -166,12 +200,6 @@ public class StreamPeerConnection(
         videoTransceiver = connection.addTransceiver(track, transceiverInit)
     }
 
-    public suspend fun onCallJoined(sdp: String) {
-        logger.d { "[onCallJoined] #sfu; #$typeTag; answerSdp: $sdp" }
-
-        setRemoteDescription(SessionDescription(SessionDescription.Type.ANSWER, sdp))
-    }
-
     public fun addLocalStream(mediaStream: MediaStream) {
         logger.i { "[addLocalStream] #sfu; #$typeTag; mediaStream: $mediaStream" }
         connection.addStream(mediaStream)
@@ -181,11 +209,11 @@ public class StreamPeerConnection(
      * Peer connection listeners.
      */
 
-    override fun onIceCandidate(candidate: org.webrtc.IceCandidate?) {
+    override fun onIceCandidate(candidate: RtcIceCandidate?) {
         logger.i { "[onIceCandidate] #sfu; #$typeTag; candidate: $candidate" }
         if (candidate == null) return
 
-        onIceCandidate?.invoke(candidate.toCandidate(), type)
+        onIceCandidate?.invoke(candidate.toDomainCandidate(), type)
     }
 
     override fun onAddStream(stream: MediaStream?) {
