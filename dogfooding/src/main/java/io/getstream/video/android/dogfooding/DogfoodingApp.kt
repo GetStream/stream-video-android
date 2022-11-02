@@ -63,6 +63,7 @@ class DogfoodingApp : Application() {
         FirebaseAuth.getInstance().signOut()
         streamCalls.clearCallState()
         userPreferences.clear()
+        calls = null
     }
 
     companion object {
