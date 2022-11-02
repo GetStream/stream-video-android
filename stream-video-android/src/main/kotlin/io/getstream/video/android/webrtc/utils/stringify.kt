@@ -20,6 +20,7 @@ import org.webrtc.IceCandidateErrorEvent
 import org.webrtc.MediaStreamTrack
 import org.webrtc.SessionDescription
 import org.webrtc.audio.JavaAudioDeviceModule
+import stream.video.sfu.models.PeerType
 
 internal fun SessionDescription.stringify(): String = "SessionDescription(type=$type, description=$description)"
 
@@ -34,4 +35,9 @@ internal fun IceCandidateErrorEvent.stringify(): String {
 internal fun JavaAudioDeviceModule.AudioSamples.stringify(): String {
     return "AudioSamples(audioFormat=$audioFormat, channelCount=$channelCount" +
         ", sampleRate=$sampleRate, data.size=${data.size})"
+}
+
+internal fun PeerType.stringify() = when (this) {
+    PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED -> "publisher"
+    PeerType.PEER_TYPE_SUBSCRIBER -> "subscriber"
 }
