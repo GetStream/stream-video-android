@@ -11,8 +11,6 @@ import "video/coordinator/stat_v1/stat.proto";
 import "video/coordinator/utils_v1/utils.proto";
 
 option go_package = "client_v1_rpc";
-// TODO: handle provider generation once
-// option java_multiple_files = true;
 option java_outer_classname = "ClientV1RPC";
 option csharp_namespace = "Stream.Video.v1.Coordinator";
 
@@ -26,7 +24,19 @@ service ClientRPC {
   rpc GetCallEdgeServer(GetCallEdgeServerRequest) returns (GetCallEdgeServerResponse);
 
   rpc UpdateCall(UpdateCallRequest) returns (UpdateCallResponse);
-  //  rpc EndCall();
+
+  // UpdateCallPermissions allows users to change permissions granted to members
+  // this can be done in three ways:
+  // 1. grant users a different role for this call (eg. make a host)
+  // 2. grant users a permission on this call (eg. allow one user to screen-share)
+  // 3. grant some permissions to all users (eg. allow participants to unmute themselves)
+  rpc UpdateCallPermissions(UpdateCallPermissionsRequest) returns (UpdateCallPermissionsResponse);
+
+  // EndCall sets the call as ended with the following side-effects:
+  // the call itself is updated and ended_at set to current time
+  // on-going call recording and broadcasting is stopped
+  // all participants connected to the call are disconnected
+  rpc EndCall(EndCallRequest) returns (EndCallResponse);
 
   rpc QueryCalls(QueryCallsRequest) returns (QueryCallsResponse);
 
@@ -110,7 +120,7 @@ message CreateCallInput {
   // Members to add to the created call
   repeated MemberInput members = 2;
   // Ringing option, used to signal to clients' UI
-  optional bool ring = 4;
+  optional bool ring = 3;
 }
 
 // A request message for GetOrCreateCall endpoint
@@ -176,6 +186,41 @@ message UpdateCallRequest {
 
 message UpdateCallResponse {
   CallEnvelope call = 1;
+}
+
+message RoleOverride {
+  // the users that should get the new role, cannot be empty
+  repeated string user_ids = 1;
+  // the new role
+  optional string role_name = 2;
+}
+
+message PermissionGrantOverride {
+  // the users that will get the new permissions granted
+  // if empty, the grant applies to all users
+  repeated string user_ids = 1;
+  // the list of permissions granted to users
+  repeated string permissions = 2;
+}
+
+message UpdateCallPermissionsRequest {
+  string call_cid = 1;
+  oneof grant_input {
+    RoleOverride role_override = 2;
+    PermissionGrantOverride permission_override = 3;
+  };
+}
+
+message UpdateCallPermissionsResponse {
+
+}
+
+message EndCallRequest {
+  string call_cid = 1;
+}
+
+message EndCallResponse {
+
 }
 
 message CreateCallResponse {

@@ -13,10 +13,10 @@ option csharp_namespace = "Stream.Video.v1.Sfu";
 message SfuEvent {
   oneof event_payload {
     SubscriberOffer subscriber_offer = 1;
-    PublisherAnswer publisher_answer = 14;
-    ConnectionQualityChanged connection_quality_changed = 2;
-    AudioLevelChanged audio_level_changed = 3;
-    models.ICETrickle ice_trickle = 4;
+    PublisherAnswer publisher_answer = 2;
+    ConnectionQualityChanged connection_quality_changed = 3;
+    AudioLevelChanged audio_level_changed = 4;
+    models.ICETrickle ice_trickle = 5;
     ChangePublishQuality change_publish_quality = 6;
     LocalDeviceChange local_device_change = 7;
     MuteStateChanged mute_state_changed = 8;
@@ -25,7 +25,8 @@ message SfuEvent {
     ParticipantLeft participant_left = 11;
     DominantSpeakerChanged dominant_speaker_changed = 12;
     JoinResponse join_response = 13;
-    HealthCheckResponse health_check_response = 15;
+    HealthCheckResponse health_check_response = 14;
+    CallEnded call_ended = 15;
   }
 }
 
@@ -117,6 +118,10 @@ message DominantSpeakerChanged {
 // AudioLevelChanged is sent by the SFU to notify about audio levels by user
 message AudioLevelChanged {
   repeated AudioLevel audio_levels = 1;
+}
+
+message CallEnded {
+  string message = 1;
 }
 
 message AudioLevel{
