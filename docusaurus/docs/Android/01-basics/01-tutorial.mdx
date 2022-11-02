@@ -1,6 +1,168 @@
-TODO - main point of the tutorial:
- - explaining our SDK
- - installation (how to set up the dependencies)
- - authentication & connecting the main client
- - Creating/joining calls
- - Rendering the UI
+## Introduction
+
+In this tutorial we'll cover the main steps required to produce a fully capable video chat app, using **Stream Video**.  We'll touch upon the following:
+
+- Creating a project & setting up Stream dependencies
+- Authenticating the user
+- Handling Stream Video lifecycle
+- Creating & joining a Call
+- Rendering Call UI and controls
+- Observing the Call state (Advanced)
+- Managing user devices (Advanced)
+
+By the end of the tutorial, you'll be more than capable of building an app that powers video calls, with deep knowledge of how our internal state management works.
+
+But first, we need a project!
+
+## Creating a Project
+
+> **Note**: In this tutorial, we'll be using Compose for the UI, but you can very much build this in XML too. Our state is pragmatic and can be integrated with the UI toolkit you prefer.
+>
+> Additionally, the completed app for each step of the tutorial is [available on GitHub](TODO).
+
+To get started with [Stream Video](https://github.com/GetStream/stream-video-android), open the latest stable [Android Studio](https://developer.android.com/studio) and create a new project.
+
+* Select the `Empty Compose Activity` as we'll be using Compose for the UI part, for simplicity.
+* Name the Project `VideoTutorial`.
+* Set the package name to `com.example.videotutorial`.
+
+Once you create and load the project, you need to add the appropriate Stream Video dependencies. For now, we'll add the core dependency which enables the use of our **low-level-client** and the **WebRTC** wrappers.
+
+Our SDKs are available from MavenCentral. Update your repositories in the `settings.gradle` file like so:
+
+```groovy
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral() // here
+    }
+}
+```
+
+Go to the project level `build.gradle` file, and make sure that you're using Compose `1.3.0`, Compose Compiler `1.3.2`, and Kotlin `1.7.20` (or newer, compatible versions).
+
+```
+buildscript {
+    ext {
+    compose_version = '1.3.0' // <-- Compose Runtime, UI
+    compose_compiler_version = '1.3.2' // <-- Compose Compiler
+    }
+}
+
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+plugins {
+    id 'com.android.application' version '7.3.0' apply false
+    id 'com.android.library' version '7.3.0' apply false
+    id 'org.jetbrains.kotlin.android' version '1.7.20' apply false // <--
+}
+```
+
+Now that you have the project setup ready, you can move on to add the Stream dependencies. Open your `app` module's `build.gradle` file and add the following:
+
+```groovy
+dependencies {
+    implementation "io.getstream:stream-video-android:1.0.0"
+}
+```
+
+This dependency holds all the necessary code to authenticate a user, start a Stream Video client, create or join a call and connect to the call to start receiving audio and video tracks.
+
+Next, make sure your project uses the correct Compose Compiler version on the `build.gradle` file:
+
+```groovy
+android {
+  ..
+
+  composeOptions {
+      kotlinCompilerExtensionVersion compose_compiler_version  // <--
+  }
+}
+```
+
+Now that you've verified the project and added the Stream dependency, you can start with **user authentication**.
+
+## Authenticating the User
+
+To fully connect to the Stream Video API, you need to authenticate a user. Using our [backend documentation](TODO) for reference you should be able to obtain a user token that contains all the information about a given user in your app.
+
+On top of that, for video, Stream provides a [low-level client](TODO) and both [XML](TODO) and [Compose](TODO) UI components to help you integrate video chat features. We'll touch upon UI later in the tutorial - for now, let's first create our Client.
+
+Once you have the token and other user credentials ready, by authenticating against your backend, it's time to create the Stream Video Client.
+
+Create a new Kotlin file in your project called `VideoApp.kt` and replace the file contents with the following:
+
+```kotlin
+class VideoApp : Application() {
+
+    private var credentials: CredentialsProvider? = null
+    private var calls: StreamCalls? = null
+
+    val credentialsProvider: CredentialsProvider
+        get() = requireNotNull(credentials)
+
+    val streamCalls: StreamCalls
+        get() = requireNotNull(calls)
+
+    /**
+     * Sets up and returns the [streamCalls] required to connect to the API.
+     */
+    fun initializeStreamCalls(
+        credentialsProvider: CredentialsProvider,
+        loggingLevel: LoggingLevel
+    ): StreamCalls {
+        this.credentials = credentialsProvider
+
+        return StreamCallsBuilder(
+            context = this,
+            credentialsProvider = credentialsProvider,
+            loggingLevel = loggingLevel,
+        ).build().also {
+            calls = it
+        }
+    }
+
+    fun logOut() {
+        streamCalls.clearCallState()
+        calls = null
+    }
+}
+
+val Context.videoApp get() = applicationContext as VideoApp
+```
+
+// TODO - check naming of each component
+
+This sh
+
+
+
+
+
+
+
+Open the `MainActivity` and replace the file's contents with the following:
+
+```
+```
+
+
+
+## Creating Calls
+
+
+
+## Rendering the Call
+
+
+
+## Listening to State
+
+
+
+## Audio & Video Devices
+
+
+
+
+
