@@ -45,7 +45,6 @@ import io.getstream.video.android.model.CallParticipant
 import io.getstream.video.android.model.CallSettings
 import io.getstream.video.android.model.IceCandidate
 import io.getstream.video.android.model.IceServer
-import io.getstream.video.android.model.toCandidate
 import io.getstream.video.android.module.WebRTCModule
 import io.getstream.video.android.token.CredentialsProvider
 import io.getstream.video.android.utils.Failure
@@ -327,17 +326,16 @@ internal class WebRTCClientImpl(
     }
 
     private fun createPeerConnections(autoPublish: Boolean) {
-        val subscriber = createSubscriber()
-        logger.v { "[initializeCall] #sfu; subscriber: $subscriber" }
-        this.subscriber = subscriber
+        logger.i { "[createPeerConnections] #sfu; autoPublish: $autoPublish" }
+        createSubscriber()
 
         if (autoPublish) {
             createPublisher()
         }
     }
 
-    private fun createSubscriber(): StreamPeerConnection {
-        return peerConnectionFactory.makePeerConnection(
+    private fun createSubscriber() {
+        this.subscriber = peerConnectionFactory.makePeerConnection(
             coroutineScope = coroutineScope,
             configuration = connectionConfiguration,
             type = PeerType.PEER_TYPE_SUBSCRIBER,
@@ -346,34 +344,29 @@ internal class WebRTCClientImpl(
             onStreamRemoved = { call?.removeStream(it) },
             onIceCandidateRequest = ::sendIceCandidate
         ).also {
-            logger.d { "[createSubscriber] #sfu; subscriber: $it" }
+            logger.i { "[createSubscriber] #sfu; subscriber: $it" }
         }
     }
 
     private fun sendIceCandidate(candidate: IceCandidate, peerType: PeerType) {
-        logger.d { "[sendIceCandidate] #sfu; type: $peerType, candidate: $candidate" }
-        val trickle = ICETrickle(
-            peer_type = peerType,
-            ice_candidate = Json.encodeToString(candidate),
-            session_id = sessionId
-        )
-
         coroutineScope.launch {
-            logger.v { "[sendIceCandidate] #sfu; type: $peerType, candidate is about to be sent" }
-            val result = signalClient.sendIceCandidate(trickle)
-            logger.v { "[sendIceCandidate] #sfu; type: $peerType, result: $result" }
+            logger.d { "[sendIceCandidate] #sfu; #${peerType.stringify()}; candidate: $candidate" }
+            val iceTrickle = ICETrickle(
+                peer_type = peerType,
+                ice_candidate = Json.encodeToString(candidate),
+                session_id = sessionId
+            )
+            logger.v { "[sendIceCandidate] #sfu; #${peerType.stringify()}; iceTrickle: $iceTrickle" }
+            val result = signalClient.sendIceCandidate(iceTrickle)
+            logger.v { "[sendIceCandidate] #sfu; #${peerType.stringify()}; completed: $result" }
         }
     }
 
     private suspend fun connectToCall(): Result<JoinResponse> {
         logger.d { "[connectToCall] #sfu; no args" }
-        val joinResponse = executeJoinRequest()
-
-        joinResponse.onSuccessSuspend { response ->
-            // subscriber?.onCallJoined(response.own_session_id) // TODO
+        return executeJoinRequest().also {
+            logger.v { "[connectToCall] #sfu; completed $it" }
         }
-        logger.v { "[connectToCall] #sfu; completed $joinResponse" }
-        return joinResponse
     }
 
     private suspend fun executeJoinRequest(): Result<JoinResponse> {
@@ -423,12 +416,10 @@ internal class WebRTCClientImpl(
             mediaConstraints = MediaConstraints(),
             onNegotiationNeeded = ::onNegotiationNeeded,
             onIceCandidateRequest = ::sendIceCandidate
-        )
-        logger.d { "[createPublisher] #sfu; publisher: $publisher" }
+        ).also {
+            logger.i { "[createPublisher] #sfu; publisher: $it" }
+        }
     }
-
-    private val publisherCandidates = mutableListOf<ICETrickleEvent>()
-    private val subscriberCandidates = mutableListOf<ICETrickleEvent>()
 
     override fun onConnecting() {
         coroutineScope.launch {
@@ -463,7 +454,7 @@ internal class WebRTCClientImpl(
             sfuEvents.emit(event)
             when (event) {
                 is ICETrickleEvent -> handleTrickle(event)
-                is SubscriberOfferEvent -> setRemoteDescription(event.sdp)
+                is SubscriberOfferEvent -> handleSubscriberOffer(event)
                 is SfuParticipantJoinedEvent -> call?.addParticipant(event)
                 is SfuParticipantLeftEvent -> call?.removeParticipant(event)
                 is ChangePublishQualityEvent -> {
@@ -476,38 +467,15 @@ internal class WebRTCClientImpl(
         }
     }
 
-    private fun handleTrickle(event: ICETrickleEvent) {
-        logger.d { "[handleTrickle] peerType: ${event.peerType}, candidate: ${event.candidate}" }
-
-        if (event.peerType == PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED) {
-            handlePublisherTrickle(event)
+    private suspend fun handleTrickle(event: ICETrickleEvent) {
+        logger.d { "[handleTrickle] #sfu; #${event.peerType.stringify()}; candidate: ${event.candidate}" }
+        val iceCandidate: IceCandidate = Json.decodeFromString(event.candidate)
+        val result = if (event.peerType == PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED) {
+            publisher?.addIceCandidate(iceCandidate)
         } else {
-            handleSubscriberTrickle(event)
+            subscriber?.addIceCandidate(iceCandidate)
         }
-    }
-
-    private fun handleSubscriberTrickle(iceTrickle: ICETrickleEvent) {
-        if (subscriber?.connection?.remoteDescription != null) {
-            val iceCandidate: IceCandidate = Json.decodeFromString(iceTrickle.candidate)
-
-            subscriber?.connection?.addIceCandidate(
-                iceCandidate.toCandidate()
-            )
-        } else {
-            subscriberCandidates.add(iceTrickle)
-        }
-    }
-
-    private fun handlePublisherTrickle(iceTrickle: ICETrickleEvent) {
-        if (publisher?.connection?.remoteDescription != null) {
-            val iceCandidate: IceCandidate = Json.decodeFromString(iceTrickle.candidate)
-
-            publisher?.connection?.addIceCandidate(
-                iceCandidate.toCandidate()
-            )
-        } else {
-            publisherCandidates.add(iceTrickle)
-        }
+        logger.v { "[handleTrickle] #sfu; #${event.peerType.stringify()}; result: $result" }
     }
 
     private fun onNegotiationNeeded(peerConnection: StreamPeerConnection) {
@@ -526,26 +494,15 @@ internal class WebRTCClientImpl(
                 signalClient.setPublisher(request).onSuccessSuspend {
                     logger.v { "[negotiate] #$id; #sfu; answerSdp: $it" }
 
-                    peerConnection.setRemoteDescription(
-                        SessionDescription(SessionDescription.Type.ANSWER, it.sdp)
+                    val answerDescription = SessionDescription(
+                        SessionDescription.Type.ANSWER, it.sdp
                     )
-
-                    applyPendingIceCandidates()
+                    peerConnection.setRemoteDescription(answerDescription)
                 }.onError {
                     logger.e { "[negotiate] #$id; #sfu; failed: $it" }
                 }
             }
         }
-    }
-
-    private fun applyPendingIceCandidates() {
-        publisherCandidates.forEach { candidate ->
-            val iceCandidate: IceCandidate = Json.decodeFromString(candidate.candidate)
-            publisher?.connection?.addIceCandidate(
-                iceCandidate.toCandidate()
-            )
-        }
-        publisherCandidates.clear()
     }
 
     private fun createUserTracks(callSettings: CallSettings, autoPublish: Boolean) {
@@ -683,41 +640,32 @@ internal class WebRTCClientImpl(
         }
     }
 
-    private fun setRemoteDescription(sdp: String) {
-        logger.d { "[setRemoteDescription] #sfu; #subscriber; offerSdp: $sdp" }
+    private suspend fun handleSubscriberOffer(offerEvent: SubscriberOfferEvent) {
+        logger.d { "[handleSubscriberOffer] #sfu; #subscriber; event: $offerEvent" }
         val subscriber = subscriber ?: return
 
-        val sessionDescription = SessionDescription(
-            SessionDescription.Type.OFFER, sdp
+        val offerDescription = SessionDescription(
+            SessionDescription.Type.OFFER, offerEvent.sdp
         )
-
-        coroutineScope.launch {
-            subscriber.setRemoteDescription(sessionDescription)
-
-            subscriberCandidates.forEach { candidate ->
-                val iceCandidate: IceCandidate = Json.decodeFromString(candidate.candidate)
-                subscriber.connection.addIceCandidate(
-                    iceCandidate.toCandidate()
-                )
-            }
-            subscriberCandidates.clear()
-
-            when (val result = subscriber.createAnswer()) {
-                is Success -> sendAnswer(result.data.description)
-                is Failure -> logger.d { "[setRemoteDescription] failure: ${result.error}" }
-            }
+        subscriber.setRemoteDescription(offerDescription)
+        val answerResult = subscriber.createAnswer()
+        if (answerResult !is Success) {
+            logger.w { "[handleSubscriberOffer] #sfu; #subscriber; rejected (createAnswer failed): $answerResult" }
+            return
         }
-    }
-
-    private fun sendAnswer(description: String) {
-        logger.d { "[sendAnswer] #sfu; answerSdp: $description" }
+        val answerSdp = answerResult.data
+        logger.v { "[handleSubscriberOffer] #sfu; #subscriber; answerSdp: $answerSdp" }
+        val setAnswerResult = subscriber.setLocalDescription(answerSdp)
+        if (setAnswerResult !is Success) {
+            logger.w { "[handleSubscriberOffer] #sfu; #subscriber; rejected (setAnswer failed): $setAnswerResult" }
+            return
+        }
+        logger.v { "[handleSubscriberOffer] #sfu; #subscriber; setAnswerResult: $setAnswerResult" }
         val sendAnswerRequest = SendAnswerRequest(
-            session_id = sessionId, peer_type = PeerType.PEER_TYPE_SUBSCRIBER, sdp = description
+            PeerType.PEER_TYPE_SUBSCRIBER, answerSdp.description, sessionId
         )
-
-        coroutineScope.launch {
-            signalClient.sendAnswer(sendAnswerRequest)
-        }
+        val sendAnswerResult = signalClient.sendAnswer(sendAnswerRequest)
+        logger.v { "[handleSubscriberOffer] #sfu; #subscriber; sendAnswerResult: $sendAnswerResult" }
     }
 
     private fun updateParticipantsSubscriptions(participants: List<CallParticipant>) {
