@@ -80,9 +80,9 @@ internal class WebRTCClientBuilder(
             context = context,
             credentialsProvider = credentialsProvider,
             signalClient = webRTCModule.signalClient,
-            servers = iceServers,
+            remoteIceServers = iceServers,
             signalSocket = SignalSocketImpl(
-                wssUrl = "$signalUrl/ws".replace("https", "ws"),
+                wssUrl = "$signalUrl/ws".replace("https", "wss"),
                 networkStateProvider = networkStateProvider,
                 coroutineScope = CoroutineScope(Dispatchers.IO), // TODO
                 signalSocketFactory = socketFactory

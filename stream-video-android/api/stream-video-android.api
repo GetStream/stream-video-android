@@ -1668,6 +1668,11 @@ public final class io/getstream/video/android/model/IceCandidate {
 	public static final field Companion Lio/getstream/video/android/model/IceCandidate$Companion;
 	public synthetic fun <init> (ILjava/lang/String;ILjava/lang/String;Ljava/lang/String;Lkotlinx/serialization/internal/SerializationConstructorMarker;)V
 	public fun <init> (Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;)V
+	public final fun copy (Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;)Lio/getstream/video/android/model/IceCandidate;
+	public static synthetic fun copy$default (Lio/getstream/video/android/model/IceCandidate;Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/model/IceCandidate;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 	public static final fun write$Self (Lio/getstream/video/android/model/IceCandidate;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
 }
 
@@ -2393,6 +2398,7 @@ public final class io/getstream/video/android/webrtc/connection/PeerConnectionTy
 public final class io/getstream/video/android/webrtc/connection/StreamPeerConnection : org/webrtc/PeerConnection$Observer {
 	public fun <init> (Lkotlinx/coroutines/CoroutineScope;Lstream/video/sfu/models/PeerType;Lorg/webrtc/MediaConstraints;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;)V
 	public final fun addAudioTransceiver (Lorg/webrtc/MediaStreamTrack;Ljava/util/List;)V
+	public final fun addIceCandidate (Lio/getstream/video/android/model/IceCandidate;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun addLocalStream (Lorg/webrtc/MediaStream;)V
 	public final fun addTrack (Lorg/webrtc/MediaStreamTrack;Ljava/util/List;)Lorg/webrtc/RtpSender;
 	public final fun addVideoTransceiver (Lorg/webrtc/MediaStreamTrack;Ljava/util/List;)V
@@ -2404,7 +2410,6 @@ public final class io/getstream/video/android/webrtc/connection/StreamPeerConnec
 	public final fun initialize (Lorg/webrtc/PeerConnection;)V
 	public fun onAddStream (Lorg/webrtc/MediaStream;)V
 	public fun onAddTrack (Lorg/webrtc/RtpReceiver;[Lorg/webrtc/MediaStream;)V
-	public final fun onCallJoined (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun onConnectionChange (Lorg/webrtc/PeerConnection$PeerConnectionState;)V
 	public fun onDataChannel (Lorg/webrtc/DataChannel;)V
 	public fun onIceCandidate (Lorg/webrtc/IceCandidate;)V
