@@ -146,8 +146,8 @@ class HomeActivity : AppCompatActivity() {
         lifecycleScope.launch {
             logger.d { "[joinCall] callId: $callId" }
             loadingState.value = true
-            val result = streamCalls.createAndJoinCall(
-                "default", id = callId, participantIds = emptyList(), ringing = false
+            val result = streamCalls.joinCall(
+                "default", id = callId
             )
             loadingState.value = false
             result.onSuccess {
