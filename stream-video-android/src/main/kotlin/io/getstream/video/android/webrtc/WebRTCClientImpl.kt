@@ -111,7 +111,7 @@ internal class WebRTCClientImpl(
     private val credentialsProvider: CredentialsProvider,
     private val signalClient: SignalClient,
     private val signalSocket: SignalSocket,
-    servers: List<IceServer>?
+    private val remoteIceServers: List<IceServer>
 ) : WebRTCClient, SignalSocketListener {
 
     private val logger = StreamLog.getLogger("Call:WebRtcClient")
@@ -129,7 +129,7 @@ internal class WebRTCClientImpl(
     private val peerConnectionFactory by lazy { StreamPeerConnectionFactory(context) }
     private val iceServers by lazy {
         if (WebRTCModule.REDIRECT_SIGNAL_URL == null) {
-            buildRemoteIceServers(WebRTCModule.SIGNAL_HOST_BASE)
+            buildRemoteIceServers(remoteIceServers)
         } else {
             buildLocalIceServers()
         }

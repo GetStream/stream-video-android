@@ -64,6 +64,15 @@ internal fun buildLocalIceServers(): List<PeerConnection.IceServer> {
     )
 }
 
+internal fun buildRemoteIceServers(iceServers: List<IceServer>): List<PeerConnection.IceServer> {
+    return iceServers.map {
+        PeerConnection.IceServer.builder(it.urls)
+            .setUsername(it.username)
+            .setPassword(it.password)
+            .createIceServer()
+    }
+}
+
 internal fun buildRemoteIceServers(hostUrl: String): List<PeerConnection.IceServer> {
     return listOf(
         PeerConnection.IceServer.builder("stun:stun.l.google.com:19302")
