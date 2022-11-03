@@ -44,7 +44,7 @@ public class VideoNetworkError private constructor(
     }
 
     override fun toString(): String {
-        return "ChatNetworkError http status $statusCode, stream error code $streamCode: $description"
+        return "VideoNetworkError(httpStatus=$statusCode, streamErrorCode=$streamCode:$description)"
     }
 
     public companion object {
