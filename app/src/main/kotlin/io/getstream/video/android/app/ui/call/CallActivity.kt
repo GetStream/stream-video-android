@@ -46,7 +46,7 @@ class CallActivity : AppCompatActivity() {
     }
 
     private val factory by lazy {
-        CallViewModelFactory(input, videoApp.streamCalls, videoApp.credentialsProvider)
+        CallViewModelFactory(input, videoApp.streamVideo, videoApp.credentialsProvider)
     }
 
     private val callViewModel by viewModels<CallViewModel>(factoryProducer = { factory })

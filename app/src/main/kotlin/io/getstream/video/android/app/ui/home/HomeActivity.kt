@@ -85,9 +85,9 @@ class HomeActivity : AppCompatActivity() {
 
     private val logger = StreamLog.getLogger("Call:HomeView")
 
-    private val streamCalls by lazy {
-        logger.d { "[initStreamCalls] no args" }
-        videoApp.streamCalls
+    private val streamVideo by lazy {
+        logger.d { "[initStreamVideo] no args" }
+        videoApp.streamVideo
     }
 
     private val router: StreamRouter by lazy { StreamRouterImpl(this) }
@@ -98,7 +98,7 @@ class HomeActivity : AppCompatActivity() {
     private val participantsOptions: MutableState<List<UserCredentials>> by lazy {
         mutableStateOf(
             getUsers().filter {
-                it.id != streamCalls.getUser().id
+                it.id != streamVideo.getUser().id
             }
         )
     }
@@ -132,7 +132,7 @@ class HomeActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         logger.d { "[onCreate] savedInstanceState: $savedInstanceState" }
         super.onCreate(savedInstanceState)
-        streamCalls.addSocketListener(socketListener)
+        streamVideo.addSocketListener(socketListener)
         setContent {
             VideoTheme {
                 HomeScreen()
@@ -141,7 +141,7 @@ class HomeActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        streamCalls.removeSocketListener(socketListener)
+        streamVideo.removeSocketListener(socketListener)
         super.onDestroy()
     }
 
@@ -278,7 +278,7 @@ class HomeActivity : AppCompatActivity() {
             logger.d { "[createMeeting] callId: $callId, participants: $participants" }
 
             loadingState.value = true
-            val result = streamCalls.createAndJoinCall(
+            val result = streamVideo.createAndJoinCall(
                 "default",
                 callId,
                 participants,
@@ -314,7 +314,7 @@ class HomeActivity : AppCompatActivity() {
             logger.d { "[dialUsers] callId: $callId, participants: $participants" }
 
             loadingState.value = true
-            val result = streamCalls.getOrCreateCall(
+            val result = streamVideo.getOrCreateCall(
                 "default",
                 callId,
                 participants,
@@ -355,7 +355,7 @@ class HomeActivity : AppCompatActivity() {
         lifecycleScope.launch {
             logger.d { "[joinCall] callId: $callId" }
             loadingState.value = true
-            val result = streamCalls.createAndJoinCall(
+            val result = streamVideo.createAndJoinCall(
                 "default",
                 id = callId,
                 participantIds = emptyList(),

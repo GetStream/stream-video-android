@@ -14,19 +14,15 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.app.ui.call
+package io.getstream.video.android
 
-import android.content.Context
-import io.getstream.video.android.StreamVideo
-import io.getstream.video.android.app.videoApp
-import io.getstream.video.android.service.StreamCallService
+public interface StreamVideoConfig {
 
-class CallService : StreamCallService() {
+    public val dropTimeout: Long
+    public val launchCallServiceInternally: Boolean
+}
 
-    override fun getStreamCalls(context: Context): StreamVideo = videoApp.streamVideo
-
-    companion object {
-        fun start(context: Context) = start<CallService>(context)
-        fun stop(context: Context) = stop<CallService>(context)
-    }
+public object StreamVideoConfigDefault : StreamVideoConfig {
+    override val dropTimeout: Long = 10_000L
+    override val launchCallServiceInternally: Boolean = true
 }

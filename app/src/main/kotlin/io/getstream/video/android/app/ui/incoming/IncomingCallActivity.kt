@@ -34,7 +34,7 @@ class IncomingCallActivity : AppCompatActivity() {
 
     private val viewModel by viewModels<IncomingCallViewModel> {
         IncomingCallViewModelFactory(
-            videoApp.streamCalls,
+            videoApp.streamVideo,
             StreamRouterImpl(this),
             requireNotNull(intent.getSerializableExtra(KEY_CALL_DATA) as? IncomingCallData)
         )

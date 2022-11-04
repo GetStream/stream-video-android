@@ -25,7 +25,7 @@ import android.os.IBinder
 import androidx.core.content.ContextCompat
 import io.getstream.logging.StreamLog
 import io.getstream.video.android.R
-import io.getstream.video.android.StreamCalls
+import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.dispatchers.DispatcherProvider
 import io.getstream.video.android.input.CallServiceInput
 import io.getstream.video.android.service.notification.StreamNotificationBuilder
@@ -46,7 +46,7 @@ public abstract class StreamCallService : Service() {
 
     private val notificationManager: NotificationManager by lazy { application.notificationManager }
 
-    private val streamCalls: StreamCalls by lazy { getStreamCalls(this) }
+    private val streamVideo: StreamVideo by lazy { getStreamCalls(this) }
 
     private val notificationBuilder: StreamNotificationBuilder by lazy {
         createNotificationBuilder(application)
@@ -56,10 +56,10 @@ public abstract class StreamCallService : Service() {
 
     private var curState: State = State.Idle
 
-    protected abstract fun getStreamCalls(context: Context): StreamCalls
+    protected abstract fun getStreamCalls(context: Context): StreamVideo
 
     protected open fun createNotificationBuilder(context: Context): StreamNotificationBuilder =
-        StreamNotificationBuilderImpl(context, streamCalls, scope) {
+        StreamNotificationBuilderImpl(context, streamVideo, scope) {
             R.id.stream_call_notification
         }
 
@@ -68,7 +68,7 @@ public abstract class StreamCallService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        val state = streamCalls.callState.value
+        val state = streamVideo.callState.value
         if (state !is State.Active) {
             logger.w { "[onCreate] rejected (state is not Active): $state" }
             destroySelf()
@@ -77,7 +77,7 @@ public abstract class StreamCallService : Service() {
         logger.i { "[onCreate] state: $state" }
         startForeground(state)
         scope.launch {
-            streamCalls.callState.collect {
+            streamVideo.callState.collect {
                 handleState(it)
             }
         }

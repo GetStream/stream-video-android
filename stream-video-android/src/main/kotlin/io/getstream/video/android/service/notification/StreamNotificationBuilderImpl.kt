@@ -26,7 +26,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import io.getstream.logging.StreamLog
 import io.getstream.video.android.R
-import io.getstream.video.android.StreamCalls
+import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.utils.notificationManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -34,7 +34,7 @@ import io.getstream.video.android.model.state.StreamCallState as State
 
 internal class StreamNotificationBuilderImpl(
     private val context: Context,
-    private val streamCalls: StreamCalls,
+    private val streamVideo: StreamVideo,
     private val scope: CoroutineScope,
     private val getNotificationId: () -> Int
 ) : StreamNotificationBuilder {
@@ -61,9 +61,9 @@ internal class StreamNotificationBuilderImpl(
             actionReceiver.registerAsFlow().collect {
                 logger.v { "[observeAction] action: $it" }
                 when (it) {
-                    is NotificationAction.Accept -> streamCalls.acceptCall(it.guid.type, it.guid.id)
-                    is NotificationAction.Reject -> streamCalls.rejectCall(it.guid.cid)
-                    is NotificationAction.Cancel -> streamCalls.cancelCall(it.guid.cid)
+                    is NotificationAction.Accept -> streamVideo.acceptCall(it.guid.type, it.guid.id)
+                    is NotificationAction.Reject -> streamVideo.rejectCall(it.guid.cid)
+                    is NotificationAction.Cancel -> streamVideo.cancelCall(it.guid.cid)
                 }
             }
         }

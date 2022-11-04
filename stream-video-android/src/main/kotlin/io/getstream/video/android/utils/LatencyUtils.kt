@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.utils
 
-import io.getstream.video.android.module.CallClientModule
+import io.getstream.video.android.module.CallCoordinatorClientModule
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.URL
@@ -33,7 +33,7 @@ public fun getLatencyMeasurements(latencyUrl: String): List<Double> {
     /**
      * Used for setting up testing on devices.
      */
-    val url = CallClientModule.REDIRECT_PING_URL ?: prepareUrl(latencyUrl)
+    val url = CallCoordinatorClientModule.REDIRECT_PING_URL ?: prepareUrl(latencyUrl)
 
     repeat(3) {
         val request = URL(url)

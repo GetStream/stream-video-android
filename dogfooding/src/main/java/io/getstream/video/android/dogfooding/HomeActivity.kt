@@ -62,9 +62,9 @@ import kotlinx.coroutines.launch
 
 class HomeActivity : AppCompatActivity() {
 
-    private val streamCalls by lazy {
-        logger.d { "[initStreamCalls] no args" }
-        dogfoodingApp.streamCalls
+    private val streamVideo by lazy {
+        logger.d { "[initStreamVideo] no args" }
+        dogfoodingApp.streamVideo
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -146,7 +146,7 @@ class HomeActivity : AppCompatActivity() {
         lifecycleScope.launch {
             logger.d { "[joinCall] callId: $callId" }
             loadingState.value = true
-            val result = streamCalls.joinCall(
+            val result = streamVideo.joinCall(
                 "default", id = callId
             )
             loadingState.value = false
@@ -202,7 +202,7 @@ class HomeActivity : AppCompatActivity() {
         ) {
             UserIcon()
 
-            val user = streamCalls.getUser()
+            val user = streamVideo.getUser()
 
             Text(
                 modifier = Modifier

@@ -20,8 +20,9 @@ import android.hardware.camera2.CameraMetadata
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.getstream.logging.StreamLog
-import io.getstream.video.android.StreamCalls
+import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.audio.AudioDevice
+import io.getstream.video.android.call.CallClient
 import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.CallInput
 import io.getstream.video.android.model.CallParticipant
@@ -35,7 +36,6 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
@@ -43,7 +43,7 @@ import java.util.*
 
 public class CallViewModel(
     private val input: CallInput,
-    private val streamCalls: StreamCalls,
+    private val streamVideo: StreamVideo,
     private val credentialsProvider: CredentialsProvider
 ) : ViewModel() {
 
@@ -80,17 +80,20 @@ public class CallViewModel(
     private val _isShowingSettings = MutableStateFlow(false)
     public val isShowingSettings: StateFlow<Boolean> = _isShowingSettings
 
-    public val streamCallState: StateFlow<StreamCallState> get() = streamCalls.callState
+    public val streamCallState: StateFlow<StreamCallState> get() = streamVideo.callState
+
+    private lateinit var client: CallClient
 
     init {
         viewModelScope.launch {
-            streamCalls.callState.collect {
+            streamVideo.callState.collect {
                 when (it) {
                     is StreamCallState.Idle -> {
                         logger.i { "[observeState] state: Idle" }
                         clearState()
                     }
-                    else -> { /* no-op */ }
+                    else -> { /* no-op */
+                    }
                 }
             }
         }
@@ -100,7 +103,7 @@ public class CallViewModel(
         logger.d { "[createCall] input: $input" }
         // this._callState.value = videoClient.getCall(callId) TODO - load details
 
-        streamCalls.createCallClient(
+        client = streamVideo.createCallClient(
             input.callUrl.removeSuffix("/twirp"),
             input.userToken,
             input.iceServers,
@@ -119,7 +122,7 @@ public class CallViewModel(
 
     private fun connectToCall(callSettings: CallSettings) {
         viewModelScope.launch {
-            val callResult = streamCalls.connectToCall(
+            val callResult = client.connectToCall(
                 UUID.randomUUID().toString(),
                 true/*false*/,
                 callSettings
@@ -131,7 +134,7 @@ public class CallViewModel(
                     _callState.value = call
 
                     if (callSettings.videoOn) {
-                        streamCalls.startCapturingLocalVideo(CameraMetadata.LENS_FACING_FRONT)
+                        client.startCapturingLocalVideo(CameraMetadata.LENS_FACING_FRONT)
                     }
                 }
                 is Failure -> {
@@ -142,18 +145,18 @@ public class CallViewModel(
     }
 
     public fun toggleCamera(enabled: Boolean) {
-        streamCalls.setCameraEnabled(enabled)
+        client.setCameraEnabled(enabled)
     }
 
     public fun toggleMicrophone(enabled: Boolean) {
-        streamCalls.setMicrophoneEnabled(enabled)
+        client.setMicrophoneEnabled(enabled)
     }
 
     /**
      * Flips the camera for the current participant if possible.
      */
     public fun flipCamera() {
-        streamCalls.flipCamera()
+        client.flipCamera()
     }
 
     public fun showSettings() {
@@ -192,17 +195,17 @@ public class CallViewModel(
     public fun leaveCall() {
         viewModelScope.launch {
             logger.d { "[leaveCall] no args" }
-            streamCalls.cancelCall(input.callCid)
+            streamVideo.cancelCall(input.callCid)
         }
     }
 
     public fun getAudioDevices(): List<AudioDevice> {
-        return streamCalls.getAudioDevices()
+        return client.getAudioDevices()
     }
 
     private fun clearState() {
         logger.i { "[leaveCall] no args" }
-        streamCalls.clearCallState()
+        streamVideo.clearCallState()
         viewModelScope.cancel()
         val room = _callState.value ?: return
 
@@ -215,6 +218,6 @@ public class CallViewModel(
     }
 
     public fun selectAudioDevice(device: AudioDevice) {
-        streamCalls.selectAudioDevice(device)
+        client.selectAudioDevice(device)
     }
 }

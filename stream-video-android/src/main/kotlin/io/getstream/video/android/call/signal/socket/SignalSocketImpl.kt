@@ -14,79 +14,60 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.socket
+package io.getstream.video.android.call.signal.socket
 
 import android.os.Handler
 import android.os.Looper
 import androidx.annotation.VisibleForTesting
-import io.getstream.video.android.coordinator.state.UserState
+import io.getstream.logging.StreamLog
 import io.getstream.video.android.errors.DisconnectCause
 import io.getstream.video.android.errors.VideoError
-import io.getstream.video.android.errors.VideoErrorCode
 import io.getstream.video.android.errors.VideoNetworkError
 import io.getstream.video.android.events.ConnectedEvent
-import io.getstream.video.android.events.VideoEvent
-import io.getstream.video.android.model.CallMetadata
+import io.getstream.video.android.events.SfuDataEvent
 import io.getstream.video.android.network.NetworkStateProvider
-import io.getstream.video.android.token.CredentialsManager
+import io.getstream.video.android.socket.EventsParser
+import io.getstream.video.android.socket.HealthMonitor
+import io.getstream.video.android.socket.Socket
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import stream.video.coordinator.client_v1_rpc.WebsocketAuthRequest
-import stream.video.coordinator.client_v1_rpc.WebsocketHealthcheck
-import stream.video.coordinator.user_v1.UserInput
-import kotlin.math.pow
+import stream.video.sfu.event.HealthCheckRequest
+import stream.video.sfu.event.JoinRequest
 import kotlin.properties.Delegates
 
-/**
- * Socket implementation used to handle the lifecycle of a WebSocket and its related state.
- *
- * @property wssUrl Base URL for the API socket.
- * @property credentialsManager Wrapper around a token providing service that manages its validity.
- * @property socketFactory Factory used to build new socket instances.
- * @property networkStateProvider Provides the network state and lifecycle handles.
- * @property coroutineScope The scope used to launch any operations.
- */
-internal class VideoSocketImpl(
+internal class SignalSocketImpl(
     private val wssUrl: String,
-    private val credentialsManager: CredentialsManager,
-    private val socketFactory: SocketFactory,
     private val networkStateProvider: NetworkStateProvider,
-    private val userState: UserState,
+    private val signalSocketFactory: SignalSocketFactory,
     private val coroutineScope: CoroutineScope,
-) : VideoSocket {
-    private var connectionConf: SocketFactory.ConnectionConf? = null
+) : SignalSocket {
+
+    private val logger = StreamLog.getLogger("Call:SfuSocket")
+
+    private var connectionConf: SignalSocketFactory.ConnectionConf? = null
+    private val listeners: MutableList<SignalSocketListener> = mutableListOf()
+
     private var socket: Socket? = null
-    private var eventsParser: EventsParser? = null
+    private var eventsParser: SignalEventsParser? = null
     private var clientId: String = ""
+    private var sessionId: String = ""
 
     private var socketConnectionJob: Job? = null
-    private val listeners = mutableSetOf<SocketListener>()
     private val eventUiHandler = Handler(Looper.getMainLooper())
-
-    /**
-     * Call related state.
-     */
-    private var call: CallMetadata? = null
 
     private val healthMonitor = HealthMonitor(
         object : HealthMonitor.HealthCallback {
             override fun reconnect() {
                 if (state is State.DisconnectedTemporarily) {
-                    this@VideoSocketImpl.reconnect(connectionConf)
+                    this@SignalSocketImpl.reconnect(connectionConf)
                 }
             }
 
             override fun check() {
                 (state as? State.Connected)?.let {
-                    sendPing(
-                        WebsocketHealthcheck(
-                            user_id = userState.user.value.id,
-                            client_id = clientId,
-                            call_type = call?.type ?: "",
-                            call_id = call?.id ?: "",
-                        )
+                    socket?.pingCall(
+                        HealthCheckRequest(sessionId)
                     )
                 }
             }
@@ -94,12 +75,14 @@ internal class VideoSocketImpl(
     )
     private val networkStateListener = object : NetworkStateProvider.NetworkStateListener {
         override fun onConnected() {
+            logger.i { "[onNetworkConnected] state: $state" }
             if (state is State.DisconnectedTemporarily || state == State.NetworkDisconnected) {
                 reconnect(connectionConf)
             }
         }
 
         override fun onDisconnected() {
+            logger.i { "[onNetworkDisconnected] state: $state" }
             healthMonitor.stop()
             if (state is State.Connected || state is State.Connecting) {
                 state = State.NetworkDisconnected
@@ -107,12 +90,11 @@ internal class VideoSocketImpl(
         }
     }
 
-    private var reconnectionAttempts = 0
-
     @VisibleForTesting
     internal var state: State by Delegates.observable(
         State.DisconnectedTemporarily(null) as State
     ) { _, oldState, newState ->
+        logger.i { "[onStateChanged] $newState <= $oldState" }
         if (oldState != newState) {
             when (newState) {
                 is State.Connecting -> {
@@ -150,84 +132,37 @@ internal class VideoSocketImpl(
     }
         private set
 
-    override fun onSocketError(error: VideoError) {
-        if (state !is State.DisconnectedPermanently) {
-            callListeners { it.onError(error) }
-            (error as? VideoNetworkError)?.let(::onNetworkError)
-        }
-    }
-
-    private fun onNetworkError(error: VideoNetworkError) {
-        if (VideoErrorCode.isAuthenticationError(error.streamCode)) {
-            credentialsManager.expireToken()
-        }
-
-        when (error.streamCode) {
-            VideoErrorCode.PARSER_ERROR.code,
-            VideoErrorCode.CANT_PARSE_CONNECTION_EVENT.code,
-            VideoErrorCode.CANT_PARSE_EVENT.code,
-            VideoErrorCode.UNABLE_TO_PARSE_SOCKET_EVENT.code,
-            VideoErrorCode.NO_ERROR_BODY.code,
-            -> {
-                if (reconnectionAttempts < RETRY_LIMIT) {
-                    coroutineScope.launch {
-                        delay(DEFAULT_DELAY * reconnectionAttempts.toDouble().pow(2.0).toLong())
-                        reconnect(connectionConf)
-                        reconnectionAttempts += 1
-                    }
-                }
-            }
-            VideoErrorCode.UNDEFINED_TOKEN.code,
-            VideoErrorCode.INVALID_TOKEN.code,
-            VideoErrorCode.API_KEY_NOT_FOUND.code,
-            VideoErrorCode.VALIDATION_ERROR.code,
-            -> {
-                state = State.DisconnectedPermanently(error)
-            }
-            else -> {
-                state = State.DisconnectedTemporarily(error)
-            }
-        }
-    }
-
-    override fun removeListener(socketListener: SocketListener) {
+    override fun removeListener(signalSocketListener: SignalSocketListener) {
         synchronized(listeners) {
-            listeners.remove(socketListener)
+            listeners.remove(signalSocketListener)
         }
     }
 
-    override fun addListener(socketListener: SocketListener) {
+    override fun addListener(signalSocketListener: SignalSocketListener) {
         synchronized(listeners) {
-            listeners.add(socketListener)
+            listeners.add(signalSocketListener)
         }
     }
 
     override fun connectSocket() {
-        connect(SocketFactory.ConnectionConf(wssUrl))
+        logger.d { "[connectSocket] wssUrl: $wssUrl" }
+        connect(SignalSocketFactory.ConnectionConf(wssUrl))
     }
 
-    override fun authenticateUser() {
-        val user = userState.user.value
-
-        socket?.authenticate(
-            WebsocketAuthRequest(
-                user = UserInput(
-                    name = user.name,
-                    image_url = user.imageUrl ?: "",
-                    role = user.role
-                ),
-                token = credentialsManager.getToken(),
-                api_key = credentialsManager.getApiKey()
-            )
-        )
+    override fun sendJoinRequest(request: JoinRequest) {
+        logger.d { "[sendJoinRequest] socketExists: ${socket != null}, request: $request" }
+        this.sessionId = request.session_id
+        socket?.joinCall(request)
     }
 
     override fun reconnect() {
-        reconnect(SocketFactory.ConnectionConf(wssUrl))
+        logger.d { "[reconnect] wssUrl: $wssUrl" }
+        reconnect(SignalSocketFactory.ConnectionConf(wssUrl))
     }
 
-    internal fun connect(connectionConf: SocketFactory.ConnectionConf) {
+    internal fun connect(connectionConf: SignalSocketFactory.ConnectionConf) {
         val isNetworkConnected = networkStateProvider.isConnected()
+        logger.d { "[connect] conf: $connectionConf, isNetworkConnected: $isNetworkConnected" }
         this.connectionConf = connectionConf
         if (isNetworkConnected) {
             setupSocket(connectionConf)
@@ -237,54 +172,57 @@ internal class VideoSocketImpl(
         networkStateProvider.subscribe(networkStateListener)
     }
 
-    override fun updateCallState(call: CallMetadata?) {
-        this.call = call
-    }
-
-    override fun getCallState(): CallMetadata? = call
-
     override fun releaseConnection() {
+        logger.i { "[releaseConnection] wssUrl: $wssUrl" }
         state = State.DisconnectedByRequest
     }
 
     override fun onConnectionResolved(event: ConnectedEvent) {
-        this.clientId = event.clientId
+        logger.i { "[onConnectionResolved] event: $event" }
         state = State.Connected(event)
     }
 
-    override fun onEvent(event: VideoEvent) {
+    override fun onEvent(event: SfuDataEvent) {
         healthMonitor.ack()
         callListeners { listener -> listener.onEvent(event) }
     }
 
-    internal fun sendPing(state: WebsocketHealthcheck) {
-        socket?.ping(state)
-    }
-
-    private fun reconnect(connectionConf: SocketFactory.ConnectionConf?) {
+    private fun reconnect(connectionConf: SignalSocketFactory.ConnectionConf?) {
+        logger.d { "[reconnect] conf: $connectionConf" }
         shutdownSocketConnection()
         setupSocket(connectionConf?.asReconnectionConf())
     }
 
-    private fun setupSocket(connectionConf: SocketFactory.ConnectionConf?) {
+    private fun setupSocket(connectionConf: SignalSocketFactory.ConnectionConf?) {
+        logger.d { "[setupSocket] conf: $connectionConf" }
         state = when (connectionConf) {
             null -> State.DisconnectedPermanently(null)
             else -> {
                 socketConnectionJob = coroutineScope.launch {
-                    credentialsManager.ensureTokenLoaded()
-
-                    socket = socketFactory.createSocket(createNewEventsParser(), connectionConf)
+                    socket = signalSocketFactory.createSocket(
+                        createNewEventsParser(),
+                        connectionConf
+                    )
                 }
                 State.Connecting
             }
         }
     }
 
-    private fun createNewEventsParser(): EventsParser = EventsParser(this).also {
+    override fun onSocketError(error: VideoError) {
+        logger.e { "[setupSocket] state: $state, error: $error" }
+        if (state !is State.DisconnectedPermanently) {
+            callListeners { it.onError(error) }
+            // (error as? VideoNetworkError)?.let(::onNetworkError) TODO - which errors can we get here
+        }
+    }
+
+    private fun createNewEventsParser(): SignalEventsParser = SignalEventsParser(this).also {
         eventsParser = it
     }
 
     private fun shutdownSocketConnection() {
+        logger.i { "[shutdownSocketConnection] state: $state" }
         socketConnectionJob?.cancel()
         eventsParser?.closeByClient()
         eventsParser = null
@@ -292,7 +230,7 @@ internal class VideoSocketImpl(
         socket = null
     }
 
-    private fun callListeners(call: (SocketListener) -> Unit) {
+    private fun callListeners(call: (SignalSocketListener) -> Unit) {
         synchronized(listeners) {
             listeners.forEach { listener ->
                 eventUiHandler.post { call(listener) }
@@ -300,18 +238,13 @@ internal class VideoSocketImpl(
         }
     }
 
-    private companion object {
-        private const val RETRY_LIMIT = 3
-        private const val DEFAULT_DELAY = 500
-    }
-
     @VisibleForTesting
     internal sealed class State {
-        object Connecting : State()
+        object Connecting : State() { override fun toString(): String = "Connecting" }
         data class Connected(val event: ConnectedEvent) : State()
-        object NetworkDisconnected : State()
+        object NetworkDisconnected : State() { override fun toString(): String = "NetworkDisconnected" }
         class DisconnectedTemporarily(val error: VideoNetworkError?) : State()
         class DisconnectedPermanently(val error: VideoNetworkError?) : State()
-        object DisconnectedByRequest : State()
+        object DisconnectedByRequest : State() { override fun toString(): String = "DisconnectedByRequest" }
     }
 }
