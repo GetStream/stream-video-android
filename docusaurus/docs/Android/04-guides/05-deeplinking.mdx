@@ -1,0 +1,155 @@
+## Implementing Call Deep Linking
+
+One of the features Stream Video provides is the ability to deeplink into a call directly, using only the call ID.
+
+This is all powered by [Android's deeplinking](https://developer.android.com/training/app-links/deep-linking) support, but our API makes it very easy to integrate and start your custom UI, or our existing screens.
+
+> **Note**: This guide expects that you've set up a custom Application that has ways to initialize our SDK with a given user. If you want to learn more about this, check our our [Basics](TODO) set of pages on ways how to do so.
+
+To get started, you first need to create an `Activity` that'll parse the deep link URL and consume the data. Here's an example of a simple `Activity` that does this:
+
+```kotlin
+class DeeplinkingActivity : AppCompatActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        val data: Uri = intent?.data ?: return
+
+        // 1
+        val callCid = data.toString().split("/").lastOrNull() ?: return
+        val callType = callCid.split(":")[0]
+        val callId = callCid.split(":")[1]
+
+        // 2
+        logIn()
+        joinCall(callType, callId)
+    }
+
+    // 3
+    private fun logIn() {
+        val myUser = myPreferences.getCachedCredentials()
+
+        myApplication.initializeStreamVideo(
+            credentialsProvider = AuthCredentialsProvider(
+                user = myUser,
+                userToken = myUser.token,
+                apiKey = myPreferences.getApiKey()
+            ),
+            loggingLevel = LoggingLevel.BODY
+        )
+    }
+
+    // 4
+    private fun joinCall(callType: String, callId: String) {
+        lifecycleScope.launch {
+            val createCallResult = myApplication.streamVideo.joinCall(callType, callId)
+
+            createCallResult.onSuccessSuspend { response ->
+                navigateToCall(
+                    CallInput(
+                        response.call.cid,
+                        response.call.type,
+                        response.call.id,
+                        response.callUrl,
+                        response.userToken,
+                        response.iceServers
+                    )
+                )
+            }
+        }
+    }
+
+    // 5
+    private fun navigateToCall(callInput: CallInput) {
+        startActivity(CallActivity.getIntent(this, callInput))
+        finish()
+    }
+}
+```
+
+Even though the `Activity` is rather straightforward, there are a few steps you need perform:
+
+1. You need to parse the data of the deep link URL. In this case, you take the last chunk of the URL and split it with a `:` delimiter, to find the call type and ID.
+
+2. If the values there are successful, you can proceed with logging in the user, initializing the `StreamVideo` client and finally joining a call.
+
+3. We suggest you build a `SharedPreferences` caching mechanism or something similar to persist your user, as you need the user credentials to log in. Once you get the user credentials and the API key for the environment, you're able to initialize the `StreamVideo` client.
+
+   > Note: On top of `SharedPreferences` we recommend using an Application class to persist the instance of `StreamVideo`. This makes it easier to control the lifecycle of your client for as long as the user is logged in.
+
+4. After doing that, joining a call is very simple. Simple get access to the `StreamVideo` and call `joinCall`. With the successful response data, you can proceed to navigate to the call that's live.
+
+5. You can either start your custom `Activity` for the call, with the given `CallInput`, or use our out of the box screens that handle everything for you.
+
+Now that you have the `Activity` ready, there are two small steps left. Announcing it in the `AndroidManifest` and declaring the domains and hosts your deep link feature can parse and uploading a deep linking association file to our servers.
+
+### Declaring Deep Linking in the AndroidManifest
+
+To have your application verify links and associate them with the `DeeplinkingActivity`, you need to declare it in the `AndroidManifest`. You can do it by adding the following snippet to your manifest:
+
+```xml
+<activity
+    android:name=".DeeplinkingActivity"
+    android:exported="true">
+    <intent-filter
+        android:autoVerify="true" 
+        android:label="Call Link">
+        <action android:name="android.intent.action.VIEW" />
+    
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <data
+            android:host="<stream-host>"
+            android:pathPrefix="/join/"
+            android:scheme="https" />
+    </intent-filter>
+</activity>
+```
+
+You can learn more about this structure in the [official documentation](https://developer.android.com/training/app-links/deep-linking), but the gist of it is this:
+
+* Adding the `<intent-filter>` lets your `Activity` parse specific intents that come from inside or outside of your application.
+* By adding the appropriate `<action>` and `<category>` tags, you let you `Activity` open and consume data that's browsable, such as URLs.
+* The most important part is the `<data>` tag. It allows you to parse the link in the format of: `https://<stream-host>/join/`. Any URL that has that structure will be consumable by your `Activity`.
+
+It's important to know that this format is something we've built to align our deeplinking features in our SDKs and using that schema should be safe.
+
+But to make your published app associate with a hosted and published website and to stop potential security issues, the website needs to know how to recognize your app.
+
+### Associating your Application with our Website
+
+The last step of the deep linking process is to associate your App with our Web. The process is fairly easy.
+
+You have to take your application `package-id` and its `SHA-256` fingerprint and use it to generate an `assetlinks.json file`. You can find the full process and documentation on the [official Android deep linking page](https://developer.android.com/training/app-links/verify-android-applinks#web-assoc).
+
+Once you've generated these fingerprints - **we recommend doing it for debug and release** **keystores** and your CI if it uses a different keystore than local setup - you can create the `assetlinks.json` file:
+
+```json
+[{ // first application
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.my.application.debug",
+    "sha256_cert_fingerprints": ["sha-256-fingerprint"]
+  }
+  },
+  { // second application
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.my.application",
+    "sha256_cert_fingerprints": ["sha-256-fingerprint"]
+  }
+}]
+```
+
+Note that the `relation` and ` namespace` parts are not as important as the rest and how each object represents one application.
+
+Now that you have the file created, you need to upload it to our servers.
+
+// TODO - the flow to upload assetlinks to our server, will it go through the dashboard or something?
+
+Finally, run your application and either manually generate a call link using the schema above or use our Web API. Once you have that ready, send it to your phone and try opening the link, it should automatically redirect to your app and open the call!
+
+// TODO - add a gif of how this behavior works

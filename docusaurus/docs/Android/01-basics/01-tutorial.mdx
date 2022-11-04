@@ -1,0 +1,586 @@
+## Introduction
+
+In this tutorial we'll cover the main steps required to produce a fully capable video chat app, using **Stream Video**.  We'll touch upon the following:
+
+- Creating a project & setting up Stream dependencies
+- Authenticating the user
+- Handling Stream Video lifecycle
+- Creating & joining a Call
+- Rendering Call UI and controls
+- Observing the Call state (Advanced)
+- Managing user devices (Advanced)
+
+By the end of the tutorial, you'll be more than capable of building an app that powers video calls, with deep knowledge of how our internal state management works.
+
+But first, we need a project!
+
+## Creating a Project
+
+> **Note**: In this tutorial, we'll be using Compose for the UI, but you can very much build this in XML too. Our state is pragmatic and can be integrated with the UI toolkit you prefer.
+>
+> Additionally, the completed app for each step of the tutorial is [available on GitHub](TODO).
+
+To get started with [Stream Video](https://github.com/GetStream/stream-video-android), open the latest stable [Android Studio](https://developer.android.com/studio) and create a new project.
+
+* Select the `Empty Compose Activity` as we'll be using Compose for the UI part, for simplicity.
+* Name the Project `VideoTutorial`.
+* Set the package name to `com.example.videotutorial`.
+
+Once you create and load the project, you need to add the appropriate Stream Video dependencies. For now, we'll add the core dependency which enables the use of our **low-level-client** and the **WebRTC** wrappers.
+
+Our SDKs are available from MavenCentral. Update your repositories in the `settings.gradle` file like so:
+
+```groovy
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral() // here
+    }
+}
+```
+
+Go to the project level `build.gradle` file, and make sure that you're using Compose `1.3.0`, Compose Compiler `1.3.2`, and Kotlin `1.7.20` (or newer, compatible versions).
+
+```
+buildscript {
+    ext {
+    compose_version = '1.3.0' // <-- Compose Runtime, UI
+    compose_compiler_version = '1.3.2' // <-- Compose Compiler
+    }
+}
+
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+plugins {
+    id 'com.android.application' version '7.3.0' apply false
+    id 'com.android.library' version '7.3.0' apply false
+    id 'org.jetbrains.kotlin.android' version '1.7.20' apply false // <--
+}
+```
+
+Now that you have the project setup ready, you can move on to add the Stream dependencies. Open your `app` module's `build.gradle` file and add the following:
+
+```groovy
+dependencies {
+    implementation "io.getstream:stream-video-android:1.0.0"
+}
+```
+
+This dependency holds all the necessary code to authenticate a user, start a Stream Video client, create or join a call and connect to the call to start receiving audio and video tracks.
+
+Next, make sure your project uses the correct Compose Compiler version on the `build.gradle` file:
+
+```groovy
+android {
+  ..
+
+  composeOptions {
+      kotlinCompilerExtensionVersion compose_compiler_version  // <--
+  }
+}
+```
+
+Now that you've verified the project and added the Stream dependency, you can start with **user authentication**.
+
+## Authenticating the User
+
+To fully connect to the Stream Video API, you need to authenticate a user. Using our [backend documentation](TODO) for reference you should be able to obtain a user token that contains all the information about a given user in your app.
+
+On top of that, for video, Stream provides a [low-level client](TODO) and both [XML](TODO) and [Compose](TODO) UI components to help you integrate video chat features. We'll touch upon UI later in the tutorial - for now, let's first create our Client.
+
+Once you have the token and other user credentials ready, by authenticating against your backend, it's time to create the Stream Video Client.
+
+Create a new Kotlin file in your project called `VideoApp.kt` and replace the file contents with the following:
+
+```kotlin
+class VideoApp : Application() {
+
+    // 1 
+    private var credentials: CredentialsProvider? = null
+    private var calls: StreamCalls? = null
+
+    val credentialsProvider: CredentialsProvider
+        get() = requireNotNull(credentials)
+
+    val streamCalls: StreamCalls
+        get() = requireNotNull(calls)
+
+    /**
+     * Sets up and returns the [streamCalls] required to connect to the API.
+     */
+    fun initializeStreamCalls( // 2
+        credentialsProvider: CredentialsProvider,
+        loggingLevel: LoggingLevel
+    ): StreamCalls {
+        this.credentials = credentialsProvider
+
+        return StreamCallsBuilder(
+            context = this,
+            credentialsProvider = credentialsProvider,
+            loggingLevel = loggingLevel,
+        ).build().also {
+            calls = it
+        }
+    }
+
+    // 3
+    fun logOut() {
+        streamCalls.clearCallState()
+        calls = null
+    }
+}
+
+// 4
+val Context.videoApp get() = applicationContext as VideoApp
+```
+
+// TODO - check naming of each component
+
+This class represents the main entry point for your app. You'll use it to achieve the following:
+
+1. Persist the the `StreamCalls` client and the  `CredentialsProvider` that let you connect to calls.
+
+2. Call `initializeStreamCalls()` with a `CredentialsProvider` and `LoggingLevel` for our internal loggers, to initialize the Stream API.
+3. Use `logOut` to clear the client state, when you want to change the user.
+4. Access the `VideoApp` through `Context` to fetch the Stream client.
+
+Now that you have the Application class ready, make sure to add it to your manifest:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application
+        android:name=".VideoApp"
+        ...
+    </application>
+</manifest>
+```
+
+Now, open the `MainActivity` and replace the file's contents with the following:
+
+```kotlin
+class MainActivity : AppCompatActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        authenticateUser()
+        setContent {
+            VideoTheme {
+                HomeScreen()
+            }
+        }
+    }
+
+    private val callIdState: MutableState<String> = mutableStateOf("call123")
+
+    private val loadingState: MutableState<Boolean> = mutableStateOf(false)
+}
+```
+
+To start off, you set the content of the screen and create a couple of UI states - the `callIdState`, where you'll store the ID of the call you want to join and the `loadingState` to show a progress bar while waiting for the API to respond.
+
+Notice the `VideoTheme`, it's a wrapper theme we provide in the Video Android SDK, that holds common colors, text styles, icons and more. You can use its various properties to style your app in a uniform way. Make sure to check out our [VideoTheme documentation](TODO) to learn more.
+
+However, the main part of this snippet is `authenticateUser()` - we'll use this function to log in a user with a hardcoded set of credentials that are already ready and available for use.
+
+> **Note**: In real scenarios, your backend would provide these credentials after you log in into your API.
+
+Add the following code to implement the function:
+
+```kotlin
+private fun authenticateUser() {
+    val token = "hardcoded-token"
+    val user = User(
+        "hardcoded-id",
+        "admin",
+        "Tutorial Droid",
+        token,
+        "hardcoded image",
+        emptyList(),
+        emptyMap()
+    )
+
+    videoApp.initializeStreamCalls( // authenticate the user and create a client
+        AuthCredentialsProvider(
+            apiKey = "hardcoded-api-key", 
+            userToken = token,
+            user = user
+        ),
+        loggingLevel = LoggingLevel.BODY
+    )
+}
+```
+
+// TODO - credentials provider impl should be something that we provide out of the box maybe.
+
+It's quite simple to create the main Stream Video client. You just pass in the `CredentialsProvider` that keeps track of your user token and ID.
+
+`StreamCalls` allows you to do many different things with our API:
+
+- Create new Calls
+- Look up Calls by ID
+- Join Calls
+- Invite participants to a Call
+- Register for Push Notifications
+- Connect to a Call and initialize WebRTC handles
+- Observe Call state
+- ...and much more!
+
+It's important to keep track of the `StreamCalls` instance, because it's not a singleton. We recommend keeping it in your `Application` class and initializing it whenever your users are ready to use video chat features. This gives you control over its lifecycle and lets you free up memory whenever your users don't use Video.
+
+Now that you've added the code to create the client, you can move onto the UI part. 
+
+## Creating Calls
+
+For the UI, you'll add a simple screen which lets the user write down a call ID that they want to join, as well as a button that lets them trigger an API call and get the call details. The code itself is not related to the way Stream Video works, so we'll skip over the explanation.
+
+Simply add the following components to the file, to fill the UI part of this simple screen:
+
+```kotlin
+@Composable
+private fun HomeScreen() {
+    Column(modifier = Modifier.fillMaxSize()) {
+        UserDetails()
+
+        JoinCallContent()
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        val isLoading by loadingState
+
+        if (isLoading) {
+            Spacer(modifier = Modifier.height(16.dp))
+
+            CircularProgressIndicator(
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
+        }
+    }
+}
+
+@Composable
+fun ColumnScope.JoinCallContent() {
+    CallIdInput()
+
+    val isDataValid = callIdState.value.isNotBlank()
+
+    Button(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .align(Alignment.CenterHorizontally),
+        enabled = isDataValid, onClick = {
+            joinCall(callId = callIdState.value)
+        }
+    ) {
+        Text(text = "Join call")
+    }
+}
+
+@Composable
+fun CallIdInput() {
+    val inputState by remember { callIdState }
+
+    OutlinedTextField(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        value = inputState,
+        onValueChange = { input ->
+            callIdState.value = input
+        },
+        label = {
+            Text(text = "Enter the call ID")
+        }
+    )
+}
+
+@Composable
+private fun UserDetails() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(40.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Start
+    ) {
+        UserIcon()
+
+        val user = videoApp.streamCalls.getUser()
+
+        Text(
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .align(Alignment.CenterVertically),
+            text = user.name,
+            overflow = TextOverflow.Ellipsis,
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+@Composable
+fun UserIcon() {
+    val user = videoApp.credentialsProvider.getUserCredentials()
+    Avatar(
+        modifier = Modifier
+            .size(40.dp)
+            .padding(top = 8.dp, start = 8.dp)
+            .clip(CircleShape),
+        imageUrl = user.imageUrl.orEmpty(),
+        initials = user.name,
+    )
+}
+```
+
+The only part that's important to connect this UI to Stream's API is `joinCall(callId)`. That function is now missing, so let's add the code that lets you join a call with the given ID:
+
+```kotlin
+private fun joinCall(callId: String) {
+    lifecycleScope.launch { // 1
+        loadingState.value = true
+        val result = videoApp.streamCalls.joinCall(
+            type = "default", id = callId
+        )
+        loadingState.value = false
+        result.onSuccess { // 3
+            // TODO - start the call
+            Toast.makeText(this@MainActivity, "Success!", Toast.LENGTH_SHORT).show()
+        }
+        result.onError { // 4
+            Toast.makeText(this@MainActivity, it.message, Toast.LENGTH_SHORT).show()
+        }
+    }
+}
+```
+
+There are a few parts of the flow:
+
+1. You launch a coroutine to process the API request. All of our Video calls are powered by coroutines to make them as performant as possible.
+2. You call `joinCall()` with the call type and ID. You could also create a new call and ring other people, but for now let's just connect to a call with a given ID.
+3. If the result of the request is successful, you show a Toast. You'll build another `Activity` to handle the call itself in the next part of the tutorial, that's why there's just a TODO and a Toast there for now. 
+4. If the request failed, you show a small toast with the failed message, to the user.
+
+If you build and run your app now, you'll see the following:
+
+![]() // TODO - image once
+
+Try writing in a call ID and clicking the "Join Call" button! If everything goes well, you should see the progress bar show up, then disappear after a while with a "Success!" message. 
+
+If this is what happens - you've successfully integrated the first two steps of the tutorial. Next, you'll connect to the call and render its UI. Let's do it!
+
+## Rendering the Call
+
+To kick off the Call experience, you first need a new screen. Create a new Kotlin file called `CallActivity.kt` and add the following content to it:
+
+```kotlin
+class CallActivity : AppCompatActivity() {
+
+    private val input: CallInput by lazy { // 1
+        requireNotNull(intent.getSerializableExtra(KEY_CALL_INPUT) as? CallInput)
+    }
+
+    private val factory by lazy { // 2
+        CallViewModelFactory(
+            input,
+            videoApp.streamCalls,
+            videoApp.credentialsProvider
+        )
+    }
+
+    // ViewModel
+    private val callViewModel by viewModels<CallViewModel>(factoryProducer = { factory })
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        setContent { // 3
+            VideoCallContent(callViewModel, onLeaveCall = ::leaveCall)
+        }
+    }
+    
+    private fun startVideoFlow() { // 4
+        val isInitialized = callViewModel.isVideoInitialized.value
+        if (isInitialized) return
+        callViewModel.connectToCall()
+    }
+
+    private fun leaveCall() { // 5
+        callViewModel.leaveCall()
+        finish()
+    }
+
+    companion object { // 6
+        private const val KEY_CALL_INPUT = "call_input"
+
+        internal fun getIntent(
+            context: Context,
+            callInput: CallInput
+        ): Intent {
+            return Intent(context, CallActivity::class.java).apply {
+                putExtra(KEY_CALL_INPUT, callInput)
+            }
+        }
+    }
+}
+```
+
+The initial code is quite simple, but it sets up some very important parts of the Call experience:
+
+1. You read the `CallInput` of the `Activity` from its `Intent`, to have information such as the `callId`, `callUrl`, the `userToken` and `iceServers` used to connect to audio and video tracks.
+2. You set up a `ViewModelFactory` that'll help you build our `CallViewModel` which contains all the call state as well as various handlers for muting tracks and changing audio and video devices.
+3. After building the `CallViewModel` you set the content of the screen using `VideoCallContent`, our ready-bake component that helps you render the call UI with a single line of code.
+4. When pressing back, you delegate the responsibility to `leaveCall()` to clean up the call state and finish the `CallActivity`.
+5. Once the call state is ready, you can `connectToCall()`. Before doing that, you'll need to request permissions from the user, in the next step of the tutorial.
+6. Finally, to start the `CallActivity`, you provide a static `getIntent()` which lets you easily bundle the required input to the screen.
+
+Now that you have the UI and basic handling done, you need to start this screen after joining a call. Go back to `MainActivity.kt` and replace the `TODO` in `result.onSuccess {}` with the following:
+
+```kotlin
+startActivity(
+    CallActivity.getIntent(
+        this@MainActivity,
+        CallInput(
+            callCid = it.call.cid,
+            callType = it.call.type,
+            callId = it.call.id,
+            callUrl = it.callUrl,
+            userToken = it.userToken,
+            iceServers = it.iceServers
+        )
+    )
+)
+```
+
+In this snippet of code, you simply start the `CallActivity` with the required information. Now, if you tap on the "Join Call" button after putting in a call ID in the input field, the request will hit our API, validate the ID and your token and provide you with the required parameters to join a call.
+
+However, there is one final step to fully experience the Call after joining it - handling permissions. 
+
+## Handling Permissions
+
+A vital part of the Call flow is asking users for permission to use different services their phones provide. In the case of video calling, there are several important permissions to consider, that the Stream SDK might use:
+
+* **Camera & Audio Recording** - it seems obvious, but we need to access user's camera(s) and microphone(s) to send their video/audio to other participants. Users can choose to opt out of both and not send anything, or just send one.
+* **Bluetooth & Audio Settings** -  Bluetooth and audio settings management is useful to let the user choose which devices they want to use for playback and recording.
+* **Internet** - We need to connect to an API to communicate, but we also need to listen to connectivity changes to reflect that to the user. _These don't need to be requested in the runtime._
+* **Utility** - There are some utility permissions that we request, such as vibration to signal users about calls, foreground services and full-screen Intents, to show the call state when it's in the background or if the user receives a call invite while the screen is locked. _These don't need to be requested in the runtime._
+
+Right now, we'll just request the camera and microphone permissions.
+
+Add the following contract at the top of the `CallActivity` class:
+
+```kotlin
+@RequiresApi(M)
+private val permissionsContract = registerForActivityResult(
+    ActivityResultContracts.RequestPermission()
+) { isGranted ->
+    val missing = getMissingPermissions()
+    val deniedCamera = !shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)
+    val deniedMicrophone =
+        !shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO)
+
+    when {
+        missing.isNotEmpty() && !deniedCamera && !deniedMicrophone -> requestPermissions(missing)
+        isGranted -> startVideoFlow()
+        deniedCamera || deniedMicrophone -> showPermissionsDialog()
+        else -> checkPermissions()
+    }
+}
+```
+
+The contract handles the missing or denied permissions and will start the Call flow when the permissions are granted. Now let's add a way to get a list of missing permissions from the system. Add the following function to the class: 
+
+```kotlin
+@RequiresApi(M)
+private fun getMissingPermissions(): Array<out String> {
+    val permissionsToCheck = arrayOf(
+        Manifest.permission.CAMERA,
+        Manifest.permission.RECORD_AUDIO
+    )
+
+    val missing = permissionsToCheck
+        .map { it to (checkSelfPermission(it) == PackageManager.PERMISSION_GRANTED) }
+        .filter { (_, isGranted) -> !isGranted }
+        .map { it.first }
+
+    return missing.toTypedArray()
+}
+```
+
+In `getMissingPermissions()`, you check if the user requires any of the aforementioned permission and you bundle them into an array.
+
+Now that you have the permissions that are missing, it's time to add a way to request them. Add the following function to the class:
+
+```kotlin
+@RequiresApi(M)
+private fun requestPermissions(permissions: Array<out String>) {
+    val deniedCamera = !shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)
+    val deniedMicrophone =
+        !shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO)
+
+    if (!deniedCamera && !deniedMicrophone) {
+        permissionsContract.launch(permissions.first())
+    } else {
+        showPermissionsDialog()
+    }
+}
+```
+
+With the previously built array of missing permissions, you check that there aren't any denied permissions and ask the user to grant you access to camera and microphone. If anything is denied, you have to show a rationale dialog to the user to send them to settings.
+
+Add that next, through the following function:
+
+```kotlin
+private fun showPermissionsDialog() {
+    AlertDialog.Builder(this)
+        .setTitle("Permissions required to launch the app")
+        .setMessage("Open settings to allow camera and microphone permissions.")
+        .setPositiveButton("Launch settings") { dialog, _ ->
+            startSettings()
+            dialog.dismiss()
+        }
+        .setNegativeButton("Cancel") { dialog, _ ->
+            finish()
+            dialog.dismiss()
+        }
+        .create()
+        .show()
+}
+```
+
+The dialog will explain why you need to open settings. If the user chooses to open the settings screen, they'll be able to grant you anything that's missing.
+
+// TODO - we should enable a way to just join without any audio/video in case people decline permissions
+
+Finally, once the user comes back from settings, you need to respond, so override `onResume()` and add the following code to it:
+
+```kotlin
+override fun onResume() {
+    super.onResume()
+    if (Build.VERSION.SDK_INT >= M) {
+        checkPermissions()
+    } else {
+        startVideoFlow()
+    }
+}
+```
+
+The reason why we need to check the permissions only for Android 6.0 (Marshmallow) or above, is because on lower end APIs, these are automatically granted.
+
+If all the permissions are in order, you can start the video flow!
+
+Finally, build and run the app and you should be able to join a call and send both audio and video with respective permissions.
+
+![]() // TODO - image
+
+---------
+
+// TODO - do these go into an advanced section, guides, or stay here as extra sprinkles on our tutorial
+
+## Listening to State
+
+
+
+## Choosing Audio & Video Devices
+

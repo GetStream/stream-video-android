@@ -60,9 +60,7 @@ class CallActivity : AppCompatActivity() {
             missing.isNotEmpty() && !deniedCamera && !deniedMicrophone -> requestPermissions(missing)
             isGranted -> startVideoFlow()
             deniedCamera || deniedMicrophone -> showPermissionsDialog()
-            else -> {
-                checkPermissions()
-            }
+            else -> checkPermissions()
         }
     }
 
