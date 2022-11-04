@@ -31,7 +31,7 @@ class OutgoingCallViewModelFactory(
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return OutgoingCallViewModel(
-            streamCalls = streamVideo,
+            streamVideo = streamVideo,
             streamRouter = streamRouter,
             callData = input
         ) as T
