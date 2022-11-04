@@ -20,7 +20,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.getstream.logging.StreamLog
-import io.getstream.video.android.StreamCalls
+import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.events.CallAcceptedEvent
 import io.getstream.video.android.events.CallRejectedEvent
 import io.getstream.video.android.events.VideoEvent
@@ -34,11 +34,10 @@ import io.getstream.video.android.utils.onError
 import io.getstream.video.android.utils.onSuccessSuspend
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class OutgoingCallViewModel(
-    private val streamCalls: StreamCalls,
+    private val streamVideo: StreamVideo,
     private val streamRouter: StreamRouter,
     private val callData: OutgoingCallData
 ) : ViewModel(), SocketListener {
@@ -55,13 +54,13 @@ class OutgoingCallViewModel(
     public val isVideoEnabled: StateFlow<Boolean> = _isVideoEnabled
 
     init {
-        streamCalls.addSocketListener(this)
+        streamVideo.addSocketListener(this)
         viewModelScope.launch {
-            streamCalls.callState.collect { state ->
+            streamVideo.callState.collect { state ->
                 when (state) {
                     is StreamCallState.Idle -> {
                         logger.i { "[observeState] state: Idle" }
-                        streamCalls.clearCallState()
+                        streamVideo.clearCallState()
                         streamRouter.finish()
                     }
                     is StreamCallState.Active -> {}
@@ -90,13 +89,13 @@ class OutgoingCallViewModel(
 
     fun hangUpCall() {
         viewModelScope.launch {
-            streamCalls.cancelCall(callData.callInfo.cid)
+            streamVideo.cancelCall(callData.callInfo.cid)
         }
     }
 
     private fun joinCall() {
         viewModelScope.launch {
-            val joinResult = streamCalls.joinCall(
+            val joinResult = streamVideo.joinCall(
                 callData.toMetadata()
             )
 
@@ -121,11 +120,11 @@ class OutgoingCallViewModel(
     }
 
     fun getUserId(): String {
-        return streamCalls.getUser().id
+        return streamVideo.getUser().id
     }
 
     override fun onCleared() {
-        streamCalls.removeSocketListener(this)
+        streamVideo.removeSocketListener(this)
         super.onCleared()
     }
 

@@ -36,7 +36,7 @@ class OutgoingCallActivity : AppCompatActivity() {
 
     private val viewModel by viewModels<OutgoingCallViewModel> {
         OutgoingCallViewModelFactory(
-            videoApp.streamCalls,
+            videoApp.streamVideo,
             StreamRouterImpl(this),
             callData
         )

@@ -18,12 +18,12 @@ package io.getstream.video.android.app.ui.incoming
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import io.getstream.video.android.StreamCalls
+import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.model.IncomingCallData
 import io.getstream.video.android.router.StreamRouter
 
 class IncomingCallViewModelFactory(
-    private val streamCalls: StreamCalls,
+    private val streamVideo: StreamVideo,
     private val streamRouter: StreamRouter,
     private val input: IncomingCallData
 ) : ViewModelProvider.Factory {
@@ -31,7 +31,7 @@ class IncomingCallViewModelFactory(
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return IncomingCallViewModel(
-            streamCalls = streamCalls,
+            streamVideo = streamVideo,
             streamRouter = streamRouter,
             callData = input
         ) as T

@@ -17,13 +17,13 @@
 package io.getstream.video.android.app.ui.call
 
 import android.content.Context
-import io.getstream.video.android.StreamCalls
+import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.app.videoApp
 import io.getstream.video.android.service.StreamCallService
 
 class CallService : StreamCallService() {
 
-    override fun getStreamCalls(context: Context): StreamCalls = videoApp.streamCalls
+    override fun getStreamCalls(context: Context): StreamVideo = videoApp.streamVideo
 
     companion object {
         fun start(context: Context) = start<CallService>(context)
