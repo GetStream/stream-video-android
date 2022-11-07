@@ -25,6 +25,7 @@ import androidx.lifecycle.lifecycleScope
 import io.getstream.logging.StreamLog
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.model.CallInput
+import io.getstream.video.android.token.AuthCredentialsProvider
 import io.getstream.video.android.utils.onError
 import io.getstream.video.android.utils.onSuccessSuspend
 import kotlinx.coroutines.launch

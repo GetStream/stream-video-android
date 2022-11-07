@@ -14,32 +14,31 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.app
+package io.getstream.video.android.token
 
 import io.getstream.video.android.model.User
-import io.getstream.video.android.model.UserCredentials
-import io.getstream.video.android.token.CredentialsProvider
 
-class FakeCredentialsProvider(
+public class AuthCredentialsProvider(
     private val apiKey: String,
-    private val userCredentials: UserCredentials
+    private val userToken: String,
+    private val user: User
 ) : CredentialsProvider {
 
     private var sfuToken: String? = null
 
     override fun loadToken(): String {
-        return userCredentials.token
+        return userToken
     }
 
     override fun getCachedToken(): String {
-        return userCredentials.token
-    }
-
-    override fun getCachedApiKey(): String {
-        return apiKey
+        return userToken
     }
 
     override fun loadApiKey(): String {
+        return apiKey
+    }
+
+    override fun getCachedApiKey(): String {
         return apiKey
     }
 
@@ -52,6 +51,6 @@ class FakeCredentialsProvider(
     }
 
     override fun getUserCredentials(): User {
-        return userCredentials.toUser()
+        return user
     }
 }
