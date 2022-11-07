@@ -9,3 +9,4 @@ inline fun <reified T : Task> TaskContainer.registerExt(
     name: String,
     configuration: Action<in T>,
 ): TaskProvider<T> = this.register(name, T::class.java, configuration)
+

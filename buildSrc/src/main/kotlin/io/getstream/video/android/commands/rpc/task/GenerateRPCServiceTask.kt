@@ -6,6 +6,7 @@ import io.getstream.video.android.commands.rpc.plugin.GenerateRPCServiceExtensio
 import org.gradle.api.tasks.Input
 import org.gradle.internal.file.FileException
 import java.io.File
+import java.io.FileNotFoundException
 import java.io.IOException
 
 private val CommentRegex = "//.*|/\\*(?s).*?\\*/".toRegex()
@@ -25,7 +26,7 @@ open class GenerateRPCServiceTask : DefaultTask() {
 
     @TaskAction
     fun generateServices() {
-        val outputFolder = File(config.outputPath)
+        val outputFolder = File(config.outputDir)
         if (!outputFolder.exists() && !outputFolder.mkdirs()) {
             throw FileException(Throwable("Failed to create output folder: ${outputFolder.path}."))
         }
@@ -46,7 +47,7 @@ open class GenerateRPCServiceTask : DefaultTask() {
             services.forEach { service ->
                 val serviceFile = getService(
                     serviceName = service.name,
-                    filePackage = config.outputPath.replace(KotlinFilePackageRegex, "").replace("/", "."),
+                    filePackage = config.outputDir.replace(KotlinFilePackageRegex, "").replace("/", "."),
                     imports = getModelImports(
                         packageName = packageName,
                         imports = imports,
@@ -64,8 +65,8 @@ open class GenerateRPCServiceTask : DefaultTask() {
                 )
 
                 try {
-                    val outputFile = File("${config.outputPath}/${service.name}Service.kt")
-                    outputFile.createNewFile()
+                    val outputFile = File("${config.outputDir}/${service.name}Service.kt")
+                    if (!outputFile.createNewFile()) throw FileNotFoundException("Failed to create a file for ${service.name}")
                     outputFile.writeText(serviceFile)
                 } catch (exception: IOException) {
                     println("Exception for service: ${service.name} inside ${protoFile.name}")

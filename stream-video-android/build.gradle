@@ -22,7 +22,7 @@ wire {
 }
 
 generateRPCServices {
-    srcDir 'stream-video-android/src/main/proto'
+    srcDir 'src/main/proto'
 }
 
 android {
