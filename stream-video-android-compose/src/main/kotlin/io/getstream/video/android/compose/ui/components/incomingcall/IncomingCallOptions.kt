@@ -34,15 +34,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.extensions.toggleAlpha
-import io.getstream.video.android.model.CallInfo
-import io.getstream.video.android.model.CallType
 
 @Composable
 internal fun IncomingCallOptions(
     modifier: Modifier = Modifier,
-    callInfo: CallInfo,
-    onDeclineCall: (CallInfo) -> Unit,
-    onAcceptCall: (CallInfo) -> Unit,
+    isVideoCall: Boolean,
+    onDeclineCall: () -> Unit,
+    onAcceptCall: () -> Unit,
     onVideoToggleChanged: (Boolean) -> Unit
 ) {
     var isVideoEnabled by remember { mutableStateOf(true) }
@@ -59,7 +57,7 @@ internal fun IncomingCallOptions(
                     shape = VideoTheme.shapes.callButton
                 )
                 .size(VideoTheme.dimens.largeButtonSize),
-            onClick = { onDeclineCall(callInfo) },
+            onClick = { onDeclineCall() },
             content = {
                 Icon(
                     painter = VideoTheme.icons.callEnd,
@@ -69,7 +67,7 @@ internal fun IncomingCallOptions(
             }
         )
 
-        if (callInfo.type == CallType.VIDEO.type) {
+        if (isVideoCall) {
             IconButton(
                 modifier = Modifier
                     .toggleAlpha(isVideoEnabled)
@@ -102,7 +100,7 @@ internal fun IncomingCallOptions(
                     shape = VideoTheme.shapes.callButton
                 )
                 .size(VideoTheme.dimens.largeButtonSize),
-            onClick = { onAcceptCall(callInfo) },
+            onClick = { onAcceptCall() },
             content = {
                 Icon(
                     painter = VideoTheme.icons.call,
@@ -119,7 +117,7 @@ internal fun IncomingCallOptions(
 private fun IncomingCallOptionsPreview() {
     VideoTheme {
         IncomingCallOptions(
-            callInfo = CallInfo("", "", "", "", false, false, null, null),
+            isVideoCall = true,
             onDeclineCall = {},
             onAcceptCall = {},
             onVideoToggleChanged = {}

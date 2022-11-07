@@ -19,6 +19,8 @@ package io.getstream.video.android.compose.ui.components.incomingcall
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -27,20 +29,36 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.CallTopAppbar
 import io.getstream.video.android.compose.ui.components.background.CallBackground
 import io.getstream.video.android.compose.ui.components.mock.mockParticipantList
-import io.getstream.video.android.model.CallInfo
 import io.getstream.video.android.model.CallType
 import io.getstream.video.android.model.CallUser
+import io.getstream.video.android.viewmodel.IncomingCallViewModel
+
+@Composable
+public fun IncomingCallScreen(
+    viewModel: IncomingCallViewModel,
+    onDeclineCall: () -> Unit,
+    onAcceptCall: () -> Unit,
+    onVideoToggleChanged: (Boolean) -> Unit,
+) {
+    val callType: CallType by viewModel.callType.collectAsState()
+    val participants: List<CallUser> by viewModel.participants.collectAsState()
+    IncomingCall(
+        participants = participants,
+        callType = callType,
+        onDeclineCall = onDeclineCall,
+        onAcceptCall = onAcceptCall,
+        onVideoToggleChanged = onVideoToggleChanged
+    )
+}
 
 @Composable
 public fun IncomingCall(
-    callInfo: CallInfo,
-    callType: CallType,
     participants: List<CallUser>,
-    onDeclineCall: (CallInfo) -> Unit,
-    onAcceptCall: (CallInfo) -> Unit,
+    callType: CallType,
+    onDeclineCall: () -> Unit,
+    onAcceptCall: () -> Unit,
     onVideoToggleChanged: (Boolean) -> Unit,
 ) {
-
     CallBackground(
         participants = participants,
         callType = callType,
@@ -69,7 +87,7 @@ public fun IncomingCall(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 44.dp),
-            callInfo = callInfo,
+            isVideoCall = callType == CallType.VIDEO,
             onDeclineCall = onDeclineCall,
             onAcceptCall = onAcceptCall,
             onVideoToggleChanged = onVideoToggleChanged
@@ -82,7 +100,6 @@ public fun IncomingCall(
 private fun IncomingCallPreview() {
     VideoTheme {
         IncomingCall(
-            callInfo = CallInfo("", "", "video", "", false, false, null, null),
             participants = mockParticipantList.map {
                 CallUser(
                     id = it.id,

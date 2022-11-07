@@ -103,6 +103,8 @@ public class CallViewModel(
         logger.d { "[createCall] input: $input" }
         // this._callState.value = videoClient.getCall(callId) TODO - load details
 
+        // TODO CallClient is supposed to live longer than VM
+        //  VM can be destroyed while the call is still running in the BG
         client = streamVideo.createCallClient(
             input.callUrl.removeSuffix("/twirp"),
             input.userToken,

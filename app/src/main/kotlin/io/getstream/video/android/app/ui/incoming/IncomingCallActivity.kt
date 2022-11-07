@@ -27,16 +27,17 @@ import androidx.appcompat.app.AppCompatActivity
 import io.getstream.video.android.app.router.StreamRouterImpl
 import io.getstream.video.android.app.videoApp
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.incomingcall.IncomingCall
-import io.getstream.video.android.model.IncomingCallData
+import io.getstream.video.android.compose.ui.components.incomingcall.IncomingCallScreen
+import io.getstream.video.android.viewmodel.IncomingCallViewModel
+import io.getstream.video.android.viewmodel.IncomingCallViewModelFactory
 
 class IncomingCallActivity : AppCompatActivity() {
 
     private val viewModel by viewModels<IncomingCallViewModel> {
         IncomingCallViewModelFactory(
             videoApp.streamVideo,
-            StreamRouterImpl(this),
-            requireNotNull(intent.getSerializableExtra(KEY_CALL_DATA) as? IncomingCallData)
+            // TODO passing [this] may lead to memory leak, cause VM may live longer than Activity
+            StreamRouterImpl(this)
         )
     }
 
@@ -46,10 +47,8 @@ class IncomingCallActivity : AppCompatActivity() {
 
         setContent {
             VideoTheme {
-                IncomingCall(
-                    callInfo = viewModel.callData.callInfo,
-                    participants = viewModel.callData.users,
-                    callType = viewModel.callData.callType,
+                IncomingCallScreen(
+                    viewModel = viewModel,
                     onDeclineCall = { viewModel.declineCall() },
                     onAcceptCall = { viewModel.acceptCall() },
                     onVideoToggleChanged = { }
@@ -70,15 +69,10 @@ class IncomingCallActivity : AppCompatActivity() {
     }
 
     companion object {
-        private const val KEY_CALL_DATA = "call_data"
-
         fun getLaunchIntent(
             context: Context,
-            incomingCallData: IncomingCallData
         ): Intent {
-            return Intent(context, IncomingCallActivity::class.java).apply {
-                putExtra(KEY_CALL_DATA, incomingCallData)
-            }
+            return Intent(context, IncomingCallActivity::class.java)
         }
     }
 }
