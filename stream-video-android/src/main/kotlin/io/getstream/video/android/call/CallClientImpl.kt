@@ -340,11 +340,12 @@ internal class CallClientImpl(
         val call = createCall(sessionId)
         this.call = call
         listenToParticipants()
-        createPeerConnections(autoPublish)
+
         val result = connectToCall()
         logger.v { "[initializeCall] #sfu; result: $result" }
         return when (result) {
             is Success -> {
+                createPeerConnections(autoPublish)
                 loadParticipantsData(result.data.call_state, callSettings)
                 createUserTracks(callSettings, autoPublish)
                 call.setupAudio()
