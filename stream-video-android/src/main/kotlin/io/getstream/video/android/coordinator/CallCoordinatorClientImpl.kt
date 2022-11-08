@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.coordinator
 
-import io.getstream.video.android.api.CallCoordinatorService
+import io.getstream.video.android.api.ClientRPCService
 import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.token.CredentialsProvider
 import io.getstream.video.android.utils.Failure
@@ -37,7 +37,7 @@ import stream.video.coordinator.client_v1_rpc.SendEventRequest
  * An accessor that allows us to communicate with the API around video calls.
  */
 internal class CallCoordinatorClientImpl(
-    private val callCoordinatorService: CallCoordinatorService,
+    private val callCoordinatorService: ClientRPCService,
     private val credentialsProvider: CredentialsProvider
 ) : CallCoordinatorClient {
 
@@ -60,10 +60,10 @@ internal class CallCoordinatorClientImpl(
             Failure(VideoError(error.message, error))
         }
 
-    override suspend fun getOrCreateCall(getOrCreateCallRequest: GetOrCreateCallRequest): Result<GetOrCreateCallResponse> =
+    override suspend fun getOrCreateCall(createCallRequest: GetOrCreateCallRequest): Result<GetOrCreateCallResponse> =
         try {
             val response = callCoordinatorService.getOrCreateCall(
-                getOrCreateCallRequest = getOrCreateCallRequest,
+                getOrCreateCallRequest = createCallRequest,
                 apiKey = credentialsProvider.getCachedApiKey()
             )
 
@@ -103,7 +103,7 @@ internal class CallCoordinatorClientImpl(
     override suspend fun selectEdgeServer(request: GetCallEdgeServerRequest): Result<GetCallEdgeServerResponse> =
         try {
             val response = callCoordinatorService.getCallEdgeServer(
-                selectEdgeServerRequest = request,
+                getCallEdgeServerRequest = request,
                 apiKey = credentialsProvider.getCachedApiKey()
             )
 
@@ -121,7 +121,7 @@ internal class CallCoordinatorClientImpl(
      */
     override suspend fun sendUserEvent(sendEventRequest: SendEventRequest): Result<Boolean> =
         try {
-            callCoordinatorService.sendUserEvent(
+            callCoordinatorService.sendEvent(
                 sendEventRequest = sendEventRequest,
                 apiKey = credentialsProvider.getCachedApiKey()
             )

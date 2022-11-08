@@ -45,7 +45,7 @@ public interface CallCoordinatorClient {
      * @param getOrCreateCallRequest The information used to describe the call.
      * @return [CreateCallResponse] which holds the cached or newly created [Call].
      */
-    public suspend fun getOrCreateCall(getOrCreateCallRequest: GetOrCreateCallRequest): Result<GetOrCreateCallResponse>
+    public suspend fun getOrCreateCall(createCallRequest: GetOrCreateCallRequest): Result<GetOrCreateCallResponse>
 
     /**
      * Asks the server to join a call. This gives the user information which servers they can

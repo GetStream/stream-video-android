@@ -1,25 +1,6 @@
 plugins {
-    `java-gradle-plugin`
     `kotlin-dsl`
 }
-
-repositories {
-    // google()
-    mavenCentral()
-    // maven { setUrl("https://jitpack.io")  }
-}
-//
-// buildscript {
-//     repositories {
-//         google()
-//         mavenCentral()
-//         maven { setUrl("https://jitpack.io")  }
-//     }
-//
-//     dependencies {
-//         classpath("com.android.tools.build:gradle:7.3.0")
-//     }
-// }
 
 gradlePlugin {
     plugins {
@@ -31,6 +12,6 @@ gradlePlugin {
     }
 }
 
-// dependencies {
-//     implementation("com.android.tools.build:gradle:7.3.0")
-// }
+repositories {
+    mavenCentral()
+}

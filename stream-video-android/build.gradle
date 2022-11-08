@@ -21,9 +21,7 @@ wire {
     }
 }
 
-generateRPCServices {
-    srcDir 'src/main/proto'
-}
+generateRPCServices {}
 
 android {
     compileSdk Configuration.compileSdk
@@ -43,10 +41,14 @@ android {
         }
     }
 
+    sourceSets {
+        main.java.srcDirs += "build/generated/source/services"
+    }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
-//        coreLibraryDesugaringEnabled true
+        coreLibraryDesugaringEnabled true
     }
 
     kotlinOptions {

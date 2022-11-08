@@ -1,7 +1,6 @@
 package io.getstream.video.android.commands.rpc.plugin
 
 open class GenerateRPCServiceExtension {
-    var srcDir = ""
-        set(value) { field = if (field.isBlank()) value else "$field/$value" }
-    internal var outputDir = ""
+    var srcDir = "stream-video-android/src/main/proto"
+    var outputDir = "stream-video-android/src/main/kotlin/io/getstream/video/android/api"
 }

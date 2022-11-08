@@ -12,7 +12,6 @@ import java.io.IOException
 private val CommentRegex = "//.*|/\\*(?s).*?\\*/".toRegex()
 private val ProtoPackageRegex = "(?<=package)(.*?)(?=;)".toRegex()
 private val ProtoImportsRegex = "((?<=\\\")(.*)(?=\\/))".toRegex()
-private val KotlinFilePackageRegex = "(.*?)kotlin/".toRegex()
 private val RPCServiceRegex = "service(.*)(?s).*?\\}".toRegex()
 private val RPCServiceNameRegex = "(?<=^service)(.*?)(?=\\{)".toRegex()
 private val RPCCallRegex = "(?<=rpc)(.*?)(?=;)".toRegex()
@@ -28,7 +27,7 @@ open class GenerateRPCServiceTask : DefaultTask() {
     fun generateServices() {
         val outputFolder = File(config.outputDir)
         if (!outputFolder.exists() && !outputFolder.mkdirs()) {
-            throw FileException(Throwable("Failed to create output folder: ${outputFolder.path}."))
+            throw FileException(Throwable("Failed to create output folder: ${outputFolder.absolutePath}."))
         }
 
         val file = File(config.srcDir)
@@ -47,7 +46,6 @@ open class GenerateRPCServiceTask : DefaultTask() {
             services.forEach { service ->
                 val serviceFile = getService(
                     serviceName = service.name,
-                    filePackage = config.outputDir.replace(KotlinFilePackageRegex, "").replace("/", "."),
                     imports = getModelImports(
                         packageName = packageName,
                         imports = imports,
@@ -66,7 +64,7 @@ open class GenerateRPCServiceTask : DefaultTask() {
 
                 try {
                     val outputFile = File("${config.outputDir}/${service.name}Service.kt")
-                    if (!outputFile.createNewFile()) throw FileNotFoundException("Failed to create a file for ${service.name}")
+                    if (!outputFile.exists() && !outputFile.createNewFile()) throw FileNotFoundException("Failed to create a file for ${service.name}")
                     outputFile.writeText(serviceFile)
                 } catch (exception: IOException) {
                     println("Exception for service: ${service.name} inside ${protoFile.name}")
@@ -165,11 +163,10 @@ open class GenerateRPCServiceTask : DefaultTask() {
 
     private fun getService(
         serviceName: String,
-        filePackage: String,
         imports: List<String>,
         functions: List<String>,
     ): String {
-        return """package $filePackage
+        return """package io.getstream.video.android.api
         
 import retrofit2.http.Body
 import retrofit2.http.Headers
