@@ -16,10 +16,13 @@
 
 package io.getstream.video.android.utils
 
+import io.getstream.logging.StreamLog
 import io.getstream.video.android.module.CallCoordinatorClientModule
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.URL
+
+private const val TAG = "Call:LatencyUtils"
 
 /**
  * Calculates the latency to ping the server multiple times.
@@ -36,23 +39,27 @@ public fun getLatencyMeasurements(latencyUrl: String): List<Double> {
     val url = CallCoordinatorClientModule.REDIRECT_PING_URL ?: prepareUrl(latencyUrl)
 
     repeat(3) {
-        val request = URL(url)
-        val start = System.currentTimeMillis()
-        val connection = request.openConnection()
+        try {
+            val request = URL(url)
+            val start = System.currentTimeMillis()
+            val connection = request.openConnection()
 
-        connection.connect()
+            connection.connect()
 
-        // Read and print the input
-        val inputStream = BufferedReader(InputStreamReader(connection.getInputStream()))
-        println(inputStream.readLines().toString())
-        inputStream.close()
+            // Read and print the input
+            val inputStream = BufferedReader(InputStreamReader(connection.getInputStream()))
+            println(inputStream.readLines().toString())
+            inputStream.close()
 
-        val end = System.currentTimeMillis()
+            val end = System.currentTimeMillis()
 
-        val seconds = (end - start) / 1000.0
-        measurements.add(seconds)
+            val seconds = (end - start) / 1000.0
+            measurements.add(seconds)
+        } catch (e: Throwable) {
+            StreamLog.e(TAG, e) { "[getLatencyMeasurements] failed: $e" }
+            measurements.add(Double.MAX_VALUE)
+        }
     }
-
     return measurements
 }
 

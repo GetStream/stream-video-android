@@ -47,6 +47,9 @@ import io.getstream.video.android.model.JoinedCall
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.state.DropReason
 import io.getstream.video.android.model.state.StreamCallGuid
+import io.getstream.video.android.model.state.StreamCallKind
+import io.getstream.video.android.model.state.StreamDate
+import io.getstream.video.android.model.state.copy
 import io.getstream.video.android.socket.SocketListener
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -153,8 +156,27 @@ internal class StreamCallEngineImpl(
             logger.w { "[onCallRejected] rejected (rejected by non-Member): $event" }
             return@launchWithLock
         }
-        logger.d { "[onCallRejected] no args" }
-        dropCall(State.Drop(state.callGuid, DropReason.Rejected(event.sentByUserId)))
+        if (!state.members.contains(event.sentByUserId)) {
+            logger.w { "[onCallRejected] rejected (rejected by non-Member): $event" }
+            return@launchWithLock
+        }
+        logger.d { "[onCallRejected] state: $state" }
+        _callState.post(
+            state.copy(
+                broadcastingEnabled = event.info.broadcastingEnabled,
+                recordingEnabled = event.info.recordingEnabled,
+                createdAt = StreamDate.from(event.info.createdAt),
+                updatedAt = StreamDate.from(event.info.updatedAt),
+                members = event.details.members,
+                users = event.users
+            )
+        )
+        if (event.details.members.isNotEmpty()) {
+            logger.w { "[onCallRejected] rejected (rejected not by all members): $event" }
+            return@launchWithLock
+        }
+        logger.d { "[onCallRejected] state: $state" }
+        dropCall(State.Drop(state.callGuid, state.callKind, DropReason.Rejected(event.sentByUserId)))
     }
 
     override fun onCallJoined(joinedCall: JoinedCall) = scope.launchWithLock(mutex) {
@@ -163,19 +185,26 @@ internal class StreamCallEngineImpl(
             logger.w { "[onCallJoined] rejected (state is not Joining): $state" }
             return@launchWithLock
         }
+        if (state.callGuid.cid != joinedCall.call.cid) {
+            logger.w {
+                "[onCallJoined] rejected (callCid is not valid); " +
+                    "expected: ${state.callGuid.cid}, actual: ${joinedCall.call.cid}"
+            }
+            return@launchWithLock
+        }
         logger.d { "[onCallJoined] joinedCall: $joinedCall, state: $state" }
         _callState.post(
             joinedCall.run {
+
                 // TODO it should be Connecting until a Connected state from ICE candidates comes
                 State.Connected(
-                    callGuid = StreamCallGuid(
-                        type = call.type,
-                        id = call.id,
-                        cid = call.cid,
-                    ),
+                    callGuid = state.callGuid,
+                    callKind = state.callKind,
                     createdByUserId = call.createdByUserId,
                     broadcastingEnabled = call.broadcastingEnabled,
                     recordingEnabled = call.recordingEnabled,
+                    createdAt = StreamDate.from(call.createdAt),
+                    updatedAt = StreamDate.from(call.updatedAt),
                     users = call.users,
                     members = call.members,
                     callUrl = callUrl,
@@ -217,8 +246,8 @@ internal class StreamCallEngineImpl(
                         id = id,
                         cid = CallCid(type, id),
                     ),
-                    memberUserIds = participantIds,
-                    ringing = ringing
+                    callKind = if (ringing) StreamCallKind.RINGING else StreamCallKind.MEETING,
+                    memberUserIds = participantIds
                 )
             )
         } else if (state is State.Incoming) {
@@ -245,20 +274,19 @@ internal class StreamCallEngineImpl(
         logger.d { "[onCallStarted] call: $call, state: $state" }
         _callState.post(
             State.Outgoing(
-                callGuid = StreamCallGuid(
-                    type = call.type,
-                    id = call.id,
-                    cid = call.cid,
-                ),
+                callGuid = state.callGuid,
+                callKind = state.callKind,
                 createdByUserId = call.createdByUserId,
                 broadcastingEnabled = call.broadcastingEnabled,
                 recordingEnabled = call.recordingEnabled,
+                createdAt = StreamDate.from(call.createdAt),
+                updatedAt = StreamDate.from(call.updatedAt),
                 users = call.users,
                 members = call.members,
                 acceptedByCallee = false
             )
         )
-        if (state.ringing) {
+        if (state.callKind == StreamCallKind.RINGING) {
             waitForCallToBeAccepted()
         }
     }
@@ -271,7 +299,7 @@ internal class StreamCallEngineImpl(
                 val state = _callState.value
                 if (state is State.Outgoing && !state.acceptedByCallee) {
                     logger.w { "[waitForCallToBeAccepted] timed out (call is not accepted)" }
-                    dropCall(State.Drop(state.callGuid, DropReason.Timeout(config.dropTimeout)))
+                    dropCall(State.Drop(state.callGuid, state.callKind, DropReason.Timeout(config.dropTimeout)))
                 } else {
                     logger.v { "[waitForCallToBeAccepted] call was accepted" }
                 }
@@ -298,8 +326,8 @@ internal class StreamCallEngineImpl(
         }
         logger.d { "[onCallEventSending] callCid: $callCid, eventType: $eventType, state: $state" }
         when (eventType) {
-            REJECTED -> dropCall(State.Drop(state.callGuid, DropReason.Rejected(getCurrentUserId())))
-            CANCELLED -> dropCall(State.Drop(state.callGuid, DropReason.Cancelled(getCurrentUserId())))
+            REJECTED -> dropCall(State.Drop(state.callGuid, state.callKind, DropReason.Rejected(getCurrentUserId())))
+            CANCELLED -> dropCall(State.Drop(state.callGuid, state.callKind, DropReason.Cancelled(getCurrentUserId())))
             ACCEPTED -> if (state is State.Incoming) {
                 _callState.post(state.copy(acceptedByMe = true))
             }
@@ -331,16 +359,15 @@ internal class StreamCallEngineImpl(
         logger.d { "[onCallJoining] call: $call, state: $state" }
         _callState.post(
             State.Joining(
-                callGuid = StreamCallGuid(
-                    type = call.type,
-                    id = call.id,
-                    cid = call.cid,
-                ),
+                callGuid = state.callGuid,
                 createdByUserId = call.createdByUserId,
                 broadcastingEnabled = call.broadcastingEnabled,
                 recordingEnabled = call.recordingEnabled,
+                createdAt = StreamDate.from(call.createdAt),
+                updatedAt = StreamDate.from(call.updatedAt),
                 users = call.users,
-                members = call.members
+                members = call.members,
+                callKind = state.callKind
             )
         )
     }
@@ -352,7 +379,7 @@ internal class StreamCallEngineImpl(
             return@launchWithLock
         }
         logger.e { "[onCallFailed] error: $error, state: $state" }
-        dropCall(State.Drop(state.callGuid, DropReason.Failure(error)))
+        dropCall(State.Drop(state.callGuid, state.callKind, DropReason.Failure(error)))
     }
 
     private fun onCallFinished(event: CallEndedEvent) = scope.launchWithLock(mutex) {
@@ -369,7 +396,7 @@ internal class StreamCallEngineImpl(
             }
             return@launchWithLock
         }
-        dropCall(State.Drop(state.callGuid, DropReason.Ended))
+        dropCall(State.Drop(state.callGuid, state.callKind, DropReason.Ended))
     }
 
     private fun onCallCancelled(event: CallCanceledEvent) = scope.launchWithLock(mutex) {
@@ -385,8 +412,12 @@ internal class StreamCallEngineImpl(
             }
             return@launchWithLock
         }
+        if (state.callKind == StreamCallKind.MEETING) {
+            logger.w { "[onCallCancelled] rejected (callKind is MEETING): $state" }
+            return@launchWithLock
+        }
         logger.d { "[onCallCancelled] event: $event, state: $state" }
-        dropCall(State.Drop(state.callGuid, DropReason.Cancelled(event.sentByUserId)))
+        dropCall(State.Drop(state.callGuid, state.callKind, DropReason.Cancelled(event.sentByUserId)))
     }
 
     private fun onCallCreated(event: CallCreatedEvent) = scope.launchWithLock(mutex) {
@@ -408,9 +439,12 @@ internal class StreamCallEngineImpl(
                         id = info.id,
                         cid = info.cid,
                     ),
+                    callKind = StreamCallKind.RINGING,
                     createdByUserId = info.createdByUserId,
                     broadcastingEnabled = info.broadcastingEnabled,
                     recordingEnabled = info.recordingEnabled,
+                    createdAt = StreamDate.from(info.createdAt),
+                    updatedAt = StreamDate.from(info.updatedAt),
                     users = users,
                     members = details.members,
                     acceptedByMe = false

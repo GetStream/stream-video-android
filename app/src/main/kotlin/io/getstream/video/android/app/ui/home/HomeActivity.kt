@@ -67,18 +67,13 @@ import io.getstream.video.android.compose.ui.components.avatar.Avatar
 import io.getstream.video.android.compose.ui.components.avatar.InitialsAvatar
 import io.getstream.video.android.events.CallCreatedEvent
 import io.getstream.video.android.events.VideoEvent
-import io.getstream.video.android.model.CallInfo
 import io.getstream.video.android.model.CallInput
-import io.getstream.video.android.model.CallType
-import io.getstream.video.android.model.IncomingCallData
-import io.getstream.video.android.model.OutgoingCallData
 import io.getstream.video.android.model.UserCredentials
 import io.getstream.video.android.router.StreamRouter
 import io.getstream.video.android.socket.SocketListener
 import io.getstream.video.android.utils.onError
 import io.getstream.video.android.utils.onSuccess
 import kotlinx.coroutines.launch
-import java.util.*
 
 class HomeActivity : AppCompatActivity() {
 
@@ -112,14 +107,7 @@ class HomeActivity : AppCompatActivity() {
         override fun onEvent(event: VideoEvent) {
             if (event is CallCreatedEvent && event.ringing) {
                 // TODO - viewModel ?
-                router.onIncomingCall(
-                    IncomingCallData(
-                        callInfo = event.info,
-                        callType = CallType.fromType(event.info.type),
-                        users = event.users.values.toList(),
-                        members = event.details.members.values.toList()
-                    )
-                )
+                router.onIncomingCall()
             }
         }
     }
@@ -324,23 +312,7 @@ class HomeActivity : AppCompatActivity() {
                 logger.v { "[dialUsers] successful: $metadata" }
                 loadingState.value = false
 
-                router.onOutgoingCall(
-                    OutgoingCallData(
-                        callType = CallType.fromType(metadata.type),
-                        callInfo = CallInfo(
-                            cid = metadata.cid,
-                            id = metadata.id,
-                            type = metadata.type,
-                            createdByUserId = metadata.createdByUserId,
-                            broadcastingEnabled = metadata.broadcastingEnabled,
-                            recordingEnabled = metadata.recordingEnabled,
-                            createdAt = Date(metadata.createdAt),
-                            updatedAt = Date(metadata.updatedAt)
-                        ),
-                        users = metadata.users.values.toList(),
-                        members = metadata.members.values.toList()
-                    )
-                )
+                router.onOutgoingCall()
             }
 
             result.onError {
