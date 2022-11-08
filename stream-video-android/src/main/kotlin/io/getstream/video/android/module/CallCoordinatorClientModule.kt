@@ -18,7 +18,7 @@ package io.getstream.video.android.module
 
 import android.content.Context
 import androidx.lifecycle.Lifecycle
-import io.getstream.video.android.api.CallCoordinatorService
+import io.getstream.video.android.api.ClientRPCService
 import io.getstream.video.android.coordinator.CallCoordinatorClient
 import io.getstream.video.android.coordinator.CallCoordinatorClientImpl
 import io.getstream.video.android.dispatchers.DispatcherProvider
@@ -61,9 +61,9 @@ internal class CallCoordinatorClientModule(
      * Cached instance of the CallCoordinator service client for API calls.
      */
     private val callCoordinatorClient: CallCoordinatorClient by lazy {
-        val service = retrofitClient.create(CallCoordinatorService::class.java)
+        val service = retrofitClient.create(ClientRPCService::class.java)
 
-        CallCoordinatorClientImpl(service, credentialsProvider)
+        CallCoordinatorClientImpl(service)
     }
 
     /**

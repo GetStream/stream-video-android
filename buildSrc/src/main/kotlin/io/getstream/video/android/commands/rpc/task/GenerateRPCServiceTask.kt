@@ -155,10 +155,7 @@ open class GenerateRPCServiceTask : DefaultTask() {
         return """
     @Headers("Content-Type: application/protobuf")
     @POST("/rpc/$packageName.$serviceName/$call")
-    public suspend fun ${call.decapitalize()}(
-        @Body ${model.decapitalize()}: $model,
-        @Query("api_key") apiKey: String
-    ): $returnType"""
+    public suspend fun ${call.decapitalize()}(@Body ${model.decapitalize()}: $model): $returnType"""
     }
 
     private fun getService(

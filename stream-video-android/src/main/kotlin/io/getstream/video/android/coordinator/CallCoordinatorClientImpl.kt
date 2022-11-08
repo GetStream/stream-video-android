@@ -18,7 +18,6 @@ package io.getstream.video.android.coordinator
 
 import io.getstream.video.android.api.ClientRPCService
 import io.getstream.video.android.errors.VideoError
-import io.getstream.video.android.token.CredentialsProvider
 import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Result
 import io.getstream.video.android.utils.Success
@@ -38,7 +37,6 @@ import stream.video.coordinator.client_v1_rpc.SendEventRequest
  */
 internal class CallCoordinatorClientImpl(
     private val callCoordinatorService: ClientRPCService,
-    private val credentialsProvider: CredentialsProvider
 ) : CallCoordinatorClient {
 
     /**
@@ -50,10 +48,7 @@ internal class CallCoordinatorClientImpl(
      */
     override suspend fun createCall(createCallRequest: CreateCallRequest): Result<CreateCallResponse> =
         try {
-            val response = callCoordinatorService.createCall(
-                createCallRequest = createCallRequest,
-                apiKey = credentialsProvider.getCachedApiKey()
-            )
+            val response = callCoordinatorService.createCall(createCallRequest = createCallRequest)
 
             Success(response)
         } catch (error: Throwable) {
@@ -62,10 +57,7 @@ internal class CallCoordinatorClientImpl(
 
     override suspend fun getOrCreateCall(createCallRequest: GetOrCreateCallRequest): Result<GetOrCreateCallResponse> =
         try {
-            val response = callCoordinatorService.getOrCreateCall(
-                getOrCreateCallRequest = createCallRequest,
-                apiKey = credentialsProvider.getCachedApiKey()
-            )
+            val response = callCoordinatorService.getOrCreateCall(getOrCreateCallRequest = createCallRequest)
 
             Success(response)
         } catch (error: Throwable) {
@@ -82,10 +74,7 @@ internal class CallCoordinatorClientImpl(
      */
     override suspend fun joinCall(request: JoinCallRequest): Result<JoinCallResponse> =
         try {
-            val response = callCoordinatorService.joinCall(
-                joinCallRequest = request,
-                apiKey = credentialsProvider.getCachedApiKey(),
-            )
+            val response = callCoordinatorService.joinCall(joinCallRequest = request)
 
             Success(response)
         } catch (error: Throwable) {
@@ -102,10 +91,7 @@ internal class CallCoordinatorClientImpl(
      */
     override suspend fun selectEdgeServer(request: GetCallEdgeServerRequest): Result<GetCallEdgeServerResponse> =
         try {
-            val response = callCoordinatorService.getCallEdgeServer(
-                getCallEdgeServerRequest = request,
-                apiKey = credentialsProvider.getCachedApiKey()
-            )
+            val response = callCoordinatorService.getCallEdgeServer(getCallEdgeServerRequest = request)
 
             Success(response)
         } catch (error: Throwable) {
@@ -121,10 +107,7 @@ internal class CallCoordinatorClientImpl(
      */
     override suspend fun sendUserEvent(sendEventRequest: SendEventRequest): Result<Boolean> =
         try {
-            callCoordinatorService.sendEvent(
-                sendEventRequest = sendEventRequest,
-                apiKey = credentialsProvider.getCachedApiKey()
-            )
+            callCoordinatorService.sendEvent(sendEventRequest = sendEventRequest)
 
             Success(true)
         } catch (error: Throwable) {

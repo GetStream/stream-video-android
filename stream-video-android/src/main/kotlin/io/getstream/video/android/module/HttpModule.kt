@@ -77,7 +77,17 @@ internal class HttpModule(
         } else {
             credentialsProvider.getCachedToken()
         }
+
+        val updatedUrl = if (original.url.toString().contains("coordinator")) {
+            original.url.newBuilder()
+                .addQueryParameter(API_KEY, credentialsProvider.getCachedApiKey())
+                .build()
+        } else {
+            original.url
+        }
+
         val updated = original.newBuilder()
+            .url(updatedUrl)
             .addHeader(HEADER_AUTHORIZATION, "Bearer $token")
             .build()
 
@@ -89,6 +99,11 @@ internal class HttpModule(
          * Key used to prove authorization to the API.
          */
         private const val HEADER_AUTHORIZATION = "authorization"
+
+        /**
+         * Query key used to authenticate to the API.
+         */
+        private const val API_KEY = "api_key"
 
         /**
          * Instance of the module, that's reused for HTTP communication.
