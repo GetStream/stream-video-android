@@ -20,12 +20,26 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.TextField
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.lifecycleScope
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
@@ -60,6 +74,8 @@ class LoginActivity : ComponentActivity() {
         }
     }
 
+    private val isShowingGuestLogin = mutableStateOf(false)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -74,16 +90,77 @@ class LoginActivity : ComponentActivity() {
         }
 
         setContent {
-            Button(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(32.dp),
-                content = {
-                    Text(text = "Authenticate")
-                },
-                onClick = ::authenticate
-            )
+            Box(modifier = Modifier.fillMaxSize()) {
+                Column(modifier = Modifier.fillMaxSize()) {
+                    Button(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 32.dp, vertical = 8.dp),
+                        content = {
+                            Text(text = "Authenticate")
+                        },
+                        onClick = ::authenticate
+                    )
+
+                    Button(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 32.dp, vertical = 8.dp),
+                        content = {
+                            Text(text = "Login as Guest")
+                        },
+                        onClick = {
+                            isShowingGuestLogin.value = true
+                        }
+                    )
+                }
+
+                val isShowingGuestLogin by isShowingGuestLogin
+
+                if (isShowingGuestLogin) {
+                    GuestLoginOverlay()
+                }
+            }
         }
+    }
+
+    @Composable
+    private fun GuestLoginOverlay() {
+        var guestLoginEmailState by remember { mutableStateOf("") }
+
+        Dialog(
+            onDismissRequest = {
+                isShowingGuestLogin.value = false
+            },
+            content = {
+                Surface(modifier = Modifier.width(300.dp)) {
+                    Column() {
+                        TextField(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                            value = guestLoginEmailState,
+                            onValueChange = { guestLoginEmailState = it },
+                            label = { Text(text = "Enter your e-mail address") },
+                            keyboardOptions = KeyboardOptions.Default.copy(
+                                keyboardType = KeyboardType.Email
+                            )
+                        )
+
+                        Button(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp),
+                            onClick = {
+                                onSignInSuccess(guestLoginEmailState)
+                                isShowingGuestLogin.value = false
+                            },
+                            content = { Text(text = "Log in") }
+                        )
+                    }
+                }
+            }
+        )
     }
 
     private fun authenticate() {
@@ -124,7 +201,7 @@ class LoginActivity : ComponentActivity() {
         if (userJSON != null) {
             val token = userJSON.getString("token")
             val user = User(
-                authUser?.email ?: "",
+                authUser?.email ?: userJSON.getString("userId"),
                 "admin",
                 authUser?.displayName ?: "",
                 token,
