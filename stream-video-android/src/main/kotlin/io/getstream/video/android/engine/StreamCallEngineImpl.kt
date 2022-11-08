@@ -246,8 +246,8 @@ internal class StreamCallEngineImpl(
                         id = id,
                         cid = CallCid(type, id),
                     ),
-                    memberUserIds = participantIds,
-                    callKind = if (ringing) StreamCallKind.REGULAR else StreamCallKind.MEETING
+                    callKind = if (ringing) StreamCallKind.RINGING else StreamCallKind.MEETING,
+                    memberUserIds = participantIds
                 )
             )
         } else if (state is State.Incoming) {
@@ -274,11 +274,8 @@ internal class StreamCallEngineImpl(
         logger.d { "[onCallStarted] call: $call, state: $state" }
         _callState.post(
             State.Outgoing(
-                callGuid = StreamCallGuid(
-                    type = call.type,
-                    id = call.id,
-                    cid = call.cid,
-                ),
+                callGuid = state.callGuid,
+                callKind = state.callKind,
                 createdByUserId = call.createdByUserId,
                 broadcastingEnabled = call.broadcastingEnabled,
                 recordingEnabled = call.recordingEnabled,
@@ -286,11 +283,10 @@ internal class StreamCallEngineImpl(
                 updatedAt = StreamDate.from(call.updatedAt),
                 users = call.users,
                 members = call.members,
-                callKind = state.callKind,
                 acceptedByCallee = false
             )
         )
-        if (state.callKind == StreamCallKind.REGULAR) {
+        if (state.callKind == StreamCallKind.RINGING) {
             waitForCallToBeAccepted()
         }
     }
@@ -443,6 +439,7 @@ internal class StreamCallEngineImpl(
                         id = info.id,
                         cid = info.cid,
                     ),
+                    callKind = StreamCallKind.RINGING,
                     createdByUserId = info.createdByUserId,
                     broadcastingEnabled = info.broadcastingEnabled,
                     recordingEnabled = info.recordingEnabled,
@@ -450,7 +447,6 @@ internal class StreamCallEngineImpl(
                     updatedAt = StreamDate.from(info.updatedAt),
                     users = users,
                     members = details.members,
-                    callKind = StreamCallKind.REGULAR,
                     acceptedByMe = false
                 )
             }

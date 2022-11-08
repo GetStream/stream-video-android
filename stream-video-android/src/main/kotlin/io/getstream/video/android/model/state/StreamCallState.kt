@@ -152,7 +152,7 @@ public data class StreamCallGuid(
 ) : Serializable
 
 public enum class StreamCallKind : Serializable {
-    MEETING, REGULAR
+    MEETING, RINGING
 }
 
 public sealed class StreamDate : Serializable {
