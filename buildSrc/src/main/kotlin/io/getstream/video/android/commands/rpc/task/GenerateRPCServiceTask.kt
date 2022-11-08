@@ -44,6 +44,8 @@ open class GenerateRPCServiceTask : DefaultTask() {
             val services = getRPCServices(proto, protoFile.name)
 
             services.forEach { service ->
+                val isRPC = service.name.contains("RPC")
+
                 val serviceFile = getService(
                     serviceName = service.name,
                     imports = getModelImports(
@@ -57,7 +59,8 @@ open class GenerateRPCServiceTask : DefaultTask() {
                             serviceName = service.name,
                             call = it.name,
                             input = it.input,
-                            returnType = it.output
+                            returnType = it.output,
+                            isRPC = isRPC
                         )
                     }
                 )
@@ -150,11 +153,12 @@ open class GenerateRPCServiceTask : DefaultTask() {
         call: String,
         input: String,
         returnType: String,
+        isRPC: Boolean
     ): String {
         val model = input.split(".").last()
         return """
     @Headers("Content-Type: application/protobuf")
-    @POST("/rpc/$packageName.$serviceName/$call")
+    @POST("/${if (isRPC) "rpc" else "twirp"}/$packageName.$serviceName/$call")
     public suspend fun ${call.decapitalize()}(@Body ${model.decapitalize()}: $model): $returnType"""
     }
 
