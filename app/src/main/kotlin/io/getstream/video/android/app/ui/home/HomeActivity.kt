@@ -24,7 +24,6 @@ import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -51,7 +50,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
-import androidx.compose.ui.Alignment.Companion.TopStart
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -66,6 +64,7 @@ import io.getstream.video.android.app.utils.getUsers
 import io.getstream.video.android.app.videoApp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.Avatar
+import io.getstream.video.android.compose.ui.components.avatar.InitialsAvatar
 import io.getstream.video.android.events.CallCreatedEvent
 import io.getstream.video.android.events.VideoEvent
 import io.getstream.video.android.model.CallInfo
@@ -445,18 +444,31 @@ class HomeActivity : AppCompatActivity() {
     }
 
     @Composable
-    fun BoxScope.UserIcon() {
+    fun UserIcon() {
         val user = videoApp.credentialsProvider.getUserCredentials()
-        Avatar(
-            // TODO - check if this looks good
-            modifier = Modifier
-                .size(40.dp)
-                .padding(top = 8.dp, start = 8.dp)
-                .align(TopStart)
-                .clip(CircleShape),
-            imageUrl = user.imageUrl.orEmpty(),
-            initials = user.name,
-        )
+        if (user.imageUrl.isNullOrEmpty()) {
+            val initials = if (user.name.isNotEmpty()) {
+                user.name.first()
+            } else {
+                user.id.first()
+            }
+            InitialsAvatar(
+                modifier = Modifier
+                    .size(40.dp)
+                    .padding(top = 8.dp, start = 8.dp)
+                    .clip(CircleShape),
+                initials = initials.toString()
+            )
+        } else {
+            Avatar(
+                modifier = Modifier
+                    .size(40.dp)
+                    .padding(top = 8.dp, start = 8.dp)
+                    .clip(CircleShape),
+                imageUrl = user.imageUrl.orEmpty(),
+                initials = user.name,
+            )
+        }
     }
 
     private fun toggleSelectState(user: UserCredentials, users: List<UserCredentials>) {
