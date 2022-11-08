@@ -25,13 +25,13 @@ import androidx.core.content.getSystemService
 import io.getstream.logging.StreamLog
 import io.getstream.video.android.audio.AudioHandler
 import io.getstream.video.android.audio.AudioSwitchHandler
+import io.getstream.video.android.call.utils.stringify
 import io.getstream.video.android.events.AudioLevelChangedEvent
 import io.getstream.video.android.events.MuteStateChangeEvent
 import io.getstream.video.android.events.SfuParticipantJoinedEvent
 import io.getstream.video.android.events.SfuParticipantLeftEvent
 import io.getstream.video.android.token.CredentialsProvider
 import io.getstream.video.android.utils.updateValue
-import io.getstream.video.android.webrtc.utils.stringify
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

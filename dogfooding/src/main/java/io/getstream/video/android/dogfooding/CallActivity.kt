@@ -42,7 +42,7 @@ class CallActivity : AppCompatActivity() {
     }
 
     private val factory by lazy {
-        CallViewModelFactory(input, dogfoodingApp.streamCalls, dogfoodingApp.credentialsProvider)
+        CallViewModelFactory(input, dogfoodingApp.streamVideo, dogfoodingApp.credentialsProvider)
     }
 
     private val callViewModel by viewModels<CallViewModel>(factoryProducer = { factory })
@@ -60,9 +60,7 @@ class CallActivity : AppCompatActivity() {
             missing.isNotEmpty() && !deniedCamera && !deniedMicrophone -> requestPermissions(missing)
             isGranted -> startVideoFlow()
             deniedCamera || deniedMicrophone -> showPermissionsDialog()
-            else -> {
-                checkPermissions()
-            }
+            else -> checkPermissions()
         }
     }
 

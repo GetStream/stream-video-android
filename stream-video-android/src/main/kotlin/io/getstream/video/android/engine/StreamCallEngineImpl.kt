@@ -17,7 +17,7 @@
 package io.getstream.video.android.engine
 
 import io.getstream.logging.StreamLog
-import io.getstream.video.android.StreamCallsConfig
+import io.getstream.video.android.StreamVideoConfig
 import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.events.AudioMutedEvent
 import io.getstream.video.android.events.AudioUnmutedEvent
@@ -70,7 +70,7 @@ import io.getstream.video.android.model.state.StreamCallState as State
  */
 internal class StreamCallEngineImpl(
     parentScope: CoroutineScope,
-    private val config: StreamCallsConfig,
+    private val config: StreamVideoConfig,
     private val getCurrentUser: () -> User,
 ) : StreamCallEngine, SocketListener {
 

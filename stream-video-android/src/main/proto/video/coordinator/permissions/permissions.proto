@@ -1,0 +1,81 @@
+syntax = "proto3";
+
+package stream.video.coordinator.permissions;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "permissions";
+option java_multiple_files = true;
+option java_outer_classname = "Permissions";
+option csharp_namespace = "Stream.Video.v1.Coordinator";
+
+// Action is an action that is possible to grant to a user
+message Action {
+  // A unique name of action
+  string name = 1;
+  // Human-readable description, provided by Stream
+  string description = 2;
+  // List of tags associated with action
+  repeated string tags = 3;
+}
+
+// Permission defines a way to allow someone to perform an action
+// Permission always governs one Action, and the set of actions is predefined by the product
+// Also, Permission contains a condition which defines whether this permission applies to authorized user.
+// There are builtin permissions that are provided by Stream with default permission settings. Builtin permissions cannot be deleted.
+message Permission {
+  // A unique permission ID
+  string id = 1;
+  // Human readable permission name
+  string name = 2;
+  // Human readable permission description
+  string description = 3;
+  // Action name that this permission applies to
+  string action = 4;
+  // A condition that checks whether or not permission applies to the authorized user
+  oneof condition {
+    // Simple condition based on resource ownership and user team
+    SimpleCondition simple = 5;
+    // JSON object containing custom MQ condition. When condition is evaluted to `true`, the permission is granted
+    bytes custom_mq = 6;
+  }
+}
+
+// A message containing simple permission condition
+message SimpleCondition {
+  // When set to true, a permission is only granted when authorized user owns the resource that it acts on
+  bool owner = 1;
+  // When set to true, a permission is only granted when authorized user interacts with a resource from the same team
+  bool same_team = 2;
+}
+
+// Role is a role of an application user
+// It can be assigned to a User itself or on a more granular level (channel member in chat or room member in video)
+// There are builtin roles that are provided by Stream with default permission settings. Builtin roles cannot be deleted.
+message Role {
+  // Role name
+  string name = 1;
+  // Role creation date
+  google.protobuf.Timestamp created_at = 2;
+}
+
+// Scope is a top-level permission group which governs all resources in it
+// In chat, scope is a Channel Type. In video - Room Type
+// There is also special `.app` scope which governs all resources that cannot be assigned to any scope (e.g. users)
+message Scope {
+  // Unique scope ID
+  string id = 1;
+  // Human readable scope description, provided by Stream
+  string description = 2;
+  // A list of roles and their permissions in this scope
+  // If a role does not have any permissions, it will not be present in this list
+  map<string, Grants> grants = 3;
+}
+
+// Grants is set of permissions that belong to a particular role
+message Grants {
+  // Role name that these grants apply to
+  string role = 1;
+  // A list of Permission IDs
+  repeated string permissions = 2;
+}

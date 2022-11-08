@@ -21,8 +21,8 @@ import android.app.Application
 import android.content.Context
 import io.getstream.logging.StreamLog
 import io.getstream.logging.android.AndroidStreamLogger
-import io.getstream.video.android.StreamCalls
-import io.getstream.video.android.StreamCallsBuilder
+import io.getstream.video.android.StreamVideo
+import io.getstream.video.android.StreamVideoBuilder
 import io.getstream.video.android.app.lifecycle.StreamActivityLifecycleCallbacks
 import io.getstream.video.android.app.ui.call.CallService
 import io.getstream.video.android.app.user.UserPreferences
@@ -47,7 +47,7 @@ class VideoApp : Application() {
     lateinit var credentialsProvider: CredentialsProvider
         private set
 
-    lateinit var streamCalls: StreamCalls
+    lateinit var streamVideo: StreamVideo
         private set
 
     private var currentActivity: Activity? = null
@@ -69,22 +69,22 @@ class VideoApp : Application() {
     }
 
     /**
-     * Sets up and returns the [streamCalls] required to connect to the API.
+     * Sets up and returns the [streamVideo] required to connect to the API.
      */
     fun initializeStreamCalls(
         credentialsProvider: CredentialsProvider,
         loggingLevel: LoggingLevel
-    ): StreamCalls {
+    ): StreamVideo {
         StreamLog.d(TAG) { "[initializeStreamCalls] loggingLevel: $loggingLevel" }
         this.credentialsProvider = credentialsProvider
 
-        return StreamCallsBuilder(
+        return StreamVideoBuilder(
             context = this,
             credentialsProvider = credentialsProvider,
             serviceInput = CallServiceInput.forClass(CallService::class),
             loggingLevel = loggingLevel
         ).build().also {
-            streamCalls = it
+            streamVideo = it
             observeState()
             StreamLog.v(TAG) { "[initializeStreamCalls] completed" }
         }
@@ -92,7 +92,7 @@ class VideoApp : Application() {
 
     private fun observeState() {
         appScope.launch {
-            streamCalls.callState.collect { state ->
+            streamVideo.callState.collect { state ->
                 // TODO - do we need any custom impl here? (useful for users to expose)
             }
         }

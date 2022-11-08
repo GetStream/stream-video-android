@@ -16,8 +16,8 @@
 
 package io.getstream.video.android.utils
 
-import io.getstream.video.android.module.WebRTCModule.Companion.REDIRECT_SIGNAL_URL
-import io.getstream.video.android.module.WebRTCModule.Companion.SIGNAL_BASE_URL
+import io.getstream.video.android.module.CallClientModule.Companion.REDIRECT_SIGNAL_URL
+import io.getstream.video.android.module.CallClientModule.Companion.SIGNAL_BASE_URL
 
 internal fun enrichSFUURL(url: String): String {
     return if (url.contains("localhost") || url.contains("127.0.0.1")) {

@@ -19,20 +19,20 @@ package io.getstream.video.android.dogfooding
 import android.app.Application
 import android.content.Context
 import com.google.firebase.auth.FirebaseAuth
-import io.getstream.video.android.StreamCalls
-import io.getstream.video.android.StreamCallsBuilder
+import io.getstream.video.android.StreamVideo
+import io.getstream.video.android.StreamVideoBuilder
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.token.CredentialsProvider
 
 class DogfoodingApp : Application() {
 
     private var credentials: CredentialsProvider? = null
-    private var calls: StreamCalls? = null
+    private var calls: StreamVideo? = null
 
     val credentialsProvider: CredentialsProvider
         get() = requireNotNull(credentials)
 
-    val streamCalls: StreamCalls
+    val streamVideo: StreamVideo
         get() = requireNotNull(calls)
 
     val userPreferences: UserPreferences by lazy {
@@ -42,15 +42,15 @@ class DogfoodingApp : Application() {
     }
 
     /**
-     * Sets up and returns the [streamCalls] required to connect to the API.
+     * Sets up and returns the [streamVideo] required to connect to the API.
      */
     fun initializeStreamCalls(
         credentialsProvider: CredentialsProvider,
         loggingLevel: LoggingLevel
-    ): StreamCalls {
+    ): StreamVideo {
         this.credentials = credentialsProvider
 
-        return StreamCallsBuilder(
+        return StreamVideoBuilder(
             context = this,
             credentialsProvider = credentialsProvider,
             loggingLevel = loggingLevel,
@@ -61,8 +61,9 @@ class DogfoodingApp : Application() {
 
     fun logOut() {
         FirebaseAuth.getInstance().signOut()
-        streamCalls.clearCallState()
+        streamVideo.clearCallState()
         userPreferences.clear()
+        calls = null
     }
 
     companion object {

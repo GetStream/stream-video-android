@@ -19,7 +19,7 @@ package io.getstream.video.android.app.ui.incoming
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.getstream.logging.StreamLog
-import io.getstream.video.android.StreamCalls
+import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.events.VideoEvent
 import io.getstream.video.android.model.CallEventType
 import io.getstream.video.android.model.CallInput
@@ -32,11 +32,10 @@ import io.getstream.video.android.utils.flatMap
 import io.getstream.video.android.utils.map
 import io.getstream.video.android.utils.onError
 import io.getstream.video.android.utils.onSuccess
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class IncomingCallViewModel(
-    private val streamCalls: StreamCalls,
+    private val streamVideo: StreamVideo,
     private val streamRouter: StreamRouter,
     public val callData: IncomingCallData
 ) : ViewModel(), SocketListener {
@@ -44,13 +43,13 @@ class IncomingCallViewModel(
     private val logger = StreamLog.getLogger("Call:Incoming-VM")
 
     init {
-        streamCalls.addSocketListener(this)
+        streamVideo.addSocketListener(this)
         viewModelScope.launch {
-            streamCalls.callState.collect { state ->
+            streamVideo.callState.collect { state ->
                 when (state) {
                     is StreamCallState.Idle -> {
                         logger.i { "[observeState] state: Idle" }
-                        streamCalls.clearCallState()
+                        streamVideo.clearCallState()
                         streamRouter.finish()
                     }
                     is StreamCallState.Active -> {}
@@ -66,10 +65,10 @@ class IncomingCallViewModel(
         logger.d { "[acceptCall] callType: $callType, callId: $callId" }
 
         viewModelScope.launch {
-            streamCalls.joinCall(callType, callId)
+            streamVideo.joinCall(callType, callId)
                 .flatMap { joined ->
                     logger.v { "[acceptCall] joined: $joined" }
-                    streamCalls.sendEvent(
+                    streamVideo.sendEvent(
                         callCid = joined.call.cid,
                         eventType = CallEventType.ACCEPTED
                     ).map { joined }
@@ -87,7 +86,7 @@ class IncomingCallViewModel(
 
     fun declineCall() {
         viewModelScope.launch {
-            val result = streamCalls.rejectCall(callData.callInfo.cid)
+            val result = streamVideo.rejectCall(callData.callInfo.cid)
             logger.d { "[declineCall] result: $result" }
         }
     }
@@ -98,7 +97,7 @@ class IncomingCallViewModel(
     }
 
     override fun onCleared() {
-        streamCalls.removeSocketListener(this)
+        streamVideo.removeSocketListener(this)
         super.onCleared()
     }
 

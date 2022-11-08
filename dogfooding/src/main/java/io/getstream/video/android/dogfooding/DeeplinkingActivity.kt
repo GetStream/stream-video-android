@@ -34,7 +34,7 @@ class DeeplinkingActivity : AppCompatActivity() {
     private val logger = StreamLog.getLogger("Call:DeeplinkView")
 
     private val controller by lazy {
-        dogfoodingApp.streamCalls
+        dogfoodingApp.streamVideo
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
