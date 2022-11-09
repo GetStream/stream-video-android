@@ -1,0 +1,34 @@
+### CallViewModel TODO
+
+The `CallViewModel` lets you automate most of the call features and flow, by delegating the call responsibilities to us. We've prepared a set of functionality and API that lets you control audio and video devices, the initialization of the call, listening to events and more.
+
+To create the `ViewModel`, you can use its factory:
+
+```kotlin
+private val factory by lazy {
+    CallViewModelFactory(callInput, streamVideo, credentialsProvider)
+}
+
+private val callViewModel by viewModels<CallViewModel>(factoryProducer = { factory })
+```
+
+You're already familiar with `StreamVideo` and `CredentialsProvider`. The last notable parameter of the `CallViewModelFactory` is the `callInput`.
+
+It's a small data structure that contains the aforementioned parameters, as well as a few other ones:
+
+```kotlin
+public data class CallInput(
+    val callCid: String,
+    val callType: String,
+    val callId: String,
+    val callUrl: String,
+    val userToken: String,
+    val iceServers: List<IceServer>,
+) : java.io.Serializable
+```
+
+* `callCid`: The combination of the `callId` and `callType`.
+* `callType`: The type of call.
+* `callId`: Unique identifier of the call for a given type.
+
+You can construct this with the data you get from joining a call. You should create the `CallViewModel` if you want to simplify things when connecting to calls, and you can do it right before connecting to the call and creating the `CallClient`. The `ViewModel` does this internally.

@@ -308,6 +308,11 @@ internal class CallClientImpl(
         }
     }
 
+    /**
+     * @return The active call instance, if it exists.
+     */
+    override fun getActiveCall(): Call? = call
+
     private fun createCall(sessionId: String): Call {
         logger.d { "[createCall] #sfu; sessionId: $sessionId" }
         this.sessionId = sessionId

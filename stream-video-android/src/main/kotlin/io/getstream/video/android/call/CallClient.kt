@@ -32,6 +32,11 @@ public interface CallClient {
         callSettings: CallSettings
     ): Result<Call>
 
+    /**
+     * @return The active call instance, if it exists.
+     */
+    public fun getActiveCall(): Call?
+
     public fun startCapturingLocalVideo(position: Int)
 
     public fun setCameraEnabled(isEnabled: Boolean)

@@ -1,0 +1,94 @@
+## CallClient
+
+Once the user joins a call through `StreamVideo` and its `joinCall` and similar functions, you'll receive a `JoinedCall`. It contains several pieces of information required to create a `CallClient` and fully connect to a `Call`.
+
+You can create the client like so:
+
+```kotlin
+val callClient = streamVideo.createCallClient(
+    input.callUrl,
+    input.userToken,
+    input.iceServers,
+    credentialsProvider
+)
+```
+
+You have to pass in a few parameters:
+
+* `signalUrl`: Also known as the call URL, this describes the server where the call is happening.
+* `userToken`: The token that authenticates the user against the aforementioned server.
+* `iceServers`: List of servers used to fetch and connect to audio and video tracks.
+* `credentialsProvider`: The provider that holds user-based information.
+
+You should create the `CallClient` as soon as you join a call through `StreamVideo`, or as soon as your users are ready to fully connect, based on your use case. After creating the client, it connects to the underlying WebSocket to listen to events from the server, which you can read more about in the [socket events guide](../04-guides/03-socket-events.mdx).
+
+## Functionality
+
+Once you create it, you can use its functionality that falls into three small groups:
+
+* Call state management
+* Media device handling
+* Socket events
+
+Let's explore what this API allows you to do.
+
+### Call state management
+
+Here are the main functions which let you control the state of a call:
+
+```kotlin
+public suspend fun connectToCall(
+    sessionId: String,
+    autoPublish: Boolean,
+    callSettings: CallSettings
+): Result<Call>
+
+public fun getActiveCall(): Call?
+
+public fun clear()
+```
+
+* `connectToCall`: It establishes a full connection to the call server. There are a few parameters that you can use to define how the call behaves:
+  * `sessionId`: The ID of the session that represents each participant in a call. Note that each user may attempt to connect multiple times with different session IDs.
+  * `autoPublish`: If you want to automatically create the audio and video publisher.
+  * `callSettings`: Settings for the call, if the audio, video or speaker are on.
+* `getActiveCall`: Returns the active call if it exists.
+* `clear`: Allows you to clear and dispose of the active call. This also terminates any tracks that are being published to free up resources.
+
+### Media Device Handling
+
+When it comes to device handling we offer the following functionality:
+
+```kotlin
+public fun startCapturingLocalVideo(position: Int)
+
+public fun setCameraEnabled(isEnabled: Boolean)
+
+public fun setMicrophoneEnabled(isEnabled: Boolean)
+
+public fun flipCamera()
+
+public fun getAudioDevices(): List<AudioDevice>
+
+public fun selectAudioDevice(device: AudioDevice)
+```
+
+* `startCapturingLocalVideo`: Using the position of the camera, you can request for the local video to be captured and published. This requires camera permission.
+* `setCameraEnabled`: Enables or disables the camera.
+* `setMicrophoneEnabled`: Enables or disables the microphone.
+* `flipCamera`: Flips the camera based on the currently active position.
+* `getAudioDevices`: Returns a list of available audio devices.
+* `selectAudioDevice`: Chooses an audio device to use for playback.
+
+### Socket Events
+
+Similar to the `StreamVideo` client, the `CallClient` has its own WebSocket connection and set of events that you can consume using the following API:
+
+```kotlin
+public fun addSocketListener(signalSocketListener: SignalSocketListener)
+
+public fun removeSocketListener(signalSocketListener: SignalSocketListener)
+```
+
+* `addSocketListener`: Adds a listener instance that will receive all the Call socket events. You can learn more about them in the [socket events guide](../04-guides/03-socket-events.mdx).
+* `removeSocketListener`: Removes an active listener instance to free up memory or stop receiving events.
