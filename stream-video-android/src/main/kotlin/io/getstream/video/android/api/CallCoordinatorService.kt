@@ -29,6 +29,7 @@ import stream.video.coordinator.client_v1_rpc.GetOrCreateCallResponse
 import stream.video.coordinator.client_v1_rpc.JoinCallRequest
 import stream.video.coordinator.client_v1_rpc.JoinCallResponse
 import stream.video.coordinator.client_v1_rpc.SendCustomEventRequest
+import stream.video.coordinator.client_v1_rpc.SendCustomEventResponse
 import stream.video.coordinator.client_v1_rpc.SendEventRequest
 
 /**
@@ -75,6 +76,10 @@ public interface CallCoordinatorService {
         @Body sendEventRequest: SendEventRequest,
         @Query(QUERY_API_KEY) apiKey: String
     ): SendCustomEventRequest
+
+    @Headers("Content-Type: application/protobuf")
+    @POST("/rpc/stream.video.coordinator.client_v1_rpc.ClientRPC/SendCustomEvent")
+    public suspend fun sendCustomEvent(sendEventRequest: SendCustomEventRequest, apiKey: String): SendCustomEventResponse
 }
 
 /**

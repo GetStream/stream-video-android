@@ -1,12 +1,12 @@
 ## Architecture Overview
 
-As you've learned in the [SDK introduction](../02-introduction.mdx), the Stream SDK consists of different artifacts:
+As you've learned in the [SDK introduction](02-introduction.mdx), the Stream SDK consists of different artifacts:
 
 * **Low-level client (LLC)**
 * UI Components (Compose and XML)
 * Push Provider(s)
 
-No matter which parts of our SDK you choose to use, you'll have to rely on the **low-level client** to set up a connection to our API and handle calls. And it's good to understand the architecture under the hood that powers our API.
+No matter which parts of our SDK you choose to use, you'll rely on the **low-level client** to set up a connection to our API and handle calls. And it's good to understand the architecture under the hood that powers our API.
 
 Let's dive into the LLC and ways of initializing various components it provides.
 
@@ -14,42 +14,17 @@ Let's dive into the LLC and ways of initializing various components it provides.
 
 The LLC consists of three main constructs that let you easily query and join calls:
 
-+ **StreamVideo**: The main client that you initialize with a user presence. It lets you create, look up and join calls, as well as create the `CallClient`.
-+ **CallClient**: Call-specific client that you initialize when joining a call. It exposes various handles for audio and video devices, muting and unmuting, listening to call specific events and observing the call state.
++ **StreamVideo**: The main client that you initialize with a user presence. It lets you create, look up and join calls, as well as create the `CallClient`. 
++ **CallClient**: Call-specific client that you initialize when joining a call. It exposes various handles for audio and video devices, muting and unmuting, listening to call specific events and observing the call state. 
 + **CallViewModel**: Higher level wrapper around `StreamVideo` and `CallClient`, that lets you easily control all the state and functionality in a call. It also exposes various pieces of state that lets you render your video call UI.
 
-Using each of these lets you access different functionality that helps you build video calling features. Let's see how to properly initialize them.
+Using each of these lets you access different functionality that helps you build video calling features. Check out each of the respective pages to learn more details about each component:
 
-### StreamVideo
+* [StreamVideo](../02-client/02-stream-video.mdx)
+* [CallClient](../02-client/03-call-client.mdx)
+* [CallViewModel](../02-client/04-call-view-model.mdx)
 
-This is the main part of our SDK and it needs to be initialized with a user and a token. We require this as it doesn't make much sense to start our client without the user present.
 
-To initialize it, you can do the following:
-
-```kotlin
-val credentialsProvider = AuthCredentialsProvider(
-    apiKey = "key10", // your API key
-    userToken = token, // the token from the BE
-    user = user // the User object with extra information 
-)
-
-val streamVideo = StreamVideoBuilder(
-    context = this,
-    credentialsProvider = credentialsProvider,
-    loggingLevel = LoggingLevel.BODY, // we support 
-).build()
-```
-
-By creating a `CredentialsProvider` and passing it down to the `StreamVideoBuilder` you're able to `build()` the instance that lets you connect to our API.
-
-There are a few other parameters and items that are important here:
-
-* `apiKey`: This serves as the main key to your Stream environment.
-* `userToken`: The token you get by authenticating your users for our backend.
-* `user`: The user object that contains information about their ID, name, profile image and more...
-* `loggingLevel`: The amount of information you want logged from all the underlying API calls.
-
-Under the hood, you need to create the `CallClient`. Let's see how.
 
 ### CallClient
 
@@ -89,21 +64,20 @@ private val factory by lazy {
 }
 
 private val callViewModel by viewModels<CallViewModel>(factoryProducer = { factory })
-
 ```
 
 You're already familiar with `StreamVideo` and `CredentialsProvider`. The last notable parameter of the `CallViewModelFactory` is the `callInput`.
 
-It's a small data structure that contains the aforementioned parameters, as well as a couple of other ones:
+It's a small data structure that contains the aforementioned parameters, as well as a few other ones:
 
 ```kotlin
 public data class CallInput(
-    internal val callCid: String,
-    internal val callType: String,
-    internal val callId: String,
-    internal val callUrl: String,
-    internal val userToken: String,
-    internal val iceServers: List<IceServer>,
+    val callCid: String,
+    val callType: String,
+    val callId: String,
+    val callUrl: String,
+    val userToken: String,
+    val iceServers: List<IceServer>,
 ) : java.io.Serializable
 ```
 
@@ -112,3 +86,7 @@ public data class CallInput(
 * `callId`: Unique identifier of the call for a given type.
 
 You can construct this with the data you get from joining a call. You should create the `CallViewModel` if you want to simplify things when connecting to calls, and you can do it right before connecting to the call and creating the `CallClient`. The `ViewModel` does this internally.
+
+## Exploring the Call Lifecycle
+
+These components have different scopes of life, so if you want to learn more about creating and disposing of such constructs, read more in our [call lifecycle](../04-guides/01-call-lifecycle.mdx) guide.
