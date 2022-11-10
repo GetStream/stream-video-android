@@ -30,12 +30,13 @@ internal class SignalEventsParser(
     private val signalSocket: SignalSocket,
 ) : okhttp3.WebSocketListener() {
 
-    private val logger = StreamLog.getLogger("Call:WS-Events")
+    private val logger = StreamLog.getLogger("Call:SFU-WS")
 
     private var connectionEventReceived = false
     private var closedByClient = true
 
     override fun onOpen(webSocket: WebSocket, response: Response) {
+        logger.i { "[onOpen] response: $response" }
         connectionEventReceived = false
         closedByClient = false
 
@@ -60,10 +61,12 @@ internal class SignalEventsParser(
     }
 
     override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
+        logger.i { "[onClosing] code: $code, reason: $reason" }
         // no-op
     }
 
     override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
+        logger.i { "[onClosed] code: $code, reason: $reason" }
         if (code == CODE_CLOSE_SOCKET_FROM_CLIENT) {
             closedByClient = true
         } else {
@@ -73,6 +76,7 @@ internal class SignalEventsParser(
     }
 
     override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+        logger.i { "[onFailure] failure: $t, response: $response" }
         // Called when socket is disconnected by client also (client.disconnect())
         onSocketError(VideoNetworkError.create(VideoErrorCode.SOCKET_FAILURE, t))
     }

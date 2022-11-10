@@ -345,11 +345,12 @@ internal class CallClientImpl(
         val call = createCall(sessionId)
         this.call = call
         listenToParticipants()
-        createPeerConnections(autoPublish)
+
         val result = connectToCall()
         logger.v { "[initializeCall] #sfu; result: $result" }
         return when (result) {
             is Success -> {
+                createPeerConnections(autoPublish)
                 loadParticipantsData(result.data.call_state, callSettings)
                 createUserTracks(callSettings, autoPublish)
                 call.setupAudio()
@@ -485,7 +486,7 @@ internal class CallClientImpl(
 
     override fun onEvent(event: SfuDataEvent) {
         coroutineScope.launch {
-            logger.v { "[onEvent] event: $event" }
+            logger.v { "[onRtcEvent] event: $event" }
             sfuEvents.emit(event)
             when (event) {
                 is ICETrickleEvent -> handleTrickle(event)
@@ -689,7 +690,7 @@ internal class CallClientImpl(
             return
         }
         val answerSdp = answerResult.data
-        logger.v { "[handleSubscriberOffer] #sfu; #subscriber; answerSdp: $answerSdp" }
+        logger.v { "[handleSubscriberOffer] #sfu; #subscriber; answerSdp: ${answerSdp.description}" }
         val setAnswerResult = subscriber.setLocalDescription(answerSdp)
         if (setAnswerResult !is Success) {
             logger.w { "[handleSubscriberOffer] #sfu; #subscriber; rejected (setAnswer failed): $setAnswerResult" }

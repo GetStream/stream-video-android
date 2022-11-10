@@ -51,6 +51,7 @@ dependencies {
     api(project(":stream-video-android"))
 
     implementation(Dependencies.material)
+    implementation(Dependencies.streamLogger)
     // Compose
     implementation(Dependencies.composeRuntime)
     implementation(Dependencies.composeUi)

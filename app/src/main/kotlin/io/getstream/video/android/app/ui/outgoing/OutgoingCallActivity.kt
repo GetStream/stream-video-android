@@ -25,20 +25,15 @@ import androidx.appcompat.app.AppCompatActivity
 import io.getstream.video.android.app.router.StreamRouterImpl
 import io.getstream.video.android.app.videoApp
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.outgoingcall.OutgoingCall
-import io.getstream.video.android.model.OutgoingCallData
+import io.getstream.video.android.compose.ui.components.outcomingcall.OutgoingCallScreen
 
 class OutgoingCallActivity : AppCompatActivity() {
-
-    private val callData by lazy {
-        requireNotNull(intent.getSerializableExtra(KEY_CALL_DATA) as? OutgoingCallData)
-    }
 
     private val viewModel by viewModels<OutgoingCallViewModel> {
         OutgoingCallViewModelFactory(
             videoApp.streamVideo,
+            // TODO passing [this] may lead to memory leak, cause VM may live longer than Activity
             StreamRouterImpl(this),
-            callData
         )
     }
 
@@ -47,11 +42,8 @@ class OutgoingCallActivity : AppCompatActivity() {
 
         setContent {
             VideoTheme {
-                OutgoingCall(
-                    callId = callData.callInfo.id,
-                    callType = callData.callType,
-                    participants = callData.users
-                        .filter { it.id != viewModel.getUserId() },
+                OutgoingCallScreen(
+                    viewModel = viewModel,
                     onCancelCall = { viewModel.hangUpCall() },
                     onMicToggleChanged = { isMicrophoneEnabled ->
                         viewModel.onMicrophoneChanged(isMicrophoneEnabled)
@@ -65,15 +57,10 @@ class OutgoingCallActivity : AppCompatActivity() {
     }
 
     companion object {
-        private const val KEY_CALL_DATA = "call_id"
-
         internal fun getIntent(
             context: Context,
-            callData: OutgoingCallData
         ): Intent {
-            return Intent(context, OutgoingCallActivity::class.java).apply {
-                putExtra(KEY_CALL_DATA, callData)
-            }
+            return Intent(context, OutgoingCallActivity::class.java)
         }
     }
 }

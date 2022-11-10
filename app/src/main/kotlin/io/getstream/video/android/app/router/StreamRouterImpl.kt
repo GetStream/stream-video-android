@@ -25,8 +25,6 @@ import io.getstream.video.android.app.ui.incoming.IncomingCallActivity
 import io.getstream.video.android.app.ui.login.LoginActivity
 import io.getstream.video.android.app.ui.outgoing.OutgoingCallActivity
 import io.getstream.video.android.model.CallInput
-import io.getstream.video.android.model.IncomingCallData
-import io.getstream.video.android.model.OutgoingCallData
 import io.getstream.video.android.router.StreamRouter
 
 class StreamRouterImpl(
@@ -43,18 +41,15 @@ class StreamRouterImpl(
         }
     }
 
-    override fun onIncomingCall(callData: IncomingCallData) {
+    override fun onIncomingCall() {
         context.startActivity(
-            IncomingCallActivity.getLaunchIntent(context, callData)
+            IncomingCallActivity.getLaunchIntent(context)
         )
     }
 
-    override fun onOutgoingCall(callData: OutgoingCallData) {
+    override fun onOutgoingCall() {
         context.startActivity(
-            OutgoingCallActivity.getIntent(
-                context,
-                callData
-            )
+            OutgoingCallActivity.getIntent(context)
         )
     }
 
