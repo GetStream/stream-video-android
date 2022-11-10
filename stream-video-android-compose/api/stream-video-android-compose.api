@@ -358,7 +358,8 @@ public final class io/getstream/video/android/compose/ui/components/incomingcall
 }
 
 public final class io/getstream/video/android/compose/ui/components/incomingcall/IncomingCallKt {
-	public static final fun IncomingCall (Lio/getstream/video/android/model/CallInfo;Lio/getstream/video/android/model/CallType;Ljava/util/List;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)V
+	public static final fun IncomingCall (Ljava/util/List;Lio/getstream/video/android/model/CallType;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)V
+	public static final fun IncomingCallScreen (Lio/getstream/video/android/viewmodel/IncomingCallViewModel;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/mock/MockUtilsKt {
@@ -398,7 +399,8 @@ public final class io/getstream/video/android/compose/ui/components/outcomingcal
 }
 
 public final class io/getstream/video/android/compose/ui/components/outcomingcall/OutgoingCallKt {
-	public static final fun OutgoingCall (Ljava/lang/String;Lio/getstream/video/android/model/CallType;Ljava/util/List;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+	public static final fun OutgoingCall (Lio/getstream/video/android/model/CallType;Ljava/lang/String;Ljava/util/List;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+	public static final fun OutgoingCallScreen (Lio/getstream/video/android/viewmodel/OutgoingCallViewModel;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/participants/ComposableSingletons$ParticipantAvatarsKt {

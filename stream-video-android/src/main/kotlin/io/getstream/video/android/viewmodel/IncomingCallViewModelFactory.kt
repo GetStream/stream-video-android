@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.app.ui.incoming
+package io.getstream.video.android.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import io.getstream.video.android.StreamVideo
-import io.getstream.video.android.model.IncomingCallData
 import io.getstream.video.android.router.StreamRouter
 
-class IncomingCallViewModelFactory(
+public class IncomingCallViewModelFactory(
     private val streamVideo: StreamVideo,
     private val streamRouter: StreamRouter,
-    private val input: IncomingCallData
 ) : ViewModelProvider.Factory {
 
     @Suppress("UNCHECKED_CAST")
@@ -33,7 +31,6 @@ class IncomingCallViewModelFactory(
         return IncomingCallViewModel(
             streamVideo = streamVideo,
             streamRouter = streamRouter,
-            callData = input
         ) as T
     }
 }

@@ -26,6 +26,11 @@ object Versions {
 
     internal const val WEBRTC = "104.5112.03"
     internal const val STREAM = "5.8.0"
+
+    internal const val ANDROIDX_TEST = "1.4.0"
+    internal const val BASE_PROFILE = "1.2.0"
+    internal const val MACRO_BENCHMARK = "1.1.0"
+    internal const val ANDROIDX_UI_AUTOMATOR = "2.2.0"
 }
 
 object Dependencies {
@@ -76,4 +81,12 @@ object Dependencies {
 
     const val streamLogger = "io.getstream:stream-logger:${Versions.STREAM}"
     const val streamLoggerAndroid = "io.getstream:stream-logger-android:${Versions.STREAM}"
+
+    const val baseProfile =
+        "androidx.profileinstaller:profileinstaller:${Versions.BASE_PROFILE}"
+    const val macroBenchmark =
+        "androidx.benchmark:benchmark-macro-junit4:${Versions.MACRO_BENCHMARK}"
+    const val uiAutomator =
+        "androidx.test.uiautomator:uiautomator:${Versions.ANDROIDX_UI_AUTOMATOR}"
+    const val testRunner = "androidx.test:runner:${Versions.ANDROIDX_TEST}"
 }

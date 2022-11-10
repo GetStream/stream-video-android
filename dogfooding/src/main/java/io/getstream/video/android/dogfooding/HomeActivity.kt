@@ -55,6 +55,7 @@ import androidx.lifecycle.lifecycleScope
 import io.getstream.logging.StreamLog
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.Avatar
+import io.getstream.video.android.compose.ui.components.avatar.InitialsAvatar
 import io.getstream.video.android.model.CallInput
 import io.getstream.video.android.utils.onError
 import io.getstream.video.android.utils.onSuccess
@@ -204,11 +205,15 @@ class HomeActivity : AppCompatActivity() {
 
             val user = streamVideo.getUser()
 
+            val name = user.name.ifEmpty {
+                user.id
+            }
+
             Text(
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
                     .align(CenterVertically),
-                text = user.name,
+                text = name,
                 overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.Center
             )
@@ -218,14 +223,29 @@ class HomeActivity : AppCompatActivity() {
     @Composable
     fun UserIcon() {
         val user = dogfoodingApp.credentialsProvider.getUserCredentials()
-        Avatar(
-            modifier = Modifier
-                .size(40.dp)
-                .padding(top = 8.dp, start = 8.dp)
-                .clip(CircleShape),
-            imageUrl = user.imageUrl.orEmpty(),
-            initials = user.name,
-        )
+        if (user.imageUrl.isNullOrEmpty()) {
+            val initials = if (user.name.isNotEmpty()) {
+                user.name.first()
+            } else {
+                user.id.first()
+            }
+            InitialsAvatar(
+                modifier = Modifier
+                    .size(40.dp)
+                    .padding(top = 8.dp, start = 8.dp)
+                    .clip(CircleShape),
+                initials = initials.toString()
+            )
+        } else {
+            Avatar(
+                modifier = Modifier
+                    .size(40.dp)
+                    .padding(top = 8.dp, start = 8.dp)
+                    .clip(CircleShape),
+                imageUrl = user.imageUrl.orEmpty(),
+                initials = user.name,
+            )
+        }
     }
 
     companion object {

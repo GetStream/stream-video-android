@@ -19,6 +19,8 @@ package io.getstream.video.android.compose.ui.components.outcomingcall
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -29,11 +31,32 @@ import io.getstream.video.android.compose.ui.components.background.CallBackgroun
 import io.getstream.video.android.compose.ui.components.mock.mockParticipant
 import io.getstream.video.android.model.CallType
 import io.getstream.video.android.model.CallUser
+import io.getstream.video.android.viewmodel.OutgoingCallViewModel
+
+@Composable
+public fun OutgoingCallScreen(
+    viewModel: OutgoingCallViewModel,
+    onCancelCall: (String) -> Unit = {},
+    onMicToggleChanged: (Boolean) -> Unit = {},
+    onVideoToggleChanged: (Boolean) -> Unit = {},
+) {
+    val callType: CallType by viewModel.callType.collectAsState()
+    val callId: String by viewModel.callId.collectAsState()
+    val participants: List<CallUser> by viewModel.participants.collectAsState()
+    OutgoingCall(
+        callType = callType,
+        callId = callId,
+        participants = participants,
+        onCancelCall = onCancelCall,
+        onMicToggleChanged = onMicToggleChanged,
+        onVideoToggleChanged = onVideoToggleChanged
+    )
+}
 
 @Composable
 public fun OutgoingCall(
-    callId: String,
     callType: CallType,
+    callId: String,
     participants: List<CallUser>,
     onCancelCall: (String) -> Unit = {},
     onMicToggleChanged: (Boolean) -> Unit = {},
@@ -94,8 +117,8 @@ public fun OutgoingCall(
 private fun OutgoingCallPreview() {
     VideoTheme {
         OutgoingCall(
-            callId = "",
             callType = CallType.VIDEO,
+            callId = "",
             participants = listOf(
                 mockParticipant.let {
                     CallUser(it.id, it.name, it.role, it.profileImageURL ?: "", null, null)

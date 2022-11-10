@@ -14,24 +14,6 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.router
+package io.getstream.video.android.benchmark
 
-import io.getstream.video.android.model.CallInput
-
-public interface StreamRouter {
-
-    public fun navigateToCall(
-        callInput: CallInput,
-        finishCurrent: Boolean
-    )
-
-    public fun onIncomingCall()
-
-    public fun onOutgoingCall()
-
-    public fun finish()
-
-    public fun onCallFailed(reason: String?)
-
-    public fun onUserLoggedOut()
-}
+internal const val packageName = "io.getstream.video.android.app"

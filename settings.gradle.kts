@@ -1,5 +1,4 @@
 @file:Suppress("UnstableApiUsage")
-
 pluginManagement {
   repositories {
     gradlePluginPortal()
@@ -17,6 +16,7 @@ dependencyResolutionManagement {
 }
 rootProject.name = "stream-video-android"
 include(":app")
+include(":benchmark")
 include(":dogfooding")
 include(":stream-video-android")
 include(":stream-video-android-compose")
