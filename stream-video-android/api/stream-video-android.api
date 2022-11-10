@@ -1977,7 +1977,7 @@ public final class io/getstream/video/android/model/state/StreamCallGuid : java/
 
 public final class io/getstream/video/android/model/state/StreamCallKind : java/lang/Enum, java/io/Serializable {
 	public static final field MEETING Lio/getstream/video/android/model/state/StreamCallKind;
-	public static final field REGULAR Lio/getstream/video/android/model/state/StreamCallKind;
+	public static final field RINGING Lio/getstream/video/android/model/state/StreamCallKind;
 	public static fun valueOf (Ljava/lang/String;)Lio/getstream/video/android/model/state/StreamCallKind;
 	public static fun values ()[Lio/getstream/video/android/model/state/StreamCallKind;
 }

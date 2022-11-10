@@ -25,7 +25,9 @@ import androidx.appcompat.app.AppCompatActivity
 import io.getstream.video.android.app.router.StreamRouterImpl
 import io.getstream.video.android.app.videoApp
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.outcomingcall.OutgoingCallScreen
+import io.getstream.video.android.compose.ui.components.outgoingcall.OutgoingCallScreen
+import io.getstream.video.android.viewmodel.OutgoingCallViewModel
+import io.getstream.video.android.viewmodel.OutgoingCallViewModelFactory
 
 class OutgoingCallActivity : AppCompatActivity() {
 
