@@ -20,6 +20,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.widget.Toast
+import io.getstream.logging.StreamLog
 import io.getstream.video.android.app.ui.call.CallActivity
 import io.getstream.video.android.app.ui.incoming.IncomingCallActivity
 import io.getstream.video.android.app.ui.login.LoginActivity
@@ -31,38 +32,42 @@ class StreamRouterImpl(
     private val context: Context
 ) : StreamRouter {
 
+    private val logger = StreamLog.getLogger("Call:StreamRouter")
+
     override fun navigateToCall(
-        callInput: CallInput,
         finishCurrent: Boolean
     ) {
-        context.startActivity(CallActivity.getIntent(context, callInput))
+        /*context.startActivity(CallActivity.getIntent(context))
         if (finishCurrent) {
             finish()
-        }
+        }*/
     }
 
     override fun onIncomingCall() {
-        context.startActivity(
+        /*context.startActivity(
             IncomingCallActivity.getLaunchIntent(context)
-        )
+        )*/
     }
 
     override fun onOutgoingCall() {
-        context.startActivity(
+        /*context.startActivity(
             OutgoingCallActivity.getIntent(context)
-        )
+        )*/
     }
 
     override fun onCallFailed(reason: String?) {
+        logger.e { "[onCallFailed] reason: $reason" }
         reason?.let { Toast.makeText(context, it, Toast.LENGTH_SHORT).show() }
         finish()
     }
 
     override fun finish() {
+        logger.i { "[finish] no args" }
         (context as? Activity)?.finish()
     }
 
     override fun onUserLoggedOut() {
+        logger.i { "[onUserLoggedOut] no args" }
         context.startActivity(Intent(context, LoginActivity::class.java))
         finish()
     }

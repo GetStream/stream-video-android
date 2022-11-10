@@ -31,7 +31,28 @@ import io.getstream.video.android.compose.ui.components.background.CallBackgroun
 import io.getstream.video.android.compose.ui.components.mock.mockParticipant
 import io.getstream.video.android.model.CallType
 import io.getstream.video.android.model.CallUser
+import io.getstream.video.android.viewmodel.CallViewModel
 import io.getstream.video.android.viewmodel.OutgoingCallViewModel
+
+@Composable
+public fun OutgoingCallScreen(
+    viewModel: CallViewModel,
+    onCancelCall: (String) -> Unit = {},
+    onMicToggleChanged: (Boolean) -> Unit = {},
+    onVideoToggleChanged: (Boolean) -> Unit = {},
+) {
+    val callType: CallType by viewModel.callType.collectAsState()
+    val callId: String by viewModel.callId.collectAsState()
+    val participants: List<CallUser> by viewModel.participants.collectAsState()
+    OutgoingCall(
+        callType = callType,
+        callId = callId,
+        participants = participants,
+        onCancelCall = onCancelCall,
+        onMicToggleChanged = onMicToggleChanged,
+        onVideoToggleChanged = onVideoToggleChanged
+    )
+}
 
 @Composable
 public fun OutgoingCallScreen(

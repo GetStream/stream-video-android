@@ -24,6 +24,8 @@ import io.getstream.video.android.call.builder.CallClientBuilder
 import io.getstream.video.android.coordinator.CallCoordinatorClient
 import io.getstream.video.android.coordinator.state.UserState
 import io.getstream.video.android.engine.StreamCallEngineImpl
+import io.getstream.video.android.engine.adapter.CoordinatorSocketListenerAdapter
+import io.getstream.video.android.engine.adapter.SfuSocketListenerAdapter
 import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.model.CallEventType
@@ -85,7 +87,7 @@ public class StreamVideoImpl(
     private val networkStateProvider: NetworkStateProvider
 ) : StreamVideo {
 
-    private val logger = StreamLog.getLogger("Call:StreamCalls")
+    private val logger = StreamLog.getLogger("Call:StreamVideo")
 
     private val engine = StreamCallEngineImpl(scope, config) {
         credentialsProvider.getUserCredentials()
@@ -124,7 +126,7 @@ public class StreamVideoImpl(
     private var callClient: CallClient? = null
 
     init {
-        socket.addListener(engine)
+        socket.addListener(CoordinatorSocketListenerAdapter(engine))
         scope.launch(Dispatchers.Main.immediate) {
             lifecycleObserver.observe()
         }
@@ -136,6 +138,10 @@ public class StreamVideoImpl(
      * Represents the state of the currently active call.
      */
     override val callState: StateFlow<StreamCallState> = engine.callState
+
+    override fun launch(block: suspend CoroutineScope.() -> Unit) {
+        scope.launch(block = block)
+    }
 
     /**
      * Domain - Coordinator.
@@ -181,10 +187,10 @@ public class StreamVideoImpl(
         id: String,
         participantIds: List<String>,
         ringing: Boolean
-    ): Result<CallMetadata> {
+    ): Result<CallMetadata> = withContext(scope.coroutineContext) {
         logger.d { "[getOrCreateCall] type: $type, id: $id, participantIds: $participantIds" }
         engine.onCallStarting(type, id, participantIds, ringing, forcedNewCall = false)
-        return callCoordinatorClient.getOrCreateCall(
+        callCoordinatorClient.getOrCreateCall(
             GetOrCreateCallRequest(
                 type = type,
                 id = id,
@@ -212,10 +218,10 @@ public class StreamVideoImpl(
     }
 
     // caller: JOIN after accepting incoming call by callee
-    override suspend fun joinCall(call: CallMetadata): Result<JoinedCall> {
+    override suspend fun joinCall(call: CallMetadata): Result<JoinedCall> = withContext(scope.coroutineContext) {
         logger.d { "[joinCallOnly] call: $call" }
         engine.onCallJoining(call)
-        return joinCallInternal(call)
+        joinCallInternal(call)
             .onSuccess { data -> engine.onCallJoined(data) }
             .onError { engine.onCallFailed(it) }
             .also { logger.v { "[joinCallOnly] result: $it" } }
@@ -276,7 +282,7 @@ public class StreamVideoImpl(
                 is Failure -> Failure(selectEdgeServerResult.error)
             }
         } catch (error: Throwable) {
-            logger.e { "[joinCallInternal] failed: $error" }
+            logger.e(error) { "[joinCallInternal] failed: $error" }
             Failure(VideoError(error.message, error))
         }
     }
@@ -306,10 +312,10 @@ public class StreamVideoImpl(
         id: String,
         participantIds: List<String>,
         ringing: Boolean
-    ): Result<JoinedCall> {
+    ): Result<JoinedCall> = withContext(scope.coroutineContext) {
         logger.d { "[getOrCreateAndJoinCall] type: $type, id: $id, participantIds: $participantIds" }
         engine.onCallStarting(type, id, participantIds, ringing, forcedNewCall = false)
-        return callCoordinatorClient.getOrCreateCall(
+        callCoordinatorClient.getOrCreateCall(
             GetOrCreateCallRequest(
                 type = type,
                 id = id,
@@ -404,21 +410,20 @@ public class StreamVideoImpl(
      * @param signalUrl The URL of the server in which the call is being hosted.
      * @param userToken User's ticket to enter the call.
      * @param iceServers Servers required to appropriately connect to the call and receive tracks.
-     * @param credentialsProvider Contains information about the user required for the Call state.
      * @return An instance of [CallClient] ready to connect to a call. Make sure to call
      * [CallClient.connectToCall] when you're ready to fully join a call.
      */
     override fun createCallClient(
         signalUrl: String,
         userToken: String,
-        iceServers: List<IceServer>,
-        credentialsProvider: CredentialsProvider
+        iceServers: List<IceServer>
     ): CallClient {
         credentialsProvider.setSfuToken(userToken)
         val builder = CallClientBuilder(
             context = context,
             credentialsProvider = credentialsProvider,
             networkStateProvider = networkStateProvider,
+            callEngine = engine,
             signalUrl = signalUrl,
             iceServers = iceServers
         )

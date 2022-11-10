@@ -35,6 +35,8 @@ import io.getstream.video.android.call.signal.socket.SignalSocketListener
 import io.getstream.video.android.call.state.ConnectionState
 import io.getstream.video.android.call.utils.stringify
 import io.getstream.video.android.dispatchers.DispatcherProvider
+import io.getstream.video.android.engine.StreamCallEngine
+import io.getstream.video.android.engine.adapter.SfuSocketListenerAdapter
 import io.getstream.video.android.errors.DisconnectCause
 import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.events.AudioLevelChangedEvent
@@ -109,6 +111,7 @@ import kotlin.random.Random
 internal class CallClientImpl(
     private val context: Context,
     private val credentialsProvider: CredentialsProvider,
+    private val callEngine: StreamCallEngine,
     private val signalClient: SignalClient,
     private val signalSocket: SignalSocket,
     private val remoteIceServers: List<IceServer>
@@ -180,6 +183,7 @@ internal class CallClientImpl(
 
     init {
         signalSocket.addListener(this)
+        signalSocket.addListener(SfuSocketListenerAdapter(callEngine))
         signalSocket.connectSocket()
     }
 
@@ -423,6 +427,7 @@ internal class CallClientImpl(
             withTimeout(TIMEOUT) {
                 isConnected.first { it }
                 signalSocket.sendJoinRequest(request)
+                callEngine.onSfuJoinSent(request)
                 logger.v { "[executeJoinRequest] request is sent" }
                 val event = sfuEvents.first { it is JoinCallResponseEvent } as JoinCallResponseEvent
                 logger.v { "[executeJoinRequest] completed: $event" }

@@ -16,12 +16,9 @@
 
 package io.getstream.video.android.router
 
-import io.getstream.video.android.model.CallInput
-
 public interface StreamRouter {
 
     public fun navigateToCall(
-        callInput: CallInput,
         finishCurrent: Boolean
     )
 

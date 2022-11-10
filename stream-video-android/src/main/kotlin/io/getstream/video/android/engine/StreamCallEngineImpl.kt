@@ -19,6 +19,7 @@ package io.getstream.video.android.engine
 import io.getstream.logging.StreamLog
 import io.getstream.video.android.StreamVideoConfig
 import io.getstream.video.android.errors.VideoError
+import io.getstream.video.android.events.AudioLevelChangedEvent
 import io.getstream.video.android.events.AudioMutedEvent
 import io.getstream.video.android.events.AudioUnmutedEvent
 import io.getstream.video.android.events.CallAcceptedEvent
@@ -29,12 +30,27 @@ import io.getstream.video.android.events.CallMembersDeletedEvent
 import io.getstream.video.android.events.CallMembersUpdatedEvent
 import io.getstream.video.android.events.CallRejectedEvent
 import io.getstream.video.android.events.CallUpdatedEvent
+import io.getstream.video.android.events.ChangePublishQualityEvent
 import io.getstream.video.android.events.ConnectedEvent
+import io.getstream.video.android.events.ConnectionQualityChangeEvent
+import io.getstream.video.android.events.DominantSpeakerChangedEvent
 import io.getstream.video.android.events.HealthCheckEvent
+import io.getstream.video.android.events.HealthCheckResponseEvent
+import io.getstream.video.android.events.ICETrickleEvent
+import io.getstream.video.android.events.JoinCallResponseEvent
+import io.getstream.video.android.events.LocalDeviceChangeEvent
+import io.getstream.video.android.events.MuteStateChangeEvent
 import io.getstream.video.android.events.ParticipantJoinedEvent
 import io.getstream.video.android.events.ParticipantLeftEvent
+import io.getstream.video.android.events.PublisherCandidateEvent
+import io.getstream.video.android.events.SfuDataEvent
+import io.getstream.video.android.events.SfuParticipantJoinedEvent
+import io.getstream.video.android.events.SfuParticipantLeftEvent
+import io.getstream.video.android.events.SubscriberCandidateEvent
+import io.getstream.video.android.events.SubscriberOfferEvent
 import io.getstream.video.android.events.UnknownEvent
 import io.getstream.video.android.events.VideoEvent
+import io.getstream.video.android.events.VideoQualityChangedEvent
 import io.getstream.video.android.events.VideoStartedEvent
 import io.getstream.video.android.events.VideoStoppedEvent
 import io.getstream.video.android.model.CallEventType
@@ -50,7 +66,6 @@ import io.getstream.video.android.model.state.StreamCallGuid
 import io.getstream.video.android.model.state.StreamCallKind
 import io.getstream.video.android.model.state.StreamDate
 import io.getstream.video.android.model.state.copy
-import io.getstream.video.android.socket.SocketListener
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -62,6 +77,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import stream.video.sfu.event.JoinRequest
 import io.getstream.video.android.model.StreamCallCid as CallCid
 import io.getstream.video.android.model.StreamCallId as CallId
 import io.getstream.video.android.model.StreamCallType as CallType
@@ -75,7 +91,7 @@ internal class StreamCallEngineImpl(
     parentScope: CoroutineScope,
     private val config: StreamVideoConfig,
     private val getCurrentUser: () -> User,
-) : StreamCallEngine, SocketListener {
+) : StreamCallEngine {
 
     private val logger = StreamLog.getLogger("Call:Engine")
 
@@ -89,9 +105,9 @@ internal class StreamCallEngineImpl(
 
     override val callState: StateFlow<State> = _callState
 
-    override fun onEvent(event: VideoEvent) {
+    override fun onCoordinatorEvent(event: VideoEvent) {
         if (event !is HealthCheckEvent) {
-            logger.v { "[onEvent] event: $event" }
+            logger.i { "[onCoordinatorEvent] event: $event" }
         }
         when (event) {
             is AudioMutedEvent -> {}
@@ -112,6 +128,33 @@ internal class StreamCallEngineImpl(
             is VideoStoppedEvent -> {}
             is UnknownEvent -> {}
         }
+    }
+
+    override fun onSfuEvent(event: SfuDataEvent) {
+        if (event !is HealthCheckResponseEvent) {
+            logger.i { "[onSfuEvent] event: $event" }
+        }
+        when (event) {
+            is AudioLevelChangedEvent -> { }
+            is ChangePublishQualityEvent -> { }
+            is ConnectionQualityChangeEvent -> { }
+            is DominantSpeakerChangedEvent -> { }
+            is HealthCheckResponseEvent -> { }
+            is ICETrickleEvent -> { }
+            is JoinCallResponseEvent -> { }
+            is LocalDeviceChangeEvent -> { }
+            is MuteStateChangeEvent -> { }
+            is PublisherCandidateEvent -> { }
+            is SfuParticipantJoinedEvent -> { }
+            is SfuParticipantLeftEvent -> { }
+            is SubscriberCandidateEvent -> { }
+            is SubscriberOfferEvent -> { }
+            is VideoQualityChangedEvent -> {}
+        }
+    }
+
+    override fun onSfuJoinSent(request: JoinRequest) = scope.launchWithLock(mutex) {
+        logger.i { "[onSfuJoinSent] request: $request" }
     }
 
     private fun onCallAccepted(event: CallAcceptedEvent) = scope.launchWithLock(mutex) {

@@ -19,21 +19,15 @@ package io.getstream.video.android.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import io.getstream.video.android.StreamVideo
-import io.getstream.video.android.model.CallInput
-import io.getstream.video.android.token.CredentialsProvider
 
 public class CallViewModelFactory(
-    private val input: CallInput,
-    private val streamVideo: StreamVideo,
-    private val credentialsProvider: CredentialsProvider
+    private val streamVideo: StreamVideo
 ) : ViewModelProvider.Factory {
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return CallViewModel(
-            input = input,
-            streamVideo = streamVideo,
-            credentialsProvider = credentialsProvider
+            streamVideo = streamVideo
         ) as T
     }
 }

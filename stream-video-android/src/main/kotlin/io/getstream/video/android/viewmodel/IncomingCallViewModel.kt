@@ -85,7 +85,7 @@ public class IncomingCallViewModel(
                 }
                 .onSuccess {
                     logger.v { "[acceptCall] completed: $it" }
-                    streamRouter.navigateToCall(callInput = it.toCallInput(), finishCurrent = true)
+                    streamRouter.navigateToCall(finishCurrent = true)
                 }
                 .onError {
                     logger.e { "[acceptCall] failed: $it" }

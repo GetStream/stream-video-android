@@ -19,6 +19,7 @@ package io.getstream.video.android
 import android.content.Context
 import androidx.lifecycle.ProcessLifecycleOwner
 import io.getstream.video.android.dispatchers.DispatcherProvider
+import io.getstream.video.android.input.CallAndroidInput
 import io.getstream.video.android.input.CallServiceInput
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.module.CallCoordinatorClientModule
@@ -31,7 +32,7 @@ public class StreamVideoBuilder(
     private val context: Context,
     private val credentialsProvider: CredentialsProvider,
     private val config: StreamVideoConfig = StreamVideoConfigDefault,
-    private val serviceInput: CallServiceInput? = null,
+    private val androidInputs: Set<CallAndroidInput> = emptySet(),
     private val loggingLevel: LoggingLevel = LoggingLevel.NONE
 ) {
 
@@ -76,7 +77,7 @@ public class StreamVideoBuilder(
             userState = userState,
             networkStateProvider = module.networkStateProvider()
         ).also { streamVideo ->
-            StreamVideoLauncher(context, streamVideo, config, serviceInput).run(scope)
+            StreamVideoLauncher(context, streamVideo, androidInputs).run(scope)
         }
     }
 }

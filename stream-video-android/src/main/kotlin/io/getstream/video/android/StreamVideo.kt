@@ -27,6 +27,7 @@ import io.getstream.video.android.model.state.StreamCallState
 import io.getstream.video.android.socket.SocketListener
 import io.getstream.video.android.token.CredentialsProvider
 import io.getstream.video.android.utils.Result
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 
 public interface StreamVideo {
@@ -36,6 +37,8 @@ public interface StreamVideo {
      * keep intermediate states, such as [StreamCallState.Idle].
      */
     public val callState: StateFlow<StreamCallState>
+
+    public fun launch(block: suspend CoroutineScope.() -> Unit)
 
     /**
      * Creates a call with given information. You can then use the [CallMetadata] and join it and get auth
@@ -160,15 +163,13 @@ public interface StreamVideo {
      * @param signalUrl The URL of the server in which the call is being hosted.
      * @param userToken User's ticket to enter the call.
      * @param iceServers Servers required to appropriately connect to the call and receive tracks.
-     * @param credentialsProvider Contains information about the user required for the Call state.
      * @return An instance of [CallClient] ready to connect to a call. Make sure to call
      * [CallClient.connectToCall] when you're ready to fully join a call.
      */
     public fun createCallClient(
         signalUrl: String,
         userToken: String,
-        iceServers: List<IceServer>,
-        credentialsProvider: CredentialsProvider
+        iceServers: List<IceServer>
     ): CallClient
 
     public fun getActiveCallClient(): CallClient?

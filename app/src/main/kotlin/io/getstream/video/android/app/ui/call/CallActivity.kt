@@ -32,21 +32,18 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import io.getstream.video.android.app.ui.call.content.VideoCallContent
+import io.getstream.video.android.StreamVideo
+import io.getstream.video.android.activity.StreamCallActivity
 import io.getstream.video.android.app.videoApp
-import io.getstream.video.android.model.CallInput
+import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.model.state.StreamCallState
 import io.getstream.video.android.viewmodel.CallViewModel
 import io.getstream.video.android.viewmodel.CallViewModelFactory
 
-class CallActivity : AppCompatActivity() {
-
-    private val input: CallInput by lazy {
-        requireNotNull(intent.getSerializableExtra(KEY_CALL_INPUT) as? CallInput)
-    }
+class CallActivity : AppCompatActivity(), StreamCallActivity {
 
     private val factory by lazy {
-        CallViewModelFactory(input, videoApp.streamVideo, videoApp.credentialsProvider)
+        CallViewModelFactory(videoApp.streamVideo)
     }
 
     private val callViewModel by viewModels<CallViewModel>(factoryProducer = { factory })
@@ -74,7 +71,16 @@ class CallActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            VideoCallContent(callViewModel, onLeaveCall = callViewModel::leaveCall)
+            VideoTheme {
+                CallScreen(
+                    viewModel = callViewModel,
+                    onRejectCall = callViewModel::rejectCall,
+                    onAcceptCall = callViewModel::acceptCall,
+                    onCancelCall = callViewModel::cancelCall,
+                    onVideoToggleChanged = callViewModel::onVideoChanged,
+                    onMicToggleChanged = callViewModel::onMicrophoneChanged,
+                )
+            }
         }
 
         lifecycleScope.launchWhenCreated {
@@ -166,15 +172,14 @@ class CallActivity : AppCompatActivity() {
     }
 
     companion object {
-        private const val KEY_CALL_INPUT = "call_input"
-
         internal fun getIntent(
             context: Context,
-            callInput: CallInput
         ): Intent {
             return Intent(context, CallActivity::class.java).apply {
-                putExtra(KEY_CALL_INPUT, callInput)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
             }
         }
     }
+
+    override fun getStreamCalls(context: Context): StreamVideo = videoApp.streamVideo
 }

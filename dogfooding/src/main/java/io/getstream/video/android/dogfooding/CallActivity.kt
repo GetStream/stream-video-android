@@ -31,18 +31,13 @@ import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import io.getstream.video.android.model.CallInput
 import io.getstream.video.android.viewmodel.CallViewModel
 import io.getstream.video.android.viewmodel.CallViewModelFactory
 
 class CallActivity : AppCompatActivity() {
 
-    private val input: CallInput by lazy {
-        requireNotNull(intent.getSerializableExtra(KEY_CALL_INPUT) as? CallInput)
-    }
-
     private val factory by lazy {
-        CallViewModelFactory(input, dogfoodingApp.streamVideo, dogfoodingApp.credentialsProvider)
+        CallViewModelFactory(dogfoodingApp.streamVideo)
     }
 
     private val callViewModel by viewModels<CallViewModel>(factoryProducer = { factory })
@@ -73,7 +68,7 @@ class CallActivity : AppCompatActivity() {
     }
 
     private fun leaveCall() {
-        callViewModel.leaveCall()
+        callViewModel.cancelCall()
         finish()
     }
 
@@ -157,15 +152,11 @@ class CallActivity : AppCompatActivity() {
     }
 
     companion object {
-        private const val KEY_CALL_INPUT = "call_input"
-
         internal fun getIntent(
-            context: Context,
-            callInput: CallInput
+            context: Context
         ): Intent {
-            return Intent(context, CallActivity::class.java).apply {
-                putExtra(KEY_CALL_INPUT, callInput)
-            }
+            return Intent(context, CallActivity::class.java)
+
         }
     }
 }

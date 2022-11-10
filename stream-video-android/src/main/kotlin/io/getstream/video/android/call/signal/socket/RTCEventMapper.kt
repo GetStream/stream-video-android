@@ -20,7 +20,7 @@ import io.getstream.video.android.events.AudioLevelChangedEvent
 import io.getstream.video.android.events.ChangePublishQualityEvent
 import io.getstream.video.android.events.ConnectionQualityChangeEvent
 import io.getstream.video.android.events.DominantSpeakerChangedEvent
-import io.getstream.video.android.events.HealthcheckResponseEvent
+import io.getstream.video.android.events.HealthCheckResponseEvent
 import io.getstream.video.android.events.ICETrickleEvent
 import io.getstream.video.android.events.JoinCallResponseEvent
 import io.getstream.video.android.events.LocalDeviceChangeEvent
@@ -69,7 +69,7 @@ public object RTCEventMapper {
             }
             event.dominant_speaker_changed != null -> DominantSpeakerChangedEvent(event.dominant_speaker_changed.user_id)
 
-            event.health_check_response != null -> HealthcheckResponseEvent(event.health_check_response.session_id)
+            event.health_check_response != null -> HealthCheckResponseEvent(event.health_check_response.session_id)
             event.join_response != null -> with(event.join_response) {
                 JoinCallResponseEvent(
                     call_state!!,

@@ -28,6 +28,7 @@ import io.getstream.video.android.model.state.StreamCallState
 import io.getstream.video.android.model.state.StreamDate
 import io.getstream.video.android.router.StreamRouter
 import io.getstream.video.android.utils.onError
+import io.getstream.video.android.utils.onSuccess
 import io.getstream.video.android.utils.onSuccessSuspend
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -105,16 +106,8 @@ public class OutgoingCallViewModel(
                 state.toMetadata()
             )
 
-            joinResult.onSuccessSuspend { response ->
+            joinResult.onSuccess {
                 streamRouter.navigateToCall(
-                    callInput = CallInput(
-                        callCid = response.call.cid,
-                        callType = response.call.type,
-                        callId = response.call.id,
-                        callUrl = response.callUrl,
-                        userToken = response.userToken,
-                        iceServers = response.iceServers
-                    ),
                     finishCurrent = true
                 )
             }

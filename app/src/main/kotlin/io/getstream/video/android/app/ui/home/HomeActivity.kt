@@ -67,7 +67,6 @@ import io.getstream.video.android.compose.ui.components.avatar.Avatar
 import io.getstream.video.android.compose.ui.components.avatar.InitialsAvatar
 import io.getstream.video.android.events.CallCreatedEvent
 import io.getstream.video.android.events.VideoEvent
-import io.getstream.video.android.model.CallInput
 import io.getstream.video.android.model.UserCredentials
 import io.getstream.video.android.router.StreamRouter
 import io.getstream.video.android.socket.SocketListener
@@ -97,7 +96,7 @@ class HomeActivity : AppCompatActivity() {
         )
     }
 
-    private val callIdState: MutableState<String> = mutableStateOf("call123")
+    private val callIdState: MutableState<String> = mutableStateOf("call654321")
 
     private val loadingState: MutableState<Boolean> = mutableStateOf(false)
 
@@ -127,7 +126,13 @@ class HomeActivity : AppCompatActivity() {
         }
     }
 
+    override fun finish() {
+        logger.d { "[finish] no args" }
+        super.finish()
+    }
+
     override fun onDestroy() {
+        logger.d { "[onDestroy] no args" }
         streamVideo.removeSocketListener(socketListener)
         super.onDestroy()
     }
@@ -277,14 +282,6 @@ class HomeActivity : AppCompatActivity() {
                 loadingState.value = false
 
                 router.navigateToCall(
-                    callInput = CallInput(
-                        data.call.cid,
-                        data.call.type,
-                        data.call.id,
-                        data.callUrl,
-                        data.userToken,
-                        data.iceServers
-                    ),
                     finishCurrent = false
                 )
             }
@@ -311,7 +308,6 @@ class HomeActivity : AppCompatActivity() {
             result.onSuccess { metadata ->
                 logger.v { "[dialUsers] successful: $metadata" }
                 loadingState.value = false
-
                 router.onOutgoingCall()
             }
 
@@ -336,9 +332,6 @@ class HomeActivity : AppCompatActivity() {
             result.onSuccess {
                 logger.v { "[joinCall] succeed: $it" }
                 router.navigateToCall(
-                    callInput = CallInput(
-                        it.call.cid, it.call.type, it.call.id, it.callUrl, it.userToken, it.iceServers
-                    ),
                     finishCurrent = false
                 )
             }

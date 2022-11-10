@@ -31,7 +31,26 @@ import io.getstream.video.android.compose.ui.components.background.CallBackgroun
 import io.getstream.video.android.compose.ui.components.mock.mockParticipantList
 import io.getstream.video.android.model.CallType
 import io.getstream.video.android.model.CallUser
+import io.getstream.video.android.viewmodel.CallViewModel
 import io.getstream.video.android.viewmodel.IncomingCallViewModel
+
+@Composable
+public fun IncomingCallScreen(
+    viewModel: CallViewModel,
+    onDeclineCall: () -> Unit,
+    onAcceptCall: () -> Unit,
+    onVideoToggleChanged: (Boolean) -> Unit,
+) {
+    val callType: CallType by viewModel.callType.collectAsState()
+    val participants: List<CallUser> by viewModel.participants.collectAsState()
+    IncomingCall(
+        participants = participants,
+        callType = callType,
+        onDeclineCall = onDeclineCall,
+        onAcceptCall = onAcceptCall,
+        onVideoToggleChanged = onVideoToggleChanged
+    )
+}
 
 @Composable
 public fun IncomingCallScreen(
