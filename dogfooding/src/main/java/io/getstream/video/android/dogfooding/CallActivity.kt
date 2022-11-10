@@ -78,7 +78,7 @@ class CallActivity : AppCompatActivity() {
     }
 
     private fun leaveCall() {
-        callViewModel.leaveCall()
+        callViewModel.cancelCall()
         finish()
     }
 

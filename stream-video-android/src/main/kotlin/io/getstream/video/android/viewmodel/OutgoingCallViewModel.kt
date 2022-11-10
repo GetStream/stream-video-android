@@ -20,7 +20,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.getstream.logging.StreamLog
 import io.getstream.video.android.StreamVideo
-import io.getstream.video.android.model.CallInput
 import io.getstream.video.android.model.CallMetadata
 import io.getstream.video.android.model.CallType
 import io.getstream.video.android.model.CallUser
@@ -105,16 +104,9 @@ public class OutgoingCallViewModel(
                 state.toMetadata()
             )
 
-            joinResult.onSuccessSuspend { response ->
+            joinResult.onSuccessSuspend { data ->
                 streamRouter.navigateToCall(
-                    callInput = CallInput(
-                        callCid = response.call.cid,
-                        callType = response.call.type,
-                        callId = response.call.id,
-                        callUrl = response.callUrl,
-                        userToken = response.userToken,
-                        iceServers = response.iceServers
-                    ),
+                    joinedCall = data,
                     finishCurrent = true
                 )
             }

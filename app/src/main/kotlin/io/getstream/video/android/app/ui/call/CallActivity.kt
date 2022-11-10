@@ -75,7 +75,7 @@ class CallActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            CallContent(callViewModel, onLeaveCall = callViewModel::leaveCall)
+            CallContent(callViewModel, onLeaveCall = callViewModel::cancelCall)
         }
 
         lifecycleScope.launchWhenCreated {

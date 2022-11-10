@@ -28,7 +28,6 @@ public interface CallClient {
 
     public suspend fun connectToCall(
         sessionId: String,
-        autoPublish: Boolean,
         callSettings: CallSettings
     ): Result<Call>
 

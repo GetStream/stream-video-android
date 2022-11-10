@@ -881,7 +881,7 @@ public abstract interface class io/getstream/video/android/audio/PermissionsChec
 public abstract interface class io/getstream/video/android/call/CallClient {
 	public abstract fun addSocketListener (Lio/getstream/video/android/call/signal/socket/SignalSocketListener;)V
 	public abstract fun clear ()V
-	public abstract fun connectToCall (Ljava/lang/String;ZLio/getstream/video/android/model/CallSettings;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun connectToCall (Ljava/lang/String;Lio/getstream/video/android/model/CallSettings;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun flipCamera ()V
 	public abstract fun getActiveCall ()Lio/getstream/video/android/model/Call;
 	public abstract fun getAudioDevices ()Ljava/util/List;
@@ -1646,9 +1646,9 @@ public final class io/getstream/video/android/model/CallInfo : java/io/Serializa
 }
 
 public final class io/getstream/video/android/model/CallInput : java/io/Serializable {
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)V
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lio/getstream/video/android/model/CallInput;
-	public static synthetic fun copy$default (Lio/getstream/video/android/model/CallInput;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lio/getstream/video/android/model/CallInput;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ZZ)V
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ZZ)Lio/getstream/video/android/model/CallInput;
+	public static synthetic fun copy$default (Lio/getstream/video/android/model/CallInput;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ZZILjava/lang/Object;)Lio/getstream/video/android/model/CallInput;
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
@@ -1755,15 +1755,17 @@ public final class io/getstream/video/android/model/CallParticipantStateKt {
 
 public final class io/getstream/video/android/model/CallSettings {
 	public fun <init> ()V
-	public fun <init> (ZZZ)V
-	public synthetic fun <init> (ZZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (ZZZZ)V
+	public synthetic fun <init> (ZZZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Z
 	public final fun component2 ()Z
 	public final fun component3 ()Z
-	public final fun copy (ZZZ)Lio/getstream/video/android/model/CallSettings;
-	public static synthetic fun copy$default (Lio/getstream/video/android/model/CallSettings;ZZZILjava/lang/Object;)Lio/getstream/video/android/model/CallSettings;
+	public final fun component4 ()Z
+	public final fun copy (ZZZZ)Lio/getstream/video/android/model/CallSettings;
+	public static synthetic fun copy$default (Lio/getstream/video/android/model/CallSettings;ZZZZILjava/lang/Object;)Lio/getstream/video/android/model/CallSettings;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAudioOn ()Z
+	public final fun getAutoPublish ()Z
 	public final fun getSpeakerOn ()Z
 	public final fun getVideoOn ()Z
 	public fun hashCode ()I
@@ -2315,7 +2317,7 @@ public abstract interface class io/getstream/video/android/network/NetworkStateP
 
 public abstract interface class io/getstream/video/android/router/StreamRouter {
 	public abstract fun finish ()V
-	public abstract fun navigateToCall (Lio/getstream/video/android/model/CallInput;Z)V
+	public abstract fun navigateToCall (Lio/getstream/video/android/model/JoinedCall;Z)V
 	public abstract fun onCallFailed (Ljava/lang/String;)V
 	public abstract fun onIncomingCall ()V
 	public abstract fun onOutgoingCall ()V
@@ -2506,6 +2508,10 @@ public final class io/getstream/video/android/ui/ParticipantItemView : org/webrt
 	public final fun isInitialized ()Z
 }
 
+public final class io/getstream/video/android/utils/CallClientUtilsKt {
+	public static final fun buildCallInput (Landroid/content/Context;Lio/getstream/video/android/model/JoinedCall;)Lio/getstream/video/android/model/CallInput;
+}
+
 public final class io/getstream/video/android/utils/ErrorKt {
 	public static final fun fetchResult (Lkotlin/jvm/functions/Function0;)Lio/getstream/video/android/utils/Result;
 }
@@ -2564,6 +2570,8 @@ public final class io/getstream/video/android/utils/TokenUtilsKt {
 
 public final class io/getstream/video/android/viewmodel/CallViewModel : androidx/lifecycle/ViewModel {
 	public fun <init> (Lio/getstream/video/android/model/CallInput;Lio/getstream/video/android/StreamVideo;Lio/getstream/video/android/token/CredentialsProvider;)V
+	public final fun cancelCall ()V
+	public final fun clearState ()V
 	public final fun connectToCall (Lio/getstream/video/android/model/CallSettings;)V
 	public final fun dismissOptions ()V
 	public final fun flipCamera ()V
@@ -2573,12 +2581,11 @@ public final class io/getstream/video/android/viewmodel/CallViewModel : androidx
 	public final fun getLocalParticipant ()Lkotlinx/coroutines/flow/Flow;
 	public final fun getParticipantList ()Lkotlinx/coroutines/flow/Flow;
 	public final fun getStreamCallState ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun isCameraEnabled ()Lkotlinx/coroutines/flow/Flow;
-	public final fun isMicrophoneEnabled ()Lkotlinx/coroutines/flow/Flow;
+	public final fun isAudioOn ()Lkotlinx/coroutines/flow/Flow;
 	public final fun isShowingParticipantsInfo ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun isShowingSettings ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun isVideoInitialized ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun leaveCall ()V
+	public final fun isVideoOn ()Lkotlinx/coroutines/flow/Flow;
 	public final fun reconnect ()V
 	public final fun selectAudioDevice (Lio/getstream/video/android/audio/AudioDevice;)V
 	public final fun showParticipants ()V

@@ -24,18 +24,19 @@ import io.getstream.video.android.app.ui.call.CallActivity
 import io.getstream.video.android.app.ui.incoming.IncomingCallActivity
 import io.getstream.video.android.app.ui.login.LoginActivity
 import io.getstream.video.android.app.ui.outgoing.OutgoingCallActivity
-import io.getstream.video.android.model.CallInput
+import io.getstream.video.android.model.JoinedCall
 import io.getstream.video.android.router.StreamRouter
+import io.getstream.video.android.utils.buildCallInput
 
 class StreamRouterImpl(
     private val context: Context
 ) : StreamRouter {
 
     override fun navigateToCall(
-        callInput: CallInput,
+        joinedCall: JoinedCall,
         finishCurrent: Boolean
     ) {
-        context.startActivity(CallActivity.getIntent(context, callInput))
+        context.startActivity(CallActivity.getIntent(context, buildCallInput(context, joinedCall)))
         if (finishCurrent) {
             finish()
         }

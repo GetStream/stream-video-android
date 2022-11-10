@@ -55,8 +55,11 @@ public fun connectToCall(callSettings: CallSettings)
 // Use to reconnect to a call if the state is cleared/dropped
 public fun reconnect()
 
-// Use to leave the call and clear the internal state
-public fun leaveCall()
+// Use to cancel the call send an event to everyone
+public fun cancelCall()
+
+// Creates 
+public fun clearState()
 
 // Automatically called when the ViewModel is disposed, calls leaveCall internally
 override fun onCleared()

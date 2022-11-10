@@ -16,10 +16,39 @@
 
 package io.getstream.video.android.utils
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import androidx.core.content.ContextCompat
+import io.getstream.video.android.model.CallInput
 import io.getstream.video.android.model.IceServer
+import io.getstream.video.android.model.JoinedCall
 import io.getstream.video.android.module.CallClientModule
 import org.webrtc.MediaConstraints
 import org.webrtc.PeerConnection
+
+public fun buildCallInput(context: Context, joinedCall: JoinedCall): CallInput {
+    val hasVideoPermission = ContextCompat.checkSelfPermission(
+        context,
+        Manifest.permission.CAMERA
+    ) == PackageManager.PERMISSION_GRANTED
+
+    val hasAudioPermission = ContextCompat.checkSelfPermission(
+        context,
+        Manifest.permission.RECORD_AUDIO
+    ) == PackageManager.PERMISSION_GRANTED
+
+    return CallInput(
+        callCid = joinedCall.call.cid,
+        callType = joinedCall.call.type,
+        callId = joinedCall.call.id,
+        callUrl = joinedCall.callUrl,
+        userToken = joinedCall.userToken,
+        iceServers = joinedCall.iceServers,
+        hasVideoPermission = hasVideoPermission,
+        hasAudioPermission = hasAudioPermission
+    )
+}
 
 internal fun buildIceServers(servers: List<IceServer>?): List<PeerConnection.IceServer> {
     return if (servers != null && servers.isNotEmpty()) {

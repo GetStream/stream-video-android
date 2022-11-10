@@ -23,4 +23,6 @@ public data class CallInput(
     internal val callUrl: String,
     internal val userToken: String,
     internal val iceServers: List<IceServer>,
+    internal val hasVideoPermission: Boolean,
+    internal val hasAudioPermission: Boolean
 ) : java.io.Serializable

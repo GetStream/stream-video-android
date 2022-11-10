@@ -67,7 +67,6 @@ import io.getstream.video.android.compose.ui.components.avatar.Avatar
 import io.getstream.video.android.compose.ui.components.avatar.InitialsAvatar
 import io.getstream.video.android.events.CallCreatedEvent
 import io.getstream.video.android.events.VideoEvent
-import io.getstream.video.android.model.CallInput
 import io.getstream.video.android.model.UserCredentials
 import io.getstream.video.android.router.StreamRouter
 import io.getstream.video.android.socket.SocketListener
@@ -137,7 +136,8 @@ class HomeActivity : AppCompatActivity() {
         Box(modifier = Modifier.fillMaxSize()) {
             UserIcon()
             Column(
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
                     .verticalScroll(rememberScrollState())
             ) {
                 CallOptions()
@@ -277,14 +277,7 @@ class HomeActivity : AppCompatActivity() {
                 loadingState.value = false
 
                 router.navigateToCall(
-                    callInput = CallInput(
-                        data.call.cid,
-                        data.call.type,
-                        data.call.id,
-                        data.callUrl,
-                        data.userToken,
-                        data.iceServers
-                    ),
+                    joinedCall = data,
                     finishCurrent = false
                 )
             }
@@ -333,12 +326,10 @@ class HomeActivity : AppCompatActivity() {
                 ringing = false
             )
             loadingState.value = false
-            result.onSuccess {
-                logger.v { "[joinCall] succeed: $it" }
+            result.onSuccess { data ->
+                logger.v { "[joinCall] succeed: $data" }
                 router.navigateToCall(
-                    callInput = CallInput(
-                        it.call.cid, it.call.type, it.call.id, it.callUrl, it.userToken, it.iceServers
-                    ),
+                    joinedCall = data,
                     finishCurrent = false
                 )
             }
