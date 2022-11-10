@@ -122,10 +122,7 @@ internal class CallCoordinatorClientImpl(
      */
     override suspend fun sendCustomEvent(sendCustomEventRequest: SendCustomEventRequest): Result<Boolean> =
         try {
-            callCoordinatorService.sendCustomEvent(
-                sendEventRequest = sendCustomEventRequest,
-                apiKey = credentialsProvider.getCachedApiKey()
-            )
+            callCoordinatorService.sendCustomEvent(sendCustomEventRequest = sendCustomEventRequest)
 
             Success(true)
         } catch (error: Throwable) {
