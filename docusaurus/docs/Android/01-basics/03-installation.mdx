@@ -17,6 +17,7 @@ dependencyResolutionManagement {
 
 Or if you're using an older project setup, add these repositories in your project level build.gradle file:
 
+```groovy
 allprojects {
     repositories {
         google()
@@ -24,6 +25,8 @@ allprojects {
         maven { url "https://jitpack.io" }
     }
 }
+```
+
 Check the Releases page for the latest version and the changelog.
 
 // TODO - embed version from GH
@@ -33,25 +36,31 @@ Check the Releases page for the latest version and the changelog.
 ### Low Level Client
 To add the low-level Video client library to your app, open your module's build.gradle script and add the following:
 
+```groovy
 dependencies {
     implementation "io.getstream:stream-video-android:$stream_version"
 }
+```
 
 ### Video XML
 To use the XML Video Components in your application, add the following dependency:
 
+```groovy
 dependencies {
     implementation "io.getstream:stream-video-android-xml:$stream_version"
 }
+```
 
 Adding the XML Video Components library as a dependency will automatically include the client library.
 
 ### Compose Video Components
 To use the Compose Video Components instead, add the following dependency:
 
+```groovy
 dependencies {
     implementation "io.getstream:stream-video-android-compose:$stream_version"
 }
+```
 
 Adding the Compose Video Components library as a dependency will automatically include the client library.
 
@@ -65,7 +74,7 @@ Our Stream Video Android libraries do **not** follow semantic versioning.
 
 We increase the minor version whenever breaking changes are introduced. Patch releases only contain smaller fixes and improvements.
 
-You can keep track of all the changes in the Stream Video Android libraries via the [GitHub releases page](https://github.com/GetStream/stream-video-android/releases), and you can also find the release notes of all past releases in our CHANGELOG(TODO create one) file. These will always highlight breaking changes.
+You can keep track of all the changes in the Stream Video Android libraries via the [GitHub releases page](https://github.com/GetStream/stream-video-android/releases), and you can also find the release notes of all past releases in our CHANGELOG (TODO create one) file. These will always highlight breaking changes.
 
 We also maintain a separate document, DEPRECATIONS (TODO - create), which lists deprecated constructs in the SDK, with their expected time of further deprecations and eventual removal.
 

@@ -45,7 +45,7 @@ import androidx.compose.ui.unit.dp
 import io.getstream.video.android.model.Call
 
 @Composable
-public fun CallOptions(
+public fun CallControls(
     call: Call,
     onEndCall: () -> Unit,
     onCameraToggled: (Boolean) -> Unit,

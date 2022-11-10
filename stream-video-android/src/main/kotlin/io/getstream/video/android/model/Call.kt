@@ -58,42 +58,30 @@ public class Call(
         AudioSwitchHandler(context)
     }
 
-    private val _callParticipants: MutableStateFlow<List<CallParticipant>> =
+    private val _callParticipants: MutableStateFlow<List<CallParticipantState>> =
         MutableStateFlow(emptyList())
 
-    public val callParticipants: StateFlow<List<CallParticipant>> = _callParticipants
+    public val callParticipants: StateFlow<List<CallParticipantState>> = _callParticipants
 
-    public val callParticipantState: Flow<List<CallParticipantState>>
-        get() = callParticipants.map { list ->
-            list.map {
-                CallParticipantState(
-                    it.id,
-                    it.name,
-                    it.hasAudio,
-                    it.hasVideo
-                )
-            }
-        }
+    private val _localParticipant: MutableStateFlow<CallParticipantState?> = MutableStateFlow(null)
 
-    private val _localParticipant: MutableStateFlow<CallParticipant?> = MutableStateFlow(null)
-
-    public val localParticipant: Flow<CallParticipant> =
+    public val localParticipant: Flow<CallParticipantState> =
         _localParticipant.filterNotNull()
 
-    public val activeSpeakers: Flow<List<CallParticipant>> = callParticipants.map { list ->
-        list.filter { participant -> participant.hasAudio }
+    public val activeSpeakers: Flow<List<CallParticipantState>> = callParticipants.map { list ->
+        list.filter { participant -> participant.hasAudio && participant.audioLevel > 0f }
     }
 
-    private var lastPrimarySpeaker: CallParticipant? = null
+    private var lastPrimarySpeaker: CallParticipantState? = null
 
-    private val _primarySpeaker: Flow<CallParticipant?> =
+    private val _primarySpeaker: Flow<CallParticipantState?> =
         callParticipants.combine(activeSpeakers) { participants, speakers ->
             selectPrimaryParticipant(participants, speakers)
         }.onEach {
             lastPrimarySpeaker = it
         }
 
-    public val primarySpeaker: Flow<CallParticipant?> = _primarySpeaker
+    public val primarySpeaker: Flow<CallParticipantState?> = _primarySpeaker
 
     public val localParticipantId: String
         get() = credentialsProvider.getUserCredentials().id
@@ -291,9 +279,9 @@ public class Call(
     }
 
     private fun selectPrimaryParticipant(
-        participantsList: List<CallParticipant>,
-        speakers: List<CallParticipant>,
-    ): CallParticipant? {
+        participantsList: List<CallParticipantState>,
+        speakers: List<CallParticipantState>,
+    ): CallParticipantState? {
         var speaker = lastPrimarySpeaker
         val localParticipant = participantsList.firstOrNull { it.isLocal }
 
@@ -362,11 +350,10 @@ public class Call(
         _callParticipants.value = emptyList()
     }
 
-    public fun getLocalParticipant(): CallParticipant? {
+    public fun getLocalParticipant(): CallParticipantState? {
         return _callParticipants.value.firstOrNull { it.isLocal }
     }
 
-    // TODO - check if this is needed or if we can rely on the MuteEvent
     public fun setCameraEnabled(isEnabled: Boolean) {
         logger.d { "[setCameraEnabled] #sfu; isEnabled: $isEnabled" }
         val localParticipant = _localParticipant.value

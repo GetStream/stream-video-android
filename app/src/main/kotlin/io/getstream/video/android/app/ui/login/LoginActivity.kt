@@ -36,7 +36,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.getstream.logging.StreamLog
-import io.getstream.video.android.app.FakeCredentialsProvider
 import io.getstream.video.android.app.ui.components.UserList
 import io.getstream.video.android.app.ui.home.HomeActivity
 import io.getstream.video.android.app.utils.getUsers
@@ -46,6 +45,7 @@ import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.model.UserCredentials
 import io.getstream.video.android.pushprovider.firebase.CallNotificationReceiver
 import io.getstream.video.android.pushprovider.firebase.CallNotificationReceiver.Companion.ACTION_CALL
+import io.getstream.video.android.token.AuthCredentialsProvider
 
 class LoginActivity : AppCompatActivity() {
 
@@ -134,9 +134,10 @@ class LoginActivity : AppCompatActivity() {
         videoApp.userPreferences.storeUserCredentials(selectedUser)
         logger.i { "[logIn] selectedUser: $selectedUser" }
         videoApp.initializeStreamCalls(
-            credentialsProvider = FakeCredentialsProvider(
-                userCredentials = selectedUser,
-                apiKey = "key1"
+            credentialsProvider = AuthCredentialsProvider(
+                user = selectedUser.toUser(),
+                apiKey = "key1",
+                userToken = selectedUser.token
             ),
             loggingLevel = LoggingLevel.BODY
         )

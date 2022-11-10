@@ -16,12 +16,12 @@
 
 package io.getstream.video.android.router
 
-import io.getstream.video.android.model.CallInput
+import io.getstream.video.android.model.JoinedCall
 
 public interface StreamRouter {
 
     public fun navigateToCall(
-        callInput: CallInput,
+        joinedCall: JoinedCall,
         finishCurrent: Boolean
     )
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.participants
+package io.getstream.video.android.compose.ui.components.participants.internal
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -36,7 +36,7 @@ import io.getstream.video.android.model.CallStatus
 import io.getstream.video.android.model.CallUser
 
 @Composable
-public fun ParticipantInformation(
+internal fun ParticipantInformation(
     callStatus: CallStatus,
     participants: List<CallUser>
 ) {

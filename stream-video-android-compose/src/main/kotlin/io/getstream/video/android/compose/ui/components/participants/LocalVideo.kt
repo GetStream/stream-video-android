@@ -34,12 +34,12 @@ import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.model.Call
-import io.getstream.video.android.model.CallParticipant
+import io.getstream.video.android.model.CallParticipantState
 
 @Composable
-public fun FloatingParticipantItem(
+public fun LocalVideo(
     call: Call,
-    callParticipant: CallParticipant,
+    callParticipant: CallParticipantState,
     modifier: Modifier = Modifier,
     onRender: (View) -> Unit = {}
 ) {

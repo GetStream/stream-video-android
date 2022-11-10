@@ -27,12 +27,12 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.model.Call
-import io.getstream.video.android.model.CallParticipant
+import io.getstream.video.android.model.CallParticipantState
 
 @Composable
-public fun ParticipantItem(
+public fun CallParticipant(
     call: Call,
-    participant: CallParticipant,
+    participant: CallParticipantState,
     modifier: Modifier = Modifier,
     isFocused: Boolean = false,
     onRender: (View) -> Unit = {}

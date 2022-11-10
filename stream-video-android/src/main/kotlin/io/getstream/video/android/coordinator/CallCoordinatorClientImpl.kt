@@ -30,6 +30,7 @@ import stream.video.coordinator.client_v1_rpc.GetOrCreateCallRequest
 import stream.video.coordinator.client_v1_rpc.GetOrCreateCallResponse
 import stream.video.coordinator.client_v1_rpc.JoinCallRequest
 import stream.video.coordinator.client_v1_rpc.JoinCallResponse
+import stream.video.coordinator.client_v1_rpc.SendCustomEventRequest
 import stream.video.coordinator.client_v1_rpc.SendEventRequest
 
 /**
@@ -108,6 +109,20 @@ internal class CallCoordinatorClientImpl(
     override suspend fun sendUserEvent(sendEventRequest: SendEventRequest): Result<Boolean> =
         try {
             callCoordinatorService.sendEvent(sendEventRequest = sendEventRequest)
+
+            Success(true)
+        } catch (error: Throwable) {
+            Failure(VideoError(error.message, error))
+        }
+
+    /**
+     * Sends a custom event with encoded JSON data.
+     *
+     * @param sendCustomEventRequest The request holding the CID and the data.
+     */
+    override suspend fun sendCustomEvent(sendCustomEventRequest: SendCustomEventRequest): Result<Boolean> =
+        try {
+            callCoordinatorService.sendCustomEvent(sendCustomEventRequest = sendCustomEventRequest)
 
             Success(true)
         } catch (error: Throwable) {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.app.ui.call.content
+package io.getstream.video.android.compose.ui.components.call
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
@@ -59,14 +59,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.getstream.video.android.audio.AudioDevice
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.CallOptions
-import io.getstream.video.android.compose.ui.components.MainStage
+import io.getstream.video.android.compose.ui.components.CallControls
+import io.getstream.video.android.compose.ui.components.participants.internal.MainStage
 import io.getstream.video.android.model.CallParticipantState
 import io.getstream.video.android.model.state.StreamCallState
 import io.getstream.video.android.viewmodel.CallViewModel
 
 @Composable
-internal fun VideoCallContent(
+public fun CallContent(
     callViewModel: CallViewModel,
     onLeaveCall: () -> Unit
 ) {
@@ -80,7 +80,7 @@ internal fun VideoCallContent(
         false
     )
 
-    val participantsState by callViewModel.participantsState.collectAsState(initial = emptyList())
+    val participantsState by callViewModel.participantList.collectAsState(initial = emptyList())
 
     BackHandler {
         if (isShowingParticipantsInfo || isShowingSettings) {
@@ -125,7 +125,7 @@ internal fun VideoCallContent(
                             call = roomState
                         )
 
-                        CallOptions(
+                        CallControls(
                             modifier = Modifier
                                 .align(Alignment.BottomCenter)
                                 .fillMaxWidth()
@@ -163,7 +163,7 @@ internal fun VideoCallContent(
 }
 
 @Composable
-private fun ParticipantsInfo(
+private fun ParticipantsInfo( // TODO - rename, expose, build better UI and flow
     callViewModel: CallViewModel,
     participantsState: List<CallParticipantState>
 ) {
@@ -252,21 +252,21 @@ private fun ParticipantInfoItem(participant: CallParticipantState) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Start
     ) {
-        val isAudioEnabled = participant.isLocalAudioEnabled
+        val isAudioEnabled = participant.hasAudio
         Icon(
             imageVector = if (isAudioEnabled) Icons.Default.VolumeUp else Icons.Default.VolumeOff,
             contentDescription = "User Audio"
         )
 
-        val isVideoEnabled = participant.isLocalVideoEnabled
+        val isVideoEnabled = participant.hasVideo
         Icon(
             imageVector = if (isVideoEnabled) Icons.Default.Videocam else Icons.Default.VideocamOff,
             contentDescription = "User Video"
         )
 
         val userName = when {
-            participant.userName.isNotBlank() -> participant.userName
-            participant.userId.isNotBlank() -> participant.userId
+            participant.name.isNotBlank() -> participant.name
+            participant.id.isNotBlank() -> participant.id
             else -> "Unknown"
         }
 

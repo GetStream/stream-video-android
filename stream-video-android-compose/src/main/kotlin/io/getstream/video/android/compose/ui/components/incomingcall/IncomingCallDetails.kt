@@ -26,9 +26,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.mock.mockParticipantList
-import io.getstream.video.android.compose.ui.components.participants.ParticipantAvatars
-import io.getstream.video.android.compose.ui.components.participants.ParticipantInformation
-import io.getstream.video.android.model.CallParticipant
+import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantAvatars
+import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantInformation
+import io.getstream.video.android.model.CallParticipantState
 import io.getstream.video.android.model.CallStatus
 import io.getstream.video.android.model.CallUser
 
@@ -41,7 +41,7 @@ internal fun IncomingCallDetails(
 
         ParticipantAvatars(
             participants = participants.map {
-                CallParticipant(
+                CallParticipantState(
                     it.id,
                     it.role,
                     it.name,

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.participants
+package io.getstream.video.android.compose.ui.components.participants.internal
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,11 +31,11 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.InitialsAvatar
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.compose.ui.components.mock.mockParticipantList
-import io.getstream.video.android.model.CallParticipant
+import io.getstream.video.android.model.CallParticipantState
 
 @Composable
-public fun ParticipantAvatars(
-    participants: List<CallParticipant>
+internal fun ParticipantAvatars(
+    participants: List<CallParticipantState>
 ) {
     Box(
         modifier = Modifier.fillMaxWidth(),

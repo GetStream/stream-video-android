@@ -30,7 +30,7 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.model.Call
 
 @Composable
-public fun ParticipantsContent(
+public fun CallParticipants(
     call: Call,
     modifier: Modifier = Modifier,
     onRender: (View) -> Unit = {}
@@ -52,7 +52,7 @@ public fun ParticipantsContent(
         1 -> {
             val participant = participants.first()
 
-            ParticipantItem(
+            CallParticipant(
                 modifier = modifier,
                 call = call,
                 participant = participant,
@@ -65,14 +65,14 @@ public fun ParticipantsContent(
             val secondParticipant = participants.first { it.isLocal }
 
             Column(modifier) {
-                ParticipantItem(
+                CallParticipant(
                     modifier = Modifier.weight(1f),
                     call = call,
                     participant = firstParticipant,
                     isFocused = primarySpeaker?.id == firstParticipant.id
                 )
 
-                ParticipantItem(
+                CallParticipant(
                     modifier = Modifier.weight(1f),
                     call = call,
                     participant = secondParticipant,
@@ -89,7 +89,7 @@ public fun ParticipantsContent(
             val thirdParticipant = participants.first { it.isLocal }
 
             Column(modifier) {
-                ParticipantItem(
+                CallParticipant(
                     modifier = Modifier.weight(1f),
                     call = call,
                     participant = firstParticipant,
@@ -97,14 +97,14 @@ public fun ParticipantsContent(
                 )
 
                 Row(modifier = Modifier.weight(1f)) {
-                    ParticipantItem(
+                    CallParticipant(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = secondParticipant,
                         isFocused = primarySpeaker?.id == secondParticipant.id
                     )
 
-                    ParticipantItem(
+                    CallParticipant(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = thirdParticipant,
@@ -127,14 +127,14 @@ public fun ParticipantsContent(
 
             Column(modifier) {
                 Row(modifier = Modifier.weight(1f)) {
-                    ParticipantItem(
+                    CallParticipant(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = firstParticipant,
                         isFocused = primarySpeaker?.id == firstParticipant.id
                     )
 
-                    ParticipantItem(
+                    CallParticipant(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = secondParticipant,
@@ -143,14 +143,14 @@ public fun ParticipantsContent(
                 }
 
                 Row(modifier = Modifier.weight(1f)) {
-                    ParticipantItem(
+                    CallParticipant(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = thirdParticipant,
                         isFocused = primarySpeaker?.id == thirdParticipant.id
                     )
 
-                    ParticipantItem(
+                    CallParticipant(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = fourthParticipant,

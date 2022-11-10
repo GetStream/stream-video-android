@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.utils.initials
-import io.getstream.video.android.model.CallParticipant
+import io.getstream.video.android.model.CallParticipantState
 import stream.video.coordinator.user_v1.User
 
 /**
@@ -44,7 +44,7 @@ import stream.video.coordinator.user_v1.User
  */
 @Composable
 public fun UserAvatar(
-    user: CallParticipant,
+    user: CallParticipantState,
     modifier: Modifier = Modifier,
     shape: Shape = VideoTheme.shapes.avatar,
     textStyle: TextStyle = VideoTheme.typography.title3Bold,
