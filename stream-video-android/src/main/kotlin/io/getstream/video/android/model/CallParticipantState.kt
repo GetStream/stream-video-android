@@ -16,9 +16,35 @@
 
 package io.getstream.video.android.model
 
+import stream.video.sfu.models.Participant
+
 public data class CallParticipantState(
-    val userId: String,
-    val userName: String,
-    val isLocalAudioEnabled: Boolean,
-    val isLocalVideoEnabled: Boolean
+    public val id: String,
+    public val role: String,
+    public val name: String,
+    public val profileImageURL: String?,
+    public val isLocal: Boolean,
+    public var isOnline: Boolean,
+    public var hasVideo: Boolean,
+    public var hasAudio: Boolean,
+    public var track: VideoTrack?,
+    public var trackSize: Pair<Int, Int>,
+    public var audioLevel: Float,
+    public val idPrefix: String
 )
+
+public fun Participant.toCallParticipant(currentUserId: String): CallParticipantState =
+    CallParticipantState(
+        id = this.user?.id ?: "",
+        name = this.user?.name ?: "",
+        role = this.user?.role ?: "",
+        profileImageURL = this.user?.image_url,
+        isLocal = currentUserId == this.user?.id,
+        isOnline = true,
+        hasVideo = video,
+        hasAudio = audio,
+        track = null,
+        trackSize = 0 to 0,
+        audioLevel = 0f,
+        idPrefix = track_lookup_prefix
+    )

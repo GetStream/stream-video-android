@@ -47,6 +47,7 @@ import com.google.firebase.auth.FirebaseAuth
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.toCredentials
+import io.getstream.video.android.token.AuthCredentialsProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.json.JSONArray

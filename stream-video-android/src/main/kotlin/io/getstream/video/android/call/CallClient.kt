@@ -28,9 +28,13 @@ public interface CallClient {
 
     public suspend fun connectToCall(
         sessionId: String,
-        autoPublish: Boolean,
         callSettings: CallSettings
     ): Result<Call>
+
+    /**
+     * @return The active call instance, if it exists.
+     */
+    public fun getActiveCall(): Call?
 
     public fun startCapturingLocalVideo(position: Int)
 

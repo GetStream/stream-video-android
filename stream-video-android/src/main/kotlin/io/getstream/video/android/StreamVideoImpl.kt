@@ -59,6 +59,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okio.ByteString.Companion.encodeUtf8
 import stream.video.coordinator.client_v1_rpc.CreateCallInput
 import stream.video.coordinator.client_v1_rpc.CreateCallRequest
 import stream.video.coordinator.client_v1_rpc.GetCallEdgeServerRequest
@@ -66,6 +67,7 @@ import stream.video.coordinator.client_v1_rpc.GetCallEdgeServerResponse
 import stream.video.coordinator.client_v1_rpc.GetOrCreateCallRequest
 import stream.video.coordinator.client_v1_rpc.JoinCallRequest
 import stream.video.coordinator.client_v1_rpc.MemberInput
+import stream.video.coordinator.client_v1_rpc.SendCustomEventRequest
 import stream.video.coordinator.client_v1_rpc.SendEventRequest
 import stream.video.coordinator.edge_v1.Latency
 import stream.video.coordinator.edge_v1.LatencyMeasurements
@@ -362,6 +364,14 @@ public class StreamVideoImpl(
         )
             .onSuccess { engine.onCallEventSent(callCid, eventType) }
             .also { logger.v { "[sendEvent] result: $it" } }
+    }
+
+    override suspend fun sendCustomEvent(callCid: String, dataJson: String): Result<Boolean> {
+        logger.d { "[sendCustomEvent] callCid: $callCid, dataJson: $dataJson" }
+        return callCoordinatorClient.sendCustomEvent(
+            SendCustomEventRequest(call_cid = callCid, data_json = dataJson.encodeUtf8())
+        )
+            .also { logger.v { "[sendCustomEvent] result: $it" } }
     }
 
     override fun clearCallState() {

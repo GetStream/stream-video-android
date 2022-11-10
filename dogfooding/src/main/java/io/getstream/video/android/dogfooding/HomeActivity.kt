@@ -150,8 +150,8 @@ class HomeActivity : AppCompatActivity() {
                 "default", id = callId
             )
             loadingState.value = false
-            result.onSuccess {
-                logger.v { "[joinCall] succeed: $it" }
+            result.onSuccess { joinedCall ->
+                logger.v { "[joinCall] succeed: $joinedCall" }
                 startActivity(
                     CallActivity.getIntent(
                         this@HomeActivity,

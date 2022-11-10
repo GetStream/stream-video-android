@@ -50,7 +50,7 @@ import io.getstream.video.android.events.SfuParticipantJoinedEvent
 import io.getstream.video.android.events.SfuParticipantLeftEvent
 import io.getstream.video.android.events.SubscriberOfferEvent
 import io.getstream.video.android.model.Call
-import io.getstream.video.android.model.CallParticipant
+import io.getstream.video.android.model.CallParticipantState
 import io.getstream.video.android.model.CallSettings
 import io.getstream.video.android.model.IceCandidate
 import io.getstream.video.android.model.IceServer
@@ -289,10 +289,9 @@ internal class CallClientImpl(
 
     override suspend fun connectToCall(
         sessionId: String,
-        autoPublish: Boolean,
         callSettings: CallSettings
     ): Result<Call> {
-        logger.d { "[connectToCall] #sfu; sessionId: $sessionId, autoPublish: $autoPublish" }
+        logger.d { "[connectToCall] #sfu; sessionId: $sessionId, autoPublish: ${callSettings.autoPublish}" }
         if (connectionState != ConnectionState.DISCONNECTED) {
             return Failure(
                 VideoError("Already connected or connecting to a call with the session ID: $sessionId")
@@ -302,7 +301,7 @@ internal class CallClientImpl(
         connectionState = ConnectionState.CONNECTING
         this.sessionId = sessionId
 
-        return when (val initializeResult = initializeCall(autoPublish, callSettings)) {
+        return when (val initializeResult = initializeCall(callSettings)) {
             is Success -> {
                 connectionState = ConnectionState.CONNECTED
 
@@ -311,6 +310,11 @@ internal class CallClientImpl(
             is Failure -> initializeResult
         }
     }
+
+    /**
+     * @return The active call instance, if it exists.
+     */
+    override fun getActiveCall(): Call? = call
 
     private fun createCall(sessionId: String): Call {
         logger.d { "[createCall] #sfu; sessionId: $sessionId" }
@@ -336,9 +340,9 @@ internal class CallClientImpl(
     }
 
     private suspend fun initializeCall(
-        autoPublish: Boolean,
         callSettings: CallSettings
     ): Result<JoinResponse> {
+        val autoPublish = callSettings.autoPublish
         logger.d { "[initializeCall] #sfu; autoPublish: $autoPublish" }
 
         val call = createCall(sessionId)
@@ -351,7 +355,7 @@ internal class CallClientImpl(
             is Success -> {
                 createPeerConnections(autoPublish)
                 loadParticipantsData(result.data.call_state, callSettings)
-                createUserTracks(callSettings, autoPublish)
+                createUserTracks(callSettings)
                 call.setupAudio()
 
                 result
@@ -541,7 +545,8 @@ internal class CallClientImpl(
         }
     }
 
-    private fun createUserTracks(callSettings: CallSettings, autoPublish: Boolean) {
+    private fun createUserTracks(callSettings: CallSettings) {
+        val autoPublish = callSettings.autoPublish
         logger.d { "[createUserTracks] #sfu; autoPublish: $autoPublish, callSettings: $callSettings" }
         val manager = context.getSystemService<AudioManager>()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -704,7 +709,7 @@ internal class CallClientImpl(
         logger.v { "[handleSubscriberOffer] #sfu; #subscriber; sendAnswerResult: $sendAnswerResult" }
     }
 
-    private fun updateParticipantsSubscriptions(participants: List<CallParticipant>) {
+    private fun updateParticipantsSubscriptions(participants: List<CallParticipantState>) {
         val subscriptions = mutableMapOf<String, VideoDimension>()
         val userId = credentialsProvider.getUserCredentials().id
 

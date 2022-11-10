@@ -127,6 +127,18 @@ public interface StreamVideo {
     ): Result<Boolean>
 
     /**
+     * Sends a custom event related to an active [Call].
+     *
+     * @param callCid The CID of the channel, describing the type and id.
+     * @param dataJson The data JSON encoded.
+     * @return [Result] which contains if the event was successfully sent.
+     */
+    public suspend fun sendCustomEvent(
+        callCid: String,
+        dataJson: String
+    ): Result<Boolean>
+
+    /**
      * Leaves the currently active call and clears up all connections to it.
      */
     // TODO

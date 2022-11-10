@@ -2,11 +2,11 @@ package io.getstream.video.android.app.ui.call
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import io.getstream.video.android.app.ui.call.content.VideoCallContent
+import io.getstream.video.android.compose.ui.components.call.CallContent
 import io.getstream.video.android.compose.ui.components.incomingcall.IncomingCallScreen
-import io.getstream.video.android.compose.ui.components.outcomingcall.OutgoingCallScreen
-import io.getstream.video.android.model.state.StreamCallState as State
+import io.getstream.video.android.compose.ui.components.outgoingcall.OutgoingCallScreen
 import io.getstream.video.android.viewmodel.CallViewModel
+import io.getstream.video.android.model.state.StreamCallState as State
 
 @Composable
 internal fun CallScreen(
@@ -34,7 +34,7 @@ internal fun CallScreen(
             onVideoToggleChanged = onVideoToggleChanged
         )
     } else {
-        VideoCallContent(
+        CallContent(
             callViewModel = viewModel,
             onLeaveCall = onCancelCall
         )

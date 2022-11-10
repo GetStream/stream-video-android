@@ -36,6 +36,7 @@ import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.activity.StreamCallActivity
 import io.getstream.video.android.app.videoApp
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.model.CallSettings
 import io.getstream.video.android.model.state.StreamCallState
 import io.getstream.video.android.viewmodel.CallViewModel
 import io.getstream.video.android.viewmodel.CallViewModelFactory
@@ -113,7 +114,13 @@ class CallActivity : AppCompatActivity(), StreamCallActivity {
     private fun startVideoFlow() {
         val isInitialized = callViewModel.isVideoInitialized.value
         if (isInitialized) return
-        callViewModel.connectToCall()
+        callViewModel.connectToCall(
+            CallSettings(
+                audioOn = false,
+                videoOn = true,
+                speakerOn = false
+            )
+        )
     }
 
     @RequiresApi(M)

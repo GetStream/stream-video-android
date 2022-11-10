@@ -1,0 +1,174 @@
+### CallViewModel
+
+The `CallViewModel` lets you automate most of the call features and flow, by delegating the call responsibilities to us. We prepared a set of functionality and API that lets you control audio and video devices, the initialization of the call, listening to events and more.
+
+To create the `ViewModel`, you can use its factory:
+
+```kotlin
+private val factory by lazy {
+    CallViewModelFactory(callInput, streamVideo, credentialsProvider)
+}
+
+private val callViewModel by viewModels<CallViewModel>(factoryProducer = { factory })
+```
+
+You're already familiar with `StreamVideo` and `CredentialsProvider`. The last notable parameter of the `CallViewModelFactory` is the `callInput`.
+
+It's a small data structure that contains the aforementioned parameters, as well as a few other ones:
+
+```kotlin
+public data class CallInput(
+    val callCid: String,
+    val callType: String,
+    val callId: String,
+    val callUrl: String,
+    val userToken: String,
+    val iceServers: List<IceServer>,
+) : java.io.Serializable
+```
+
+* `callCid`: The combination of the `callId` and `callType`.
+* `callType`: The type of call.
+* `callId`: Unique identifier of the call for a given type.
+
+You can construct this with the data you get from joining a call. You should create the `CallViewModel` if you want to simplify things when connecting to calls, and you can do it right before connecting to the call and creating the `CallClient`. The `ViewModel` does this internally.
+
+## Functionality
+
+The `CallViewModel` is a wrapper of the `CallClient` and `StreamVideo`. As such, it has a dual purpose:
+
+* Call initialization & state management
+* Call configuration
+
+It exposes a clean API for you to observe different states within an active call. On top of that, it prepares helpful ease-of-use functions that let you control the call configuration.
+
+Let's see how.
+
+### Call Initialization & State management
+
+Once you create the `CallViewModel`, it doesn't automatically connect to the call and create a `CallClient`. To handle the call start and end, you can use its initialization and dispose API:
+
+```kotlin
+// Use to start the call
+public fun connectToCall(callSettings: CallSettings)
+
+// Use to reconnect to a call if the state is cleared/dropped
+public fun reconnect()
+
+// Use to cancel the call send an event to everyone
+public fun cancelCall()
+
+// Creates 
+public fun clearState()
+
+// Automatically called when the ViewModel is disposed, calls leaveCall internally
+override fun onCleared()
+```
+
+Here's an example of how you can start a call once the rest of your setup is done:
+
+```kotlin
+override fun onCreate(savedInstanceState: Bundle?) {
+    // rest of the setup
+    callViewModel.connectToCall(
+        CallSettings(
+            videoOn = true,
+            audioOn = true,
+            speakerOn = true
+        )
+    )
+}
+```
+
+It uses the underlying `CallInput` that you pass in through the `CallViewModelFactory` to build a new `CallClient`, and it sets up state and local tracks based on the `CallSettings` you pass in.
+
+Once the user is connected to the call, various pieces of information are collected and exposed through the state of the `ViewModel`:
+
+```kotlin
+public val isVideoInitialized: StateFlow<Boolean>
+
+public val isCameraEnabled: Flow<Boolean>
+
+public val isMicrophoneEnabled: Flow<Boolean>
+
+public val isShowingParticipantsInfo: StateFlow<Boolean>
+
+public val isShowingSettings: StateFlow<Boolean>
+```
+
+These represent the flags that indicate if the video has been initialized successfully and if we're showing specific UI or if the audio and video devices are enabled. They are fairly simple and can be used to show or hide UI and change the UI state.
+
+Additionally, it's important to know about the call itself, the type of `StreamCallState` you're in, other participants and their tracks or who the primary speaker is:
+
+```kotlin
+public val callState: StateFlow<Call?>
+
+public val streamCallState: StateFlow<StreamCallState>
+
+public val participantList: Flow<List<CallParticipant>>
+
+public val activeSpeakers: Flow<List<CallParticipant>>
+
+public val localParticipant: Flow<CallParticipant>
+```
+
+* `callState`: Represents an instance of `Call`, which holds all the call participants, their extra data, tracks, volume levels and similar. It can also be used as a convenience to enable or disable the local participant tracks.
+* `streamCallState`: Our **call engine** state wrapper, which exposes more information about the state of the call we're in. It can give you information if you're receiving a call, starting a call yourself, if the call dropped and for which reason and similar. Read more about it in our [call engine state guide](../04-guides/02-call-engine-state.mdx).
+* `participantList`: Currently active participants in the call, with their full information and video tracks.
+* `activeSpeakers`: Participants whose audio levels are not at zero (0).
+* `localParticipant`: Ease-of-use accessor that lets you distinguish the local participant from remote ones. 
+
+You can simply collect all of these flows within your UI. If you're using Jetpack Compose, you can transform it into state:
+
+```kotlin
+val currentParticipants = callViewModel.participantList.collectAsState(emptyList())
+
+if (currentParticipants.isNotEmpty()) {
+    // show some UI
+}
+```
+
+If you're coming from XML, you can use this state to set the content of your `View`s. Read more about our [UI components](../03-ui/01-overview.mdx) to see how to utilize this state to render and customize the UI.
+
+Now that you have the state management under your belt, you can explore ways to trigger events in the call and to configure the devices.
+
+### Call Configuration
+
+Using the `CallViewModel`, you can also trigger several functions that let you switch between media devices or to change the internal state that lets you update your UI based on the state:
+
+```kotlin
+public fun showSettings()
+
+public fun showParticipants()
+
+public fun dismissOptions()
+```
+
+This small group lets you change the state of the `isShowingParticipantsInfo` and `isShowingSettings` flag that you can use to show or hide popup UI. We use it in our main, `CallContent` , component for the built-in UI.
+
+Next, you have functions that let you flip the state of the user camera and microphone:
+
+```kotlin
+public fun toggleCamera(enabled: Boolean)
+
+public fun toggleMicrophone(enabled: Boolean)
+
+public fun flipCamera()
+```
+
+* `toggleCamera`: This will enable or disable the internal video track. It affects both the local and remote UI, as a disabled track is not published to other participants.
+* `toggleMicrophone`: Similar to `toggleCamera`, this enables or disables the microphone and the published audio track.
+* `flipCamera`: An ease-of-use accessor that lets the user switch between front and back cameras.
+
+Finally, if you want to get a handle on available audio devices to choose from, you can use the following API:
+
+```kotlin
+public fun getAudioDevices(): List<AudioDevice>
+
+public fun selectAudioDevice(device: AudioDevice)
+```
+
+* `getAudioDevices`: Returns a list of devices the phone has available, to use for audio playback.
+* `selectAudioDevice`: In pair with `getAudioDevices`, it allows you to choose a device to use for audio playback, from the list.
+
+Using the entire API, you should have an easy way of controlling the call state and updating the UI based on the events!

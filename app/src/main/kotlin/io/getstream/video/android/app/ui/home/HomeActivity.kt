@@ -142,7 +142,8 @@ class HomeActivity : AppCompatActivity() {
         Box(modifier = Modifier.fillMaxSize()) {
             UserIcon()
             Column(
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
                     .verticalScroll(rememberScrollState())
             ) {
                 CallOptions()
@@ -329,8 +330,8 @@ class HomeActivity : AppCompatActivity() {
                 ringing = false
             )
             loadingState.value = false
-            result.onSuccess {
-                logger.v { "[joinCall] succeed: $it" }
+            result.onSuccess { data ->
+                logger.v { "[joinCall] succeed: $data" }
                 router.navigateToCall(
                     finishCurrent = false
                 )

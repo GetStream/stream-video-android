@@ -26,6 +26,7 @@ import stream.video.coordinator.client_v1_rpc.GetOrCreateCallRequest
 import stream.video.coordinator.client_v1_rpc.GetOrCreateCallResponse
 import stream.video.coordinator.client_v1_rpc.JoinCallRequest
 import stream.video.coordinator.client_v1_rpc.JoinCallResponse
+import stream.video.coordinator.client_v1_rpc.SendCustomEventRequest
 import stream.video.coordinator.client_v1_rpc.SendEventRequest
 
 public interface CallCoordinatorClient {
@@ -45,7 +46,7 @@ public interface CallCoordinatorClient {
      * @param getOrCreateCallRequest The information used to describe the call.
      * @return [CreateCallResponse] which holds the cached or newly created [Call].
      */
-    public suspend fun getOrCreateCall(getOrCreateCallRequest: GetOrCreateCallRequest): Result<GetOrCreateCallResponse>
+    public suspend fun getOrCreateCall(createCallRequest: GetOrCreateCallRequest): Result<GetOrCreateCallResponse>
 
     /**
      * Asks the server to join a call. This gives the user information which servers they can
@@ -72,4 +73,11 @@ public interface CallCoordinatorClient {
      * @return a [Result] wrapper if the call succeeded or not.
      */
     public suspend fun sendUserEvent(sendEventRequest: SendEventRequest): Result<Boolean>
+
+    /**
+     * Sends a custom event with encoded JSON data.
+     *
+     * @param sendCustomEventRequest The request holding the CID and the data.
+     */
+    public suspend fun sendCustomEvent(sendCustomEventRequest: SendCustomEventRequest): Result<Boolean>
 }

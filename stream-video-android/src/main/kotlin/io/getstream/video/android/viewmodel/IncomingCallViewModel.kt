@@ -21,10 +21,8 @@ import androidx.lifecycle.viewModelScope
 import io.getstream.logging.StreamLog
 import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.model.CallEventType
-import io.getstream.video.android.model.CallInput
 import io.getstream.video.android.model.CallType
 import io.getstream.video.android.model.CallUser
-import io.getstream.video.android.model.JoinedCall
 import io.getstream.video.android.router.StreamRouter
 import io.getstream.video.android.utils.flatMap
 import io.getstream.video.android.utils.map
@@ -106,13 +104,4 @@ public class IncomingCallViewModel(
             logger.d { "[declineCall] result: $result" }
         }
     }
-
-    private fun JoinedCall.toCallInput() = CallInput(
-        callCid = call.cid,
-        callType = call.type,
-        callId = call.id,
-        callUrl = callUrl,
-        userToken = userToken,
-        iceServers = iceServers
-    )
 }

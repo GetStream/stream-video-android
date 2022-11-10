@@ -26,7 +26,6 @@ import io.getstream.video.android.call.CallClient
 import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.CallEventType
 import io.getstream.video.android.model.CallMetadata
-import io.getstream.video.android.model.CallParticipant
 import io.getstream.video.android.model.CallParticipantState
 import io.getstream.video.android.model.CallSettings
 import io.getstream.video.android.model.CallType
@@ -42,8 +41,10 @@ import io.getstream.video.android.utils.onSuccessSuspend
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
@@ -63,22 +64,31 @@ public class CallViewModel(
     private var _isVideoInitialized: MutableStateFlow<Boolean> = MutableStateFlow(false)
     public val isVideoInitialized: StateFlow<Boolean> = _isVideoInitialized
 
-    private val _isCameraEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    public val isCameraEnabled: Flow<Boolean> = _isCameraEnabled
+    private val hasVideoPermission: MutableStateFlow<Boolean> =
+        MutableStateFlow(input.hasVideoPermission)
+    private val isVideoEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
-    private val _isMicrophoneEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    public val isMicrophoneEnabled: Flow<Boolean> = _isMicrophoneEnabled
+    public val isVideoOn: Flow<Boolean> =
+        hasVideoPermission.combine(isVideoEnabled) { hasPermission, videoEnabled ->
+            hasPermission && videoEnabled
+        }
 
-    public val participantList: Flow<List<CallParticipant>> =
+    private val hasAudioPermission: MutableStateFlow<Boolean> =
+        MutableStateFlow(input.hasAudioPermission)
+    private val isAudioEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
+
+    public val isAudioOn: Flow<Boolean> =
+        hasAudioPermission.combine(isAudioEnabled) { hasPermission, audioEnabled ->
+            hasPermission && audioEnabled
+        }
+
+    public val participantList: Flow<List<CallParticipantState>> =
         callState.filterNotNull().flatMapLatest { it.callParticipants }
 
-    public val participantsState: Flow<List<CallParticipantState>> =
-        callState.filterNotNull().flatMapLatest { it.callParticipantState }
-
-    public val activeSpeakers: Flow<List<CallParticipant>> =
+    public val activeSpeakers: Flow<List<CallParticipantState>> =
         callState.filterNotNull().flatMapLatest { it.activeSpeakers }
 
-    public val localParticipant: Flow<CallParticipant> =
+    public val localParticipant: Flow<CallParticipantState> =
         callState.filterNotNull().flatMapLatest { it.localParticipant }
 
     private val _isShowingParticipantsInfo = MutableStateFlow(false)
@@ -97,6 +107,12 @@ public class CallViewModel(
 
     private val _participants: MutableStateFlow<List<CallUser>> = MutableStateFlow(emptyList())
     public val participants: StateFlow<List<CallUser>> = _participants
+
+    private val _isMicrophoneEnabled = MutableStateFlow(false)
+    public val isMicrophoneEnabled: StateFlow<Boolean> = _isMicrophoneEnabled
+
+    private val _isCameraEnabled = MutableStateFlow(false)
+    public val isCameraEnabled: StateFlow<Boolean> = _isCameraEnabled
 
     private lateinit var client: CallClient
 
@@ -144,8 +160,8 @@ public class CallViewModel(
         }
     }
 
-    public fun connectToCall() {
-
+    public fun connectToCall(callSettings: CallSettings) {
+        logger.d { "[createCall] input: $callSettings" }
         // this._callState.value = videoClient.getCall(callId) TODO - load details
 
         // TODO CallClient is supposed to live longer than VM
@@ -161,23 +177,14 @@ public class CallViewModel(
                     state.iceServers,
                 )
                 _isVideoInitialized.value = true
-
-                connectToCall(
-                    callSettings = CallSettings(
-                        audioOn = true,
-                        videoOn = true,
-                        speakerOn = true
-                    )
-                )
-                logger.v { "[connectToCall] completed" }
+                initializeCall(callSettings = callSettings)
             }
         }
     }
 
-    private suspend fun connectToCall(callSettings: CallSettings) {
+    private suspend fun initializeCall(callSettings: CallSettings) {
         val callResult = client.connectToCall(
             UUID.randomUUID().toString(),
-            true/*false*/,
             callSettings
         )
 
@@ -185,8 +192,12 @@ public class CallViewModel(
             is Success -> {
                 val call = callResult.data
                 _callState.value = call
+                isVideoEnabled.value = callSettings.videoOn
+                isAudioEnabled.value = callSettings.audioOn
 
-                if (callSettings.videoOn) {
+                val isVideoOn = isVideoOn.firstOrNull() ?: false
+
+                if (callSettings.autoPublish && isVideoOn) {
                     client.startCapturingLocalVideo(CameraMetadata.LENS_FACING_FRONT)
                 }
             }
@@ -211,6 +222,9 @@ public class CallViewModel(
         client.flipCamera()
     }
 
+    /**
+     * Sets the flag used to display the settings menu in the UI to true.
+     */
     public fun showSettings() {
         _isShowingSettings.value = true
     }
@@ -240,10 +254,16 @@ public class CallViewModel(
         clearState()
     }
 
+    /**
+     * Sets the flag used to display participants info menu in the UI to true.
+     */
     public fun showParticipants() {
         this._isShowingParticipantsInfo.value = true
     }
 
+    /**
+     * Drops the call by sending a cancel event, which informs other users.
+     */
     public fun cancelCall() {
         val state = streamVideo.callState.value
         if (state !is State.Active) {
@@ -256,23 +276,44 @@ public class CallViewModel(
         }
     }
 
+    /**
+     * @return A [List] of [AudioDevice] that can be used for playback.
+     */
     public fun getAudioDevices(): List<AudioDevice> {
         return client.getAudioDevices()
     }
 
-    private fun clearState() {
+    /**
+     * Clears the state of the call and disposes of the CallClient and Call instances.
+     */
+    public fun clearState() {
         logger.i { "[leaveCall] no args" }
         streamVideo.clearCallState()
         val room = _callState.value ?: return
 
         room.disconnect()
+        _callState.value = null
+        isVideoEnabled.value = false
+        isAudioEnabled.value = false
+        hasAudioPermission.value = false
+        hasVideoPermission.value = false
+        _isVideoInitialized.value = false
+        dismissOptions()
     }
 
+    /**
+     * Resets the state of two popup UI flags.
+     */
     public fun dismissOptions() {
         this._isShowingSettings.value = false
         this._isShowingParticipantsInfo.value = false
     }
 
+    /**
+     * Selects an audio device to be used for playback.
+     *
+     * @param device The device to use.
+     */
     public fun selectAudioDevice(device: AudioDevice) {
         client.selectAudioDevice(device)
     }

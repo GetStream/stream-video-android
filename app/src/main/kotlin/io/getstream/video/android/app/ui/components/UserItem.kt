@@ -101,7 +101,7 @@ fun UserItem(
                         .size(40.dp)
                         .align(alignment = Alignment.Center),
                     imageUrl = credentials.image,
-                    initials = credentials.name
+                    initials = credentials.name.split(" ").joinToString { it }
                 )
             }
 

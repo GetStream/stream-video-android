@@ -16,17 +16,17 @@
 
 package io.getstream.video.android.compose.ui.components.mock
 
-import io.getstream.video.android.model.CallParticipant
+import io.getstream.video.android.model.CallParticipantState
 import stream.video.sfu.models.User
 
-internal val mockParticipant: CallParticipant
+internal val mockParticipant: CallParticipantState
     inline get() = mockUsers[0].toCallParticipant()
 
-internal val mockParticipantList: List<CallParticipant>
+internal val mockParticipantList: List<CallParticipantState>
     inline get() = mockUsers.map { it.toCallParticipant() }
 
 private fun User.toCallParticipant() =
-    CallParticipant(
+    CallParticipantState(
         id = this.id,
         name = this.name,
         profileImageURL = this.image_url,

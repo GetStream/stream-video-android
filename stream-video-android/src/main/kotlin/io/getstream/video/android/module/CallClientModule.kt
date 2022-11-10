@@ -16,9 +16,9 @@
 
 package io.getstream.video.android.module
 
+import io.getstream.video.android.api.SignalServerService
 import io.getstream.video.android.call.signal.SignalClient
 import io.getstream.video.android.call.signal.SignalClientImpl
-import io.getstream.video.android.call.signal.SignalService
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.wire.WireConverterFactory
@@ -37,7 +37,7 @@ internal class CallClientModule(
     }
 
     internal val signalClient: SignalClient by lazy {
-        val service = signalRetrofitClient.create(SignalService::class.java)
+        val service = signalRetrofitClient.create(SignalServerService::class.java)
 
         SignalClientImpl(service)
     }
