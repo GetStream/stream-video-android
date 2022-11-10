@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.call.signal
 
+import io.getstream.video.android.api.SignalServerService
 import io.getstream.video.android.utils.Result
 import io.getstream.video.android.utils.fetchResult
 import stream.video.sfu.models.ICETrickle
@@ -30,13 +31,13 @@ import stream.video.sfu.signal.UpdateSubscriptionsRequest
 import stream.video.sfu.signal.UpdateSubscriptionsResponse
 
 public class SignalClientImpl(
-    private val signalService: SignalService
+    private val signalService: SignalServerService
 ) : SignalClient {
     override suspend fun sendAnswer(request: SendAnswerRequest): Result<SendAnswerResponse> =
         fetchResult { signalService.sendAnswer(request) }
 
     override suspend fun sendIceCandidate(request: ICETrickle): Result<ICETrickleResponse> =
-        fetchResult { signalService.sendIceCandidate(request) }
+        fetchResult { signalService.iceTrickle(request) }
 
     override suspend fun setPublisher(request: SetPublisherRequest): Result<SetPublisherResponse> =
         fetchResult { signalService.setPublisher(request) }

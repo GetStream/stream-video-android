@@ -7,6 +7,7 @@ plugins {
     id 'org.jetbrains.kotlin.plugin.serialization'
     id 'com.squareup.wire'
     id 'binary-compatibility-validator'
+    id 'io.getstream.video.generateServices'
 }
 
 wire {
@@ -19,6 +20,8 @@ wire {
         // TODO -> check proto docs to generate a library instead of files directly
     }
 }
+
+generateRPCServices {}
 
 android {
     compileSdk Configuration.compileSdk
@@ -36,6 +39,10 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+    }
+
+    sourceSets {
+        main.java.srcDirs += "build/generated/source/services"
     }
 
     compileOptions {
