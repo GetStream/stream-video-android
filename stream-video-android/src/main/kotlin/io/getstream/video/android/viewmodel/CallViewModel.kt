@@ -53,6 +53,7 @@ import io.getstream.video.android.model.state.StreamCallState as State
 
 public class CallViewModel(
     private val streamVideo: StreamVideo,
+    private val permissionManager: PermissionManager
 ) : ViewModel() {
 
     private val logger = StreamLog.getLogger("Call:ViewModel")
@@ -65,7 +66,7 @@ public class CallViewModel(
     public val isVideoInitialized: StateFlow<Boolean> = _isVideoInitialized
 
     private val hasVideoPermission: MutableStateFlow<Boolean> =
-        MutableStateFlow(input.hasVideoPermission)
+        MutableStateFlow(permissionManager.hasVideoPermission)
     private val isVideoEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
     public val isVideoOn: Flow<Boolean> =
@@ -74,7 +75,7 @@ public class CallViewModel(
         }
 
     private val hasAudioPermission: MutableStateFlow<Boolean> =
-        MutableStateFlow(input.hasAudioPermission)
+        MutableStateFlow(permissionManager.hasAudioPermission)
     private val isAudioEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
     public val isAudioOn: Flow<Boolean> =

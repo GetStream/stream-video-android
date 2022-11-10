@@ -40,11 +40,12 @@ import io.getstream.video.android.model.CallSettings
 import io.getstream.video.android.model.state.StreamCallState
 import io.getstream.video.android.viewmodel.CallViewModel
 import io.getstream.video.android.viewmodel.CallViewModelFactory
+import io.getstream.video.android.viewmodel.PermissionManagerImpl
 
 class CallActivity : AppCompatActivity(), StreamCallActivity {
 
     private val factory by lazy {
-        CallViewModelFactory(videoApp.streamVideo)
+        CallViewModelFactory(videoApp.streamVideo, PermissionManagerImpl(applicationContext))
     }
 
     private val callViewModel by viewModels<CallViewModel>(factoryProducer = { factory })
