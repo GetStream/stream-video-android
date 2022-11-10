@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.outcomingcall
+package io.getstream.video.android.compose.ui.components.outgoingcall
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding

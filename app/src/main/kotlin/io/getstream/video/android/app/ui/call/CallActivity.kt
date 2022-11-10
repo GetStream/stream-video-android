@@ -32,9 +32,10 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import io.getstream.video.android.app.ui.call.content.VideoCallContent
 import io.getstream.video.android.app.videoApp
+import io.getstream.video.android.compose.ui.components.call.CallContent
 import io.getstream.video.android.model.CallInput
+import io.getstream.video.android.model.CallSettings
 import io.getstream.video.android.model.state.StreamCallState
 import io.getstream.video.android.viewmodel.CallViewModel
 import io.getstream.video.android.viewmodel.CallViewModelFactory
@@ -74,7 +75,7 @@ class CallActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            VideoCallContent(callViewModel, onLeaveCall = callViewModel::leaveCall)
+            CallContent(callViewModel, onLeaveCall = callViewModel::leaveCall)
         }
 
         lifecycleScope.launchWhenCreated {
@@ -107,7 +108,13 @@ class CallActivity : AppCompatActivity() {
     private fun startVideoFlow() {
         val isInitialized = callViewModel.isVideoInitialized.value
         if (isInitialized) return
-        callViewModel.connectToCall()
+        callViewModel.connectToCall(
+            CallSettings(
+                audioOn = false,
+                videoOn = true,
+                speakerOn = false
+            )
+        )
     }
 
     @RequiresApi(M)

@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components
+package io.getstream.video.android.compose.ui.components.participants.internal
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import io.getstream.video.android.compose.ui.components.participants.ParticipantsContent
+import io.getstream.video.android.compose.ui.components.participants.CallParticipants
 import io.getstream.video.android.model.Call
 import org.webrtc.SurfaceViewRenderer
 
 @Composable
-public fun MainStage(
+internal fun MainStage(
     call: Call,
     modifier: Modifier = Modifier
 ) {
     Box(modifier = modifier) {
-        ParticipantsContent(
+        CallParticipants(
             modifier = Modifier.fillMaxSize(),
             call = call,
             onRender = {

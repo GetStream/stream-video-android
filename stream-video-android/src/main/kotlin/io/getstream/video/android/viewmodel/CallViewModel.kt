@@ -25,7 +25,6 @@ import io.getstream.video.android.audio.AudioDevice
 import io.getstream.video.android.call.CallClient
 import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.CallInput
-import io.getstream.video.android.model.CallParticipant
 import io.getstream.video.android.model.CallParticipantState
 import io.getstream.video.android.model.CallSettings
 import io.getstream.video.android.model.state.StreamCallState
@@ -62,16 +61,13 @@ public class CallViewModel(
     private val _isMicrophoneEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
     public val isMicrophoneEnabled: Flow<Boolean> = _isMicrophoneEnabled
 
-    public val participantList: Flow<List<CallParticipant>> =
+    public val participantList: Flow<List<CallParticipantState>> =
         callState.filterNotNull().flatMapLatest { it.callParticipants }
 
-    public val participantsState: Flow<List<CallParticipantState>> =
-        callState.filterNotNull().flatMapLatest { it.callParticipantState }
-
-    public val activeSpeakers: Flow<List<CallParticipant>> =
+    public val activeSpeakers: Flow<List<CallParticipantState>> =
         callState.filterNotNull().flatMapLatest { it.activeSpeakers }
 
-    public val localParticipant: Flow<CallParticipant> =
+    public val localParticipant: Flow<CallParticipantState> =
         callState.filterNotNull().flatMapLatest { it.localParticipant }
 
     private val _isShowingParticipantsInfo = MutableStateFlow(false)
@@ -99,7 +95,7 @@ public class CallViewModel(
         }
     }
 
-    public fun connectToCall() {
+    public fun connectToCall(callSettings: CallSettings) {
         logger.d { "[createCall] input: $input" }
         // this._callState.value = videoClient.getCall(callId) TODO - load details
 
@@ -111,16 +107,10 @@ public class CallViewModel(
         )
         _isVideoInitialized.value = true
 
-        connectToCall(
-            callSettings = CallSettings(
-                audioOn = true,
-                videoOn = true,
-                speakerOn = true
-            )
-        )
+        initializeCall(callSettings = callSettings)
     }
 
-    private fun connectToCall(callSettings: CallSettings) {
+    private fun initializeCall(callSettings: CallSettings) {
         viewModelScope.launch {
             val callResult = client.connectToCall(
                 UUID.randomUUID().toString(),

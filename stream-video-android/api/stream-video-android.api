@@ -1496,9 +1496,8 @@ public final class io/getstream/video/android/logging/LoggingLevel : java/lang/E
 public final class io/getstream/video/android/model/Call {
 	public fun <init> (Landroid/content/Context;Lio/getstream/video/android/token/CredentialsProvider;Lorg/webrtc/EglBase;)V
 	public final fun getActiveSpeakers ()Lkotlinx/coroutines/flow/Flow;
-	public final fun getCallParticipantState ()Lkotlinx/coroutines/flow/Flow;
 	public final fun getCallParticipants ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun getLocalParticipant ()Lio/getstream/video/android/model/CallParticipant;
+	public final fun getLocalParticipant ()Lio/getstream/video/android/model/CallParticipantState;
 	public final fun getLocalParticipant ()Lkotlinx/coroutines/flow/Flow;
 	public final fun getLocalParticipantId ()Ljava/lang/String;
 	public final fun getLocalParticipantIdPrefix ()Ljava/lang/String;
@@ -1638,7 +1637,7 @@ public final class io/getstream/video/android/model/CallMetadataKt {
 	public static final fun toMembers (Ljava/util/Map;Ljava/lang/String;)Ljava/util/Map;
 }
 
-public final class io/getstream/video/android/model/CallParticipant {
+public final class io/getstream/video/android/model/CallParticipantState {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZZZLio/getstream/video/android/model/VideoTrack;Lkotlin/Pair;FLjava/lang/String;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component10 ()Lkotlin/Pair;
@@ -1652,8 +1651,8 @@ public final class io/getstream/video/android/model/CallParticipant {
 	public final fun component7 ()Z
 	public final fun component8 ()Z
 	public final fun component9 ()Lio/getstream/video/android/model/VideoTrack;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZZZLio/getstream/video/android/model/VideoTrack;Lkotlin/Pair;FLjava/lang/String;)Lio/getstream/video/android/model/CallParticipant;
-	public static synthetic fun copy$default (Lio/getstream/video/android/model/CallParticipant;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZZZLio/getstream/video/android/model/VideoTrack;Lkotlin/Pair;FLjava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/model/CallParticipant;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZZZLio/getstream/video/android/model/VideoTrack;Lkotlin/Pair;FLjava/lang/String;)Lio/getstream/video/android/model/CallParticipantState;
+	public static synthetic fun copy$default (Lio/getstream/video/android/model/CallParticipantState;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZZZLio/getstream/video/android/model/VideoTrack;Lkotlin/Pair;FLjava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/model/CallParticipantState;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAudioLevel ()F
 	public final fun getHasAudio ()Z
@@ -1677,25 +1676,8 @@ public final class io/getstream/video/android/model/CallParticipant {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/model/CallParticipantKt {
-	public static final fun toCallParticipant (Lstream/video/sfu/models/Participant;Ljava/lang/String;)Lio/getstream/video/android/model/CallParticipant;
-}
-
-public final class io/getstream/video/android/model/CallParticipantState {
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;ZZ)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Z
-	public final fun component4 ()Z
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;ZZ)Lio/getstream/video/android/model/CallParticipantState;
-	public static synthetic fun copy$default (Lio/getstream/video/android/model/CallParticipantState;Ljava/lang/String;Ljava/lang/String;ZZILjava/lang/Object;)Lio/getstream/video/android/model/CallParticipantState;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getUserId ()Ljava/lang/String;
-	public final fun getUserName ()Ljava/lang/String;
-	public fun hashCode ()I
-	public final fun isLocalAudioEnabled ()Z
-	public final fun isLocalVideoEnabled ()Z
-	public fun toString ()Ljava/lang/String;
+public final class io/getstream/video/android/model/CallParticipantStateKt {
+	public static final fun toCallParticipant (Lstream/video/sfu/models/Participant;Ljava/lang/String;)Lio/getstream/video/android/model/CallParticipantState;
 }
 
 public final class io/getstream/video/android/model/CallSettings {
@@ -2477,7 +2459,7 @@ public final class io/getstream/video/android/utils/TokenUtilsKt {
 
 public final class io/getstream/video/android/viewmodel/CallViewModel : androidx/lifecycle/ViewModel {
 	public fun <init> (Lio/getstream/video/android/model/CallInput;Lio/getstream/video/android/StreamVideo;Lio/getstream/video/android/token/CredentialsProvider;)V
-	public final fun connectToCall ()V
+	public final fun connectToCall (Lio/getstream/video/android/model/CallSettings;)V
 	public final fun dismissOptions ()V
 	public final fun flipCamera ()V
 	public final fun getActiveSpeakers ()Lkotlinx/coroutines/flow/Flow;
@@ -2485,7 +2467,6 @@ public final class io/getstream/video/android/viewmodel/CallViewModel : androidx
 	public final fun getCallState ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getLocalParticipant ()Lkotlinx/coroutines/flow/Flow;
 	public final fun getParticipantList ()Lkotlinx/coroutines/flow/Flow;
-	public final fun getParticipantsState ()Lkotlinx/coroutines/flow/Flow;
 	public final fun getStreamCallState ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun isCameraEnabled ()Lkotlinx/coroutines/flow/Flow;
 	public final fun isMicrophoneEnabled ()Lkotlinx/coroutines/flow/Flow;

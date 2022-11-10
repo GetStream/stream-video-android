@@ -48,7 +48,7 @@ import io.getstream.video.android.events.SfuParticipantJoinedEvent
 import io.getstream.video.android.events.SfuParticipantLeftEvent
 import io.getstream.video.android.events.SubscriberOfferEvent
 import io.getstream.video.android.model.Call
-import io.getstream.video.android.model.CallParticipant
+import io.getstream.video.android.model.CallParticipantState
 import io.getstream.video.android.model.CallSettings
 import io.getstream.video.android.model.IceCandidate
 import io.getstream.video.android.model.IceServer
@@ -703,7 +703,7 @@ internal class CallClientImpl(
         logger.v { "[handleSubscriberOffer] #sfu; #subscriber; sendAnswerResult: $sendAnswerResult" }
     }
 
-    private fun updateParticipantsSubscriptions(participants: List<CallParticipant>) {
+    private fun updateParticipantsSubscriptions(participants: List<CallParticipantState>) {
         val subscriptions = mutableMapOf<String, VideoDimension>()
         val userId = credentialsProvider.getUserCredentials().id
 
