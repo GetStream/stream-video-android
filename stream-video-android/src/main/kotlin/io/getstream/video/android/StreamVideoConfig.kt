@@ -22,5 +22,5 @@ public interface StreamVideoConfig {
 }
 
 public object StreamVideoConfigDefault : StreamVideoConfig {
-    override val dropTimeout: Long = 10_000L
+    override val dropTimeout: Long = 30_000L
 }

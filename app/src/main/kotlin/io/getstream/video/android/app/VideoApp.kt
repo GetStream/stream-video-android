@@ -16,14 +16,13 @@
 
 package io.getstream.video.android.app
 
-import android.app.Activity
 import android.app.Application
 import android.content.Context
 import io.getstream.logging.StreamLog
 import io.getstream.logging.android.AndroidStreamLogger
 import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.StreamVideoBuilder
-import io.getstream.video.android.app.lifecycle.StreamActivityLifecycleCallbacks
+import io.getstream.video.android.app.router.StreamRouterImpl
 import io.getstream.video.android.app.ui.call.CallActivity
 import io.getstream.video.android.app.ui.call.CallService
 import io.getstream.video.android.app.user.UserPreferences
@@ -31,13 +30,10 @@ import io.getstream.video.android.app.user.UserPreferencesImpl
 import io.getstream.video.android.input.CallActivityInput
 import io.getstream.video.android.input.CallServiceInput
 import io.getstream.video.android.logging.LoggingLevel
+import io.getstream.video.android.router.StreamRouter
 import io.getstream.video.android.token.CredentialsProvider
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 
 class VideoApp : Application() {
-
-    private val appScope = CoroutineScope(Dispatchers.Main)
 
     val userPreferences: UserPreferences by lazy {
         UserPreferencesImpl(
@@ -51,7 +47,8 @@ class VideoApp : Application() {
     lateinit var streamVideo: StreamVideo
         private set
 
-    private var currentActivity: Activity? = null
+    lateinit var streamRouter: StreamRouter
+        private set
 
     override fun onCreate() {
         super.onCreate()
@@ -61,11 +58,9 @@ class VideoApp : Application() {
         }
         StreamLog.i(TAG) { "[onCreate] no args" }
         registerActivityLifecycleCallbacks(
-            StreamActivityLifecycleCallbacks(
-                onActivityCreated = { currentActivity = it },
-                onActivityStarted = { currentActivity = it },
-                onLastActivityStopped = { currentActivity = null },
-            )
+            StreamRouterImpl().also {
+                streamRouter = it
+            }
         )
     }
 

@@ -61,7 +61,7 @@ internal class StreamNotificationBuilderImpl(
             actionReceiver.registerAsFlow().collect {
                 logger.v { "[observeAction] action: $it" }
                 when (it) {
-                    is NotificationAction.Accept -> streamVideo.acceptCall(it.guid.type, it.guid.id)
+                    is NotificationAction.Accept -> streamVideo.acceptCall(it.guid.cid)
                     is NotificationAction.Reject -> streamVideo.rejectCall(it.guid.cid)
                     is NotificationAction.Cancel -> streamVideo.cancelCall(it.guid.cid)
                 }

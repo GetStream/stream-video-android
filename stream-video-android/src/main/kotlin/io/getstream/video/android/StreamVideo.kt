@@ -25,7 +25,6 @@ import io.getstream.video.android.model.JoinedCall
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.state.StreamCallState
 import io.getstream.video.android.socket.SocketListener
-import io.getstream.video.android.token.CredentialsProvider
 import io.getstream.video.android.utils.Result
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
@@ -186,7 +185,7 @@ public interface StreamVideo {
 
     public fun getActiveCallClient(): CallClient?
 
-    public suspend fun acceptCall(type: String, id: String): Result<JoinedCall>
+    public suspend fun acceptCall(cid: String): Result<JoinedCall>
 
     public suspend fun rejectCall(cid: String): Result<Boolean>
 

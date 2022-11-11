@@ -17,59 +17,52 @@
 package io.getstream.video.android.app.router
 
 import android.app.Activity
-import android.content.Context
+import android.app.Application
 import android.content.Intent
-import android.widget.Toast
+import android.os.Bundle
 import io.getstream.logging.StreamLog
-import io.getstream.video.android.app.ui.call.CallActivity
-import io.getstream.video.android.app.ui.incoming.IncomingCallActivity
+import io.getstream.video.android.app.ui.home.HomeActivity
 import io.getstream.video.android.app.ui.login.LoginActivity
-import io.getstream.video.android.app.ui.outgoing.OutgoingCallActivity
-import io.getstream.video.android.model.JoinedCall
 import io.getstream.video.android.router.StreamRouter
-import io.getstream.video.android.utils.buildCallInput
 
-class StreamRouterImpl(
-    private val context: Context
-) : StreamRouter {
+class StreamRouterImpl : StreamRouter, Application.ActivityLifecycleCallbacks {
 
     private val logger = StreamLog.getLogger("Call:StreamRouter")
 
-    override fun navigateToCall(
-        finishCurrent: Boolean
-    ) {
-        /*context.startActivity(CallActivity.getIntent(context, buildCallInput(context, joinedCall)))
-        if (finishCurrent) {
-            finish()
-        }*/
-    }
-
-    override fun onIncomingCall() {
-        /*context.startActivity(
-            IncomingCallActivity.getLaunchIntent(context)
-        )*/
-    }
-
-    override fun onOutgoingCall() {
-        /*context.startActivity(
-            OutgoingCallActivity.getIntent(context)
-        )*/
-    }
-
-    override fun onCallFailed(reason: String?) {
-        logger.e { "[onCallFailed] reason: $reason" }
-        reason?.let { Toast.makeText(context, it, Toast.LENGTH_SHORT).show() }
-        finish()
-    }
+    private var currentActivity: Activity? = null
 
     override fun finish() {
         logger.i { "[finish] no args" }
-        (context as? Activity)?.finish()
+        currentActivity?.finish()
+    }
+
+    override fun onUserLoggedIn() {
+        logger.i { "[onUserLoggedIn] no args" }
+        currentActivity?.also {
+            it.startActivity(HomeActivity.getIntent(it))
+            it.finish()
+        }
     }
 
     override fun onUserLoggedOut() {
         logger.i { "[onUserLoggedOut] no args" }
-        context.startActivity(Intent(context, LoginActivity::class.java))
-        finish()
+        currentActivity?.also {
+            it.startActivity(Intent(it, LoginActivity::class.java))
+            it.finish()
+        }
     }
+
+    override fun onActivityCreated(activity: Activity, bundle: Bundle?) { currentActivity = activity }
+
+    override fun onActivityStarted(activity: Activity) { currentActivity = activity }
+
+    override fun onActivityResumed(activity: Activity) { currentActivity = activity }
+
+    override fun onActivityPaused(activity: Activity) { currentActivity = null }
+
+    override fun onActivityStopped(activity: Activity) { /* no-op */ }
+
+    override fun onActivitySaveInstanceState(activity: Activity, bundle: Bundle) { /* no-op */ }
+
+    override fun onActivityDestroyed(activity: Activity) { /* no-op */ }
 }

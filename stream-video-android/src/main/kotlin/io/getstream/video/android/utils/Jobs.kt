@@ -14,23 +14,25 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.viewmodel
+package io.getstream.video.android.utils
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import io.getstream.video.android.StreamVideo
-import io.getstream.video.android.router.StreamRouter
+import kotlinx.coroutines.Job
 
-public class IncomingCallViewModelFactory(
-    private val streamVideo: StreamVideo,
-    private val streamRouter: StreamRouter,
-) : ViewModelProvider.Factory {
+internal class Jobs {
 
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return IncomingCallViewModel(
-            streamVideo = streamVideo,
-            streamRouter = streamRouter,
-        ) as T
+    private val jobs = hashMapOf<Int, Job>()
+
+    fun add(id: Int, job: Job) {
+        jobs[id]?.cancel()
+        jobs[id] = job
+    }
+
+    fun cancel(id: Int) {
+        jobs.remove(id)?.cancel()
+    }
+
+    fun cancelAll() {
+        jobs.values.forEach { it.cancel() }
+        jobs.clear()
     }
 }

@@ -18,17 +18,9 @@ package io.getstream.video.android.router
 
 public interface StreamRouter {
 
-    public fun navigateToCall(
-        finishCurrent: Boolean
-    )
-
-    public fun onIncomingCall()
-
-    public fun onOutgoingCall()
-
-    public fun finish()
-
-    public fun onCallFailed(reason: String?)
+    public fun onUserLoggedIn()
 
     public fun onUserLoggedOut()
+
+    public fun finish()
 }

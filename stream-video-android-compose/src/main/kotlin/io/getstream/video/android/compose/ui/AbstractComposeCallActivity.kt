@@ -14,38 +14,44 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.dogfooding
+package io.getstream.video.android.compose.ui
 
 import android.Manifest
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
-import android.os.Build.VERSION_CODES.M
 import android.os.Bundle
 import android.provider.Settings
+import android.view.WindowManager
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import io.getstream.video.android.compose.ui.components.call.CallContent
+import androidx.lifecycle.lifecycleScope
+import io.getstream.video.android.StreamVideo
+import io.getstream.video.android.activity.StreamCallActivity
+import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.call.CallScreen
 import io.getstream.video.android.model.CallSettings
+import io.getstream.video.android.model.state.StreamCallState
 import io.getstream.video.android.viewmodel.CallViewModel
 import io.getstream.video.android.viewmodel.CallViewModelFactory
 import io.getstream.video.android.viewmodel.PermissionManagerImpl
 
-class CallActivity : AppCompatActivity() {
+public abstract class AbstractComposeCallActivity : AppCompatActivity(), StreamCallActivity {
+
+    private val streamVideo: StreamVideo by lazy { getStreamVideo(this) }
 
     private val factory by lazy {
-        CallViewModelFactory(dogfoodingApp.streamVideo, PermissionManagerImpl(applicationContext))
+        CallViewModelFactory(streamVideo, PermissionManagerImpl(applicationContext))
     }
 
     private val callViewModel by viewModels<CallViewModel>(factoryProducer = { factory })
 
-    @RequiresApi(M)
+    @RequiresApi(Build.VERSION_CODES.M)
     private val permissionsContract = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
@@ -58,29 +64,40 @@ class CallActivity : AppCompatActivity() {
             missing.isNotEmpty() && !deniedCamera && !deniedMicrophone -> requestPermissions(missing)
             isGranted -> startVideoFlow()
             deniedCamera || deniedMicrophone -> showPermissionsDialog()
-            else -> checkPermissions()
+            else -> {
+                checkPermissions()
+            }
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        showWhenLockedAndTurnScreenOn()
         super.onCreate(savedInstanceState)
-
         setContent {
-            CallContent(
-                callViewModel,
-                onLeaveCall = ::leaveCall
-            )
+            VideoTheme {
+                CallScreen(
+                    viewModel = callViewModel,
+                    onRejectCall = callViewModel::rejectCall,
+                    onAcceptCall = callViewModel::acceptCall,
+                    onCancelCall = callViewModel::cancelCall,
+                    onVideoToggleChanged = callViewModel::onVideoChanged,
+                    onMicToggleChanged = callViewModel::onMicrophoneChanged,
+                )
+            }
         }
-    }
 
-    private fun leaveCall() {
-        callViewModel.cancelCall()
-        finish()
+        lifecycleScope.launchWhenCreated {
+            callViewModel.streamCallState.collect {
+                if (it is StreamCallState.Idle) {
+                    finish()
+                }
+            }
+        }
     }
 
     override fun onResume() {
         super.onResume()
-        if (Build.VERSION.SDK_INT >= M) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             checkPermissions()
         } else {
             startVideoFlow()
@@ -108,7 +125,7 @@ class CallActivity : AppCompatActivity() {
         )
     }
 
-    @RequiresApi(M)
+    @RequiresApi(Build.VERSION_CODES.M)
     private fun checkPermissions() {
         val missing = getMissingPermissions()
 
@@ -119,7 +136,7 @@ class CallActivity : AppCompatActivity() {
         }
     }
 
-    @RequiresApi(M)
+    @RequiresApi(Build.VERSION_CODES.M)
     private fun requestPermissions(permissions: Array<out String>) {
         val deniedCamera = !shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)
         val deniedMicrophone =
@@ -132,7 +149,7 @@ class CallActivity : AppCompatActivity() {
         }
     }
 
-    @RequiresApi(M)
+    @RequiresApi(Build.VERSION_CODES.M)
     private fun getMissingPermissions(): Array<out String> {
         val permissionsToCheck = arrayOf(
             Manifest.permission.CAMERA,
@@ -163,11 +180,14 @@ class CallActivity : AppCompatActivity() {
             .show()
     }
 
-    companion object {
-        internal fun getIntent(
-            context: Context
-        ): Intent {
-            return Intent(context, CallActivity::class.java)
+    private fun showWhenLockedAndTurnScreenOn() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            setShowWhenLocked(true)
+            setTurnScreenOn(true)
+        } else {
+            window.addFlags(
+                WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+            )
         }
     }
 }

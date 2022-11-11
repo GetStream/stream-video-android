@@ -103,6 +103,7 @@ public sealed interface StreamCallState : Serializable {
     public data class Connected(
         override val callGuid: StreamCallGuid,
         override val callKind: StreamCallKind,
+        public val sessionId: StreamRtcSessionId,
         override val createdByUserId: String,
         override val broadcastingEnabled: Boolean,
         override val recordingEnabled: Boolean,
@@ -118,6 +119,7 @@ public sealed interface StreamCallState : Serializable {
     public data class Connecting(
         override val callGuid: StreamCallGuid,
         override val callKind: StreamCallKind,
+        public val sessionId: StreamRtcSessionId,
         override val createdByUserId: String,
         override val broadcastingEnabled: Boolean,
         override val recordingEnabled: Boolean,
@@ -174,7 +176,12 @@ public sealed class StreamDate : Serializable {
     }
 }
 
-public fun StreamCallState.Started.copy(
+public sealed class StreamRtcSessionId {
+    public data class Specified(val value: String) : StreamRtcSessionId()
+    public object Undefined : StreamRtcSessionId() { override fun toString(): String = "Undefined" }
+}
+
+internal fun StreamCallState.Started.copy(
     createdByUserId: String = this.createdByUserId,
     broadcastingEnabled: Boolean = this.broadcastingEnabled,
     recordingEnabled: Boolean = this.recordingEnabled,
@@ -229,3 +236,19 @@ public fun StreamCallState.Started.copy(
         members = members,
     )
 }
+
+internal fun StreamCallState.Connecting.toConnected() = StreamCallState.Connected(
+    callGuid = callGuid,
+    callKind = callKind,
+    sessionId = sessionId,
+    createdByUserId = createdByUserId,
+    broadcastingEnabled = broadcastingEnabled,
+    recordingEnabled = recordingEnabled,
+    createdAt = createdAt,
+    updatedAt = updatedAt,
+    users = users,
+    members = members,
+    callUrl = callUrl,
+    userToken = userToken,
+    iceServers = iceServers
+)

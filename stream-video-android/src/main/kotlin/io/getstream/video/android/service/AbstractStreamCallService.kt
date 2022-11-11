@@ -43,7 +43,7 @@ public abstract class AbstractStreamCallService : Service(), StreamCallService {
 
     private val notificationManager: NotificationManager by lazy { application.notificationManager }
 
-    private val streamVideo: StreamVideo by lazy { getStreamCalls(this) }
+    private val streamVideo: StreamVideo by lazy { getStreamVideo(this) }
 
     private val notificationBuilder: StreamNotificationBuilder by lazy {
         createNotificationBuilder(application)
@@ -124,5 +124,4 @@ public abstract class AbstractStreamCallService : Service(), StreamCallService {
         val (notificationId, notification) = notificationBuilder.build(state)
         notificationManager.notify(notificationId, notification)
     }
-
 }

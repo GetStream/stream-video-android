@@ -17,7 +17,6 @@
 package io.getstream.video.android.engine
 
 import io.getstream.video.android.errors.VideoError
-import io.getstream.video.android.events.CallEndedEvent
 import io.getstream.video.android.events.SfuDataEvent
 import io.getstream.video.android.events.VideoEvent
 import io.getstream.video.android.model.CallEventType

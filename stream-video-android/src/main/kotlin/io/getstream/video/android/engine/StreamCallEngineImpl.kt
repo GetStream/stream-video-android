@@ -65,7 +65,10 @@ import io.getstream.video.android.model.state.DropReason
 import io.getstream.video.android.model.state.StreamCallGuid
 import io.getstream.video.android.model.state.StreamCallKind
 import io.getstream.video.android.model.state.StreamDate
+import io.getstream.video.android.model.state.StreamRtcSessionId
 import io.getstream.video.android.model.state.copy
+import io.getstream.video.android.model.state.toConnected
+import io.getstream.video.android.utils.Jobs
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -83,6 +86,11 @@ import io.getstream.video.android.model.StreamCallId as CallId
 import io.getstream.video.android.model.StreamCallType as CallType
 import io.getstream.video.android.model.state.StreamCallState as State
 
+private const val ID_TIMEOUT_ACCEPT = 1
+private const val ID_TIMEOUT_SFU_JOINED = 2
+
+private const val TIMEOUT_SFU_JOINED = 10_000L
+
 /**
  * Should be written in pure kotlin.
  * No android imports are allowed here.
@@ -94,6 +102,8 @@ internal class StreamCallEngineImpl(
 ) : StreamCallEngine {
 
     private val logger = StreamLog.getLogger("Call:Engine")
+
+    private val jobs = Jobs()
 
     private val getCurrentUserId = { getCurrentUser().id }
 
@@ -141,7 +151,7 @@ internal class StreamCallEngineImpl(
             is DominantSpeakerChangedEvent -> { }
             is HealthCheckResponseEvent -> { }
             is ICETrickleEvent -> { }
-            is JoinCallResponseEvent -> { }
+            is JoinCallResponseEvent -> onSfuJoined(event)
             is LocalDeviceChangeEvent -> { }
             is MuteStateChangeEvent -> { }
             is PublisherCandidateEvent -> { }
@@ -154,7 +164,71 @@ internal class StreamCallEngineImpl(
     }
 
     override fun onSfuJoinSent(request: JoinRequest) = scope.launchWithLock(mutex) {
+        val state = _callState.value
+        if (state !is State.Connecting) {
+            logger.w { "[onSfuJoinSent] rejected (state is not Connecting): $state" }
+            return@launchWithLock
+        }
+        if (state.userToken != request.token) {
+            logger.w {
+                "[onSfuJoinSent] rejected (token is not valid);" +
+                    " expected: ${state.userToken}, actual: ${request.token}"
+            }
+            return@launchWithLock
+        }
         logger.i { "[onSfuJoinSent] request: $request" }
+        _callState.post(
+            state.copy(
+                sessionId = StreamRtcSessionId.Specified(request.session_id)
+            )
+        )
+        waitForSfuJoined()
+    }
+
+    private fun waitForSfuJoined() {
+        jobs.add(
+            ID_TIMEOUT_SFU_JOINED,
+            scope.launch {
+                logger.d { "[waitForSfuJoined] dropTimeout: $TIMEOUT_SFU_JOINED" }
+                delay(TIMEOUT_SFU_JOINED)
+                mutex.withLock {
+                    val state = _callState.value
+                    if (state is State.Connecting) {
+                        logger.w { "[waitForSfuJoined] timed out (no SfuJoined event received)" }
+                        dropCall(
+                            State.Drop(
+                                state.callGuid, state.callKind,
+                                DropReason.Failure(
+                                    VideoError(message = "no SfuJoined event received")
+                                )
+                            )
+                        )
+                    } else {
+                        logger.v { "[waitForSfuJoined] SfuJoined event was accepted" }
+                    }
+                }
+            }
+        )
+    }
+
+    private fun onSfuJoined(event: JoinCallResponseEvent) = scope.launchWithLock(mutex) {
+        val state = _callState.value
+        if (state !is State.Connecting) {
+            logger.w { "[onSfuJoined] rejected (state is not Connecting): $state" }
+            return@launchWithLock
+        }
+        if (state.sessionId !is StreamRtcSessionId.Specified || state.sessionId.value != event.ownSessionId) {
+            logger.w {
+                "[onSfuJoined] rejected (sessionId is not valid);" +
+                    " expected: ${state.sessionId}, actual: ${event.ownSessionId}"
+            }
+            return@launchWithLock
+        }
+        logger.d { "[onSfuJoined] state: $state" }
+        jobs.cancel(ID_TIMEOUT_SFU_JOINED)
+        _callState.post(
+            state.toConnected()
+        )
     }
 
     private fun onCallAccepted(event: CallAcceptedEvent) = scope.launchWithLock(mutex) {
@@ -174,6 +248,7 @@ internal class StreamCallEngineImpl(
             logger.w { "[onCallAccepted] rejected (accepted by non-Member): $event" }
             return@launchWithLock
         }
+        jobs.cancel(ID_TIMEOUT_ACCEPT)
         logger.d { "[onCallAccepted] state: $state" }
         _callState.post(
             state.copy(
@@ -238,9 +313,7 @@ internal class StreamCallEngineImpl(
         logger.d { "[onCallJoined] joinedCall: $joinedCall, state: $state" }
         _callState.post(
             joinedCall.run {
-
-                // TODO it should be Connecting until a Connected state from ICE candidates comes
-                State.Connected(
+                State.Connecting(
                     callGuid = state.callGuid,
                     callKind = state.callKind,
                     createdByUserId = call.createdByUserId,
@@ -253,6 +326,7 @@ internal class StreamCallEngineImpl(
                     callUrl = callUrl,
                     userToken = userToken,
                     iceServers = iceServers,
+                    sessionId = StreamRtcSessionId.Undefined
                 )
             }
         )
@@ -335,19 +409,22 @@ internal class StreamCallEngineImpl(
     }
 
     private fun waitForCallToBeAccepted() {
-        scope.launch {
-            logger.d { "[waitForCallToBeAccepted] dropTimeout: ${config.dropTimeout}" }
-            delay(config.dropTimeout)
-            mutex.withLock {
-                val state = _callState.value
-                if (state is State.Outgoing && !state.acceptedByCallee) {
-                    logger.w { "[waitForCallToBeAccepted] timed out (call is not accepted)" }
-                    dropCall(State.Drop(state.callGuid, state.callKind, DropReason.Timeout(config.dropTimeout)))
-                } else {
-                    logger.v { "[waitForCallToBeAccepted] call was accepted" }
+        jobs.add(
+            ID_TIMEOUT_ACCEPT,
+            scope.launch {
+                logger.d { "[waitForCallToBeAccepted] dropTimeout: ${config.dropTimeout}" }
+                delay(config.dropTimeout)
+                mutex.withLock {
+                    val state = _callState.value
+                    if (state is State.Outgoing && !state.acceptedByCallee) {
+                        logger.w { "[waitForCallToBeAccepted] timed out (call is not accepted)" }
+                        dropCall(State.Drop(state.callGuid, state.callKind, DropReason.Timeout(config.dropTimeout)))
+                    } else {
+                        logger.v { "[waitForCallToBeAccepted] call was accepted" }
+                    }
                 }
             }
-        }
+        )
     }
 
     override fun onCallEventSending(callCid: String, eventType: CallEventType) = scope.launchWithLock(mutex) {
@@ -500,6 +577,7 @@ internal class StreamCallEngineImpl(
      * Used for setting the state to a dropped call and then immediately switching to Idle.
      */
     private fun dropCall(state: State.Drop) {
+        jobs.cancelAll()
         _callState.post(state)
         _callState.post(State.Idle)
     }

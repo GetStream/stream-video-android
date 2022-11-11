@@ -24,7 +24,6 @@ import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.audio.AudioDevice
 import io.getstream.video.android.call.CallClient
 import io.getstream.video.android.model.Call
-import io.getstream.video.android.model.CallEventType
 import io.getstream.video.android.model.CallMetadata
 import io.getstream.video.android.model.CallParticipantState
 import io.getstream.video.android.model.CallSettings
@@ -33,8 +32,6 @@ import io.getstream.video.android.model.CallUser
 import io.getstream.video.android.model.state.StreamDate
 import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Success
-import io.getstream.video.android.utils.flatMap
-import io.getstream.video.android.utils.map
 import io.getstream.video.android.utils.onError
 import io.getstream.video.android.utils.onSuccess
 import io.getstream.video.android.utils.onSuccessSuspend
@@ -144,16 +141,12 @@ public class CallViewModel(
                         joinCall()
                     }
                     is State.Joining -> {
-
                     }
                     is State.Connected -> {
-
                     }
                     is State.Connecting -> {
-
                     }
                     is State.Drop -> {
-
                     }
                 }
                 prevState = state
@@ -327,18 +320,9 @@ public class CallViewModel(
         }
         logger.d { "[acceptCall] state: $state" }
         viewModelScope.launch {
-            streamVideo.joinCall(state.callGuid.type, state.callGuid.id)
-                .flatMap { joined ->
-                    logger.v { "[acceptCall] joined: $joined" }
-                    streamVideo.sendEvent(
-                        callCid = joined.call.cid,
-                        eventType = CallEventType.ACCEPTED
-                    ).map { joined }
-                }
+            streamVideo.acceptCall(state.callGuid.cid)
                 .onSuccess {
                     logger.v { "[acceptCall] completed: $it" }
-                    //TODO
-                    // streamRouter.navigateToCall(callInput = it.toCallInput(), finishCurrent = true)
                 }
                 .onError {
                     logger.e { "[acceptCall] failed: $it" }
@@ -400,7 +384,7 @@ public class CallViewModel(
             }
             joinResult.onError {
                 logger.e { "[joinCall] failed: $it" }
-                //TODO
+                // TODO
                 // streamRouter.onCallFailed(it.message)
             }
         }

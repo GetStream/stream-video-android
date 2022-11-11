@@ -23,9 +23,9 @@ import io.getstream.video.android.call.CallClient
 import io.getstream.video.android.call.builder.CallClientBuilder
 import io.getstream.video.android.coordinator.CallCoordinatorClient
 import io.getstream.video.android.coordinator.state.UserState
+import io.getstream.video.android.engine.StreamCallEngine
 import io.getstream.video.android.engine.StreamCallEngineImpl
 import io.getstream.video.android.engine.adapter.CoordinatorSocketListenerAdapter
-import io.getstream.video.android.engine.adapter.SfuSocketListenerAdapter
 import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.model.CallEventType
@@ -91,25 +91,8 @@ public class StreamVideoImpl(
 
     private val logger = StreamLog.getLogger("Call:StreamVideo")
 
-    private val engine = StreamCallEngineImpl(scope, config) {
+    private val engine: StreamCallEngine = StreamCallEngineImpl(scope, config) {
         credentialsProvider.getUserCredentials()
-    }
-
-    init {
-        scope.launch {
-            engine.callState.collect { state ->
-                when (state) {
-                    is StreamCallState.Drop -> {
-                        if (state.reason is DropReason.Timeout) {
-                            logger.i { "[observeState] call dropped by timeout" }
-                            cancelCall(state.callGuid.cid)
-                        }
-                    }
-                    else -> { /* no-op */
-                    }
-                }
-            }
-        }
     }
 
     /**
@@ -128,12 +111,29 @@ public class StreamVideoImpl(
     private var callClient: CallClient? = null
 
     init {
+        observeState()
         socket.addListener(CoordinatorSocketListenerAdapter(engine))
         scope.launch(Dispatchers.Main.immediate) {
             lifecycleObserver.observe()
         }
 
         socket.connectSocket()
+    }
+
+    private fun observeState() {
+        scope.launch {
+            engine.callState.collect { state ->
+                when (state) {
+                    is StreamCallState.Drop -> {
+                        if (state.reason is DropReason.Timeout) {
+                            logger.i { "[observeState] call dropped by timeout" }
+                            cancelCall(state.callGuid.cid)
+                        }
+                    }
+                    else -> { /* no-op */ }
+                }
+            }
+        }
     }
 
     /**
@@ -454,15 +454,17 @@ public class StreamVideoImpl(
         return this.callClient
     }
 
-    override suspend fun acceptCall(type: String, id: String): Result<JoinedCall> {
-        logger.d { "[acceptCall] type: $type, id: $id" }
-        return joinCall(type = type, id = id)
-            .flatMap { joined ->
-                sendEvent(
-                    callCid = joined.call.cid,
-                    eventType = CallEventType.ACCEPTED
-                ).map { joined }
-            }.also { logger.v { "[acceptCall] result: $it" } }
+    override suspend fun acceptCall(cid: String): Result<JoinedCall> {
+        logger.d { "[acceptCall] cid: $cid" }
+        val (type, id) = cid.split(":").apply {
+            if (size != 2) return Failure(VideoError(message = "invalid cid: $cid"))
+        }
+        return sendEvent(
+            callCid = cid,
+            eventType = CallEventType.ACCEPTED
+        ).flatMap {
+            joinCall(type, id)
+        }.also { logger.v { "[acceptCall] result: $it" } }
     }
 
     override suspend fun rejectCall(cid: String): Result<Boolean> {

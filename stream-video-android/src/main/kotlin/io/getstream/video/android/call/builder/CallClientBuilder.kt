@@ -22,7 +22,6 @@ import io.getstream.video.android.call.CallClientImpl
 import io.getstream.video.android.call.signal.socket.SignalSocketFactory
 import io.getstream.video.android.call.signal.socket.SignalSocketImpl
 import io.getstream.video.android.engine.StreamCallEngine
-import io.getstream.video.android.engine.StreamCallEngineImpl
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.model.IceServer
 import io.getstream.video.android.module.CallClientModule

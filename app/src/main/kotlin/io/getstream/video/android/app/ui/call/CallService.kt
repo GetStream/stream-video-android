@@ -23,6 +23,5 @@ import io.getstream.video.android.service.AbstractStreamCallService
 
 class CallService : AbstractStreamCallService() {
 
-    override fun getStreamCalls(context: Context): StreamVideo = videoApp.streamVideo
-
+    override fun getStreamVideo(context: Context): StreamVideo = videoApp.streamVideo
 }

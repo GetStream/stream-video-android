@@ -37,7 +37,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.getstream.logging.StreamLog
 import io.getstream.video.android.app.ui.components.UserList
-import io.getstream.video.android.app.ui.home.HomeActivity
 import io.getstream.video.android.app.utils.getUsers
 import io.getstream.video.android.app.videoApp
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -141,6 +140,6 @@ class LoginActivity : AppCompatActivity() {
             ),
             loggingLevel = LoggingLevel.BODY
         )
-        startActivity(HomeActivity.getIntent(this))
+        videoApp.streamRouter.onUserLoggedIn()
     }
 }
