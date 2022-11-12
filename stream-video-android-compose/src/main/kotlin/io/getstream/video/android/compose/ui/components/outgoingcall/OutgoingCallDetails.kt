@@ -83,7 +83,8 @@ private fun OutgoingCallDetailsPreview() {
                     it.role,
                     it.profileImageURL ?: "",
                     null,
-                    null
+                    null,
+                    emptyList()
                 )
             }
         )

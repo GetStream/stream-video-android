@@ -24,17 +24,15 @@ import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.audio.AudioDevice
 import io.getstream.video.android.call.CallClient
 import io.getstream.video.android.model.Call
-import io.getstream.video.android.model.CallMetadata
 import io.getstream.video.android.model.CallParticipantState
 import io.getstream.video.android.model.CallSettings
 import io.getstream.video.android.model.CallType
 import io.getstream.video.android.model.CallUser
-import io.getstream.video.android.model.state.StreamDate
+import io.getstream.video.android.model.mapper.toMetadata
 import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Success
 import io.getstream.video.android.utils.onError
 import io.getstream.video.android.utils.onSuccess
-import io.getstream.video.android.utils.onSuccessSuspend
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -47,6 +45,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import java.util.UUID
 import io.getstream.video.android.model.state.StreamCallState as State
+
+private const val CONNECT_TIMEOUT = 30_000L
 
 public class CallViewModel(
     private val streamVideo: StreamVideo,
@@ -106,12 +106,6 @@ public class CallViewModel(
     private val _participants: MutableStateFlow<List<CallUser>> = MutableStateFlow(emptyList())
     public val participants: StateFlow<List<CallUser>> = _participants
 
-    private val _isMicrophoneEnabled = MutableStateFlow(false)
-    public val isMicrophoneEnabled: StateFlow<Boolean> = _isMicrophoneEnabled
-
-    private val _isCameraEnabled = MutableStateFlow(false)
-    public val isCameraEnabled: StateFlow<Boolean> = _isCameraEnabled
-
     private lateinit var client: CallClient
 
     private var prevState: State = State.Idle
@@ -142,9 +136,7 @@ public class CallViewModel(
                     }
                     is State.Joining -> {
                     }
-                    is State.Connected -> {
-                    }
-                    is State.Connecting -> {
+                    is State.InCall -> {
                     }
                     is State.Drop -> {
                     }
@@ -162,12 +154,12 @@ public class CallViewModel(
         //  VM can be destroyed while the call is still running in the BG
         viewModelScope.launch {
             logger.d { "[connectToCall] state: ${streamCallState.value}" }
-            withTimeout(30_000) {
+            withTimeout(CONNECT_TIMEOUT) {
                 val state = streamCallState.first { it is State.InCall } as State.InCall
                 logger.v { "[connectToCall] received: ${streamCallState.value}" }
                 client = streamVideo.createCallClient(
                     state.callUrl.removeSuffix("/twirp"),
-                    state.userToken,
+                    state.sfuToken,
                     state.iceServers,
                 )
                 _isVideoInitialized.value = true
@@ -364,54 +356,23 @@ public class CallViewModel(
         }
         logger.d { "[joinCall] state: $state" }
         viewModelScope.launch {
-            val joinResult = streamVideo.joinCall(
+            streamVideo.joinCall(
                 state.toMetadata()
-            )
-
-            joinResult.onSuccessSuspend { response ->
-                /* TODO
-                streamRouter.navigateToCall(
-                    callInput = CallInput(
-                        callCid = response.call.cid,
-                        callType = response.call.type,
-                        callId = response.call.id,
-                        callUrl = response.callUrl,
-                        userToken = response.userToken,
-                        iceServers = response.iceServers
-                    ),
-                    finishCurrent = true
-                )*/
-            }
-            joinResult.onError {
+            ).onSuccess {
+                logger.v { "[joinCall] completed: $it" }
+            }.onError {
                 logger.e { "[joinCall] failed: $it" }
-                // TODO
-                // streamRouter.onCallFailed(it.message)
             }
         }
     }
 
     public fun onMicrophoneChanged(microphoneEnabled: Boolean) {
         logger.d { "[onMicrophoneChanged] microphoneEnabled: $microphoneEnabled" }
-        this._isMicrophoneEnabled.value = microphoneEnabled
+        this.isAudioEnabled.value = microphoneEnabled
     }
 
     public fun onVideoChanged(videoEnabled: Boolean) {
         logger.d { "[onVideoChanged] videoEnabled: $videoEnabled" }
-        this._isCameraEnabled.value = videoEnabled
+        this.isVideoEnabled.value = videoEnabled
     }
-
-    private fun State.Outgoing.toMetadata(): CallMetadata =
-        CallMetadata(
-            cid = callGuid.cid,
-            type = callGuid.type,
-            id = callGuid.id,
-            users = users,
-            members = members,
-            createdAt = (createdAt as? StreamDate.Specified)?.date?.time ?: 0,
-            updatedAt = (updatedAt as? StreamDate.Specified)?.date?.time ?: 0,
-            createdByUserId = createdByUserId,
-            broadcastingEnabled = broadcastingEnabled,
-            recordingEnabled = recordingEnabled,
-            extraData = emptyMap()
-        )
 }

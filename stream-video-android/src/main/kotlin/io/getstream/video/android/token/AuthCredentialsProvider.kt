@@ -16,37 +16,40 @@
 
 package io.getstream.video.android.token
 
+import io.getstream.video.android.model.ApiKey
+import io.getstream.video.android.model.SfuToken
 import io.getstream.video.android.model.User
+import io.getstream.video.android.model.UserToken
 
 public class AuthCredentialsProvider(
-    private val apiKey: String,
-    private val userToken: String,
+    private val apiKey: ApiKey,
+    private val userToken: UserToken,
     private val user: User
 ) : CredentialsProvider {
 
-    private var sfuToken: String? = null
+    private var sfuToken: SfuToken? = null
 
-    override fun loadToken(): String {
+    override fun loadUserToken(): UserToken {
         return userToken
     }
 
-    override fun getCachedToken(): String {
+    override fun getCachedUserToken(): UserToken {
         return userToken
     }
 
-    override fun loadApiKey(): String {
+    override fun loadApiKey(): ApiKey {
         return apiKey
     }
 
-    override fun getCachedApiKey(): String {
+    override fun getCachedApiKey(): ApiKey {
         return apiKey
     }
 
-    override fun setSfuToken(token: String?) {
+    override fun setSfuToken(token: SfuToken?) {
         this.sfuToken = token
     }
 
-    override fun getSfuToken(): String {
+    override fun getSfuToken(): SfuToken {
         return sfuToken ?: ""
     }
 

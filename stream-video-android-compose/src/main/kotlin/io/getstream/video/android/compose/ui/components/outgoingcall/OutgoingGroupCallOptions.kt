@@ -42,8 +42,7 @@ import io.getstream.video.android.compose.ui.components.extensions.toggleAlpha
 @Composable
 internal fun OutgoingGroupCallOptions(
     modifier: Modifier = Modifier,
-    callId: String,
-    onCancelCall: (String) -> Unit = {},
+    onCancelCall: () -> Unit = {},
     onMicToggleChanged: (Boolean) -> Unit = {},
     onVideoToggleChanged: (Boolean) -> Unit = {},
 ) {
@@ -61,7 +60,7 @@ internal fun OutgoingGroupCallOptions(
                     shape = VideoTheme.shapes.callButton
                 )
                 .size(VideoTheme.dimens.largeButtonSize),
-            onClick = { onCancelCall(callId) },
+            onClick = { onCancelCall() },
             content = {
                 Icon(
                     painter = VideoTheme.icons.callEnd,
@@ -132,5 +131,5 @@ internal fun OutgoingGroupCallOptions(
 @Preview
 @Composable
 private fun OutgoingCallGroupOptions() {
-    VideoTheme { OutgoingGroupCallOptions(callId = "") }
+    VideoTheme { OutgoingGroupCallOptions() }
 }

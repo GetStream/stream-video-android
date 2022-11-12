@@ -59,6 +59,7 @@ import androidx.lifecycle.lifecycleScope
 import io.getstream.logging.StreamLog
 import io.getstream.video.android.app.model.HomeScreenOption
 import io.getstream.video.android.app.ui.components.UserList
+import io.getstream.video.android.app.ui.login.LoginActivity
 import io.getstream.video.android.app.utils.getUsers
 import io.getstream.video.android.app.videoApp
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -109,16 +110,6 @@ class HomeActivity : AppCompatActivity() {
         }
     }
 
-    override fun finish() {
-        logger.d { "[finish] no args" }
-        super.finish()
-    }
-
-    override fun onDestroy() {
-        logger.d { "[onDestroy] no args" }
-        super.onDestroy()
-    }
-
     @Composable
     private fun HomeScreen() {
         Box(modifier = Modifier.fillMaxSize()) {
@@ -165,7 +156,8 @@ class HomeActivity : AppCompatActivity() {
 
     private fun logOut() {
         videoApp.userPreferences.clear()
-        videoApp.streamRouter.onUserLoggedOut()
+        startActivity(Intent(this, LoginActivity::class.java))
+        finish()
     }
 
     @Composable

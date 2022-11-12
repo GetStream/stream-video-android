@@ -43,7 +43,7 @@ import io.getstream.video.android.compose.ui.components.extensions.toggleAlpha
 internal fun OutgoingSingleCallOptions(
     modifier: Modifier = Modifier,
     callId: String,
-    onCancelCall: (String) -> Unit = {},
+    onCancelCall: () -> Unit = {},
     onMicToggleChanged: (Boolean) -> Unit = {},
     onVideoToggleChanged: (Boolean) -> Unit = {},
 ) {
@@ -117,7 +117,7 @@ internal fun OutgoingSingleCallOptions(
                     shape = VideoTheme.shapes.callButton
                 )
                 .size(VideoTheme.dimens.largeButtonSize),
-            onClick = { onCancelCall(callId) },
+            onClick = { onCancelCall() },
             content = {
                 Icon(
                     painter = VideoTheme.icons.callEnd,

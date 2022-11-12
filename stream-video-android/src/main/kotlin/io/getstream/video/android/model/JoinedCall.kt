@@ -19,6 +19,6 @@ package io.getstream.video.android.model
 public data class JoinedCall(
     val call: CallMetadata,
     val callUrl: String,
-    val userToken: String,
+    val sfuToken: SfuToken,
     val iceServers: List<IceServer>
 )

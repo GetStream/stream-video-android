@@ -32,8 +32,11 @@ import io.getstream.video.android.model.CallEventType
 import io.getstream.video.android.model.CallMetadata
 import io.getstream.video.android.model.IceServer
 import io.getstream.video.android.model.JoinedCall
+import io.getstream.video.android.model.SfuToken
 import io.getstream.video.android.model.StartedCall
+import io.getstream.video.android.model.StreamCallCid
 import io.getstream.video.android.model.User
+import io.getstream.video.android.model.mapper.toTypeAndId
 import io.getstream.video.android.model.state.DropReason
 import io.getstream.video.android.model.state.StreamCallState
 import io.getstream.video.android.model.toIceServer
@@ -92,7 +95,7 @@ public class StreamVideoImpl(
     private val logger = StreamLog.getLogger("Call:StreamVideo")
 
     private val engine: StreamCallEngine = StreamCallEngineImpl(scope, config) {
-        credentialsProvider.getUserCredentials()
+        credentialsProvider.getUserCredentials().id
     }
 
     /**
@@ -140,10 +143,6 @@ public class StreamVideoImpl(
      * Represents the state of the currently active call.
      */
     override val callState: StateFlow<StreamCallState> = engine.callState
-
-    override fun launch(block: suspend CoroutineScope.() -> Unit) {
-        scope.launch(block = block)
-    }
 
     /**
      * Domain - Coordinator.
@@ -276,7 +275,7 @@ public class StreamVideoImpl(
                         JoinedCall(
                             call = call,
                             callUrl = enrichSFUURL(url!!),
-                            userToken = credentials.token,
+                            sfuToken = credentials.token,
                             iceServers = iceServers
                         )
                     )
@@ -406,7 +405,7 @@ public class StreamVideoImpl(
     /**
      * Removes a listener from the socket allowing you to clean up event handling.
      *
-     * @param socketListener The listener instance to be removed.
+     * @param socketListener The listener instance tocon be removed.
      */
     override fun removeSocketListener(socketListener: SocketListener): Unit =
         socket.removeListener(socketListener)
@@ -418,17 +417,17 @@ public class StreamVideoImpl(
      * Use it to control the track state, mute/unmute devices and listen to call events.
      *
      * @param signalUrl The URL of the server in which the call is being hosted.
-     * @param userToken User's ticket to enter the call.
+     * @param sfuToken User's ticket to enter the call.
      * @param iceServers Servers required to appropriately connect to the call and receive tracks.
      * @return An instance of [CallClient] ready to connect to a call. Make sure to call
      * [CallClient.connectToCall] when you're ready to fully join a call.
      */
     override fun createCallClient(
         signalUrl: String,
-        userToken: String,
+        sfuToken: SfuToken,
         iceServers: List<IceServer>
     ): CallClient {
-        credentialsProvider.setSfuToken(userToken)
+        credentialsProvider.setSfuToken(sfuToken)
         val builder = CallClientBuilder(
             context = context,
             credentialsProvider = credentialsProvider,
@@ -454,25 +453,30 @@ public class StreamVideoImpl(
         return this.callClient
     }
 
-    override suspend fun acceptCall(cid: String): Result<JoinedCall> {
-        logger.d { "[acceptCall] cid: $cid" }
-        val (type, id) = cid.split(":").apply {
-            if (size != 2) return Failure(VideoError(message = "invalid cid: $cid"))
+    override suspend fun acceptCall(cid: StreamCallCid): Result<JoinedCall> {
+        return try {
+            logger.d { "[acceptCall] cid: $cid" }
+            val (type, id) = cid.toTypeAndId()
+            sendEvent(
+                callCid = cid,
+                eventType = CallEventType.ACCEPTED
+            ).flatMap {
+                joinCall(type, id)
+            }.also {
+                logger.v { "[acceptCall] result: $it" }
+            }
+        } catch (e: Throwable) {
+            logger.e { "[acceptCall] failed: $e" }
+            Failure(VideoError(e.message, e))
         }
-        return sendEvent(
-            callCid = cid,
-            eventType = CallEventType.ACCEPTED
-        ).flatMap {
-            joinCall(type, id)
-        }.also { logger.v { "[acceptCall] result: $it" } }
     }
 
-    override suspend fun rejectCall(cid: String): Result<Boolean> {
+    override suspend fun rejectCall(cid: StreamCallCid): Result<Boolean> {
         logger.d { "[rejectCall] cid: $cid" }
         return sendEvent(callCid = cid, CallEventType.REJECTED)
     }
 
-    override suspend fun cancelCall(cid: String): Result<Boolean> {
+    override suspend fun cancelCall(cid: StreamCallCid): Result<Boolean> {
         logger.d { "[cancelCall] cid: $cid" }
         return sendEvent(callCid = cid, CallEventType.CANCELLED)
     }

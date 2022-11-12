@@ -60,14 +60,12 @@ import io.getstream.video.android.model.CallEventType.REJECTED
 import io.getstream.video.android.model.CallEventType.UNDEFINED
 import io.getstream.video.android.model.CallMetadata
 import io.getstream.video.android.model.JoinedCall
-import io.getstream.video.android.model.User
 import io.getstream.video.android.model.state.DropReason
 import io.getstream.video.android.model.state.StreamCallGuid
 import io.getstream.video.android.model.state.StreamCallKind
 import io.getstream.video.android.model.state.StreamDate
-import io.getstream.video.android.model.state.StreamRtcSessionId
+import io.getstream.video.android.model.state.StreamSfuSessionId
 import io.getstream.video.android.model.state.copy
-import io.getstream.video.android.model.state.toConnected
 import io.getstream.video.android.utils.Jobs
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -98,14 +96,12 @@ private const val TIMEOUT_SFU_JOINED = 10_000L
 internal class StreamCallEngineImpl(
     parentScope: CoroutineScope,
     private val config: StreamVideoConfig,
-    private val getCurrentUser: () -> User,
+    private val getCurrentUserId: () -> String,
 ) : StreamCallEngine {
 
     private val logger = StreamLog.getLogger("Call:Engine")
 
     private val jobs = Jobs()
-
-    private val getCurrentUserId = { getCurrentUser().id }
 
     private val mutex = Mutex()
 
@@ -165,21 +161,21 @@ internal class StreamCallEngineImpl(
 
     override fun onSfuJoinSent(request: JoinRequest) = scope.launchWithLock(mutex) {
         val state = _callState.value
-        if (state !is State.Connecting) {
+        if (state !is State.InCall) {
             logger.w { "[onSfuJoinSent] rejected (state is not Connecting): $state" }
             return@launchWithLock
         }
-        if (state.userToken != request.token) {
+        if (state.sfuToken != request.token) {
             logger.w {
                 "[onSfuJoinSent] rejected (token is not valid);" +
-                    " expected: ${state.userToken}, actual: ${request.token}"
+                    " expected: ${state.sfuToken}, actual: ${request.token}"
             }
             return@launchWithLock
         }
         logger.i { "[onSfuJoinSent] request: $request" }
         _callState.post(
             state.copy(
-                sessionId = StreamRtcSessionId.Specified(request.session_id)
+                sfuSessionId = StreamSfuSessionId.Specified(request.session_id)
             )
         )
         waitForSfuJoined()
@@ -193,7 +189,7 @@ internal class StreamCallEngineImpl(
                 delay(TIMEOUT_SFU_JOINED)
                 mutex.withLock {
                     val state = _callState.value
-                    if (state is State.Connecting) {
+                    if (state is State.InCall && !state.sfuSessionJoined) {
                         logger.w { "[waitForSfuJoined] timed out (no SfuJoined event received)" }
                         dropCall(
                             State.Drop(
@@ -213,21 +209,23 @@ internal class StreamCallEngineImpl(
 
     private fun onSfuJoined(event: JoinCallResponseEvent) = scope.launchWithLock(mutex) {
         val state = _callState.value
-        if (state !is State.Connecting) {
+        if (state !is State.InCall) {
             logger.w { "[onSfuJoined] rejected (state is not Connecting): $state" }
             return@launchWithLock
         }
-        if (state.sessionId !is StreamRtcSessionId.Specified || state.sessionId.value != event.ownSessionId) {
+        if (state.sfuSessionId !is StreamSfuSessionId.Specified || state.sfuSessionId.value != event.ownSessionId) {
             logger.w {
                 "[onSfuJoined] rejected (sessionId is not valid);" +
-                    " expected: ${state.sessionId}, actual: ${event.ownSessionId}"
+                    " expected: ${state.sfuSessionId}, actual: ${event.ownSessionId}"
             }
             return@launchWithLock
         }
         logger.d { "[onSfuJoined] state: $state" }
         jobs.cancel(ID_TIMEOUT_SFU_JOINED)
         _callState.post(
-            state.toConnected()
+            state.copy(
+                sfuSessionJoined = true
+            )
         )
     }
 
@@ -313,7 +311,7 @@ internal class StreamCallEngineImpl(
         logger.d { "[onCallJoined] joinedCall: $joinedCall, state: $state" }
         _callState.post(
             joinedCall.run {
-                State.Connecting(
+                State.InCall(
                     callGuid = state.callGuid,
                     callKind = state.callKind,
                     createdByUserId = call.createdByUserId,
@@ -324,9 +322,10 @@ internal class StreamCallEngineImpl(
                     users = call.users,
                     members = call.members,
                     callUrl = callUrl,
-                    userToken = userToken,
+                    sfuToken = sfuToken,
                     iceServers = iceServers,
-                    sessionId = StreamRtcSessionId.Undefined
+                    sfuSessionId = StreamSfuSessionId.Undefined,
+                    sfuSessionJoined = false
                 )
             }
         )

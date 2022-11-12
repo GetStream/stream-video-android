@@ -22,11 +22,14 @@ import io.getstream.video.android.model.CallEventType
 import io.getstream.video.android.model.CallMetadata
 import io.getstream.video.android.model.IceServer
 import io.getstream.video.android.model.JoinedCall
+import io.getstream.video.android.model.SfuToken
+import io.getstream.video.android.model.StreamCallCid
+import io.getstream.video.android.model.StreamCallId
+import io.getstream.video.android.model.StreamCallType
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.state.StreamCallState
 import io.getstream.video.android.socket.SocketListener
 import io.getstream.video.android.utils.Result
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 
 public interface StreamVideo {
@@ -36,8 +39,6 @@ public interface StreamVideo {
      * keep intermediate states, such as [StreamCallState.Idle].
      */
     public val callState: StateFlow<StreamCallState>
-
-    public fun launch(block: suspend CoroutineScope.() -> Unit)
 
     /**
      * Creates a call with given information. You can then use the [CallMetadata] and join it and get auth
@@ -51,8 +52,8 @@ public interface StreamVideo {
      * @return [Result] which contains the [CallMetadata] and its information.
      */
     public suspend fun createCall(
-        type: String,
-        id: String,
+        type: StreamCallType,
+        id: StreamCallId,
         participantIds: List<String> = emptyList(),
         ringing: Boolean
     ): Result<CallMetadata>
@@ -68,8 +69,8 @@ public interface StreamVideo {
      * @return [Result] which contains the [CallMetadata] and its information.
      */
     public suspend fun getOrCreateCall(
-        type: String,
-        id: String,
+        type: StreamCallType,
+        id: StreamCallId,
         participantIds: List<String> = emptyList(),
         ringing: Boolean
     ): Result<CallMetadata>
@@ -87,8 +88,8 @@ public interface StreamVideo {
     // TODO createAndJoin is misleading, because internally it uses getOrCreate and then join
     //  we might need to choose a better name
     public suspend fun createAndJoinCall(
-        type: String,
-        id: String,
+        type: StreamCallType,
+        id: StreamCallId,
         participantIds: List<String>,
         ringing: Boolean
     ): Result<JoinedCall>
@@ -102,7 +103,7 @@ public interface StreamVideo {
      * @return [Result] which contains the [JoinedCall] with the auth information required to fully
      * connect.
      */
-    public suspend fun joinCall(type: String, id: String): Result<JoinedCall>
+    public suspend fun joinCall(type: StreamCallType, id: StreamCallId): Result<JoinedCall>
 
     /**
      * Authenticates the user to join a given Call using the [CallMetadata].
@@ -121,7 +122,7 @@ public interface StreamVideo {
      * @return [Result] which contains if the event was successfully sent.
      */
     public suspend fun sendEvent(
-        callCid: String,
+        callCid: StreamCallCid,
         eventType: CallEventType
     ): Result<Boolean>
 
@@ -133,7 +134,7 @@ public interface StreamVideo {
      * @return [Result] which contains if the event was successfully sent.
      */
     public suspend fun sendCustomEvent(
-        callCid: String,
+        callCid: StreamCallCid,
         dataJson: String
     ): Result<Boolean>
 
@@ -172,22 +173,22 @@ public interface StreamVideo {
      * Use it to control the track state, mute/unmute devices and listen to call events.
      *
      * @param signalUrl The URL of the server in which the call is being hosted.
-     * @param userToken User's ticket to enter the call.
+     * @param sfuToken User's ticket to enter the call.
      * @param iceServers Servers required to appropriately connect to the call and receive tracks.
      * @return An instance of [CallClient] ready to connect to a call. Make sure to call
      * [CallClient.connectToCall] when you're ready to fully join a call.
      */
     public fun createCallClient(
         signalUrl: String,
-        userToken: String,
+        sfuToken: SfuToken,
         iceServers: List<IceServer>
     ): CallClient
 
     public fun getActiveCallClient(): CallClient?
 
-    public suspend fun acceptCall(cid: String): Result<JoinedCall>
+    public suspend fun acceptCall(cid: StreamCallCid): Result<JoinedCall>
 
-    public suspend fun rejectCall(cid: String): Result<Boolean>
+    public suspend fun rejectCall(cid: StreamCallCid): Result<Boolean>
 
-    public suspend fun cancelCall(cid: String): Result<Boolean>
+    public suspend fun cancelCall(cid: StreamCallCid): Result<Boolean>
 }

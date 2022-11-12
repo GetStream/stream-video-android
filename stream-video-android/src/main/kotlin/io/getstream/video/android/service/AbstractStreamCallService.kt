@@ -24,6 +24,7 @@ import android.os.IBinder
 import io.getstream.logging.StreamLog
 import io.getstream.video.android.R
 import io.getstream.video.android.StreamVideo
+import io.getstream.video.android.StreamVideoProvider
 import io.getstream.video.android.dispatchers.DispatcherProvider
 import io.getstream.video.android.service.notification.StreamNotificationBuilder
 import io.getstream.video.android.service.notification.StreamNotificationBuilderImpl
@@ -35,7 +36,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import io.getstream.video.android.model.state.StreamCallState as State
 
-public abstract class AbstractStreamCallService : Service(), StreamCallService {
+public abstract class AbstractStreamCallService : Service(), StreamVideoProvider {
 
     private val logger = StreamLog.getLogger("Call:StreamService")
 

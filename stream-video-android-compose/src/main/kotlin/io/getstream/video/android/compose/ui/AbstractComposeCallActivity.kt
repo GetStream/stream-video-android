@@ -30,9 +30,10 @@ import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.runtime.Composable
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.StreamVideo
-import io.getstream.video.android.activity.StreamCallActivity
+import io.getstream.video.android.StreamVideoProvider
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.CallScreen
 import io.getstream.video.android.model.CallSettings
@@ -41,7 +42,7 @@ import io.getstream.video.android.viewmodel.CallViewModel
 import io.getstream.video.android.viewmodel.CallViewModelFactory
 import io.getstream.video.android.viewmodel.PermissionManagerImpl
 
-public abstract class AbstractComposeCallActivity : AppCompatActivity(), StreamCallActivity {
+public abstract class AbstractComposeCallActivity : AppCompatActivity(), StreamVideoProvider {
 
     private val streamVideo: StreamVideo by lazy { getStreamVideo(this) }
 
@@ -73,18 +74,7 @@ public abstract class AbstractComposeCallActivity : AppCompatActivity(), StreamC
     override fun onCreate(savedInstanceState: Bundle?) {
         showWhenLockedAndTurnScreenOn()
         super.onCreate(savedInstanceState)
-        setContent {
-            VideoTheme {
-                CallScreen(
-                    viewModel = callViewModel,
-                    onRejectCall = callViewModel::rejectCall,
-                    onAcceptCall = callViewModel::acceptCall,
-                    onCancelCall = callViewModel::cancelCall,
-                    onVideoToggleChanged = callViewModel::onVideoChanged,
-                    onMicToggleChanged = callViewModel::onMicrophoneChanged,
-                )
-            }
-        }
+        setContent(content = buildContent())
 
         lifecycleScope.launchWhenCreated {
             callViewModel.streamCallState.collect {
@@ -92,6 +82,19 @@ public abstract class AbstractComposeCallActivity : AppCompatActivity(), StreamC
                     finish()
                 }
             }
+        }
+    }
+
+    protected fun buildContent(): (@Composable () -> Unit) = {
+        VideoTheme {
+            CallScreen(
+                viewModel = callViewModel,
+                onRejectCall = callViewModel::rejectCall,
+                onAcceptCall = callViewModel::acceptCall,
+                onCancelCall = callViewModel::cancelCall,
+                onVideoToggleChanged = callViewModel::onVideoChanged,
+                onMicToggleChanged = callViewModel::onMicrophoneChanged,
+            )
         }
     }
 
@@ -116,14 +119,14 @@ public abstract class AbstractComposeCallActivity : AppCompatActivity(), StreamC
     private fun startVideoFlow() {
         val isInitialized = callViewModel.isVideoInitialized.value
         if (isInitialized) return
-        callViewModel.connectToCall(
-            CallSettings(
-                audioOn = false,
-                videoOn = true,
-                speakerOn = false
-            )
-        )
+        callViewModel.connectToCall(getDefaultCallSettings())
     }
+
+    protected fun getDefaultCallSettings(): CallSettings = CallSettings(
+        audioOn = false,
+        videoOn = true,
+        speakerOn = false
+    )
 
     @RequiresApi(Build.VERSION_CODES.M)
     private fun checkPermissions() {

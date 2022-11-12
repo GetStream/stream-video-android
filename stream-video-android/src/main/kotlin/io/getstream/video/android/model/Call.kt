@@ -30,7 +30,6 @@ import io.getstream.video.android.events.AudioLevelChangedEvent
 import io.getstream.video.android.events.MuteStateChangeEvent
 import io.getstream.video.android.events.SfuParticipantJoinedEvent
 import io.getstream.video.android.events.SfuParticipantLeftEvent
-import io.getstream.video.android.token.CredentialsProvider
 import io.getstream.video.android.utils.updateValue
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -48,7 +47,7 @@ import stream.video.sfu.models.CallState
 
 public class Call(
     private val context: Context,
-    private val credentialsProvider: CredentialsProvider,
+    private val getCurrentUserId: () -> String,
     private val eglBase: EglBase,
 ) {
 
@@ -84,7 +83,7 @@ public class Call(
     public val primarySpeaker: Flow<CallParticipantState?> = _primarySpeaker
 
     public val localParticipantId: String
-        get() = credentialsProvider.getUserCredentials().id
+        get() = getCurrentUserId()
 
     public val localParticipantIdPrefix: String
         get() = _localParticipant.value?.idPrefix ?: ""
@@ -231,9 +230,9 @@ public class Call(
     internal fun loadParticipants(callState: CallState, callSettings: CallSettings) {
         val allParticipants =
             callState.participants.map {
-                val user = it.toCallParticipant(credentialsProvider.getUserCredentials().id)
+                val user = it.toCallParticipant(getCurrentUserId())
 
-                if (it.user?.id == credentialsProvider.getUserCredentials().id) {
+                if (it.user?.id == getCurrentUserId()) {
                     user.hasAudio = callSettings.audioOn
                     user.hasVideo = callSettings.videoOn
                 }
@@ -268,7 +267,7 @@ public class Call(
     internal fun addParticipant(event: SfuParticipantJoinedEvent) {
         logger.d { "[addParticipant] #sfu; event: $event" }
         _callParticipants.value =
-            _callParticipants.value + event.participant.toCallParticipant(credentialsProvider.getUserCredentials().id)
+            _callParticipants.value + event.participant.toCallParticipant(getCurrentUserId())
     }
 
     internal fun removeParticipant(event: SfuParticipantLeftEvent) {
@@ -320,7 +319,7 @@ public class Call(
 
         val videoTrack = VideoTrack(
             video = localVideoTrack,
-            streamId = "${credentialsProvider.getUserCredentials().id}:${localVideoTrack.id()}"
+            streamId = "${getCurrentUserId()}:${localVideoTrack.id()}"
         )
 
         val updatedParticipant = localParticipant.copy(
@@ -328,7 +327,7 @@ public class Call(
         )
 
         val updated = allParticipants.updateValue(
-            predicate = { it.id == credentialsProvider.getUserCredentials().id },
+            predicate = { it.id == getCurrentUserId() },
             transformer = {
                 it.copy(track = videoTrack)
             }
@@ -361,7 +360,7 @@ public class Call(
         _localParticipant.value = updatedLocal
 
         val updatedList = _callParticipants.value.updateValue(
-            predicate = { it.id == credentialsProvider.getUserCredentials().id },
+            predicate = { it.id == getCurrentUserId() },
             transformer = { it.copy(hasVideo = isEnabled) }
         )
 
@@ -375,7 +374,7 @@ public class Call(
         _localParticipant.value = updatedLocal
 
         val updatedList = _callParticipants.value.updateValue(
-            predicate = { it.id == credentialsProvider.getUserCredentials().id },
+            predicate = { it.id == getCurrentUserId() },
             transformer = { it.copy(hasAudio = isEnabled) }
         )
 

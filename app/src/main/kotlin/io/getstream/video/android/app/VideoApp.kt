@@ -22,7 +22,6 @@ import io.getstream.logging.StreamLog
 import io.getstream.logging.android.AndroidStreamLogger
 import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.StreamVideoBuilder
-import io.getstream.video.android.app.router.StreamRouterImpl
 import io.getstream.video.android.app.ui.call.CallActivity
 import io.getstream.video.android.app.ui.call.CallService
 import io.getstream.video.android.app.user.UserPreferences
@@ -30,7 +29,6 @@ import io.getstream.video.android.app.user.UserPreferencesImpl
 import io.getstream.video.android.input.CallActivityInput
 import io.getstream.video.android.input.CallServiceInput
 import io.getstream.video.android.logging.LoggingLevel
-import io.getstream.video.android.router.StreamRouter
 import io.getstream.video.android.token.CredentialsProvider
 
 class VideoApp : Application() {
@@ -47,9 +45,6 @@ class VideoApp : Application() {
     lateinit var streamVideo: StreamVideo
         private set
 
-    lateinit var streamRouter: StreamRouter
-        private set
-
     override fun onCreate() {
         super.onCreate()
         if (BuildConfig.DEBUG) {
@@ -57,11 +52,6 @@ class VideoApp : Application() {
             StreamLog.setLogger(AndroidStreamLogger())
         }
         StreamLog.i(TAG) { "[onCreate] no args" }
-        registerActivityLifecycleCallbacks(
-            StreamRouterImpl().also {
-                streamRouter = it
-            }
-        )
     }
 
     /**

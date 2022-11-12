@@ -103,7 +103,7 @@ public fun CallContent(
                     is StreamCallState.Active -> state.callGuid.id
                     else -> ""
                 }
-                val status = callState.asTitle()
+                val status = callState.formatAsTitle()
                 CallActionBar(callViewModel, status, callId)
 
                 if (roomState == null) {
@@ -317,10 +317,11 @@ private fun CallActionBar(callViewModel: CallViewModel, status: String, callId: 
     }
 }
 
-private fun StreamCallState.asTitle() = when (this) {
+@Composable
+private fun StreamCallState.formatAsTitle() = when (this) {
+    // TODO stringResource(id = )
     is StreamCallState.Drop -> "Drop"
-    is StreamCallState.Connected -> "Connected"
-    is StreamCallState.Connecting -> "Connecting"
+    is StreamCallState.InCall -> "InCall"
     is StreamCallState.Incoming -> "Incoming"
     is StreamCallState.Joining -> "Joining"
     is StreamCallState.Outgoing -> "Outgoing"

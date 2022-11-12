@@ -26,8 +26,8 @@ import io.getstream.video.android.model.state.StreamCallState as State
 @Composable
 public fun CallScreen(
     viewModel: CallViewModel,
-    onRejectCall: () -> Unit,
-    onAcceptCall: () -> Unit,
+    onRejectCall: () -> Unit = {},
+    onAcceptCall: () -> Unit = {},
     onCancelCall: () -> Unit = {},
     onMicToggleChanged: (Boolean) -> Unit = {},
     onVideoToggleChanged: (Boolean) -> Unit,
@@ -44,7 +44,7 @@ public fun CallScreen(
     } else if (state is State.Outgoing && !state.acceptedByCallee) {
         OutgoingCallScreen(
             viewModel = viewModel,
-            onCancelCall = { onCancelCall() },
+            onCancelCall = onCancelCall,
             onMicToggleChanged = onMicToggleChanged,
             onVideoToggleChanged = onVideoToggleChanged
         )

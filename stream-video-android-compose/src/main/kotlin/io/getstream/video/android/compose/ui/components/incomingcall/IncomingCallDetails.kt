@@ -79,7 +79,8 @@ private fun IncomingCallDetailsPreview() {
                     it.role,
                     it.profileImageURL ?: "",
                     null,
-                    null
+                    null,
+                    emptyList()
                 )
             }
         )

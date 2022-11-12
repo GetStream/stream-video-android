@@ -79,7 +79,8 @@ internal class CallClientBuilder(
 
         return CallClientImpl(
             context = context,
-            credentialsProvider = credentialsProvider,
+            getCurrentUserId = { credentialsProvider.getUserCredentials().id },
+            getSfuToken = { credentialsProvider.getSfuToken() },
             callEngine = callEngine,
             signalClient = callClientModule.signalClient,
             remoteIceServers = iceServers,

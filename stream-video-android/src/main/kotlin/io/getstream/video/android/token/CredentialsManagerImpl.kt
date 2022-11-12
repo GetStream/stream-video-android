@@ -16,10 +16,13 @@
 
 package io.getstream.video.android.token
 
+import io.getstream.video.android.model.ApiKey
+import io.getstream.video.android.model.UserToken
+
 internal class CredentialsManagerImpl : CredentialsManager {
     @Volatile
-    private var token: String = EMPTY_TOKEN
-    private var apiKey: String = EMPTY_TOKEN
+    private var token: UserToken = EMPTY
+    private var apiKey: ApiKey = EMPTY
     private lateinit var provider: CredentialsProvider
 
     override fun ensureTokenLoaded() {
@@ -29,14 +32,14 @@ internal class CredentialsManagerImpl : CredentialsManager {
     }
 
     override fun loadTokenSync(): String {
-        return provider.getCachedToken().also {
+        return provider.getCachedUserToken().also {
             this.token = it
         }
     }
 
     override fun setCredentialsProvider(provider: CredentialsProvider) {
         this.provider = provider
-        this.token = provider.getCachedToken()
+        this.token = provider.getCachedUserToken()
         this.apiKey = provider.getCachedApiKey()
     }
 
@@ -44,14 +47,14 @@ internal class CredentialsManagerImpl : CredentialsManager {
         return this::provider.isInitialized
     }
 
-    override fun getToken(): String = token
+    override fun getToken(): UserToken = token
 
     override fun hasToken(): Boolean {
-        return token != EMPTY_TOKEN
+        return token != EMPTY
     }
 
     override fun expireToken() {
-        token = EMPTY_TOKEN
+        token = EMPTY
     }
 
     override fun getApiKey(): String {
@@ -59,6 +62,6 @@ internal class CredentialsManagerImpl : CredentialsManager {
     }
 
     companion object {
-        const val EMPTY_TOKEN = ""
+        const val EMPTY = ""
     }
 }

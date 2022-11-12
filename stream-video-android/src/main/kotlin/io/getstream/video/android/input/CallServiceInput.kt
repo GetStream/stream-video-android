@@ -17,7 +17,7 @@
 package io.getstream.video.android.input
 
 import android.app.Service
-import io.getstream.video.android.service.StreamCallService
+import io.getstream.video.android.StreamVideoProvider
 import kotlin.reflect.KClass
 
 public class CallServiceInput private constructor(
@@ -35,11 +35,11 @@ public class CallServiceInput private constructor(
     override fun toString(): String = "CallServiceInput(className='$className')"
 
     public companion object {
-        public fun <T> from(clazz: Class<T>): CallServiceInput where T : Service, T : StreamCallService {
+        public fun <T> from(clazz: Class<T>): CallServiceInput where T : Service, T : StreamVideoProvider {
             return CallServiceInput(clazz.name)
         }
 
-        public fun <T> from(kClass: KClass<T>): CallServiceInput where T : Service, T : StreamCallService {
+        public fun <T> from(kClass: KClass<T>): CallServiceInput where T : Service, T : StreamVideoProvider {
             return CallServiceInput(
                 kClass.qualifiedName
                     ?: error("qualifiedName cannot be obtained")

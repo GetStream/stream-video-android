@@ -44,7 +44,7 @@ public class StreamVideoBuilder(
 
         if (credentialsProvider.loadApiKey().isBlank() ||
             user.id.isBlank() ||
-            credentialsProvider.getCachedToken().isBlank()
+            credentialsProvider.getCachedUserToken().isBlank()
         ) throw IllegalArgumentException("The API key, user ID and token cannot be empty!")
 
         val httpModule = HttpModule.getOrCreate(loggingLevel.httpLoggingLevel, credentialsProvider)

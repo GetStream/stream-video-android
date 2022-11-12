@@ -14,12 +14,19 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.service
+package io.getstream.video.android.model
 
-import android.content.Context
-import io.getstream.video.android.StreamVideo
+/**
+ * The API key of your Stream Video app.
+ */
+public typealias ApiKey = String
 
-public interface StreamCallService {
+/**
+ * User's ticket to join/initiate the call.
+ */
+public typealias UserToken = String
 
-    public fun getStreamVideo(context: Context): StreamVideo
-}
+/**
+ * User's ticket to enter the call when joined/initiated.
+ */
+public typealias SfuToken = String

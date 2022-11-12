@@ -20,7 +20,7 @@ package io.getstream.video.android.model
 public data class UserCredentials(
     val id: String,
     val role: String,
-    val token: String,
+    val token: UserToken,
     val name: String,
     val image: String = "",
     val isSelected: Boolean = false

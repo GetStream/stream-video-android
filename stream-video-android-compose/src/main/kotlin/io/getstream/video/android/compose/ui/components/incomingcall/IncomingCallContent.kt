@@ -107,7 +107,8 @@ private fun IncomingCallPreview() {
                     role = it.role,
                     createdAt = null,
                     updatedAt = null,
-                    imageUrl = it.profileImageURL ?: ""
+                    imageUrl = it.profileImageURL ?: "",
+                    teams = emptyList()
                 )
             },
             callType = CallType.VIDEO,

@@ -14,15 +14,11 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.model
+package io.getstream.video.android
 
-public data class CallInput(
-    internal val callCid: String,
-    internal val callType: String,
-    internal val callId: String,
-    internal val callUrl: String,
-    internal val userToken: String,
-    internal val iceServers: List<IceServer>,
-    internal val hasVideoPermission: Boolean,
-    internal val hasAudioPermission: Boolean
-) : java.io.Serializable
+import android.content.Context
+
+public interface StreamVideoProvider {
+
+    public fun getStreamVideo(context: Context): StreamVideo
+}

@@ -28,16 +28,42 @@ import stream.video.sfu.event.JoinRequest
 
 internal interface StreamCallEngine {
 
+    /**
+     * Represents the state of the currently active call.
+     */
     val callState: StateFlow<StreamCallState>
 
+    /**
+     * Called when [VideoEvent] received from Coordinator.
+     */
     fun onCoordinatorEvent(event: VideoEvent)
 
+    /**
+     * Called when [SfuDataEvent] received from SFU.
+     */
     fun onSfuEvent(event: SfuDataEvent)
 
+    /**
+     * Called when [JoinRequest] message is sent to SFU.
+     */
     fun onSfuJoinSent(request: JoinRequest)
 
+    /**
+     * Called when one of the following actions happens:
+     * - User joined a created Meeting.
+     * - User joined a received Meeting.
+     * - Caller joined a Call which has been accepted by Callee.
+     * - Callee joined an accepted incoming Call.
+     */
     fun onCallJoined(joinedCall: JoinedCall)
 
+    /**
+     * Called when one of the following actions happens:
+     * - User starts a Meeting.
+     * - User receives a Meeting.
+     * - Caller dials specified [participantIds].
+     * - Callee accepts an incoming Call.
+     */
     fun onCallStarting(
         type: String,
         id: String,
@@ -46,13 +72,32 @@ internal interface StreamCallEngine {
         forcedNewCall: Boolean
     )
 
+    /**
+     * Called when Caller started a Call and waits it to be accepted by a Callee.
+     */
     fun onCallStarted(call: CallMetadata)
 
+    /**
+     * Called when one of the following actions happens:
+     * - User joins a created Meeting.
+     * - User joins a received Meeting.
+     * - Caller joins a Call which has been accepted by Callee.
+     * - Callee joins an accepted incoming Call.
+     */
     fun onCallJoining(call: CallMetadata)
 
+    /**
+     * Called when a Call has been failed.
+     */
     fun onCallFailed(error: VideoError)
 
+    /**
+     * Called when [CallEventType] message is about to be sent to Coordinator.
+     */
     fun onCallEventSending(callCid: String, eventType: CallEventType)
 
+    /**
+     * Called when [CallEventType] message is sent to Coordinator.
+     */
     fun onCallEventSent(callCid: String, eventType: CallEventType)
 }

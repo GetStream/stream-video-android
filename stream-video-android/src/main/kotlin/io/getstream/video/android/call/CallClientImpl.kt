@@ -54,8 +54,8 @@ import io.getstream.video.android.model.CallParticipantState
 import io.getstream.video.android.model.CallSettings
 import io.getstream.video.android.model.IceCandidate
 import io.getstream.video.android.model.IceServer
+import io.getstream.video.android.model.SfuToken
 import io.getstream.video.android.module.CallClientModule
-import io.getstream.video.android.token.CredentialsProvider
 import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Result
 import io.getstream.video.android.utils.Success
@@ -110,7 +110,8 @@ import kotlin.random.Random
 
 internal class CallClientImpl(
     private val context: Context,
-    private val credentialsProvider: CredentialsProvider,
+    private val getCurrentUserId: () -> String,
+    private val getSfuToken: () -> SfuToken,
     private val callEngine: StreamCallEngine,
     private val signalClient: SignalClient,
     private val signalSocket: SignalSocket,
@@ -327,7 +328,7 @@ internal class CallClientImpl(
         logger.d { "[buildCall] #sfu; sessionId: $sessionId" }
         return Call(
             context = context,
-            credentialsProvider = credentialsProvider,
+            getCurrentUserId = getCurrentUserId,
             eglBase = peerConnectionFactory.eglBase,
         )
     }
@@ -423,7 +424,7 @@ internal class CallClientImpl(
                     decodes = peerConnectionFactory.getAudioDecoderCoders()
                 )
             ),
-            token = credentialsProvider.getSfuToken()
+            token = getSfuToken()
         )
         logger.d { "[executeJoinRequest] request: $request" }
 
@@ -711,7 +712,7 @@ internal class CallClientImpl(
 
     private fun updateParticipantsSubscriptions(participants: List<CallParticipantState>) {
         val subscriptions = mutableMapOf<String, VideoDimension>()
-        val userId = credentialsProvider.getUserCredentials().id
+        val userId = getCurrentUserId()
 
         for (user in participants) {
             if (user.id != userId) {
