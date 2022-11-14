@@ -207,7 +207,7 @@ func (m *MediaStateChanged) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *TelemetryEvent) MarshalVT() (dAtA []byte, err error) {
+func (m *TimelineEvent) MarshalVT() (dAtA []byte, err error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -220,12 +220,12 @@ func (m *TelemetryEvent) MarshalVT() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *TelemetryEvent) MarshalToVT(dAtA []byte) (int, error) {
+func (m *TimelineEvent) MarshalToVT(dAtA []byte) (int, error) {
 	size := m.SizeVT()
 	return m.MarshalToSizedBufferVT(dAtA[:size])
 }
 
-func (m *TelemetryEvent) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
+func (m *TimelineEvent) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 	if m == nil {
 		return 0, nil
 	}
@@ -274,12 +274,12 @@ func (m *TelemetryEvent) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *TelemetryEvent_ParticipantConnected) MarshalToVT(dAtA []byte) (int, error) {
+func (m *TimelineEvent_ParticipantConnected) MarshalToVT(dAtA []byte) (int, error) {
 	size := m.SizeVT()
 	return m.MarshalToSizedBufferVT(dAtA[:size])
 }
 
-func (m *TelemetryEvent_ParticipantConnected) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
+func (m *TimelineEvent_ParticipantConnected) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	if m.ParticipantConnected != nil {
 		size, err := m.ParticipantConnected.MarshalToSizedBufferVT(dAtA[:i])
@@ -293,12 +293,12 @@ func (m *TelemetryEvent_ParticipantConnected) MarshalToSizedBufferVT(dAtA []byte
 	}
 	return len(dAtA) - i, nil
 }
-func (m *TelemetryEvent_ParticipantDisconnected) MarshalToVT(dAtA []byte) (int, error) {
+func (m *TimelineEvent_ParticipantDisconnected) MarshalToVT(dAtA []byte) (int, error) {
 	size := m.SizeVT()
 	return m.MarshalToSizedBufferVT(dAtA[:size])
 }
 
-func (m *TelemetryEvent_ParticipantDisconnected) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
+func (m *TimelineEvent_ParticipantDisconnected) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	if m.ParticipantDisconnected != nil {
 		size, err := m.ParticipantDisconnected.MarshalToSizedBufferVT(dAtA[:i])
@@ -312,12 +312,12 @@ func (m *TelemetryEvent_ParticipantDisconnected) MarshalToSizedBufferVT(dAtA []b
 	}
 	return len(dAtA) - i, nil
 }
-func (m *TelemetryEvent_MediaStateChanged) MarshalToVT(dAtA []byte) (int, error) {
+func (m *TimelineEvent_MediaStateChanged) MarshalToVT(dAtA []byte) (int, error) {
 	size := m.SizeVT()
 	return m.MarshalToSizedBufferVT(dAtA[:size])
 }
 
-func (m *TelemetryEvent_MediaStateChanged) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
+func (m *TimelineEvent_MediaStateChanged) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	if m.MediaStateChanged != nil {
 		size, err := m.MediaStateChanged.MarshalToSizedBufferVT(dAtA[:i])
@@ -331,12 +331,12 @@ func (m *TelemetryEvent_MediaStateChanged) MarshalToSizedBufferVT(dAtA []byte) (
 	}
 	return len(dAtA) - i, nil
 }
-func (m *TelemetryEvent_Freeze) MarshalToVT(dAtA []byte) (int, error) {
+func (m *TimelineEvent_Freeze) MarshalToVT(dAtA []byte) (int, error) {
 	size := m.SizeVT()
 	return m.MarshalToSizedBufferVT(dAtA[:size])
 }
 
-func (m *TelemetryEvent_Freeze) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
+func (m *TimelineEvent_Freeze) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	if m.Freeze != nil {
 		size, err := m.Freeze.MarshalToSizedBufferVT(dAtA[:i])
@@ -389,15 +389,8 @@ func (m *CallParticipantTimeline) MarshalToSizedBufferVT(dAtA []byte) (int, erro
 			i -= size
 			i = encodeVarint(dAtA, i, uint64(size))
 			i--
-			dAtA[i] = 0x1a
+			dAtA[i] = 0x12
 		}
-	}
-	if len(m.SessionId) > 0 {
-		i -= len(m.SessionId)
-		copy(dAtA[i:], m.SessionId)
-		i = encodeVarint(dAtA, i, uint64(len(m.SessionId)))
-		i--
-		dAtA[i] = 0x12
 	}
 	if len(m.UserId) > 0 {
 		i -= len(m.UserId)
@@ -497,7 +490,7 @@ func (m *MediaStateChanged) SizeVT() (n int) {
 	return n
 }
 
-func (m *TelemetryEvent) SizeVT() (n int) {
+func (m *TimelineEvent) SizeVT() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -522,7 +515,7 @@ func (m *TelemetryEvent) SizeVT() (n int) {
 	return n
 }
 
-func (m *TelemetryEvent_ParticipantConnected) SizeVT() (n int) {
+func (m *TimelineEvent_ParticipantConnected) SizeVT() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -534,7 +527,7 @@ func (m *TelemetryEvent_ParticipantConnected) SizeVT() (n int) {
 	}
 	return n
 }
-func (m *TelemetryEvent_ParticipantDisconnected) SizeVT() (n int) {
+func (m *TimelineEvent_ParticipantDisconnected) SizeVT() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -546,7 +539,7 @@ func (m *TelemetryEvent_ParticipantDisconnected) SizeVT() (n int) {
 	}
 	return n
 }
-func (m *TelemetryEvent_MediaStateChanged) SizeVT() (n int) {
+func (m *TimelineEvent_MediaStateChanged) SizeVT() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -558,7 +551,7 @@ func (m *TelemetryEvent_MediaStateChanged) SizeVT() (n int) {
 	}
 	return n
 }
-func (m *TelemetryEvent_Freeze) SizeVT() (n int) {
+func (m *TimelineEvent_Freeze) SizeVT() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -577,10 +570,6 @@ func (m *CallParticipantTimeline) SizeVT() (n int) {
 	var l int
 	_ = l
 	l = len(m.UserId)
-	if l > 0 {
-		n += 1 + l + sov(uint64(l))
-	}
-	l = len(m.SessionId)
 	if l > 0 {
 		n += 1 + l + sov(uint64(l))
 	}
@@ -977,7 +966,7 @@ func (m *MediaStateChanged) UnmarshalVT(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *TelemetryEvent) UnmarshalVT(dAtA []byte) error {
+func (m *TimelineEvent) UnmarshalVT(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -1000,10 +989,10 @@ func (m *TelemetryEvent) UnmarshalVT(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: TelemetryEvent: wiretype end group for non-group")
+			return fmt.Errorf("proto: TimelineEvent: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: TelemetryEvent: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: TimelineEvent: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -1079,7 +1068,7 @@ func (m *TelemetryEvent) UnmarshalVT(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if oneof, ok := m.Event.(*TelemetryEvent_ParticipantConnected); ok {
+			if oneof, ok := m.Event.(*TimelineEvent_ParticipantConnected); ok {
 				if err := oneof.ParticipantConnected.UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
 					return err
 				}
@@ -1088,7 +1077,7 @@ func (m *TelemetryEvent) UnmarshalVT(dAtA []byte) error {
 				if err := v.UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
 					return err
 				}
-				m.Event = &TelemetryEvent_ParticipantConnected{v}
+				m.Event = &TimelineEvent_ParticipantConnected{v}
 			}
 			iNdEx = postIndex
 		case 3:
@@ -1120,7 +1109,7 @@ func (m *TelemetryEvent) UnmarshalVT(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if oneof, ok := m.Event.(*TelemetryEvent_ParticipantDisconnected); ok {
+			if oneof, ok := m.Event.(*TimelineEvent_ParticipantDisconnected); ok {
 				if err := oneof.ParticipantDisconnected.UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
 					return err
 				}
@@ -1129,7 +1118,7 @@ func (m *TelemetryEvent) UnmarshalVT(dAtA []byte) error {
 				if err := v.UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
 					return err
 				}
-				m.Event = &TelemetryEvent_ParticipantDisconnected{v}
+				m.Event = &TimelineEvent_ParticipantDisconnected{v}
 			}
 			iNdEx = postIndex
 		case 4:
@@ -1161,7 +1150,7 @@ func (m *TelemetryEvent) UnmarshalVT(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if oneof, ok := m.Event.(*TelemetryEvent_MediaStateChanged); ok {
+			if oneof, ok := m.Event.(*TimelineEvent_MediaStateChanged); ok {
 				if err := oneof.MediaStateChanged.UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
 					return err
 				}
@@ -1170,7 +1159,7 @@ func (m *TelemetryEvent) UnmarshalVT(dAtA []byte) error {
 				if err := v.UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
 					return err
 				}
-				m.Event = &TelemetryEvent_MediaStateChanged{v}
+				m.Event = &TimelineEvent_MediaStateChanged{v}
 			}
 			iNdEx = postIndex
 		case 5:
@@ -1202,7 +1191,7 @@ func (m *TelemetryEvent) UnmarshalVT(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if oneof, ok := m.Event.(*TelemetryEvent_Freeze); ok {
+			if oneof, ok := m.Event.(*TimelineEvent_Freeze); ok {
 				if err := oneof.Freeze.UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
 					return err
 				}
@@ -1211,7 +1200,7 @@ func (m *TelemetryEvent) UnmarshalVT(dAtA []byte) error {
 				if err := v.UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
 					return err
 				}
-				m.Event = &TelemetryEvent_Freeze{v}
+				m.Event = &TimelineEvent_Freeze{v}
 			}
 			iNdEx = postIndex
 		default:
@@ -1299,38 +1288,6 @@ func (m *CallParticipantTimeline) UnmarshalVT(dAtA []byte) error {
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field SessionId", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflow
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLength
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLength
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.SessionId = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 3:
-			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Events", wireType)
 			}
 			var msglen int
@@ -1358,7 +1315,7 @@ func (m *CallParticipantTimeline) UnmarshalVT(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Events = append(m.Events, &TelemetryEvent{})
+			m.Events = append(m.Events, &TimelineEvent{})
 			if err := m.Events[len(m.Events)-1].UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}

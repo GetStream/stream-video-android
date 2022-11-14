@@ -251,6 +251,20 @@ internal class CallClientImpl(
         }
     }
 
+    override fun setSpeakerphoneEnabled(isEnabled: Boolean) {
+        val devices = getAudioDevices()
+
+        val activeDevice = devices.firstOrNull {
+            if (isEnabled) {
+                it.name.contains("speaker", true)
+            } else {
+                !it.name.contains("speaker", true)
+            }
+        }
+
+        getAudioHandler()?.selectDevice(activeDevice)
+    }
+
     private suspend fun updateMuteState(muteStateRequest: UpdateMuteStateRequest): Result<UpdateMuteStateResponse> {
         return signalClient.updateMuteState(muteStateRequest)
     }
@@ -357,7 +371,7 @@ internal class CallClientImpl(
                 createPeerConnections(autoPublish)
                 loadParticipantsData(result.data.call_state, callSettings)
                 createUserTracks(callSettings)
-                call.setupAudio()
+                call.setupAudio(callSettings)
 
                 result
             }
@@ -555,7 +569,7 @@ internal class CallClientImpl(
         }
 
         val audioTrack = makeAudioTrack()
-        audioTrack.setEnabled(true)
+        audioTrack.setEnabled(callSettings.audioOn)
         localAudioTrack = audioTrack
         logger.v { "[createUserTracks] #sfu; audioTrack: ${audioTrack.stringify()}" }
 

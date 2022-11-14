@@ -5995,37 +5995,36 @@ var _ interface {
 	ErrorName() string
 } = DeleteRecordingResponseValidationError{}
 
-// Validate checks the field values on QueryCallTimelineEventsRequest with the
-// rules defined in the proto definition for this message. If any rules are
-// violated, the first error encountered is returned, or nil if there are no violations.
-func (m *QueryCallTimelineEventsRequest) Validate() error {
+// Validate checks the field values on QuerySessionTimelineEventsRequest with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, the first error encountered is returned, or nil if there are
+// no violations.
+func (m *QuerySessionTimelineEventsRequest) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on QueryCallTimelineEventsRequest with
-// the rules defined in the proto definition for this message. If any rules
-// are violated, the result is a list of violation errors wrapped in
-// QueryCallTimelineEventsRequestMultiError, or nil if none found.
-func (m *QueryCallTimelineEventsRequest) ValidateAll() error {
+// ValidateAll checks the field values on QuerySessionTimelineEventsRequest
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the result is a list of violation errors wrapped in
+// QuerySessionTimelineEventsRequestMultiError, or nil if none found.
+func (m *QuerySessionTimelineEventsRequest) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *QueryCallTimelineEventsRequest) validate(all bool) error {
+func (m *QuerySessionTimelineEventsRequest) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
 
 	var errors []error
 
-	// no validation rules for Type
-
-	// no validation rules for Id
+	// no validation rules for SessionId
 
 	if all {
 		switch v := interface{}(m.GetDuration()).(type) {
 		case interface{ ValidateAll() error }:
 			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, QueryCallTimelineEventsRequestValidationError{
+				errors = append(errors, QuerySessionTimelineEventsRequestValidationError{
 					field:  "Duration",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -6033,7 +6032,7 @@ func (m *QueryCallTimelineEventsRequest) validate(all bool) error {
 			}
 		case interface{ Validate() error }:
 			if err := v.Validate(); err != nil {
-				errors = append(errors, QueryCallTimelineEventsRequestValidationError{
+				errors = append(errors, QuerySessionTimelineEventsRequestValidationError{
 					field:  "Duration",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -6042,7 +6041,7 @@ func (m *QueryCallTimelineEventsRequest) validate(all bool) error {
 		}
 	} else if v, ok := interface{}(m.GetDuration()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
-			return QueryCallTimelineEventsRequestValidationError{
+			return QuerySessionTimelineEventsRequestValidationError{
 				field:  "Duration",
 				reason: "embedded message failed validation",
 				cause:  err,
@@ -6054,7 +6053,7 @@ func (m *QueryCallTimelineEventsRequest) validate(all bool) error {
 		switch v := interface{}(m.GetSince()).(type) {
 		case interface{ ValidateAll() error }:
 			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, QueryCallTimelineEventsRequestValidationError{
+				errors = append(errors, QuerySessionTimelineEventsRequestValidationError{
 					field:  "Since",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -6062,7 +6061,7 @@ func (m *QueryCallTimelineEventsRequest) validate(all bool) error {
 			}
 		case interface{ Validate() error }:
 			if err := v.Validate(); err != nil {
-				errors = append(errors, QueryCallTimelineEventsRequestValidationError{
+				errors = append(errors, QuerySessionTimelineEventsRequestValidationError{
 					field:  "Since",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -6071,7 +6070,7 @@ func (m *QueryCallTimelineEventsRequest) validate(all bool) error {
 		}
 	} else if v, ok := interface{}(m.GetSince()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
-			return QueryCallTimelineEventsRequestValidationError{
+			return QuerySessionTimelineEventsRequestValidationError{
 				field:  "Since",
 				reason: "embedded message failed validation",
 				cause:  err,
@@ -6080,19 +6079,20 @@ func (m *QueryCallTimelineEventsRequest) validate(all bool) error {
 	}
 
 	if len(errors) > 0 {
-		return QueryCallTimelineEventsRequestMultiError(errors)
+		return QuerySessionTimelineEventsRequestMultiError(errors)
 	}
 
 	return nil
 }
 
-// QueryCallTimelineEventsRequestMultiError is an error wrapping multiple
-// validation errors returned by QueryCallTimelineEventsRequest.ValidateAll()
-// if the designated constraints aren't met.
-type QueryCallTimelineEventsRequestMultiError []error
+// QuerySessionTimelineEventsRequestMultiError is an error wrapping multiple
+// validation errors returned by
+// QuerySessionTimelineEventsRequest.ValidateAll() if the designated
+// constraints aren't met.
+type QuerySessionTimelineEventsRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m QueryCallTimelineEventsRequestMultiError) Error() string {
+func (m QuerySessionTimelineEventsRequestMultiError) Error() string {
 	var msgs []string
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -6101,12 +6101,12 @@ func (m QueryCallTimelineEventsRequestMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m QueryCallTimelineEventsRequestMultiError) AllErrors() []error { return m }
+func (m QuerySessionTimelineEventsRequestMultiError) AllErrors() []error { return m }
 
-// QueryCallTimelineEventsRequestValidationError is the validation error
-// returned by QueryCallTimelineEventsRequest.Validate if the designated
+// QuerySessionTimelineEventsRequestValidationError is the validation error
+// returned by QuerySessionTimelineEventsRequest.Validate if the designated
 // constraints aren't met.
-type QueryCallTimelineEventsRequestValidationError struct {
+type QuerySessionTimelineEventsRequestValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -6114,24 +6114,24 @@ type QueryCallTimelineEventsRequestValidationError struct {
 }
 
 // Field function returns field value.
-func (e QueryCallTimelineEventsRequestValidationError) Field() string { return e.field }
+func (e QuerySessionTimelineEventsRequestValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e QueryCallTimelineEventsRequestValidationError) Reason() string { return e.reason }
+func (e QuerySessionTimelineEventsRequestValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e QueryCallTimelineEventsRequestValidationError) Cause() error { return e.cause }
+func (e QuerySessionTimelineEventsRequestValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e QueryCallTimelineEventsRequestValidationError) Key() bool { return e.key }
+func (e QuerySessionTimelineEventsRequestValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e QueryCallTimelineEventsRequestValidationError) ErrorName() string {
-	return "QueryCallTimelineEventsRequestValidationError"
+func (e QuerySessionTimelineEventsRequestValidationError) ErrorName() string {
+	return "QuerySessionTimelineEventsRequestValidationError"
 }
 
 // Error satisfies the builtin error interface
-func (e QueryCallTimelineEventsRequestValidationError) Error() string {
+func (e QuerySessionTimelineEventsRequestValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -6143,14 +6143,14 @@ func (e QueryCallTimelineEventsRequestValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sQueryCallTimelineEventsRequest.%s: %s%s",
+		"invalid %sQuerySessionTimelineEventsRequest.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = QueryCallTimelineEventsRequestValidationError{}
+var _ error = QuerySessionTimelineEventsRequestValidationError{}
 
 var _ interface {
 	Field() string
@@ -6158,35 +6158,47 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = QueryCallTimelineEventsRequestValidationError{}
+} = QuerySessionTimelineEventsRequestValidationError{}
 
-// Validate checks the field values on QueryCallTimelineEventsResponse with the
-// rules defined in the proto definition for this message. If any rules are
-// violated, the first error encountered is returned, or nil if there are no violations.
-func (m *QueryCallTimelineEventsResponse) Validate() error {
+// Validate checks the field values on QuerySessionTimelineEventsResponse with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, the first error encountered is returned, or nil if there are
+// no violations.
+func (m *QuerySessionTimelineEventsResponse) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on QueryCallTimelineEventsResponse with
-// the rules defined in the proto definition for this message. If any rules
-// are violated, the result is a list of violation errors wrapped in
-// QueryCallTimelineEventsResponseMultiError, or nil if none found.
-func (m *QueryCallTimelineEventsResponse) ValidateAll() error {
+// ValidateAll checks the field values on QuerySessionTimelineEventsResponse
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the result is a list of violation errors wrapped in
+// QuerySessionTimelineEventsResponseMultiError, or nil if none found.
+func (m *QuerySessionTimelineEventsResponse) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *QueryCallTimelineEventsResponse) validate(all bool) error {
+func (m *QuerySessionTimelineEventsResponse) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
 
 	var errors []error
 
+	if utf8.RuneCountInString(m.GetSessionId()) < 1 {
+		err := QuerySessionTimelineEventsResponseValidationError{
+			field:  "SessionId",
+			reason: "value length must be at least 1 runes",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
 	if all {
 		switch v := interface{}(m.GetStart()).(type) {
 		case interface{ ValidateAll() error }:
 			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, QueryCallTimelineEventsResponseValidationError{
+				errors = append(errors, QuerySessionTimelineEventsResponseValidationError{
 					field:  "Start",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -6194,7 +6206,7 @@ func (m *QueryCallTimelineEventsResponse) validate(all bool) error {
 			}
 		case interface{ Validate() error }:
 			if err := v.Validate(); err != nil {
-				errors = append(errors, QueryCallTimelineEventsResponseValidationError{
+				errors = append(errors, QuerySessionTimelineEventsResponseValidationError{
 					field:  "Start",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -6203,7 +6215,7 @@ func (m *QueryCallTimelineEventsResponse) validate(all bool) error {
 		}
 	} else if v, ok := interface{}(m.GetStart()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
-			return QueryCallTimelineEventsResponseValidationError{
+			return QuerySessionTimelineEventsResponseValidationError{
 				field:  "Start",
 				reason: "embedded message failed validation",
 				cause:  err,
@@ -6215,7 +6227,7 @@ func (m *QueryCallTimelineEventsResponse) validate(all bool) error {
 		switch v := interface{}(m.GetEnd()).(type) {
 		case interface{ ValidateAll() error }:
 			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, QueryCallTimelineEventsResponseValidationError{
+				errors = append(errors, QuerySessionTimelineEventsResponseValidationError{
 					field:  "End",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -6223,7 +6235,7 @@ func (m *QueryCallTimelineEventsResponse) validate(all bool) error {
 			}
 		case interface{ Validate() error }:
 			if err := v.Validate(); err != nil {
-				errors = append(errors, QueryCallTimelineEventsResponseValidationError{
+				errors = append(errors, QuerySessionTimelineEventsResponseValidationError{
 					field:  "End",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -6232,7 +6244,7 @@ func (m *QueryCallTimelineEventsResponse) validate(all bool) error {
 		}
 	} else if v, ok := interface{}(m.GetEnd()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
-			return QueryCallTimelineEventsResponseValidationError{
+			return QuerySessionTimelineEventsResponseValidationError{
 				field:  "End",
 				reason: "embedded message failed validation",
 				cause:  err,
@@ -6244,7 +6256,7 @@ func (m *QueryCallTimelineEventsResponse) validate(all bool) error {
 		switch v := interface{}(m.GetNext()).(type) {
 		case interface{ ValidateAll() error }:
 			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, QueryCallTimelineEventsResponseValidationError{
+				errors = append(errors, QuerySessionTimelineEventsResponseValidationError{
 					field:  "Next",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -6252,7 +6264,7 @@ func (m *QueryCallTimelineEventsResponse) validate(all bool) error {
 			}
 		case interface{ Validate() error }:
 			if err := v.Validate(); err != nil {
-				errors = append(errors, QueryCallTimelineEventsResponseValidationError{
+				errors = append(errors, QuerySessionTimelineEventsResponseValidationError{
 					field:  "Next",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -6261,7 +6273,7 @@ func (m *QueryCallTimelineEventsResponse) validate(all bool) error {
 		}
 	} else if v, ok := interface{}(m.GetNext()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
-			return QueryCallTimelineEventsResponseValidationError{
+			return QuerySessionTimelineEventsResponseValidationError{
 				field:  "Next",
 				reason: "embedded message failed validation",
 				cause:  err,
@@ -6276,7 +6288,7 @@ func (m *QueryCallTimelineEventsResponse) validate(all bool) error {
 			switch v := interface{}(item).(type) {
 			case interface{ ValidateAll() error }:
 				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, QueryCallTimelineEventsResponseValidationError{
+					errors = append(errors, QuerySessionTimelineEventsResponseValidationError{
 						field:  fmt.Sprintf("ParticipantEvents[%v]", idx),
 						reason: "embedded message failed validation",
 						cause:  err,
@@ -6284,7 +6296,7 @@ func (m *QueryCallTimelineEventsResponse) validate(all bool) error {
 				}
 			case interface{ Validate() error }:
 				if err := v.Validate(); err != nil {
-					errors = append(errors, QueryCallTimelineEventsResponseValidationError{
+					errors = append(errors, QuerySessionTimelineEventsResponseValidationError{
 						field:  fmt.Sprintf("ParticipantEvents[%v]", idx),
 						reason: "embedded message failed validation",
 						cause:  err,
@@ -6293,7 +6305,7 @@ func (m *QueryCallTimelineEventsResponse) validate(all bool) error {
 			}
 		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
-				return QueryCallTimelineEventsResponseValidationError{
+				return QuerySessionTimelineEventsResponseValidationError{
 					field:  fmt.Sprintf("ParticipantEvents[%v]", idx),
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -6304,19 +6316,20 @@ func (m *QueryCallTimelineEventsResponse) validate(all bool) error {
 	}
 
 	if len(errors) > 0 {
-		return QueryCallTimelineEventsResponseMultiError(errors)
+		return QuerySessionTimelineEventsResponseMultiError(errors)
 	}
 
 	return nil
 }
 
-// QueryCallTimelineEventsResponseMultiError is an error wrapping multiple
-// validation errors returned by QueryCallTimelineEventsResponse.ValidateAll()
-// if the designated constraints aren't met.
-type QueryCallTimelineEventsResponseMultiError []error
+// QuerySessionTimelineEventsResponseMultiError is an error wrapping multiple
+// validation errors returned by
+// QuerySessionTimelineEventsResponse.ValidateAll() if the designated
+// constraints aren't met.
+type QuerySessionTimelineEventsResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m QueryCallTimelineEventsResponseMultiError) Error() string {
+func (m QuerySessionTimelineEventsResponseMultiError) Error() string {
 	var msgs []string
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -6325,12 +6338,12 @@ func (m QueryCallTimelineEventsResponseMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m QueryCallTimelineEventsResponseMultiError) AllErrors() []error { return m }
+func (m QuerySessionTimelineEventsResponseMultiError) AllErrors() []error { return m }
 
-// QueryCallTimelineEventsResponseValidationError is the validation error
-// returned by QueryCallTimelineEventsResponse.Validate if the designated
+// QuerySessionTimelineEventsResponseValidationError is the validation error
+// returned by QuerySessionTimelineEventsResponse.Validate if the designated
 // constraints aren't met.
-type QueryCallTimelineEventsResponseValidationError struct {
+type QuerySessionTimelineEventsResponseValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -6338,24 +6351,24 @@ type QueryCallTimelineEventsResponseValidationError struct {
 }
 
 // Field function returns field value.
-func (e QueryCallTimelineEventsResponseValidationError) Field() string { return e.field }
+func (e QuerySessionTimelineEventsResponseValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e QueryCallTimelineEventsResponseValidationError) Reason() string { return e.reason }
+func (e QuerySessionTimelineEventsResponseValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e QueryCallTimelineEventsResponseValidationError) Cause() error { return e.cause }
+func (e QuerySessionTimelineEventsResponseValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e QueryCallTimelineEventsResponseValidationError) Key() bool { return e.key }
+func (e QuerySessionTimelineEventsResponseValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e QueryCallTimelineEventsResponseValidationError) ErrorName() string {
-	return "QueryCallTimelineEventsResponseValidationError"
+func (e QuerySessionTimelineEventsResponseValidationError) ErrorName() string {
+	return "QuerySessionTimelineEventsResponseValidationError"
 }
 
 // Error satisfies the builtin error interface
-func (e QueryCallTimelineEventsResponseValidationError) Error() string {
+func (e QuerySessionTimelineEventsResponseValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -6367,14 +6380,14 @@ func (e QueryCallTimelineEventsResponseValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sQueryCallTimelineEventsResponse.%s: %s%s",
+		"invalid %sQuerySessionTimelineEventsResponse.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = QueryCallTimelineEventsResponseValidationError{}
+var _ error = QuerySessionTimelineEventsResponseValidationError{}
 
 var _ interface {
 	Field() string
@@ -6382,7 +6395,7 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = QueryCallTimelineEventsResponseValidationError{}
+} = QuerySessionTimelineEventsResponseValidationError{}
 
 // Validate checks the field values on CreateRoleRequest with the rules defined
 // in the proto definition for this message. If any rules are violated, the

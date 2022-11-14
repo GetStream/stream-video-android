@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.incomingcall
+package io.getstream.video.android.compose.ui.components.call.outgoingcall.internal
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -30,38 +30,41 @@ import io.getstream.video.android.compose.ui.components.participants.internal.Pa
 import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantInformation
 import io.getstream.video.android.model.CallParticipantState
 import io.getstream.video.android.model.CallStatus
+import io.getstream.video.android.model.CallType
 import io.getstream.video.android.model.CallUser
 
 @Composable
-internal fun IncomingCallDetails(
+internal fun OutgoingCallDetails(
     modifier: Modifier = Modifier,
+    callType: CallType,
     participants: List<CallUser>
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
+        if (callType == CallType.AUDIO) {
+            ParticipantAvatars(
+                participants = participants.map {
+                    CallParticipantState(
+                        it.id,
+                        it.role,
+                        it.name,
+                        it.imageUrl,
+                        false,
+                        true,
+                        true,
+                        true,
+                        null,
+                        Pair(0, 0),
+                        audioLevel = 0f,
+                        idPrefix = ""
+                    )
+                }
+            )
 
-        ParticipantAvatars(
-            participants = participants.map {
-                CallParticipantState(
-                    it.id,
-                    it.role,
-                    it.name,
-                    it.imageUrl,
-                    false,
-                    true,
-                    true,
-                    true,
-                    null,
-                    Pair(0, 0),
-                    audioLevel = 0f,
-                    ""
-                )
-            }
-        )
-
-        Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(32.dp))
+        }
 
         ParticipantInformation(
-            callStatus = CallStatus.Incoming,
+            callStatus = CallStatus.Outgoing,
             participants = participants
         )
     }
@@ -69,9 +72,10 @@ internal fun IncomingCallDetails(
 
 @Preview
 @Composable
-private fun IncomingCallDetailsPreview() {
+private fun OutgoingCallDetailsPreview() {
     VideoTheme {
-        IncomingCallDetails(
+        OutgoingCallDetails(
+            callType = CallType.VIDEO,
             participants = mockParticipantList.map {
                 CallUser(
                     it.id,

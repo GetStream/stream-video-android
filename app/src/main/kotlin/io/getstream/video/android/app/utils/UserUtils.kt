@@ -24,21 +24,21 @@ fun getUsers(): List<UserCredentials> {
             id = "filip",
             name = "Filip",
             image = "https://avatars.githubusercontent.com/u/17215808?v=4",
-            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci9maWxpcCIsImlhdCI6MTY2MzgzNzcyNSwidXNlcl9pZCI6ImZpbGlwIn0.iv6C5qJKFyvWhbKsXKGVToyfo63P5fAyLJW0h517vSk",
+            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci9maWxpcCIsImlhdCI6MTY2ODQyMDkyMSwidXNlcl9pZCI6ImZpbGlwIn0.cqm237T2SVlYEcQWL5bMJM0svMskJDoy6SOv2VnXd9w",
             role = "admin"
         ),
         UserCredentials(
             id = "thierry",
             name = "Thierry",
             image = "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Mile_Kitic_from_BISO0675.jpg/300px-Mile_Kitic_from_BISO0675.jpg",
-            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci90aGllcnJ5IiwiaWF0IjoxNjYzODM3NzQxLCJ1c2VyX2lkIjoidGhpZXJyeSJ9.pPi5OaX8rOe2EoLa-mhUiV7ydudZnQZgggZv5b6E2dc",
+            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci90aGllcnJ5IiwiaWF0IjoxNjY4NDIwOTA4LCJ1c2VyX2lkIjoidGhpZXJyeSJ9.HnYxgrG9MkBb17KMbUWFN76W3WfxzmoqKcvdxOfp-7A",
             role = "admin"
         ),
         UserCredentials(
             id = "martin",
             name = "Martin",
             image = "https://upload.wikimedia.org/wikipedia/commons/d/da/Toma_Zdravkovi%C4%87.jpg",
-            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci9tYXJ0aW4iLCJpYXQiOjE2NjM4Mzc2NTEsInVzZXJfaWQiOiJtYXJ0aW4ifQ.Rk68sAq1y2onI1qcCiDGAUV8hZNUp9XCspwdalqu27Y",
+            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci9tYXJ0aW4iLCJpYXQiOjE2Njg0MjA4ODksInVzZXJfaWQiOiJtYXJ0aW4ifQ.E9pak8M4FuHOQbxqFYDrV4Fs6-poY_ePAfF_EoqMX_g",
             role = "admin"
         )
     )

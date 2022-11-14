@@ -31,7 +31,8 @@ import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import io.getstream.video.android.compose.ui.components.call.CallContent
+import io.getstream.video.android.call.state.LeaveCall
+import io.getstream.video.android.compose.ui.components.call.activecall.ActiveCallContent
 import io.getstream.video.android.model.CallSettings
 import io.getstream.video.android.viewmodel.CallViewModel
 import io.getstream.video.android.viewmodel.CallViewModelFactory
@@ -66,16 +67,16 @@ class CallActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            CallContent(
+            ActiveCallContent(
                 callViewModel,
-                onLeaveCall = ::leaveCall
+                onCallAction = { action ->
+                    if (action is LeaveCall) {
+                        callViewModel.cancelCall()
+                        finish()
+                    }
+                }
             )
         }
-    }
-
-    private fun leaveCall() {
-        callViewModel.cancelCall()
-        finish()
     }
 
     override fun onResume() {

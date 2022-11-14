@@ -31,14 +31,16 @@ public data class StreamIcons(
     public val call: Painter,
     public val callEnd: Painter,
     public val arrowBack: Painter,
-    public val cameraRotate: Painter,
+    public val cameraFlip: Painter,
     public val message: Painter,
     public val micOff: Painter,
     public val micOn: Painter,
     public val participants: Painter,
     public val avatarPreview: Painter,
-    public val videoCam: Painter,
+    public val videoCamOn: Painter,
     public val videoCamOff: Painter,
+    public val speakerPhoneOn: Painter,
+    public val speakerPhoneOff: Painter
 ) {
     public companion object {
         /**
@@ -51,14 +53,16 @@ public data class StreamIcons(
             call = painterResource(id = R.drawable.ic_call),
             callEnd = painterResource(id = R.drawable.ic_call_end),
             arrowBack = painterResource(id = R.drawable.ic_arrow_back),
-            cameraRotate = painterResource(id = R.drawable.ic_camera_rotate),
+            cameraFlip = painterResource(id = R.drawable.ic_camera_rotate),
             message = painterResource(id = R.drawable.ic_message),
             micOff = painterResource(id = R.drawable.ic_mic_off),
             micOn = painterResource(id = R.drawable.ic_mic_on),
             participants = painterResource(id = R.drawable.ic_participants),
             avatarPreview = painterResource(id = R.drawable.ic_preview_avatar),
-            videoCam = painterResource(id = R.drawable.ic_videocam),
+            videoCamOn = painterResource(id = R.drawable.ic_videocam_on),
             videoCamOff = painterResource(id = R.drawable.ic_videocam_off),
+            speakerPhoneOn = painterResource(id = R.drawable.ic_speaker_on),
+            speakerPhoneOff = painterResource(id = R.drawable.ic_speaker_off)
         )
     }
 }

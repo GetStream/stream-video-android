@@ -5,6 +5,7 @@ package stream.video.coordinator.server_v1_rpc;
 import "google/protobuf/duration.proto";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/wrappers.proto";
+import "validate/validate.proto";
 import "video/coordinator/app_v1/app.proto";
 import "video/coordinator/broadcast_v1/broadcast.proto";
 import "video/coordinator/call_v1/call.proto";
@@ -48,7 +49,7 @@ service ServerRPC {
   rpc GetRecordings(GetRecordingsRequest) returns (GetRecordingsResponse);
   rpc DeleteRecording(DeleteRecordingRequest) returns (DeleteRecordingResponse);
 
-  rpc QueryCallTimelineEvents(QueryCallTimelineEventsRequest) returns (QueryCallTimelineEventsResponse);
+  rpc QuerySessionTimelineEvents(QuerySessionTimelineEventsRequest) returns (QuerySessionTimelineEventsResponse);
 
   //  rpc CreateOrUpdateCalls(CreateOrUpdateCallsRequest) returns (CreateOrUpdateCallsResponse);
   //  rpc CreateOrUpdateUsers(CreateOrUpdateUsersRequest) returns (CreateOrUpdateUsersResponse);
@@ -329,28 +330,27 @@ message DeleteRecordingRequest {
 message DeleteRecordingResponse {
 }
 
-// A request message for the QueryCallTimelineEvents endpoint
+// A request message for the QuerySessionTimelineEvents endpoint
 // Specifies a subset of events to request
-message QueryCallTimelineEventsRequest {
-  // The call type.
-  string type = 1;
-  // The call id.
-  string id = 2;
+message QuerySessionTimelineEventsRequest {
+  // The session id.
+  string session_id = 1;
   // Limits event timespan of the response. Default: 10m, max: 30m
-  google.protobuf.Duration duration = 3;
+  google.protobuf.Duration duration = 2;
   // since which date to query events. Default: time of the first event of the call
-  google.protobuf.Timestamp since = 4;
+  google.protobuf.Timestamp since = 3;
 }
 
-message QueryCallTimelineEventsResponse {
+message QuerySessionTimelineEventsResponse {
+  string session_id = 1 [(validate.rules).string.min_len = 1];
   // timeline inclusive start time
-  google.protobuf.Timestamp start = 1;
+  google.protobuf.Timestamp start = 2;
   // timeline inclusive end time
-  google.protobuf.Timestamp end = 2;
-  // contains cursor to use to request the next page
-  google.protobuf.Timestamp next = 3;
+  google.protobuf.Timestamp end = 3;
+  // contains cursor to use to request the next page (optional)
+  google.protobuf.Timestamp next = 4;
   // list of events for each participant from requested time period
-  repeated stat_v1.CallParticipantTimeline participant_events = 4;
+  repeated stat_v1.CallParticipantTimeline participant_events = 5;
 }
 
 message CreateRoleRequest {
