@@ -47,6 +47,16 @@ public data class StreamDimens(
     public val onCallStatusTextAlpha: Float,
     public val buttonToggleOnAlpha: Float,
     public val buttonToggleOffAlpha: Float,
+    public val incomingCallOptionsBottomPadding: Dp,
+    public val callAppBarPadding: Dp,
+    public val callAppBarLeadingContentSpacingStart: Dp,
+    public val callAppBarLeadingContentSpacingEnd: Dp,
+    public val callAppBarCenterContentSpacingStart: Dp,
+    public val callAppBarCenterContentSpacingEnd: Dp,
+    public val callAppBarTrailingContentSpacingStart: Dp,
+    public val callAppBarTrailingContentSpacingEnd: Dp,
+    public val callControlButtonSize: Dp,
+    public val callControlsSheetHeight: Dp
 ) {
     public companion object {
         /**
@@ -72,6 +82,16 @@ public data class StreamDimens(
             onCallStatusTextAlpha = 0.6f,
             buttonToggleOnAlpha = 0.4f,
             buttonToggleOffAlpha = 1.0f,
+            incomingCallOptionsBottomPadding = 44.dp,
+            callAppBarPadding = 12.dp,
+            callAppBarLeadingContentSpacingStart = 8.dp,
+            callAppBarLeadingContentSpacingEnd = 8.dp,
+            callAppBarCenterContentSpacingStart = 36.dp,
+            callAppBarTrailingContentSpacingStart = 8.dp,
+            callAppBarTrailingContentSpacingEnd = 8.dp,
+            callAppBarCenterContentSpacingEnd = 0.dp,
+            callControlButtonSize = 50.dp,
+            callControlsSheetHeight = 96.dp
         )
     }
 }

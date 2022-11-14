@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="default_app_bar_title">Call</string>
+    <string name="back_button_content_description">Back</string>
+
+    <string name="call_participants_menu_content_description">Participants</string>
+
+    <string name="call_controls_toggle_speakerphone">Toggle Speakerphone</string>
+    <string name="call_controls_leave_call">Leave call</string>
+    <string name="call_controls_flip_camera">Flip camera</string>
+    <string name="call_controls_toggle_microphone">Toggle microphone</string>
+    <string name="call_controls_toggle_camera">Toggle camera</string>
+</resources>

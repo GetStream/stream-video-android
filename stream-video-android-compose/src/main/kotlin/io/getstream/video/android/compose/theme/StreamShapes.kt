@@ -17,8 +17,10 @@
 package io.getstream.video.android.compose.theme
 
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.unit.dp
 
 /**
  * Contains all the shapes we provide for our components.
@@ -29,6 +31,8 @@ import androidx.compose.ui.graphics.Shape
 public data class StreamShapes(
     public val avatar: Shape,
     public val callButton: Shape,
+    public val callControls: Shape,
+    public val callControlsButton: Shape
 ) {
     public companion object {
         /**
@@ -39,6 +43,8 @@ public data class StreamShapes(
         public fun defaultShapes(): StreamShapes = StreamShapes(
             avatar = CircleShape,
             callButton = CircleShape,
+            callControls = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+            callControlsButton = CircleShape
         )
     }
 }

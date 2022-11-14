@@ -5121,6 +5121,68 @@ func (m *ReportCallStatEventRequest) validate(all bool) error {
 
 	switch m.Event.(type) {
 
+	case *ReportCallStatEventRequest_ParticipantConnected:
+
+		if all {
+			switch v := interface{}(m.GetParticipantConnected()).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, ReportCallStatEventRequestValidationError{
+						field:  "ParticipantConnected",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, ReportCallStatEventRequestValidationError{
+						field:  "ParticipantConnected",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(m.GetParticipantConnected()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return ReportCallStatEventRequestValidationError{
+					field:  "ParticipantConnected",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	case *ReportCallStatEventRequest_ParticipantDisconnected:
+
+		if all {
+			switch v := interface{}(m.GetParticipantDisconnected()).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, ReportCallStatEventRequestValidationError{
+						field:  "ParticipantDisconnected",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, ReportCallStatEventRequestValidationError{
+						field:  "ParticipantDisconnected",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(m.GetParticipantDisconnected()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return ReportCallStatEventRequestValidationError{
+					field:  "ParticipantDisconnected",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
 	case *ReportCallStatEventRequest_MediaStateChanged:
 
 		if all {

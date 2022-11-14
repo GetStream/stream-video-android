@@ -79,7 +79,7 @@ public fun LocalVideo(
                 modifier = Modifier
                     .padding(4.dp)
                     .size(24.dp),
-                painter = if (callParticipant.hasVideo) icons.videoCam else icons.videoCamOff,
+                painter = if (callParticipant.hasVideo) icons.videoCamOn else icons.videoCamOff,
                 contentDescription = "Video enabled: ${callParticipant.hasVideo}",
                 tint = Color.White,
             )

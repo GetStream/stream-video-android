@@ -71,4 +71,7 @@ enum E {
   //18xx - SFU errors
 
   SFU_NO_DATACENTERS_AVAILABLE = 1801;
+
+  //19xx - Session errors
+  SESSION_NOT_FOUND = 1901;
 }

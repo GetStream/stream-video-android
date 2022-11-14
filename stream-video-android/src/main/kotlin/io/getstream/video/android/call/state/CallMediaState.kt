@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.model
+package io.getstream.video.android.call.state
 
-public data class CallSettings(
-    public val autoPublish: Boolean = true,
-    public val audioOn: Boolean = false,
-    public val videoOn: Boolean = true,
-    public val speakerOn: Boolean = false
+public data class CallMediaState(
+    val isMicrophoneEnabled: Boolean = false,
+    val isSpeakerphoneEnabled: Boolean = false,
+    val isCameraEnabled: Boolean = false
 )

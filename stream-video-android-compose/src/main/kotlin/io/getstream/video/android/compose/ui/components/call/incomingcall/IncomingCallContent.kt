@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.incomingcall
+package io.getstream.video.android.compose.ui.components.call.incomingcall
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -24,50 +24,79 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
+import io.getstream.video.android.call.state.ToggleMicrophone
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.CallTopAppbar
 import io.getstream.video.android.compose.ui.components.background.CallBackground
+import io.getstream.video.android.compose.ui.components.call.CallAppBar
+import io.getstream.video.android.compose.ui.components.call.incomingcall.internal.IncomingCallDetails
+import io.getstream.video.android.compose.ui.components.call.incomingcall.internal.IncomingCallOptions
 import io.getstream.video.android.compose.ui.components.mock.mockParticipantList
 import io.getstream.video.android.model.CallType
 import io.getstream.video.android.model.CallUser
 import io.getstream.video.android.viewmodel.CallViewModel
 
+/**
+ * Represents the Incoming Call state and UI, when the user receives a call from other people.
+ *
+ * @param viewModel The [CallViewModel] used to provide state and various handlers in the call.
+ * @param modifier Modifier for styling.
+ * @param onRejectCall Handler when the user decides to cancel or drop out of a call.
+ * @param onAcceptCall Handler when the user accepts a call in Incoming Call state.
+ * @param onVideoToggleChanged Handler when the user toggles their video on or off.
+ */
 @Composable
-public fun IncomingCallScreen(
+public fun IncomingCallContent(
     viewModel: CallViewModel,
-    onDeclineCall: () -> Unit,
-    onAcceptCall: () -> Unit,
-    onVideoToggleChanged: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+    onRejectCall: () -> Unit = viewModel::hangUpCall,
+    onAcceptCall: () -> Unit = viewModel::acceptCall,
+    onVideoToggleChanged: (Boolean) -> Unit = { isEnabled ->
+        viewModel.onCallAction(
+            ToggleMicrophone(isEnabled)
+        )
+    },
 ) {
     val callType: CallType by viewModel.callType.collectAsState()
     val participants: List<CallUser> by viewModel.participants.collectAsState()
     IncomingCall(
+        modifier = modifier,
         participants = participants,
         callType = callType,
-        onDeclineCall = onDeclineCall,
+        onRejectCall = onRejectCall,
         onAcceptCall = onAcceptCall,
         onVideoToggleChanged = onVideoToggleChanged
     )
 }
 
+/**
+ * Stateless variant of the Incoming call UI, which you can use to build your own custom logic that
+ * powers the state and handlers.
+ *
+ * @param participants People participating in the call.
+ * @param callType The type of call, Audio or Video.
+ * @param onRejectCall Handler when the user decides to cancel or drop out of a call.
+ * @param onAcceptCall Handler when the user accepts a call in Incoming Call state.
+ * @param onVideoToggleChanged Handler when the user toggles their video on or off.
+ * @param modifier Modifier for styling.
+ */
 @Composable
 public fun IncomingCall(
     participants: List<CallUser>,
     callType: CallType,
-    onDeclineCall: () -> Unit,
+    onRejectCall: () -> Unit,
     onAcceptCall: () -> Unit,
     onVideoToggleChanged: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     CallBackground(
+        modifier = modifier,
         participants = participants,
         callType = callType,
         isIncoming = true
     ) {
-
         Column {
 
-            CallTopAppbar()
+            CallAppBar()
 
             val topPadding = if (participants.size == 1) {
                 VideoTheme.dimens.singleAvatarAppbarPadding
@@ -86,9 +115,9 @@ public fun IncomingCall(
         IncomingCallOptions(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 44.dp),
+                .padding(bottom = VideoTheme.dimens.incomingCallOptionsBottomPadding),
             isVideoCall = callType == CallType.VIDEO,
-            onDeclineCall = onDeclineCall,
+            onDeclineCall = onRejectCall,
             onAcceptCall = onAcceptCall,
             onVideoToggleChanged = onVideoToggleChanged
         )
@@ -112,7 +141,7 @@ private fun IncomingCallPreview() {
                 )
             },
             callType = CallType.VIDEO,
-            onDeclineCall = { },
+            onRejectCall = { },
             onAcceptCall = { },
             onVideoToggleChanged = { }
         )

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.outgoingcall
+package io.getstream.video.android.compose.ui.components.call.outgoingcall.internal
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -42,7 +42,6 @@ import io.getstream.video.android.compose.ui.components.extensions.toggleAlpha
 @Composable
 internal fun OutgoingSingleCallOptions(
     modifier: Modifier = Modifier,
-    callId: String,
     onCancelCall: () -> Unit = {},
     onMicToggleChanged: (Boolean) -> Unit = {},
     onVideoToggleChanged: (Boolean) -> Unit = {},
@@ -97,7 +96,7 @@ internal fun OutgoingSingleCallOptions(
                 },
                 content = {
                     val cameraIcon =
-                        if (isVideoEnabled) VideoTheme.icons.videoCam else VideoTheme.icons.videoCamOff
+                        if (isVideoEnabled) VideoTheme.icons.videoCamOn else VideoTheme.icons.videoCamOff
 
                     Icon(
                         painter = cameraIcon,
@@ -132,5 +131,5 @@ internal fun OutgoingSingleCallOptions(
 @Preview
 @Composable
 private fun OutgoingCallOptionsPreview() {
-    VideoTheme { OutgoingSingleCallOptions(callId = "") }
+    VideoTheme { OutgoingSingleCallOptions() }
 }
