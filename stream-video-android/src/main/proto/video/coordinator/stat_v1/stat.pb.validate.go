@@ -489,22 +489,22 @@ var _ interface {
 	ErrorName() string
 } = MediaStateChangedValidationError{}
 
-// Validate checks the field values on TelemetryEvent with the rules defined in
+// Validate checks the field values on TimelineEvent with the rules defined in
 // the proto definition for this message. If any rules are violated, the first
 // error encountered is returned, or nil if there are no violations.
-func (m *TelemetryEvent) Validate() error {
+func (m *TimelineEvent) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on TelemetryEvent with the rules defined
+// ValidateAll checks the field values on TimelineEvent with the rules defined
 // in the proto definition for this message. If any rules are violated, the
-// result is a list of violation errors wrapped in TelemetryEventMultiError,
-// or nil if none found.
-func (m *TelemetryEvent) ValidateAll() error {
+// result is a list of violation errors wrapped in TimelineEventMultiError, or
+// nil if none found.
+func (m *TimelineEvent) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *TelemetryEvent) validate(all bool) error {
+func (m *TimelineEvent) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
@@ -515,7 +515,7 @@ func (m *TelemetryEvent) validate(all bool) error {
 		switch v := interface{}(m.GetTimestamp()).(type) {
 		case interface{ ValidateAll() error }:
 			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, TelemetryEventValidationError{
+				errors = append(errors, TimelineEventValidationError{
 					field:  "Timestamp",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -523,7 +523,7 @@ func (m *TelemetryEvent) validate(all bool) error {
 			}
 		case interface{ Validate() error }:
 			if err := v.Validate(); err != nil {
-				errors = append(errors, TelemetryEventValidationError{
+				errors = append(errors, TimelineEventValidationError{
 					field:  "Timestamp",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -532,7 +532,7 @@ func (m *TelemetryEvent) validate(all bool) error {
 		}
 	} else if v, ok := interface{}(m.GetTimestamp()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
-			return TelemetryEventValidationError{
+			return TimelineEventValidationError{
 				field:  "Timestamp",
 				reason: "embedded message failed validation",
 				cause:  err,
@@ -542,13 +542,13 @@ func (m *TelemetryEvent) validate(all bool) error {
 
 	switch m.Event.(type) {
 
-	case *TelemetryEvent_ParticipantConnected:
+	case *TimelineEvent_ParticipantConnected:
 
 		if all {
 			switch v := interface{}(m.GetParticipantConnected()).(type) {
 			case interface{ ValidateAll() error }:
 				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, TelemetryEventValidationError{
+					errors = append(errors, TimelineEventValidationError{
 						field:  "ParticipantConnected",
 						reason: "embedded message failed validation",
 						cause:  err,
@@ -556,7 +556,7 @@ func (m *TelemetryEvent) validate(all bool) error {
 				}
 			case interface{ Validate() error }:
 				if err := v.Validate(); err != nil {
-					errors = append(errors, TelemetryEventValidationError{
+					errors = append(errors, TimelineEventValidationError{
 						field:  "ParticipantConnected",
 						reason: "embedded message failed validation",
 						cause:  err,
@@ -565,7 +565,7 @@ func (m *TelemetryEvent) validate(all bool) error {
 			}
 		} else if v, ok := interface{}(m.GetParticipantConnected()).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
-				return TelemetryEventValidationError{
+				return TimelineEventValidationError{
 					field:  "ParticipantConnected",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -573,13 +573,13 @@ func (m *TelemetryEvent) validate(all bool) error {
 			}
 		}
 
-	case *TelemetryEvent_ParticipantDisconnected:
+	case *TimelineEvent_ParticipantDisconnected:
 
 		if all {
 			switch v := interface{}(m.GetParticipantDisconnected()).(type) {
 			case interface{ ValidateAll() error }:
 				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, TelemetryEventValidationError{
+					errors = append(errors, TimelineEventValidationError{
 						field:  "ParticipantDisconnected",
 						reason: "embedded message failed validation",
 						cause:  err,
@@ -587,7 +587,7 @@ func (m *TelemetryEvent) validate(all bool) error {
 				}
 			case interface{ Validate() error }:
 				if err := v.Validate(); err != nil {
-					errors = append(errors, TelemetryEventValidationError{
+					errors = append(errors, TimelineEventValidationError{
 						field:  "ParticipantDisconnected",
 						reason: "embedded message failed validation",
 						cause:  err,
@@ -596,7 +596,7 @@ func (m *TelemetryEvent) validate(all bool) error {
 			}
 		} else if v, ok := interface{}(m.GetParticipantDisconnected()).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
-				return TelemetryEventValidationError{
+				return TimelineEventValidationError{
 					field:  "ParticipantDisconnected",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -604,13 +604,13 @@ func (m *TelemetryEvent) validate(all bool) error {
 			}
 		}
 
-	case *TelemetryEvent_MediaStateChanged:
+	case *TimelineEvent_MediaStateChanged:
 
 		if all {
 			switch v := interface{}(m.GetMediaStateChanged()).(type) {
 			case interface{ ValidateAll() error }:
 				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, TelemetryEventValidationError{
+					errors = append(errors, TimelineEventValidationError{
 						field:  "MediaStateChanged",
 						reason: "embedded message failed validation",
 						cause:  err,
@@ -618,7 +618,7 @@ func (m *TelemetryEvent) validate(all bool) error {
 				}
 			case interface{ Validate() error }:
 				if err := v.Validate(); err != nil {
-					errors = append(errors, TelemetryEventValidationError{
+					errors = append(errors, TimelineEventValidationError{
 						field:  "MediaStateChanged",
 						reason: "embedded message failed validation",
 						cause:  err,
@@ -627,7 +627,7 @@ func (m *TelemetryEvent) validate(all bool) error {
 			}
 		} else if v, ok := interface{}(m.GetMediaStateChanged()).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
-				return TelemetryEventValidationError{
+				return TimelineEventValidationError{
 					field:  "MediaStateChanged",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -635,13 +635,13 @@ func (m *TelemetryEvent) validate(all bool) error {
 			}
 		}
 
-	case *TelemetryEvent_Freeze:
+	case *TimelineEvent_Freeze:
 
 		if all {
 			switch v := interface{}(m.GetFreeze()).(type) {
 			case interface{ ValidateAll() error }:
 				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, TelemetryEventValidationError{
+					errors = append(errors, TimelineEventValidationError{
 						field:  "Freeze",
 						reason: "embedded message failed validation",
 						cause:  err,
@@ -649,7 +649,7 @@ func (m *TelemetryEvent) validate(all bool) error {
 				}
 			case interface{ Validate() error }:
 				if err := v.Validate(); err != nil {
-					errors = append(errors, TelemetryEventValidationError{
+					errors = append(errors, TimelineEventValidationError{
 						field:  "Freeze",
 						reason: "embedded message failed validation",
 						cause:  err,
@@ -658,7 +658,7 @@ func (m *TelemetryEvent) validate(all bool) error {
 			}
 		} else if v, ok := interface{}(m.GetFreeze()).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
-				return TelemetryEventValidationError{
+				return TimelineEventValidationError{
 					field:  "Freeze",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -669,19 +669,19 @@ func (m *TelemetryEvent) validate(all bool) error {
 	}
 
 	if len(errors) > 0 {
-		return TelemetryEventMultiError(errors)
+		return TimelineEventMultiError(errors)
 	}
 
 	return nil
 }
 
-// TelemetryEventMultiError is an error wrapping multiple validation errors
-// returned by TelemetryEvent.ValidateAll() if the designated constraints
+// TimelineEventMultiError is an error wrapping multiple validation errors
+// returned by TimelineEvent.ValidateAll() if the designated constraints
 // aren't met.
-type TelemetryEventMultiError []error
+type TimelineEventMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m TelemetryEventMultiError) Error() string {
+func (m TimelineEventMultiError) Error() string {
 	var msgs []string
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -690,11 +690,11 @@ func (m TelemetryEventMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m TelemetryEventMultiError) AllErrors() []error { return m }
+func (m TimelineEventMultiError) AllErrors() []error { return m }
 
-// TelemetryEventValidationError is the validation error returned by
-// TelemetryEvent.Validate if the designated constraints aren't met.
-type TelemetryEventValidationError struct {
+// TimelineEventValidationError is the validation error returned by
+// TimelineEvent.Validate if the designated constraints aren't met.
+type TimelineEventValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -702,22 +702,22 @@ type TelemetryEventValidationError struct {
 }
 
 // Field function returns field value.
-func (e TelemetryEventValidationError) Field() string { return e.field }
+func (e TimelineEventValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e TelemetryEventValidationError) Reason() string { return e.reason }
+func (e TimelineEventValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e TelemetryEventValidationError) Cause() error { return e.cause }
+func (e TimelineEventValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e TelemetryEventValidationError) Key() bool { return e.key }
+func (e TimelineEventValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e TelemetryEventValidationError) ErrorName() string { return "TelemetryEventValidationError" }
+func (e TimelineEventValidationError) ErrorName() string { return "TimelineEventValidationError" }
 
 // Error satisfies the builtin error interface
-func (e TelemetryEventValidationError) Error() string {
+func (e TimelineEventValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -729,14 +729,14 @@ func (e TelemetryEventValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sTelemetryEvent.%s: %s%s",
+		"invalid %sTimelineEvent.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = TelemetryEventValidationError{}
+var _ error = TimelineEventValidationError{}
 
 var _ interface {
 	Field() string
@@ -744,7 +744,7 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = TelemetryEventValidationError{}
+} = TimelineEventValidationError{}
 
 // Validate checks the field values on CallParticipantTimeline with the rules
 // defined in the proto definition for this message. If any rules are
@@ -771,17 +771,6 @@ func (m *CallParticipantTimeline) validate(all bool) error {
 	if utf8.RuneCountInString(m.GetUserId()) < 1 {
 		err := CallParticipantTimelineValidationError{
 			field:  "UserId",
-			reason: "value length must be at least 1 runes",
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
-
-	if utf8.RuneCountInString(m.GetSessionId()) < 1 {
-		err := CallParticipantTimelineValidationError{
-			field:  "SessionId",
 			reason: "value length must be at least 1 runes",
 		}
 		if !all {

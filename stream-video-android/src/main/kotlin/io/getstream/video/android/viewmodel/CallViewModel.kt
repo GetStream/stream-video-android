@@ -23,6 +23,14 @@ import io.getstream.logging.StreamLog
 import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.audio.AudioDevice
 import io.getstream.video.android.call.CallClient
+import io.getstream.video.android.call.state.CallAction
+import io.getstream.video.android.call.state.CallMediaState
+import io.getstream.video.android.call.state.CustomAction
+import io.getstream.video.android.call.state.FlipCamera
+import io.getstream.video.android.call.state.LeaveCall
+import io.getstream.video.android.call.state.ToggleCamera
+import io.getstream.video.android.call.state.ToggleMicrophone
+import io.getstream.video.android.call.state.ToggleSpeakerphone
 import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.CallParticipantState
 import io.getstream.video.android.model.CallSettings
@@ -43,7 +51,7 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
-import java.util.UUID
+import java.util.*
 import io.getstream.video.android.model.state.StreamCallState as State
 
 private const val CONNECT_TIMEOUT = 30_000L
@@ -80,6 +88,17 @@ public class CallViewModel(
             hasPermission && audioEnabled
         }
 
+    private val _callMediaState: MutableStateFlow<CallMediaState> =
+        MutableStateFlow(
+            CallMediaState(
+                isMicrophoneEnabled = isAudioEnabled.value && hasAudioPermission.value,
+                isCameraEnabled = isVideoEnabled.value && hasVideoPermission.value,
+                isSpeakerphoneEnabled = false
+            )
+        )
+
+    public val callMediaState: StateFlow<CallMediaState> = _callMediaState
+
     public val participantList: Flow<List<CallParticipantState>> =
         callState.filterNotNull().flatMapLatest { it.callParticipants }
 
@@ -93,7 +112,7 @@ public class CallViewModel(
     public val isShowingParticipantsInfo: StateFlow<Boolean> = _isShowingParticipantsInfo
 
     private val _isShowingSettings = MutableStateFlow(false)
-    public val isShowingSettings: StateFlow<Boolean> = _isShowingSettings
+    public val isShowingAudioDevicePicker: StateFlow<Boolean> = _isShowingSettings
 
     public val streamCallState: StateFlow<State> get() = streamVideo.callState
 
@@ -180,6 +199,11 @@ public class CallViewModel(
                 _callState.value = call
                 isVideoEnabled.value = callSettings.videoOn
                 isAudioEnabled.value = callSettings.audioOn
+                _callMediaState.value = CallMediaState(
+                    isMicrophoneEnabled = callSettings.audioOn,
+                    isCameraEnabled = callSettings.videoOn,
+                    isSpeakerphoneEnabled = callSettings.speakerOn
+                )
 
                 val isVideoOn = isVideoOn.firstOrNull() ?: false
 
@@ -193,12 +217,19 @@ public class CallViewModel(
         }
     }
 
+    public fun toggleSpeakerphone(enabled: Boolean) {
+        client.setSpeakerphoneEnabled(enabled)
+        onSpeakerphoneChanged(enabled)
+    }
+
     public fun toggleCamera(enabled: Boolean) {
         client.setCameraEnabled(enabled)
+        onVideoChanged(enabled)
     }
 
     public fun toggleMicrophone(enabled: Boolean) {
         client.setMicrophoneEnabled(enabled)
+        onMicrophoneChanged(enabled)
     }
 
     /**
@@ -247,6 +278,19 @@ public class CallViewModel(
         this._isShowingParticipantsInfo.value = true
     }
 
+    public fun onCallAction(callAction: CallAction) {
+        when (callAction) {
+            is ToggleSpeakerphone -> toggleSpeakerphone(callAction.isEnabled)
+            is ToggleCamera -> toggleCamera(callAction.isEnabled)
+            is ToggleMicrophone -> toggleMicrophone(callAction.isEnabled)
+            is FlipCamera -> flipCamera()
+            is LeaveCall -> cancelCall()
+            is CustomAction -> {
+                // custom actions
+            }
+        }
+    }
+
     /**
      * Drops the call by sending a cancel event, which informs other users.
      */
@@ -281,6 +325,7 @@ public class CallViewModel(
         _callState.value = null
         isVideoEnabled.value = false
         isAudioEnabled.value = false
+        _callMediaState.value = CallMediaState()
         hasAudioPermission.value = false
         hasVideoPermission.value = false
         _isVideoInitialized.value = false
@@ -366,13 +411,26 @@ public class CallViewModel(
         }
     }
 
-    public fun onMicrophoneChanged(microphoneEnabled: Boolean) {
+    private fun onMicrophoneChanged(microphoneEnabled: Boolean) {
         logger.d { "[onMicrophoneChanged] microphoneEnabled: $microphoneEnabled" }
         this.isAudioEnabled.value = microphoneEnabled
+        val mediaState = _callMediaState.value
+
+        _callMediaState.value = mediaState.copy(isMicrophoneEnabled = microphoneEnabled)
     }
 
-    public fun onVideoChanged(videoEnabled: Boolean) {
+    private fun onVideoChanged(videoEnabled: Boolean) {
         logger.d { "[onVideoChanged] videoEnabled: $videoEnabled" }
         this.isVideoEnabled.value = videoEnabled
+        val mediaState = _callMediaState.value
+
+        _callMediaState.value = mediaState.copy(isCameraEnabled = videoEnabled)
+    }
+
+    private fun onSpeakerphoneChanged(speakerPhoneEnabled: Boolean) {
+        logger.d { "[onSpeakerphoneChanged] speakerPhoneEnabled: $speakerPhoneEnabled" }
+        val mediaState = _callMediaState.value
+
+        _callMediaState.value = mediaState.copy(isSpeakerphoneEnabled = speakerPhoneEnabled)
     }
 }

@@ -42,6 +42,8 @@ public interface CallClient {
 
     public fun setMicrophoneEnabled(isEnabled: Boolean)
 
+    public fun setSpeakerphoneEnabled(isEnabled: Boolean)
+
     public fun flipCamera()
 
     public fun getAudioDevices(): List<AudioDevice>
@@ -49,6 +51,5 @@ public interface CallClient {
     public fun selectAudioDevice(device: AudioDevice)
 
     public fun addSocketListener(signalSocketListener: SignalSocketListener)
-
     public fun removeSocketListener(signalSocketListener: SignalSocketListener)
 }

@@ -17,8 +17,9 @@
 package io.getstream.video.android.model
 
 import android.content.Context
-import android.media.AudioDeviceInfo.TYPE_BUILTIN_SPEAKER
+import android.media.AudioDeviceInfo
 import android.media.AudioManager
+import android.media.AudioManager.MODE_IN_COMMUNICATION
 import android.os.Build
 import android.view.View
 import androidx.core.content.getSystemService
@@ -151,8 +152,6 @@ public class Call(
 
             remoteAudioTracks.addAll(mediaStream.audioTracks)
             logger.d { "[addStream] #sfu; remoteAudioTracks: $remoteAudioTracks" }
-
-            updateAudio()
         }
 
         val updatedList = _callParticipants.value.updateValue(
@@ -173,32 +172,6 @@ public class Call(
         logger.d { "[addStream] updated list $updatedList" }
         _callParticipants.value = updatedList
         onStreamAdded(mediaStream)
-    }
-
-    private fun updateAudio() {
-        val switchHandler = audioHandler as? AudioSwitchHandler
-        if (switchHandler != null && switchHandler.availableAudioDevices.isNotEmpty()) {
-            val speaker = switchHandler.availableAudioDevices.firstOrNull {
-                it.name.contains(
-                    "speaker",
-                    true
-                )
-            }
-
-            if (speaker != null) {
-                switchHandler.selectDevice(speaker)
-            }
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val devices = audioManager?.availableCommunicationDevices ?: return
-            val speaker = devices.firstOrNull { it.type == TYPE_BUILTIN_SPEAKER } ?: return
-
-            val isCommunicationDeviceSet = audioManager?.setCommunicationDevice(speaker)
-            logger.d { "[updateAudio] #sfu; isCommunicationDeviceSet: $isCommunicationDeviceSet" }
-        }
-        audioManager?.mode = AudioManager.MODE_IN_COMMUNICATION
-        audioManager?.isSpeakerphoneOn = true
     }
 
     private fun replaceTrackIfNeeded(mediaStream: MediaStream, streamId: String?): VideoTrack? {
@@ -337,9 +310,24 @@ public class Call(
         _callParticipants.value = updated
     }
 
-    internal fun setupAudio() {
+    internal fun setupAudio(callSettings: CallSettings) {
         logger.d { "[setupAudio] #sfu; no args" }
         audioHandler.start()
+        audioManager?.mode = MODE_IN_COMMUNICATION
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val devices = audioManager?.availableCommunicationDevices ?: return
+            val deviceType = if (callSettings.speakerOn) {
+                AudioDeviceInfo.TYPE_BUILTIN_SPEAKER
+            } else {
+                AudioDeviceInfo.TYPE_BUILTIN_EARPIECE
+            }
+
+            val device = devices.firstOrNull { it.type == deviceType } ?: return
+
+            val isCommunicationDeviceSet = audioManager?.setCommunicationDevice(device)
+            logger.d { "[updateAudio] #sfu; isCommunicationDeviceSet: $isCommunicationDeviceSet" }
+        }
     }
 
     internal fun disconnect() {

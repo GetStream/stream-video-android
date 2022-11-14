@@ -60,7 +60,7 @@ message MediaStateChanged {
 }
 
 // A stat event from the perspective of a particular participant
-message TelemetryEvent {
+message TimelineEvent {
   // Event timestamp as RFC3339 string.
   google.protobuf.Timestamp timestamp = 1;
 
@@ -75,6 +75,5 @@ message TelemetryEvent {
 message CallParticipantTimeline {
   // The events in this timeline are from the perspective of the user with this ID
   string user_id = 1 [(validate.rules).string.min_len = 1];
-  string session_id = 2 [(validate.rules).string.min_len = 1];
-  repeated TelemetryEvent events = 3;
+  repeated TimelineEvent events = 2;
 }

@@ -2563,7 +2563,7 @@ func (m *DeleteRecordingResponse) MarshalToSizedBufferVT(dAtA []byte) (int, erro
 	return len(dAtA) - i, nil
 }
 
-func (m *QueryCallTimelineEventsRequest) MarshalVT() (dAtA []byte, err error) {
+func (m *QuerySessionTimelineEventsRequest) MarshalVT() (dAtA []byte, err error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -2576,12 +2576,12 @@ func (m *QueryCallTimelineEventsRequest) MarshalVT() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryCallTimelineEventsRequest) MarshalToVT(dAtA []byte) (int, error) {
+func (m *QuerySessionTimelineEventsRequest) MarshalToVT(dAtA []byte) (int, error) {
 	size := m.SizeVT()
 	return m.MarshalToSizedBufferVT(dAtA[:size])
 }
 
-func (m *QueryCallTimelineEventsRequest) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
+func (m *QuerySessionTimelineEventsRequest) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 	if m == nil {
 		return 0, nil
 	}
@@ -2613,7 +2613,7 @@ func (m *QueryCallTimelineEventsRequest) MarshalToSizedBufferVT(dAtA []byte) (in
 			i = encodeVarint(dAtA, i, uint64(len(encoded)))
 		}
 		i--
-		dAtA[i] = 0x22
+		dAtA[i] = 0x1a
 	}
 	if m.Duration != nil {
 		if marshalto, ok := interface{}(m.Duration).(interface {
@@ -2635,26 +2635,19 @@ func (m *QueryCallTimelineEventsRequest) MarshalToSizedBufferVT(dAtA []byte) (in
 			i = encodeVarint(dAtA, i, uint64(len(encoded)))
 		}
 		i--
-		dAtA[i] = 0x1a
-	}
-	if len(m.Id) > 0 {
-		i -= len(m.Id)
-		copy(dAtA[i:], m.Id)
-		i = encodeVarint(dAtA, i, uint64(len(m.Id)))
-		i--
 		dAtA[i] = 0x12
 	}
-	if len(m.Type) > 0 {
-		i -= len(m.Type)
-		copy(dAtA[i:], m.Type)
-		i = encodeVarint(dAtA, i, uint64(len(m.Type)))
+	if len(m.SessionId) > 0 {
+		i -= len(m.SessionId)
+		copy(dAtA[i:], m.SessionId)
+		i = encodeVarint(dAtA, i, uint64(len(m.SessionId)))
 		i--
 		dAtA[i] = 0xa
 	}
 	return len(dAtA) - i, nil
 }
 
-func (m *QueryCallTimelineEventsResponse) MarshalVT() (dAtA []byte, err error) {
+func (m *QuerySessionTimelineEventsResponse) MarshalVT() (dAtA []byte, err error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -2667,12 +2660,12 @@ func (m *QueryCallTimelineEventsResponse) MarshalVT() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryCallTimelineEventsResponse) MarshalToVT(dAtA []byte) (int, error) {
+func (m *QuerySessionTimelineEventsResponse) MarshalToVT(dAtA []byte) (int, error) {
 	size := m.SizeVT()
 	return m.MarshalToSizedBufferVT(dAtA[:size])
 }
 
-func (m *QueryCallTimelineEventsResponse) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
+func (m *QuerySessionTimelineEventsResponse) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 	if m == nil {
 		return 0, nil
 	}
@@ -2705,7 +2698,7 @@ func (m *QueryCallTimelineEventsResponse) MarshalToSizedBufferVT(dAtA []byte) (i
 				i = encodeVarint(dAtA, i, uint64(len(encoded)))
 			}
 			i--
-			dAtA[i] = 0x22
+			dAtA[i] = 0x2a
 		}
 	}
 	if m.Next != nil {
@@ -2728,7 +2721,7 @@ func (m *QueryCallTimelineEventsResponse) MarshalToSizedBufferVT(dAtA []byte) (i
 			i = encodeVarint(dAtA, i, uint64(len(encoded)))
 		}
 		i--
-		dAtA[i] = 0x1a
+		dAtA[i] = 0x22
 	}
 	if m.End != nil {
 		if marshalto, ok := interface{}(m.End).(interface {
@@ -2750,7 +2743,7 @@ func (m *QueryCallTimelineEventsResponse) MarshalToSizedBufferVT(dAtA []byte) (i
 			i = encodeVarint(dAtA, i, uint64(len(encoded)))
 		}
 		i--
-		dAtA[i] = 0x12
+		dAtA[i] = 0x1a
 	}
 	if m.Start != nil {
 		if marshalto, ok := interface{}(m.Start).(interface {
@@ -2771,6 +2764,13 @@ func (m *QueryCallTimelineEventsResponse) MarshalToSizedBufferVT(dAtA []byte) (i
 			copy(dAtA[i:], encoded)
 			i = encodeVarint(dAtA, i, uint64(len(encoded)))
 		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.SessionId) > 0 {
+		i -= len(m.SessionId)
+		copy(dAtA[i:], m.SessionId)
+		i = encodeVarint(dAtA, i, uint64(len(m.SessionId)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -4589,17 +4589,13 @@ func (m *DeleteRecordingResponse) SizeVT() (n int) {
 	return n
 }
 
-func (m *QueryCallTimelineEventsRequest) SizeVT() (n int) {
+func (m *QuerySessionTimelineEventsRequest) SizeVT() (n int) {
 	if m == nil {
 		return 0
 	}
 	var l int
 	_ = l
-	l = len(m.Type)
-	if l > 0 {
-		n += 1 + l + sov(uint64(l))
-	}
-	l = len(m.Id)
+	l = len(m.SessionId)
 	if l > 0 {
 		n += 1 + l + sov(uint64(l))
 	}
@@ -4629,12 +4625,16 @@ func (m *QueryCallTimelineEventsRequest) SizeVT() (n int) {
 	return n
 }
 
-func (m *QueryCallTimelineEventsResponse) SizeVT() (n int) {
+func (m *QuerySessionTimelineEventsResponse) SizeVT() (n int) {
 	if m == nil {
 		return 0
 	}
 	var l int
 	_ = l
+	l = len(m.SessionId)
+	if l > 0 {
+		n += 1 + l + sov(uint64(l))
+	}
 	if m.Start != nil {
 		if size, ok := interface{}(m.Start).(interface {
 			SizeVT() int
@@ -9842,7 +9842,7 @@ func (m *DeleteRecordingResponse) UnmarshalVT(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *QueryCallTimelineEventsRequest) UnmarshalVT(dAtA []byte) error {
+func (m *QuerySessionTimelineEventsRequest) UnmarshalVT(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -9865,15 +9865,15 @@ func (m *QueryCallTimelineEventsRequest) UnmarshalVT(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryCallTimelineEventsRequest: wiretype end group for non-group")
+			return fmt.Errorf("proto: QuerySessionTimelineEventsRequest: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryCallTimelineEventsRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QuerySessionTimelineEventsRequest: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Type", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field SessionId", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -9901,41 +9901,9 @@ func (m *QueryCallTimelineEventsRequest) UnmarshalVT(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Type = string(dAtA[iNdEx:postIndex])
+			m.SessionId = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Id", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflow
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLength
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLength
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Id = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 3:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Duration", wireType)
 			}
@@ -9979,7 +9947,7 @@ func (m *QueryCallTimelineEventsRequest) UnmarshalVT(dAtA []byte) error {
 				}
 			}
 			iNdEx = postIndex
-		case 4:
+		case 3:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Since", wireType)
 			}
@@ -10045,7 +10013,7 @@ func (m *QueryCallTimelineEventsRequest) UnmarshalVT(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *QueryCallTimelineEventsResponse) UnmarshalVT(dAtA []byte) error {
+func (m *QuerySessionTimelineEventsResponse) UnmarshalVT(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -10068,13 +10036,45 @@ func (m *QueryCallTimelineEventsResponse) UnmarshalVT(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryCallTimelineEventsResponse: wiretype end group for non-group")
+			return fmt.Errorf("proto: QuerySessionTimelineEventsResponse: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryCallTimelineEventsResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QuerySessionTimelineEventsResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field SessionId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflow
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLength
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLength
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.SessionId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Start", wireType)
 			}
@@ -10118,7 +10118,7 @@ func (m *QueryCallTimelineEventsResponse) UnmarshalVT(dAtA []byte) error {
 				}
 			}
 			iNdEx = postIndex
-		case 2:
+		case 3:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field End", wireType)
 			}
@@ -10162,7 +10162,7 @@ func (m *QueryCallTimelineEventsResponse) UnmarshalVT(dAtA []byte) error {
 				}
 			}
 			iNdEx = postIndex
-		case 3:
+		case 4:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Next", wireType)
 			}
@@ -10206,7 +10206,7 @@ func (m *QueryCallTimelineEventsResponse) UnmarshalVT(dAtA []byte) error {
 				}
 			}
 			iNdEx = postIndex
-		case 4:
+		case 5:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field ParticipantEvents", wireType)
 			}

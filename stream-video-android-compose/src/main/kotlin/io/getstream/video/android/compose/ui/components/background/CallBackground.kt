@@ -31,6 +31,15 @@ import io.getstream.video.android.compose.R
 import io.getstream.video.android.model.CallType
 import io.getstream.video.android.model.CallUser
 
+/**
+ * Renders a call background that shows either a static image or user images based on the call state.
+ *
+ * @param participants The list of participants in the call.
+ * @param callType The type of call, Audio or Video.
+ * @param isIncoming If the call is incoming from other users or if we're calling other people.
+ * @param modifier Modifier for styling.
+ * @param content The content to render on top of the background.
+ */
 @Composable
 public fun CallBackground(
     participants: List<CallUser>,
@@ -39,9 +48,7 @@ public fun CallBackground(
     modifier: Modifier = Modifier,
     content: @Composable BoxScope.() -> Unit
 ) {
-    Box(
-        modifier = modifier.fillMaxSize()
-    ) {
+    Box(modifier = modifier) {
         if (isIncoming) {
             IncomingCallBackground(participants)
         } else {

@@ -2150,6 +2150,68 @@ func (m *ReportCallStatEventRequest) MarshalToSizedBufferVT(dAtA []byte) (int, e
 	return len(dAtA) - i, nil
 }
 
+func (m *ReportCallStatEventRequest_ParticipantConnected) MarshalToVT(dAtA []byte) (int, error) {
+	size := m.SizeVT()
+	return m.MarshalToSizedBufferVT(dAtA[:size])
+}
+
+func (m *ReportCallStatEventRequest_ParticipantConnected) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.ParticipantConnected != nil {
+		if marshalto, ok := interface{}(m.ParticipantConnected).(interface {
+			MarshalToSizedBufferVT([]byte) (int, error)
+		}); ok {
+			size, err := marshalto.MarshalToSizedBufferVT(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarint(dAtA, i, uint64(size))
+		} else {
+			encoded, err := proto.Marshal(m.ParticipantConnected)
+			if err != nil {
+				return 0, err
+			}
+			i -= len(encoded)
+			copy(dAtA[i:], encoded)
+			i = encodeVarint(dAtA, i, uint64(len(encoded)))
+		}
+		i--
+		dAtA[i] = 0x1a
+	}
+	return len(dAtA) - i, nil
+}
+func (m *ReportCallStatEventRequest_ParticipantDisconnected) MarshalToVT(dAtA []byte) (int, error) {
+	size := m.SizeVT()
+	return m.MarshalToSizedBufferVT(dAtA[:size])
+}
+
+func (m *ReportCallStatEventRequest_ParticipantDisconnected) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.ParticipantDisconnected != nil {
+		if marshalto, ok := interface{}(m.ParticipantDisconnected).(interface {
+			MarshalToSizedBufferVT([]byte) (int, error)
+		}); ok {
+			size, err := marshalto.MarshalToSizedBufferVT(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarint(dAtA, i, uint64(size))
+		} else {
+			encoded, err := proto.Marshal(m.ParticipantDisconnected)
+			if err != nil {
+				return 0, err
+			}
+			i -= len(encoded)
+			copy(dAtA[i:], encoded)
+			i = encodeVarint(dAtA, i, uint64(len(encoded)))
+		}
+		i--
+		dAtA[i] = 0x22
+	}
+	return len(dAtA) - i, nil
+}
 func (m *ReportCallStatEventRequest_MediaStateChanged) MarshalToVT(dAtA []byte) (int, error) {
 	size := m.SizeVT()
 	return m.MarshalToSizedBufferVT(dAtA[:size])
@@ -2177,7 +2239,7 @@ func (m *ReportCallStatEventRequest_MediaStateChanged) MarshalToSizedBufferVT(dA
 			i = encodeVarint(dAtA, i, uint64(len(encoded)))
 		}
 		i--
-		dAtA[i] = 0x1a
+		dAtA[i] = 0x2a
 	}
 	return len(dAtA) - i, nil
 }
@@ -3301,6 +3363,42 @@ func (m *ReportCallStatEventRequest) SizeVT() (n int) {
 	return n
 }
 
+func (m *ReportCallStatEventRequest_ParticipantConnected) SizeVT() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.ParticipantConnected != nil {
+		if size, ok := interface{}(m.ParticipantConnected).(interface {
+			SizeVT() int
+		}); ok {
+			l = size.SizeVT()
+		} else {
+			l = proto.Size(m.ParticipantConnected)
+		}
+		n += 1 + l + sov(uint64(l))
+	}
+	return n
+}
+func (m *ReportCallStatEventRequest_ParticipantDisconnected) SizeVT() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.ParticipantDisconnected != nil {
+		if size, ok := interface{}(m.ParticipantDisconnected).(interface {
+			SizeVT() int
+		}); ok {
+			l = size.SizeVT()
+		} else {
+			l = proto.Size(m.ParticipantDisconnected)
+		}
+		n += 1 + l + sov(uint64(l))
+	}
+	return n
+}
 func (m *ReportCallStatEventRequest_MediaStateChanged) SizeVT() (n int) {
 	if m == nil {
 		return 0
@@ -7803,6 +7901,120 @@ func (m *ReportCallStatEventRequest) UnmarshalVT(dAtA []byte) error {
 			}
 			iNdEx = postIndex
 		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ParticipantConnected", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflow
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLength
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLength
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if oneof, ok := m.Event.(*ReportCallStatEventRequest_ParticipantConnected); ok {
+				if unmarshal, ok := interface{}(oneof.ParticipantConnected).(interface {
+					UnmarshalVT([]byte) error
+				}); ok {
+					if err := unmarshal.UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
+						return err
+					}
+				} else {
+					if err := proto.Unmarshal(dAtA[iNdEx:postIndex], oneof.ParticipantConnected); err != nil {
+						return err
+					}
+				}
+			} else {
+				v := &stat_v1.ParticipantConnected{}
+				if unmarshal, ok := interface{}(v).(interface {
+					UnmarshalVT([]byte) error
+				}); ok {
+					if err := unmarshal.UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
+						return err
+					}
+				} else {
+					if err := proto.Unmarshal(dAtA[iNdEx:postIndex], v); err != nil {
+						return err
+					}
+				}
+				m.Event = &ReportCallStatEventRequest_ParticipantConnected{v}
+			}
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ParticipantDisconnected", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflow
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLength
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLength
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if oneof, ok := m.Event.(*ReportCallStatEventRequest_ParticipantDisconnected); ok {
+				if unmarshal, ok := interface{}(oneof.ParticipantDisconnected).(interface {
+					UnmarshalVT([]byte) error
+				}); ok {
+					if err := unmarshal.UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
+						return err
+					}
+				} else {
+					if err := proto.Unmarshal(dAtA[iNdEx:postIndex], oneof.ParticipantDisconnected); err != nil {
+						return err
+					}
+				}
+			} else {
+				v := &stat_v1.ParticipantDisconnected{}
+				if unmarshal, ok := interface{}(v).(interface {
+					UnmarshalVT([]byte) error
+				}); ok {
+					if err := unmarshal.UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
+						return err
+					}
+				} else {
+					if err := proto.Unmarshal(dAtA[iNdEx:postIndex], v); err != nil {
+						return err
+					}
+				}
+				m.Event = &ReportCallStatEventRequest_ParticipantDisconnected{v}
+			}
+			iNdEx = postIndex
+		case 5:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field MediaStateChanged", wireType)
 			}

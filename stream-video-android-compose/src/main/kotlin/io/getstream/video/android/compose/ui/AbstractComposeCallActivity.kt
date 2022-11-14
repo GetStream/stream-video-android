@@ -34,8 +34,10 @@ import androidx.compose.runtime.Composable
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.StreamVideoProvider
+import io.getstream.video.android.call.state.ToggleCamera
+import io.getstream.video.android.call.state.ToggleMicrophone
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.call.CallScreen
+import io.getstream.video.android.compose.ui.components.call.CallContent
 import io.getstream.video.android.model.CallSettings
 import io.getstream.video.android.model.state.StreamCallState
 import io.getstream.video.android.viewmodel.CallViewModel
@@ -87,13 +89,21 @@ public abstract class AbstractComposeCallActivity : AppCompatActivity(), StreamV
 
     protected fun buildContent(): (@Composable () -> Unit) = {
         VideoTheme {
-            CallScreen(
+            CallContent(
                 viewModel = callViewModel,
                 onRejectCall = callViewModel::rejectCall,
                 onAcceptCall = callViewModel::acceptCall,
                 onCancelCall = callViewModel::cancelCall,
-                onVideoToggleChanged = callViewModel::onVideoChanged,
-                onMicToggleChanged = callViewModel::onMicrophoneChanged,
+                onVideoToggleChanged = { isEnabled ->
+                    callViewModel.onCallAction(
+                        ToggleCamera(isEnabled)
+                    )
+                },
+                onMicToggleChanged = { isEnabled ->
+                    callViewModel.onCallAction(
+                        ToggleMicrophone(isEnabled)
+                    )
+                },
             )
         }
     }

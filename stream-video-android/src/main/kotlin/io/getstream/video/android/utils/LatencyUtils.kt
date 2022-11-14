@@ -28,7 +28,7 @@ private const val TAG = "Call:LatencyUtils"
  * Calculates the latency to ping the server multiple times.
  *
  * @param latencyUrl The URL of the server where we ping a connection.
- * @return A [List] of [Float] values representing the portion of a second it takes to connect.
+ * @return A [List] of [Double] values representing the portion of a second it takes to connect.
  */
 public fun getLatencyMeasurements(latencyUrl: String): List<Double> {
     val measurements = mutableListOf<Double>()
