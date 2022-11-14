@@ -40,26 +40,44 @@ import org.webrtc.audio.JavaAudioDeviceModule
 import stream.video.sfu.models.Codec
 import stream.video.sfu.models.PeerType
 
+/**
+ * Builds a factory that provides [PeerConnection]s when requested.
+ *
+ * @param context Used to build the underlying native components for the factory.
+ */
 public class StreamPeerConnectionFactory(private val context: Context) {
 
     private val webRtcLogger = StreamLog.getLogger("Call:WebRTC")
     private val audioLogger = StreamLog.getLogger("Call:AudioTrackCallback")
 
+    /**
+     * Represents the EGL rendering context.
+     */
     public val eglBase: EglBase by lazy {
         EglBase.create()
     }
 
+    /**
+     * Default video decoder factory used to unpack video from the remote tracks.
+     */
     private val videoDecoderFactory by lazy {
         DefaultVideoDecoderFactory(
             eglBase.eglBaseContext
         )
     }
 
+    /**
+     * Default encoder factory that supports Simulcast, used to send video tracks to the server.
+     */
     private val videoEncoderFactory by lazy {
         val hardwareEncoder = HardwareVideoEncoderFactory(eglBase.eglBaseContext, true, true)
         SimulcastVideoEncoderFactory(hardwareEncoder, SoftwareVideoEncoderFactory())
     }
 
+    /**
+     * Factory that builds all the connections based on the extensive configuration provided under
+     * the hood.
+     */
     private val factory by lazy {
         PeerConnectionFactory.initialize(
             PeerConnectionFactory.InitializationOptions.builder(context)
@@ -95,59 +113,59 @@ public class StreamPeerConnectionFactory(private val context: Context) {
                     .setUseHardwareAcousticEchoCanceler(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
                     .setUseHardwareNoiseSuppressor(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
                     .setAudioRecordErrorCallback(object :
-                            JavaAudioDeviceModule.AudioRecordErrorCallback {
-                            override fun onWebRtcAudioRecordInitError(p0: String?) {
-                                audioLogger.w { "[onWebRtcAudioRecordInitError] $p0" }
-                            }
+                        JavaAudioDeviceModule.AudioRecordErrorCallback {
+                        override fun onWebRtcAudioRecordInitError(p0: String?) {
+                            audioLogger.w { "[onWebRtcAudioRecordInitError] $p0" }
+                        }
 
-                            override fun onWebRtcAudioRecordStartError(
-                                p0: JavaAudioDeviceModule.AudioRecordStartErrorCode?,
-                                p1: String?
-                            ) {
-                                audioLogger.w { "[onWebRtcAudioRecordInitError] $p1" }
-                            }
+                        override fun onWebRtcAudioRecordStartError(
+                            p0: JavaAudioDeviceModule.AudioRecordStartErrorCode?,
+                            p1: String?
+                        ) {
+                            audioLogger.w { "[onWebRtcAudioRecordInitError] $p1" }
+                        }
 
-                            override fun onWebRtcAudioRecordError(p0: String?) {
-                                audioLogger.w { "[onWebRtcAudioRecordError] $p0" }
-                            }
-                        })
+                        override fun onWebRtcAudioRecordError(p0: String?) {
+                            audioLogger.w { "[onWebRtcAudioRecordError] $p0" }
+                        }
+                    })
                     .setAudioTrackErrorCallback(object :
-                            JavaAudioDeviceModule.AudioTrackErrorCallback {
-                            override fun onWebRtcAudioTrackInitError(p0: String?) {
-                                audioLogger.w { "[onWebRtcAudioTrackInitError] $p0" }
-                            }
+                        JavaAudioDeviceModule.AudioTrackErrorCallback {
+                        override fun onWebRtcAudioTrackInitError(p0: String?) {
+                            audioLogger.w { "[onWebRtcAudioTrackInitError] $p0" }
+                        }
 
-                            override fun onWebRtcAudioTrackStartError(
-                                p0: JavaAudioDeviceModule.AudioTrackStartErrorCode?,
-                                p1: String?
-                            ) {
-                                audioLogger.w { "[onWebRtcAudioTrackStartError] $p0" }
-                            }
+                        override fun onWebRtcAudioTrackStartError(
+                            p0: JavaAudioDeviceModule.AudioTrackStartErrorCode?,
+                            p1: String?
+                        ) {
+                            audioLogger.w { "[onWebRtcAudioTrackStartError] $p0" }
+                        }
 
-                            override fun onWebRtcAudioTrackError(p0: String?) {
-                                audioLogger.w { "[onWebRtcAudioTrackError] $p0" }
-                            }
-                        })
+                        override fun onWebRtcAudioTrackError(p0: String?) {
+                            audioLogger.w { "[onWebRtcAudioTrackError] $p0" }
+                        }
+                    })
                     .setAudioRecordStateCallback(object :
-                            JavaAudioDeviceModule.AudioRecordStateCallback {
-                            override fun onWebRtcAudioRecordStart() {
-                                audioLogger.d { "[onWebRtcAudioRecordStart] no args" }
-                            }
+                        JavaAudioDeviceModule.AudioRecordStateCallback {
+                        override fun onWebRtcAudioRecordStart() {
+                            audioLogger.d { "[onWebRtcAudioRecordStart] no args" }
+                        }
 
-                            override fun onWebRtcAudioRecordStop() {
-                                audioLogger.d { "[onWebRtcAudioRecordStop] no args" }
-                            }
-                        })
+                        override fun onWebRtcAudioRecordStop() {
+                            audioLogger.d { "[onWebRtcAudioRecordStop] no args" }
+                        }
+                    })
                     .setAudioTrackStateCallback(object :
-                            JavaAudioDeviceModule.AudioTrackStateCallback {
-                            override fun onWebRtcAudioTrackStart() {
-                                audioLogger.d { "[onWebRtcAudioTrackStart] no args" }
-                            }
+                        JavaAudioDeviceModule.AudioTrackStateCallback {
+                        override fun onWebRtcAudioTrackStart() {
+                            audioLogger.d { "[onWebRtcAudioTrackStart] no args" }
+                        }
 
-                            override fun onWebRtcAudioTrackStop() {
-                                audioLogger.d { "[onWebRtcAudioTrackStop] no args" }
-                            }
-                        })
+                        override fun onWebRtcAudioTrackStop() {
+                            audioLogger.d { "[onWebRtcAudioTrackStop] no args" }
+                        }
+                    })
                     .createAudioDeviceModule().also {
                         it.setMicrophoneMute(false)
                         it.setSpeakerMute(false)
@@ -156,12 +174,21 @@ public class StreamPeerConnectionFactory(private val context: Context) {
             .createPeerConnectionFactory()
     }
 
+    /**
+     * System-based codecs fetched from the Android Media API.
+     */
     private val systemCodecs by lazy {
         (0 until MediaCodecList.getCodecCount()).map {
             MediaCodecList.getCodecInfoAt(it)
         }
     }
 
+    /**
+     * Uses the [systemCodecs] to process and provide codecs for encoding of video tracks
+     * before sending to the server.
+     *
+     * @return [List] of [Codec]s that we can use for encoding.
+     */
     public fun getVideoEncoderCodecs(): List<Codec> {
         val factoryCodecs = try {
             videoEncoderFactory.supportedCodecs
@@ -193,6 +220,12 @@ public class StreamPeerConnectionFactory(private val context: Context) {
         }
     }
 
+    /**
+     * Uses the [systemCodecs] to process and provide codecs for decoding of video tracks
+     * before displaying to the user.
+     *
+     * @return [List] of [Codec]s that we can use for decoding.
+     */
     public fun getVideoDecoderCodecs(): List<Codec> {
         val factoryCodecs = try {
             videoDecoderFactory.supportedCodecs
@@ -225,6 +258,12 @@ public class StreamPeerConnectionFactory(private val context: Context) {
         }
     }
 
+    /**
+     * Uses the [systemCodecs] to process and provide codecs for encoding of audio tracks
+     * before sending to the server.
+     *
+     * @return [List] of [Codec]s that we can use for encoding.
+     */
     public fun getAudioEncoderCoders(): List<Codec> {
         val supportedSystemCodecs = systemCodecs.filter {
             it.isEncoder && it.supportedTypes.any { type -> type.contains("audio") }
@@ -244,6 +283,12 @@ public class StreamPeerConnectionFactory(private val context: Context) {
         }
     }
 
+    /**
+     * Uses the [systemCodecs] to process and provide codecs for decoding of audio tracks
+     * before playing them to the user.
+     *
+     * @return [List] of [Codec]s that we can use for decoding.
+     */
     public fun getAudioDecoderCoders(): List<Codec> {
         val supportedSystemCodecs = systemCodecs.filter {
             !it.isEncoder && it.supportedTypes.any { type -> type.contains("audio") }
@@ -264,7 +309,19 @@ public class StreamPeerConnectionFactory(private val context: Context) {
     }
 
     /**
-     * Peer connection.
+     * Builds a [StreamPeerConnection] that wraps the WebRTC [PeerConnection] and exposes several
+     * helpful handlers.
+     *
+     * @param coroutineScope Scope used for asynchronous operations.
+     * @param configuration The [PeerConnection.RTCConfiguration] used to set up the connection.
+     * @param type The type of connection, either a subscriber of a publisher.
+     * @param mediaConstraints Constraints used for audio and video tracks in the connection.
+     * @param onStreamAdded Handler when a new [MediaStream] gets added.
+     * @param onStreamRemoved Handler when a [MediaStream] gets removed.
+     * @param onNegotiationNeeded Handler when there's a new negotiation.
+     * @param onIceCandidateRequest Handler whenever we receive [IceCandidate]s.
+     * @return [StreamPeerConnection] That's fully set up and can be observed and used to send and
+     * receive tracks.
      */
     public fun makePeerConnection(
         coroutineScope: CoroutineScope,
@@ -292,6 +349,14 @@ public class StreamPeerConnectionFactory(private val context: Context) {
         return peerConnection.apply { initialize(connection) }
     }
 
+    /**
+     * Builds a [PeerConnection] internally that connects to the server and is able to send and
+     * receive tracks.
+     *
+     * @param configuration The [PeerConnection.RTCConfiguration] used to set up the connection.
+     * @param observer Handler used to observe different states of the connection.
+     * @return [PeerConnection] that's fully set up.
+     */
     private fun makePeerConnectionInternal(
         configuration: PeerConnection.RTCConfiguration,
         observer: PeerConnection.Observer?
@@ -305,25 +370,47 @@ public class StreamPeerConnectionFactory(private val context: Context) {
     }
 
     /**
-     * Audio and Video sources.
+     * Builds a [VideoSource] from the [factory] that can be used for regular video share (camera)
+     * or screen sharing.
+     *
+     * @param isScreencast If we're screen sharing using this source.
+     * @return [VideoSource] that can be used to build tracks.
      */
     public fun makeVideoSource(isScreencast: Boolean): VideoSource =
         factory.createVideoSource(isScreencast)
 
+    /**
+     * Builds a [VideoTrack] from the [factory] that can be used for regular video share (camera)
+     * or screen sharing.
+     *
+     * @param source The [VideoSource] used for the track.
+     * @param trackId The unique ID for this track.
+     * @return [VideoTrack] That represents a video feed.
+     */
     public fun makeVideoTrack(
         source: VideoSource,
         trackId: String
     ): VideoTrack = factory.createVideoTrack(trackId, source)
 
+    /**
+     * Builds an [AudioSource] from the [factory] that can be used for audio sharing.
+     *
+     * @param constraints The constraints used to change the way the audio behaves.
+     * @return [AudioSource] that can be used to build tracks.
+     */
     public fun makeAudioSource(constraints: MediaConstraints = MediaConstraints()): AudioSource =
         factory.createAudioSource(constraints)
 
+    /**
+     * Builds an [AudioTrack] from the [factory] that can be used for regular video share (camera)
+     * or screen sharing.
+     *
+     * @param source The [AudioSource] used for the track.
+     * @param trackId The unique ID for this track.
+     * @return [AudioTrack] That represents an audio feed.
+     */
     public fun makeAudioTrack(
         source: AudioSource,
         trackId: String
-    ): AudioTrack =
-        factory.createAudioTrack(trackId, source)
-
-    internal fun reset() {
-    }
+    ): AudioTrack = factory.createAudioTrack(trackId, source)
 }
