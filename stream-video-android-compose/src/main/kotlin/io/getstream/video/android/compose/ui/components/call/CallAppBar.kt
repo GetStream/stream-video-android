@@ -32,7 +32,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.theme.VideoTheme
 
-
 /**
  * Represents the default AppBar that's shown in calls. Exposes handlers for the two default slot
  * component implementations (leading and trailing).
@@ -114,7 +113,6 @@ internal fun DefaultCallAppBarCenterContent(title: String) {
         textAlign = TextAlign.Center,
     )
 }
-
 
 /**
  * Default trailing content slot, representing an icon to show the call participants menu.
