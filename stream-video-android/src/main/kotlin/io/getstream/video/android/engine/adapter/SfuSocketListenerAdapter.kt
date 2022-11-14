@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.app.ui.call
+package io.getstream.video.android.engine.adapter
 
-import android.content.Context
-import io.getstream.video.android.StreamVideo
-import io.getstream.video.android.app.videoApp
-import io.getstream.video.android.compose.ui.AbstractComposeCallActivity
+import io.getstream.video.android.call.signal.socket.SignalSocketListener
+import io.getstream.video.android.engine.StreamCallEngine
+import io.getstream.video.android.events.SfuDataEvent
 
-class CallActivity : AbstractComposeCallActivity() {
+internal class SfuSocketListenerAdapter(
+    private val engine: StreamCallEngine
+) : SignalSocketListener {
 
-    override fun getStreamVideo(context: Context): StreamVideo = videoApp.streamVideo
+    override fun onEvent(event: SfuDataEvent) {
+        engine.onSfuEvent(event)
+    }
 }

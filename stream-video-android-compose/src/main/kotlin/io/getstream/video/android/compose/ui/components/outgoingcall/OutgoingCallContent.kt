@@ -31,12 +31,12 @@ import io.getstream.video.android.compose.ui.components.background.CallBackgroun
 import io.getstream.video.android.compose.ui.components.mock.mockParticipant
 import io.getstream.video.android.model.CallType
 import io.getstream.video.android.model.CallUser
-import io.getstream.video.android.viewmodel.OutgoingCallViewModel
+import io.getstream.video.android.viewmodel.CallViewModel
 
 @Composable
 public fun OutgoingCallScreen(
-    viewModel: OutgoingCallViewModel,
-    onCancelCall: (String) -> Unit = {},
+    viewModel: CallViewModel,
+    onCancelCall: () -> Unit = {},
     onMicToggleChanged: (Boolean) -> Unit = {},
     onVideoToggleChanged: (Boolean) -> Unit = {},
 ) {
@@ -58,7 +58,7 @@ public fun OutgoingCall(
     callType: CallType,
     callId: String,
     participants: List<CallUser>,
-    onCancelCall: (String) -> Unit = {},
+    onCancelCall: () -> Unit = {},
     onMicToggleChanged: (Boolean) -> Unit = {},
     onVideoToggleChanged: (Boolean) -> Unit = {},
 ) {
@@ -103,7 +103,6 @@ public fun OutgoingCall(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(bottom = 44.dp),
-                callId = callId,
                 onCancelCall = onCancelCall,
                 onMicToggleChanged = onMicToggleChanged,
                 onVideoToggleChanged = onVideoToggleChanged,
@@ -121,7 +120,10 @@ private fun OutgoingCallPreview() {
             callId = "",
             participants = listOf(
                 mockParticipant.let {
-                    CallUser(it.id, it.name, it.role, it.profileImageURL ?: "", null, null)
+                    CallUser(
+                        it.id, it.name, it.role, it.profileImageURL ?: "",
+                        null, null, emptyList()
+                    )
                 }
             ),
             onCancelCall = { },

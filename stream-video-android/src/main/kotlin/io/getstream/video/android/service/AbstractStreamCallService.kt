@@ -18,16 +18,14 @@ package io.getstream.video.android.service
 
 import android.app.NotificationManager
 import android.app.Service
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.IBinder
-import androidx.core.content.ContextCompat
 import io.getstream.logging.StreamLog
 import io.getstream.video.android.R
 import io.getstream.video.android.StreamVideo
+import io.getstream.video.android.StreamVideoProvider
 import io.getstream.video.android.dispatchers.DispatcherProvider
-import io.getstream.video.android.input.CallServiceInput
 import io.getstream.video.android.service.notification.StreamNotificationBuilder
 import io.getstream.video.android.service.notification.StreamNotificationBuilderImpl
 import io.getstream.video.android.service.vibro.StreamVibroManager
@@ -38,15 +36,15 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import io.getstream.video.android.model.state.StreamCallState as State
 
-public abstract class StreamCallService : Service() {
+public abstract class AbstractStreamCallService : Service(), StreamVideoProvider {
 
-    private val logger = StreamLog.getLogger(TAG)
+    private val logger = StreamLog.getLogger("Call:StreamService")
 
     private val scope = CoroutineScope(DispatcherProvider.Default)
 
     private val notificationManager: NotificationManager by lazy { application.notificationManager }
 
-    private val streamVideo: StreamVideo by lazy { getStreamCalls(this) }
+    private val streamVideo: StreamVideo by lazy { getStreamVideo(this) }
 
     private val notificationBuilder: StreamNotificationBuilder by lazy {
         createNotificationBuilder(application)
@@ -55,8 +53,6 @@ public abstract class StreamCallService : Service() {
     private val vibroManager: StreamVibroManager by lazy { createVibroManager(application) }
 
     private var curState: State = State.Idle
-
-    protected abstract fun getStreamCalls(context: Context): StreamVideo
 
     protected open fun createNotificationBuilder(context: Context): StreamNotificationBuilder =
         StreamNotificationBuilderImpl(context, streamVideo, scope) {
@@ -128,38 +124,5 @@ public abstract class StreamCallService : Service() {
         logger.v { "[updateNotification] state: $state" }
         val (notificationId, notification) = notificationBuilder.build(state)
         notificationManager.notify(notificationId, notification)
-    }
-
-    public companion object {
-        @PublishedApi
-        internal const val TAG: String = "Call:StreamService"
-
-        public fun start(context: Context, input: CallServiceInput) {
-            StreamLog.v(TAG) { "/start/ service: ${input.serviceClassName}" }
-            ContextCompat.startForegroundService(
-                context, newIntent(context, input)
-            )
-        }
-
-        public fun newIntent(context: Context, input: CallServiceInput): Intent {
-            StreamLog.v(TAG) { "/newIntent/ service: ${input.serviceClassName}" }
-            return Intent().apply {
-                component = ComponentName(context.packageName, input.serviceClassName)
-            }
-        }
-
-        public inline fun <reified T : StreamCallService> start(context: Context) {
-            StreamLog.v(TAG) { "/start/ service: ${T::class}" }
-            ContextCompat.startForegroundService(
-                context, Intent(context, T::class.java)
-            )
-        }
-
-        public inline fun <reified T : StreamCallService> stop(context: Context) {
-            StreamLog.v(TAG) { "/stop/ service: ${T::class}" }
-            context.stopService(
-                Intent(context, T::class.java)
-            )
-        }
     }
 }

@@ -30,11 +30,6 @@
         </activity>
         <activity android:name=".ui.home.HomeActivity" />
         <activity android:name=".ui.call.CallActivity" />
-        <activity
-            android:name=".ui.incoming.IncomingCallActivity"
-            android:launchMode="singleTop"
-            android:showOnLockScreen="true" />
-        <activity android:name=".ui.outgoing.OutgoingCallActivity" />
 
         <service
             android:name=".ui.call.CallService"

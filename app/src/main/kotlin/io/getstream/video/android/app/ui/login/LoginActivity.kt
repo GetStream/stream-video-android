@@ -142,5 +142,6 @@ class LoginActivity : AppCompatActivity() {
             loggingLevel = LoggingLevel.BODY
         )
         startActivity(HomeActivity.getIntent(this))
+        finish()
     }
 }

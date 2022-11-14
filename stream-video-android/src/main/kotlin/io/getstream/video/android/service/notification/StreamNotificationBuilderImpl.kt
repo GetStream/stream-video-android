@@ -61,7 +61,7 @@ internal class StreamNotificationBuilderImpl(
             actionReceiver.registerAsFlow().collect {
                 logger.v { "[observeAction] action: $it" }
                 when (it) {
-                    is NotificationAction.Accept -> streamVideo.acceptCall(it.guid.type, it.guid.id)
+                    is NotificationAction.Accept -> streamVideo.acceptCall(it.guid.cid)
                     is NotificationAction.Reject -> streamVideo.rejectCall(it.guid.cid)
                     is NotificationAction.Cancel -> streamVideo.cancelCall(it.guid.cid)
                 }
@@ -93,8 +93,7 @@ internal class StreamNotificationBuilderImpl(
             is State.Starting,
             is State.Outgoing,
             is State.Joining,
-            is State.Connecting,
-            is State.Connected -> arrayOf(
+            is State.InCall -> arrayOf(
                 actionBuilder.createCancelAction(notificationId, state.callGuid)
             )
             is State.Drop -> emptyArray()
@@ -107,8 +106,7 @@ internal class StreamNotificationBuilderImpl(
             is State.Outgoing -> "Outgoing Call"
             is State.Incoming -> "Incoming"
             is State.Joining -> "Joining"
-            is State.Connected -> "Connected"
-            is State.Connecting -> "Connecting"
+            is State.InCall -> "InCall"
             is State.Drop -> "Drop"
         }
     }

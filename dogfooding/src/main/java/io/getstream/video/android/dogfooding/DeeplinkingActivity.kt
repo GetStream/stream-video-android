@@ -24,11 +24,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import io.getstream.logging.StreamLog
 import io.getstream.video.android.logging.LoggingLevel
-import io.getstream.video.android.model.CallInput
 import io.getstream.video.android.token.AuthCredentialsProvider
-import io.getstream.video.android.utils.buildCallInput
 import io.getstream.video.android.utils.onError
-import io.getstream.video.android.utils.onSuccessSuspend
+import io.getstream.video.android.utils.onSuccess
 import kotlinx.coroutines.launch
 
 class DeeplinkingActivity : AppCompatActivity() {
@@ -58,8 +56,8 @@ class DeeplinkingActivity : AppCompatActivity() {
         lifecycleScope.launch {
             val createCallResult = controller.joinCall("default", callId)
 
-            createCallResult.onSuccessSuspend { joinedCall ->
-                navigateToCall(buildCallInput(this@DeeplinkingActivity, joinedCall))
+            createCallResult.onSuccess {
+                navigateToCall()
             }
             createCallResult.onError {
                 Log.d("Couldn't select server", it.message ?: "")
@@ -68,8 +66,8 @@ class DeeplinkingActivity : AppCompatActivity() {
         }
     }
 
-    private fun navigateToCall(callInput: CallInput) {
-        startActivity(CallActivity.getIntent(this, callInput))
+    private fun navigateToCall() {
+        startActivity(CallActivity.getIntent(this))
         finish()
     }
 

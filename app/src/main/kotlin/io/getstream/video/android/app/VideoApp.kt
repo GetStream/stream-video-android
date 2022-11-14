@@ -16,27 +16,22 @@
 
 package io.getstream.video.android.app
 
-import android.app.Activity
 import android.app.Application
 import android.content.Context
 import io.getstream.logging.StreamLog
 import io.getstream.logging.android.AndroidStreamLogger
 import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.StreamVideoBuilder
-import io.getstream.video.android.app.lifecycle.StreamActivityLifecycleCallbacks
+import io.getstream.video.android.app.ui.call.CallActivity
 import io.getstream.video.android.app.ui.call.CallService
 import io.getstream.video.android.app.user.UserPreferences
 import io.getstream.video.android.app.user.UserPreferencesImpl
+import io.getstream.video.android.input.CallActivityInput
 import io.getstream.video.android.input.CallServiceInput
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.token.CredentialsProvider
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 class VideoApp : Application() {
-
-    private val appScope = CoroutineScope(Dispatchers.Main)
 
     val userPreferences: UserPreferences by lazy {
         UserPreferencesImpl(
@@ -50,8 +45,6 @@ class VideoApp : Application() {
     lateinit var streamVideo: StreamVideo
         private set
 
-    private var currentActivity: Activity? = null
-
     override fun onCreate() {
         super.onCreate()
         if (BuildConfig.DEBUG) {
@@ -59,13 +52,6 @@ class VideoApp : Application() {
             StreamLog.setLogger(AndroidStreamLogger())
         }
         StreamLog.i(TAG) { "[onCreate] no args" }
-        registerActivityLifecycleCallbacks(
-            StreamActivityLifecycleCallbacks(
-                onActivityCreated = { currentActivity = it },
-                onActivityStarted = { currentActivity = it },
-                onLastActivityStopped = { currentActivity = null },
-            )
-        )
     }
 
     /**
@@ -81,20 +67,14 @@ class VideoApp : Application() {
         return StreamVideoBuilder(
             context = this,
             credentialsProvider = credentialsProvider,
-            serviceInput = CallServiceInput.forClass(CallService::class),
+            androidInputs = setOf(
+                CallServiceInput.from(CallService::class),
+                CallActivityInput.from(CallActivity::class),
+            ),
             loggingLevel = loggingLevel
         ).build().also {
             streamVideo = it
-            observeState()
             StreamLog.v(TAG) { "[initializeStreamCalls] completed" }
-        }
-    }
-
-    private fun observeState() {
-        appScope.launch {
-            streamVideo.callState.collect { state ->
-                // TODO - do we need any custom impl here? (useful for users to expose)
-            }
         }
     }
 

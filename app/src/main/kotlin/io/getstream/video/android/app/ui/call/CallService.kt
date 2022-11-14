@@ -19,14 +19,9 @@ package io.getstream.video.android.app.ui.call
 import android.content.Context
 import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.app.videoApp
-import io.getstream.video.android.service.StreamCallService
+import io.getstream.video.android.service.AbstractStreamCallService
 
-class CallService : StreamCallService() {
+class CallService : AbstractStreamCallService() {
 
-    override fun getStreamCalls(context: Context): StreamVideo = videoApp.streamVideo
-
-    companion object {
-        fun start(context: Context) = start<CallService>(context)
-        fun stop(context: Context) = stop<CallService>(context)
-    }
+    override fun getStreamVideo(context: Context): StreamVideo = videoApp.streamVideo
 }

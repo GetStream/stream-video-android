@@ -101,9 +101,10 @@ public fun CallContent(
             Column(modifier = Modifier.fillMaxSize()) {
                 val callId = when (val state = callState) {
                     is StreamCallState.Active -> state.callGuid.id
-                    else -> "No Call Id"
+                    else -> ""
                 }
-                CallActionBar(callViewModel, callId)
+                val status = callState.formatAsTitle()
+                CallActionBar(callViewModel, status, callId)
 
                 if (roomState == null) {
                     Box(
@@ -280,8 +281,11 @@ private fun ParticipantInfoItem(participant: CallParticipantState) {
 }
 
 @Composable
-private fun CallActionBar(callViewModel: CallViewModel, callId: String) {
-    val title = if (callId.isBlank()) "Joining call..." else "Call ID: $callId"
+private fun CallActionBar(callViewModel: CallViewModel, status: String, callId: String) {
+    val title = when (callId.isBlank()) {
+        true -> status
+        else -> "$status: $callId"
+    }
 
     Box(
         modifier = Modifier
@@ -311,4 +315,16 @@ private fun CallActionBar(callViewModel: CallViewModel, callId: String) {
             tint = Color.White
         )
     }
+}
+
+@Composable
+private fun StreamCallState.formatAsTitle() = when (this) {
+    // TODO stringResource(id = )
+    is StreamCallState.Drop -> "Drop"
+    is StreamCallState.InCall -> "InCall"
+    is StreamCallState.Incoming -> "Incoming"
+    is StreamCallState.Joining -> "Joining"
+    is StreamCallState.Outgoing -> "Outgoing"
+    is StreamCallState.Starting -> "Starting"
+    StreamCallState.Idle -> "Idle"
 }

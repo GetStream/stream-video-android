@@ -29,7 +29,8 @@ public data class CallUser(
     val role: String,
     val imageUrl: String,
     val createdAt: Date?,
-    val updatedAt: Date?
+    val updatedAt: Date?,
+    val teams: List<String>
 ) : Serializable
 
 public data class CallMember(
@@ -70,6 +71,7 @@ public fun ProtoUser.toCallUser(): CallUser = CallUser(
     imageUrl = image_url,
     createdAt = created_at?.let { Date(it.toEpochMilli()) },
     updatedAt = updated_at?.let { Date(it.toEpochMilli()) },
+    teams = teams
 )
 
 public fun Map<String, ProtoMember>.toCallMembers(): Map<String, CallMember> = map { (userId, protoMember) ->

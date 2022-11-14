@@ -31,11 +31,11 @@ import io.getstream.video.android.compose.ui.components.background.CallBackgroun
 import io.getstream.video.android.compose.ui.components.mock.mockParticipantList
 import io.getstream.video.android.model.CallType
 import io.getstream.video.android.model.CallUser
-import io.getstream.video.android.viewmodel.IncomingCallViewModel
+import io.getstream.video.android.viewmodel.CallViewModel
 
 @Composable
 public fun IncomingCallScreen(
-    viewModel: IncomingCallViewModel,
+    viewModel: CallViewModel,
     onDeclineCall: () -> Unit,
     onAcceptCall: () -> Unit,
     onVideoToggleChanged: (Boolean) -> Unit,
@@ -107,7 +107,8 @@ private fun IncomingCallPreview() {
                     role = it.role,
                     createdAt = null,
                     updatedAt = null,
-                    imageUrl = it.profileImageURL ?: ""
+                    imageUrl = it.profileImageURL ?: "",
+                    teams = emptyList()
                 )
             },
             callType = CallType.VIDEO,

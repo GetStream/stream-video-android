@@ -16,7 +16,10 @@
 
 package io.getstream.video.android.token
 
+import io.getstream.video.android.model.ApiKey
+import io.getstream.video.android.model.SfuToken
 import io.getstream.video.android.model.User
+import io.getstream.video.android.model.UserToken
 
 /**
  * Exposes a way to build a token provided that connects to custom implementation for
@@ -27,20 +30,20 @@ public interface CredentialsProvider {
     /**
      * @return The user token backed by authentication services.
      */
-    public fun loadToken(): String
+    public fun loadUserToken(): UserToken
 
     /**
      * @return The user token that's cached.
      */
-    public fun getCachedToken(): String
+    public fun getCachedUserToken(): UserToken
 
-    public fun loadApiKey(): String
+    public fun loadApiKey(): ApiKey
 
-    public fun getCachedApiKey(): String
+    public fun getCachedApiKey(): ApiKey
 
-    public fun setSfuToken(token: String?)
+    public fun setSfuToken(token: SfuToken?)
 
-    public fun getSfuToken(): String
+    public fun getSfuToken(): SfuToken
 
     public fun getUserCredentials(): User
 }

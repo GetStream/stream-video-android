@@ -24,28 +24,33 @@ import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.audio.AudioDevice
 import io.getstream.video.android.call.CallClient
 import io.getstream.video.android.model.Call
-import io.getstream.video.android.model.CallInput
 import io.getstream.video.android.model.CallParticipantState
 import io.getstream.video.android.model.CallSettings
-import io.getstream.video.android.model.state.StreamCallState
-import io.getstream.video.android.token.CredentialsProvider
+import io.getstream.video.android.model.CallType
+import io.getstream.video.android.model.CallUser
+import io.getstream.video.android.model.mapper.toMetadata
 import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Success
-import kotlinx.coroutines.cancel
+import io.getstream.video.android.utils.onError
+import io.getstream.video.android.utils.onSuccess
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
-import java.util.*
+import kotlinx.coroutines.withTimeout
+import java.util.UUID
+import io.getstream.video.android.model.state.StreamCallState as State
+
+private const val CONNECT_TIMEOUT = 30_000L
 
 public class CallViewModel(
-    private val input: CallInput,
     private val streamVideo: StreamVideo,
-    private val credentialsProvider: CredentialsProvider
+    private val permissionManager: PermissionManager
 ) : ViewModel() {
 
     private val logger = StreamLog.getLogger("Call:ViewModel")
@@ -58,7 +63,7 @@ public class CallViewModel(
     public val isVideoInitialized: StateFlow<Boolean> = _isVideoInitialized
 
     private val hasVideoPermission: MutableStateFlow<Boolean> =
-        MutableStateFlow(input.hasVideoPermission)
+        MutableStateFlow(permissionManager.hasVideoPermission)
     private val isVideoEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
     public val isVideoOn: Flow<Boolean> =
@@ -67,7 +72,7 @@ public class CallViewModel(
         }
 
     private val hasAudioPermission: MutableStateFlow<Boolean> =
-        MutableStateFlow(input.hasAudioPermission)
+        MutableStateFlow(permissionManager.hasAudioPermission)
     private val isAudioEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
     public val isAudioOn: Flow<Boolean> =
@@ -90,65 +95,100 @@ public class CallViewModel(
     private val _isShowingSettings = MutableStateFlow(false)
     public val isShowingSettings: StateFlow<Boolean> = _isShowingSettings
 
-    public val streamCallState: StateFlow<StreamCallState> get() = streamVideo.callState
+    public val streamCallState: StateFlow<State> get() = streamVideo.callState
+
+    private val _callType: MutableStateFlow<CallType> = MutableStateFlow(CallType.VIDEO)
+    public val callType: StateFlow<CallType> = _callType
+
+    private val _callId: MutableStateFlow<String> = MutableStateFlow(value = "")
+    public val callId: StateFlow<String> = _callId
+
+    private val _participants: MutableStateFlow<List<CallUser>> = MutableStateFlow(emptyList())
+    public val participants: StateFlow<List<CallUser>> = _participants
 
     private lateinit var client: CallClient
 
+    private var prevState: State = State.Idle
+
     init {
         viewModelScope.launch {
-            streamVideo.callState.collect {
-                when (it) {
-                    is StreamCallState.Idle -> {
-                        logger.i { "[observeState] state: Idle" }
+            streamVideo.callState.collect { state ->
+                logger.i { "[observeState] state: $state" }
+                when (state) {
+                    is State.Idle -> {
                         clearState()
                     }
-                    else -> { /* no-op */
+                    is State.Incoming -> {
+                        _callType.value = CallType.fromType(state.callGuid.type)
+                        _participants.value = state.users.values.toList()
+                    }
+                    is State.Starting -> {
+                        _callType.value = CallType.fromType(state.callGuid.type)
+                        _callId.value = state.callGuid.id
+                    }
+                    is State.Outgoing -> {
+                        _callType.value = CallType.fromType(state.callGuid.type)
+                        _callId.value = state.callGuid.id
+                        _participants.value = state.users.values
+                            .filter { it.id != streamVideo.getUser().id }
+                            .toList()
+                        joinCall()
+                    }
+                    is State.Joining -> {
+                    }
+                    is State.InCall -> {
+                    }
+                    is State.Drop -> {
                     }
                 }
+                prevState = state
             }
         }
     }
 
     public fun connectToCall(callSettings: CallSettings) {
-        logger.d { "[createCall] input: $input" }
+        logger.d { "[createCall] input: $callSettings" }
         // this._callState.value = videoClient.getCall(callId) TODO - load details
 
         // TODO CallClient is supposed to live longer than VM
         //  VM can be destroyed while the call is still running in the BG
-        client = streamVideo.createCallClient(
-            input.callUrl.removeSuffix("/twirp"),
-            input.userToken,
-            input.iceServers,
-            credentialsProvider
-        )
-        _isVideoInitialized.value = true
-
-        initializeCall(callSettings = callSettings)
+        viewModelScope.launch {
+            logger.d { "[connectToCall] state: ${streamCallState.value}" }
+            withTimeout(CONNECT_TIMEOUT) {
+                val state = streamCallState.first { it is State.InCall } as State.InCall
+                logger.v { "[connectToCall] received: ${streamCallState.value}" }
+                client = streamVideo.createCallClient(
+                    state.callUrl.removeSuffix("/twirp"),
+                    state.sfuToken,
+                    state.iceServers,
+                )
+                _isVideoInitialized.value = true
+                initializeCall(callSettings = callSettings)
+            }
+        }
     }
 
-    private fun initializeCall(callSettings: CallSettings) {
-        viewModelScope.launch {
-            val callResult = client.connectToCall(
-                UUID.randomUUID().toString(),
-                callSettings
-            )
+    private suspend fun initializeCall(callSettings: CallSettings) {
+        val callResult = client.connectToCall(
+            UUID.randomUUID().toString(),
+            callSettings
+        )
 
-            when (callResult) {
-                is Success -> {
-                    val call = callResult.data
-                    _callState.value = call
-                    isVideoEnabled.value = callSettings.videoOn
-                    isAudioEnabled.value = callSettings.audioOn
+        when (callResult) {
+            is Success -> {
+                val call = callResult.data
+                _callState.value = call
+                isVideoEnabled.value = callSettings.videoOn
+                isAudioEnabled.value = callSettings.audioOn
 
-                    val isVideoOn = isVideoOn.firstOrNull() ?: false
+                val isVideoOn = isVideoOn.firstOrNull() ?: false
 
-                    if (callSettings.autoPublish && isVideoOn) {
-                        client.startCapturingLocalVideo(CameraMetadata.LENS_FACING_FRONT)
-                    }
+                if (callSettings.autoPublish && isVideoOn) {
+                    client.startCapturingLocalVideo(CameraMetadata.LENS_FACING_FRONT)
                 }
-                is Failure -> {
-                    // TODO - show error to user
-                }
+            }
+            is Failure -> {
+                // TODO - show error to user
             }
         }
     }
@@ -211,9 +251,14 @@ public class CallViewModel(
      * Drops the call by sending a cancel event, which informs other users.
      */
     public fun cancelCall() {
+        val state = streamVideo.callState.value
+        if (state !is State.Active) {
+            logger.w { "[cancelCall] rejected (state is not Active): $state" }
+            return
+        }
         viewModelScope.launch {
-            logger.d { "[leaveCall] no args" }
-            streamVideo.cancelCall(input.callCid)
+            logger.d { "[cancelCall] state: $state" }
+            streamVideo.cancelCall(state.callGuid.cid)
         }
     }
 
@@ -230,7 +275,6 @@ public class CallViewModel(
     public fun clearState() {
         logger.i { "[leaveCall] no args" }
         streamVideo.clearCallState()
-        viewModelScope.cancel()
         val room = _callState.value ?: return
 
         room.disconnect()
@@ -258,5 +302,77 @@ public class CallViewModel(
      */
     public fun selectAudioDevice(device: AudioDevice) {
         client.selectAudioDevice(device)
+    }
+
+    public fun acceptCall() {
+        val state = streamVideo.callState.value
+        if (state !is State.Incoming || state.acceptedByMe) {
+            logger.w { "[acceptCall] rejected (state is not unaccepted Incoming): $state" }
+            return
+        }
+        logger.d { "[acceptCall] state: $state" }
+        viewModelScope.launch {
+            streamVideo.acceptCall(state.callGuid.cid)
+                .onSuccess {
+                    logger.v { "[acceptCall] completed: $it" }
+                }
+                .onError {
+                    logger.e { "[acceptCall] failed: $it" }
+                    rejectCall()
+                }
+        }
+    }
+
+    public fun rejectCall() {
+        val state = streamVideo.callState.value
+        if (state !is State.Incoming || state.acceptedByMe) {
+            logger.w { "[declineCall] rejected (state is not unaccepted Incoming): $state" }
+            return
+        }
+        logger.d { "[declineCall] state: $state" }
+        viewModelScope.launch {
+            val result = streamVideo.rejectCall(state.callGuid.cid)
+            logger.d { "[declineCall] result: $result" }
+        }
+    }
+
+    public fun hangUpCall() {
+        val state = streamVideo.callState.value
+        if (state !is State.Active) {
+            logger.w { "[hangUpCall] rejected (state is not Active): $state" }
+            return
+        }
+        logger.d { "[hangUpCall] state: $state" }
+        viewModelScope.launch {
+            streamVideo.cancelCall(state.callGuid.cid)
+        }
+    }
+
+    private fun joinCall() {
+        val state = streamVideo.callState.value
+        if (state !is State.Outgoing || !state.acceptedByCallee) {
+            logger.w { "[joinCall] rejected (state is not accepted Outgoing): $state" }
+            return
+        }
+        logger.d { "[joinCall] state: $state" }
+        viewModelScope.launch {
+            streamVideo.joinCall(
+                state.toMetadata()
+            ).onSuccess {
+                logger.v { "[joinCall] completed: $it" }
+            }.onError {
+                logger.e { "[joinCall] failed: $it" }
+            }
+        }
+    }
+
+    public fun onMicrophoneChanged(microphoneEnabled: Boolean) {
+        logger.d { "[onMicrophoneChanged] microphoneEnabled: $microphoneEnabled" }
+        this.isAudioEnabled.value = microphoneEnabled
+    }
+
+    public fun onVideoChanged(videoEnabled: Boolean) {
+        logger.d { "[onVideoChanged] videoEnabled: $videoEnabled" }
+        this.isVideoEnabled.value = videoEnabled
     }
 }

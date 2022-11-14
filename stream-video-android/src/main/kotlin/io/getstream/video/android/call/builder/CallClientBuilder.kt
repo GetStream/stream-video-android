@@ -21,6 +21,7 @@ import io.getstream.video.android.call.CallClient
 import io.getstream.video.android.call.CallClientImpl
 import io.getstream.video.android.call.signal.socket.SignalSocketFactory
 import io.getstream.video.android.call.signal.socket.SignalSocketImpl
+import io.getstream.video.android.engine.StreamCallEngine
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.model.IceServer
 import io.getstream.video.android.module.CallClientModule
@@ -35,8 +36,9 @@ internal class CallClientBuilder(
     private val context: Context,
     private val credentialsProvider: CredentialsProvider,
     private val networkStateProvider: NetworkStateProvider,
+    private val callEngine: StreamCallEngine,
     private val signalUrl: String,
-    private val iceServers: List<IceServer>
+    private val iceServers: List<IceServer>,
 ) {
     private var loggingLevel: HttpLoggingInterceptor.Level =
         HttpLoggingInterceptor.Level.NONE
@@ -77,7 +79,9 @@ internal class CallClientBuilder(
 
         return CallClientImpl(
             context = context,
-            credentialsProvider = credentialsProvider,
+            getCurrentUserId = { credentialsProvider.getUserCredentials().id },
+            getSfuToken = { credentialsProvider.getSfuToken() },
+            callEngine = callEngine,
             signalClient = callClientModule.signalClient,
             remoteIceServers = iceServers,
             signalSocket = SignalSocketImpl(

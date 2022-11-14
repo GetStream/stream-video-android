@@ -14,24 +14,25 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.router
+package io.getstream.video.android.utils
 
-import io.getstream.video.android.model.JoinedCall
+import kotlinx.coroutines.Job
 
-public interface StreamRouter {
+internal class Jobs {
 
-    public fun navigateToCall(
-        joinedCall: JoinedCall,
-        finishCurrent: Boolean
-    )
+    private val jobs = hashMapOf<Int, Job>()
 
-    public fun onIncomingCall()
+    fun add(id: Int, job: Job) {
+        jobs[id]?.cancel()
+        jobs[id] = job
+    }
 
-    public fun onOutgoingCall()
+    fun cancel(id: Int) {
+        jobs.remove(id)?.cancel()
+    }
 
-    public fun finish()
-
-    public fun onCallFailed(reason: String?)
-
-    public fun onUserLoggedOut()
+    fun cancelAll() {
+        jobs.values.forEach { it.cancel() }
+        jobs.clear()
+    }
 }

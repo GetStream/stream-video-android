@@ -116,7 +116,8 @@ private fun ParticipantInformationPreview() {
                     it.name,
                     it.profileImageURL ?: "",
                     null,
-                    null
+                    null,
+                    emptyList()
                 )
             }
         )

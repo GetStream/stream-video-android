@@ -14,15 +14,8 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.model
+package io.getstream.video.android.input
 
-public data class CallInput(
-    internal val callCid: String,
-    internal val callType: String,
-    internal val callId: String,
-    internal val callUrl: String,
-    internal val userToken: String,
-    internal val iceServers: List<IceServer>,
-    internal val hasVideoPermission: Boolean,
-    internal val hasAudioPermission: Boolean
-) : java.io.Serializable
+public sealed class CallAndroidInput {
+    public abstract val className: String
+}

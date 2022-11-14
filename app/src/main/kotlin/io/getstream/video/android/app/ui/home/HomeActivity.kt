@@ -58,18 +58,14 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
 import io.getstream.logging.StreamLog
 import io.getstream.video.android.app.model.HomeScreenOption
-import io.getstream.video.android.app.router.StreamRouterImpl
 import io.getstream.video.android.app.ui.components.UserList
+import io.getstream.video.android.app.ui.login.LoginActivity
 import io.getstream.video.android.app.utils.getUsers
 import io.getstream.video.android.app.videoApp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.Avatar
 import io.getstream.video.android.compose.ui.components.avatar.InitialsAvatar
-import io.getstream.video.android.events.CallCreatedEvent
-import io.getstream.video.android.events.VideoEvent
 import io.getstream.video.android.model.UserCredentials
-import io.getstream.video.android.router.StreamRouter
-import io.getstream.video.android.socket.SocketListener
 import io.getstream.video.android.utils.onError
 import io.getstream.video.android.utils.onSuccess
 import kotlinx.coroutines.launch
@@ -83,8 +79,6 @@ class HomeActivity : AppCompatActivity() {
         videoApp.streamVideo
     }
 
-    private val router: StreamRouter by lazy { StreamRouterImpl(this) }
-
     private val selectedOption: MutableState<HomeScreenOption> =
         mutableStateOf(HomeScreenOption.CREATE_CALL)
 
@@ -96,20 +90,11 @@ class HomeActivity : AppCompatActivity() {
         )
     }
 
-    private val callIdState: MutableState<String> = mutableStateOf("call123")
+    private val callIdState: MutableState<String> = mutableStateOf("call328")
 
     private val loadingState: MutableState<Boolean> = mutableStateOf(false)
 
     private val ringingState: MutableState<Boolean> = mutableStateOf(true)
-
-    private val socketListener = object : SocketListener {
-        override fun onEvent(event: VideoEvent) {
-            if (event is CallCreatedEvent && event.ringing) {
-                // TODO - viewModel ?
-                router.onIncomingCall()
-            }
-        }
-    }
 
     init {
         logger.i { "<init> this: $this" }
@@ -118,17 +103,11 @@ class HomeActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         logger.d { "[onCreate] savedInstanceState: $savedInstanceState" }
         super.onCreate(savedInstanceState)
-        streamVideo.addSocketListener(socketListener)
         setContent {
             VideoTheme {
                 HomeScreen()
             }
         }
-    }
-
-    override fun onDestroy() {
-        streamVideo.removeSocketListener(socketListener)
-        super.onDestroy()
     }
 
     @Composable
@@ -177,7 +156,8 @@ class HomeActivity : AppCompatActivity() {
 
     private fun logOut() {
         videoApp.userPreferences.clear()
-        router.onUserLoggedOut()
+        startActivity(Intent(this, LoginActivity::class.java))
+        finish()
     }
 
     @Composable
@@ -275,11 +255,6 @@ class HomeActivity : AppCompatActivity() {
             result.onSuccess { data ->
                 logger.v { "[createMeeting] successful: $data" }
                 loadingState.value = false
-
-                router.navigateToCall(
-                    joinedCall = data,
-                    finishCurrent = false
-                )
             }
 
             result.onError {
@@ -294,24 +269,18 @@ class HomeActivity : AppCompatActivity() {
             logger.d { "[dialUsers] callId: $callId, participants: $participants" }
 
             loadingState.value = true
-            val result = streamVideo.getOrCreateCall(
+            streamVideo.getOrCreateCall(
                 "default",
                 callId,
                 participants,
                 ringing = true
-            )
-
-            result.onSuccess { metadata ->
-                logger.v { "[dialUsers] successful: $metadata" }
-                loadingState.value = false
-
-                router.onOutgoingCall()
-            }
-
-            result.onError {
+            ).onSuccess {
+                logger.v { "[dialUsers] completed: $it" }
+            }.onError {
                 logger.e { "[dialUsers] failed: $it" }
                 Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
             }
+            loadingState.value = false
         }
     }
 
@@ -319,24 +288,18 @@ class HomeActivity : AppCompatActivity() {
         lifecycleScope.launch {
             logger.d { "[joinCall] callId: $callId" }
             loadingState.value = true
-            val result = streamVideo.createAndJoinCall(
+            streamVideo.createAndJoinCall(
                 "default",
                 id = callId,
                 participantIds = emptyList(),
                 ringing = false
-            )
-            loadingState.value = false
-            result.onSuccess { data ->
+            ).onSuccess { data ->
                 logger.v { "[joinCall] succeed: $data" }
-                router.navigateToCall(
-                    joinedCall = data,
-                    finishCurrent = false
-                )
-            }
-            result.onError {
+            }.onError {
                 logger.e { "[joinCall] failed: $it" }
                 Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
             }
+            loadingState.value = false
         }
     }
 

@@ -14,23 +14,17 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.viewmodel
+package io.getstream.video.android.engine.adapter
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import io.getstream.video.android.StreamVideo
-import io.getstream.video.android.router.StreamRouter
+import io.getstream.video.android.engine.StreamCallEngine
+import io.getstream.video.android.events.VideoEvent
+import io.getstream.video.android.socket.SocketListener
 
-public class OutgoingCallViewModelFactory(
-    private val streamVideo: StreamVideo,
-    private val streamRouter: StreamRouter,
-) : ViewModelProvider.Factory {
+internal class CoordinatorSocketListenerAdapter(
+    private val engine: StreamCallEngine
+) : SocketListener {
 
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return OutgoingCallViewModel(
-            streamVideo = streamVideo,
-            streamRouter = streamRouter,
-        ) as T
+    override fun onEvent(event: VideoEvent) {
+        engine.onCoordinatorEvent(event)
     }
 }
