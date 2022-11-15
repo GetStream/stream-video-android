@@ -30,8 +30,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.CallParticipantState
@@ -54,9 +55,7 @@ public fun LocalVideo(
                 modifier = Modifier.fillMaxSize(),
                 call = call,
                 videoTrack = videoTrack,
-                onRender = {
-                    it.elevation = 8f
-                }
+                onRender = onRender
             )
         }
 
@@ -65,12 +64,17 @@ public fun LocalVideo(
             verticalAlignment = Alignment.Bottom,
             horizontalArrangement = Arrangement.Center
         ) {
-            val icons = VideoTheme.icons
             Icon(
                 modifier = Modifier
                     .padding(4.dp)
                     .size(24.dp),
-                painter = if (callParticipant.hasAudio) icons.micOn else icons.micOff,
+                painter = painterResource(
+                    id = if (callParticipant.hasAudio) {
+                        R.drawable.ic_mic_on
+                    } else {
+                        R.drawable.ic_mic_off
+                    }
+                ),
                 contentDescription = "Audio enabled: ${callParticipant.hasAudio}",
                 tint = Color.White
             )
@@ -79,7 +83,13 @@ public fun LocalVideo(
                 modifier = Modifier
                     .padding(4.dp)
                     .size(24.dp),
-                painter = if (callParticipant.hasVideo) icons.videoCamOn else icons.videoCamOff,
+                painter = painterResource(
+                    if (callParticipant.hasVideo) {
+                        R.drawable.ic_videocam_on
+                    } else {
+                        R.drawable.ic_videocam_off
+                    }
+                ),
                 contentDescription = "Video enabled: ${callParticipant.hasVideo}",
                 tint = Color.White,
             )

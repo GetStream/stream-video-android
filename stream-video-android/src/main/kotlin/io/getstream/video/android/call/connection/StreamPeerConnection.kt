@@ -161,7 +161,15 @@ public class StreamPeerConnection(
      */
     public suspend fun setRemoteDescription(sessionDescription: SessionDescription): Result<Unit> {
         logger.d { "[setRemoteDescription] #sfu; #$typeTag; answerSdp: ${sessionDescription.stringify()}" }
-        return setValue { connection.setRemoteDescription(it, sessionDescription) }.also {
+        return setValue {
+            connection.setRemoteDescription(
+                it,
+                SessionDescription(
+                    sessionDescription.type,
+                    sessionDescription.description.mungeCodecs()
+                )
+            )
+        }.also {
             pendingIceMutex.withLock {
                 pendingIceCandidates.forEach { iceCandidate ->
                     val rtcIceCandidate = iceCandidate.toRtcCandidate()
@@ -181,8 +189,12 @@ public class StreamPeerConnection(
      * @return An empty [Result], if the operation has been successful or not.
      */
     public suspend fun setLocalDescription(sessionDescription: SessionDescription): Result<Unit> {
+        val sdp = SessionDescription(
+            sessionDescription.type,
+            sessionDescription.description.mungeCodecs()
+        )
         logger.d { "[setLocalDescription] #sfu; #$typeTag; offerSdp: ${sessionDescription.stringify()}" }
-        return setValue { connection.setLocalDescription(it, sessionDescription) }
+        return setValue { connection.setLocalDescription(it, sdp) }
     }
 
     /**
@@ -222,7 +234,10 @@ public class StreamPeerConnection(
         return connection.addTrack(mediaStreamTrack, streamIds)
     }
 
-    public fun addAudioTransceiver(track: MediaStreamTrack, streamIds: List<String>) { // TODO - do we need this
+    public fun addAudioTransceiver(
+        track: MediaStreamTrack,
+        streamIds: List<String>
+    ) { // TODO - do we need this
         logger.i { "[addAudioTransceiver] #sfu; #$typeTag; track: ${track.stringify()}, streamIds: $streamIds" }
         val fullQuality = RtpParameters.Encoding(
             "a",
@@ -439,4 +454,10 @@ public class StreamPeerConnection(
 
     override fun toString(): String =
         "StreamPeerConnection(type='$typeTag', constraints=$mediaConstraints)"
+
+    private fun String.mungeCodecs(): String {
+        return this.replace("vp9", "VP9")
+            .replace("vp8", "VP8")
+            .replace("h264", "H264")
+    }
 }

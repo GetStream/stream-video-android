@@ -594,7 +594,7 @@ internal class CallClientImpl(
         logger.v { "[createUserTracks] #sfu; videoTrack: ${videoTrack.stringify()}" }
 
         if (autoPublish) {
-            publisher?.addAudioTransceiver(localAudioTrack!!, listOf(sessionId))
+            publisher?.addTrack(localAudioTrack!!, listOf(sessionId))
             publisher?.addVideoTransceiver(localVideoTrack!!, listOf(sessionId))
         }
     }

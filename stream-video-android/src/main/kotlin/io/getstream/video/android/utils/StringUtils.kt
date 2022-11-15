@@ -24,3 +24,10 @@ internal fun enrichSFUURL(url: String): String {
         REDIRECT_SIGNAL_URL ?: SIGNAL_BASE_URL
     } else url
 }
+
+public fun String.initials(): String {
+    return trim()
+        .split("\\s+".toRegex())
+        .take(2)
+        .joinToString(separator = "") { it.take(1).uppercase() }
+}

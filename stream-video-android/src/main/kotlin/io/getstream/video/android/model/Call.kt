@@ -370,6 +370,8 @@ public class Call(
     }
 
     internal fun updateAudioLevel(event: AudioLevelChangedEvent) {
+        logger.d { "[updateAudioLevel] #sfu; isEnabled: $event" }
+
         val current = _callParticipants.value.toMutableList()
 
         event.levels.forEach { (userId, level) ->

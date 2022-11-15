@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.getstream.video.android.compose.ui.components.avatar.Avatar
 import io.getstream.video.android.model.UserCredentials
+import io.getstream.video.android.utils.initials
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -101,7 +102,7 @@ fun UserItem(
                         .size(40.dp)
                         .align(alignment = Alignment.Center),
                     imageUrl = credentials.image,
-                    initials = credentials.name.split(" ").joinToString { it }
+                    initials = credentials.name.initials()
                 )
             }
 

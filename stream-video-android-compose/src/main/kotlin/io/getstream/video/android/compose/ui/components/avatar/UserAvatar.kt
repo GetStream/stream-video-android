@@ -25,8 +25,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.utils.initials
 import io.getstream.video.android.model.CallParticipantState
+import io.getstream.video.android.utils.initials
 import stream.video.coordinator.user_v1.User
 
 /**

@@ -34,8 +34,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.extensions.toggleAlpha
 
@@ -71,8 +73,13 @@ internal fun OutgoingSingleCallOptions(
                     onMicToggleChanged(isMicEnabled)
                 },
                 content = {
-                    val micIcon =
-                        if (isMicEnabled) VideoTheme.icons.micOn else VideoTheme.icons.micOff
+                    val micIcon = painterResource(
+                        id = if (isMicEnabled) {
+                            R.drawable.ic_mic_on
+                        } else {
+                            R.drawable.ic_mic_off
+                        }
+                    )
 
                     Icon(
                         painter = micIcon,
@@ -95,8 +102,13 @@ internal fun OutgoingSingleCallOptions(
                     onVideoToggleChanged(isVideoEnabled)
                 },
                 content = {
-                    val cameraIcon =
-                        if (isVideoEnabled) VideoTheme.icons.videoCamOn else VideoTheme.icons.videoCamOff
+                    val cameraIcon = painterResource(
+                        id = if (isVideoEnabled) {
+                            R.drawable.ic_videocam_on
+                        } else {
+                            R.drawable.ic_videocam_off
+                        }
+                    )
 
                     Icon(
                         painter = cameraIcon,
@@ -119,7 +131,7 @@ internal fun OutgoingSingleCallOptions(
             onClick = { onCancelCall() },
             content = {
                 Icon(
-                    painter = VideoTheme.icons.callEnd,
+                    painter = painterResource(id = R.drawable.ic_call_end),
                     tint = Color.White,
                     contentDescription = "End call"
                 )

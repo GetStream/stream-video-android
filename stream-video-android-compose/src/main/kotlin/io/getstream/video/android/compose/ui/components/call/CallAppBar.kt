@@ -26,6 +26,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -91,7 +92,7 @@ internal fun DefaultCallAppBarLeadingContent(onBackButtonClicked: () -> Unit) {
                 end = VideoTheme.dimens.callAppBarLeadingContentSpacingEnd
             )
             .clickable { onBackButtonClicked() },
-        painter = VideoTheme.icons.arrowBack,
+        painter = painterResource(id = R.drawable.ic_arrow_back),
         contentDescription = stringResource(id = R.string.back_button_content_description),
         tint = VideoTheme.colors.textHighEmphasis
     )
@@ -126,7 +127,7 @@ internal fun DefaultCallAppBarTrailingContent(onParticipantsClicked: () -> Unit)
                 end = VideoTheme.dimens.callAppBarTrailingContentSpacingEnd
             )
             .clickable { onParticipantsClicked() },
-        painter = VideoTheme.icons.participants,
+        painter = painterResource(id = R.drawable.ic_participants),
         contentDescription = stringResource(id = R.string.call_participants_menu_content_description),
         tint = VideoTheme.colors.textHighEmphasis
     )
