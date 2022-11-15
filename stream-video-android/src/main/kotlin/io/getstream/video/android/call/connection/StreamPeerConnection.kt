@@ -375,7 +375,6 @@ public class StreamPeerConnection(
         }
     }
 
-
     /**
      * @return The [RTCStatsReport] for the active connection.
      */

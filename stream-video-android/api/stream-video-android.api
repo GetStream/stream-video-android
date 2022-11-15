@@ -906,13 +906,13 @@ public final class io/getstream/video/android/call/connection/StreamPeerConnecti
 	public fun <init> (Lkotlinx/coroutines/CoroutineScope;Lstream/video/sfu/models/PeerType;Lorg/webrtc/MediaConstraints;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;)V
 	public final fun addAudioTransceiver (Lorg/webrtc/MediaStreamTrack;Ljava/util/List;)V
 	public final fun addIceCandidate (Lio/getstream/video/android/model/IceCandidate;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun addLocalStream (Lorg/webrtc/MediaStream;)V
 	public final fun addTrack (Lorg/webrtc/MediaStreamTrack;Ljava/util/List;)Lorg/webrtc/RtpSender;
 	public final fun addVideoTransceiver (Lorg/webrtc/MediaStreamTrack;Ljava/util/List;)V
 	public final fun createAnswer (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun createOffer (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun getAudioTransceiver ()Lorg/webrtc/RtpTransceiver;
 	public final fun getConnection ()Lorg/webrtc/PeerConnection;
+	public final fun getStats ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getVideoTransceiver ()Lorg/webrtc/RtpTransceiver;
 	public final fun initialize (Lorg/webrtc/PeerConnection;)V
 	public fun onAddStream (Lorg/webrtc/MediaStream;)V
@@ -930,7 +930,6 @@ public final class io/getstream/video/android/call/connection/StreamPeerConnecti
 	public fun onRenegotiationNeeded ()V
 	public fun onSelectedCandidatePairChanged (Lorg/webrtc/CandidatePairChangeEvent;)V
 	public fun onSignalingChange (Lorg/webrtc/PeerConnection$SignalingState;)V
-	public fun onStandardizedIceConnectionChange (Lorg/webrtc/PeerConnection$IceConnectionState;)V
 	public fun onTrack (Lorg/webrtc/RtpTransceiver;)V
 	public final fun setLocalDescription (Lorg/webrtc/SessionDescription;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun setRemoteDescription (Lorg/webrtc/SessionDescription;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;

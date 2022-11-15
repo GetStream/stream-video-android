@@ -190,7 +190,6 @@ internal class CallClientImpl(
 
     override fun clear() {
         logger.i { "[clear] #sfu; no args" }
-        peerConnectionFactory.reset()
         supervisorJob.cancelChildren()
 
         connectionState = ConnectionState.DISCONNECTED
