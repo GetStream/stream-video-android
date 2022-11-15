@@ -32,6 +32,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import okhttp3.logging.HttpLoggingInterceptor
 
+/**
+ * @param context Used to set up internal factories that depend on Android.
+ * @param credentialsProvider Used to propagate logged in user's credentials.
+ * @param networkStateProvider Listens to events of the network state, used for socket connections.
+ * @param callEngine Provides the state of active calls.
+ * @param signalUrl The URL used to connect to a call.
+ * @param iceServers Servers used to authenticate and connect to the call and its tracks.
+ */
 internal class CallClientBuilder(
     private val context: Context,
     private val credentialsProvider: CredentialsProvider,
@@ -40,6 +48,10 @@ internal class CallClientBuilder(
     private val signalUrl: String,
     private val iceServers: List<IceServer>,
 ) {
+
+    /**
+     * Represents the level of logs we'll have for all the HTTP communication.
+     */
     private var loggingLevel: HttpLoggingInterceptor.Level =
         HttpLoggingInterceptor.Level.NONE
 
@@ -57,6 +69,8 @@ internal class CallClientBuilder(
     /**
      * Builds the [CallClient] and its respective dependencies, used to set up all the business
      * logic of the SDK.
+     *
+     * @return [CallClient] used for this particular call.
      */
     fun build(): CallClient {
         val user = credentialsProvider.getUserCredentials()
