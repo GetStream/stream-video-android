@@ -887,6 +887,8 @@ public abstract interface class io/getstream/video/android/call/CallClient {
 	public abstract fun flipCamera ()V
 	public abstract fun getActiveCall ()Lio/getstream/video/android/model/Call;
 	public abstract fun getAudioDevices ()Ljava/util/List;
+	public abstract fun getPublisherStats ()Lkotlinx/coroutines/flow/StateFlow;
+	public abstract fun getSubscriberStats ()Lkotlinx/coroutines/flow/StateFlow;
 	public abstract fun removeSocketListener (Lio/getstream/video/android/call/signal/socket/SignalSocketListener;)V
 	public abstract fun selectAudioDevice (Lio/getstream/video/android/audio/AudioDevice;)V
 	public abstract fun setCameraEnabled (Z)V

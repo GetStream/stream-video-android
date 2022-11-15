@@ -21,6 +21,8 @@ import io.getstream.video.android.call.signal.socket.SignalSocketListener
 import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.CallSettings
 import io.getstream.video.android.utils.Result
+import kotlinx.coroutines.flow.StateFlow
+import org.webrtc.RTCStatsReport
 
 public interface CallClient {
 
@@ -35,6 +37,16 @@ public interface CallClient {
      * @return The active call instance, if it exists.
      */
     public fun getActiveCall(): Call?
+
+    /**
+     * Exposes the publisher stats for the connection, if they exist.
+     */
+    public fun getPublisherStats(): StateFlow<RTCStatsReport?>
+
+    /**
+     * Exposes the subscriber stats for the connection, if they exist.
+     */
+    public fun getSubscriberStats(): StateFlow<RTCStatsReport?>
 
     public fun startCapturingLocalVideo(position: Int)
 
@@ -51,5 +63,6 @@ public interface CallClient {
     public fun selectAudioDevice(device: AudioDevice)
 
     public fun addSocketListener(signalSocketListener: SignalSocketListener)
+
     public fun removeSocketListener(signalSocketListener: SignalSocketListener)
 }
