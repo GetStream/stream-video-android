@@ -2602,10 +2602,11 @@ public final class io/getstream/video/android/utils/ResultKt {
 	public static final synthetic fun onErrorSuspend (Lio/getstream/video/android/utils/Result;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static final synthetic fun onSuccess (Lio/getstream/video/android/utils/Result;Lkotlin/jvm/functions/Function1;)Lio/getstream/video/android/utils/Result;
 	public static final synthetic fun onSuccessSuspend (Lio/getstream/video/android/utils/Result;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun stringify (Lio/getstream/video/android/utils/Result;Lkotlin/jvm/functions/Function1;)Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/utils/StringifyKt {
-	public static final fun stringify (Lio/getstream/video/android/utils/Result;Lkotlin/jvm/functions/Function1;)Ljava/lang/String;
+public final class io/getstream/video/android/utils/StringUtilsKt {
+	public static final fun initials (Ljava/lang/String;)Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/utils/Success : io/getstream/video/android/utils/Result {
