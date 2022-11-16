@@ -66,6 +66,7 @@ import org.webrtc.IceCandidate as RtcIceCandidate
  * @param onStreamRemoved Handler when a [MediaStream] gets removed.
  * @param onNegotiationNeeded Handler when there's a new negotiation.
  * @param onIceCandidate Handler whenever we receive [IceCandidate]s.
+ * @param onConnectionChanged Handler whenever we receive [StreamPeerConnectionState] changes.
  */
 public class StreamPeerConnection(
     private val coroutineScope: CoroutineScope,

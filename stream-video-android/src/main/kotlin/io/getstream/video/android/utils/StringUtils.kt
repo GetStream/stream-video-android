@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.utils
 
+import io.getstream.video.android.model.StreamPeerType
 import io.getstream.video.android.module.CallClientModule.Companion.REDIRECT_SIGNAL_URL
 import io.getstream.video.android.module.CallClientModule.Companion.SIGNAL_BASE_URL
 
@@ -23,4 +24,14 @@ internal fun enrichSFUURL(url: String): String {
     return if (url.contains("localhost") || url.contains("127.0.0.1")) {
         REDIRECT_SIGNAL_URL ?: SIGNAL_BASE_URL
     } else url
+}
+
+internal fun <T : Any> Result<T>.stringify(toString: (T) -> String): String = when (this) {
+    is Success -> "Success(data=${toString(data)})"
+    is Failure -> toString()
+}
+
+internal fun StreamPeerType.stringify() = when (this) {
+    StreamPeerType.PUBLISHER -> "publisher"
+    StreamPeerType.SUBSCRIBER -> "subscriber"
 }

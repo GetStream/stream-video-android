@@ -104,7 +104,12 @@ internal interface StreamCallEngine {
     fun onCallEventSent(callCid: String, eventType: CallEventType)
 
     /**
-     * Called when [io.getstream.video.android.call.connection.StreamPeerConnection] connection state changes.
+     * Called when peer connection state changes.
+     *
+     * @param sfuSessionId The id of SFU session.
+     * @param connectionState Represents the current state of peer connection.
+     *
+     * @see [io.getstream.video.android.call.connection.StreamPeerConnection]
      */
     fun onCallConnectionChange(sfuSessionId: String, peerType: StreamPeerType, connectionState: StreamPeerConnectionState)
 }

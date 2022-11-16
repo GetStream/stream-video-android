@@ -241,8 +241,7 @@ internal class StreamCallEngineImpl(
 
     /**
      * Called when participant joins an existing call.
-     * @param event Contains information about the participant who joined. 
-     */
+     * @param event Contains information about the participant who joined. */
     private fun onSfuParticipantJoined(event: SfuParticipantJoinedEvent) = scope.launchWithLock(mutex) {
         logger.d { "[onSfuParticipantJoined] event: $event" }
         val state = _callState.value
@@ -269,6 +268,7 @@ internal class StreamCallEngineImpl(
 
     /**
      * Called when participant leaves a call.
+     * @param event Contains information about the participant who left.
      */
     private fun onSfuParticipantLeft(event: SfuParticipantLeftEvent) = scope.launchWithLock(mutex) {
         logger.d { "[onSfuParticipantLeft] event: $event" }
@@ -556,12 +556,20 @@ internal class StreamCallEngineImpl(
         dropCall(State.Drop(state.callGuid, state.callKind, DropReason.Failure(error)))
     }
 
+    /**
+     * Called when peer connection state changes.
+     *
+     * @param sfuSessionId The id of SFU session.
+     * @param connectionState Represents the current state of peer connection.
+     *
+     * @see [io.getstream.video.android.call.connection.StreamPeerConnection]
+     */
     override fun onCallConnectionChange(
         sfuSessionId: String,
         peerType: StreamPeerType,
         connectionState: StreamPeerConnectionState
     ) = scope.launchWithLock(mutex) {
-        logger.d { "[onCallConnectionChange] #${peerType.stringify()}; iceConnection: $connectionState" }
+        logger.d { "[onCallConnectionChange] #${peerType.stringify()}; connectionState: $connectionState" }
         val state = _callState.value
         if (state !is State.InCall) {
             logger.w { "[onCallConnectionChange] rejected (state is not InCall): $state" }
