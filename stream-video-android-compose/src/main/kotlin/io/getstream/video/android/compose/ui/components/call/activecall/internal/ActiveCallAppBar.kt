@@ -89,7 +89,9 @@ internal fun ActiveCallAppBar(
 private fun StreamCallState.formatAsTitle() = when (this) {
     // TODO stringResource(id = )
     is StreamCallState.Drop -> "Drop"
-    is StreamCallState.InCall -> "InCall"
+    is StreamCallState.Joined -> "Joined"
+    is StreamCallState.Connecting -> "Connecting"
+    is StreamCallState.Connected -> "Connected"
     is StreamCallState.Incoming -> "Incoming"
     is StreamCallState.Joining -> "Joining"
     is StreamCallState.Outgoing -> "Outgoing"

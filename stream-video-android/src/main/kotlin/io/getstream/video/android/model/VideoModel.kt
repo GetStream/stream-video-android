@@ -18,20 +18,40 @@ package io.getstream.video.android.model
 
 import java.io.Serializable
 import java.util.Date
-import stream.video.coordinator.call_v1.Call as ProtoCall
-import stream.video.coordinator.call_v1.CallDetails as ProtoCallDetails
-import stream.video.coordinator.member_v1.Member as ProtoMember
-import stream.video.coordinator.user_v1.User as ProtoUser
+import stream.video.coordinator.call_v1.Call as CoordinatorCall
+import stream.video.coordinator.call_v1.CallDetails as CoordinatorCallDetails
+import stream.video.coordinator.member_v1.Member as CoordinatorMember
+import stream.video.coordinator.user_v1.User as CoordinatorUser
+import stream.video.sfu.models.Participant as SfuParticipant
 
 public data class CallUser(
     val id: String,
     val name: String,
     val role: String,
+    val state: CallUserState,
     val imageUrl: String,
     val createdAt: Date?,
     val updatedAt: Date?,
     val teams: List<String>
 ) : Serializable
+
+public sealed class CallUserState : Serializable {
+    public data class Joined(
+        val trackIdPrefix: String,
+        val online: Boolean,
+        val audio: Boolean,
+        val video: Boolean
+    ) : CallUserState()
+    public object Idle : CallUserState() { override fun toString(): String = "Idle" }
+}
+
+/**
+ * Invokes [block] if state is [CallUserState.Joined].
+ */
+public fun CallUserState.onJoined(block: CallUserState.Joined.() -> Unit): Unit = when (this) {
+    is CallUserState.Joined -> block()
+    is CallUserState.Idle -> Unit
+}
 
 public data class CallMember(
     val callCid: String,
@@ -59,26 +79,27 @@ public data class CallDetails(
     val recordingEnabled: Boolean,
 ) : Serializable
 
-public fun Map<String, ProtoUser>.toCallUsers(): Map<String, CallUser> =
+public fun Map<String, CoordinatorUser>.toCallUsers(): Map<String, CallUser> =
     map { (userId, protoUser) ->
         userId to protoUser.toCallUser()
     }.toMap()
 
-public fun ProtoUser.toCallUser(): CallUser = CallUser(
+public fun CoordinatorUser.toCallUser(): CallUser = CallUser(
     id = id,
     name = name,
     role = role,
     imageUrl = image_url,
+    state = CallUserState.Idle,
     createdAt = created_at?.let { Date(it.toEpochMilli()) },
     updatedAt = updated_at?.let { Date(it.toEpochMilli()) },
     teams = teams
 )
 
-public fun Map<String, ProtoMember>.toCallMembers(): Map<String, CallMember> = map { (userId, protoMember) ->
+public fun Map<String, CoordinatorMember>.toCallMembers(): Map<String, CallMember> = map { (userId, protoMember) ->
     userId to protoMember.toCallMember()
 }.toMap()
 
-public fun ProtoMember.toCallMember(): CallMember = CallMember(
+public fun CoordinatorMember.toCallMember(): CallMember = CallMember(
     callCid = call_cid,
     role = role,
     userId = user_id,
@@ -86,7 +107,7 @@ public fun ProtoMember.toCallMember(): CallMember = CallMember(
     updatedAt = updated_at?.let { Date(it.toEpochMilli()) },
 )
 
-public fun ProtoCallDetails?.toCallDetails(): CallDetails {
+public fun CoordinatorCallDetails?.toCallDetails(): CallDetails {
     this ?: error("CallDetails is not provided")
     return CallDetails(
         memberUserIds = member_user_ids,
@@ -96,7 +117,7 @@ public fun ProtoCallDetails?.toCallDetails(): CallDetails {
     )
 }
 
-public fun ProtoCall?.toCallInfo(): CallInfo {
+public fun CoordinatorCall?.toCallInfo(): CallInfo {
     this ?: error("CallInfo is not provided")
     return CallInfo(
         cid = call_cid,
@@ -108,4 +129,83 @@ public fun ProtoCall?.toCallInfo(): CallInfo {
         createdAt = created_at?.let { Date(it.toEpochMilli()) },
         updatedAt = updated_at?.let { Date(it.toEpochMilli()) },
     )
+}
+
+/**
+ * Converts [SfuParticipant] into [CallUser].
+ */
+public fun SfuParticipant.toCallUser(): CallUser = CallUser(
+    id = user?.id ?: error("SfuParticipant has no userId"),
+    name = user.name,
+    role = user.role,
+    imageUrl = user.image_url,
+    state = CallUserState.Joined(
+        trackIdPrefix = track_lookup_prefix,
+        online = online,
+        audio = audio,
+        video = video,
+    ),
+    createdAt = /*TODO user.created_at*/ null,
+    updatedAt = /*TODO user.updated_at*/ null,
+    teams = user.teams
+)
+
+/**
+ * Converts a list of [SfuParticipant] into a map associated by [CallUser.id] to [CallUser].
+ */
+public fun List<SfuParticipant>.toCallUserMap(): Map<String, CallUser> = associate { participant ->
+    participant.toCallUser().let {
+        it.id to it
+    }
+}
+
+/**
+ * Merges [CallUser] maps to absorb as many non-null and non-empty data from both collections.
+ */
+public infix fun Map<String, CallUser>.merge(that: Map<String, CallUser>): Map<String, CallUser> {
+    val new = this - that.keys
+    val merged = this.map { (userId, user) ->
+        userId to user.merge(that[userId])
+    }.toMap()
+    return merged + new
+}
+
+/**
+ * Merges [that] [CallUser] into [this] map.
+ */
+public infix fun Map<String, CallUser>.merge(that: CallUser): Map<String, CallUser> = when (contains(that.id)) {
+    true -> this.map { (userId, user) ->
+        userId to user.merge(that)
+    }.toMap()
+    else -> this.toMutableMap().also {
+        it[that.id] = that
+    }
+}
+
+/**
+ * Merges [that] into [this] CallUser to absorb as much data as possible from both instances.
+ */
+public infix fun CallUser.merge(that: CallUser?): CallUser = when (that) {
+    null -> this
+    else -> copy(
+        id = that.id.ifEmpty { this.id },
+        name = that.name.ifEmpty { this.name },
+        role = that.role.ifEmpty { this.role },
+        imageUrl = that.imageUrl.ifEmpty { this.imageUrl },
+        state = that.state merge this.state,
+        createdAt = that.createdAt ?: this.createdAt,
+        updatedAt = that.updatedAt ?: this.updatedAt,
+        teams = (that.teams + this.teams).distinct()
+    )
+}
+
+/**
+ * Merges [that] into [this] CallUserState to absorb as much data as possible from both instances.
+ */
+public infix fun CallUserState.merge(that: CallUserState): CallUserState = when {
+    this is CallUserState.Joined && that is CallUserState.Joined -> that.copy(
+        trackIdPrefix = that.trackIdPrefix.ifEmpty { this.trackIdPrefix },
+    )
+    this is CallUserState.Idle -> that
+    else -> this
 }

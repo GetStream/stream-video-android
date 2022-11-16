@@ -21,5 +21,9 @@ public typealias StreamCallType = String
 public typealias StreamCallId = String
 
 public fun StreamCallCid(type: StreamCallType, id: StreamCallId): StreamCallCid {
-    return "$type:$id"
+    return when {
+        type.isNotEmpty() && id.isNotEmpty() -> "$type:$id"
+        id.isNotEmpty() -> id
+        else -> error("[StreamCallCid] invalid arguments; type=$type, id=$id")
+    }
 }

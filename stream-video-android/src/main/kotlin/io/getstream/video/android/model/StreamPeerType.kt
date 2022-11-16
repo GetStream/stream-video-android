@@ -14,9 +14,20 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.utils
+package io.getstream.video.android.model
 
-public fun <T : Any> Result<T>.stringify(toString: (T) -> String): String = when (this) {
-    is Success -> "Success(data=${toString(data)})"
-    is Failure -> toString()
+import stream.video.sfu.models.PeerType
+
+/**
+ * The type of peer connections, either a [PUBLISHER] that sends data to the call or a [SUBSCRIBER]
+ * that receives and decodes the data from the server.
+ */
+public enum class StreamPeerType {
+    PUBLISHER,
+    SUBSCRIBER
+}
+
+public fun StreamPeerType.toPeerType(): PeerType = when (this) {
+    StreamPeerType.PUBLISHER -> PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED
+    StreamPeerType.SUBSCRIBER -> PeerType.PEER_TYPE_SUBSCRIBER
 }

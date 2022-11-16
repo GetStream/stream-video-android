@@ -28,7 +28,6 @@ public data class CallMetadata(
     val recordingEnabled: Boolean,
     val broadcastingEnabled: Boolean,
     val users: Map<String, CallUser>,
-    val members: Map<String, CallMember>,
     val extraData: Map<String, String>?,
 ) : java.io.Serializable
 

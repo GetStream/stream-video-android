@@ -51,7 +51,7 @@ internal class EventsParser(
 
             if (rawEvent.healthcheck == null) logger.v { "[onMessage] rawEvent: $rawEvent" }
             val processedEvent = EventMapper.mapEvent(rawEvent)
-            logger.v { "[onMessage] processedEvent: $processedEvent" }
+            if (processedEvent !is HealthCheckEvent) logger.v { "[onMessage] processedEvent: $processedEvent" }
 
             if (!connectionEventReceived && processedEvent is HealthCheckEvent) {
                 connectionEventReceived = true

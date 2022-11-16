@@ -23,10 +23,14 @@ import io.getstream.video.android.call.utils.setValue
 import io.getstream.video.android.call.utils.stringify
 import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.model.IceCandidate
+import io.getstream.video.android.model.StreamPeerConnectionState
+import io.getstream.video.android.model.StreamPeerType
 import io.getstream.video.android.model.toDomainCandidate
+import io.getstream.video.android.model.toDomainPeerConnectionState
 import io.getstream.video.android.model.toRtcCandidate
 import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Result
+import io.getstream.video.android.utils.stringify
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -50,28 +54,29 @@ import org.webrtc.RtpSender
 import org.webrtc.RtpTransceiver
 import org.webrtc.RtpTransceiver.RtpTransceiverInit
 import org.webrtc.SessionDescription
-import stream.video.sfu.models.PeerType
 import org.webrtc.IceCandidate as RtcIceCandidate
 
 /**
  * Wrapper around the WebRTC connection that contains tracks.
  *
  * @param coroutineScope The scope used to listen to stats events.
- * @param type The internal type of the PeerConnection. Check [PeerConnectionType].
+ * @param type The internal type of the PeerConnection. Check [StreamPeerType].
  * @param mediaConstraints Constraints used for the connections.
  * @param onStreamAdded Handler when a new [MediaStream] gets added.
  * @param onStreamRemoved Handler when a [MediaStream] gets removed.
  * @param onNegotiationNeeded Handler when there's a new negotiation.
  * @param onIceCandidate Handler whenever we receive [IceCandidate]s.
+ * @param onConnectionChanged Handler whenever we receive [StreamPeerConnectionState] changes.
  */
 public class StreamPeerConnection(
     private val coroutineScope: CoroutineScope,
-    private val type: PeerType,
+    private val type: StreamPeerType,
     private val mediaConstraints: MediaConstraints,
     private val onStreamAdded: ((MediaStream) -> Unit)?,
     private val onStreamRemoved: ((MediaStream) -> Unit)?,
     private val onNegotiationNeeded: ((StreamPeerConnection) -> Unit)?,
-    private val onIceCandidate: ((IceCandidate, PeerType) -> Unit)?
+    private val onIceCandidate: ((IceCandidate, StreamPeerType) -> Unit)?,
+    private val onConnectionChanged: ((StreamPeerConnectionState, StreamPeerType) -> Unit)?
 ) : PeerConnection.Observer {
 
     private val typeTag = type.stringify()
@@ -425,6 +430,9 @@ public class StreamPeerConnection(
 
     override fun onConnectionChange(newState: PeerConnection.PeerConnectionState?) {
         logger.i { "[onConnectionChange] #sfu; #$typeTag; newState: $newState" }
+        newState?.also {
+            onConnectionChanged?.invoke(it.toDomainPeerConnectionState(), type)
+        }
     }
 
     override fun onSelectedCandidatePairChanged(event: CandidatePairChangeEvent?) {
