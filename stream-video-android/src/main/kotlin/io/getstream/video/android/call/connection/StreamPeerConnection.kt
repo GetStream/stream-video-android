@@ -46,6 +46,7 @@ import org.webrtc.IceCandidateErrorEvent
 import org.webrtc.MediaConstraints
 import org.webrtc.MediaStream
 import org.webrtc.MediaStreamTrack
+import org.webrtc.PeerConnection
 import org.webrtc.RTCStatsReport
 import org.webrtc.RtpParameters
 import org.webrtc.RtpReceiver
@@ -54,7 +55,6 @@ import org.webrtc.RtpTransceiver
 import org.webrtc.RtpTransceiver.RtpTransceiverInit
 import org.webrtc.SessionDescription
 import org.webrtc.IceCandidate as RtcIceCandidate
-import org.webrtc.PeerConnection
 
 /**
  * Wrapper around the WebRTC connection that contains tracks.

@@ -896,7 +896,7 @@ public abstract interface class io/getstream/video/android/call/CallClient {
 }
 
 public final class io/getstream/video/android/call/connection/StreamPeerConnection : org/webrtc/PeerConnection$Observer {
-	public fun <init> (Lkotlinx/coroutines/CoroutineScope;Lio/getstream/video/android/model/PeerConnectionType;Lorg/webrtc/MediaConstraints;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
+	public fun <init> (Lkotlinx/coroutines/CoroutineScope;Lio/getstream/video/android/model/StreamPeerType;Lorg/webrtc/MediaConstraints;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
 	public final fun addAudioTransceiver (Lorg/webrtc/MediaStreamTrack;Ljava/util/List;)V
 	public final fun addIceCandidate (Lio/getstream/video/android/model/IceCandidate;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun addTrack (Lorg/webrtc/MediaStreamTrack;Ljava/util/List;)Lorg/webrtc/RtpSender;
@@ -939,8 +939,8 @@ public final class io/getstream/video/android/call/connection/StreamPeerConnecti
 	public final fun makeAudioSource (Lorg/webrtc/MediaConstraints;)Lorg/webrtc/AudioSource;
 	public static synthetic fun makeAudioSource$default (Lio/getstream/video/android/call/connection/StreamPeerConnectionFactory;Lorg/webrtc/MediaConstraints;ILjava/lang/Object;)Lorg/webrtc/AudioSource;
 	public final fun makeAudioTrack (Lorg/webrtc/AudioSource;Ljava/lang/String;)Lorg/webrtc/AudioTrack;
-	public final fun makePeerConnection (Lkotlinx/coroutines/CoroutineScope;Lorg/webrtc/PeerConnection$RTCConfiguration;Lio/getstream/video/android/model/PeerConnectionType;Lorg/webrtc/MediaConstraints;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)Lio/getstream/video/android/call/connection/StreamPeerConnection;
-	public static synthetic fun makePeerConnection$default (Lio/getstream/video/android/call/connection/StreamPeerConnectionFactory;Lkotlinx/coroutines/CoroutineScope;Lorg/webrtc/PeerConnection$RTCConfiguration;Lio/getstream/video/android/model/PeerConnectionType;Lorg/webrtc/MediaConstraints;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)Lio/getstream/video/android/call/connection/StreamPeerConnection;
+	public final fun makePeerConnection (Lkotlinx/coroutines/CoroutineScope;Lorg/webrtc/PeerConnection$RTCConfiguration;Lio/getstream/video/android/model/StreamPeerType;Lorg/webrtc/MediaConstraints;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)Lio/getstream/video/android/call/connection/StreamPeerConnection;
+	public static synthetic fun makePeerConnection$default (Lio/getstream/video/android/call/connection/StreamPeerConnectionFactory;Lkotlinx/coroutines/CoroutineScope;Lorg/webrtc/PeerConnection$RTCConfiguration;Lio/getstream/video/android/model/StreamPeerType;Lorg/webrtc/MediaConstraints;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)Lio/getstream/video/android/call/connection/StreamPeerConnection;
 	public final fun makeVideoSource (Z)Lorg/webrtc/VideoSource;
 	public final fun makeVideoTrack (Lorg/webrtc/VideoSource;Ljava/lang/String;)Lorg/webrtc/VideoTrack;
 }
@@ -1912,28 +1912,28 @@ public final class io/getstream/video/android/model/CallUser : java/io/Serializa
 	public fun toString ()Ljava/lang/String;
 }
 
-public abstract class io/getstream/video/android/model/CallUserState {
+public abstract class io/getstream/video/android/model/CallUserState : java/io/Serializable {
 }
 
-public final class io/getstream/video/android/model/CallUserState$Specified : io/getstream/video/android/model/CallUserState {
+public final class io/getstream/video/android/model/CallUserState$Idle : io/getstream/video/android/model/CallUserState {
+	public static final field INSTANCE Lio/getstream/video/android/model/CallUserState$Idle;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/model/CallUserState$Joined : io/getstream/video/android/model/CallUserState {
 	public fun <init> (Ljava/lang/String;ZZZ)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Z
 	public final fun component3 ()Z
 	public final fun component4 ()Z
-	public final fun copy (Ljava/lang/String;ZZZ)Lio/getstream/video/android/model/CallUserState$Specified;
-	public static synthetic fun copy$default (Lio/getstream/video/android/model/CallUserState$Specified;Ljava/lang/String;ZZZILjava/lang/Object;)Lio/getstream/video/android/model/CallUserState$Specified;
+	public final fun copy (Ljava/lang/String;ZZZ)Lio/getstream/video/android/model/CallUserState$Joined;
+	public static synthetic fun copy$default (Lio/getstream/video/android/model/CallUserState$Joined;Ljava/lang/String;ZZZILjava/lang/Object;)Lio/getstream/video/android/model/CallUserState$Joined;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAudio ()Z
 	public final fun getOnline ()Z
 	public final fun getTrackIdPrefix ()Ljava/lang/String;
 	public final fun getVideo ()Z
 	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/model/CallUserState$Undefined : io/getstream/video/android/model/CallUserState {
-	public static final field INSTANCE Lio/getstream/video/android/model/CallUserState$Undefined;
 	public fun toString ()Ljava/lang/String;
 }
 
@@ -1963,18 +1963,6 @@ public final class io/getstream/video/android/model/IceCandidate$$serializer : k
 
 public final class io/getstream/video/android/model/IceCandidate$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
-}
-
-public final class io/getstream/video/android/model/IceConnection : java/lang/Enum {
-	public static final field CHECKING Lio/getstream/video/android/model/IceConnection;
-	public static final field CLOSED Lio/getstream/video/android/model/IceConnection;
-	public static final field COMPLETED Lio/getstream/video/android/model/IceConnection;
-	public static final field CONNECTED Lio/getstream/video/android/model/IceConnection;
-	public static final field DISCONNECTED Lio/getstream/video/android/model/IceConnection;
-	public static final field FAILED Lio/getstream/video/android/model/IceConnection;
-	public static final field NEW Lio/getstream/video/android/model/IceConnection;
-	public static fun valueOf (Ljava/lang/String;)Lio/getstream/video/android/model/IceConnection;
-	public static fun values ()[Lio/getstream/video/android/model/IceConnection;
 }
 
 public final class io/getstream/video/android/model/IceServer : java/io/Serializable {
@@ -2020,28 +2008,6 @@ public final class io/getstream/video/android/model/JoinedCall {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/model/PeerConnection : java/lang/Enum {
-	public static final field CLOSED Lio/getstream/video/android/model/PeerConnection;
-	public static final field CONNECTED Lio/getstream/video/android/model/PeerConnection;
-	public static final field CONNECTING Lio/getstream/video/android/model/PeerConnection;
-	public static final field DISCONNECTED Lio/getstream/video/android/model/PeerConnection;
-	public static final field FAILED Lio/getstream/video/android/model/PeerConnection;
-	public static final field NEW Lio/getstream/video/android/model/PeerConnection;
-	public static fun valueOf (Ljava/lang/String;)Lio/getstream/video/android/model/PeerConnection;
-	public static fun values ()[Lio/getstream/video/android/model/PeerConnection;
-}
-
-public final class io/getstream/video/android/model/PeerConnectionType : java/lang/Enum {
-	public static final field PUBLISHER Lio/getstream/video/android/model/PeerConnectionType;
-	public static final field SUBSCRIBER Lio/getstream/video/android/model/PeerConnectionType;
-	public static fun valueOf (Ljava/lang/String;)Lio/getstream/video/android/model/PeerConnectionType;
-	public static fun values ()[Lio/getstream/video/android/model/PeerConnectionType;
-}
-
-public final class io/getstream/video/android/model/PeerConnectionTypeKt {
-	public static final fun toPeerType (Lio/getstream/video/android/model/PeerConnectionType;)Lstream/video/sfu/models/PeerType;
-}
-
 public final class io/getstream/video/android/model/StartedCall {
 	public fun <init> (Lio/getstream/video/android/model/CallMetadata;)V
 	public final fun component1 ()Lio/getstream/video/android/model/CallMetadata;
@@ -2051,6 +2017,28 @@ public final class io/getstream/video/android/model/StartedCall {
 	public final fun getCall ()Lio/getstream/video/android/model/CallMetadata;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/model/StreamPeerConnectionState : java/lang/Enum {
+	public static final field CLOSED Lio/getstream/video/android/model/StreamPeerConnectionState;
+	public static final field CONNECTED Lio/getstream/video/android/model/StreamPeerConnectionState;
+	public static final field CONNECTING Lio/getstream/video/android/model/StreamPeerConnectionState;
+	public static final field DISCONNECTED Lio/getstream/video/android/model/StreamPeerConnectionState;
+	public static final field FAILED Lio/getstream/video/android/model/StreamPeerConnectionState;
+	public static final field NEW Lio/getstream/video/android/model/StreamPeerConnectionState;
+	public static fun valueOf (Ljava/lang/String;)Lio/getstream/video/android/model/StreamPeerConnectionState;
+	public static fun values ()[Lio/getstream/video/android/model/StreamPeerConnectionState;
+}
+
+public final class io/getstream/video/android/model/StreamPeerType : java/lang/Enum {
+	public static final field PUBLISHER Lio/getstream/video/android/model/StreamPeerType;
+	public static final field SUBSCRIBER Lio/getstream/video/android/model/StreamPeerType;
+	public static fun valueOf (Ljava/lang/String;)Lio/getstream/video/android/model/StreamPeerType;
+	public static fun values ()[Lio/getstream/video/android/model/StreamPeerType;
+}
+
+public final class io/getstream/video/android/model/StreamPeerTypeKt {
+	public static final fun toPeerType (Lio/getstream/video/android/model/StreamPeerType;)Lstream/video/sfu/models/PeerType;
 }
 
 public final class io/getstream/video/android/model/User {
@@ -2109,6 +2097,7 @@ public final class io/getstream/video/android/model/VideoModelKt {
 	public static final fun merge (Lio/getstream/video/android/model/CallUserState;Lio/getstream/video/android/model/CallUserState;)Lio/getstream/video/android/model/CallUserState;
 	public static final fun merge (Ljava/util/Map;Lio/getstream/video/android/model/CallUser;)Ljava/util/Map;
 	public static final fun merge (Ljava/util/Map;Ljava/util/Map;)Ljava/util/Map;
+	public static final fun onJoined (Lio/getstream/video/android/model/CallUserState;Lkotlin/jvm/functions/Function1;)V
 	public static final fun toCallDetails (Lstream/video/coordinator/call_v1/CallDetails;)Lio/getstream/video/android/model/CallDetails;
 	public static final fun toCallInfo (Lstream/video/coordinator/call_v1/Call;)Lio/getstream/video/android/model/CallInfo;
 	public static final fun toCallMember (Lstream/video/coordinator/member_v1/Member;)Lio/getstream/video/android/model/CallMember;
