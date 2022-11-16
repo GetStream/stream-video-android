@@ -558,9 +558,9 @@ internal class StreamCallEngineImpl(
     override fun onCallConnectionChange(
         sfuSessionId: String,
         peerType: StreamPeerType,
-        connection: StreamPeerConnectionState
+        connectionState: StreamPeerConnectionState
     ) = scope.launchWithLock(mutex) {
-        logger.d { "[onCallConnectionChange] #${peerType.stringify()}; iceConnection: $connection" }
+        logger.d { "[onCallConnectionChange] #${peerType.stringify()}; iceConnection: $connectionState" }
         val state = _callState.value
         if (state !is State.InCall) {
             logger.w { "[onCallConnectionChange] rejected (state is not InCall): $state" }
@@ -574,9 +574,9 @@ internal class StreamCallEngineImpl(
             }
             return@launchWithLock
         }
-        if (connection == StreamPeerConnectionState.CONNECTING) {
+        if (connectionState == StreamPeerConnectionState.CONNECTING) {
             _callState.post(state.toConnecting())
-        } else if (connection == StreamPeerConnectionState.CONNECTED) {
+        } else if (connectionState == StreamPeerConnectionState.CONNECTED) {
             _callState.post(state.toConnected())
         }
     }
