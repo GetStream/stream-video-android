@@ -120,7 +120,7 @@ public sealed interface StreamCallState : Serializable {
 
     /**
      * Set when joined to Coordinator.
-     * [StreamCallState] stays [Joined] until [sfuSessionId] reaches [StreamSfuSessionId.Confirmed] inclusively.
+     * [StreamCallState] stays [Joined] until [sfuSessionId] reaches [StreamSfuSessionId.Confirmed] explicitly.
      */
     public data class Joined(
         override val callGuid: StreamCallGuid,
@@ -174,7 +174,7 @@ public sealed interface StreamCallState : Serializable {
     ) : InCall()
 
     /**
-     * Signifies that the call was drop because of the following [reason].
+     * Signifies that the call was dropped because of the following [reason].
      */
     public data class Drop(
         override val callGuid: StreamCallGuid,
