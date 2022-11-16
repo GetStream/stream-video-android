@@ -240,7 +240,8 @@ internal class StreamCallEngineImpl(
     }
 
     /**
-     * Called when participant joins to the existing call.
+     * Called when participant joins an existing call.
+     * @param event Contains information about the participant who joined. 
      */
     private fun onSfuParticipantJoined(event: SfuParticipantJoinedEvent) = scope.launchWithLock(mutex) {
         logger.d { "[onSfuParticipantJoined] event: $event" }
