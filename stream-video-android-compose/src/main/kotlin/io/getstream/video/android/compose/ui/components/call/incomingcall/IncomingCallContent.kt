@@ -135,7 +135,7 @@ private fun IncomingCallPreview() {
                     id = it.id,
                     name = it.name,
                     role = it.role,
-                    state = CallUserState.Undefined,
+                    state = CallUserState.Idle,
                     createdAt = null,
                     updatedAt = null,
                     imageUrl = it.profileImageURL ?: "",

@@ -23,10 +23,10 @@ import io.getstream.video.android.call.utils.setValue
 import io.getstream.video.android.call.utils.stringify
 import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.model.IceCandidate
-import io.getstream.video.android.model.PeerConnection
-import io.getstream.video.android.model.PeerConnectionType
+import io.getstream.video.android.model.StreamPeerConnectionState
+import io.getstream.video.android.model.StreamPeerType
 import io.getstream.video.android.model.toDomainCandidate
-import io.getstream.video.android.model.toPeerConnection
+import io.getstream.video.android.model.toDomainPeerConnectionState
 import io.getstream.video.android.model.toRtcCandidate
 import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Result
@@ -54,13 +54,13 @@ import org.webrtc.RtpTransceiver
 import org.webrtc.RtpTransceiver.RtpTransceiverInit
 import org.webrtc.SessionDescription
 import org.webrtc.IceCandidate as RtcIceCandidate
-import org.webrtc.PeerConnection as RtcPeerConnection
+import org.webrtc.PeerConnection
 
 /**
  * Wrapper around the WebRTC connection that contains tracks.
  *
  * @param coroutineScope The scope used to listen to stats events.
- * @param type The internal type of the PeerConnection. Check [PeerConnectionType].
+ * @param type The internal type of the PeerConnection. Check [StreamPeerType].
  * @param mediaConstraints Constraints used for the connections.
  * @param onStreamAdded Handler when a new [MediaStream] gets added.
  * @param onStreamRemoved Handler when a [MediaStream] gets removed.
@@ -69,14 +69,14 @@ import org.webrtc.PeerConnection as RtcPeerConnection
  */
 public class StreamPeerConnection(
     private val coroutineScope: CoroutineScope,
-    private val type: PeerConnectionType,
+    private val type: StreamPeerType,
     private val mediaConstraints: MediaConstraints,
     private val onStreamAdded: ((MediaStream) -> Unit)?,
     private val onStreamRemoved: ((MediaStream) -> Unit)?,
     private val onNegotiationNeeded: ((StreamPeerConnection) -> Unit)?,
-    private val onIceCandidate: ((IceCandidate, PeerConnectionType) -> Unit)?,
-    private val onConnectionChanged: ((PeerConnection, PeerConnectionType) -> Unit)?
-) : RtcPeerConnection.Observer {
+    private val onIceCandidate: ((IceCandidate, StreamPeerType) -> Unit)?,
+    private val onConnectionChanged: ((StreamPeerConnectionState, StreamPeerType) -> Unit)?
+) : PeerConnection.Observer {
 
     private val typeTag = type.stringify()
 
@@ -85,7 +85,7 @@ public class StreamPeerConnection(
     /**
      * The wrapped connection for all the WebRTC communication.
      */
-    public lateinit var connection: RtcPeerConnection
+    public lateinit var connection: PeerConnection
         private set
 
     /**
@@ -121,11 +121,11 @@ public class StreamPeerConnection(
     }
 
     /**
-     * Initialize a [StreamPeerConnection] using a WebRTC [PeerConnection].
+     * Initialize a [StreamPeerConnection] using a WebRTC [StreamPeerConnectionState].
      *
      * @param peerConnection The connection that holds audio and video tracks.
      */
-    public fun initialize(peerConnection: RtcPeerConnection) {
+    public fun initialize(peerConnection: PeerConnection) {
         logger.d { "[initialize] #sfu; #$typeTag; peerConnection: $peerConnection" }
         this.connection = peerConnection
     }
@@ -340,7 +340,7 @@ public class StreamPeerConnection(
     }
 
     /**
-     * Triggered whenever there's a new negotiation needed for the active [PeerConnection].
+     * Triggered whenever there's a new negotiation needed for the active [StreamPeerConnectionState].
      */
     override fun onRenegotiationNeeded() {
         logger.i { "[onRenegotiationNeeded] #sfu; #$typeTag; no args" }
@@ -362,17 +362,17 @@ public class StreamPeerConnection(
     /**
      * Triggered when the connection state changes.  Used to start and stop the stats observing.
      *
-     * @param newState The new state of the [PeerConnection].
+     * @param newState The new state of the [StreamPeerConnectionState].
      */
-    override fun onIceConnectionChange(newState: RtcPeerConnection.IceConnectionState?) {
+    override fun onIceConnectionChange(newState: PeerConnection.IceConnectionState?) {
         logger.i { "[onIceConnectionChange] #sfu; #$typeTag; newState: $newState" }
         when (newState) {
-            RtcPeerConnection.IceConnectionState.CLOSED,
-            RtcPeerConnection.IceConnectionState.FAILED,
-            RtcPeerConnection.IceConnectionState.DISCONNECTED -> {
+            PeerConnection.IceConnectionState.CLOSED,
+            PeerConnection.IceConnectionState.FAILED,
+            PeerConnection.IceConnectionState.DISCONNECTED -> {
                 statsJob?.cancel()
             }
-            RtcPeerConnection.IceConnectionState.CONNECTED -> {
+            PeerConnection.IceConnectionState.CONNECTED -> {
                 statsJob = observeStats()
             }
             else -> Unit
@@ -400,14 +400,14 @@ public class StreamPeerConnection(
     }
 
     /**
-     * Domain - [RtcPeerConnection] and [RtcPeerConnection.Observer] related callbacks.
+     * Domain - [PeerConnection] and [PeerConnection.Observer] related callbacks.
      */
 
     override fun onRemoveTrack(receiver: RtpReceiver?) {
         logger.i { "[onRemoveTrack] #sfu; #$typeTag; receiver: $receiver" }
     }
 
-    override fun onSignalingChange(newState: RtcPeerConnection.SignalingState?) {
+    override fun onSignalingChange(newState: PeerConnection.SignalingState?) {
         logger.d { "[onSignalingChange] #sfu; #$typeTag; newState: $newState" }
     }
 
@@ -415,7 +415,7 @@ public class StreamPeerConnection(
         logger.i { "[onIceConnectionReceivingChange] #sfu; #$typeTag; receiving: $receiving" }
     }
 
-    override fun onIceGatheringChange(newState: RtcPeerConnection.IceGatheringState?) {
+    override fun onIceGatheringChange(newState: PeerConnection.IceGatheringState?) {
         logger.i { "[onIceGatheringChange] #sfu; #$typeTag; newState: $newState" }
     }
 
@@ -427,10 +427,10 @@ public class StreamPeerConnection(
         logger.e { "[onIceCandidateError] #sfu; #$typeTag; event: ${event?.stringify()}" }
     }
 
-    override fun onConnectionChange(newState: RtcPeerConnection.PeerConnectionState?) {
+    override fun onConnectionChange(newState: PeerConnection.PeerConnectionState?) {
         logger.i { "[onConnectionChange] #sfu; #$typeTag; newState: $newState" }
         newState?.also {
-            onConnectionChanged?.invoke(it.toPeerConnection(), type)
+            onConnectionChanged?.invoke(it.toDomainPeerConnectionState(), type)
         }
     }
 

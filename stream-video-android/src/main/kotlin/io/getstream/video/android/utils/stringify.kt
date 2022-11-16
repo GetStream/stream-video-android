@@ -16,14 +16,14 @@
 
 package io.getstream.video.android.utils
 
-import io.getstream.video.android.model.PeerConnectionType
+import io.getstream.video.android.model.StreamPeerType
 
 public fun <T : Any> Result<T>.stringify(toString: (T) -> String): String = when (this) {
     is Success -> "Success(data=${toString(data)})"
     is Failure -> toString()
 }
 
-internal fun PeerConnectionType.stringify() = when (this) {
-    PeerConnectionType.PUBLISHER -> "publisher"
-    PeerConnectionType.SUBSCRIBER -> "subscriber"
+internal fun StreamPeerType.stringify() = when (this) {
+    StreamPeerType.PUBLISHER -> "publisher"
+    StreamPeerType.SUBSCRIBER -> "subscriber"
 }

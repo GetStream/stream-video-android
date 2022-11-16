@@ -21,8 +21,8 @@ import android.media.MediaCodecList
 import android.os.Build
 import io.getstream.logging.StreamLog
 import io.getstream.video.android.model.IceCandidate
-import io.getstream.video.android.model.PeerConnection
-import io.getstream.video.android.model.PeerConnectionType
+import io.getstream.video.android.model.StreamPeerConnectionState
+import io.getstream.video.android.model.StreamPeerType
 import kotlinx.coroutines.CoroutineScope
 import org.webrtc.AudioSource
 import org.webrtc.AudioTrack
@@ -32,6 +32,7 @@ import org.webrtc.HardwareVideoEncoderFactory
 import org.webrtc.Logging
 import org.webrtc.MediaConstraints
 import org.webrtc.MediaStream
+import org.webrtc.PeerConnection
 import org.webrtc.PeerConnectionFactory
 import org.webrtc.SimulcastVideoEncoderFactory
 import org.webrtc.SoftwareVideoEncoderFactory
@@ -39,10 +40,9 @@ import org.webrtc.VideoSource
 import org.webrtc.VideoTrack
 import org.webrtc.audio.JavaAudioDeviceModule
 import stream.video.sfu.models.Codec
-import org.webrtc.PeerConnection as RtcPeerConnection
 
 /**
- * Builds a factory that provides [RtcPeerConnection]s when requested.
+ * Builds a factory that provides [PeerConnection]s when requested.
  *
  * @param context Used to build the underlying native components for the factory.
  */
@@ -310,11 +310,11 @@ public class StreamPeerConnectionFactory(private val context: Context) {
     }
 
     /**
-     * Builds a [StreamPeerConnection] that wraps the WebRTC [RtcPeerConnection] and exposes several
+     * Builds a [StreamPeerConnection] that wraps the WebRTC [PeerConnection] and exposes several
      * helpful handlers.
      *
      * @param coroutineScope Scope used for asynchronous operations.
-     * @param configuration The [RtcPeerConnection.RTCConfiguration] used to set up the connection.
+     * @param configuration The [PeerConnection.RTCConfiguration] used to set up the connection.
      * @param type The type of connection, either a subscriber of a publisher.
      * @param mediaConstraints Constraints used for audio and video tracks in the connection.
      * @param onStreamAdded Handler when a new [MediaStream] gets added.
@@ -326,14 +326,14 @@ public class StreamPeerConnectionFactory(private val context: Context) {
      */
     public fun makePeerConnection(
         coroutineScope: CoroutineScope,
-        configuration: RtcPeerConnection.RTCConfiguration,
-        type: PeerConnectionType,
+        configuration: PeerConnection.RTCConfiguration,
+        type: StreamPeerType,
         mediaConstraints: MediaConstraints,
         onStreamAdded: ((MediaStream) -> Unit)? = null,
         onStreamRemoved: ((MediaStream) -> Unit)? = null,
         onNegotiationNeeded: ((StreamPeerConnection) -> Unit)? = null,
-        onIceCandidateRequest: ((IceCandidate, PeerConnectionType) -> Unit)? = null,
-        onConnectionChange: ((PeerConnection, PeerConnectionType) -> Unit)? = null
+        onIceCandidateRequest: ((IceCandidate, StreamPeerType) -> Unit)? = null,
+        onConnectionChange: ((StreamPeerConnectionState, StreamPeerType) -> Unit)? = null
     ): StreamPeerConnection {
         val peerConnection = StreamPeerConnection(
             coroutineScope,
@@ -353,17 +353,17 @@ public class StreamPeerConnectionFactory(private val context: Context) {
     }
 
     /**
-     * Builds a [RtcPeerConnection] internally that connects to the server and is able to send and
+     * Builds a [PeerConnection] internally that connects to the server and is able to send and
      * receive tracks.
      *
-     * @param configuration The [RtcPeerConnection.RTCConfiguration] used to set up the connection.
+     * @param configuration The [PeerConnection.RTCConfiguration] used to set up the connection.
      * @param observer Handler used to observe different states of the connection.
-     * @return [RtcPeerConnection] that's fully set up.
+     * @return [PeerConnection] that's fully set up.
      */
     private fun makePeerConnectionInternal(
-        configuration: RtcPeerConnection.RTCConfiguration,
-        observer: RtcPeerConnection.Observer?
-    ): RtcPeerConnection {
+        configuration: PeerConnection.RTCConfiguration,
+        observer: PeerConnection.Observer?
+    ): PeerConnection {
         return requireNotNull(
             factory.createPeerConnection(
                 configuration,

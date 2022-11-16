@@ -35,14 +35,22 @@ public data class CallUser(
     val teams: List<String>
 ) : Serializable
 
-public sealed class CallUserState {
-    public data class Specified(
+public sealed class CallUserState : Serializable {
+    public data class Joined(
         val trackIdPrefix: String,
         val online: Boolean,
         val audio: Boolean,
         val video: Boolean
     ) : CallUserState()
-    public object Undefined : CallUserState() { override fun toString(): String = "Undefined" }
+    public object Idle : CallUserState() { override fun toString(): String = "Idle" }
+}
+
+/**
+ * Invokes [block] if state is [CallUserState.Joined].
+ */
+public fun CallUserState.onJoined(block: CallUserState.Joined.() -> Unit): Unit = when (this) {
+    is CallUserState.Joined -> block()
+    is CallUserState.Idle -> Unit
 }
 
 public data class CallMember(
@@ -81,7 +89,7 @@ public fun CoordinatorUser.toCallUser(): CallUser = CallUser(
     name = name,
     role = role,
     imageUrl = image_url,
-    state = CallUserState.Undefined,
+    state = CallUserState.Idle,
     createdAt = created_at?.let { Date(it.toEpochMilli()) },
     updatedAt = updated_at?.let { Date(it.toEpochMilli()) },
     teams = teams
@@ -123,12 +131,15 @@ public fun CoordinatorCall?.toCallInfo(): CallInfo {
     )
 }
 
+/**
+ * Converts [SfuParticipant] into [CallUser].
+ */
 public fun SfuParticipant.toCallUser(): CallUser = CallUser(
     id = user?.id ?: error("SfuParticipant has no userId"),
     name = user.name,
     role = user.role,
     imageUrl = user.image_url,
-    state = CallUserState.Specified(
+    state = CallUserState.Joined(
         trackIdPrefix = track_lookup_prefix,
         online = online,
         audio = audio,
@@ -139,12 +150,18 @@ public fun SfuParticipant.toCallUser(): CallUser = CallUser(
     teams = user.teams
 )
 
+/**
+ * Converts a list of [SfuParticipant] into a map associated by [CallUser.id] to [CallUser].
+ */
 public fun List<SfuParticipant>.toCallUserMap(): Map<String, CallUser> = associate { participant ->
     participant.toCallUser().let {
         it.id to it
     }
 }
 
+/**
+ * Merges [CallUser] maps to absorb as many non-null and non-empty data from both collections.
+ */
 public infix fun Map<String, CallUser>.merge(that: Map<String, CallUser>): Map<String, CallUser> {
     val new = this - that.keys
     val merged = this.map { (userId, user) ->
@@ -153,6 +170,9 @@ public infix fun Map<String, CallUser>.merge(that: Map<String, CallUser>): Map<S
     return merged + new
 }
 
+/**
+ * Merges [that] [CallUser] into [this] map.
+ */
 public infix fun Map<String, CallUser>.merge(that: CallUser): Map<String, CallUser> = when (contains(that.id)) {
     true -> this.map { (userId, user) ->
         userId to user.merge(that)
@@ -162,6 +182,9 @@ public infix fun Map<String, CallUser>.merge(that: CallUser): Map<String, CallUs
     }
 }
 
+/**
+ * Merges [that] into [this] CallUser to absorb as much data as possible from both instances.
+ */
 public infix fun CallUser.merge(that: CallUser?): CallUser = when (that) {
     null -> this
     else -> copy(
@@ -176,10 +199,13 @@ public infix fun CallUser.merge(that: CallUser?): CallUser = when (that) {
     )
 }
 
+/**
+ * Merges [that] into [this] CallUserState to absorb as much data as possible from both instances.
+ */
 public infix fun CallUserState.merge(that: CallUserState): CallUserState = when {
-    this is CallUserState.Specified && that is CallUserState.Specified -> that.copy(
+    this is CallUserState.Joined && that is CallUserState.Joined -> that.copy(
         trackIdPrefix = that.trackIdPrefix.ifEmpty { this.trackIdPrefix },
     )
-    this is CallUserState.Undefined -> that
+    this is CallUserState.Idle -> that
     else -> this
 }

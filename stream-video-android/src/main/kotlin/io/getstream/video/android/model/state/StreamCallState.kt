@@ -85,6 +85,9 @@ public sealed interface StreamCallState : Serializable {
         val acceptedByCallee: Boolean
     ) : Started(), Joinable
 
+    /**
+     * Signifies that the callee received an incoming call.
+     */
     public data class Incoming(
         override val callGuid: StreamCallGuid,
         override val callKind: StreamCallKind,
@@ -115,6 +118,10 @@ public sealed interface StreamCallState : Serializable {
         public abstract val sfuSessionId: StreamSfuSessionId
     }
 
+    /**
+     * Set when joined to Coordinator.
+     * [StreamCallState] stays [Joined] until [sfuSessionId] reaches [StreamSfuSessionId.Confirmed] inclusively.
+     */
     public data class Joined(
         override val callGuid: StreamCallGuid,
         override val sfuSessionId: StreamSfuSessionId,
@@ -130,6 +137,9 @@ public sealed interface StreamCallState : Serializable {
         override val iceServers: List<IceServer>,
     ) : InCall()
 
+    /**
+     * Signifies that one of the peer connections (subscriber or publisher) is in Connecting state.
+     */
     public data class Connecting(
         override val callGuid: StreamCallGuid,
         override val sfuSessionId: StreamSfuSessionId,
@@ -145,6 +155,9 @@ public sealed interface StreamCallState : Serializable {
         override val iceServers: List<IceServer>,
     ) : InCall()
 
+    /**
+     * Signifies that one of the peer connections (subscriber or publisher) is in Connected state.
+     */
     public data class Connected(
         override val callGuid: StreamCallGuid,
         override val sfuSessionId: StreamSfuSessionId,
@@ -160,6 +173,9 @@ public sealed interface StreamCallState : Serializable {
         override val iceServers: List<IceServer>,
     ) : InCall()
 
+    /**
+     * Signifies that the call was drop because of the following [reason].
+     */
     public data class Drop(
         override val callGuid: StreamCallGuid,
         override val callKind: StreamCallKind,
@@ -167,6 +183,9 @@ public sealed interface StreamCallState : Serializable {
     ) : Active()
 }
 
+/**
+ * Represents the call drop reason.
+ */
 public sealed class DropReason : Serializable {
     public data class Timeout(val waitMillis: Long) : DropReason()
     public data class Failure(val error: VideoError) : DropReason()
@@ -204,12 +223,33 @@ public sealed class StreamDate : Serializable {
     }
 }
 
+/**
+ * Represents the connection flow to SFU server.
+ */
 public sealed class StreamSfuSessionId {
+    /**
+     * Set when joined to Coordinator and SFU sessionId is still undefined.
+     *
+     * @see [io.getstream.video.android.engine.StreamCallEngine.onCallJoined]
+     */
     public object Undefined : StreamSfuSessionId() { override fun toString(): String = "Undefined" }
     public sealed class Specified : StreamSfuSessionId() {
         public abstract val value: String
     }
+    /**
+     * Set when SFU join request is sent.
+     *
+     * @see [stream.video.sfu.event.JoinRequest]
+     * @see [io.getstream.video.android.engine.StreamCallEngine.onSfuJoinSent]
+     */
     public data class Requested(override val value: String) : Specified()
+
+    /**
+     * Set when SFU join response is received.
+     *
+     * @see [io.getstream.video.android.events.JoinCallResponseEvent]
+     * @see [io.getstream.video.android.engine.StreamCallEngine.onSfuEvent]
+     */
     public data class Confirmed(override val value: String) : Specified()
 }
 
@@ -271,6 +311,9 @@ internal fun StreamCallState.Started.copy(
     )
 }
 
+/**
+ * Converts [StreamCallState.InCall] into [StreamCallState.Connecting].
+ */
 internal fun StreamCallState.InCall.toConnecting() = StreamCallState.Connecting(
     callGuid = callGuid,
     callKind = callKind,
@@ -286,6 +329,9 @@ internal fun StreamCallState.InCall.toConnecting() = StreamCallState.Connecting(
     sfuToken = sfuToken,
 )
 
+/**
+ * Converts [StreamCallState.InCall] into [StreamCallState.Connected].
+ */
 internal fun StreamCallState.InCall.toConnected() = StreamCallState.Connected(
     callGuid = callGuid,
     callKind = callKind,

@@ -154,7 +154,7 @@ private fun OutgoingCallPreview() {
             participants = listOf(
                 mockParticipant.let {
                     CallUser(
-                        it.id, it.name, it.role, CallUserState.Undefined, it.profileImageURL ?: "",
+                        it.id, it.name, it.role, CallUserState.Idle, it.profileImageURL ?: "",
                         null, null, emptyList()
                     )
                 }

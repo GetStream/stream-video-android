@@ -60,8 +60,8 @@ import io.getstream.video.android.model.CallEventType.REJECTED
 import io.getstream.video.android.model.CallEventType.UNDEFINED
 import io.getstream.video.android.model.CallMetadata
 import io.getstream.video.android.model.JoinedCall
-import io.getstream.video.android.model.PeerConnection
-import io.getstream.video.android.model.PeerConnectionType
+import io.getstream.video.android.model.StreamPeerConnectionState
+import io.getstream.video.android.model.StreamPeerType
 import io.getstream.video.android.model.merge
 import io.getstream.video.android.model.state.DropReason
 import io.getstream.video.android.model.state.StreamCallGuid
@@ -239,6 +239,9 @@ internal class StreamCallEngineImpl(
         )
     }
 
+    /**
+     * Called when participant joins to the existing call.
+     */
     private fun onSfuParticipantJoined(event: SfuParticipantJoinedEvent) = scope.launchWithLock(mutex) {
         logger.d { "[onSfuParticipantJoined] event: $event" }
         val state = _callState.value
@@ -263,6 +266,9 @@ internal class StreamCallEngineImpl(
         )
     }
 
+    /**
+     * Called when participant leaves a call.
+     */
     private fun onSfuParticipantLeft(event: SfuParticipantLeftEvent) = scope.launchWithLock(mutex) {
         logger.d { "[onSfuParticipantLeft] event: $event" }
         val state = _callState.value
@@ -551,8 +557,8 @@ internal class StreamCallEngineImpl(
 
     override fun onCallConnectionChange(
         sfuSessionId: String,
-        peerType: PeerConnectionType,
-        connection: PeerConnection
+        peerType: StreamPeerType,
+        connection: StreamPeerConnectionState
     ) = scope.launchWithLock(mutex) {
         logger.d { "[onCallConnectionChange] #${peerType.stringify()}; iceConnection: $connection" }
         val state = _callState.value
@@ -568,9 +574,9 @@ internal class StreamCallEngineImpl(
             }
             return@launchWithLock
         }
-        if (connection == PeerConnection.CONNECTING) {
+        if (connection == StreamPeerConnectionState.CONNECTING) {
             _callState.post(state.toConnecting())
-        } else if (connection == PeerConnection.CONNECTED) {
+        } else if (connection == StreamPeerConnectionState.CONNECTED) {
             _callState.post(state.toConnected())
         }
     }

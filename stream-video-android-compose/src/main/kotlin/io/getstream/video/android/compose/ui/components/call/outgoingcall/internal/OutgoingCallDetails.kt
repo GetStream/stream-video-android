@@ -82,7 +82,7 @@ private fun OutgoingCallDetailsPreview() {
                     it.id,
                     it.name,
                     it.role,
-                    CallUserState.Undefined,
+                    CallUserState.Idle,
                     it.profileImageURL ?: "",
                     null,
                     null,

@@ -115,7 +115,7 @@ private fun ParticipantInformationPreview() {
                     it.id,
                     it.role,
                     it.name,
-                    CallUserState.Undefined,
+                    CallUserState.Idle,
                     it.profileImageURL ?: "",
                     null,
                     null,

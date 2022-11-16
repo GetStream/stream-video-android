@@ -18,7 +18,10 @@ package io.getstream.video.android.model
 
 import org.webrtc.PeerConnection.PeerConnectionState
 
-public enum class PeerConnection {
+/**
+ * Represents [io.getstream.video.android.call.connection.StreamPeerConnection] connection state.
+ */
+public enum class StreamPeerConnectionState {
     NEW,
     CONNECTING,
     CONNECTED,
@@ -27,11 +30,11 @@ public enum class PeerConnection {
     CLOSED;
 }
 
-internal fun PeerConnectionState.toPeerConnection(): PeerConnection = when (this) {
-    PeerConnectionState.NEW -> PeerConnection.NEW
-    PeerConnectionState.CONNECTING -> PeerConnection.CONNECTING
-    PeerConnectionState.CONNECTED -> PeerConnection.CONNECTED
-    PeerConnectionState.FAILED -> PeerConnection.FAILED
-    PeerConnectionState.DISCONNECTED -> PeerConnection.DISCONNECTED
-    PeerConnectionState.CLOSED -> PeerConnection.CLOSED
+internal fun PeerConnectionState.toDomainPeerConnectionState(): StreamPeerConnectionState = when (this) {
+    PeerConnectionState.NEW -> StreamPeerConnectionState.NEW
+    PeerConnectionState.CONNECTING -> StreamPeerConnectionState.CONNECTING
+    PeerConnectionState.CONNECTED -> StreamPeerConnectionState.CONNECTED
+    PeerConnectionState.FAILED -> StreamPeerConnectionState.FAILED
+    PeerConnectionState.DISCONNECTED -> StreamPeerConnectionState.DISCONNECTED
+    PeerConnectionState.CLOSED -> StreamPeerConnectionState.CLOSED
 }
