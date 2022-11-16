@@ -20,7 +20,7 @@ You have to pass in a few parameters:
 * `iceServers`: List of servers used to fetch and connect to audio and video tracks.
 * `credentialsProvider`: The provider that holds user-based information.
 
-You should create the `CallClient` as soon as you join a call through `StreamVideo`, or as soon as your users are ready to fully connect, based on your use case. After creating the client, it connects to the underlying WebSocket to listen to events from the server, which you can read more about in the [socket events guide](../04-guides/03-socket-events.mdx).
+You should create the `CallClient` as soon as you join a call through `StreamVideo`, or as soon as your users are ready to fully connect, based on your use case. After creating the client, it connects to the underlying WebSocket to listen to events from the server, which you can read more about in the [socket events guide](../02-guides/04-socket-events.mdx).
 
 ## Functionality
 
@@ -90,5 +90,5 @@ public fun addSocketListener(signalSocketListener: SignalSocketListener)
 public fun removeSocketListener(signalSocketListener: SignalSocketListener)
 ```
 
-* `addSocketListener`: Adds a listener instance that will receive all the Call socket events. You can learn more about them in the [socket events guide](../04-guides/03-socket-events.mdx).
+* `addSocketListener`: Adds a listener instance that will receive all the Call socket events. You can learn more about them in the [socket events guide](../02-guides/04-socket-events.mdx).
 * `removeSocketListener`: Removes an active listener instance to free up memory or stop receiving events.

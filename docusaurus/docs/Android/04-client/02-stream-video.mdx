@@ -139,7 +139,7 @@ public fun createCallClient(
 public fun getActiveCallClient(): CallClient?
 ```
 
-* `callState`: An easy accessor to our call engine that produces the `StreamCallState`. If you want to learn more about this, check out our [call-engine-state guide](../04-guides/02-call-engine-state.mdx).
+* `callState`: An easy accessor to our call engine that produces the `StreamCallState`. If you want to learn more about this, check out our [call-engine-state guide](../02-guides/03-call-engine-state.mdx).
 * `clearCallState`: Allows you to clear up all the state related to an active call, in turn shutting down the call and stopping any tracks for the user.
 * `getUser`: Accessor for the user state.
 * `createCallClient`: Used to create the `CallClient` that handles the call and lets you publish tracks. Learn more about it in the [CallClient overview](03-call-client.mdx).
