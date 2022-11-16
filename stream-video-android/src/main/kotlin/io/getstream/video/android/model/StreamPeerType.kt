@@ -14,13 +14,20 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.call.connection
+package io.getstream.video.android.model
+
+import stream.video.sfu.models.PeerType
 
 /**
  * The type of peer connections, either a [PUBLISHER] that sends data to the call or a [SUBSCRIBER]
  * that receives and decodes the data from the server.
  */
-public enum class PeerConnectionType {
+public enum class StreamPeerType {
     PUBLISHER,
     SUBSCRIBER
+}
+
+public fun StreamPeerType.toPeerType(): PeerType = when (this) {
+    StreamPeerType.PUBLISHER -> PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED
+    StreamPeerType.SUBSCRIBER -> PeerType.PEER_TYPE_SUBSCRIBER
 }

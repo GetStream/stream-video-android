@@ -21,6 +21,8 @@ import android.media.MediaCodecList
 import android.os.Build
 import io.getstream.logging.StreamLog
 import io.getstream.video.android.model.IceCandidate
+import io.getstream.video.android.model.StreamPeerConnectionState
+import io.getstream.video.android.model.StreamPeerType
 import kotlinx.coroutines.CoroutineScope
 import org.webrtc.AudioSource
 import org.webrtc.AudioTrack
@@ -38,7 +40,6 @@ import org.webrtc.VideoSource
 import org.webrtc.VideoTrack
 import org.webrtc.audio.JavaAudioDeviceModule
 import stream.video.sfu.models.Codec
-import stream.video.sfu.models.PeerType
 
 /**
  * Builds a factory that provides [PeerConnection]s when requested.
@@ -326,12 +327,13 @@ public class StreamPeerConnectionFactory(private val context: Context) {
     public fun makePeerConnection(
         coroutineScope: CoroutineScope,
         configuration: PeerConnection.RTCConfiguration,
-        type: PeerType,
+        type: StreamPeerType,
         mediaConstraints: MediaConstraints,
         onStreamAdded: ((MediaStream) -> Unit)? = null,
         onStreamRemoved: ((MediaStream) -> Unit)? = null,
         onNegotiationNeeded: ((StreamPeerConnection) -> Unit)? = null,
-        onIceCandidateRequest: ((IceCandidate, PeerType) -> Unit)? = null
+        onIceCandidateRequest: ((IceCandidate, StreamPeerType) -> Unit)? = null,
+        onConnectionChange: ((StreamPeerConnectionState, StreamPeerType) -> Unit)? = null
     ): StreamPeerConnection {
         val peerConnection = StreamPeerConnection(
             coroutineScope,
@@ -340,7 +342,8 @@ public class StreamPeerConnectionFactory(private val context: Context) {
             onStreamAdded,
             onStreamRemoved,
             onNegotiationNeeded,
-            onIceCandidateRequest
+            onIceCandidateRequest,
+            onConnectionChange
         )
         val connection = makePeerConnectionInternal(
             configuration,

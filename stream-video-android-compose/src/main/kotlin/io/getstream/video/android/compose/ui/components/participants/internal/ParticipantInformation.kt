@@ -34,6 +34,7 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.mock.mockParticipantList
 import io.getstream.video.android.model.CallStatus
 import io.getstream.video.android.model.CallUser
+import io.getstream.video.android.model.CallUserState
 
 @Composable
 internal fun ParticipantInformation(
@@ -114,6 +115,7 @@ private fun ParticipantInformationPreview() {
                     it.id,
                     it.role,
                     it.name,
+                    CallUserState.Idle,
                     it.profileImageURL ?: "",
                     null,
                     null,

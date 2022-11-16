@@ -17,10 +17,8 @@
 package io.getstream.video.android.utils
 
 import io.getstream.video.android.model.CallMetadata
-import io.getstream.video.android.model.toCallDetails
 import io.getstream.video.android.model.toCallUsers
 import stream.video.coordinator.client_v1_rpc.CallEnvelope
-import java.util.*
 
 internal fun CallEnvelope.toCall(): CallMetadata {
     // val extraDataJson = custom_json.toByteArray().decodeToString() // TODO - check this
@@ -38,7 +36,6 @@ internal fun CallEnvelope.toCall(): CallMetadata {
             recordingEnabled = options?.recording?.enabled ?: false,
             broadcastingEnabled = options?.broadcasting?.enabled ?: false,
             users = users.toCallUsers(),
-            members = details.toCallDetails().members,
             extraData = emptyMap() // Json.decodeFromString<Map<String, String>>(extraDataJson)
         )
     }
