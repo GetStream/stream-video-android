@@ -26,9 +26,11 @@ internal fun enrichSFUURL(url: String): String {
     } else url
 }
 
-internal fun <T : Any> Result<T>.stringify(toString: (T) -> String): String = when (this) {
-    is Success -> "Success(data=${toString(data)})"
-    is Failure -> toString()
+public fun String.initials(): String {
+    return trim()
+        .split("\\s+".toRegex())
+        .take(2)
+        .joinToString(separator = "") { it.take(1).uppercase() }
 }
 
 internal fun StreamPeerType.stringify() = when (this) {

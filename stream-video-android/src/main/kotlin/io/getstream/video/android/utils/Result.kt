@@ -126,3 +126,8 @@ public suspend inline fun <T : Any, K : Any> Result<T>.flatMap(
         is Failure -> this
     }
 }
+
+public fun <T : Any> Result<T>.stringify(toString: (T) -> String): String = when (this) {
+    is Success -> "Success(data=${toString(data)})"
+    is Failure -> toString()
+}

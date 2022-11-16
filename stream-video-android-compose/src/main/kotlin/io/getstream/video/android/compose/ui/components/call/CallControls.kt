@@ -29,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.call.state.CallAction
@@ -83,7 +84,6 @@ public fun CallControlsActions(
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         items(actions) { action ->
-
             Card(
                 modifier = Modifier.size(VideoTheme.dimens.callControlButtonSize),
                 shape = VideoTheme.shapes.callControlsButton,
@@ -91,7 +91,7 @@ public fun CallControlsActions(
             ) {
                 Icon(
                     modifier = Modifier
-                        .padding(6.dp)
+                        .padding(10.dp)
                         .clickable { onCallAction(action.callAction) },
                     tint = action.iconTint,
                     painter = action.icon,
@@ -113,13 +113,30 @@ public fun buildDefaultCallControlActions(
     callMediaState: CallMediaState
 ): List<CallControlAction> {
     val speakerphoneIcon =
-        if (callMediaState.isSpeakerphoneEnabled) VideoTheme.icons.speakerPhoneOn else VideoTheme.icons.speakerPhoneOff
+        painterResource(
+            id = if (callMediaState.isSpeakerphoneEnabled) {
+                R.drawable.ic_speaker_on
+            } else {
+                R.drawable.ic_speaker_off
+            }
+        )
 
     val microphoneIcon =
-        if (callMediaState.isMicrophoneEnabled) VideoTheme.icons.micOn else VideoTheme.icons.micOff
+        painterResource(
+            id = if (callMediaState.isMicrophoneEnabled) {
+                R.drawable.ic_mic_on
+            } else {
+                R.drawable.ic_mic_off
+            }
+        )
 
-    val cameraIcon =
-        if (callMediaState.isCameraEnabled) VideoTheme.icons.videoCamOn else VideoTheme.icons.videoCamOff
+    val cameraIcon = painterResource(
+        id = if (callMediaState.isCameraEnabled) {
+            R.drawable.ic_videocam_on
+        } else {
+            R.drawable.ic_videocam_off
+        }
+    )
 
     return listOf(
         CallControlAction(
@@ -145,14 +162,14 @@ public fun buildDefaultCallControlActions(
         ),
         CallControlAction(
             actionBackgroundTint = Color.LightGray,
-            icon = VideoTheme.icons.cameraFlip,
+            icon = painterResource(id = R.drawable.ic_camera_flip),
             iconTint = Color.White,
             callAction = FlipCamera,
             description = stringResource(R.string.call_controls_flip_camera)
         ),
         CallControlAction(
             actionBackgroundTint = VideoTheme.colors.errorAccent,
-            icon = VideoTheme.icons.callEnd,
+            icon = painterResource(id = R.drawable.ic_call_end),
             iconTint = Color.White,
             callAction = LeaveCall,
             description = stringResource(R.string.call_controls_leave_call)

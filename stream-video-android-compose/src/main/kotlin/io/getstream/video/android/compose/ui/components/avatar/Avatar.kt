@@ -21,10 +21,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImagePainter
+import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.utils.rememberStreamImagePainter
 
@@ -42,8 +44,7 @@ import io.getstream.video.android.compose.utils.rememberStreamImagePainter
  * @param initialsAvatarOffset The initials offset to apply to the avatar.
  * @param onClick OnClick action, that can be nullable.
  */
-@Composable
-public fun Avatar(
+@Composable public fun Avatar(
     imageUrl: String,
     initials: String,
     modifier: Modifier = Modifier,
@@ -59,7 +60,7 @@ public fun Avatar(
         ImageAvatar(
             modifier = modifier,
             shape = shape,
-            painter = VideoTheme.icons.avatarPreview,
+            painter = painterResource(id = R.drawable.ic_preview_avatar),
             contentDescription = contentDescription,
             onClick = onClick
         )
@@ -78,8 +79,7 @@ public fun Avatar(
     }
 
     val painter = rememberStreamImagePainter(
-        data = imageUrl,
-        placeholderPainter = VideoTheme.icons.avatarPreview
+        data = imageUrl, placeholderPainter = painterResource(id = R.drawable.ic_preview_avatar)
     )
 
     if (painter.state is AsyncImagePainter.State.Error) {

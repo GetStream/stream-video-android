@@ -18,16 +18,28 @@ package io.getstream.video.android.compose.ui.components.participants
 
 import android.view.View
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.audio.SoundIndicator
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.CallParticipantState
+import io.getstream.video.android.model.VideoTrack
 
 @Composable
 public fun CallParticipant(
@@ -40,20 +52,69 @@ public fun CallParticipant(
     val track = participant.track
 
     val containerModifier =
-        if (isFocused) modifier.border(BorderStroke(3.dp, VideoTheme.colors.infoAccent)) else modifier
+        if (isFocused) modifier.border(
+            BorderStroke(
+                3.dp,
+                VideoTheme.colors.infoAccent
+            )
+        ) else modifier
 
+    Box(modifier = containerModifier) {
+        ParticipantVideo(
+            call = call,
+            participant = participant,
+            track = track,
+            onRender = onRender
+        )
+
+        ParticipantLabel(participant)
+    }
+}
+
+@Composable
+private fun ParticipantVideo(
+    call: Call,
+    participant: CallParticipantState,
+    track: VideoTrack?,
+    onRender: (View) -> Unit
+) {
     if (track != null && track.video.enabled()) {
         VideoRenderer(
-            modifier = containerModifier,
             call = call,
             videoTrack = track,
             onRender = onRender
         )
     } else {
         UserAvatar(
-            modifier = containerModifier,
             shape = RectangleShape,
             user = participant
         )
+    }
+}
+
+@Composable
+private fun BoxScope.ParticipantLabel(participant: CallParticipantState) {
+    Row(
+        modifier = Modifier
+            .align(Alignment.TopStart)
+            .padding(16.dp)
+            .height(36.dp)
+            .background(
+                Color.DarkGray,
+                shape = RoundedCornerShape(8.dp)
+            ),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        val name = participant.name.ifEmpty {
+            participant.id
+        }
+        Text(
+            modifier = Modifier.padding(start = 8.dp, end = 8.dp),
+            text = name,
+            style = VideoTheme.typography.bodyBold,
+            color = Color.White
+        )
+
+        SoundIndicator(participant.hasAudio, participant.audioLevel)
     }
 }

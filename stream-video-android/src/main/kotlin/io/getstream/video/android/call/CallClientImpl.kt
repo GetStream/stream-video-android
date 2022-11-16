@@ -74,6 +74,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -87,6 +88,7 @@ import org.webrtc.Camera2Enumerator
 import org.webrtc.CameraEnumerator
 import org.webrtc.MediaConstraints
 import org.webrtc.PeerConnection
+import org.webrtc.RTCStatsReport
 import org.webrtc.RtpParameters
 import org.webrtc.SessionDescription
 import org.webrtc.SurfaceTextureHelper
@@ -332,6 +334,20 @@ internal class CallClientImpl(
      * @return The active call instance, if it exists.
      */
     override fun getActiveCall(): Call? = call
+
+    /**
+     * @return [StateFlow] that holds [RTCStatsReport] that the publisher exposes.
+     */
+    override fun getPublisherStats(): StateFlow<RTCStatsReport?> {
+        return publisher?.getStats() ?: MutableStateFlow(null)
+    }
+
+    /**
+     * @return [StateFlow] that holds [RTCStatsReport] that the subscriber exposes.
+     */
+    override fun getSubscriberStats(): StateFlow<RTCStatsReport?> {
+        return subscriber?.getStats() ?: MutableStateFlow(null)
+    }
 
     private fun createCall(sessionId: String): Call {
         logger.d { "[createCall] #sfu; sessionId: $sessionId" }
@@ -584,7 +600,7 @@ internal class CallClientImpl(
         logger.v { "[createUserTracks] #sfu; videoTrack: ${videoTrack.stringify()}" }
 
         if (autoPublish) {
-            publisher?.addAudioTransceiver(localAudioTrack!!, listOf(sessionId))
+            publisher?.addTrack(localAudioTrack!!, listOf(sessionId))
             publisher?.addVideoTransceiver(localVideoTrack!!, listOf(sessionId))
         }
     }

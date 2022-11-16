@@ -31,6 +31,14 @@ import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.VideoTrack
 import org.webrtc.SurfaceViewRenderer
 
+/**
+ * Renders a single video track based on the call state.
+ *
+ * @param call The call state that contains all the tracks and participants.
+ * @param videoTrack The track containing the video stream for a given participant.
+ * @param modifier Modifier for styling.
+ * @param onRender Handler when the view is rendered.
+ */
 @Composable
 public fun VideoRenderer(
     call: Call,
@@ -38,12 +46,12 @@ public fun VideoRenderer(
     modifier: Modifier = Modifier,
     onRender: (View) -> Unit = {}
 ) {
-    val boundVideoTrack: MutableState<VideoTrack?> = remember { mutableStateOf(null) }
+    val trackState: MutableState<VideoTrack?> = remember { mutableStateOf(null) }
     var view: SurfaceViewRenderer? by remember { mutableStateOf(null) }
 
     DisposableEffect(call, videoTrack) {
         onDispose {
-            cleanupVideoTrack(view, boundVideoTrack)
+            cleanTrack(view, trackState)
         }
     }
 
@@ -56,40 +64,39 @@ public fun VideoRenderer(
     AndroidView(
         factory = { context ->
             SurfaceViewRenderer(context).apply {
-                this.setZOrderOnTop(false)
-                this.setZOrderMediaOverlay(false)
+                setZOrderOnTop(false)
+                setZOrderMediaOverlay(false)
+
                 call.initRenderer(this, videoTrack.streamId, onRender)
-                setupVideoIfNeeded(boundVideoTrack, videoTrack, this)
+                setupVideo(trackState, videoTrack, this)
 
                 view = this
             }
         },
-        update = { v ->
-            setupVideoIfNeeded(boundVideoTrack, videoTrack, v)
-        },
+        update = { v -> setupVideo(trackState, videoTrack, v) },
         modifier = modifier,
     )
 }
 
-private fun cleanupVideoTrack(
+private fun cleanTrack(
     view: SurfaceViewRenderer?,
-    boundVideoTrack: MutableState<VideoTrack?>
+    trackState: MutableState<VideoTrack?>
 ) {
-    view?.let { boundVideoTrack.value?.video?.removeSink(it) }
-    boundVideoTrack.value = null
+    view?.let { trackState.value?.video?.removeSink(it) }
+    trackState.value = null
 }
 
-private fun setupVideoIfNeeded(
-    boundVideoTrack: MutableState<VideoTrack?>,
-    videoTrack: VideoTrack,
-    view: SurfaceViewRenderer
+private fun setupVideo(
+    trackState: MutableState<VideoTrack?>,
+    track: VideoTrack,
+    renderer: SurfaceViewRenderer
 ) {
-    if (boundVideoTrack.value == videoTrack) {
+    if (trackState.value == track) {
         return
     }
 
-    cleanupVideoTrack(view, boundVideoTrack)
+    cleanTrack(renderer, trackState)
 
-    boundVideoTrack.value = videoTrack
-    videoTrack.video.addSink(view)
+    trackState.value = track
+    track.video.addSink(renderer)
 }

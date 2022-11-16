@@ -26,7 +26,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import io.getstream.video.android.compose.theme.VideoTheme
+import androidx.compose.ui.res.painterResource
+import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.ui.components.participants.CallParticipant
 import io.getstream.video.android.model.Call
 
@@ -42,7 +43,7 @@ internal fun Participants(modifier: Modifier, call: Call, onRender: (View) -> Un
             Box(modifier = modifier) {
                 Icon(
                     modifier = Modifier.align(Alignment.Center),
-                    painter = VideoTheme.icons.call,
+                    painter = painterResource(id = R.drawable.ic_call),
                     contentDescription = null
                 )
             }
