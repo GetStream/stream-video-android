@@ -121,7 +121,7 @@ public class StreamPeerConnection(
     }
 
     /**
-     * Initialize a [StreamPeerConnection] using a WebRTC [StreamPeerConnectionState].
+     * Initialize a [StreamPeerConnection] using a WebRTC [PeerConnection].
      *
      * @param peerConnection The connection that holds audio and video tracks.
      */
@@ -340,7 +340,7 @@ public class StreamPeerConnection(
     }
 
     /**
-     * Triggered whenever there's a new negotiation needed for the active [StreamPeerConnectionState].
+     * Triggered whenever there's a new negotiation needed for the active [PeerConnection].
      */
     override fun onRenegotiationNeeded() {
         logger.i { "[onRenegotiationNeeded] #sfu; #$typeTag; no args" }
@@ -362,7 +362,7 @@ public class StreamPeerConnection(
     /**
      * Triggered when the connection state changes.  Used to start and stop the stats observing.
      *
-     * @param newState The new state of the [StreamPeerConnectionState].
+     * @param newState The new state of the [PeerConnection].
      */
     override fun onIceConnectionChange(newState: PeerConnection.IceConnectionState?) {
         logger.i { "[onIceConnectionChange] #sfu; #$typeTag; newState: $newState" }
