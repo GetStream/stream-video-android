@@ -23,10 +23,14 @@ import io.getstream.video.android.call.utils.setValue
 import io.getstream.video.android.call.utils.stringify
 import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.model.IceCandidate
+import io.getstream.video.android.model.PeerConnection
+import io.getstream.video.android.model.PeerConnectionType
 import io.getstream.video.android.model.toDomainCandidate
+import io.getstream.video.android.model.toPeerConnection
 import io.getstream.video.android.model.toRtcCandidate
 import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Result
+import io.getstream.video.android.utils.stringify
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -42,7 +46,6 @@ import org.webrtc.IceCandidateErrorEvent
 import org.webrtc.MediaConstraints
 import org.webrtc.MediaStream
 import org.webrtc.MediaStreamTrack
-import org.webrtc.PeerConnection
 import org.webrtc.RTCStatsReport
 import org.webrtc.RtpParameters
 import org.webrtc.RtpReceiver
@@ -50,8 +53,8 @@ import org.webrtc.RtpSender
 import org.webrtc.RtpTransceiver
 import org.webrtc.RtpTransceiver.RtpTransceiverInit
 import org.webrtc.SessionDescription
-import stream.video.sfu.models.PeerType
 import org.webrtc.IceCandidate as RtcIceCandidate
+import org.webrtc.PeerConnection as RtcPeerConnection
 
 /**
  * Wrapper around the WebRTC connection that contains tracks.
@@ -66,13 +69,14 @@ import org.webrtc.IceCandidate as RtcIceCandidate
  */
 public class StreamPeerConnection(
     private val coroutineScope: CoroutineScope,
-    private val type: PeerType,
+    private val type: PeerConnectionType,
     private val mediaConstraints: MediaConstraints,
     private val onStreamAdded: ((MediaStream) -> Unit)?,
     private val onStreamRemoved: ((MediaStream) -> Unit)?,
     private val onNegotiationNeeded: ((StreamPeerConnection) -> Unit)?,
-    private val onIceCandidate: ((IceCandidate, PeerType) -> Unit)?
-) : PeerConnection.Observer {
+    private val onIceCandidate: ((IceCandidate, PeerConnectionType) -> Unit)?,
+    private val onConnectionChanged: ((PeerConnection, PeerConnectionType) -> Unit)?
+) : RtcPeerConnection.Observer {
 
     private val typeTag = type.stringify()
 
@@ -81,7 +85,7 @@ public class StreamPeerConnection(
     /**
      * The wrapped connection for all the WebRTC communication.
      */
-    public lateinit var connection: PeerConnection
+    public lateinit var connection: RtcPeerConnection
         private set
 
     /**
@@ -121,7 +125,7 @@ public class StreamPeerConnection(
      *
      * @param peerConnection The connection that holds audio and video tracks.
      */
-    public fun initialize(peerConnection: PeerConnection) {
+    public fun initialize(peerConnection: RtcPeerConnection) {
         logger.d { "[initialize] #sfu; #$typeTag; peerConnection: $peerConnection" }
         this.connection = peerConnection
     }
@@ -360,15 +364,15 @@ public class StreamPeerConnection(
      *
      * @param newState The new state of the [PeerConnection].
      */
-    override fun onIceConnectionChange(newState: PeerConnection.IceConnectionState?) {
+    override fun onIceConnectionChange(newState: RtcPeerConnection.IceConnectionState?) {
         logger.i { "[onIceConnectionChange] #sfu; #$typeTag; newState: $newState" }
         when (newState) {
-            PeerConnection.IceConnectionState.CLOSED,
-            PeerConnection.IceConnectionState.FAILED,
-            PeerConnection.IceConnectionState.DISCONNECTED -> {
+            RtcPeerConnection.IceConnectionState.CLOSED,
+            RtcPeerConnection.IceConnectionState.FAILED,
+            RtcPeerConnection.IceConnectionState.DISCONNECTED -> {
                 statsJob?.cancel()
             }
-            PeerConnection.IceConnectionState.CONNECTED -> {
+            RtcPeerConnection.IceConnectionState.CONNECTED -> {
                 statsJob = observeStats()
             }
             else -> Unit
@@ -396,14 +400,14 @@ public class StreamPeerConnection(
     }
 
     /**
-     * Domain - [PeerConnection] and [PeerConnection.Observer] related callbacks.
+     * Domain - [RtcPeerConnection] and [RtcPeerConnection.Observer] related callbacks.
      */
 
     override fun onRemoveTrack(receiver: RtpReceiver?) {
         logger.i { "[onRemoveTrack] #sfu; #$typeTag; receiver: $receiver" }
     }
 
-    override fun onSignalingChange(newState: PeerConnection.SignalingState?) {
+    override fun onSignalingChange(newState: RtcPeerConnection.SignalingState?) {
         logger.d { "[onSignalingChange] #sfu; #$typeTag; newState: $newState" }
     }
 
@@ -411,7 +415,7 @@ public class StreamPeerConnection(
         logger.i { "[onIceConnectionReceivingChange] #sfu; #$typeTag; receiving: $receiving" }
     }
 
-    override fun onIceGatheringChange(newState: PeerConnection.IceGatheringState?) {
+    override fun onIceGatheringChange(newState: RtcPeerConnection.IceGatheringState?) {
         logger.i { "[onIceGatheringChange] #sfu; #$typeTag; newState: $newState" }
     }
 
@@ -423,8 +427,11 @@ public class StreamPeerConnection(
         logger.e { "[onIceCandidateError] #sfu; #$typeTag; event: ${event?.stringify()}" }
     }
 
-    override fun onConnectionChange(newState: PeerConnection.PeerConnectionState?) {
+    override fun onConnectionChange(newState: RtcPeerConnection.PeerConnectionState?) {
         logger.i { "[onConnectionChange] #sfu; #$typeTag; newState: $newState" }
+        newState?.also {
+            onConnectionChanged?.invoke(it.toPeerConnection(), type)
+        }
     }
 
     override fun onSelectedCandidatePairChanged(event: CandidatePairChangeEvent?) {

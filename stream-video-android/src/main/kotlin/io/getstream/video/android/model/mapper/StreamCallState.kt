@@ -26,7 +26,6 @@ internal fun StreamCallState.Outgoing.toMetadata(): CallMetadata =
         type = callGuid.type,
         id = callGuid.id,
         users = users,
-        members = members,
         createdAt = (createdAt as? StreamDate.Specified)?.date?.time ?: 0,
         updatedAt = (updatedAt as? StreamDate.Specified)?.date?.time ?: 0,
         createdByUserId = createdByUserId,

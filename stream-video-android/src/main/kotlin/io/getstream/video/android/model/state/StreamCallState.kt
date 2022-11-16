@@ -17,7 +17,6 @@
 package io.getstream.video.android.model.state
 
 import io.getstream.video.android.errors.VideoError
-import io.getstream.video.android.model.CallMember
 import io.getstream.video.android.model.CallUser
 import io.getstream.video.android.model.IceServer
 import io.getstream.video.android.model.SfuToken
@@ -69,7 +68,6 @@ public sealed interface StreamCallState : Serializable {
         public abstract val createdAt: StreamDate
         public abstract val updatedAt: StreamDate
         public abstract val users: Map<String, CallUser>
-        public abstract val members: Map<String, CallMember>
     }
 
     /**
@@ -84,7 +82,6 @@ public sealed interface StreamCallState : Serializable {
         override val createdAt: StreamDate,
         override val updatedAt: StreamDate,
         override val users: Map<String, CallUser>,
-        override val members: Map<String, CallMember>,
         val acceptedByCallee: Boolean
     ) : Started(), Joinable
 
@@ -97,7 +94,6 @@ public sealed interface StreamCallState : Serializable {
         override val createdAt: StreamDate,
         override val updatedAt: StreamDate,
         override val users: Map<String, CallUser>,
-        override val members: Map<String, CallMember>,
         val acceptedByMe: Boolean,
     ) : Started(), Joinable
 
@@ -110,11 +106,18 @@ public sealed interface StreamCallState : Serializable {
         override val createdAt: StreamDate,
         override val updatedAt: StreamDate,
         override val users: Map<String, CallUser>,
-        override val members: Map<String, CallMember>,
     ) : Started()
 
-    public data class InCall(
+    public sealed class InCall : Started() {
+        public abstract val callUrl: String
+        public abstract val sfuToken: SfuToken
+        public abstract val iceServers: List<IceServer>
+        public abstract val sfuSessionId: StreamSfuSessionId
+    }
+
+    public data class Joined(
         override val callGuid: StreamCallGuid,
+        override val sfuSessionId: StreamSfuSessionId,
         override val callKind: StreamCallKind,
         override val createdByUserId: String,
         override val broadcastingEnabled: Boolean,
@@ -122,13 +125,40 @@ public sealed interface StreamCallState : Serializable {
         override val createdAt: StreamDate,
         override val updatedAt: StreamDate,
         override val users: Map<String, CallUser>,
-        override val members: Map<String, CallMember>,
-        public val callUrl: String,
-        public val sfuToken: SfuToken,
-        public val iceServers: List<IceServer>,
-        public val sfuSessionId: StreamSfuSessionId,
-        public val sfuSessionJoined: Boolean
-    ) : Started()
+        override val callUrl: String,
+        override val sfuToken: SfuToken,
+        override val iceServers: List<IceServer>,
+    ) : InCall()
+
+    public data class Connecting(
+        override val callGuid: StreamCallGuid,
+        override val sfuSessionId: StreamSfuSessionId,
+        override val callKind: StreamCallKind,
+        override val createdByUserId: String,
+        override val broadcastingEnabled: Boolean,
+        override val recordingEnabled: Boolean,
+        override val createdAt: StreamDate,
+        override val updatedAt: StreamDate,
+        override val users: Map<String, CallUser>,
+        override val callUrl: String,
+        override val sfuToken: SfuToken,
+        override val iceServers: List<IceServer>,
+    ) : InCall()
+
+    public data class Connected(
+        override val callGuid: StreamCallGuid,
+        override val sfuSessionId: StreamSfuSessionId,
+        override val callKind: StreamCallKind,
+        override val createdByUserId: String,
+        override val broadcastingEnabled: Boolean,
+        override val recordingEnabled: Boolean,
+        override val createdAt: StreamDate,
+        override val updatedAt: StreamDate,
+        override val users: Map<String, CallUser>,
+        override val callUrl: String,
+        override val sfuToken: SfuToken,
+        override val iceServers: List<IceServer>,
+    ) : InCall()
 
     public data class Drop(
         override val callGuid: StreamCallGuid,
@@ -175,8 +205,12 @@ public sealed class StreamDate : Serializable {
 }
 
 public sealed class StreamSfuSessionId {
-    public data class Specified(val value: String) : StreamSfuSessionId()
     public object Undefined : StreamSfuSessionId() { override fun toString(): String = "Undefined" }
+    public sealed class Specified : StreamSfuSessionId() {
+        public abstract val value: String
+    }
+    public data class Requested(override val value: String) : Specified()
+    public data class Confirmed(override val value: String) : Specified()
 }
 
 internal fun StreamCallState.Started.copy(
@@ -186,16 +220,30 @@ internal fun StreamCallState.Started.copy(
     createdAt: StreamDate = this.createdAt,
     updatedAt: StreamDate = this.updatedAt,
     users: Map<String, CallUser> = this.users,
-    members: Map<String, CallMember> = this.members,
 ): StreamCallState = when (this) {
-    is StreamCallState.InCall -> copy(
+    is StreamCallState.Joined -> copy(
         createdByUserId = createdByUserId,
         broadcastingEnabled = broadcastingEnabled,
         recordingEnabled = recordingEnabled,
         createdAt = createdAt,
         updatedAt = updatedAt,
         users = users,
-        members = members,
+    )
+    is StreamCallState.Connecting -> copy(
+        createdByUserId = createdByUserId,
+        broadcastingEnabled = broadcastingEnabled,
+        recordingEnabled = recordingEnabled,
+        createdAt = createdAt,
+        updatedAt = updatedAt,
+        users = users,
+    )
+    is StreamCallState.Connected -> copy(
+        createdByUserId = createdByUserId,
+        broadcastingEnabled = broadcastingEnabled,
+        recordingEnabled = recordingEnabled,
+        createdAt = createdAt,
+        updatedAt = updatedAt,
+        users = users,
     )
     is StreamCallState.Incoming -> copy(
         createdByUserId = createdByUserId,
@@ -204,7 +252,6 @@ internal fun StreamCallState.Started.copy(
         createdAt = createdAt,
         updatedAt = updatedAt,
         users = users,
-        members = members,
     )
     is StreamCallState.Joining -> copy(
         createdByUserId = createdByUserId,
@@ -213,7 +260,6 @@ internal fun StreamCallState.Started.copy(
         createdAt = createdAt,
         updatedAt = updatedAt,
         users = users,
-        members = members,
     )
     is StreamCallState.Outgoing -> copy(
         createdByUserId = createdByUserId,
@@ -222,6 +268,35 @@ internal fun StreamCallState.Started.copy(
         createdAt = createdAt,
         updatedAt = updatedAt,
         users = users,
-        members = members,
     )
 }
+
+internal fun StreamCallState.InCall.toConnecting() = StreamCallState.Connecting(
+    callGuid = callGuid,
+    callKind = callKind,
+    callUrl = callUrl,
+    createdByUserId = createdByUserId,
+    broadcastingEnabled = broadcastingEnabled,
+    recordingEnabled = recordingEnabled,
+    createdAt = createdAt,
+    updatedAt = updatedAt,
+    users = users,
+    iceServers = iceServers,
+    sfuSessionId = sfuSessionId,
+    sfuToken = sfuToken,
+)
+
+internal fun StreamCallState.InCall.toConnected() = StreamCallState.Connected(
+    callGuid = callGuid,
+    callKind = callKind,
+    callUrl = callUrl,
+    createdByUserId = createdByUserId,
+    broadcastingEnabled = broadcastingEnabled,
+    recordingEnabled = recordingEnabled,
+    createdAt = createdAt,
+    updatedAt = updatedAt,
+    users = users,
+    iceServers = iceServers,
+    sfuSessionId = sfuSessionId,
+    sfuToken = sfuToken,
+)

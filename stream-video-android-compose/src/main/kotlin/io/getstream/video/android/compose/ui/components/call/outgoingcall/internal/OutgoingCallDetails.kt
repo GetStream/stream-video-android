@@ -32,6 +32,7 @@ import io.getstream.video.android.model.CallParticipantState
 import io.getstream.video.android.model.CallStatus
 import io.getstream.video.android.model.CallType
 import io.getstream.video.android.model.CallUser
+import io.getstream.video.android.model.CallUserState
 
 @Composable
 internal fun OutgoingCallDetails(
@@ -81,6 +82,7 @@ private fun OutgoingCallDetailsPreview() {
                     it.id,
                     it.name,
                     it.role,
+                    CallUserState.Undefined,
                     it.profileImageURL ?: "",
                     null,
                     null,

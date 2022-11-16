@@ -54,7 +54,9 @@ import io.getstream.video.android.model.CallParticipantState
 import io.getstream.video.android.model.CallSettings
 import io.getstream.video.android.model.IceCandidate
 import io.getstream.video.android.model.IceServer
+import io.getstream.video.android.model.PeerConnectionType
 import io.getstream.video.android.model.SfuToken
+import io.getstream.video.android.model.toPeerType
 import io.getstream.video.android.module.CallClientModule
 import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Result
@@ -66,6 +68,7 @@ import io.getstream.video.android.utils.buildMediaConstraints
 import io.getstream.video.android.utils.buildRemoteIceServers
 import io.getstream.video.android.utils.onError
 import io.getstream.video.android.utils.onSuccessSuspend
+import io.getstream.video.android.utils.stringify
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelChildren
@@ -83,7 +86,6 @@ import org.webrtc.Camera2Capturer
 import org.webrtc.Camera2Enumerator
 import org.webrtc.CameraEnumerator
 import org.webrtc.MediaConstraints
-import org.webrtc.PeerConnection
 import org.webrtc.RtpParameters
 import org.webrtc.SessionDescription
 import org.webrtc.SurfaceTextureHelper
@@ -107,6 +109,7 @@ import stream.video.sfu.signal.UpdateSubscriptionsRequest
 import stream.video.sfu.signal.VideoMuteChanged
 import kotlin.math.absoluteValue
 import kotlin.random.Random
+import org.webrtc.PeerConnection as RtcPeerConnection
 
 internal class CallClientImpl(
     private val context: Context,
@@ -139,7 +142,7 @@ internal class CallClientImpl(
         }
     }
 
-    private val connectionConfiguration: PeerConnection.RTCConfiguration by lazy {
+    private val connectionConfiguration: RtcPeerConnection.RTCConfiguration by lazy {
         buildConnectionConfiguration(iceServers)
     }
 
@@ -391,7 +394,7 @@ internal class CallClientImpl(
         this.subscriber = peerConnectionFactory.makePeerConnection(
             coroutineScope = coroutineScope,
             configuration = connectionConfiguration,
-            type = PeerType.PEER_TYPE_SUBSCRIBER,
+            type = PeerConnectionType.SUBSCRIBER,
             mediaConstraints = mediaConstraints,
             onStreamAdded = { call?.addStream(it) }, // addTrack
             onStreamRemoved = { call?.removeStream(it) },
@@ -401,11 +404,11 @@ internal class CallClientImpl(
         }
     }
 
-    private fun sendIceCandidate(candidate: IceCandidate, peerType: PeerType) {
+    private fun sendIceCandidate(candidate: IceCandidate, peerType: PeerConnectionType) {
         coroutineScope.launch {
             logger.d { "[sendIceCandidate] #sfu; #${peerType.stringify()}; candidate: $candidate" }
             val iceTrickle = ICETrickle(
-                peer_type = peerType,
+                peer_type = peerType.toPeerType(),
                 ice_candidate = Json.encodeToString(candidate),
                 session_id = sessionId
             )
@@ -466,10 +469,13 @@ internal class CallClientImpl(
         publisher = peerConnectionFactory.makePeerConnection(
             coroutineScope = coroutineScope,
             configuration = connectionConfiguration,
-            type = PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED,
+            type = PeerConnectionType.PUBLISHER,
             mediaConstraints = MediaConstraints(),
             onNegotiationNeeded = ::onNegotiationNeeded,
-            onIceCandidateRequest = ::sendIceCandidate
+            onIceCandidateRequest = ::sendIceCandidate,
+            onConnectionChange = { connection, peerType ->
+                callEngine.onCallConnectionChange(sessionId, peerType, connection)
+            }
         ).also {
             logger.i { "[createPublisher] #sfu; publisher: $it" }
         }

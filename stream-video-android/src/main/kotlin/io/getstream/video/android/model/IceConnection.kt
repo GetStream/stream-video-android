@@ -16,14 +16,24 @@
 
 package io.getstream.video.android.model
 
-public typealias StreamCallCid = String
-public typealias StreamCallType = String
-public typealias StreamCallId = String
+import org.webrtc.PeerConnection.IceConnectionState
 
-public fun StreamCallCid(type: StreamCallType, id: StreamCallId): StreamCallCid {
-    return when {
-        type.isNotEmpty() && id.isNotEmpty() -> "$type:$id"
-        id.isNotEmpty() -> id
-        else -> error("[StreamCallCid] invalid arguments; type=$type, id=$id")
-    }
+public enum class IceConnection {
+    NEW,
+    CHECKING,
+    CONNECTED,
+    COMPLETED,
+    FAILED,
+    DISCONNECTED,
+    CLOSED;
+}
+
+internal fun IceConnectionState.toIceConnection(): IceConnection = when (this) {
+    IceConnectionState.NEW -> IceConnection.NEW
+    IceConnectionState.CHECKING -> IceConnection.CHECKING
+    IceConnectionState.CONNECTED -> IceConnection.CONNECTED
+    IceConnectionState.COMPLETED -> IceConnection.COMPLETED
+    IceConnectionState.FAILED -> IceConnection.FAILED
+    IceConnectionState.DISCONNECTED -> IceConnection.DISCONNECTED
+    IceConnectionState.CLOSED -> IceConnection.CLOSED
 }
