@@ -22,6 +22,8 @@ import io.getstream.video.android.events.VideoEvent
 import io.getstream.video.android.model.CallEventType
 import io.getstream.video.android.model.CallMetadata
 import io.getstream.video.android.model.JoinedCall
+import io.getstream.video.android.model.StreamPeerConnectionState
+import io.getstream.video.android.model.StreamPeerType
 import io.getstream.video.android.model.state.StreamCallState
 import kotlinx.coroutines.flow.StateFlow
 import stream.video.sfu.event.JoinRequest
@@ -100,4 +102,14 @@ internal interface StreamCallEngine {
      * Called when [CallEventType] message is sent to Coordinator.
      */
     fun onCallEventSent(callCid: String, eventType: CallEventType)
+
+    /**
+     * Called when peer connection state changes.
+     *
+     * @param sfuSessionId The id of SFU session.
+     * @param connectionState Represents the current state of peer connection.
+     *
+     * @see [io.getstream.video.android.call.connection.StreamPeerConnection]
+     */
+    fun onCallConnectionChange(sfuSessionId: String, peerType: StreamPeerType, connectionState: StreamPeerConnectionState)
 }

@@ -31,6 +31,7 @@ import io.getstream.video.android.compose.ui.components.participants.internal.Pa
 import io.getstream.video.android.model.CallParticipantState
 import io.getstream.video.android.model.CallStatus
 import io.getstream.video.android.model.CallUser
+import io.getstream.video.android.model.CallUserState
 
 @Composable
 internal fun IncomingCallDetails(
@@ -77,6 +78,7 @@ private fun IncomingCallDetailsPreview() {
                     it.id,
                     it.name,
                     it.role,
+                    CallUserState.Idle,
                     it.profileImageURL ?: "",
                     null,
                     null,

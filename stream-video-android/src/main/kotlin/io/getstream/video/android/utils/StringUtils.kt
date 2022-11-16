@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.utils
 
+import io.getstream.video.android.model.StreamPeerType
 import io.getstream.video.android.module.CallClientModule.Companion.REDIRECT_SIGNAL_URL
 import io.getstream.video.android.module.CallClientModule.Companion.SIGNAL_BASE_URL
 
@@ -30,4 +31,9 @@ public fun String.initials(): String {
         .split("\\s+".toRegex())
         .take(2)
         .joinToString(separator = "") { it.take(1).uppercase() }
+}
+
+internal fun StreamPeerType.stringify() = when (this) {
+    StreamPeerType.PUBLISHER -> "publisher"
+    StreamPeerType.SUBSCRIBER -> "subscriber"
 }

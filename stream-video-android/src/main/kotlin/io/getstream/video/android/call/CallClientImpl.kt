@@ -55,6 +55,8 @@ import io.getstream.video.android.model.CallSettings
 import io.getstream.video.android.model.IceCandidate
 import io.getstream.video.android.model.IceServer
 import io.getstream.video.android.model.SfuToken
+import io.getstream.video.android.model.StreamPeerType
+import io.getstream.video.android.model.toPeerType
 import io.getstream.video.android.module.CallClientModule
 import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Result
@@ -66,6 +68,7 @@ import io.getstream.video.android.utils.buildMediaConstraints
 import io.getstream.video.android.utils.buildRemoteIceServers
 import io.getstream.video.android.utils.onError
 import io.getstream.video.android.utils.onSuccessSuspend
+import io.getstream.video.android.utils.stringify
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelChildren
@@ -407,7 +410,7 @@ internal class CallClientImpl(
         this.subscriber = peerConnectionFactory.makePeerConnection(
             coroutineScope = coroutineScope,
             configuration = connectionConfiguration,
-            type = PeerType.PEER_TYPE_SUBSCRIBER,
+            type = StreamPeerType.SUBSCRIBER,
             mediaConstraints = mediaConstraints,
             onStreamAdded = { call?.addStream(it) }, // addTrack
             onStreamRemoved = { call?.removeStream(it) },
@@ -417,11 +420,11 @@ internal class CallClientImpl(
         }
     }
 
-    private fun sendIceCandidate(candidate: IceCandidate, peerType: PeerType) {
+    private fun sendIceCandidate(candidate: IceCandidate, peerType: StreamPeerType) {
         coroutineScope.launch {
             logger.d { "[sendIceCandidate] #sfu; #${peerType.stringify()}; candidate: $candidate" }
             val iceTrickle = ICETrickle(
-                peer_type = peerType,
+                peer_type = peerType.toPeerType(),
                 ice_candidate = Json.encodeToString(candidate),
                 session_id = sessionId
             )
@@ -482,10 +485,13 @@ internal class CallClientImpl(
         publisher = peerConnectionFactory.makePeerConnection(
             coroutineScope = coroutineScope,
             configuration = connectionConfiguration,
-            type = PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED,
+            type = StreamPeerType.PUBLISHER,
             mediaConstraints = MediaConstraints(),
             onNegotiationNeeded = ::onNegotiationNeeded,
-            onIceCandidateRequest = ::sendIceCandidate
+            onIceCandidateRequest = ::sendIceCandidate,
+            onConnectionChange = { connection, peerType ->
+                callEngine.onCallConnectionChange(sessionId, peerType, connection)
+            }
         ).also {
             logger.i { "[createPublisher] #sfu; publisher: $it" }
         }
