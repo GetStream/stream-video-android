@@ -887,6 +887,8 @@ public abstract interface class io/getstream/video/android/call/CallClient {
 	public abstract fun flipCamera ()V
 	public abstract fun getActiveCall ()Lio/getstream/video/android/model/Call;
 	public abstract fun getAudioDevices ()Ljava/util/List;
+	public abstract fun getPublisherStats ()Lkotlinx/coroutines/flow/StateFlow;
+	public abstract fun getSubscriberStats ()Lkotlinx/coroutines/flow/StateFlow;
 	public abstract fun removeSocketListener (Lio/getstream/video/android/call/signal/socket/SignalSocketListener;)V
 	public abstract fun selectAudioDevice (Lio/getstream/video/android/audio/AudioDevice;)V
 	public abstract fun setCameraEnabled (Z)V
@@ -2724,6 +2726,11 @@ public final class io/getstream/video/android/utils/ResultKt {
 	public static final synthetic fun onErrorSuspend (Lio/getstream/video/android/utils/Result;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static final synthetic fun onSuccess (Lio/getstream/video/android/utils/Result;Lkotlin/jvm/functions/Function1;)Lio/getstream/video/android/utils/Result;
 	public static final synthetic fun onSuccessSuspend (Lio/getstream/video/android/utils/Result;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun stringify (Lio/getstream/video/android/utils/Result;Lkotlin/jvm/functions/Function1;)Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/utils/StringUtilsKt {
+	public static final fun initials (Ljava/lang/String;)Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/utils/Success : io/getstream/video/android/utils/Result {

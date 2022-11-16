@@ -33,11 +33,6 @@ public fun String.initials(): String {
         .joinToString(separator = "") { it.take(1).uppercase() }
 }
 
-internal fun <T : Any> Result<T>.stringify(toString: (T) -> String): String = when (this) {
-    is Success -> "Success(data=${toString(data)})"
-    is Failure -> toString()
-}
-
 internal fun StreamPeerType.stringify() = when (this) {
     StreamPeerType.PUBLISHER -> "publisher"
     StreamPeerType.SUBSCRIBER -> "subscriber"
