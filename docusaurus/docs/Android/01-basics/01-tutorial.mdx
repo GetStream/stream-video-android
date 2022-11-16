@@ -12,9 +12,9 @@ In this tutorial we'll cover the main steps required to produce a fully capable 
 
 By the end of the tutorial, you'll be more than capable of building an app that powers video calls, with deep knowledge of how our internal state management works. The app has only a couple of screens to choose a Call ID and to participate in the call:
 
-| HomeActivity                                                 | CallActivity TODO (we need the call screen)                  |
+| HomeActivity                                                 | CallActivity                  |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| ![Home Activity UI](https://user-images.githubusercontent.com/17215808/200299040-93396c6b-41ba-4020-895a-eb22058983d0.png) | ![Home Activity UI](https://user-images.githubusercontent.com/17215808/200299040-93396c6b-41ba-4020-895a-eb22058983d0.png) |
+| ![Home Activity UI](https://user-images.githubusercontent.com/17215808/200299040-93396c6b-41ba-4020-895a-eb22058983d0.png) | ![Call Screen](https://user-images.githubusercontent.com/17215808/202099515-90ca68f0-fea6-4be8-a7d9-df590d6f357b.png) |
 
 If you're interested in what the application looks like and a small demo of how it works, make sure to check out the [full sample app]() or the video that walks through it below.
 
@@ -53,7 +53,7 @@ Now that you've verified the project and added the Stream dependency, you can st
 
 To fully connect to the Stream Video API, you need to authenticate a user. Using our [backend documentation](TODO) for reference you should be able to obtain a user token that contains all the information about a given user in your app.
 
-On top of that, for video, Stream provides a [low-level client](TODO) and both [XML](TODO) and [Compose](TODO) UI components to help you integrate video chat features. We'll touch upon UI later in the tutorial - for now, let's first create our Client.
+On top of that, for video, Stream provides a [low-level client](.../04-client/01-overview.mdx) and both [XML](03-ui/04-xml/01-overview.mdx) and [Compose](03-ui/03-compose/01-overview.mdx) UI components to help you integrate video chat features. We'll touch upon UI later in the tutorial - for now, let's first create our Client.
 
 Once you have the token and other user credentials ready, by authenticating against your backend, it's time to create the Stream Video Client.
 
@@ -327,4 +327,4 @@ In the `CallActivity` we just request the camera and microphone permissions, but
 
 Finally, build and run the app and you should be able to join a call and send both audio and video with respective permissions! :]
 
-![]() // TODO - image of call screen
+![Call Screen](https://user-images.githubusercontent.com/17215808/202099515-90ca68f0-fea6-4be8-a7d9-df590d6f357b.png)
