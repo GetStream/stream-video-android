@@ -74,19 +74,16 @@ public class CallViewModel(
         MutableStateFlow(permissionManager.hasVideoPermission)
     private val isVideoEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
-    public val isVideoOn: Flow<Boolean> =
-        hasVideoPermission.combine(isVideoEnabled) { hasPermission, videoEnabled ->
-            hasPermission && videoEnabled
-        }
+    public val isVideoOn: Flow<Boolean> = hasVideoPermission.combine(isVideoEnabled) { hasPermission, videoEnabled ->
+        hasPermission && videoEnabled
+    }
 
-    private val hasAudioPermission: MutableStateFlow<Boolean> =
-        MutableStateFlow(permissionManager.hasAudioPermission)
+    private val hasAudioPermission: MutableStateFlow<Boolean> = MutableStateFlow(permissionManager.hasAudioPermission)
     private val isAudioEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
-    public val isAudioOn: Flow<Boolean> =
-        hasAudioPermission.combine(isAudioEnabled) { hasPermission, audioEnabled ->
-            hasPermission && audioEnabled
-        }
+    public val isAudioOn: Flow<Boolean> = hasAudioPermission.combine(isAudioEnabled) { hasPermission, audioEnabled ->
+        hasPermission && audioEnabled
+    }
 
     private val _callMediaState: MutableStateFlow<CallMediaState> =
         MutableStateFlow(
@@ -409,6 +406,16 @@ public class CallViewModel(
                 logger.e { "[joinCall] failed: $it" }
             }
         }
+    }
+
+    public fun onAudioPermissionChanged(permissionGranted: Boolean) {
+        logger.d { "[onAudioPermissionChanged] hasAudioPermission: $permissionGranted" }
+        hasAudioPermission.value = permissionGranted
+    }
+
+    public fun onVideoPermissionChanged(permissionGranted: Boolean) {
+        logger.d { "[onVideoPermissionChanged] hasVideoPermission: $permissionGranted" }
+        hasVideoPermission.value = permissionGranted
     }
 
     private fun onMicrophoneChanged(microphoneEnabled: Boolean) {

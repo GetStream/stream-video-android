@@ -19,6 +19,7 @@ package io.getstream.video.android.compose.ui.components.call
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import io.getstream.video.android.call.state.CallAction
 import io.getstream.video.android.call.state.ToggleCamera
 import io.getstream.video.android.call.state.ToggleMicrophone
 import io.getstream.video.android.compose.ui.components.call.activecall.ActiveCallContent
@@ -40,8 +41,7 @@ import io.getstream.video.android.model.state.StreamCallState as State
  * @param onRejectCall Handler when the user taps on the Reject Call button in Incoming Call state.
  * @param onAcceptCall Handler when the user accepts a call in Incoming Call state.
  * @param onCancelCall Handler when the user decides to cancel or drop out of a call.
- * @param onMicToggleChanged Handler when the user toggles their microphone on or off.
- * @param onVideoToggleChanged Handler when the user toggles their video on or off.
+ * @param onCallAction Handler when the user clicks on some of the call controls.
  */
 @Composable
 public fun CallContent(
@@ -50,16 +50,7 @@ public fun CallContent(
     onRejectCall: () -> Unit = viewModel::rejectCall,
     onAcceptCall: () -> Unit = viewModel::acceptCall,
     onCancelCall: () -> Unit = viewModel::cancelCall,
-    onMicToggleChanged: (Boolean) -> Unit = { isEnabled ->
-        viewModel.onCallAction(
-            ToggleCamera(isEnabled)
-        )
-    },
-    onVideoToggleChanged: (Boolean) -> Unit = { isEnabled ->
-        viewModel.onCallAction(
-            ToggleMicrophone(isEnabled)
-        )
-    },
+    onCallAction: (CallAction) -> Unit = { viewModel.onCallAction(it) }
 ) {
     val stateHolder = viewModel.streamCallState.collectAsState(initial = State.Idle)
     val state = stateHolder.value
@@ -69,20 +60,21 @@ public fun CallContent(
             viewModel = viewModel,
             onRejectCall = onRejectCall,
             onAcceptCall = onAcceptCall,
-            onVideoToggleChanged = onVideoToggleChanged
+            onVideoToggleChanged = { onCallAction(ToggleCamera(it)) }
         )
     } else if (state is State.Outgoing && !state.acceptedByCallee) {
         OutgoingCallContent(
             modifier = modifier,
             viewModel = viewModel,
             onCancelCall = onCancelCall,
-            onMicToggleChanged = onMicToggleChanged,
-            onVideoToggleChanged = onVideoToggleChanged
+            onMicToggleChanged = { onCallAction(ToggleMicrophone(it)) },
+            onVideoToggleChanged = { onCallAction(ToggleCamera(it)) }
         )
     } else {
         ActiveCallContent(
             modifier = modifier,
             callViewModel = viewModel,
+            onCallAction = onCallAction
         )
     }
 }

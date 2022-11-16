@@ -286,7 +286,7 @@ public final class io/getstream/video/android/compose/ui/components/call/CallApp
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/CallContentKt {
-	public static final fun CallContent (Lio/getstream/video/android/viewmodel/CallViewModel;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+	public static final fun CallContent (Lio/getstream/video/android/viewmodel/CallViewModel;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/CallControlsKt {
