@@ -33,7 +33,7 @@ task clean(type: Delete) {
 
 apply from: teamPropsFile("git-hooks.gradle.kts")
 
-def teamPropsFile(String propsFile){
+def teamPropsFile(String propsFile) {
     def teamPropsDir = file("team-props")
     return new File(teamPropsDir, propsFile)
 }
