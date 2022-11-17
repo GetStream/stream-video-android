@@ -210,7 +210,12 @@ internal class CallClientImpl(
 
         signalSocket.releaseConnection()
 
+        videoCapturer?.stopCapture()
+        videoCapturer?.dispose()
         videoCapturer = null
+
+        surfaceTextureHelper.stopListening()
+
         isCapturingVideo = false
     }
 
