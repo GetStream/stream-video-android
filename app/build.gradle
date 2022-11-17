@@ -48,6 +48,10 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion Versions.COMPOSE_COMPILER
     }
+
+    lintOptions {
+        disable "Instantiatable"
+    }
 }
 
 dependencies {
