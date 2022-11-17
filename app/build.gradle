@@ -49,8 +49,10 @@ android {
         kotlinCompilerExtensionVersion Versions.COMPOSE_COMPILER
     }
 
-    lintOptions {
-        disable "Instantiatable"
+    android {
+        lint {
+            baseline = file("lint-baseline.xml")
+        }
     }
 }
 
