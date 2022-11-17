@@ -21,5 +21,6 @@ jobs:
         with:
           target-branch: 'staging'
           destination-repository-name: 'stream-video-docusaurus'
+          user-name: 'petyosi'
         env:
-          DOCUSAURUS_GH_TOKEN: ${{ secrets.DOCUSAURUS_GH_TOKEN }}
+          DOCUSAURUS_GH_TOKEN: ${{secrets.TEMP_STREAM_VIDEO_DOCUSAURUS_TOKEN}}
