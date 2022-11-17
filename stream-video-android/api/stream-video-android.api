@@ -1193,34 +1193,6 @@ public final class io/getstream/video/android/events/AudioLevelChangedEvent : io
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/events/AudioMutedEvent : io/getstream/video/android/events/VideoEvent {
-	public fun <init> (Ljava/lang/String;Lstream/video/sfu/models/Call;Z)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Lstream/video/sfu/models/Call;
-	public final fun component3 ()Z
-	public final fun copy (Ljava/lang/String;Lstream/video/sfu/models/Call;Z)Lio/getstream/video/android/events/AudioMutedEvent;
-	public static synthetic fun copy$default (Lio/getstream/video/android/events/AudioMutedEvent;Ljava/lang/String;Lstream/video/sfu/models/Call;ZILjava/lang/Object;)Lio/getstream/video/android/events/AudioMutedEvent;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getAreAllUsersMuted ()Z
-	public final fun getCall ()Lstream/video/sfu/models/Call;
-	public final fun getUserId ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/events/AudioUnmutedEvent : io/getstream/video/android/events/VideoEvent {
-	public fun <init> (Ljava/lang/String;Lstream/video/sfu/models/Call;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Lstream/video/sfu/models/Call;
-	public final fun copy (Ljava/lang/String;Lstream/video/sfu/models/Call;)Lio/getstream/video/android/events/AudioUnmutedEvent;
-	public static synthetic fun copy$default (Lio/getstream/video/android/events/AudioUnmutedEvent;Ljava/lang/String;Lstream/video/sfu/models/Call;ILjava/lang/Object;)Lio/getstream/video/android/events/AudioUnmutedEvent;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getCall ()Lstream/video/sfu/models/Call;
-	public final fun getUserId ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
 public final class io/getstream/video/android/events/CallAcceptedEvent : io/getstream/video/android/events/VideoEvent {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lio/getstream/video/android/model/CallInfo;Lio/getstream/video/android/model/CallDetails;)V
 	public final fun component1 ()Ljava/lang/String;
@@ -1461,17 +1433,6 @@ public final class io/getstream/video/android/events/JoinCallResponseEvent : io/
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/events/LocalDeviceChangeEvent : io/getstream/video/android/events/SfuDataEvent {
-	public fun <init> (Ljava/lang/String;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/events/LocalDeviceChangeEvent;
-	public static synthetic fun copy$default (Lio/getstream/video/android/events/LocalDeviceChangeEvent;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/events/LocalDeviceChangeEvent;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getType ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
 public final class io/getstream/video/android/events/MuteStateChangeEvent : io/getstream/video/android/events/SfuDataEvent {
 	public fun <init> (Ljava/lang/String;ZZ)V
 	public final fun component1 ()Ljava/lang/String;
@@ -1487,77 +1448,33 @@ public final class io/getstream/video/android/events/MuteStateChangeEvent : io/g
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/events/ParticipantJoinedEvent : io/getstream/video/android/events/VideoEvent {
-	public fun <init> (Lstream/video/coordinator/participant_v1/Participant;)V
-	public final fun component1 ()Lstream/video/coordinator/participant_v1/Participant;
-	public final fun copy (Lstream/video/coordinator/participant_v1/Participant;)Lio/getstream/video/android/events/ParticipantJoinedEvent;
-	public static synthetic fun copy$default (Lio/getstream/video/android/events/ParticipantJoinedEvent;Lstream/video/coordinator/participant_v1/Participant;ILjava/lang/Object;)Lio/getstream/video/android/events/ParticipantJoinedEvent;
+public final class io/getstream/video/android/events/ParticipantJoinedEvent : io/getstream/video/android/events/SfuDataEvent {
+	public fun <init> (Lstream/video/sfu/models/Participant;Lstream/video/sfu/models/Call;)V
+	public final fun component1 ()Lstream/video/sfu/models/Participant;
+	public final fun component2 ()Lstream/video/sfu/models/Call;
+	public final fun copy (Lstream/video/sfu/models/Participant;Lstream/video/sfu/models/Call;)Lio/getstream/video/android/events/ParticipantJoinedEvent;
+	public static synthetic fun copy$default (Lio/getstream/video/android/events/ParticipantJoinedEvent;Lstream/video/sfu/models/Participant;Lstream/video/sfu/models/Call;ILjava/lang/Object;)Lio/getstream/video/android/events/ParticipantJoinedEvent;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getParticipant ()Lstream/video/coordinator/participant_v1/Participant;
+	public final fun getCall ()Lstream/video/sfu/models/Call;
+	public final fun getParticipant ()Lstream/video/sfu/models/Participant;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/events/ParticipantLeftEvent : io/getstream/video/android/events/VideoEvent {
-	public fun <init> (Lstream/video/coordinator/participant_v1/Participant;)V
-	public final fun component1 ()Lstream/video/coordinator/participant_v1/Participant;
-	public final fun copy (Lstream/video/coordinator/participant_v1/Participant;)Lio/getstream/video/android/events/ParticipantLeftEvent;
-	public static synthetic fun copy$default (Lio/getstream/video/android/events/ParticipantLeftEvent;Lstream/video/coordinator/participant_v1/Participant;ILjava/lang/Object;)Lio/getstream/video/android/events/ParticipantLeftEvent;
+public final class io/getstream/video/android/events/ParticipantLeftEvent : io/getstream/video/android/events/SfuDataEvent {
+	public fun <init> (Lstream/video/sfu/models/Participant;Lstream/video/sfu/models/Call;)V
+	public final fun component1 ()Lstream/video/sfu/models/Participant;
+	public final fun component2 ()Lstream/video/sfu/models/Call;
+	public final fun copy (Lstream/video/sfu/models/Participant;Lstream/video/sfu/models/Call;)Lio/getstream/video/android/events/ParticipantLeftEvent;
+	public static synthetic fun copy$default (Lio/getstream/video/android/events/ParticipantLeftEvent;Lstream/video/sfu/models/Participant;Lstream/video/sfu/models/Call;ILjava/lang/Object;)Lio/getstream/video/android/events/ParticipantLeftEvent;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getParticipant ()Lstream/video/coordinator/participant_v1/Participant;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/events/PublisherCandidateEvent : io/getstream/video/android/events/SfuDataEvent {
-	public fun <init> (Ljava/lang/String;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/events/PublisherCandidateEvent;
-	public static synthetic fun copy$default (Lio/getstream/video/android/events/PublisherCandidateEvent;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/events/PublisherCandidateEvent;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getCandidate ()Ljava/lang/String;
+	public final fun getCall ()Lstream/video/sfu/models/Call;
+	public final fun getParticipant ()Lstream/video/sfu/models/Participant;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
 
 public abstract class io/getstream/video/android/events/SfuDataEvent {
-}
-
-public final class io/getstream/video/android/events/SfuParticipantJoinedEvent : io/getstream/video/android/events/SfuDataEvent {
-	public fun <init> (Lstream/video/sfu/models/Participant;Lstream/video/sfu/models/Call;)V
-	public final fun component1 ()Lstream/video/sfu/models/Participant;
-	public final fun component2 ()Lstream/video/sfu/models/Call;
-	public final fun copy (Lstream/video/sfu/models/Participant;Lstream/video/sfu/models/Call;)Lio/getstream/video/android/events/SfuParticipantJoinedEvent;
-	public static synthetic fun copy$default (Lio/getstream/video/android/events/SfuParticipantJoinedEvent;Lstream/video/sfu/models/Participant;Lstream/video/sfu/models/Call;ILjava/lang/Object;)Lio/getstream/video/android/events/SfuParticipantJoinedEvent;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getCall ()Lstream/video/sfu/models/Call;
-	public final fun getParticipant ()Lstream/video/sfu/models/Participant;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/events/SfuParticipantLeftEvent : io/getstream/video/android/events/SfuDataEvent {
-	public fun <init> (Lstream/video/sfu/models/Participant;Lstream/video/sfu/models/Call;)V
-	public final fun component1 ()Lstream/video/sfu/models/Participant;
-	public final fun component2 ()Lstream/video/sfu/models/Call;
-	public final fun copy (Lstream/video/sfu/models/Participant;Lstream/video/sfu/models/Call;)Lio/getstream/video/android/events/SfuParticipantLeftEvent;
-	public static synthetic fun copy$default (Lio/getstream/video/android/events/SfuParticipantLeftEvent;Lstream/video/sfu/models/Participant;Lstream/video/sfu/models/Call;ILjava/lang/Object;)Lio/getstream/video/android/events/SfuParticipantLeftEvent;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getCall ()Lstream/video/sfu/models/Call;
-	public final fun getParticipant ()Lstream/video/sfu/models/Participant;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/events/SubscriberCandidateEvent : io/getstream/video/android/events/SfuDataEvent {
-	public fun <init> (Ljava/lang/String;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/events/SubscriberCandidateEvent;
-	public static synthetic fun copy$default (Lio/getstream/video/android/events/SubscriberCandidateEvent;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/events/SubscriberCandidateEvent;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getCandidate ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/events/SubscriberOfferEvent : io/getstream/video/android/events/SfuDataEvent {
@@ -1585,32 +1502,6 @@ public final class io/getstream/video/android/events/VideoQualityChangedEvent : 
 	public static synthetic fun copy$default (Lio/getstream/video/android/events/VideoQualityChangedEvent;Ljava/util/Map;ILjava/lang/Object;)Lio/getstream/video/android/events/VideoQualityChangedEvent;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getQualities ()Ljava/util/Map;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/events/VideoStartedEvent : io/getstream/video/android/events/VideoEvent {
-	public fun <init> (Ljava/lang/String;Lstream/video/sfu/models/Call;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Lstream/video/sfu/models/Call;
-	public final fun copy (Ljava/lang/String;Lstream/video/sfu/models/Call;)Lio/getstream/video/android/events/VideoStartedEvent;
-	public static synthetic fun copy$default (Lio/getstream/video/android/events/VideoStartedEvent;Ljava/lang/String;Lstream/video/sfu/models/Call;ILjava/lang/Object;)Lio/getstream/video/android/events/VideoStartedEvent;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getCall ()Lstream/video/sfu/models/Call;
-	public final fun getUserId ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/events/VideoStoppedEvent : io/getstream/video/android/events/VideoEvent {
-	public fun <init> (Ljava/lang/String;Lstream/video/sfu/models/Call;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Lstream/video/sfu/models/Call;
-	public final fun copy (Ljava/lang/String;Lstream/video/sfu/models/Call;)Lio/getstream/video/android/events/VideoStoppedEvent;
-	public static synthetic fun copy$default (Lio/getstream/video/android/events/VideoStoppedEvent;Ljava/lang/String;Lstream/video/sfu/models/Call;ILjava/lang/Object;)Lio/getstream/video/android/events/VideoStoppedEvent;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getCall ()Lstream/video/sfu/models/Call;
-	public final fun getUserId ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }

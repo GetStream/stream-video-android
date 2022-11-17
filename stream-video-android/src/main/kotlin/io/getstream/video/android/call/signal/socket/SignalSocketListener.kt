@@ -20,7 +20,6 @@ import io.getstream.video.android.errors.DisconnectCause
 import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.events.ConnectedEvent
 import io.getstream.video.android.events.SfuDataEvent
-import io.getstream.video.android.events.VideoEvent
 
 /**
  * Used to listen to socket events on the SFU/Signaling level, inside an active call.
