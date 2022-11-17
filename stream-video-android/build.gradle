@@ -10,6 +10,14 @@ plugins {
     id 'io.getstream.video.generateServices'
 }
 
+ext {
+    PUBLISH_GROUP_ID = Configuration.artifactGroup
+    PUBLISH_ARTIFACT_ID = 'stream-video-android'
+    PUBLISH_VERSION = rootVersionName
+}
+
+apply from: "${rootDir}/scripts/publish-module.gradle"
+
 wire {
     kotlin {
         rpcRole = 'none'
