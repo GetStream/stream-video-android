@@ -1,0 +1,128 @@
+## Listening to Socket Events
+
+A great part of our Android Video SDK are real time updates based on socket events from the server. There are two sets of WebSocket connections and types of events that our SDK receives and consumes:
+
+* **Coordinator**: Events for calls being created, started, call invites, etc. Effective **outside** of an active call.
+* **Signaling**: Events for participants joining, leaving, mute states, audio levels, etc. Effective **inside** an active call.
+
+All of these events are processed internally to update the state of our lower-level client and UI Components. If you're using our default  `CallAndroidInputLauncher`, based on the events and the [call engine](03-call-engine.mdx) state, we launch our out of the box `CallActivity` that handles incoming, outgoing and call starting flows.
+
+However, you can also add custom socket listeners to WebSocket connections, to build custom behavior. By listening to events, you can build custom UI such as popups, that let your users know there's a new call starting, that someone is calling them, that people joined or left calls and more.
+
+Let's see how to do that!
+
+### Coordinator Events
+
+The coordinator set of events are available immediately after you create the `StreamVideo` client. You can listen to these events simply by calling the following code:
+
+```kotlin
+public fun addSocketListener(socketListener: SocketListener)
+
+// Usage
+streamVideo.addSocketListener(MySocketListener())
+```
+
+To add a listener for our coordinator socket events, you have to pass in a `SocketListener` instance. The listener is defined as a simple interface with default implementations of functions, allowing you to only override the handles you need for your use case:
+
+```kotlin
+public interface SocketListener {
+
+    public fun onConnecting() {}
+
+    public fun onConnected(event: ConnectedEvent) {}
+
+    public fun onDisconnected(cause: DisconnectCause) {}
+
+    public fun onError(error: VideoError) {}
+
+    public fun onEvent(event: VideoEvent) {}
+}
+```
+
+The main point of entry is `onEvent(event: VideoEvent)`, which lets you handle any number of our coordinator events around calls.
+
+The events you can consume are the following:
+
+* **HealthCheckEvent**: Received periodically as a way to keep the WebSocket connection open.
+* **ConnectedEvent**: Notifies about a successful connection
+* **CallCreatedEvent**: Called when a call has been successfully created with participants.
+* **CallEndedEvent**: Called when an active call ends.
+* **CallUpdatedEvent**: Called when an existing call has been updated with new information.
+* **CallMembersUpdatedEvent**: Notifies that some members of a call have been updated or added.
+* **CallMembersDeletedEvent**: Notifies that some members of a call have been deleted.
+* **CallAcceptedEvent**: If a user **accepts** a ringing call we get notified through this event.
+* **CallRejectedEvent**: Alternatively, if a user **rejects** an incoming call we receive it through this event. 
+* **CallCanceledEvent**: Notifies that a ringing call is canceled before starting.
+
+Once you're done with observing events, such as when you're logging out a user or disabling some features, you **need to clean up** the listener instance. Here's how:
+```kotlin
+streamVideo.removeSocketListener(mySocketListenerInstance)
+```
+
+Just pass in the same instance you added as a listener before, to the `removeSocketListener()` function on the `StreamVideo` client.
+
+These events help you notify your users about call state changing **outside of a call**. They are useful for various popups or modal UI, and updating your custom UI state.
+
+If you want to react to events **inside a call**, you need to use the signal WebSocket and its listeners to consume signaling events.
+
+### Signaling Events
+
+As soon as you create a `CallClient`, we connect to a signaling WebSocket instance which is responsible for all call-based events - primarily for the call connection flow, codec negotiation and similar, but also about participants and their mute or audio states.
+
+Similarly to the coordinator WebSocket and its corresponding events, you can attach a listener to the signaling WebSocket, like so:
+
+```kotlin
+callClient.addSocketListener(MySignalSocketListener())
+```
+
+The socket accepts a different interface type - `SignalSocketListener`, but its signature is almost the same:
+
+```kotlin
+public interface SignalSocketListener {
+
+    public fun onConnecting() {}
+
+    public fun onConnected(event: ConnectedEvent) {}
+
+    public fun onDisconnected(cause: DisconnectCause) {}
+
+    public fun onError(error: VideoError) {}
+
+    public fun onEvent(event: SfuDataEvent) {}
+}
+```
+
+The only difference is the type you receive in `onEvent`, which is `SfuDataEvent`.
+
+> **Note**: Because a good number of events are used for the connection and negotiation logic, we'll split the events into two groups - **connection** and **call state**. 
+
+The **connection** events you can receive are the following:
+
+* **ICETrickleEvent**: Used to listen for ICE candidates when setting up connections and tracks.
+* **SubscriberOfferEvent**: Contains the SDP used to set up subscribers.
+
+* **HealthCheckResponseEvent**: Sent periodically to keep the WebSocket connection alive.
+* **JoinCallResponseEvent**: Received as one of the first parts of the WebRTC flow, to set up the call connections.
+
+**Call state** events are the following:
+
+* **AudioLevelChangedEvent**: Indicates the current audio level for each participant in the call.
+
+* **ConnectionQualityChangeEvent**: Holds information of the quality of a participant's connection.
+
+* **ChangePublishQualityEvent**: Used to update the publishing quality of audio and video, based on other participants' requests.
+* **MuteStateChangeEvent**: Notifies the client whether a given user has muted or unmuted their audio or video.
+* **VideoQualityChangedEvent**: Indicates a change in the video quality for call participants. 
+* **ParticipantJoinedEvent**: Sent when a participant joins the call.
+* **ParticipantLeftEvent**: Sent when a participant leaves the call.
+* **DominantSpeakerChangedEvent**: Notifies the call who the current dominant speaker is.
+
+All of these events are processed internally, in the `CallClient`, but you can listen to them to build custom behavior or UI.
+
+Once you're ready to stop listening to events, be it when leaving a call or when you disable custom features, you can remove the listener in a similar manner to the coordinator WebSocket:
+
+```kotlin
+callClient.removeSocketListener(mySignalSocketListenerInstance)
+```
+
+If you're curious about the lifecycle of our SDK and calls, check out the [call lifecycle guide](02-call-lifecycle.mdx).

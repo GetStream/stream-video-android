@@ -23,11 +23,10 @@ import io.getstream.video.android.events.DominantSpeakerChangedEvent
 import io.getstream.video.android.events.HealthCheckResponseEvent
 import io.getstream.video.android.events.ICETrickleEvent
 import io.getstream.video.android.events.JoinCallResponseEvent
-import io.getstream.video.android.events.LocalDeviceChangeEvent
 import io.getstream.video.android.events.MuteStateChangeEvent
+import io.getstream.video.android.events.ParticipantJoinedEvent
+import io.getstream.video.android.events.ParticipantLeftEvent
 import io.getstream.video.android.events.SfuDataEvent
-import io.getstream.video.android.events.SfuParticipantJoinedEvent
-import io.getstream.video.android.events.SfuParticipantLeftEvent
 import io.getstream.video.android.events.SubscriberOfferEvent
 import io.getstream.video.android.events.VideoQualityChangedEvent
 import stream.video.sfu.event.SfuEvent
@@ -48,7 +47,6 @@ public object RTCEventMapper {
             )
 
             event.change_publish_quality != null -> ChangePublishQualityEvent(event.change_publish_quality)
-            event.local_device_change != null -> LocalDeviceChangeEvent(event.local_device_change.type)
             event.mute_state_changed != null -> with(event.mute_state_changed) {
                 MuteStateChangeEvent(
                     user_id,
@@ -62,10 +60,10 @@ public object RTCEventMapper {
                 }
             )
             event.participant_joined != null -> with(event.participant_joined) {
-                SfuParticipantJoinedEvent(participant!!, call!!)
+                ParticipantJoinedEvent(participant!!, call!!)
             }
             event.participant_left != null -> with(event.participant_left) {
-                SfuParticipantLeftEvent(participant!!, call!!)
+                ParticipantLeftEvent(participant!!, call!!)
             }
             event.dominant_speaker_changed != null -> DominantSpeakerChangedEvent(event.dominant_speaker_changed.user_id)
 

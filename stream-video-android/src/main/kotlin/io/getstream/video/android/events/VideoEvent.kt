@@ -19,8 +19,6 @@ package io.getstream.video.android.events
 import io.getstream.video.android.model.CallDetails
 import io.getstream.video.android.model.CallInfo
 import io.getstream.video.android.model.CallUser
-import stream.video.coordinator.participant_v1.Participant
-import stream.video.sfu.models.Call
 
 /**
  * Represents the events coming in from the socket.
@@ -93,54 +91,6 @@ public data class CallMembersDeletedEvent(
     val details: CallDetails
 ) : VideoEvent()
 
-/**
- * Triggered whenever a user's audio is unmuted or started.
- */
-public data class AudioUnmutedEvent(
-    val userId: String,
-    val call: Call
-) : VideoEvent()
-
-/**
- * Triggered whenever a user's audio is muted. Either responds to everyone being muted in a call, or just one
- * user.
- */
-public data class AudioMutedEvent(
-    val userId: String,
-    val call: Call,
-    val areAllUsersMuted: Boolean
-) : VideoEvent()
-
-/**
- * Triggered whenever a user's video starts.
- */
-public data class VideoStartedEvent(
-    val userId: String,
-    val call: Call
-) : VideoEvent()
-
-/**
- * Triggered whenever a user's video is stopped.
- */
-public data class VideoStoppedEvent(
-    val userId: String,
-    val call: Call
-) : VideoEvent()
-
-/**
- * Triggered when someone joins a call.
- */
-public data class ParticipantJoinedEvent(
-    val participant: Participant
-) : VideoEvent()
-
-/**
- * Triggered when someone leaves a call.
- */
-public data class ParticipantLeftEvent(
-    val participant: Participant
-) : VideoEvent()
-
 public data class CallAcceptedEvent(
     val callCid: String,
     val sentByUserId: String,
@@ -166,5 +116,3 @@ public data class CallCanceledEvent(
 ) : VideoEvent()
 
 public object UnknownEvent : VideoEvent()
-
-// TODO - rest of the events

@@ -44,20 +44,8 @@ public data class AudioLevelChangedEvent(
     val levels: Map<String, Float>
 ) : SfuDataEvent()
 
-public data class SubscriberCandidateEvent(
-    val candidate: String
-) : SfuDataEvent()
-
-public data class PublisherCandidateEvent(
-    val candidate: String
-) : SfuDataEvent()
-
 public data class ChangePublishQualityEvent(
-    val changePublishQuality: ChangePublishQuality // TODO - unwrap the complex set of data
-) : SfuDataEvent()
-
-public data class LocalDeviceChangeEvent(
-    val type: String
+    val changePublishQuality: ChangePublishQuality
 ) : SfuDataEvent()
 
 public data class MuteStateChangeEvent(
@@ -70,12 +58,12 @@ public data class VideoQualityChangedEvent(
     val qualities: Map<String, VideoQuality>
 ) : SfuDataEvent()
 
-public data class SfuParticipantJoinedEvent(
+public data class ParticipantJoinedEvent(
     val participant: Participant,
     val call: Call,
 ) : SfuDataEvent()
 
-public data class SfuParticipantLeftEvent(
+public data class ParticipantLeftEvent(
     val participant: Participant,
     val call: Call
 ) : SfuDataEvent()
