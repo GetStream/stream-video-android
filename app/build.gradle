@@ -48,6 +48,10 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion Versions.COMPOSE_COMPILER
     }
+
+    lint {
+        baseline = file("lint-baseline.xml")
+    }
 }
 
 dependencies {
