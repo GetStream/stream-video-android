@@ -6,7 +6,7 @@
 
 # Core
 stream-video-android                                @GetStream/android-developers-core
-stream-video-pushprovider-pushprovider-firebase     @GetStream/android-developers-core
+stream-video-android-pushprovider-firebase     @GetStream/android-developers-core
 
 # UI
 app                                 @GetStream/android-developers-ui
