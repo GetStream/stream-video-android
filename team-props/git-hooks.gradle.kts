@@ -5,11 +5,16 @@ fun shouldInstallHooks(): Boolean {
 }
 
 fun hooksEnabled(): Boolean {
-    val localProperties = java.util.Properties().apply {
-        load(java.io.FileInputStream(File(rootProject.rootDir, "local.properties")))
-    }
+    return try {
+        val localProperties = java.util.Properties().apply {
+            load(java.io.FileInputStream(File(rootProject.rootDir, "local.properties")))
+        }
 
-    return localProperties.getProperty("enableGitHooks") == "true"
+        localProperties.getProperty("enableGitHooks") == "true"
+    } catch (error: Throwable) {
+        error.printStackTrace()
+        false
+    }
 }
 
 tasks.create<Copy>("copyGitHooks") {
