@@ -32,7 +32,7 @@
         <activity android:name=".ui.call.CallActivity" />
 
         <service
-            android:name=".ui.call.CallService"
+            android:name="io.getstream.video.android.app.ui.call.CallService"
             android:enabled="true"
             android:exported="false" />
     </application>
