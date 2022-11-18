@@ -2692,10 +2692,6 @@ public final class io/getstream/video/android/ui/ParticipantItemView : org/webrt
 	public final fun isInitialized ()Z
 }
 
-public final class io/getstream/video/android/utils/ErrorKt {
-	public static final fun fetchResult (Lkotlin/jvm/functions/Function0;)Lio/getstream/video/android/utils/Result;
-}
-
 public final class io/getstream/video/android/utils/Failure : io/getstream/video/android/utils/Result {
 	public fun <init> (Lio/getstream/video/android/errors/VideoError;)V
 	public final fun component1 ()Lio/getstream/video/android/errors/VideoError;
@@ -2717,11 +2713,15 @@ public final class io/getstream/video/android/utils/ListUtilsKt {
 }
 
 public abstract class io/getstream/video/android/utils/Result {
+	public final fun isFailure ()Z
+	public final fun isSuccess ()Z
 }
 
 public final class io/getstream/video/android/utils/ResultKt {
-	public static final synthetic fun flatMap (Lio/getstream/video/android/utils/Result;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final synthetic fun flatMap (Lio/getstream/video/android/utils/Result;Lkotlin/jvm/functions/Function1;)Lio/getstream/video/android/utils/Result;
+	public static final synthetic fun flatMapSuspend (Lio/getstream/video/android/utils/Result;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static final synthetic fun map (Lio/getstream/video/android/utils/Result;Lkotlin/jvm/functions/Function1;)Lio/getstream/video/android/utils/Result;
+	public static final synthetic fun mapSuspend (Lio/getstream/video/android/utils/Result;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static final synthetic fun onError (Lio/getstream/video/android/utils/Result;Lkotlin/jvm/functions/Function1;)Lio/getstream/video/android/utils/Result;
 	public static final synthetic fun onErrorSuspend (Lio/getstream/video/android/utils/Result;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static final synthetic fun onSuccess (Lio/getstream/video/android/utils/Result;Lkotlin/jvm/functions/Function1;)Lio/getstream/video/android/utils/Result;
