@@ -59,6 +59,10 @@ internal class CallClientModule(
          */
         private var module: CallClientModule? = null
 
+        /**
+         * Returns an instance of the [CallClientModule]. If one doesn't exists, creates
+         * the instance and then returns it.
+         */
         internal fun getOrCreate(
             okHttpClient: OkHttpClient,
             signalUrl: String
