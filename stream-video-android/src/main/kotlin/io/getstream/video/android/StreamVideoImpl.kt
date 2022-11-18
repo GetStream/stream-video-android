@@ -36,9 +36,11 @@ import io.getstream.video.android.model.SfuToken
 import io.getstream.video.android.model.StartedCall
 import io.getstream.video.android.model.StreamCallCid
 import io.getstream.video.android.model.User
+import io.getstream.video.android.model.mapper.toMetadata
 import io.getstream.video.android.model.mapper.toTypeAndId
 import io.getstream.video.android.model.state.DropReason
 import io.getstream.video.android.model.state.StreamCallState
+import io.getstream.video.android.model.state.StreamSfuSessionId
 import io.getstream.video.android.model.toIceServer
 import io.getstream.video.android.model.toUserEventType
 import io.getstream.video.android.network.NetworkStateProvider
@@ -59,7 +61,9 @@ import io.getstream.video.android.utils.onSuccess
 import io.getstream.video.android.utils.toCall
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okio.ByteString.Companion.encodeUtf8
@@ -111,7 +115,7 @@ public class StreamVideoImpl(
         }
     )
 
-    private var callClient: CallClient? = null
+    private val callClientHolder = MutableStateFlow<CallClient?>(null)
 
     init {
         observeState()
@@ -131,6 +135,26 @@ public class StreamVideoImpl(
                         if (state.reason is DropReason.Timeout) {
                             logger.i { "[observeState] call dropped by timeout" }
                             cancelCall(state.callGuid.cid)
+                        }
+                    }
+                    is StreamCallState.Idle -> {
+                        clearCallState()
+                    }
+                    is StreamCallState.Joined -> {
+                        if (state.sfuSessionId is StreamSfuSessionId.Undefined) {
+                            logger.i { "[observeState] caller joins a call: $state" }
+                            credentialsProvider.setSfuToken(state.sfuToken)
+                            createCallClient(
+                                signalUrl = state.callUrl,
+                                sfuToken = state.sfuToken,
+                                iceServers = state.iceServers,
+                            )
+                        }
+                    }
+                    is StreamCallState.Outgoing -> {
+                        if (state.acceptedByCallee) {
+                            logger.i { "[observeState] caller joins a call: $state" }
+                            joinCall(state.toMetadata())
                         }
                     }
                     else -> { /* no-op */ }
@@ -254,7 +278,7 @@ public class StreamVideoImpl(
             val latencyResults = joinResult.data.edges.associate {
                 it.name to measureLatency(it.latency_url)
             }
-
+            logger.v { "[joinCallInternal] latencyResults: $latencyResults" }
             val selectEdgeServerResult = selectEdgeServer(
                 request = GetCallEdgeServerRequest(
                     call_cid = call.cid,
@@ -377,8 +401,8 @@ public class StreamVideoImpl(
         logger.i { "[clearCallState] no args" }
         credentialsProvider.setSfuToken(null)
         socket.updateCallState(null)
-        callClient?.clear()
-        callClient = null
+        callClientHolder.value?.clear()
+        callClientHolder.value = null
     }
 
     /**
@@ -427,22 +451,19 @@ public class StreamVideoImpl(
         sfuToken: SfuToken,
         iceServers: List<IceServer>
     ): CallClient {
-        credentialsProvider.setSfuToken(sfuToken)
-        val builder = CallClientBuilder(
+        logger.i { "[createCallClient] signalUrl: $signalUrl, sfuToken: $sfuToken, iceServers: $iceServers" }
+        return CallClientBuilder(
             context = context,
             credentialsProvider = credentialsProvider,
             networkStateProvider = networkStateProvider,
             callEngine = engine,
             signalUrl = signalUrl,
             iceServers = iceServers
-        )
-
-        builder.loggingLevel(loggingLevel)
-
-        val client = builder.build()
-        this.callClient = client
-
-        return client
+        ).apply {
+            loggingLevel(loggingLevel)
+        }.build().also {
+            callClientHolder.value = it
+        }
     }
 
     /**
@@ -450,7 +471,15 @@ public class StreamVideoImpl(
      * @return An instance of the [CallClient] if it currently exists (the user is in a call).
      */
     override fun getActiveCallClient(): CallClient? {
-        return this.callClient
+        return callClientHolder.value
+    }
+
+    /**
+     *
+     * @return An instance of the [CallClient] if it currently exists (the user is in a call).
+     */
+    override suspend fun awaitCallClient(): CallClient {
+        return callClientHolder.first { it != null } ?: error("callClient must not be null")
     }
 
     override suspend fun acceptCall(cid: StreamCallCid): Result<JoinedCall> {

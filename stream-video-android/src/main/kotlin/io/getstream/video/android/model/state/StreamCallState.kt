@@ -138,6 +138,24 @@ public sealed interface StreamCallState : Serializable {
     ) : InCall()
 
     /**
+     * Signifies that one of the peer connections (subscriber or publisher) is getting initialized.
+     */
+    public data class Initializing(
+        override val callGuid: StreamCallGuid,
+        override val sfuSessionId: StreamSfuSessionId,
+        override val callKind: StreamCallKind,
+        override val createdByUserId: String,
+        override val broadcastingEnabled: Boolean,
+        override val recordingEnabled: Boolean,
+        override val createdAt: StreamDate,
+        override val updatedAt: StreamDate,
+        override val users: Map<String, CallUser>,
+        override val callUrl: String,
+        override val sfuToken: SfuToken,
+        override val iceServers: List<IceServer>,
+    ) : InCall()
+
+    /**
      * Signifies that one of the peer connections (subscriber or publisher) is in Connecting state.
      */
     public data class Connecting(
@@ -261,6 +279,14 @@ internal fun StreamCallState.Started.copy(
     updatedAt: StreamDate = this.updatedAt,
     users: Map<String, CallUser> = this.users,
 ): StreamCallState = when (this) {
+    is StreamCallState.Initializing -> copy(
+        createdByUserId = createdByUserId,
+        broadcastingEnabled = broadcastingEnabled,
+        recordingEnabled = recordingEnabled,
+        createdAt = createdAt,
+        updatedAt = updatedAt,
+        users = users,
+    )
     is StreamCallState.Joined -> copy(
         createdByUserId = createdByUserId,
         broadcastingEnabled = broadcastingEnabled,
@@ -310,6 +336,24 @@ internal fun StreamCallState.Started.copy(
         users = users,
     )
 }
+
+/**
+ * Converts [StreamCallState.InCall] into [StreamCallState.Initializing].
+ */
+internal fun StreamCallState.InCall.toInitializing() = StreamCallState.Initializing(
+    callGuid = callGuid,
+    callKind = callKind,
+    callUrl = callUrl,
+    createdByUserId = createdByUserId,
+    broadcastingEnabled = broadcastingEnabled,
+    recordingEnabled = recordingEnabled,
+    createdAt = createdAt,
+    updatedAt = updatedAt,
+    users = users,
+    iceServers = iceServers,
+    sfuSessionId = sfuSessionId,
+    sfuToken = sfuToken,
+)
 
 /**
  * Converts [StreamCallState.InCall] into [StreamCallState.Connecting].

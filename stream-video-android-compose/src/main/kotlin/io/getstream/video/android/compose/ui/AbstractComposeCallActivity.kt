@@ -25,12 +25,12 @@ import android.os.Bundle
 import android.provider.Settings
 import android.view.WindowManager
 import androidx.activity.compose.setContent
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
+import androidx.core.app.ActivityCompat
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.StreamVideoProvider
@@ -40,9 +40,12 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.CallContent
 import io.getstream.video.android.model.CallSettings
 import io.getstream.video.android.model.state.StreamCallState
+import io.getstream.video.android.permission.PermissionManagerImpl
+import io.getstream.video.android.utils.shouldShowRequestPermissionsRationale
 import io.getstream.video.android.viewmodel.CallViewModel
 import io.getstream.video.android.viewmodel.CallViewModelFactory
-import io.getstream.video.android.viewmodel.PermissionManagerImpl
+
+private const val PERMISSION_REQUEST_CODE = 16
 
 public abstract class AbstractComposeCallActivity : AppCompatActivity(), StreamVideoProvider {
 
@@ -54,24 +57,10 @@ public abstract class AbstractComposeCallActivity : AppCompatActivity(), StreamV
 
     private val callViewModel by viewModels<CallViewModel>(factoryProducer = { factory })
 
-    @RequiresApi(Build.VERSION_CODES.M)
-    private val permissionsContract = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        val missing = getMissingPermissions()
-        val deniedCamera = !shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)
-        val deniedMicrophone =
-            !shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO)
-
-        when {
-            missing.isNotEmpty() && !deniedCamera && !deniedMicrophone -> requestPermissions(missing)
-            isGranted -> startVideoFlow()
-            deniedCamera || deniedMicrophone -> showPermissionsDialog()
-            else -> {
-                checkPermissions()
-            }
-        }
-    }
+    private val requiredPermissions = arrayOf(
+        Manifest.permission.CAMERA,
+        Manifest.permission.RECORD_AUDIO
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         showWhenLockedAndTurnScreenOn()
@@ -141,40 +130,33 @@ public abstract class AbstractComposeCallActivity : AppCompatActivity(), StreamV
     @RequiresApi(Build.VERSION_CODES.M)
     private fun checkPermissions() {
         val missing = getMissingPermissions()
-
-        if (missing.isNotEmpty()) {
-            requestPermissions(missing)
-        } else {
+        if (missing.isEmpty()) {
             startVideoFlow()
+        } else if (shouldShowRequestPermissionsRationale(missing)) {
+            showPermissionsDialog()
+        } else {
+            ActivityCompat.requestPermissions(this, missing, PERMISSION_REQUEST_CODE)
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
-    private fun requestPermissions(permissions: Array<out String>) {
-        val deniedCamera = !shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)
-        val deniedMicrophone =
-            !shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO)
-
-        if (!deniedCamera && !deniedMicrophone) {
-            permissionsContract.launch(permissions.first())
-        } else {
-            showPermissionsDialog()
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode != PERMISSION_REQUEST_CODE) return
+        val allGranted = grantResults.map { it == PackageManager.PERMISSION_GRANTED }
+            .reduce { acc, value -> acc && value }
+        when (allGranted) {
+            true -> startVideoFlow()
+            else -> showPermissionsDialog()
         }
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
     private fun getMissingPermissions(): Array<out String> {
-        val permissionsToCheck = arrayOf(
-            Manifest.permission.CAMERA,
-            Manifest.permission.RECORD_AUDIO
-        )
-
-        val missing = permissionsToCheck
+        return requiredPermissions
             .map { it to (checkSelfPermission(it) == PackageManager.PERMISSION_GRANTED) }
             .filter { (_, isGranted) -> !isGranted }
             .map { it.first }
-
-        return missing.toTypedArray()
+            .toTypedArray()
     }
 
     private fun showPermissionsDialog() {
@@ -186,6 +168,7 @@ public abstract class AbstractComposeCallActivity : AppCompatActivity(), StreamV
                 dialog.dismiss()
             }
             .setNegativeButton("Cancel") { dialog, _ ->
+                callViewModel.hangUpCall()
                 finish()
                 dialog.dismiss()
             }
