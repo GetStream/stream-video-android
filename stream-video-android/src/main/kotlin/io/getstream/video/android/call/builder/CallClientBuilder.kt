@@ -30,6 +30,7 @@ import io.getstream.video.android.network.NetworkStateProvider
 import io.getstream.video.android.token.CredentialsProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.logging.HttpLoggingInterceptor
 
 /**
@@ -84,7 +85,7 @@ internal class CallClientBuilder(
             loggingLevel = loggingLevel,
             credentialsProvider = credentialsProvider
         ).apply {
-            this.baseUrl = updatedSignalUrl
+            this.baseUrl = updatedSignalUrl.toHttpUrl()
         }
 
         val callClientModule = CallClientModule.getOrCreate(

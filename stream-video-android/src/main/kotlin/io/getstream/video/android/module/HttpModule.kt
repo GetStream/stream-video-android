@@ -17,7 +17,7 @@
 package io.getstream.video.android.module
 
 import io.getstream.video.android.token.CredentialsProvider
-import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.HttpUrl
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -41,7 +41,7 @@ internal class HttpModule(
     /**
      * New base url of the HTTP client.
      */
-    internal var baseUrl: String? = null
+    internal var baseUrl: HttpUrl? = null
 
     /**
      * Builds the [OkHttpClient] used for all API calls.
@@ -101,8 +101,13 @@ internal class HttpModule(
         it.proceed(updated)
     }
 
+    /**
+     * Builds the HTTP interceptor that sets a new host from [baseUrl].
+     *
+     * @return [Interceptor] which replaces baseUrl.
+     */
     private fun buildHostSelectionInterceptor(): Interceptor = Interceptor { chain ->
-        val baseUrl = baseUrl?.toHttpUrl() ?: return@Interceptor chain.proceed(chain.request())
+        val baseUrl = baseUrl ?: return@Interceptor chain.proceed(chain.request())
         val original = chain.request()
         if (original.url.host == REPLACEMENT_HOST) {
             val updatedBaseUrl = original.url.newBuilder()
@@ -118,14 +123,17 @@ internal class HttpModule(
     }
 
     companion object {
+
         /**
-         * Host selection host pattern.
+         * Host pattern to be replaced.
          */
         private const val REPLACEMENT_HOST = "replacement.url"
+
         /**
-         * Host selection url pattern.
+         * Url pattern to be replaced.
          */
         internal const val REPLACEMENT_URL = "https://$REPLACEMENT_HOST"
+
         /**
          * Key used to prove authorization to the API.
          */
