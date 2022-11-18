@@ -177,7 +177,7 @@ public class CallViewModel(
                 val state = streamCallState.first { it is State.InCall } as State.InCall
                 logger.v { "[connectToCall] received: ${streamCallState.value}" }
                 client = streamVideo.createCallClient(
-                    state.callUrl.removeSuffix("/twirp"),
+                    state.callUrl,
                     state.sfuToken,
                     state.iceServers,
                 )
