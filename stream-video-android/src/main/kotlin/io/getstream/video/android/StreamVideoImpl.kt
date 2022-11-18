@@ -137,9 +137,7 @@ public class StreamVideoImpl(
                             cancelCall(state.callGuid.cid)
                         }
                     }
-                    is StreamCallState.Idle -> {
-                        clearCallState()
-                    }
+                    is StreamCallState.Idle -> clearCallState()
                     is StreamCallState.Joined -> {
                         if (state.sfuSessionId is StreamSfuSessionId.Undefined) {
                             logger.i { "[observeState] caller joins a call: $state" }

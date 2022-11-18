@@ -141,7 +141,7 @@ public class CallViewModel(
             withTimeout(CONNECT_TIMEOUT) {
                 logger.v { "[connectToCall] received: ${streamCallState.value}" }
                 val client = streamVideo.awaitCallClient().also {
-                    client = it
+                    this.client = it
                 }
                 _isVideoInitialized.value = true
                 val callResult = client.connectToCall(
