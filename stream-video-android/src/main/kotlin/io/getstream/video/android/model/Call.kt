@@ -29,8 +29,8 @@ import io.getstream.video.android.audio.AudioSwitchHandler
 import io.getstream.video.android.call.utils.stringify
 import io.getstream.video.android.events.AudioLevelChangedEvent
 import io.getstream.video.android.events.MuteStateChangeEvent
-import io.getstream.video.android.events.SfuParticipantJoinedEvent
-import io.getstream.video.android.events.SfuParticipantLeftEvent
+import io.getstream.video.android.events.ParticipantJoinedEvent
+import io.getstream.video.android.events.ParticipantLeftEvent
 import io.getstream.video.android.utils.updateValue
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -237,13 +237,13 @@ public class Call(
         _callParticipants.value = updatedList
     }
 
-    internal fun addParticipant(event: SfuParticipantJoinedEvent) {
+    internal fun addParticipant(event: ParticipantJoinedEvent) {
         logger.d { "[addParticipant] #sfu; event: $event" }
         _callParticipants.value =
             _callParticipants.value + event.participant.toCallParticipant(getCurrentUserId())
     }
 
-    internal fun removeParticipant(event: SfuParticipantLeftEvent) {
+    internal fun removeParticipant(event: ParticipantLeftEvent) {
         logger.d { "[removeParticipant] #sfu; event: $event" }
         val userId = event.participant.user?.id ?: return
 
