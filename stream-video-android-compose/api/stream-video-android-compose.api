@@ -250,7 +250,6 @@ public abstract class io/getstream/video/android/compose/ui/AbstractComposeCallA
 	protected final fun buildContent ()Lkotlin/jvm/functions/Function2;
 	protected final fun getDefaultCallSettings ()Lio/getstream/video/android/model/CallSettings;
 	protected fun onCreate (Landroid/os/Bundle;)V
-	public fun onRequestPermissionsResult (I[Ljava/lang/String;[I)V
 	protected fun onResume ()V
 }
 

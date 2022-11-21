@@ -23,7 +23,7 @@ import androidx.core.content.ContextCompat
 
 public interface PermissionManager {
 
-    public val hasMicPermission: Boolean
+    public val hasRecordAudioPermission: Boolean
     public val hasCameraPermission: Boolean
 }
 
@@ -33,7 +33,7 @@ public class PermissionManagerImpl(
 
     private val appContext: Context = context.applicationContext
 
-    override val hasMicPermission: Boolean
+    override val hasRecordAudioPermission: Boolean
         get() = ContextCompat.checkSelfPermission(
             appContext,
             Manifest.permission.RECORD_AUDIO
