@@ -35,6 +35,7 @@ type WebsocketEvent struct {
 	Users map[string]*user_v1.User `protobuf:"bytes,1,rep,name=users,proto3" json:"users,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	// Types that are assignable to Event:
 	//
+	//	*WebsocketEvent_Error
 	//	*WebsocketEvent_Healthcheck
 	//	*WebsocketEvent_CallCreated
 	//	*WebsocketEvent_CallUpdated
@@ -93,6 +94,13 @@ func (x *WebsocketEvent) GetUsers() map[string]*user_v1.User {
 func (m *WebsocketEvent) GetEvent() isWebsocketEvent_Event {
 	if m != nil {
 		return m.Event
+	}
+	return nil
+}
+
+func (x *WebsocketEvent) GetError() *WebsocketError {
+	if x, ok := x.GetEvent().(*WebsocketEvent_Error); ok {
+		return x.Error
 	}
 	return nil
 }
@@ -192,6 +200,10 @@ type isWebsocketEvent_Event interface {
 	isWebsocketEvent_Event()
 }
 
+type WebsocketEvent_Error struct {
+	Error *WebsocketError `protobuf:"bytes,19,opt,name=error,proto3,oneof"`
+}
+
 type WebsocketEvent_Healthcheck struct {
 	Healthcheck *WebsocketHealthcheck `protobuf:"bytes,20,opt,name=healthcheck,proto3,oneof"`
 }
@@ -247,6 +259,8 @@ type WebsocketEvent_CallCustom struct {
 	// Custom event
 	CallCustom *event_v1.CallCustom `protobuf:"bytes,99,opt,name=call_custom,json=callCustom,proto3,oneof"`
 }
+
+func (*WebsocketEvent_Error) isWebsocketEvent_Event() {}
 
 func (*WebsocketEvent_Healthcheck) isWebsocketEvent_Event() {}
 
@@ -525,6 +539,61 @@ func (x *WebsocketHealthcheck) GetAudio() bool {
 	return false
 }
 
+type WebsocketError struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Code    int32  `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
+	Message string `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+}
+
+func (x *WebsocketError) Reset() {
+	*x = WebsocketError{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_video_coordinator_client_v1_rpc_websocket_proto_msgTypes[4]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *WebsocketError) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*WebsocketError) ProtoMessage() {}
+
+func (x *WebsocketError) ProtoReflect() protoreflect.Message {
+	mi := &file_video_coordinator_client_v1_rpc_websocket_proto_msgTypes[4]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use WebsocketError.ProtoReflect.Descriptor instead.
+func (*WebsocketError) Descriptor() ([]byte, []int) {
+	return file_video_coordinator_client_v1_rpc_websocket_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *WebsocketError) GetCode() int32 {
+	if x != nil {
+		return x.Code
+	}
+	return 0
+}
+
+func (x *WebsocketError) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
 var File_video_coordinator_client_v1_rpc_websocket_proto protoreflect.FileDescriptor
 
 var file_video_coordinator_client_v1_rpc_websocket_proto_rawDesc = []byte{
@@ -542,14 +611,19 @@ var file_video_coordinator_client_v1_rpc_websocket_proto_rawDesc = []byte{
 	0x73, 0x68, 0x5f, 0x76, 0x31, 0x2f, 0x70, 0x75, 0x73, 0x68, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f,
 	0x1a, 0x24, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x2f, 0x63, 0x6f, 0x6f, 0x72, 0x64, 0x69, 0x6e, 0x61,
 	0x74, 0x6f, 0x72, 0x2f, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x76, 0x31, 0x2f, 0x75, 0x73, 0x65, 0x72,
-	0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0xf7, 0x0a, 0x0a, 0x0e, 0x57, 0x65, 0x62, 0x73, 0x6f,
+	0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0xc7, 0x0b, 0x0a, 0x0e, 0x57, 0x65, 0x62, 0x73, 0x6f,
 	0x63, 0x6b, 0x65, 0x74, 0x45, 0x76, 0x65, 0x6e, 0x74, 0x12, 0x57, 0x0a, 0x05, 0x75, 0x73, 0x65,
 	0x72, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x41, 0x2e, 0x73, 0x74, 0x72, 0x65, 0x61,
 	0x6d, 0x2e, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x2e, 0x63, 0x6f, 0x6f, 0x72, 0x64, 0x69, 0x6e, 0x61,
 	0x74, 0x6f, 0x72, 0x2e, 0x63, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x5f, 0x76, 0x31, 0x5f, 0x72, 0x70,
 	0x63, 0x2e, 0x57, 0x65, 0x62, 0x73, 0x6f, 0x63, 0x6b, 0x65, 0x74, 0x45, 0x76, 0x65, 0x6e, 0x74,
 	0x2e, 0x55, 0x73, 0x65, 0x72, 0x73, 0x45, 0x6e, 0x74, 0x72, 0x79, 0x52, 0x05, 0x75, 0x73, 0x65,
-	0x72, 0x73, 0x12, 0x60, 0x0a, 0x0b, 0x68, 0x65, 0x61, 0x6c, 0x74, 0x68, 0x63, 0x68, 0x65, 0x63,
+	0x72, 0x73, 0x12, 0x4e, 0x0a, 0x05, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x18, 0x13, 0x20, 0x01, 0x28,
+	0x0b, 0x32, 0x36, 0x2e, 0x73, 0x74, 0x72, 0x65, 0x61, 0x6d, 0x2e, 0x76, 0x69, 0x64, 0x65, 0x6f,
+	0x2e, 0x63, 0x6f, 0x6f, 0x72, 0x64, 0x69, 0x6e, 0x61, 0x74, 0x6f, 0x72, 0x2e, 0x63, 0x6c, 0x69,
+	0x65, 0x6e, 0x74, 0x5f, 0x76, 0x31, 0x5f, 0x72, 0x70, 0x63, 0x2e, 0x57, 0x65, 0x62, 0x73, 0x6f,
+	0x63, 0x6b, 0x65, 0x74, 0x45, 0x72, 0x72, 0x6f, 0x72, 0x48, 0x00, 0x52, 0x05, 0x65, 0x72, 0x72,
+	0x6f, 0x72, 0x12, 0x60, 0x0a, 0x0b, 0x68, 0x65, 0x61, 0x6c, 0x74, 0x68, 0x63, 0x68, 0x65, 0x63,
 	0x6b, 0x18, 0x14, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x3c, 0x2e, 0x73, 0x74, 0x72, 0x65, 0x61, 0x6d,
 	0x2e, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x2e, 0x63, 0x6f, 0x6f, 0x72, 0x64, 0x69, 0x6e, 0x61, 0x74,
 	0x6f, 0x72, 0x2e, 0x63, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x5f, 0x76, 0x31, 0x5f, 0x72, 0x70, 0x63,
@@ -669,7 +743,11 @@ var file_video_coordinator_client_v1_rpc_websocket_proto_rawDesc = []byte{
 	0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x63, 0x61, 0x6c, 0x6c, 0x49, 0x64, 0x12, 0x14,
 	0x0a, 0x05, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x18, 0x05, 0x20, 0x01, 0x28, 0x08, 0x52, 0x05, 0x76,
 	0x69, 0x64, 0x65, 0x6f, 0x12, 0x14, 0x0a, 0x05, 0x61, 0x75, 0x64, 0x69, 0x6f, 0x18, 0x06, 0x20,
-	0x01, 0x28, 0x08, 0x52, 0x05, 0x61, 0x75, 0x64, 0x69, 0x6f, 0x42, 0x40, 0x42, 0x11, 0x43, 0x6c,
+	0x01, 0x28, 0x08, 0x52, 0x05, 0x61, 0x75, 0x64, 0x69, 0x6f, 0x22, 0x3e, 0x0a, 0x0e, 0x57, 0x65,
+	0x62, 0x73, 0x6f, 0x63, 0x6b, 0x65, 0x74, 0x45, 0x72, 0x72, 0x6f, 0x72, 0x12, 0x12, 0x0a, 0x04,
+	0x63, 0x6f, 0x64, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x04, 0x63, 0x6f, 0x64, 0x65,
+	0x12, 0x18, 0x0a, 0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x42, 0x40, 0x42, 0x11, 0x43, 0x6c,
 	0x69, 0x65, 0x6e, 0x74, 0x56, 0x31, 0x57, 0x65, 0x62, 0x73, 0x6f, 0x63, 0x6b, 0x65, 0x74, 0x5a,
 	0x0d, 0x63, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x5f, 0x76, 0x31, 0x5f, 0x72, 0x70, 0x63, 0xaa, 0x02,
 	0x1b, 0x53, 0x74, 0x72, 0x65, 0x61, 0x6d, 0x2e, 0x56, 0x69, 0x64, 0x65, 0x6f, 0x2e, 0x76, 0x31,
@@ -689,54 +767,56 @@ func file_video_coordinator_client_v1_rpc_websocket_proto_rawDescGZIP() []byte {
 	return file_video_coordinator_client_v1_rpc_websocket_proto_rawDescData
 }
 
-var file_video_coordinator_client_v1_rpc_websocket_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_video_coordinator_client_v1_rpc_websocket_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_video_coordinator_client_v1_rpc_websocket_proto_goTypes = []interface{}{
 	(*WebsocketEvent)(nil),              // 0: stream.video.coordinator.client_v1_rpc.WebsocketEvent
 	(*WebsocketClientEvent)(nil),        // 1: stream.video.coordinator.client_v1_rpc.WebsocketClientEvent
 	(*WebsocketAuthRequest)(nil),        // 2: stream.video.coordinator.client_v1_rpc.WebsocketAuthRequest
 	(*WebsocketHealthcheck)(nil),        // 3: stream.video.coordinator.client_v1_rpc.WebsocketHealthcheck
-	nil,                                 // 4: stream.video.coordinator.client_v1_rpc.WebsocketEvent.UsersEntry
-	(*event_v1.CallCreated)(nil),        // 5: stream.video.coordinator.event_v1.CallCreated
-	(*event_v1.CallUpdated)(nil),        // 6: stream.video.coordinator.event_v1.CallUpdated
-	(*event_v1.CallDeleted)(nil),        // 7: stream.video.coordinator.event_v1.CallDeleted
-	(*event_v1.CallMembersCreated)(nil), // 8: stream.video.coordinator.event_v1.CallMembersCreated
-	(*event_v1.CallMembersUpdated)(nil), // 9: stream.video.coordinator.event_v1.CallMembersUpdated
-	(*event_v1.CallMembersDeleted)(nil), // 10: stream.video.coordinator.event_v1.CallMembersDeleted
-	(*event_v1.CallEnded)(nil),          // 11: stream.video.coordinator.event_v1.CallEnded
-	(*event_v1.CallAccepted)(nil),       // 12: stream.video.coordinator.event_v1.CallAccepted
-	(*event_v1.CallRejected)(nil),       // 13: stream.video.coordinator.event_v1.CallRejected
-	(*event_v1.CallCancelled)(nil),      // 14: stream.video.coordinator.event_v1.CallCancelled
-	(*event_v1.UserUpdated)(nil),        // 15: stream.video.coordinator.event_v1.UserUpdated
-	(*event_v1.CallCustom)(nil),         // 16: stream.video.coordinator.event_v1.CallCustom
-	(*user_v1.UserInput)(nil),           // 17: stream.video.coordinator.user_v1.UserInput
-	(*push_v1.DeviceInput)(nil),         // 18: stream.video.coordinator.push_v1.DeviceInput
-	(*user_v1.User)(nil),                // 19: stream.video.coordinator.user_v1.User
+	(*WebsocketError)(nil),              // 4: stream.video.coordinator.client_v1_rpc.WebsocketError
+	nil,                                 // 5: stream.video.coordinator.client_v1_rpc.WebsocketEvent.UsersEntry
+	(*event_v1.CallCreated)(nil),        // 6: stream.video.coordinator.event_v1.CallCreated
+	(*event_v1.CallUpdated)(nil),        // 7: stream.video.coordinator.event_v1.CallUpdated
+	(*event_v1.CallDeleted)(nil),        // 8: stream.video.coordinator.event_v1.CallDeleted
+	(*event_v1.CallMembersCreated)(nil), // 9: stream.video.coordinator.event_v1.CallMembersCreated
+	(*event_v1.CallMembersUpdated)(nil), // 10: stream.video.coordinator.event_v1.CallMembersUpdated
+	(*event_v1.CallMembersDeleted)(nil), // 11: stream.video.coordinator.event_v1.CallMembersDeleted
+	(*event_v1.CallEnded)(nil),          // 12: stream.video.coordinator.event_v1.CallEnded
+	(*event_v1.CallAccepted)(nil),       // 13: stream.video.coordinator.event_v1.CallAccepted
+	(*event_v1.CallRejected)(nil),       // 14: stream.video.coordinator.event_v1.CallRejected
+	(*event_v1.CallCancelled)(nil),      // 15: stream.video.coordinator.event_v1.CallCancelled
+	(*event_v1.UserUpdated)(nil),        // 16: stream.video.coordinator.event_v1.UserUpdated
+	(*event_v1.CallCustom)(nil),         // 17: stream.video.coordinator.event_v1.CallCustom
+	(*user_v1.UserInput)(nil),           // 18: stream.video.coordinator.user_v1.UserInput
+	(*push_v1.DeviceInput)(nil),         // 19: stream.video.coordinator.push_v1.DeviceInput
+	(*user_v1.User)(nil),                // 20: stream.video.coordinator.user_v1.User
 }
 var file_video_coordinator_client_v1_rpc_websocket_proto_depIdxs = []int32{
-	4,  // 0: stream.video.coordinator.client_v1_rpc.WebsocketEvent.users:type_name -> stream.video.coordinator.client_v1_rpc.WebsocketEvent.UsersEntry
-	3,  // 1: stream.video.coordinator.client_v1_rpc.WebsocketEvent.healthcheck:type_name -> stream.video.coordinator.client_v1_rpc.WebsocketHealthcheck
-	5,  // 2: stream.video.coordinator.client_v1_rpc.WebsocketEvent.call_created:type_name -> stream.video.coordinator.event_v1.CallCreated
-	6,  // 3: stream.video.coordinator.client_v1_rpc.WebsocketEvent.call_updated:type_name -> stream.video.coordinator.event_v1.CallUpdated
-	7,  // 4: stream.video.coordinator.client_v1_rpc.WebsocketEvent.call_deleted:type_name -> stream.video.coordinator.event_v1.CallDeleted
-	8,  // 5: stream.video.coordinator.client_v1_rpc.WebsocketEvent.call_members_created:type_name -> stream.video.coordinator.event_v1.CallMembersCreated
-	9,  // 6: stream.video.coordinator.client_v1_rpc.WebsocketEvent.call_members_updated:type_name -> stream.video.coordinator.event_v1.CallMembersUpdated
-	10, // 7: stream.video.coordinator.client_v1_rpc.WebsocketEvent.call_members_deleted:type_name -> stream.video.coordinator.event_v1.CallMembersDeleted
-	11, // 8: stream.video.coordinator.client_v1_rpc.WebsocketEvent.call_ended:type_name -> stream.video.coordinator.event_v1.CallEnded
-	12, // 9: stream.video.coordinator.client_v1_rpc.WebsocketEvent.call_accepted:type_name -> stream.video.coordinator.event_v1.CallAccepted
-	13, // 10: stream.video.coordinator.client_v1_rpc.WebsocketEvent.call_rejected:type_name -> stream.video.coordinator.event_v1.CallRejected
-	14, // 11: stream.video.coordinator.client_v1_rpc.WebsocketEvent.call_cancelled:type_name -> stream.video.coordinator.event_v1.CallCancelled
-	15, // 12: stream.video.coordinator.client_v1_rpc.WebsocketEvent.user_updated:type_name -> stream.video.coordinator.event_v1.UserUpdated
-	16, // 13: stream.video.coordinator.client_v1_rpc.WebsocketEvent.call_custom:type_name -> stream.video.coordinator.event_v1.CallCustom
-	3,  // 14: stream.video.coordinator.client_v1_rpc.WebsocketClientEvent.healthcheck:type_name -> stream.video.coordinator.client_v1_rpc.WebsocketHealthcheck
-	2,  // 15: stream.video.coordinator.client_v1_rpc.WebsocketClientEvent.auth_request:type_name -> stream.video.coordinator.client_v1_rpc.WebsocketAuthRequest
-	17, // 16: stream.video.coordinator.client_v1_rpc.WebsocketAuthRequest.user:type_name -> stream.video.coordinator.user_v1.UserInput
-	18, // 17: stream.video.coordinator.client_v1_rpc.WebsocketAuthRequest.device:type_name -> stream.video.coordinator.push_v1.DeviceInput
-	19, // 18: stream.video.coordinator.client_v1_rpc.WebsocketEvent.UsersEntry.value:type_name -> stream.video.coordinator.user_v1.User
-	19, // [19:19] is the sub-list for method output_type
-	19, // [19:19] is the sub-list for method input_type
-	19, // [19:19] is the sub-list for extension type_name
-	19, // [19:19] is the sub-list for extension extendee
-	0,  // [0:19] is the sub-list for field type_name
+	5,  // 0: stream.video.coordinator.client_v1_rpc.WebsocketEvent.users:type_name -> stream.video.coordinator.client_v1_rpc.WebsocketEvent.UsersEntry
+	4,  // 1: stream.video.coordinator.client_v1_rpc.WebsocketEvent.error:type_name -> stream.video.coordinator.client_v1_rpc.WebsocketError
+	3,  // 2: stream.video.coordinator.client_v1_rpc.WebsocketEvent.healthcheck:type_name -> stream.video.coordinator.client_v1_rpc.WebsocketHealthcheck
+	6,  // 3: stream.video.coordinator.client_v1_rpc.WebsocketEvent.call_created:type_name -> stream.video.coordinator.event_v1.CallCreated
+	7,  // 4: stream.video.coordinator.client_v1_rpc.WebsocketEvent.call_updated:type_name -> stream.video.coordinator.event_v1.CallUpdated
+	8,  // 5: stream.video.coordinator.client_v1_rpc.WebsocketEvent.call_deleted:type_name -> stream.video.coordinator.event_v1.CallDeleted
+	9,  // 6: stream.video.coordinator.client_v1_rpc.WebsocketEvent.call_members_created:type_name -> stream.video.coordinator.event_v1.CallMembersCreated
+	10, // 7: stream.video.coordinator.client_v1_rpc.WebsocketEvent.call_members_updated:type_name -> stream.video.coordinator.event_v1.CallMembersUpdated
+	11, // 8: stream.video.coordinator.client_v1_rpc.WebsocketEvent.call_members_deleted:type_name -> stream.video.coordinator.event_v1.CallMembersDeleted
+	12, // 9: stream.video.coordinator.client_v1_rpc.WebsocketEvent.call_ended:type_name -> stream.video.coordinator.event_v1.CallEnded
+	13, // 10: stream.video.coordinator.client_v1_rpc.WebsocketEvent.call_accepted:type_name -> stream.video.coordinator.event_v1.CallAccepted
+	14, // 11: stream.video.coordinator.client_v1_rpc.WebsocketEvent.call_rejected:type_name -> stream.video.coordinator.event_v1.CallRejected
+	15, // 12: stream.video.coordinator.client_v1_rpc.WebsocketEvent.call_cancelled:type_name -> stream.video.coordinator.event_v1.CallCancelled
+	16, // 13: stream.video.coordinator.client_v1_rpc.WebsocketEvent.user_updated:type_name -> stream.video.coordinator.event_v1.UserUpdated
+	17, // 14: stream.video.coordinator.client_v1_rpc.WebsocketEvent.call_custom:type_name -> stream.video.coordinator.event_v1.CallCustom
+	3,  // 15: stream.video.coordinator.client_v1_rpc.WebsocketClientEvent.healthcheck:type_name -> stream.video.coordinator.client_v1_rpc.WebsocketHealthcheck
+	2,  // 16: stream.video.coordinator.client_v1_rpc.WebsocketClientEvent.auth_request:type_name -> stream.video.coordinator.client_v1_rpc.WebsocketAuthRequest
+	18, // 17: stream.video.coordinator.client_v1_rpc.WebsocketAuthRequest.user:type_name -> stream.video.coordinator.user_v1.UserInput
+	19, // 18: stream.video.coordinator.client_v1_rpc.WebsocketAuthRequest.device:type_name -> stream.video.coordinator.push_v1.DeviceInput
+	20, // 19: stream.video.coordinator.client_v1_rpc.WebsocketEvent.UsersEntry.value:type_name -> stream.video.coordinator.user_v1.User
+	20, // [20:20] is the sub-list for method output_type
+	20, // [20:20] is the sub-list for method input_type
+	20, // [20:20] is the sub-list for extension type_name
+	20, // [20:20] is the sub-list for extension extendee
+	0,  // [0:20] is the sub-list for field type_name
 }
 
 func init() { file_video_coordinator_client_v1_rpc_websocket_proto_init() }
@@ -793,8 +873,21 @@ func file_video_coordinator_client_v1_rpc_websocket_proto_init() {
 				return nil
 			}
 		}
+		file_video_coordinator_client_v1_rpc_websocket_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*WebsocketError); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	file_video_coordinator_client_v1_rpc_websocket_proto_msgTypes[0].OneofWrappers = []interface{}{
+		(*WebsocketEvent_Error)(nil),
 		(*WebsocketEvent_Healthcheck)(nil),
 		(*WebsocketEvent_CallCreated)(nil),
 		(*WebsocketEvent_CallUpdated)(nil),
@@ -819,7 +912,7 @@ func file_video_coordinator_client_v1_rpc_websocket_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_video_coordinator_client_v1_rpc_websocket_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

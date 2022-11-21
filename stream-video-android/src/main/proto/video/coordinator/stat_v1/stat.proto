@@ -77,3 +77,14 @@ message CallParticipantTimeline {
   string user_id = 1 [(validate.rules).string.min_len = 1];
   repeated TimelineEvent events = 2;
 }
+
+message Session {
+  string session_id = 1 [(validate.rules).string.min_len = 1];
+  string call_id = 2;
+  string call_type = 3;
+  // time when first participant joined
+  google.protobuf.Timestamp start = 4;
+  // time when last participant left
+  google.protobuf.Timestamp end = 5;
+}
+

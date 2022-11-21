@@ -49,6 +49,7 @@ service ServerRPC {
   rpc GetRecordings(GetRecordingsRequest) returns (GetRecordingsResponse);
   rpc DeleteRecording(DeleteRecordingRequest) returns (DeleteRecordingResponse);
 
+  rpc QuerySessions(QuerySessionsRequest) returns (QuerySessionsResponse);
   rpc QuerySessionTimelineEvents(QuerySessionTimelineEventsRequest) returns (QuerySessionTimelineEventsResponse);
 
   //  rpc CreateOrUpdateCalls(CreateOrUpdateCallsRequest) returns (CreateOrUpdateCallsResponse);
@@ -328,6 +329,17 @@ message DeleteRecordingRequest {
 }
 
 message DeleteRecordingResponse {
+}
+
+// A request message for the QuerySessions endpoint
+// Specifies a subset of events to request
+message QuerySessionsRequest {
+  // TODO filter sessions by more than app ID
+  // TODO pagination
+}
+
+message QuerySessionsResponse {
+  repeated stat_v1.Session sessions = 1;
 }
 
 // A request message for the QuerySessionTimelineEvents endpoint
