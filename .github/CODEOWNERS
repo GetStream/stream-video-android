@@ -1,0 +1,43 @@
+# Default owner for everything in the repo
+*   @GetStream/android-developers
+
+### Modules
+# Common
+
+# Core
+stream-video-android                                @GetStream/android-developers-core
+stream-video-android-pushprovider-firebase     @GetStream/android-developers-core
+
+# UI
+app                                 @GetStream/android-developers-ui
+dogfooding                          @GetStream/android-developers-ui
+stream-video-android-compose        @GetStream/android-developers-ui
+
+### Top level files and directories
+# Git and GitHub
+.gitignore                  @GetStream/android-developers
+.github                     @GetStream/android-developers
+team-props                  @GetStream/android-developers
+benchmark                   @GetStream/android-developers
+spotless                    @GetStream/android-developers
+
+# Build config
+build.gradle                @GetStream/android-developers
+buildSrc                    @GetStream/android-developers
+gradle                      @GetStream/android-developers
+gradle.properties           @GetStream/android-developers
+gradlew                     @GetStream/android-developers
+gradlew.bat                 @GetStream/android-developers
+settings.gradle.kts         @GetStream/android-developers
+
+# Docs
+CHANGELOG.md                            @GetStream/android-developers
+DEPRECATIONS.md                         @GetStream/android-developers
+CONTRIBUTING.md                         @GetStream/android-developers
+LICENSE                                 @GetStream/android-developers
+README.md                               @GetStream/android-developers
+DokkaRoot.md                            @GetStream/android-developers
+docusaurus                              @GetStream/android-developers
+
+# Misc
+.idea                       @GetStream/android-developers

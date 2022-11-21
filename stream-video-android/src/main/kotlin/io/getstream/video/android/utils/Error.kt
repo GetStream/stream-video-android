@@ -18,8 +18,8 @@ package io.getstream.video.android.utils
 
 import io.getstream.video.android.errors.VideoError
 
-public inline fun <T : Any> fetchResult(call: () -> T): Result<T> = try {
-    Success(call())
+internal inline fun <T : Any> fetchResult(call: () -> T): Result<T> = try {
+    Success(call.invoke())
 } catch (error: Throwable) {
     Failure(VideoError(error.message, error))
 }
