@@ -24,7 +24,6 @@ import io.getstream.video.android.call.builder.CallClientBuilder
 import io.getstream.video.android.coordinator.CallCoordinatorClient
 import io.getstream.video.android.coordinator.state.UserState
 import io.getstream.video.android.engine.StreamCallEngine
-import io.getstream.video.android.engine.StreamCallEngineImpl
 import io.getstream.video.android.engine.adapter.CoordinatorSocketListenerAdapter
 import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.logging.LoggingLevel
@@ -86,6 +85,7 @@ public class StreamVideoImpl(
     private val context: Context,
     private val scope: CoroutineScope,
     private val config: StreamVideoConfig,
+    private val engine: StreamCallEngine,
     private val lifecycle: Lifecycle,
     private val loggingLevel: LoggingLevel,
     private val callCoordinatorClient: CallCoordinatorClient,
@@ -93,14 +93,10 @@ public class StreamVideoImpl(
     private val socket: VideoSocket,
     private val socketStateService: SocketStateService,
     private val userState: UserState,
-    private val networkStateProvider: NetworkStateProvider
+    private val networkStateProvider: NetworkStateProvider,
 ) : StreamVideo {
 
     private val logger = StreamLog.getLogger("Call:StreamVideo")
-
-    private val engine: StreamCallEngine = StreamCallEngineImpl(scope, config) {
-        credentialsProvider.getUserCredentials().id
-    }
 
     /**
      * Observes the app lifecycle and attempts to reconnect/release the socket connection.
@@ -131,31 +127,27 @@ public class StreamVideoImpl(
         scope.launch {
             engine.callState.collect { state ->
                 when (state) {
-                    is StreamCallState.Drop -> {
-                        if (state.reason is DropReason.Timeout) {
-                            logger.i { "[observeState] call dropped by timeout" }
-                            cancelCall(state.callGuid.cid)
-                        }
+                    is StreamCallState.Drop -> if (config.cancelOnTimeout && state.reason is DropReason.Timeout) {
+                        logger.i { "[observeState] call dropped by timeout" }
+                        cancelCall(state.callGuid.cid)
                     }
                     is StreamCallState.Idle -> clearCallState()
-                    is StreamCallState.Joined -> {
-                        if (state.sfuSessionId is StreamSfuSessionId.Undefined) {
-                            logger.i { "[observeState] caller joins a call: $state" }
-                            credentialsProvider.setSfuToken(state.sfuToken)
-                            createCallClient(
-                                signalUrl = state.callUrl,
-                                sfuToken = state.sfuToken,
-                                iceServers = state.iceServers,
-                            )
-                        }
+                    is StreamCallState.Joined -> if (config.createCallClientInternally &&
+                        state.sfuSessionId is StreamSfuSessionId.Undefined
+                    ) {
+                        logger.i { "[observeState] caller joins a call: $state" }
+                        createCallClient(
+                            signalUrl = state.callUrl,
+                            sfuToken = state.sfuToken,
+                            iceServers = state.iceServers,
+                        )
                     }
-                    is StreamCallState.Outgoing -> {
-                        if (state.acceptedByCallee) {
-                            logger.i { "[observeState] caller joins a call: $state" }
-                            joinCall(state.toMetadata())
-                        }
+                    is StreamCallState.Outgoing -> if (config.joinOnAcceptedByCallee && state.acceptedByCallee) {
+                        logger.i { "[observeState] caller joins a call: $state" }
+                        joinCall(state.toMetadata())
                     }
-                    else -> { /* no-op */ }
+                    else -> { /* no-op */
+                    }
                 }
             }
         }
@@ -300,7 +292,9 @@ public class StreamVideoImpl(
                             sfuToken = credentials.token,
                             iceServers = iceServers
                         )
-                    )
+                    ).also {
+                        credentialsProvider.setSfuToken(it.data.sfuToken)
+                    }
                 }
                 is Failure -> Failure(selectEdgeServerResult.error)
             }
@@ -450,6 +444,10 @@ public class StreamVideoImpl(
         iceServers: List<IceServer>
     ): CallClient {
         logger.i { "[createCallClient] signalUrl: $signalUrl, sfuToken: $sfuToken, iceServers: $iceServers" }
+        /**
+         * TODO [sfuToken] can be set as soon as we get [JoinedCall] in [joinCallInternal] function.
+         */
+        credentialsProvider.setSfuToken(sfuToken)
         return CallClientBuilder(
             context = context,
             credentialsProvider = credentialsProvider,
@@ -476,12 +474,12 @@ public class StreamVideoImpl(
      *
      * @return An instance of the [CallClient] if it currently exists (the user is in a call).
      */
-    override suspend fun awaitCallClient(): CallClient {
-        return callClientHolder.first { it != null } ?: error("callClient must not be null")
+    override suspend fun awaitCallClient(): CallClient = withContext(scope.coroutineContext) {
+        callClientHolder.first { it != null } ?: error("callClient must not be null")
     }
 
-    override suspend fun acceptCall(cid: StreamCallCid): Result<JoinedCall> {
-        return try {
+    override suspend fun acceptCall(cid: StreamCallCid): Result<JoinedCall> = withContext(scope.coroutineContext) {
+        try {
             logger.d { "[acceptCall] cid: $cid" }
             val (type, id) = cid.toTypeAndId()
             sendEvent(
@@ -498,13 +496,13 @@ public class StreamVideoImpl(
         }
     }
 
-    override suspend fun rejectCall(cid: StreamCallCid): Result<Boolean> {
+    override suspend fun rejectCall(cid: StreamCallCid): Result<Boolean> = withContext(scope.coroutineContext) {
         logger.d { "[rejectCall] cid: $cid" }
-        return sendEvent(callCid = cid, CallEventType.REJECTED)
+        sendEvent(callCid = cid, CallEventType.REJECTED)
     }
 
-    override suspend fun cancelCall(cid: StreamCallCid): Result<Boolean> {
+    override suspend fun cancelCall(cid: StreamCallCid): Result<Boolean> = withContext(scope.coroutineContext) {
         logger.d { "[cancelCall] cid: $cid" }
-        return sendEvent(callCid = cid, CallEventType.CANCELLED)
+        sendEvent(callCid = cid, CallEventType.CANCELLED)
     }
 }

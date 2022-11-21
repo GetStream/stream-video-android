@@ -667,22 +667,28 @@ public final class io/getstream/video/android/StreamVideo$DefaultImpls {
 }
 
 public final class io/getstream/video/android/StreamVideoBuilder {
-	public fun <init> (Landroid/content/Context;Lio/getstream/video/android/token/CredentialsProvider;Lio/getstream/video/android/StreamVideoConfig;Ljava/util/Set;Lio/getstream/video/android/input/CallAndroidInputLauncher;Lio/getstream/video/android/logging/LoggingLevel;)V
-	public synthetic fun <init> (Landroid/content/Context;Lio/getstream/video/android/token/CredentialsProvider;Lio/getstream/video/android/StreamVideoConfig;Ljava/util/Set;Lio/getstream/video/android/input/CallAndroidInputLauncher;Lio/getstream/video/android/logging/LoggingLevel;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Landroid/content/Context;Lio/getstream/video/android/token/CredentialsProvider;Lio/getstream/video/android/StreamVideoConfig;Ljava/util/Set;Lio/getstream/video/android/input/CallAndroidInputLauncher;Lio/getstream/video/android/logging/LoggingLevel;Lkotlin/jvm/functions/Function1;)V
+	public synthetic fun <init> (Landroid/content/Context;Lio/getstream/video/android/token/CredentialsProvider;Lio/getstream/video/android/StreamVideoConfig;Ljava/util/Set;Lio/getstream/video/android/input/CallAndroidInputLauncher;Lio/getstream/video/android/logging/LoggingLevel;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun build ()Lio/getstream/video/android/StreamVideo;
 }
 
 public abstract interface class io/getstream/video/android/StreamVideoConfig {
+	public abstract fun getCancelOnTimeout ()Z
+	public abstract fun getCreateCallClientInternally ()Z
 	public abstract fun getDropTimeout ()J
+	public abstract fun getJoinOnAcceptedByCallee ()Z
 }
 
 public final class io/getstream/video/android/StreamVideoConfigDefault : io/getstream/video/android/StreamVideoConfig {
 	public static final field INSTANCE Lio/getstream/video/android/StreamVideoConfigDefault;
+	public fun getCancelOnTimeout ()Z
+	public fun getCreateCallClientInternally ()Z
 	public fun getDropTimeout ()J
+	public fun getJoinOnAcceptedByCallee ()Z
 }
 
 public final class io/getstream/video/android/StreamVideoImpl : io/getstream/video/android/StreamVideo {
-	public fun <init> (Landroid/content/Context;Lkotlinx/coroutines/CoroutineScope;Lio/getstream/video/android/StreamVideoConfig;Landroidx/lifecycle/Lifecycle;Lio/getstream/video/android/logging/LoggingLevel;Lio/getstream/video/android/coordinator/CallCoordinatorClient;Lio/getstream/video/android/token/CredentialsProvider;Lio/getstream/video/android/socket/VideoSocket;Lio/getstream/video/android/socket/SocketStateService;Lio/getstream/video/android/coordinator/state/UserState;Lio/getstream/video/android/network/NetworkStateProvider;)V
+	public fun <init> (Landroid/content/Context;Lkotlinx/coroutines/CoroutineScope;Lio/getstream/video/android/StreamVideoConfig;Lio/getstream/video/android/engine/StreamCallEngine;Landroidx/lifecycle/Lifecycle;Lio/getstream/video/android/logging/LoggingLevel;Lio/getstream/video/android/coordinator/CallCoordinatorClient;Lio/getstream/video/android/token/CredentialsProvider;Lio/getstream/video/android/socket/VideoSocket;Lio/getstream/video/android/socket/SocketStateService;Lio/getstream/video/android/coordinator/state/UserState;Lio/getstream/video/android/network/NetworkStateProvider;)V
 	public fun acceptCall (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun addSocketListener (Lio/getstream/video/android/socket/SocketListener;)V
 	public fun awaitCallClient (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -1102,6 +1108,21 @@ public final class io/getstream/video/android/dispatchers/DispatcherProvider {
 	public final fun getMain ()Lkotlinx/coroutines/CoroutineDispatcher;
 	public final fun reset ()V
 	public final fun set (Lkotlinx/coroutines/CoroutineDispatcher;Lkotlinx/coroutines/CoroutineDispatcher;)V
+}
+
+public abstract interface class io/getstream/video/android/engine/StreamCallEngine {
+	public abstract fun getCallState ()Lkotlinx/coroutines/flow/StateFlow;
+	public abstract fun onCallConnectionChange (Ljava/lang/String;Lio/getstream/video/android/model/StreamPeerType;Lio/getstream/video/android/model/StreamPeerConnectionState;)V
+	public abstract fun onCallEventSending (Ljava/lang/String;Lio/getstream/video/android/model/CallEventType;)V
+	public abstract fun onCallEventSent (Ljava/lang/String;Lio/getstream/video/android/model/CallEventType;)V
+	public abstract fun onCallFailed (Lio/getstream/video/android/errors/VideoError;)V
+	public abstract fun onCallJoined (Lio/getstream/video/android/model/JoinedCall;)V
+	public abstract fun onCallJoining (Lio/getstream/video/android/model/CallMetadata;)V
+	public abstract fun onCallStarted (Lio/getstream/video/android/model/CallMetadata;)V
+	public abstract fun onCallStarting (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ZZ)V
+	public abstract fun onCoordinatorEvent (Lio/getstream/video/android/events/VideoEvent;)V
+	public abstract fun onSfuEvent (Lio/getstream/video/android/events/SfuDataEvent;)V
+	public abstract fun onSfuJoinSent (Lstream/video/sfu/event/JoinRequest;)V
 }
 
 public abstract class io/getstream/video/android/errors/DisconnectCause {
