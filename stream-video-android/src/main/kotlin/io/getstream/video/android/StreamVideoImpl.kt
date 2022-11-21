@@ -115,7 +115,7 @@ public class StreamVideoImpl(
 
     init {
         observeState()
-        socket.addListener(CoordinatorSocketListenerAdapter(engine))
+        addSocketListener(CoordinatorSocketListenerAdapter(engine))
         scope.launch(Dispatchers.Main.immediate) {
             lifecycleObserver.observe()
         }

@@ -45,9 +45,9 @@ import io.getstream.video.android.events.ConnectedEvent
 import io.getstream.video.android.events.ICETrickleEvent
 import io.getstream.video.android.events.JoinCallResponseEvent
 import io.getstream.video.android.events.MuteStateChangeEvent
+import io.getstream.video.android.events.ParticipantJoinedEvent
+import io.getstream.video.android.events.ParticipantLeftEvent
 import io.getstream.video.android.events.SfuDataEvent
-import io.getstream.video.android.events.SfuParticipantJoinedEvent
-import io.getstream.video.android.events.SfuParticipantLeftEvent
 import io.getstream.video.android.events.SubscriberOfferEvent
 import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.CallParticipantState
@@ -536,8 +536,8 @@ internal class CallClientImpl(
             when (event) {
                 is ICETrickleEvent -> handleTrickle(event)
                 is SubscriberOfferEvent -> handleSubscriberOffer(event)
-                is SfuParticipantJoinedEvent -> call?.addParticipant(event)
-                is SfuParticipantLeftEvent -> call?.removeParticipant(event)
+                is ParticipantJoinedEvent -> call?.addParticipant(event)
+                is ParticipantLeftEvent -> call?.removeParticipant(event)
                 is ChangePublishQualityEvent -> {
                     // updatePublishQuality(event) -> TODO - re-enable once we send the proper quality (dimensions)
                 }

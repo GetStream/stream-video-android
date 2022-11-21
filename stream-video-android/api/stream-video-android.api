@@ -775,6 +775,7 @@ public abstract interface class io/getstream/video/android/api/ServerRPCService 
 	public abstract fun queryRoles (Lstream/video/coordinator/server_v1_rpc/QueryRolesRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun queryScopes (Lstream/video/coordinator/server_v1_rpc/QueryScopesRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun querySessionTimelineEvents (Lstream/video/coordinator/server_v1_rpc/QuerySessionTimelineEventsRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun querySessions (Lstream/video/coordinator/server_v1_rpc/QuerySessionsRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun resetScope (Lstream/video/coordinator/server_v1_rpc/ResetScopeRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun startBroadcast (Lstream/video/coordinator/server_v1_rpc/StartBroadcastRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun startRecording (Lstream/video/coordinator/server_v1_rpc/StartRecordingRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -1193,34 +1194,6 @@ public final class io/getstream/video/android/events/AudioLevelChangedEvent : io
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/events/AudioMutedEvent : io/getstream/video/android/events/VideoEvent {
-	public fun <init> (Ljava/lang/String;Lstream/video/sfu/models/Call;Z)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Lstream/video/sfu/models/Call;
-	public final fun component3 ()Z
-	public final fun copy (Ljava/lang/String;Lstream/video/sfu/models/Call;Z)Lio/getstream/video/android/events/AudioMutedEvent;
-	public static synthetic fun copy$default (Lio/getstream/video/android/events/AudioMutedEvent;Ljava/lang/String;Lstream/video/sfu/models/Call;ZILjava/lang/Object;)Lio/getstream/video/android/events/AudioMutedEvent;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getAreAllUsersMuted ()Z
-	public final fun getCall ()Lstream/video/sfu/models/Call;
-	public final fun getUserId ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/events/AudioUnmutedEvent : io/getstream/video/android/events/VideoEvent {
-	public fun <init> (Ljava/lang/String;Lstream/video/sfu/models/Call;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Lstream/video/sfu/models/Call;
-	public final fun copy (Ljava/lang/String;Lstream/video/sfu/models/Call;)Lio/getstream/video/android/events/AudioUnmutedEvent;
-	public static synthetic fun copy$default (Lio/getstream/video/android/events/AudioUnmutedEvent;Ljava/lang/String;Lstream/video/sfu/models/Call;ILjava/lang/Object;)Lio/getstream/video/android/events/AudioUnmutedEvent;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getCall ()Lstream/video/sfu/models/Call;
-	public final fun getUserId ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
 public final class io/getstream/video/android/events/CallAcceptedEvent : io/getstream/video/android/events/VideoEvent {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lio/getstream/video/android/model/CallInfo;Lio/getstream/video/android/model/CallDetails;)V
 	public final fun component1 ()Ljava/lang/String;
@@ -1461,17 +1434,6 @@ public final class io/getstream/video/android/events/JoinCallResponseEvent : io/
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/events/LocalDeviceChangeEvent : io/getstream/video/android/events/SfuDataEvent {
-	public fun <init> (Ljava/lang/String;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/events/LocalDeviceChangeEvent;
-	public static synthetic fun copy$default (Lio/getstream/video/android/events/LocalDeviceChangeEvent;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/events/LocalDeviceChangeEvent;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getType ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
 public final class io/getstream/video/android/events/MuteStateChangeEvent : io/getstream/video/android/events/SfuDataEvent {
 	public fun <init> (Ljava/lang/String;ZZ)V
 	public final fun component1 ()Ljava/lang/String;
@@ -1487,77 +1449,33 @@ public final class io/getstream/video/android/events/MuteStateChangeEvent : io/g
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/events/ParticipantJoinedEvent : io/getstream/video/android/events/VideoEvent {
-	public fun <init> (Lstream/video/coordinator/participant_v1/Participant;)V
-	public final fun component1 ()Lstream/video/coordinator/participant_v1/Participant;
-	public final fun copy (Lstream/video/coordinator/participant_v1/Participant;)Lio/getstream/video/android/events/ParticipantJoinedEvent;
-	public static synthetic fun copy$default (Lio/getstream/video/android/events/ParticipantJoinedEvent;Lstream/video/coordinator/participant_v1/Participant;ILjava/lang/Object;)Lio/getstream/video/android/events/ParticipantJoinedEvent;
+public final class io/getstream/video/android/events/ParticipantJoinedEvent : io/getstream/video/android/events/SfuDataEvent {
+	public fun <init> (Lstream/video/sfu/models/Participant;Lstream/video/sfu/models/Call;)V
+	public final fun component1 ()Lstream/video/sfu/models/Participant;
+	public final fun component2 ()Lstream/video/sfu/models/Call;
+	public final fun copy (Lstream/video/sfu/models/Participant;Lstream/video/sfu/models/Call;)Lio/getstream/video/android/events/ParticipantJoinedEvent;
+	public static synthetic fun copy$default (Lio/getstream/video/android/events/ParticipantJoinedEvent;Lstream/video/sfu/models/Participant;Lstream/video/sfu/models/Call;ILjava/lang/Object;)Lio/getstream/video/android/events/ParticipantJoinedEvent;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getParticipant ()Lstream/video/coordinator/participant_v1/Participant;
+	public final fun getCall ()Lstream/video/sfu/models/Call;
+	public final fun getParticipant ()Lstream/video/sfu/models/Participant;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/events/ParticipantLeftEvent : io/getstream/video/android/events/VideoEvent {
-	public fun <init> (Lstream/video/coordinator/participant_v1/Participant;)V
-	public final fun component1 ()Lstream/video/coordinator/participant_v1/Participant;
-	public final fun copy (Lstream/video/coordinator/participant_v1/Participant;)Lio/getstream/video/android/events/ParticipantLeftEvent;
-	public static synthetic fun copy$default (Lio/getstream/video/android/events/ParticipantLeftEvent;Lstream/video/coordinator/participant_v1/Participant;ILjava/lang/Object;)Lio/getstream/video/android/events/ParticipantLeftEvent;
+public final class io/getstream/video/android/events/ParticipantLeftEvent : io/getstream/video/android/events/SfuDataEvent {
+	public fun <init> (Lstream/video/sfu/models/Participant;Lstream/video/sfu/models/Call;)V
+	public final fun component1 ()Lstream/video/sfu/models/Participant;
+	public final fun component2 ()Lstream/video/sfu/models/Call;
+	public final fun copy (Lstream/video/sfu/models/Participant;Lstream/video/sfu/models/Call;)Lio/getstream/video/android/events/ParticipantLeftEvent;
+	public static synthetic fun copy$default (Lio/getstream/video/android/events/ParticipantLeftEvent;Lstream/video/sfu/models/Participant;Lstream/video/sfu/models/Call;ILjava/lang/Object;)Lio/getstream/video/android/events/ParticipantLeftEvent;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getParticipant ()Lstream/video/coordinator/participant_v1/Participant;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/events/PublisherCandidateEvent : io/getstream/video/android/events/SfuDataEvent {
-	public fun <init> (Ljava/lang/String;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/events/PublisherCandidateEvent;
-	public static synthetic fun copy$default (Lio/getstream/video/android/events/PublisherCandidateEvent;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/events/PublisherCandidateEvent;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getCandidate ()Ljava/lang/String;
+	public final fun getCall ()Lstream/video/sfu/models/Call;
+	public final fun getParticipant ()Lstream/video/sfu/models/Participant;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
 
 public abstract class io/getstream/video/android/events/SfuDataEvent {
-}
-
-public final class io/getstream/video/android/events/SfuParticipantJoinedEvent : io/getstream/video/android/events/SfuDataEvent {
-	public fun <init> (Lstream/video/sfu/models/Participant;Lstream/video/sfu/models/Call;)V
-	public final fun component1 ()Lstream/video/sfu/models/Participant;
-	public final fun component2 ()Lstream/video/sfu/models/Call;
-	public final fun copy (Lstream/video/sfu/models/Participant;Lstream/video/sfu/models/Call;)Lio/getstream/video/android/events/SfuParticipantJoinedEvent;
-	public static synthetic fun copy$default (Lio/getstream/video/android/events/SfuParticipantJoinedEvent;Lstream/video/sfu/models/Participant;Lstream/video/sfu/models/Call;ILjava/lang/Object;)Lio/getstream/video/android/events/SfuParticipantJoinedEvent;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getCall ()Lstream/video/sfu/models/Call;
-	public final fun getParticipant ()Lstream/video/sfu/models/Participant;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/events/SfuParticipantLeftEvent : io/getstream/video/android/events/SfuDataEvent {
-	public fun <init> (Lstream/video/sfu/models/Participant;Lstream/video/sfu/models/Call;)V
-	public final fun component1 ()Lstream/video/sfu/models/Participant;
-	public final fun component2 ()Lstream/video/sfu/models/Call;
-	public final fun copy (Lstream/video/sfu/models/Participant;Lstream/video/sfu/models/Call;)Lio/getstream/video/android/events/SfuParticipantLeftEvent;
-	public static synthetic fun copy$default (Lio/getstream/video/android/events/SfuParticipantLeftEvent;Lstream/video/sfu/models/Participant;Lstream/video/sfu/models/Call;ILjava/lang/Object;)Lio/getstream/video/android/events/SfuParticipantLeftEvent;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getCall ()Lstream/video/sfu/models/Call;
-	public final fun getParticipant ()Lstream/video/sfu/models/Participant;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/events/SubscriberCandidateEvent : io/getstream/video/android/events/SfuDataEvent {
-	public fun <init> (Ljava/lang/String;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/events/SubscriberCandidateEvent;
-	public static synthetic fun copy$default (Lio/getstream/video/android/events/SubscriberCandidateEvent;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/events/SubscriberCandidateEvent;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getCandidate ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/events/SubscriberOfferEvent : io/getstream/video/android/events/SfuDataEvent {
@@ -1585,32 +1503,6 @@ public final class io/getstream/video/android/events/VideoQualityChangedEvent : 
 	public static synthetic fun copy$default (Lio/getstream/video/android/events/VideoQualityChangedEvent;Ljava/util/Map;ILjava/lang/Object;)Lio/getstream/video/android/events/VideoQualityChangedEvent;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getQualities ()Ljava/util/Map;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/events/VideoStartedEvent : io/getstream/video/android/events/VideoEvent {
-	public fun <init> (Ljava/lang/String;Lstream/video/sfu/models/Call;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Lstream/video/sfu/models/Call;
-	public final fun copy (Ljava/lang/String;Lstream/video/sfu/models/Call;)Lio/getstream/video/android/events/VideoStartedEvent;
-	public static synthetic fun copy$default (Lio/getstream/video/android/events/VideoStartedEvent;Ljava/lang/String;Lstream/video/sfu/models/Call;ILjava/lang/Object;)Lio/getstream/video/android/events/VideoStartedEvent;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getCall ()Lstream/video/sfu/models/Call;
-	public final fun getUserId ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/events/VideoStoppedEvent : io/getstream/video/android/events/VideoEvent {
-	public fun <init> (Ljava/lang/String;Lstream/video/sfu/models/Call;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Lstream/video/sfu/models/Call;
-	public final fun copy (Ljava/lang/String;Lstream/video/sfu/models/Call;)Lio/getstream/video/android/events/VideoStoppedEvent;
-	public static synthetic fun copy$default (Lio/getstream/video/android/events/VideoStoppedEvent;Ljava/lang/String;Lstream/video/sfu/models/Call;ILjava/lang/Object;)Lio/getstream/video/android/events/VideoStoppedEvent;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getCall ()Lstream/video/sfu/models/Call;
-	public final fun getUserId ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -2692,10 +2584,6 @@ public final class io/getstream/video/android/ui/ParticipantItemView : org/webrt
 	public final fun isInitialized ()Z
 }
 
-public final class io/getstream/video/android/utils/ErrorKt {
-	public static final fun fetchResult (Lkotlin/jvm/functions/Function0;)Lio/getstream/video/android/utils/Result;
-}
-
 public final class io/getstream/video/android/utils/Failure : io/getstream/video/android/utils/Result {
 	public fun <init> (Lio/getstream/video/android/errors/VideoError;)V
 	public final fun component1 ()Lio/getstream/video/android/errors/VideoError;
@@ -2717,11 +2605,15 @@ public final class io/getstream/video/android/utils/ListUtilsKt {
 }
 
 public abstract class io/getstream/video/android/utils/Result {
+	public final fun isFailure ()Z
+	public final fun isSuccess ()Z
 }
 
 public final class io/getstream/video/android/utils/ResultKt {
-	public static final synthetic fun flatMap (Lio/getstream/video/android/utils/Result;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final synthetic fun flatMap (Lio/getstream/video/android/utils/Result;Lkotlin/jvm/functions/Function1;)Lio/getstream/video/android/utils/Result;
+	public static final synthetic fun flatMapSuspend (Lio/getstream/video/android/utils/Result;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static final synthetic fun map (Lio/getstream/video/android/utils/Result;Lkotlin/jvm/functions/Function1;)Lio/getstream/video/android/utils/Result;
+	public static final synthetic fun mapSuspend (Lio/getstream/video/android/utils/Result;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static final synthetic fun onError (Lio/getstream/video/android/utils/Result;Lkotlin/jvm/functions/Function1;)Lio/getstream/video/android/utils/Result;
 	public static final synthetic fun onErrorSuspend (Lio/getstream/video/android/utils/Result;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static final synthetic fun onSuccess (Lio/getstream/video/android/utils/Result;Lkotlin/jvm/functions/Function1;)Lio/getstream/video/android/utils/Result;
@@ -3950,14 +3842,15 @@ public final class stream/video/coordinator/client_v1_rpc/MemberInput : com/squa
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/coordinator/client_v1_rpc/MemberInput$Companion;
 	public fun <init> ()V
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;Lokio/ByteString;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;Lokio/ByteString;)Lstream/video/coordinator/client_v1_rpc/MemberInput;
-	public static synthetic fun copy$default (Lstream/video/coordinator/client_v1_rpc/MemberInput;Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;Lokio/ByteString;ILjava/lang/Object;)Lstream/video/coordinator/client_v1_rpc/MemberInput;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;Lstream/video/coordinator/user_v1/UserInput;Lokio/ByteString;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;Lstream/video/coordinator/user_v1/UserInput;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;Lstream/video/coordinator/user_v1/UserInput;Lokio/ByteString;)Lstream/video/coordinator/client_v1_rpc/MemberInput;
+	public static synthetic fun copy$default (Lstream/video/coordinator/client_v1_rpc/MemberInput;Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;Lstream/video/coordinator/user_v1/UserInput;Lokio/ByteString;ILjava/lang/Object;)Lstream/video/coordinator/client_v1_rpc/MemberInput;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCustom_json ()Lokio/ByteString;
 	public final fun getRole ()Ljava/lang/String;
 	public final fun getUser_id ()Ljava/lang/String;
+	public final fun getUser_input ()Lstream/video/coordinator/user_v1/UserInput;
 	public fun hashCode ()I
 	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
 	public synthetic fun newBuilder ()Ljava/lang/Void;
@@ -4556,14 +4449,34 @@ public final class stream/video/coordinator/client_v1_rpc/WebsocketClientEvent :
 public final class stream/video/coordinator/client_v1_rpc/WebsocketClientEvent$Companion {
 }
 
+public final class stream/video/coordinator/client_v1_rpc/WebsocketError : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field Companion Lstream/video/coordinator/client_v1_rpc/WebsocketError$Companion;
+	public fun <init> ()V
+	public fun <init> (ILjava/lang/String;Lokio/ByteString;)V
+	public synthetic fun <init> (ILjava/lang/String;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (ILjava/lang/String;Lokio/ByteString;)Lstream/video/coordinator/client_v1_rpc/WebsocketError;
+	public static synthetic fun copy$default (Lstream/video/coordinator/client_v1_rpc/WebsocketError;ILjava/lang/String;Lokio/ByteString;ILjava/lang/Object;)Lstream/video/coordinator/client_v1_rpc/WebsocketError;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCode ()I
+	public final fun getMessage ()Ljava/lang/String;
+	public fun hashCode ()I
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public synthetic fun newBuilder ()Ljava/lang/Void;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class stream/video/coordinator/client_v1_rpc/WebsocketError$Companion {
+}
+
 public final class stream/video/coordinator/client_v1_rpc/WebsocketEvent : com/squareup/wire/Message {
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/coordinator/client_v1_rpc/WebsocketEvent$Companion;
 	public fun <init> ()V
-	public fun <init> (Ljava/util/Map;Lstream/video/coordinator/client_v1_rpc/WebsocketHealthcheck;Lstream/video/coordinator/event_v1/CallCreated;Lstream/video/coordinator/event_v1/CallUpdated;Lstream/video/coordinator/event_v1/CallDeleted;Lstream/video/coordinator/event_v1/CallMembersCreated;Lstream/video/coordinator/event_v1/CallMembersUpdated;Lstream/video/coordinator/event_v1/CallMembersDeleted;Lstream/video/coordinator/event_v1/CallEnded;Lstream/video/coordinator/event_v1/CallAccepted;Lstream/video/coordinator/event_v1/CallRejected;Lstream/video/coordinator/event_v1/CallCancelled;Lstream/video/coordinator/event_v1/UserUpdated;Lstream/video/coordinator/event_v1/CallCustom;Lokio/ByteString;)V
-	public synthetic fun <init> (Ljava/util/Map;Lstream/video/coordinator/client_v1_rpc/WebsocketHealthcheck;Lstream/video/coordinator/event_v1/CallCreated;Lstream/video/coordinator/event_v1/CallUpdated;Lstream/video/coordinator/event_v1/CallDeleted;Lstream/video/coordinator/event_v1/CallMembersCreated;Lstream/video/coordinator/event_v1/CallMembersUpdated;Lstream/video/coordinator/event_v1/CallMembersDeleted;Lstream/video/coordinator/event_v1/CallEnded;Lstream/video/coordinator/event_v1/CallAccepted;Lstream/video/coordinator/event_v1/CallRejected;Lstream/video/coordinator/event_v1/CallCancelled;Lstream/video/coordinator/event_v1/UserUpdated;Lstream/video/coordinator/event_v1/CallCustom;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun copy (Ljava/util/Map;Lstream/video/coordinator/client_v1_rpc/WebsocketHealthcheck;Lstream/video/coordinator/event_v1/CallCreated;Lstream/video/coordinator/event_v1/CallUpdated;Lstream/video/coordinator/event_v1/CallDeleted;Lstream/video/coordinator/event_v1/CallMembersCreated;Lstream/video/coordinator/event_v1/CallMembersUpdated;Lstream/video/coordinator/event_v1/CallMembersDeleted;Lstream/video/coordinator/event_v1/CallEnded;Lstream/video/coordinator/event_v1/CallAccepted;Lstream/video/coordinator/event_v1/CallRejected;Lstream/video/coordinator/event_v1/CallCancelled;Lstream/video/coordinator/event_v1/UserUpdated;Lstream/video/coordinator/event_v1/CallCustom;Lokio/ByteString;)Lstream/video/coordinator/client_v1_rpc/WebsocketEvent;
-	public static synthetic fun copy$default (Lstream/video/coordinator/client_v1_rpc/WebsocketEvent;Ljava/util/Map;Lstream/video/coordinator/client_v1_rpc/WebsocketHealthcheck;Lstream/video/coordinator/event_v1/CallCreated;Lstream/video/coordinator/event_v1/CallUpdated;Lstream/video/coordinator/event_v1/CallDeleted;Lstream/video/coordinator/event_v1/CallMembersCreated;Lstream/video/coordinator/event_v1/CallMembersUpdated;Lstream/video/coordinator/event_v1/CallMembersDeleted;Lstream/video/coordinator/event_v1/CallEnded;Lstream/video/coordinator/event_v1/CallAccepted;Lstream/video/coordinator/event_v1/CallRejected;Lstream/video/coordinator/event_v1/CallCancelled;Lstream/video/coordinator/event_v1/UserUpdated;Lstream/video/coordinator/event_v1/CallCustom;Lokio/ByteString;ILjava/lang/Object;)Lstream/video/coordinator/client_v1_rpc/WebsocketEvent;
+	public fun <init> (Ljava/util/Map;Lstream/video/coordinator/client_v1_rpc/WebsocketError;Lstream/video/coordinator/client_v1_rpc/WebsocketHealthcheck;Lstream/video/coordinator/event_v1/CallCreated;Lstream/video/coordinator/event_v1/CallUpdated;Lstream/video/coordinator/event_v1/CallDeleted;Lstream/video/coordinator/event_v1/CallMembersCreated;Lstream/video/coordinator/event_v1/CallMembersUpdated;Lstream/video/coordinator/event_v1/CallMembersDeleted;Lstream/video/coordinator/event_v1/CallEnded;Lstream/video/coordinator/event_v1/CallAccepted;Lstream/video/coordinator/event_v1/CallRejected;Lstream/video/coordinator/event_v1/CallCancelled;Lstream/video/coordinator/event_v1/UserUpdated;Lstream/video/coordinator/event_v1/CallCustom;Lokio/ByteString;)V
+	public synthetic fun <init> (Ljava/util/Map;Lstream/video/coordinator/client_v1_rpc/WebsocketError;Lstream/video/coordinator/client_v1_rpc/WebsocketHealthcheck;Lstream/video/coordinator/event_v1/CallCreated;Lstream/video/coordinator/event_v1/CallUpdated;Lstream/video/coordinator/event_v1/CallDeleted;Lstream/video/coordinator/event_v1/CallMembersCreated;Lstream/video/coordinator/event_v1/CallMembersUpdated;Lstream/video/coordinator/event_v1/CallMembersDeleted;Lstream/video/coordinator/event_v1/CallEnded;Lstream/video/coordinator/event_v1/CallAccepted;Lstream/video/coordinator/event_v1/CallRejected;Lstream/video/coordinator/event_v1/CallCancelled;Lstream/video/coordinator/event_v1/UserUpdated;Lstream/video/coordinator/event_v1/CallCustom;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (Ljava/util/Map;Lstream/video/coordinator/client_v1_rpc/WebsocketError;Lstream/video/coordinator/client_v1_rpc/WebsocketHealthcheck;Lstream/video/coordinator/event_v1/CallCreated;Lstream/video/coordinator/event_v1/CallUpdated;Lstream/video/coordinator/event_v1/CallDeleted;Lstream/video/coordinator/event_v1/CallMembersCreated;Lstream/video/coordinator/event_v1/CallMembersUpdated;Lstream/video/coordinator/event_v1/CallMembersDeleted;Lstream/video/coordinator/event_v1/CallEnded;Lstream/video/coordinator/event_v1/CallAccepted;Lstream/video/coordinator/event_v1/CallRejected;Lstream/video/coordinator/event_v1/CallCancelled;Lstream/video/coordinator/event_v1/UserUpdated;Lstream/video/coordinator/event_v1/CallCustom;Lokio/ByteString;)Lstream/video/coordinator/client_v1_rpc/WebsocketEvent;
+	public static synthetic fun copy$default (Lstream/video/coordinator/client_v1_rpc/WebsocketEvent;Ljava/util/Map;Lstream/video/coordinator/client_v1_rpc/WebsocketError;Lstream/video/coordinator/client_v1_rpc/WebsocketHealthcheck;Lstream/video/coordinator/event_v1/CallCreated;Lstream/video/coordinator/event_v1/CallUpdated;Lstream/video/coordinator/event_v1/CallDeleted;Lstream/video/coordinator/event_v1/CallMembersCreated;Lstream/video/coordinator/event_v1/CallMembersUpdated;Lstream/video/coordinator/event_v1/CallMembersDeleted;Lstream/video/coordinator/event_v1/CallEnded;Lstream/video/coordinator/event_v1/CallAccepted;Lstream/video/coordinator/event_v1/CallRejected;Lstream/video/coordinator/event_v1/CallCancelled;Lstream/video/coordinator/event_v1/UserUpdated;Lstream/video/coordinator/event_v1/CallCustom;Lokio/ByteString;ILjava/lang/Object;)Lstream/video/coordinator/client_v1_rpc/WebsocketEvent;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCall_accepted ()Lstream/video/coordinator/event_v1/CallAccepted;
 	public final fun getCall_cancelled ()Lstream/video/coordinator/event_v1/CallCancelled;
@@ -4576,6 +4489,7 @@ public final class stream/video/coordinator/client_v1_rpc/WebsocketEvent : com/s
 	public final fun getCall_members_updated ()Lstream/video/coordinator/event_v1/CallMembersUpdated;
 	public final fun getCall_rejected ()Lstream/video/coordinator/event_v1/CallRejected;
 	public final fun getCall_updated ()Lstream/video/coordinator/event_v1/CallUpdated;
+	public final fun getError ()Lstream/video/coordinator/client_v1_rpc/WebsocketError;
 	public final fun getHealthcheck ()Lstream/video/coordinator/client_v1_rpc/WebsocketHealthcheck;
 	public final fun getUser_updated ()Lstream/video/coordinator/event_v1/UserUpdated;
 	public final fun getUsers ()Ljava/util/Map;
@@ -6446,6 +6360,43 @@ public final class stream/video/coordinator/server_v1_rpc/QuerySessionTimelineEv
 public final class stream/video/coordinator/server_v1_rpc/QuerySessionTimelineEventsResponse$Companion {
 }
 
+public final class stream/video/coordinator/server_v1_rpc/QuerySessionsRequest : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field Companion Lstream/video/coordinator/server_v1_rpc/QuerySessionsRequest$Companion;
+	public fun <init> ()V
+	public fun <init> (Lokio/ByteString;)V
+	public synthetic fun <init> (Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (Lokio/ByteString;)Lstream/video/coordinator/server_v1_rpc/QuerySessionsRequest;
+	public static synthetic fun copy$default (Lstream/video/coordinator/server_v1_rpc/QuerySessionsRequest;Lokio/ByteString;ILjava/lang/Object;)Lstream/video/coordinator/server_v1_rpc/QuerySessionsRequest;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public synthetic fun newBuilder ()Ljava/lang/Void;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class stream/video/coordinator/server_v1_rpc/QuerySessionsRequest$Companion {
+}
+
+public final class stream/video/coordinator/server_v1_rpc/QuerySessionsResponse : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field Companion Lstream/video/coordinator/server_v1_rpc/QuerySessionsResponse$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/util/List;Lokio/ByteString;)V
+	public synthetic fun <init> (Ljava/util/List;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (Ljava/util/List;Lokio/ByteString;)Lstream/video/coordinator/server_v1_rpc/QuerySessionsResponse;
+	public static synthetic fun copy$default (Lstream/video/coordinator/server_v1_rpc/QuerySessionsResponse;Ljava/util/List;Lokio/ByteString;ILjava/lang/Object;)Lstream/video/coordinator/server_v1_rpc/QuerySessionsResponse;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getSessions ()Ljava/util/List;
+	public fun hashCode ()I
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public synthetic fun newBuilder ()Ljava/lang/Void;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class stream/video/coordinator/server_v1_rpc/QuerySessionsResponse$Companion {
+}
+
 public final class stream/video/coordinator/server_v1_rpc/ResetScopeRequest : com/squareup/wire/Message {
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/coordinator/server_v1_rpc/ResetScopeRequest$Companion;
@@ -7010,6 +6961,29 @@ public final class stream/video/coordinator/stat_v1/ParticipantDisconnected : co
 }
 
 public final class stream/video/coordinator/stat_v1/ParticipantDisconnected$Companion {
+}
+
+public final class stream/video/coordinator/stat_v1/Session : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field Companion Lstream/video/coordinator/stat_v1/Session$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/time/Instant;Ljava/time/Instant;Lokio/ByteString;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/time/Instant;Ljava/time/Instant;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/time/Instant;Ljava/time/Instant;Lokio/ByteString;)Lstream/video/coordinator/stat_v1/Session;
+	public static synthetic fun copy$default (Lstream/video/coordinator/stat_v1/Session;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/time/Instant;Ljava/time/Instant;Lokio/ByteString;ILjava/lang/Object;)Lstream/video/coordinator/stat_v1/Session;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCall_id ()Ljava/lang/String;
+	public final fun getCall_type ()Ljava/lang/String;
+	public final fun getEnd ()Ljava/time/Instant;
+	public final fun getSession_id ()Ljava/lang/String;
+	public final fun getStart ()Ljava/time/Instant;
+	public fun hashCode ()I
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public synthetic fun newBuilder ()Ljava/lang/Void;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class stream/video/coordinator/stat_v1/Session$Companion {
 }
 
 public final class stream/video/coordinator/stat_v1/TimelineEvent : com/squareup/wire/Message {

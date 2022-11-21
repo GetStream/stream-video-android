@@ -121,31 +121,6 @@ internal object EventMapper {
             )
         }
 
-//        TODO - do we remove these?
-//        socketEvent.audio_muted != null -> with(socketEvent.audio_muted) {
-//            AudioMutedEvent(user_id ?: "", call!!, all_users ?: false)
-//        }
-//
-//        socketEvent.audio_unmuted != null -> with(socketEvent.audio_unmuted) {
-//            AudioUnmutedEvent(user_id, call!!)
-//        }
-//
-//        socketEvent.video_started != null -> with(socketEvent.video_started) {
-//            VideoStartedEvent(user_id, call!!)
-//        }
-//
-//        socketEvent.video_stopped != null -> with(socketEvent.video_stopped) {
-//            VideoStoppedEvent(user_id, call!!)
-//        }
-//
-//        socketEvent.participant_joined != null -> with(socketEvent.participant_joined) {
-//            ParticipantJoinedEvent(participant!!)
-//        }
-//
-//        socketEvent.participant_left != null -> with(socketEvent.participant_left) {
-//            ParticipantLeftEvent(participant!!)
-//        }
-
         else -> UnknownEvent
     }
 }
