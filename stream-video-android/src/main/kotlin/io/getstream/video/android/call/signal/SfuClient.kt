@@ -16,9 +16,7 @@
 
 package io.getstream.video.android.call.signal
 
-import io.getstream.video.android.api.SignalServerService
 import io.getstream.video.android.utils.Result
-import io.getstream.video.android.utils.fetchResult
 import stream.video.sfu.models.ICETrickle
 import stream.video.sfu.signal.ICETrickleResponse
 import stream.video.sfu.signal.SendAnswerRequest
@@ -30,21 +28,15 @@ import stream.video.sfu.signal.UpdateMuteStateResponse
 import stream.video.sfu.signal.UpdateSubscriptionsRequest
 import stream.video.sfu.signal.UpdateSubscriptionsResponse
 
-public class SignalClientImpl(
-    private val signalService: SignalServerService
-) : SignalClient {
-    override suspend fun sendAnswer(request: SendAnswerRequest): Result<SendAnswerResponse> =
-        fetchResult { signalService.sendAnswer(request) }
+public interface SfuClient {
 
-    override suspend fun sendIceCandidate(request: ICETrickle): Result<ICETrickleResponse> =
-        fetchResult { signalService.iceTrickle(request) }
+    public suspend fun sendAnswer(request: SendAnswerRequest): Result<SendAnswerResponse>
 
-    override suspend fun setPublisher(request: SetPublisherRequest): Result<SetPublisherResponse> =
-        fetchResult { signalService.setPublisher(request) }
+    public suspend fun sendIceCandidate(request: ICETrickle): Result<ICETrickleResponse>
 
-    override suspend fun updateSubscriptions(request: UpdateSubscriptionsRequest): Result<UpdateSubscriptionsResponse> =
-        fetchResult { signalService.updateSubscriptions(request) }
+    public suspend fun setPublisher(request: SetPublisherRequest): Result<SetPublisherResponse>
 
-    override suspend fun updateMuteState(muteStateRequest: UpdateMuteStateRequest): Result<UpdateMuteStateResponse> =
-        fetchResult { signalService.updateMuteState(muteStateRequest) }
+    public suspend fun updateSubscriptions(request: UpdateSubscriptionsRequest): Result<UpdateSubscriptionsResponse>
+
+    public suspend fun updateMuteState(muteStateRequest: UpdateMuteStateRequest): Result<UpdateMuteStateResponse>
 }

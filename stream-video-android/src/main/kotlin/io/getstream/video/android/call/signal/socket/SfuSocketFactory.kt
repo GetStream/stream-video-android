@@ -22,7 +22,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.logging.HttpLoggingInterceptor
 
-internal class SignalSocketFactory(
+internal class SfuSocketFactory(
     private val httpClient: OkHttpClient = OkHttpClient.Builder()
         .addInterceptor(
             HttpLoggingInterceptor().apply {
