@@ -28,6 +28,11 @@ import stream.video.sfu.signal.UpdateMuteStateResponse
 import stream.video.sfu.signal.UpdateSubscriptionsRequest
 import stream.video.sfu.signal.UpdateSubscriptionsResponse
 
+// TODO
+// We need to think about renaming it to SfuClient for the sake of transparency for other devs
+// , since this client works with `video-sfu`.
+// In addition all generated proto files have `sfu` in their package name.
+// Otherwise 2 names for the same thing may confuse those who are not familiar with the project.
 public interface SignalClient {
 
     public suspend fun sendAnswer(request: SendAnswerRequest): Result<SendAnswerResponse>

@@ -23,6 +23,9 @@ import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.wire.WireConverterFactory
 
+// TODO
+// We might need to rename it.
+// CallClientModule name may imply it provides CallClient instance.
 internal class CallClientModule(
     private val okHttpClient: OkHttpClient,
     private val signalUrl: String
@@ -50,5 +53,25 @@ internal class CallClientModule(
             "10.0.2.2:3031" // "sfu2.fra1.gtstrm.com"
 
         const val SIGNAL_BASE_URL = "http://$SIGNAL_HOST_BASE/"
+
+        /**
+         * Reusable instance of the module.
+         */
+        private var module: CallClientModule? = null
+
+        /**
+         * Returns an instance of the [CallClientModule]. If one doesn't exists, creates
+         * the instance and then returns it.
+         */
+        internal fun getOrCreate(
+            okHttpClient: OkHttpClient,
+            signalUrl: String
+        ): CallClientModule {
+            return module ?: synchronized(this) {
+                module ?: CallClientModule(okHttpClient, signalUrl).also {
+                    module = it
+                }
+            }
+        }
     }
 }

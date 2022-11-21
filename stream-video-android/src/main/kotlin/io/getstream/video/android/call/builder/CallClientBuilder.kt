@@ -30,6 +30,7 @@ import io.getstream.video.android.network.NetworkStateProvider
 import io.getstream.video.android.token.CredentialsProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.logging.HttpLoggingInterceptor
 
 /**
@@ -79,17 +80,20 @@ internal class CallClientBuilder(
             credentialsProvider.getSfuToken().isBlank()
         ) throw IllegalArgumentException("The API key, user ID and token cannot be empty!")
 
+        val updatedSignalUrl = signalUrl.removeSuffix(suffix = "/twirp")
         val httpModule = HttpModule.getOrCreate(
             loggingLevel = loggingLevel,
             credentialsProvider = credentialsProvider
-        )
+        ).apply {
+            this.baseUrl = updatedSignalUrl.toHttpUrl()
+        }
 
-        val callClientModule = CallClientModule(
+        val callClientModule = CallClientModule.getOrCreate(
             okHttpClient = httpModule.okHttpClient,
-            signalUrl = signalUrl
+            signalUrl = HttpModule.REPLACEMENT_URL
         )
 
-        val socketFactory = SignalSocketFactory()
+        val socketFactory = SignalSocketFactory(httpModule.okHttpClient)
 
         return CallClientImpl(
             context = context,
@@ -99,7 +103,7 @@ internal class CallClientBuilder(
             signalClient = callClientModule.signalClient,
             remoteIceServers = iceServers,
             signalSocket = SignalSocketImpl(
-                wssUrl = "$signalUrl/ws".replace("https", "wss"),
+                wssUrl = "$updatedSignalUrl/ws".replace("https", "wss"),
                 networkStateProvider = networkStateProvider,
                 coroutineScope = CoroutineScope(Dispatchers.IO),
                 signalSocketFactory = socketFactory
