@@ -77,6 +77,12 @@ afterEvaluate {
                             email = "kanat.kiialbaev@getstream.io"
                             url = "https://github.com/kanat"
                         }
+                        developer {
+                            id = 'TGazica'
+                            name = 'Tomislav Gazica'
+                            email = "tomislav.gazica@getstream.io"
+                            url = "https://github.com/TGazica"
+                        }
                     }
                     scm {
                         connection = 'scm:git:github.com/getstream/stream-video-android.git'
