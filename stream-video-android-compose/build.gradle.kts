@@ -8,6 +8,14 @@ plugins {
     id("binary-compatibility-validator")
 }
 
+rootProject.extra.apply {
+    set("PUBLISH_GROUP_ID", Configuration.artifactGroup)
+    set("PUBLISH_ARTIFACT_ID", "stream-video-android-compose")
+    set("PUBLISH_VERSION", rootProject.extra.get("rootVersionName"))
+}
+
+apply(from ="${rootDir}/scripts/publish-module.gradle")
+
 android {
     compileSdk = Configuration.compileSdk
 
