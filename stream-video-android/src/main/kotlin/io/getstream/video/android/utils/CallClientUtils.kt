@@ -17,7 +17,7 @@
 package io.getstream.video.android.utils
 
 import io.getstream.video.android.model.IceServer
-import io.getstream.video.android.module.CallClientModule
+import io.getstream.video.android.module.SfuClientModule
 import org.webrtc.MediaConstraints
 import org.webrtc.PeerConnection
 
@@ -30,8 +30,8 @@ internal fun buildIceServers(servers: List<IceServer>?): List<PeerConnection.Ice
                 .createIceServer()
         }
     } else {
-        if (CallClientModule.REDIRECT_SIGNAL_URL == null) {
-            buildRemoteIceServers(CallClientModule.SIGNAL_HOST_BASE)
+        if (SfuClientModule.REDIRECT_SIGNAL_URL == null) {
+            buildRemoteIceServers(SfuClientModule.SIGNAL_HOST_BASE)
         } else {
             buildLocalIceServers()
         }
@@ -39,8 +39,8 @@ internal fun buildIceServers(servers: List<IceServer>?): List<PeerConnection.Ice
 }
 
 internal fun buildTestIceServers(): List<PeerConnection.IceServer> {
-    return if (CallClientModule.REDIRECT_SIGNAL_URL == null) {
-        buildRemoteIceServers(CallClientModule.SIGNAL_HOST_BASE)
+    return if (SfuClientModule.REDIRECT_SIGNAL_URL == null) {
+        buildRemoteIceServers(SfuClientModule.SIGNAL_HOST_BASE)
     } else {
         buildLocalIceServers()
     }

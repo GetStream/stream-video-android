@@ -85,9 +85,9 @@ public fun selectAudioDevice(device: AudioDevice)
 Similar to the `StreamVideo` client, the `CallClient` has its own WebSocket connection and set of events that you can consume using the following API:
 
 ```kotlin
-public fun addSocketListener(signalSocketListener: SignalSocketListener)
+public fun addSocketListener(sfuSocketListener: SfuSocketListener)
 
-public fun removeSocketListener(signalSocketListener: SignalSocketListener)
+public fun removeSocketListener(sfuSocketListener: SfuSocketListener)
 ```
 
 * `addSocketListener`: Adds a listener instance that will receive all the Call socket events. You can learn more about them in the [socket events guide](../02-guides/04-socket-events.mdx).

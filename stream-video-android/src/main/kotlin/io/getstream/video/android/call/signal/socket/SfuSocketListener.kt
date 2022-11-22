@@ -24,7 +24,7 @@ import io.getstream.video.android.events.SfuDataEvent
 /**
  * Used to listen to socket events on the SFU/Signaling level, inside an active call.
  */
-public interface SignalSocketListener {
+public interface SfuSocketListener {
 
     /**
      * Triggered when we begin the connection process. Useful to indicate the progress to your
