@@ -37,6 +37,7 @@ import io.getstream.video.android.model.CallSettings
 import io.getstream.video.android.model.CallType
 import io.getstream.video.android.model.CallUser
 import io.getstream.video.android.model.User
+import io.getstream.video.android.permission.PermissionManager
 import io.getstream.video.android.user.UsersProvider
 import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Success
