@@ -48,3 +48,15 @@ public fun Participant.toCallParticipant(currentUserId: String): CallParticipant
         audioLevel = 0f,
         idPrefix = track_lookup_prefix
     )
+
+public fun CallParticipantState.toUser(): User {
+    return User(
+        id = id,
+        role = role,
+        name = name,
+        token = "",
+        imageUrl = profileImageURL,
+        teams = emptyList(),
+        extraData = emptyMap()
+    )
+}

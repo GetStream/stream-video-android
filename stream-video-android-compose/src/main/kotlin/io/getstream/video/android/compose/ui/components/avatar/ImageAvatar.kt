@@ -36,6 +36,7 @@ import io.getstream.video.android.compose.theme.VideoTheme
  * @param painter The painter for the image.
  * @param modifier Modifier for styling.
  * @param shape The shape of the avatar.
+ * @param contentScale The scale option used for the content.
  * @param contentDescription Description of the image.
  * @param onClick OnClick action, that can be nullable.
  */
@@ -44,6 +45,7 @@ public fun ImageAvatar(
     painter: Painter,
     modifier: Modifier = Modifier,
     shape: Shape = VideoTheme.shapes.avatar,
+    contentScale: ContentScale = ContentScale.Crop,
     contentDescription: String? = null,
     onClick: (() -> Unit)? = null,
 ) {
@@ -59,7 +61,7 @@ public fun ImageAvatar(
 
     Image(
         modifier = clickableModifier.clip(shape),
-        contentScale = ContentScale.Crop,
+        contentScale = contentScale,
         painter = painter,
         contentDescription = contentDescription
     )

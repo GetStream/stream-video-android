@@ -18,10 +18,29 @@ package io.getstream.video.android.app.ui.call
 
 import android.content.Context
 import io.getstream.video.android.StreamVideo
+import io.getstream.video.android.app.BuildConfig
+import io.getstream.video.android.app.user.FakeUsersProvider
 import io.getstream.video.android.app.videoApp
 import io.getstream.video.android.compose.ui.AbstractComposeCallActivity
+import io.getstream.video.android.user.EmptyUsersProvider
+import io.getstream.video.android.viewmodel.CallViewModelFactory
+import io.getstream.video.android.viewmodel.PermissionManagerImpl
 
 class CallActivity : AbstractComposeCallActivity() {
 
-    override fun getStreamVideo(context: Context): StreamVideo = videoApp.streamVideo
+    /**
+     * Provides the StreamVideo instance through the videoApp.
+     */
+    override fun getStreamVideo(context: Context): StreamVideo = context.videoApp.streamVideo
+
+    /**
+     * Provides a custom factory for the ViewModel, that provides fake users for invites.
+     */
+    override fun getCallViewModelFactory(): CallViewModelFactory {
+        return CallViewModelFactory(
+            streamVideo = getStreamVideo(this),
+            permissionManager = PermissionManagerImpl(applicationContext),
+            usersProvider = if (BuildConfig.DEBUG) FakeUsersProvider() else EmptyUsersProvider
+        )
+    }
 }

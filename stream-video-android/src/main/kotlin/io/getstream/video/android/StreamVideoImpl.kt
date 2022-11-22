@@ -133,7 +133,9 @@ public class StreamVideoImpl(
                             cancelCall(state.callGuid.cid)
                         }
                     }
-                    else -> { /* no-op */ }
+                    else -> {
+                        /* no-op */
+                    }
                 }
             }
         }
@@ -219,13 +221,27 @@ public class StreamVideoImpl(
     }
 
     // caller: JOIN after accepting incoming call by callee
-    override suspend fun joinCall(call: CallMetadata): Result<JoinedCall> = withContext(scope.coroutineContext) {
-        logger.d { "[joinCallOnly] call: $call" }
-        engine.onCallJoining(call)
-        joinCallInternal(call)
-            .onSuccess { data -> engine.onCallJoined(data) }
-            .onError { engine.onCallFailed(it) }
-            .also { logger.v { "[joinCallOnly] result: $it" } }
+    override suspend fun joinCall(call: CallMetadata): Result<JoinedCall> =
+        withContext(scope.coroutineContext) {
+            logger.d { "[joinCallOnly] call: $call" }
+            engine.onCallJoining(call)
+            joinCallInternal(call)
+                .onSuccess { data -> engine.onCallJoined(data) }
+                .onError { engine.onCallFailed(it) }
+                .also { logger.v { "[joinCallOnly] result: $it" } }
+        }
+
+    /**
+     * Used to invite new users/members to an existing call.
+     *
+     * @param users The users to invite.
+     * @param cid The channel ID.
+     * @return [Result] if the operation was successful or not.
+     */
+    override suspend fun inviteUsers(users: List<User>, cid: StreamCallCid): Result<Unit> {
+        logger.d { "[inviteUsers] users: $users" }
+
+        return callCoordinatorClient.inviteUsers(users, cid)
     }
 
     /**
