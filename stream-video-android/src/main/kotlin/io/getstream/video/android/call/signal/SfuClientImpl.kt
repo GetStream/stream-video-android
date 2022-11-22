@@ -16,7 +16,9 @@
 
 package io.getstream.video.android.call.signal
 
+import io.getstream.video.android.api.SignalServerService
 import io.getstream.video.android.utils.Result
+import io.getstream.video.android.utils.fetchResult
 import stream.video.sfu.models.ICETrickle
 import stream.video.sfu.signal.ICETrickleResponse
 import stream.video.sfu.signal.SendAnswerRequest
@@ -28,20 +30,21 @@ import stream.video.sfu.signal.UpdateMuteStateResponse
 import stream.video.sfu.signal.UpdateSubscriptionsRequest
 import stream.video.sfu.signal.UpdateSubscriptionsResponse
 
-// TODO
-// We need to think about renaming it to SfuClient for the sake of transparency for other devs
-// , since this client works with `video-sfu`.
-// In addition all generated proto files have `sfu` in their package name.
-// Otherwise 2 names for the same thing may confuse those who are not familiar with the project.
-public interface SignalClient {
+public class SfuClientImpl(
+    private val signalService: SignalServerService
+) : SfuClient {
+    override suspend fun sendAnswer(request: SendAnswerRequest): Result<SendAnswerResponse> =
+        fetchResult { signalService.sendAnswer(request) }
 
-    public suspend fun sendAnswer(request: SendAnswerRequest): Result<SendAnswerResponse>
+    override suspend fun sendIceCandidate(request: ICETrickle): Result<ICETrickleResponse> =
+        fetchResult { signalService.iceTrickle(request) }
 
-    public suspend fun sendIceCandidate(request: ICETrickle): Result<ICETrickleResponse>
+    override suspend fun setPublisher(request: SetPublisherRequest): Result<SetPublisherResponse> =
+        fetchResult { signalService.setPublisher(request) }
 
-    public suspend fun setPublisher(request: SetPublisherRequest): Result<SetPublisherResponse>
+    override suspend fun updateSubscriptions(request: UpdateSubscriptionsRequest): Result<UpdateSubscriptionsResponse> =
+        fetchResult { signalService.updateSubscriptions(request) }
 
-    public suspend fun updateSubscriptions(request: UpdateSubscriptionsRequest): Result<UpdateSubscriptionsResponse>
-
-    public suspend fun updateMuteState(muteStateRequest: UpdateMuteStateRequest): Result<UpdateMuteStateResponse>
+    override suspend fun updateMuteState(muteStateRequest: UpdateMuteStateRequest): Result<UpdateMuteStateResponse> =
+        fetchResult { signalService.updateMuteState(muteStateRequest) }
 }

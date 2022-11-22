@@ -72,13 +72,13 @@ As soon as you create a `CallClient`, we connect to a signaling WebSocket instan
 Similarly to the coordinator WebSocket and its corresponding events, you can attach a listener to the signaling WebSocket, like so:
 
 ```kotlin
-callClient.addSocketListener(MySignalSocketListener())
+callClient.addSocketListener(MySfuSocketListener())
 ```
 
-The socket accepts a different interface type - `SignalSocketListener`, but its signature is almost the same:
+The socket accepts a different interface type - `SfuSocketListener`, but its signature is almost the same:
 
 ```kotlin
-public interface SignalSocketListener {
+public interface SfuSocketListener {
 
     public fun onConnecting() {}
 
@@ -122,7 +122,7 @@ All of these events are processed internally, in the `CallClient`, but you can l
 Once you're ready to stop listening to events, be it when leaving a call or when you disable custom features, you can remove the listener in a similar manner to the coordinator WebSocket:
 
 ```kotlin
-callClient.removeSocketListener(mySignalSocketListenerInstance)
+callClient.removeSocketListener(mySfuSocketListenerInstance)
 ```
 
 If you're curious about the lifecycle of our SDK and calls, check out the [call lifecycle guide](02-call-lifecycle.mdx).
