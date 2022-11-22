@@ -41,9 +41,9 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.CallContent
 import io.getstream.video.android.model.CallSettings
 import io.getstream.video.android.model.state.StreamCallState
+import io.getstream.video.android.permission.PermissionManagerImpl
 import io.getstream.video.android.viewmodel.CallViewModel
 import io.getstream.video.android.viewmodel.CallViewModelFactory
-import io.getstream.video.android.viewmodel.PermissionManagerImpl
 
 public abstract class AbstractComposeCallActivity :
     AppCompatActivity(),

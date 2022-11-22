@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.viewmodel
+package io.getstream.video.android.permission
 
 import android.Manifest
 import android.content.Context
@@ -23,21 +23,23 @@ import androidx.core.content.ContextCompat
 
 public interface PermissionManager {
 
-    public val hasAudioPermission: Boolean
-    public val hasVideoPermission: Boolean
+    public val hasRecordAudioPermission: Boolean
+    public val hasCameraPermission: Boolean
 }
 
 public class PermissionManagerImpl(
-    private val appContext: Context
+    context: Context
 ) : PermissionManager {
 
-    override val hasAudioPermission: Boolean
+    private val appContext: Context = context.applicationContext
+
+    override val hasRecordAudioPermission: Boolean
         get() = ContextCompat.checkSelfPermission(
             appContext,
             Manifest.permission.RECORD_AUDIO
         ) == PackageManager.PERMISSION_GRANTED
 
-    override val hasVideoPermission: Boolean
+    override val hasCameraPermission: Boolean
         get() = ContextCompat.checkSelfPermission(
             appContext,
             Manifest.permission.CAMERA

@@ -331,7 +331,7 @@ public class Call(
     }
 
     internal fun disconnect() {
-        logger.d { "[disconnect] #sfu; no args" }
+        logger.i { "[disconnect] #sfu; no args" }
         audioHandler.stop()
         _callParticipants.value.forEach { it.track?.video?.dispose() }
         _callParticipants.value = emptyList()

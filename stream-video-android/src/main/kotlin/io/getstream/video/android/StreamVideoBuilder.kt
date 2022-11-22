@@ -19,6 +19,8 @@ package io.getstream.video.android
 import android.content.Context
 import androidx.lifecycle.ProcessLifecycleOwner
 import io.getstream.video.android.dispatchers.DispatcherProvider
+import io.getstream.video.android.engine.StreamCallEngine
+import io.getstream.video.android.engine.StreamCallEngineImpl
 import io.getstream.video.android.input.CallAndroidInput
 import io.getstream.video.android.input.CallAndroidInputLauncher
 import io.getstream.video.android.input.DefaultCallAndroidInputLauncher
@@ -35,7 +37,8 @@ public class StreamVideoBuilder(
     private val config: StreamVideoConfig = StreamVideoConfigDefault,
     private val androidInputs: Set<CallAndroidInput> = emptySet(),
     private val inputLauncher: CallAndroidInputLauncher = DefaultCallAndroidInputLauncher,
-    private val loggingLevel: LoggingLevel = LoggingLevel.NONE
+    private val loggingLevel: LoggingLevel = LoggingLevel.NONE,
+    private val callEngineBuilder: ((CoroutineScope) -> StreamCallEngine)? = null
 ) {
 
     public fun build(): StreamVideo {
@@ -66,10 +69,16 @@ public class StreamVideoBuilder(
         )
 
         val scope = CoroutineScope(DispatcherProvider.IO)
+
+        val engine: StreamCallEngine = callEngineBuilder?.invoke(scope) ?: StreamCallEngineImpl(scope, config) {
+            credentialsProvider.getUserCredentials().id
+        }
+
         return StreamVideoImpl(
             context = context,
             scope = scope,
             config = config,
+            engine = engine,
             loggingLevel = loggingLevel,
             callCoordinatorClient = callCoordinatorClientModule.callCoordinatorClient(),
             credentialsProvider = credentialsProvider,

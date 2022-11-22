@@ -34,9 +34,9 @@ import androidx.appcompat.app.AppCompatActivity
 import io.getstream.video.android.call.state.LeaveCall
 import io.getstream.video.android.compose.ui.components.call.activecall.ActiveCallContent
 import io.getstream.video.android.model.CallSettings
+import io.getstream.video.android.permission.PermissionManagerImpl
 import io.getstream.video.android.viewmodel.CallViewModel
 import io.getstream.video.android.viewmodel.CallViewModelFactory
-import io.getstream.video.android.viewmodel.PermissionManagerImpl
 
 class CallActivity : AppCompatActivity() {
 

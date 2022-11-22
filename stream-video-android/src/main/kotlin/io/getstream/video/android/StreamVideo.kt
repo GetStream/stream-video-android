@@ -193,11 +193,28 @@ public interface StreamVideo {
         iceServers: List<IceServer>
     ): CallClient
 
+    /**
+     * Returns current [CallClient] instance.
+     */
     public fun getActiveCallClient(): CallClient?
 
+    /**
+     * Awaits [CallClient] creation.
+     */
+    public suspend fun awaitCallClient(): CallClient
+
+    /**
+     * Accepts incoming call.
+     */
     public suspend fun acceptCall(cid: StreamCallCid): Result<JoinedCall>
 
+    /**
+     * Rejects incoming call.
+     */
     public suspend fun rejectCall(cid: StreamCallCid): Result<Boolean>
 
+    /**
+     * Cancels outgoing or active call.
+     */
     public suspend fun cancelCall(cid: StreamCallCid): Result<Boolean>
 }
