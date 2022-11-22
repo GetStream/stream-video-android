@@ -18,6 +18,8 @@ package io.getstream.video.android.coordinator
 
 import io.getstream.video.android.api.ClientRPCService
 import io.getstream.video.android.errors.VideoError
+import io.getstream.video.android.model.StreamCallCid
+import io.getstream.video.android.model.User
 import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Result
 import io.getstream.video.android.utils.Success
@@ -30,8 +32,10 @@ import stream.video.coordinator.client_v1_rpc.GetOrCreateCallRequest
 import stream.video.coordinator.client_v1_rpc.GetOrCreateCallResponse
 import stream.video.coordinator.client_v1_rpc.JoinCallRequest
 import stream.video.coordinator.client_v1_rpc.JoinCallResponse
+import stream.video.coordinator.client_v1_rpc.MemberInput
 import stream.video.coordinator.client_v1_rpc.SendCustomEventRequest
 import stream.video.coordinator.client_v1_rpc.SendEventRequest
+import stream.video.coordinator.client_v1_rpc.UpsertCallMembersRequest
 
 /**
  * An accessor that allows us to communicate with the API around video calls.
@@ -56,9 +60,10 @@ internal class CallCoordinatorClientImpl(
             Failure(VideoError(error.message, error))
         }
 
-    override suspend fun getOrCreateCall(createCallRequest: GetOrCreateCallRequest): Result<GetOrCreateCallResponse> =
+    override suspend fun getOrCreateCall(getOrCreateCallRequest: GetOrCreateCallRequest): Result<GetOrCreateCallResponse> =
         try {
-            val response = callCoordinatorService.getOrCreateCall(getOrCreateCallRequest = createCallRequest)
+            val response =
+                callCoordinatorService.getOrCreateCall(getOrCreateCallRequest = getOrCreateCallRequest)
 
             Success(response)
         } catch (error: Throwable) {
@@ -92,7 +97,8 @@ internal class CallCoordinatorClientImpl(
      */
     override suspend fun selectEdgeServer(request: GetCallEdgeServerRequest): Result<GetCallEdgeServerResponse> =
         try {
-            val response = callCoordinatorService.getCallEdgeServer(getCallEdgeServerRequest = request)
+            val response =
+                callCoordinatorService.getCallEdgeServer(getCallEdgeServerRequest = request)
 
             Success(response)
         } catch (error: Throwable) {
@@ -125,6 +131,32 @@ internal class CallCoordinatorClientImpl(
             callCoordinatorService.sendCustomEvent(sendCustomEventRequest = sendCustomEventRequest)
 
             Success(true)
+        } catch (error: Throwable) {
+            Failure(VideoError(error.message, error))
+        }
+
+    /**
+     * Sends invite to people for an existing call.
+     *
+     * @param users The users to invite.
+     * @param cid The call ID.
+     * @return [Result] if the operation is successful or not.
+     */
+    override suspend fun inviteUsers(users: List<User>, cid: StreamCallCid): Result<Unit> =
+        try {
+            callCoordinatorService.upsertCallMembers(
+                UpsertCallMembersRequest(
+                    call_cid = cid,
+                    members = users.map { user ->
+                        MemberInput(
+                            user_id = user.id,
+                            role = user.role
+                        )
+                    }
+                )
+            )
+
+            Success(Unit)
         } catch (error: Throwable) {
             Failure(VideoError(error.message, error))
         }

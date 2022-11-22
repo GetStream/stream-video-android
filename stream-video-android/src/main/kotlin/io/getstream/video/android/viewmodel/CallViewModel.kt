@@ -36,7 +36,9 @@ import io.getstream.video.android.model.CallParticipantState
 import io.getstream.video.android.model.CallSettings
 import io.getstream.video.android.model.CallType
 import io.getstream.video.android.model.CallUser
+import io.getstream.video.android.model.User
 import io.getstream.video.android.permission.PermissionManager
+import io.getstream.video.android.user.UsersProvider
 import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Success
 import io.getstream.video.android.utils.onError
@@ -57,13 +59,13 @@ private const val CONNECT_TIMEOUT = 30_000L
 
 public class CallViewModel(
     private val streamVideo: StreamVideo,
-    private val permissionManager: PermissionManager
+    private val permissionManager: PermissionManager,
+    private val usersProvider: UsersProvider
 ) : ViewModel() {
 
     private val logger = StreamLog.getLogger("Call:ViewModel")
 
-    private val _callState: MutableStateFlow<Call?> =
-        MutableStateFlow(null)
+    private val _callState: MutableStateFlow<Call?> = MutableStateFlow(null)
     public val callState: StateFlow<Call?> = _callState
 
     private var _isVideoInitialized: MutableStateFlow<Boolean> = MutableStateFlow(false)
@@ -399,5 +401,40 @@ public class CallViewModel(
         val mediaState = _callMediaState.value
 
         _callMediaState.value = mediaState.copy(isSpeakerphoneEnabled = speakerPhoneEnabled)
+    }
+
+    /**
+     * Exposes a list of users you can plug in to the UI, such as user invites.
+     */
+    public fun getUsers(): List<User> = usersProvider.provideUsers()
+
+    /**
+     * Exposes a [StateFlow] of a list of users, that can be updated over time, based on your custom
+     * logic, and plugged into the UI, similar to [getUsers].
+     */
+    public fun getUsersState(): StateFlow<List<User>> = usersProvider.userState
+
+    /**
+     * Attempts to invite people to an ongoing call.
+     *
+     * @param users The list of users to add to the call.
+     */
+    public fun inviteUsersToCall(users: List<User>) {
+        logger.d { "[inviteUsersToCall] Inviting users to call, users: $users" }
+        val callState = streamCallState.value
+
+        if (callState !is State.Connected) {
+            logger.d { "[inviteUsersToCall] Invalid state, not in State.Connected!" }
+            return
+        }
+        viewModelScope.launch {
+            streamVideo.inviteUsers(users, callState.callGuid.cid)
+                .onSuccess {
+                    logger.d { "[inviteUsersToCall] Success!" }
+                }
+                .onError {
+                    logger.d { "[inviteUsersToCall] Error, ${it.message}." }
+                }
+        }
     }
 }

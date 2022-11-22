@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -39,17 +40,20 @@ import io.getstream.video.android.compose.utils.rememberStreamImagePainter
  * @param modifier Modifier for styling.
  * @param shape The shape of the avatar.
  * @param textStyle The text style of the [initials] text.
+ * @param contentScale The scale option used for the content.
  * @param placeholderPainter The placeholder to render while loading is in progress.
  * @param contentDescription Description of the image.
  * @param initialsAvatarOffset The initials offset to apply to the avatar.
  * @param onClick OnClick action, that can be nullable.
  */
-@Composable public fun Avatar(
+@Composable
+public fun Avatar(
     imageUrl: String,
     initials: String,
     modifier: Modifier = Modifier,
     shape: Shape = VideoTheme.shapes.avatar,
     textStyle: TextStyle = VideoTheme.typography.title3Bold,
+    contentScale: ContentScale = ContentScale.Crop,
     placeholderPainter: Painter? = null,
     contentDescription: String? = null,
     initialsAvatarOffset: DpOffset = DpOffset(0.dp, 0.dp),
@@ -96,6 +100,7 @@ import io.getstream.video.android.compose.utils.rememberStreamImagePainter
             modifier = modifier,
             shape = shape,
             painter = placeholderPainter,
+            contentScale = contentScale,
             contentDescription = contentDescription,
             onClick = onClick
         )
@@ -104,6 +109,7 @@ import io.getstream.video.android.compose.utils.rememberStreamImagePainter
             modifier = modifier,
             shape = shape,
             painter = painter,
+            contentScale = contentScale,
             contentDescription = contentDescription,
             onClick = onClick
         )

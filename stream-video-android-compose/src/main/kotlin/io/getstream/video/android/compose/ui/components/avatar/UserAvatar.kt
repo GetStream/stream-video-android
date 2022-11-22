@@ -21,13 +21,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.model.CallParticipantState
+import io.getstream.video.android.model.User
 import io.getstream.video.android.utils.initials
-import stream.video.coordinator.user_v1.User
 
 /**
  * Represents the [User] avatar that's shown on the Messages screen or in headers of DMs.
@@ -38,26 +38,35 @@ import stream.video.coordinator.user_v1.User
  * @param modifier Modifier for styling.
  * @param shape The shape of the avatar.
  * @param textStyle The [TextStyle] that will be used for the initials.
+ * @param contentScale The scale option used for the content.
  * @param contentDescription The content description of the avatar.
  * @param initialsAvatarOffset The initials offset to apply to the avatar.
  * @param onClick The handler when the user clicks on the avatar.
  */
 @Composable
 public fun UserAvatar(
-    user: CallParticipantState,
+    user: User,
     modifier: Modifier = Modifier,
     shape: Shape = VideoTheme.shapes.avatar,
     textStyle: TextStyle = VideoTheme.typography.title3Bold,
+    contentScale: ContentScale = ContentScale.Crop,
     contentDescription: String? = null,
     initialsAvatarOffset: DpOffset = DpOffset(0.dp, 0.dp),
     onClick: (() -> Unit)? = null,
 ) {
     Box(modifier = modifier) {
+        val initials = if (user.name.isNotBlank()) {
+            user.name.initials()
+        } else {
+            user.id.initials()
+        }
+
         Avatar(
             modifier = Modifier.fillMaxSize(),
-            imageUrl = user.profileImageURL ?: "",
-            initials = user.name.initials(),
+            imageUrl = user.imageUrl ?: "",
+            initials = initials,
             textStyle = textStyle,
+            contentScale = contentScale,
             shape = shape,
             contentDescription = contentDescription,
             onClick = onClick,

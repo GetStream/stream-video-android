@@ -32,6 +32,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.lifecycleScope
+import io.getstream.video.android.CallViewModelFactoryProvider
 import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.StreamVideoProvider
 import io.getstream.video.android.call.state.ToggleCamera
@@ -44,12 +45,25 @@ import io.getstream.video.android.permission.PermissionManagerImpl
 import io.getstream.video.android.viewmodel.CallViewModel
 import io.getstream.video.android.viewmodel.CallViewModelFactory
 
-public abstract class AbstractComposeCallActivity : AppCompatActivity(), StreamVideoProvider {
+public abstract class AbstractComposeCallActivity :
+    AppCompatActivity(),
+    StreamVideoProvider,
+    CallViewModelFactoryProvider {
 
     private val streamVideo: StreamVideo by lazy { getStreamVideo(this) }
 
     private val factory by lazy {
-        CallViewModelFactory(streamVideo, PermissionManagerImpl(applicationContext))
+        getCallViewModelFactory() ?: defaultViewModelFactory()
+    }
+
+    /**
+     * Provides the default ViewModel factory.
+     */
+    public fun defaultViewModelFactory(): CallViewModelFactory {
+        return CallViewModelFactory(
+            streamVideo = streamVideo,
+            permissionManager = PermissionManagerImpl(applicationContext),
+        )
     }
 
     private val callViewModel by viewModels<CallViewModel>(factoryProducer = { factory })

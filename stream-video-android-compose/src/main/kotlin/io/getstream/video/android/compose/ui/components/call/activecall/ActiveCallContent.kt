@@ -37,9 +37,7 @@ import io.getstream.video.android.call.state.LeaveCall
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.CallControls
 import io.getstream.video.android.compose.ui.components.call.activecall.internal.ActiveCallAppBar
-import io.getstream.video.android.compose.ui.components.call.activecall.internal.AudioDeviceMenu
 import io.getstream.video.android.compose.ui.components.participants.CallParticipants
-import io.getstream.video.android.compose.ui.components.participants.CallParticipantsInfoMenu
 import io.getstream.video.android.viewmodel.CallViewModel
 
 /**
@@ -51,7 +49,8 @@ import io.getstream.video.android.viewmodel.CallViewModel
  * @param onCallAction Handler when the user triggers a Call Control Action.
  * @param onParticipantsMenuClick Handler when the user taps on the participant menu.
  */
-@Composable public fun ActiveCallContent(
+@Composable
+public fun ActiveCallContent(
     callViewModel: CallViewModel,
     modifier: Modifier = Modifier,
     onCallAction: (CallAction) -> Unit = callViewModel::onCallAction,
@@ -65,8 +64,6 @@ import io.getstream.video.android.viewmodel.CallViewModel
     val isShowingAudioDevicePicker by callViewModel.isShowingAudioDevicePicker.collectAsState(
         false
     )
-
-    val participantsState by callViewModel.participantList.collectAsState(initial = emptyList())
 
     val callMediaState by callViewModel.callMediaState.collectAsState(initial = CallMediaState())
 
@@ -116,14 +113,6 @@ import io.getstream.video.android.viewmodel.CallViewModel
                     )
                 }
             }
-        }
-
-        if (isShowingParticipantsInfo) {
-            CallParticipantsInfoMenu(callViewModel, participantsState)
-        }
-
-        if (isShowingAudioDevicePicker) {
-            AudioDeviceMenu(callViewModel)
         }
     }
 }
