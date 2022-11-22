@@ -17,7 +17,6 @@
 package io.getstream.video.android.compose.ui
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -25,9 +24,7 @@ import android.os.Bundle
 import android.provider.Settings
 import android.view.WindowManager
 import androidx.activity.compose.setContent
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
@@ -42,34 +39,20 @@ import io.getstream.video.android.model.CallSettings
 import io.getstream.video.android.model.state.StreamCallState
 import io.getstream.video.android.viewmodel.CallViewModel
 import io.getstream.video.android.viewmodel.CallViewModelFactory
+import io.getstream.video.android.viewmodel.PermissionManager
 import io.getstream.video.android.viewmodel.PermissionManagerImpl
 
 public abstract class AbstractComposeCallActivity : AppCompatActivity(), StreamVideoProvider {
 
     private val streamVideo: StreamVideo by lazy { getStreamVideo(this) }
 
-    private val permissionManager by lazy {
-        PermissionManagerImpl(applicationContext)
-    }
-    private val factory by lazy {
-        CallViewModelFactory(streamVideo, permissionManager)
-    }
+    private lateinit var permissionManager: PermissionManager
+    private val factory by lazy { CallViewModelFactory(streamVideo, permissionManager) }
 
     private val callViewModel by viewModels<CallViewModel>(factoryProducer = { factory })
 
-    private val permissionsContract = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-        permissions[Manifest.permission.RECORD_AUDIO]?.let {
-            callViewModel.onAudioPermissionChanged(it)
-            callViewModel.toggleMicrophone(it)
-        }
-
-        permissions[Manifest.permission.CAMERA]?.let {
-            callViewModel.onVideoPermissionChanged(it)
-            callViewModel.toggleCamera(it)
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
+        initPermissionManager()
         showWhenLockedAndTurnScreenOn()
         super.onCreate(savedInstanceState)
         setContent(content = buildContent())
@@ -83,6 +66,17 @@ public abstract class AbstractComposeCallActivity : AppCompatActivity(), StreamV
         }
     }
 
+    private fun initPermissionManager() {
+        permissionManager = PermissionManagerImpl(this, onPermissionResult = { permission, isGranted ->
+            when (permission) {
+                Manifest.permission.CAMERA -> callViewModel.onCallAction(ToggleCamera(isGranted))
+                Manifest.permission.RECORD_AUDIO -> callViewModel.onCallAction(ToggleMicrophone(isGranted))
+            }
+        }, onShowSettings = {
+                showPermissionsDialog()
+            })
+    }
+
     protected fun buildContent(): (@Composable () -> Unit) = {
         VideoTheme {
             CallContent(
@@ -90,40 +84,36 @@ public abstract class AbstractComposeCallActivity : AppCompatActivity(), StreamV
                 onRejectCall = callViewModel::rejectCall,
                 onAcceptCall = callViewModel::acceptCall,
                 onCancelCall = callViewModel::cancelCall,
-                onCallAction = { callAction ->
-                    when (callAction) {
-                        is ToggleCamera -> toggleVideo(callAction.isEnabled)
-                        is ToggleMicrophone -> toggleMicrophone(callAction.isEnabled)
-                        else -> callViewModel.onCallAction(callAction)
+                onCallAction = { action ->
+                    when (action) {
+                        is ToggleMicrophone -> toggleMicrophone(action)
+                        is ToggleCamera -> toggleCamera(action)
+                        else -> callViewModel.onCallAction(action)
                     }
                 }
             )
         }
     }
 
-    @SuppressLint("NewApi")
-    private fun toggleVideo(isEnabled: Boolean) {
-        when {
-            isEnabled && !permissionManager.hasVideoPermission -> {
-                checkPermission(Manifest.permission.CAMERA)
-            }
-            else -> callViewModel.onCallAction(ToggleCamera(isEnabled))
-        }
-    }
-
-    @SuppressLint("NewApi")
-    private fun toggleMicrophone(isEnabled: Boolean) {
-        when {
-            isEnabled && !permissionManager.hasAudioPermission -> {
-                checkPermission(Manifest.permission.RECORD_AUDIO)
-            }
-            else -> callViewModel.onCallAction(ToggleMicrophone(isEnabled))
-        }
-    }
-
     override fun onResume() {
         super.onResume()
         startVideoFlow()
+    }
+
+    private fun toggleMicrophone(action: ToggleMicrophone) {
+        if (!permissionManager.hasRecordAudioPermission.value && action.isEnabled) {
+            permissionManager.requestPermission(Manifest.permission.RECORD_AUDIO)
+        } else {
+            callViewModel.onCallAction(action)
+        }
+    }
+
+    private fun toggleCamera(action: ToggleCamera) {
+        if (!permissionManager.hasCameraPermission.value && action.isEnabled) {
+            permissionManager.requestPermission(Manifest.permission.CAMERA)
+        } else {
+            callViewModel.onCallAction(action)
+        }
     }
 
     private fun startSettings() {
@@ -143,18 +133,9 @@ public abstract class AbstractComposeCallActivity : AppCompatActivity(), StreamV
 
     protected fun getDefaultCallSettings(): CallSettings = CallSettings(
         audioOn = false,
-        videoOn = permissionManager.hasVideoPermission,
+        videoOn = permissionManager.hasCameraPermission.value,
         speakerOn = false
     )
-
-    @RequiresApi(Build.VERSION_CODES.M)
-    private fun checkPermission(permission: String) {
-        if (!shouldShowRequestPermissionRationale(permission)) {
-            permissionsContract.launch(arrayOf(permission))
-        } else {
-            showPermissionsDialog()
-        }
-    }
 
     private fun showPermissionsDialog() {
         AlertDialog.Builder(this)

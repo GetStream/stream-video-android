@@ -19,73 +19,71 @@ package io.getstream.video.android.dogfooding
 import android.Manifest
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.Build
-import android.os.Build.VERSION_CODES.M
 import android.os.Bundle
 import android.provider.Settings
 import androidx.activity.compose.setContent
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import io.getstream.video.android.call.state.LeaveCall
+import io.getstream.video.android.call.state.ToggleCamera
+import io.getstream.video.android.call.state.ToggleMicrophone
+import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.activecall.ActiveCallContent
 import io.getstream.video.android.model.CallSettings
 import io.getstream.video.android.viewmodel.CallViewModel
 import io.getstream.video.android.viewmodel.CallViewModelFactory
+import io.getstream.video.android.viewmodel.PermissionManager
 import io.getstream.video.android.viewmodel.PermissionManagerImpl
 
 class CallActivity : AppCompatActivity() {
 
+    private lateinit var permissionManager: PermissionManager
     private val factory by lazy {
-        CallViewModelFactory(dogfoodingApp.streamVideo, PermissionManagerImpl(applicationContext))
+        CallViewModelFactory(dogfoodingApp.streamVideo, permissionManager)
     }
 
     private val callViewModel by viewModels<CallViewModel>(factoryProducer = { factory })
 
-    @RequiresApi(M)
-    private val permissionsContract = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        val missing = getMissingPermissions()
-        val deniedCamera = !shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)
-        val deniedMicrophone =
-            !shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO)
-
-        when {
-            missing.isNotEmpty() && !deniedCamera && !deniedMicrophone -> requestPermissions(missing)
-            isGranted -> startVideoFlow()
-            deniedCamera || deniedMicrophone -> showPermissionsDialog()
-            else -> checkPermissions()
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
+        initPermissionManager()
         super.onCreate(savedInstanceState)
 
         setContent {
-            ActiveCallContent(
-                callViewModel,
-                onCallAction = { action ->
-                    if (action is LeaveCall) {
-                        callViewModel.cancelCall()
-                        finish()
+            VideoTheme {
+                ActiveCallContent(
+                    callViewModel,
+                    onCallAction = { action ->
+                        when (action) {
+                            is ToggleMicrophone -> toggleMicrophone(action)
+                            is ToggleCamera -> toggleCamera(action)
+                            else -> callViewModel.onCallAction(action)
+                        }
+
+                        if (action is LeaveCall) {
+                            finish()
+                        }
                     }
-                }
-            )
+                )
+            }
         }
+    }
+
+    private fun initPermissionManager() {
+        permissionManager = PermissionManagerImpl(this, onPermissionResult = { permission, isGranted ->
+            when (permission) {
+                Manifest.permission.CAMERA -> callViewModel.onCallAction(ToggleCamera(isGranted))
+                Manifest.permission.RECORD_AUDIO -> callViewModel.onCallAction(ToggleMicrophone(isGranted))
+            }
+        }, onShowSettings = {
+                showPermissionsDialog()
+            })
     }
 
     override fun onResume() {
         super.onResume()
-        if (Build.VERSION.SDK_INT >= M) {
-            checkPermissions()
-        } else {
-            startVideoFlow()
-        }
+        startVideoFlow()
     }
 
     private fun startSettings() {
@@ -103,49 +101,26 @@ class CallActivity : AppCompatActivity() {
         callViewModel.connectToCall(
             CallSettings(
                 audioOn = false,
-                videoOn = true,
+                videoOn = permissionManager.hasCameraPermission.value,
                 speakerOn = false
             )
         )
     }
 
-    @RequiresApi(M)
-    private fun checkPermissions() {
-        val missing = getMissingPermissions()
-
-        if (missing.isNotEmpty()) {
-            requestPermissions(missing)
+    private fun toggleMicrophone(action: ToggleMicrophone) {
+        if (!permissionManager.hasRecordAudioPermission.value && action.isEnabled) {
+            permissionManager.requestPermission(Manifest.permission.RECORD_AUDIO)
         } else {
-            startVideoFlow()
+            callViewModel.onCallAction(action)
         }
     }
 
-    @RequiresApi(M)
-    private fun requestPermissions(permissions: Array<out String>) {
-        val deniedCamera = !shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)
-        val deniedMicrophone =
-            !shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO)
-
-        if (!deniedCamera && !deniedMicrophone) {
-            permissionsContract.launch(permissions.first())
+    private fun toggleCamera(action: ToggleCamera) {
+        if (!permissionManager.hasCameraPermission.value && action.isEnabled) {
+            permissionManager.requestPermission(Manifest.permission.CAMERA)
         } else {
-            showPermissionsDialog()
+            callViewModel.onCallAction(action)
         }
-    }
-
-    @RequiresApi(M)
-    private fun getMissingPermissions(): Array<out String> {
-        val permissionsToCheck = arrayOf(
-            Manifest.permission.CAMERA,
-            Manifest.permission.RECORD_AUDIO
-        )
-
-        val missing = permissionsToCheck
-            .map { it to (checkSelfPermission(it) == PackageManager.PERMISSION_GRANTED) }
-            .filter { (_, isGranted) -> !isGranted }
-            .map { it.first }
-
-        return missing.toTypedArray()
     }
 
     private fun showPermissionsDialog() {
@@ -166,7 +141,7 @@ class CallActivity : AppCompatActivity() {
 
     companion object {
         internal fun getIntent(
-            context: Context
+            context: Context,
         ): Intent {
             return Intent(context, CallActivity::class.java)
         }

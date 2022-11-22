@@ -58,7 +58,7 @@ private const val CONNECT_TIMEOUT = 30_000L
 
 public class CallViewModel(
     private val streamVideo: StreamVideo,
-    private val permissionManager: PermissionManager
+    private val permissionManager: PermissionManager,
 ) : ViewModel() {
 
     private val logger = StreamLog.getLogger("Call:ViewModel")
@@ -70,15 +70,14 @@ public class CallViewModel(
     private var _isVideoInitialized: MutableStateFlow<Boolean> = MutableStateFlow(false)
     public val isVideoInitialized: StateFlow<Boolean> = _isVideoInitialized
 
-    private val hasVideoPermission: MutableStateFlow<Boolean> =
-        MutableStateFlow(permissionManager.hasVideoPermission)
     private val isVideoEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
-    public val isVideoOn: Flow<Boolean> = hasVideoPermission.combine(isVideoEnabled) { hasPermission, videoEnabled ->
-        hasPermission && videoEnabled
-    }
+    public val isVideoOn: Flow<Boolean> = permissionManager.hasCameraPermission
+        .combine(isVideoEnabled) { hasPermission, videoEnabled ->
+            hasPermission && videoEnabled
+        }
 
-    private val hasAudioPermission: MutableStateFlow<Boolean> = MutableStateFlow(permissionManager.hasAudioPermission)
+    private val hasAudioPermission: StateFlow<Boolean> = permissionManager.hasRecordAudioPermission
     private val isAudioEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
     public val isAudioOn: Flow<Boolean> = hasAudioPermission.combine(isAudioEnabled) { hasPermission, audioEnabled ->
@@ -89,7 +88,7 @@ public class CallViewModel(
         MutableStateFlow(
             CallMediaState(
                 isMicrophoneEnabled = isAudioEnabled.value && hasAudioPermission.value,
-                isCameraEnabled = isVideoEnabled.value && hasVideoPermission.value,
+                isCameraEnabled = isVideoEnabled.value && permissionManager.hasCameraPermission.value,
                 isSpeakerphoneEnabled = false
             )
         )
@@ -214,18 +213,18 @@ public class CallViewModel(
         }
     }
 
-    public fun toggleSpeakerphone(enabled: Boolean) {
+    private fun toggleSpeakerphone(enabled: Boolean) {
         client.setSpeakerphoneEnabled(enabled)
         onSpeakerphoneChanged(enabled)
     }
 
-    public fun toggleCamera(enabled: Boolean) {
-        client.setCameraEnabled(enabled)
+    private fun toggleCamera(enabled: Boolean) {
+        if (::client.isInitialized) client.setCameraEnabled(enabled)
         onVideoChanged(enabled)
     }
 
-    public fun toggleMicrophone(enabled: Boolean) {
-        client.setMicrophoneEnabled(enabled)
+    private fun toggleMicrophone(enabled: Boolean) {
+        if (::client.isInitialized) client.setMicrophoneEnabled(enabled)
         onMicrophoneChanged(enabled)
     }
 
@@ -323,8 +322,6 @@ public class CallViewModel(
         isVideoEnabled.value = false
         isAudioEnabled.value = false
         _callMediaState.value = CallMediaState()
-        hasAudioPermission.value = false
-        hasVideoPermission.value = false
         _isVideoInitialized.value = false
         dismissOptions()
     }
@@ -406,16 +403,6 @@ public class CallViewModel(
                 logger.e { "[joinCall] failed: $it" }
             }
         }
-    }
-
-    public fun onAudioPermissionChanged(permissionGranted: Boolean) {
-        logger.d { "[onAudioPermissionChanged] hasAudioPermission: $permissionGranted" }
-        hasAudioPermission.value = permissionGranted
-    }
-
-    public fun onVideoPermissionChanged(permissionGranted: Boolean) {
-        logger.d { "[onVideoPermissionChanged] hasVideoPermission: $permissionGranted" }
-        hasVideoPermission.value = permissionGranted
     }
 
     private fun onMicrophoneChanged(microphoneEnabled: Boolean) {

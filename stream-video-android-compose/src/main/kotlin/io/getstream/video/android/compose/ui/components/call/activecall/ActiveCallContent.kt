@@ -51,7 +51,8 @@ import io.getstream.video.android.viewmodel.CallViewModel
  * @param onCallAction Handler when the user triggers a Call Control Action.
  * @param onParticipantsMenuClick Handler when the user taps on the participant menu.
  */
-@Composable public fun ActiveCallContent(
+@Composable
+public fun ActiveCallContent(
     callViewModel: CallViewModel,
     modifier: Modifier = Modifier,
     onCallAction: (CallAction) -> Unit = callViewModel::onCallAction,
