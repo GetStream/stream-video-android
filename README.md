@@ -137,7 +137,7 @@ This will generate a screen similar to this one:
 
 ![ngrok Generated redirect](https://user-images.githubusercontent.com/17215808/180743067-f49835b5-fcdd-4db9-923f-f7242a9d5f17.png)
 
-Copy the highlighted URL and search the Android Studio project for `stream-video-android` for `REDIRECT_BASE_URL` and replace the value with the given URL. It's located in the `CallClientModule` at the bottom of the file.
+Copy the highlighted URL and search the Android Studio project for `stream-video-android` for `REDIRECT_BASE_URL` and replace the value with the given URL. It's located in the `SfuClientModule` at the bottom of the file.
 
 ![Redirect Base Url](https://user-images.githubusercontent.com/17215808/180743284-98c1a7ba-cd12-4001-b303-6af5c803cd8e.png)
 

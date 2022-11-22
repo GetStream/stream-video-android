@@ -36,17 +36,17 @@ import stream.video.sfu.event.HealthCheckRequest
 import stream.video.sfu.event.JoinRequest
 import kotlin.properties.Delegates
 
-internal class SignalSocketImpl(
+internal class SfuSocketImpl(
     private val wssUrl: String,
     private val networkStateProvider: NetworkStateProvider,
-    private val signalSocketFactory: SignalSocketFactory,
+    private val sfuSocketFactory: SfuSocketFactory,
     private val coroutineScope: CoroutineScope,
-) : SignalSocket {
+) : SfuSocket {
 
     private val logger = StreamLog.getLogger("Call:SfuSocket")
 
-    private var connectionConf: SignalSocketFactory.ConnectionConf? = null
-    private val listeners: MutableList<SignalSocketListener> = mutableListOf()
+    private var connectionConf: SfuSocketFactory.ConnectionConf? = null
+    private val listeners: MutableList<SfuSocketListener> = mutableListOf()
 
     private var socket: Socket? = null
     private var eventsParser: SignalEventsParser? = null
@@ -60,7 +60,7 @@ internal class SignalSocketImpl(
         object : HealthMonitor.HealthCallback {
             override fun reconnect() {
                 if (state is State.DisconnectedTemporarily) {
-                    this@SignalSocketImpl.reconnect(connectionConf)
+                    this@SfuSocketImpl.reconnect(connectionConf)
                 }
             }
 
@@ -132,21 +132,21 @@ internal class SignalSocketImpl(
     }
         private set
 
-    override fun removeListener(signalSocketListener: SignalSocketListener) {
+    override fun removeListener(sfuSocketListener: SfuSocketListener) {
         synchronized(listeners) {
-            listeners.remove(signalSocketListener)
+            listeners.remove(sfuSocketListener)
         }
     }
 
-    override fun addListener(signalSocketListener: SignalSocketListener) {
+    override fun addListener(sfuSocketListener: SfuSocketListener) {
         synchronized(listeners) {
-            listeners.add(signalSocketListener)
+            listeners.add(sfuSocketListener)
         }
     }
 
     override fun connectSocket() {
         logger.d { "[connectSocket] wssUrl: $wssUrl" }
-        connect(SignalSocketFactory.ConnectionConf(wssUrl))
+        connect(SfuSocketFactory.ConnectionConf(wssUrl))
     }
 
     override fun sendJoinRequest(request: JoinRequest) {
@@ -157,10 +157,10 @@ internal class SignalSocketImpl(
 
     override fun reconnect() {
         logger.d { "[reconnect] wssUrl: $wssUrl" }
-        reconnect(SignalSocketFactory.ConnectionConf(wssUrl))
+        reconnect(SfuSocketFactory.ConnectionConf(wssUrl))
     }
 
-    internal fun connect(connectionConf: SignalSocketFactory.ConnectionConf) {
+    internal fun connect(connectionConf: SfuSocketFactory.ConnectionConf) {
         val isNetworkConnected = networkStateProvider.isConnected()
         logger.d { "[connect] conf: $connectionConf, isNetworkConnected: $isNetworkConnected" }
         this.connectionConf = connectionConf
@@ -187,19 +187,19 @@ internal class SignalSocketImpl(
         callListeners { listener -> listener.onEvent(event) }
     }
 
-    private fun reconnect(connectionConf: SignalSocketFactory.ConnectionConf?) {
+    private fun reconnect(connectionConf: SfuSocketFactory.ConnectionConf?) {
         logger.d { "[reconnect] conf: $connectionConf" }
         shutdownSocketConnection()
         setupSocket(connectionConf?.asReconnectionConf())
     }
 
-    private fun setupSocket(connectionConf: SignalSocketFactory.ConnectionConf?) {
+    private fun setupSocket(connectionConf: SfuSocketFactory.ConnectionConf?) {
         logger.d { "[setupSocket] conf: $connectionConf" }
         state = when (connectionConf) {
             null -> State.DisconnectedPermanently(null)
             else -> {
                 socketConnectionJob = coroutineScope.launch {
-                    socket = signalSocketFactory.createSocket(
+                    socket = sfuSocketFactory.createSocket(
                         createNewEventsParser(),
                         connectionConf
                     )
@@ -230,7 +230,7 @@ internal class SignalSocketImpl(
         socket = null
     }
 
-    private fun callListeners(call: (SignalSocketListener) -> Unit) {
+    private fun callListeners(call: (SfuSocketListener) -> Unit) {
         synchronized(listeners) {
             listeners.forEach { listener ->
                 eventUiHandler.post { call(listener) }

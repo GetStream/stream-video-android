@@ -21,7 +21,7 @@ import io.getstream.video.android.events.ConnectedEvent
 import io.getstream.video.android.events.SfuDataEvent
 import stream.video.sfu.event.JoinRequest
 
-internal interface SignalSocket {
+internal interface SfuSocket {
 
     /**
      * Initializes the socket connection.
@@ -67,9 +67,9 @@ internal interface SignalSocket {
     /**
      * Attaches a listener to the socket that receives events.
      */
-    fun addListener(signalSocketListener: SignalSocketListener)
+    fun addListener(sfuSocketListener: SfuSocketListener)
     /**
      * Detaches a listener from the socket to stop receiving events.
      */
-    fun removeListener(signalSocketListener: SignalSocketListener)
+    fun removeListener(sfuSocketListener: SfuSocketListener)
 }

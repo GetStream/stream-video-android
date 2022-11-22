@@ -27,7 +27,7 @@ import okio.ByteString
 import stream.video.sfu.event.SfuEvent
 
 internal class SignalEventsParser(
-    private val signalSocket: SignalSocket,
+    private val sfuSocket: SfuSocket,
 ) : okhttp3.WebSocketListener() {
 
     private val logger = StreamLog.getLogger("Call:SFU-WS")
@@ -40,7 +40,7 @@ internal class SignalEventsParser(
         connectionEventReceived = false
         closedByClient = false
 
-        signalSocket.onConnectionResolved(ConnectedEvent(""))
+        sfuSocket.onConnectionResolved(ConnectedEvent(""))
     }
 
     override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
@@ -53,7 +53,7 @@ internal class SignalEventsParser(
             val rawEvent = SfuEvent.ADAPTER.decode(byteArray)
             logger.v { "[onMessage] rawEvent: $rawEvent" }
             val message = RTCEventMapper.mapEvent(rawEvent)
-            signalSocket.onEvent(message)
+            sfuSocket.onEvent(message)
         } catch (error: Throwable) {
             logger.e { "[onMessage] failed: $error" }
             error.printStackTrace()
@@ -92,7 +92,7 @@ internal class SignalEventsParser(
 
     private fun onSocketError(error: VideoError) {
         if (!closedByClient) {
-            signalSocket.onSocketError(error)
+            sfuSocket.onSocketError(error)
         }
     }
 

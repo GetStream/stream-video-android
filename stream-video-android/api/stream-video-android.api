@@ -892,7 +892,7 @@ public abstract interface class io/getstream/video/android/audio/PermissionsChec
 }
 
 public abstract interface class io/getstream/video/android/call/CallClient {
-	public abstract fun addSocketListener (Lio/getstream/video/android/call/signal/socket/SignalSocketListener;)V
+	public abstract fun addSocketListener (Lio/getstream/video/android/call/signal/socket/SfuSocketListener;)V
 	public abstract fun clear ()V
 	public abstract fun connectToCall (Ljava/lang/String;Lio/getstream/video/android/model/CallSettings;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun flipCamera ()V
@@ -900,7 +900,7 @@ public abstract interface class io/getstream/video/android/call/CallClient {
 	public abstract fun getAudioDevices ()Ljava/util/List;
 	public abstract fun getPublisherStats ()Lkotlinx/coroutines/flow/StateFlow;
 	public abstract fun getSubscriberStats ()Lkotlinx/coroutines/flow/StateFlow;
-	public abstract fun removeSocketListener (Lio/getstream/video/android/call/signal/socket/SignalSocketListener;)V
+	public abstract fun removeSocketListener (Lio/getstream/video/android/call/signal/socket/SfuSocketListener;)V
 	public abstract fun selectAudioDevice (Lio/getstream/video/android/audio/AudioDevice;)V
 	public abstract fun setCameraEnabled (Z)V
 	public abstract fun setMicrophoneEnabled (Z)V
@@ -958,7 +958,7 @@ public final class io/getstream/video/android/call/connection/StreamPeerConnecti
 	public final fun makeVideoTrack (Lorg/webrtc/VideoSource;Ljava/lang/String;)Lorg/webrtc/VideoTrack;
 }
 
-public abstract interface class io/getstream/video/android/call/signal/SignalClient {
+public abstract interface class io/getstream/video/android/call/signal/SfuClient {
 	public abstract fun sendAnswer (Lstream/video/sfu/signal/SendAnswerRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun sendIceCandidate (Lstream/video/sfu/models/ICETrickle;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun setPublisher (Lstream/video/sfu/signal/SetPublisherRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -966,7 +966,7 @@ public abstract interface class io/getstream/video/android/call/signal/SignalCli
 	public abstract fun updateSubscriptions (Lstream/video/sfu/signal/UpdateSubscriptionsRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
-public final class io/getstream/video/android/call/signal/SignalClientImpl : io/getstream/video/android/call/signal/SignalClient {
+public final class io/getstream/video/android/call/signal/SfuClientImpl : io/getstream/video/android/call/signal/SfuClient {
 	public fun <init> (Lio/getstream/video/android/api/SignalServerService;)V
 	public fun sendAnswer (Lstream/video/sfu/signal/SendAnswerRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun sendIceCandidate (Lstream/video/sfu/models/ICETrickle;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -980,7 +980,7 @@ public final class io/getstream/video/android/call/signal/socket/RTCEventMapper 
 	public final fun mapEvent (Lstream/video/sfu/event/SfuEvent;)Lio/getstream/video/android/events/SfuDataEvent;
 }
 
-public abstract interface class io/getstream/video/android/call/signal/socket/SignalSocketListener {
+public abstract interface class io/getstream/video/android/call/signal/socket/SfuSocketListener {
 	public abstract fun onConnected (Lio/getstream/video/android/events/ConnectedEvent;)V
 	public abstract fun onConnecting ()V
 	public abstract fun onDisconnected (Lio/getstream/video/android/errors/DisconnectCause;)V
@@ -988,12 +988,12 @@ public abstract interface class io/getstream/video/android/call/signal/socket/Si
 	public abstract fun onEvent (Lio/getstream/video/android/events/SfuDataEvent;)V
 }
 
-public final class io/getstream/video/android/call/signal/socket/SignalSocketListener$DefaultImpls {
-	public static fun onConnected (Lio/getstream/video/android/call/signal/socket/SignalSocketListener;Lio/getstream/video/android/events/ConnectedEvent;)V
-	public static fun onConnecting (Lio/getstream/video/android/call/signal/socket/SignalSocketListener;)V
-	public static fun onDisconnected (Lio/getstream/video/android/call/signal/socket/SignalSocketListener;Lio/getstream/video/android/errors/DisconnectCause;)V
-	public static fun onError (Lio/getstream/video/android/call/signal/socket/SignalSocketListener;Lio/getstream/video/android/errors/VideoError;)V
-	public static fun onEvent (Lio/getstream/video/android/call/signal/socket/SignalSocketListener;Lio/getstream/video/android/events/SfuDataEvent;)V
+public final class io/getstream/video/android/call/signal/socket/SfuSocketListener$DefaultImpls {
+	public static fun onConnected (Lio/getstream/video/android/call/signal/socket/SfuSocketListener;Lio/getstream/video/android/events/ConnectedEvent;)V
+	public static fun onConnecting (Lio/getstream/video/android/call/signal/socket/SfuSocketListener;)V
+	public static fun onDisconnected (Lio/getstream/video/android/call/signal/socket/SfuSocketListener;Lio/getstream/video/android/errors/DisconnectCause;)V
+	public static fun onError (Lio/getstream/video/android/call/signal/socket/SfuSocketListener;Lio/getstream/video/android/errors/VideoError;)V
+	public static fun onEvent (Lio/getstream/video/android/call/signal/socket/SfuSocketListener;Lio/getstream/video/android/events/SfuDataEvent;)V
 }
 
 public abstract class io/getstream/video/android/call/state/CallAction {
