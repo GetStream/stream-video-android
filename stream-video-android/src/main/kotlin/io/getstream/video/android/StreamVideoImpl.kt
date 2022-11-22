@@ -444,10 +444,7 @@ public class StreamVideoImpl(
         iceServers: List<IceServer>
     ): CallClient {
         logger.i { "[createCallClient] signalUrl: $signalUrl, sfuToken: $sfuToken, iceServers: $iceServers" }
-        /**
-         * TODO [sfuToken] can be set as soon as we get [JoinedCall] in [joinCallInternal] function.
-         */
-        credentialsProvider.setSfuToken(sfuToken)
+
         return CallClientBuilder(
             context = context,
             credentialsProvider = credentialsProvider,
