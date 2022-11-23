@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.engine.adapter
+package io.getstream.video.android.compose.state.ui.internal
 
-import io.getstream.video.android.call.signal.socket.SfuSocketListener
-import io.getstream.video.android.engine.StreamCallEngine
-import io.getstream.video.android.events.SfuDataEvent
+import io.getstream.video.android.model.User
 
-internal class SfuSocketListenerAdapter(
-    private val engine: StreamCallEngine
-) : SfuSocketListener {
-
-    override fun onEvent(event: SfuDataEvent) {
-        engine.onSfuEvent(event)
-    }
-}
+/**
+ * State for the invite users UI in Call Participants Info.
+ *
+ * @param user The user state.
+ * @param isSelected If the user is selected or not.
+ */
+internal data class InviteUserItemState(
+    val user: User,
+    val isSelected: Boolean = false
+)

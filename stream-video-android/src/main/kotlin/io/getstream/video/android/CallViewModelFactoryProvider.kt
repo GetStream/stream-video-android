@@ -14,17 +14,14 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.engine.adapter
+package io.getstream.video.android
 
-import io.getstream.video.android.call.signal.socket.SfuSocketListener
-import io.getstream.video.android.engine.StreamCallEngine
-import io.getstream.video.android.events.SfuDataEvent
+import io.getstream.video.android.viewmodel.CallViewModelFactory
 
-internal class SfuSocketListenerAdapter(
-    private val engine: StreamCallEngine
-) : SfuSocketListener {
+public interface CallViewModelFactoryProvider {
 
-    override fun onEvent(event: SfuDataEvent) {
-        engine.onSfuEvent(event)
-    }
+    /**
+     * Allows for a custom implementation of the [CallViewModelFactory].
+     */
+    public fun getCallViewModelFactory(): CallViewModelFactory? = null
 }

@@ -19,17 +19,18 @@ package io.getstream.video.android.call.builder
 import android.content.Context
 import io.getstream.video.android.call.CallClient
 import io.getstream.video.android.call.CallClientImpl
-import io.getstream.video.android.call.signal.socket.SignalSocketFactory
-import io.getstream.video.android.call.signal.socket.SignalSocketImpl
+import io.getstream.video.android.call.signal.socket.SfuSocketFactory
+import io.getstream.video.android.call.signal.socket.SfuSocketImpl
 import io.getstream.video.android.engine.StreamCallEngine
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.model.IceServer
-import io.getstream.video.android.module.CallClientModule
 import io.getstream.video.android.module.HttpModule
+import io.getstream.video.android.module.SfuClientModule
 import io.getstream.video.android.network.NetworkStateProvider
 import io.getstream.video.android.token.CredentialsProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.logging.HttpLoggingInterceptor
 
 /**
@@ -79,30 +80,33 @@ internal class CallClientBuilder(
             credentialsProvider.getSfuToken().isBlank()
         ) throw IllegalArgumentException("The API key, user ID and token cannot be empty!")
 
+        val updatedSignalUrl = signalUrl.removeSuffix(suffix = "/twirp")
         val httpModule = HttpModule.getOrCreate(
             loggingLevel = loggingLevel,
             credentialsProvider = credentialsProvider
-        )
+        ).apply {
+            this.baseUrl = updatedSignalUrl.toHttpUrl()
+        }
 
-        val callClientModule = CallClientModule(
+        val sfuClientModule = SfuClientModule.getOrCreate(
             okHttpClient = httpModule.okHttpClient,
-            signalUrl = signalUrl
+            signalUrl = HttpModule.REPLACEMENT_URL
         )
 
-        val socketFactory = SignalSocketFactory()
+        val socketFactory = SfuSocketFactory(httpModule.okHttpClient)
 
         return CallClientImpl(
             context = context,
             getCurrentUserId = { credentialsProvider.getUserCredentials().id },
             getSfuToken = { credentialsProvider.getSfuToken() },
             callEngine = callEngine,
-            signalClient = callClientModule.signalClient,
+            sfuClient = sfuClientModule.sfuClient,
             remoteIceServers = iceServers,
-            signalSocket = SignalSocketImpl(
-                wssUrl = "$signalUrl/ws".replace("https", "wss"),
+            sfuSocket = SfuSocketImpl(
+                wssUrl = "$updatedSignalUrl/ws".replace("https", "wss"),
                 networkStateProvider = networkStateProvider,
                 coroutineScope = CoroutineScope(Dispatchers.IO),
-                signalSocketFactory = socketFactory
+                sfuSocketFactory = socketFactory
             )
         )
     }

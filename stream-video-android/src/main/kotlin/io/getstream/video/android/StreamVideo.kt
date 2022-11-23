@@ -116,6 +116,15 @@ public interface StreamVideo {
     public suspend fun joinCall(call: CallMetadata): Result<JoinedCall>
 
     /**
+     * Sends invite to people for an existing call.
+     *
+     * @param users The users to invite.
+     * @param cid The call ID.
+     * @return [Result] if the operation is successful or not.
+     */
+    public suspend fun inviteUsers(users: List<User>, cid: StreamCallCid): Result<Unit>
+
+    /**
      * Sends a specific event related to an active [Call].
      *
      * @param eventType The event type, such as accepting or declining a call.
@@ -184,11 +193,28 @@ public interface StreamVideo {
         iceServers: List<IceServer>
     ): CallClient
 
+    /**
+     * Returns current [CallClient] instance.
+     */
     public fun getActiveCallClient(): CallClient?
 
+    /**
+     * Awaits [CallClient] creation.
+     */
+    public suspend fun awaitCallClient(): CallClient
+
+    /**
+     * Accepts incoming call.
+     */
     public suspend fun acceptCall(cid: StreamCallCid): Result<JoinedCall>
 
+    /**
+     * Rejects incoming call.
+     */
     public suspend fun rejectCall(cid: StreamCallCid): Result<Boolean>
 
+    /**
+     * Cancels outgoing or active call.
+     */
     public suspend fun cancelCall(cid: StreamCallCid): Result<Boolean>
 }

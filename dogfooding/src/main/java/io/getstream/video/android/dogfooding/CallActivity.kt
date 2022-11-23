@@ -32,10 +32,9 @@ import io.getstream.video.android.call.state.ToggleMicrophone
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.activecall.ActiveCallContent
 import io.getstream.video.android.model.CallSettings
+import io.getstream.video.android.permission.PermissionManagerImpl
 import io.getstream.video.android.viewmodel.CallViewModel
 import io.getstream.video.android.viewmodel.CallViewModelFactory
-import io.getstream.video.android.viewmodel.PermissionManager
-import io.getstream.video.android.viewmodel.PermissionManagerImpl
 
 class CallActivity : AppCompatActivity() {
 

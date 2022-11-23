@@ -32,6 +32,7 @@ import io.getstream.video.android.compose.ui.components.avatar.InitialsAvatar
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.compose.ui.components.mock.mockParticipantList
 import io.getstream.video.android.model.CallParticipantState
+import io.getstream.video.android.model.toUser
 
 @Composable
 internal fun ParticipantAvatars(
@@ -43,18 +44,18 @@ internal fun ParticipantAvatars(
     ) {
         if (participants.isNotEmpty()) {
             if (participants.size == 1) {
-                val user = participants.first()
+                val participant = participants.first()
 
                 UserAvatar(
                     modifier = Modifier.size(VideoTheme.dimens.singleAvatarSize),
-                    user = user
+                    user = participant.toUser()
                 )
             } else {
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
                     items(participants.take(2)) { participant ->
                         UserAvatar(
                             modifier = Modifier.size(VideoTheme.dimens.callAvatarSize),
-                            user = participant
+                            user = participant.toUser()
                         )
                     }
 
@@ -62,7 +63,7 @@ internal fun ParticipantAvatars(
                         item {
                             UserAvatar(
                                 modifier = Modifier.size(VideoTheme.dimens.callAvatarSize),
-                                user = participants[2]
+                                user = participants[2].toUser()
                             )
                         }
                     } else if (participants.size > 3) {

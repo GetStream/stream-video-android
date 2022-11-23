@@ -16,15 +16,25 @@
 
 package io.getstream.video.android.compose.ui.components.call
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import io.getstream.video.android.call.state.CallAction
 import io.getstream.video.android.call.state.ToggleCamera
 import io.getstream.video.android.call.state.ToggleMicrophone
+import io.getstream.video.android.compose.state.ui.participants.ChangeMuteState
+import io.getstream.video.android.compose.state.ui.participants.InviteUsers
 import io.getstream.video.android.compose.ui.components.call.activecall.ActiveCallContent
+import io.getstream.video.android.compose.ui.components.call.activecall.internal.InviteUsersDialog
 import io.getstream.video.android.compose.ui.components.call.incomingcall.IncomingCallContent
 import io.getstream.video.android.compose.ui.components.call.outgoingcall.OutgoingCallContent
+import io.getstream.video.android.compose.ui.components.participants.CallParticipantsInfoMenu
+import io.getstream.video.android.model.User
 import io.getstream.video.android.viewmodel.CallViewModel
 import io.getstream.video.android.model.state.StreamCallState as State
 
@@ -54,6 +64,8 @@ public fun CallContent(
 ) {
     val stateHolder = viewModel.streamCallState.collectAsState(initial = State.Idle)
     val state = stateHolder.value
+    var usersToInvite by remember { mutableStateOf(emptyList<User>()) }
+
     if (state is State.Incoming && !state.acceptedByMe) {
         IncomingCallContent(
             modifier = modifier,
@@ -76,5 +88,38 @@ public fun CallContent(
             callViewModel = viewModel,
             onCallAction = onCallAction
         )
+        val isShowingParticipantsInfo by viewModel.isShowingParticipantsInfo.collectAsState()
+
+        if (isShowingParticipantsInfo) {
+            val participantsState by viewModel.participantList.collectAsState(initial = emptyList())
+            val users by viewModel.getUsersState().collectAsState()
+
+            CallParticipantsInfoMenu(
+                modifier = Modifier.fillMaxSize(),
+                participantsState = participantsState,
+                users = users,
+                onDismiss = { viewModel.dismissOptions() },
+                onInfoMenuAction = { action ->
+                    when (action) {
+                        is InviteUsers -> {
+                            viewModel.dismissOptions()
+                            usersToInvite = action.users
+                        }
+                        is ChangeMuteState -> viewModel.toggleMicrophone(action.isEnabled)
+                    }
+                }
+            )
+        }
+
+        if (usersToInvite.isNotEmpty()) {
+            InviteUsersDialog(
+                users = usersToInvite,
+                onDismiss = { usersToInvite = emptyList() },
+                onInviteUsers = {
+                    usersToInvite = emptyList()
+                    viewModel.inviteUsersToCall(it)
+                }
+            )
+        }
     }
 }

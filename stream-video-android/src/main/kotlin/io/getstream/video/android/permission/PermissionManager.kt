@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.viewmodel
+package io.getstream.video.android.permission
 
 import android.Manifest
 import android.content.pm.PackageManager

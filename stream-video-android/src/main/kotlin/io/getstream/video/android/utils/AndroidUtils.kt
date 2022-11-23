@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.utils
 
+import android.app.Activity
 import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -25,6 +26,7 @@ import android.os.Build
 import android.os.Vibrator
 import android.os.VibratorManager
 import androidx.annotation.RequiresApi
+import androidx.core.app.ActivityCompat
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.trySendBlocking
@@ -63,3 +65,9 @@ internal val Context.vibrator: Vibrator
 internal val Context.vibratorManager: VibratorManager
     @RequiresApi(Build.VERSION_CODES.S)
     get() = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+
+public fun Activity.shouldShowRequestPermissionsRationale(permissions: Array<out String>): Boolean {
+    return permissions.map {
+        ActivityCompat.shouldShowRequestPermissionRationale(this, it)
+    }.reduce { acc, value -> acc && value }
+}

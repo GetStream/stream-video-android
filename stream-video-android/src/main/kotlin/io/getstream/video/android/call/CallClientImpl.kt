@@ -29,9 +29,9 @@ import io.getstream.video.android.audio.AudioDevice
 import io.getstream.video.android.audio.AudioSwitchHandler
 import io.getstream.video.android.call.connection.StreamPeerConnection
 import io.getstream.video.android.call.connection.StreamPeerConnectionFactory
-import io.getstream.video.android.call.signal.SignalClient
-import io.getstream.video.android.call.signal.socket.SignalSocket
-import io.getstream.video.android.call.signal.socket.SignalSocketListener
+import io.getstream.video.android.call.signal.SfuClient
+import io.getstream.video.android.call.signal.socket.SfuSocket
+import io.getstream.video.android.call.signal.socket.SfuSocketListener
 import io.getstream.video.android.call.state.ConnectionState
 import io.getstream.video.android.call.utils.stringify
 import io.getstream.video.android.dispatchers.DispatcherProvider
@@ -57,7 +57,7 @@ import io.getstream.video.android.model.IceServer
 import io.getstream.video.android.model.SfuToken
 import io.getstream.video.android.model.StreamPeerType
 import io.getstream.video.android.model.toPeerType
-import io.getstream.video.android.module.CallClientModule
+import io.getstream.video.android.module.SfuClientModule
 import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Result
 import io.getstream.video.android.utils.Success
@@ -118,10 +118,10 @@ internal class CallClientImpl(
     private val getCurrentUserId: () -> String,
     private val getSfuToken: () -> SfuToken,
     private val callEngine: StreamCallEngine,
-    private val signalClient: SignalClient,
-    private val signalSocket: SignalSocket,
+    private val sfuClient: SfuClient,
+    private val sfuSocket: SfuSocket,
     private val remoteIceServers: List<IceServer>,
-) : CallClient, SignalSocketListener {
+) : CallClient, SfuSocketListener {
 
     private val logger = StreamLog.getLogger("Call:WebRtcClient")
 
@@ -137,7 +137,7 @@ internal class CallClientImpl(
      */
     private val peerConnectionFactory by lazy { StreamPeerConnectionFactory(context) }
     private val iceServers by lazy {
-        if (CallClientModule.REDIRECT_SIGNAL_URL == null) {
+        if (SfuClientModule.REDIRECT_SIGNAL_URL == null) {
             buildRemoteIceServers(remoteIceServers)
         } else {
             buildLocalIceServers()
@@ -188,9 +188,9 @@ internal class CallClientImpl(
     private var isCapturingVideo: Boolean = false
 
     init {
-        signalSocket.addListener(this)
-        signalSocket.addListener(SfuSocketListenerAdapter(callEngine))
-        signalSocket.connectSocket()
+        sfuSocket.addListener(this)
+        sfuSocket.addListener(SfuSocketListenerAdapter(callEngine))
+        sfuSocket.connectSocket()
     }
 
     override fun clear() {
@@ -208,7 +208,7 @@ internal class CallClientImpl(
         subscriber = null
         publisher = null
 
-        signalSocket.releaseConnection()
+        sfuSocket.releaseConnection()
 
         videoCapturer?.stopCapture()
         videoCapturer?.dispose()
@@ -219,12 +219,12 @@ internal class CallClientImpl(
         isCapturingVideo = false
     }
 
-    override fun addSocketListener(signalSocketListener: SignalSocketListener) {
-        signalSocket.addListener(signalSocketListener)
+    override fun addSocketListener(sfuSocketListener: SfuSocketListener) {
+        sfuSocket.addListener(sfuSocketListener)
     }
 
-    override fun removeSocketListener(signalSocketListener: SignalSocketListener) {
-        signalSocket.removeListener(signalSocketListener)
+    override fun removeSocketListener(sfuSocketListener: SfuSocketListener) {
+        sfuSocket.removeListener(sfuSocketListener)
     }
 
     override fun setCameraEnabled(isEnabled: Boolean) {
@@ -277,7 +277,7 @@ internal class CallClientImpl(
     }
 
     private suspend fun updateMuteState(muteStateRequest: UpdateMuteStateRequest): Result<UpdateMuteStateResponse> {
-        return signalClient.updateMuteState(muteStateRequest)
+        return sfuClient.updateMuteState(muteStateRequest)
     }
 
     override fun flipCamera() {
@@ -437,7 +437,7 @@ internal class CallClientImpl(
                 session_id = sessionId
             )
             logger.v { "[sendIceCandidate] #sfu; #${peerType.stringify()}; iceTrickle: $iceTrickle" }
-            val result = signalClient.sendIceCandidate(iceTrickle)
+            val result = sfuClient.sendIceCandidate(iceTrickle)
             logger.v { "[sendIceCandidate] #sfu; #${peerType.stringify()}; completed: $result" }
         }
     }
@@ -471,7 +471,7 @@ internal class CallClientImpl(
         return try {
             withTimeout(TIMEOUT) {
                 isConnected.first { it }
-                signalSocket.sendJoinRequest(request)
+                sfuSocket.sendJoinRequest(request)
                 callEngine.onSfuJoinSent(request)
                 logger.v { "[executeJoinRequest] request is sent" }
                 val event = sfuEvents.first { it is JoinCallResponseEvent } as JoinCallResponseEvent
@@ -575,7 +575,7 @@ internal class CallClientImpl(
                     sdp = data.description, session_id = sessionId
                 )
 
-                signalClient.setPublisher(request).onSuccessSuspend {
+                sfuClient.setPublisher(request).onSuccessSuspend {
                     logger.v { "[negotiate] #$id; #sfu; answerSdp: $it" }
 
                     val answerDescription = SessionDescription(
@@ -760,7 +760,7 @@ internal class CallClientImpl(
         val sendAnswerRequest = SendAnswerRequest(
             PeerType.PEER_TYPE_SUBSCRIBER, answerSdp.description, sessionId
         )
-        val sendAnswerResult = signalClient.sendAnswer(sendAnswerRequest)
+        val sendAnswerResult = sfuClient.sendAnswer(sendAnswerRequest)
         logger.v { "[handleSubscriberOffer] #sfu; #subscriber; sendAnswerResult: $sendAnswerResult" }
     }
 
@@ -787,7 +787,7 @@ internal class CallClientImpl(
         )
 
         coroutineScope.launch {
-            when (val result = signalClient.updateSubscriptions(request)) {
+            when (val result = sfuClient.updateSubscriptions(request)) {
                 is Success -> {
                     logger.v { "[updateParticipantsSubscriptions] #sfu; succeed" }
                 }

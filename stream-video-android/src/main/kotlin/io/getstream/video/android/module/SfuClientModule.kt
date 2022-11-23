@@ -17,13 +17,13 @@
 package io.getstream.video.android.module
 
 import io.getstream.video.android.api.SignalServerService
-import io.getstream.video.android.call.signal.SignalClient
-import io.getstream.video.android.call.signal.SignalClientImpl
+import io.getstream.video.android.call.signal.SfuClient
+import io.getstream.video.android.call.signal.SfuClientImpl
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.wire.WireConverterFactory
 
-internal class CallClientModule(
+internal class SfuClientModule(
     private val okHttpClient: OkHttpClient,
     private val signalUrl: String
 ) {
@@ -36,10 +36,10 @@ internal class CallClientModule(
             .build()
     }
 
-    internal val signalClient: SignalClient by lazy {
+    internal val sfuClient: SfuClient by lazy {
         val service = signalRetrofitClient.create(SignalServerService::class.java)
 
-        SignalClientImpl(service)
+        SfuClientImpl(service)
     }
 
     companion object {
@@ -50,5 +50,25 @@ internal class CallClientModule(
             "10.0.2.2:3031" // "sfu2.fra1.gtstrm.com"
 
         const val SIGNAL_BASE_URL = "http://$SIGNAL_HOST_BASE/"
+
+        /**
+         * Reusable instance of the module.
+         */
+        private var module: SfuClientModule? = null
+
+        /**
+         * Returns an instance of the [SfuClientModule]. If one doesn't exists, creates
+         * the instance and then returns it.
+         */
+        internal fun getOrCreate(
+            okHttpClient: OkHttpClient,
+            signalUrl: String
+        ): SfuClientModule {
+            return module ?: synchronized(this) {
+                module ?: SfuClientModule(okHttpClient, signalUrl).also {
+                    module = it
+                }
+            }
+        }
     }
 }

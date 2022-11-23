@@ -17,7 +17,7 @@
 package io.getstream.video.android.call
 
 import io.getstream.video.android.audio.AudioDevice
-import io.getstream.video.android.call.signal.socket.SignalSocketListener
+import io.getstream.video.android.call.signal.socket.SfuSocketListener
 import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.CallSettings
 import io.getstream.video.android.utils.Result
@@ -62,7 +62,7 @@ public interface CallClient {
 
     public fun selectAudioDevice(device: AudioDevice)
 
-    public fun addSocketListener(signalSocketListener: SignalSocketListener)
+    public fun addSocketListener(sfuSocketListener: SfuSocketListener)
 
-    public fun removeSocketListener(signalSocketListener: SignalSocketListener)
+    public fun removeSocketListener(sfuSocketListener: SfuSocketListener)
 }

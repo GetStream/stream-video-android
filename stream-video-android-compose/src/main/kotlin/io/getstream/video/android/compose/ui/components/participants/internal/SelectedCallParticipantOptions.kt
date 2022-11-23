@@ -14,17 +14,10 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.engine.adapter
+package io.getstream.video.android.compose.ui.components.participants.internal
 
-import io.getstream.video.android.call.signal.socket.SfuSocketListener
-import io.getstream.video.android.engine.StreamCallEngine
-import io.getstream.video.android.events.SfuDataEvent
+import androidx.compose.runtime.Composable
 
-internal class SfuSocketListenerAdapter(
-    private val engine: StreamCallEngine
-) : SfuSocketListener {
-
-    override fun onEvent(event: SfuDataEvent) {
-        engine.onSfuEvent(event)
-    }
+@Composable
+internal fun SelectedCallParticipantOptions() { // TODO - show some options based on permissions
 }

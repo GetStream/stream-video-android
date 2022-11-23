@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.engine.adapter
+package io.getstream.video.android.compose.state.ui.internal
 
-import io.getstream.video.android.call.signal.socket.SfuSocketListener
-import io.getstream.video.android.engine.StreamCallEngine
-import io.getstream.video.android.events.SfuDataEvent
+/**
+ * Represents the mode of the CallParticipantsInfo menu.
+ */
+public sealed class CallParticipantInfoMode
 
-internal class SfuSocketListenerAdapter(
-    private val engine: StreamCallEngine
-) : SfuSocketListener {
+/**
+ * Shown when the user is observing the active list of participants.
+ */
+internal object ParticipantList : CallParticipantInfoMode()
 
-    override fun onEvent(event: SfuDataEvent) {
-        engine.onSfuEvent(event)
-    }
-}
+/**
+ * Shown when the user is in the process of inviting people to an active call.
+ */
+internal object ParticipantInvites : CallParticipantInfoMode()

@@ -36,7 +36,9 @@ import io.getstream.video.android.model.CallParticipantState
 import io.getstream.video.android.model.CallSettings
 import io.getstream.video.android.model.CallType
 import io.getstream.video.android.model.CallUser
-import io.getstream.video.android.model.mapper.toMetadata
+import io.getstream.video.android.model.User
+import io.getstream.video.android.permission.PermissionManager
+import io.getstream.video.android.user.UsersProvider
 import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Success
 import io.getstream.video.android.utils.onError
@@ -47,7 +49,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.onEach
@@ -62,12 +63,12 @@ private const val CONNECT_TIMEOUT = 30_000L
 public class CallViewModel(
     private val streamVideo: StreamVideo,
     private val permissionManager: PermissionManager,
+    private val usersProvider: UsersProvider
 ) : ViewModel() {
 
     private val logger = StreamLog.getLogger("Call:ViewModel")
 
-    private val _callState: MutableStateFlow<Call?> =
-        MutableStateFlow(null)
+    private val _callState: MutableStateFlow<Call?> = MutableStateFlow(null)
     public val callState: StateFlow<Call?> = _callState
 
     private var _isVideoInitialized: MutableStateFlow<Boolean> = MutableStateFlow(false)
@@ -156,7 +157,6 @@ public class CallViewModel(
                         _participants.value = state.users.values
                             .filter { it.id != streamVideo.getUser().id }
                             .toList()
-                        joinCall()
                     }
                     is State.Joining -> {
                     }
@@ -171,24 +171,16 @@ public class CallViewModel(
     }
 
     public fun connectToCall(initialCallSettings: CallSettings) {
-        logger.d { "[createCall] input: $initialCallSettings" }
-        // this._callState.value = videoClient.getCall(callId) TODO - load details
+        logger.d { "[connectToCall] input: $initialCallSettings" }
 
         isAudioEnabled.value = initialCallSettings.audioOn && permissionManager.hasRecordAudioPermission.value
         isVideoEnabled.value = initialCallSettings.videoOn && permissionManager.hasCameraPermission.value
 
-        // TODO CallClient is supposed to live longer than VM
-        //  VM can be destroyed while the call is still running in the BG
         viewModelScope.launch {
             logger.d { "[connectToCall] state: ${streamCallState.value}" }
             withTimeout(CONNECT_TIMEOUT) {
-                val state = streamCallState.first { it is State.InCall } as State.InCall
                 logger.v { "[connectToCall] received: ${streamCallState.value}" }
-                client = streamVideo.createCallClient(
-                    state.callUrl.removeSuffix("/twirp"),
-                    state.sfuToken,
-                    state.iceServers,
-                )
+                client = streamVideo.awaitCallClient()
                 _isVideoInitialized.value = true
                 initializeCall(initialCallSettings)
             }
@@ -316,11 +308,7 @@ public class CallViewModel(
      * Clears the state of the call and disposes of the CallClient and Call instances.
      */
     public fun clearState() {
-        logger.i { "[leaveCall] no args" }
-        streamVideo.clearCallState()
-        val room = _callState.value ?: return
-
-        room.disconnect()
+        logger.i { "[clearState] no args" }
         _callState.value = null
         isVideoEnabled.value = false
         isAudioEnabled.value = false
@@ -389,24 +377,6 @@ public class CallViewModel(
         }
     }
 
-    private fun joinCall() {
-        val state = streamVideo.callState.value
-        if (state !is State.Outgoing || !state.acceptedByCallee) {
-            logger.w { "[joinCall] rejected (state is not accepted Outgoing): $state" }
-            return
-        }
-        logger.d { "[joinCall] state: $state" }
-        viewModelScope.launch {
-            streamVideo.joinCall(
-                state.toMetadata()
-            ).onSuccess {
-                logger.v { "[joinCall] completed: $it" }
-            }.onError {
-                logger.e { "[joinCall] failed: $it" }
-            }
-        }
-    }
-
     private fun onMicrophoneChanged(microphoneEnabled: Boolean) {
         logger.d { "[onMicrophoneChanged] microphoneEnabled: $microphoneEnabled" }
         if (!permissionManager.hasRecordAudioPermission.value) {
@@ -426,5 +396,40 @@ public class CallViewModel(
     private fun onSpeakerphoneChanged(speakerPhoneEnabled: Boolean) {
         logger.d { "[onSpeakerphoneChanged] speakerPhoneEnabled: $speakerPhoneEnabled" }
         isSpeakerPhoneOn.value = speakerPhoneEnabled
+    }
+
+    /**
+     * Exposes a list of users you can plug in to the UI, such as user invites.
+     */
+    public fun getUsers(): List<User> = usersProvider.provideUsers()
+
+    /**
+     * Exposes a [StateFlow] of a list of users, that can be updated over time, based on your custom
+     * logic, and plugged into the UI, similar to [getUsers].
+     */
+    public fun getUsersState(): StateFlow<List<User>> = usersProvider.userState
+
+    /**
+     * Attempts to invite people to an ongoing call.
+     *
+     * @param users The list of users to add to the call.
+     */
+    public fun inviteUsersToCall(users: List<User>) {
+        logger.d { "[inviteUsersToCall] Inviting users to call, users: $users" }
+        val callState = streamCallState.value
+
+        if (callState !is State.Connected) {
+            logger.d { "[inviteUsersToCall] Invalid state, not in State.Connected!" }
+            return
+        }
+        viewModelScope.launch {
+            streamVideo.inviteUsers(users, callState.callGuid.cid)
+                .onSuccess {
+                    logger.d { "[inviteUsersToCall] Success!" }
+                }
+                .onError {
+                    logger.d { "[inviteUsersToCall] Error, ${it.message}." }
+                }
+        }
     }
 }

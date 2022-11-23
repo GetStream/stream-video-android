@@ -40,7 +40,17 @@ import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.CallParticipantState
 import io.getstream.video.android.model.VideoTrack
+import io.getstream.video.android.model.toUser
 
+/**
+ * Represents a single participant in a call.
+ *
+ * @param call The active call.
+ * @param participant Participant to render.
+ * @param modifier Modifier for styling.
+ * @param isFocused If the participant is focused or not.
+ * @param onRender Handler when the Video renders.
+ */
 @Composable
 public fun CallParticipant(
     call: Call,
@@ -87,7 +97,7 @@ private fun ParticipantVideo(
     } else {
         UserAvatar(
             shape = RectangleShape,
-            user = participant
+            user = participant.toUser()
         )
     }
 }

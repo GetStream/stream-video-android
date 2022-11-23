@@ -37,9 +37,7 @@ import io.getstream.video.android.call.state.LeaveCall
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.CallControls
 import io.getstream.video.android.compose.ui.components.call.activecall.internal.ActiveCallAppBar
-import io.getstream.video.android.compose.ui.components.call.activecall.internal.AudioDeviceMenu
 import io.getstream.video.android.compose.ui.components.participants.CallParticipants
-import io.getstream.video.android.compose.ui.components.participants.CallParticipantsInfoMenu
 import io.getstream.video.android.viewmodel.CallViewModel
 
 /**
@@ -66,8 +64,6 @@ public fun ActiveCallContent(
     val isShowingAudioDevicePicker by callViewModel.isShowingAudioDevicePicker.collectAsState(
         false
     )
-
-    val participantsState by callViewModel.participantList.collectAsState(initial = emptyList())
 
     val callMediaState by callViewModel.callMediaState.collectAsState(initial = CallMediaState())
 
@@ -117,14 +113,6 @@ public fun ActiveCallContent(
                     )
                 }
             }
-        }
-
-        if (isShowingParticipantsInfo) {
-            CallParticipantsInfoMenu(callViewModel, participantsState)
-        }
-
-        if (isShowingAudioDevicePicker) {
-            AudioDeviceMenu(callViewModel)
         }
     }
 }

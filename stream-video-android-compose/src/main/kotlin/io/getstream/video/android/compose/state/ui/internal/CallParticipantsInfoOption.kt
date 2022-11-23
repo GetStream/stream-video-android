@@ -14,17 +14,21 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.engine.adapter
+package io.getstream.video.android.compose.state.ui.internal
 
-import io.getstream.video.android.call.signal.socket.SfuSocketListener
-import io.getstream.video.android.engine.StreamCallEngine
-import io.getstream.video.android.events.SfuDataEvent
+/**
+ * Actions that can be taken in the Call Participants Info menu.
+ */
+internal sealed class CallParticipantsInfoOption
 
-internal class SfuSocketListenerAdapter(
-    private val engine: StreamCallEngine
-) : SfuSocketListener {
+/**
+ * Starts the Invite flow.
+ */
+internal object Invite : CallParticipantsInfoOption()
 
-    override fun onEvent(event: SfuDataEvent) {
-        engine.onSfuEvent(event)
-    }
-}
+/**
+ * Triggers a mute toggle event for the current user.
+ */
+internal data class ToggleMute(
+    val isMuted: Boolean
+) : CallParticipantsInfoOption()

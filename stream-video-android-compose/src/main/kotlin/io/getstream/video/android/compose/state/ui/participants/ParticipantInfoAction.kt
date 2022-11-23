@@ -14,17 +14,27 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.engine.adapter
+package io.getstream.video.android.compose.state.ui.participants
 
-import io.getstream.video.android.call.signal.socket.SfuSocketListener
-import io.getstream.video.android.engine.StreamCallEngine
-import io.getstream.video.android.events.SfuDataEvent
+import io.getstream.video.android.model.User
 
-internal class SfuSocketListenerAdapter(
-    private val engine: StreamCallEngine
-) : SfuSocketListener {
+/**
+ * Actions which can be taken in the participants info UI in a call.
+ */
+public sealed class ParticipantInfoAction
 
-    override fun onEvent(event: SfuDataEvent) {
-        engine.onSfuEvent(event)
-    }
-}
+/**
+ * Triggers a mute change state for the active participant.
+ *
+ * @param isEnabled If the microphone is enabled or not.
+ */
+public data class ChangeMuteState(
+    val isEnabled: Boolean
+) : ParticipantInfoAction()
+
+/**
+ * Triggers an invite action for users.
+ *
+ * @param users The users to invite.
+ */
+public data class InviteUsers(val users: List<User>) : ParticipantInfoAction()

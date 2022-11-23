@@ -62,6 +62,7 @@ import io.getstream.video.android.model.state.StreamSfuSessionId
 import io.getstream.video.android.model.state.copy
 import io.getstream.video.android.model.state.toConnected
 import io.getstream.video.android.model.state.toConnecting
+import io.getstream.video.android.model.state.toInitializing
 import io.getstream.video.android.model.toCallUser
 import io.getstream.video.android.model.toCallUserMap
 import io.getstream.video.android.utils.Jobs
@@ -213,12 +214,12 @@ internal class StreamCallEngineImpl(
         }
         jobs.cancel(ID_TIMEOUT_SFU_JOINED)
         val eventUsers = event.callState.participants.toCallUserMap()
-        _callState.post(
-            state.copy(
-                users = state.users merge eventUsers,
-                sfuSessionId = StreamSfuSessionId.Confirmed(state.sfuSessionId.value)
-            )
+        val stateConfirmed = state.copy(
+            users = state.users merge eventUsers,
+            sfuSessionId = StreamSfuSessionId.Confirmed(state.sfuSessionId.value)
         )
+        _callState.post(stateConfirmed)
+        _callState.post(stateConfirmed.toInitializing())
     }
 
     /**
