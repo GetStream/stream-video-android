@@ -67,14 +67,17 @@ public abstract class AbstractComposeCallActivity : AppCompatActivity(), StreamV
     }
 
     private fun initPermissionManager() {
-        permissionManager = PermissionManagerImpl(this, onPermissionResult = { permission, isGranted ->
-            when (permission) {
-                Manifest.permission.CAMERA -> callViewModel.onCallAction(ToggleCamera(isGranted))
-                Manifest.permission.RECORD_AUDIO -> callViewModel.onCallAction(ToggleMicrophone(isGranted))
-            }
-        }, onShowSettings = {
+        permissionManager = PermissionManagerImpl(
+            fragmentActivity = this,
+            onPermissionResult = { permission, isGranted ->
+                when (permission) {
+                    Manifest.permission.CAMERA -> callViewModel.onCallAction(ToggleCamera(isGranted))
+                    Manifest.permission.RECORD_AUDIO -> callViewModel.onCallAction(ToggleMicrophone(isGranted))
+                }
+            }, onShowSettings = {
                 showPermissionsDialog()
-            })
+            }
+        )
     }
 
     protected fun buildContent(): (@Composable () -> Unit) = {

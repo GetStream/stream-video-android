@@ -20,10 +20,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import io.getstream.video.android.call.state.CallMediaState
 import io.getstream.video.android.call.state.ToggleMicrophone
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.background.CallBackground
@@ -59,9 +62,11 @@ public fun IncomingCallContent(
 ) {
     val callType: CallType by viewModel.callType.collectAsState()
     val participants: List<CallUser> by viewModel.participants.collectAsState()
+    val callMediaState: CallMediaState by viewModel.callMediaState.collectAsState()
     IncomingCall(
         modifier = modifier,
         participants = participants,
+        isVideoEnabled = callMediaState.isCameraEnabled,
         callType = callType,
         onRejectCall = onRejectCall,
         onAcceptCall = onAcceptCall,
@@ -75,6 +80,7 @@ public fun IncomingCallContent(
  *
  * @param participants People participating in the call.
  * @param callType The type of call, Audio or Video.
+ * @param isVideoEnabled Whether the video should be enabled when entering the call or not.
  * @param onRejectCall Handler when the user decides to cancel or drop out of a call.
  * @param onAcceptCall Handler when the user accepts a call in Incoming Call state.
  * @param onVideoToggleChanged Handler when the user toggles their video on or off.
@@ -84,6 +90,7 @@ public fun IncomingCallContent(
 public fun IncomingCall(
     participants: List<CallUser>,
     callType: CallType,
+    isVideoEnabled: Boolean,
     onRejectCall: () -> Unit,
     onAcceptCall: () -> Unit,
     onVideoToggleChanged: (Boolean) -> Unit,
@@ -118,6 +125,7 @@ public fun IncomingCall(
                 .align(Alignment.BottomCenter)
                 .padding(bottom = VideoTheme.dimens.incomingCallOptionsBottomPadding),
             isVideoCall = callType == CallType.VIDEO,
+            isVideoEnabled = isVideoEnabled,
             onDeclineCall = onRejectCall,
             onAcceptCall = onAcceptCall,
             onVideoToggleChanged = onVideoToggleChanged
@@ -142,6 +150,7 @@ private fun IncomingCallPreview() {
                     teams = emptyList()
                 )
             },
+            isVideoEnabled = false,
             callType = CallType.VIDEO,
             onRejectCall = { },
             onAcceptCall = { },

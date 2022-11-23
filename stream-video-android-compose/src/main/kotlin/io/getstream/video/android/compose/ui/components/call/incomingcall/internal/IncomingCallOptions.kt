@@ -24,10 +24,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -41,12 +37,11 @@ import io.getstream.video.android.compose.ui.components.extensions.toggleAlpha
 internal fun IncomingCallOptions(
     modifier: Modifier = Modifier,
     isVideoCall: Boolean,
+    isVideoEnabled: Boolean,
     onDeclineCall: () -> Unit,
     onAcceptCall: () -> Unit,
     onVideoToggleChanged: (Boolean) -> Unit
 ) {
-    var isVideoEnabled by remember { mutableStateOf(true) }
-
     Row(
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -79,8 +74,7 @@ internal fun IncomingCallOptions(
                     )
                     .size(VideoTheme.dimens.mediumButtonSize),
                 onClick = {
-                    isVideoEnabled = !isVideoEnabled
-                    onVideoToggleChanged(isVideoEnabled)
+                    onVideoToggleChanged(!isVideoEnabled)
                 },
                 content = {
                     val cameraIcon = painterResource(
@@ -125,6 +119,7 @@ private fun IncomingCallOptionsPreview() {
     VideoTheme {
         IncomingCallOptions(
             isVideoCall = true,
+            isVideoEnabled = true,
             onDeclineCall = {},
             onAcceptCall = {},
             onVideoToggleChanged = {}

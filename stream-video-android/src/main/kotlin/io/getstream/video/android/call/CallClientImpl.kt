@@ -120,7 +120,7 @@ internal class CallClientImpl(
     private val callEngine: StreamCallEngine,
     private val signalClient: SignalClient,
     private val signalSocket: SignalSocket,
-    private val remoteIceServers: List<IceServer>
+    private val remoteIceServers: List<IceServer>,
 ) : CallClient, SignalSocketListener {
 
     private val logger = StreamLog.getLogger("Call:WebRtcClient")
@@ -248,6 +248,8 @@ internal class CallClientImpl(
     override fun setMicrophoneEnabled(isEnabled: Boolean) {
         logger.d { "[setMicrophoneEnabled] #sfu; isEnabled: $isEnabled" }
         coroutineScope.launch {
+            if (isEnabled) setupAudioTrack()
+
             val request = UpdateMuteStateRequest(
                 sessionId,
                 audio_mute_changed = AudioMuteChanged(muted = !isEnabled),
@@ -313,9 +315,9 @@ internal class CallClientImpl(
 
     override suspend fun connectToCall(
         sessionId: String,
-        callSettings: CallSettings
+        getCallSettings: () -> CallSettings,
     ): Result<Call> {
-        logger.d { "[connectToCall] #sfu; sessionId: $sessionId, autoPublish: ${callSettings.autoPublish}" }
+        logger.d { "[connectToCall] #sfu; sessionId: $sessionId, autoPublish: ${getCallSettings().autoPublish}" }
         if (connectionState != ConnectionState.DISCONNECTED) {
             return Failure(
                 VideoError("Already connected or connecting to a call with the session ID: $sessionId")
@@ -325,7 +327,7 @@ internal class CallClientImpl(
         connectionState = ConnectionState.CONNECTING
         this.sessionId = sessionId
 
-        return when (val initializeResult = initializeCall(callSettings)) {
+        return when (val initializeResult = initializeCall(getCallSettings)) {
             is Success -> {
                 connectionState = ConnectionState.CONNECTED
 
@@ -378,9 +380,9 @@ internal class CallClientImpl(
     }
 
     private suspend fun initializeCall(
-        callSettings: CallSettings
+        getCallSettings: () -> CallSettings,
     ): Result<JoinResponse> {
-        val autoPublish = callSettings.autoPublish
+        val autoPublish = getCallSettings().autoPublish
         logger.d { "[initializeCall] #sfu; autoPublish: $autoPublish" }
 
         val call = createCall(sessionId)
@@ -392,6 +394,7 @@ internal class CallClientImpl(
         return when (result) {
             is Success -> {
                 createPeerConnections(autoPublish)
+                val callSettings = getCallSettings()
                 loadParticipantsData(result.data.call_state, callSettings)
                 createUserTracks(callSettings)
                 call.setupAudio(callSettings)
@@ -594,19 +597,30 @@ internal class CallClientImpl(
             manager?.allowedCapturePolicy = ALLOW_CAPTURE_BY_ALL
         }
 
-        val audioTrack = makeAudioTrack()
-        audioTrack.setEnabled(callSettings.audioOn)
-        localAudioTrack = audioTrack
-        logger.v { "[createUserTracks] #sfu; audioTrack: ${audioTrack.stringify()}" }
+        if (callSettings.audioOn) {
+            setupAudioTrack(callSettings.autoPublish)
+        }
 
         val videoTrack = makeVideoTrack()
         localVideoTrack = videoTrack
         videoTrack.setEnabled(callSettings.videoOn)
-        logger.v { "[createUserTracks] #sfu; videoTrack: ${videoTrack.stringify()}" }
+        logger.d { "[createUserTracks] #sfu; videoTrack: ${videoTrack.stringify()}" }
+
+        if (autoPublish) {
+            publisher?.addVideoTransceiver(localVideoTrack!!, listOf(sessionId))
+        }
+    }
+
+    private fun setupAudioTrack(autoPublish: Boolean = true) {
+        if (localAudioTrack != null) return
+
+        val audioTrack = makeAudioTrack()
+        audioTrack.setEnabled(true)
+        localAudioTrack = audioTrack
+        logger.d { "[setupAudioTrack] #sfu; audioTrack: ${audioTrack.stringify()}" }
 
         if (autoPublish) {
             publisher?.addTrack(localAudioTrack!!, listOf(sessionId))
-            publisher?.addVideoTransceiver(localVideoTrack!!, listOf(sessionId))
         }
     }
 

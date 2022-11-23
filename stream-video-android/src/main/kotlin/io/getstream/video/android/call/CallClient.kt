@@ -30,7 +30,7 @@ public interface CallClient {
 
     public suspend fun connectToCall(
         sessionId: String,
-        callSettings: CallSettings
+        getCallSettings: () -> CallSettings
     ): Result<Call>
 
     /**
