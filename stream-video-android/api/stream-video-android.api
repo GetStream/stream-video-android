@@ -641,11 +641,19 @@ public final class io/getstream/video/android/BuildConfig {
 }
 
 public abstract interface class io/getstream/video/android/CallViewModelFactoryProvider {
-	public abstract fun getCallViewModelFactory ()Lio/getstream/video/android/viewmodel/CallViewModelFactory;
+	public abstract fun getCallViewModelFactory (Lio/getstream/video/android/permission/PermissionManager;)Lio/getstream/video/android/viewmodel/CallViewModelFactory;
 }
 
 public final class io/getstream/video/android/CallViewModelFactoryProvider$DefaultImpls {
-	public static fun getCallViewModelFactory (Lio/getstream/video/android/CallViewModelFactoryProvider;)Lio/getstream/video/android/viewmodel/CallViewModelFactory;
+	public static fun getCallViewModelFactory (Lio/getstream/video/android/CallViewModelFactoryProvider;Lio/getstream/video/android/permission/PermissionManager;)Lio/getstream/video/android/viewmodel/CallViewModelFactory;
+}
+
+public abstract interface class io/getstream/video/android/PermissionManagerProvider {
+	public abstract fun getPermissionManager ()Lio/getstream/video/android/permission/PermissionManager;
+}
+
+public final class io/getstream/video/android/PermissionManagerProvider$DefaultImpls {
+	public static fun getPermissionManager (Lio/getstream/video/android/PermissionManagerProvider;)Lio/getstream/video/android/permission/PermissionManager;
 }
 
 public abstract interface class io/getstream/video/android/StreamVideo {
@@ -902,7 +910,7 @@ public abstract interface class io/getstream/video/android/audio/PermissionsChec
 public abstract interface class io/getstream/video/android/call/CallClient {
 	public abstract fun addSocketListener (Lio/getstream/video/android/call/signal/socket/SfuSocketListener;)V
 	public abstract fun clear ()V
-	public abstract fun connectToCall (Ljava/lang/String;Lio/getstream/video/android/model/CallSettings;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun connectToCall (Ljava/lang/String;Lkotlin/jvm/functions/Function0;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun flipCamera ()V
 	public abstract fun getActiveCall ()Lio/getstream/video/android/model/Call;
 	public abstract fun getAudioDevices ()Ljava/util/List;
@@ -2476,14 +2484,18 @@ public abstract interface class io/getstream/video/android/network/NetworkStateP
 }
 
 public abstract interface class io/getstream/video/android/permission/PermissionManager {
-	public abstract fun getHasCameraPermission ()Z
-	public abstract fun getHasRecordAudioPermission ()Z
+	public abstract fun checkPermission (Ljava/lang/String;)Z
+	public abstract fun getHasCameraPermission ()Lkotlinx/coroutines/flow/StateFlow;
+	public abstract fun getHasRecordAudioPermission ()Lkotlinx/coroutines/flow/StateFlow;
+	public abstract fun requestPermission (Ljava/lang/String;)Z
 }
 
-public final class io/getstream/video/android/permission/PermissionManagerImpl : io/getstream/video/android/permission/PermissionManager {
-	public fun <init> (Landroid/content/Context;)V
-	public fun getHasCameraPermission ()Z
-	public fun getHasRecordAudioPermission ()Z
+public final class io/getstream/video/android/permission/StreamPermissionManagerImpl : io/getstream/video/android/permission/PermissionManager {
+	public fun <init> (Landroidx/fragment/app/FragmentActivity;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function1;)V
+	public fun checkPermission (Ljava/lang/String;)Z
+	public fun getHasCameraPermission ()Lkotlinx/coroutines/flow/StateFlow;
+	public fun getHasRecordAudioPermission ()Lkotlinx/coroutines/flow/StateFlow;
+	public fun requestPermission (Ljava/lang/String;)Z
 }
 
 public abstract class io/getstream/video/android/service/AbstractStreamCallService : android/app/Service, io/getstream/video/android/StreamVideoProvider {
@@ -2757,22 +2769,15 @@ public final class io/getstream/video/android/viewmodel/CallViewModel : androidx
 	public final fun getUsersState ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun hangUpCall ()V
 	public final fun inviteUsersToCall (Ljava/util/List;)V
-	public final fun isAudioOn ()Lkotlinx/coroutines/flow/Flow;
 	public final fun isShowingAudioDevicePicker ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun isShowingParticipantsInfo ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun isVideoInitialized ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun isVideoOn ()Lkotlinx/coroutines/flow/Flow;
-	public final fun onAudioPermissionChanged (Z)V
 	public final fun onCallAction (Lio/getstream/video/android/call/state/CallAction;)V
-	public final fun onVideoPermissionChanged (Z)V
 	public final fun reconnect ()V
 	public final fun rejectCall ()V
 	public final fun selectAudioDevice (Lio/getstream/video/android/audio/AudioDevice;)V
 	public final fun showParticipants ()V
 	public final fun showSettings ()V
-	public final fun toggleCamera (Z)V
-	public final fun toggleMicrophone (Z)V
-	public final fun toggleSpeakerphone (Z)V
 }
 
 public final class io/getstream/video/android/viewmodel/CallViewModelFactory : androidx/lifecycle/ViewModelProvider$Factory {

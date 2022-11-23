@@ -32,7 +32,8 @@ import io.getstream.video.android.call.state.ToggleMicrophone
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.activecall.ActiveCallContent
 import io.getstream.video.android.model.CallSettings
-import io.getstream.video.android.permission.PermissionManagerImpl
+import io.getstream.video.android.permission.PermissionManager
+import io.getstream.video.android.permission.StreamPermissionManagerImpl
 import io.getstream.video.android.viewmodel.CallViewModel
 import io.getstream.video.android.viewmodel.CallViewModelFactory
 
@@ -70,7 +71,7 @@ class CallActivity : AppCompatActivity() {
     }
 
     private fun initPermissionManager() {
-        permissionManager = PermissionManagerImpl(this, onPermissionResult = { permission, isGranted ->
+        permissionManager = StreamPermissionManagerImpl(this, onPermissionResult = { permission, isGranted ->
             when (permission) {
                 Manifest.permission.CAMERA -> callViewModel.onCallAction(ToggleCamera(isGranted))
                 Manifest.permission.RECORD_AUDIO -> callViewModel.onCallAction(ToggleMicrophone(isGranted))

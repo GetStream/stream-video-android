@@ -80,6 +80,7 @@ public class CallViewModel(
             hasPermission && videoEnabled
         }.onEach {
             if (::client.isInitialized && _callState.value != null) {
+                logger.d { "[isVideoEnabled] setCameraEnabled: $it" }
                 client.setCameraEnabled(it)
             }
         }.stateIn(scope = viewModelScope, started = SharingStarted.Eagerly, false)
@@ -90,6 +91,7 @@ public class CallViewModel(
             hasPermission && audioEnabled
         }.onEach {
             if (::client.isInitialized && _callState.value != null) {
+                logger.d { "[isVideoEnabled] setMicrophoneEnabled: $it" }
                 client.setMicrophoneEnabled(it)
             }
         }.stateIn(scope = viewModelScope, started = SharingStarted.Eagerly, false)

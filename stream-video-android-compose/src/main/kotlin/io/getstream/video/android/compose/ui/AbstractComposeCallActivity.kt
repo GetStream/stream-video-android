@@ -30,6 +30,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.CallViewModelFactoryProvider
+import io.getstream.video.android.PermissionManagerProvider
 import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.StreamVideoProvider
 import io.getstream.video.android.call.state.ToggleCamera
@@ -38,19 +39,22 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.CallContent
 import io.getstream.video.android.model.CallSettings
 import io.getstream.video.android.model.state.StreamCallState
-import io.getstream.video.android.permission.PermissionManagerImpl
+import io.getstream.video.android.permission.PermissionManager
+import io.getstream.video.android.permission.StreamPermissionManagerImpl
 import io.getstream.video.android.viewmodel.CallViewModel
 import io.getstream.video.android.viewmodel.CallViewModelFactory
 
 public abstract class AbstractComposeCallActivity :
     AppCompatActivity(),
     StreamVideoProvider,
-    CallViewModelFactoryProvider {
+    CallViewModelFactoryProvider,
+    PermissionManagerProvider {
 
     private val streamVideo: StreamVideo by lazy { getStreamVideo(this) }
 
+    private lateinit var callPermissionManager: PermissionManager
     private val factory by lazy {
-        getCallViewModelFactory() ?: defaultViewModelFactory()
+        getCallViewModelFactory(callPermissionManager) ?: defaultViewModelFactory()
     }
 
     /**
@@ -59,7 +63,24 @@ public abstract class AbstractComposeCallActivity :
     public fun defaultViewModelFactory(): CallViewModelFactory {
         return CallViewModelFactory(
             streamVideo = streamVideo,
-            permissionManager = PermissionManagerImpl(applicationContext),
+            permissionManager = callPermissionManager,
+        )
+    }
+
+    /**
+     * Provides the default [PermissionManager] implementation.
+     */
+    private fun getDefaultPermissionManager(): PermissionManager {
+        return StreamPermissionManagerImpl(
+            fragmentActivity = this,
+            onPermissionResult = { permission, isGranted ->
+                when (permission) {
+                    Manifest.permission.CAMERA -> callViewModel.onCallAction(ToggleCamera(isGranted))
+                    Manifest.permission.RECORD_AUDIO -> callViewModel.onCallAction(ToggleMicrophone(isGranted))
+                }
+            }, onShowSettings = {
+                showPermissionsDialog()
+            }
         )
     }
 
@@ -81,17 +102,7 @@ public abstract class AbstractComposeCallActivity :
     }
 
     private fun initPermissionManager() {
-        permissionManager = PermissionManagerImpl(
-            fragmentActivity = this,
-            onPermissionResult = { permission, isGranted ->
-                when (permission) {
-                    Manifest.permission.CAMERA -> callViewModel.onCallAction(ToggleCamera(isGranted))
-                    Manifest.permission.RECORD_AUDIO -> callViewModel.onCallAction(ToggleMicrophone(isGranted))
-                }
-            }, onShowSettings = {
-                showPermissionsDialog()
-            }
-        )
+        callPermissionManager = getPermissionManager() ?: getDefaultPermissionManager()
     }
 
     protected fun buildContent(): (@Composable () -> Unit) = {
@@ -118,16 +129,16 @@ public abstract class AbstractComposeCallActivity :
     }
 
     private fun toggleMicrophone(action: ToggleMicrophone) {
-        if (!permissionManager.hasRecordAudioPermission.value && action.isEnabled) {
-            permissionManager.requestPermission(Manifest.permission.RECORD_AUDIO)
+        if (!callPermissionManager.hasRecordAudioPermission.value && action.isEnabled) {
+            callPermissionManager.requestPermission(Manifest.permission.RECORD_AUDIO)
         } else {
             callViewModel.onCallAction(action)
         }
     }
 
     private fun toggleCamera(action: ToggleCamera) {
-        if (!permissionManager.hasCameraPermission.value && action.isEnabled) {
-            permissionManager.requestPermission(Manifest.permission.CAMERA)
+        if (!callPermissionManager.hasCameraPermission.value && action.isEnabled) {
+            callPermissionManager.requestPermission(Manifest.permission.CAMERA)
         } else {
             callViewModel.onCallAction(action)
         }
@@ -150,7 +161,7 @@ public abstract class AbstractComposeCallActivity :
 
     protected fun getDefaultCallSettings(): CallSettings = CallSettings(
         audioOn = false,
-        videoOn = permissionManager.hasCameraPermission.value,
+        videoOn = callPermissionManager.hasCameraPermission.value,
         speakerOn = false
     )
 

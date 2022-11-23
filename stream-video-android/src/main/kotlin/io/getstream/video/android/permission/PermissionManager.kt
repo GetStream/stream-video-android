@@ -69,7 +69,7 @@ public interface PermissionManager {
  * @param onShowSettings Callback used when the user has selected don't allow and we need to take them to the
  * settings to grant the permissions
  */
-public class PermissionManagerImpl(
+public class StreamPermissionManagerImpl(
     private val fragmentActivity: FragmentActivity,
     private val onPermissionResult: (String, Boolean) -> Unit,
     private val onShowSettings: (String) -> Unit,

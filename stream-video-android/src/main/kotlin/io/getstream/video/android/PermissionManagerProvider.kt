@@ -17,12 +17,11 @@
 package io.getstream.video.android
 
 import io.getstream.video.android.permission.PermissionManager
-import io.getstream.video.android.viewmodel.CallViewModelFactory
 
-public interface CallViewModelFactoryProvider {
+public interface PermissionManagerProvider {
 
     /**
-     * Allows for a custom implementation of the [CallViewModelFactory].
+     * Allows for a custom implementation of the [PermissionManager].
      */
-    public fun getCallViewModelFactory(permissionManager: PermissionManager): CallViewModelFactory? = null
+    public fun getPermissionManager(): PermissionManager? = null
 }

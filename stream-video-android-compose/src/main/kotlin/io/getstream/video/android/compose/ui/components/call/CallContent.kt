@@ -60,7 +60,7 @@ public fun CallContent(
     onRejectCall: () -> Unit = viewModel::rejectCall,
     onAcceptCall: () -> Unit = viewModel::acceptCall,
     onCancelCall: () -> Unit = viewModel::cancelCall,
-    onCallAction: (CallAction) -> Unit = { viewModel.onCallAction(it) }
+    onCallAction: (CallAction) -> Unit = { viewModel.onCallAction(it) },
 ) {
     val stateHolder = viewModel.streamCallState.collectAsState(initial = State.Idle)
     val state = stateHolder.value
@@ -105,7 +105,7 @@ public fun CallContent(
                             viewModel.dismissOptions()
                             usersToInvite = action.users
                         }
-                        is ChangeMuteState -> viewModel.toggleMicrophone(action.isEnabled)
+                        is ChangeMuteState -> onCallAction(ToggleMicrophone(action.isEnabled))
                     }
                 }
             )

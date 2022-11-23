@@ -22,7 +22,7 @@ import io.getstream.video.android.app.BuildConfig
 import io.getstream.video.android.app.user.FakeUsersProvider
 import io.getstream.video.android.app.videoApp
 import io.getstream.video.android.compose.ui.AbstractComposeCallActivity
-import io.getstream.video.android.permission.PermissionManagerImpl
+import io.getstream.video.android.permission.PermissionManager
 import io.getstream.video.android.user.EmptyUsersProvider
 import io.getstream.video.android.viewmodel.CallViewModelFactory
 
@@ -36,10 +36,10 @@ class CallActivity : AbstractComposeCallActivity() {
     /**
      * Provides a custom factory for the ViewModel, that provides fake users for invites.
      */
-    override fun getCallViewModelFactory(): CallViewModelFactory {
+    override fun getCallViewModelFactory(permissionManager: PermissionManager): CallViewModelFactory {
         return CallViewModelFactory(
             streamVideo = getStreamVideo(this),
-            permissionManager = PermissionManagerImpl(applicationContext),
+            permissionManager = permissionManager,
             usersProvider = if (BuildConfig.DEBUG) FakeUsersProvider() else EmptyUsersProvider
         )
     }
