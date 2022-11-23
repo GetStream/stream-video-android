@@ -25,7 +25,7 @@ object Versions {
     internal const val OKHTTP = "4.10.0"
 
     internal const val WEBRTC = "104.5112.03"
-    internal const val STREAM = "5.8.0"
+    internal const val STREAM = "6.0.0-beta1"
 
     internal const val ANDROIDX_TEST = "1.4.0"
     internal const val BASE_PROFILE = "1.2.0"
@@ -39,7 +39,8 @@ object Dependencies {
     const val gradleNexusPublishPlugin =
         "io.github.gradle-nexus:publish-plugin:${Versions.GRADLE_NEXUS_PUBLISH_PLUGIN}"
     const val kotlinGradlePlugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:${Versions.KOTLIN}"
-    const val kotlinSerializationPlugin = "org.jetbrains.kotlin:kotlin-serialization:${Versions.KOTLIN}"
+    const val kotlinSerializationPlugin =
+        "org.jetbrains.kotlin:kotlin-serialization:${Versions.KOTLIN}"
     const val kotlinSerializationJson =
         "org.jetbrains.kotlinx:kotlinx-serialization-json:${Versions.KOTLIN_SERIALIZATION_JSON}"
     const val spotlessGradlePlugin =
@@ -68,7 +69,8 @@ object Dependencies {
     const val composeUiTooling = "androidx.compose.ui:ui-tooling:${Versions.COMPOSE}"
     const val composeFoundation = "androidx.compose.foundation:foundation:${Versions.COMPOSE}"
     const val composeMaterial = "androidx.compose.material:material:${Versions.COMPOSE}"
-    const val composeIconsExtended = "androidx.compose.material:material-icons-extended:${Versions.COMPOSE}"
+    const val composeIconsExtended =
+        "androidx.compose.material:material-icons-extended:${Versions.COMPOSE}"
     const val composeCoil = "io.coil-kt:coil-compose:${Versions.COIL}"
 
     const val wireRuntime = "com.squareup.wire:wire-runtime:${Versions.WIRE}"
@@ -81,6 +83,10 @@ object Dependencies {
 
     const val streamLogger = "io.getstream:stream-logger:${Versions.STREAM}"
     const val streamLoggerAndroid = "io.getstream:stream-logger-android:${Versions.STREAM}"
+
+    const val streamChatCompose = "io.getstream:stream-chat-android-compose:${Versions.STREAM}"
+    const val streamChatOffline = "io.getstream:stream-chat-android-offline:${Versions.STREAM}"
+    const val streamChatState = "io.getstream:stream-chat-android-state:${Versions.STREAM}"
 
     const val baseProfile =
         "androidx.profileinstaller:profileinstaller:${Versions.BASE_PROFILE}"

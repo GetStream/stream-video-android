@@ -4,7 +4,7 @@
     <issue
         id="Instantiatable"
         message="`CallService` must extend android.app.Service"
-        errorLine1="            android:name=&quot;io.getstream.video.android.app.ui.call.CallService&quot;"
+        errorLine1="            android:name=&quot;io.getstream.video.chat_with_video_sample.ui.call.CallService&quot;"
         errorLine2="                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/AndroidManifest.xml"
