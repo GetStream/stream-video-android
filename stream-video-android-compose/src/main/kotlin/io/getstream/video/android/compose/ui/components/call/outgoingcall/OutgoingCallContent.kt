@@ -36,7 +36,6 @@ import io.getstream.video.android.compose.ui.components.call.outgoingcall.intern
 import io.getstream.video.android.compose.ui.components.mock.mockParticipant
 import io.getstream.video.android.model.CallType
 import io.getstream.video.android.model.CallUser
-import io.getstream.video.android.model.CallUserState
 import io.getstream.video.android.viewmodel.CallViewModel
 
 /**
@@ -154,8 +153,14 @@ private fun OutgoingCallPreview() {
             participants = listOf(
                 mockParticipant.let {
                     CallUser(
-                        it.id, it.name, it.role, CallUserState.Idle, it.profileImageURL ?: "",
-                        null, null, emptyList()
+                        id = it.id,
+                        name = it.name,
+                        role = it.role,
+                        state = null,
+                        imageUrl = it.profileImageURL ?: "",
+                        createdAt = null,
+                        updatedAt = null,
+                        teams = emptyList()
                     )
                 }
             ),

@@ -153,12 +153,7 @@ public class CallViewModel(
                             .filter { it.id != streamVideo.getUser().id }
                             .toList()
                     }
-                    is State.Joining -> {
-                    }
-                    is State.InCall -> {
-                    }
-                    is State.Drop -> {
-                    }
+                    else -> Unit
                 }
                 prevState = state
             }

@@ -34,12 +34,12 @@ import io.getstream.video.android.model.JoinedCall
 import io.getstream.video.android.model.SfuToken
 import io.getstream.video.android.model.StartedCall
 import io.getstream.video.android.model.StreamCallCid
+import io.getstream.video.android.model.StreamCallKind
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.mapper.toMetadata
 import io.getstream.video.android.model.mapper.toTypeAndId
 import io.getstream.video.android.model.state.DropReason
 import io.getstream.video.android.model.state.StreamCallState
-import io.getstream.video.android.model.state.StreamSfuSessionId
 import io.getstream.video.android.model.toIceServer
 import io.getstream.video.android.model.toUserEventType
 import io.getstream.video.android.network.NetworkStateProvider
@@ -132,9 +132,7 @@ public class StreamVideoImpl(
                         cancelCall(state.callGuid.cid)
                     }
                     is StreamCallState.Idle -> clearCallState()
-                    is StreamCallState.Joined -> if (config.createCallClientInternally &&
-                        state.sfuSessionId is StreamSfuSessionId.Undefined
-                    ) {
+                    is StreamCallState.Joined -> if (config.createCallClientInternally) {
                         logger.i { "[observeState] caller joins a call: $state" }
                         createCallClient(
                             signalUrl = state.callUrl,
@@ -187,7 +185,8 @@ public class StreamVideoImpl(
             .also { logger.v { "[getOrCreateCall] result: $it" } }
             .map {
                 StartedCall(
-                    call = it.call?.toCall() ?: error("CreateCallResponse has no call object")
+                    call = it.call?.toCall(StreamCallKind.fromRinging(ringing))
+                        ?: error("CreateCallResponse has no call object")
                 )
             }
             .onSuccess { engine.onCallStarted(it.call) }
@@ -223,7 +222,8 @@ public class StreamVideoImpl(
             .also { logger.v { "[getOrCreateCall] Coordinator result: $it" } }
             .map {
                 StartedCall(
-                    call = it.call?.toCall() ?: error("CreateCallResponse has no call object")
+                    call = it.call?.toCall(StreamCallKind.fromRinging(ringing))
+                        ?: error("CreateCallResponse has no call object")
                 )
             }
             .onSuccess { engine.onCallStarted(it.call) }
@@ -364,7 +364,8 @@ public class StreamVideoImpl(
             .also { logger.v { "[getOrCreateCall] Coordinator result: $it" } }
             .map {
                 StartedCall(
-                    call = it.call?.toCall() ?: error("CreateCallResponse has no call object")
+                    call = it.call?.toCall(StreamCallKind.fromRinging(ringing))
+                        ?: error("CreateCallResponse has no call object")
                 )
             }
             .onSuccess { engine.onCallJoining(it.call) }

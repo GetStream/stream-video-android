@@ -107,7 +107,6 @@ internal class StreamNotificationBuilderImpl(
             is State.Incoming -> "Incoming"
             is State.Joining -> "Joining"
             is State.Joined -> "Joined"
-            is State.Initializing -> "Initializing"
             is State.Connecting -> "Connecting"
             is State.Connected -> "Connected"
             is State.Drop -> "Drop"

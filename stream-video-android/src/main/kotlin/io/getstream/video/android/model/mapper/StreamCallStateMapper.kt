@@ -20,11 +20,15 @@ import io.getstream.video.android.model.CallMetadata
 import io.getstream.video.android.model.state.StreamCallState
 import io.getstream.video.android.model.state.StreamDate
 
+/**
+ * Converts [StreamCallState.Outgoing] into [CallMetadata].
+ */
 internal fun StreamCallState.Outgoing.toMetadata(): CallMetadata =
     CallMetadata(
         cid = callGuid.cid,
         type = callGuid.type,
         id = callGuid.id,
+        kind = callKind,
         users = users,
         createdAt = (createdAt as? StreamDate.Specified)?.date?.time ?: 0,
         updatedAt = (updatedAt as? StreamDate.Specified)?.date?.time ?: 0,
@@ -33,3 +37,39 @@ internal fun StreamCallState.Outgoing.toMetadata(): CallMetadata =
         recordingEnabled = recordingEnabled,
         extraData = emptyMap()
     )
+
+/**
+ * Converts [StreamCallState.InCall] into [StreamCallState.Connecting].
+ */
+internal fun StreamCallState.Joined.toConnecting(sfuSessionId: String) = StreamCallState.Connecting(
+    callGuid = callGuid,
+    callKind = callKind,
+    callUrl = callUrl,
+    createdByUserId = createdByUserId,
+    broadcastingEnabled = broadcastingEnabled,
+    recordingEnabled = recordingEnabled,
+    createdAt = createdAt,
+    updatedAt = updatedAt,
+    users = users,
+    iceServers = iceServers,
+    sfuSessionId = sfuSessionId,
+    sfuToken = sfuToken,
+)
+
+/**
+ * Converts [StreamCallState.Connecting] into [StreamCallState.Connected].
+ */
+internal fun StreamCallState.Connecting.toConnected() = StreamCallState.Connected(
+    callGuid = callGuid,
+    callKind = callKind,
+    callUrl = callUrl,
+    createdByUserId = createdByUserId,
+    broadcastingEnabled = broadcastingEnabled,
+    recordingEnabled = recordingEnabled,
+    createdAt = createdAt,
+    updatedAt = updatedAt,
+    users = users,
+    iceServers = iceServers,
+    sfuSessionId = sfuSessionId,
+    sfuToken = sfuToken,
+)

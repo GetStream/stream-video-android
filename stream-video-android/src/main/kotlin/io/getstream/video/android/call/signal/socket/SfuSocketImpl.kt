@@ -210,7 +210,7 @@ internal class SfuSocketImpl(
     }
 
     override fun onSocketError(error: VideoError) {
-        logger.e { "[setupSocket] state: $state, error: $error" }
+        logger.e { "[onSocketError] state: $state, error: $error" }
         if (state !is State.DisconnectedPermanently) {
             callListeners { it.onError(error) }
             // (error as? VideoNetworkError)?.let(::onNetworkError) TODO - which errors can we get here
@@ -243,8 +243,8 @@ internal class SfuSocketImpl(
         object Connecting : State() { override fun toString(): String = "Connecting" }
         data class Connected(val event: ConnectedEvent) : State()
         object NetworkDisconnected : State() { override fun toString(): String = "NetworkDisconnected" }
-        class DisconnectedTemporarily(val error: VideoNetworkError?) : State()
-        class DisconnectedPermanently(val error: VideoNetworkError?) : State()
+        data class DisconnectedTemporarily(val error: VideoNetworkError?) : State()
+        data class DisconnectedPermanently(val error: VideoNetworkError?) : State()
         object DisconnectedByRequest : State() { override fun toString(): String = "DisconnectedByRequest" }
     }
 }

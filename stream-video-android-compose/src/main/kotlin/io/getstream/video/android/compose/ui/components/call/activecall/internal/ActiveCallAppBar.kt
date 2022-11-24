@@ -90,7 +90,6 @@ private fun StreamCallState.formatAsTitle() = when (this) {
     // TODO stringResource(id = )
     is StreamCallState.Drop -> "Drop"
     is StreamCallState.Joined -> "Joined"
-    is StreamCallState.Initializing -> "Initializing"
     is StreamCallState.Connecting -> "Connecting"
     is StreamCallState.Connected -> "Connected"
     is StreamCallState.Incoming -> "Incoming"

@@ -17,10 +17,11 @@
 package io.getstream.video.android.utils
 
 import io.getstream.video.android.model.CallMetadata
+import io.getstream.video.android.model.StreamCallKind
 import io.getstream.video.android.model.toCallUsers
 import stream.video.coordinator.client_v1_rpc.CallEnvelope
 
-internal fun CallEnvelope.toCall(): CallMetadata {
+internal fun CallEnvelope.toCall(kind: StreamCallKind): CallMetadata {
     // val extraDataJson = custom_json.toByteArray().decodeToString() // TODO - check this
 
     val call = call!!
@@ -30,6 +31,7 @@ internal fun CallEnvelope.toCall(): CallMetadata {
             cid = call_cid,
             id = id,
             type = type,
+            kind = kind,
             createdByUserId = created_by_user_id,
             createdAt = created_at?.epochSecond ?: 0,
             updatedAt = updated_at?.epochSecond ?: 0,

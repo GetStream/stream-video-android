@@ -14,25 +14,9 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.service.notification
+package io.getstream.video.android.model
 
-import androidx.core.app.NotificationCompat
-import io.getstream.video.android.model.StreamCallGuid
-
-internal interface NotificationActionBuilder {
-
-    fun createAcceptAction(
-        notificationId: Int,
-        guid: StreamCallGuid
-    ): NotificationCompat.Action
-
-    fun createRejectAction(
-        notificationId: Int,
-        guid: StreamCallGuid
-    ): NotificationCompat.Action
-
-    fun createCancelAction(
-        notificationId: Int,
-        guid: StreamCallGuid
-    ): NotificationCompat.Action
-}
+/**
+ * Represents SFU session id.
+ */
+public typealias StreamSfuSessionId = String
