@@ -14,25 +14,15 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.service.notification
+package io.getstream.video.android.model
 
-import androidx.core.app.NotificationCompat
-import io.getstream.video.android.model.StreamCallGuid
+import java.io.Serializable
 
-internal interface NotificationActionBuilder {
-
-    fun createAcceptAction(
-        notificationId: Int,
-        guid: StreamCallGuid
-    ): NotificationCompat.Action
-
-    fun createRejectAction(
-        notificationId: Int,
-        guid: StreamCallGuid
-    ): NotificationCompat.Action
-
-    fun createCancelAction(
-        notificationId: Int,
-        guid: StreamCallGuid
-    ): NotificationCompat.Action
-}
+/**
+ * Represents combined call identifier as a set of [StreamCallType], [StreamCallId] and [StreamCallCid].
+ */
+public data class StreamCallGuid(
+    val type: StreamCallType,
+    val id: StreamCallId,
+    val cid: StreamCallCid
+) : Serializable

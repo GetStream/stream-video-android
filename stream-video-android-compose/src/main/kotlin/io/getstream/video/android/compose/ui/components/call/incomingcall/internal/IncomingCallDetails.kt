@@ -31,7 +31,6 @@ import io.getstream.video.android.compose.ui.components.participants.internal.Pa
 import io.getstream.video.android.model.CallParticipantState
 import io.getstream.video.android.model.CallStatus
 import io.getstream.video.android.model.CallUser
-import io.getstream.video.android.model.CallUserState
 
 @Composable
 internal fun IncomingCallDetails(
@@ -75,14 +74,14 @@ private fun IncomingCallDetailsPreview() {
         IncomingCallDetails(
             participants = mockParticipantList.map {
                 CallUser(
-                    it.id,
-                    it.name,
-                    it.role,
-                    CallUserState.Idle,
-                    it.profileImageURL ?: "",
-                    null,
-                    null,
-                    emptyList()
+                    id = it.id,
+                    name = it.name,
+                    role = it.role,
+                    state = null,
+                    imageUrl = it.profileImageURL ?: "",
+                    createdAt = null,
+                    updatedAt = null,
+                    teams = emptyList()
                 )
             }
         )

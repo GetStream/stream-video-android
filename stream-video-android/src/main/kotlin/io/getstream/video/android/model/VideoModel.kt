@@ -28,30 +28,19 @@ public data class CallUser(
     val id: String,
     val name: String,
     val role: String,
-    val state: CallUserState,
     val imageUrl: String,
+    val teams: List<String>,
+    val state: CallUserState?,
     val createdAt: Date?,
-    val updatedAt: Date?,
-    val teams: List<String>
+    val updatedAt: Date?
 ) : Serializable
 
-public sealed class CallUserState : Serializable {
-    public data class Joined(
-        val trackIdPrefix: String,
-        val online: Boolean,
-        val audio: Boolean,
-        val video: Boolean
-    ) : CallUserState()
-    public object Idle : CallUserState() { override fun toString(): String = "Idle" }
-}
-
-/**
- * Invokes [block] if state is [CallUserState.Joined].
- */
-public fun CallUserState.onJoined(block: CallUserState.Joined.() -> Unit): Unit = when (this) {
-    is CallUserState.Joined -> block()
-    is CallUserState.Idle -> Unit
-}
+public data class CallUserState(
+    val trackIdPrefix: String,
+    val online: Boolean,
+    val audio: Boolean,
+    val video: Boolean
+)
 
 public data class CallMember(
     val callCid: String,
@@ -89,7 +78,7 @@ public fun CoordinatorUser.toCallUser(): CallUser = CallUser(
     name = name,
     role = role,
     imageUrl = image_url,
-    state = CallUserState.Idle,
+    state = null,
     createdAt = created_at?.let { Date(it.toEpochMilli()) },
     updatedAt = updated_at?.let { Date(it.toEpochMilli()) },
     teams = teams
@@ -139,7 +128,7 @@ public fun SfuParticipant.toCallUser(): CallUser = CallUser(
     name = user.name,
     role = user.role,
     imageUrl = user.image_url,
-    state = CallUserState.Joined(
+    state = CallUserState(
         trackIdPrefix = track_lookup_prefix,
         online = online,
         audio = audio,
@@ -202,10 +191,10 @@ public infix fun CallUser.merge(that: CallUser?): CallUser = when (that) {
 /**
  * Merges [that] into [this] CallUserState to absorb as much data as possible from both instances.
  */
-public infix fun CallUserState.merge(that: CallUserState): CallUserState = when {
-    this is CallUserState.Joined && that is CallUserState.Joined -> that.copy(
+public infix fun CallUserState?.merge(that: CallUserState?): CallUserState? = when {
+    this != null && that != null -> that.copy(
         trackIdPrefix = that.trackIdPrefix.ifEmpty { this.trackIdPrefix },
     )
-    this is CallUserState.Idle -> that
+    this == null -> that
     else -> this
 }

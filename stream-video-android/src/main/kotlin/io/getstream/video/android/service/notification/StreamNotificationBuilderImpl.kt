@@ -90,7 +90,6 @@ internal class StreamNotificationBuilderImpl(
                 actionBuilder.createRejectAction(notificationId, state.callGuid),
                 actionBuilder.createAcceptAction(notificationId, state.callGuid)
             )
-            is State.Starting,
             is State.Outgoing,
             is State.Joining,
             is State.InCall -> arrayOf(
@@ -102,12 +101,10 @@ internal class StreamNotificationBuilderImpl(
 
     private fun getContentTitle(state: State.Active): String {
         return "${state.callGuid.id}: " + when (state) {
-            is State.Starting -> "Starting call of ${state.memberUserIds.size} people"
             is State.Outgoing -> "Outgoing Call"
             is State.Incoming -> "Incoming"
             is State.Joining -> "Joining"
             is State.Joined -> "Joined"
-            is State.Initializing -> "Initializing"
             is State.Connecting -> "Connecting"
             is State.Connected -> "Connected"
             is State.Drop -> "Drop"
@@ -116,7 +113,6 @@ internal class StreamNotificationBuilderImpl(
 
     private fun getContentText(state: State.Active): String {
         return when (state) {
-            is State.Starting -> state.memberUserIds.joinToString()
             is State.Started -> state.users.values.filter { it.id != state.createdByUserId }.joinToString { it.name }
             is State.Drop -> ""
         }

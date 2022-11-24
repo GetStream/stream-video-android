@@ -51,22 +51,17 @@ import io.getstream.video.android.model.CallEventType.REJECTED
 import io.getstream.video.android.model.CallEventType.UNDEFINED
 import io.getstream.video.android.model.CallMetadata
 import io.getstream.video.android.model.JoinedCall
-import io.getstream.video.android.model.StreamPeerConnectionState
-import io.getstream.video.android.model.StreamPeerType
+import io.getstream.video.android.model.StreamCallGuid
+import io.getstream.video.android.model.StreamCallKind
+import io.getstream.video.android.model.mapper.toConnected
+import io.getstream.video.android.model.mapper.toConnecting
 import io.getstream.video.android.model.merge
 import io.getstream.video.android.model.state.DropReason
-import io.getstream.video.android.model.state.StreamCallGuid
-import io.getstream.video.android.model.state.StreamCallKind
 import io.getstream.video.android.model.state.StreamDate
-import io.getstream.video.android.model.state.StreamSfuSessionId
 import io.getstream.video.android.model.state.copy
-import io.getstream.video.android.model.state.toConnected
-import io.getstream.video.android.model.state.toConnecting
-import io.getstream.video.android.model.state.toInitializing
 import io.getstream.video.android.model.toCallUser
 import io.getstream.video.android.model.toCallUserMap
 import io.getstream.video.android.utils.Jobs
-import io.getstream.video.android.utils.stringify
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -165,9 +160,7 @@ internal class StreamCallEngineImpl(
             return@launchWithLock
         }
         _callState.post(
-            state.copy(
-                sfuSessionId = StreamSfuSessionId.Requested(request.session_id)
-            )
+            state.toConnecting(sfuSessionId = request.session_id)
         )
         waitForSfuJoined()
     }
@@ -180,7 +173,7 @@ internal class StreamCallEngineImpl(
                 delay(TIMEOUT_SFU_JOINED)
                 mutex.withLock {
                     val state = _callState.value
-                    if (state is State.Joined && state.sfuSessionId !is StreamSfuSessionId.Confirmed) {
+                    if (state is State.Connecting) {
                         logger.w { "[waitForSfuJoined] timed out (no SfuJoined event received)" }
                         dropCall(
                             State.Drop(
@@ -201,11 +194,11 @@ internal class StreamCallEngineImpl(
     private fun onSfuJoined(event: JoinCallResponseEvent) = scope.launchWithLock(mutex) {
         logger.d { "[onSfuJoined] event: $event" }
         val state = _callState.value
-        if (state !is State.Joined) {
+        if (state !is State.Connecting) {
             logger.w { "[onSfuJoined] rejected (state is not Connecting): $state" }
             return@launchWithLock
         }
-        if (state.sfuSessionId !is StreamSfuSessionId.Requested || state.sfuSessionId.value != event.ownSessionId) {
+        if (state.sfuSessionId != event.ownSessionId) {
             logger.w {
                 "[onSfuJoined] rejected (sessionId is not valid);" +
                     " expected: ${state.sfuSessionId}, actual: ${event.ownSessionId}"
@@ -214,12 +207,10 @@ internal class StreamCallEngineImpl(
         }
         jobs.cancel(ID_TIMEOUT_SFU_JOINED)
         val eventUsers = event.callState.participants.toCallUserMap()
-        val stateConfirmed = state.copy(
-            users = state.users merge eventUsers,
-            sfuSessionId = StreamSfuSessionId.Confirmed(state.sfuSessionId.value)
+        val stateConfirmed = state.toConnected().copy(
+            users = state.users merge eventUsers
         )
         _callState.post(stateConfirmed)
-        _callState.post(stateConfirmed.toInitializing())
     }
 
     /**
@@ -373,7 +364,6 @@ internal class StreamCallEngineImpl(
                     callUrl = callUrl,
                     sfuToken = sfuToken,
                     iceServers = iceServers,
-                    sfuSessionId = StreamSfuSessionId.Undefined,
                 )
             }
         )
@@ -391,55 +381,44 @@ internal class StreamCallEngineImpl(
                 "participantIds: $participantIds"
         }
         val state = _callState.value
-        if (state !is State.Idle && state !is State.Incoming) {
-            logger.w { "[onCallStarting] rejected (state is not Idle/Incoming): $state" }
+        if (state !is State.Incoming) {
+            logger.w { "[onCallStarting] rejected (state is not Incoming): $state" }
             return@launchWithLock
         }
         val callCid = CallCid(type, id)
-        if (state is State.Incoming && state.callGuid.cid != callCid) {
+        if (state.callGuid.cid != callCid) {
             logger.w {
                 "[onCallStarting] rejected (callCid is not valid); expected: ${state.callGuid.cid}, actual: $callCid"
             }
             return@launchWithLock
         }
-        if (state is State.Idle) {
-            _callState.post(
-                State.Starting(
-                    callGuid = StreamCallGuid(
-                        type = type,
-                        id = id,
-                        cid = CallCid(type, id),
-                    ),
-                    callKind = if (ringing) StreamCallKind.RINGING else StreamCallKind.MEETING,
-                    memberUserIds = participantIds
-                )
+        _callState.post(
+            state.copy(
+                acceptedByMe = true
             )
-        } else if (state is State.Incoming) {
-            _callState.post(
-                state.copy(
-                    acceptedByMe = true
-                )
-            )
-        }
+        )
     }
 
     override fun onCallStarted(call: CallMetadata) = scope.launchWithLock(mutex) {
         logger.d { "[onCallStarted] call: $call" }
         val state = _callState.value
-        if (state !is State.Starting) {
+        if (state !is State.Idle) {
             logger.w { "[onCallStarted] rejected (state is not Starting): $state" }
             return@launchWithLock
         }
-        if (state.callGuid.cid != call.cid) {
-            logger.w {
-                "[onCallStarted] rejected (callCid is not valid); expected: ${state.callGuid.cid}, actual: ${call.cid}"
-            }
+        if (call.kind != StreamCallKind.RINGING) {
+            logger.w { "[onCallStarted] rejected (call.kind is not RINGING)" }
             return@launchWithLock
         }
+        val callGuid = StreamCallGuid(
+            type = call.type,
+            id = call.id,
+            cid = call.cid,
+        )
         _callState.post(
             State.Outgoing(
-                callGuid = state.callGuid,
-                callKind = state.callKind,
+                callGuid = callGuid,
+                callKind = StreamCallKind.RINGING,
                 createdByUserId = call.createdByUserId,
                 broadcastingEnabled = call.broadcastingEnabled,
                 recordingEnabled = call.recordingEnabled,
@@ -449,9 +428,7 @@ internal class StreamCallEngineImpl(
                 acceptedByCallee = false
             )
         )
-        if (state.callKind == StreamCallKind.RINGING) {
-            waitForCallToBeAccepted()
-        }
+        waitForCallToBeAccepted()
     }
 
     private fun waitForCallToBeAccepted() {
@@ -534,23 +511,21 @@ internal class StreamCallEngineImpl(
             logger.w { "[onCallJoining] rejected (state is not Joinable): $state" }
             return@launchWithLock
         }
-        if (state.callGuid.cid != call.cid) {
-            logger.w {
-                "[onCallJoining] rejected (callCid is not valid);" +
-                    " expected: ${state.callGuid.cid}, actual: $${call.cid}"
-            }
-            return@launchWithLock
-        }
+        val callGuid = StreamCallGuid(
+            type = call.type,
+            id = call.id,
+            cid = call.cid,
+        )
         _callState.post(
             State.Joining(
-                callGuid = state.callGuid,
+                callGuid = callGuid,
                 createdByUserId = call.createdByUserId,
                 broadcastingEnabled = call.broadcastingEnabled,
                 recordingEnabled = call.recordingEnabled,
                 createdAt = StreamDate.from(call.createdAt),
                 updatedAt = StreamDate.from(call.updatedAt),
                 users = call.users,
-                callKind = state.callKind
+                callKind = call.kind,
             )
         )
     }
@@ -563,40 +538,6 @@ internal class StreamCallEngineImpl(
             return@launchWithLock
         }
         dropCall(State.Drop(state.callGuid, state.callKind, DropReason.Failure(error)))
-    }
-
-    /**
-     * Called when peer connection state changes.
-     *
-     * @param sfuSessionId The id of SFU session.
-     * @param connectionState Represents the current state of peer connection.
-     *
-     * @see [io.getstream.video.android.call.connection.StreamPeerConnection]
-     */
-    override fun onCallConnectionChange(
-        sfuSessionId: String,
-        peerType: StreamPeerType,
-        connectionState: StreamPeerConnectionState
-    ) = scope.launchWithLock(mutex) {
-        logger.d { "[onCallConnectionChange] #${peerType.stringify()}; connectionState: $connectionState" }
-        val state = _callState.value
-        if (state !is State.InCall) {
-            logger.w { "[onCallConnectionChange] rejected (state is not InCall): $state" }
-            return@launchWithLock
-        }
-        val stateSfuSessionId = state.sfuSessionId
-        if (stateSfuSessionId !is StreamSfuSessionId.Confirmed || stateSfuSessionId.value != sfuSessionId) {
-            logger.w {
-                "[onCallConnectionChange] rejected (sessionId is not valid);" +
-                    " expected: ${state.sfuSessionId}, actual: $sfuSessionId"
-            }
-            return@launchWithLock
-        }
-        if (connectionState == StreamPeerConnectionState.CONNECTING) {
-            _callState.post(state.toConnecting())
-        } else if (connectionState == StreamPeerConnectionState.CONNECTED) {
-            _callState.post(state.toConnected())
-        }
     }
 
     private fun onCallFinished(event: CallEndedEvent) = scope.launchWithLock(mutex) {

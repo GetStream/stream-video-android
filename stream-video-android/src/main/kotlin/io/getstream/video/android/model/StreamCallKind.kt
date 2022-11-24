@@ -14,25 +14,22 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.service.notification
+package io.getstream.video.android.model
 
-import androidx.core.app.NotificationCompat
-import io.getstream.video.android.model.StreamCallGuid
+import io.getstream.video.android.model.StreamCallKind.MEETING
+import io.getstream.video.android.model.StreamCallKind.RINGING
+import java.io.Serializable
 
-internal interface NotificationActionBuilder {
+/**
+ * The kind of call, either a [RINGING] or a [MEETING].
+ */
+public enum class StreamCallKind : Serializable {
+    MEETING, RINGING;
 
-    fun createAcceptAction(
-        notificationId: Int,
-        guid: StreamCallGuid
-    ): NotificationCompat.Action
-
-    fun createRejectAction(
-        notificationId: Int,
-        guid: StreamCallGuid
-    ): NotificationCompat.Action
-
-    fun createCancelAction(
-        notificationId: Int,
-        guid: StreamCallGuid
-    ): NotificationCompat.Action
+    public companion object {
+        public fun fromRinging(ringing: Boolean): StreamCallKind = when (ringing) {
+            true -> RINGING
+            else -> MEETING
+        }
+    }
 }
