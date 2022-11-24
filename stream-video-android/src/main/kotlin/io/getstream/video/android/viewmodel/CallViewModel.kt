@@ -91,7 +91,7 @@ public class CallViewModel(
             hasPermission && audioEnabled
         }.onEach {
             if (::client.isInitialized && _callState.value != null) {
-                logger.d { "[isVideoEnabled] setMicrophoneEnabled: $it" }
+                logger.d { "[isAudioEnabled] setMicrophoneEnabled: $it" }
                 client.setMicrophoneEnabled(it)
             }
         }.stateIn(scope = viewModelScope, started = SharingStarted.Eagerly, false)
@@ -105,6 +105,8 @@ public class CallViewModel(
                 isSpeakerphoneEnabled = isSpeakerPhoneEnabled,
                 isCameraEnabled = isVideoOn
             )
+        }.onEach {
+            logger.d { "[callMediaState] callMediaState: $it" }
         }.stateIn(scope = viewModelScope, started = SharingStarted.Eagerly, initialValue = CallMediaState())
 
     public val participantList: Flow<List<CallParticipantState>> =

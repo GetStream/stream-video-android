@@ -99,6 +99,8 @@ public abstract class AbstractComposeCallActivity :
                 }
             }
         }
+
+        startVideoFlow()
     }
 
     private fun initPermissionManager() {
@@ -121,11 +123,6 @@ public abstract class AbstractComposeCallActivity :
                 }
             )
         }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        startVideoFlow()
     }
 
     private fun toggleMicrophone(action: ToggleMicrophone) {
