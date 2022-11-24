@@ -22,6 +22,7 @@ import io.getstream.video.android.model.IceServer
 import io.getstream.video.android.model.SfuToken
 import io.getstream.video.android.model.StreamCallGuid
 import io.getstream.video.android.model.StreamCallKind
+import io.getstream.video.android.model.StreamSfuSessionId
 import java.io.Serializable
 import java.util.Date
 
@@ -47,15 +48,6 @@ public sealed interface StreamCallState : Serializable {
         public abstract val callGuid: StreamCallGuid
         public abstract val callKind: StreamCallKind
     }
-
-    /**
-     * Signifies the caller starts the call.
-     */
-    public data class Starting(
-        override val callGuid: StreamCallGuid,
-        override val callKind: StreamCallKind,
-        val memberUserIds: List<String>
-    ) : Active(), Joinable
 
     public sealed class Started : Active() {
         public abstract val createdByUserId: String
@@ -137,7 +129,7 @@ public sealed interface StreamCallState : Serializable {
      * @see [io.getstream.video.android.engine.StreamCallEngine.onSfuJoinSent]
      */
     public data class Connecting(
-        val sfuSessionId: String,
+        val sfuSessionId: StreamSfuSessionId,
         override val callGuid: StreamCallGuid,
         override val callKind: StreamCallKind,
         override val createdByUserId: String,
@@ -157,7 +149,7 @@ public sealed interface StreamCallState : Serializable {
      * @see [io.getstream.video.android.engine.StreamCallEngine.onSfuEvent]
      */
     public data class Connected(
-        val sfuSessionId: String,
+        val sfuSessionId: StreamSfuSessionId,
         override val callGuid: StreamCallGuid,
         override val callKind: StreamCallKind,
         override val createdByUserId: String,

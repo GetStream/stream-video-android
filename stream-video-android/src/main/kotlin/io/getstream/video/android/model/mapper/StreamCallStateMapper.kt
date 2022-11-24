@@ -17,6 +17,7 @@
 package io.getstream.video.android.model.mapper
 
 import io.getstream.video.android.model.CallMetadata
+import io.getstream.video.android.model.StreamSfuSessionId
 import io.getstream.video.android.model.state.StreamCallState
 import io.getstream.video.android.model.state.StreamDate
 
@@ -41,7 +42,7 @@ internal fun StreamCallState.Outgoing.toMetadata(): CallMetadata =
 /**
  * Converts [StreamCallState.InCall] into [StreamCallState.Connecting].
  */
-internal fun StreamCallState.Joined.toConnecting(sfuSessionId: String) = StreamCallState.Connecting(
+internal fun StreamCallState.Joined.toConnecting(sfuSessionId: StreamSfuSessionId) = StreamCallState.Connecting(
     callGuid = callGuid,
     callKind = callKind,
     callUrl = callUrl,

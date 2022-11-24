@@ -95,6 +95,5 @@ private fun StreamCallState.formatAsTitle() = when (this) {
     is StreamCallState.Incoming -> "Incoming"
     is StreamCallState.Joining -> "Joining"
     is StreamCallState.Outgoing -> "Outgoing"
-    is StreamCallState.Starting -> "Starting"
     StreamCallState.Idle -> "Idle"
 }

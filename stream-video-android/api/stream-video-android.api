@@ -2347,21 +2347,6 @@ public abstract class io/getstream/video/android/model/state/StreamCallState$Sta
 	public abstract fun getUsers ()Ljava/util/Map;
 }
 
-public final class io/getstream/video/android/model/state/StreamCallState$Starting : io/getstream/video/android/model/state/StreamCallState$Active, io/getstream/video/android/model/state/StreamCallState$Joinable {
-	public fun <init> (Lio/getstream/video/android/model/StreamCallGuid;Lio/getstream/video/android/model/StreamCallKind;Ljava/util/List;)V
-	public final fun component1 ()Lio/getstream/video/android/model/StreamCallGuid;
-	public final fun component2 ()Lio/getstream/video/android/model/StreamCallKind;
-	public final fun component3 ()Ljava/util/List;
-	public final fun copy (Lio/getstream/video/android/model/StreamCallGuid;Lio/getstream/video/android/model/StreamCallKind;Ljava/util/List;)Lio/getstream/video/android/model/state/StreamCallState$Starting;
-	public static synthetic fun copy$default (Lio/getstream/video/android/model/state/StreamCallState$Starting;Lio/getstream/video/android/model/StreamCallGuid;Lio/getstream/video/android/model/StreamCallKind;Ljava/util/List;ILjava/lang/Object;)Lio/getstream/video/android/model/state/StreamCallState$Starting;
-	public fun equals (Ljava/lang/Object;)Z
-	public fun getCallGuid ()Lio/getstream/video/android/model/StreamCallGuid;
-	public fun getCallKind ()Lio/getstream/video/android/model/StreamCallKind;
-	public final fun getMemberUserIds ()Ljava/util/List;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
 public abstract class io/getstream/video/android/model/state/StreamDate : java/io/Serializable {
 	public static final field Companion Lio/getstream/video/android/model/state/StreamDate$Companion;
 }
