@@ -66,10 +66,14 @@ Provide the patch code here
 - [ ] New code is covered by unit tests
 - [ ] Comparison screenshots added for visual changes
 - [ ] Affected documentation updated (KDocs, docusaurus, tutorial)
+- [ ] Tutorial starter kit updated
+- [ ] Examples/guides starter kits updated (`stream-video-examples`)
 
 ### ☑️Reviewer Checklist
-- [ ] UI Components sample runs & works
+- [ ] XML sample runs & works
 - [ ] Compose sample runs & works
+- [ ] Tutorial starter kit
+- [ ] Example starter kits work
 - [ ] UI Changes correct (before & after images)
 - [ ] Bugs validated (bugfixes)
 - [ ] New feature tested and works
