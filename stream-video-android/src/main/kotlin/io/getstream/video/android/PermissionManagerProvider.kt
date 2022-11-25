@@ -20,8 +20,10 @@ import io.getstream.video.android.permission.PermissionManager
 
 public interface PermissionManagerProvider {
 
+    public fun initPermissionManager(): PermissionManager
+
     /**
      * Allows for a custom implementation of the [PermissionManager].
      */
-    public fun getPermissionManager(): PermissionManager? = null
+    public fun getPermissionManager(): PermissionManager
 }

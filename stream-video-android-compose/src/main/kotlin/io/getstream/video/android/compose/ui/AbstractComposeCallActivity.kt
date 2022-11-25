@@ -54,7 +54,7 @@ public abstract class AbstractComposeCallActivity :
 
     private lateinit var callPermissionManager: PermissionManager
     private val factory by lazy {
-        getCallViewModelFactory(callPermissionManager) ?: defaultViewModelFactory()
+        getCallViewModelFactory() ?: defaultViewModelFactory()
     }
 
     /**
@@ -70,7 +70,7 @@ public abstract class AbstractComposeCallActivity :
     /**
      * Provides the default [PermissionManager] implementation.
      */
-    private fun getDefaultPermissionManager(): PermissionManager {
+    override fun initPermissionManager(): PermissionManager {
         return StreamPermissionManagerImpl(
             fragmentActivity = this,
             onPermissionResult = { permission, isGranted ->
@@ -87,7 +87,7 @@ public abstract class AbstractComposeCallActivity :
     private val callViewModel by viewModels<CallViewModel>(factoryProducer = { factory })
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        initPermissionManager()
+        callPermissionManager = initPermissionManager()
         showWhenLockedAndTurnScreenOn()
         super.onCreate(savedInstanceState)
         setContent(content = buildContent())
@@ -103,9 +103,7 @@ public abstract class AbstractComposeCallActivity :
         startVideoFlow()
     }
 
-    private fun initPermissionManager() {
-        callPermissionManager = getPermissionManager() ?: getDefaultPermissionManager()
-    }
+    override fun getPermissionManager(): PermissionManager = callPermissionManager
 
     protected fun buildContent(): (@Composable () -> Unit) = {
         VideoTheme {

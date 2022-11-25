@@ -36,10 +36,10 @@ class CallActivity : AbstractComposeCallActivity() {
     /**
      * Provides a custom factory for the ViewModel, that provides fake users for invites.
      */
-    override fun getCallViewModelFactory(permissionManager: PermissionManager): CallViewModelFactory {
+    override fun getCallViewModelFactory(): CallViewModelFactory {
         return CallViewModelFactory(
             streamVideo = getStreamVideo(this),
-            permissionManager = permissionManager,
+            permissionManager = getPermissionManager(),
             usersProvider = if (BuildConfig.DEBUG) FakeUsersProvider() else EmptyUsersProvider
         )
     }
