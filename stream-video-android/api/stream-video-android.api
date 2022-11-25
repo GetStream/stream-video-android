@@ -2722,6 +2722,7 @@ public final class io/getstream/video/android/utils/ResultKt {
 }
 
 public final class io/getstream/video/android/utils/StringUtilsKt {
+	public static final fun formatAsTitle (Lio/getstream/video/android/model/state/StreamCallState;Landroid/content/Context;)Ljava/lang/String;
 	public static final fun initials (Ljava/lang/String;)Ljava/lang/String;
 }
 
@@ -2764,15 +2765,17 @@ public final class io/getstream/video/android/viewmodel/CallViewModel : androidx
 	public final fun hangUpCall ()V
 	public final fun inviteUsersToCall (Ljava/util/List;)V
 	public final fun isAudioOn ()Lkotlinx/coroutines/flow/Flow;
+	public final fun isInPictureInPicture ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun isShowingAudioDevicePicker ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun isShowingParticipantsInfo ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun isShowingCallInfo ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun isVideoInitialized ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun isVideoOn ()Lkotlinx/coroutines/flow/Flow;
 	public final fun onCallAction (Lio/getstream/video/android/call/state/CallAction;)V
+	public final fun onPictureInPictureModeChanged (Z)V
 	public final fun reconnect ()V
 	public final fun rejectCall ()V
 	public final fun selectAudioDevice (Lio/getstream/video/android/audio/AudioDevice;)V
-	public final fun showParticipants ()V
+	public final fun showCallInfo ()V
 	public final fun showSettings ()V
 	public final fun toggleCamera (Z)V
 	public final fun toggleMicrophone (Z)V
