@@ -59,7 +59,7 @@ private fun canHandleCallAttachments(attachments: List<Attachment>): Boolean {
     val result = attachments.any {
         it.extraData["callCid"] != null &&
             it.extraData["members"] != null
-//            && it.extraData["callName"] != null
+            && it.extraData["callName"] != null
     }
 
     Log.d("customAttachments", result.toString())

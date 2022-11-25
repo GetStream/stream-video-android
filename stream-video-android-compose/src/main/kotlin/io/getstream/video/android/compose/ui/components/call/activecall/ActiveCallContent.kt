@@ -30,14 +30,17 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.call.state.CallAction
 import io.getstream.video.android.call.state.CallMediaState
 import io.getstream.video.android.call.state.LeaveCall
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.call.CallControls
-import io.getstream.video.android.compose.ui.components.call.activecall.internal.ActiveCallAppBar
 import io.getstream.video.android.compose.ui.components.participants.CallParticipants
+import io.getstream.video.android.model.state.StreamCallState
+import io.getstream.video.android.utils.formatAsTitle
 import io.getstream.video.android.viewmodel.CallViewModel
 
 /**
@@ -46,18 +49,20 @@ import io.getstream.video.android.viewmodel.CallViewModel
  *
  * @param callViewModel The ViewModel required to fetch the Call state and render the UI.
  * @param modifier Modifier for styling.
+ * @param onBackPressed Handler when the user taps on the back button.
  * @param onCallAction Handler when the user triggers a Call Control Action.
- * @param onParticipantsMenuClick Handler when the user taps on the participant menu.
+ * @param onCallInfoSelected Handler when the user taps on the participant menu.
  */
 @Composable
 public fun ActiveCallContent(
     callViewModel: CallViewModel,
     modifier: Modifier = Modifier,
+    onBackPressed: () -> Unit = { callViewModel.onCallAction(LeaveCall) },
     onCallAction: (CallAction) -> Unit = callViewModel::onCallAction,
-    onParticipantsMenuClick: () -> Unit = callViewModel::showParticipants
+    onCallInfoSelected: () -> Unit = callViewModel::showCallInfo
 ) {
     val room by callViewModel.callState.collectAsState(initial = null)
-    val isShowingParticipantsInfo by callViewModel.isShowingParticipantsInfo.collectAsState(
+    val isShowingParticipantsInfo by callViewModel.isShowingCallInfo.collectAsState(
         false
     )
 
@@ -67,13 +72,17 @@ public fun ActiveCallContent(
 
     val callMediaState by callViewModel.callMediaState.collectAsState(initial = CallMediaState())
 
+    val isInPiPMode by callViewModel.isInPictureInPicture.collectAsState()
+
     BackHandler {
         if (isShowingParticipantsInfo || isShowingAudioDevicePicker) {
             callViewModel.dismissOptions()
         } else {
-            onCallAction(LeaveCall)
+            onBackPressed()
         }
     }
+
+    // TODO - when in PiP, we should probably render a different component, of a single primary speaker
 
     Box(
         modifier = modifier, contentAlignment = Alignment.Center
@@ -82,7 +91,13 @@ public fun ActiveCallContent(
 
         Column(modifier = Modifier.fillMaxSize()) {
 
-            ActiveCallAppBar(callViewModel, onParticipantsMenuClick)
+            if (!isInPiPMode) {
+                ActiveCallAppBar(
+                    callViewModel = callViewModel,
+                    onBackPressed = onBackPressed,
+                    onCallInfoSelected = onCallInfoSelected
+                )
+            }
 
             if (roomState == null) {
                 Box(
@@ -102,17 +117,45 @@ public fun ActiveCallContent(
                         modifier = Modifier.fillMaxSize(), call = roomState
                     )
 
-                    // TODO - colors
-                    CallControls(
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .fillMaxWidth()
-                            .height(VideoTheme.dimens.callControlsSheetHeight),
-                        callMediaState = callMediaState,
-                        onCallAction = onCallAction
-                    )
+                    if (!isInPiPMode) {
+                        // TODO - colors
+                        CallControls(
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .fillMaxWidth()
+                                .height(VideoTheme.dimens.callControlsSheetHeight),
+                            callMediaState = callMediaState,
+                            onCallAction = onCallAction
+                        )
+                    }
                 }
             }
         }
     }
+}
+
+@Composable
+internal fun ActiveCallAppBar(
+    callViewModel: CallViewModel,
+    onBackPressed: () -> Unit,
+    onCallInfoSelected: () -> Unit
+) {
+    val callState by callViewModel.streamCallState.collectAsState(initial = StreamCallState.Idle)
+
+    val callId = when (val state = callState) {
+        is StreamCallState.Active -> state.callGuid.id
+        else -> ""
+    }
+    val status = callState.formatAsTitle(LocalContext.current)
+
+    val title = when (callId.isBlank()) {
+        true -> status
+        else -> "$status: $callId"
+    }
+
+    CallAppBar(
+        title = title,
+        onBackPressed = onBackPressed,
+        onCallInfoSelected = onCallInfoSelected
+    )
 }

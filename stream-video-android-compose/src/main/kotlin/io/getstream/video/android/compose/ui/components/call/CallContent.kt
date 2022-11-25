@@ -47,6 +47,8 @@ import io.getstream.video.android.model.state.StreamCallState as State
  *
  * @param viewModel The [CallViewModel] used to provide state and various handlers in the call.
  * @param modifier Modifier for styling.
+ * @param onBackPressed Handler when the user taps on the back button.
+ * @param onCallInfoSelected Handler when the call participants info is selected.
  * @param onRejectCall Handler when the user taps on the Reject Call button in Incoming Call state.
  * @param onAcceptCall Handler when the user accepts a call in Incoming Call state.
  * @param onCancelCall Handler when the user decides to cancel or drop out of a call.
@@ -57,6 +59,8 @@ import io.getstream.video.android.model.state.StreamCallState as State
 public fun CallContent(
     viewModel: CallViewModel,
     modifier: Modifier = Modifier,
+    onBackPressed: () -> Unit = {},
+    onCallInfoSelected: () -> Unit = viewModel::showCallInfo,
     onRejectCall: () -> Unit = viewModel::rejectCall,
     onAcceptCall: () -> Unit = viewModel::acceptCall,
     onCancelCall: () -> Unit = viewModel::cancelCall,
@@ -79,6 +83,8 @@ public fun CallContent(
         IncomingCallContent(
             modifier = modifier,
             viewModel = viewModel,
+            onBackPressed = onBackPressed,
+            onCallInfoSelected = onCallInfoSelected,
             onRejectCall = onRejectCall,
             onAcceptCall = onAcceptCall,
             onVideoToggleChanged = onVideoToggleChanged
@@ -87,6 +93,8 @@ public fun CallContent(
         OutgoingCallContent(
             modifier = modifier,
             viewModel = viewModel,
+            onBackPressed = onBackPressed,
+            onCallInfoSelected = onCallInfoSelected,
             onCancelCall = onCancelCall,
             onMicToggleChanged = onMicToggleChanged,
             onVideoToggleChanged = onVideoToggleChanged
@@ -95,8 +103,10 @@ public fun CallContent(
         ActiveCallContent(
             modifier = modifier,
             callViewModel = viewModel,
+            onBackPressed = onBackPressed,
+            onCallInfoSelected = onCallInfoSelected,
         )
-        val isShowingParticipantsInfo by viewModel.isShowingParticipantsInfo.collectAsState()
+        val isShowingParticipantsInfo by viewModel.isShowingCallInfo.collectAsState()
 
         if (isShowingParticipantsInfo) {
             val participantsState by viewModel.participantList.collectAsState(initial = emptyList())

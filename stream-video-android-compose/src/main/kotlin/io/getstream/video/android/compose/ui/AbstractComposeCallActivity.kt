@@ -65,7 +65,7 @@ public abstract class AbstractComposeCallActivity :
         )
     }
 
-    private val callViewModel by viewModels<CallViewModel>(factoryProducer = { factory })
+    protected val callViewModel: CallViewModel by viewModels<CallViewModel>(factoryProducer = { factory })
 
     @RequiresApi(Build.VERSION_CODES.M)
     private val permissionsContract = registerForActivityResult(
@@ -100,24 +100,23 @@ public abstract class AbstractComposeCallActivity :
         }
     }
 
-    protected fun buildContent(): (@Composable () -> Unit) = {
+    protected open fun buildContent(): (@Composable () -> Unit) = {
         VideoTheme {
             CallContent(
                 viewModel = callViewModel,
                 onRejectCall = callViewModel::rejectCall,
                 onAcceptCall = callViewModel::acceptCall,
                 onCancelCall = callViewModel::cancelCall,
-                onVideoToggleChanged = { isEnabled ->
-                    callViewModel.onCallAction(
-                        ToggleCamera(isEnabled)
-                    )
-                },
                 onMicToggleChanged = { isEnabled ->
                     callViewModel.onCallAction(
                         ToggleMicrophone(isEnabled)
                     )
                 },
-            )
+            ) { isEnabled ->
+                callViewModel.onCallAction(
+                    ToggleCamera(isEnabled)
+                )
+            }
         }
     }
 

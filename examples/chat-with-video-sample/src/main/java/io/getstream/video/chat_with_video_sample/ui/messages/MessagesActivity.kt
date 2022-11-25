@@ -122,7 +122,7 @@ class MessagesActivity : ComponentActivity() {
                 id = callId,
                 type = "default",
                 ringing = true,
-                participantIds = users
+                participantIds = emptyList()
             )
 
             if (createCallResult is Success) {

@@ -44,7 +44,9 @@ import io.getstream.video.android.viewmodel.CallViewModel
  *
  * @param viewModel The [CallViewModel] used to provide state and various handlers in the call.
  * @param modifier Modifier for styling.
- * @param onCancelCall Handler when the user decides to cancel.
+ * @param onBackPressed Handler when the user taps on the back button.
+ * @param onCallInfoSelected Handler when the call participants info is selected. * @param onCancelCall Handler when the user decides to cancel.
+ * @param onCancelCall Handler when the user cancels the outgoing call.
  * @param onMicToggleChanged Handler when the user toggles their microphone on or off.
  * @param onVideoToggleChanged Handler when the user toggles their video on or off.
  */
@@ -52,6 +54,8 @@ import io.getstream.video.android.viewmodel.CallViewModel
 public fun OutgoingCallContent(
     viewModel: CallViewModel,
     modifier: Modifier = Modifier,
+    onBackPressed: () -> Unit,
+    onCallInfoSelected: () -> Unit = viewModel::showCallInfo,
     onCancelCall: () -> Unit = viewModel::cancelCall,
     onMicToggleChanged: (Boolean) -> Unit = { isEnabled ->
         viewModel.onCallAction(
@@ -71,6 +75,8 @@ public fun OutgoingCallContent(
         callType = callType,
         participants = participants,
         modifier = modifier,
+        onBackPressed = onBackPressed,
+        onCallInfoSelected = onCallInfoSelected,
         onCancelCall = onCancelCall,
         onMicToggleChanged = onMicToggleChanged,
         onVideoToggleChanged = onVideoToggleChanged
@@ -93,9 +99,11 @@ public fun OutgoingCall(
     callType: CallType,
     participants: List<CallUser>,
     modifier: Modifier = Modifier,
-    onCancelCall: () -> Unit = {},
-    onMicToggleChanged: (Boolean) -> Unit = {},
-    onVideoToggleChanged: (Boolean) -> Unit = {},
+    onBackPressed: () -> Unit,
+    onCallInfoSelected: () -> Unit,
+    onCancelCall: () -> Unit,
+    onMicToggleChanged: (Boolean) -> Unit,
+    onVideoToggleChanged: (Boolean) -> Unit,
 ) {
     CallBackground(
         modifier = modifier,
@@ -106,7 +114,7 @@ public fun OutgoingCall(
 
         Column {
 
-            CallAppBar()
+            CallAppBar(onBackPressed = onBackPressed, onCallInfoSelected = onCallInfoSelected)
 
             val topPadding = if (participants.size == 1 || callType == CallType.VIDEO) {
                 VideoTheme.dimens.singleAvatarAppbarPadding
@@ -159,8 +167,11 @@ private fun OutgoingCallPreview() {
                     )
                 }
             ),
-            onCancelCall = { },
-            onMicToggleChanged = { },
-        ) { }
+            onCancelCall = {},
+            onMicToggleChanged = {},
+            onBackPressed = {},
+            onCallInfoSelected = {},
+            onVideoToggleChanged = {}
+        )
     }
 }

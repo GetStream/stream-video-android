@@ -109,8 +109,8 @@ public class CallViewModel(
     public val localParticipant: Flow<CallParticipantState> =
         callState.filterNotNull().flatMapLatest { it.localParticipant }
 
-    private val _isShowingParticipantsInfo = MutableStateFlow(false)
-    public val isShowingParticipantsInfo: StateFlow<Boolean> = _isShowingParticipantsInfo
+    private val _isShowingCallInfo = MutableStateFlow(false)
+    public val isShowingCallInfo: StateFlow<Boolean> = _isShowingCallInfo
 
     private val _isShowingSettings = MutableStateFlow(false)
     public val isShowingAudioDevicePicker: StateFlow<Boolean> = _isShowingSettings
@@ -125,6 +125,9 @@ public class CallViewModel(
 
     private val _participants: MutableStateFlow<List<CallUser>> = MutableStateFlow(emptyList())
     public val participants: StateFlow<List<CallUser>> = _participants
+
+    private val _isInPictureInPicture: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    public val isInPictureInPicture: StateFlow<Boolean> = _isInPictureInPicture
 
     private val callSettings: CallSettings = CallSettings(
         autoPublish = true,
@@ -286,8 +289,8 @@ public class CallViewModel(
     /**
      * Sets the flag used to display participants info menu in the UI to true.
      */
-    public fun showParticipants() {
-        this._isShowingParticipantsInfo.value = true
+    public fun showCallInfo() {
+        this._isShowingCallInfo.value = true
     }
 
     public fun onCallAction(callAction: CallAction) {
@@ -345,7 +348,7 @@ public class CallViewModel(
      */
     public fun dismissOptions() {
         this._isShowingSettings.value = false
-        this._isShowingParticipantsInfo.value = false
+        this._isShowingCallInfo.value = false
     }
 
     /**
@@ -457,5 +460,9 @@ public class CallViewModel(
                     logger.d { "[inviteUsersToCall] Error, ${it.message}." }
                 }
         }
+    }
+
+    public fun onPictureInPictureModeChanged(inPictureInPictureMode: Boolean) {
+        this._isInPictureInPicture.value = inPictureInPictureMode
     }
 }

@@ -40,8 +40,8 @@ import io.getstream.video.android.compose.theme.VideoTheme
  * Exposes slots required to customize the look and feel.
  *
  * @param modifier Modifier for styling.
- * @param onBackButtonClicked Handler when the user taps on the default leading content slot.
- * @param onParticipantsClicked Handler when the user taps on the default trailing content slot.
+ * @param onBackPressed Handler when the user taps on the default leading content slot.
+ * @param onCallInfoSelected Handler when the user taps on the default trailing content slot.
  * @param leadingContent The leading content, by default [DefaultCallAppBarLeadingContent].
  * @param centerContent The center content, by default [DefaultCallAppBarCenterContent].
  * @param trailingContent The trailing content, by default [DefaultCallAppBarTrailingContent].
@@ -49,18 +49,18 @@ import io.getstream.video.android.compose.theme.VideoTheme
 @Composable
 public fun CallAppBar(
     modifier: Modifier = Modifier,
-    onBackButtonClicked: () -> Unit = {},
-    onParticipantsClicked: () -> Unit = {},
+    onBackPressed: () -> Unit = {},
+    onCallInfoSelected: () -> Unit = {},
     title: String = stringResource(id = R.string.default_app_bar_title),
     leadingContent: @Composable () -> Unit = {
-        DefaultCallAppBarLeadingContent(onBackButtonClicked)
+        DefaultCallAppBarLeadingContent(onBackPressed)
     },
     centerContent: @Composable () -> Unit = {
         DefaultCallAppBarCenterContent(title)
     },
     trailingContent: @Composable () -> Unit = {
         DefaultCallAppBarTrailingContent(
-            onParticipantsClicked
+            onCallInfoSelected
         )
     }
 ) {
@@ -68,8 +68,7 @@ public fun CallAppBar(
         modifier = modifier
             .fillMaxWidth()
             .height(VideoTheme.dimens.topAppbarHeightSize)
-            .padding(VideoTheme.dimens.callAppBarPadding)
-            .fillMaxWidth(),
+            .padding(VideoTheme.dimens.callAppBarPadding),
         verticalAlignment = Alignment.CenterVertically
     ) {
         leadingContent()
@@ -119,14 +118,14 @@ internal fun DefaultCallAppBarCenterContent(title: String) {
  * Default trailing content slot, representing an icon to show the call participants menu.
  */
 @Composable
-internal fun DefaultCallAppBarTrailingContent(onParticipantsClicked: () -> Unit) {
+internal fun DefaultCallAppBarTrailingContent(onCallInfoSelected: () -> Unit) {
     Icon(
         modifier = Modifier
             .padding(
                 start = VideoTheme.dimens.callAppBarTrailingContentSpacingStart,
                 end = VideoTheme.dimens.callAppBarTrailingContentSpacingEnd
             )
-            .clickable { onParticipantsClicked() },
+            .clickable { onCallInfoSelected() },
         painter = painterResource(id = R.drawable.ic_participants),
         contentDescription = stringResource(id = R.string.call_participants_menu_content_description),
         tint = VideoTheme.colors.textHighEmphasis
