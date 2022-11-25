@@ -55,7 +55,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
-import java.util.*
+import java.util.UUID
 import io.getstream.video.android.model.state.StreamCallState as State
 
 private const val CONNECT_TIMEOUT = 30_000L
@@ -151,7 +151,7 @@ public class CallViewModel(
                         _callType.value = CallType.fromType(state.callGuid.type)
                         _participants.value = state.users.values.toList()
                     }
-                    is State.Starting -> {
+                    is State.Joining -> {
                         _callType.value = CallType.fromType(state.callGuid.type)
                         _callId.value = state.callGuid.id
                     }
@@ -162,12 +162,7 @@ public class CallViewModel(
                             .filter { it.id != streamVideo.getUser().id }
                             .toList()
                     }
-                    is State.Joining -> {
-                    }
-                    is State.InCall -> {
-                    }
-                    is State.Drop -> {
-                    }
+                    else -> Unit
                 }
                 prevState = state
             }

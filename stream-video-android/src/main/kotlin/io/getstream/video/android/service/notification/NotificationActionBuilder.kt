@@ -17,7 +17,7 @@
 package io.getstream.video.android.service.notification
 
 import androidx.core.app.NotificationCompat
-import io.getstream.video.android.model.state.StreamCallGuid
+import io.getstream.video.android.model.StreamCallGuid
 
 internal interface NotificationActionBuilder {
 

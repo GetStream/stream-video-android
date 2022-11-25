@@ -16,12 +16,13 @@
 
 package io.getstream.video.android.model
 
-import java.util.*
+import java.util.Date
 
 public data class CallMetadata(
-    val cid: String,
-    val id: String,
-    val type: String,
+    val cid: StreamCallCid,
+    val id: StreamCallId,
+    val type: StreamCallType,
+    val kind: StreamCallKind,
     val createdByUserId: String,
     val createdAt: Long,
     val updatedAt: Long,

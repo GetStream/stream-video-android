@@ -326,7 +326,7 @@ public class Call(
             val device = devices.firstOrNull { it.type == deviceType } ?: return
 
             val isCommunicationDeviceSet = audioManager?.setCommunicationDevice(device)
-            logger.d { "[updateAudio] #sfu; isCommunicationDeviceSet: $isCommunicationDeviceSet" }
+            logger.d { "[setupAudio] #sfu; isCommunicationDeviceSet: $isCommunicationDeviceSet" }
         }
     }
 

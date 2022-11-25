@@ -42,7 +42,7 @@ internal class StreamVideoStateLauncher(
                 logger.v { "[run] $state <= $lastState" }
                 when {
                     lastState is StreamCallState.Idle &&
-                        state is StreamCallState.Starting -> {
+                        state is StreamCallState.Joining -> {
                         androidInputs.forEach {
                             inputLauncher.launch(context, it)
                         }

@@ -17,7 +17,7 @@
 package io.getstream.video.android.service.notification
 
 import android.content.Intent
-import io.getstream.video.android.model.state.StreamCallGuid
+import io.getstream.video.android.model.StreamCallGuid
 
 private const val KEY_TYPE = "type"
 private const val KEY_ID = "id"

@@ -16,10 +16,24 @@
 
 package io.getstream.video.android.model
 
+/**
+ * Represents call cid.
+ */
 public typealias StreamCallCid = String
+
+/**
+ * Represents call type.
+ */
 public typealias StreamCallType = String
+
+/**
+ * Represents call id.
+ */
 public typealias StreamCallId = String
 
+/**
+ * Generates [StreamCallCid] from [StreamCallType] and [StreamCallId].
+ */
 public fun StreamCallCid(type: StreamCallType, id: StreamCallId): StreamCallCid {
     return when {
         type.isNotEmpty() && id.isNotEmpty() -> "$type:$id"

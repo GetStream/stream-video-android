@@ -497,9 +497,6 @@ internal class CallClientImpl(
             mediaConstraints = MediaConstraints(),
             onNegotiationNeeded = ::onNegotiationNeeded,
             onIceCandidateRequest = ::sendIceCandidate,
-            onConnectionChange = { connection, peerType ->
-                callEngine.onCallConnectionChange(sessionId, peerType, connection)
-            }
         ).also {
             logger.i { "[createPublisher] #sfu; publisher: $it" }
         }
@@ -562,12 +559,12 @@ internal class CallClientImpl(
         logger.v { "[handleTrickle] #sfu; #${event.peerType.stringify()}; result: $result" }
     }
 
-    private fun onNegotiationNeeded(peerConnection: StreamPeerConnection) {
+    private fun onNegotiationNeeded(peerConnection: StreamPeerConnection, peerType: StreamPeerType) {
         val id = Random.nextInt().absoluteValue
-        logger.d { "[negotiate] #$id; #sfu; peerConnection: $peerConnection" }
+        logger.d { "[negotiate] #$id; #sfu; #${peerType.stringify()}; peerConnection: $peerConnection" }
         coroutineScope.launch {
             peerConnection.createOffer().onSuccessSuspend { data ->
-                logger.v { "[negotiate] #$id; #sfu; offerSdp: $data" }
+                logger.v { "[negotiate] #$id; #sfu; #${peerType.stringify()}; offerSdp: $data" }
 
                 peerConnection.setLocalDescription(data)
 
@@ -576,14 +573,14 @@ internal class CallClientImpl(
                 )
 
                 sfuClient.setPublisher(request).onSuccessSuspend {
-                    logger.v { "[negotiate] #$id; #sfu; answerSdp: $it" }
+                    logger.v { "[negotiate] #$id; #sfu; #${peerType.stringify()}; answerSdp: $it" }
 
                     val answerDescription = SessionDescription(
                         SessionDescription.Type.ANSWER, it.sdp
                     )
                     peerConnection.setRemoteDescription(answerDescription)
                 }.onError {
-                    logger.e { "[negotiate] #$id; #sfu; failed: $it" }
+                    logger.e { "[negotiate] #$id; #sfu; #${peerType.stringify()}; failed: $it" }
                 }
             }
         }

@@ -60,7 +60,7 @@ internal class SocketFactory(
      *
      * @property endpoint The URL endpoint to connect the socket to.
      */
-    internal class ConnectionConf(val endpoint: String) {
+    internal data class ConnectionConf(val endpoint: String) {
         var isReconnection: Boolean = false
             private set
 
