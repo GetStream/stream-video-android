@@ -294,7 +294,6 @@ public abstract class io/getstream/video/android/compose/ui/AbstractComposeCallA
 	protected final fun buildContent ()Lkotlin/jvm/functions/Function2;
 	public final fun defaultViewModelFactory ()Lio/getstream/video/android/viewmodel/CallViewModelFactory;
 	public fun getCallViewModelFactory ()Lio/getstream/video/android/viewmodel/CallViewModelFactory;
-	protected final fun getDefaultCallSettings ()Lio/getstream/video/android/model/CallSettings;
 	protected fun onCreate (Landroid/os/Bundle;)V
 	protected fun onResume ()V
 }

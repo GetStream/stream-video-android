@@ -1773,11 +1773,15 @@ public final class io/getstream/video/android/model/CallSettings {
 	public final fun copy (ZZZZ)Lio/getstream/video/android/model/CallSettings;
 	public static synthetic fun copy$default (Lio/getstream/video/android/model/CallSettings;ZZZZILjava/lang/Object;)Lio/getstream/video/android/model/CallSettings;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getAudioOn ()Z
 	public final fun getAutoPublish ()Z
+	public final fun getCameraOn ()Z
+	public final fun getMicrophoneOn ()Z
 	public final fun getSpeakerOn ()Z
-	public final fun getVideoOn ()Z
 	public fun hashCode ()I
+	public final fun setAutoPublish (Z)V
+	public final fun setCameraOn (Z)V
+	public final fun setMicrophoneOn (Z)V
+	public final fun setSpeakerOn (Z)V
 	public fun toString ()Ljava/lang/String;
 }
 
@@ -2632,6 +2636,7 @@ public final class io/getstream/video/android/token/AuthCredentialsProvider : io
 	public fun loadApiKey ()Ljava/lang/String;
 	public fun loadUserToken ()Ljava/lang/String;
 	public fun setSfuToken (Ljava/lang/String;)V
+	public fun updateUser (Lio/getstream/video/android/model/User;Ljava/lang/String;)V
 }
 
 public abstract interface class io/getstream/video/android/token/CredentialsProvider {
@@ -2642,6 +2647,7 @@ public abstract interface class io/getstream/video/android/token/CredentialsProv
 	public abstract fun loadApiKey ()Ljava/lang/String;
 	public abstract fun loadUserToken ()Ljava/lang/String;
 	public abstract fun setSfuToken (Ljava/lang/String;)V
+	public abstract fun updateUser (Lio/getstream/video/android/model/User;Ljava/lang/String;)V
 }
 
 public final class io/getstream/video/android/ui/ParticipantContentView : android/widget/LinearLayout {
@@ -2740,7 +2746,7 @@ public final class io/getstream/video/android/viewmodel/CallViewModel : androidx
 	public final fun acceptCall ()V
 	public final fun cancelCall ()V
 	public final fun clearState ()V
-	public final fun connectToCall (Lio/getstream/video/android/model/CallSettings;)V
+	public final fun connectToCall ()V
 	public final fun dismissOptions ()V
 	public final fun flipCamera ()V
 	public final fun getActiveSpeakers ()Lkotlinx/coroutines/flow/Flow;

@@ -232,7 +232,6 @@ public class CallViewModel(
             callSettings.cameraOn = enabled
             callSettings.autoPublish = (callSettings.cameraOn || callSettings.microphoneOn)
         }
-
     }
 
     public fun toggleMicrophone(enabled: Boolean) {
