@@ -23,11 +23,16 @@ import io.getstream.logging.StreamLog
 import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.audio.AudioDevice
 import io.getstream.video.android.call.CallClient
+import io.getstream.video.android.call.state.AcceptCall
 import io.getstream.video.android.call.state.CallAction
 import io.getstream.video.android.call.state.CallMediaState
+import io.getstream.video.android.call.state.CancelCall
 import io.getstream.video.android.call.state.CustomAction
+import io.getstream.video.android.call.state.DeclineCall
 import io.getstream.video.android.call.state.FlipCamera
+import io.getstream.video.android.call.state.InviteUsersToCall
 import io.getstream.video.android.call.state.LeaveCall
+import io.getstream.video.android.call.state.SelectAudioDevice
 import io.getstream.video.android.call.state.ToggleCamera
 import io.getstream.video.android.call.state.ToggleMicrophone
 import io.getstream.video.android.call.state.ToggleSpeakerphone
@@ -273,8 +278,13 @@ public class CallViewModel(
             is ToggleSpeakerphone -> toggleSpeakerphone(callAction.isEnabled)
             is ToggleCamera -> onVideoChanged(callAction.isEnabled)
             is ToggleMicrophone -> onMicrophoneChanged(callAction.isEnabled)
+            is SelectAudioDevice -> selectAudioDevice(callAction.audioDevice)
             is FlipCamera -> flipCamera()
+            CancelCall -> cancelCall()
+            AcceptCall -> acceptCall()
+            DeclineCall -> hangUpCall()
             is LeaveCall -> cancelCall()
+            is InviteUsersToCall -> inviteUsersToCall(callAction.users)
             is CustomAction -> {
                 // custom actions
             }
@@ -284,7 +294,7 @@ public class CallViewModel(
     /**
      * Drops the call by sending a cancel event, which informs other users.
      */
-    public fun cancelCall() {
+    private fun cancelCall() {
         val state = streamVideo.callState.value
         if (state !is State.Active) {
             logger.w { "[cancelCall] rejected (state is not Active): $state" }
@@ -328,11 +338,11 @@ public class CallViewModel(
      *
      * @param device The device to use.
      */
-    public fun selectAudioDevice(device: AudioDevice) {
+    private fun selectAudioDevice(device: AudioDevice) {
         client.selectAudioDevice(device)
     }
 
-    public fun acceptCall() {
+    private fun acceptCall() {
         val state = streamVideo.callState.value
         if (state !is State.Incoming || state.acceptedByMe) {
             logger.w { "[acceptCall] rejected (state is not unaccepted Incoming): $state" }
@@ -351,7 +361,7 @@ public class CallViewModel(
         }
     }
 
-    public fun rejectCall() {
+    private fun rejectCall() {
         val state = streamVideo.callState.value
         if (state !is State.Incoming || state.acceptedByMe) {
             logger.w { "[declineCall] rejected (state is not unaccepted Incoming): $state" }
@@ -364,7 +374,7 @@ public class CallViewModel(
         }
     }
 
-    public fun hangUpCall() {
+    private fun hangUpCall() {
         val state = streamVideo.callState.value
         if (state !is State.Active) {
             logger.w { "[hangUpCall] rejected (state is not Active): $state" }
@@ -413,7 +423,7 @@ public class CallViewModel(
      *
      * @param users The list of users to add to the call.
      */
-    public fun inviteUsersToCall(users: List<User>) {
+    private fun inviteUsersToCall(users: List<User>) {
         logger.d { "[inviteUsersToCall] Inviting users to call, users: $users" }
         val callState = streamCallState.value
 

@@ -34,7 +34,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import io.getstream.video.android.call.state.CallAction
 import io.getstream.video.android.call.state.CallMediaState
+import io.getstream.video.android.call.state.CancelCall
+import io.getstream.video.android.call.state.ToggleCamera
+import io.getstream.video.android.call.state.ToggleMicrophone
 import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.extensions.toggleAlpha
@@ -42,10 +46,8 @@ import io.getstream.video.android.compose.ui.components.extensions.toggleAlpha
 @Composable
 internal fun OutgoingSingleCallOptions(
     callMediaState: CallMediaState,
+    onCallAction: (CallAction) -> Unit,
     modifier: Modifier = Modifier,
-    onCancelCall: () -> Unit = {},
-    onMicToggleChanged: (Boolean) -> Unit = {},
-    onVideoToggleChanged: (Boolean) -> Unit = {},
 ) {
     val isMicEnabled = callMediaState.isMicrophoneEnabled
     val isVideoEnabled = callMediaState.isCameraEnabled
@@ -67,9 +69,7 @@ internal fun OutgoingSingleCallOptions(
                         shape = VideoTheme.shapes.callButton
                     )
                     .size(VideoTheme.dimens.mediumButtonSize),
-                onClick = {
-                    onMicToggleChanged(!isMicEnabled)
-                },
+                onClick = { onCallAction(ToggleMicrophone(!callMediaState.isMicrophoneEnabled)) },
                 content = {
                     val micIcon = painterResource(
                         id = if (isMicEnabled) {
@@ -95,9 +95,7 @@ internal fun OutgoingSingleCallOptions(
                         shape = VideoTheme.shapes.callButton
                     )
                     .size(VideoTheme.dimens.mediumButtonSize),
-                onClick = {
-                    onVideoToggleChanged(!isVideoEnabled)
-                },
+                onClick = { onCallAction(ToggleCamera(!callMediaState.isCameraEnabled)) },
                 content = {
                     val cameraIcon = painterResource(
                         id = if (isVideoEnabled) {
@@ -125,7 +123,7 @@ internal fun OutgoingSingleCallOptions(
                     shape = VideoTheme.shapes.callButton
                 )
                 .size(VideoTheme.dimens.largeButtonSize),
-            onClick = { onCancelCall() },
+            onClick = { onCallAction(CancelCall) },
             content = {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_call_end),
@@ -140,5 +138,10 @@ internal fun OutgoingSingleCallOptions(
 @Preview
 @Composable
 private fun OutgoingCallOptionsPreview() {
-    VideoTheme { OutgoingSingleCallOptions(CallMediaState()) }
+    VideoTheme {
+        OutgoingSingleCallOptions(
+            callMediaState = CallMediaState(),
+            onCallAction = { }
+        )
+    }
 }

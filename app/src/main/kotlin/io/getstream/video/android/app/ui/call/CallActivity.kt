@@ -22,7 +22,6 @@ import io.getstream.video.android.app.BuildConfig
 import io.getstream.video.android.app.user.FakeUsersProvider
 import io.getstream.video.android.app.videoApp
 import io.getstream.video.android.compose.ui.AbstractComposeCallActivity
-import io.getstream.video.android.permission.PermissionManager
 import io.getstream.video.android.user.EmptyUsersProvider
 import io.getstream.video.android.viewmodel.CallViewModelFactory
 

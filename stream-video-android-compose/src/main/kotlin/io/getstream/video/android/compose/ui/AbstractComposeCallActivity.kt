@@ -109,9 +109,6 @@ public abstract class AbstractComposeCallActivity :
         VideoTheme {
             CallContent(
                 viewModel = callViewModel,
-                onRejectCall = callViewModel::rejectCall,
-                onAcceptCall = callViewModel::acceptCall,
-                onCancelCall = callViewModel::cancelCall,
                 onCallAction = { action ->
                     when (action) {
                         is ToggleMicrophone -> toggleMicrophone(action)

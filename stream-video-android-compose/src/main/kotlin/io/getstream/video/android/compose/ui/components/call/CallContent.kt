@@ -25,7 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import io.getstream.video.android.call.state.CallAction
-import io.getstream.video.android.call.state.ToggleCamera
+import io.getstream.video.android.call.state.InviteUsersToCall
 import io.getstream.video.android.call.state.ToggleMicrophone
 import io.getstream.video.android.compose.state.ui.participants.ChangeMuteState
 import io.getstream.video.android.compose.state.ui.participants.InviteUsers
@@ -57,9 +57,6 @@ import io.getstream.video.android.model.state.StreamCallState as State
 public fun CallContent(
     viewModel: CallViewModel,
     modifier: Modifier = Modifier,
-    onRejectCall: () -> Unit = viewModel::rejectCall,
-    onAcceptCall: () -> Unit = viewModel::acceptCall,
-    onCancelCall: () -> Unit = viewModel::cancelCall,
     onCallAction: (CallAction) -> Unit = { viewModel.onCallAction(it) },
 ) {
     val stateHolder = viewModel.streamCallState.collectAsState(initial = State.Idle)
@@ -70,17 +67,13 @@ public fun CallContent(
         IncomingCallContent(
             modifier = modifier,
             viewModel = viewModel,
-            onRejectCall = onRejectCall,
-            onAcceptCall = onAcceptCall,
-            onVideoToggleChanged = { onCallAction(ToggleCamera(it)) }
+            onCallAction = onCallAction
         )
     } else if (state is State.Outgoing && !state.acceptedByCallee) {
         OutgoingCallContent(
             modifier = modifier,
             viewModel = viewModel,
-            onCancelCall = onCancelCall,
-            onMicToggleChanged = { onCallAction(ToggleMicrophone(it)) },
-            onVideoToggleChanged = { onCallAction(ToggleCamera(it)) }
+            onCallAction = onCallAction
         )
     } else {
         ActiveCallContent(
@@ -117,7 +110,7 @@ public fun CallContent(
                 onDismiss = { usersToInvite = emptyList() },
                 onInviteUsers = {
                     usersToInvite = emptyList()
-                    viewModel.inviteUsersToCall(it)
+                    viewModel.onCallAction(InviteUsersToCall(it))
                 }
             )
         }

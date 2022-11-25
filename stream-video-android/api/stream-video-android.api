@@ -641,19 +641,16 @@ public final class io/getstream/video/android/BuildConfig {
 }
 
 public abstract interface class io/getstream/video/android/CallViewModelFactoryProvider {
-	public abstract fun getCallViewModelFactory (Lio/getstream/video/android/permission/PermissionManager;)Lio/getstream/video/android/viewmodel/CallViewModelFactory;
+	public abstract fun getCallViewModelFactory ()Lio/getstream/video/android/viewmodel/CallViewModelFactory;
 }
 
 public final class io/getstream/video/android/CallViewModelFactoryProvider$DefaultImpls {
-	public static fun getCallViewModelFactory (Lio/getstream/video/android/CallViewModelFactoryProvider;Lio/getstream/video/android/permission/PermissionManager;)Lio/getstream/video/android/viewmodel/CallViewModelFactory;
+	public static fun getCallViewModelFactory (Lio/getstream/video/android/CallViewModelFactoryProvider;)Lio/getstream/video/android/viewmodel/CallViewModelFactory;
 }
 
 public abstract interface class io/getstream/video/android/PermissionManagerProvider {
 	public abstract fun getPermissionManager ()Lio/getstream/video/android/permission/PermissionManager;
-}
-
-public final class io/getstream/video/android/PermissionManagerProvider$DefaultImpls {
-	public static fun getPermissionManager (Lio/getstream/video/android/PermissionManagerProvider;)Lio/getstream/video/android/permission/PermissionManager;
+	public abstract fun initPermissionManager ()Lio/getstream/video/android/permission/PermissionManager;
 }
 
 public abstract interface class io/getstream/video/android/StreamVideo {
@@ -1012,6 +1009,10 @@ public final class io/getstream/video/android/call/signal/socket/SfuSocketListen
 	public static fun onEvent (Lio/getstream/video/android/call/signal/socket/SfuSocketListener;Lio/getstream/video/android/events/SfuDataEvent;)V
 }
 
+public final class io/getstream/video/android/call/state/AcceptCall : io/getstream/video/android/call/state/CallAction {
+	public static final field INSTANCE Lio/getstream/video/android/call/state/AcceptCall;
+}
+
 public abstract class io/getstream/video/android/call/state/CallAction {
 }
 
@@ -1030,6 +1031,10 @@ public final class io/getstream/video/android/call/state/CallMediaState {
 	public final fun isMicrophoneEnabled ()Z
 	public final fun isSpeakerphoneEnabled ()Z
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/call/state/CancelCall : io/getstream/video/android/call/state/CallAction {
+	public static final field INSTANCE Lio/getstream/video/android/call/state/CancelCall;
 }
 
 public final class io/getstream/video/android/call/state/ConnectionState : java/lang/Enum {
@@ -1053,12 +1058,38 @@ public final class io/getstream/video/android/call/state/CustomAction : io/getst
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class io/getstream/video/android/call/state/DeclineCall : io/getstream/video/android/call/state/CallAction {
+	public static final field INSTANCE Lio/getstream/video/android/call/state/DeclineCall;
+}
+
 public final class io/getstream/video/android/call/state/FlipCamera : io/getstream/video/android/call/state/CallAction {
 	public static final field INSTANCE Lio/getstream/video/android/call/state/FlipCamera;
 }
 
+public final class io/getstream/video/android/call/state/InviteUsersToCall : io/getstream/video/android/call/state/CallAction {
+	public fun <init> (Ljava/util/List;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Lio/getstream/video/android/call/state/InviteUsersToCall;
+	public static synthetic fun copy$default (Lio/getstream/video/android/call/state/InviteUsersToCall;Ljava/util/List;ILjava/lang/Object;)Lio/getstream/video/android/call/state/InviteUsersToCall;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getUsers ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class io/getstream/video/android/call/state/LeaveCall : io/getstream/video/android/call/state/CallAction {
 	public static final field INSTANCE Lio/getstream/video/android/call/state/LeaveCall;
+}
+
+public final class io/getstream/video/android/call/state/SelectAudioDevice : io/getstream/video/android/call/state/CallAction {
+	public fun <init> (Lio/getstream/video/android/audio/AudioDevice;)V
+	public final fun component1 ()Lio/getstream/video/android/audio/AudioDevice;
+	public final fun copy (Lio/getstream/video/android/audio/AudioDevice;)Lio/getstream/video/android/call/state/SelectAudioDevice;
+	public static synthetic fun copy$default (Lio/getstream/video/android/call/state/SelectAudioDevice;Lio/getstream/video/android/audio/AudioDevice;ILjava/lang/Object;)Lio/getstream/video/android/call/state/SelectAudioDevice;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAudioDevice ()Lio/getstream/video/android/audio/AudioDevice;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/call/state/ToggleCamera : io/getstream/video/android/call/state/CallAction {
@@ -2659,8 +2690,6 @@ public final class io/getstream/video/android/utils/TokenUtilsKt {
 
 public final class io/getstream/video/android/viewmodel/CallViewModel : androidx/lifecycle/ViewModel {
 	public fun <init> (Lio/getstream/video/android/StreamVideo;Lio/getstream/video/android/permission/PermissionManager;Lio/getstream/video/android/user/UsersProvider;)V
-	public final fun acceptCall ()V
-	public final fun cancelCall ()V
 	public final fun clearState ()V
 	public final fun connectToCall (Lio/getstream/video/android/model/CallSettings;)V
 	public final fun dismissOptions ()V
@@ -2677,15 +2706,11 @@ public final class io/getstream/video/android/viewmodel/CallViewModel : androidx
 	public final fun getStreamCallState ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getUsers ()Ljava/util/List;
 	public final fun getUsersState ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun hangUpCall ()V
-	public final fun inviteUsersToCall (Ljava/util/List;)V
 	public final fun isShowingAudioDevicePicker ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun isShowingParticipantsInfo ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun isVideoInitialized ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun onCallAction (Lio/getstream/video/android/call/state/CallAction;)V
 	public final fun reconnect ()V
-	public final fun rejectCall ()V
-	public final fun selectAudioDevice (Lio/getstream/video/android/audio/AudioDevice;)V
 	public final fun showParticipants ()V
 	public final fun showSettings ()V
 }

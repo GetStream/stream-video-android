@@ -16,7 +16,6 @@
 
 package io.getstream.video.android
 
-import io.getstream.video.android.permission.PermissionManager
 import io.getstream.video.android.viewmodel.CallViewModelFactory
 
 public interface CallViewModelFactoryProvider {

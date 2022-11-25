@@ -25,9 +25,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import io.getstream.video.android.call.state.CallAction
 import io.getstream.video.android.call.state.CallMediaState
-import io.getstream.video.android.call.state.ToggleCamera
-import io.getstream.video.android.call.state.ToggleMicrophone
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.background.CallBackground
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
@@ -52,17 +51,7 @@ import io.getstream.video.android.viewmodel.CallViewModel
 public fun OutgoingCallContent(
     viewModel: CallViewModel,
     modifier: Modifier = Modifier,
-    onCancelCall: () -> Unit = viewModel::cancelCall,
-    onMicToggleChanged: (Boolean) -> Unit = { isEnabled ->
-        viewModel.onCallAction(
-            ToggleCamera(isEnabled)
-        )
-    },
-    onVideoToggleChanged: (Boolean) -> Unit = { isEnabled ->
-        viewModel.onCallAction(
-            ToggleMicrophone(isEnabled)
-        )
-    },
+    onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
 ) {
     val callType: CallType by viewModel.callType.collectAsState()
     val participants: List<CallUser> by viewModel.participants.collectAsState()
@@ -73,9 +62,7 @@ public fun OutgoingCallContent(
         participants = participants,
         callMediaState = callMediaState,
         modifier = modifier,
-        onCancelCall = onCancelCall,
-        onMicToggleChanged = onMicToggleChanged,
-        onVideoToggleChanged = onVideoToggleChanged
+        onCallAction = onCallAction
     )
 }
 
@@ -96,10 +83,8 @@ public fun OutgoingCall(
     callType: CallType,
     participants: List<CallUser>,
     callMediaState: CallMediaState,
+    onCallAction: (CallAction) -> Unit,
     modifier: Modifier = Modifier,
-    onCancelCall: () -> Unit = {},
-    onMicToggleChanged: (Boolean) -> Unit = {},
-    onVideoToggleChanged: (Boolean) -> Unit = {},
 ) {
     CallBackground(
         modifier = modifier,
@@ -133,9 +118,7 @@ public fun OutgoingCall(
                     .align(Alignment.BottomCenter)
                     .padding(bottom = 44.dp),
                 callMediaState = callMediaState,
-                onCancelCall = onCancelCall,
-                onMicToggleChanged = onMicToggleChanged,
-                onVideoToggleChanged = onVideoToggleChanged
+                onCallAction = onCallAction
             )
         } else {
             OutgoingGroupCallOptions(
@@ -143,9 +126,7 @@ public fun OutgoingCall(
                     .align(Alignment.BottomCenter)
                     .padding(bottom = 44.dp),
                 callMediaState = callMediaState,
-                onCancelCall = onCancelCall,
-                onMicToggleChanged = onMicToggleChanged,
-                onVideoToggleChanged = onVideoToggleChanged,
+                onCallAction = onCallAction
             )
         }
     }
@@ -172,8 +153,7 @@ private fun OutgoingCallPreview() {
                 }
             ),
             callMediaState = CallMediaState(),
-            onCancelCall = { },
-            onMicToggleChanged = { },
-        ) { }
+            onCallAction = { }
+        )
     }
 }
