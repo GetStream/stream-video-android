@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -43,7 +44,9 @@ class LoginActivity : ComponentActivity() {
         setContent {
             VideoTheme {
                 UserList(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(VideoTheme.colors.appBackground),
                     userItems = dataSet,
                     onClick = { user ->
                         logIn(user)
@@ -72,7 +75,6 @@ class LoginActivity : ComponentActivity() {
         ).enqueue()
     }
 
-
     private fun logInToVideo(user: User) {
         chatWithVideoApp.initializeStreamVideo(
             AuthCredentialsProvider(
@@ -93,7 +95,6 @@ class LoginActivity : ComponentActivity() {
         Column(
             modifier = modifier,
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceEvenly
         ) {
             userItems.forEachIndexed { index, credentials ->
                 if (index > 0) {
@@ -143,6 +144,7 @@ class LoginActivity : ComponentActivity() {
                         .weight(1f),
                     text = credentials.name,
                     fontSize = 16.sp,
+                    color = VideoTheme.colors.textHighEmphasis
                 )
             }
             Spacer(modifier = Modifier.height(8.dp))

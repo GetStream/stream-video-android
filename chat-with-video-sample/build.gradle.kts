@@ -79,5 +79,5 @@ dependencies {
     implementation(Dependencies.streamChatCompose)
     implementation(Dependencies.streamChatOffline)
     implementation(Dependencies.streamChatState)
-
+    implementation(Dependencies.streamChatUiUtils)
 }

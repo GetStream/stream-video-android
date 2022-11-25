@@ -590,13 +590,13 @@ internal class CallClientImpl(
         }
 
         val audioTrack = makeAudioTrack()
-        audioTrack.setEnabled(callSettings.audioOn)
+        audioTrack.setEnabled(callSettings.microphoneOn)
         localAudioTrack = audioTrack
         logger.v { "[createUserTracks] #sfu; audioTrack: ${audioTrack.stringify()}" }
 
         val videoTrack = makeVideoTrack()
         localVideoTrack = videoTrack
-        videoTrack.setEnabled(callSettings.videoOn)
+        videoTrack.setEnabled(callSettings.cameraOn)
         logger.v { "[createUserTracks] #sfu; videoTrack: ${videoTrack.stringify()}" }
 
         if (autoPublish) {

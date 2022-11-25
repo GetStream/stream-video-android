@@ -33,7 +33,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import io.getstream.video.android.call.state.LeaveCall
 import io.getstream.video.android.compose.ui.components.call.activecall.ActiveCallContent
-import io.getstream.video.android.model.CallSettings
 import io.getstream.video.android.permission.PermissionManagerImpl
 import io.getstream.video.android.viewmodel.CallViewModel
 import io.getstream.video.android.viewmodel.CallViewModelFactory
@@ -100,13 +99,7 @@ class CallActivity : AppCompatActivity() {
     private fun startVideoFlow() {
         val isInitialized = callViewModel.isVideoInitialized.value
         if (isInitialized) return
-        callViewModel.connectToCall(
-            CallSettings(
-                audioOn = false,
-                videoOn = true,
-                speakerOn = false
-            )
-        )
+        callViewModel.connectToCall()
     }
 
     @RequiresApi(M)

@@ -87,6 +87,7 @@ object Dependencies {
     const val streamChatCompose = "io.getstream:stream-chat-android-compose:${Versions.STREAM}"
     const val streamChatOffline = "io.getstream:stream-chat-android-offline:${Versions.STREAM}"
     const val streamChatState = "io.getstream:stream-chat-android-state:${Versions.STREAM}"
+    const val streamChatUiUtils = "io.getstream:stream-chat-android-ui-utils:${Versions.STREAM}"
 
     const val baseProfile =
         "androidx.profileinstaller:profileinstaller:${Versions.BASE_PROFILE}"

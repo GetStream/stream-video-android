@@ -206,8 +206,8 @@ public class Call(
                 val user = it.toCallParticipant(getCurrentUserId())
 
                 if (it.user?.id == getCurrentUserId()) {
-                    user.hasAudio = callSettings.audioOn
-                    user.hasVideo = callSettings.videoOn
+                    user.hasAudio = callSettings.microphoneOn
+                    user.hasVideo = callSettings.cameraOn
                 }
 
                 user

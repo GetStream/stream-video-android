@@ -20,6 +20,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
+import io.getstream.chat.android.client.models.Attachment
 import io.getstream.chat.android.compose.ui.messages.composer.MessageComposer
 import io.getstream.chat.android.compose.ui.messages.header.MessageListHeader
 import io.getstream.chat.android.compose.ui.messages.list.MessageList
@@ -27,6 +28,9 @@ import io.getstream.chat.android.compose.ui.theme.ChatTheme
 import io.getstream.chat.android.compose.viewmodel.messages.MessageComposerViewModel
 import io.getstream.chat.android.compose.viewmodel.messages.MessageListViewModel
 import io.getstream.chat.android.compose.viewmodel.messages.MessagesViewModelFactory
+import io.getstream.chat.android.uiutils.extension.getDisplayName
+import io.getstream.video.android.utils.Success
+import io.getstream.video.chat_with_video_sample.R
 import io.getstream.video.chat_with_video_sample.application.chatWithVideoApp
 import kotlinx.coroutines.launch
 import java.util.*
@@ -48,7 +52,7 @@ class MessagesActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            ChatTheme {
+            ChatTheme(attachmentFactories = chatWithVideoApp.attachmentFactories) {
                 val channelState = messageListViewModel.channel
                 val currentUser by messageListViewModel.user.collectAsState()
 
@@ -68,7 +72,7 @@ class MessagesActivity : ComponentActivity() {
                                 .fillMaxSize()
                                 .background(ChatTheme.colors.appBackground)
                                 .padding(paddingValues),
-                            viewModel = messageListViewModel
+                            viewModel = messageListViewModel,
                         )
                     }
                 )
@@ -91,17 +95,39 @@ class MessagesActivity : ComponentActivity() {
     private fun startCall() {
         val users = messageListViewModel.channel.members.map {
             it.user.id
-        }
+        }.filter { it != chatWithVideoApp.chatClient.getCurrentUser()?.id }
 
         val videoClient = chatWithVideoApp.streamVideo
 
         lifecycleScope.launch {
-            videoClient.createAndJoinCall(
-                id = UUID.randomUUID().toString(),
+            val callId = UUID.randomUUID().toString()
+
+            val createCallResult = videoClient.createCall(
+                id = callId,
                 type = "default",
                 ringing = true,
                 participantIds = users
             )
+
+            if (createCallResult is Success) {
+                val data = createCallResult.data
+
+                val customAttachment = Attachment(
+                    type = "custom",
+                    authorName = videoClient.getUser().name,
+                    extraData = mutableMapOf(
+                        "callCid" to data.cid,
+                        "members" to data.users.map { it.value.name },
+                        "callName" to messageListViewModel.channel.getDisplayName(
+                            context = this@MessagesActivity,
+                            fallback = R.string.call_name_placeholder
+                        )
+                    )
+                )
+
+                val newMessage = composerViewModel.buildNewMessage("", listOf(customAttachment))
+                composerViewModel.sendMessage(newMessage)
+            }
         }
     }
 

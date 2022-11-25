@@ -126,6 +126,13 @@ public class CallViewModel(
     private val _participants: MutableStateFlow<List<CallUser>> = MutableStateFlow(emptyList())
     public val participants: StateFlow<List<CallUser>> = _participants
 
+    private val callSettings: CallSettings = CallSettings(
+        autoPublish = true,
+        microphoneOn = false,
+        cameraOn = true,
+        speakerOn = true
+    )
+
     private lateinit var client: CallClient
 
     private var prevState: State = State.Idle
@@ -165,7 +172,7 @@ public class CallViewModel(
         }
     }
 
-    public fun connectToCall(callSettings: CallSettings) {
+    public fun connectToCall() {
         logger.d { "[connectToCall] input: $callSettings" }
         viewModelScope.launch {
             logger.d { "[connectToCall] state: ${streamCallState.value}" }
@@ -188,11 +195,11 @@ public class CallViewModel(
             is Success -> {
                 val call = callResult.data
                 _callState.value = call
-                isVideoEnabled.value = callSettings.videoOn
-                isAudioEnabled.value = callSettings.audioOn
+                isVideoEnabled.value = callSettings.cameraOn
+                isAudioEnabled.value = callSettings.microphoneOn
                 _callMediaState.value = CallMediaState(
-                    isMicrophoneEnabled = callSettings.audioOn,
-                    isCameraEnabled = callSettings.videoOn,
+                    isMicrophoneEnabled = callSettings.microphoneOn,
+                    isCameraEnabled = callSettings.cameraOn,
                     isSpeakerphoneEnabled = callSettings.speakerOn
                 )
 
@@ -209,18 +216,33 @@ public class CallViewModel(
     }
 
     public fun toggleSpeakerphone(enabled: Boolean) {
-        client.setSpeakerphoneEnabled(enabled)
-        onSpeakerphoneChanged(enabled)
+        if (::client.isInitialized) {
+            client.setSpeakerphoneEnabled(enabled)
+            onSpeakerphoneChanged(enabled)
+        } else {
+            callSettings.speakerOn = enabled
+        }
     }
 
     public fun toggleCamera(enabled: Boolean) {
-        client.setCameraEnabled(enabled)
-        onVideoChanged(enabled)
+        if (::client.isInitialized) {
+            client.setCameraEnabled(enabled)
+            onVideoChanged(enabled)
+        } else {
+            callSettings.cameraOn = enabled
+            callSettings.autoPublish = (callSettings.cameraOn || callSettings.microphoneOn)
+        }
+
     }
 
     public fun toggleMicrophone(enabled: Boolean) {
-        client.setMicrophoneEnabled(enabled)
-        onMicrophoneChanged(enabled)
+        if (::client.isInitialized) {
+            client.setMicrophoneEnabled(enabled)
+            onMicrophoneChanged(enabled)
+        } else {
+            callSettings.microphoneOn = enabled
+            callSettings.autoPublish = (callSettings.cameraOn || callSettings.microphoneOn)
+        }
     }
 
     /**

@@ -25,7 +25,16 @@
                 android:value="" />
         </activity>
         <activity android:name=".ui.channels.ChannelsActivity" />
-        <activity android:name=".ui.messages.MessagesActivity" />
+        <activity
+            android:name=".ui.messages.MessagesActivity"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity android:name=".ui.call.CallActivity" />
+
+        <service
+            android:name=".ui.call.CallService"
+            android:enabled="true"
+            android:exported="false" />
     </application>
 
 </manifest>
