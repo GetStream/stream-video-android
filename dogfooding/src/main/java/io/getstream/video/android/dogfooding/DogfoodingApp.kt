@@ -49,7 +49,7 @@ class DogfoodingApp : Application() {
     /**
      * Sets up and returns the [streamVideo] required to connect to the API.
      */
-    fun initializeStreamCalls(
+    fun initializeStreamVideo(
         credentialsProvider: CredentialsProvider,
         loggingLevel: LoggingLevel
     ): StreamVideo {

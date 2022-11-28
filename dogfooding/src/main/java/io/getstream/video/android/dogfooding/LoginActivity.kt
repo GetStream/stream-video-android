@@ -215,14 +215,13 @@ class LoginActivity : ComponentActivity() {
     }
 
     private fun startHome(token: String, user: User) {
-        dogfoodingApp.initializeStreamCalls(
+        dogfoodingApp.initializeStreamVideo(
             AuthCredentialsProvider(
                 "key10", token,
                 user = user
             ),
             loggingLevel = LoggingLevel.BODY
         )
-        dogfoodingApp.userPreferences.storeUserCredentials(user)
         startActivity(HomeActivity.getIntent(this))
     }
 

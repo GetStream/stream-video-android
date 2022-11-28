@@ -136,9 +136,8 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun logIn(selectedUser: User) {
-        videoApp.userPreferences.storeUserCredentials(selectedUser)
         logger.i { "[logIn] selectedUser: $selectedUser" }
-        videoApp.initializeStreamCalls(
+        videoApp.initializeStreamVideo(
             credentialsProvider = AuthCredentialsProvider(
                 user = selectedUser,
                 apiKey = "key1",

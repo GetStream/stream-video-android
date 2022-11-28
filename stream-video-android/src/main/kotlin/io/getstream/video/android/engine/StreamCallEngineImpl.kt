@@ -91,7 +91,7 @@ private const val TIMEOUT_SFU_JOINED = 10_000L
 internal class StreamCallEngineImpl(
     parentScope: CoroutineScope,
     private val config: StreamVideoConfig,
-    private val getCurrentUserId: () -> String,
+    private inline val getCurrentUserId: () -> String,
 ) : StreamCallEngine {
 
     private val logger = StreamLog.getLogger("Call:Engine")

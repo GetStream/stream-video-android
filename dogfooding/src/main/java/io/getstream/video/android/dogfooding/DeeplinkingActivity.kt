@@ -75,7 +75,7 @@ class DeeplinkingActivity : AppCompatActivity() {
         val user = dogfoodingApp.userPreferences.getCachedCredentials()
         if (user != null) {
             logger.d { "[logIn] selectedUser: $user" }
-            dogfoodingApp.initializeStreamCalls(
+            dogfoodingApp.initializeStreamVideo(
                 credentialsProvider = AuthCredentialsProvider(
                     user = user,
                     userToken = user.token,
