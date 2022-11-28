@@ -29,6 +29,7 @@ import io.getstream.video.android.module.CallCoordinatorClientModule
 import io.getstream.video.android.module.HttpModule
 import io.getstream.video.android.module.VideoModule
 import io.getstream.video.android.token.CredentialsProvider
+import io.getstream.video.android.user.UserCredentialsManager
 import kotlinx.coroutines.CoroutineScope
 
 public class StreamVideoBuilder(
@@ -38,7 +39,7 @@ public class StreamVideoBuilder(
     private val androidInputs: Set<CallAndroidInput> = emptySet(),
     private val inputLauncher: CallAndroidInputLauncher = DefaultCallAndroidInputLauncher,
     private val loggingLevel: LoggingLevel = LoggingLevel.NONE,
-    private val callEngineBuilder: ((CoroutineScope) -> StreamCallEngine)? = null
+    private inline val callEngineBuilder: ((CoroutineScope) -> StreamCallEngine)? = null
 ) {
 
     public fun build(): StreamVideo {
@@ -47,8 +48,12 @@ public class StreamVideoBuilder(
 
         if (credentialsProvider.loadApiKey().isBlank() ||
             user.id.isBlank() ||
-            credentialsProvider.getCachedUserToken().isBlank()
+            user.token.isBlank()
         ) throw IllegalArgumentException("The API key, user ID and token cannot be empty!")
+
+        UserCredentialsManager.initialize(context).apply {
+            storeUserCredentials(user)
+        }
 
         val httpModule = HttpModule.getOrCreate(loggingLevel.httpLoggingLevel, credentialsProvider)
 
@@ -70,9 +75,10 @@ public class StreamVideoBuilder(
 
         val scope = CoroutineScope(DispatcherProvider.IO)
 
-        val engine: StreamCallEngine = callEngineBuilder?.invoke(scope) ?: StreamCallEngineImpl(scope, config) {
-            credentialsProvider.getUserCredentials().id
-        }
+        val engine: StreamCallEngine =
+            callEngineBuilder?.invoke(scope) ?: StreamCallEngineImpl(scope, config) {
+                credentialsProvider.getUserCredentials().id
+            }
 
         return StreamVideoImpl(
             context = context,

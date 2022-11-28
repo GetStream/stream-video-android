@@ -33,7 +33,6 @@ import io.getstream.video.android.compose.ui.components.call.incomingcall.intern
 import io.getstream.video.android.compose.ui.components.mock.mockParticipantList
 import io.getstream.video.android.model.CallType
 import io.getstream.video.android.model.CallUser
-import io.getstream.video.android.model.CallUserState
 import io.getstream.video.android.viewmodel.CallViewModel
 
 /**
@@ -143,7 +142,7 @@ private fun IncomingCallPreview() {
                     id = it.id,
                     name = it.name,
                     role = it.role,
-                    state = CallUserState.Idle,
+                    state = null,
                     createdAt = null,
                     updatedAt = null,
                     imageUrl = it.profileImageURL ?: "",

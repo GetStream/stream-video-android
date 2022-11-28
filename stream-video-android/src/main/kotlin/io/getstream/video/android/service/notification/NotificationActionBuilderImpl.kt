@@ -22,7 +22,7 @@ import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import io.getstream.video.android.R
-import io.getstream.video.android.model.state.StreamCallGuid
+import io.getstream.video.android.model.StreamCallGuid
 
 internal class NotificationActionBuilderImpl(
     private val context: Context
