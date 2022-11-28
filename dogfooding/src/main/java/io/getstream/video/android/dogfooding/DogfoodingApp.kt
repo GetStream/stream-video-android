@@ -23,6 +23,8 @@ import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.StreamVideoBuilder
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.token.CredentialsProvider
+import io.getstream.video.android.user.UserCredentialsManager
+import io.getstream.video.android.user.UserPreferences
 
 class DogfoodingApp : Application() {
 
@@ -36,15 +38,18 @@ class DogfoodingApp : Application() {
         get() = requireNotNull(calls)
 
     val userPreferences: UserPreferences by lazy {
-        UserPreferencesImpl(
-            getSharedPreferences(KEY_PREFERENCES, MODE_PRIVATE)
-        )
+        UserCredentialsManager.getPreferences()
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+        UserCredentialsManager.initialize(this)
     }
 
     /**
      * Sets up and returns the [streamVideo] required to connect to the API.
      */
-    fun initializeStreamCalls(
+    fun initializeStreamVideo(
         credentialsProvider: CredentialsProvider,
         loggingLevel: LoggingLevel
     ): StreamVideo {
@@ -64,10 +69,6 @@ class DogfoodingApp : Application() {
         streamVideo.clearCallState()
         userPreferences.clear()
         calls = null
-    }
-
-    companion object {
-        private const val KEY_PREFERENCES = "dogfooding-prefs"
     }
 }
 

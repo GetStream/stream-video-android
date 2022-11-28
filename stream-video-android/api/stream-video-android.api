@@ -1991,6 +1991,8 @@ public final class io/getstream/video/android/model/StreamPeerTypeKt {
 }
 
 public final class io/getstream/video/android/model/User {
+	public static final field Companion Lio/getstream/video/android/model/User$Companion;
+	public synthetic fun <init> (ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Lkotlinx/serialization/internal/SerializationConstructorMarker;)V
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
@@ -2010,35 +2012,25 @@ public final class io/getstream/video/android/model/User {
 	public final fun getTeams ()Ljava/util/List;
 	public final fun getToken ()Ljava/lang/String;
 	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/model/UserCredentials {
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Ljava/lang/String;
-	public final fun component4 ()Ljava/lang/String;
-	public final fun component5 ()Ljava/lang/String;
-	public final fun component6 ()Z
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)Lio/getstream/video/android/model/UserCredentials;
-	public static synthetic fun copy$default (Lio/getstream/video/android/model/UserCredentials;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZILjava/lang/Object;)Lio/getstream/video/android/model/UserCredentials;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getId ()Ljava/lang/String;
-	public final fun getImage ()Ljava/lang/String;
-	public final fun getName ()Ljava/lang/String;
-	public final fun getRole ()Ljava/lang/String;
-	public final fun getToken ()Ljava/lang/String;
-	public fun hashCode ()I
-	public final fun isSelected ()Z
 	public final fun isValid ()Z
 	public fun toString ()Ljava/lang/String;
-	public final fun toUser ()Lio/getstream/video/android/model/User;
+	public static final fun write$Self (Lio/getstream/video/android/model/User;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
 }
 
-public final class io/getstream/video/android/model/UserKt {
-	public static final fun toCredentials (Lio/getstream/video/android/model/User;)Lio/getstream/video/android/model/UserCredentials;
+public final class io/getstream/video/android/model/User$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lio/getstream/video/android/model/User$$serializer;
+	public static final synthetic field descriptor Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/getstream/video/android/model/User;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/getstream/video/android/model/User;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/getstream/video/android/model/User$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
 public final class io/getstream/video/android/model/VideoModelKt {
@@ -2577,6 +2569,18 @@ public final class io/getstream/video/android/user/EmptyUsersProvider : io/getst
 	public static final field INSTANCE Lio/getstream/video/android/user/EmptyUsersProvider;
 	public fun getUserState ()Lkotlinx/coroutines/flow/StateFlow;
 	public fun provideUsers ()Ljava/util/List;
+}
+
+public final class io/getstream/video/android/user/UserCredentialsManager {
+	public static final field INSTANCE Lio/getstream/video/android/user/UserCredentialsManager;
+	public final fun getPreferences ()Lio/getstream/video/android/user/UserPreferences;
+	public final fun initialize (Landroid/content/Context;)Lio/getstream/video/android/user/UserPreferences;
+}
+
+public abstract interface class io/getstream/video/android/user/UserPreferences {
+	public abstract fun clear ()V
+	public abstract fun getCachedCredentials ()Lio/getstream/video/android/model/User;
+	public abstract fun storeUserCredentials (Lio/getstream/video/android/model/User;)V
 }
 
 public abstract interface class io/getstream/video/android/user/UsersProvider {

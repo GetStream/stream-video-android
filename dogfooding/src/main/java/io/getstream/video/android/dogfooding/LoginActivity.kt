@@ -46,7 +46,6 @@ import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.google.firebase.auth.FirebaseAuth
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.model.User
-import io.getstream.video.android.model.toCredentials
 import io.getstream.video.android.token.AuthCredentialsProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -82,10 +81,10 @@ class LoginActivity : ComponentActivity() {
 
         val user = dogfoodingApp.userPreferences.getCachedCredentials()
 
-        if (user.id.isNotEmpty() && user.token.isNotEmpty()) {
+        if (user != null && user.isValid()) {
             startHome(
                 user.token,
-                user.toUser()
+                user
             )
             finish()
         }
@@ -215,18 +214,14 @@ class LoginActivity : ComponentActivity() {
         }
     }
 
-    private fun startHome(
-        token: String,
-        user: User
-    ) {
-        dogfoodingApp.initializeStreamCalls(
+    private fun startHome(token: String, user: User) {
+        dogfoodingApp.initializeStreamVideo(
             AuthCredentialsProvider(
                 "key10", token,
                 user = user
             ),
             loggingLevel = LoggingLevel.BODY
         )
-        dogfoodingApp.userPreferences.storeUserCredentials(user.toCredentials())
         startActivity(HomeActivity.getIntent(this))
     }
 
