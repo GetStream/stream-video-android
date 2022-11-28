@@ -20,7 +20,6 @@ import android.content.Context
 import android.content.Intent
 import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.compose.ui.AbstractComposeCallActivity
-import io.getstream.video.android.permission.PermissionManagerImpl
 import io.getstream.video.android.viewmodel.CallViewModelFactory
 
 class CallActivity : AbstractComposeCallActivity() {
@@ -34,10 +33,7 @@ class CallActivity : AbstractComposeCallActivity() {
      * Provides a custom factory for the ViewModel.
      */
     override fun getCallViewModelFactory(): CallViewModelFactory {
-        return CallViewModelFactory(
-            streamVideo = getStreamVideo(applicationContext),
-            permissionManager = PermissionManagerImpl(applicationContext)
-        )
+        return defaultViewModelFactory()
     }
 
     companion object {
