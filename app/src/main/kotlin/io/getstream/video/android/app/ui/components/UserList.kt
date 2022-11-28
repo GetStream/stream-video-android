@@ -24,24 +24,27 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.model.UserCredentials
+import io.getstream.video.android.app.user.UserWrapper
 
 @Composable
 fun UserList(
-    userItems: List<UserCredentials>,
+    userItems: List<UserWrapper>,
     modifier: Modifier = Modifier,
-    onClick: (UserCredentials) -> Unit
+    onClick: (UserWrapper) -> Unit
 ) {
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceEvenly
     ) {
-        userItems.forEachIndexed { index, credentials ->
+        userItems.forEachIndexed { index, user ->
             if (index > 0) {
                 Divider(startIndent = 16.dp, thickness = 0.5.dp, color = Color.LightGray)
             }
-            UserItem(credentials = credentials, onClick = onClick)
+            UserItem(
+                userWrapper = user,
+                onClick = onClick
+            )
         }
     }
 }

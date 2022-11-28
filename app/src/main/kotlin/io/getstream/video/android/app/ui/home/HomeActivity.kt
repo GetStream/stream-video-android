@@ -60,12 +60,12 @@ import io.getstream.logging.StreamLog
 import io.getstream.video.android.app.model.HomeScreenOption
 import io.getstream.video.android.app.ui.components.UserList
 import io.getstream.video.android.app.ui.login.LoginActivity
+import io.getstream.video.android.app.user.UserWrapper
 import io.getstream.video.android.app.utils.getUsers
 import io.getstream.video.android.app.videoApp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.Avatar
 import io.getstream.video.android.compose.ui.components.avatar.InitialsAvatar
-import io.getstream.video.android.model.UserCredentials
 import io.getstream.video.android.utils.initials
 import io.getstream.video.android.utils.onError
 import io.getstream.video.android.utils.onSuccess
@@ -83,10 +83,15 @@ class HomeActivity : AppCompatActivity() {
     private val selectedOption: MutableState<HomeScreenOption> =
         mutableStateOf(HomeScreenOption.CREATE_CALL)
 
-    private val participantsOptions: MutableState<List<UserCredentials>> by lazy {
+    private val participantsOptions: MutableState<List<UserWrapper>> by lazy {
         mutableStateOf(
             getUsers().filter {
                 it.id != streamVideo.getUser().id
+            }.map { user ->
+                UserWrapper(
+                    user,
+                    false
+                )
             }
         )
     }
@@ -195,7 +200,8 @@ class HomeActivity : AppCompatActivity() {
             onClick = {
                 createCall(
                     callId = callIdState.value,
-                    participants = participantsOptions.value.filter { it.isSelected }.map { it.id },
+                    participants = participantsOptions.value.filter { it.isSelected }
+                        .map { it.user.id },
                     isRinging
                 )
             }
@@ -398,9 +404,9 @@ class HomeActivity : AppCompatActivity() {
         }
     }
 
-    private fun toggleSelectState(user: UserCredentials, users: List<UserCredentials>) {
+    private fun toggleSelectState(wrapper: UserWrapper, users: List<UserWrapper>) {
         val currentUsers = users.toMutableList()
-        val selectedUser = currentUsers.firstOrNull { it.id == user.id }
+        val selectedUser = currentUsers.firstOrNull { it.user.id == wrapper.user.id }
 
         if (selectedUser != null) {
             val index = currentUsers.indexOf(selectedUser)

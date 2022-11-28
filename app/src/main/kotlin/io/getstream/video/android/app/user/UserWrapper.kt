@@ -16,13 +16,9 @@
 
 package io.getstream.video.android.app.user
 
-import io.getstream.video.android.model.UserCredentials
+import io.getstream.video.android.model.User
 
-interface UserPreferences {
-
-    fun getCachedCredentials(): UserCredentials
-
-    fun storeUserCredentials(userCredentials: UserCredentials)
-
-    fun clear()
-}
+data class UserWrapper(
+    val user: User,
+    val isSelected: Boolean
+)

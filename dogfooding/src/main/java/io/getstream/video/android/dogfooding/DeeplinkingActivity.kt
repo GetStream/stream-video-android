@@ -72,15 +72,17 @@ class DeeplinkingActivity : AppCompatActivity() {
     }
 
     private fun logIn() {
-        val selectedUser = dogfoodingApp.userPreferences.getCachedCredentials()
-        logger.d { "[logIn] selectedUser: $selectedUser" }
-        dogfoodingApp.initializeStreamCalls(
-            credentialsProvider = AuthCredentialsProvider(
-                user = selectedUser.toUser(),
-                userToken = selectedUser.token,
-                apiKey = "key10"
-            ),
-            loggingLevel = LoggingLevel.BODY
-        )
+        val user = dogfoodingApp.userPreferences.getCachedCredentials()
+        if (user != null) {
+            logger.d { "[logIn] selectedUser: $user" }
+            dogfoodingApp.initializeStreamCalls(
+                credentialsProvider = AuthCredentialsProvider(
+                    user = user,
+                    userToken = user.token,
+                    apiKey = "key10"
+                ),
+                loggingLevel = LoggingLevel.BODY
+            )
+        }
     }
 }
