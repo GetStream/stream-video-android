@@ -17,12 +17,15 @@
 package io.getstream.video.android.compose.ui
 
 import android.Manifest
+import android.app.PictureInPictureParams
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Rational
 import android.view.WindowManager
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -65,7 +68,7 @@ public abstract class AbstractComposeCallActivity :
         )
     }
 
-    protected val callViewModel: CallViewModel by viewModels<CallViewModel>(factoryProducer = { factory })
+    protected val callViewModel: CallViewModel by viewModels(factoryProducer = { factory })
 
     @RequiresApi(Build.VERSION_CODES.M)
     private val permissionsContract = registerForActivityResult(
@@ -104,6 +107,7 @@ public abstract class AbstractComposeCallActivity :
         VideoTheme {
             CallContent(
                 viewModel = callViewModel,
+                onBackPressed = ::handleBackPressed,
                 onRejectCall = callViewModel::rejectCall,
                 onAcceptCall = callViewModel::acceptCall,
                 onCancelCall = callViewModel::cancelCall,
@@ -207,6 +211,67 @@ public abstract class AbstractComposeCallActivity :
             window.addFlags(
                 WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
             )
+        }
+    }
+
+    /**
+     * Triggers when the user taps on the system or header back button.
+     *
+     * Attempts to show Picture in Picture mode, if the user allows it and your Application supports
+     * the feature.
+     */
+    protected open fun handleBackPressed() {
+        val callState = callViewModel.streamCallState.value
+
+        if (callState !is StreamCallState.Connected) {
+            closeCall()
+            return
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                callViewModel.dismissOptions()
+
+                enterPictureInPictureMode(
+                    PictureInPictureParams.Builder()
+                        .setAspectRatio(Rational(9, 16))
+                        .apply {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                this.setAutoEnterEnabled(true)
+                            }
+                        }.build()
+                )
+            } else {
+                enterPictureInPictureMode()
+            }
+        } else {
+            closeCall()
+        }
+    }
+
+    private fun closeCall() {
+        callViewModel.cancelCall()
+        callViewModel.clearState()
+        finish()
+    }
+
+    override fun onStop() {
+        super.onStop()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            val isInPiP = isInPictureInPictureMode
+
+            if (isInPiP) {
+                callViewModel.cancelCall()
+                callViewModel.clearState()
+            }
+        }
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            callViewModel.onPictureInPictureModeChanged(isInPictureInPictureMode)
         }
     }
 }

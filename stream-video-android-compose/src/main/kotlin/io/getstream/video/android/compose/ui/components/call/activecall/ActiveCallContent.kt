@@ -38,6 +38,7 @@ import io.getstream.video.android.call.state.LeaveCall
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.call.CallControls
+import io.getstream.video.android.compose.ui.components.participants.CallParticipant
 import io.getstream.video.android.compose.ui.components.participants.CallParticipants
 import io.getstream.video.android.model.state.StreamCallState
 import io.getstream.video.android.utils.formatAsTitle
@@ -82,8 +83,6 @@ public fun ActiveCallContent(
         }
     }
 
-    // TODO - when in PiP, we should probably render a different component, of a single primary speaker
-
     Box(
         modifier = modifier, contentAlignment = Alignment.Center
     ) {
@@ -112,12 +111,12 @@ public fun ActiveCallContent(
                     )
                 }
             } else {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    CallParticipants(
-                        modifier = Modifier.fillMaxSize(), call = roomState
-                    )
+                if (!isInPiPMode) {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        CallParticipants(
+                            modifier = Modifier.fillMaxSize(), call = roomState
+                        )
 
-                    if (!isInPiPMode) {
                         // TODO - colors
                         CallControls(
                             modifier = Modifier
@@ -127,6 +126,13 @@ public fun ActiveCallContent(
                             callMediaState = callMediaState,
                             onCallAction = onCallAction
                         )
+                    }
+                } else {
+                    val primarySpeaker by roomState.primarySpeaker.collectAsState(initial = null)
+                    val currentPrimary = primarySpeaker
+
+                    if (currentPrimary != null) {
+                        CallParticipant(call = roomState, participant = currentPrimary)
                     }
                 }
             }

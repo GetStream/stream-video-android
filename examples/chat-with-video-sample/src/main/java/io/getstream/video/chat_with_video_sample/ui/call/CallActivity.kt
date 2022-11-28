@@ -16,10 +16,7 @@
 
 package io.getstream.video.chat_with_video_sample.ui.call
 
-import android.app.PictureInPictureParams
 import android.content.Context
-import android.content.res.Configuration
-import android.os.Build
 import androidx.compose.runtime.Composable
 import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.call.state.ToggleCamera
@@ -27,7 +24,6 @@ import io.getstream.video.android.call.state.ToggleMicrophone
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.AbstractComposeCallActivity
 import io.getstream.video.android.compose.ui.components.call.CallContent
-import io.getstream.video.android.model.state.StreamCallState
 import io.getstream.video.android.permission.PermissionManagerImpl
 import io.getstream.video.android.viewmodel.CallViewModelFactory
 import io.getstream.video.chat_with_video_sample.application.chatWithVideoApp
@@ -71,54 +67,6 @@ class CallActivity : AbstractComposeCallActivity() {
                     )
                 }
             }
-        }
-    }
-
-    private fun handleBackPressed() {
-        val callState = callViewModel.streamCallState.value
-
-        if (callState !is StreamCallState.Connected) {
-            callViewModel.cancelCall()
-            callViewModel.clearState()
-            finish()
-            return
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                callViewModel.dismissOptions()
-
-                enterPictureInPictureMode(
-                    PictureInPictureParams.Builder().apply {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                            this.setAutoEnterEnabled(true)
-                        }
-                    }.build()
-                )
-            } else {
-                enterPictureInPictureMode()
-            }
-        }
-    }
-
-    override fun onStop() {
-        super.onStop()
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            val isInPiP = isInPictureInPictureMode
-
-            if (isInPiP) {
-                callViewModel.cancelCall()
-                callViewModel.clearState()
-            }
-        }
-    }
-
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            callViewModel.onPictureInPictureModeChanged(isInPictureInPictureMode)
         }
     }
 }

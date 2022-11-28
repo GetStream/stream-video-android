@@ -295,8 +295,11 @@ public abstract class io/getstream/video/android/compose/ui/AbstractComposeCallA
 	public final fun defaultViewModelFactory ()Lio/getstream/video/android/viewmodel/CallViewModelFactory;
 	protected final fun getCallViewModel ()Lio/getstream/video/android/viewmodel/CallViewModel;
 	public fun getCallViewModelFactory ()Lio/getstream/video/android/viewmodel/CallViewModelFactory;
+	protected fun handleBackPressed ()V
+	public fun onConfigurationChanged (Landroid/content/res/Configuration;)V
 	protected fun onCreate (Landroid/os/Bundle;)V
 	protected fun onResume ()V
+	protected fun onStop ()V
 }
 
 public final class io/getstream/video/android/compose/ui/components/audio/SoundIndicatorKt {
