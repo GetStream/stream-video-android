@@ -21,7 +21,7 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.IBinder
-import io.getstream.logging.StreamLog
+import io.getstream.log.StreamLog
 import io.getstream.video.android.R
 import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.StreamVideoProvider

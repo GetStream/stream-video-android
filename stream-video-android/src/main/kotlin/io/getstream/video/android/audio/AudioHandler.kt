@@ -20,7 +20,7 @@ import android.content.Context
 import android.media.AudioManager
 import android.os.Handler
 import android.os.Looper
-import io.getstream.logging.StreamLog
+import io.getstream.log.StreamLog
 
 public interface AudioHandler {
     /**

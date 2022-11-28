@@ -35,7 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.getstream.logging.StreamLog
+import io.getstream.log.StreamLog
 import io.getstream.video.android.app.ui.components.UserList
 import io.getstream.video.android.app.ui.home.HomeActivity
 import io.getstream.video.android.app.user.AppUser

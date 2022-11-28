@@ -19,7 +19,7 @@ package io.getstream.video.android.audio
 import android.bluetooth.BluetoothAdapter
 import android.content.Context
 import android.media.AudioManager
-import io.getstream.logging.StreamLog
+import io.getstream.log.StreamLog
 import io.getstream.video.android.audio.AudioDevice.BluetoothHeadset
 import io.getstream.video.android.audio.AudioDevice.Earpiece
 import io.getstream.video.android.audio.AudioDevice.Speakerphone

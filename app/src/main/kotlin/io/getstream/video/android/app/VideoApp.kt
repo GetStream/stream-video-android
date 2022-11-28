@@ -18,8 +18,8 @@ package io.getstream.video.android.app
 
 import android.app.Application
 import android.content.Context
-import io.getstream.logging.StreamLog
-import io.getstream.logging.android.AndroidStreamLogger
+import io.getstream.log.StreamLog
+import io.getstream.log.android.AndroidStreamLogger
 import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.StreamVideoBuilder
 import io.getstream.video.android.app.ui.call.CallActivity

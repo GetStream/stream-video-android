@@ -23,7 +23,7 @@ import android.media.AudioManager.MODE_IN_COMMUNICATION
 import android.os.Build
 import android.view.View
 import androidx.core.content.getSystemService
-import io.getstream.logging.StreamLog
+import io.getstream.log.StreamLog
 import io.getstream.video.android.audio.AudioHandler
 import io.getstream.video.android.audio.AudioSwitchHandler
 import io.getstream.video.android.call.utils.stringify

@@ -98,7 +98,7 @@ dependencies {
     implementation Dependencies.kotlinSerializationJson
 
     // Stream Logger
-    implementation Dependencies.streamLogger
+    implementation Dependencies.streamLog
 
     // Unit Tests
     testImplementation 'junit:junit:4.13.2'

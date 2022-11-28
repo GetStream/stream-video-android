@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.call.signal.socket
 
-import io.getstream.logging.StreamLog
+import io.getstream.log.StreamLog
 import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.errors.VideoErrorCode
 import io.getstream.video.android.errors.VideoNetworkError
