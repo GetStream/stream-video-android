@@ -68,7 +68,7 @@ private const val CONNECT_TIMEOUT = 30_000L
 public class CallViewModel(
     private val streamVideo: StreamVideo,
     private val permissionManager: PermissionManager,
-    private val usersProvider: UsersProvider
+    private val usersProvider: UsersProvider,
 ) : ViewModel() {
 
     private val logger = StreamLog.getLogger("Call:ViewModel")
@@ -76,38 +76,69 @@ public class CallViewModel(
     private val _callState: MutableStateFlow<Call?> = MutableStateFlow(null)
     public val callState: StateFlow<Call?> = _callState
 
+    private val clientState: MutableStateFlow<CallClient?> = MutableStateFlow(null)
+    private val client: CallClient?
+        get() = clientState.value
+
     private var _isVideoInitialized: MutableStateFlow<Boolean> = MutableStateFlow(false)
     public val isVideoInitialized: StateFlow<Boolean> = _isVideoInitialized
 
-    private val isVideoEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    private val isVideoOn: StateFlow<Boolean> = permissionManager.hasCameraPermission
-        .combine(isVideoEnabled) { hasPermission, videoEnabled ->
-            hasPermission && videoEnabled
-        }.onEach {
-            if (::client.isInitialized && _callState.value != null) {
-                logger.d { "[isVideoEnabled] setCameraEnabled: $it" }
-                client.setCameraEnabled(it)
-            }
-        }.stateIn(scope = viewModelScope, started = SharingStarted.Eagerly, false)
+    /**
+     * Determines whether the video should be enabled/disabled before [Call] and [CallClient] get initialised.
+     */
+    private val isVideoEnabled: MutableStateFlow<Boolean> =
+        MutableStateFlow(streamVideo.config.defaultVideoOn && permissionManager.hasCameraPermission.value)
 
-    private val isAudioEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    private val isAudioOn: StateFlow<Boolean> = permissionManager.hasRecordAudioPermission
-        .combine(isAudioEnabled) { hasPermission, audioEnabled ->
-            hasPermission && audioEnabled
-        }.onEach {
-            if (::client.isInitialized && _callState.value != null) {
-                logger.d { "[isAudioEnabled] setMicrophoneEnabled: $it" }
-                client.setMicrophoneEnabled(it)
-            }
-        }.stateIn(scope = viewModelScope, started = SharingStarted.Eagerly, false)
+    /**
+     * Determines whether the video should be on or not. If [CallClient] is not initialised reflects the UI state
+     * stored inside [isVideoEnabled], otherwise reflects the state of the [CallClient.isVideoEnabled].
+     */
+    private val isVideoOn: StateFlow<Boolean> = clientState.flatMapLatest { it?.isVideoEnabled ?: isVideoEnabled }
+        .stateIn(scope = viewModelScope, started = SharingStarted.Eagerly, streamVideo.config.defaultVideoOn)
 
-    private val isSpeakerPhoneOn: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    /**
+     * Determines whether the audio should be enabled/disabled before [Call] and [CallClient] get initialised.
+     */
+    private val isAudioEnabled: MutableStateFlow<Boolean> =
+        MutableStateFlow(streamVideo.config.defaultAudioOn && permissionManager.hasRecordAudioPermission.value)
 
+    /**
+     * Determines whether the audio should be on or not. If [CallClient] is not initialised reflects the UI state
+     * stored inside [isAudioEnabled], otherwise reflects the state of the [CallClient.isAudioEnabled].
+     */
+    private val isAudioOn: StateFlow<Boolean> = clientState.flatMapLatest { it?.isAudioEnabled ?: isAudioEnabled }
+        .onEach {
+            logger.d { "[isAudioOn] isAudioOn: $it" }
+        }
+        .stateIn(scope = viewModelScope, started = SharingStarted.Eagerly, false)
+
+    /**
+     * Determines whether the speaker phone should be enabled/disabled before [Call] and [CallClient] get initialised.
+     */
+    private val isSpeakerPhoneEnabled: MutableStateFlow<Boolean> =
+        MutableStateFlow(streamVideo.config.defaultSpeakerPhoneOn)
+
+    /**
+     * Determines whether the speaker phone should be on or not. If [CallClient] is not initialised reflects the UI
+     * state stored inside [isSpeakerPhoneEnabled], otherwise reflects the state of the
+     * [CallClient.isSpeakerPhoneEnabled].
+     */
+    private val isSpeakerPhoneOn: StateFlow<Boolean> = clientState
+        .flatMapLatest { it?.isSpeakerPhoneEnabled ?: isSpeakerPhoneEnabled }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = streamVideo.config.defaultSpeakerPhoneOn
+        )
+
+    /**
+     * The state of the call media. Combines [isAudioOn], [isVideoOn], [isSpeakerPhoneOn].
+     */
     public val callMediaState: StateFlow<CallMediaState> =
-        combine(isAudioOn, isVideoOn, isSpeakerPhoneOn) { isAudioOn, isVideoOn, isSpeakerPhoneEnabled ->
+        combine(isAudioOn, isVideoOn, isSpeakerPhoneOn) { isAudioOn, isVideoOn, isSpeakerPhoneOn ->
             CallMediaState(
                 isMicrophoneEnabled = isAudioOn,
-                isSpeakerphoneEnabled = isSpeakerPhoneEnabled,
+                isSpeakerphoneEnabled = isSpeakerPhoneOn,
                 isCameraEnabled = isVideoOn
             )
         }.onEach {
@@ -139,8 +170,6 @@ public class CallViewModel(
 
     private val _participants: MutableStateFlow<List<CallUser>> = MutableStateFlow(emptyList())
     public val participants: StateFlow<List<CallUser>> = _participants
-
-    private lateinit var client: CallClient
 
     private var prevState: State = State.Idle
 
@@ -174,56 +203,48 @@ public class CallViewModel(
         }
     }
 
-    public fun connectToCall(initialCallSettings: CallSettings) {
-        logger.d { "[connectToCall] input: $initialCallSettings" }
-
-        isAudioEnabled.value = initialCallSettings.audioOn && permissionManager.hasRecordAudioPermission.value
-        isVideoEnabled.value = initialCallSettings.videoOn && permissionManager.hasCameraPermission.value
-
+    public fun connectToCall() {
         viewModelScope.launch {
             logger.d { "[connectToCall] state: ${streamCallState.value}" }
             withTimeout(CONNECT_TIMEOUT) {
                 logger.v { "[connectToCall] received: ${streamCallState.value}" }
-                client = streamVideo.awaitCallClient()
+                clientState.value = streamVideo.awaitCallClient()
+                client?.setInitialCallSettings(
+                    CallSettings(
+                        autoPublish = streamVideo.config.autoPublish,
+                        audioOn = isAudioEnabled.value,
+                        videoOn = isVideoEnabled.value,
+                        speakerOn = isSpeakerPhoneEnabled.value
+                    )
+                )
                 _isVideoInitialized.value = true
-                initializeCall(initialCallSettings)
+                initializeCall(streamVideo.config.autoPublish)
             }
         }
     }
 
-    private suspend fun initializeCall(initialCallSettings: CallSettings) {
-        val callResult = client.connectToCall(
-            UUID.randomUUID().toString(),
-        ) {
-            val callSettings = CallSettings(
-                autoPublish = initialCallSettings.autoPublish,
-                audioOn = isAudioOn.value,
-                videoOn = isVideoOn.value,
-                speakerOn = isSpeakerPhoneOn.value
-            )
-            logger.d { "[initializeCall] call settings: $callSettings" }
-            callSettings
-        }
+    private suspend fun initializeCall(autoPublish: Boolean) {
+        client?.let { client ->
+            when (val callResult = client.connectToCall(UUID.randomUUID().toString(), autoPublish)) {
+                is Success -> {
+                    val call = callResult.data
+                    _callState.value = call
 
-        when (callResult) {
-            is Success -> {
-                val call = callResult.data
-                _callState.value = call
+                    val isVideoOn = isVideoOn.firstOrNull() ?: false
 
-                val isVideoOn = isVideoOn.firstOrNull() ?: false
-
-                if (initialCallSettings.autoPublish && isVideoOn) {
-                    client.startCapturingLocalVideo(CameraMetadata.LENS_FACING_FRONT)
+                    if (autoPublish && isVideoOn) {
+                        client.startCapturingLocalVideo(CameraMetadata.LENS_FACING_FRONT)
+                    }
+                }
+                is Failure -> {
+                    // TODO - show error to user
                 }
             }
-            is Failure -> {
-                // TODO - show error to user
-            }
-        }
+        } ?: logger.e { "[initializeCall] CallClient was not initialised." }
     }
 
     private fun toggleSpeakerphone(enabled: Boolean) {
-        if (::client.isInitialized) client.setSpeakerphoneEnabled(enabled)
+        client?.setSpeakerphoneEnabled(enabled)
         onSpeakerphoneChanged(enabled)
     }
 
@@ -231,7 +252,7 @@ public class CallViewModel(
      * Flips the camera for the current participant if possible.
      */
     public fun flipCamera() {
-        client.flipCamera()
+        client?.flipCamera()
     }
 
     /**
@@ -310,7 +331,7 @@ public class CallViewModel(
      * @return A [List] of [AudioDevice] that can be used for playback.
      */
     public fun getAudioDevices(): List<AudioDevice> {
-        return client.getAudioDevices()
+        return client?.getAudioDevices() ?: listOf()
     }
 
     /**
@@ -339,7 +360,7 @@ public class CallViewModel(
      * @param device The device to use.
      */
     private fun selectAudioDevice(device: AudioDevice) {
-        client.selectAudioDevice(device)
+        client?.selectAudioDevice(device)
     }
 
     private fun acceptCall() {
@@ -391,20 +412,23 @@ public class CallViewModel(
         if (!permissionManager.hasRecordAudioPermission.value) {
             logger.w { "[onMicrophoneChanged] the [Manifest.permissions.RECORD_AUDIO] has to be granted for audio to be sent" }
         }
+        client?.setMicrophoneEnabled(microphoneEnabled)
         isAudioEnabled.value = microphoneEnabled
     }
 
     private fun onVideoChanged(videoEnabled: Boolean) {
         logger.d { "[onVideoChanged] videoEnabled: $videoEnabled" }
         if (!permissionManager.hasCameraPermission.value) {
-            logger.w { "[onMicrophoneChanged] the [Manifest.permissions.CAMERA] has to be granted for video to be sent" }
+            logger.w { "[onVideoChanged] the [Manifest.permissions.CAMERA] has to be granted for video to be sent" }
         }
+        client?.setCameraEnabled(videoEnabled)
         isVideoEnabled.value = videoEnabled
     }
 
     private fun onSpeakerphoneChanged(speakerPhoneEnabled: Boolean) {
         logger.d { "[onSpeakerphoneChanged] speakerPhoneEnabled: $speakerPhoneEnabled" }
-        isSpeakerPhoneOn.value = speakerPhoneEnabled
+        client?.setSpeakerphoneEnabled(speakerPhoneEnabled)
+        isSpeakerPhoneEnabled.value = speakerPhoneEnabled
     }
 
     /**

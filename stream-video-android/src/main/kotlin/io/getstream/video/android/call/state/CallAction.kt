@@ -33,7 +33,7 @@ public data class ToggleSpeakerphone(
 
 public data class SelectAudioDevice(
     val audioDevice: AudioDevice
-): CallAction()
+) : CallAction()
 
 /**
  * Action to toggle if the camera is on or off.
@@ -57,17 +57,17 @@ public object FlipCamera : CallAction()
 /**
  * Action to accept a call in Incoming Call state.
  */
-public object AcceptCall: CallAction()
+public object AcceptCall : CallAction()
 
 /**
  * Action used to cancel an outgoing call.
  */
-public object CancelCall: CallAction()
+public object CancelCall : CallAction()
 
 /**
  * Action to decline an oncoming call.
  */
-public object DeclineCall: CallAction()
+public object DeclineCall : CallAction()
 
 /**
  * Action to leave the call.
@@ -79,7 +79,7 @@ public object LeaveCall : CallAction()
  */
 public data class InviteUsersToCall(
     val users: List<User>
-): CallAction()
+) : CallAction()
 
 /**
  * Custom action used to handle any custom behavior with the given [data], such as opening chat,

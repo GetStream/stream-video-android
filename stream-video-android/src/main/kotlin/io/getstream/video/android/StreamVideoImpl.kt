@@ -84,7 +84,7 @@ import stream.video.coordinator.edge_v1.LatencyMeasurements
 public class StreamVideoImpl(
     private val context: Context,
     private val scope: CoroutineScope,
-    private val config: StreamVideoConfig,
+    override val config: StreamVideoConfig,
     private val engine: StreamCallEngine,
     private val lifecycle: Lifecycle,
     private val loggingLevel: LoggingLevel,

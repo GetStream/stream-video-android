@@ -37,7 +37,6 @@ import io.getstream.video.android.call.state.ToggleCamera
 import io.getstream.video.android.call.state.ToggleMicrophone
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.CallContent
-import io.getstream.video.android.model.CallSettings
 import io.getstream.video.android.model.state.StreamCallState
 import io.getstream.video.android.permission.PermissionManager
 import io.getstream.video.android.permission.StreamPermissionManagerImpl
@@ -148,14 +147,8 @@ public abstract class AbstractComposeCallActivity :
     private fun startVideoFlow() {
         val isInitialized = callViewModel.isVideoInitialized.value
         if (isInitialized) return
-        callViewModel.connectToCall(getDefaultCallSettings())
+        callViewModel.connectToCall()
     }
-
-    protected fun getDefaultCallSettings(): CallSettings = CallSettings(
-        audioOn = false,
-        videoOn = callPermissionManager.hasCameraPermission.value,
-        speakerOn = false
-    )
 
     private fun showPermissionsDialog() {
         AlertDialog.Builder(this)

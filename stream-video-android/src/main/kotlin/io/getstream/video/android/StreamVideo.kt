@@ -41,6 +41,11 @@ public interface StreamVideo {
     public val callState: StateFlow<StreamCallState>
 
     /**
+     * Represents the default call config when starting a call.
+     */
+    public val config: StreamVideoConfig
+
+    /**
      * Creates a call with given information. You can then use the [CallMetadata] and join it and get auth
      * information to fully connect. This is different from [getOrCreateCall] because if the
      * call already exists, we'll return an error.
