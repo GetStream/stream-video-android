@@ -38,7 +38,7 @@ import androidx.compose.ui.unit.sp
 import io.getstream.logging.StreamLog
 import io.getstream.video.android.app.ui.components.UserList
 import io.getstream.video.android.app.ui.home.HomeActivity
-import io.getstream.video.android.app.user.UserWrapper
+import io.getstream.video.android.app.user.AppUser
 import io.getstream.video.android.app.utils.getUsers
 import io.getstream.video.android.app.videoApp
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -54,7 +54,7 @@ class LoginActivity : AppCompatActivity() {
 
     private val loginItemsState = mutableStateOf(
         getUsers().map {
-            UserWrapper(it, false)
+            AppUser(it, false)
         }
     )
 

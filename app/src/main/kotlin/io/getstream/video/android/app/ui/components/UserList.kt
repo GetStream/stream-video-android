@@ -24,13 +24,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.app.user.UserWrapper
+import io.getstream.video.android.app.user.AppUser
 
 @Composable
 fun UserList(
-    userItems: List<UserWrapper>,
+    userItems: List<AppUser>,
     modifier: Modifier = Modifier,
-    onClick: (UserWrapper) -> Unit
+    onClick: (AppUser) -> Unit
 ) {
     Column(
         modifier = modifier,
@@ -42,7 +42,7 @@ fun UserList(
                 Divider(startIndent = 16.dp, thickness = 0.5.dp, color = Color.LightGray)
             }
             UserItem(
-                userWrapper = user,
+                appUser = user,
                 onClick = onClick
             )
         }

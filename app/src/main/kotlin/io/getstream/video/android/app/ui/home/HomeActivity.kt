@@ -60,7 +60,7 @@ import io.getstream.logging.StreamLog
 import io.getstream.video.android.app.model.HomeScreenOption
 import io.getstream.video.android.app.ui.components.UserList
 import io.getstream.video.android.app.ui.login.LoginActivity
-import io.getstream.video.android.app.user.UserWrapper
+import io.getstream.video.android.app.user.AppUser
 import io.getstream.video.android.app.utils.getUsers
 import io.getstream.video.android.app.videoApp
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -83,12 +83,12 @@ class HomeActivity : AppCompatActivity() {
     private val selectedOption: MutableState<HomeScreenOption> =
         mutableStateOf(HomeScreenOption.CREATE_CALL)
 
-    private val participantsOptions: MutableState<List<UserWrapper>> by lazy {
+    private val participantsOptions: MutableState<List<AppUser>> by lazy {
         mutableStateOf(
             getUsers().filter {
                 it.id != streamVideo.getUser().id
             }.map { user ->
-                UserWrapper(
+                AppUser(
                     user,
                     false
                 )
@@ -404,7 +404,7 @@ class HomeActivity : AppCompatActivity() {
         }
     }
 
-    private fun toggleSelectState(wrapper: UserWrapper, users: List<UserWrapper>) {
+    private fun toggleSelectState(wrapper: AppUser, users: List<AppUser>) {
         val currentUsers = users.toMutableList()
         val selectedUser = currentUsers.firstOrNull { it.user.id == wrapper.user.id }
 

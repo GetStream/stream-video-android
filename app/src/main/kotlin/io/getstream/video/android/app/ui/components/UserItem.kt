@@ -50,18 +50,18 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.getstream.video.android.app.user.UserWrapper
+import io.getstream.video.android.app.user.AppUser
 import io.getstream.video.android.compose.ui.components.avatar.Avatar
 import io.getstream.video.android.utils.initials
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun UserItem(
-    userWrapper: UserWrapper,
-    onClick: (UserWrapper) -> Unit
+    appUser: AppUser,
+    onClick: (AppUser) -> Unit
 ) {
-    val user = userWrapper.user
-    val isSelected = userWrapper.isSelected
+    val user = appUser.user
+    val isSelected = appUser.isSelected
 
     val buttonColor = if (isSelected) {
         MaterialTheme.colors.primary
@@ -76,7 +76,7 @@ fun UserItem(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = rememberRipple(color = buttonColor),
                 onClick = {
-                    onClick(userWrapper)
+                    onClick(appUser)
                 }
             ),
     ) {
