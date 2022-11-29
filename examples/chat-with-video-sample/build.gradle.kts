@@ -74,8 +74,8 @@ dependencies {
     implementation(Dependencies.composeCoil)
 
     // Stream Logger
-    implementation(Dependencies.streamLogger)
-    implementation(Dependencies.streamLoggerAndroid)
+    implementation(Dependencies.streamLog)
+    implementation(Dependencies.streamLogAndroid)
     implementation(Dependencies.streamChatCompose)
     implementation(Dependencies.streamChatOffline)
     implementation(Dependencies.streamChatState)
