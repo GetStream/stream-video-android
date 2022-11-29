@@ -21,9 +21,7 @@ import io.getstream.video.android.module.SfuClientModule.Companion.REDIRECT_SIGN
 import io.getstream.video.android.module.SfuClientModule.Companion.SIGNAL_BASE_URL
 
 internal fun enrichSFUURL(url: String): String {
-    return if (url.contains("localhost") || url.contains("127.0.0.1")) {
-        REDIRECT_SIGNAL_URL ?: SIGNAL_BASE_URL
-    } else url
+    return REDIRECT_SIGNAL_URL ?: url ?: SIGNAL_BASE_URL
 }
 
 public fun String.initials(): String {

@@ -17,12 +17,11 @@
 package io.getstream.video.android.model
 
 import java.io.Serializable
-import java.util.Date
+import java.util.*
 import stream.video.coordinator.call_v1.Call as CoordinatorCall
 import stream.video.coordinator.call_v1.CallDetails as CoordinatorCallDetails
 import stream.video.coordinator.member_v1.Member as CoordinatorMember
 import stream.video.coordinator.user_v1.User as CoordinatorUser
-import stream.video.sfu.models.Participant as SfuParticipant
 
 public data class CallUser(
     val id: String,
@@ -84,9 +83,10 @@ public fun CoordinatorUser.toCallUser(): CallUser = CallUser(
     teams = teams
 )
 
-public fun Map<String, CoordinatorMember>.toCallMembers(): Map<String, CallMember> = map { (userId, protoMember) ->
-    userId to protoMember.toCallMember()
-}.toMap()
+public fun Map<String, CoordinatorMember>.toCallMembers(): Map<String, CallMember> =
+    map { (userId, protoMember) ->
+        userId to protoMember.toCallMember()
+    }.toMap()
 
 public fun CoordinatorMember.toCallMember(): CallMember = CallMember(
     callCid = call_cid,
@@ -121,34 +121,6 @@ public fun CoordinatorCall?.toCallInfo(): CallInfo {
 }
 
 /**
- * Converts [SfuParticipant] into [CallUser].
- */
-public fun SfuParticipant.toCallUser(): CallUser = CallUser(
-    id = user?.id ?: error("SfuParticipant has no userId"),
-    name = user.name,
-    role = user.role,
-    imageUrl = user.image_url,
-    state = CallUserState(
-        trackIdPrefix = track_lookup_prefix,
-        online = online,
-        audio = audio,
-        video = video,
-    ),
-    createdAt = /*TODO user.created_at*/ null,
-    updatedAt = /*TODO user.updated_at*/ null,
-    teams = user.teams
-)
-
-/**
- * Converts a list of [SfuParticipant] into a map associated by [CallUser.id] to [CallUser].
- */
-public fun List<SfuParticipant>.toCallUserMap(): Map<String, CallUser> = associate { participant ->
-    participant.toCallUser().let {
-        it.id to it
-    }
-}
-
-/**
  * Merges [CallUser] maps to absorb as many non-null and non-empty data from both collections.
  */
 public infix fun Map<String, CallUser>.merge(that: Map<String, CallUser>): Map<String, CallUser> {
@@ -162,14 +134,15 @@ public infix fun Map<String, CallUser>.merge(that: Map<String, CallUser>): Map<S
 /**
  * Merges [that] [CallUser] into [this] map.
  */
-public infix fun Map<String, CallUser>.merge(that: CallUser): Map<String, CallUser> = when (contains(that.id)) {
-    true -> this.map { (userId, user) ->
-        userId to user.merge(that)
-    }.toMap()
-    else -> this.toMutableMap().also {
-        it[that.id] = that
+public infix fun Map<String, CallUser>.merge(that: CallUser): Map<String, CallUser> =
+    when (contains(that.id)) {
+        true -> this.map { (userId, user) ->
+            userId to user.merge(that)
+        }.toMap()
+        else -> this.toMutableMap().also {
+            it[that.id] = that
+        }
     }
-}
 
 /**
  * Merges [that] into [this] CallUser to absorb as much data as possible from both instances.

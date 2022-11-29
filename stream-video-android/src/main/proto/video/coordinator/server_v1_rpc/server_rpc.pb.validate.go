@@ -4481,9 +4481,9 @@ func (m *StartBroadcastRequest) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for CallId
-
 	// no validation rules for CallType
+
+	// no validation rules for CallId
 
 	// no validation rules for HlsBroadcast
 
@@ -4748,6 +4748,10 @@ func (m *StopBroadcastRequest) validate(all bool) error {
 	}
 
 	var errors []error
+
+	// no validation rules for CallType
+
+	// no validation rules for CallId
 
 	if len(errors) > 0 {
 		return StopBroadcastRequestMultiError(errors)

@@ -462,6 +462,7 @@ public class StreamVideoImpl(
 
         return CallClientBuilder(
             context = context,
+            coordinatorClient = callCoordinatorClient,
             credentialsProvider = credentialsProvider,
             networkStateProvider = networkStateProvider,
             callEngine = engine,

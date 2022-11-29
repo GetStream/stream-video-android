@@ -5953,3 +5953,895 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = ReviewCallResponseValidationError{}
+
+// Validate checks the field values on StartBroadcastRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *StartBroadcastRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on StartBroadcastRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// StartBroadcastRequestMultiError, or nil if none found.
+func (m *StartBroadcastRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *StartBroadcastRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for CallType
+
+	// no validation rules for CallId
+
+	// no validation rules for HlsBroadcast
+
+	if all {
+		switch v := interface{}(m.GetRtmp()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, StartBroadcastRequestValidationError{
+					field:  "Rtmp",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, StartBroadcastRequestValidationError{
+					field:  "Rtmp",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetRtmp()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return StartBroadcastRequestValidationError{
+				field:  "Rtmp",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return StartBroadcastRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// StartBroadcastRequestMultiError is an error wrapping multiple validation
+// errors returned by StartBroadcastRequest.ValidateAll() if the designated
+// constraints aren't met.
+type StartBroadcastRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m StartBroadcastRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m StartBroadcastRequestMultiError) AllErrors() []error { return m }
+
+// StartBroadcastRequestValidationError is the validation error returned by
+// StartBroadcastRequest.Validate if the designated constraints aren't met.
+type StartBroadcastRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e StartBroadcastRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e StartBroadcastRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e StartBroadcastRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e StartBroadcastRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e StartBroadcastRequestValidationError) ErrorName() string {
+	return "StartBroadcastRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e StartBroadcastRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sStartBroadcastRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = StartBroadcastRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = StartBroadcastRequestValidationError{}
+
+// Validate checks the field values on StartBroadcastResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *StartBroadcastResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on StartBroadcastResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// StartBroadcastResponseMultiError, or nil if none found.
+func (m *StartBroadcastResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *StartBroadcastResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetBroadcast()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, StartBroadcastResponseValidationError{
+					field:  "Broadcast",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, StartBroadcastResponseValidationError{
+					field:  "Broadcast",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetBroadcast()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return StartBroadcastResponseValidationError{
+				field:  "Broadcast",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return StartBroadcastResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// StartBroadcastResponseMultiError is an error wrapping multiple validation
+// errors returned by StartBroadcastResponse.ValidateAll() if the designated
+// constraints aren't met.
+type StartBroadcastResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m StartBroadcastResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m StartBroadcastResponseMultiError) AllErrors() []error { return m }
+
+// StartBroadcastResponseValidationError is the validation error returned by
+// StartBroadcastResponse.Validate if the designated constraints aren't met.
+type StartBroadcastResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e StartBroadcastResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e StartBroadcastResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e StartBroadcastResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e StartBroadcastResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e StartBroadcastResponseValidationError) ErrorName() string {
+	return "StartBroadcastResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e StartBroadcastResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sStartBroadcastResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = StartBroadcastResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = StartBroadcastResponseValidationError{}
+
+// Validate checks the field values on StopBroadcastRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *StopBroadcastRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on StopBroadcastRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// StopBroadcastRequestMultiError, or nil if none found.
+func (m *StopBroadcastRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *StopBroadcastRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for CallType
+
+	// no validation rules for CallId
+
+	if len(errors) > 0 {
+		return StopBroadcastRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// StopBroadcastRequestMultiError is an error wrapping multiple validation
+// errors returned by StopBroadcastRequest.ValidateAll() if the designated
+// constraints aren't met.
+type StopBroadcastRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m StopBroadcastRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m StopBroadcastRequestMultiError) AllErrors() []error { return m }
+
+// StopBroadcastRequestValidationError is the validation error returned by
+// StopBroadcastRequest.Validate if the designated constraints aren't met.
+type StopBroadcastRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e StopBroadcastRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e StopBroadcastRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e StopBroadcastRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e StopBroadcastRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e StopBroadcastRequestValidationError) ErrorName() string {
+	return "StopBroadcastRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e StopBroadcastRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sStopBroadcastRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = StopBroadcastRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = StopBroadcastRequestValidationError{}
+
+// Validate checks the field values on StopBroadcastResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *StopBroadcastResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on StopBroadcastResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// StopBroadcastResponseMultiError, or nil if none found.
+func (m *StopBroadcastResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *StopBroadcastResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if len(errors) > 0 {
+		return StopBroadcastResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// StopBroadcastResponseMultiError is an error wrapping multiple validation
+// errors returned by StopBroadcastResponse.ValidateAll() if the designated
+// constraints aren't met.
+type StopBroadcastResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m StopBroadcastResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m StopBroadcastResponseMultiError) AllErrors() []error { return m }
+
+// StopBroadcastResponseValidationError is the validation error returned by
+// StopBroadcastResponse.Validate if the designated constraints aren't met.
+type StopBroadcastResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e StopBroadcastResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e StopBroadcastResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e StopBroadcastResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e StopBroadcastResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e StopBroadcastResponseValidationError) ErrorName() string {
+	return "StopBroadcastResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e StopBroadcastResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sStopBroadcastResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = StopBroadcastResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = StopBroadcastResponseValidationError{}
+
+// Validate checks the field values on StartRecordingRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *StartRecordingRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on StartRecordingRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// StartRecordingRequestMultiError, or nil if none found.
+func (m *StartRecordingRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *StartRecordingRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for CallType
+
+	// no validation rules for CallId
+
+	if len(errors) > 0 {
+		return StartRecordingRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// StartRecordingRequestMultiError is an error wrapping multiple validation
+// errors returned by StartRecordingRequest.ValidateAll() if the designated
+// constraints aren't met.
+type StartRecordingRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m StartRecordingRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m StartRecordingRequestMultiError) AllErrors() []error { return m }
+
+// StartRecordingRequestValidationError is the validation error returned by
+// StartRecordingRequest.Validate if the designated constraints aren't met.
+type StartRecordingRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e StartRecordingRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e StartRecordingRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e StartRecordingRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e StartRecordingRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e StartRecordingRequestValidationError) ErrorName() string {
+	return "StartRecordingRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e StartRecordingRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sStartRecordingRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = StartRecordingRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = StartRecordingRequestValidationError{}
+
+// Validate checks the field values on StartRecordingResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *StartRecordingResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on StartRecordingResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// StartRecordingResponseMultiError, or nil if none found.
+func (m *StartRecordingResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *StartRecordingResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if len(errors) > 0 {
+		return StartRecordingResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// StartRecordingResponseMultiError is an error wrapping multiple validation
+// errors returned by StartRecordingResponse.ValidateAll() if the designated
+// constraints aren't met.
+type StartRecordingResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m StartRecordingResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m StartRecordingResponseMultiError) AllErrors() []error { return m }
+
+// StartRecordingResponseValidationError is the validation error returned by
+// StartRecordingResponse.Validate if the designated constraints aren't met.
+type StartRecordingResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e StartRecordingResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e StartRecordingResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e StartRecordingResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e StartRecordingResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e StartRecordingResponseValidationError) ErrorName() string {
+	return "StartRecordingResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e StartRecordingResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sStartRecordingResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = StartRecordingResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = StartRecordingResponseValidationError{}
+
+// Validate checks the field values on StopRecordingRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *StopRecordingRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on StopRecordingRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// StopRecordingRequestMultiError, or nil if none found.
+func (m *StopRecordingRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *StopRecordingRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for CallType
+
+	// no validation rules for CallId
+
+	if len(errors) > 0 {
+		return StopRecordingRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// StopRecordingRequestMultiError is an error wrapping multiple validation
+// errors returned by StopRecordingRequest.ValidateAll() if the designated
+// constraints aren't met.
+type StopRecordingRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m StopRecordingRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m StopRecordingRequestMultiError) AllErrors() []error { return m }
+
+// StopRecordingRequestValidationError is the validation error returned by
+// StopRecordingRequest.Validate if the designated constraints aren't met.
+type StopRecordingRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e StopRecordingRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e StopRecordingRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e StopRecordingRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e StopRecordingRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e StopRecordingRequestValidationError) ErrorName() string {
+	return "StopRecordingRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e StopRecordingRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sStopRecordingRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = StopRecordingRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = StopRecordingRequestValidationError{}
+
+// Validate checks the field values on StopRecordingResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *StopRecordingResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on StopRecordingResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// StopRecordingResponseMultiError, or nil if none found.
+func (m *StopRecordingResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *StopRecordingResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if len(errors) > 0 {
+		return StopRecordingResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// StopRecordingResponseMultiError is an error wrapping multiple validation
+// errors returned by StopRecordingResponse.ValidateAll() if the designated
+// constraints aren't met.
+type StopRecordingResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m StopRecordingResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m StopRecordingResponseMultiError) AllErrors() []error { return m }
+
+// StopRecordingResponseValidationError is the validation error returned by
+// StopRecordingResponse.Validate if the designated constraints aren't met.
+type StopRecordingResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e StopRecordingResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e StopRecordingResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e StopRecordingResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e StopRecordingResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e StopRecordingResponseValidationError) ErrorName() string {
+	return "StopRecordingResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e StopRecordingResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sStopRecordingResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = StopRecordingResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = StopRecordingResponseValidationError{}

@@ -21,6 +21,7 @@ import io.getstream.video.android.call.CallClient
 import io.getstream.video.android.call.CallClientImpl
 import io.getstream.video.android.call.signal.socket.SfuSocketFactory
 import io.getstream.video.android.call.signal.socket.SfuSocketImpl
+import io.getstream.video.android.coordinator.CallCoordinatorClient
 import io.getstream.video.android.engine.StreamCallEngine
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.model.IceServer
@@ -43,6 +44,7 @@ import okhttp3.logging.HttpLoggingInterceptor
  */
 internal class CallClientBuilder(
     private val context: Context,
+    private val coordinatorClient: CallCoordinatorClient,
     private val credentialsProvider: CredentialsProvider,
     private val networkStateProvider: NetworkStateProvider,
     private val callEngine: StreamCallEngine,
@@ -97,6 +99,7 @@ internal class CallClientBuilder(
 
         return CallClientImpl(
             context = context,
+            coordinatorClient = coordinatorClient,
             getCurrentUserId = { credentialsProvider.getUserCredentials().id },
             getSfuToken = { credentialsProvider.getSfuToken() },
             callEngine = callEngine,

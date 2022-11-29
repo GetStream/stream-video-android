@@ -271,9 +271,9 @@ message UserCapability {
 }
 
 message StartBroadcastRequest {
-  // Call id and type.
-  string call_id = 1;
-  string call_type = 2;
+  // Call type and id.
+  string call_type = 1;
+  string call_id = 2;
 
   // Toggles HLS broadcasting on/off.
   bool hls_broadcast = 3;
@@ -287,6 +287,9 @@ message StartBroadcastResponse {
 }
 
 message StopBroadcastRequest {
+  // Call type and id.
+  string call_type = 1;
+  string call_id = 2;
 }
 
 message StopBroadcastResponse {
