@@ -24,7 +24,7 @@ import android.content.Intent
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
-import io.getstream.logging.StreamLog
+import io.getstream.log.StreamLog
 import io.getstream.video.android.R
 import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.utils.notificationManager

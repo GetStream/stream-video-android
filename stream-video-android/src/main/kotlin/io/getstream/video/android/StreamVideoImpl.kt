@@ -18,7 +18,7 @@ package io.getstream.video.android
 
 import android.content.Context
 import androidx.lifecycle.Lifecycle
-import io.getstream.logging.StreamLog
+import io.getstream.log.StreamLog
 import io.getstream.video.android.call.CallClient
 import io.getstream.video.android.call.builder.CallClientBuilder
 import io.getstream.video.android.coordinator.CallCoordinatorClient

@@ -107,8 +107,8 @@ dependencies {
     implementation(project(":stream-video-android-compose"))
     implementation(project(":stream-video-android-pushprovider-firebase"))
 
-    implementation(Dependencies.streamLogger)
-    implementation(Dependencies.streamLoggerAndroid)
+    implementation(Dependencies.streamLog)
+    implementation(Dependencies.streamLogAndroid)
 
     implementation(Dependencies.androidxCore)
     implementation(Dependencies.androidxAppcompat)

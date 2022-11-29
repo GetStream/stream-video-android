@@ -19,7 +19,7 @@ package io.getstream.video.android.call.connection
 import android.content.Context
 import android.media.MediaCodecList
 import android.os.Build
-import io.getstream.logging.StreamLog
+import io.getstream.log.StreamLog
 import io.getstream.video.android.model.IceCandidate
 import io.getstream.video.android.model.StreamPeerType
 import kotlinx.coroutines.CoroutineScope

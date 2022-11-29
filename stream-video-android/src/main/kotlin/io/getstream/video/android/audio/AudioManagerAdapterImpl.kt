@@ -23,7 +23,7 @@ import android.media.AudioDeviceInfo
 import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.os.Build
-import io.getstream.logging.StreamLog
+import io.getstream.log.StreamLog
 
 internal class AudioManagerAdapterImpl(
     private val context: Context,

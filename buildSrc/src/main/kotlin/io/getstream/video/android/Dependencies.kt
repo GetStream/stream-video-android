@@ -26,6 +26,7 @@ object Versions {
 
     internal const val WEBRTC = "104.5112.03"
     internal const val STREAM = "6.0.0-beta1"
+    internal const val STREAM_LOG = "1.0.0"
 
     internal const val ANDROIDX_TEST = "1.4.0"
     internal const val BASE_PROFILE = "1.2.0"
@@ -81,8 +82,8 @@ object Dependencies {
 
     const val webRTC = "com.github.webrtc-sdk:android:${Versions.WEBRTC}"
 
-    const val streamLogger = "io.getstream:stream-logger:${Versions.STREAM}"
-    const val streamLoggerAndroid = "io.getstream:stream-logger-android:${Versions.STREAM}"
+    const val streamLog = "io.getstream:stream-log:${Versions.STREAM_LOG}"
+    const val streamLogAndroid = "io.getstream:stream-log-android:${Versions.STREAM_LOG}"
 
     const val streamChatCompose = "io.getstream:stream-chat-android-compose:${Versions.STREAM}"
     const val streamChatOffline = "io.getstream:stream-chat-android-offline:${Versions.STREAM}"

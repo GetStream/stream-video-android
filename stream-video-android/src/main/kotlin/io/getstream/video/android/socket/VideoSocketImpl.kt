@@ -19,7 +19,7 @@ package io.getstream.video.android.socket
 import android.os.Handler
 import android.os.Looper
 import androidx.annotation.VisibleForTesting
-import io.getstream.logging.StreamLog
+import io.getstream.log.StreamLog
 import io.getstream.video.android.coordinator.state.UserState
 import io.getstream.video.android.errors.DisconnectCause
 import io.getstream.video.android.errors.VideoError
