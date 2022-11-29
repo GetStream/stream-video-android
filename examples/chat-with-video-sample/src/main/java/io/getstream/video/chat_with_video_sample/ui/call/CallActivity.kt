@@ -17,13 +17,8 @@
 package io.getstream.video.chat_with_video_sample.ui.call
 
 import android.content.Context
-import androidx.compose.runtime.Composable
 import io.getstream.video.android.StreamVideo
-import io.getstream.video.android.call.state.ToggleCamera
-import io.getstream.video.android.call.state.ToggleMicrophone
-import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.AbstractComposeCallActivity
-import io.getstream.video.android.compose.ui.components.call.CallContent
 import io.getstream.video.android.permission.PermissionManagerImpl
 import io.getstream.video.android.viewmodel.CallViewModelFactory
 import io.getstream.video.chat_with_video_sample.application.chatWithVideoApp
@@ -45,28 +40,5 @@ class CallActivity : AbstractComposeCallActivity() {
             permissionManager = PermissionManagerImpl(applicationContext),
             usersProvider = chatWithVideoApp.usersLoginProvider
         )
-    }
-
-    override fun buildContent(): @Composable () -> Unit {
-        return {
-            VideoTheme {
-                CallContent(
-                    viewModel = callViewModel,
-                    onBackPressed = ::handleBackPressed,
-                    onRejectCall = callViewModel::rejectCall,
-                    onAcceptCall = callViewModel::acceptCall,
-                    onCancelCall = callViewModel::cancelCall,
-                    onMicToggleChanged = { isEnabled ->
-                        callViewModel.onCallAction(
-                            ToggleMicrophone(isEnabled)
-                        )
-                    },
-                ) { isEnabled ->
-                    callViewModel.onCallAction(
-                        ToggleCamera(isEnabled)
-                    )
-                }
-            }
-        }
     }
 }

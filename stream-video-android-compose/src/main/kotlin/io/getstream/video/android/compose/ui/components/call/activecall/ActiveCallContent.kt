@@ -40,6 +40,7 @@ import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.call.CallControls
 import io.getstream.video.android.compose.ui.components.participants.CallParticipant
 import io.getstream.video.android.compose.ui.components.participants.CallParticipants
+import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.state.StreamCallState
 import io.getstream.video.android.utils.formatAsTitle
 import io.getstream.video.android.viewmodel.CallViewModel
@@ -53,6 +54,8 @@ import io.getstream.video.android.viewmodel.CallViewModel
  * @param onBackPressed Handler when the user taps on the back button.
  * @param onCallAction Handler when the user triggers a Call Control Action.
  * @param onCallInfoSelected Handler when the user taps on the participant menu.
+ * @param pictureInPictureContent Content shown when the user enters Picture in Picture mode, if
+ * it's been enabled in the app.
  */
 @Composable
 public fun ActiveCallContent(
@@ -60,7 +63,8 @@ public fun ActiveCallContent(
     modifier: Modifier = Modifier,
     onBackPressed: () -> Unit = { callViewModel.onCallAction(LeaveCall) },
     onCallAction: (CallAction) -> Unit = callViewModel::onCallAction,
-    onCallInfoSelected: () -> Unit = callViewModel::showCallInfo
+    onCallInfoSelected: () -> Unit = callViewModel::showCallInfo,
+    pictureInPictureContent: @Composable (Call) -> Unit = { DefaultPictureInPictureContent(it) }
 ) {
     val room by callViewModel.callState.collectAsState(initial = null)
     val isShowingParticipantsInfo by callViewModel.isShowingCallInfo.collectAsState(
@@ -128,12 +132,7 @@ public fun ActiveCallContent(
                         )
                     }
                 } else {
-                    val primarySpeaker by roomState.primarySpeaker.collectAsState(initial = null)
-                    val currentPrimary = primarySpeaker
-
-                    if (currentPrimary != null) {
-                        CallParticipant(call = roomState, participant = currentPrimary)
-                    }
+                    pictureInPictureContent(roomState)
                 }
             }
         }
@@ -160,8 +159,20 @@ internal fun ActiveCallAppBar(
     }
 
     CallAppBar(
-        title = title,
-        onBackPressed = onBackPressed,
-        onCallInfoSelected = onCallInfoSelected
+        title = title, onBackPressed = onBackPressed, onCallInfoSelected = onCallInfoSelected
     )
+}
+
+@Composable
+internal fun DefaultPictureInPictureContent(roomState: Call) {
+    val primarySpeaker by roomState.primarySpeaker.collectAsState(initial = null)
+    val currentPrimary = primarySpeaker
+
+    if (currentPrimary != null) {
+        CallParticipant(
+            call = roomState,
+            participant = currentPrimary,
+            labelPosition = Alignment.BottomStart
+        )
+    }
 }

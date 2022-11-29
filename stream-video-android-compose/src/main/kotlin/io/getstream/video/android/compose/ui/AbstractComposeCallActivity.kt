@@ -42,6 +42,8 @@ import io.getstream.video.android.call.state.ToggleCamera
 import io.getstream.video.android.call.state.ToggleMicrophone
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.CallContent
+import io.getstream.video.android.compose.ui.components.call.activecall.DefaultPictureInPictureContent
+import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.state.StreamCallState
 import io.getstream.video.android.permission.PermissionManagerImpl
 import io.getstream.video.android.viewmodel.CallViewModel
@@ -116,12 +118,19 @@ public abstract class AbstractComposeCallActivity :
                         ToggleMicrophone(isEnabled)
                     )
                 },
-            ) { isEnabled ->
-                callViewModel.onCallAction(
-                    ToggleCamera(isEnabled)
-                )
-            }
+                onVideoToggleChanged = { isEnabled ->
+                    callViewModel.onCallAction(
+                        ToggleCamera(isEnabled)
+                    )
+                },
+                pictureInPictureContent = { PictureInPictureContent(call = it) }
+            )
         }
+    }
+
+    @Composable
+    protected open fun PictureInPictureContent(call: Call) {
+        DefaultPictureInPictureContent(roomState = call)
     }
 
     override fun onResume() {

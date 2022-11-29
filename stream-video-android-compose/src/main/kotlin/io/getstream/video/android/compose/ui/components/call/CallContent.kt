@@ -29,10 +29,12 @@ import io.getstream.video.android.call.state.ToggleMicrophone
 import io.getstream.video.android.compose.state.ui.participants.ChangeMuteState
 import io.getstream.video.android.compose.state.ui.participants.InviteUsers
 import io.getstream.video.android.compose.ui.components.call.activecall.ActiveCallContent
+import io.getstream.video.android.compose.ui.components.call.activecall.DefaultPictureInPictureContent
 import io.getstream.video.android.compose.ui.components.call.activecall.internal.InviteUsersDialog
 import io.getstream.video.android.compose.ui.components.call.incomingcall.IncomingCallContent
 import io.getstream.video.android.compose.ui.components.call.outgoingcall.OutgoingCallContent
 import io.getstream.video.android.compose.ui.components.participants.CallParticipantsInfoMenu
+import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.User
 import io.getstream.video.android.viewmodel.CallViewModel
 import io.getstream.video.android.model.state.StreamCallState as State
@@ -54,6 +56,8 @@ import io.getstream.video.android.model.state.StreamCallState as State
  * @param onCancelCall Handler when the user decides to cancel or drop out of a call.
  * @param onMicToggleChanged Handler when the user toggles their microphone on or off.
  * @param onVideoToggleChanged Handler when the user toggles their video on or off.
+ * @param pictureInPictureContent Content shown when the user enters Picture in Picture mode, if
+ * it's been enabled in the app.
  */
 @Composable
 public fun CallContent(
@@ -74,6 +78,7 @@ public fun CallContent(
             ToggleMicrophone(isEnabled)
         )
     },
+    pictureInPictureContent: @Composable (Call) -> Unit = { DefaultPictureInPictureContent(it) }
 ) {
     val stateHolder = viewModel.streamCallState.collectAsState(initial = State.Idle)
     val state = stateHolder.value
@@ -105,6 +110,7 @@ public fun CallContent(
             callViewModel = viewModel,
             onBackPressed = onBackPressed,
             onCallInfoSelected = onCallInfoSelected,
+            pictureInPictureContent = pictureInPictureContent
         )
         val isShowingParticipantsInfo by viewModel.isShowingCallInfo.collectAsState()
 
