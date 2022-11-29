@@ -56,7 +56,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
-import io.getstream.logging.StreamLog
+import io.getstream.log.StreamLog
 import io.getstream.video.android.app.model.HomeScreenOption
 import io.getstream.video.android.app.ui.components.UserList
 import io.getstream.video.android.app.ui.login.LoginActivity

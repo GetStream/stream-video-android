@@ -22,7 +22,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import io.getstream.logging.StreamLog
+import io.getstream.log.StreamLog
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.token.AuthCredentialsProvider
 import io.getstream.video.android.utils.onError

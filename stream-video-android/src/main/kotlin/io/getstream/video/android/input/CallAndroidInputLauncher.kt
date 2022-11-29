@@ -20,7 +20,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import androidx.core.content.ContextCompat
-import io.getstream.logging.StreamLog
+import io.getstream.log.StreamLog
 
 public fun interface CallAndroidInputLauncher {
 

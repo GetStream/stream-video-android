@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.engine
 
-import io.getstream.logging.StreamLog
+import io.getstream.log.StreamLog
 import io.getstream.video.android.StreamVideoConfig
 import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.events.AudioLevelChangedEvent
