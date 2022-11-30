@@ -2595,7 +2595,9 @@ public final class io/getstream/video/android/user/UserCredentialsManager {
 
 public abstract interface class io/getstream/video/android/user/UserPreferences {
 	public abstract fun clear ()V
+	public abstract fun getCachedApiKey ()Ljava/lang/String;
 	public abstract fun getCachedCredentials ()Lio/getstream/video/android/model/User;
+	public abstract fun storeApiKey (Ljava/lang/String;)V
 	public abstract fun storeUserCredentials (Lio/getstream/video/android/model/User;)V
 }
 
