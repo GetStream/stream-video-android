@@ -22,6 +22,8 @@ import io.getstream.video.android.utils.Result
 import stream.video.coordinator.call_v1.Call
 import stream.video.coordinator.client_v1_rpc.CreateCallRequest
 import stream.video.coordinator.client_v1_rpc.CreateCallResponse
+import stream.video.coordinator.client_v1_rpc.CreateDeviceRequest
+import stream.video.coordinator.client_v1_rpc.CreateDeviceResponse
 import stream.video.coordinator.client_v1_rpc.GetCallEdgeServerRequest
 import stream.video.coordinator.client_v1_rpc.GetCallEdgeServerResponse
 import stream.video.coordinator.client_v1_rpc.GetOrCreateCallRequest
@@ -32,6 +34,14 @@ import stream.video.coordinator.client_v1_rpc.SendCustomEventRequest
 import stream.video.coordinator.client_v1_rpc.SendEventRequest
 
 public interface CallCoordinatorClient {
+
+    /**
+     * Create a new Device used to receive Push Notifications
+     *
+     * @param createDeviceRequest The device data.
+     * @return [CreateDeviceResponse] witch hold the device.
+     */
+    public suspend fun createDevice(createDeviceRequest: CreateDeviceRequest): Result<CreateDeviceResponse>
 
     /**
      * Creates a new call that users can connect to and communicate in.
