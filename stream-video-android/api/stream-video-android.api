@@ -677,8 +677,8 @@ public final class io/getstream/video/android/StreamVideo$DefaultImpls {
 }
 
 public final class io/getstream/video/android/StreamVideoBuilder {
-	public fun <init> (Landroid/content/Context;Lio/getstream/video/android/token/CredentialsProvider;Lio/getstream/video/android/StreamVideoConfig;Ljava/util/Set;Lio/getstream/video/android/input/CallAndroidInputLauncher;Lio/getstream/video/android/logging/LoggingLevel;Lkotlin/jvm/functions/Function1;)V
-	public synthetic fun <init> (Landroid/content/Context;Lio/getstream/video/android/token/CredentialsProvider;Lio/getstream/video/android/StreamVideoConfig;Ljava/util/Set;Lio/getstream/video/android/input/CallAndroidInputLauncher;Lio/getstream/video/android/logging/LoggingLevel;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Landroid/content/Context;Lio/getstream/video/android/token/CredentialsProvider;Lio/getstream/video/android/StreamVideoConfig;Ljava/util/Set;Lio/getstream/video/android/input/CallAndroidInputLauncher;Lio/getstream/video/android/logging/LoggingLevel;Lkotlin/jvm/functions/Function1;Ljava/util/List;)V
+	public synthetic fun <init> (Landroid/content/Context;Lio/getstream/video/android/token/CredentialsProvider;Lio/getstream/video/android/StreamVideoConfig;Ljava/util/Set;Lio/getstream/video/android/input/CallAndroidInputLauncher;Lio/getstream/video/android/logging/LoggingLevel;Lkotlin/jvm/functions/Function1;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun build ()Lio/getstream/video/android/StreamVideo;
 }
 
