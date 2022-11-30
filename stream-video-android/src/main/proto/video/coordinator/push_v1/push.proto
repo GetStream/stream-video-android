@@ -25,16 +25,13 @@ message PushProvider {
 }
 
 message ApnCredentials {
-  string auth_key = 1;
-  string key_id = 2;
-  string apn_topic = 3;
-  string team_id = 4;
-  bool development = 5;
+  bytes certificate_p12 = 1;
+  string topic = 2;
+  string team_id = 3;
 }
 
 message FirebaseCredentials {
-  string server_key = 1;
-  string credentials_json = 2;
+  string credentials = 1;
 }
 
 message HuaweiCredentials {

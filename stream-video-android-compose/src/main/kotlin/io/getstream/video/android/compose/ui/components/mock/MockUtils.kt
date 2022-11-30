@@ -32,20 +32,23 @@ internal val mockUsers: List<CallParticipantState>
             name = "Filip",
             profileImageURL = "https://avatars.githubusercontent.com/u/17215808?v=4",
             idPrefix = "",
-            role = ""
+            role = "",
+            sessionId = ""
         ),
         CallParticipantState(
             id = "jaewoong",
             name = "Jaewoong Eum",
             profileImageURL = "https://ca.slack-edge.com/T02RM6X6B-U02HU1XR9LM-626fb91c334e-128",
             idPrefix = "",
-            role = ""
+            role = "",
+            sessionId = ""
         ),
         CallParticipantState(
             id = "toma_zdravkovic",
             name = "Toma Zdravkovic",
             profileImageURL = "https://upload.wikimedia.org/wikipedia/commons/d/da/Toma_Zdravkovi%C4%87.jpg",
             idPrefix = "",
-            role = ""
+            role = "",
+            sessionId = ""
         )
     )

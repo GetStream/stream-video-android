@@ -47,6 +47,8 @@ import io.getstream.video.android.events.TrackUnpublishedEvent
 import io.getstream.video.android.events.UnknownEvent
 import io.getstream.video.android.events.VideoEvent
 import io.getstream.video.android.events.VideoQualityChangedEvent
+import io.getstream.video.android.filter.InFilterObject
+import io.getstream.video.android.filter.toMap
 import io.getstream.video.android.model.CallEventType
 import io.getstream.video.android.model.CallEventType.ACCEPTED
 import io.getstream.video.android.model.CallEventType.CANCELLED
@@ -62,6 +64,7 @@ import io.getstream.video.android.model.merge
 import io.getstream.video.android.model.state.DropReason
 import io.getstream.video.android.model.state.StreamDate
 import io.getstream.video.android.model.state.copy
+import io.getstream.video.android.moshi.filterAdapter
 import io.getstream.video.android.utils.Jobs
 import io.getstream.video.android.utils.Success
 import kotlinx.coroutines.CoroutineScope
@@ -75,7 +78,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import stream.video.coordinator.client_v1_rpc.QueryMembersRequest
+import okio.ByteString.Companion.encode
+import stream.video.coordinator.client_v1_rpc.QueryUsersRequest
 import stream.video.sfu.event.JoinRequest
 import io.getstream.video.android.model.StreamCallCid as CallCid
 import io.getstream.video.android.model.StreamCallId as CallId
@@ -206,8 +210,16 @@ internal class StreamCallEngineImpl(
 
         jobs.cancel(ID_TIMEOUT_SFU_JOINED)
 
+        val query = filterAdapter.toJson(
+            InFilterObject(
+                "id", event.callState.participants.map { it.user_id }.toSet()
+            ).toMap()
+        ).encode()
+
         val queryUsersResult = coordinatorClient.queryUsers(
-            QueryMembersRequest() // TODO - add query for all the members that are in the call
+            QueryUsersRequest(
+                mq_json = query
+            )
         )
 
         if (queryUsersResult is Success) {
@@ -239,8 +251,12 @@ internal class StreamCallEngineImpl(
                 }
                 return@launchWithLock
             }
+            val query = filterAdapter.toJson(
+                InFilterObject("id", setOf(event.participant.user_id)).toMap()
+            ).encode()
+
             val userQueryResult = coordinatorClient.queryUsers(
-                QueryMembersRequest() // TODO - add query for a single member that joined the call
+                QueryUsersRequest(mq_json = query)
             )
 
             if (userQueryResult is Success) {

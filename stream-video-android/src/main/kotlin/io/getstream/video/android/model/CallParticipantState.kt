@@ -23,6 +23,7 @@ public data class CallParticipantState(
     public val role: String,
     public val name: String,
     public val profileImageURL: String?,
+    public var sessionId: String,
     public val idPrefix: String,
     public val isLocal: Boolean = false,
     public var isOnline: Boolean = false,

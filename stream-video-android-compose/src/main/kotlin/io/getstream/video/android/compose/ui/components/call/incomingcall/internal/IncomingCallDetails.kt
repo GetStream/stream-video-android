@@ -46,7 +46,8 @@ internal fun IncomingCallDetails(
                     role = it.role,
                     name = it.name,
                     profileImageURL = it.imageUrl,
-                    idPrefix = ""
+                    idPrefix = "",
+                    sessionId = ""
                 )
             }
         )

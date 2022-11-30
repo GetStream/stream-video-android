@@ -3472,6 +3472,556 @@ var _ interface {
 	ErrorName() string
 } = QueryMembersResponseValidationError{}
 
+// Validate checks the field values on QueryUsersRequest with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *QueryUsersRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on QueryUsersRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// QueryUsersRequestMultiError, or nil if none found.
+func (m *QueryUsersRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *QueryUsersRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for MqJson
+
+	for idx, item := range m.GetSorts() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, QueryUsersRequestValidationError{
+						field:  fmt.Sprintf("Sorts[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, QueryUsersRequestValidationError{
+						field:  fmt.Sprintf("Sorts[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return QueryUsersRequestValidationError{
+					field:  fmt.Sprintf("Sorts[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if m.Limit != nil {
+		// no validation rules for Limit
+	}
+
+	if len(errors) > 0 {
+		return QueryUsersRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// QueryUsersRequestMultiError is an error wrapping multiple validation errors
+// returned by QueryUsersRequest.ValidateAll() if the designated constraints
+// aren't met.
+type QueryUsersRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m QueryUsersRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m QueryUsersRequestMultiError) AllErrors() []error { return m }
+
+// QueryUsersRequestValidationError is the validation error returned by
+// QueryUsersRequest.Validate if the designated constraints aren't met.
+type QueryUsersRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e QueryUsersRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e QueryUsersRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e QueryUsersRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e QueryUsersRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e QueryUsersRequestValidationError) ErrorName() string {
+	return "QueryUsersRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e QueryUsersRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sQueryUsersRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = QueryUsersRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = QueryUsersRequestValidationError{}
+
+// Validate checks the field values on QueryUsersResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *QueryUsersResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on QueryUsersResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// QueryUsersResponseMultiError, or nil if none found.
+func (m *QueryUsersResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *QueryUsersResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	for idx, item := range m.GetUsers() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, QueryUsersResponseValidationError{
+						field:  fmt.Sprintf("Users[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, QueryUsersResponseValidationError{
+						field:  fmt.Sprintf("Users[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return QueryUsersResponseValidationError{
+					field:  fmt.Sprintf("Users[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if len(errors) > 0 {
+		return QueryUsersResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// QueryUsersResponseMultiError is an error wrapping multiple validation errors
+// returned by QueryUsersResponse.ValidateAll() if the designated constraints
+// aren't met.
+type QueryUsersResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m QueryUsersResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m QueryUsersResponseMultiError) AllErrors() []error { return m }
+
+// QueryUsersResponseValidationError is the validation error returned by
+// QueryUsersResponse.Validate if the designated constraints aren't met.
+type QueryUsersResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e QueryUsersResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e QueryUsersResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e QueryUsersResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e QueryUsersResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e QueryUsersResponseValidationError) ErrorName() string {
+	return "QueryUsersResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e QueryUsersResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sQueryUsersResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = QueryUsersResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = QueryUsersResponseValidationError{}
+
+// Validate checks the field values on UpsertUsersRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *UpsertUsersRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on UpsertUsersRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// UpsertUsersRequestMultiError, or nil if none found.
+func (m *UpsertUsersRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *UpsertUsersRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	for idx, item := range m.GetUsers() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, UpsertUsersRequestValidationError{
+						field:  fmt.Sprintf("Users[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, UpsertUsersRequestValidationError{
+						field:  fmt.Sprintf("Users[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return UpsertUsersRequestValidationError{
+					field:  fmt.Sprintf("Users[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if len(errors) > 0 {
+		return UpsertUsersRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// UpsertUsersRequestMultiError is an error wrapping multiple validation errors
+// returned by UpsertUsersRequest.ValidateAll() if the designated constraints
+// aren't met.
+type UpsertUsersRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m UpsertUsersRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m UpsertUsersRequestMultiError) AllErrors() []error { return m }
+
+// UpsertUsersRequestValidationError is the validation error returned by
+// UpsertUsersRequest.Validate if the designated constraints aren't met.
+type UpsertUsersRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e UpsertUsersRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e UpsertUsersRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e UpsertUsersRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e UpsertUsersRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e UpsertUsersRequestValidationError) ErrorName() string {
+	return "UpsertUsersRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e UpsertUsersRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sUpsertUsersRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = UpsertUsersRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = UpsertUsersRequestValidationError{}
+
+// Validate checks the field values on UpsertUsersResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *UpsertUsersResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on UpsertUsersResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// UpsertUsersResponseMultiError, or nil if none found.
+func (m *UpsertUsersResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *UpsertUsersResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	for idx, item := range m.GetUsers() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, UpsertUsersResponseValidationError{
+						field:  fmt.Sprintf("Users[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, UpsertUsersResponseValidationError{
+						field:  fmt.Sprintf("Users[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return UpsertUsersResponseValidationError{
+					field:  fmt.Sprintf("Users[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if len(errors) > 0 {
+		return UpsertUsersResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// UpsertUsersResponseMultiError is an error wrapping multiple validation
+// errors returned by UpsertUsersResponse.ValidateAll() if the designated
+// constraints aren't met.
+type UpsertUsersResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m UpsertUsersResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m UpsertUsersResponseMultiError) AllErrors() []error { return m }
+
+// UpsertUsersResponseValidationError is the validation error returned by
+// UpsertUsersResponse.Validate if the designated constraints aren't met.
+type UpsertUsersResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e UpsertUsersResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e UpsertUsersResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e UpsertUsersResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e UpsertUsersResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e UpsertUsersResponseValidationError) ErrorName() string {
+	return "UpsertUsersResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e UpsertUsersResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sUpsertUsersResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = UpsertUsersResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = UpsertUsersResponseValidationError{}
+
 // Validate checks the field values on GetCallEdgeServerRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.

@@ -52,6 +52,8 @@ import io.getstream.video.android.events.SfuDataEvent
 import io.getstream.video.android.events.SubscriberOfferEvent
 import io.getstream.video.android.events.TrackPublishedEvent
 import io.getstream.video.android.events.TrackUnpublishedEvent
+import io.getstream.video.android.filter.InFilterObject
+import io.getstream.video.android.filter.toMap
 import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.CallParticipantState
 import io.getstream.video.android.model.CallSettings
@@ -61,6 +63,7 @@ import io.getstream.video.android.model.SfuToken
 import io.getstream.video.android.model.StreamPeerType
 import io.getstream.video.android.model.toPeerType
 import io.getstream.video.android.module.SfuClientModule
+import io.getstream.video.android.moshi.filterAdapter
 import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Result
 import io.getstream.video.android.utils.Success
@@ -85,27 +88,33 @@ import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import okio.ByteString.Companion.encode
 import org.webrtc.AudioTrack
 import org.webrtc.Camera2Capturer
 import org.webrtc.Camera2Enumerator
 import org.webrtc.CameraEnumerator
 import org.webrtc.MediaConstraints
+import org.webrtc.MediaStreamTrack
 import org.webrtc.PeerConnection
 import org.webrtc.RTCStatsReport
 import org.webrtc.RtpParameters
+import org.webrtc.RtpTransceiver
 import org.webrtc.SessionDescription
 import org.webrtc.SurfaceTextureHelper
 import org.webrtc.VideoCapturer
 import org.webrtc.VideoTrack
+import stream.video.coordinator.client_v1_rpc.QueryUsersRequest
 import stream.video.sfu.event.JoinRequest
 import stream.video.sfu.event.JoinResponse
 import stream.video.sfu.models.CallState
 import stream.video.sfu.models.ICETrickle
 import stream.video.sfu.models.PeerType
+import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
 import stream.video.sfu.signal.AudioMuteChanged
 import stream.video.sfu.signal.SendAnswerRequest
 import stream.video.sfu.signal.SetPublisherRequest
+import stream.video.sfu.signal.TrackSubscriptionDetails
 import stream.video.sfu.signal.UpdateMuteStateRequest
 import stream.video.sfu.signal.UpdateMuteStateResponse
 import stream.video.sfu.signal.UpdateSubscriptionsRequest
@@ -369,7 +378,39 @@ internal class CallClientImpl(
     private suspend fun loadParticipantsData(callState: CallState?, callSettings: CallSettings) {
         logger.d { "[loadParticipantsData] #sfu; callState: $callState, callSettings: $callSettings" }
         if (callState != null) {
-            call?.setParticipants(emptyList()) // TODO load from coordinator and map
+
+            val query = filterAdapter.toJson(
+                InFilterObject(
+                    "id",
+                    callState.participants.map { it.user_id }.toSet()
+                ).toMap()
+            )
+
+            val userQueryResult = coordinatorClient.queryUsers(
+                QueryUsersRequest(mq_json = query.encode())
+            )
+
+            if (userQueryResult is Success) {
+                val participantsMap = callState.participants.associateBy { it.user_id }
+
+                call?.setParticipants(
+                    userQueryResult.data.map {
+                        val participant = participantsMap[it.id]
+                        val isLocal = it.id == getCurrentUserId()
+
+                        CallParticipantState(
+                            id = it.id,
+                            role = it.role,
+                            name = it.name,
+                            profileImageURL = it.imageUrl,
+                            sessionId = participant?.session_id ?: "",
+                            idPrefix = participant?.track_lookup_prefix ?: "",
+                            isLocal = isLocal,
+                            isOnline = !isLocal
+                        )
+                    }
+                )
+            }
         }
     }
 
@@ -443,12 +484,12 @@ internal class CallClientImpl(
     }
 
     private suspend fun executeJoinRequest(): Result<JoinResponse> {
-        // TODO - temporary connection for the subscriber SDP
+        val sdp = getGenericSdp()
 
         val request = JoinRequest(
             session_id = sessionId,
             token = getSfuToken(),
-            subscriber_sdp = ""
+            subscriber_sdp = sdp
         )
         logger.d { "[executeJoinRequest] request: $request" }
 
@@ -465,6 +506,46 @@ internal class CallClientImpl(
         } catch (e: Throwable) {
             logger.e { "[executeJoinRequest] failed: $e" }
             Failure(VideoError(e.message, e))
+        }
+    }
+
+    private suspend fun getGenericSdp(): String {
+        val streamPeerConnection = peerConnectionFactory.makePeerConnection(
+            coroutineScope = coroutineScope,
+            configuration = connectionConfiguration,
+            type = StreamPeerType.SUBSCRIBER,
+            mediaConstraints = mediaConstraints,
+        )
+
+        val connection = streamPeerConnection.connection
+
+        connection.apply {
+            addTransceiver(
+                MediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO,
+                RtpTransceiver.RtpTransceiverInit(
+                    RtpTransceiver.RtpTransceiverDirection.RECV_ONLY
+                )
+            )
+            addTransceiver(
+                MediaStreamTrack.MediaType.MEDIA_TYPE_AUDIO,
+                RtpTransceiver.RtpTransceiverInit(
+                    RtpTransceiver.RtpTransceiverDirection.RECV_ONLY
+                )
+            )
+        }
+
+        val offer = streamPeerConnection.createOffer()
+
+        try {
+            connection.dispose()
+        } catch (error: Throwable) {
+            error.printStackTrace()
+        }
+
+        return if (offer is Success) {
+            offer.data.description
+        } else {
+            ""
         }
     }
 
@@ -515,7 +596,7 @@ internal class CallClientImpl(
             when (event) {
                 is ICETrickleEvent -> handleTrickle(event)
                 is SubscriberOfferEvent -> handleSubscriberOffer(event)
-                is PublisherAnswerEvent -> {
+                is PublisherAnswerEvent -> { // TODO - do we need anyhting here?
                 }
                 is ParticipantJoinedEvent -> addParticipant(event)
                 is ParticipantLeftEvent -> call?.removeParticipant(event)
@@ -534,8 +615,32 @@ internal class CallClientImpl(
         }
     }
 
-    private fun addParticipant(event: ParticipantJoinedEvent) {
-        // call?.addParticipant(event) // TODO coordinator
+    private suspend fun addParticipant(event: ParticipantJoinedEvent) {
+        val query = filterAdapter.toJson(
+            InFilterObject("id", setOf(event.participant.user_id)).toMap()
+        ).encode()
+
+        val userQueryResult = coordinatorClient.queryUsers(
+            QueryUsersRequest(mq_json = query)
+        )
+
+        if (userQueryResult is Success) {
+            val user = userQueryResult.data.first()
+            val isLocal = user.id == getCurrentUserId()
+
+            call?.addParticipant(
+                CallParticipantState(
+                    id = user.id,
+                    role = user.role,
+                    name = user.name,
+                    profileImageURL = user.imageUrl,
+                    sessionId = event.participant.session_id,
+                    idPrefix = event.participant.track_lookup_prefix,
+                    isLocal = isLocal,
+                    isOnline = !isLocal
+                )
+            )
+        }
     }
 
     private suspend fun handleTrickle(event: ICETrickleEvent) {
@@ -744,7 +849,7 @@ internal class CallClientImpl(
     }
 
     private fun updateParticipantsSubscriptions(participants: List<CallParticipantState>) {
-        val subscriptions = mutableMapOf<String, VideoDimension>()
+        val subscriptions = mutableMapOf<CallParticipantState, VideoDimension>()
         val userId = getCurrentUserId()
 
         for (user in participants) {
@@ -754,7 +859,7 @@ internal class CallClientImpl(
                 val dimension = VideoDimension(
                     width = user.videoTrackSize.first, height = user.videoTrackSize.second
                 )
-                subscriptions[user.id] = dimension
+                subscriptions[user] = dimension
             }
         }
         if (subscriptions.isEmpty()) {
@@ -763,7 +868,22 @@ internal class CallClientImpl(
 
         val request = UpdateSubscriptionsRequest(
             session_id = sessionId,
-            tracks = listOf() // TODO - list of tracks we want to subscribe to
+            tracks = subscriptions.flatMap { (user, videoDimensions) ->
+                listOf(
+                    TrackSubscriptionDetails(
+                        user_id = user.id,
+                        track_type = TrackType.TRACK_TYPE_VIDEO,
+                        dimension = videoDimensions,
+                        session_id = user.sessionId
+                    ),
+                    TrackSubscriptionDetails(
+                        user_id = user.id,
+                        track_type = TrackType.TRACK_TYPE_SCREEN_SHARE,
+                        dimension = videoDimensions,
+                        session_id = user.sessionId
+                    )
+                )
+            }
         )
 
         coroutineScope.launch {

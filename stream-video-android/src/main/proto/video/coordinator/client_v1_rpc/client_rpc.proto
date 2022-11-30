@@ -72,6 +72,9 @@ service ClientRPC {
 
   rpc SendCustomEvent(SendCustomEventRequest) returns (SendCustomEventResponse);
 
+  rpc QueryUsers(QueryUsersRequest) returns (QueryUsersResponse);
+  rpc UpsertUsers(UpsertUsersRequest) returns (UpsertUsersResponse);
+
   // room is a confusing name. better to call it breakout room
   // breakout rooms have their own audio/video track
   // breakout rooms have their own chat
@@ -261,6 +264,24 @@ message QueryMembersRequest {
 
 message QueryMembersResponse {
   MembersEnvelope members = 1;
+}
+
+message QueryUsersRequest {
+  bytes mq_json = 1;
+  optional int32 limit = 2;
+  repeated utils_v1.Sort sorts = 3;
+}
+
+message QueryUsersResponse {
+  repeated user_v1.User users = 1;
+}
+
+message UpsertUsersRequest {
+  repeated user_v1.UserInput users = 1;
+}
+
+message UpsertUsersResponse {
+  repeated user_v1.User users = 1;
 }
 
 // A request message for GetCallEdgeServer endpoint

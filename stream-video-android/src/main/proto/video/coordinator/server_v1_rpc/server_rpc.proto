@@ -218,21 +218,13 @@ message CreateCallRequest {
   // The ring option, overrides the default call type setting if provided.
   google.protobuf.BoolValue notify = 9;
 }
-
 message CreateUserRequest {
-  string id = 1;
-  repeated string teams = 2;
-  string role = 3;
-  bytes custom_json = 4;
-
-  string name = 5;
-  string image_url = 6;
+  user_v1.UserInput user = 1;
 }
-
 // CreateOrUpdateUsersRequest runs a partial update or create on the list of users
 // specify replace = true to do a hard update instead of partial update.
 message CreateOrUpdateUsersRequest {
-  repeated CreateUserRequest users = 1;
+  repeated user_v1.UserInput users = 1;
 
   // Full update (defaults to false and does a partial update).
   bool full_update = 2;

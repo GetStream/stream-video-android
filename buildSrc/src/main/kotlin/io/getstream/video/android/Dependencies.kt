@@ -26,6 +26,7 @@ object Versions {
 
     internal const val WEBRTC = "104.5112.03"
     internal const val STREAM_LOG = "1.0.0"
+    internal const val MOSHI = "1.14.0"
 
     internal const val ANDROIDX_TEST = "1.4.0"
     internal const val BASE_PROFILE = "1.2.0"
@@ -81,6 +82,10 @@ object Dependencies {
 
     const val streamLog = "io.getstream:stream-log:${Versions.STREAM_LOG}"
     const val streamLogAndroid = "io.getstream:stream-log-android:${Versions.STREAM_LOG}"
+
+    const val moshi = "com.squareup.moshi:moshi:${Versions.MOSHI}"
+    const val moshiKotlin = "com.squareup.moshi:moshi-kotlin:${Versions.MOSHI}"
+    const val moshiAdapters = "com.squareup.moshi:moshi-adapters:${Versions.MOSHI}"
 
     const val baseProfile =
         "androidx.profileinstaller:profileinstaller:${Versions.BASE_PROFILE}"

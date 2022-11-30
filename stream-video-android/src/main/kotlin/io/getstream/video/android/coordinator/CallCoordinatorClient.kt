@@ -29,7 +29,7 @@ import stream.video.coordinator.client_v1_rpc.GetOrCreateCallRequest
 import stream.video.coordinator.client_v1_rpc.GetOrCreateCallResponse
 import stream.video.coordinator.client_v1_rpc.JoinCallRequest
 import stream.video.coordinator.client_v1_rpc.JoinCallResponse
-import stream.video.coordinator.client_v1_rpc.QueryMembersRequest
+import stream.video.coordinator.client_v1_rpc.QueryUsersRequest
 import stream.video.coordinator.client_v1_rpc.SendCustomEventRequest
 import stream.video.coordinator.client_v1_rpc.SendEventRequest
 
@@ -100,5 +100,5 @@ public interface CallCoordinatorClient {
      * @param request The request that describes the query filter, limit and sort.
      * @return [List] of [CallUser]s that match the given query.
      */
-    public suspend fun queryUsers(request: QueryMembersRequest): Result<List<CallUser>>
+    public suspend fun queryUsers(request: QueryUsersRequest): Result<List<CallUser>>
 }

@@ -16,14 +16,53 @@
 
 package io.getstream.video.android.filter
 
-@Suppress("ComplexMethod")
+private fun Map<String, Any>.toFilterObject(): FilterObject = when {
+    this.isEmpty() -> NeutralFilterObject
+    this.size == 1 -> this.entries.first().toFilterObject()
+    this.size == 2 && this.containsKey(KEY_DISTINCT) && this.containsKey(KEY_MEMBERS) -> Filters.distinct(
+        (this[KEY_MEMBERS] as List<String>)
+    )
+    else -> throw IllegalArgumentException("FilterObject can not be created with this map `$this`")
+}
+
+private fun Map.Entry<String, Any>.toFilterObject(): FilterObject = when (this.key) {
+    KEY_AND -> Filters.and(
+        *(this.value as List<Map<String, Any>>).map(Map<String, Any>::toFilterObject).toTypedArray()
+    )
+    KEY_OR -> Filters.or(
+        *(this.value as List<Map<String, Any>>).map(Map<String, Any>::toFilterObject).toTypedArray()
+    )
+    KEY_NOR -> Filters.nor(
+        *(this.value as List<Map<String, Any>>).map(Map<String, Any>::toFilterObject).toTypedArray()
+    )
+    else -> (this.value as Map<String, Any>).entries.first().let {
+        when (it.key) {
+            KEY_EXIST -> when (it.value as Boolean) {
+                true -> Filters.exists(this.key)
+                false -> Filters.notExists(this.key)
+            }
+            KEY_EQUALS -> Filters.eq(this.key, it.value)
+            KEY_NOT_EQUALS -> Filters.ne(this.key, it.value)
+            KEY_CONTAINS -> Filters.contains(this.key, it.value)
+            KEY_GREATER_THAN -> Filters.greaterThan(this.key, it.value)
+            KEY_GREATER_THAN_OR_EQUALS -> Filters.greaterThanEquals(this.key, it.value)
+            KEY_LESS_THAN -> Filters.lessThan(this.key, it.value)
+            KEY_LESS_THAN_OR_EQUALS -> Filters.lessThanEquals(this.key, it.value)
+            KEY_IN -> Filters.`in`(this.key, (it.value as List<Any>))
+            KEY_NOT_IN -> Filters.nin(this.key, (it.value as List<Any>))
+            KEY_AUTOCOMPLETE -> Filters.autocomplete(this.key, it.value as String)
+            else -> throw IllegalArgumentException("FilterObject can be create with this map `$this`")
+        }
+    }
+}
+
 internal fun FilterObject.toMap(): Map<String, Any> = when (this) {
     is AndFilterObject -> mapOf(KEY_AND to this.filterObjects.map(FilterObject::toMap))
     is OrFilterObject -> mapOf(KEY_OR to this.filterObjects.map(FilterObject::toMap))
     is NorFilterObject -> mapOf(KEY_NOR to this.filterObjects.map(FilterObject::toMap))
     is ExistsFilterObject -> mapOf(this.fieldName to mapOf(KEY_EXIST to true))
     is NotExistsFilterObject -> mapOf(this.fieldName to mapOf(KEY_EXIST to false))
-    is EqualsFilterObject -> mapOf(this.fieldName to this.value)
+    is EqualsFilterObject -> mapOf(this.fieldName to mapOf(KEY_EQUALS to this.value))
     is NotEqualsFilterObject -> mapOf(this.fieldName to mapOf(KEY_NOT_EQUALS to this.value))
     is ContainsFilterObject -> mapOf(this.fieldName to mapOf(KEY_CONTAINS to this.value))
     is GreaterThanFilterObject -> mapOf(this.fieldName to mapOf(KEY_GREATER_THAN to this.value))
@@ -42,6 +81,7 @@ private const val KEY_CONTAINS: String = "\$contains"
 private const val KEY_AND: String = "\$and"
 private const val KEY_OR: String = "\$or"
 private const val KEY_NOR: String = "\$nor"
+private const val KEY_EQUALS: String = "\$eq"
 private const val KEY_NOT_EQUALS: String = "\$ne"
 private const val KEY_GREATER_THAN: String = "\$gt"
 private const val KEY_GREATER_THAN_OR_EQUALS: String = "\$gte"
