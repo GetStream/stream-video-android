@@ -20,7 +20,6 @@ import android.view.View
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.currentCompositeKeyHash
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,7 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.VideoTrack
-import org.webrtc.SurfaceViewRenderer
+import io.getstream.video.android.ui.TextureViewRenderer
 
 /**
  * Renders a single video track based on the call state.
@@ -44,10 +43,10 @@ public fun VideoRenderer(
     call: Call,
     videoTrack: VideoTrack,
     modifier: Modifier = Modifier,
-    onRender: (View) -> Unit = {}
+    onRender: (View) -> Unit = {},
 ) {
     val trackState: MutableState<VideoTrack?> = remember { mutableStateOf(null) }
-    var view: SurfaceViewRenderer? by remember { mutableStateOf(null) }
+    var view: TextureViewRenderer? by remember { mutableStateOf(null) }
 
     DisposableEffect(call, videoTrack) {
         onDispose {
@@ -55,19 +54,10 @@ public fun VideoRenderer(
         }
     }
 
-    DisposableEffect(currentCompositeKeyHash.toString()) {
-        onDispose {
-            view?.release()
-        }
-    }
-
     AndroidView(
         factory = { context ->
-            SurfaceViewRenderer(context).apply {
-                setZOrderOnTop(false)
-                setZOrderMediaOverlay(false)
-
-                call.initRenderer(this, videoTrack.streamId, onRender)
+            TextureViewRenderer(context).apply {
+                call.initRenderer(this, videoTrack.streamId, onRender = onRender)
                 setupVideo(trackState, videoTrack, this)
 
                 view = this
@@ -79,8 +69,8 @@ public fun VideoRenderer(
 }
 
 private fun cleanTrack(
-    view: SurfaceViewRenderer?,
-    trackState: MutableState<VideoTrack?>
+    view: TextureViewRenderer?,
+    trackState: MutableState<VideoTrack?>,
 ) {
     view?.let { trackState.value?.video?.removeSink(it) }
     trackState.value = null
@@ -89,7 +79,7 @@ private fun cleanTrack(
 private fun setupVideo(
     trackState: MutableState<VideoTrack?>,
     track: VideoTrack,
-    renderer: SurfaceViewRenderer
+    renderer: TextureViewRenderer,
 ) {
     if (trackState.value == track) {
         return
