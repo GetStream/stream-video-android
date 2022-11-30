@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (c) 2014-2022 Stream.io Inc. All rights reserved.
+
+    Licensed under the Stream License;
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+      https://github.com/GetStream/stream-chat-android/blob/main/LICENSE
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<resources>
+    <!-- Greys -->
+    <color name="stream_xml_black">#FFFFFF</color>
+    <color name="stream_xml_black_50">#80FFFFFF</color>
+    <color name="stream_xml_grey">#7A7A7A</color>
+    <color name="stream_xml_grey_gainsboro">#2D2F2F</color>
+    <color name="stream_xml_grey_whisper">#1C1E22</color>
+    <color name="stream_xml_white_smoke">#13151B</color>
+    <color name="stream_xml_white_snow">#070A0D</color>
+    <color name="stream_xml_white">#101418</color>
+    <color name="stream_xml_blue_alice">#00193D</color>
+
+    <!-- Specials -->
+    <color name="stream_xml_overlay">#66000000</color>
+    <color name="stream_xml_overlay_dark">#99FFFFFF</color>
+    <color name="stream_xml_background_gradient_start">#101214</color>
+    <color name="stream_xml_background_gradient_end">#070A0D</color>
+    <color name="stream_xml_message_list_image_attachment_background">#1C1E22</color>
+    <color name="stream_xml_message_list_video_attachment_background">#1C1E22</color>
+
+    <!-- Other -->
+    <color name="stream_xml_button_background_color">#FFFFFF</color>
+    <color name="stream_xml_button_text_color">#005AFF</color>
+    <color name="stream_xml_border">#141924</color>
+    <color name="stream_xml_highlight">#302D22</color>
+</resources>

@@ -14,7 +14,9 @@ object Versions {
     internal const val ANDROIDX_APPCOMPAT = "1.4.2"
     internal const val ANDROIDX_CORE = "1.8.0"
     internal const val ANDROIDX_LIFECYCLE = "2.5.1"
-    internal const val ACTIVITY_COMPOSE = "1.5.0"
+    internal const val ANDROIDX_STARTUP = "1.1.1"
+    internal const val ANDROIDX_ACTIVITY = "1.5.1"
+    internal const val ACTIVITY_COMPOSE = "1.5.1"
 
     internal const val COMPOSE = "1.3.0"
     const val COMPOSE_COMPILER = "1.3.2"
@@ -54,12 +56,14 @@ object Dependencies {
     const val material = "com.google.android.material:material:${Versions.MATERIAL}"
     const val androidxAppcompat = "androidx.appcompat:appcompat:${Versions.ANDROIDX_APPCOMPAT}"
     const val androidxCore = "androidx.core:core-ktx:${Versions.ANDROIDX_CORE}"
+    const val androidxActivity = "androidx.activity:activity-ktx:${Versions.ANDROIDX_ACTIVITY}"
     const val androidxLifecycleViewModel =
         "androidx.lifecycle:lifecycle-viewmodel-ktx:${Versions.ANDROIDX_LIFECYCLE}"
     const val androidxLifecycleRuntime =
         "androidx.lifecycle:lifecycle-runtime-ktx:${Versions.ANDROIDX_LIFECYCLE}"
     const val androidxLifecycleProcess =
         "androidx.lifecycle:lifecycle-process:${Versions.ANDROIDX_LIFECYCLE}"
+    const val androidxStartup = "androidx.startup:startup-runtime:${Versions.ANDROIDX_STARTUP}"
 
     // Compose
     const val activityCompose = "androidx.activity:activity-compose:${Versions.ACTIVITY_COMPOSE}"
@@ -70,6 +74,8 @@ object Dependencies {
     const val composeMaterial = "androidx.compose.material:material:${Versions.COMPOSE}"
     const val composeIconsExtended = "androidx.compose.material:material-icons-extended:${Versions.COMPOSE}"
     const val composeCoil = "io.coil-kt:coil-compose:${Versions.COIL}"
+
+    const val coil = "io.coil-kt:coil:${Versions.COIL}"
 
     const val wireRuntime = "com.squareup.wire:wire-runtime:${Versions.WIRE}"
     const val retrofit = "com.squareup.retrofit2:retrofit:${Versions.RETROFIT}"

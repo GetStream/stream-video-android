@@ -58,6 +58,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
 import io.getstream.log.StreamLog
 import io.getstream.video.android.app.model.HomeScreenOption
+import io.getstream.video.android.app.ui.call.XmlCallActivity
 import io.getstream.video.android.app.ui.components.UserList
 import io.getstream.video.android.app.ui.login.LoginActivity
 import io.getstream.video.android.app.user.AppUser
@@ -149,6 +150,8 @@ class HomeActivity : AppCompatActivity() {
                     Text(text = "Log Out")
                 }
 
+                // TODO XML()
+
                 val isLoading by loadingState
 
                 if (isLoading) {
@@ -157,6 +160,26 @@ class HomeActivity : AppCompatActivity() {
                     CircularProgressIndicator(modifier = Modifier.align(CenterHorizontally))
                 }
             }
+        }
+    }
+
+    @Composable
+    private fun XML() {
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            onClick = {
+                startActivity(
+                    Intent(this, XmlCallActivity::class.java)
+                )
+            },
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = VideoTheme.colors.infoAccent, contentColor = Color.White
+            )
+        ) {
+            Text(text = "XML")
         }
     }
 

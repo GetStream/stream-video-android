@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (c) 2014-2022 Stream.io Inc. All rights reserved.
+
+    Licensed under the Stream License;
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+      https://github.com/GetStream/stream-chat-android/blob/main/LICENSE
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<resources>
+    <dimen name="stream_xml_spacing_medium">16dp</dimen>
+    <dimen name="stream_xml_spacing_small">8dp</dimen>
+    <dimen name="stream_xml_spacing_tiny">4dp</dimen>
+
+    <dimen name="stream_xml_text_small">12sp</dimen>
+    <dimen name="stream_xml_text_medium">14sp</dimen>
+    <dimen name="stream_xml_text_large">16sp</dimen>
+
+    <dimen name="stream_xml_divider_height">1dp</dimen>
+
+    <dimen name="stream_xml_elevation_big">8dp</dimen>
+    <dimen name="stream_xml_elevation_small">3dp</dimen>
+
+    <!--AvatarView-->
+    <dimen name="stream_xml_avatar_size_extra_tiny">18dp</dimen>
+    <dimen name="stream_xml_avatar_size_tiny">24dp</dimen>
+    <dimen name="stream_xml_avatar_size_small">32dp</dimen>
+    <dimen name="stream_xml_avatar_size_medium">40dp</dimen>
+    <dimen name="stream_xml_avatar_size_large">64dp</dimen>
+    <dimen name="stream_xml_avatar_size_extra_large">72dp</dimen>
+    <dimen name="stream_xml_avatar_text_size_tiny">12sp</dimen>
+    <dimen name="stream_xml_avatar_text_size_small">14sp</dimen>
+    <dimen name="stream_xml_avatar_text_size_medium">16sp</dimen>
+    <dimen name="stream_xml_avatar_text_size_large">24sp</dimen>
+    <dimen name="stream_xml_avatar_text_size_extra_large">28sp</dimen>
+    <dimen name="stream_xml_avatar_initials">14sp</dimen>
+    <dimen name="stream_xml_group_avatar_initials">10sp</dimen>
+    <dimen name="stream_xml_avatar_border_width">3dp</dimen>
+
+    <!--Channel Actions-->
+    <dimen name="stream_xml_channel_actions_corners_radius">16dp</dimen>
+    <dimen name="stream_xml_channel_actions_item_height">56dp</dimen>
+    <dimen name="stream_xml_channel_actions_member_height">80dp</dimen>
+
+    <dimen name="stream_xml_text_size_input">14sp</dimen>
+    <dimen name="stream_xml_attachment_button_width">25dp</dimen>
+    <dimen name="stream_xml_attachment_button_height">25dp</dimen>
+
+    <!-- headers -->
+    <dimen name="stream_xml_default_header_height">56dp</dimen>
+
+    <!-- Search Input -->
+    <dimen name="stream_xml_search_input_height">36dp</dimen>
+
+
+</resources>

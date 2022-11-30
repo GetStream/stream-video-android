@@ -30,6 +30,7 @@
         </activity>
         <activity android:name=".ui.home.HomeActivity" />
         <activity android:name=".ui.call.CallActivity" />
+        <activity android:name=".ui.call.XmlCallActivity" />
 
         <service
             android:name="io.getstream.video.android.app.ui.call.CallService"

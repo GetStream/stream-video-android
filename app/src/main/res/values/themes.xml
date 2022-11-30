@@ -11,6 +11,13 @@
         <item name="colorOnSecondary">@color/black</item>
         <!-- Status bar color. -->
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
+        <!-- Stream Video theme. -->
+        <item name="streamVideoTheme">@style/StreamTheme</item>
+
         <!-- Customize your theme here. -->
+    </style>
+
+    <style name="StreamTheme" parent="@style/StreamVideoTheme">
+        <!-- Customize Stream Video theme here. -->
     </style>
 </resources>
