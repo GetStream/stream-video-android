@@ -27,12 +27,22 @@ import io.getstream.video.android.user.UserPreferences
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
+/**
+ * Class used to handle Push Notifications.
+ * It is used by reflection by [io.getstream.android.push.delegate.PushDelegateProvider] class.
+ */
 internal class VideoPushDelegate(context: Context) : PushDelegate(context) {
     val logger = StreamLog.getLogger("VideoPushDelegate")
     val userPreferences: UserPreferences by lazy {
         UserCredentialsManager.initialize(context)
     }
 
+    /**
+     * Handle a push message.
+     *
+     * @param payload The content of the Push Notification.
+     * @return true if the payload was handled properly.
+     */
     override fun handlePushMessage(payload: Map<String, Any?>): Boolean {
         logger.d { "[handlePushMessage] payload: $payload" }
         return payload.ifValid {
@@ -40,6 +50,11 @@ internal class VideoPushDelegate(context: Context) : PushDelegate(context) {
         }
     }
 
+    /**
+     * Register a push device in our servers.
+     *
+     * @param pushDevice Contains info of the push device to be registered.
+     */
     override fun registerPushDevice(pushDevice: PushDevice) {
         logger.d { "[registerPushDevice] pushDevice: $pushDevice" }
         userPreferences.getCachedCredentials()?.let { user ->
@@ -64,6 +79,13 @@ internal class VideoPushDelegate(context: Context) : PushDelegate(context) {
         }
     }
 
+    /**
+     * Return if the map is valid.
+     * The effect function is only invoked in the case the map is valid.
+     *
+     * @param effect The function to be invoked on the case the map is valid.
+     * @return true if the map is valid.
+     */
     private fun Map<String, Any?>.ifValid(effect: () -> Unit): Boolean {
         val isValid = this.isValid()
         effect.takeIf { isValid }?.invoke()
@@ -73,8 +95,14 @@ internal class VideoPushDelegate(context: Context) : PushDelegate(context) {
     private fun Map<String, Any?>.isValid(): Boolean =
         isFromStreamServer() && isValidIncomingCall()
 
+    /**
+     * Verify if the map contains key/value from Stream Server.
+     */
     private fun Map<String, Any?>.isFromStreamServer(): Boolean = this[KEY_SENDER] == VALUE_STREAM_SENDER
 
+    /**
+     * Verify if the map contains all keys/values for an incoming call.
+     */
     private fun Map<String, Any?>.isValidIncomingCall(): Boolean =
         !(this[KEY_TYPE] as? String).isNullOrBlank() &&
             !(this[KEY_CALL_CID] as? String).isNullOrBlank()
@@ -84,6 +112,6 @@ internal class VideoPushDelegate(context: Context) : PushDelegate(context) {
         private const val KEY_TYPE = "type"
         private const val KEY_CALL_CID = "call_cid"
 
-        private const val VALUE_STREAM_SENDER = "stream.chat"
+        private const val VALUE_STREAM_SENDER = "stream.video"
     }
 }
