@@ -43,7 +43,7 @@ public interface UserPreferences {
     public fun getCachedApiKey(): ApiKey?
 
     /**
-     * Stores ApiKey for the SDK to use. Useful when logging in to the SDK
+     * Stores ApiKey for the SDK to use. Useful when logging in to the SDK.
      *
      * @param apiKey The [ApiKey] to store.
      */

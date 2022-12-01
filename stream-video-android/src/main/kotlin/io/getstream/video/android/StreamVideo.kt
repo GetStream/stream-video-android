@@ -44,10 +44,10 @@ public interface StreamVideo {
     /**
      * Create a device that will be used to receive push notifications.
      *
-     * @param token the Token obtained from the push provider to be used.
-     * @param pushProvider The push provider to be used.
+     * @param token The Token obtained from the selected push provider.
+     * @param pushProvider The selected push provider.
      *
-     * @return [Result] witch contains the [Device]
+     * @return [Result] containing the [Device].
      */
     public suspend fun createDevice(
         token: String,
