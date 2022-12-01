@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.app.ui.call
+package io.getstream.video.android.ui.xml.utils.extensions
 
-import android.content.Context
-import io.getstream.video.android.StreamVideo
-import io.getstream.video.android.app.videoApp
-import io.getstream.video.android.ui.xml.AbstractXmlCallActivity
+import android.view.LayoutInflater
+import android.view.ViewGroup
 
-class XmlCallActivity : AbstractXmlCallActivity() {
+internal inline val ViewGroup.inflater: LayoutInflater
+    get() = LayoutInflater.from(context)
 
-    /**
-     * Provides the StreamVideo instance through the videoApp.
-     */
-    override fun getStreamVideo(context: Context): StreamVideo = videoApp.streamVideo
-}
+internal val ViewGroup.streamThemeInflater: LayoutInflater
+    get() = LayoutInflater.from(context.createStreamThemeWrapper())

@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.app.ui.call
+package io.getstream.video.android.ui.xml.widget.transformer
 
-import android.content.Context
-import io.getstream.video.android.StreamVideo
-import io.getstream.video.android.app.videoApp
-import io.getstream.video.android.ui.xml.AbstractXmlCallActivity
+import io.getstream.video.android.ui.xml.widget.avatar.AvatarStyle
 
-class XmlCallActivity : AbstractXmlCallActivity() {
+public object TransformStyle {
+    @JvmStatic
+    public var avatarStyleTransformer: StyleTransformer<AvatarStyle> = noopTransformer()
 
-    /**
-     * Provides the StreamVideo instance through the videoApp.
-     */
-    override fun getStreamVideo(context: Context): StreamVideo = videoApp.streamVideo
+    private fun <T> noopTransformer() = StyleTransformer<T> { it }
+}
+
+public fun interface StyleTransformer<T> {
+    public fun transform(source: T): T
 }

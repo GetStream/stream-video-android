@@ -14,17 +14,11 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.app.ui.call
+package io.getstream.video.android.ui.xml.widget.control
 
-import android.content.Context
-import io.getstream.video.android.StreamVideo
-import io.getstream.video.android.app.videoApp
-import io.getstream.video.android.ui.xml.AbstractXmlCallActivity
+import io.getstream.video.android.call.state.CallAction
 
-class XmlCallActivity : AbstractXmlCallActivity() {
-
-    /**
-     * Provides the StreamVideo instance through the videoApp.
-     */
-    override fun getStreamVideo(context: Context): StreamVideo = videoApp.streamVideo
-}
+public data class CallControlItem(
+    val icon: Int,
+    val action: CallAction
+)

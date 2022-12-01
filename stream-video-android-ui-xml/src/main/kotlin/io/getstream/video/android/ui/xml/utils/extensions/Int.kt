@@ -14,17 +14,23 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.app.ui.call
+package io.getstream.video.android.ui.xml.utils.extensions
 
-import android.content.Context
-import io.getstream.video.android.StreamVideo
-import io.getstream.video.android.app.videoApp
-import io.getstream.video.android.ui.xml.AbstractXmlCallActivity
+import android.content.res.Resources
+import android.util.DisplayMetrics
+import kotlin.math.roundToInt
 
-class XmlCallActivity : AbstractXmlCallActivity() {
+/**
+ * Transforms DP value integer to pixels, based on the screen density.
+ */
+internal fun Int.dpToPx(): Int = dpToPxPrecise().roundToInt()
 
-    /**
-     * Provides the StreamVideo instance through the videoApp.
-     */
-    override fun getStreamVideo(context: Context): StreamVideo = videoApp.streamVideo
-}
+/**
+ * Uses the display metrics to transform the value of DP to pixels.
+ */
+internal fun Int.dpToPxPrecise(): Float = (this * displayMetrics().density)
+
+/**
+ * Fetches the current system display metrics based on [Resources].
+ */
+internal fun displayMetrics(): DisplayMetrics = Resources.getSystem().displayMetrics

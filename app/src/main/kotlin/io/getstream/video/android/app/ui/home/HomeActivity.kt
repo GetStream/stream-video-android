@@ -97,7 +97,7 @@ class HomeActivity : AppCompatActivity() {
         )
     }
 
-    private val callIdState: MutableState<String> = mutableStateOf("call328")
+    private val callIdState: MutableState<String> = mutableStateOf("call42977")
 
     private val loadingState: MutableState<Boolean> = mutableStateOf(false)
 
@@ -150,7 +150,7 @@ class HomeActivity : AppCompatActivity() {
                     Text(text = "Log Out")
                 }
 
-                // TODO XML()
+                XML()
 
                 val isLoading by loadingState
 

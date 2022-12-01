@@ -14,17 +14,24 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.app.ui.call
+package io.getstream.video.android.ui.xml.imageloading
 
-import android.content.Context
-import io.getstream.video.android.StreamVideo
-import io.getstream.video.android.app.videoApp
-import io.getstream.video.android.ui.xml.AbstractXmlCallActivity
+import io.getstream.video.android.ui.xml.utils.Disposable
 
-class XmlCallActivity : AbstractXmlCallActivity() {
+/**
+ * Wrapper around the Coil Disposable.
+ *
+ * @param disposable [coil.request.Disposable]
+ */
+public class CoilDisposable(private val disposable: coil.request.Disposable) : Disposable {
+
+    override val isDisposed: Boolean
+        get() = disposable.isDisposed
 
     /**
-     * Provides the StreamVideo instance through the videoApp.
+     * Dispose all the source. Use it when the resource is already used or the result is no longer needed.
      */
-    override fun getStreamVideo(context: Context): StreamVideo = videoApp.streamVideo
+    override fun dispose() {
+        disposable.dispose()
+    }
 }
