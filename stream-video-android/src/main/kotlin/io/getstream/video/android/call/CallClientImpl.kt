@@ -92,6 +92,7 @@ import okio.ByteString.Companion.encode
 import org.webrtc.AudioTrack
 import org.webrtc.Camera2Capturer
 import org.webrtc.Camera2Enumerator
+import org.webrtc.CameraEnumerationAndroid
 import org.webrtc.CameraEnumerator
 import org.webrtc.MediaConstraints
 import org.webrtc.MediaStreamTrack
@@ -109,8 +110,10 @@ import stream.video.sfu.event.JoinResponse
 import stream.video.sfu.models.CallState
 import stream.video.sfu.models.ICETrickle
 import stream.video.sfu.models.PeerType
+import stream.video.sfu.models.TrackInfo
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
+import stream.video.sfu.models.VideoLayer
 import stream.video.sfu.signal.AudioMuteChanged
 import stream.video.sfu.signal.SendAnswerRequest
 import stream.video.sfu.signal.SetPublisherRequest
@@ -196,6 +199,7 @@ internal class CallClientImpl(
 
     private var videoCapturer: VideoCapturer? = null
     private var isCapturingVideo: Boolean = false
+    private var captureResolution: CameraEnumerationAndroid.CaptureFormat? = null
 
     init {
         sfuSocket.addListener(this)
@@ -666,8 +670,41 @@ internal class CallClientImpl(
 
                 peerConnection.setLocalDescription(data)
 
+                val trackInfos = peerConnection.connection.transceivers.filter {
+                    it.direction == RtpTransceiver.RtpTransceiverDirection.SEND_ONLY && it.sender?.track() != null
+                }.map { transceiver ->
+                    val track = transceiver.sender.track()!!
+
+                    val trackType = when (track.kind()) {
+                        "audio" -> TrackType.TRACK_TYPE_AUDIO
+                        "screen" -> TrackType.TRACK_TYPE_SCREEN_SHARE
+                        "video" -> TrackType.TRACK_TYPE_VIDEO
+                        else -> TrackType.TRACK_TYPE_UNSPECIFIED
+                    }
+
+                    val layers: List<VideoLayer> = transceiver.sender.parameters.encodings.map {
+                        VideoLayer(
+                            rid = it.rid ?: "",
+                            video_dimension = VideoDimension(
+                                width = captureResolution?.width ?: 0,
+                                height = captureResolution?.height ?: 0
+                            ),
+                            bitrate = it.maxBitrateBps ?: 0,
+                            fps = captureResolution?.framerate?.max ?: 0
+                        )
+                    }
+
+                    TrackInfo(
+                        track_id = track.id(),
+                        track_type = trackType,
+                        layers = layers
+                    )
+                }
+
                 val request = SetPublisherRequest(
-                    sdp = data.description, session_id = sessionId
+                    sdp = data.description,
+                    session_id = sessionId,
+                    tracks = trackInfos
                 )
 
                 sfuClient.setPublisher(request).onSuccessSuspend {
@@ -748,11 +785,12 @@ internal class CallClientImpl(
         val supportedFormats = enumerator.getSupportedFormats(frontCamera) ?: emptyList()
 
         val resolution = supportedFormats.firstOrNull {
-            (it.width == 1080 || it.width == 720 || it.width == 480)
+            (it.width == 720 || it.width == 480 || it.width == 360)
         } ?: return
 
         capturer.startCapture(resolution.width, resolution.height, 30)
         isCapturingVideo = true
+        captureResolution = resolution
     }
 
     private fun buildCameraCapturer(): VideoCapturer? {
@@ -880,6 +918,12 @@ internal class CallClientImpl(
                         user_id = user.id,
                         track_type = TrackType.TRACK_TYPE_SCREEN_SHARE,
                         dimension = videoDimensions,
+                        session_id = user.sessionId
+                    ),
+                    TrackSubscriptionDetails(
+                        user_id = user.id,
+                        track_type = TrackType.TRACK_TYPE_AUDIO,
+                        dimension = null,
                         session_id = user.sessionId
                     )
                 )
