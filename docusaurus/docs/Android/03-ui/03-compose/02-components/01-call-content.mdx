@@ -1,0 +1,121 @@
+## CallContent
+
+`CallContent` is a bound component that automatically handles Incoming/Outgoing and Active call components and states. All you have to do is pass it the `CallViewModel`.
+
+<!-- After https://github.com/GetStream/stream-video-android/pull/110 has been merged in there will be only one onCallAction handler -->
+```kotlin
+@Composable
+public fun CallContent(
+    viewModel: CallViewModel,
+    modifier: Modifier = Modifier,
+    onCallAction: (CallAction) -> Unit = viewModel::onCallAction
+)
+```
+
+<!-- TODO link call actions -->
+You can also pass a custom onCallAction handler to handle `CallAction`s which can be found [here]().
+
+## OutgoingCall
+
+To show an outgoing call UI on the screen there are two options. The first one is `OutgoingCallContent`, which is a bound component. By default its state and handlers will depend on the `CallViewModel` which can be overridden.
+
+```kotlin
+@Composable
+public fun OutgoingCallContent(
+    viewModel: CallViewModel,
+    modifier: Modifier = Modifier,
+    onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
+)
+```
+
+The second option is the `OutgoingCall`, which is a stateless component. It allows you to provide and control the state directly.
+
+<!-- After https://github.com/GetStream/stream-video-android/pull/110 has been merged in there will be only one onCallAction handler -->
+```kotlin
+@Composable
+public fun OutgoingCall(
+    callType: CallType,
+    participants: List<CallUser>,
+    onCallAction: (CallAction) -> Unit,
+    modifier: Modifier = Modifier,
+)
+```
+
+<!-- TODO add some outgoing call image -->
+[OutgoingCallContent]()
+
+## IncomingCall
+
+To show an incoming call UI on the screen there are two options. The first one is `IncomingCallContent`, which is a bound component. By default its state and handlers will depend on the `CallViewModel` which can be overridden.
+
+```kotlin
+@Composable
+public fun IncomingCallContent(
+    viewModel: CallViewModel,
+    modifier: Modifier = Modifier,
+    onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
+)
+```
+
+The second option is the `IncomingCall`, which is a stateless component. It allows you to provide and control the state directly.
+
+<!-- After https://github.com/GetStream/stream-video-android/pull/110 has been merged in there will be only one onCallAction handler -->
+```kotlin
+@Composable
+public fun IncomingCall(
+    callType: CallType,
+    participants: List<CallUser>,
+    onCallAction: (CallAction) -> Unit,
+    modifier: Modifier = Modifier,
+)
+```
+
+<!-- TODO add some incoming call image -->
+[IncomingCallContent]()
+
+## ActiveCall
+
+To show an active call with all of its participants there are two options. The first on is `ActiveCallContent` which is a bound component. By default its state and  handlers will depend on the `CallViewModel` which can be overridden.
+
+```kotlin
+@Composable
+public fun ActiveCallContent(
+    callViewModel: CallViewModel,
+    modifier: Modifier = Modifier,
+    onCallAction: (CallAction) -> Unit = callViewModel::onCallAction,
+    onParticipantsMenuClick: () -> Unit = callViewModel::showParticipants,
+    onBackPressed: () -> Unit = {
+        val isShowingParticipantsInfo = callViewModel.isShowingParticipantsInfo.value
+        val isShowingAudioDevicePicker = callViewModel.isShowingAudioDevicePicker.value
+
+        if (isShowingParticipantsInfo || isShowingAudioDevicePicker) {
+            callViewModel.dismissOptions()
+        } else {
+            onCallAction(LeaveCall)
+        }
+    }
+)
+```
+
+The second option is to use the `ActiveCall` stateless component. It allows you to provide and control the state directly.
+
+```kotlin
+public fun ActiveCall(
+    call: Call?,
+    callState: StreamCallState,
+    callMediaState: CallMediaState,
+    onCallAction: (CallAction) -> Unit,
+    onParticipantsMenuClick: () -> Unit,
+    onBackPressed: () -> Unit,
+    modifier: Modifier = Modifier
+)
+```
+
+Both allow you to override some of the handlers:
+
+* **onCallAction**: Handler that notifies that user performed some kind of a `CallAction`.
+* **onParticipantsMenuClick**: Handler that notifies that the user wants to see a list of other participants inside the call.
+* **onBackPressed**: Handler that notifies of the back pressed actions to show the participants list or go back if it is not open.
+
+<!-- TODO add some active call image -->
+[ActiveCallContent]()

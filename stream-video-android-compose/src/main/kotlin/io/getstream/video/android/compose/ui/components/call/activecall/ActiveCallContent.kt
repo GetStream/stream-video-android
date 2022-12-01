@@ -64,6 +64,7 @@ import stream.video.sfu.models.TrackType
  * @param onCallAction Handler when the user triggers a Call Control Action.
  * @param pictureInPictureContent Content shown when the user enters Picture in Picture mode, if
  * it's been enabled in the app.
+ * @param onBackPressed Handler when the user presses back button.
  */
 @Composable
 public fun ActiveCallContent(
@@ -89,6 +90,47 @@ public fun ActiveCallContent(
         } else {
             onBackPressed()
         }
+    }
+) {
+    val room by callViewModel.callState.collectAsState(initial = null)
+    val callState by callViewModel.streamCallState.collectAsState()
+    val callMediaState by callViewModel.callMediaState.collectAsState(initial = CallMediaState())
+
+    ActiveCall(
+        modifier = modifier,
+        call = room,
+        callState = callState,
+        callMediaState = callMediaState,
+        onCallAction = onCallAction,
+        onParticipantsMenuClick = onParticipantsMenuClick,
+        onBackPressed = onBackPressed,
+    )
+}
+
+/**
+ * Represents the UI in an Active call that shows participants and their video, as well as some
+ * extra UI features to control the call settings, browse participants and more.
+ *
+ * @param call The [Call] state used to render the UI.
+ * @param callState The [StreamCallState] used to render the UI in the correct call state.
+ * @param callMediaState The [CallMediaState] used to render the media controls UI in the correct state.
+ * @param onCallAction Handler when the user triggers a Call Control Action.
+ * @param onParticipantsMenuClick Handler when the user taps on the participant menu.
+ * @param onBackPressed Handler when the user presses back button.
+ * @param modifier Modifier for styling.
+ */
+@Composable
+public fun ActiveCall(
+    call: Call?,
+    callState: StreamCallState,
+    callMediaState: CallMediaState,
+    onCallAction: (CallAction) -> Unit,
+    onParticipantsMenuClick: () -> Unit,
+    onBackPressed: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    BackHandler {
+        onBackPressed()
     }
 
     BackHandler { backAction() }
