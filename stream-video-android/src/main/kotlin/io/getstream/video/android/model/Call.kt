@@ -31,6 +31,7 @@ import io.getstream.video.android.events.AudioLevelChangedEvent
 import io.getstream.video.android.events.MuteStateChangeEvent
 import io.getstream.video.android.events.ParticipantJoinedEvent
 import io.getstream.video.android.events.ParticipantLeftEvent
+import io.getstream.video.android.ui.TextureViewRenderer
 import io.getstream.video.android.utils.updateValue
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -43,7 +44,6 @@ import org.webrtc.AudioTrack
 import org.webrtc.EglBase
 import org.webrtc.MediaStream
 import org.webrtc.RendererCommon
-import org.webrtc.SurfaceViewRenderer
 import stream.video.sfu.models.CallState
 
 public class Call(
@@ -102,7 +102,7 @@ public class Call(
      * Public API.
      */
     public fun initRenderer(
-        videoRenderer: SurfaceViewRenderer,
+        videoRenderer: TextureViewRenderer,
         streamId: String,
         onRender: (View) -> Unit = {}
     ) {
