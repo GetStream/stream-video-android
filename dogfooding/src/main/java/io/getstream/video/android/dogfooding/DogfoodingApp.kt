@@ -19,6 +19,7 @@ package io.getstream.video.android.dogfooding
 import android.app.Application
 import android.content.Context
 import com.google.firebase.auth.FirebaseAuth
+import io.getstream.android.push.firebase.FirebasePushDeviceGenerator
 import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.StreamVideoBuilder
 import io.getstream.video.android.logging.LoggingLevel
@@ -59,6 +60,7 @@ class DogfoodingApp : Application() {
             context = this,
             credentialsProvider = credentialsProvider,
             loggingLevel = loggingLevel,
+            pushDeviceGenerators = listOf(FirebasePushDeviceGenerator())
         ).build().also {
             calls = it
         }

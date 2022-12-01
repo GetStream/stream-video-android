@@ -97,8 +97,10 @@ dependencies {
     implementation Dependencies.okhttpLoggingInterceptor
     implementation Dependencies.kotlinSerializationJson
 
-    // Stream Logger
+    // Stream
     implementation Dependencies.streamLog
+    implementation Dependencies.streamPush
+    implementation Dependencies.streamPushDelegate
 
     // Unit Tests
     testImplementation 'junit:junit:4.13.2'

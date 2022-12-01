@@ -18,6 +18,7 @@ package io.getstream.video.android.user
 
 import android.content.SharedPreferences
 import androidx.core.content.edit
+import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -44,6 +45,21 @@ internal class UserPreferencesImpl(
     }
 
     /**
+     * @see UserPreferences.getCachedApiKey
+     */
+    override fun getCachedApiKey(): ApiKey? =
+        sharedPreferences.getString(KEY_APIKEY, null)
+
+    /**
+     * @see UserPreferences.storeApiKey
+     */
+    override fun storeApiKey(apiKey: ApiKey) {
+        sharedPreferences.edit {
+            putString(KEY_APIKEY, apiKey)
+        }
+    }
+
+    /**
      * Parses the User JSON from the local preferences if able or a null user if nothing is stored.
      *
      * @return The user value that's parsed.
@@ -62,10 +78,11 @@ internal class UserPreferencesImpl(
      * @see UserPreferences.clear
      */
     override fun clear() {
-        sharedPreferences.edit().clear().apply()
+        sharedPreferences.edit { clear() }
     }
 
     internal companion object {
         private const val KEY_USER = "user_data"
+        private const val KEY_APIKEY = "apikey"
     }
 }
