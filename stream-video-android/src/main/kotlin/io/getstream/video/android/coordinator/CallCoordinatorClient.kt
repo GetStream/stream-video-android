@@ -36,10 +36,10 @@ import stream.video.coordinator.client_v1_rpc.SendEventRequest
 public interface CallCoordinatorClient {
 
     /**
-     * Create a new Device used to receive Push Notifications
+     * Create a new Device used to receive Push Notifications.
      *
      * @param createDeviceRequest The device data.
-     * @return [CreateDeviceResponse] witch hold the device.
+     * @return [CreateDeviceResponse] witch holds the device.
      */
     public suspend fun createDevice(createDeviceRequest: CreateDeviceRequest): Result<CreateDeviceResponse>
 

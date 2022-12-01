@@ -162,10 +162,10 @@ public class StreamVideoImpl(
     /**
      * Create a device that will be used to receive push notifications.
      *
-     * @param token the Token obtained from the push provider to be used.
-     * @param pushProvider The push provider to be used.
+     * @param token The Token obtained from the selected push provider.
+     * @param pushProvider The selected push provider.
      *
-     * @return [Result] witch contains the [Device]
+     * @return [Result] containing the [Device].
      */
     override suspend fun createDevice(token: String, pushProvider: String): Result<Device> {
         logger.d { "[createDevice] token: $token, pushProvider: $pushProvider" }

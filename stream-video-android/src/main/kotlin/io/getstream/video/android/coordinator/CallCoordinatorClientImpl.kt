@@ -47,10 +47,10 @@ internal class CallCoordinatorClientImpl(
 ) : CallCoordinatorClient {
 
     /**
-     * Create a new Device used to receive Push Notifications
+     * Create a new Device used to receive Push Notifications.
      *
      * @param createDeviceRequest The device data.
-     * @return [CreateDeviceResponse] witch hold the device.
+     * @return [CreateDeviceResponse] witch holds the device.
      */
     override suspend fun createDevice(
         createDeviceRequest: CreateDeviceRequest
