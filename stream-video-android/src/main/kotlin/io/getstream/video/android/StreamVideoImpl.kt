@@ -29,6 +29,7 @@ import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.model.CallEventType
 import io.getstream.video.android.model.CallMetadata
+import io.getstream.video.android.model.Device
 import io.getstream.video.android.model.IceServer
 import io.getstream.video.android.model.JoinedCall
 import io.getstream.video.android.model.SfuToken
@@ -68,6 +69,7 @@ import kotlinx.coroutines.withContext
 import okio.ByteString.Companion.encodeUtf8
 import stream.video.coordinator.client_v1_rpc.CreateCallInput
 import stream.video.coordinator.client_v1_rpc.CreateCallRequest
+import stream.video.coordinator.client_v1_rpc.CreateDeviceRequest
 import stream.video.coordinator.client_v1_rpc.GetCallEdgeServerRequest
 import stream.video.coordinator.client_v1_rpc.GetCallEdgeServerResponse
 import stream.video.coordinator.client_v1_rpc.GetOrCreateCallRequest
@@ -77,6 +79,7 @@ import stream.video.coordinator.client_v1_rpc.SendCustomEventRequest
 import stream.video.coordinator.client_v1_rpc.SendEventRequest
 import stream.video.coordinator.edge_v1.Latency
 import stream.video.coordinator.edge_v1.LatencyMeasurements
+import stream.video.coordinator.push_v1.DeviceInput
 
 /**
  * @param lifecycle The lifecycle used to observe changes in the process. // TODO - docs
@@ -155,6 +158,33 @@ public class StreamVideoImpl(
      * Represents the state of the currently active call.
      */
     override val callState: StateFlow<StreamCallState> = engine.callState
+
+    /**
+     * Create a device that will be used to receive push notifications.
+     *
+     * @param token The Token obtained from the selected push provider.
+     * @param pushProvider The selected push provider.
+     *
+     * @return [Result] containing the [Device].
+     */
+    override suspend fun createDevice(token: String, pushProvider: String): Result<Device> {
+        logger.d { "[createDevice] token: $token, pushProvider: $pushProvider" }
+        return callCoordinatorClient.createDevice(
+            CreateDeviceRequest(
+                DeviceInput(
+                    id = token,
+                    push_provider_id = pushProvider
+                )
+            )
+        )
+            .also { logger.v { "[createDevice] result: $it" } }
+            .map {
+                Device(
+                    token = it.device?.id ?: error("CreateDeviceResponse has no device object "),
+                    pushProvider = it.device.push_provider_name
+                )
+            }
+    }
 
     /**
      * Domain - Coordinator.

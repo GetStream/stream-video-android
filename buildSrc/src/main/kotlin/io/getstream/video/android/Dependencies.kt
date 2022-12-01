@@ -26,8 +26,9 @@ object Versions {
     internal const val RETROFIT = "2.9.0"
     internal const val OKHTTP = "4.10.0"
 
-    internal const val WEBRTC = "104.5112.03"
+    internal const val WEBRTC = "104.5112.05"
     internal const val STREAM_LOG = "1.0.0"
+    internal const val STREAM_PUSH = "1.0.2"
 
     internal const val ANDROIDX_TEST = "1.4.0"
     internal const val BASE_PROFILE = "1.2.0"
@@ -87,6 +88,9 @@ object Dependencies {
 
     const val streamLog = "io.getstream:stream-log:${Versions.STREAM_LOG}"
     const val streamLogAndroid = "io.getstream:stream-log-android:${Versions.STREAM_LOG}"
+    const val streamPush = "io.getstream:stream-android-push:${Versions.STREAM_PUSH}"
+    const val streamPushDelegate = "io.getstream:stream-android-push-delegate:${Versions.STREAM_PUSH}"
+    const val streamPushFirebase = "io.getstream:stream-android-push-firebase:${Versions.STREAM_PUSH}"
 
     const val baseProfile =
         "androidx.profileinstaller:profileinstaller:${Versions.BASE_PROFILE}"
