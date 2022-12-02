@@ -217,7 +217,8 @@ class LoginActivity : ComponentActivity() {
     private fun startHome(token: String, user: User) {
         dogfoodingApp.initializeStreamVideo(
             AuthCredentialsProvider(
-                "key10", token,
+                API_KEY,
+                token,
                 user = user
             ),
             loggingLevel = LoggingLevel.BODY
