@@ -30,7 +30,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import io.getstream.video.android.compose.R
+import io.getstream.video.android.ui.common.R
 import io.getstream.video.android.compose.theme.VideoTheme
 
 /**
