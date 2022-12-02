@@ -1,28 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<io.getstream.video.android.ui.xml.widget.active.ActiveCallView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/activeCallView"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical">
-
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@android:color/holo_blue_dark"/>
-
-    <io.getstream.video.android.ui.xml.widget.participant.CallParticipantsView
-        android:id="@+id/participantsView"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:background="#000" />
-
-    <io.getstream.video.android.ui.xml.widget.control.CallControlsView
-        android:id="@+id/controlsView"
-        android:background="#903452"
-        android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:contentDescription="" />
-
-</LinearLayout>
+    android:layout_height="match_parent" />

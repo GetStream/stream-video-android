@@ -17,23 +17,17 @@
 package io.getstream.video.android.ui.xml.widget.participant
 
 import android.content.Context
-import android.graphics.Color
 import android.util.AttributeSet
-import android.util.Log
-import android.view.Gravity
 import android.view.View
-import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.constraintlayout.widget.Guideline
 import androidx.core.view.isVisible
 import androidx.transition.TransitionManager
+import io.getstream.log.StreamLog
 import io.getstream.video.android.model.CallParticipantState
 import io.getstream.video.android.ui.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.ui.xml.utils.extensions.updateConstraints
-import org.webrtc.SurfaceViewRenderer
-
-private const val TAG = "Call:ParticipantsView"
 
 public class CallParticipantsView : ConstraintLayout {
 
@@ -48,6 +42,8 @@ public class CallParticipantsView : ConstraintLayout {
     ) {
         init(context, attrs)
     }
+
+    private val logger = StreamLog.getLogger("Call:ParticipantsView")
 
     private val verticalGuideline by lazy {
         context.buildGuideline(
@@ -64,10 +60,10 @@ public class CallParticipantsView : ConstraintLayout {
     }
 
     private val childList = arrayListOf(
-        context.buildParticipantView(text = "Text1", bgColor = Color.RED),
-        context.buildParticipantView(text = "Text2", bgColor = Color.BLUE),
-        context.buildParticipantView(text = "Text3", bgColor = Color.GREEN),
-        context.buildParticipantView(text = "Text4", bgColor = Color.MAGENTA)
+        context.buildParticipantView(),
+        context.buildParticipantView(),
+        context.buildParticipantView(),
+        context.buildParticipantView()
     )
 
     private fun init(context: Context, attrs: AttributeSet?) {
@@ -75,34 +71,35 @@ public class CallParticipantsView : ConstraintLayout {
         addView(horizontalGuideline)
 
         childList.forEach { addView(it) }
-
-        // TODO delete
-        show(count = MAX_CHILD_COUNT)
-        childList.firstOrNull()?.setActive(true)
     }
 
-    public fun setRendererInitializer(rendererInitializer: (SurfaceViewRenderer, String, (View) -> Unit) -> Unit) {
+    public fun setRendererInitializer(rendererInitializer: RendererInitializer) {
+        logger.i { "[setRendererInitializer] rendererInitializer: $rendererInitializer" }
         childList.forEach {
             it.setRendererInitializer(rendererInitializer)
         }
     }
 
-    public fun set(participants: List<CallParticipantState>) {
+    public fun setParticipants(participants: List<CallParticipantState>) {
+        logger.i { "[setParticipants] participants: $participants" }
         show(participants.size)
-        participants.take(4).forEachIndexed { index, callParticipantState ->
-            childList.getOrNull(index)?.also {
-                it.setName(callParticipantState.name)
-                it.set(callParticipantState)
+        participants.take(4).forEachIndexed { index, state ->
+            childList.getOrNull(index)?.also { participantView ->
+                participantView.isVisible = true
+                participantView.setData(state.profileImageURL.orEmpty(), state.name.ifEmpty { state.id })
+                state.track?.also {
+                    participantView.setTrack(it)
+                }
             }
         }
     }
 
     private fun show(count: Int) {
-        Log.i(TAG, "[show] count: $count")
+        logger.i { "[show] count: $count" }
         TransitionManager.beginDelayedTransition(this)
         childList.forEachIndexed { index, view ->
             val isVisible = index < count
-            Log.v(TAG, "[show] index: $index, isVisible: $isVisible")
+            logger.v { "[show] index: $index, isVisible: $isVisible" }
             view.isVisible = isVisible
         }
         updateConstraints {
@@ -184,35 +181,14 @@ public class CallParticipantsView : ConstraintLayout {
     }
 }
 
-private fun Context.buildParticipantView(
-    text: String,
-    bgColor: Int
-): CallParticipantView {
+private fun Context.buildParticipantView(): CallParticipantView {
     return CallParticipantView(this).apply {
         this.id = View.generateViewId()
-        this.setName(text)
-        setBackgroundColor(bgColor)
         this.layoutParams = ConstraintLayout.LayoutParams(
             ConstraintLayout.LayoutParams.MATCH_CONSTRAINT,
             ConstraintLayout.LayoutParams.MATCH_CONSTRAINT
         )
-    }
-}
-
-private fun Context.buildTextView(
-    text: String,
-    bgColor: Int
-): TextView {
-    return TextView(this).apply {
-        this.id = View.generateViewId()
-        this.text = text
-        textSize = 30f
-        gravity = Gravity.CENTER
-        setBackgroundColor(bgColor)
-        this.layoutParams = ConstraintLayout.LayoutParams(
-            ConstraintLayout.LayoutParams.MATCH_CONSTRAINT,
-            ConstraintLayout.LayoutParams.MATCH_CONSTRAINT
-        )
+        this.isVisible = false
     }
 }
 

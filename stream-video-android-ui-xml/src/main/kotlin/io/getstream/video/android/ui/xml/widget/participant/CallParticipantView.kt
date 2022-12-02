@@ -24,31 +24,34 @@ import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.core.view.children
 import androidx.core.view.isVisible
-import io.getstream.video.android.model.CallParticipantState
+import io.getstream.log.StreamLog
+import io.getstream.video.android.model.VideoTrack
+import io.getstream.video.android.ui.TextureViewRenderer
 import io.getstream.video.android.ui.xml.R
 import io.getstream.video.android.ui.xml.utils.extensions.constrainViewToParent
 import io.getstream.video.android.ui.xml.utils.extensions.constrainViewToParentBySide
+import io.getstream.video.android.ui.xml.utils.extensions.createStreamThemeWrapper
+import io.getstream.video.android.ui.xml.utils.extensions.dpToPx
 import io.getstream.video.android.ui.xml.utils.extensions.updateConstraints
 import io.getstream.video.android.ui.xml.widget.avatar.AvatarView
-import org.webrtc.SurfaceViewRenderer
 
 public class CallParticipantView : ConstraintLayout {
 
-    public constructor(context: Context) : super(context)
-    public constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
-    public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
+    public constructor(context: Context) : this(context, null)
+    public constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
+    public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : this(context, attrs, defStyleAttr, 0)
     public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(
-        context,
+        context.createStreamThemeWrapper(),
         attrs,
         defStyleAttr,
         defStyleRes
-    )
+    ) {
+        init(context, attrs)
+    }
 
-    // TODO delete
-    private val tempColors = listOf(
-        Color.RED, Color.BLUE, Color.GREEN, Color.MAGENTA, Color.YELLOW, Color.CYAN
-    )
+    private val logger = StreamLog.getLogger("Call:ParticipantView")
 
     private val videoContainer = FrameLayout(context).apply {
         this.id = View.generateViewId()
@@ -56,35 +59,33 @@ public class CallParticipantView : ConstraintLayout {
             LayoutParams.MATCH_CONSTRAINT,
             LayoutParams.MATCH_CONSTRAINT
         )
-        setBackgroundColor(tempColors.random())
     }
 
     private val nameView = TextView(context).apply {
         this.id = View.generateViewId()
         this.text = text
         textSize = 24f
-        setBackgroundColor(Color.DKGRAY)
+        setBackgroundColor(Color.GRAY)
         setTextColor(Color.WHITE)
+        setPadding(8.dpToPx(), 4.dpToPx(), 8.dpToPx(), 4.dpToPx())
         this.layoutParams = LayoutParams(
             LayoutParams.WRAP_CONTENT,
             LayoutParams.WRAP_CONTENT
         ).apply {
-            marginStart = 50
-            topMargin = 50
+            marginStart = 16.dpToPx()
+            topMargin = 16.dpToPx()
         }
     }
 
     private val avatarView = AvatarView(context).apply {
         this.id = View.generateViewId()
         this.layoutParams = LayoutParams(
-            300,
-            300
-        )
-        setData(
-            imageUrl = "https://getstream.io/static/a4ba18b7dc1eedfa3ea4edbac74ce5e4/a3911/kanat-kiialbaev.webp",
-            name = "Kanat Kia"
+            96.dpToPx(),
+            96.dpToPx()
         )
     }
+
+    private var rendererInitializer: RendererInitializer? = null
 
     private val activeSpeakerView = View(context).apply {
         this.id = View.generateViewId()
@@ -92,7 +93,7 @@ public class CallParticipantView : ConstraintLayout {
         setBackgroundResource(R.drawable.rect_active_speaker)
     }
 
-    init {
+    private fun init(context: Context, attrs: AttributeSet?) {
         addView(videoContainer)
         addView(nameView)
         addView(avatarView)
@@ -108,39 +109,79 @@ public class CallParticipantView : ConstraintLayout {
         }
     }
 
-    public fun setName(name: String) {
-        nameView.text = name.ifBlank { "John" }
+    public fun setData(imageUrl: String, name: String) {
+        avatarView.setData(imageUrl, name)
+        nameView.text = name.ifBlank { "Empty" }
     }
 
     public fun setActive(isActive: Boolean) {
         activeSpeakerView.isVisible = isActive
     }
 
-    private var rendererInitializer: ((SurfaceViewRenderer, String, (View) -> Unit) -> Unit)? = null
-
-    public fun setRendererInitializer(rendererInitializer: (SurfaceViewRenderer, String, (View) -> Unit) -> Unit) {
+    public fun setRendererInitializer(rendererInitializer: RendererInitializer) {
         this.rendererInitializer = rendererInitializer
+        rendererInitializer.initialize()
     }
 
-    public fun set(
-        participant: CallParticipantState,
-    ) {
-        val renderer = SurfaceViewRenderer(context).apply {
-            this.id = SurfaceViewRenderer.generateViewId()
+    public fun setTrack(track: VideoTrack) {
+        val renderer = TextureViewRenderer(context).apply {
+            this.id = View.generateViewId()
+            this.videoTrack = InitializableTrack(delegate = track)
             this.layoutParams = LayoutParams(
                 LayoutParams.MATCH_CONSTRAINT,
                 LayoutParams.MATCH_CONSTRAINT
             )
         }
-        rendererInitializer?.invoke(renderer, participant.track?.streamId.orEmpty()) { /* no-op */ }
-        participant.track?.video?.addSink(renderer)
+        track.video.addSink(renderer)
+        videoContainer.videoRenderer = renderer
+        rendererInitializer.initialize()
+    }
 
-        videoContainer.addView(
-            renderer,
-            FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.MATCH_PARENT,
-                FrameLayout.LayoutParams.MATCH_PARENT
-            )
-        )
+    private fun RendererInitializer?.initialize() {
+        val videoRenderer = videoContainer.videoRenderer ?: return
+        val videoTrack = videoRenderer.videoTrack ?: return
+        if (videoTrack.initialized) return
+        logger.i { "[initialize] videoTrack: '$videoTrack'" }
+        this?.initRenderer(videoRenderer, videoTrack.streamId) { /* no-op */ }
+        videoTrack.initialized = true
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        logger.i { "[onDetachedFromWindow] participant: '${nameView.text}'" }
+        videoContainer.videoRenderer?.also { videoRenderer ->
+            videoRenderer.videoTrack?.video?.removeSink(videoRenderer)
+            videoRenderer.release()
+        }
+        videoContainer.videoRenderer = null
+    }
+
+    private var FrameLayout.videoRenderer: TextureViewRenderer?
+        get() = children.firstOrNull() as? TextureViewRenderer
+        set(value) {
+            removeAllViews()
+            if (value != null) {
+                addView(
+                    value,
+                    FrameLayout.LayoutParams(
+                        FrameLayout.LayoutParams.MATCH_PARENT,
+                        FrameLayout.LayoutParams.MATCH_PARENT
+                    )
+                )
+            }
+        }
+
+    private var TextureViewRenderer.videoTrack: InitializableTrack?
+        get() = tag as? InitializableTrack
+        set(value) {
+            tag = value
+        }
+
+    private data class InitializableTrack(
+        var initialized: Boolean = false,
+        private val delegate: VideoTrack,
+    ) {
+        val streamId = delegate.streamId
+        val video = delegate.video
     }
 }

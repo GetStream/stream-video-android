@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.ui.xml.widget.local
+package io.getstream.video.android.ui.xml.widget.incoming
 
 import android.content.Context
 import android.util.AttributeSet
 import androidx.constraintlayout.widget.ConstraintLayout
 import io.getstream.video.android.ui.xml.utils.extensions.createStreamThemeWrapper
 
-public class LocalVideoView : ConstraintLayout {
+public class IncomingCallView : ConstraintLayout {
 
     public constructor(context: Context) : this(context, null)
     public constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
@@ -36,5 +36,6 @@ public class LocalVideoView : ConstraintLayout {
     }
 
     private fun init(context: Context, attrs: AttributeSet?) {
+        // TODO
     }
 }

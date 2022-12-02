@@ -174,11 +174,12 @@ public class CallViewModel(
     }
 
     private suspend fun initializeCall(callSettings: CallSettings) {
+        logger.d { "[initializeCall] callSettings: $callSettings" }
         val callResult = client.connectToCall(
             UUID.randomUUID().toString(),
             callSettings
         )
-
+        logger.v { "[initializeCall] callResult: $callResult" }
         when (callResult) {
             is Success -> {
                 val call = callResult.data

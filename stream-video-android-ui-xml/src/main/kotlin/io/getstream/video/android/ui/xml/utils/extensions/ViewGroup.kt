@@ -16,11 +16,42 @@
 
 package io.getstream.video.android.ui.xml.utils.extensions
 
+import android.content.ContextWrapper
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
+import io.getstream.log.StreamLog
+
+private const val TAG = "Call:ViewGroupExt"
 
 internal inline val ViewGroup.inflater: LayoutInflater
     get() = LayoutInflater.from(context)
 
 internal val ViewGroup.streamThemeInflater: LayoutInflater
     get() = LayoutInflater.from(context.createStreamThemeWrapper())
+
+internal fun ViewGroup.initToolbar(toolbar: Toolbar) {
+    val activity: AppCompatActivity = context as? AppCompatActivity
+        ?: (context as? ContextWrapper)?.baseContext as? AppCompatActivity
+        ?: kotlin.run {
+            StreamLog.w(TAG) { "[initToolbar] rejected (no AppCompatActivity found)" }
+            return
+        }
+    activity.apply {
+        setSupportActionBar(toolbar)
+        supportActionBar?.run {
+            setDisplayShowTitleEnabled(false)
+            setDisplayShowHomeEnabled(true)
+            setDisplayHomeAsUpEnabled(true)
+
+            /*ContextCompat.getDrawable(context(), R.drawable.ic_icon_left)?.apply {
+                setTint(ContextCompat.getColor(context, R.color.stream_ui_black))
+            }?.let(toolbar::setNavigationIcon)*/
+
+            toolbar.setNavigationOnClickListener {
+                onBackPressed()
+            }
+        }
+    }
+}

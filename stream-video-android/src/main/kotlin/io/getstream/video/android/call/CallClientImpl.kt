@@ -210,6 +210,7 @@ internal class CallClientImpl(
 
         sfuSocket.releaseConnection()
 
+        videoCapturer?.dispose()
         videoCapturer = null
         isCapturingVideo = false
     }

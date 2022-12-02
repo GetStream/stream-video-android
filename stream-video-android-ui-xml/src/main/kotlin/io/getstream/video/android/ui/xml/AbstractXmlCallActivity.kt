@@ -32,20 +32,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.CallViewModelFactoryProvider
 import io.getstream.video.android.StreamVideoProvider
-import io.getstream.video.android.call.state.CustomAction
-import io.getstream.video.android.call.state.FlipCamera
-import io.getstream.video.android.call.state.LeaveCall
-import io.getstream.video.android.call.state.ToggleCamera
-import io.getstream.video.android.call.state.ToggleMicrophone
-import io.getstream.video.android.call.state.ToggleSpeakerphone
 import io.getstream.video.android.model.CallSettings
 import io.getstream.video.android.model.state.StreamCallState
 import io.getstream.video.android.permission.PermissionManagerImpl
+import io.getstream.video.android.ui.xml.binding.bindTo
 import io.getstream.video.android.ui.xml.databinding.ActivityCallBinding
-import io.getstream.video.android.ui.xml.widget.control.CallControlItem
 import io.getstream.video.android.viewmodel.CallViewModel
 import io.getstream.video.android.viewmodel.CallViewModelFactory
-import kotlinx.coroutines.flow.collectLatest
 
 public abstract class AbstractXmlCallActivity :
     AppCompatActivity(),
@@ -94,72 +87,16 @@ public abstract class AbstractXmlCallActivity :
     override fun onCreate(savedInstanceState: Bundle?) {
         showWhenLockedAndTurnScreenOn()
         super.onCreate(savedInstanceState)
+
         setContentView(binding.root)
-        setSupportActionBar(binding.toolbar)
-
-        binding.controlsView.setOnControlItemClickListener { item ->
-            when (val action = item.action) {
-                is LeaveCall -> {
-                    callViewModel.hangUpCall()
-                }
-                is FlipCamera -> {
-                    callViewModel.flipCamera()
-                }
-                is ToggleCamera -> {
-                    callViewModel.toggleCamera(action.isEnabled.not())
-                }
-                is ToggleMicrophone -> {
-                }
-                is ToggleSpeakerphone -> {
-                }
-                is CustomAction -> {
-                }
-            }
-        }
-
-        binding.controlsView.setItems(
-            listOf(
-                CallControlItem(R.drawable.ic_speaker_on, ToggleSpeakerphone(isEnabled = true)),
-                CallControlItem(R.drawable.ic_videocam_on, ToggleCamera(isEnabled = true)),
-                CallControlItem(R.drawable.ic_mic_on, ToggleMicrophone(isEnabled = true)),
-                CallControlItem(R.drawable.ic_camera_flip, FlipCamera),
-                CallControlItem(R.drawable.ic_call_end, LeaveCall),
-            )
-        )
+        binding.activeCallView.bindTo(callViewModel, lifecycleOwner = this)
 
         lifecycleScope.launchWhenCreated {
-            callViewModel.streamCallState.collectLatest {
+            callViewModel.streamCallState.collect {
                 if (it is StreamCallState.Idle) {
-                    // TODO finish()
+                    //TODO
+                    // finish()
                 }
-            }
-        }
-
-        lifecycleScope.launchWhenResumed {
-            callViewModel.callState.collectLatest {
-                binding.participantsView.setRendererInitializer { videoRenderer, trackId, onRender ->
-                    it?.initRenderer(videoRenderer, trackId, onRender)
-                }
-            }
-        }
-
-        lifecycleScope.launchWhenResumed {
-            callViewModel.participantList.collectLatest {
-                binding.participantsView.set(it)
-            }
-        }
-
-        lifecycleScope.launchWhenResumed {
-            callViewModel.callMediaState.collectLatest {
-                binding.controlsView.setItems(
-                    listOf(
-                        CallControlItem(R.drawable.ic_speaker_on, ToggleSpeakerphone(it.isSpeakerphoneEnabled)),
-                        CallControlItem(R.drawable.ic_videocam_on, ToggleCamera(it.isCameraEnabled)),
-                        CallControlItem(R.drawable.ic_mic_on, ToggleMicrophone(it.isMicrophoneEnabled)),
-                        CallControlItem(R.drawable.ic_camera_flip, FlipCamera),
-                        CallControlItem(R.drawable.ic_call_end, LeaveCall),
-                    )
-                )
             }
         }
     }
