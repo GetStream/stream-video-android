@@ -36,8 +36,8 @@ The second option is the `OutgoingCall`, which is a stateless component. It allo
 public fun OutgoingCall(
     callType: CallType,
     participants: List<CallUser>,
-    onCallAction: (CallAction) -> Unit,
     modifier: Modifier = Modifier,
+    onCallAction: (CallAction) -> Unit,
 )
 ```
 
@@ -48,7 +48,7 @@ Both allow you to override the `onCallAction` handler and implement custom logic
 
 ## IncomingCall
 
-To show an incoming call UI on the screen there are two options. The first one is `IncomingCallContent`, which is a bound component. By default its state and handlers will depend on the `CallViewModel` which can be overridden.
+The component behaves the same as `OutgoingCall`, but shows different UI and a different call state. You can use the component in the same two ways:
 
 ```kotlin
 @Composable
@@ -59,7 +59,7 @@ public fun IncomingCallContent(
 )
 ```
 
-The second option is the `IncomingCall`, which is a stateless component. It allows you to provide and control the state directly.
+And the second, stateless option is the `IncomingCall` composable:
 
 <!-- After https://github.com/GetStream/stream-video-android/pull/110 has been merged in there will be only one onCallAction handler -->
 ```kotlin
@@ -67,8 +67,8 @@ The second option is the `IncomingCall`, which is a stateless component. It allo
 public fun IncomingCall(
     callType: CallType,
     participants: List<CallUser>,
-    onCallAction: (CallAction) -> Unit,
     modifier: Modifier = Modifier,
+    onCallAction: (CallAction) -> Unit,
 )
 ```
 
@@ -79,7 +79,7 @@ Both allow you to override the `onCallAction` handler and implement custom logic
 
 ## ActiveCall
 
-To show an active call with all of its participants there are two options. The first on is `ActiveCallContent` which is a bound component. By default its state and  handlers will depend on the `CallViewModel` which can be overridden.
+Finally, `ActiveCallContent` shows the participants video and call media state after the user has joined or accepted the call. Like the others it has a bound component:
 
 ```kotlin
 @Composable
@@ -101,7 +101,7 @@ public fun ActiveCallContent(
 )
 ```
 
-The second option is to use the `ActiveCall` stateless component. It allows you to provide and control the state directly.
+And the stateless `ActiveCall` component:
 
 ```kotlin
 public fun ActiveCall(
