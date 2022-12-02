@@ -37,7 +37,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.R
+import io.getstream.video.android.ui.common.R
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.extensions.toggleAlpha
 

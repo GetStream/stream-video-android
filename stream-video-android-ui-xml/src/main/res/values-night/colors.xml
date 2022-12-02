@@ -15,28 +15,18 @@
     limitations under the License.
 -->
 <resources>
-    <!-- Greys -->
-    <color name="stream_xml_black">#FFFFFF</color>
-    <color name="stream_xml_black_50">#80FFFFFF</color>
-    <color name="stream_xml_grey">#7A7A7A</color>
-    <color name="stream_xml_grey_gainsboro">#2D2F2F</color>
-    <color name="stream_xml_grey_whisper">#1C1E22</color>
-    <color name="stream_xml_white_smoke">#13151B</color>
-    <color name="stream_xml_white_snow">#070A0D</color>
-    <color name="stream_xml_white">#101418</color>
-    <color name="stream_xml_blue_alice">#00193D</color>
-
-    <!-- Specials -->
-    <color name="stream_xml_overlay">#66000000</color>
-    <color name="stream_xml_overlay_dark">#99FFFFFF</color>
-    <color name="stream_xml_background_gradient_start">#101214</color>
-    <color name="stream_xml_background_gradient_end">#070A0D</color>
-    <color name="stream_xml_message_list_image_attachment_background">#1C1E22</color>
-    <color name="stream_xml_message_list_video_attachment_background">#1C1E22</color>
-
-    <!-- Other -->
-    <color name="stream_xml_button_background_color">#FFFFFF</color>
-    <color name="stream_xml_button_text_color">#005AFF</color>
-    <color name="stream_xml_border">#141924</color>
-    <color name="stream_xml_highlight">#302D22</color>
+    <color name="stream_compose_text_high_emphasis">#FFFFFF</color>
+    <color name="stream_compose_text_low_emphasis">#72767E</color>
+    <color name="stream_compose_disabled">#4C525C</color>
+    <color name="stream_compose_borders">#272A30</color>
+    <color name="stream_compose_input_background">#1C1E22</color>
+    <color name="stream_compose_app_background">#000000</color>
+    <color name="stream_compose_bars_background">#121416</color>
+    <color name="stream_compose_link_background">#00193D</color>
+    <color name="stream_compose_overlay_regular">#33000000</color>
+    <color name="stream_compose_overlay_dark">#99FFFFFF</color>
+    <color name="stream_compose_primary_accent">#337EFF</color>
+    <color name="stream_compose_error_accent">#FF3742</color>
+    <color name="stream_compose_info_accent">#20E070</color>
+    <color name="stream_compose_highlight">#302D22</color>
 </resources>

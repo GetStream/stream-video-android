@@ -20,7 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
-import io.getstream.video.android.compose.R
+import io.getstream.video.android.ui.common.R
 
 /**
  * Contains all the colors in our palette. Each color is used for various things an can be changed to

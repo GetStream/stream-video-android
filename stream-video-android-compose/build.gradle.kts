@@ -57,6 +57,7 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().all {
 
 dependencies {
     api(project(":stream-video-android"))
+    api(project(":stream-video-android-ui-common"))
 
     implementation(Dependencies.material)
     implementation(Dependencies.streamLog)

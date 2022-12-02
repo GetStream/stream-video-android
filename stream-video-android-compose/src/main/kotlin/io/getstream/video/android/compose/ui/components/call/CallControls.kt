@@ -39,7 +39,7 @@ import io.getstream.video.android.call.state.LeaveCall
 import io.getstream.video.android.call.state.ToggleCamera
 import io.getstream.video.android.call.state.ToggleMicrophone
 import io.getstream.video.android.call.state.ToggleSpeakerphone
-import io.getstream.video.android.compose.R
+import io.getstream.video.android.ui.common.R
 import io.getstream.video.android.compose.state.ui.call.CallControlAction
 import io.getstream.video.android.compose.theme.VideoTheme
 
