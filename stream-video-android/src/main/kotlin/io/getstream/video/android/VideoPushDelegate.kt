@@ -16,7 +16,15 @@
 
 package io.getstream.video.android
 
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
+import android.os.Build
+import androidx.core.app.NotificationChannelCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import io.getstream.android.push.PushDevice
 import io.getstream.android.push.delegate.PushDelegate
 import io.getstream.log.StreamLog
@@ -27,14 +35,27 @@ import io.getstream.video.android.user.UserPreferences
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
+
 /**
  * Class used to handle Push Notifications.
  * It is used by reflection by [io.getstream.android.push.delegate.PushDelegateProvider] class.
  */
 internal class VideoPushDelegate(context: Context) : PushDelegate(context) {
-    val logger = StreamLog.getLogger("VideoPushDelegate")
-    val userPreferences: UserPreferences by lazy {
+    private val logger = StreamLog.getLogger("VideoPushDelegate")
+    private val userPreferences: UserPreferences by lazy {
         UserCredentialsManager.initialize(context)
+    }
+    private val notificationManager: NotificationManagerCompat by lazy {
+        NotificationManagerCompat.from(context).also {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                it.createNotificationChannel(
+                    NotificationChannelCompat.Builder(CHANNEL_ID, NotificationManager.IMPORTANCE_HIGH)
+                        .setName(CHANNEL_NAME)
+                        .setDescription(CHANNEL_DESCRIPTION)
+                        .build()
+                )
+            }
+        }
     }
 
     /**
@@ -46,8 +67,109 @@ internal class VideoPushDelegate(context: Context) : PushDelegate(context) {
     override fun handlePushMessage(payload: Map<String, Any?>): Boolean {
         logger.d { "[handlePushMessage] payload: $payload" }
         return payload.ifValid {
-            // TODO: Show PN Notification
+            val users = payload[KEY_USER_NAMES] as String
+            val callId = payload[KEY_CALL_CID] as String
+            searchIncomingCallPendingIntent(callId, users)
+                ?.let { fullScreenPendingIntent ->
+                    searchAcceptCallPendingIntent(callId, users)
+                        ?.let { acceptCallPendingIntent ->
+                            showIncomingCallNotification(
+                                fullScreenPendingIntent,
+                                acceptCallPendingIntent,
+                                users,
+                            )
+                        } ?: logger.e { "Couldn't find any activity for $ACTION_ACCEPT_CALL" }
+                } ?: logger.e { "Couldn't find any activity for $ACTION_INCOMING_CALL" }
         }
+    }
+
+    private fun showIncomingCallNotification(
+        fullScreenPendingIntent: PendingIntent,
+        acceptCallPendingIntent: PendingIntent,
+        users: String,
+    ) {
+        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(androidx.loader.R.drawable.notification_bg)
+            .setContentTitle("Incoming call")
+            .setContentText(users)
+            .setOngoing(true)
+            .setAutoCancel(true)
+            .setContentIntent(fullScreenPendingIntent)
+            .setFullScreenIntent(fullScreenPendingIntent, true)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setCategory(NotificationCompat.CATEGORY_CALL)
+            .addAction(
+                NotificationCompat.Action.Builder(
+                    null,
+                    context.getString(R.string.stream_call_notification_action_accept),
+                    acceptCallPendingIntent,
+                ).build()
+            )
+            .addAction(
+                NotificationCompat.Action.Builder(
+                    null,
+                    context.getString(R.string.stream_call_notification_action_reject),
+                    PendingIntent.getBroadcast(context, 0, Intent(), 0)
+                ).build()
+            )
+            .build()
+        notificationManager.notify(INCOMING_CALL_NOTIFICATION_ID, notification)
+    }
+
+    /**
+     * Search for an activity that can receive incoming calls from Stream Server.
+     *
+     * @param callId The call id from the incoming call.
+     * @param users The invited users to this call.
+     */
+    private fun searchIncomingCallPendingIntent(
+        callId: String,
+        users: String,
+    ): PendingIntent? =
+        searchPendingIntent(Intent(ACTION_INCOMING_CALL), callId, users)
+
+
+    /**
+     * Search for an activity that can accept call from Stream Server.
+     *
+     * @param callId The call id from the incoming call.
+     * @param users The invited users to this call.
+     */
+    private fun searchAcceptCallPendingIntent(
+        callId: String,
+        users: String,
+    ): PendingIntent? =
+        searchPendingIntent(Intent(ACTION_ACCEPT_CALL), callId, users)
+
+    private fun searchPendingIntent(
+        baseIntent: Intent,
+        callId: String,
+        users: String,
+    ): PendingIntent? {
+        return context.packageManager.queryIntentActivities(baseIntent, 0)
+            .filter { it.activityInfo.packageName == context.packageName }
+            .maxByOrNull { it.priority }
+            ?.let { resolveInfo ->
+                val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                } else {
+                    PendingIntent.FLAG_UPDATE_CURRENT
+                }
+                PendingIntent.getActivity(
+                    context,
+                    0,
+                    Intent(baseIntent).apply {
+                        component = ComponentName(
+                            resolveInfo.activityInfo.applicationInfo.packageName,
+                            resolveInfo.activityInfo.name
+                        )
+                        putExtra(INTENT_EXTRA_CALL_CID, callId)
+                        putExtra(INTENT_EXTRA_USERS, users)
+                        putExtra(INTENT_EXTRA_NOTIFICATION_ID, INCOMING_CALL_NOTIFICATION_ID)
+                    },
+                    flags
+                )
+            }
     }
 
     /**
@@ -111,7 +233,20 @@ internal class VideoPushDelegate(context: Context) : PushDelegate(context) {
         private const val KEY_SENDER = "sender"
         private const val KEY_TYPE = "type"
         private const val KEY_CALL_CID = "call_cid"
+        private const val KEY_USER_NAMES = "user_names"
 
         private const val VALUE_STREAM_SENDER = "stream.video"
+
+        private const val ACTION_INCOMING_CALL = "io.getstream.video.android.action.INCOMING_CALL"
+        private const val ACTION_ACCEPT_CALL = "io.getstream.video.android.action.ACCEPT_CALL"
+
+        private const val CHANNEL_ID = "incoming_calls"
+        private const val CHANNEL_NAME = "Incoming Calls"
+        private const val CHANNEL_DESCRIPTION = "Incoming audio and video call alerts"
+        private const val INCOMING_CALL_NOTIFICATION_ID = 24756
+
+        private const val INTENT_EXTRA_CALL_CID = "call_cid"
+        private const val INTENT_EXTRA_USERS = "users"
+        private const val INTENT_EXTRA_NOTIFICATION_ID = "notification_id"
     }
 }
