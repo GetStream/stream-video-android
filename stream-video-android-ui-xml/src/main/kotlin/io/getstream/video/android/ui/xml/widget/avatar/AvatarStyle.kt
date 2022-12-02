@@ -28,6 +28,7 @@ import io.getstream.video.android.ui.xml.utils.extensions.getColorCompat
 import io.getstream.video.android.ui.xml.utils.extensions.getDimension
 import io.getstream.video.android.ui.xml.utils.extensions.getEnum
 import io.getstream.video.android.ui.xml.widget.transformer.TransformStyle
+import io.getstream.video.android.ui.xml.R as RCommon
 
 /**
  * Style for [AvatarView].
@@ -66,7 +67,7 @@ public data class AvatarStyle(
                     )
                     .color(
                         R.styleable.AvatarView_streamXmlAvatarTextColor,
-                        context.getColorCompat(R.color.stream_xml_white)
+                        context.getColorCompat(RCommon.color.stream_text_avatar_initials)
                     )
                     .font(
                         R.styleable.AvatarView_streamXmlAvatarTextFontAssets,

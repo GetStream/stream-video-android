@@ -15,18 +15,19 @@
     limitations under the License.
 -->
 <resources>
-    <color name="stream_compose_text_high_emphasis">#FFFFFF</color>
-    <color name="stream_compose_text_low_emphasis">#72767E</color>
-    <color name="stream_compose_disabled">#4C525C</color>
-    <color name="stream_compose_borders">#272A30</color>
-    <color name="stream_compose_input_background">#1C1E22</color>
-    <color name="stream_compose_app_background">#000000</color>
-    <color name="stream_compose_bars_background">#121416</color>
-    <color name="stream_compose_link_background">#00193D</color>
-    <color name="stream_compose_overlay_regular">#33000000</color>
-    <color name="stream_compose_overlay_dark">#99FFFFFF</color>
-    <color name="stream_compose_primary_accent">#337EFF</color>
-    <color name="stream_compose_error_accent">#FF3742</color>
-    <color name="stream_compose_info_accent">#20E070</color>
-    <color name="stream_compose_highlight">#302D22</color>
+    <color name="stream_text_high_emphasis">#FFFFFF</color>
+    <color name="stream_text_low_emphasis">#72767E</color>
+    <color name="stream_disabled">#4C525C</color>
+    <color name="stream_borders">#272A30</color>
+    <color name="stream_input_background">#1C1E22</color>
+    <color name="stream_app_background">#000000</color>
+    <color name="stream_bars_background">#121416</color>
+    <color name="stream_link_background">#00193D</color>
+    <color name="stream_overlay_regular">#33000000</color>
+    <color name="stream_overlay_dark">#99FFFFFF</color>
+    <color name="stream_primary_accent">#337EFF</color>
+    <color name="stream_error_accent">#FF3742</color>
+    <color name="stream_info_accent">#20E070</color>
+    <color name="stream_highlight">#302D22</color>
+    <color name="stream_text_avatar_initials">#FFFFFF</color>
 </resources>

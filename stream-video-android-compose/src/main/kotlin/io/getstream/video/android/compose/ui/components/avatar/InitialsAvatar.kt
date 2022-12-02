@@ -79,7 +79,7 @@ public fun InitialsAvatar(
                 .offset(avatarOffset.x, avatarOffset.y),
             text = initials,
             style = textStyle,
-            color = Color.White
+            color = VideoTheme.colors.avatarInitials
         )
     }
 }

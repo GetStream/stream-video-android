@@ -45,7 +45,7 @@ private const val GradientLighterColorFactor = 0.7f
 @ReadOnlyComposable
 internal fun initialsGradient(initials: String): Brush {
     val gradientBaseColors =
-        LocalContext.current.resources.getIntArray(R.array.stream_compose_avatar_gradient_colors)
+        LocalContext.current.resources.getIntArray(R.array.stream_avatar_gradient_colors)
 
     val baseColorIndex = abs(initials.hashCode()) % gradientBaseColors.size
     val baseColor = gradientBaseColors[baseColorIndex]

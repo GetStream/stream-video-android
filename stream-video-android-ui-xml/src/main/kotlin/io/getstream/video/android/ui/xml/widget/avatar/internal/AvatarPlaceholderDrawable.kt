@@ -26,7 +26,7 @@ import android.graphics.Shader
 import android.graphics.Typeface
 import android.graphics.drawable.Drawable
 import androidx.annotation.Px
-import io.getstream.video.android.ui.xml.R
+import io.getstream.video.android.ui.common.R
 import io.getstream.video.android.ui.xml.font.TextStyle
 import io.getstream.video.android.ui.xml.utils.adjustColorBrightness
 import io.getstream.video.android.ui.xml.utils.extensions.getIntArray
@@ -115,7 +115,7 @@ internal class AvatarPlaceholderDrawable(
         @Px width: Int,
         @Px height: Int,
     ): Shader {
-        val gradientBaseColors = context.getIntArray(R.array.stream_xml_avatar_gradient_colors)
+        val gradientBaseColors = context.getIntArray(R.array.stream_avatar_gradient_colors)
 
         val baseColorIndex = abs(initials.hashCode()) % gradientBaseColors.size
         val baseColor = gradientBaseColors[baseColorIndex]
