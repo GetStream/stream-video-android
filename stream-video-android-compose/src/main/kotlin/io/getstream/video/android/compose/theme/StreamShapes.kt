@@ -52,7 +52,7 @@ public data class StreamShapes(
             callButton = CircleShape,
             callControls = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
             callControlsButton = CircleShape,
-            participantsInfoMenuButton = RoundedCornerShape(16.dp),
+            participantsInfoMenuButton = RoundedCornerShape(32.dp),
             dialog = RoundedCornerShape(16.dp)
         )
     }

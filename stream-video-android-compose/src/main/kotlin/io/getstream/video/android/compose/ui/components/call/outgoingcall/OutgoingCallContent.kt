@@ -43,12 +43,16 @@ import io.getstream.video.android.viewmodel.CallViewModel
  *
  * @param viewModel The [CallViewModel] used to provide state and various handlers in the call.
  * @param modifier Modifier for styling.
+ * @param onBackPressed Handler when the user taps on the back button.
+ * @param onCallInfoSelected Handler when the call participants info is selected.
  * @param onCallAction Handler when the user clicks on some of the call controls.
  */
 @Composable
 public fun OutgoingCallContent(
     viewModel: CallViewModel,
     modifier: Modifier = Modifier,
+    onBackPressed: () -> Unit,
+    onCallInfoSelected: () -> Unit = viewModel::showCallInfo,
     onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
 ) {
     val callType: CallType by viewModel.callType.collectAsState()
@@ -60,6 +64,8 @@ public fun OutgoingCallContent(
         participants = participants,
         callMediaState = callMediaState,
         modifier = modifier,
+        onBackPressed = onBackPressed,
+        onCallInfoSelected = onCallInfoSelected,
         onCallAction = onCallAction
     )
 }
@@ -72,6 +78,8 @@ public fun OutgoingCallContent(
  * @param participants People participating in the call.
  * @param callMediaState The state of current user media (camera on, audio on, etc.).
  * @param modifier Modifier for styling.
+ * @param onBackPressed Handler when the user taps on back.
+ * @param onCallInfoSelected Handler when the call participants info is selected.
  * @param onCallAction Handler when the user clicks on some of the call controls.
  */
 @Composable
@@ -80,6 +88,8 @@ public fun OutgoingCall(
     participants: List<CallUser>,
     callMediaState: CallMediaState,
     modifier: Modifier = Modifier,
+    onBackPressed: () -> Unit,
+    onCallInfoSelected: () -> Unit,
     onCallAction: (CallAction) -> Unit,
 ) {
     CallBackground(
@@ -91,7 +101,7 @@ public fun OutgoingCall(
 
         Column {
 
-            CallAppBar()
+            CallAppBar(onBackPressed = onBackPressed, onCallInfoSelected = onCallInfoSelected)
 
             val topPadding = if (participants.size == 1 || callType == CallType.VIDEO) {
                 VideoTheme.dimens.singleAvatarAppbarPadding
@@ -149,7 +159,9 @@ private fun OutgoingCallPreview() {
                 }
             ),
             callMediaState = CallMediaState(),
-            onCallAction = { }
+            onCallAction = {},
+            onCallInfoSelected = {},
+            onBackPressed = {}
         )
     }
 }

@@ -248,8 +248,8 @@ internal class CallClientImpl(
 
     override fun setInitialCallSettings(callSettings: CallSettings) {
         logger.d { "[setCallSettings] call settings: $callSettings" }
-        _isVideoEnabled.value = callSettings.videoOn
-        _isAudioEnabled.value = callSettings.audioOn
+        _isVideoEnabled.value = callSettings.cameraOn
+        _isAudioEnabled.value = callSettings.microphoneOn
         _isSpeakerPhoneEnabled.value = callSettings.speakerOn
     }
 
@@ -269,8 +269,7 @@ internal class CallClientImpl(
                 startCapturingLocalVideo(CameraMetadata.LENS_FACING_FRONT)
             }
             val request = UpdateMuteStateRequest(
-                sessionId,
-                video_mute_changed = VideoMuteChanged(muted = !isEnabled)
+                sessionId, video_mute_changed = VideoMuteChanged(muted = !isEnabled)
             )
 
             updateMuteState(request).onSuccessSuspend {
@@ -435,8 +434,8 @@ internal class CallClientImpl(
         logger.v { "[initializeCall] #sfu; result: $result" }
         val callSettings = CallSettings(
             autoPublish = autoPublish,
-            audioOn = _isAudioEnabled.value,
-            videoOn = _isVideoEnabled.value,
+            microphoneOn = _isAudioEnabled.value,
+            cameraOn = _isVideoEnabled.value,
             speakerOn = _isSpeakerPhoneEnabled.value
         )
         logger.d { "[initializeCall] callSettings: $callSettings" }
@@ -503,7 +502,7 @@ internal class CallClientImpl(
 
         val request = JoinRequest(
             session_id = sessionId,
-            codec_settings = CodecSettings( // TODO - layers
+            codec_settings = CodecSettings(
                 video = VideoCodecs(
                     encodes = encoderCodecs, decodes = decoderCodecs
                 ),
@@ -526,8 +525,7 @@ internal class CallClientImpl(
                 logger.v { "[executeJoinRequest] completed: $event" }
                 Success(
                     JoinResponse(
-                        event.callState,
-                        event.ownSessionId
+                        event.callState, event.ownSessionId
                     )
                 )
             }
@@ -607,7 +605,10 @@ internal class CallClientImpl(
         logger.v { "[handleTrickle] #sfu; #${event.peerType.stringify()}; result: $result" }
     }
 
-    private fun onNegotiationNeeded(peerConnection: StreamPeerConnection, peerType: StreamPeerType) {
+    private fun onNegotiationNeeded(
+        peerConnection: StreamPeerConnection,
+        peerType: StreamPeerType
+    ) {
         val id = Random.nextInt().absoluteValue
         logger.d { "[negotiate] #$id; #sfu; #${peerType.stringify()}; peerConnection: $peerConnection" }
         coroutineScope.launch {
@@ -682,8 +683,7 @@ internal class CallClientImpl(
         val audioSource = peerConnectionFactory.makeAudioSource(audioConstraints)
 
         return peerConnectionFactory.makeAudioTrack(
-            source = audioSource,
-            trackId = buildTrackId(TRACK_TYPE_AUDIO)
+            source = audioSource, trackId = buildTrackId(TRACK_TYPE_AUDIO)
         )
     }
 
@@ -694,8 +694,7 @@ internal class CallClientImpl(
         capturer?.initialize(surfaceTextureHelper, context, videoSource.capturerObserver)
 
         return peerConnectionFactory.makeVideoTrack(
-            source = videoSource,
-            trackId = buildTrackId(TRACK_TYPE_VIDEO)
+            source = videoSource, trackId = buildTrackId(TRACK_TYPE_VIDEO)
         )
     }
 

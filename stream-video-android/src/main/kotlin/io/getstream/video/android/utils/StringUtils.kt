@@ -16,7 +16,9 @@
 
 package io.getstream.video.android.utils
 
+import android.content.Context
 import io.getstream.video.android.model.StreamPeerType
+import io.getstream.video.android.model.state.StreamCallState
 import io.getstream.video.android.module.SfuClientModule.Companion.REDIRECT_SIGNAL_URL
 import io.getstream.video.android.module.SfuClientModule.Companion.SIGNAL_BASE_URL
 
@@ -25,13 +27,23 @@ internal fun enrichSFUURL(url: String?): String {
 }
 
 public fun String.initials(): String {
-    return trim()
-        .split("\\s+".toRegex())
-        .take(2)
+    return trim().split("\\s+".toRegex()).take(2)
         .joinToString(separator = "") { it.take(1).uppercase() }
 }
 
 internal fun StreamPeerType.stringify() = when (this) {
     StreamPeerType.PUBLISHER -> "publisher"
     StreamPeerType.SUBSCRIBER -> "subscriber"
+}
+
+public fun StreamCallState.formatAsTitle(context: Context): String = when (this) {
+    // TODO stringResource(id = )
+    is StreamCallState.Drop -> "Drop"
+    is StreamCallState.Joined -> "Joined"
+    is StreamCallState.Connecting -> "Connecting"
+    is StreamCallState.Connected -> "Connected"
+    is StreamCallState.Incoming -> "Incoming"
+    is StreamCallState.Joining -> "Joining"
+    is StreamCallState.Outgoing -> "Outgoing"
+    StreamCallState.Idle -> "Idle"
 }

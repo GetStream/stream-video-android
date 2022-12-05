@@ -17,11 +17,14 @@
 package io.getstream.video.android.compose.ui
 
 import android.Manifest
+import android.app.PictureInPictureParams
 import android.content.Intent
+import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Rational
 import android.view.WindowManager
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -33,10 +36,13 @@ import io.getstream.video.android.CallViewModelFactoryProvider
 import io.getstream.video.android.PermissionManagerProvider
 import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.StreamVideoProvider
+import io.getstream.video.android.call.state.CancelCall
 import io.getstream.video.android.call.state.ToggleCamera
 import io.getstream.video.android.call.state.ToggleMicrophone
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.CallContent
+import io.getstream.video.android.compose.ui.components.call.activecall.DefaultPictureInPictureContent
+import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.state.StreamCallState
 import io.getstream.video.android.permission.PermissionManager
 import io.getstream.video.android.permission.StreamPermissionManagerImpl
@@ -75,15 +81,20 @@ public abstract class AbstractComposeCallActivity :
             onPermissionResult = { permission, isGranted ->
                 when (permission) {
                     Manifest.permission.CAMERA -> callViewModel.onCallAction(ToggleCamera(isGranted))
-                    Manifest.permission.RECORD_AUDIO -> callViewModel.onCallAction(ToggleMicrophone(isGranted))
+                    Manifest.permission.RECORD_AUDIO -> callViewModel.onCallAction(
+                        ToggleMicrophone(
+                            isGranted
+                        )
+                    )
                 }
-            }, onShowSettings = {
+            },
+            onShowSettings = {
                 showPermissionsDialog()
             }
         )
     }
 
-    private val callViewModel by viewModels<CallViewModel>(factoryProducer = { factory })
+    protected val callViewModel: CallViewModel by viewModels(factoryProducer = { factory })
 
     override fun onCreate(savedInstanceState: Bundle?) {
         callPermissionManager = initPermissionManager()
@@ -104,7 +115,7 @@ public abstract class AbstractComposeCallActivity :
 
     override fun getPermissionManager(): PermissionManager = callPermissionManager
 
-    protected fun buildContent(): (@Composable () -> Unit) = {
+    protected open fun buildContent(): (@Composable () -> Unit) = {
         VideoTheme {
             CallContent(
                 viewModel = callViewModel,
@@ -114,9 +125,16 @@ public abstract class AbstractComposeCallActivity :
                         is ToggleCamera -> toggleCamera(action)
                         else -> callViewModel.onCallAction(action)
                     }
-                }
+                },
+                onBackPressed = ::handleBackPressed,
+                pictureInPictureContent = { PictureInPictureContent(call = it) }
             )
         }
+    }
+
+    @Composable
+    protected open fun PictureInPictureContent(call: Call) {
+        DefaultPictureInPictureContent(roomState = call)
     }
 
     private fun toggleMicrophone(action: ToggleMicrophone) {
@@ -151,18 +169,14 @@ public abstract class AbstractComposeCallActivity :
     }
 
     private fun showPermissionsDialog() {
-        AlertDialog.Builder(this)
-            .setTitle("Permissions required to launch the app")
+        AlertDialog.Builder(this).setTitle("Permissions required to launch the app")
             .setMessage("Open settings to allow camera and microphone permissions.")
             .setPositiveButton("Launch settings") { dialog, _ ->
                 startSettings()
                 dialog.dismiss()
-            }
-            .setNegativeButton("Cancel") { dialog, _ ->
+            }.setNegativeButton("Cancel") { dialog, _ ->
                 dialog.dismiss()
-            }
-            .create()
-            .show()
+            }.create().show()
     }
 
     private fun showWhenLockedAndTurnScreenOn() {
@@ -173,6 +187,65 @@ public abstract class AbstractComposeCallActivity :
             window.addFlags(
                 WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
             )
+        }
+    }
+
+    /**
+     * Triggers when the user taps on the system or header back button.
+     *
+     * Attempts to show Picture in Picture mode, if the user allows it and your Application supports
+     * the feature.
+     */
+    protected open fun handleBackPressed() {
+        val callState = callViewModel.streamCallState.value
+
+        if (callState !is StreamCallState.Connected) {
+            closeCall()
+            return
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                callViewModel.dismissOptions()
+
+                enterPictureInPictureMode(
+                    PictureInPictureParams.Builder().setAspectRatio(Rational(9, 16)).apply {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                            this.setAutoEnterEnabled(true)
+                        }
+                    }.build()
+                )
+            } else {
+                enterPictureInPictureMode()
+            }
+        } else {
+            closeCall()
+        }
+    }
+
+    private fun closeCall() {
+        callViewModel.onCallAction(CancelCall)
+        callViewModel.clearState()
+        finish()
+    }
+
+    override fun onStop() {
+        super.onStop()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            val isInPiP = isInPictureInPictureMode
+
+            if (isInPiP) {
+                callViewModel.onCallAction(CancelCall)
+                callViewModel.clearState()
+            }
+        }
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            callViewModel.onPictureInPictureModeChanged(isInPictureInPictureMode)
         }
     }
 }
