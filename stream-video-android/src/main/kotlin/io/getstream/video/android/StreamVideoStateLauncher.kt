@@ -17,7 +17,7 @@
 package io.getstream.video.android
 
 import android.content.Context
-import io.getstream.logging.StreamLog
+import io.getstream.log.StreamLog
 import io.getstream.video.android.dispatchers.DispatcherProvider
 import io.getstream.video.android.input.CallAndroidInput
 import io.getstream.video.android.input.CallAndroidInputLauncher

@@ -50,17 +50,20 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.getstream.video.android.app.user.AppUser
 import io.getstream.video.android.compose.ui.components.avatar.Avatar
-import io.getstream.video.android.model.UserCredentials
 import io.getstream.video.android.utils.initials
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun UserItem(
-    credentials: UserCredentials,
-    onClick: (UserCredentials) -> Unit
+    appUser: AppUser,
+    onClick: (AppUser) -> Unit
 ) {
-    val buttonColor = if (!credentials.isSelected) {
+    val user = appUser.user
+    val isSelected = appUser.isSelected
+
+    val buttonColor = if (isSelected) {
         MaterialTheme.colors.primary
     } else {
         MaterialTheme.colors.secondary
@@ -73,7 +76,7 @@ fun UserItem(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = rememberRipple(color = buttonColor),
                 onClick = {
-                    onClick(credentials)
+                    onClick(appUser)
                 }
             ),
     ) {
@@ -84,7 +87,7 @@ fun UserItem(
                 .padding(horizontal = 16.dp)
         ) {
             val colorState = animateColorAsState(
-                targetValue = when (credentials.isSelected) {
+                targetValue = when (isSelected) {
                     true -> MaterialTheme.colors.secondary
                     else -> Color.Transparent
                 },
@@ -101,8 +104,8 @@ fun UserItem(
                     modifier = Modifier
                         .size(40.dp)
                         .align(alignment = Alignment.Center),
-                    imageUrl = credentials.image,
-                    initials = credentials.name.initials()
+                    imageUrl = user.imageUrl ?: "",
+                    initials = user.name.initials()
                 )
             }
 
@@ -112,12 +115,12 @@ fun UserItem(
                 modifier = Modifier
                     .align(Alignment.CenterVertically)
                     .weight(1f),
-                text = credentials.name,
+                text = user.name,
                 fontSize = 16.sp,
             )
 
             AnimatedVisibility(
-                visible = credentials.isSelected,
+                visible = isSelected,
                 modifier = Modifier.align(Alignment.CenterVertically),
                 enter = fadeIn() + scaleIn(),
                 exit = fadeOut() + scaleOut()

@@ -26,6 +26,8 @@ import io.getstream.video.android.utils.Success
 import stream.video.coordinator.call_v1.Call
 import stream.video.coordinator.client_v1_rpc.CreateCallRequest
 import stream.video.coordinator.client_v1_rpc.CreateCallResponse
+import stream.video.coordinator.client_v1_rpc.CreateDeviceRequest
+import stream.video.coordinator.client_v1_rpc.CreateDeviceResponse
 import stream.video.coordinator.client_v1_rpc.GetCallEdgeServerRequest
 import stream.video.coordinator.client_v1_rpc.GetCallEdgeServerResponse
 import stream.video.coordinator.client_v1_rpc.GetOrCreateCallRequest
@@ -43,6 +45,20 @@ import stream.video.coordinator.client_v1_rpc.UpsertCallMembersRequest
 internal class CallCoordinatorClientImpl(
     private val callCoordinatorService: ClientRPCService,
 ) : CallCoordinatorClient {
+
+    /**
+     * Create a new Device used to receive Push Notifications.
+     *
+     * @param createDeviceRequest The device data.
+     * @return [CreateDeviceResponse] witch holds the device.
+     */
+    override suspend fun createDevice(
+        createDeviceRequest: CreateDeviceRequest
+    ): Result<CreateDeviceResponse> = try {
+        Success(callCoordinatorService.createDevice(createDeviceRequest))
+    } catch (error: Throwable) {
+        Failure(VideoError(error.message, error))
+    }
 
     /**
      * Attempts to create a new [Call].

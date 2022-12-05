@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.utils
 
-import io.getstream.logging.StreamLog
+import io.getstream.log.StreamLog
 import io.getstream.video.android.module.CallCoordinatorClientModule
 import java.io.BufferedReader
 import java.io.InputStreamReader

@@ -14,15 +14,11 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.dogfooding
+package io.getstream.video.android.app.user
 
-import io.getstream.video.android.model.UserCredentials
+import io.getstream.video.android.model.User
 
-interface UserPreferences {
-
-    fun getCachedCredentials(): UserCredentials
-
-    fun storeUserCredentials(userCredentials: UserCredentials)
-
-    fun clear()
-}
+data class AppUser(
+    val user: User,
+    val isSelected: Boolean
+)

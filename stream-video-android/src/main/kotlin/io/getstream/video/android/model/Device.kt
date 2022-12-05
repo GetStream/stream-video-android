@@ -14,15 +14,9 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.app.user
+package io.getstream.video.android.model
 
-import io.getstream.video.android.model.UserCredentials
-
-interface UserPreferences {
-
-    fun getCachedCredentials(): UserCredentials
-
-    fun storeUserCredentials(userCredentials: UserCredentials)
-
-    fun clear()
-}
+public data class Device(
+    val token: String,
+    val pushProvider: String
+)

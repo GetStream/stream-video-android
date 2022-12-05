@@ -18,25 +18,23 @@ package io.getstream.video.android.app
 
 import android.app.Application
 import android.content.Context
-import io.getstream.logging.StreamLog
-import io.getstream.logging.android.AndroidStreamLogger
+import io.getstream.log.StreamLog
+import io.getstream.log.android.AndroidStreamLogger
 import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.StreamVideoBuilder
 import io.getstream.video.android.app.ui.call.CallActivity
 import io.getstream.video.android.app.ui.call.CallService
-import io.getstream.video.android.app.user.UserPreferences
-import io.getstream.video.android.app.user.UserPreferencesImpl
 import io.getstream.video.android.input.CallActivityInput
 import io.getstream.video.android.input.CallServiceInput
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.token.CredentialsProvider
+import io.getstream.video.android.user.UserCredentialsManager
+import io.getstream.video.android.user.UserPreferences
 
 class VideoApp : Application() {
 
     val userPreferences: UserPreferences by lazy {
-        UserPreferencesImpl(
-            getSharedPreferences(KEY_PREFERENCES, MODE_PRIVATE)
-        )
+        UserCredentialsManager.getPreferences()
     }
 
     lateinit var credentialsProvider: CredentialsProvider
@@ -52,12 +50,13 @@ class VideoApp : Application() {
             StreamLog.setLogger(AndroidStreamLogger())
         }
         StreamLog.i(TAG) { "[onCreate] no args" }
+        UserCredentialsManager.initialize(this)
     }
 
     /**
      * Sets up and returns the [streamVideo] required to connect to the API.
      */
-    fun initializeStreamCalls(
+    fun initializeStreamVideo(
         credentialsProvider: CredentialsProvider,
         loggingLevel: LoggingLevel
     ): StreamVideo {
@@ -79,10 +78,6 @@ class VideoApp : Application() {
     }
 
     private companion object {
-        /**
-         * Preferences file name.
-         */
-        private const val KEY_PREFERENCES = "video-prefs"
         private const val TAG = "Call:App"
     }
 }
