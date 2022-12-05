@@ -19,7 +19,6 @@ package io.getstream.video.android.compose.ui
 import android.Manifest
 import android.app.PictureInPictureParams
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build
@@ -37,6 +36,7 @@ import io.getstream.video.android.CallViewModelFactoryProvider
 import io.getstream.video.android.PermissionManagerProvider
 import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.StreamVideoProvider
+import io.getstream.video.android.call.state.CancelCall
 import io.getstream.video.android.call.state.ToggleCamera
 import io.getstream.video.android.call.state.ToggleMicrophone
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -49,8 +49,11 @@ import io.getstream.video.android.permission.StreamPermissionManagerImpl
 import io.getstream.video.android.viewmodel.CallViewModel
 import io.getstream.video.android.viewmodel.CallViewModelFactory
 
-public abstract class AbstractComposeCallActivity : AppCompatActivity(), StreamVideoProvider,
-    CallViewModelFactoryProvider, PermissionManagerProvider {
+public abstract class AbstractComposeCallActivity :
+    AppCompatActivity(),
+    StreamVideoProvider,
+    CallViewModelFactoryProvider,
+    PermissionManagerProvider {
 
     private val streamVideo: StreamVideo by lazy { getStreamVideo(this) }
 
@@ -73,7 +76,8 @@ public abstract class AbstractComposeCallActivity : AppCompatActivity(), StreamV
      * Provides the default [PermissionManager] implementation.
      */
     override fun initPermissionManager(): PermissionManager {
-        return StreamPermissionManagerImpl(fragmentActivity = this,
+        return StreamPermissionManagerImpl(
+            fragmentActivity = this,
             onPermissionResult = { permission, isGranted ->
                 when (permission) {
                     Manifest.permission.CAMERA -> callViewModel.onCallAction(ToggleCamera(isGranted))
@@ -86,7 +90,8 @@ public abstract class AbstractComposeCallActivity : AppCompatActivity(), StreamV
             },
             onShowSettings = {
                 showPermissionsDialog()
-            })
+            }
+        )
     }
 
     protected val callViewModel: CallViewModel by viewModels(factoryProducer = { factory })
@@ -112,13 +117,18 @@ public abstract class AbstractComposeCallActivity : AppCompatActivity(), StreamV
 
     protected open fun buildContent(): (@Composable () -> Unit) = {
         VideoTheme {
-            CallContent(viewModel = callViewModel, onCallAction = { action ->
-                when (action) {
-                    is ToggleMicrophone -> toggleMicrophone(action)
-                    is ToggleCamera -> toggleCamera(action)
-                    else -> callViewModel.onCallAction(action)
-                }
-            }, pictureInPictureContent = { PictureInPictureContent(call = it) })
+            CallContent(
+                viewModel = callViewModel,
+                onCallAction = { action ->
+                    when (action) {
+                        is ToggleMicrophone -> toggleMicrophone(action)
+                        is ToggleCamera -> toggleCamera(action)
+                        else -> callViewModel.onCallAction(action)
+                    }
+                },
+                onBackPressed = ::handleBackPressed,
+                pictureInPictureContent = { PictureInPictureContent(call = it) }
+            )
         }
     }
 
@@ -143,10 +153,12 @@ public abstract class AbstractComposeCallActivity : AppCompatActivity(), StreamV
     }
 
     private fun startSettings() {
-        startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-            val uri = Uri.fromParts("package", packageName, null)
-            data = uri
-        })
+        startActivity(
+            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                val uri = Uri.fromParts("package", packageName, null)
+                data = uri
+            }
+        )
     }
 
     private fun startVideoFlow() {
@@ -211,7 +223,7 @@ public abstract class AbstractComposeCallActivity : AppCompatActivity(), StreamV
     }
 
     private fun closeCall() {
-        callViewModel.cancelCall()
+        callViewModel.onCallAction(CancelCall)
         callViewModel.clearState()
         finish()
     }
@@ -223,7 +235,7 @@ public abstract class AbstractComposeCallActivity : AppCompatActivity(), StreamV
             val isInPiP = isInPictureInPictureMode
 
             if (isInPiP) {
-                callViewModel.cancelCall()
+                callViewModel.onCallAction(CancelCall)
                 callViewModel.clearState()
             }
         }

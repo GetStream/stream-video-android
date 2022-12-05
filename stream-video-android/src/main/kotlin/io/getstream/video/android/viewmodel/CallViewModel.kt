@@ -60,7 +60,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
-import java.util.UUID
+import java.util.*
 import io.getstream.video.android.model.state.StreamCallState as State
 
 private const val CONNECT_TIMEOUT = 30_000L
@@ -167,9 +167,6 @@ public class CallViewModel(
     private val _isShowingCallInfo = MutableStateFlow(false)
     public val isShowingCallInfo: StateFlow<Boolean> = _isShowingCallInfo
 
-    private val _isShowingSettings = MutableStateFlow(false)
-    public val isShowingAudioDevicePicker: StateFlow<Boolean> = _isShowingSettings
-
     public val streamCallState: StateFlow<State> get() = streamVideo.callState
 
     private val _callType: MutableStateFlow<CallType> = MutableStateFlow(CallType.VIDEO)
@@ -182,6 +179,9 @@ public class CallViewModel(
     public val participants: StateFlow<List<CallUser>> = _participants
 
     private var prevState: State = State.Idle
+
+    private val _isInPictureInPicture: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    public val isInPictureInPicture: StateFlow<Boolean> = _isInPictureInPicture
 
     init {
         viewModelScope.launch {
@@ -222,8 +222,8 @@ public class CallViewModel(
                 client?.setInitialCallSettings(
                     CallSettings(
                         autoPublish = streamVideo.config.autoPublish,
-                        audioOn = isAudioEnabled.value,
-                        videoOn = isVideoEnabled.value,
+                        microphoneOn = isAudioEnabled.value,
+                        cameraOn = isVideoEnabled.value,
                         speakerOn = isSpeakerPhoneEnabled.value
                     )
                 )
@@ -235,8 +235,10 @@ public class CallViewModel(
 
     private suspend fun initializeCall(autoPublish: Boolean) {
         client?.let { client ->
-            when (val callResult =
-                client.connectToCall(UUID.randomUUID().toString(), autoPublish)) {
+            when (
+                val callResult =
+                    client.connectToCall(UUID.randomUUID().toString(), autoPublish)
+            ) {
                 is Success -> {
                     val call = callResult.data
                     _callState.value = call
@@ -254,27 +256,11 @@ public class CallViewModel(
         } ?: logger.e { "[initializeCall] CallClient was not initialised." }
     }
 
-    private fun toggleSpeakerphone(enabled: Boolean) {
-        if (::client.isInitialized) {
-            client?.setSpeakerphoneEnabled(enabled)
-            onSpeakerphoneChanged(enabled)
-        } else {
-            callSettings.speakerOn = enabled
-        }
-    }
-
     /**
      * Flips the camera for the current participant if possible.
      */
     public fun flipCamera() {
         client?.flipCamera()
-    }
-
-    /**
-     * Sets the flag used to display the settings menu in the UI to true.
-     */
-    public fun showSettings() {
-        _isShowingSettings.value = true
     }
 
     /**
@@ -311,7 +297,7 @@ public class CallViewModel(
 
     public fun onCallAction(callAction: CallAction) {
         when (callAction) {
-            is ToggleSpeakerphone -> toggleSpeakerphone(callAction.isEnabled)
+            is ToggleSpeakerphone -> onSpeakerphoneChanged(callAction.isEnabled)
             is ToggleCamera -> onVideoChanged(callAction.isEnabled)
             is ToggleMicrophone -> onMicrophoneChanged(callAction.isEnabled)
             is SelectAudioDevice -> selectAudioDevice(callAction.audioDevice)
@@ -365,7 +351,6 @@ public class CallViewModel(
      * Resets the state of two popup UI flags.
      */
     public fun dismissOptions() {
-        this._isShowingSettings.value = false
         this._isShowingCallInfo.value = false
     }
 

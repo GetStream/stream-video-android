@@ -67,25 +67,21 @@ public fun ActiveCallContent(
     pictureInPictureContent: @Composable (Call) -> Unit = { DefaultPictureInPictureContent(it) }
 ) {
     val room by callViewModel.callState.collectAsState(initial = null)
-    val isShowingParticipantsInfo by callViewModel.isShowingCallInfo.collectAsState(
-        false
-    )
-
-    val isShowingAudioDevicePicker by callViewModel.isShowingAudioDevicePicker.collectAsState(
-        false
-    )
+    val isShowingParticipantsInfo by callViewModel.isShowingCallInfo.collectAsState(false)
 
     val callMediaState by callViewModel.callMediaState.collectAsState(initial = CallMediaState())
 
     val isInPiPMode by callViewModel.isInPictureInPicture.collectAsState()
 
-    BackHandler {
-        if (isShowingParticipantsInfo || isShowingAudioDevicePicker) {
+    val backAction = {
+        if (isShowingParticipantsInfo) {
             callViewModel.dismissOptions()
         } else {
             onBackPressed()
         }
     }
+
+    BackHandler { backAction() }
 
     Box(
         modifier = modifier, contentAlignment = Alignment.Center
@@ -97,7 +93,7 @@ public fun ActiveCallContent(
             if (!isInPiPMode) {
                 ActiveCallAppBar(
                     callViewModel = callViewModel,
-                    onBackPressed = onBackPressed,
+                    onBackPressed = backAction,
                     onCallInfoSelected = onCallInfoSelected
                 )
             }
@@ -121,7 +117,6 @@ public fun ActiveCallContent(
                             modifier = Modifier.fillMaxSize(), call = roomState
                         )
 
-                        // TODO - colors
                         CallControls(
                             modifier = Modifier
                                 .align(Alignment.BottomCenter)
@@ -146,6 +141,7 @@ internal fun ActiveCallAppBar(
     onCallInfoSelected: () -> Unit
 ) {
     val callState by callViewModel.streamCallState.collectAsState(initial = StreamCallState.Idle)
+    val isShowingCallInfo by callViewModel.isShowingCallInfo.collectAsState()
 
     val callId = when (val state = callState) {
         is StreamCallState.Active -> state.callGuid.id
@@ -159,7 +155,10 @@ internal fun ActiveCallAppBar(
     }
 
     CallAppBar(
-        title = title, onBackPressed = onBackPressed, onCallInfoSelected = onCallInfoSelected
+        title = title,
+        isShowingOverlays = isShowingCallInfo,
+        onBackPressed = onBackPressed,
+        onCallInfoSelected = onCallInfoSelected
     )
 }
 
@@ -170,9 +169,7 @@ internal fun DefaultPictureInPictureContent(roomState: Call) {
 
     if (currentPrimary != null) {
         CallParticipant(
-            call = roomState,
-            participant = currentPrimary,
-            labelPosition = Alignment.BottomStart
+            call = roomState, participant = currentPrimary, labelPosition = Alignment.BottomStart
         )
     }
 }

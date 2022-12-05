@@ -20,6 +20,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -63,7 +64,8 @@ internal fun CallParticipantsInfoAppBar(
         modifier = Modifier
             .fillMaxWidth()
             .height(VideoTheme.dimens.callParticipantInfoMenuAppBarHeight)
-            .background(VideoTheme.colors.barsBackground),
+            .background(VideoTheme.colors.barsBackground)
+            .padding(VideoTheme.dimens.callAppBarPadding),
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(
@@ -90,7 +92,12 @@ internal fun CallParticipantsInfoAppBar(
         }
 
         Text(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier
+                .weight(1f)
+                .padding(
+                    start = VideoTheme.dimens.callAppBarCenterContentSpacingStart,
+                    end = VideoTheme.dimens.callAppBarCenterContentSpacingEnd
+                ),
             text = titleText,
             style = VideoTheme.typography.title3,
             color = VideoTheme.colors.textHighEmphasis

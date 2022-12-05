@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.compose.ui.components.call
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -29,6 +30,7 @@ import io.getstream.video.android.call.state.InviteUsersToCall
 import io.getstream.video.android.call.state.ToggleMicrophone
 import io.getstream.video.android.compose.state.ui.participants.ChangeMuteState
 import io.getstream.video.android.compose.state.ui.participants.InviteUsers
+import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.activecall.ActiveCallContent
 import io.getstream.video.android.compose.ui.components.call.activecall.DefaultPictureInPictureContent
 import io.getstream.video.android.compose.ui.components.call.activecall.internal.InviteUsersDialog
@@ -91,13 +93,15 @@ public fun CallContent(
         )
 
         val isShowingParticipantsInfo by viewModel.isShowingCallInfo.collectAsState()
+        val participantsState by viewModel.participantList.collectAsState(initial = emptyList())
 
-        if (isShowingParticipantsInfo) {
-            val participantsState by viewModel.participantList.collectAsState(initial = emptyList())
+        if (isShowingParticipantsInfo && participantsState.isNotEmpty()) {
             val users by viewModel.getUsersState().collectAsState()
 
             CallParticipantsInfoMenu(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(VideoTheme.colors.appBackground),
                 participantsState = participantsState,
                 users = users,
                 onDismiss = { viewModel.dismissOptions() },

@@ -16,12 +16,14 @@
 
 package io.getstream.video.android.compose.ui.components.call
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -49,13 +51,14 @@ import io.getstream.video.android.compose.theme.VideoTheme
 @Composable
 public fun CallAppBar(
     modifier: Modifier = Modifier,
+    isShowingOverlays: Boolean = false,
     onBackPressed: () -> Unit = {},
     onCallInfoSelected: () -> Unit = {},
     title: String = stringResource(id = R.string.default_app_bar_title),
     leadingContent: @Composable () -> Unit = {
-        DefaultCallAppBarLeadingContent(onBackPressed)
+        DefaultCallAppBarLeadingContent(isShowingOverlays, onBackPressed)
     },
-    centerContent: @Composable () -> Unit = {
+    centerContent: @Composable RowScope.() -> Unit = {
         DefaultCallAppBarCenterContent(title)
     },
     trailingContent: @Composable () -> Unit = {
@@ -68,8 +71,9 @@ public fun CallAppBar(
         modifier = modifier
             .fillMaxWidth()
             .height(VideoTheme.dimens.topAppbarHeightSize)
+            .background(color = VideoTheme.colors.barsBackground)
             .padding(VideoTheme.dimens.callAppBarPadding),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         leadingContent()
 
@@ -83,34 +87,42 @@ public fun CallAppBar(
  * Default leading slot, representing the back button.
  */
 @Composable
-internal fun DefaultCallAppBarLeadingContent(onBackButtonClicked: () -> Unit) {
-    Icon(
-        modifier = Modifier
-            .padding(
-                start = VideoTheme.dimens.callAppBarLeadingContentSpacingStart,
-                end = VideoTheme.dimens.callAppBarLeadingContentSpacingEnd
-            )
-            .clickable { onBackButtonClicked() },
-        painter = painterResource(id = R.drawable.ic_arrow_back),
-        contentDescription = stringResource(id = R.string.back_button_content_description),
-        tint = VideoTheme.colors.textHighEmphasis
-    )
+internal fun DefaultCallAppBarLeadingContent(
+    isShowingOverlays: Boolean,
+    onBackButtonClicked: () -> Unit
+) {
+    IconButton(
+        enabled = !isShowingOverlays,
+        onClick = onBackButtonClicked,
+        modifier = Modifier.padding(
+            start = VideoTheme.dimens.callAppBarLeadingContentSpacingStart,
+            end = VideoTheme.dimens.callAppBarLeadingContentSpacingEnd
+        )
+    ) {
+        Icon(
+            painter = painterResource(id = R.drawable.ic_arrow_back),
+            contentDescription = stringResource(id = R.string.back_button_content_description),
+            tint = VideoTheme.colors.textHighEmphasis
+        )
+    }
 }
 
 /**
  * Default center slot, representing the call title.
  */
 @Composable
-internal fun DefaultCallAppBarCenterContent(title: String) {
+internal fun RowScope.DefaultCallAppBarCenterContent(title: String) {
     Text(
-        modifier = Modifier.padding(
-            start = VideoTheme.dimens.callAppBarCenterContentSpacingStart,
-            end = VideoTheme.dimens.callAppBarCenterContentSpacingEnd
-        ),
+        modifier = Modifier
+            .weight(1f)
+            .padding(
+                start = VideoTheme.dimens.callAppBarCenterContentSpacingStart,
+                end = VideoTheme.dimens.callAppBarCenterContentSpacingEnd
+            ),
         text = title,
         fontSize = VideoTheme.dimens.topAppbarTextSize,
         color = VideoTheme.colors.textHighEmphasis,
-        textAlign = TextAlign.Center,
+        textAlign = TextAlign.Start,
     )
 }
 
@@ -119,17 +131,19 @@ internal fun DefaultCallAppBarCenterContent(title: String) {
  */
 @Composable
 internal fun DefaultCallAppBarTrailingContent(onCallInfoSelected: () -> Unit) {
-    Icon(
-        modifier = Modifier
-            .padding(
-                start = VideoTheme.dimens.callAppBarTrailingContentSpacingStart,
-                end = VideoTheme.dimens.callAppBarTrailingContentSpacingEnd
-            )
-            .clickable { onCallInfoSelected() },
-        painter = painterResource(id = R.drawable.ic_participants),
-        contentDescription = stringResource(id = R.string.call_participants_menu_content_description),
-        tint = VideoTheme.colors.textHighEmphasis
-    )
+    IconButton(
+        onClick = onCallInfoSelected,
+        modifier = Modifier.padding(
+            start = VideoTheme.dimens.callAppBarLeadingContentSpacingStart,
+            end = VideoTheme.dimens.callAppBarLeadingContentSpacingEnd
+        )
+    ) {
+        Icon(
+            painter = painterResource(id = R.drawable.ic_participants),
+            contentDescription = stringResource(id = R.string.call_participants_menu_content_description),
+            tint = VideoTheme.colors.textHighEmphasis
+        )
+    }
 }
 
 @Preview

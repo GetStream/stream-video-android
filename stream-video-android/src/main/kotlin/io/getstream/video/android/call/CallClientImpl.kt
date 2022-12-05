@@ -248,8 +248,8 @@ internal class CallClientImpl(
 
     override fun setInitialCallSettings(callSettings: CallSettings) {
         logger.d { "[setCallSettings] call settings: $callSettings" }
-        _isVideoEnabled.value = callSettings.videoOn
-        _isAudioEnabled.value = callSettings.audioOn
+        _isVideoEnabled.value = callSettings.cameraOn
+        _isAudioEnabled.value = callSettings.microphoneOn
         _isSpeakerPhoneEnabled.value = callSettings.speakerOn
     }
 
@@ -434,8 +434,8 @@ internal class CallClientImpl(
         logger.v { "[initializeCall] #sfu; result: $result" }
         val callSettings = CallSettings(
             autoPublish = autoPublish,
-            audioOn = _isAudioEnabled.value,
-            videoOn = _isVideoEnabled.value,
+            microphoneOn = _isAudioEnabled.value,
+            cameraOn = _isVideoEnabled.value,
             speakerOn = _isSpeakerPhoneEnabled.value
         )
         logger.d { "[initializeCall] callSettings: $callSettings" }
@@ -501,14 +501,17 @@ internal class CallClientImpl(
         val encoderCodecs = peerConnectionFactory.getVideoEncoderCodecs()
 
         val request = JoinRequest(
-            session_id = sessionId, codec_settings = CodecSettings( // TODO - layers
+            session_id = sessionId,
+            codec_settings = CodecSettings(
                 video = VideoCodecs(
                     encodes = encoderCodecs, decodes = decoderCodecs
-                ), audio = AudioCodecs(
+                ),
+                audio = AudioCodecs(
                     encodes = peerConnectionFactory.getAudioEncoderCoders(),
                     decodes = peerConnectionFactory.getAudioDecoderCoders()
                 )
-            ), token = getSfuToken()
+            ),
+            token = getSfuToken()
         )
         logger.d { "[executeJoinRequest] request: $request" }
 
@@ -603,7 +606,8 @@ internal class CallClientImpl(
     }
 
     private fun onNegotiationNeeded(
-        peerConnection: StreamPeerConnection, peerType: StreamPeerType
+        peerConnection: StreamPeerConnection,
+        peerType: StreamPeerType
     ) {
         val id = Random.nextInt().absoluteValue
         logger.d { "[negotiate] #$id; #sfu; #${peerType.stringify()}; peerConnection: $peerConnection" }

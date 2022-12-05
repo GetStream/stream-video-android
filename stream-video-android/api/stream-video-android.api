@@ -1833,11 +1833,15 @@ public final class io/getstream/video/android/model/CallSettings {
 	public final fun copy (ZZZZ)Lio/getstream/video/android/model/CallSettings;
 	public static synthetic fun copy$default (Lio/getstream/video/android/model/CallSettings;ZZZZILjava/lang/Object;)Lio/getstream/video/android/model/CallSettings;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getAudioOn ()Z
 	public final fun getAutoPublish ()Z
+	public final fun getCameraOn ()Z
+	public final fun getMicrophoneOn ()Z
 	public final fun getSpeakerOn ()Z
-	public final fun getVideoOn ()Z
 	public fun hashCode ()I
+	public final fun setAutoPublish (Z)V
+	public final fun setCameraOn (Z)V
+	public final fun setMicrophoneOn (Z)V
+	public final fun setSpeakerOn (Z)V
 	public fun toString ()Ljava/lang/String;
 }
 
@@ -2614,6 +2618,7 @@ public final class io/getstream/video/android/token/AuthCredentialsProvider : io
 	public fun loadApiKey ()Ljava/lang/String;
 	public fun loadUserToken ()Ljava/lang/String;
 	public fun setSfuToken (Ljava/lang/String;)V
+	public fun updateUser (Lio/getstream/video/android/model/User;Ljava/lang/String;)V
 }
 
 public abstract interface class io/getstream/video/android/token/CredentialsProvider {
@@ -2624,6 +2629,7 @@ public abstract interface class io/getstream/video/android/token/CredentialsProv
 	public abstract fun loadApiKey ()Ljava/lang/String;
 	public abstract fun loadUserToken ()Ljava/lang/String;
 	public abstract fun setSfuToken (Ljava/lang/String;)V
+	public abstract fun updateUser (Lio/getstream/video/android/model/User;Ljava/lang/String;)V
 }
 
 public final class io/getstream/video/android/ui/ParticipantContentView : android/widget/LinearLayout {
@@ -2727,6 +2733,7 @@ public final class io/getstream/video/android/utils/ResultKt {
 }
 
 public final class io/getstream/video/android/utils/StringUtilsKt {
+	public static final fun formatAsTitle (Lio/getstream/video/android/model/state/StreamCallState;Landroid/content/Context;)Ljava/lang/String;
 	public static final fun initials (Ljava/lang/String;)Ljava/lang/String;
 }
 
@@ -2764,13 +2771,13 @@ public final class io/getstream/video/android/viewmodel/CallViewModel : androidx
 	public final fun getStreamCallState ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getUsers ()Ljava/util/List;
 	public final fun getUsersState ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun isShowingAudioDevicePicker ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun isShowingParticipantsInfo ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun isInPictureInPicture ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun isShowingCallInfo ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun isVideoInitialized ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun onCallAction (Lio/getstream/video/android/call/state/CallAction;)V
+	public final fun onPictureInPictureModeChanged (Z)V
 	public final fun reconnect ()V
-	public final fun showParticipants ()V
-	public final fun showSettings ()V
+	public final fun showCallInfo ()V
 }
 
 public final class io/getstream/video/android/viewmodel/CallViewModelFactory : androidx/lifecycle/ViewModelProvider$Factory {
