@@ -132,7 +132,8 @@ public abstract class AbstractComposeCallActivity :
         }
     }
 
-    @Composable protected open fun PictureInPictureContent(call: Call) {
+    @Composable
+    protected open fun PictureInPictureContent(call: Call) {
         DefaultPictureInPictureContent(roomState = call)
     }
 
