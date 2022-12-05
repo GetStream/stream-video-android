@@ -48,9 +48,6 @@ import io.getstream.video.android.model.state.StreamCallState as State
  *
  * @param viewModel The [CallViewModel] used to provide state and various handlers in the call.
  * @param modifier Modifier for styling.
- * @param onRejectCall Handler when the user taps on the Reject Call button in Incoming Call state.
- * @param onAcceptCall Handler when the user accepts a call in Incoming Call state.
- * @param onCancelCall Handler when the user decides to cancel or drop out of a call.
  * @param onCallAction Handler when the user clicks on some of the call controls.
  */
 @Composable

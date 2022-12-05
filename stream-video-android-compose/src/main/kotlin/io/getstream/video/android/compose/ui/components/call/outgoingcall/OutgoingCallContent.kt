@@ -43,9 +43,7 @@ import io.getstream.video.android.viewmodel.CallViewModel
  *
  * @param viewModel The [CallViewModel] used to provide state and various handlers in the call.
  * @param modifier Modifier for styling.
- * @param onCancelCall Handler when the user decides to cancel.
- * @param onMicToggleChanged Handler when the user toggles their microphone on or off.
- * @param onVideoToggleChanged Handler when the user toggles their video on or off.
+ * @param onCallAction Handler when the user clicks on some of the call controls.
  */
 @Composable
 public fun OutgoingCallContent(
@@ -74,17 +72,15 @@ public fun OutgoingCallContent(
  * @param participants People participating in the call.
  * @param callMediaState The state of current user media (camera on, audio on, etc.).
  * @param modifier Modifier for styling.
- * @param onCancelCall Handler when the user decides to cancel or drop out of a call.
- * @param onMicToggleChanged Handler when the user toggles their microphone on or off.
- * @param onVideoToggleChanged Handler when the user toggles their video on or off.
+ * @param onCallAction Handler when the user clicks on some of the call controls.
  */
 @Composable
 public fun OutgoingCall(
     callType: CallType,
     participants: List<CallUser>,
     callMediaState: CallMediaState,
-    onCallAction: (CallAction) -> Unit,
     modifier: Modifier = Modifier,
+    onCallAction: (CallAction) -> Unit,
 ) {
     CallBackground(
         modifier = modifier,

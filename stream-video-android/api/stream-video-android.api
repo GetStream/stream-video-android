@@ -1651,8 +1651,8 @@ public final class io/getstream/video/android/model/Call {
 	public final fun getOnStreamAdded ()Lkotlin/jvm/functions/Function1;
 	public final fun getOnStreamRemoved ()Lkotlin/jvm/functions/Function1;
 	public final fun getPrimarySpeaker ()Lkotlinx/coroutines/flow/Flow;
-	public final fun initRenderer (Lio/getstream/video/android/ui/VideoTextureView;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
-	public static synthetic fun initRenderer$default (Lio/getstream/video/android/model/Call;Lio/getstream/video/android/ui/VideoTextureView;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+	public final fun initRenderer (Lio/getstream/video/android/ui/TextureViewRenderer;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun initRenderer$default (Lio/getstream/video/android/model/Call;Lio/getstream/video/android/ui/TextureViewRenderer;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public final fun setCameraEnabled (Z)V
 	public final fun setMicrophoneEnabled (Z)V
 	public final fun setOnStreamAdded (Lkotlin/jvm/functions/Function1;)V
@@ -2628,7 +2628,7 @@ public final class io/getstream/video/android/ui/ParticipantContentView : androi
 	public final fun renderParticipants (Lio/getstream/video/android/model/Call;Ljava/util/List;)V
 }
 
-public final class io/getstream/video/android/ui/ParticipantItemView : io/getstream/video/android/ui/VideoTextureView {
+public final class io/getstream/video/android/ui/ParticipantItemView : io/getstream/video/android/ui/TextureViewRenderer {
 	public fun <init> (Landroid/content/Context;)V
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
 	public final fun bindTrack (Lorg/webrtc/VideoTrack;)V
@@ -2638,7 +2638,7 @@ public final class io/getstream/video/android/ui/ParticipantItemView : io/getstr
 	public final fun isInitialized ()Z
 }
 
-public class io/getstream/video/android/ui/VideoTextureView : android/view/TextureView, android/view/TextureView$SurfaceTextureListener, org/webrtc/VideoSink {
+public class io/getstream/video/android/ui/TextureViewRenderer : android/view/TextureView, android/view/TextureView$SurfaceTextureListener, org/webrtc/VideoSink {
 	public fun <init> (Landroid/content/Context;)V
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
 	public synthetic fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;ILkotlin/jvm/internal/DefaultConstructorMarker;)V

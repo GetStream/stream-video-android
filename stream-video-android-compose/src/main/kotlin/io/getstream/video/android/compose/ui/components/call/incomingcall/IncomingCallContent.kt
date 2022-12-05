@@ -68,16 +68,16 @@ public fun IncomingCallContent(
  * @param participants People participating in the call.
  * @param callType The type of call, Audio or Video.
  * @param isVideoEnabled Whether the video should be enabled when entering the call or not.
- * @param onCallAction Handler used when the user interacts with Call UI.
  * @param modifier Modifier for styling.
+ * @param onCallAction Handler used when the user interacts with Call UI.
  */
 @Composable
 public fun IncomingCall(
     participants: List<CallUser>,
     callType: CallType,
     isVideoEnabled: Boolean,
-    onCallAction: (CallAction) -> Unit,
     modifier: Modifier = Modifier,
+    onCallAction: (CallAction) -> Unit,
 ) {
     CallBackground(
         modifier = modifier,

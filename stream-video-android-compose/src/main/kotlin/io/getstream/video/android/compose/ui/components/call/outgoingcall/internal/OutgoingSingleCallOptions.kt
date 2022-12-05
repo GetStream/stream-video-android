@@ -46,8 +46,8 @@ import io.getstream.video.android.compose.ui.components.extensions.toggleAlpha
 @Composable
 internal fun OutgoingSingleCallOptions(
     callMediaState: CallMediaState,
-    onCallAction: (CallAction) -> Unit,
     modifier: Modifier = Modifier,
+    onCallAction: (CallAction) -> Unit,
 ) {
     val isMicEnabled = callMediaState.isMicrophoneEnabled
     val isVideoEnabled = callMediaState.isCameraEnabled
