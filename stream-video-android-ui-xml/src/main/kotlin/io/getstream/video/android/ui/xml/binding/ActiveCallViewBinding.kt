@@ -36,24 +36,8 @@ public fun ActiveCallView.bindTo(
     viewModel: CallViewModel,
     lifecycleOwner: LifecycleOwner,
 ) {
-    setOnControlItemClickListener { item ->
-        when (val action = item.action) {
-            is LeaveCall -> {
-                viewModel.hangUpCall()
-            }
-            is FlipCamera -> {
-                viewModel.flipCamera()
-            }
-            is ToggleCamera -> {
-                viewModel.toggleCamera(action.isEnabled.not())
-            }
-            is ToggleMicrophone -> {
-            }
-            is ToggleSpeakerphone -> {
-            }
-            is CustomAction -> {
-            }
-        }
+    setOnControlItemClickListener {
+        viewModel.onCallAction(it.action)
     }
 
     setControlItems(
