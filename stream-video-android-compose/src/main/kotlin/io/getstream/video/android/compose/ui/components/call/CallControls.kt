@@ -63,7 +63,8 @@ public fun CallControls(
         color = VideoTheme.colors.appBackground
     ) {
         CallControlsActions(
-            actions = buildDefaultCallControlActions(callMediaState), onCallAction = onCallAction
+            actions = buildDefaultCallControlActions(callMediaState),
+            onCallAction = onCallAction
         )
     }
 }

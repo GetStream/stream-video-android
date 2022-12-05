@@ -14,25 +14,23 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.dogfooding
+package io.getstream.video.android
 
-import android.content.Context
-import android.content.Intent
-import io.getstream.video.android.StreamVideo
-import io.getstream.video.android.compose.ui.AbstractComposeCallActivity
+import io.getstream.video.android.permission.PermissionManager
 
-class CallActivity : AbstractComposeCallActivity() {
+public interface PermissionManagerProvider {
 
     /**
-     * Provides the StreamVideo instance through the videoApp.
+     * Used for [PermissionManager] setup and registration with the Activity that it's used in.
+     *
+     * @return The initialized and registered [PermissionManager].
      */
-    override fun getStreamVideo(context: Context): StreamVideo = context.dogfoodingApp.streamVideo
+    public fun initPermissionManager(): PermissionManager
 
-    companion object {
-        internal fun getIntent(
-            context: Context,
-        ): Intent {
-            return Intent(context, CallActivity::class.java)
-        }
-    }
+    /**
+     * Allows fetching of the [PermissionManager] instance created by [initPermissionManager].
+     *
+     * @return The initialized [PermissionManager] instance.
+     */
+    public fun getPermissionManager(): PermissionManager
 }

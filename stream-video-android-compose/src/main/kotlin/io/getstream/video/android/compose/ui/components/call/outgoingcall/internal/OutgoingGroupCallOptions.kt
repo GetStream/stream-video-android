@@ -28,28 +28,29 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import io.getstream.video.android.call.state.CallAction
+import io.getstream.video.android.call.state.CallMediaState
+import io.getstream.video.android.call.state.CancelCall
+import io.getstream.video.android.call.state.ToggleCamera
+import io.getstream.video.android.call.state.ToggleMicrophone
 import io.getstream.video.android.ui.common.R
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.extensions.toggleAlpha
 
 @Composable
 internal fun OutgoingGroupCallOptions(
+    callMediaState: CallMediaState,
     modifier: Modifier = Modifier,
-    onCancelCall: () -> Unit = {},
-    onMicToggleChanged: (Boolean) -> Unit = {},
-    onVideoToggleChanged: (Boolean) -> Unit = {},
+    onCallAction: (CallAction) -> Unit,
 ) {
-    var isMicEnabled by remember { mutableStateOf(true) }
-    var isVideoEnabled by remember { mutableStateOf(true) }
+    val isMicEnabled = callMediaState.isMicrophoneEnabled
+    val isVideoEnabled = callMediaState.isCameraEnabled
 
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -62,7 +63,7 @@ internal fun OutgoingGroupCallOptions(
                     shape = VideoTheme.shapes.callButton
                 )
                 .size(VideoTheme.dimens.largeButtonSize),
-            onClick = { onCancelCall() },
+            onClick = { onCallAction(CancelCall) },
             content = {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_call_end),
@@ -87,10 +88,7 @@ internal fun OutgoingGroupCallOptions(
                         shape = VideoTheme.shapes.callButton
                     )
                     .size(VideoTheme.dimens.mediumButtonSize),
-                onClick = {
-                    isVideoEnabled = !isVideoEnabled
-                    onVideoToggleChanged(isVideoEnabled)
-                },
+                onClick = { onCallAction(ToggleCamera(!callMediaState.isCameraEnabled)) },
                 content = {
                     val cameraIcon =
                         painterResource(
@@ -117,10 +115,7 @@ internal fun OutgoingGroupCallOptions(
                         shape = VideoTheme.shapes.callButton
                     )
                     .size(VideoTheme.dimens.mediumButtonSize),
-                onClick = {
-                    isMicEnabled = !isMicEnabled
-                    onMicToggleChanged(isMicEnabled)
-                },
+                onClick = { onCallAction(ToggleMicrophone(!callMediaState.isMicrophoneEnabled)) },
                 content = {
                     val micIcon = painterResource(
                         id = if (isMicEnabled) {
@@ -144,5 +139,10 @@ internal fun OutgoingGroupCallOptions(
 @Preview
 @Composable
 private fun OutgoingCallGroupOptions() {
-    VideoTheme { OutgoingGroupCallOptions() }
+    VideoTheme {
+        OutgoingGroupCallOptions(
+            callMediaState = CallMediaState(),
+            onCallAction = { }
+        )
+    }
 }

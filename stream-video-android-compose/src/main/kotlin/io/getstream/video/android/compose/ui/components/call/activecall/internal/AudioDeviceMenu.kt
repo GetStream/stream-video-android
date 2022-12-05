@@ -37,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.audio.AudioDevice
+import io.getstream.video.android.call.state.SelectAudioDevice
 import io.getstream.video.android.viewmodel.CallViewModel
 
 @Composable
@@ -70,7 +71,7 @@ internal fun AudioDeviceMenu(callViewModel: CallViewModel) {
                 ) {
                     items(devices) {
                         AudioDeviceItem(it) { device ->
-                            callViewModel.selectAudioDevice(device)
+                            callViewModel.onCallAction(SelectAudioDevice(device))
                             callViewModel.dismissOptions()
                         }
                     }

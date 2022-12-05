@@ -18,40 +18,40 @@ package io.getstream.video.android.compose.ui
 
 import android.Manifest
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.view.WindowManager
 import androidx.activity.compose.setContent
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.CallViewModelFactoryProvider
+import io.getstream.video.android.PermissionManagerProvider
 import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.StreamVideoProvider
 import io.getstream.video.android.call.state.ToggleCamera
 import io.getstream.video.android.call.state.ToggleMicrophone
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.CallContent
-import io.getstream.video.android.model.CallSettings
 import io.getstream.video.android.model.state.StreamCallState
-import io.getstream.video.android.permission.PermissionManagerImpl
+import io.getstream.video.android.permission.PermissionManager
+import io.getstream.video.android.permission.StreamPermissionManagerImpl
 import io.getstream.video.android.viewmodel.CallViewModel
 import io.getstream.video.android.viewmodel.CallViewModelFactory
 
 public abstract class AbstractComposeCallActivity :
     AppCompatActivity(),
     StreamVideoProvider,
-    CallViewModelFactoryProvider {
+    CallViewModelFactoryProvider,
+    PermissionManagerProvider {
 
     private val streamVideo: StreamVideo by lazy { getStreamVideo(this) }
 
+    private lateinit var callPermissionManager: PermissionManager
     private val factory by lazy {
         getCallViewModelFactory() ?: defaultViewModelFactory()
     }
@@ -62,32 +62,31 @@ public abstract class AbstractComposeCallActivity :
     public fun defaultViewModelFactory(): CallViewModelFactory {
         return CallViewModelFactory(
             streamVideo = streamVideo,
-            permissionManager = PermissionManagerImpl(applicationContext),
+            permissionManager = callPermissionManager,
+        )
+    }
+
+    /**
+     * Provides the default [PermissionManager] implementation.
+     */
+    override fun initPermissionManager(): PermissionManager {
+        return StreamPermissionManagerImpl(
+            fragmentActivity = this,
+            onPermissionResult = { permission, isGranted ->
+                when (permission) {
+                    Manifest.permission.CAMERA -> callViewModel.onCallAction(ToggleCamera(isGranted))
+                    Manifest.permission.RECORD_AUDIO -> callViewModel.onCallAction(ToggleMicrophone(isGranted))
+                }
+            }, onShowSettings = {
+                showPermissionsDialog()
+            }
         )
     }
 
     private val callViewModel by viewModels<CallViewModel>(factoryProducer = { factory })
 
-    @RequiresApi(Build.VERSION_CODES.M)
-    private val permissionsContract = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        val missing = getMissingPermissions()
-        val deniedCamera = !shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)
-        val deniedMicrophone =
-            !shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO)
-
-        when {
-            missing.isNotEmpty() && !deniedCamera && !deniedMicrophone -> requestPermissions(missing)
-            isGranted -> startVideoFlow()
-            deniedCamera || deniedMicrophone -> showPermissionsDialog()
-            else -> {
-                checkPermissions()
-            }
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
+        callPermissionManager = initPermissionManager()
         showWhenLockedAndTurnScreenOn()
         super.onCreate(savedInstanceState)
         setContent(content = buildContent())
@@ -99,35 +98,40 @@ public abstract class AbstractComposeCallActivity :
                 }
             }
         }
+
+        startVideoFlow()
     }
+
+    override fun getPermissionManager(): PermissionManager = callPermissionManager
 
     protected fun buildContent(): (@Composable () -> Unit) = {
         VideoTheme {
             CallContent(
                 viewModel = callViewModel,
-                onRejectCall = callViewModel::rejectCall,
-                onAcceptCall = callViewModel::acceptCall,
-                onCancelCall = callViewModel::cancelCall,
-                onVideoToggleChanged = { isEnabled ->
-                    callViewModel.onCallAction(
-                        ToggleCamera(isEnabled)
-                    )
-                },
-                onMicToggleChanged = { isEnabled ->
-                    callViewModel.onCallAction(
-                        ToggleMicrophone(isEnabled)
-                    )
-                },
+                onCallAction = { action ->
+                    when (action) {
+                        is ToggleMicrophone -> toggleMicrophone(action)
+                        is ToggleCamera -> toggleCamera(action)
+                        else -> callViewModel.onCallAction(action)
+                    }
+                }
             )
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            checkPermissions()
+    private fun toggleMicrophone(action: ToggleMicrophone) {
+        if (!callPermissionManager.hasRecordAudioPermission.value && action.isEnabled) {
+            callPermissionManager.requestPermission(Manifest.permission.RECORD_AUDIO)
         } else {
-            startVideoFlow()
+            callViewModel.onCallAction(action)
+        }
+    }
+
+    private fun toggleCamera(action: ToggleCamera) {
+        if (!callPermissionManager.hasCameraPermission.value && action.isEnabled) {
+            callPermissionManager.requestPermission(Manifest.permission.CAMERA)
+        } else {
+            callViewModel.onCallAction(action)
         }
     }
 
@@ -143,52 +147,7 @@ public abstract class AbstractComposeCallActivity :
     private fun startVideoFlow() {
         val isInitialized = callViewModel.isVideoInitialized.value
         if (isInitialized) return
-        callViewModel.connectToCall(getDefaultCallSettings())
-    }
-
-    protected fun getDefaultCallSettings(): CallSettings = CallSettings(
-        audioOn = false,
-        videoOn = true,
-        speakerOn = false
-    )
-
-    @RequiresApi(Build.VERSION_CODES.M)
-    private fun checkPermissions() {
-        val missing = getMissingPermissions()
-
-        if (missing.isNotEmpty()) {
-            requestPermissions(missing)
-        } else {
-            startVideoFlow()
-        }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.M)
-    private fun requestPermissions(permissions: Array<out String>) {
-        val deniedCamera = !shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)
-        val deniedMicrophone =
-            !shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO)
-
-        if (!deniedCamera && !deniedMicrophone) {
-            permissionsContract.launch(permissions.first())
-        } else {
-            showPermissionsDialog()
-        }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.M)
-    private fun getMissingPermissions(): Array<out String> {
-        val permissionsToCheck = arrayOf(
-            Manifest.permission.CAMERA,
-            Manifest.permission.RECORD_AUDIO
-        )
-
-        val missing = permissionsToCheck
-            .map { it to (checkSelfPermission(it) == PackageManager.PERMISSION_GRANTED) }
-            .filter { (_, isGranted) -> !isGranted }
-            .map { it.first }
-
-        return missing.toTypedArray()
+        callViewModel.connectToCall()
     }
 
     private fun showPermissionsDialog() {
@@ -200,7 +159,6 @@ public abstract class AbstractComposeCallActivity :
                 dialog.dismiss()
             }
             .setNegativeButton("Cancel") { dialog, _ ->
-                finish()
                 dialog.dismiss()
             }
             .create()
