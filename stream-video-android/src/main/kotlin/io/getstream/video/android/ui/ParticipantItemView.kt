@@ -20,10 +20,9 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.View
 import io.getstream.video.android.model.Call
-import org.webrtc.SurfaceViewRenderer
 import org.webrtc.VideoTrack
 
-public class ParticipantItemView : SurfaceViewRenderer {
+public class ParticipantItemView : TextureViewRenderer {
 
     private var track: VideoTrack? = null
     public var isInitialized: Boolean = false

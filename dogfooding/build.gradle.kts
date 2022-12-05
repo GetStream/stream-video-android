@@ -105,8 +105,8 @@ dependencies {
     implementation("com.firebaseui:firebase-ui-auth:7.2.0")
 
     implementation(project(":stream-video-android-compose"))
-    implementation(project(":stream-video-android-pushprovider-firebase"))
 
+    implementation(Dependencies.streamPushFirebase)
     implementation(Dependencies.streamLog)
     implementation(Dependencies.streamLogAndroid)
 

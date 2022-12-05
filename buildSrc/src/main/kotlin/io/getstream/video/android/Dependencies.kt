@@ -27,6 +27,7 @@ object Versions {
     internal const val WEBRTC = "104.5112.05"
     internal const val STREAM = "6.0.0-beta1"
     internal const val STREAM_LOG = "1.0.0"
+    internal const val STREAM_PUSH = "1.0.2"
 
     internal const val ANDROIDX_TEST = "1.4.0"
     internal const val BASE_PROFILE = "1.2.0"
@@ -40,8 +41,7 @@ object Dependencies {
     const val gradleNexusPublishPlugin =
         "io.github.gradle-nexus:publish-plugin:${Versions.GRADLE_NEXUS_PUBLISH_PLUGIN}"
     const val kotlinGradlePlugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:${Versions.KOTLIN}"
-    const val kotlinSerializationPlugin =
-        "org.jetbrains.kotlin:kotlin-serialization:${Versions.KOTLIN}"
+    const val kotlinSerializationPlugin = "org.jetbrains.kotlin:kotlin-serialization:${Versions.KOTLIN}"
     const val kotlinSerializationJson =
         "org.jetbrains.kotlinx:kotlinx-serialization-json:${Versions.KOTLIN_SERIALIZATION_JSON}"
     const val spotlessGradlePlugin =
@@ -70,8 +70,7 @@ object Dependencies {
     const val composeUiTooling = "androidx.compose.ui:ui-tooling:${Versions.COMPOSE}"
     const val composeFoundation = "androidx.compose.foundation:foundation:${Versions.COMPOSE}"
     const val composeMaterial = "androidx.compose.material:material:${Versions.COMPOSE}"
-    const val composeIconsExtended =
-        "androidx.compose.material:material-icons-extended:${Versions.COMPOSE}"
+    const val composeIconsExtended = "androidx.compose.material:material-icons-extended:${Versions.COMPOSE}"
     const val composeCoil = "io.coil-kt:coil-compose:${Versions.COIL}"
 
     const val wireRuntime = "com.squareup.wire:wire-runtime:${Versions.WIRE}"
@@ -84,6 +83,9 @@ object Dependencies {
 
     const val streamLog = "io.getstream:stream-log:${Versions.STREAM_LOG}"
     const val streamLogAndroid = "io.getstream:stream-log-android:${Versions.STREAM_LOG}"
+    const val streamPush = "io.getstream:stream-android-push:${Versions.STREAM_PUSH}"
+    const val streamPushDelegate = "io.getstream:stream-android-push-delegate:${Versions.STREAM_PUSH}"
+    const val streamPushFirebase = "io.getstream:stream-android-push-firebase:${Versions.STREAM_PUSH}"
 
     const val streamChatCompose = "io.getstream:stream-chat-android-compose:${Versions.STREAM}"
     const val streamChatOffline = "io.getstream:stream-chat-android-offline:${Versions.STREAM}"
