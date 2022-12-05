@@ -24,15 +24,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import io.getstream.video.android.call.state.AcceptCall
+import io.getstream.video.android.call.state.CallAction
+import io.getstream.video.android.call.state.DeclineCall
+import io.getstream.video.android.call.state.ToggleCamera
 import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.extensions.toggleAlpha
@@ -41,12 +41,9 @@ import io.getstream.video.android.compose.ui.components.extensions.toggleAlpha
 internal fun IncomingCallOptions(
     modifier: Modifier = Modifier,
     isVideoCall: Boolean,
-    onDeclineCall: () -> Unit,
-    onAcceptCall: () -> Unit,
-    onVideoToggleChanged: (Boolean) -> Unit
+    isVideoEnabled: Boolean,
+    onCallAction: (CallAction) -> Unit,
 ) {
-    var isVideoEnabled by remember { mutableStateOf(true) }
-
     Row(
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -59,7 +56,7 @@ internal fun IncomingCallOptions(
                     shape = VideoTheme.shapes.callButton
                 )
                 .size(VideoTheme.dimens.largeButtonSize),
-            onClick = { onDeclineCall() },
+            onClick = { onCallAction(DeclineCall) },
             content = {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_call_end),
@@ -78,10 +75,7 @@ internal fun IncomingCallOptions(
                         shape = VideoTheme.shapes.callButton
                     )
                     .size(VideoTheme.dimens.mediumButtonSize),
-                onClick = {
-                    isVideoEnabled = !isVideoEnabled
-                    onVideoToggleChanged(isVideoEnabled)
-                },
+                onClick = { onCallAction(ToggleCamera(!isVideoEnabled)) },
                 content = {
                     val cameraIcon = painterResource(
                         id = if (isVideoEnabled) {
@@ -107,7 +101,7 @@ internal fun IncomingCallOptions(
                     shape = VideoTheme.shapes.callButton
                 )
                 .size(VideoTheme.dimens.largeButtonSize),
-            onClick = { onAcceptCall() },
+            onClick = { onCallAction(AcceptCall) },
             content = {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_call),
@@ -125,9 +119,8 @@ private fun IncomingCallOptionsPreview() {
     VideoTheme {
         IncomingCallOptions(
             isVideoCall = true,
-            onDeclineCall = {},
-            onAcceptCall = {},
-            onVideoToggleChanged = {}
+            isVideoEnabled = true,
+            onCallAction = { }
         )
     }
 }

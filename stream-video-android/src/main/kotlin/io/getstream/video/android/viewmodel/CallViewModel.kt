@@ -23,11 +23,16 @@ import io.getstream.log.StreamLog
 import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.audio.AudioDevice
 import io.getstream.video.android.call.CallClient
+import io.getstream.video.android.call.state.AcceptCall
 import io.getstream.video.android.call.state.CallAction
 import io.getstream.video.android.call.state.CallMediaState
+import io.getstream.video.android.call.state.CancelCall
 import io.getstream.video.android.call.state.CustomAction
+import io.getstream.video.android.call.state.DeclineCall
 import io.getstream.video.android.call.state.FlipCamera
+import io.getstream.video.android.call.state.InviteUsersToCall
 import io.getstream.video.android.call.state.LeaveCall
+import io.getstream.video.android.call.state.SelectAudioDevice
 import io.getstream.video.android.call.state.ToggleCamera
 import io.getstream.video.android.call.state.ToggleMicrophone
 import io.getstream.video.android.call.state.ToggleSpeakerphone
@@ -45,11 +50,14 @@ import io.getstream.video.android.utils.onError
 import io.getstream.video.android.utils.onSuccess
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import java.util.UUID
@@ -60,7 +68,7 @@ private const val CONNECT_TIMEOUT = 30_000L
 public class CallViewModel(
     private val streamVideo: StreamVideo,
     private val permissionManager: PermissionManager,
-    private val usersProvider: UsersProvider
+    private val usersProvider: UsersProvider,
 ) : ViewModel() {
 
     private val logger = StreamLog.getLogger("Call:ViewModel")
@@ -68,37 +76,74 @@ public class CallViewModel(
     private val _callState: MutableStateFlow<Call?> = MutableStateFlow(null)
     public val callState: StateFlow<Call?> = _callState
 
+    private val clientState: MutableStateFlow<CallClient?> = MutableStateFlow(null)
+    private val client: CallClient?
+        get() = clientState.value
+
     private var _isVideoInitialized: MutableStateFlow<Boolean> = MutableStateFlow(false)
     public val isVideoInitialized: StateFlow<Boolean> = _isVideoInitialized
 
-    private val hasVideoPermission: MutableStateFlow<Boolean> =
-        MutableStateFlow(permissionManager.hasCameraPermission)
-    private val isVideoEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    /**
+     * Determines whether the video should be enabled/disabled before [Call] and [CallClient] get initialised.
+     */
+    private val isVideoEnabled: MutableStateFlow<Boolean> =
+        MutableStateFlow(streamVideo.config.defaultVideoOn && permissionManager.hasCameraPermission.value)
 
-    public val isVideoOn: Flow<Boolean> =
-        hasVideoPermission.combine(isVideoEnabled) { hasPermission, videoEnabled ->
-            hasPermission && videoEnabled
+    /**
+     * Determines whether the video should be on or not. If [CallClient] is not initialised reflects the UI state
+     * stored inside [isVideoEnabled], otherwise reflects the state of the [CallClient.isVideoEnabled].
+     */
+    private val isVideoOn: StateFlow<Boolean> = clientState.flatMapLatest { it?.isVideoEnabled ?: isVideoEnabled }
+        .stateIn(scope = viewModelScope, started = SharingStarted.Eagerly, streamVideo.config.defaultVideoOn)
+
+    /**
+     * Determines whether the audio should be enabled/disabled before [Call] and [CallClient] get initialised.
+     */
+    private val isAudioEnabled: MutableStateFlow<Boolean> =
+        MutableStateFlow(streamVideo.config.defaultAudioOn && permissionManager.hasRecordAudioPermission.value)
+
+    /**
+     * Determines whether the audio should be on or not. If [CallClient] is not initialised reflects the UI state
+     * stored inside [isAudioEnabled], otherwise reflects the state of the [CallClient.isAudioEnabled].
+     */
+    private val isAudioOn: StateFlow<Boolean> = clientState.flatMapLatest { it?.isAudioEnabled ?: isAudioEnabled }
+        .onEach {
+            logger.d { "[isAudioOn] isAudioOn: $it" }
         }
+        .stateIn(scope = viewModelScope, started = SharingStarted.Eagerly, false)
 
-    private val hasAudioPermission: MutableStateFlow<Boolean> =
-        MutableStateFlow(permissionManager.hasRecordAudioPermission)
-    private val isAudioEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    /**
+     * Determines whether the speaker phone should be enabled/disabled before [Call] and [CallClient] get initialised.
+     */
+    private val isSpeakerPhoneEnabled: MutableStateFlow<Boolean> =
+        MutableStateFlow(streamVideo.config.defaultSpeakerPhoneOn)
 
-    public val isAudioOn: Flow<Boolean> =
-        hasAudioPermission.combine(isAudioEnabled) { hasPermission, audioEnabled ->
-            hasPermission && audioEnabled
-        }
-
-    private val _callMediaState: MutableStateFlow<CallMediaState> =
-        MutableStateFlow(
-            CallMediaState(
-                isMicrophoneEnabled = isAudioEnabled.value && hasAudioPermission.value,
-                isCameraEnabled = isVideoEnabled.value && hasVideoPermission.value,
-                isSpeakerphoneEnabled = false
-            )
+    /**
+     * Determines whether the speaker phone should be on or not. If [CallClient] is not initialised reflects the UI
+     * state stored inside [isSpeakerPhoneEnabled], otherwise reflects the state of the
+     * [CallClient.isSpeakerPhoneEnabled].
+     */
+    private val isSpeakerPhoneOn: StateFlow<Boolean> = clientState
+        .flatMapLatest { it?.isSpeakerPhoneEnabled ?: isSpeakerPhoneEnabled }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = streamVideo.config.defaultSpeakerPhoneOn
         )
 
-    public val callMediaState: StateFlow<CallMediaState> = _callMediaState
+    /**
+     * The state of the call media. Combines [isAudioOn], [isVideoOn], [isSpeakerPhoneOn].
+     */
+    public val callMediaState: StateFlow<CallMediaState> =
+        combine(isAudioOn, isVideoOn, isSpeakerPhoneOn) { isAudioOn, isVideoOn, isSpeakerPhoneOn ->
+            CallMediaState(
+                isMicrophoneEnabled = isAudioOn,
+                isSpeakerphoneEnabled = isSpeakerPhoneOn,
+                isCameraEnabled = isVideoOn
+            )
+        }.onEach {
+            logger.d { "[callMediaState] callMediaState: $it" }
+        }.stateIn(scope = viewModelScope, started = SharingStarted.Eagerly, initialValue = CallMediaState())
 
     public val participantList: Flow<List<CallParticipantState>> =
         callState.filterNotNull().flatMapLatest { it.callParticipants }
@@ -125,8 +170,6 @@ public class CallViewModel(
 
     private val _participants: MutableStateFlow<List<CallUser>> = MutableStateFlow(emptyList())
     public val participants: StateFlow<List<CallUser>> = _participants
-
-    private lateinit var client: CallClient
 
     private var prevState: State = State.Idle
 
@@ -160,69 +203,56 @@ public class CallViewModel(
         }
     }
 
-    public fun connectToCall(callSettings: CallSettings) {
-        logger.d { "[connectToCall] input: $callSettings" }
+    public fun connectToCall() {
         viewModelScope.launch {
             logger.d { "[connectToCall] state: ${streamCallState.value}" }
             withTimeout(CONNECT_TIMEOUT) {
                 logger.v { "[connectToCall] received: ${streamCallState.value}" }
-                client = streamVideo.awaitCallClient()
+                clientState.value = streamVideo.awaitCallClient()
+                client?.setInitialCallSettings(
+                    CallSettings(
+                        autoPublish = streamVideo.config.autoPublish,
+                        audioOn = isAudioEnabled.value,
+                        videoOn = isVideoEnabled.value,
+                        speakerOn = isSpeakerPhoneEnabled.value
+                    )
+                )
                 _isVideoInitialized.value = true
-                initializeCall(callSettings = callSettings)
+                initializeCall(streamVideo.config.autoPublish)
             }
         }
     }
 
-    private suspend fun initializeCall(callSettings: CallSettings) {
-        val callResult = client.connectToCall(
-            UUID.randomUUID().toString(),
-            callSettings
-        )
+    private suspend fun initializeCall(autoPublish: Boolean) {
+        client?.let { client ->
+            when (val callResult = client.connectToCall(UUID.randomUUID().toString(), autoPublish)) {
+                is Success -> {
+                    val call = callResult.data
+                    _callState.value = call
 
-        when (callResult) {
-            is Success -> {
-                val call = callResult.data
-                _callState.value = call
-                isVideoEnabled.value = callSettings.videoOn
-                isAudioEnabled.value = callSettings.audioOn
-                _callMediaState.value = CallMediaState(
-                    isMicrophoneEnabled = callSettings.audioOn,
-                    isCameraEnabled = callSettings.videoOn,
-                    isSpeakerphoneEnabled = callSettings.speakerOn
-                )
+                    val isVideoOn = isVideoOn.firstOrNull() ?: false
 
-                val isVideoOn = isVideoOn.firstOrNull() ?: false
-
-                if (callSettings.autoPublish && isVideoOn) {
-                    client.startCapturingLocalVideo(CameraMetadata.LENS_FACING_FRONT)
+                    if (autoPublish && isVideoOn) {
+                        client.startCapturingLocalVideo(CameraMetadata.LENS_FACING_FRONT)
+                    }
+                }
+                is Failure -> {
+                    // TODO - show error to user
                 }
             }
-            is Failure -> {
-                // TODO - show error to user
-            }
-        }
+        } ?: logger.e { "[initializeCall] CallClient was not initialised." }
     }
 
-    public fun toggleSpeakerphone(enabled: Boolean) {
-        client.setSpeakerphoneEnabled(enabled)
+    private fun toggleSpeakerphone(enabled: Boolean) {
+        client?.setSpeakerphoneEnabled(enabled)
         onSpeakerphoneChanged(enabled)
-    }
-
-    public fun toggleCamera(enabled: Boolean) {
-        client.setCameraEnabled(enabled)
-        onVideoChanged(enabled)
-    }
-
-    public fun toggleMicrophone(enabled: Boolean) {
-        client.setMicrophoneEnabled(enabled)
-        onMicrophoneChanged(enabled)
     }
 
     /**
      * Flips the camera for the current participant if possible.
      */
     public fun flipCamera() {
-        client.flipCamera()
+        client?.flipCamera()
     }
 
     /**
@@ -267,10 +297,15 @@ public class CallViewModel(
     public fun onCallAction(callAction: CallAction) {
         when (callAction) {
             is ToggleSpeakerphone -> toggleSpeakerphone(callAction.isEnabled)
-            is ToggleCamera -> toggleCamera(callAction.isEnabled)
-            is ToggleMicrophone -> toggleMicrophone(callAction.isEnabled)
+            is ToggleCamera -> onVideoChanged(callAction.isEnabled)
+            is ToggleMicrophone -> onMicrophoneChanged(callAction.isEnabled)
+            is SelectAudioDevice -> selectAudioDevice(callAction.audioDevice)
             is FlipCamera -> flipCamera()
+            CancelCall -> cancelCall()
+            AcceptCall -> acceptCall()
+            DeclineCall -> hangUpCall()
             is LeaveCall -> cancelCall()
+            is InviteUsersToCall -> inviteUsersToCall(callAction.users)
             is CustomAction -> {
                 // custom actions
             }
@@ -280,7 +315,7 @@ public class CallViewModel(
     /**
      * Drops the call by sending a cancel event, which informs other users.
      */
-    public fun cancelCall() {
+    private fun cancelCall() {
         val state = streamVideo.callState.value
         if (state !is State.Active) {
             logger.w { "[cancelCall] rejected (state is not Active): $state" }
@@ -296,7 +331,7 @@ public class CallViewModel(
      * @return A [List] of [AudioDevice] that can be used for playback.
      */
     public fun getAudioDevices(): List<AudioDevice> {
-        return client.getAudioDevices()
+        return client?.getAudioDevices() ?: listOf()
     }
 
     /**
@@ -307,9 +342,6 @@ public class CallViewModel(
         _callState.value = null
         isVideoEnabled.value = false
         isAudioEnabled.value = false
-        _callMediaState.value = CallMediaState()
-        hasAudioPermission.value = false
-        hasVideoPermission.value = false
         _isVideoInitialized.value = false
         dismissOptions()
     }
@@ -327,11 +359,11 @@ public class CallViewModel(
      *
      * @param device The device to use.
      */
-    public fun selectAudioDevice(device: AudioDevice) {
-        client.selectAudioDevice(device)
+    private fun selectAudioDevice(device: AudioDevice) {
+        client?.selectAudioDevice(device)
     }
 
-    public fun acceptCall() {
+    private fun acceptCall() {
         val state = streamVideo.callState.value
         if (state !is State.Incoming || state.acceptedByMe) {
             logger.w { "[acceptCall] rejected (state is not unaccepted Incoming): $state" }
@@ -350,7 +382,7 @@ public class CallViewModel(
         }
     }
 
-    public fun rejectCall() {
+    private fun rejectCall() {
         val state = streamVideo.callState.value
         if (state !is State.Incoming || state.acceptedByMe) {
             logger.w { "[declineCall] rejected (state is not unaccepted Incoming): $state" }
@@ -363,7 +395,7 @@ public class CallViewModel(
         }
     }
 
-    public fun hangUpCall() {
+    private fun hangUpCall() {
         val state = streamVideo.callState.value
         if (state !is State.Active) {
             logger.w { "[hangUpCall] rejected (state is not Active): $state" }
@@ -377,25 +409,26 @@ public class CallViewModel(
 
     private fun onMicrophoneChanged(microphoneEnabled: Boolean) {
         logger.d { "[onMicrophoneChanged] microphoneEnabled: $microphoneEnabled" }
-        this.isAudioEnabled.value = microphoneEnabled
-        val mediaState = _callMediaState.value
-
-        _callMediaState.value = mediaState.copy(isMicrophoneEnabled = microphoneEnabled)
+        if (!permissionManager.hasRecordAudioPermission.value) {
+            logger.w { "[onMicrophoneChanged] the [Manifest.permissions.RECORD_AUDIO] has to be granted for audio to be sent" }
+        }
+        client?.setMicrophoneEnabled(microphoneEnabled)
+        isAudioEnabled.value = microphoneEnabled
     }
 
     private fun onVideoChanged(videoEnabled: Boolean) {
         logger.d { "[onVideoChanged] videoEnabled: $videoEnabled" }
-        this.isVideoEnabled.value = videoEnabled
-        val mediaState = _callMediaState.value
-
-        _callMediaState.value = mediaState.copy(isCameraEnabled = videoEnabled)
+        if (!permissionManager.hasCameraPermission.value) {
+            logger.w { "[onVideoChanged] the [Manifest.permissions.CAMERA] has to be granted for video to be sent" }
+        }
+        client?.setCameraEnabled(videoEnabled)
+        isVideoEnabled.value = videoEnabled
     }
 
     private fun onSpeakerphoneChanged(speakerPhoneEnabled: Boolean) {
         logger.d { "[onSpeakerphoneChanged] speakerPhoneEnabled: $speakerPhoneEnabled" }
-        val mediaState = _callMediaState.value
-
-        _callMediaState.value = mediaState.copy(isSpeakerphoneEnabled = speakerPhoneEnabled)
+        client?.setSpeakerphoneEnabled(speakerPhoneEnabled)
+        isSpeakerPhoneEnabled.value = speakerPhoneEnabled
     }
 
     /**
@@ -414,7 +447,7 @@ public class CallViewModel(
      *
      * @param users The list of users to add to the call.
      */
-    public fun inviteUsersToCall(users: List<User>) {
+    private fun inviteUsersToCall(users: List<User>) {
         logger.d { "[inviteUsersToCall] Inviting users to call, users: $users" }
         val callState = streamCallState.value
 

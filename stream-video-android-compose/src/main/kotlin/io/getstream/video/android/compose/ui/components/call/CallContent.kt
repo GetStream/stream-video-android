@@ -24,7 +24,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import io.getstream.video.android.call.state.ToggleCamera
+import io.getstream.video.android.call.state.CallAction
+import io.getstream.video.android.call.state.InviteUsersToCall
 import io.getstream.video.android.call.state.ToggleMicrophone
 import io.getstream.video.android.compose.state.ui.participants.ChangeMuteState
 import io.getstream.video.android.compose.state.ui.participants.InviteUsers
@@ -47,29 +48,13 @@ import io.getstream.video.android.model.state.StreamCallState as State
  *
  * @param viewModel The [CallViewModel] used to provide state and various handlers in the call.
  * @param modifier Modifier for styling.
- * @param onRejectCall Handler when the user taps on the Reject Call button in Incoming Call state.
- * @param onAcceptCall Handler when the user accepts a call in Incoming Call state.
- * @param onCancelCall Handler when the user decides to cancel or drop out of a call.
- * @param onMicToggleChanged Handler when the user toggles their microphone on or off.
- * @param onVideoToggleChanged Handler when the user toggles their video on or off.
+ * @param onCallAction Handler when the user clicks on some of the call controls.
  */
 @Composable
 public fun CallContent(
     viewModel: CallViewModel,
     modifier: Modifier = Modifier,
-    onRejectCall: () -> Unit = viewModel::rejectCall,
-    onAcceptCall: () -> Unit = viewModel::acceptCall,
-    onCancelCall: () -> Unit = viewModel::cancelCall,
-    onMicToggleChanged: (Boolean) -> Unit = { isEnabled ->
-        viewModel.onCallAction(
-            ToggleCamera(isEnabled)
-        )
-    },
-    onVideoToggleChanged: (Boolean) -> Unit = { isEnabled ->
-        viewModel.onCallAction(
-            ToggleMicrophone(isEnabled)
-        )
-    },
+    onCallAction: (CallAction) -> Unit = { viewModel.onCallAction(it) },
 ) {
     val stateHolder = viewModel.streamCallState.collectAsState(initial = State.Idle)
     val state = stateHolder.value
@@ -79,22 +64,19 @@ public fun CallContent(
         IncomingCallContent(
             modifier = modifier,
             viewModel = viewModel,
-            onRejectCall = onRejectCall,
-            onAcceptCall = onAcceptCall,
-            onVideoToggleChanged = onVideoToggleChanged
+            onCallAction = onCallAction
         )
     } else if (state is State.Outgoing && !state.acceptedByCallee) {
         OutgoingCallContent(
             modifier = modifier,
             viewModel = viewModel,
-            onCancelCall = onCancelCall,
-            onMicToggleChanged = onMicToggleChanged,
-            onVideoToggleChanged = onVideoToggleChanged
+            onCallAction = onCallAction
         )
     } else {
         ActiveCallContent(
             modifier = modifier,
             callViewModel = viewModel,
+            onCallAction = onCallAction
         )
         val isShowingParticipantsInfo by viewModel.isShowingParticipantsInfo.collectAsState()
 
@@ -113,7 +95,7 @@ public fun CallContent(
                             viewModel.dismissOptions()
                             usersToInvite = action.users
                         }
-                        is ChangeMuteState -> viewModel.toggleMicrophone(action.isEnabled)
+                        is ChangeMuteState -> onCallAction(ToggleMicrophone(action.isEnabled))
                     }
                 }
             )
@@ -125,7 +107,7 @@ public fun CallContent(
                 onDismiss = { usersToInvite = emptyList() },
                 onInviteUsers = {
                     usersToInvite = emptyList()
-                    viewModel.inviteUsersToCall(it)
+                    viewModel.onCallAction(InviteUsersToCall(it))
                 }
             )
         }
