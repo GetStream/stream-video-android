@@ -2,6 +2,7 @@
 Giphy
 composable
 livestream
+codec
 Giphies
 SDKs
 SDK's
@@ -9,11 +10,14 @@ browsable
 scrollable
 boolean
 squircle
+Kotlin
+ngrok
 Gradle
 [Ll]ivestream
 keystore
 Huawei
 Sonatype
+protobuf
 dialogs
 Macrobenchmark
 [Cc]ooldown

@@ -1,10 +1,10 @@
 ## Implementing Call Deep Linking
 
-One of the features Stream Video provides is the ability to deeplink into a call directly, using only the call ID.
+One of the features Stream Video provides is the ability to deep link into a call directly, using only the call ID.
 
-This is all powered by [Android's deeplinking](https://developer.android.com/training/app-links/deep-linking) support, but our API makes it very easy to integrate and start your custom UI, or our existing screens.
+This is all powered by [Android's deep linking](https://developer.android.com/training/app-links/deep-linking) support, but our API makes it very easy to integrate and start your custom UI, or our existing screens.
 
-> **Note**: This guide expects that you've set up a custom Application that has ways to initialize our SDK with a given user. If you want to learn more about this, check our our [Basics](TODO) set of pages on ways how to do so.
+> **Note**: This guide expects that you've set up a custom Application that has ways to initialize our SDK with a given user. If you want to learn more about this, check our [Basics](TODO) set of pages on ways how to do so.
 
 To get started, you first need to create an `Activity` that'll parse the deep link URL and consume the data. Here's an example of a simple `Activity` that does this:
 
@@ -113,7 +113,7 @@ You can learn more about this structure in the [official documentation](https://
 * By adding the appropriate `<action>` and `<category>` tags, you let you `Activity` open and consume data that's browsable, such as URLs.
 * The most important part is the `<data>` tag. It allows you to parse the link in the format of: `https://<stream-host>/join/`. Any URL that has that structure will be consumable by your `Activity`.
 
-It's important to know that this format is something we've built to align our deeplinking features in our SDKs and using that schema should be safe.
+It's important to know that this format is something we've built to align our deep linking features in our SDKs and using that schema should be safe.
 
 But to make your published app associate with a hosted and published website and to stop potential security issues, the website needs to know how to recognize your app.
 
@@ -148,8 +148,8 @@ Note that the `relation` and ` namespace` parts are not as important as the rest
 
 Now that you have the file created, you need to upload it to our servers.
 
-// TODO - the flow to upload assetlinks to our server, will it go through the dashboard or something?
+// TODO - the flow to upload asset links to our server, will it go through the dashboard or something?
 
-Finally, run your application and either manually generate a call link using the schema above or use our Web API. Once you have that ready, send it to your phone and try opening the link, it should automatically redirect to your app and open the call!
+Finally, run your application and either manually generate a call link using the schema above or use our Web API. Once you have that ready, send it to your phone and try opening the link, it should automatically redirect to your app and open the call.
 
-// TODO - add a gif of how this behavior works
+// TODO - add a GIF of how this behavior works
