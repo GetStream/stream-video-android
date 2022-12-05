@@ -42,6 +42,11 @@ public interface StreamVideo {
     public val callState: StateFlow<StreamCallState>
 
     /**
+     * Represents the default call config when starting a call.
+     */
+    public val config: StreamVideoConfig
+
+    /**
      * Create a device that will be used to receive push notifications.
      *
      * @param token The Token obtained from the selected push provider.

@@ -24,7 +24,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import io.getstream.video.android.call.state.ToggleMicrophone
+import io.getstream.video.android.call.state.CallAction
+import io.getstream.video.android.call.state.CallMediaState
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.background.CallBackground
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
@@ -41,36 +42,26 @@ import io.getstream.video.android.viewmodel.CallViewModel
  * @param viewModel The [CallViewModel] used to provide state and various handlers in the call.
  * @param modifier Modifier for styling.
  * @param onBackPressed Handler when the user taps on the back button.
- * @param onCallInfoSelected Handler when the call participants info is selected.
- * @param onRejectCall Handler when the user decides to cancel or drop out of a call.
- * @param onAcceptCall Handler when the user accepts a call in Incoming Call state.
- * @param onVideoToggleChanged Handler when the user toggles their video on or off.
+ * @param onCallAction Handler used when the user interacts with Call UI.
  */
 @Composable
 public fun IncomingCallContent(
     viewModel: CallViewModel,
     modifier: Modifier = Modifier,
     onBackPressed: () -> Unit,
-    onCallInfoSelected: () -> Unit = viewModel::showCallInfo,
-    onRejectCall: () -> Unit = viewModel::hangUpCall,
-    onAcceptCall: () -> Unit = viewModel::acceptCall,
-    onVideoToggleChanged: (Boolean) -> Unit = { isEnabled ->
-        viewModel.onCallAction(
-            ToggleMicrophone(isEnabled)
-        )
-    },
+    onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
 ) {
     val callType: CallType by viewModel.callType.collectAsState()
     val participants: List<CallUser> by viewModel.participants.collectAsState()
+    val callMediaState: CallMediaState by viewModel.callMediaState.collectAsState()
+
     IncomingCall(
         modifier = modifier,
         participants = participants,
+        isVideoEnabled = callMediaState.isCameraEnabled,
         callType = callType,
         onBackPressed = onBackPressed,
-        onCallInfoSelected = onCallInfoSelected,
-        onRejectCall = onRejectCall,
-        onAcceptCall = onAcceptCall,
-        onVideoToggleChanged = onVideoToggleChanged
+        onCallAction = onCallAction
     )
 }
 
@@ -80,21 +71,19 @@ public fun IncomingCallContent(
  *
  * @param participants People participating in the call.
  * @param callType The type of call, Audio or Video.
- * @param onRejectCall Handler when the user decides to cancel or drop out of a call.
- * @param onAcceptCall Handler when the user accepts a call in Incoming Call state.
- * @param onVideoToggleChanged Handler when the user toggles their video on or off.
+ * @param isVideoEnabled Whether the video should be enabled when entering the call or not.
  * @param modifier Modifier for styling.
+ * @param onBackPressed Handler when the user taps on the back button.
+ * @param onCallAction Handler used when the user interacts with Call UI.
  */
 @Composable
 public fun IncomingCall(
     participants: List<CallUser>,
     callType: CallType,
-    onBackPressed: () -> Unit,
-    onCallInfoSelected: () -> Unit,
-    onRejectCall: () -> Unit,
-    onAcceptCall: () -> Unit,
-    onVideoToggleChanged: (Boolean) -> Unit,
+    isVideoEnabled: Boolean,
     modifier: Modifier = Modifier,
+    onBackPressed: () -> Unit,
+    onCallAction: (CallAction) -> Unit,
 ) {
     CallBackground(
         modifier = modifier,
@@ -125,9 +114,8 @@ public fun IncomingCall(
                 .align(Alignment.BottomCenter)
                 .padding(bottom = VideoTheme.dimens.incomingCallOptionsBottomPadding),
             isVideoCall = callType == CallType.VIDEO,
-            onDeclineCall = onRejectCall,
-            onAcceptCall = onAcceptCall,
-            onVideoToggleChanged = onVideoToggleChanged
+            isVideoEnabled = isVideoEnabled,
+            onCallAction = onCallAction
         )
     }
 }
@@ -149,11 +137,9 @@ private fun IncomingCallPreview() {
                     teams = emptyList()
                 )
             },
+            isVideoEnabled = false,
             callType = CallType.VIDEO,
-            onRejectCall = {},
-            onAcceptCall = {},
-            onVideoToggleChanged = {},
-            onCallInfoSelected = {},
+            onCallAction = {},
             onBackPressed = {}
         )
     }

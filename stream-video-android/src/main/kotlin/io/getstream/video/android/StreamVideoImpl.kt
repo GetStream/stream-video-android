@@ -87,7 +87,7 @@ import stream.video.coordinator.push_v1.DeviceInput
 public class StreamVideoImpl(
     private val context: Context,
     private val scope: CoroutineScope,
-    private val config: StreamVideoConfig,
+    override val config: StreamVideoConfig,
     private val engine: StreamCallEngine,
     private val lifecycle: Lifecycle,
     private val loggingLevel: LoggingLevel,

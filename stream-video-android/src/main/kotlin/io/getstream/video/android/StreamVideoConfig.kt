@@ -22,6 +22,11 @@ public interface StreamVideoConfig {
     public val cancelOnTimeout: Boolean
     public val joinOnAcceptedByCallee: Boolean
     public val createCallClientInternally: Boolean
+
+    public val autoPublish: Boolean
+    public val defaultAudioOn: Boolean
+    public val defaultVideoOn: Boolean
+    public val defaultSpeakerPhoneOn: Boolean
 }
 
 public object StreamVideoConfigDefault : StreamVideoConfig {
@@ -29,4 +34,9 @@ public object StreamVideoConfigDefault : StreamVideoConfig {
     override val cancelOnTimeout: Boolean = true
     override val joinOnAcceptedByCallee: Boolean = true
     override val createCallClientInternally: Boolean = true
+
+    override val autoPublish: Boolean = true
+    override val defaultAudioOn: Boolean = false
+    override val defaultVideoOn: Boolean = true
+    override val defaultSpeakerPhoneOn: Boolean = false
 }
