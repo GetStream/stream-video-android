@@ -20,10 +20,17 @@ import io.getstream.video.android.permission.PermissionManager
 
 public interface PermissionManagerProvider {
 
+    /**
+     * Used for [PermissionManager] setup and registration with the Activity that it's used in.
+     *
+     * @return The initialized and registered [PermissionManager].
+     */
     public fun initPermissionManager(): PermissionManager
 
     /**
-     * Allows for a custom implementation of the [PermissionManager].
+     * Allows fetching of the [PermissionManager] instance created by [initPermissionManager].
+     *
+     * @return The initialized [PermissionManager] instance.
      */
     public fun getPermissionManager(): PermissionManager
 }

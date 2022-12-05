@@ -31,6 +31,9 @@ public data class ToggleSpeakerphone(
     val isEnabled: Boolean
 ) : CallAction()
 
+/**
+ * Action to select an audio device for playback.
+ */
 public data class SelectAudioDevice(
     val audioDevice: AudioDevice
 ) : CallAction()

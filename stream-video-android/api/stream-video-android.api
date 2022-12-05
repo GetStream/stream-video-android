@@ -763,6 +763,13 @@ public abstract interface class io/getstream/video/android/api/ClientRPCService 
 	public abstract fun upsertCallMembers (Lstream/video/coordinator/client_v1_rpc/UpsertCallMembersRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
+public abstract interface class io/getstream/video/android/api/EgressRPCService {
+	public abstract fun startBroadcast (Lstream/video/coordinator/server_v1_rpc/StartBroadcastRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun startRecording (Lstream/video/coordinator/server_v1_rpc/StartRecordingRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun stopBroadcast (Lstream/video/coordinator/server_v1_rpc/StopBroadcastRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun stopRecording (Lstream/video/coordinator/server_v1_rpc/StopRecordingRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
 public abstract interface class io/getstream/video/android/api/GossipRPCService {
 	public abstract fun getCallState (Lstream/video/sfu/gossip/GetCallStateRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun joinCall (Lstream/video/sfu/gossip/JoinCallRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
