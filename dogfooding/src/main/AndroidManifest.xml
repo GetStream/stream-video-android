@@ -24,7 +24,23 @@
 
         <activity android:name=".HomeActivity" />
 
-        <activity android:name=".CallActivity" />
+        <activity
+            android:name=".CallActivity"
+            android:exported="false" />
+
+        <service
+            android:name=".CallService"
+            android:enabled="true"
+            android:exported="false" />
+
+        <activity
+            android:name=".NotificationActivity"
+            android:exported="false">
+            <intent-filter android:priority="-1">
+                <action android:name="io.getstream.video.android.action.INCOMING_CALL" />
+                <action android:name="io.getstream.video.android.action.ACCEPT_CALL" />
+            </intent-filter>
+        </activity>
 
         <activity
             android:name=".DeeplinkingActivity"
@@ -36,6 +52,7 @@
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
+
                 <data
                     android:host="stream-calls-dogfood.vercel.app"
                     android:pathPrefix="/join/"
@@ -43,5 +60,4 @@
             </intent-filter>
         </activity>
     </application>
-
 </manifest>

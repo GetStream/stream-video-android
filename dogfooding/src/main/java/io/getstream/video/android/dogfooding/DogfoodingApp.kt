@@ -22,6 +22,8 @@ import com.google.firebase.auth.FirebaseAuth
 import io.getstream.android.push.firebase.FirebasePushDeviceGenerator
 import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.StreamVideoBuilder
+import io.getstream.video.android.input.CallActivityInput
+import io.getstream.video.android.input.CallServiceInput
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.token.AuthCredentialsProvider
 import io.getstream.video.android.token.CredentialsProvider
@@ -65,7 +67,11 @@ class DogfoodingApp : Application() {
             context = this,
             credentialsProvider = credentialsProvider,
             loggingLevel = loggingLevel,
-            pushDeviceGenerators = listOf(FirebasePushDeviceGenerator())
+            pushDeviceGenerators = listOf(FirebasePushDeviceGenerator()),
+            androidInputs = setOf(
+                CallServiceInput.from(CallService::class),
+                CallActivityInput.from(CallActivity::class),
+            )
         ).build().also {
             video = it
         }

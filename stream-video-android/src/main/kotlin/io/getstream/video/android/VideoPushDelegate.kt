@@ -97,7 +97,7 @@ internal class VideoPushDelegate(context: Context) : PushDelegate(context) {
             .setSmallIcon(androidx.loader.R.drawable.notification_bg)
             .setContentTitle("Incoming call")
             .setContentText(users)
-            .setOngoing(true)
+            .setOngoing(false)
             .setAutoCancel(true)
             .setContentIntent(fullScreenPendingIntent)
             .setFullScreenIntent(fullScreenPendingIntent, true)
