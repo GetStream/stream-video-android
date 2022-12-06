@@ -29,6 +29,7 @@ import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.CallViewModelFactoryProvider
 import io.getstream.video.android.PermissionManagerProvider
@@ -39,6 +40,7 @@ import io.getstream.video.android.model.state.StreamCallState
 import io.getstream.video.android.permission.PermissionManager
 import io.getstream.video.android.permission.StreamPermissionManagerImpl
 import io.getstream.video.android.ui.xml.binding.bindTo
+import io.getstream.video.android.ui.xml.binding.bindView
 import io.getstream.video.android.ui.xml.databinding.ActivityCallBinding
 import io.getstream.video.android.viewmodel.CallViewModel
 import io.getstream.video.android.viewmodel.CallViewModelFactory
@@ -97,12 +99,27 @@ public abstract class AbstractXmlCallActivity :
 
         setContentView(binding.root)
         binding.activeCallView.bindTo(callViewModel, lifecycleOwner = this)
+        binding.outgoingCallView.bindView(callViewModel, lifecycleOwner = this)
 
         lifecycleScope.launchWhenCreated {
-            callViewModel.streamCallState.collect {
-                if (it is StreamCallState.Idle) {
-                    //TODO
-                    // finish()
+            callViewModel.streamCallState.collect { state ->
+                println(state)
+                when {
+                    state is StreamCallState.Incoming && !state.acceptedByMe -> {
+                        // showIncomingScreen()
+                    }
+
+                    state is StreamCallState.Outgoing && !state.acceptedByCallee -> {
+                        showOutgoingScreen()
+                    }
+
+                    state is StreamCallState.Idle -> {
+                        finish()
+                    }
+
+                    else -> {
+                        showActiveCallScreen()
+                    }
                 }
             }
         }
@@ -111,6 +128,24 @@ public abstract class AbstractXmlCallActivity :
     override fun onResume() {
         super.onResume()
         startVideoFlow()
+    }
+
+    private fun showOutgoingScreen() {
+        binding.outgoingCallView.isVisible = true
+        binding.incomingCallView.isVisible = false
+        binding.activeCallView.isVisible = false
+    }
+
+    private fun showIncomingScreen() {
+        binding.outgoingCallView.isVisible = false
+        binding.incomingCallView.isVisible = true
+        binding.activeCallView.isVisible = false
+    }
+
+    private fun showActiveCallScreen() {
+        binding.outgoingCallView.isVisible = false
+        binding.incomingCallView.isVisible = false
+        binding.activeCallView.isVisible = true
     }
 
     private fun startSettings() {

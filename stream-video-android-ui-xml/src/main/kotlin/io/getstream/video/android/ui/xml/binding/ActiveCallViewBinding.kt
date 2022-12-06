@@ -18,9 +18,14 @@ package io.getstream.video.android.ui.xml.binding
 
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import io.getstream.video.android.call.state.AcceptCall
+import io.getstream.video.android.call.state.CancelCall
 import io.getstream.video.android.call.state.CustomAction
+import io.getstream.video.android.call.state.DeclineCall
 import io.getstream.video.android.call.state.FlipCamera
+import io.getstream.video.android.call.state.InviteUsersToCall
 import io.getstream.video.android.call.state.LeaveCall
+import io.getstream.video.android.call.state.SelectAudioDevice
 import io.getstream.video.android.call.state.ToggleCamera
 import io.getstream.video.android.call.state.ToggleMicrophone
 import io.getstream.video.android.call.state.ToggleSpeakerphone
@@ -36,8 +41,8 @@ public fun ActiveCallView.bindTo(
     viewModel: CallViewModel,
     lifecycleOwner: LifecycleOwner,
 ) {
-    setOnControlItemClickListener {
-        viewModel.onCallAction(it.action)
+    setOnControlItemClickListener { item ->
+        viewModel.onCallAction(item.action)
     }
 
     setControlItems(

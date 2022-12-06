@@ -20,7 +20,7 @@ import android.content.Context
 import android.util.AttributeSet
 import androidx.constraintlayout.widget.ConstraintLayout
 import io.getstream.video.android.model.CallParticipantState
-import io.getstream.video.android.ui.xml.databinding.ContentActiveCallBinding
+import io.getstream.video.android.ui.xml.databinding.ViewActiveCallBinding
 import io.getstream.video.android.ui.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.ui.xml.utils.extensions.initToolbar
 import io.getstream.video.android.ui.xml.utils.extensions.streamThemeInflater
@@ -42,7 +42,7 @@ public class ActiveCallView : ConstraintLayout {
         init(context, attrs)
     }
 
-    private val binding by lazy { ContentActiveCallBinding.inflate(streamThemeInflater, this) }
+    private val binding by lazy { ViewActiveCallBinding.inflate(streamThemeInflater, this) }
 
     private fun init(context: Context, attrs: AttributeSet?) {
         initToolbar(binding.toolbar)

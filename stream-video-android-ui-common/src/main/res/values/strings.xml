@@ -20,6 +20,9 @@
     <string name="invite_users_cancel">Cancel</string>
     <string name="invite_users_accept">Invite</string>
 
+    <string name="call_status_incoming">Incoming call...</string>
+    <string name="call_status_outgoing">Calling...</string>
+
     <plurals name="call_participants_info_number_of_participants">
         <item quantity="one">Participant (%d)</item>
         <item quantity="other">Participants (%d)</item>

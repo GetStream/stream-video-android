@@ -28,7 +28,7 @@ import io.getstream.video.android.ui.xml.utils.extensions.getColorCompat
 import io.getstream.video.android.ui.xml.utils.extensions.getDimension
 import io.getstream.video.android.ui.xml.utils.extensions.getEnum
 import io.getstream.video.android.ui.xml.widget.transformer.TransformStyle
-import io.getstream.video.android.ui.xml.R as RCommon
+import io.getstream.video.android.ui.common.R as RCommon
 
 /**
  * Style for [AvatarView].

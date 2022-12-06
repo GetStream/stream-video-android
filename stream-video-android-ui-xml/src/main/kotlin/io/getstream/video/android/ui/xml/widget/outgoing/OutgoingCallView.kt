@@ -19,23 +19,88 @@ package io.getstream.video.android.ui.xml.widget.outgoing
 import android.content.Context
 import android.util.AttributeSet
 import androidx.constraintlayout.widget.ConstraintLayout
-import io.getstream.video.android.ui.xml.utils.extensions.createStreamThemeWrapper
+import androidx.constraintlayout.widget.ConstraintSet
+import io.getstream.video.android.call.state.CallAction
+import io.getstream.video.android.call.state.CancelCall
+import io.getstream.video.android.call.state.ToggleCamera
+import io.getstream.video.android.call.state.ToggleMicrophone
+import io.getstream.video.android.common.util.getFloatResource
+import io.getstream.video.android.model.CallStatus
+import io.getstream.video.android.model.CallUser
+import io.getstream.video.android.ui.xml.databinding.ViewOutgoingCallBinding
+import io.getstream.video.android.ui.xml.utils.extensions.inflater
+import kotlin.math.roundToInt
+import io.getstream.video.android.ui.common.R as RCommon
 
-public class OutgoingCallView : ConstraintLayout {
+public class OutgoingCallView @JvmOverloads constructor(
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0,
+) : ConstraintLayout(context, attrs, defStyleAttr) {
 
-    public constructor(context: Context) : this(context, null)
-    public constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
-    public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : this(context, attrs, defStyleAttr, 0)
-    public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(
-        context.createStreamThemeWrapper(),
-        attrs,
-        defStyleAttr,
-        defStyleRes
-    ) {
-        init(context, attrs)
+    private val binding = ViewOutgoingCallBinding.inflate(inflater, this)
+
+    private var actionListener: CallActionListener? = null
+
+    private var isMicrophoneEnabled: Boolean = false
+    private var isCameraEnabled: Boolean = false
+
+    init {
+        setBackgroundResource(RCommon.drawable.bg_call)
+
+        with(binding) {
+            cancelCall.setOnClickListener { actionListener?.onCallAction(CancelCall) }
+            micToggle.setOnClickListener { actionListener?.onCallAction(ToggleMicrophone(!isMicrophoneEnabled)) }
+            cameraToggle.setOnClickListener { actionListener?.onCallAction(ToggleCamera(!isCameraEnabled)) }
+        }
     }
 
-    private fun init(context: Context, attrs: AttributeSet?) {
-        // TODO
+    public fun setParticipants(participants: List<CallUser>) {
+        binding.participantsInfo.setParticipants(participants)
+        if (participants.size >= 3) setGroupCallControlsLayout()
+    }
+
+    public fun setCallStatus(callStatus: CallStatus) {
+        binding.participantsInfo.setCallStatus(callStatus)
+    }
+
+    public fun setMicrophoneEnabled(isEnabled: Boolean) {
+        isMicrophoneEnabled = isEnabled
+        val icon = if (isEnabled) RCommon.drawable.ic_mic_on else RCommon.drawable.ic_mic_off
+        val alpha = if (isEnabled) RCommon.dimen.buttonToggleOnAlpha else RCommon.dimen.buttonToggleOffAlpha
+        binding.micToggle.setImageResource(icon)
+        binding.micToggle.background.alpha = (255 * context.getFloatResource(alpha)).roundToInt()
+    }
+
+    public fun setCameraEnabled(isEnabled: Boolean) {
+        isCameraEnabled = isEnabled
+        val icon = if (isEnabled) RCommon.drawable.ic_videocam_on else RCommon.drawable.ic_videocam_off
+        binding.cameraToggle.setImageResource(icon)
+        binding.cameraToggle.background.alpha = (context.getFloatResource(if (isEnabled) RCommon.dimen.buttonToggleOnAlpha else RCommon.dimen.buttonToggleOffAlpha) * 255).toInt()
+    }
+
+    private fun setGroupCallControlsLayout() {
+        with(binding) {
+            val constraintSet = ConstraintSet()
+            constraintSet.clone(controlsHolder)
+            constraintSet.clear(cancelCall.id, ConstraintSet.BOTTOM)
+            constraintSet.clear(micToggle.id, ConstraintSet.BOTTOM)
+            constraintSet.clear(cameraToggle.id, ConstraintSet.BOTTOM)
+
+            constraintSet.connect(micToggle.id, ConstraintSet.BOTTOM, controlsHolder.id, ConstraintSet.BOTTOM)
+            constraintSet.connect(cameraToggle.id, ConstraintSet.BOTTOM, controlsHolder.id, ConstraintSet.BOTTOM)
+
+            constraintSet.connect(cancelCall.id, ConstraintSet.BOTTOM, micToggle.id, ConstraintSet.TOP)
+
+            controlsHolder.setConstraintSet(constraintSet)
+        }
+    }
+
+    public fun setCallActionListener(callActionListener: CallActionListener) {
+        actionListener = callActionListener
+    }
+
+    public fun interface CallActionListener {
+        public fun onCallAction(callAction: CallAction)
     }
 }

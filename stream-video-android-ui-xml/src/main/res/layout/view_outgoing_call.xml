@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_call"
+    tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout"
+    >
+
+    <Toolbar
+        android:id="@+id/outgoingCallToolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+
+    <io.getstream.video.android.ui.xml.widget.participant.ParticipantsInfoView
+        android:id="@+id/participantsInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/outgoingCallToolbar"
+        />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/controlsHolder"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="44dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        >
+
+        <ImageButton
+            android:id="@+id/micToggle"
+            android:layout_width="@dimen/mediumButtonSize"
+            android:layout_height="@dimen/mediumButtonSize"
+            android:layout_marginBottom="32dp"
+            android:background="@drawable/bg_call_option"
+            android:src="@drawable/ic_mic_on"
+            app:layout_constraintBottom_toTopOf="@id/cancelCall"
+            app:layout_constraintEnd_toStartOf="@id/cameraToggle"
+            app:layout_constraintStart_toStartOf="parent"
+            />
+
+        <ImageButton
+            android:id="@+id/cameraToggle"
+            android:layout_width="@dimen/mediumButtonSize"
+            android:layout_height="@dimen/mediumButtonSize"
+            android:layout_marginBottom="32dp"
+            android:background="@drawable/bg_call_option"
+            android:src="@drawable/ic_videocam_on"
+            app:layout_constraintBottom_toTopOf="@id/cancelCall"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/micToggle"
+            />
+
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/cancelCall"
+            android:layout_width="@dimen/largeButtonSize"
+            android:layout_height="@dimen/largeButtonSize"
+            android:background="@drawable/bg_call_option_reject"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_call_end"
+            android:tint="@color/stream_xml_white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</merge>

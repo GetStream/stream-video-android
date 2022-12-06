@@ -19,16 +19,17 @@ package io.getstream.video.android.ui.xml.widget.control
 import android.content.Context
 import android.util.AttributeSet
 import android.view.View
+import android.widget.ImageButton
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import io.getstream.log.StreamLog
-import io.getstream.video.android.ui.xml.databinding.AdapterControlItemBinding
+import io.getstream.video.android.ui.xml.R
 import io.getstream.video.android.ui.xml.utils.extensions.constrainViewEndToStartOfView
 import io.getstream.video.android.ui.xml.utils.extensions.constrainViewStartToEndOfView
 import io.getstream.video.android.ui.xml.utils.extensions.constrainViewToParentBySide
 import io.getstream.video.android.ui.xml.utils.extensions.createStreamThemeWrapper
-import io.getstream.video.android.ui.xml.utils.extensions.inflater
 import io.getstream.video.android.ui.xml.utils.extensions.updateConstraints
+import io.getstream.video.android.ui.common.R as RCommon
 
 public class CallControlsView : ConstraintLayout, View.OnClickListener {
 
@@ -45,7 +46,7 @@ public class CallControlsView : ConstraintLayout, View.OnClickListener {
     }
 
     private val logger = StreamLog.getLogger("Call:ControlsView")
-    private val controlList = arrayListOf<AdapterControlItemBinding>()
+    private val controlList = arrayListOf<ImageButton>()
 
     private var listener: OnControlItemClickListener? = null
 
@@ -59,42 +60,49 @@ public class CallControlsView : ConstraintLayout, View.OnClickListener {
 
     public fun setItems(items: List<CallControlItem>) {
         logger.d { "[setItems] items: $items" }
-        controlList.forEach { removeView(it.root) }
+        controlList.forEach { removeView(it) }
         controlList.clear()
+        val buttonSize = context.resources.getDimension(RCommon.dimen.callControlButtonSize).toInt()
         items.forEach { item ->
-            val binding = AdapterControlItemBinding.inflate(inflater, this, true).apply {
-                root.id = View.generateViewId()
-                root.tag = item
-                root.setOnClickListener(this@CallControlsView)
-                root.layoutParams = LayoutParams(
-                    LayoutParams.WRAP_CONTENT,
-                    LayoutParams.WRAP_CONTENT
-                )
-                iconView.setImageResource(item.icon)
+            val view = ImageButton(context).apply {
+                id = View.generateViewId()
+                tag = item
+                setOnClickListener(this@CallControlsView)
+                layoutParams = LayoutParams(buttonSize, buttonSize)
+                setBackgroundResource(R.drawable.bg_call_option)
+                setImageResource(item.icon)
             }
-            controlList.add(binding)
+
+            // val binding = ViewCallMediaButtonBinding.inflate(inflater, this, true).apply {
+            //     root.id = View.generateViewId()
+            //     root.tag = item
+            //     root.setOnClickListener(this@CallControlsView)
+            //     root.layoutParams = LayoutParams(buttonSize, buttonSize)
+            //     iconView.setImageResource(item.icon)
+            // }
+            controlList.add(view)
         }
         defineConstraints(controlList)
     }
 
-    private fun defineConstraints(controlList: List<AdapterControlItemBinding>) {
+    private fun defineConstraints(controlList: List<ImageButton>) {
         updateConstraints {
-            controlList.forEachIndexed { index, binding ->
-                constrainViewToParentBySide(binding.root, ConstraintSet.TOP)
-                constrainViewToParentBySide(binding.root, ConstraintSet.BOTTOM)
+            controlList.forEachIndexed { index, view ->
+                constrainViewToParentBySide(view, ConstraintSet.TOP)
+                constrainViewToParentBySide(view, ConstraintSet.BOTTOM)
                 if (index == 0) {
-                    constrainViewToParentBySide(binding.root, ConstraintSet.START)
+                    constrainViewToParentBySide(view, ConstraintSet.START)
                 }
                 if (index == controlList.lastIndex) {
-                    constrainViewToParentBySide(binding.root, ConstraintSet.END)
+                    constrainViewToParentBySide(view, ConstraintSet.END)
                 }
                 if (index > 0) {
                     val prevBinding = controlList[index - 1]
-                    constrainViewStartToEndOfView(binding.root, prevBinding.root)
+                    constrainViewStartToEndOfView(view, prevBinding)
                 }
                 if (index < controlList.lastIndex) {
                     val nextBinding = controlList[index + 1]
-                    constrainViewEndToStartOfView(binding.root, nextBinding.root)
+                    constrainViewEndToStartOfView(view, nextBinding)
                 }
             }
         }
