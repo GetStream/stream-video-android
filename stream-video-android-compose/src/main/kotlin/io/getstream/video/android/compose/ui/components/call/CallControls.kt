@@ -57,13 +57,14 @@ public fun CallControls(
     onCallAction: (CallAction) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Surface( // TODO - add the small spacer/divider to indicate it's a "sheet"
+    Surface(
         modifier = modifier,
         shape = VideoTheme.shapes.callControls,
         color = VideoTheme.colors.appBackground
     ) {
         CallControlsActions(
-            actions = buildDefaultCallControlActions(callMediaState), onCallAction = onCallAction
+            actions = buildDefaultCallControlActions(callMediaState),
+            onCallAction = onCallAction
         )
     }
 }

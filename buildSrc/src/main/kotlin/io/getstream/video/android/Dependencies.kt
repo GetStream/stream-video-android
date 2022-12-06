@@ -25,6 +25,7 @@ object Versions {
     internal const val OKHTTP = "4.10.0"
 
     internal const val WEBRTC = "104.5112.05"
+    internal const val STREAM = "6.0.0-beta1"
     internal const val STREAM_LOG = "1.0.0"
     internal const val STREAM_PUSH = "1.0.2"
 
@@ -85,6 +86,11 @@ object Dependencies {
     const val streamPush = "io.getstream:stream-android-push:${Versions.STREAM_PUSH}"
     const val streamPushDelegate = "io.getstream:stream-android-push-delegate:${Versions.STREAM_PUSH}"
     const val streamPushFirebase = "io.getstream:stream-android-push-firebase:${Versions.STREAM_PUSH}"
+
+    const val streamChatCompose = "io.getstream:stream-chat-android-compose:${Versions.STREAM}"
+    const val streamChatOffline = "io.getstream:stream-chat-android-offline:${Versions.STREAM}"
+    const val streamChatState = "io.getstream:stream-chat-android-state:${Versions.STREAM}"
+    const val streamChatUiUtils = "io.getstream:stream-chat-android-ui-utils:${Versions.STREAM}"
 
     const val baseProfile =
         "androidx.profileinstaller:profileinstaller:${Versions.BASE_PROFILE}"

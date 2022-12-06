@@ -56,6 +56,7 @@ import io.getstream.video.android.model.IceCandidate
 import io.getstream.video.android.model.IceServer
 import io.getstream.video.android.model.SfuToken
 import io.getstream.video.android.model.StreamPeerType
+import io.getstream.video.android.model.state.StreamCallState
 import io.getstream.video.android.model.toPeerType
 import io.getstream.video.android.module.SfuClientModule
 import io.getstream.video.android.utils.Failure
@@ -120,7 +121,7 @@ internal class CallClientImpl(
     private val callEngine: StreamCallEngine,
     private val sfuClient: SfuClient,
     private val sfuSocket: SfuSocket,
-    private val remoteIceServers: List<IceServer>
+    private val remoteIceServers: List<IceServer>,
 ) : CallClient, SfuSocketListener {
 
     private val logger = StreamLog.getLogger("Call:WebRtcClient")
@@ -128,6 +129,24 @@ internal class CallClientImpl(
     private var connectionState: ConnectionState = ConnectionState.DISCONNECTED
     private var sessionId: String = ""
     private var call: Call? = null
+
+    /**
+     * State that indicates whether the camera is capturing and sending video or not.
+     */
+    private val _isVideoEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    override val isVideoEnabled: StateFlow<Boolean> = _isVideoEnabled
+
+    /**
+     * State that indicates whether the mic is capturing and sending the audio or not.
+     */
+    private val _isAudioEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    override val isAudioEnabled: StateFlow<Boolean> = _isAudioEnabled
+
+    /**
+     * State that indicates whether the speakerphone is on or not.
+     */
+    private val _isSpeakerPhoneEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    override val isSpeakerPhoneEnabled: StateFlow<Boolean> = _isSpeakerPhoneEnabled
 
     private val supervisorJob = SupervisorJob()
     private val coroutineScope = CoroutineScope(DispatcherProvider.IO + supervisorJob)
@@ -210,7 +229,12 @@ internal class CallClientImpl(
 
         sfuSocket.releaseConnection()
 
+        videoCapturer?.stopCapture()
+        videoCapturer?.dispose()
         videoCapturer = null
+
+        surfaceTextureHelper.stopListening()
+
         isCapturingVideo = false
     }
 
@@ -222,20 +246,36 @@ internal class CallClientImpl(
         sfuSocket.removeListener(sfuSocketListener)
     }
 
+    override fun setInitialCallSettings(callSettings: CallSettings) {
+        logger.d { "[setCallSettings] call settings: $callSettings" }
+        _isVideoEnabled.value = callSettings.cameraOn
+        _isAudioEnabled.value = callSettings.microphoneOn
+        _isSpeakerPhoneEnabled.value = callSettings.speakerOn
+    }
+
     override fun setCameraEnabled(isEnabled: Boolean) {
         logger.d { "[setCameraEnabled] #sfu; isEnabled: $isEnabled" }
         coroutineScope.launch {
+            // If we are not connected to the SFU we do not want to send requests or initialise any tracks not to waste
+            // resources if the user declines a call.
+            if (callEngine.callState.value !is StreamCallState.Connected) {
+                _isVideoEnabled.value = isEnabled
+                return@launch
+            }
+
+            setupVideoTrack()
+
             if (!isCapturingVideo && isEnabled) {
                 startCapturingLocalVideo(CameraMetadata.LENS_FACING_FRONT)
             }
             val request = UpdateMuteStateRequest(
-                sessionId,
-                video_mute_changed = VideoMuteChanged(muted = !isEnabled)
+                sessionId, video_mute_changed = VideoMuteChanged(muted = !isEnabled)
             )
 
             updateMuteState(request).onSuccessSuspend {
                 call?.setCameraEnabled(isEnabled)
                 localVideoTrack?.setEnabled(isEnabled)
+                _isVideoEnabled.value = isEnabled
             }
         }
     }
@@ -243,6 +283,15 @@ internal class CallClientImpl(
     override fun setMicrophoneEnabled(isEnabled: Boolean) {
         logger.d { "[setMicrophoneEnabled] #sfu; isEnabled: $isEnabled" }
         coroutineScope.launch {
+            // If we are not connected to the SFU we do not want to send requests or initialise any tracks not to waste
+            // resources if the user declines a call.
+            if (callEngine.callState.value !is StreamCallState.Connected) {
+                _isAudioEnabled.value = isEnabled
+                return@launch
+            }
+
+            setupAudioTrack()
+
             val request = UpdateMuteStateRequest(
                 sessionId,
                 audio_mute_changed = AudioMuteChanged(muted = !isEnabled),
@@ -251,6 +300,7 @@ internal class CallClientImpl(
             updateMuteState(request).onSuccessSuspend {
                 call?.setMicrophoneEnabled(isEnabled)
                 localAudioTrack?.setEnabled(isEnabled)
+                _isAudioEnabled.value = isEnabled
             }
         }
     }
@@ -266,7 +316,9 @@ internal class CallClientImpl(
             }
         }
 
-        getAudioHandler()?.selectDevice(activeDevice)
+        getAudioHandler()?.selectDevice(activeDevice)?.also {
+            _isSpeakerPhoneEnabled.value = isEnabled
+        }
     }
 
     private suspend fun updateMuteState(muteStateRequest: UpdateMuteStateRequest): Result<UpdateMuteStateResponse> {
@@ -306,11 +358,8 @@ internal class CallClientImpl(
         }
     }
 
-    override suspend fun connectToCall(
-        sessionId: String,
-        callSettings: CallSettings
-    ): Result<Call> {
-        logger.d { "[connectToCall] #sfu; sessionId: $sessionId, autoPublish: ${callSettings.autoPublish}" }
+    override suspend fun connectToCall(sessionId: String, autoPublish: Boolean): Result<Call> {
+        logger.d { "[connectToCall] #sfu; sessionId: $sessionId, autoPublish: $autoPublish" }
         if (connectionState != ConnectionState.DISCONNECTED) {
             return Failure(
                 VideoError("Already connected or connecting to a call with the session ID: $sessionId")
@@ -320,7 +369,7 @@ internal class CallClientImpl(
         connectionState = ConnectionState.CONNECTING
         this.sessionId = sessionId
 
-        return when (val initializeResult = initializeCall(callSettings)) {
+        return when (val initializeResult = initializeCall(autoPublish)) {
             is Success -> {
                 connectionState = ConnectionState.CONNECTED
 
@@ -373,9 +422,8 @@ internal class CallClientImpl(
     }
 
     private suspend fun initializeCall(
-        callSettings: CallSettings
+        autoPublish: Boolean,
     ): Result<JoinResponse> {
-        val autoPublish = callSettings.autoPublish
         logger.d { "[initializeCall] #sfu; autoPublish: $autoPublish" }
 
         val call = createCall(sessionId)
@@ -384,6 +432,13 @@ internal class CallClientImpl(
 
         val result = connectToCall()
         logger.v { "[initializeCall] #sfu; result: $result" }
+        val callSettings = CallSettings(
+            autoPublish = autoPublish,
+            microphoneOn = _isAudioEnabled.value,
+            cameraOn = _isVideoEnabled.value,
+            speakerOn = _isSpeakerPhoneEnabled.value
+        )
+        logger.d { "[initializeCall] callSettings: $callSettings" }
         return when (result) {
             is Success -> {
                 createPeerConnections(autoPublish)
@@ -447,7 +502,7 @@ internal class CallClientImpl(
 
         val request = JoinRequest(
             session_id = sessionId,
-            codec_settings = CodecSettings( // TODO - layers
+            codec_settings = CodecSettings(
                 video = VideoCodecs(
                     encodes = encoderCodecs, decodes = decoderCodecs
                 ),
@@ -470,8 +525,7 @@ internal class CallClientImpl(
                 logger.v { "[executeJoinRequest] completed: $event" }
                 Success(
                     JoinResponse(
-                        event.callState,
-                        event.ownSessionId
+                        event.callState, event.ownSessionId
                     )
                 )
             }
@@ -551,7 +605,10 @@ internal class CallClientImpl(
         logger.v { "[handleTrickle] #sfu; #${event.peerType.stringify()}; result: $result" }
     }
 
-    private fun onNegotiationNeeded(peerConnection: StreamPeerConnection, peerType: StreamPeerType) {
+    private fun onNegotiationNeeded(
+        peerConnection: StreamPeerConnection,
+        peerType: StreamPeerType
+    ) {
         val id = Random.nextInt().absoluteValue
         logger.d { "[negotiate] #$id; #sfu; #${peerType.stringify()}; peerConnection: $peerConnection" }
         coroutineScope.launch {
@@ -580,24 +637,44 @@ internal class CallClientImpl(
 
     private fun createUserTracks(callSettings: CallSettings) {
         val autoPublish = callSettings.autoPublish
+
         logger.d { "[createUserTracks] #sfu; autoPublish: $autoPublish, callSettings: $callSettings" }
         val manager = context.getSystemService<AudioManager>()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             manager?.allowedCapturePolicy = ALLOW_CAPTURE_BY_ALL
         }
 
+        if (_isAudioEnabled.value) {
+            setupAudioTrack(autoPublish)
+        }
+
+        if (_isVideoEnabled.value) {
+            setupVideoTrack(autoPublish)
+        }
+    }
+
+    private fun setupAudioTrack(autoPublish: Boolean = true) {
+        if (localAudioTrack != null) return
+
         val audioTrack = makeAudioTrack()
-        audioTrack.setEnabled(callSettings.audioOn)
+        audioTrack.setEnabled(_isAudioEnabled.value)
         localAudioTrack = audioTrack
         logger.v { "[createUserTracks] #sfu; audioTrack: ${audioTrack.stringify()}" }
 
+        if (autoPublish) {
+            publisher?.addAudioTransceiver(localAudioTrack!!, listOf(sessionId))
+        }
+    }
+
+    private fun setupVideoTrack(autoPublish: Boolean = true) {
+        if (localVideoTrack != null) return
+
         val videoTrack = makeVideoTrack()
         localVideoTrack = videoTrack
-        videoTrack.setEnabled(callSettings.videoOn)
+        videoTrack.setEnabled(_isVideoEnabled.value)
         logger.v { "[createUserTracks] #sfu; videoTrack: ${videoTrack.stringify()}" }
 
         if (autoPublish) {
-            publisher?.addTrack(localAudioTrack!!, listOf(sessionId))
             publisher?.addVideoTransceiver(localVideoTrack!!, listOf(sessionId))
         }
     }
@@ -606,8 +683,7 @@ internal class CallClientImpl(
         val audioSource = peerConnectionFactory.makeAudioSource(audioConstraints)
 
         return peerConnectionFactory.makeAudioTrack(
-            source = audioSource,
-            trackId = buildTrackId(TRACK_TYPE_AUDIO)
+            source = audioSource, trackId = buildTrackId(TRACK_TYPE_AUDIO)
         )
     }
 
@@ -618,8 +694,7 @@ internal class CallClientImpl(
         capturer?.initialize(surfaceTextureHelper, context, videoSource.capturerObserver)
 
         return peerConnectionFactory.makeVideoTrack(
-            source = videoSource,
-            trackId = buildTrackId(TRACK_TYPE_VIDEO)
+            source = videoSource, trackId = buildTrackId(TRACK_TYPE_VIDEO)
         )
     }
 

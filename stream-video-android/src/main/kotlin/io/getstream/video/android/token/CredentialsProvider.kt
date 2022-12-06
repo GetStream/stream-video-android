@@ -46,4 +46,9 @@ public interface CredentialsProvider {
     public fun getSfuToken(): SfuToken
 
     public fun getUserCredentials(): User
+
+    public fun updateUser(
+        user: User,
+        userToken: String
+    )
 }

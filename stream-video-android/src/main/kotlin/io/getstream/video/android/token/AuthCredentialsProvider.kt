@@ -23,11 +23,16 @@ import io.getstream.video.android.model.UserToken
 
 public class AuthCredentialsProvider(
     private val apiKey: ApiKey,
-    private val userToken: UserToken,
-    private val user: User
+    private var userToken: UserToken,
+    private var user: User
 ) : CredentialsProvider {
 
     private var sfuToken: SfuToken? = null
+
+    override fun updateUser(user: User, userToken: String) {
+        this.user = user
+        this.userToken = userToken
+    }
 
     override fun loadUserToken(): UserToken {
         return userToken

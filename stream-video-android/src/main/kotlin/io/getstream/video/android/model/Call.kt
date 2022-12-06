@@ -175,15 +175,15 @@ public class Call(
     }
 
     private fun replaceTrackIfNeeded(mediaStream: MediaStream, streamId: String?): VideoTrack? {
-        if (streamId == null || streamId != mediaStream.id) {
-            return mediaStream.videoTracks?.firstOrNull()?.let { track ->
+        return if (streamId == null || streamId != mediaStream.id) {
+            mediaStream.videoTracks?.firstOrNull()?.let { track ->
                 VideoTrack(
                     streamId = mediaStream.id,
                     video = track
                 )
             }
         } else {
-            return null
+            null
         }
     }
 
@@ -206,8 +206,8 @@ public class Call(
                 val user = it.toCallParticipant(getCurrentUserId())
 
                 if (it.user?.id == getCurrentUserId()) {
-                    user.hasAudio = callSettings.audioOn
-                    user.hasVideo = callSettings.videoOn
+                    user.hasAudio = callSettings.microphoneOn
+                    user.hasVideo = callSettings.cameraOn
                 }
 
                 user
