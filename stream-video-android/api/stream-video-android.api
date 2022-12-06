@@ -668,6 +668,7 @@ public abstract interface class io/getstream/video/android/StreamVideo {
 	public abstract fun getConfig ()Lio/getstream/video/android/StreamVideoConfig;
 	public abstract fun getOrCreateCall (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun getUser ()Lio/getstream/video/android/model/User;
+	public abstract fun handlePushMessage (Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun inviteUsers (Ljava/util/List;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun joinCall (Lio/getstream/video/android/model/CallMetadata;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun joinCall (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -727,6 +728,7 @@ public final class io/getstream/video/android/StreamVideoImpl : io/getstream/vid
 	public fun getConfig ()Lio/getstream/video/android/StreamVideoConfig;
 	public fun getOrCreateCall (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun getUser ()Lio/getstream/video/android/model/User;
+	public fun handlePushMessage (Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun inviteUsers (Ljava/util/List;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun joinCall (Lio/getstream/video/android/model/CallMetadata;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun joinCall (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -761,13 +763,6 @@ public abstract interface class io/getstream/video/android/api/ClientRPCService 
 	public abstract fun updateCall (Lstream/video/coordinator/client_v1_rpc/UpdateCallRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun updateCallPermissions (Lstream/video/coordinator/client_v1_rpc/UpdateCallPermissionsRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun upsertCallMembers (Lstream/video/coordinator/client_v1_rpc/UpsertCallMembersRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
-public abstract interface class io/getstream/video/android/api/EgressRPCService {
-	public abstract fun startBroadcast (Lstream/video/coordinator/server_v1_rpc/StartBroadcastRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun startRecording (Lstream/video/coordinator/server_v1_rpc/StartRecordingRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun stopBroadcast (Lstream/video/coordinator/server_v1_rpc/StopBroadcastRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun stopRecording (Lstream/video/coordinator/server_v1_rpc/StopRecordingRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public abstract interface class io/getstream/video/android/api/GossipRPCService {
@@ -2610,7 +2605,7 @@ public abstract interface class io/getstream/video/android/socket/VideoSocket {
 }
 
 public final class io/getstream/video/android/token/AuthCredentialsProvider : io/getstream/video/android/token/CredentialsProvider {
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lio/getstream/video/android/model/User;)V
+	public fun <init> (Ljava/lang/String;Lio/getstream/video/android/model/User;)V
 	public fun getCachedApiKey ()Ljava/lang/String;
 	public fun getCachedUserToken ()Ljava/lang/String;
 	public fun getSfuToken ()Ljava/lang/String;
@@ -2618,7 +2613,7 @@ public final class io/getstream/video/android/token/AuthCredentialsProvider : io
 	public fun loadApiKey ()Ljava/lang/String;
 	public fun loadUserToken ()Ljava/lang/String;
 	public fun setSfuToken (Ljava/lang/String;)V
-	public fun updateUser (Lio/getstream/video/android/model/User;Ljava/lang/String;)V
+	public fun updateUser (Lio/getstream/video/android/model/User;)V
 }
 
 public abstract interface class io/getstream/video/android/token/CredentialsProvider {
@@ -2629,7 +2624,7 @@ public abstract interface class io/getstream/video/android/token/CredentialsProv
 	public abstract fun loadApiKey ()Ljava/lang/String;
 	public abstract fun loadUserToken ()Ljava/lang/String;
 	public abstract fun setSfuToken (Ljava/lang/String;)V
-	public abstract fun updateUser (Lio/getstream/video/android/model/User;Ljava/lang/String;)V
+	public abstract fun updateUser (Lio/getstream/video/android/model/User;)V
 }
 
 public final class io/getstream/video/android/ui/ParticipantContentView : android/widget/LinearLayout {
@@ -2693,6 +2688,12 @@ public abstract interface class io/getstream/video/android/user/UsersProvider {
 
 public final class io/getstream/video/android/utils/AndroidUtilsKt {
 	public static final fun shouldShowRequestPermissionsRationale (Landroid/app/Activity;[Ljava/lang/String;)Z
+}
+
+public final class io/getstream/video/android/utils/ConstantsKt {
+	public static final field INTENT_EXTRA_CALL_ACCEPTED Ljava/lang/String;
+	public static final field INTENT_EXTRA_CALL_CID Ljava/lang/String;
+	public static final field INTENT_EXTRA_NOTIFICATION_ID Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/utils/Failure : io/getstream/video/android/utils/Result {

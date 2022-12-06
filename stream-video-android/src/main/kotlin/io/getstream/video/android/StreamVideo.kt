@@ -236,4 +236,9 @@ public interface StreamVideo {
      * Cancels outgoing or active call.
      */
     public suspend fun cancelCall(cid: StreamCallCid): Result<Boolean>
+
+    /**
+     * Used to process push notification payloads.
+     */
+    public suspend fun handlePushMessage(payload: Map<String, Any>): Result<Unit>
 }

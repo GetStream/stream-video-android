@@ -83,7 +83,6 @@ class LoginActivity : ComponentActivity() {
 
         if (user != null && user.isValid()) {
             startHome(
-                user.token,
                 user
             )
             finish()
@@ -210,15 +209,14 @@ class LoginActivity : ComponentActivity() {
                 emptyMap()
             )
 
-            startHome(token, user)
+            startHome(user)
         }
     }
 
-    private fun startHome(token: String, user: User) {
+    private fun startHome(user: User) {
         dogfoodingApp.initializeStreamVideo(
             AuthCredentialsProvider(
-                API_KEY,
-                token,
+                apiKey = API_KEY,
                 user = user
             ),
             loggingLevel = LoggingLevel.BODY

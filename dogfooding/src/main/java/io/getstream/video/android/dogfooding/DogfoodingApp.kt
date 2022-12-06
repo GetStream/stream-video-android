@@ -23,6 +23,7 @@ import io.getstream.android.push.firebase.FirebasePushDeviceGenerator
 import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.StreamVideoBuilder
 import io.getstream.video.android.logging.LoggingLevel
+import io.getstream.video.android.token.AuthCredentialsProvider
 import io.getstream.video.android.token.CredentialsProvider
 import io.getstream.video.android.user.UserCredentialsManager
 import io.getstream.video.android.user.UserPreferences
@@ -30,16 +31,20 @@ import io.getstream.video.android.user.UserPreferences
 class DogfoodingApp : Application() {
 
     private var credentials: CredentialsProvider? = null
-    private var calls: StreamVideo? = null
+    private var video: StreamVideo? = null
 
     val credentialsProvider: CredentialsProvider
         get() = requireNotNull(credentials)
 
     val streamVideo: StreamVideo
-        get() = requireNotNull(calls)
+        get() = requireNotNull(video)
 
     val userPreferences: UserPreferences by lazy {
         UserCredentialsManager.getPreferences()
+    }
+
+    fun isInitialized(): Boolean {
+        return video != null
     }
 
     override fun onCreate() {
@@ -62,7 +67,7 @@ class DogfoodingApp : Application() {
             loggingLevel = loggingLevel,
             pushDeviceGenerators = listOf(FirebasePushDeviceGenerator())
         ).build().also {
-            calls = it
+            video = it
         }
     }
 
@@ -70,7 +75,26 @@ class DogfoodingApp : Application() {
         FirebaseAuth.getInstance().signOut()
         streamVideo.clearCallState()
         userPreferences.clear()
-        calls = null
+        video = null
+    }
+
+    fun initializeFromCredentials(): Boolean {
+        val credentials = UserCredentialsManager.initialize(this)
+        val user = credentials.getCachedCredentials()
+        val apiKey = credentials.getCachedApiKey()
+
+        if (user == null || apiKey.isNullOrBlank()) {
+            return false
+        }
+
+        dogfoodingApp.initializeStreamVideo(
+            AuthCredentialsProvider(
+                apiKey = apiKey,
+                user = user
+            ),
+            loggingLevel = LoggingLevel.NONE
+        )
+        return true
     }
 }
 

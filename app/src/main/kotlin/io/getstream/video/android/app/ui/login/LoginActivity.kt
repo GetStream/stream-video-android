@@ -140,8 +140,7 @@ class LoginActivity : AppCompatActivity() {
         videoApp.initializeStreamVideo(
             credentialsProvider = AuthCredentialsProvider(
                 user = selectedUser,
-                apiKey = "key1",
-                userToken = selectedUser.token
+                apiKey = "key1"
             ),
             loggingLevel = LoggingLevel.BODY
         )

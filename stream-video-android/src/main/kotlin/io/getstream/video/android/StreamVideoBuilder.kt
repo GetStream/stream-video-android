@@ -56,6 +56,7 @@ public class StreamVideoBuilder(
 
         UserCredentialsManager.initialize(context).apply {
             storeUserCredentials(user)
+            storeApiKey(credentialsProvider.getCachedApiKey())
         }
 
         val httpModule = HttpModule.getOrCreate(loggingLevel.httpLoggingLevel, credentialsProvider)

@@ -14,21 +14,8 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.model
+package io.getstream.video.android.utils
 
-import kotlinx.serialization.Serializable
-
-@Serializable
-public data class User(
-    val id: String,
-    val role: String,
-    val name: String,
-    val token: String,
-    val imageUrl: String?,
-    val teams: List<String>,
-    val extraData: Map<String, String>
-) {
-    public fun isValid(): Boolean {
-        return id.isNotEmpty() && token.isNotEmpty()
-    }
-}
+public const val INTENT_EXTRA_CALL_CID: String = "call_cid"
+public const val INTENT_EXTRA_NOTIFICATION_ID: String = "notification_id"
+public const val INTENT_EXTRA_CALL_ACCEPTED: String = "call_accepted"

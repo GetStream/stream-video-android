@@ -76,6 +76,7 @@ public fun IncomingCallContent(
  * @param callType The type of call, Audio or Video.
  * @param isVideoEnabled Whether the video should be enabled when entering the call or not.
  * @param modifier Modifier for styling.
+ * @param showHeader If the app bar header is shown or not.
  * @param onBackPressed Handler when the user taps on the back button.
  * @param onCallInfoSelected Handler when the call participants info is selected.
  * @param onCallAction Handler used when the user interacts with Call UI.
@@ -86,6 +87,7 @@ public fun IncomingCall(
     callType: CallType,
     isVideoEnabled: Boolean,
     modifier: Modifier = Modifier,
+    showHeader: Boolean = true,
     onBackPressed: () -> Unit,
     onCallInfoSelected: () -> Unit,
     onCallAction: (CallAction) -> Unit,
@@ -98,7 +100,9 @@ public fun IncomingCall(
     ) {
         Column {
 
-            CallAppBar(onBackPressed = onBackPressed, onCallInfoSelected = onCallInfoSelected)
+            if (showHeader) { // TODO - we should either pass down this flag based on the state or make the app bar nicer
+                CallAppBar(onBackPressed = onBackPressed, onCallInfoSelected = onCallInfoSelected)
+            }
 
             val topPadding = if (participants.size == 1) {
                 VideoTheme.dimens.singleAvatarAppbarPadding

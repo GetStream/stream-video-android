@@ -20,6 +20,7 @@ import android.app.Application
 import android.content.Context
 import io.getstream.log.StreamLog
 import io.getstream.log.android.AndroidStreamLogger
+import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.StreamVideoBuilder
 import io.getstream.video.android.app.ui.call.CallActivity
