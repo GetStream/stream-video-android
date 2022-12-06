@@ -32,9 +32,11 @@ import io.getstream.video.android.dispatchers.DispatcherProvider
 import io.getstream.video.android.token.AuthCredentialsProvider
 import io.getstream.video.android.user.UserCredentialsManager
 import io.getstream.video.android.user.UserPreferences
+import io.getstream.video.android.utils.INTENT_EXTRA_CALL_ACCEPTED
+import io.getstream.video.android.utils.INTENT_EXTRA_CALL_CID
+import io.getstream.video.android.utils.INTENT_EXTRA_NOTIFICATION_ID
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-
 
 /**
  * Class used to handle Push Notifications.
@@ -49,7 +51,10 @@ internal class VideoPushDelegate(context: Context) : PushDelegate(context) {
         NotificationManagerCompat.from(context).also {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 it.createNotificationChannel(
-                    NotificationChannelCompat.Builder(CHANNEL_ID, NotificationManager.IMPORTANCE_HIGH)
+                    NotificationChannelCompat.Builder(
+                        CHANNEL_ID,
+                        NotificationManager.IMPORTANCE_HIGH
+                    )
                         .setName(CHANNEL_NAME)
                         .setDescription(CHANNEL_DESCRIPTION)
                         .build()
@@ -69,9 +74,9 @@ internal class VideoPushDelegate(context: Context) : PushDelegate(context) {
         return payload.ifValid {
             val users = payload[KEY_USER_NAMES] as String
             val callId = payload[KEY_CALL_CID] as String
-            searchIncomingCallPendingIntent(callId, users)
+            searchIncomingCallPendingIntent(callId)
                 ?.let { fullScreenPendingIntent ->
-                    searchAcceptCallPendingIntent(callId, users)
+                    searchAcceptCallPendingIntent(callId)
                         ?.let { acceptCallPendingIntent ->
                             showIncomingCallNotification(
                                 fullScreenPendingIntent,
@@ -109,7 +114,12 @@ internal class VideoPushDelegate(context: Context) : PushDelegate(context) {
                 NotificationCompat.Action.Builder(
                     null,
                     context.getString(R.string.stream_call_notification_action_reject),
-                    PendingIntent.getBroadcast(context, 0, Intent(), 0)
+                    PendingIntent.getBroadcast(
+                        context,
+                        0,
+                        Intent(),
+                        PendingIntent.FLAG_IMMUTABLE
+                    ) // TODO add broadcast receiver that rejects the call
                 ).build()
             )
             .build()
@@ -120,31 +130,23 @@ internal class VideoPushDelegate(context: Context) : PushDelegate(context) {
      * Search for an activity that can receive incoming calls from Stream Server.
      *
      * @param callId The call id from the incoming call.
-     * @param users The invited users to this call.
      */
     private fun searchIncomingCallPendingIntent(
-        callId: String,
-        users: String,
-    ): PendingIntent? =
-        searchPendingIntent(Intent(ACTION_INCOMING_CALL), callId, users)
-
+        callId: String
+    ): PendingIntent? = searchPendingIntent(Intent(ACTION_INCOMING_CALL), callId)
 
     /**
      * Search for an activity that can accept call from Stream Server.
      *
      * @param callId The call id from the incoming call.
-     * @param users The invited users to this call.
      */
     private fun searchAcceptCallPendingIntent(
         callId: String,
-        users: String,
-    ): PendingIntent? =
-        searchPendingIntent(Intent(ACTION_ACCEPT_CALL), callId, users)
+    ): PendingIntent? = searchPendingIntent(Intent(ACTION_ACCEPT_CALL), callId)
 
     private fun searchPendingIntent(
         baseIntent: Intent,
         callId: String,
-        users: String,
     ): PendingIntent? {
         return context.packageManager.queryIntentActivities(baseIntent, 0)
             .filter { it.activityInfo.packageName == context.packageName }
@@ -164,7 +166,9 @@ internal class VideoPushDelegate(context: Context) : PushDelegate(context) {
                             resolveInfo.activityInfo.name
                         )
                         putExtra(INTENT_EXTRA_CALL_CID, callId)
-                        putExtra(INTENT_EXTRA_USERS, users)
+                        if (baseIntent.action == ACTION_ACCEPT_CALL) {
+                            putExtra(INTENT_EXTRA_CALL_ACCEPTED, true)
+                        }
                         putExtra(INTENT_EXTRA_NOTIFICATION_ID, INCOMING_CALL_NOTIFICATION_ID)
                     },
                     flags
@@ -183,8 +187,7 @@ internal class VideoPushDelegate(context: Context) : PushDelegate(context) {
             userPreferences.getCachedApiKey()?.let { apiKey ->
                 AuthCredentialsProvider(
                     user = user,
-                    apiKey = apiKey,
-                    userToken = user.token
+                    apiKey = apiKey
                 )
             }
         }?.let { authCredentialsProvider ->
@@ -220,7 +223,8 @@ internal class VideoPushDelegate(context: Context) : PushDelegate(context) {
     /**
      * Verify if the map contains key/value from Stream Server.
      */
-    private fun Map<String, Any?>.isFromStreamServer(): Boolean = this[KEY_SENDER] == VALUE_STREAM_SENDER
+    private fun Map<String, Any?>.isFromStreamServer(): Boolean =
+        this[KEY_SENDER] == VALUE_STREAM_SENDER
 
     /**
      * Verify if the map contains all keys/values for an incoming call.
@@ -244,9 +248,5 @@ internal class VideoPushDelegate(context: Context) : PushDelegate(context) {
         private const val CHANNEL_NAME = "Incoming Calls"
         private const val CHANNEL_DESCRIPTION = "Incoming audio and video call alerts"
         private const val INCOMING_CALL_NOTIFICATION_ID = 24756
-
-        private const val INTENT_EXTRA_CALL_CID = "call_cid"
-        private const val INTENT_EXTRA_USERS = "users"
-        private const val INTENT_EXTRA_NOTIFICATION_ID = "notification_id"
     }
 }
