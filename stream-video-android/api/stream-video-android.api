@@ -2439,6 +2439,12 @@ public abstract interface class io/getstream/video/android/network/NetworkStateP
 	public abstract fun onDisconnected ()V
 }
 
+public abstract class io/getstream/video/android/notifications/AbstractNotificationActivity : androidx/appcompat/app/AppCompatActivity, io/getstream/video/android/StreamVideoProvider {
+	public fun <init> ()V
+	protected abstract fun initializeVideoIfNeeded ()V
+	protected fun onCreate (Landroid/os/Bundle;)V
+}
+
 public abstract interface class io/getstream/video/android/permission/PermissionManager {
 	public abstract fun checkPermission (Ljava/lang/String;)Z
 	public abstract fun getHasCameraPermission ()Lkotlinx/coroutines/flow/StateFlow;
