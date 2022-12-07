@@ -42,7 +42,7 @@ import org.webrtc.AudioTrack
 import org.webrtc.EglBase
 import org.webrtc.MediaStream
 import org.webrtc.RendererCommon
-import stream.video.sfu.models.CallState
+import stream.video.sfu.models.TrackType
 
 public class Call(
     private val context: Context,

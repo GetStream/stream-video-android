@@ -46,6 +46,11 @@ class ChatWithVideoApp : Application() {
         override val cancelOnTimeout: Boolean = true
         override val joinOnAcceptedByCallee: Boolean = true
         override val createCallClientInternally: Boolean = true
+
+        override val autoPublish: Boolean = true
+        override val defaultAudioOn: Boolean = false
+        override val defaultVideoOn: Boolean = true
+        override val defaultSpeakerPhoneOn: Boolean = false
     }
 
     val usersLoginProvider: UsersProvider by lazy { FakeUsersProvider() }
