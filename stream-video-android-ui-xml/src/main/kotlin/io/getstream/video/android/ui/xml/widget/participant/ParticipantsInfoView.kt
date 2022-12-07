@@ -2,8 +2,8 @@ package io.getstream.video.android.ui.xml.widget.participant
 
 import android.content.Context
 import android.util.AttributeSet
+import android.util.TypedValue
 import android.view.View
-import android.widget.Space
 import androidx.constraintlayout.widget.ConstraintLayout
 import io.getstream.video.android.common.util.buildLargeCallText
 import io.getstream.video.android.common.util.buildSmallCallText
@@ -13,6 +13,7 @@ import io.getstream.video.android.ui.common.R
 import io.getstream.video.android.ui.xml.databinding.ViewParticipantsInfoBinding
 import io.getstream.video.android.ui.xml.utils.extensions.inflater
 import io.getstream.video.android.ui.xml.utils.extensions.dpToPx
+import io.getstream.video.android.ui.xml.utils.extensions.getDimension
 import io.getstream.video.android.ui.xml.widget.avatar.AvatarView
 
 internal class ParticipantsInfoView @JvmOverloads constructor(
@@ -60,6 +61,12 @@ internal class ParticipantsInfoView @JvmOverloads constructor(
     }
 
     private fun setParticipantsText(participants: List<CallUser>) {
+        val textSize = context.getDimension(if (participants.size == 1) {
+            R.dimen.directCallUserNameTextSize
+        } else {
+            R.dimen.groupCallUserNameTextSize
+        })
+        binding.participantsText.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize.toFloat())
         binding.participantsText.text = if (participants.size < 3) {
             buildSmallCallText(participants)
         } else {

@@ -59,7 +59,7 @@ private val LocalShapes = compositionLocalOf<StreamShapes> {
 public fun VideoTheme(
     isInDarkMode: Boolean = isSystemInDarkTheme(),
     colors: StreamColors = if (isInDarkMode) StreamColors.defaultDarkColors() else StreamColors.defaultColors(),
-    dimens: StreamDimens = StreamDimens.defaultDimens(LocalContext.current),
+    dimens: StreamDimens = StreamDimens.defaultDimens(),
     typography: StreamTypography = StreamTypography.defaultTypography(),
     shapes: StreamShapes = StreamShapes.defaultShapes(),
     rippleTheme: RippleTheme = StreamRippleTheme,

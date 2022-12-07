@@ -16,14 +16,13 @@
 
 package io.getstream.video.android.compose.theme
 
-import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.sp
-import io.getstream.video.android.common.util.getFloatResource
+import io.getstream.video.android.compose.utils.floatResource
+import io.getstream.video.android.compose.utils.textSizeResource
 import io.getstream.video.android.ui.common.R
 
 /**
@@ -73,8 +72,7 @@ public data class StreamDimens(
          * @return A [StreamDimens] instance holding our default dimensions.
          */
         @Composable
-        public fun defaultDimens(context: Context): StreamDimens {
-
+        public fun defaultDimens(): StreamDimens {
             return StreamDimens(
                 callAvatarSize = dimensionResource(id = R.dimen.callAvatarSize),
                 singleAvatarSize = dimensionResource(id = R.dimen.singleAvatarSize),
@@ -86,13 +84,13 @@ public data class StreamDimens(
                 avatarAppbarPadding = dimensionResource(id = R.dimen.avatarAppbarPadding),
                 singleAvatarAppbarPadding = dimensionResource(id = R.dimen.singleAvatarAppbarPadding),
                 participantsTextPadding = dimensionResource(id = R.dimen.participantsTextPadding),
-                topAppbarTextSize = dimensionResource(id = R.dimen.topAppbarTextSize).value.sp,
-                directCallUserNameTextSize = dimensionResource(id = R.dimen.directCallUserNameTextSize).value.sp,
-                groupCallUserNameTextSize = dimensionResource(id = R.dimen.groupCallUserNameTextSize).value.sp,
-                onCallStatusTextSize = dimensionResource(id = R.dimen.onCallStatusTextSize).value.sp,
-                onCallStatusTextAlpha = context.getFloatResource(R.dimen.onCallStatusTextAlpha),
-                buttonToggleOnAlpha = context.getFloatResource(R.dimen.buttonToggleOnAlpha),
-                buttonToggleOffAlpha = context.getFloatResource(R.dimen.buttonToggleOffAlpha),
+                topAppbarTextSize = textSizeResource(id = R.dimen.topAppbarTextSize),
+                directCallUserNameTextSize = textSizeResource(id = R.dimen.directCallUserNameTextSize),
+                groupCallUserNameTextSize = textSizeResource(id = R.dimen.groupCallUserNameTextSize),
+                onCallStatusTextSize = textSizeResource(id = R.dimen.onCallStatusTextSize),
+                onCallStatusTextAlpha = floatResource(R.dimen.onCallStatusTextAlpha),
+                buttonToggleOnAlpha = floatResource(R.dimen.buttonToggleOnAlpha),
+                buttonToggleOffAlpha = floatResource(R.dimen.buttonToggleOffAlpha),
                 incomingCallOptionsBottomPadding = dimensionResource(id = R.dimen.incomingCallOptionsBottomPadding),
                 callAppBarPadding = dimensionResource(id = R.dimen.callAppBarPadding),
                 callAppBarLeadingContentSpacingStart = dimensionResource(id = R.dimen.callAppBarLeadingContentSpacingStart),

@@ -33,4 +33,15 @@
     <dimen name="callParticipantsInfoMenuOptionsButtonHeight">40dp</dimen>
     <dimen name="callParticipantsInfoAvatarSize">56dp</dimen>
 
+    <dimen name="title1TextSize">24sp</dimen>
+    <dimen name="title1LineHeight">34sp</dimen>
+    <dimen name="title3TextSize">18sp</dimen>
+    <dimen name="title3LineHeight">23sp</dimen>
+    <dimen name="bodyTextSize">14sp</dimen>
+    <dimen name="footnoteTextSize">12sp</dimen>
+    <dimen name="footnoteLineHeight">20sp</dimen>
+    <dimen name="captionTextSize">10sp</dimen>
+    <dimen name="captionLineHeight">16sp</dimen>
+    <dimen name="tabBarTextSize">10sp</dimen>
+
 </resources>

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_call"
+    tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout"
+    >
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/incomingCallToolbar"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/topAppbarHeightSize"
+        app:layout_constraintTop_toTopOf="parent"
+        >
+
+        <ImageView
+            android:id="@+id/backImageView"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:scaleType="center"
+            android:src="@drawable/ic_arrow_back"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            />
+
+        <TextView
+            android:id="@+id/toolbarTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/default_app_bar_title"
+            android:textSize="@dimen/topAppbarTextSize"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@id/backImageView"
+            app:layout_constraintTop_toTopOf="parent"
+            />
+
+        <ImageView
+            android:id="@+id/toolbarTrailingImage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_participants"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@id/toolbarTitle"
+            app:layout_constraintTop_toTopOf="parent"
+            />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <io.getstream.video.android.ui.xml.widget.participant.ParticipantsInfoView
+        android:id="@+id/participantsInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/incomingCallToolbar"
+        />
+
+    <io.getstream.video.android.ui.xml.widget.control.StreamImageButton
+        android:id="@+id/declineCall"
+        android:layout_width="@dimen/largeButtonSize"
+        android:layout_height="@dimen/largeButtonSize"
+        android:layout_marginBottom="@dimen/incomingCallOptionsBottomPadding"
+        android:background="@drawable/bg_call_option_reject"
+        android:scaleType="center"
+        android:src="@drawable/ic_call_end"
+        android:tint="@color/stream_xml_white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/cameraToggle"
+        app:layout_constraintStart_toStartOf="parent"
+        />
+
+    <io.getstream.video.android.ui.xml.widget.control.StreamImageButton
+        android:id="@+id/cameraToggle"
+        android:layout_width="@dimen/mediumButtonSize"
+        android:layout_height="@dimen/mediumButtonSize"
+        android:background="@drawable/bg_call_control_option"
+        android:scaleType="center"
+        android:src="@drawable/ic_videocam_on"
+        app:layout_constraintBottom_toBottomOf="@id/declineCall"
+        app:layout_constraintEnd_toStartOf="@id/acceptCall"
+        app:layout_constraintStart_toEndOf="@id/declineCall"
+        app:layout_constraintTop_toTopOf="@id/declineCall"
+        />
+
+    <io.getstream.video.android.ui.xml.widget.control.StreamImageButton
+        android:id="@+id/acceptCall"
+        android:layout_width="@dimen/largeButtonSize"
+        android:layout_height="@dimen/largeButtonSize"
+        android:layout_marginBottom="@dimen/incomingCallOptionsBottomPadding"
+        android:background="@drawable/bg_call_option_accept"
+        android:scaleType="center"
+        android:src="@drawable/ic_call"
+        android:tint="@color/stream_xml_white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/cameraToggle"
+        />
+
+</merge>

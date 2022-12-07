@@ -18,15 +18,12 @@ package io.getstream.video.android.ui.xml
 
 import android.Manifest
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.view.WindowManager
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
@@ -39,7 +36,6 @@ import io.getstream.video.android.call.state.ToggleMicrophone
 import io.getstream.video.android.model.state.StreamCallState
 import io.getstream.video.android.permission.PermissionManager
 import io.getstream.video.android.permission.StreamPermissionManagerImpl
-import io.getstream.video.android.ui.xml.binding.bindTo
 import io.getstream.video.android.ui.xml.binding.bindView
 import io.getstream.video.android.ui.xml.databinding.ActivityCallBinding
 import io.getstream.video.android.viewmodel.CallViewModel
@@ -98,15 +94,16 @@ public abstract class AbstractXmlCallActivity :
         super.onCreate(savedInstanceState)
 
         setContentView(binding.root)
-        binding.activeCallView.bindTo(callViewModel, lifecycleOwner = this)
+        binding.activeCallView.bindView(callViewModel, lifecycleOwner = this)
         binding.outgoingCallView.bindView(callViewModel, lifecycleOwner = this)
+        binding.incomingCallView.bindView(callViewModel, lifecycleOwner = this)
 
         lifecycleScope.launchWhenCreated {
             callViewModel.streamCallState.collect { state ->
                 println(state)
                 when {
                     state is StreamCallState.Incoming && !state.acceptedByMe -> {
-                        // showIncomingScreen()
+                        showIncomingScreen()
                     }
 
                     state is StreamCallState.Outgoing && !state.acceptedByCallee -> {

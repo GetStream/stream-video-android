@@ -20,6 +20,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.View
 import android.widget.ImageButton
+import android.widget.ImageView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import io.getstream.log.StreamLog
@@ -27,32 +28,19 @@ import io.getstream.video.android.ui.xml.R
 import io.getstream.video.android.ui.xml.utils.extensions.constrainViewEndToStartOfView
 import io.getstream.video.android.ui.xml.utils.extensions.constrainViewStartToEndOfView
 import io.getstream.video.android.ui.xml.utils.extensions.constrainViewToParentBySide
-import io.getstream.video.android.ui.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.ui.xml.utils.extensions.updateConstraints
 import io.getstream.video.android.ui.common.R as RCommon
 
-public class CallControlsView : ConstraintLayout, View.OnClickListener {
-
-    public constructor(context: Context) : this(context, null)
-    public constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
-    public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : this(context, attrs, defStyleAttr, 0)
-    public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(
-        context.createStreamThemeWrapper(),
-        attrs,
-        defStyleAttr,
-        defStyleRes
-    ) {
-        init(context, attrs)
-    }
+public class CallControlsView @JvmOverloads constructor(
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0,
+) : ConstraintLayout(context, attrs, defStyleAttr), View.OnClickListener {
 
     private val logger = StreamLog.getLogger("Call:ControlsView")
-    private val controlList = arrayListOf<ImageButton>()
+    private val controlList = arrayListOf<StreamImageButton>()
 
     private var listener: OnControlItemClickListener? = null
-
-    private fun init(context: Context, attrs: AttributeSet?) {
-        // TODO
-    }
 
     public fun setOnControlItemClickListener(listener: OnControlItemClickListener) {
         this.listener = listener
@@ -64,23 +52,18 @@ public class CallControlsView : ConstraintLayout, View.OnClickListener {
         controlList.clear()
         val buttonSize = context.resources.getDimension(RCommon.dimen.callControlButtonSize).toInt()
         items.forEach { item ->
-            val view = ImageButton(context).apply {
+            val view = StreamImageButton(context).apply {
                 id = View.generateViewId()
                 tag = item
                 setOnClickListener(this@CallControlsView)
                 layoutParams = LayoutParams(buttonSize, buttonSize)
-                setBackgroundResource(R.drawable.bg_call_option)
+                scaleType = ImageView.ScaleType.CENTER
+                setBackgroundResource(R.drawable.bg_call_control_option)
                 setImageResource(item.icon)
             }
 
-            // val binding = ViewCallMediaButtonBinding.inflate(inflater, this, true).apply {
-            //     root.id = View.generateViewId()
-            //     root.tag = item
-            //     root.setOnClickListener(this@CallControlsView)
-            //     root.layoutParams = LayoutParams(buttonSize, buttonSize)
-            //     iconView.setImageResource(item.icon)
-            // }
             controlList.add(view)
+            addView(view)
         }
         defineConstraints(controlList)
     }

@@ -19,23 +19,56 @@ package io.getstream.video.android.ui.xml.widget.incoming
 import android.content.Context
 import android.util.AttributeSet
 import androidx.constraintlayout.widget.ConstraintLayout
-import io.getstream.video.android.ui.xml.utils.extensions.createStreamThemeWrapper
+import io.getstream.video.android.call.state.AcceptCall
+import io.getstream.video.android.call.state.CallAction
+import io.getstream.video.android.call.state.DeclineCall
+import io.getstream.video.android.call.state.ToggleCamera
+import io.getstream.video.android.model.CallStatus
+import io.getstream.video.android.model.CallUser
+import io.getstream.video.android.ui.common.R
+import io.getstream.video.android.ui.xml.databinding.ViewIncomingCallBinding
+import io.getstream.video.android.ui.xml.utils.extensions.inflater
 
-public class IncomingCallView : ConstraintLayout {
+public class IncomingCallView @JvmOverloads constructor(
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0,
+) : ConstraintLayout(context, attrs, defStyleAttr) {
 
-    public constructor(context: Context) : this(context, null)
-    public constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
-    public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : this(context, attrs, defStyleAttr, 0)
-    public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(
-        context.createStreamThemeWrapper(),
-        attrs,
-        defStyleAttr,
-        defStyleRes
-    ) {
-        init(context, attrs)
+    private val binding = ViewIncomingCallBinding.inflate(inflater, this)
+
+    private var isCameraEnabled = false
+
+    private var callActionListener: CallActionListener? = null
+
+    init {
+        setBackgroundResource(R.drawable.bg_call)
+
+        binding.acceptCall.setOnClickListener { callActionListener?.onCallAction(AcceptCall) }
+        binding.declineCall.setOnClickListener { callActionListener?.onCallAction(DeclineCall) }
+        binding.cameraToggle.setOnClickListener { callActionListener?.onCallAction(ToggleCamera(!isCameraEnabled)) }
     }
 
-    private fun init(context: Context, attrs: AttributeSet?) {
-        // TODO
+    public fun setCameraEnabled(isEnabled: Boolean) {
+        isCameraEnabled = isEnabled
+        val icon = if (isEnabled) R.drawable.ic_videocam_on else R.drawable.ic_videocam_off
+        binding.cameraToggle.setImageResource(icon)
+        binding.cameraToggle.isEnabled = isEnabled
+    }
+
+    public fun setParticipants(participants: List<CallUser>) {
+        binding.participantsInfo.setParticipants(participants)
+    }
+
+    public fun setCallStatus(callStatus: CallStatus) {
+        binding.participantsInfo.setCallStatus(callStatus)
+    }
+
+    public fun setCallActionListener(listener: CallActionListener) {
+        this.callActionListener = listener
+    }
+
+    public fun interface CallActionListener {
+        public fun onCallAction(callAction: CallAction)
     }
 }

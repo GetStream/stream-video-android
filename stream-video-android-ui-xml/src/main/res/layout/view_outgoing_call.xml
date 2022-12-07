@@ -30,36 +30,38 @@
         app:layout_constraintBottom_toBottomOf="parent"
         >
 
-        <ImageButton
+        <io.getstream.video.android.ui.xml.widget.control.StreamImageButton
             android:id="@+id/micToggle"
             android:layout_width="@dimen/mediumButtonSize"
             android:layout_height="@dimen/mediumButtonSize"
             android:layout_marginBottom="32dp"
-            android:background="@drawable/bg_call_option"
+            android:background="@drawable/bg_call_control_option"
+            android:scaleType="center"
             android:src="@drawable/ic_mic_on"
             app:layout_constraintBottom_toTopOf="@id/cancelCall"
             app:layout_constraintEnd_toStartOf="@id/cameraToggle"
             app:layout_constraintStart_toStartOf="parent"
             />
 
-        <ImageButton
+        <io.getstream.video.android.ui.xml.widget.control.StreamImageButton
             android:id="@+id/cameraToggle"
             android:layout_width="@dimen/mediumButtonSize"
             android:layout_height="@dimen/mediumButtonSize"
             android:layout_marginBottom="32dp"
-            android:background="@drawable/bg_call_option"
+            android:background="@drawable/bg_call_control_option"
+            android:scaleType="center"
             android:src="@drawable/ic_videocam_on"
             app:layout_constraintBottom_toTopOf="@id/cancelCall"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/micToggle"
             />
 
-        <androidx.appcompat.widget.AppCompatImageButton
+        <io.getstream.video.android.ui.xml.widget.control.StreamImageButton
             android:id="@+id/cancelCall"
             android:layout_width="@dimen/largeButtonSize"
             android:layout_height="@dimen/largeButtonSize"
             android:background="@drawable/bg_call_option_reject"
-            android:scaleType="centerInside"
+            android:scaleType="center"
             android:src="@drawable/ic_call_end"
             android:tint="@color/stream_xml_white"
             app:layout_constraintBottom_toBottomOf="parent"

@@ -67,16 +67,15 @@ public class OutgoingCallView @JvmOverloads constructor(
     public fun setMicrophoneEnabled(isEnabled: Boolean) {
         isMicrophoneEnabled = isEnabled
         val icon = if (isEnabled) RCommon.drawable.ic_mic_on else RCommon.drawable.ic_mic_off
-        val alpha = if (isEnabled) RCommon.dimen.buttonToggleOnAlpha else RCommon.dimen.buttonToggleOffAlpha
         binding.micToggle.setImageResource(icon)
-        binding.micToggle.background.alpha = (255 * context.getFloatResource(alpha)).roundToInt()
+        binding.micToggle.isEnabled = isEnabled
     }
 
     public fun setCameraEnabled(isEnabled: Boolean) {
         isCameraEnabled = isEnabled
         val icon = if (isEnabled) RCommon.drawable.ic_videocam_on else RCommon.drawable.ic_videocam_off
         binding.cameraToggle.setImageResource(icon)
-        binding.cameraToggle.background.alpha = (context.getFloatResource(if (isEnabled) RCommon.dimen.buttonToggleOnAlpha else RCommon.dimen.buttonToggleOffAlpha) * 255).toInt()
+        binding.cameraToggle.isEnabled = isEnabled
     }
 
     private fun setGroupCallControlsLayout() {
