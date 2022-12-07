@@ -23,6 +23,7 @@ object Versions {
     internal const val WIRE = "4.4.1"
     internal const val RETROFIT = "2.9.0"
     internal const val OKHTTP = "4.10.0"
+    internal const val MOSHI = "1.14.0"
 
     internal const val WEBRTC = "104.5112.05"
     internal const val STREAM = "6.0.0-beta1"
@@ -41,7 +42,8 @@ object Dependencies {
     const val gradleNexusPublishPlugin =
         "io.github.gradle-nexus:publish-plugin:${Versions.GRADLE_NEXUS_PUBLISH_PLUGIN}"
     const val kotlinGradlePlugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:${Versions.KOTLIN}"
-    const val kotlinSerializationPlugin = "org.jetbrains.kotlin:kotlin-serialization:${Versions.KOTLIN}"
+    const val kotlinSerializationPlugin =
+        "org.jetbrains.kotlin:kotlin-serialization:${Versions.KOTLIN}"
     const val kotlinSerializationJson =
         "org.jetbrains.kotlinx:kotlinx-serialization-json:${Versions.KOTLIN_SERIALIZATION_JSON}"
     const val spotlessGradlePlugin =
@@ -70,7 +72,8 @@ object Dependencies {
     const val composeUiTooling = "androidx.compose.ui:ui-tooling:${Versions.COMPOSE}"
     const val composeFoundation = "androidx.compose.foundation:foundation:${Versions.COMPOSE}"
     const val composeMaterial = "androidx.compose.material:material:${Versions.COMPOSE}"
-    const val composeIconsExtended = "androidx.compose.material:material-icons-extended:${Versions.COMPOSE}"
+    const val composeIconsExtended =
+        "androidx.compose.material:material-icons-extended:${Versions.COMPOSE}"
     const val composeCoil = "io.coil-kt:coil-compose:${Versions.COIL}"
 
     const val wireRuntime = "com.squareup.wire:wire-runtime:${Versions.WIRE}"
@@ -78,14 +81,19 @@ object Dependencies {
     const val retrofitWireConverter = "com.squareup.retrofit2:converter-wire:${Versions.RETROFIT}"
     const val okhttpLoggingInterceptor =
         "com.squareup.okhttp3:logging-interceptor:${Versions.OKHTTP}"
+    const val moshi = "com.squareup.moshi:moshi:${Versions.MOSHI}"
+    const val moshiKotlin = "com.squareup.moshi:moshi-kotlin:${Versions.MOSHI}"
+    const val moshiAdapters = "com.squareup.moshi:moshi-adapters:${Versions.MOSHI}"
 
     const val webRTC = "com.github.webrtc-sdk:android:${Versions.WEBRTC}"
 
     const val streamLog = "io.getstream:stream-log:${Versions.STREAM_LOG}"
     const val streamLogAndroid = "io.getstream:stream-log-android:${Versions.STREAM_LOG}"
     const val streamPush = "io.getstream:stream-android-push:${Versions.STREAM_PUSH}"
-    const val streamPushDelegate = "io.getstream:stream-android-push-delegate:${Versions.STREAM_PUSH}"
-    const val streamPushFirebase = "io.getstream:stream-android-push-firebase:${Versions.STREAM_PUSH}"
+    const val streamPushDelegate =
+        "io.getstream:stream-android-push-delegate:${Versions.STREAM_PUSH}"
+    const val streamPushFirebase =
+        "io.getstream:stream-android-push-firebase:${Versions.STREAM_PUSH}"
 
     const val streamChatCompose = "io.getstream:stream-chat-android-compose:${Versions.STREAM}"
     const val streamChatOffline = "io.getstream:stream-chat-android-offline:${Versions.STREAM}"

@@ -19,7 +19,6 @@ package io.getstream.video.chat_with_video_sample.ui.call
 import android.content.Context
 import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.compose.ui.AbstractComposeCallActivity
-import io.getstream.video.android.permission.PermissionManagerImpl
 import io.getstream.video.android.viewmodel.CallViewModelFactory
 import io.getstream.video.chat_with_video_sample.application.chatWithVideoApp
 
@@ -37,7 +36,7 @@ class CallActivity : AbstractComposeCallActivity() {
     override fun getCallViewModelFactory(): CallViewModelFactory {
         return CallViewModelFactory(
             streamVideo = getStreamVideo(this),
-            permissionManager = PermissionManagerImpl(applicationContext),
+            permissionManager = getPermissionManager(),
             usersProvider = chatWithVideoApp.usersLoginProvider
         )
     }

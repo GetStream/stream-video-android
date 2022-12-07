@@ -109,10 +109,6 @@ class MessagesActivity : ComponentActivity() {
     }
 
     private fun startCall() {
-        val users = messageListViewModel.channel.members.map {
-            it.user.id
-        }.filter { it != chatWithVideoApp.chatClient.getCurrentUser()?.id }
-
         val videoClient = chatWithVideoApp.streamVideo
 
         lifecycleScope.launch {
@@ -121,7 +117,7 @@ class MessagesActivity : ComponentActivity() {
             val createCallResult = videoClient.createCall(
                 id = callId,
                 type = "default",
-                ringing = true,
+                ringing = false,
                 participantIds = emptyList()
             )
 

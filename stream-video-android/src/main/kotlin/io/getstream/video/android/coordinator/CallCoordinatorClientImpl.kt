@@ -18,8 +18,10 @@ package io.getstream.video.android.coordinator
 
 import io.getstream.video.android.api.ClientRPCService
 import io.getstream.video.android.errors.VideoError
+import io.getstream.video.android.model.CallUser
 import io.getstream.video.android.model.StreamCallCid
 import io.getstream.video.android.model.User
+import io.getstream.video.android.model.toCallUser
 import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Result
 import io.getstream.video.android.utils.Success
@@ -35,6 +37,7 @@ import stream.video.coordinator.client_v1_rpc.GetOrCreateCallResponse
 import stream.video.coordinator.client_v1_rpc.JoinCallRequest
 import stream.video.coordinator.client_v1_rpc.JoinCallResponse
 import stream.video.coordinator.client_v1_rpc.MemberInput
+import stream.video.coordinator.client_v1_rpc.QueryUsersRequest
 import stream.video.coordinator.client_v1_rpc.SendCustomEventRequest
 import stream.video.coordinator.client_v1_rpc.SendEventRequest
 import stream.video.coordinator.client_v1_rpc.UpsertCallMembersRequest
@@ -173,6 +176,15 @@ internal class CallCoordinatorClientImpl(
             )
 
             Success(Unit)
+        } catch (error: Throwable) {
+            Failure(VideoError(error.message, error))
+        }
+
+    override suspend fun queryUsers(request: QueryUsersRequest): Result<List<CallUser>> =
+        try {
+            val users = callCoordinatorService.queryUsers(request).users
+
+            Success(users.map { it.toCallUser() })
         } catch (error: Throwable) {
             Failure(VideoError(error.message, error))
         }

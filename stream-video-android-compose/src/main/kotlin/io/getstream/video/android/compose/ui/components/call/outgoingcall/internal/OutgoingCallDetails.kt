@@ -44,18 +44,12 @@ internal fun OutgoingCallDetails(
             ParticipantAvatars(
                 participants = participants.map {
                     CallParticipantState(
-                        it.id,
-                        it.role,
-                        it.name,
-                        it.imageUrl,
-                        false,
-                        true,
-                        true,
-                        true,
-                        null,
-                        Pair(0, 0),
-                        audioLevel = 0f,
-                        idPrefix = ""
+                        id = it.id,
+                        role = it.role,
+                        name = it.name,
+                        profileImageURL = it.imageUrl,
+                        idPrefix = "",
+                        sessionId = ""
                     )
                 }
             )
