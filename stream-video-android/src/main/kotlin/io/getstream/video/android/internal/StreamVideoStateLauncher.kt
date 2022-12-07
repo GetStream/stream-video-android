@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android
+package io.getstream.video.android.internal
 
 import android.content.Context
 import io.getstream.log.StreamLog
+import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.dispatchers.DispatcherProvider
 import io.getstream.video.android.input.CallAndroidInput
 import io.getstream.video.android.input.CallAndroidInputLauncher

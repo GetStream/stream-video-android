@@ -640,19 +640,6 @@ public final class io/getstream/video/android/BuildConfig {
 	public fun <init> ()V
 }
 
-public abstract interface class io/getstream/video/android/CallViewModelFactoryProvider {
-	public abstract fun getCallViewModelFactory ()Lio/getstream/video/android/viewmodel/CallViewModelFactory;
-}
-
-public final class io/getstream/video/android/CallViewModelFactoryProvider$DefaultImpls {
-	public static fun getCallViewModelFactory (Lio/getstream/video/android/CallViewModelFactoryProvider;)Lio/getstream/video/android/viewmodel/CallViewModelFactory;
-}
-
-public abstract interface class io/getstream/video/android/PermissionManagerProvider {
-	public abstract fun getPermissionManager ()Lio/getstream/video/android/permission/PermissionManager;
-	public abstract fun initPermissionManager ()Lio/getstream/video/android/permission/PermissionManager;
-}
-
 public abstract interface class io/getstream/video/android/StreamVideo {
 	public abstract fun acceptCall (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun addSocketListener (Lio/getstream/video/android/socket/SocketListener;)V
@@ -2459,6 +2446,11 @@ public abstract interface class io/getstream/video/android/permission/Permission
 	public abstract fun requestPermission (Ljava/lang/String;)Z
 }
 
+public abstract interface class io/getstream/video/android/permission/PermissionManagerProvider {
+	public abstract fun getPermissionManager ()Lio/getstream/video/android/permission/PermissionManager;
+	public abstract fun initPermissionManager ()Lio/getstream/video/android/permission/PermissionManager;
+}
+
 public final class io/getstream/video/android/permission/StreamPermissionManagerImpl : io/getstream/video/android/permission/PermissionManager {
 	public fun <init> (Landroidx/fragment/app/FragmentActivity;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function1;)V
 	public fun checkPermission (Ljava/lang/String;)Z
@@ -2785,6 +2777,14 @@ public final class io/getstream/video/android/viewmodel/CallViewModelFactory : a
 	public fun <init> (Lio/getstream/video/android/StreamVideo;Lio/getstream/video/android/permission/PermissionManager;Lio/getstream/video/android/user/UsersProvider;)V
 	public synthetic fun <init> (Lio/getstream/video/android/StreamVideo;Lio/getstream/video/android/permission/PermissionManager;Lio/getstream/video/android/user/UsersProvider;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun create (Ljava/lang/Class;)Landroidx/lifecycle/ViewModel;
+}
+
+public abstract interface class io/getstream/video/android/viewmodel/CallViewModelFactoryProvider {
+	public abstract fun getCallViewModelFactory ()Lio/getstream/video/android/viewmodel/CallViewModelFactory;
+}
+
+public final class io/getstream/video/android/viewmodel/CallViewModelFactoryProvider$DefaultImpls {
+	public static fun getCallViewModelFactory (Lio/getstream/video/android/viewmodel/CallViewModelFactoryProvider;)Lio/getstream/video/android/viewmodel/CallViewModelFactory;
 }
 
 public final class stream/permissions/permissions_v1_rpc/Action : com/squareup/wire/Message {

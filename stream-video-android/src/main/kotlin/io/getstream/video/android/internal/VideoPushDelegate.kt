@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android
+package io.getstream.video.android.internal
 
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -28,6 +28,8 @@ import androidx.core.app.NotificationManagerCompat
 import io.getstream.android.push.PushDevice
 import io.getstream.android.push.delegate.PushDelegate
 import io.getstream.log.StreamLog
+import io.getstream.video.android.R
+import io.getstream.video.android.StreamVideoBuilder
 import io.getstream.video.android.dispatchers.DispatcherProvider
 import io.getstream.video.android.token.AuthCredentialsProvider
 import io.getstream.video.android.user.UserCredentialsManager
@@ -118,8 +120,12 @@ internal class VideoPushDelegate(context: Context) : PushDelegate(context) {
                         context,
                         0,
                         Intent(),
-                        PendingIntent.FLAG_IMMUTABLE
-                    ) // TODO add broadcast receiver that rejects the call
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                            PendingIntent.FLAG_IMMUTABLE
+                        } else {
+                            0
+                        }
+                    )
                 ).build()
             )
             .build()

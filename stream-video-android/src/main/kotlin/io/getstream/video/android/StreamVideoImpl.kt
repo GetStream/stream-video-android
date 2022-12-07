@@ -27,6 +27,8 @@ import io.getstream.video.android.engine.StreamCallEngine
 import io.getstream.video.android.engine.adapter.CoordinatorSocketListenerAdapter
 import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.events.CallCreatedEvent
+import io.getstream.video.android.lifecycle.LifecycleHandler
+import io.getstream.video.android.lifecycle.internal.StreamLifecycleObserver
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.model.CallEventType
 import io.getstream.video.android.model.CallMetadata

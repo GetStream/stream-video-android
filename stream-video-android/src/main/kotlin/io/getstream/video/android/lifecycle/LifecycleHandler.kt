@@ -14,14 +14,9 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android
+package io.getstream.video.android.lifecycle
 
-import io.getstream.video.android.viewmodel.CallViewModelFactory
-
-public interface CallViewModelFactoryProvider {
-
-    /**
-     * Allows for a custom implementation of the [CallViewModelFactory].
-     */
-    public fun getCallViewModelFactory(): CallViewModelFactory? = null
+internal interface LifecycleHandler {
+    fun resume()
+    fun stopped()
 }

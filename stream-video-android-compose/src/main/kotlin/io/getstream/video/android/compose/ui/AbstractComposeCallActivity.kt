@@ -32,8 +32,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.lifecycleScope
-import io.getstream.video.android.CallViewModelFactoryProvider
-import io.getstream.video.android.PermissionManagerProvider
 import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.StreamVideoProvider
 import io.getstream.video.android.call.state.CancelCall
@@ -45,9 +43,11 @@ import io.getstream.video.android.compose.ui.components.call.activecall.DefaultP
 import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.state.StreamCallState
 import io.getstream.video.android.permission.PermissionManager
+import io.getstream.video.android.permission.PermissionManagerProvider
 import io.getstream.video.android.permission.StreamPermissionManagerImpl
 import io.getstream.video.android.viewmodel.CallViewModel
 import io.getstream.video.android.viewmodel.CallViewModelFactory
+import io.getstream.video.android.viewmodel.CallViewModelFactoryProvider
 
 public abstract class AbstractComposeCallActivity :
     AppCompatActivity(),

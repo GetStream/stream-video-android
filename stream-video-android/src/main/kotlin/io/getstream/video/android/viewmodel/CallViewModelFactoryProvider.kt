@@ -14,23 +14,12 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android
+package io.getstream.video.android.viewmodel
 
-import io.getstream.video.android.permission.PermissionManager
-
-public interface PermissionManagerProvider {
+public interface CallViewModelFactoryProvider {
 
     /**
-     * Used for [PermissionManager] setup and registration with the Activity that it's used in.
-     *
-     * @return The initialized and registered [PermissionManager].
+     * Allows for a custom implementation of the [CallViewModelFactory].
      */
-    public fun initPermissionManager(): PermissionManager
-
-    /**
-     * Allows fetching of the [PermissionManager] instance created by [initPermissionManager].
-     *
-     * @return The initialized [PermissionManager] instance.
-     */
-    public fun getPermissionManager(): PermissionManager
+    public fun getCallViewModelFactory(): CallViewModelFactory? = null
 }
