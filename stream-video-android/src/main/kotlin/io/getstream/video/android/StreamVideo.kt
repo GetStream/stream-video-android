@@ -20,6 +20,7 @@ import io.getstream.video.android.call.CallClient
 import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.CallEventType
 import io.getstream.video.android.model.CallMetadata
+import io.getstream.video.android.model.Device
 import io.getstream.video.android.model.IceServer
 import io.getstream.video.android.model.JoinedCall
 import io.getstream.video.android.model.SfuToken
@@ -39,6 +40,24 @@ public interface StreamVideo {
      * keep intermediate states, such as [StreamCallState.Idle].
      */
     public val callState: StateFlow<StreamCallState>
+
+    /**
+     * Represents the default call config when starting a call.
+     */
+    public val config: StreamVideoConfig
+
+    /**
+     * Create a device that will be used to receive push notifications.
+     *
+     * @param token The Token obtained from the selected push provider.
+     * @param pushProvider The selected push provider.
+     *
+     * @return [Result] containing the [Device].
+     */
+    public suspend fun createDevice(
+        token: String,
+        pushProvider: String,
+    ): Result<Device>
 
     /**
      * Creates a call with given information. You can then use the [CallMetadata] and join it and get auth

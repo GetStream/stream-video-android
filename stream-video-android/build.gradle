@@ -25,7 +25,6 @@ wire {
 
     protoPath {
         srcDir 'src/main/proto'
-        // TODO -> check proto docs to generate a library instead of files directly
     }
 }
 
@@ -101,8 +100,10 @@ dependencies {
     implementation Dependencies.moshiKotlin
     implementation Dependencies.moshiAdapters
 
-    // Stream Logger
+    // Stream
     implementation Dependencies.streamLog
+    implementation Dependencies.streamPush
+    implementation Dependencies.streamPushDelegate
 
     // Unit Tests
     testImplementation 'junit:junit:4.13.2'

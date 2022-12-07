@@ -84,7 +84,7 @@ internal fun ParticipantInformation(
 
 // TODO - localize all this
 private fun buildSmallCallText(participants: List<CallUser>): String {
-    val names = participants.map { it.name }
+    val names = participants.map { it.name.ifBlank { it.id } }
 
     return if (names.isEmpty()) {
         "none"

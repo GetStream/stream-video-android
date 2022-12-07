@@ -20,7 +20,6 @@ import android.content.Context
 import android.content.Intent
 import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.compose.ui.AbstractComposeCallActivity
-import io.getstream.video.android.viewmodel.CallViewModelFactory
 
 class CallActivity : AbstractComposeCallActivity() {
 
@@ -29,16 +28,9 @@ class CallActivity : AbstractComposeCallActivity() {
      */
     override fun getStreamVideo(context: Context): StreamVideo = context.dogfoodingApp.streamVideo
 
-    /**
-     * Provides a custom factory for the ViewModel.
-     */
-    override fun getCallViewModelFactory(): CallViewModelFactory {
-        return defaultViewModelFactory()
-    }
-
     companion object {
         internal fun getIntent(
-            context: Context
+            context: Context,
         ): Intent {
             return Intent(context, CallActivity::class.java)
         }

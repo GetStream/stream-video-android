@@ -22,7 +22,6 @@ import io.getstream.video.android.app.BuildConfig
 import io.getstream.video.android.app.user.FakeUsersProvider
 import io.getstream.video.android.app.videoApp
 import io.getstream.video.android.compose.ui.AbstractComposeCallActivity
-import io.getstream.video.android.permission.PermissionManagerImpl
 import io.getstream.video.android.user.EmptyUsersProvider
 import io.getstream.video.android.viewmodel.CallViewModelFactory
 
@@ -39,7 +38,7 @@ class CallActivity : AbstractComposeCallActivity() {
     override fun getCallViewModelFactory(): CallViewModelFactory {
         return CallViewModelFactory(
             streamVideo = getStreamVideo(this),
-            permissionManager = PermissionManagerImpl(applicationContext),
+            permissionManager = getPermissionManager(),
             usersProvider = if (BuildConfig.DEBUG) FakeUsersProvider() else EmptyUsersProvider
         )
     }

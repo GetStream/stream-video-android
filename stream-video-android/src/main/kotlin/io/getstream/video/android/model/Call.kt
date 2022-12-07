@@ -29,6 +29,7 @@ import io.getstream.video.android.audio.AudioSwitchHandler
 import io.getstream.video.android.call.utils.stringify
 import io.getstream.video.android.events.AudioLevelChangedEvent
 import io.getstream.video.android.events.ParticipantLeftEvent
+import io.getstream.video.android.ui.TextureViewRenderer
 import io.getstream.video.android.utils.updateValue
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,8 +42,7 @@ import org.webrtc.AudioTrack
 import org.webrtc.EglBase
 import org.webrtc.MediaStream
 import org.webrtc.RendererCommon
-import org.webrtc.SurfaceViewRenderer
-import stream.video.sfu.models.TrackType
+import stream.video.sfu.models.CallState
 
 public class Call(
     private val context: Context,
@@ -100,7 +100,7 @@ public class Call(
      * Public API.
      */
     public fun initRenderer(
-        videoRenderer: SurfaceViewRenderer,
+        videoRenderer: TextureViewRenderer,
         streamId: String,
         onRender: (View) -> Unit = {}
     ) {
@@ -173,15 +173,15 @@ public class Call(
     }
 
     private fun replaceTrackIfNeeded(mediaStream: MediaStream, streamId: String?): VideoTrack? {
-        if (streamId == null || streamId != mediaStream.id) {
-            return mediaStream.videoTracks?.firstOrNull()?.let { track ->
+        return if (streamId == null || streamId != mediaStream.id) {
+            mediaStream.videoTracks?.firstOrNull()?.let { track ->
                 VideoTrack(
                     streamId = mediaStream.id,
                     video = track
                 )
             }
         } else {
-            return null
+            null
         }
     }
 
