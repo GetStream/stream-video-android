@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.internal
+package io.getstream.video.android.input.internal
 
 import android.content.Context
 import io.getstream.log.StreamLog
