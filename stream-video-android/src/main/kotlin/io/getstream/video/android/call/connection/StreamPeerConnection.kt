@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.call.connection
 
-import io.getstream.log.StreamLog
+import io.getstream.log.taggedLogger
 import io.getstream.video.android.call.utils.addRtcIceCandidate
 import io.getstream.video.android.call.utils.createValue
 import io.getstream.video.android.call.utils.setValue
@@ -77,7 +77,7 @@ public class StreamPeerConnection(
 
     private val typeTag = type.stringify()
 
-    private val logger = StreamLog.getLogger("Call:PeerConnection")
+    private val logger by taggedLogger("Call:PeerConnection")
 
     /**
      * The wrapped connection for all the WebRTC communication.

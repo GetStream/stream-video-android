@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.engine
 
-import io.getstream.log.StreamLog
+import io.getstream.log.taggedLogger
 import io.getstream.video.android.StreamVideoConfig
 import io.getstream.video.android.coordinator.CallCoordinatorClient
 import io.getstream.video.android.errors.VideoError
@@ -102,7 +102,7 @@ internal class StreamCallEngineImpl(
     private inline val getCurrentUserId: () -> String,
 ) : StreamCallEngine {
 
-    private val logger = StreamLog.getLogger("Call:Engine")
+    private val logger by taggedLogger("Call:Engine")
 
     private val jobs = Jobs()
 

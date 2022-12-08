@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.call.signal.socket
 
-import io.getstream.log.StreamLog
+import io.getstream.log.taggedLogger
 import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.errors.VideoErrorCode
 import io.getstream.video.android.errors.VideoNetworkError
@@ -30,7 +30,7 @@ internal class SignalEventsParser(
     private val sfuSocket: SfuSocket,
 ) : okhttp3.WebSocketListener() {
 
-    private val logger = StreamLog.getLogger("Call:SFU-WS")
+    private val logger by taggedLogger("Call:SFU-WS")
 
     private var connectionEventReceived = false
     private var closedByClient = true

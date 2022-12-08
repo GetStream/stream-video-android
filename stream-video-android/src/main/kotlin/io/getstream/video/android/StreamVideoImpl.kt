@@ -18,7 +18,7 @@ package io.getstream.video.android
 
 import android.content.Context
 import androidx.lifecycle.Lifecycle
-import io.getstream.log.StreamLog
+import io.getstream.log.taggedLogger
 import io.getstream.video.android.call.CallClient
 import io.getstream.video.android.call.builder.CallClientBuilder
 import io.getstream.video.android.coordinator.CallCoordinatorClient
@@ -99,7 +99,7 @@ public class StreamVideoImpl(
     private val networkStateProvider: NetworkStateProvider,
 ) : StreamVideo {
 
-    private val logger = StreamLog.getLogger("Call:StreamVideo")
+    private val logger by taggedLogger("Call:StreamVideo")
 
     /**
      * Observes the app lifecycle and attempts to reconnect/release the socket connection.

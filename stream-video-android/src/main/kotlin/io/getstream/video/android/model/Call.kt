@@ -23,7 +23,7 @@ import android.media.AudioManager.MODE_IN_COMMUNICATION
 import android.os.Build
 import android.view.View
 import androidx.core.content.getSystemService
-import io.getstream.log.StreamLog
+import io.getstream.log.taggedLogger
 import io.getstream.video.android.audio.AudioHandler
 import io.getstream.video.android.audio.AudioSwitchHandler
 import io.getstream.video.android.call.utils.stringify
@@ -50,7 +50,7 @@ public class Call(
     private val eglBase: EglBase,
 ) {
 
-    private val logger = StreamLog.getLogger("Call:Room")
+    private val logger by taggedLogger("Call:Room")
 
     internal val audioHandler: AudioHandler by lazy {
         AudioSwitchHandler(context)

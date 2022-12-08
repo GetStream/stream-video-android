@@ -19,7 +19,7 @@ package io.getstream.video.android.call.signal.socket
 import android.os.Handler
 import android.os.Looper
 import androidx.annotation.VisibleForTesting
-import io.getstream.log.StreamLog
+import io.getstream.log.taggedLogger
 import io.getstream.video.android.errors.DisconnectCause
 import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.errors.VideoNetworkError
@@ -44,7 +44,7 @@ internal class SfuSocketImpl(
     private val coroutineScope: CoroutineScope,
 ) : SfuSocket {
 
-    private val logger = StreamLog.getLogger("Call:SfuSocket")
+    private val logger by taggedLogger("Call:SfuSocket")
 
     private var connectionConf: SfuSocketFactory.ConnectionConf? = null
     private val listeners: MutableList<SfuSocketListener> = mutableListOf()
