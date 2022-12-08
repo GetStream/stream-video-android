@@ -10,63 +10,45 @@ option java_outer_classname = "SfuModelsV1";
 option csharp_namespace = "Stream.Video.v1.Sfu";
 
 enum PeerType {
+  // todo fix me (marcelo)
   PEER_TYPE_PUBLISHER_UNSPECIFIED = 0;
   PEER_TYPE_SUBSCRIBER = 1;
 }
 
 enum ConnectionQuality {
-  CONNECTION_QUALITY_BAD_UNSPECIFIED = 0;
-  CONNECTION_QUALITY_POOR = 1;
-  CONNECTION_QUALITY_GOOD = 2;
+  CONNECTION_QUALITY_UNSPECIFIED = 0;
+  CONNECTION_QUALITY_BAD_UNSPECIFIED = 1;
+  CONNECTION_QUALITY_POOR = 2;
+  CONNECTION_QUALITY_GOOD = 3;
 }
 
 enum VideoQuality {
-  VIDEO_QUALITY_LOW_UNSPECIFIED = 0;
-  VIDEO_QUALITY_MID = 1;
-  VIDEO_QUALITY_HIGH = 2;
+  VIDEO_QUALITY_UNSPECIFIED = 0;
+  VIDEO_QUALITY_LOW_UNSPECIFIED = 1;
+  VIDEO_QUALITY_MID = 2;
+  VIDEO_QUALITY_HIGH = 3;
+}
+
+enum TrackType {
+  TRACK_TYPE_UNSPECIFIED = 0;
+  TRACK_TYPE_AUDIO = 1;
+  TRACK_TYPE_VIDEO = 2;
+  TRACK_TYPE_SCREEN_SHARE = 3;
+  TRACK_TYPE_SCREEN_SHARE_AUDIO = 4;
 }
 
 message CallState {
   repeated Participant participants = 1;
 }
 
-message Call {
-  // the call type
-  string type = 1;
-  // the call id
-  string id = 2;
-  // the id of the user that created this call
-  string created_by_user_id = 3;
-  // the id of the current host for this call
-  string host_user_id = 4;
-  google.protobuf.Struct custom = 5;
-  google.protobuf.Timestamp created_at = 6;
-  google.protobuf.Timestamp updated_at = 7;
-}
-
 // those who are online in the call
 message Participant {
-  User user = 1;
-  string role = 2;
-  bool online = 3;
-  google.protobuf.Struct custom = 4 ;
-  bool video = 5;
-  bool audio = 6;
-  google.protobuf.Timestamp created_at = 7;
-  google.protobuf.Timestamp updated_at = 8;
-  string session_id = 9;
-  string track_lookup_prefix = 10;
-}
-
-message User {
-  string id = 1;
-  repeated string teams = 2;
-  string role = 3;
-  google.protobuf.Struct custom = 4;
-  string name = 5;
-  string image_url = 6;
-  string created_at = 7;
-  string updated_at = 8;
+  string user_id = 1;
+  string session_id = 2;
+  // map of track id to track type
+  repeated TrackType published_tracks = 3;
+  google.protobuf.Timestamp joined_at = 4;
+  string track_lookup_prefix = 5;
 }
 
 message StreamQuality {
@@ -85,40 +67,43 @@ message VideoLayer {
   VideoDimension video_dimension = 2;
   // target bitrate, server will measure actual
   uint32 bitrate = 4;
+  uint32 fps = 5;
 }
 
-message SimulcastCodecInfo {
-  string mime_type = 1;
-  string mid = 2;
-  string cid = 3;
-  repeated VideoLayer layers = 4;
-}
 
 message Codec {
-  string mime = 1;
-  string fmtp_line = 2;
-  uint32 clock_rate = 3;
-  bool hw_accelerated = 4;
-}
-
-message AudioCodecs {
-  repeated Codec encodes = 1;
-  repeated Codec decodes = 2;
-}
-
-message VideoCodecs {
-  repeated Codec encodes = 1;
-  repeated Codec decodes = 2;
-}
-
-message CodecSettings {
-  AudioCodecs audio = 1;
-  VideoCodecs video = 2;
-  repeated VideoLayer layers = 3;
+  uint32 payload_type = 1;
+  string name = 2;
+  string fmtp_line = 3;
+  uint32 clock_rate = 4;
+  string encoding_parameters = 5;
+  repeated string feedbacks = 6;
 }
 
 message ICETrickle {
   PeerType peer_type = 1;
   string ice_candidate = 2;
   string session_id = 3;
+}
+
+message TrackInfo {
+  string track_id = 1;
+  TrackType track_type = 2;
+  repeated VideoLayer layers = 5;
+}
+
+
+// todo remove this
+message Call {
+  // the call type
+  string type = 1;
+  // the call id
+  string id = 2;
+  // the id of the user that created this call
+  string created_by_user_id = 3;
+  // the id of the current host for this call
+  string host_user_id = 4;
+  google.protobuf.Struct custom = 5;
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp updated_at = 7;
 }

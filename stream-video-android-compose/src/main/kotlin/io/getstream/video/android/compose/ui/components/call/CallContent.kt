@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.compose.ui.components.call
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -29,11 +30,14 @@ import io.getstream.video.android.call.state.InviteUsersToCall
 import io.getstream.video.android.call.state.ToggleMicrophone
 import io.getstream.video.android.compose.state.ui.participants.ChangeMuteState
 import io.getstream.video.android.compose.state.ui.participants.InviteUsers
+import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.activecall.ActiveCallContent
+import io.getstream.video.android.compose.ui.components.call.activecall.DefaultPictureInPictureContent
 import io.getstream.video.android.compose.ui.components.call.activecall.internal.InviteUsersDialog
 import io.getstream.video.android.compose.ui.components.call.incomingcall.IncomingCallContent
 import io.getstream.video.android.compose.ui.components.call.outgoingcall.OutgoingCallContent
 import io.getstream.video.android.compose.ui.components.participants.CallParticipantsInfoMenu
+import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.User
 import io.getstream.video.android.viewmodel.CallViewModel
 import io.getstream.video.android.model.state.StreamCallState as State
@@ -48,13 +52,18 @@ import io.getstream.video.android.model.state.StreamCallState as State
  *
  * @param viewModel The [CallViewModel] used to provide state and various handlers in the call.
  * @param modifier Modifier for styling.
+ * @param onBackPressed Handler when the user taps on the back button.
  * @param onCallAction Handler when the user clicks on some of the call controls.
+ * @param pictureInPictureContent Content shown when the user enters Picture in Picture mode, if
+ * it's been enabled in the app.
  */
 @Composable
 public fun CallContent(
     viewModel: CallViewModel,
     modifier: Modifier = Modifier,
+    onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = { viewModel.onCallAction(it) },
+    pictureInPictureContent: @Composable (Call) -> Unit = { DefaultPictureInPictureContent(it) }
 ) {
     val stateHolder = viewModel.streamCallState.collectAsState(initial = State.Idle)
     val state = stateHolder.value
@@ -64,28 +73,35 @@ public fun CallContent(
         IncomingCallContent(
             modifier = modifier,
             viewModel = viewModel,
+            onBackPressed = onBackPressed,
             onCallAction = onCallAction
         )
     } else if (state is State.Outgoing && !state.acceptedByCallee) {
         OutgoingCallContent(
             modifier = modifier,
             viewModel = viewModel,
+            onBackPressed = onBackPressed,
             onCallAction = onCallAction
         )
     } else {
         ActiveCallContent(
             modifier = modifier,
             callViewModel = viewModel,
-            onCallAction = onCallAction
+            onBackPressed = onBackPressed,
+            onCallAction = onCallAction,
+            pictureInPictureContent = pictureInPictureContent
         )
-        val isShowingParticipantsInfo by viewModel.isShowingParticipantsInfo.collectAsState()
 
-        if (isShowingParticipantsInfo) {
-            val participantsState by viewModel.participantList.collectAsState(initial = emptyList())
+        val isShowingParticipantsInfo by viewModel.isShowingCallInfo.collectAsState()
+        val participantsState by viewModel.participantList.collectAsState(initial = emptyList())
+
+        if (isShowingParticipantsInfo && participantsState.isNotEmpty()) {
             val users by viewModel.getUsersState().collectAsState()
 
             CallParticipantsInfoMenu(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(VideoTheme.colors.appBackground),
                 participantsState = participantsState,
                 users = users,
                 onDismiss = { viewModel.dismissOptions() },

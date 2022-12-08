@@ -222,6 +222,7 @@ internal class VideoSocketImpl(
         socket?.authenticate(
             WebsocketAuthRequest(
                 user = UserInput(
+                    id = user.id,
                     name = user.name,
                     image_url = user.imageUrl ?: "",
                     role = user.role

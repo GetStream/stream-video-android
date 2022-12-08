@@ -17,7 +17,6 @@
 package io.getstream.video.android.compose.ui.components.participants.internal
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
@@ -55,13 +54,10 @@ internal fun CallParticipantsInfoOptions(
     modifier: Modifier = Modifier
 ) {
     Row(
-        modifier
-            .background(color = VideoTheme.colors.appBackground)
-            .padding(12.dp),
+        modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-
         Button(
             modifier = Modifier
                 .height(VideoTheme.dimens.callParticipantsInfoMenuOptionsButtonHeight)
@@ -73,7 +69,7 @@ internal fun CallParticipantsInfoOptions(
             content = {
                 Text(
                     text = stringResource(R.string.call_participants_info_options_invite),
-                    style = VideoTheme.typography.body,
+                    style = VideoTheme.typography.bodyBold,
                     color = Color.White
                 )
             }
@@ -91,7 +87,7 @@ internal fun CallParticipantsInfoOptions(
             content = {
                 Text(
                     text = stringResource(if (isCurrentUserMuted) R.string.call_participants_info_options_unmute else R.string.call_participants_info_options_mute),
-                    style = VideoTheme.typography.body,
+                    style = VideoTheme.typography.bodyBold,
                     color = VideoTheme.colors.textLowEmphasis
                 )
             }

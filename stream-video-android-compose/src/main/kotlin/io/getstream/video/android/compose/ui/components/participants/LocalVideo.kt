@@ -36,6 +36,7 @@ import io.getstream.video.android.ui.common.R
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.CallParticipantState
+import stream.video.sfu.models.TrackType
 
 @Composable
 public fun LocalVideo(
@@ -79,18 +80,14 @@ public fun LocalVideo(
                 tint = Color.White
             )
 
+            val hasVideo = callParticipant.publishedTracks.contains(TrackType.TRACK_TYPE_VIDEO)
+
             Icon(
                 modifier = Modifier
                     .padding(4.dp)
                     .size(24.dp),
-                painter = painterResource(
-                    if (callParticipant.hasVideo) {
-                        R.drawable.ic_videocam_on
-                    } else {
-                        R.drawable.ic_videocam_off
-                    }
-                ),
-                contentDescription = "Video enabled: ${callParticipant.hasVideo}",
+                painter = painterResource(if (hasVideo) R.drawable.ic_videocam_on else R.drawable.ic_videocam_off),
+                contentDescription = "Video enabled: $hasVideo",
                 tint = Color.White,
             )
         }

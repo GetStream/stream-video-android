@@ -29,7 +29,10 @@
             </intent-filter>
         </activity>
         <activity android:name=".ui.home.HomeActivity" />
-        <activity android:name=".ui.call.CallActivity" />
+        <activity
+            android:name=".ui.call.CallActivity"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:supportsPictureInPicture="true" />
         <activity android:name=".ui.call.XmlCallActivity" />
 
         <service

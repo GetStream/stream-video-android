@@ -238,7 +238,7 @@ public class StreamPeerConnection(
     public fun addAudioTransceiver(
         track: MediaStreamTrack,
         streamIds: List<String>
-    ) { // TODO - do we need this
+    ) {
         logger.i { "[addAudioTransceiver] #sfu; #$typeTag; track: ${track.stringify()}, streamIds: $streamIds" }
         val fullQuality = RtpParameters.Encoding(
             "a",

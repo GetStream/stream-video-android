@@ -25,18 +25,8 @@ service SignalServer {
   rpc UpdateSubscriptions(UpdateSubscriptionsRequest) returns (UpdateSubscriptionsResponse);
 
   rpc UpdateMuteState(UpdateMuteStateRequest) returns (UpdateMuteStateResponse);
-
-  rpc RequestVideoQuality(UpdateVideoQualityRequest) returns (UpdateVideoQualityResponse);
 }
 
-message UpdateVideoQualityRequest{
-  repeated stream.video.sfu.models.StreamQuality stream_qualities = 1;
-  string session_id = 2;
-}
-
-message UpdateVideoQualityResponse{
-
-}
 
 message UpdateMuteStateRequest{
   string session_id = 1;
@@ -59,9 +49,15 @@ message VideoMuteChanged {
 }
 
 message UpdateSubscriptionsRequest {
-  // maps stream user_ids to its size
-  map<string, stream.video.sfu.models.VideoDimension> subscriptions = 1;
   string session_id = 2;
+  repeated TrackSubscriptionDetails tracks = 3;
+}
+
+message TrackSubscriptionDetails {
+  string user_id = 1;
+  string session_id = 2;
+  stream.video.sfu.models.TrackType track_type = 3;
+  stream.video.sfu.models.VideoDimension dimension = 4;
 }
 
 message SendAnswerRequest {
@@ -72,16 +68,6 @@ message SendAnswerRequest {
 
 message SendAnswerResponse {
 
-}
-
-message IceCandidateRequest{
-  // TODO: use PeerTYPE!
-  bool publisher = 1;
-  string candidate = 2 ;
-  optional string sdp_mid = 3;
-  optional uint32 sdp_mline_index = 4;
-  optional string username_fragment = 5;
-  string session_id = 7;
 }
 
 message ICETrickleResponse{
@@ -95,59 +81,12 @@ message SetPublisherRequest {
   // sdp offer
   string sdp = 1;
   string session_id = 3;
+  repeated models.TrackInfo tracks = 5;
 }
 
 message SetPublisherResponse {
   // sdp answer
   string sdp = 1;
   string session_id = 3;
-}
-
-message ConnectRequest {
-  // peer connection sdp offer
-  string sdp_offer = 1;
-  // token used for authentication
-  string token = 2;
-}
-
-message ConnectResponse {
-  // sdp answer
-  string sdp_answer = 1;
-}
-
-// Signaling related payload, all these messages will be exchanged using signaling channel
-message SignalRequest {
-  oneof event_payload {
-    SubscribeRequest subscribe = 1;
-    PublishRequest publish = 2;
-  }
-}
-
-message SignalEvent {
-  oneof event_payload {
-    SubscribeResponse subscribe = 1;
-    PublishResponse publish = 2;
-  }
-}
-// SubscribeRequest
-message SubscribeRequest {
-  string token = 1;
-  string sdp_offer = 2;
-  // preferred quality
-  string quality = 3;
-}
-
-// SubscribeResponse
-message SubscribeResponse {
-  // preferred quality
-  string quality = 2;
-}
-
-message PublishRequest {
-  string token = 1;
-  string sdp_offer = 2;
-}
-
-message PublishResponse {
-  string sdp_answer = 2;
+  bool ice_restart = 4;
 }

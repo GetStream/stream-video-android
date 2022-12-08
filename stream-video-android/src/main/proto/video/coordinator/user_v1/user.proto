@@ -27,14 +27,16 @@ message User {
 
 // A message that is used in User requests to create and modify user data
 message UserInput {
+  // A unique ID for the user
+  string id = 1;
   // A human-readable name of the user
-  string name = 1;
+  string name = 2;
   // User role, as defined by permission settings
-  string role = 2;
+  string role = 3;
   // List of user teams for multi-tenant applications
-  repeated string teams = 3;
+  repeated string teams = 4;
   // A URL that points to a user image
-  string image_url = 4;
+  string image_url = 5;
   // A JSON object with custom user information
-  bytes custom_json = 5;
+  bytes custom_json = 6;
 }
