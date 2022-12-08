@@ -28,6 +28,7 @@ import io.getstream.video.android.common.util.getFloatResource
 import io.getstream.video.android.model.CallStatus
 import io.getstream.video.android.model.CallUser
 import io.getstream.video.android.ui.xml.databinding.ViewOutgoingCallBinding
+import io.getstream.video.android.ui.xml.utils.extensions.dpToPx
 import io.getstream.video.android.ui.xml.utils.extensions.inflater
 import kotlin.math.roundToInt
 import io.getstream.video.android.ui.common.R as RCommon
@@ -46,8 +47,6 @@ public class OutgoingCallView @JvmOverloads constructor(
     private var isCameraEnabled: Boolean = false
 
     init {
-        setBackgroundResource(RCommon.drawable.bg_call)
-
         with(binding) {
             cancelCall.setOnClickListener { actionListener?.onCallAction(CancelCall) }
             micToggle.setOnClickListener { actionListener?.onCallAction(ToggleMicrophone(!isMicrophoneEnabled)) }
@@ -57,7 +56,8 @@ public class OutgoingCallView @JvmOverloads constructor(
 
     public fun setParticipants(participants: List<CallUser>) {
         binding.participantsInfo.setParticipants(participants)
-        if (participants.size >= 3) setGroupCallControlsLayout()
+        if (participants.size >= 2) setGroupCallControlsLayout()
+        binding.callBackground.setParticipants(participants)
     }
 
     public fun setCallStatus(callStatus: CallStatus) {
@@ -90,6 +90,7 @@ public class OutgoingCallView @JvmOverloads constructor(
             constraintSet.connect(cameraToggle.id, ConstraintSet.BOTTOM, controlsHolder.id, ConstraintSet.BOTTOM)
 
             constraintSet.connect(cancelCall.id, ConstraintSet.BOTTOM, micToggle.id, ConstraintSet.TOP)
+            constraintSet.setMargin(cancelCall.id, ConstraintSet.BOTTOM, 32.dpToPx())
 
             controlsHolder.setConstraintSet(constraintSet)
         }

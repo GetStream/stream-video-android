@@ -4,9 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_call"
     tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout"
     >
+
+    <io.getstream.video.android.ui.xml.widget.call.CallBackgroundView
+        android:id="@+id/callBackground"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/incomingCallToolbar"

@@ -39,24 +39,25 @@ internal class ParticipantsInfoView @JvmOverloads constructor(
 
     private fun setParticipantsAvatars(participants: List<CallUser>) {
         binding.avatarsHolder.removeAllViews()
+        val isSingleParticipant = participants.size > 1
 
         participants.take(2).forEachIndexed { index, participant ->
             if (index > 0) {
                 addAvatarSpacer()
             }
 
-            addAvatar(participant.imageUrl, participant.name)
+            addAvatar(participant.imageUrl, participant.name, isSingleParticipant)
         }
 
         if (participants.size == 3) {
             val participant = participants[2]
             addAvatarSpacer()
-            addAvatar(participant.imageUrl, participant.name)
+            addAvatar(participant.imageUrl, participant.name, isSingleParticipant)
         }
 
         if (participants.size > 3) {
             addAvatarSpacer()
-            addAvatar("", "+${participants.size - 2}")
+            addAvatar("", "+${participants.size - 2}", isSingleParticipant)
         }
     }
 
@@ -74,9 +75,14 @@ internal class ParticipantsInfoView @JvmOverloads constructor(
         }
     }
 
-    private fun addAvatar(imageUrl: String?, name: String) {
+    private fun addAvatar(imageUrl: String?, name: String, isSingleAvatar: Boolean) {
+        val avatarSize = context.getDimension(if (isSingleAvatar) {
+            R.dimen.singleAvatarSize
+        } else {
+            R.dimen.callAvatarSize
+        })
         val avatar = AvatarView(context).apply {
-            layoutParams = LayoutParams(80.dpToPx(), LayoutParams.MATCH_PARENT)
+            layoutParams = LayoutParams(avatarSize, avatarSize)
         }
         avatar.setData(imageUrl ?: "", name)
         binding.avatarsHolder.addView(avatar)

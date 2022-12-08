@@ -49,18 +49,18 @@ public data class AvatarStyle(
                 R.styleable.AvatarView,
                 0,
                 0,
-            ).use {
-                val avatarBorderWidth = it.getDimensionPixelSize(
+            ).apply {
+                val avatarBorderWidth = getDimensionPixelSize(
                     R.styleable.AvatarView_streamXmlAvatarBorderWidth,
                     0
                 )
 
-                val avatarBorderColor = it.getColor(
+                val avatarBorderColor = getColor(
                     R.styleable.AvatarView_streamXmlAvatarBorderColor,
                     context.getColorCompat(R.color.stream_xml_black)
                 )
 
-                val avatarInitialsTextStyle = TextStyle.Builder(it)
+                val avatarInitialsTextStyle = TextStyle.Builder(this)
                     .size(
                         R.styleable.AvatarView_streamXmlAvatarTextSize,
                         context.getDimension(RCommon.dimen.title3TextSize)
@@ -79,7 +79,7 @@ public data class AvatarStyle(
                     )
                     .build()
 
-                val groupAvatarInitialsTextStyle = TextStyle.Builder(it)
+                val groupAvatarInitialsTextStyle = TextStyle.Builder(this)
                     .size(
                         R.styleable.AvatarView_streamXmlGroupAvatarTextSize,
                         context.getDimension(RCommon.dimen.title3TextSize)
@@ -99,13 +99,15 @@ public data class AvatarStyle(
                     .build()
 
                 val avatarShape =
-                    it.getEnum(R.styleable.AvatarView_streamXmlAvatarShape, AvatarShape.CIRCLE)
+                    getEnum(R.styleable.AvatarView_streamXmlAvatarShape, AvatarShape.CIRCLE)
 
                 val borderRadius =
-                    it.getDimensionPixelSize(
+                    getDimensionPixelSize(
                         R.styleable.AvatarView_streamXmlAvatarBorderRadius,
                         4.dpToPx()
                     ).toFloat()
+
+                recycle()
 
                 return AvatarStyle(
                     avatarBorderWidth = avatarBorderWidth,

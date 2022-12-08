@@ -27,6 +27,7 @@ import io.getstream.video.android.model.CallStatus
 import io.getstream.video.android.model.CallUser
 import io.getstream.video.android.ui.common.R
 import io.getstream.video.android.ui.xml.databinding.ViewIncomingCallBinding
+import io.getstream.video.android.ui.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.ui.xml.utils.extensions.inflater
 
 public class IncomingCallView @JvmOverloads constructor(
@@ -42,11 +43,11 @@ public class IncomingCallView @JvmOverloads constructor(
     private var callActionListener: CallActionListener? = null
 
     init {
-        setBackgroundResource(R.drawable.bg_call)
-
-        binding.acceptCall.setOnClickListener { callActionListener?.onCallAction(AcceptCall) }
-        binding.declineCall.setOnClickListener { callActionListener?.onCallAction(DeclineCall) }
-        binding.cameraToggle.setOnClickListener { callActionListener?.onCallAction(ToggleCamera(!isCameraEnabled)) }
+        with(binding) {
+            acceptCall.setOnClickListener { callActionListener?.onCallAction(AcceptCall) }
+            declineCall.setOnClickListener { callActionListener?.onCallAction(DeclineCall) }
+            cameraToggle.setOnClickListener { callActionListener?.onCallAction(ToggleCamera(!isCameraEnabled)) }
+        }
     }
 
     public fun setCameraEnabled(isEnabled: Boolean) {
@@ -58,6 +59,7 @@ public class IncomingCallView @JvmOverloads constructor(
 
     public fun setParticipants(participants: List<CallUser>) {
         binding.participantsInfo.setParticipants(participants)
+        binding.callBackground.setParticipants(participants)
     }
 
     public fun setCallStatus(callStatus: CallStatus) {
