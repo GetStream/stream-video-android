@@ -48,6 +48,7 @@ import io.getstream.video.android.model.toUser
  * @param call The active call.
  * @param participant Participant to render.
  * @param modifier Modifier for styling.
+ * @param labelPosition The position of the user audio state label.
  * @param isFocused If the participant is focused or not.
  * @param onRender Handler when the Video renders.
  */
@@ -56,6 +57,7 @@ public fun CallParticipant(
     call: Call,
     participant: CallParticipantState,
     modifier: Modifier = Modifier,
+    labelPosition: Alignment = Alignment.TopStart,
     isFocused: Boolean = false,
     onRender: (View) -> Unit = {}
 ) {
@@ -77,7 +79,7 @@ public fun CallParticipant(
             onRender = onRender
         )
 
-        ParticipantLabel(participant)
+        ParticipantLabel(participant, labelPosition)
     }
 }
 
@@ -103,10 +105,13 @@ private fun ParticipantVideo(
 }
 
 @Composable
-private fun BoxScope.ParticipantLabel(participant: CallParticipantState) {
+private fun BoxScope.ParticipantLabel(
+    participant: CallParticipantState,
+    labelPosition: Alignment
+) {
     Row(
         modifier = Modifier
-            .align(Alignment.TopStart)
+            .align(labelPosition)
             .padding(16.dp)
             .height(36.dp)
             .background(

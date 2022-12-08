@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.coordinator
 
+import io.getstream.video.android.model.CallUser
 import io.getstream.video.android.model.StreamCallCid
 import io.getstream.video.android.model.User
 import io.getstream.video.android.utils.Result
@@ -30,6 +31,7 @@ import stream.video.coordinator.client_v1_rpc.GetOrCreateCallRequest
 import stream.video.coordinator.client_v1_rpc.GetOrCreateCallResponse
 import stream.video.coordinator.client_v1_rpc.JoinCallRequest
 import stream.video.coordinator.client_v1_rpc.JoinCallResponse
+import stream.video.coordinator.client_v1_rpc.QueryUsersRequest
 import stream.video.coordinator.client_v1_rpc.SendCustomEventRequest
 import stream.video.coordinator.client_v1_rpc.SendEventRequest
 
@@ -101,4 +103,12 @@ public interface CallCoordinatorClient {
      * @return [Result] if the operation is successful or not.
      */
     public suspend fun inviteUsers(users: List<User>, cid: StreamCallCid): Result<Unit>
+
+    /**
+     * Queries users based on the given [request].
+     *
+     * @param request The request that describes the query filter, limit and sort.
+     * @return [List] of [CallUser]s that match the given query.
+     */
+    public suspend fun queryUsers(request: QueryUsersRequest): Result<List<CallUser>>
 }

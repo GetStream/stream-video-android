@@ -348,15 +348,11 @@ func (m *ApnCredentials) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for AuthKey
+	// no validation rules for CertificateP12
 
-	// no validation rules for KeyId
-
-	// no validation rules for ApnTopic
+	// no validation rules for Topic
 
 	// no validation rules for TeamId
-
-	// no validation rules for Development
 
 	if len(errors) > 0 {
 		return ApnCredentialsMultiError(errors)
@@ -458,9 +454,7 @@ func (m *FirebaseCredentials) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for ServerKey
-
-	// no validation rules for CredentialsJson
+	// no validation rules for Credentials
 
 	if len(errors) > 0 {
 		return FirebaseCredentialsMultiError(errors)

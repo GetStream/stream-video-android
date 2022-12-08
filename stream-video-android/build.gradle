@@ -25,7 +25,6 @@ wire {
 
     protoPath {
         srcDir 'src/main/proto'
-        // TODO -> check proto docs to generate a library instead of files directly
     }
 }
 
@@ -96,6 +95,10 @@ dependencies {
     implementation Dependencies.retrofitWireConverter
     implementation Dependencies.okhttpLoggingInterceptor
     implementation Dependencies.kotlinSerializationJson
+
+    implementation Dependencies.moshi
+    implementation Dependencies.moshiKotlin
+    implementation Dependencies.moshiAdapters
 
     // Stream
     implementation Dependencies.streamLog
