@@ -71,39 +71,6 @@ public data class StreamDimens(
          *
          * @return A [StreamDimens] instance holding our default dimensions.
          */
-        public fun defaultDimens(): StreamDimens = StreamDimens(
-            callAvatarSize = 80.dp,
-            singleAvatarSize = 160.dp,
-            headerElevation = 4.dp,
-            largeButtonSize = 80.dp,
-            mediumButtonSize = 64.dp,
-            smallButtonSize = 32.dp,
-            topAppbarHeightSize = 64.dp,
-            avatarAppbarPadding = 100.dp,
-            singleAvatarAppbarPadding = 20.dp,
-            participantsTextPadding = 65.dp,
-            topAppbarTextSize = 17.sp,
-            directCallUserNameTextSize = 34.sp,
-            groupCallUserNameTextSize = 24.sp,
-            onCallStatusTextSize = 20.sp,
-            onCallStatusTextAlpha = 0.6f,
-            buttonToggleOnAlpha = 0.4f,
-            buttonToggleOffAlpha = 1.0f,
-            incomingCallOptionsBottomPadding = 44.dp,
-            callAppBarPadding = 12.dp,
-            callAppBarLeadingContentSpacingStart = 0.dp,
-            callAppBarLeadingContentSpacingEnd = 0.dp,
-            callAppBarCenterContentSpacingStart = 8.dp,
-            callAppBarCenterContentSpacingEnd = 0.dp,
-            callAppBarTrailingContentSpacingStart = 8.dp,
-            callAppBarTrailingContentSpacingEnd = 8.dp,
-            callControlButtonSize = 50.dp,
-            callControlsSheetHeight = 96.dp,
-            callParticipantInfoMenuAppBarHeight = 64.dp,
-            callParticipantInfoMenuOptionsHeight = 56.dp,
-            callParticipantsInfoMenuOptionsButtonHeight = 40.dp,
-            callParticipantsInfoAvatarSize = 56.dp
-        )
         @Composable
         public fun defaultDimens(): StreamDimens {
             return StreamDimens(

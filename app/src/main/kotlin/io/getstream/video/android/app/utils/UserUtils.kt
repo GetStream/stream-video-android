@@ -21,28 +21,28 @@ import io.getstream.video.android.model.User
 fun getUsers(): List<User> {
     return listOf(
         User(
-            id = "tomislav",
-            name = "Tomislav",
-            imageUrl = "",
-            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci90b21pc2xhdiIsImlhdCI6MTY2OTI4Mjg4MywidXNlcl9pZCI6InRvbWlzbGF2In0.-_Vik2BG8aA28b7CtKrU901V-g1daIL9fQ6Kq-4sMHI",
+            id = "filip",
+            name = "Filip",
+            imageUrl = "https://avatars.githubusercontent.com/u/17215808?v=4",
+            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci9maWxpcCIsImlhdCI6MTY2ODQyMDkyMSwidXNlcl9pZCI6ImZpbGlwIn0.cqm237T2SVlYEcQWL5bMJM0svMskJDoy6SOv2VnXd9w",
             role = "admin",
             teams = emptyList(),
             extraData = emptyMap()
         ),
         User(
-            id = "tomislav2",
-            name = "Tomislav Clone",
-            imageUrl = "",
-            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci90b21pc2xhdjIiLCJpYXQiOjE2NjkyODI4ODcsInVzZXJfaWQiOiJ0b21pc2xhdjIifQ.U_ydsiXscIG3WkX6O33L0Um0fteu3AuTGrJFRvoNT-4",
+            id = "thierry",
+            name = "Thierry",
+            imageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Mile_Kitic_from_BISO0675.jpg/300px-Mile_Kitic_from_BISO0675.jpg",
+            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci90aGllcnJ5IiwiaWF0IjoxNjY4NDIwOTA4LCJ1c2VyX2lkIjoidGhpZXJyeSJ9.HnYxgrG9MkBb17KMbUWFN76W3WfxzmoqKcvdxOfp-7A",
             role = "admin",
             teams = emptyList(),
             extraData = emptyMap()
         ),
         User(
-            id = "tomislav3",
-            name = "Tomislav Clone Clone",
-            imageUrl = "",
-            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci90b21pc2xhdjMiLCJpYXQiOjE2NjkyODI4OTAsInVzZXJfaWQiOiJ0b21pc2xhdjMifQ.u6mhWyX_uMOal9vM2DTaDXFpAjIoeAAj9N_TEuygakk",
+            id = "martin",
+            name = "Martin",
+            imageUrl = "https://upload.wikimedia.org/wikipedia/commons/d/da/Toma_Zdravkovi%C4%87.jpg",
+            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci9tYXJ0aW4iLCJpYXQiOjE2Njg0MjA4ODksInVzZXJfaWQiOiJtYXJ0aW4ifQ.E9pak8M4FuHOQbxqFYDrV4Fs6-poY_ePAfF_EoqMX_g",
             role = "admin",
             teams = emptyList(),
             extraData = emptyMap()
