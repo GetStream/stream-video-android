@@ -61,7 +61,9 @@ dependencies {
 
     implementation(Dependencies.material)
     implementation(Dependencies.streamLog)
+
     // Compose
+    implementation(platform(Dependencies.composeBom))
     implementation(Dependencies.composeRuntime)
     implementation(Dependencies.composeUi)
     implementation(Dependencies.composeUiTooling)

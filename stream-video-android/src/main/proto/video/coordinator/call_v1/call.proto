@@ -15,7 +15,7 @@ message CallType {
   // The unique name for the call type.
   string name = 1;
 
-  CallOptions options = 2;
+  CallSettings settings = 2;
 
   google.protobuf.Timestamp created_at = 3;
   google.protobuf.Timestamp updated_at = 4;
@@ -36,19 +36,23 @@ message Call {
 
   bytes custom_json = 5;
 
-  // Room options that are set explicitly in this room
-  // This set of options does not include RoomType options
-  CallOptions options = 6;
+  // Call settings overrides that are set explicitly in this room
+  // This set of settings does not include CallType settings
+  CallSettings settings_overrides = 6;
 
   google.protobuf.Timestamp created_at = 7;
 
   google.protobuf.Timestamp updated_at = 8;
+
+  bool recording_active = 9;
+
+  bool broadcasting_active = 10;
 }
 
 // CallDetails contains call additional details
 message CallDetails {
-  // Call options merged with CallType options
-  call_v1.CallOptions options = 1;
+  // Call settings_overrides merged with CallType settings
+  call_v1.CallSettings settings = 1;
   // Ordered list of member user IDs
   repeated string member_user_ids = 2;
   // Room members map indexed by Member.user_id
@@ -56,10 +60,10 @@ message CallDetails {
   map<string, member_v1.Member> members = 3;
 }
 
-// CallOptions contains all options available to change for a CallType
-// Options can also be set on the call level where they will be merged with call options using `proto.Merge`
+// CallSettings contains all options available to change for a CallType
+// Settings can also be set on the call level where they will be merged with call options using `json.Merge`
 // To make sure options can be overridden on the call level, all underlying option fields should be optional
-message CallOptions {
+message CallSettings {
   RecordingOptions recording = 1;
   BroadcastingOptions broadcasting = 2;
 }

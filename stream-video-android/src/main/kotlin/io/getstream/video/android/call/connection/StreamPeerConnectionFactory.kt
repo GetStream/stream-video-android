@@ -18,7 +18,7 @@ package io.getstream.video.android.call.connection
 
 import android.content.Context
 import android.os.Build
-import io.getstream.log.StreamLog
+import io.getstream.log.taggedLogger
 import io.getstream.video.android.model.IceCandidate
 import io.getstream.video.android.model.StreamPeerType
 import kotlinx.coroutines.CoroutineScope
@@ -45,8 +45,8 @@ import org.webrtc.audio.JavaAudioDeviceModule
  */
 public class StreamPeerConnectionFactory(private val context: Context) {
 
-    private val webRtcLogger = StreamLog.getLogger("Call:WebRTC")
-    private val audioLogger = StreamLog.getLogger("Call:AudioTrackCallback")
+    private val webRtcLogger by taggedLogger("Call:WebRTC")
+    private val audioLogger by taggedLogger("Call:AudioTrackCallback")
 
     /**
      * Represents the EGL rendering context.

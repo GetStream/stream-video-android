@@ -116,6 +116,7 @@ dependencies {
     implementation(Dependencies.material)
 
     // Compose
+    implementation(platform(Dependencies.composeBom))
     implementation(Dependencies.composeRuntime)
     implementation(Dependencies.composeUi)
     implementation(Dependencies.composeUiTooling)

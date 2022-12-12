@@ -25,9 +25,14 @@ message SfuEvent {
     HealthCheckResponse health_check_response = 14;
     TrackPublished track_published = 16;
     TrackUnpublished track_unpublished = 17;
+    Error error = 18;
   }
 }
 
+
+message Error{
+  models.Error error = 4;
+}
 
 message ICETrickle {
   models.PeerType peer_type = 1;

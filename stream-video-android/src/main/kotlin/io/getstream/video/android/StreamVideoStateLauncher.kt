@@ -17,7 +17,7 @@
 package io.getstream.video.android
 
 import android.content.Context
-import io.getstream.log.StreamLog
+import io.getstream.log.taggedLogger
 import io.getstream.video.android.dispatchers.DispatcherProvider
 import io.getstream.video.android.input.CallAndroidInput
 import io.getstream.video.android.input.CallAndroidInputLauncher
@@ -32,7 +32,7 @@ internal class StreamVideoStateLauncher(
     private val inputLauncher: CallAndroidInputLauncher
 ) {
 
-    private val logger = StreamLog.getLogger("Call:State-Launcher")
+    private val logger by taggedLogger("Call:State-Launcher")
 
     private var lastState: StreamCallState = StreamCallState.Idle
 

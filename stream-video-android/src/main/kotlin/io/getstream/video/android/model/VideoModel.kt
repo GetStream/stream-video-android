@@ -101,8 +101,8 @@ public fun CoordinatorCallDetails?.toCallDetails(): CallDetails {
     return CallDetails(
         memberUserIds = member_user_ids,
         members = members.toCallMembers(),
-        broadcastingEnabled = options?.broadcasting?.enabled ?: false,
-        recordingEnabled = options?.recording?.enabled ?: false
+        broadcastingEnabled = settings?.broadcasting?.enabled ?: false,
+        recordingEnabled = settings?.recording?.enabled ?: false
     )
 }
 
@@ -113,8 +113,8 @@ public fun CoordinatorCall?.toCallInfo(): CallInfo {
         id = id,
         type = type,
         createdByUserId = created_by_user_id,
-        broadcastingEnabled = options?.broadcasting?.enabled ?: false,
-        recordingEnabled = options?.recording?.enabled ?: false,
+        broadcastingEnabled = settings_overrides?.broadcasting?.enabled ?: false,
+        recordingEnabled = settings_overrides?.recording?.enabled ?: false,
         createdAt = created_at?.let { Date(it.toEpochMilli()) },
         updatedAt = updated_at?.let { Date(it.toEpochMilli()) },
     )

@@ -188,8 +188,8 @@ message CallInput {
   // Custom JSON object that is stored in this call
   // All users with read permissions will have access to this object
   bytes custom_json = 1;
-  // Call options to set
-  call_v1.CallOptions options = 2;
+  // Call settings to be overridden specifically
+  call_v1.CallSettings settings_overrides = 2;
 }
 
 message GetOrCreateCallResponse {

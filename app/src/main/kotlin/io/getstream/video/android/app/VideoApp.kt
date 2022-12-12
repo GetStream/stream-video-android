@@ -47,7 +47,7 @@ class VideoApp : Application() {
         super.onCreate()
         if (BuildConfig.DEBUG) {
             StreamLog.setValidator { _, _ -> true }
-            StreamLog.setLogger(AndroidStreamLogger())
+            StreamLog.install(AndroidStreamLogger())
         }
         StreamLog.i(TAG) { "[onCreate] no args" }
         UserCredentialsManager.initialize(this)

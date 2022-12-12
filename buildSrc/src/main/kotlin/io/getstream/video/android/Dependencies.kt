@@ -1,7 +1,7 @@
 package io.getstream.video.android
 
 object Versions {
-    internal const val ANDROID_GRADLE_PLUGIN = "7.3.0"
+    internal const val ANDROID_GRADLE_PLUGIN = "7.3.1"
     internal const val ANDROID_GRADLE_SPOTLESS = "6.7.0"
     internal const val GRADLE_NEXUS_PUBLISH_PLUGIN = "1.1.0"
     internal const val KOTLIN = "1.7.20"
@@ -18,7 +18,7 @@ object Versions {
     internal const val ANDROIDX_ACTIVITY = "1.5.1"
     internal const val ACTIVITY_COMPOSE = "1.5.1"
 
-    internal const val COMPOSE = "1.3.0"
+    internal const val COMPOSE_BOM = "2022.12.00"
     const val COMPOSE_COMPILER = "1.3.2"
     internal const val COIL = "2.2.1"
 
@@ -29,7 +29,7 @@ object Versions {
 
     internal const val WEBRTC = "104.5112.05"
     internal const val STREAM = "6.0.0-beta1"
-    internal const val STREAM_LOG = "1.0.0"
+    internal const val STREAM_LOG = "1.1.3"
     internal const val STREAM_PUSH = "1.0.2"
 
     internal const val ANDROIDX_TEST = "1.4.0"
@@ -71,13 +71,13 @@ object Dependencies {
 
     // Compose
     const val activityCompose = "androidx.activity:activity-compose:${Versions.ACTIVITY_COMPOSE}"
-    const val composeRuntime = "androidx.compose.runtime:runtime:${Versions.COMPOSE}"
-    const val composeUi = "androidx.compose.ui:ui:${Versions.COMPOSE}"
-    const val composeUiTooling = "androidx.compose.ui:ui-tooling:${Versions.COMPOSE}"
-    const val composeFoundation = "androidx.compose.foundation:foundation:${Versions.COMPOSE}"
-    const val composeMaterial = "androidx.compose.material:material:${Versions.COMPOSE}"
-    const val composeIconsExtended =
-        "androidx.compose.material:material-icons-extended:${Versions.COMPOSE}"
+    const val composeBom = "androidx.compose:compose-bom:${Versions.COMPOSE_BOM}"
+    const val composeRuntime = "androidx.compose.runtime:runtime"
+    const val composeUi = "androidx.compose.ui:ui"
+    const val composeUiTooling = "androidx.compose.ui:ui-tooling"
+    const val composeFoundation = "androidx.compose.foundation:foundation"
+    const val composeMaterial = "androidx.compose.material:material"
+    const val composeIconsExtended = "androidx.compose.material:material-icons-extended"
     const val composeCoil = "io.coil-kt:coil-compose:${Versions.COIL}"
 
     const val coil = "io.coil-kt:coil:${Versions.COIL}"
