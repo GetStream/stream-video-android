@@ -13,46 +13,11 @@
         android:layout_height="match_parent"
         />
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <io.getstream.video.android.ui.xml.widget.call.CallAppBarView
         android:id="@+id/incomingCallToolbar"
         android:layout_width="match_parent"
         android:layout_height="@dimen/topAppbarHeightSize"
-        app:layout_constraintTop_toTopOf="parent"
-        >
-
-        <ImageView
-            android:id="@+id/backImageView"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:scaleType="center"
-            android:src="@drawable/ic_arrow_back"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            />
-
-        <TextView
-            android:id="@+id/toolbarTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/default_app_bar_title"
-            android:textSize="@dimen/topAppbarTextSize"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@id/backImageView"
-            app:layout_constraintTop_toTopOf="parent"
-            />
-
-        <ImageView
-            android:id="@+id/toolbarTrailingImage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_participants"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@id/toolbarTitle"
-            app:layout_constraintTop_toTopOf="parent"
-            />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        />
 
     <io.getstream.video.android.ui.xml.widget.participant.ParticipantsInfoView
         android:id="@+id/participantsInfo"

@@ -13,10 +13,10 @@
         android:layout_height="match_parent"
         />
 
-    <Toolbar
+    <io.getstream.video.android.ui.xml.widget.call.CallAppBarView
         android:id="@+id/outgoingCallToolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/topAppbarHeightSize"
         app:layout_constraintTop_toTopOf="parent"
         />
 

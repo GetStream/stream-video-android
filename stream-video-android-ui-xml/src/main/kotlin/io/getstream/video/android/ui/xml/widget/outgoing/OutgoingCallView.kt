@@ -24,13 +24,11 @@ import io.getstream.video.android.call.state.CallAction
 import io.getstream.video.android.call.state.CancelCall
 import io.getstream.video.android.call.state.ToggleCamera
 import io.getstream.video.android.call.state.ToggleMicrophone
-import io.getstream.video.android.common.util.getFloatResource
 import io.getstream.video.android.model.CallStatus
 import io.getstream.video.android.model.CallUser
 import io.getstream.video.android.ui.xml.databinding.ViewOutgoingCallBinding
 import io.getstream.video.android.ui.xml.utils.extensions.dpToPx
 import io.getstream.video.android.ui.xml.utils.extensions.inflater
-import kotlin.math.roundToInt
 import io.getstream.video.android.ui.common.R as RCommon
 
 public class OutgoingCallView @JvmOverloads constructor(
@@ -41,16 +39,19 @@ public class OutgoingCallView @JvmOverloads constructor(
 
     private val binding = ViewOutgoingCallBinding.inflate(inflater, this)
 
-    private var actionListener: CallActionListener? = null
-
     private var isMicrophoneEnabled: Boolean = false
     private var isCameraEnabled: Boolean = false
 
+    public var callActionListener: (CallAction) -> Unit = { }
+    public var backListener: () -> Unit = { }
+
     init {
         with(binding) {
-            cancelCall.setOnClickListener { actionListener?.onCallAction(CancelCall) }
-            micToggle.setOnClickListener { actionListener?.onCallAction(ToggleMicrophone(!isMicrophoneEnabled)) }
-            cameraToggle.setOnClickListener { actionListener?.onCallAction(ToggleCamera(!isCameraEnabled)) }
+            outgoingCallToolbar.backListener = { backListener() }
+
+            cancelCall.setOnClickListener { callActionListener(CancelCall) }
+            micToggle.setOnClickListener { callActionListener(ToggleMicrophone(!isMicrophoneEnabled)) }
+            cameraToggle.setOnClickListener { callActionListener(ToggleCamera(!isCameraEnabled)) }
         }
     }
 
@@ -94,13 +95,5 @@ public class OutgoingCallView @JvmOverloads constructor(
 
             controlsHolder.setConstraintSet(constraintSet)
         }
-    }
-
-    public fun setCallActionListener(callActionListener: CallActionListener) {
-        actionListener = callActionListener
-    }
-
-    public fun interface CallActionListener {
-        public fun onCallAction(callAction: CallAction)
     }
 }

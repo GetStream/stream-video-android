@@ -27,7 +27,6 @@ import io.getstream.video.android.model.CallStatus
 import io.getstream.video.android.model.CallUser
 import io.getstream.video.android.ui.common.R
 import io.getstream.video.android.ui.xml.databinding.ViewIncomingCallBinding
-import io.getstream.video.android.ui.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.ui.xml.utils.extensions.inflater
 
 public class IncomingCallView @JvmOverloads constructor(
@@ -40,13 +39,17 @@ public class IncomingCallView @JvmOverloads constructor(
 
     private var isCameraEnabled = false
 
-    private var callActionListener: CallActionListener? = null
+    public var callActionListener: (CallAction) -> Unit = {}
+
+    public var backListener: () -> Unit = {}
 
     init {
         with(binding) {
-            acceptCall.setOnClickListener { callActionListener?.onCallAction(AcceptCall) }
-            declineCall.setOnClickListener { callActionListener?.onCallAction(DeclineCall) }
-            cameraToggle.setOnClickListener { callActionListener?.onCallAction(ToggleCamera(!isCameraEnabled)) }
+            incomingCallToolbar.backListener = { backListener() }
+
+            acceptCall.setOnClickListener { callActionListener(AcceptCall) }
+            declineCall.setOnClickListener { callActionListener(DeclineCall) }
+            cameraToggle.setOnClickListener { callActionListener(ToggleCamera(!isCameraEnabled)) }
         }
     }
 
@@ -66,11 +69,4 @@ public class IncomingCallView @JvmOverloads constructor(
         binding.participantsInfo.setCallStatus(callStatus)
     }
 
-    public fun setCallActionListener(listener: CallActionListener) {
-        this.callActionListener = listener
-    }
-
-    public fun interface CallActionListener {
-        public fun onCallAction(callAction: CallAction)
-    }
 }

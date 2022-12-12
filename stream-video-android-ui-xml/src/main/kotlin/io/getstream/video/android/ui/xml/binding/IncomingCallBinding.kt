@@ -13,7 +13,7 @@ public fun IncomingCallView.bindView(
 ) {
     setCallStatus(CallStatus.Outgoing)
 
-    setCallActionListener(viewModel::onCallAction)
+    callActionListener = viewModel::onCallAction
 
     lifecycleOwner.lifecycleScope.launchWhenCreated {
         viewModel.callMediaState.collectLatest {
