@@ -27,6 +27,7 @@ import io.getstream.video.android.model.CallStatus
 import io.getstream.video.android.model.CallUser
 import io.getstream.video.android.ui.common.R
 import io.getstream.video.android.ui.xml.databinding.ViewIncomingCallBinding
+import io.getstream.video.android.ui.xml.utils.extensions.getDimension
 import io.getstream.video.android.ui.xml.utils.extensions.inflater
 
 public class IncomingCallView @JvmOverloads constructor(
@@ -63,10 +64,16 @@ public class IncomingCallView @JvmOverloads constructor(
     public fun setParticipants(participants: List<CallUser>) {
         binding.participantsInfo.setParticipants(participants)
         binding.callBackground.setParticipants(participants)
+
+        if (participants.size > 1) {
+            (binding.participantsInfo.layoutParams as LayoutParams).apply {
+                this.topMargin = context.getDimension(R.dimen.avatarAppbarPadding)
+                requestLayout()
+            }
+        }
     }
 
     public fun setCallStatus(callStatus: CallStatus) {
         binding.participantsInfo.setCallStatus(callStatus)
     }
-
 }

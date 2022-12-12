@@ -28,6 +28,7 @@ import io.getstream.video.android.model.CallStatus
 import io.getstream.video.android.model.CallUser
 import io.getstream.video.android.ui.xml.databinding.ViewOutgoingCallBinding
 import io.getstream.video.android.ui.xml.utils.extensions.dpToPx
+import io.getstream.video.android.ui.xml.utils.extensions.getDimension
 import io.getstream.video.android.ui.xml.utils.extensions.inflater
 import io.getstream.video.android.ui.common.R as RCommon
 
@@ -94,6 +95,11 @@ public class OutgoingCallView @JvmOverloads constructor(
             constraintSet.setMargin(cancelCall.id, ConstraintSet.BOTTOM, 32.dpToPx())
 
             controlsHolder.setConstraintSet(constraintSet)
+
+            (participantsInfo.layoutParams as LayoutParams).apply {
+                this.topMargin = context.getDimension(io.getstream.video.android.ui.common.R.dimen.avatarAppbarPadding)
+                requestLayout()
+            }
         }
     }
 }

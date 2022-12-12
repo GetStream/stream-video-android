@@ -39,7 +39,7 @@ internal class ParticipantsInfoView @JvmOverloads constructor(
 
     private fun setParticipantsAvatars(participants: List<CallUser>) {
         binding.avatarsHolder.removeAllViews()
-        val isSingleParticipant = participants.size > 1
+        val isSingleParticipant = participants.size == 1
 
         participants.take(2).forEachIndexed { index, participant ->
             if (index > 0) {
