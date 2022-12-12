@@ -1,7 +1,7 @@
 package io.getstream.video.android
 
 object Versions {
-    internal const val ANDROID_GRADLE_PLUGIN = "7.3.0"
+    internal const val ANDROID_GRADLE_PLUGIN = "7.3.1"
     internal const val ANDROID_GRADLE_SPOTLESS = "6.7.0"
     internal const val GRADLE_NEXUS_PUBLISH_PLUGIN = "1.1.0"
     internal const val KOTLIN = "1.7.20"
