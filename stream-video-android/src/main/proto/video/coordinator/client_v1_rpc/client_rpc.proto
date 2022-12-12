@@ -3,12 +3,15 @@ syntax = "proto3";
 package stream.video.coordinator.client_v1_rpc;
 
 import "google/protobuf/timestamp.proto";
+import "video/coordinator/broadcast_v1/broadcast.proto";
 import "video/coordinator/call_v1/call.proto";
 import "video/coordinator/client_v1_rpc/envelopes.proto";
 import "video/coordinator/edge_v1/edge.proto";
 import "video/coordinator/push_v1/push.proto";
 import "video/coordinator/stat_v1/stat.proto";
+import "video/coordinator/user_v1/user.proto";
 import "video/coordinator/utils_v1/utils.proto";
+
 
 option go_package = "client_v1_rpc";
 option java_outer_classname = "ClientV1RPC";
@@ -49,6 +52,15 @@ service ClientRPC {
 
   // UNSTABLE ENDPOINTS BELOW
 
+  // starts broadcast to HLS and/or RTMP, replaces existing settings if broadcasting is already started
+  rpc StartBroadcast(StartBroadcastRequest) returns (StartBroadcastResponse);
+  // stops broadcasting to HLS and/or RTMP
+  rpc StopBroadcast(StopBroadcastRequest) returns (StopBroadcastResponse);
+
+  rpc StartRecording(StartRecordingRequest) returns (StartRecordingResponse);
+
+  rpc StopRecording(StopRecordingRequest) returns (StopRecordingResponse);
+
   // UpdateMembers creates or updates members in a room.
 
   // Adds members to a call
@@ -59,6 +71,9 @@ service ClientRPC {
   rpc SendEvent(SendEventRequest) returns (SendEventResponse);
 
   rpc SendCustomEvent(SendCustomEventRequest) returns (SendCustomEventResponse);
+
+  rpc QueryUsers(QueryUsersRequest) returns (QueryUsersResponse);
+  rpc UpsertUsers(UpsertUsersRequest) returns (UpsertUsersResponse);
 
   // room is a confusing name. better to call it breakout room
   // breakout rooms have their own audio/video track
@@ -93,6 +108,10 @@ message MemberInput {
   string user_id = 1;
   string role = 2;
   bytes custom_json = 3;
+  // The user data for the user
+  // If the user does not exist, this will be used to create the user
+  // If the user already exists, this input will be ignored
+  user_v1.UserInput user_input = 4;
 }
 
 message UpsertCallMembersRequest {
@@ -247,6 +266,24 @@ message QueryMembersResponse {
   MembersEnvelope members = 1;
 }
 
+message QueryUsersRequest {
+  bytes mq_json = 1;
+  optional int32 limit = 2;
+  repeated utils_v1.Sort sorts = 3;
+}
+
+message QueryUsersResponse {
+  repeated user_v1.User users = 1;
+}
+
+message UpsertUsersRequest {
+  repeated user_v1.UserInput users = 1;
+}
+
+message UpsertUsersResponse {
+  repeated user_v1.User users = 1;
+}
+
 // A request message for GetCallEdgeServer endpoint
 message GetCallEdgeServerRequest {
   // Call CID to get SFU for
@@ -373,4 +410,45 @@ message ReviewCallRequest {
 }
 
 message ReviewCallResponse {
+}
+
+message StartBroadcastRequest {
+  // Call type and id.
+  string call_type = 1;
+  string call_id = 2;
+
+  // Toggles HLS broadcasting on/off.
+  bool hls_broadcast = 3;
+
+  // Enables rtmp broadcasting.
+  broadcast_v1.RTMPOptions rtmp = 5;
+}
+
+message StartBroadcastResponse {
+  broadcast_v1.Broadcast broadcast = 1;
+}
+
+message StopBroadcastRequest {
+  // Call type and id.
+  string call_type = 1;
+  string call_id = 2;
+}
+
+message StopBroadcastResponse {
+}
+
+message StartRecordingRequest {
+  string call_type = 1;
+  string call_id = 2;
+}
+
+message StartRecordingResponse {
+}
+
+message StopRecordingRequest {
+  string call_type = 1;
+  string call_id = 2;
+}
+
+message StopRecordingResponse {
 }

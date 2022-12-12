@@ -17,6 +17,7 @@
 package io.getstream.video.android.module
 
 import io.getstream.video.android.token.CredentialsProvider
+import okhttp3.HttpUrl
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -26,10 +27,9 @@ import okhttp3.logging.HttpLoggingInterceptor
  * @property credentialsProvider Provider used to fetch user based credentials.
  */
 internal class HttpModule(
-    private val credentialsProvider: CredentialsProvider
+    private val loggingLevel: HttpLoggingInterceptor.Level = HttpLoggingInterceptor.Level.NONE,
+    private val credentialsProvider: CredentialsProvider,
 ) {
-
-    private var loggingLevel: HttpLoggingInterceptor.Level = HttpLoggingInterceptor.Level.NONE
 
     /**
      * Cached instance of the HTTP client.
@@ -37,6 +37,11 @@ internal class HttpModule(
     internal val okHttpClient: OkHttpClient by lazy {
         buildOkHttpClient(credentialsProvider)
     }
+
+    /**
+     * New base url of the HTTP client.
+     */
+    internal var baseUrl: HttpUrl? = null
 
     /**
      * Builds the [OkHttpClient] used for all API calls.
@@ -48,7 +53,7 @@ internal class HttpModule(
     private fun buildOkHttpClient(credentialsProvider: CredentialsProvider): OkHttpClient {
         return OkHttpClient.Builder()
             .addInterceptor(
-                buildInterceptor(
+                buildCredentialsInterceptor(
                     credentialsProvider = credentialsProvider
                 )
             )
@@ -57,6 +62,7 @@ internal class HttpModule(
                     level = loggingLevel
                 }
             )
+            .addInterceptor(buildHostSelectionInterceptor())
             .build()
     }
 
@@ -67,7 +73,7 @@ internal class HttpModule(
      *
      * @return [Interceptor] which adds headers.
      */
-    private fun buildInterceptor(
+    private fun buildCredentialsInterceptor(
         credentialsProvider: CredentialsProvider
     ): Interceptor = Interceptor {
         val original = it.request()
@@ -95,7 +101,39 @@ internal class HttpModule(
         it.proceed(updated)
     }
 
+    /**
+     * Builds the HTTP interceptor that sets a new host from [baseUrl].
+     *
+     * @return [Interceptor] which replaces baseUrl.
+     */
+    private fun buildHostSelectionInterceptor(): Interceptor = Interceptor { chain ->
+        val baseUrl = baseUrl ?: return@Interceptor chain.proceed(chain.request())
+        val original = chain.request()
+        if (original.url.host == REPLACEMENT_HOST) {
+            val updatedBaseUrl = original.url.newBuilder()
+                .host(baseUrl.host)
+                .build()
+            val updated = original.newBuilder()
+                .url(updatedBaseUrl)
+                .build()
+            chain.proceed(updated)
+        } else {
+            chain.proceed(chain.request())
+        }
+    }
+
     companion object {
+
+        /**
+         * Host pattern to be replaced.
+         */
+        private const val REPLACEMENT_HOST = "replacement.url"
+
+        /**
+         * Url pattern to be replaced.
+         */
+        internal const val REPLACEMENT_URL = "https://$REPLACEMENT_HOST"
+
         /**
          * Key used to prove authorization to the API.
          */
@@ -115,9 +153,7 @@ internal class HttpModule(
             loggingLevel: HttpLoggingInterceptor.Level = HttpLoggingInterceptor.Level.NONE,
             credentialsProvider: CredentialsProvider
         ): HttpModule {
-            return HttpModule(credentialsProvider).apply {
-                this.loggingLevel = loggingLevel
-            }
+            return HttpModule(loggingLevel, credentialsProvider)
         }
 
         /**

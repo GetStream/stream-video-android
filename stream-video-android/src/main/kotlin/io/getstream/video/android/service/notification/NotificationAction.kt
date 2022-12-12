@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.service.notification
 
-import io.getstream.video.android.model.state.StreamCallGuid
+import io.getstream.video.android.model.StreamCallGuid
 
 public sealed class NotificationAction {
     internal abstract val guid: StreamCallGuid

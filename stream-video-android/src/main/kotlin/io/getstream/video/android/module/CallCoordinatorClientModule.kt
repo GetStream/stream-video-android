@@ -99,8 +99,7 @@ internal class CallCoordinatorClientModule(
          * leave it as-is.
          */
         @Suppress("RedundantNullableReturnType")
-        private val REDIRECT_BASE_URL: String? = null // "https://a769-93-140-102-246.eu.ngrok.io"
-        // e.g. "https://dc54-83-131-252-51.eu.ngrok.io"
+        private val REDIRECT_BASE_URL: String? = null // e.g. "https://dc54-83-131-252-51.eu.ngrok.io"
 
         /**
          * The base URL of the API.

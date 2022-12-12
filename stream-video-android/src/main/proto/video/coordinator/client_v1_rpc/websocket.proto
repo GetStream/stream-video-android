@@ -19,6 +19,7 @@ message WebsocketEvent {
   map<string, user_v1.User> users = 1;
 
   oneof event {
+    WebsocketError error = 19;
     WebsocketHealthcheck healthcheck = 20;
 
     // Call events
@@ -75,4 +76,9 @@ message WebsocketHealthcheck {
   string call_id = 4;
   bool video = 5;
   bool audio = 6;
+}
+
+message WebsocketError {
+  int32 code = 1;
+  string message = 2;
 }

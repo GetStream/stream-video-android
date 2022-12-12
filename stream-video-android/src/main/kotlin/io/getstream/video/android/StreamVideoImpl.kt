@@ -18,24 +18,26 @@ package io.getstream.video.android
 
 import android.content.Context
 import androidx.lifecycle.Lifecycle
-import io.getstream.logging.StreamLog
+import io.getstream.log.taggedLogger
 import io.getstream.video.android.call.CallClient
 import io.getstream.video.android.call.builder.CallClientBuilder
 import io.getstream.video.android.coordinator.CallCoordinatorClient
 import io.getstream.video.android.coordinator.state.UserState
 import io.getstream.video.android.engine.StreamCallEngine
-import io.getstream.video.android.engine.StreamCallEngineImpl
 import io.getstream.video.android.engine.adapter.CoordinatorSocketListenerAdapter
 import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.model.CallEventType
 import io.getstream.video.android.model.CallMetadata
+import io.getstream.video.android.model.Device
 import io.getstream.video.android.model.IceServer
 import io.getstream.video.android.model.JoinedCall
 import io.getstream.video.android.model.SfuToken
 import io.getstream.video.android.model.StartedCall
 import io.getstream.video.android.model.StreamCallCid
+import io.getstream.video.android.model.StreamCallKind
 import io.getstream.video.android.model.User
+import io.getstream.video.android.model.mapper.toMetadata
 import io.getstream.video.android.model.mapper.toTypeAndId
 import io.getstream.video.android.model.state.DropReason
 import io.getstream.video.android.model.state.StreamCallState
@@ -59,12 +61,15 @@ import io.getstream.video.android.utils.onSuccess
 import io.getstream.video.android.utils.toCall
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okio.ByteString.Companion.encodeUtf8
 import stream.video.coordinator.client_v1_rpc.CreateCallInput
 import stream.video.coordinator.client_v1_rpc.CreateCallRequest
+import stream.video.coordinator.client_v1_rpc.CreateDeviceRequest
 import stream.video.coordinator.client_v1_rpc.GetCallEdgeServerRequest
 import stream.video.coordinator.client_v1_rpc.GetCallEdgeServerResponse
 import stream.video.coordinator.client_v1_rpc.GetOrCreateCallRequest
@@ -74,6 +79,7 @@ import stream.video.coordinator.client_v1_rpc.SendCustomEventRequest
 import stream.video.coordinator.client_v1_rpc.SendEventRequest
 import stream.video.coordinator.edge_v1.Latency
 import stream.video.coordinator.edge_v1.LatencyMeasurements
+import stream.video.coordinator.push_v1.DeviceInput
 
 /**
  * @param lifecycle The lifecycle used to observe changes in the process. // TODO - docs
@@ -81,7 +87,8 @@ import stream.video.coordinator.edge_v1.LatencyMeasurements
 public class StreamVideoImpl(
     private val context: Context,
     private val scope: CoroutineScope,
-    private val config: StreamVideoConfig,
+    override val config: StreamVideoConfig,
+    private val engine: StreamCallEngine,
     private val lifecycle: Lifecycle,
     private val loggingLevel: LoggingLevel,
     private val callCoordinatorClient: CallCoordinatorClient,
@@ -89,14 +96,10 @@ public class StreamVideoImpl(
     private val socket: VideoSocket,
     private val socketStateService: SocketStateService,
     private val userState: UserState,
-    private val networkStateProvider: NetworkStateProvider
+    private val networkStateProvider: NetworkStateProvider,
 ) : StreamVideo {
 
-    private val logger = StreamLog.getLogger("Call:StreamVideo")
-
-    private val engine: StreamCallEngine = StreamCallEngineImpl(scope, config) {
-        credentialsProvider.getUserCredentials().id
-    }
+    private val logger by taggedLogger("Call:StreamVideo")
 
     /**
      * Observes the app lifecycle and attempts to reconnect/release the socket connection.
@@ -111,11 +114,11 @@ public class StreamVideoImpl(
         }
     )
 
-    private var callClient: CallClient? = null
+    private val callClientHolder = MutableStateFlow<CallClient?>(null)
 
     init {
         observeState()
-        socket.addListener(CoordinatorSocketListenerAdapter(engine))
+        addSocketListener(CoordinatorSocketListenerAdapter(engine))
         scope.launch(Dispatchers.Main.immediate) {
             lifecycleObserver.observe()
         }
@@ -127,13 +130,25 @@ public class StreamVideoImpl(
         scope.launch {
             engine.callState.collect { state ->
                 when (state) {
-                    is StreamCallState.Drop -> {
-                        if (state.reason is DropReason.Timeout) {
-                            logger.i { "[observeState] call dropped by timeout" }
-                            cancelCall(state.callGuid.cid)
-                        }
+                    is StreamCallState.Drop -> if (config.cancelOnTimeout && state.reason is DropReason.Timeout) {
+                        logger.i { "[observeState] call dropped by timeout" }
+                        cancelCall(state.callGuid.cid)
                     }
-                    else -> { /* no-op */ }
+                    is StreamCallState.Idle -> clearCallState()
+                    is StreamCallState.Joined -> if (config.createCallClientInternally) {
+                        logger.i { "[observeState] caller joins a call: $state" }
+                        createCallClient(
+                            signalUrl = state.callUrl,
+                            sfuToken = state.sfuToken,
+                            iceServers = state.iceServers,
+                        )
+                    }
+                    is StreamCallState.Outgoing -> if (config.joinOnAcceptedByCallee && state.acceptedByCallee) {
+                        logger.i { "[observeState] caller joins a call: $state" }
+                        joinCall(state.toMetadata())
+                    }
+                    else -> { /* no-op */
+                    }
                 }
             }
         }
@@ -143,6 +158,33 @@ public class StreamVideoImpl(
      * Represents the state of the currently active call.
      */
     override val callState: StateFlow<StreamCallState> = engine.callState
+
+    /**
+     * Create a device that will be used to receive push notifications.
+     *
+     * @param token The Token obtained from the selected push provider.
+     * @param pushProvider The selected push provider.
+     *
+     * @return [Result] containing the [Device].
+     */
+    override suspend fun createDevice(token: String, pushProvider: String): Result<Device> {
+        logger.d { "[createDevice] token: $token, pushProvider: $pushProvider" }
+        return callCoordinatorClient.createDevice(
+            CreateDeviceRequest(
+                DeviceInput(
+                    id = token,
+                    push_provider_id = pushProvider
+                )
+            )
+        )
+            .also { logger.v { "[createDevice] result: $it" } }
+            .map {
+                Device(
+                    token = it.device?.id ?: error("CreateDeviceResponse has no device object "),
+                    pushProvider = it.device.push_provider_name
+                )
+            }
+    }
 
     /**
      * Domain - Coordinator.
@@ -173,7 +215,8 @@ public class StreamVideoImpl(
             .also { logger.v { "[getOrCreateCall] result: $it" } }
             .map {
                 StartedCall(
-                    call = it.call?.toCall() ?: error("CreateCallResponse has no call object")
+                    call = it.call?.toCall(StreamCallKind.fromRinging(ringing))
+                        ?: error("CreateCallResponse has no call object")
                 )
             }
             .onSuccess { engine.onCallStarted(it.call) }
@@ -209,7 +252,8 @@ public class StreamVideoImpl(
             .also { logger.v { "[getOrCreateCall] Coordinator result: $it" } }
             .map {
                 StartedCall(
-                    call = it.call?.toCall() ?: error("CreateCallResponse has no call object")
+                    call = it.call?.toCall(StreamCallKind.fromRinging(ringing))
+                        ?: error("CreateCallResponse has no call object")
                 )
             }
             .onSuccess { engine.onCallStarted(it.call) }
@@ -219,13 +263,27 @@ public class StreamVideoImpl(
     }
 
     // caller: JOIN after accepting incoming call by callee
-    override suspend fun joinCall(call: CallMetadata): Result<JoinedCall> = withContext(scope.coroutineContext) {
-        logger.d { "[joinCallOnly] call: $call" }
-        engine.onCallJoining(call)
-        joinCallInternal(call)
-            .onSuccess { data -> engine.onCallJoined(data) }
-            .onError { engine.onCallFailed(it) }
-            .also { logger.v { "[joinCallOnly] result: $it" } }
+    override suspend fun joinCall(call: CallMetadata): Result<JoinedCall> =
+        withContext(scope.coroutineContext) {
+            logger.d { "[joinCallOnly] call: $call" }
+            engine.onCallJoining(call)
+            joinCallInternal(call)
+                .onSuccess { data -> engine.onCallJoined(data) }
+                .onError { engine.onCallFailed(it) }
+                .also { logger.v { "[joinCallOnly] result: $it" } }
+        }
+
+    /**
+     * Used to invite new users/members to an existing call.
+     *
+     * @param users The users to invite.
+     * @param cid The channel ID.
+     * @return [Result] if the operation was successful or not.
+     */
+    override suspend fun inviteUsers(users: List<User>, cid: StreamCallCid): Result<Unit> {
+        logger.d { "[inviteUsers] users: $users" }
+
+        return callCoordinatorClient.inviteUsers(users, cid)
     }
 
     /**
@@ -254,7 +312,7 @@ public class StreamVideoImpl(
             val latencyResults = joinResult.data.edges.associate {
                 it.name to measureLatency(it.latency_url)
             }
-
+            logger.v { "[joinCallInternal] latencyResults: $latencyResults" }
             val selectEdgeServerResult = selectEdgeServer(
                 request = GetCallEdgeServerRequest(
                     call_cid = call.cid,
@@ -278,7 +336,9 @@ public class StreamVideoImpl(
                             sfuToken = credentials.token,
                             iceServers = iceServers
                         )
-                    )
+                    ).also {
+                        credentialsProvider.setSfuToken(it.data.sfuToken)
+                    }
                 }
                 is Failure -> Failure(selectEdgeServerResult.error)
             }
@@ -334,7 +394,8 @@ public class StreamVideoImpl(
             .also { logger.v { "[getOrCreateCall] Coordinator result: $it" } }
             .map {
                 StartedCall(
-                    call = it.call?.toCall() ?: error("CreateCallResponse has no call object")
+                    call = it.call?.toCall(StreamCallKind.fromRinging(ringing))
+                        ?: error("CreateCallResponse has no call object")
                 )
             }
             .onSuccess { engine.onCallJoining(it.call) }
@@ -377,8 +438,8 @@ public class StreamVideoImpl(
         logger.i { "[clearCallState] no args" }
         credentialsProvider.setSfuToken(null)
         socket.updateCallState(null)
-        callClient?.clear()
-        callClient = null
+        callClientHolder.value?.clear()
+        callClientHolder.value = null
     }
 
     /**
@@ -427,22 +488,21 @@ public class StreamVideoImpl(
         sfuToken: SfuToken,
         iceServers: List<IceServer>
     ): CallClient {
-        credentialsProvider.setSfuToken(sfuToken)
-        val builder = CallClientBuilder(
+        logger.i { "[createCallClient] signalUrl: $signalUrl, sfuToken: $sfuToken, iceServers: $iceServers" }
+
+        return CallClientBuilder(
             context = context,
+            coordinatorClient = callCoordinatorClient,
             credentialsProvider = credentialsProvider,
             networkStateProvider = networkStateProvider,
             callEngine = engine,
             signalUrl = signalUrl,
             iceServers = iceServers
-        )
-
-        builder.loggingLevel(loggingLevel)
-
-        val client = builder.build()
-        this.callClient = client
-
-        return client
+        ).apply {
+            loggingLevel(loggingLevel)
+        }.build().also {
+            callClientHolder.value = it
+        }
     }
 
     /**
@@ -450,34 +510,45 @@ public class StreamVideoImpl(
      * @return An instance of the [CallClient] if it currently exists (the user is in a call).
      */
     override fun getActiveCallClient(): CallClient? {
-        return this.callClient
+        return callClientHolder.value
     }
 
-    override suspend fun acceptCall(cid: StreamCallCid): Result<JoinedCall> {
-        return try {
-            logger.d { "[acceptCall] cid: $cid" }
-            val (type, id) = cid.toTypeAndId()
-            sendEvent(
-                callCid = cid,
-                eventType = CallEventType.ACCEPTED
-            ).flatMap {
-                joinCall(type, id)
-            }.also {
-                logger.v { "[acceptCall] result: $it" }
+    /**
+     *
+     * @return An instance of the [CallClient] if it currently exists (the user is in a call).
+     */
+    override suspend fun awaitCallClient(): CallClient = withContext(scope.coroutineContext) {
+        callClientHolder.first { it != null } ?: error("callClient must not be null")
+    }
+
+    override suspend fun acceptCall(cid: StreamCallCid): Result<JoinedCall> =
+        withContext(scope.coroutineContext) {
+            try {
+                logger.d { "[acceptCall] cid: $cid" }
+                val (type, id) = cid.toTypeAndId()
+                sendEvent(
+                    callCid = cid,
+                    eventType = CallEventType.ACCEPTED
+                ).flatMap {
+                    joinCall(type, id)
+                }.also {
+                    logger.v { "[acceptCall] result: $it" }
+                }
+            } catch (e: Throwable) {
+                logger.e { "[acceptCall] failed: $e" }
+                Failure(VideoError(e.message, e))
             }
-        } catch (e: Throwable) {
-            logger.e { "[acceptCall] failed: $e" }
-            Failure(VideoError(e.message, e))
         }
-    }
 
-    override suspend fun rejectCall(cid: StreamCallCid): Result<Boolean> {
-        logger.d { "[rejectCall] cid: $cid" }
-        return sendEvent(callCid = cid, CallEventType.REJECTED)
-    }
+    override suspend fun rejectCall(cid: StreamCallCid): Result<Boolean> =
+        withContext(scope.coroutineContext) {
+            logger.d { "[rejectCall] cid: $cid" }
+            sendEvent(callCid = cid, CallEventType.REJECTED)
+        }
 
-    override suspend fun cancelCall(cid: StreamCallCid): Result<Boolean> {
-        logger.d { "[cancelCall] cid: $cid" }
-        return sendEvent(callCid = cid, CallEventType.CANCELLED)
-    }
+    override suspend fun cancelCall(cid: StreamCallCid): Result<Boolean> =
+        withContext(scope.coroutineContext) {
+            logger.d { "[cancelCall] cid: $cid" }
+            sendEvent(callCid = cid, CallEventType.CANCELLED)
+        }
 }

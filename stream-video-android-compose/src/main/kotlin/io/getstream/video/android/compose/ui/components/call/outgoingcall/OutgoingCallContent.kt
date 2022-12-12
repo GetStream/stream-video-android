@@ -25,8 +25,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.call.state.ToggleCamera
-import io.getstream.video.android.call.state.ToggleMicrophone
+import io.getstream.video.android.call.state.CallAction
+import io.getstream.video.android.call.state.CallMediaState
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.background.CallBackground
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
@@ -36,7 +36,6 @@ import io.getstream.video.android.compose.ui.components.call.outgoingcall.intern
 import io.getstream.video.android.compose.ui.components.mock.mockParticipant
 import io.getstream.video.android.model.CallType
 import io.getstream.video.android.model.CallUser
-import io.getstream.video.android.model.CallUserState
 import io.getstream.video.android.viewmodel.CallViewModel
 
 /**
@@ -44,36 +43,30 @@ import io.getstream.video.android.viewmodel.CallViewModel
  *
  * @param viewModel The [CallViewModel] used to provide state and various handlers in the call.
  * @param modifier Modifier for styling.
- * @param onCancelCall Handler when the user decides to cancel.
- * @param onMicToggleChanged Handler when the user toggles their microphone on or off.
- * @param onVideoToggleChanged Handler when the user toggles their video on or off.
+ * @param onBackPressed Handler when the user taps on the back button.
+ * @param onCallInfoSelected Handler when the call participants info is selected.
+ * @param onCallAction Handler when the user clicks on some of the call controls.
  */
 @Composable
 public fun OutgoingCallContent(
     viewModel: CallViewModel,
     modifier: Modifier = Modifier,
-    onCancelCall: () -> Unit = viewModel::cancelCall,
-    onMicToggleChanged: (Boolean) -> Unit = { isEnabled ->
-        viewModel.onCallAction(
-            ToggleCamera(isEnabled)
-        )
-    },
-    onVideoToggleChanged: (Boolean) -> Unit = { isEnabled ->
-        viewModel.onCallAction(
-            ToggleMicrophone(isEnabled)
-        )
-    },
+    onBackPressed: () -> Unit,
+    onCallInfoSelected: () -> Unit = viewModel::showCallInfo,
+    onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
 ) {
     val callType: CallType by viewModel.callType.collectAsState()
     val participants: List<CallUser> by viewModel.participants.collectAsState()
+    val callMediaState: CallMediaState by viewModel.callMediaState.collectAsState()
 
     OutgoingCall(
         callType = callType,
         participants = participants,
+        callMediaState = callMediaState,
         modifier = modifier,
-        onCancelCall = onCancelCall,
-        onMicToggleChanged = onMicToggleChanged,
-        onVideoToggleChanged = onVideoToggleChanged
+        onBackPressed = onBackPressed,
+        onCallInfoSelected = onCallInfoSelected,
+        onCallAction = onCallAction
     )
 }
 
@@ -83,19 +76,21 @@ public fun OutgoingCallContent(
  *
  * @param callType The type of call, Audio or Video.
  * @param participants People participating in the call.
+ * @param callMediaState The state of current user media (camera on, audio on, etc.).
  * @param modifier Modifier for styling.
- * @param onCancelCall Handler when the user decides to cancel or drop out of a call.
- * @param onMicToggleChanged Handler when the user toggles their microphone on or off.
- * @param onVideoToggleChanged Handler when the user toggles their video on or off.
+ * @param onBackPressed Handler when the user taps on back.
+ * @param onCallInfoSelected Handler when the call participants info is selected.
+ * @param onCallAction Handler when the user clicks on some of the call controls.
  */
 @Composable
 public fun OutgoingCall(
     callType: CallType,
     participants: List<CallUser>,
+    callMediaState: CallMediaState,
     modifier: Modifier = Modifier,
-    onCancelCall: () -> Unit = {},
-    onMicToggleChanged: (Boolean) -> Unit = {},
-    onVideoToggleChanged: (Boolean) -> Unit = {},
+    onBackPressed: () -> Unit,
+    onCallInfoSelected: () -> Unit,
+    onCallAction: (CallAction) -> Unit,
 ) {
     CallBackground(
         modifier = modifier,
@@ -106,7 +101,7 @@ public fun OutgoingCall(
 
         Column {
 
-            CallAppBar()
+            CallAppBar(onBackPressed = onBackPressed, onCallInfoSelected = onCallInfoSelected)
 
             val topPadding = if (participants.size == 1 || callType == CallType.VIDEO) {
                 VideoTheme.dimens.singleAvatarAppbarPadding
@@ -128,18 +123,16 @@ public fun OutgoingCall(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(bottom = 44.dp),
-                onCancelCall = onCancelCall,
-                onMicToggleChanged = onMicToggleChanged,
-                onVideoToggleChanged = onVideoToggleChanged
+                callMediaState = callMediaState,
+                onCallAction = onCallAction
             )
         } else {
             OutgoingGroupCallOptions(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(bottom = 44.dp),
-                onCancelCall = onCancelCall,
-                onMicToggleChanged = onMicToggleChanged,
-                onVideoToggleChanged = onVideoToggleChanged,
+                callMediaState = callMediaState,
+                onCallAction = onCallAction
             )
         }
     }
@@ -154,13 +147,21 @@ private fun OutgoingCallPreview() {
             participants = listOf(
                 mockParticipant.let {
                     CallUser(
-                        it.id, it.name, it.role, CallUserState.Idle, it.profileImageURL ?: "",
-                        null, null, emptyList()
+                        id = it.id,
+                        name = it.name,
+                        role = it.role,
+                        state = null,
+                        imageUrl = it.profileImageURL ?: "",
+                        createdAt = null,
+                        updatedAt = null,
+                        teams = emptyList()
                     )
                 }
             ),
-            onCancelCall = { },
-            onMicToggleChanged = { },
-        ) { }
+            callMediaState = CallMediaState(),
+            onCallAction = {},
+            onCallInfoSelected = {},
+            onBackPressed = {}
+        )
     }
 }

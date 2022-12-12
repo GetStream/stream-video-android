@@ -35,23 +35,28 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.getstream.logging.StreamLog
+import io.getstream.log.taggedLogger
 import io.getstream.video.android.app.ui.components.UserList
 import io.getstream.video.android.app.ui.home.HomeActivity
+import io.getstream.video.android.app.user.AppUser
 import io.getstream.video.android.app.utils.getUsers
 import io.getstream.video.android.app.videoApp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.logging.LoggingLevel
-import io.getstream.video.android.model.UserCredentials
+import io.getstream.video.android.model.User
 import io.getstream.video.android.pushprovider.firebase.CallNotificationReceiver
 import io.getstream.video.android.pushprovider.firebase.CallNotificationReceiver.Companion.ACTION_CALL
 import io.getstream.video.android.token.AuthCredentialsProvider
 
 class LoginActivity : AppCompatActivity() {
 
-    private val logger = StreamLog.getLogger("Call:LoginView")
+    private val logger by taggedLogger("Call:LoginView")
 
-    private val loginItemsState = mutableStateOf(getUsers())
+    private val loginItemsState = mutableStateOf(
+        getUsers().map {
+            AppUser(it, false)
+        }
+    )
 
     init {
         logger.i { "<init> this: $this" }
@@ -76,10 +81,10 @@ class LoginActivity : AppCompatActivity() {
     private fun checkIfUserLoggedIn() {
         val preferences = videoApp.userPreferences
 
-        val credentials = preferences.getCachedCredentials()
+        val user = preferences.getCachedCredentials()
 
-        if (credentials.isValid()) {
-            logIn(credentials)
+        if (user != null && user.isValid()) {
+            logIn(user)
         }
     }
 
@@ -102,7 +107,7 @@ class LoginActivity : AppCompatActivity() {
                 userItems = loginItems,
                 onClick = { credentials ->
                     val updated = loginItemsState.value.map {
-                        it.copy(isSelected = it.token == credentials.token)
+                        it.copy(isSelected = it.user.token == credentials.user.token)
                     }
 
                     loginItemsState.value = updated
@@ -119,10 +124,10 @@ class LoginActivity : AppCompatActivity() {
                     .padding(horizontal = 16.dp),
                 enabled = isDataValid,
                 onClick = {
-                    val user = loginItemsState.value.firstOrNull { it.isSelected }
+                    val wrapper = loginItemsState.value.firstOrNull { it.isSelected }
 
-                    if (user != null) {
-                        logIn(user)
+                    if (wrapper != null) {
+                        logIn(wrapper.user)
                     }
                 },
                 content = { Text(text = "Log In") }
@@ -130,12 +135,11 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    private fun logIn(selectedUser: UserCredentials) {
-        videoApp.userPreferences.storeUserCredentials(selectedUser)
+    private fun logIn(selectedUser: User) {
         logger.i { "[logIn] selectedUser: $selectedUser" }
-        videoApp.initializeStreamCalls(
+        videoApp.initializeStreamVideo(
             credentialsProvider = AuthCredentialsProvider(
-                user = selectedUser.toUser(),
+                user = selectedUser,
                 apiKey = "key1",
                 userToken = selectedUser.token
             ),

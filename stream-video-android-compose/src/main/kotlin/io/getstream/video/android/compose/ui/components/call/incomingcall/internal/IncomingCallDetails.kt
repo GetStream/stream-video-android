@@ -31,7 +31,6 @@ import io.getstream.video.android.compose.ui.components.participants.internal.Pa
 import io.getstream.video.android.model.CallParticipantState
 import io.getstream.video.android.model.CallStatus
 import io.getstream.video.android.model.CallUser
-import io.getstream.video.android.model.CallUserState
 
 @Composable
 internal fun IncomingCallDetails(
@@ -43,18 +42,12 @@ internal fun IncomingCallDetails(
         ParticipantAvatars(
             participants = participants.map {
                 CallParticipantState(
-                    it.id,
-                    it.role,
-                    it.name,
-                    it.imageUrl,
-                    false,
-                    true,
-                    true,
-                    true,
-                    null,
-                    Pair(0, 0),
-                    audioLevel = 0f,
-                    ""
+                    id = it.id,
+                    role = it.role,
+                    name = it.name,
+                    profileImageURL = it.imageUrl,
+                    idPrefix = "",
+                    sessionId = ""
                 )
             }
         )
@@ -75,14 +68,14 @@ private fun IncomingCallDetailsPreview() {
         IncomingCallDetails(
             participants = mockParticipantList.map {
                 CallUser(
-                    it.id,
-                    it.name,
-                    it.role,
-                    CallUserState.Idle,
-                    it.profileImageURL ?: "",
-                    null,
-                    null,
-                    emptyList()
+                    id = it.id,
+                    name = it.name,
+                    role = it.role,
+                    state = null,
+                    imageUrl = it.profileImageURL ?: "",
+                    createdAt = null,
+                    updatedAt = null,
+                    teams = emptyList()
                 )
             }
         )

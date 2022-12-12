@@ -20,7 +20,8 @@ import android.content.Context
 import android.media.AudioManager
 import android.os.Handler
 import android.os.Looper
-import io.getstream.logging.StreamLog
+import io.getstream.log.StreamLog
+import io.getstream.log.taggedLogger
 
 public interface AudioHandler {
     /**
@@ -36,7 +37,7 @@ public interface AudioHandler {
 
 public class AudioSwitchHandler constructor(private val context: Context) : AudioHandler {
 
-    private val logger = StreamLog.getLogger(TAG)
+    private val logger by taggedLogger(TAG)
 
     private var audioDeviceChangeListener: AudioDeviceChangeListener? = null
     private var onAudioFocusChangeListener: AudioManager.OnAudioFocusChangeListener? = null

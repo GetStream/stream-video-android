@@ -19,8 +19,24 @@ package io.getstream.video.android
 public interface StreamVideoConfig {
 
     public val dropTimeout: Long
+    public val cancelOnTimeout: Boolean
+    public val joinOnAcceptedByCallee: Boolean
+    public val createCallClientInternally: Boolean
+
+    public val autoPublish: Boolean
+    public val defaultAudioOn: Boolean
+    public val defaultVideoOn: Boolean
+    public val defaultSpeakerPhoneOn: Boolean
 }
 
 public object StreamVideoConfigDefault : StreamVideoConfig {
     override val dropTimeout: Long = 30_000L
+    override val cancelOnTimeout: Boolean = true
+    override val joinOnAcceptedByCallee: Boolean = true
+    override val createCallClientInternally: Boolean = true
+
+    override val autoPublish: Boolean = true
+    override val defaultAudioOn: Boolean = false
+    override val defaultVideoOn: Boolean = true
+    override val defaultSpeakerPhoneOn: Boolean = false
 }

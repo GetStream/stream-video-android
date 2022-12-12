@@ -17,46 +17,38 @@
 package io.getstream.video.android.compose.ui.components.mock
 
 import io.getstream.video.android.model.CallParticipantState
-import stream.video.sfu.models.User
 
 internal val mockParticipant: CallParticipantState
-    inline get() = mockUsers[0].toCallParticipant()
+    inline get() = mockUsers[0]
 
 internal val mockParticipantList: List<CallParticipantState>
-    inline get() = mockUsers.map { it.toCallParticipant() }
-
-private fun User.toCallParticipant() =
-    CallParticipantState(
-        id = this.id,
-        name = this.name,
-        profileImageURL = this.image_url,
-        role = this.role,
-        hasAudio = false,
-        hasVideo = false,
-        isOnline = false,
-        track = null,
-        trackSize = 0 to 0,
-        isLocal = false,
-        audioLevel = 0f,
-        idPrefix = ""
-    )
+    inline get() = mockUsers
 
 @PublishedApi
-internal val mockUsers: List<User>
+internal val mockUsers: List<CallParticipantState>
     inline get() = listOf(
-        User(
+        CallParticipantState(
             id = "filip_babic",
             name = "Filip",
-            image_url = "https://avatars.githubusercontent.com/u/17215808?v=4",
+            profileImageURL = "https://avatars.githubusercontent.com/u/17215808?v=4",
+            idPrefix = "",
+            role = "",
+            sessionId = ""
         ),
-        User(
+        CallParticipantState(
             id = "jaewoong",
             name = "Jaewoong Eum",
-            image_url = "https://ca.slack-edge.com/T02RM6X6B-U02HU1XR9LM-626fb91c334e-128"
+            profileImageURL = "https://ca.slack-edge.com/T02RM6X6B-U02HU1XR9LM-626fb91c334e-128",
+            idPrefix = "",
+            role = "",
+            sessionId = ""
         ),
-        User(
+        CallParticipantState(
             id = "toma_zdravkovic",
             name = "Toma Zdravkovic",
-            image_url = "https://upload.wikimedia.org/wikipedia/commons/d/da/Toma_Zdravkovi%C4%87.jpg"
+            profileImageURL = "https://upload.wikimedia.org/wikipedia/commons/d/da/Toma_Zdravkovi%C4%87.jpg",
+            idPrefix = "",
+            role = "",
+            sessionId = ""
         )
     )

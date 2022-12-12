@@ -22,7 +22,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import io.getstream.logging.StreamLog
+import io.getstream.log.taggedLogger
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.token.AuthCredentialsProvider
 import io.getstream.video.android.utils.onError
@@ -31,7 +31,7 @@ import kotlinx.coroutines.launch
 
 class DeeplinkingActivity : AppCompatActivity() {
 
-    private val logger = StreamLog.getLogger("Call:DeeplinkView")
+    private val logger by taggedLogger("Call:DeeplinkView")
 
     private val controller by lazy {
         dogfoodingApp.streamVideo
@@ -72,15 +72,17 @@ class DeeplinkingActivity : AppCompatActivity() {
     }
 
     private fun logIn() {
-        val selectedUser = dogfoodingApp.userPreferences.getCachedCredentials()
-        logger.d { "[logIn] selectedUser: $selectedUser" }
-        dogfoodingApp.initializeStreamCalls(
-            credentialsProvider = AuthCredentialsProvider(
-                user = selectedUser.toUser(),
-                userToken = selectedUser.token,
-                apiKey = "key10"
-            ),
-            loggingLevel = LoggingLevel.BODY
-        )
+        val user = dogfoodingApp.userPreferences.getCachedCredentials()
+        if (user != null) {
+            logger.d { "[logIn] selectedUser: $user" }
+            dogfoodingApp.initializeStreamVideo(
+                credentialsProvider = AuthCredentialsProvider(
+                    user = user,
+                    userToken = user.token,
+                    apiKey = "key10"
+                ),
+                loggingLevel = LoggingLevel.BODY
+            )
+        }
     }
 }

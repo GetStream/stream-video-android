@@ -23,14 +23,13 @@ import android.media.AudioManager.MODE_IN_COMMUNICATION
 import android.os.Build
 import android.view.View
 import androidx.core.content.getSystemService
-import io.getstream.logging.StreamLog
+import io.getstream.log.taggedLogger
 import io.getstream.video.android.audio.AudioHandler
 import io.getstream.video.android.audio.AudioSwitchHandler
 import io.getstream.video.android.call.utils.stringify
 import io.getstream.video.android.events.AudioLevelChangedEvent
-import io.getstream.video.android.events.MuteStateChangeEvent
-import io.getstream.video.android.events.SfuParticipantJoinedEvent
-import io.getstream.video.android.events.SfuParticipantLeftEvent
+import io.getstream.video.android.events.ParticipantLeftEvent
+import io.getstream.video.android.ui.TextureViewRenderer
 import io.getstream.video.android.utils.updateValue
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -43,8 +42,7 @@ import org.webrtc.AudioTrack
 import org.webrtc.EglBase
 import org.webrtc.MediaStream
 import org.webrtc.RendererCommon
-import org.webrtc.SurfaceViewRenderer
-import stream.video.sfu.models.CallState
+import stream.video.sfu.models.TrackType
 
 public class Call(
     private val context: Context,
@@ -52,7 +50,7 @@ public class Call(
     private val eglBase: EglBase,
 ) {
 
-    private val logger = StreamLog.getLogger("Call:Room")
+    private val logger by taggedLogger("Call:Room")
 
     internal val audioHandler: AudioHandler by lazy {
         AudioSwitchHandler(context)
@@ -102,7 +100,7 @@ public class Call(
      * Public API.
      */
     public fun initRenderer(
-        videoRenderer: SurfaceViewRenderer,
+        videoRenderer: TextureViewRenderer,
         streamId: String,
         onRender: (View) -> Unit = {}
     ) {
@@ -136,7 +134,7 @@ public class Call(
 
         val newState = oldState.updateValue(
             predicate = { it.id in streamId },
-            transformer = { it.copy(trackSize = measuredWidth to measuredHeight) }
+            transformer = { it.copy(videoTrackSize = measuredWidth to measuredHeight) }
         )
 
         _callParticipants.value = newState
@@ -175,15 +173,15 @@ public class Call(
     }
 
     private fun replaceTrackIfNeeded(mediaStream: MediaStream, streamId: String?): VideoTrack? {
-        if (streamId == null || streamId != mediaStream.id) {
-            return mediaStream.videoTracks?.firstOrNull()?.let { track ->
+        return if (streamId == null || streamId != mediaStream.id) {
+            mediaStream.videoTracks?.firstOrNull()?.let { track ->
                 VideoTrack(
                     streamId = mediaStream.id,
                     video = track
                 )
             }
         } else {
-            return null
+            null
         }
     }
 
@@ -192,7 +190,7 @@ public class Call(
         val updatedList = _callParticipants.value.updateValue(
             predicate = { it.id in mediaStream.id },
             transformer = {
-                it.copy(track = null, trackSize = 0 to 0)
+                it.copy(track = null, videoTrackSize = 0 to 0)
             }
         )
 
@@ -200,36 +198,28 @@ public class Call(
         onStreamRemoved(mediaStream)
     }
 
-    internal fun loadParticipants(callState: CallState, callSettings: CallSettings) {
-        val allParticipants =
-            callState.participants.map {
-                val user = it.toCallParticipant(getCurrentUserId())
-
-                if (it.user?.id == getCurrentUserId()) {
-                    user.hasAudio = callSettings.audioOn
-                    user.hasVideo = callSettings.videoOn
-                }
-
-                user
-            }
-
-        this._callParticipants.value = allParticipants
+    internal fun setParticipants(participants: List<CallParticipantState>) {
+        this._callParticipants.value = participants
         logger.d { "[loadParticipants] #sfu; allParticipants: ${_callParticipants.value}" }
 
-        this._localParticipant.value = allParticipants.firstOrNull { it.isLocal }
+        this._localParticipant.value = participants.firstOrNull { it.isLocal }
         logger.v { "[loadParticipants] #sfu; localParticipants: ${_localParticipant.value}" }
     }
 
-    internal fun updateMuteState(event: MuteStateChangeEvent) {
-        logger.d { "[updateMuteState] #sfu; event: $event" }
+    internal fun updateMuteState(
+        userId: String,
+        sessionId: String,
+        trackType: TrackType,
+        isEnabled: Boolean
+    ) {
+        logger.d { "[updateMuteState] #sfu; userId: $userId, sessionId: $sessionId, isEnabled: $isEnabled" }
         val currentParticipants = _callParticipants.value
 
         val updatedList = currentParticipants.updateValue(
-            predicate = { it.id == event.userId },
+            predicate = { it.id == userId },
             transformer = {
                 it.copy(
-                    hasAudio = !event.audioMuted,
-                    hasVideo = !event.videoMuted
+                    publishedTracks = if (isEnabled) it.publishedTracks + trackType else it.publishedTracks - trackType
                 )
             }
         )
@@ -237,15 +227,14 @@ public class Call(
         _callParticipants.value = updatedList
     }
 
-    internal fun addParticipant(event: SfuParticipantJoinedEvent) {
-        logger.d { "[addParticipant] #sfu; event: $event" }
-        _callParticipants.value =
-            _callParticipants.value + event.participant.toCallParticipant(getCurrentUserId())
+    internal fun addParticipant(participant: CallParticipantState) {
+        logger.d { "[addParticipant] #sfu; participant: $participant" }
+        _callParticipants.value = _callParticipants.value + participant
     }
 
-    internal fun removeParticipant(event: SfuParticipantLeftEvent) {
+    internal fun removeParticipant(event: ParticipantLeftEvent) {
         logger.d { "[removeParticipant] #sfu; event: $event" }
-        val userId = event.participant.user?.id ?: return
+        val userId = event.participant.user_id
 
         _callParticipants.value = _callParticipants.value.filter { it.id != userId }
     }
@@ -326,14 +315,18 @@ public class Call(
             val device = devices.firstOrNull { it.type == deviceType } ?: return
 
             val isCommunicationDeviceSet = audioManager?.setCommunicationDevice(device)
-            logger.d { "[updateAudio] #sfu; isCommunicationDeviceSet: $isCommunicationDeviceSet" }
+            logger.d { "[setupAudio] #sfu; isCommunicationDeviceSet: $isCommunicationDeviceSet" }
         }
     }
 
     internal fun disconnect() {
-        logger.d { "[disconnect] #sfu; no args" }
+        logger.i { "[disconnect] #sfu; no args" }
         audioHandler.stop()
-        _callParticipants.value.forEach { it.track?.video?.dispose() }
+        _callParticipants.value.forEach {
+            val track = it.track
+            it.track = null
+            track?.video?.dispose()
+        }
         _callParticipants.value = emptyList()
     }
 
@@ -343,13 +336,19 @@ public class Call(
 
     public fun setCameraEnabled(isEnabled: Boolean) {
         logger.d { "[setCameraEnabled] #sfu; isEnabled: $isEnabled" }
-        val localParticipant = _localParticipant.value
-        val updatedLocal = localParticipant?.copy(hasVideo = isEnabled)
+        val localParticipant = _localParticipant.value ?: return
+        val track = TrackType.TRACK_TYPE_VIDEO
+        val tracks = localParticipant.publishedTracks
+
+        val newTracks = if (isEnabled) tracks + track else tracks - track
+        val updatedLocal = localParticipant.copy(
+            publishedTracks = newTracks
+        )
         _localParticipant.value = updatedLocal
 
         val updatedList = _callParticipants.value.updateValue(
             predicate = { it.id == getCurrentUserId() },
-            transformer = { it.copy(hasVideo = isEnabled) }
+            transformer = { it.copy(publishedTracks = newTracks) }
         )
 
         _callParticipants.value = updatedList
@@ -357,13 +356,17 @@ public class Call(
 
     public fun setMicrophoneEnabled(isEnabled: Boolean) {
         logger.d { "[setMicrophoneEnabled] #sfu; isEnabled: $isEnabled" }
-        val localParticipant = _localParticipant.value
-        val updatedLocal = localParticipant?.copy(hasAudio = isEnabled)
+        val localParticipant = _localParticipant.value ?: return
+        val track = TrackType.TRACK_TYPE_AUDIO
+        val tracks = localParticipant.publishedTracks
+
+        val newTracks = if (isEnabled) tracks + track else tracks - track
+        val updatedLocal = localParticipant.copy(publishedTracks = newTracks)
         _localParticipant.value = updatedLocal
 
         val updatedList = _callParticipants.value.updateValue(
             predicate = { it.id == getCurrentUserId() },
-            transformer = { it.copy(hasAudio = isEnabled) }
+            transformer = { it.copy(publishedTracks = newTracks) }
         )
 
         _callParticipants.value = updatedList

@@ -12,6 +12,7 @@ dependencyResolutionManagement {
     google()
     mavenCentral()
     maven(url = "https://jitpack.io")
+    maven(url = "https://plugins.gradle.org/m2/")
   }
 }
 rootProject.name = "stream-video-android"
@@ -21,3 +22,4 @@ include(":dogfooding")
 include(":stream-video-android")
 include(":stream-video-android-compose")
 include(":stream-video-android-pushprovider-firebase")
+include(":examples:chat-with-video-sample")

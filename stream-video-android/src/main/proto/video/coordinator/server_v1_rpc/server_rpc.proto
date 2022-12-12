@@ -49,6 +49,7 @@ service ServerRPC {
   rpc GetRecordings(GetRecordingsRequest) returns (GetRecordingsResponse);
   rpc DeleteRecording(DeleteRecordingRequest) returns (DeleteRecordingResponse);
 
+  rpc QuerySessions(QuerySessionsRequest) returns (QuerySessionsResponse);
   rpc QuerySessionTimelineEvents(QuerySessionTimelineEventsRequest) returns (QuerySessionTimelineEventsResponse);
 
   //  rpc CreateOrUpdateCalls(CreateOrUpdateCallsRequest) returns (CreateOrUpdateCallsResponse);
@@ -217,21 +218,13 @@ message CreateCallRequest {
   // The ring option, overrides the default call type setting if provided.
   google.protobuf.BoolValue notify = 9;
 }
-
 message CreateUserRequest {
-  string id = 1;
-  repeated string teams = 2;
-  string role = 3;
-  bytes custom_json = 4;
-
-  string name = 5;
-  string image_url = 6;
+  user_v1.UserInput user = 1;
 }
-
 // CreateOrUpdateUsersRequest runs a partial update or create on the list of users
 // specify replace = true to do a hard update instead of partial update.
 message CreateOrUpdateUsersRequest {
-  repeated CreateUserRequest users = 1;
+  repeated user_v1.UserInput users = 1;
 
   // Full update (defaults to false and does a partial update).
   bool full_update = 2;
@@ -270,9 +263,9 @@ message UserCapability {
 }
 
 message StartBroadcastRequest {
-  // Call id and type.
-  string call_id = 1;
-  string call_type = 2;
+  // Call type and id.
+  string call_type = 1;
+  string call_id = 2;
 
   // Toggles HLS broadcasting on/off.
   bool hls_broadcast = 3;
@@ -286,6 +279,9 @@ message StartBroadcastResponse {
 }
 
 message StopBroadcastRequest {
+  // Call type and id.
+  string call_type = 1;
+  string call_id = 2;
 }
 
 message StopBroadcastResponse {
@@ -328,6 +324,17 @@ message DeleteRecordingRequest {
 }
 
 message DeleteRecordingResponse {
+}
+
+// A request message for the QuerySessions endpoint
+// Specifies a subset of events to request
+message QuerySessionsRequest {
+  // TODO filter sessions by more than app ID
+  // TODO pagination
+}
+
+message QuerySessionsResponse {
+  repeated stat_v1.Session sessions = 1;
 }
 
 // A request message for the QuerySessionTimelineEvents endpoint

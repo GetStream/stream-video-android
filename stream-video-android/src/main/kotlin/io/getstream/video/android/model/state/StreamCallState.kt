@@ -20,11 +20,11 @@ import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.model.CallUser
 import io.getstream.video.android.model.IceServer
 import io.getstream.video.android.model.SfuToken
+import io.getstream.video.android.model.StreamCallGuid
+import io.getstream.video.android.model.StreamCallKind
+import io.getstream.video.android.model.StreamSfuSessionId
 import java.io.Serializable
 import java.util.Date
-import io.getstream.video.android.model.StreamCallCid as CallCid
-import io.getstream.video.android.model.StreamCallId as CallId
-import io.getstream.video.android.model.StreamCallType as CallType
 
 /**
  * Represents possible state of [io.getstream.video.android.engine.StreamCallEngine].
@@ -32,9 +32,14 @@ import io.getstream.video.android.model.StreamCallType as CallType
 public sealed interface StreamCallState : Serializable {
 
     /**
+     * Represents a state which can be joined.
+     */
+    public sealed interface Joinable : StreamCallState
+
+    /**
      * Signifies there is no active call.
      */
-    public object Idle : StreamCallState { override fun toString(): String = "Idle" }
+    public object Idle : StreamCallState, Joinable { override fun toString(): String = "Idle" }
 
     /**
      * Represents an active state.
@@ -43,23 +48,6 @@ public sealed interface StreamCallState : Serializable {
         public abstract val callGuid: StreamCallGuid
         public abstract val callKind: StreamCallKind
     }
-
-    /**
-     * Represents a state which can be joined.
-     */
-    public sealed interface Joinable : StreamCallState {
-        public val callGuid: StreamCallGuid
-        public val callKind: StreamCallKind
-    }
-
-    /**
-     * Signifies the caller starts the call.
-     */
-    public data class Starting(
-        override val callGuid: StreamCallGuid,
-        override val callKind: StreamCallKind,
-        val memberUserIds: List<String>
-    ) : Active(), Joinable
 
     public sealed class Started : Active() {
         public abstract val createdByUserId: String
@@ -115,16 +103,14 @@ public sealed interface StreamCallState : Serializable {
         public abstract val callUrl: String
         public abstract val sfuToken: SfuToken
         public abstract val iceServers: List<IceServer>
-        public abstract val sfuSessionId: StreamSfuSessionId
     }
 
     /**
      * Set when joined to Coordinator.
-     * [StreamCallState] stays [Joined] until [sfuSessionId] reaches [StreamSfuSessionId.Confirmed] explicitly.
+     * @see [io.getstream.video.android.engine.StreamCallEngine.onCallJoined]
      */
     public data class Joined(
         override val callGuid: StreamCallGuid,
-        override val sfuSessionId: StreamSfuSessionId,
         override val callKind: StreamCallKind,
         override val createdByUserId: String,
         override val broadcastingEnabled: Boolean,
@@ -138,11 +124,13 @@ public sealed interface StreamCallState : Serializable {
     ) : InCall()
 
     /**
-     * Signifies that one of the peer connections (subscriber or publisher) is in Connecting state.
+     * Set when SFU join request is sent.
+     * @see [stream.video.sfu.event.JoinRequest]
+     * @see [io.getstream.video.android.engine.StreamCallEngine.onSfuJoinSent]
      */
     public data class Connecting(
+        val sfuSessionId: StreamSfuSessionId,
         override val callGuid: StreamCallGuid,
-        override val sfuSessionId: StreamSfuSessionId,
         override val callKind: StreamCallKind,
         override val createdByUserId: String,
         override val broadcastingEnabled: Boolean,
@@ -156,11 +144,13 @@ public sealed interface StreamCallState : Serializable {
     ) : InCall()
 
     /**
-     * Signifies that one of the peer connections (subscriber or publisher) is in Connected state.
+     * Set when SFU join response is received.
+     * @see [io.getstream.video.android.events.JoinCallResponseEvent]
+     * @see [io.getstream.video.android.engine.StreamCallEngine.onSfuEvent]
      */
     public data class Connected(
+        val sfuSessionId: StreamSfuSessionId,
         override val callGuid: StreamCallGuid,
-        override val sfuSessionId: StreamSfuSessionId,
         override val callKind: StreamCallKind,
         override val createdByUserId: String,
         override val broadcastingEnabled: Boolean,
@@ -194,16 +184,6 @@ public sealed class DropReason : Serializable {
     public object Ended : DropReason() { override fun toString(): String = "Ended" }
 }
 
-public data class StreamCallGuid(
-    val type: CallType,
-    val id: CallId,
-    val cid: CallCid
-) : Serializable
-
-public enum class StreamCallKind : Serializable {
-    MEETING, RINGING
-}
-
 public sealed class StreamDate : Serializable {
     public data class Specified(val date: Date) : StreamDate() {
         public constructor(ts: Long) : this(Date(ts))
@@ -221,36 +201,6 @@ public sealed class StreamDate : Serializable {
             else -> Specified(date)
         }
     }
-}
-
-/**
- * Represents the connection flow to SFU server.
- */
-public sealed class StreamSfuSessionId {
-    /**
-     * Set when joined to Coordinator and SFU sessionId is still undefined.
-     *
-     * @see [io.getstream.video.android.engine.StreamCallEngine.onCallJoined]
-     */
-    public object Undefined : StreamSfuSessionId() { override fun toString(): String = "Undefined" }
-    public sealed class Specified : StreamSfuSessionId() {
-        public abstract val value: String
-    }
-    /**
-     * Set when SFU join request is sent.
-     *
-     * @see [stream.video.sfu.event.JoinRequest]
-     * @see [io.getstream.video.android.engine.StreamCallEngine.onSfuJoinSent]
-     */
-    public data class Requested(override val value: String) : Specified()
-
-    /**
-     * Set when SFU join response is received.
-     *
-     * @see [io.getstream.video.android.events.JoinCallResponseEvent]
-     * @see [io.getstream.video.android.engine.StreamCallEngine.onSfuEvent]
-     */
-    public data class Confirmed(override val value: String) : Specified()
 }
 
 internal fun StreamCallState.Started.copy(
@@ -310,39 +260,3 @@ internal fun StreamCallState.Started.copy(
         users = users,
     )
 }
-
-/**
- * Converts [StreamCallState.InCall] into [StreamCallState.Connecting].
- */
-internal fun StreamCallState.InCall.toConnecting() = StreamCallState.Connecting(
-    callGuid = callGuid,
-    callKind = callKind,
-    callUrl = callUrl,
-    createdByUserId = createdByUserId,
-    broadcastingEnabled = broadcastingEnabled,
-    recordingEnabled = recordingEnabled,
-    createdAt = createdAt,
-    updatedAt = updatedAt,
-    users = users,
-    iceServers = iceServers,
-    sfuSessionId = sfuSessionId,
-    sfuToken = sfuToken,
-)
-
-/**
- * Converts [StreamCallState.InCall] into [StreamCallState.Connected].
- */
-internal fun StreamCallState.InCall.toConnected() = StreamCallState.Connected(
-    callGuid = callGuid,
-    callKind = callKind,
-    callUrl = callUrl,
-    createdByUserId = createdByUserId,
-    broadcastingEnabled = broadcastingEnabled,
-    recordingEnabled = recordingEnabled,
-    createdAt = createdAt,
-    updatedAt = updatedAt,
-    users = users,
-    iceServers = iceServers,
-    sfuSessionId = sfuSessionId,
-    sfuToken = sfuToken,
-)

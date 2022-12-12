@@ -18,7 +18,10 @@ package io.getstream.video.android
 
 import android.content.Context
 import androidx.lifecycle.ProcessLifecycleOwner
+import io.getstream.android.push.PushDeviceGenerator
 import io.getstream.video.android.dispatchers.DispatcherProvider
+import io.getstream.video.android.engine.StreamCallEngine
+import io.getstream.video.android.engine.StreamCallEngineImpl
 import io.getstream.video.android.input.CallAndroidInput
 import io.getstream.video.android.input.CallAndroidInputLauncher
 import io.getstream.video.android.input.DefaultCallAndroidInputLauncher
@@ -27,7 +30,9 @@ import io.getstream.video.android.module.CallCoordinatorClientModule
 import io.getstream.video.android.module.HttpModule
 import io.getstream.video.android.module.VideoModule
 import io.getstream.video.android.token.CredentialsProvider
+import io.getstream.video.android.user.UserCredentialsManager
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 public class StreamVideoBuilder(
     private val context: Context,
@@ -35,7 +40,9 @@ public class StreamVideoBuilder(
     private val config: StreamVideoConfig = StreamVideoConfigDefault,
     private val androidInputs: Set<CallAndroidInput> = emptySet(),
     private val inputLauncher: CallAndroidInputLauncher = DefaultCallAndroidInputLauncher,
-    private val loggingLevel: LoggingLevel = LoggingLevel.NONE
+    private val loggingLevel: LoggingLevel = LoggingLevel.NONE,
+    private inline val callEngineBuilder: ((CoroutineScope) -> StreamCallEngine)? = null,
+    private val pushDeviceGenerators: List<PushDeviceGenerator> = emptyList(),
 ) {
 
     public fun build(): StreamVideo {
@@ -44,8 +51,12 @@ public class StreamVideoBuilder(
 
         if (credentialsProvider.loadApiKey().isBlank() ||
             user.id.isBlank() ||
-            credentialsProvider.getCachedUserToken().isBlank()
+            user.token.isBlank()
         ) throw IllegalArgumentException("The API key, user ID and token cannot be empty!")
+
+        UserCredentialsManager.initialize(context).apply {
+            storeUserCredentials(user)
+        }
 
         val httpModule = HttpModule.getOrCreate(loggingLevel.httpLoggingLevel, credentialsProvider)
 
@@ -66,10 +77,20 @@ public class StreamVideoBuilder(
         )
 
         val scope = CoroutineScope(DispatcherProvider.IO)
+
+        val engine: StreamCallEngine =
+            callEngineBuilder?.invoke(scope) ?: StreamCallEngineImpl(
+                parentScope = scope,
+                coordinatorClient = callCoordinatorClientModule.callCoordinatorClient(),
+                config = config,
+                getCurrentUserId = { credentialsProvider.getUserCredentials().id }
+            )
+
         return StreamVideoImpl(
             context = context,
             scope = scope,
             config = config,
+            engine = engine,
             loggingLevel = loggingLevel,
             callCoordinatorClient = callCoordinatorClientModule.callCoordinatorClient(),
             credentialsProvider = credentialsProvider,
@@ -80,6 +101,21 @@ public class StreamVideoBuilder(
             networkStateProvider = module.networkStateProvider()
         ).also { streamVideo ->
             StreamVideoStateLauncher(context, streamVideo, androidInputs, inputLauncher).run(scope)
+            scope.launch {
+                pushDeviceGenerators
+                    .firstOrNull { it.isValidForThisDevice(context) }
+                    ?.let {
+                        it.onPushDeviceGeneratorSelected()
+                        it.asyncGeneratePushDevice {
+                            scope.launch {
+                                streamVideo.createDevice(
+                                    token = it.token,
+                                    pushProvider = it.pushProvider.key
+                                )
+                            }
+                        }
+                    }
+            }
         }
     }
 }

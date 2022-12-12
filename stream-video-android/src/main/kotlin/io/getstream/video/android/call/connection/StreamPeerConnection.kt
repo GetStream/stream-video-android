@@ -16,17 +16,15 @@
 
 package io.getstream.video.android.call.connection
 
-import io.getstream.logging.StreamLog
+import io.getstream.log.taggedLogger
 import io.getstream.video.android.call.utils.addRtcIceCandidate
 import io.getstream.video.android.call.utils.createValue
 import io.getstream.video.android.call.utils.setValue
 import io.getstream.video.android.call.utils.stringify
 import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.model.IceCandidate
-import io.getstream.video.android.model.StreamPeerConnectionState
 import io.getstream.video.android.model.StreamPeerType
 import io.getstream.video.android.model.toDomainCandidate
-import io.getstream.video.android.model.toDomainPeerConnectionState
 import io.getstream.video.android.model.toRtcCandidate
 import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Result
@@ -66,7 +64,6 @@ import org.webrtc.IceCandidate as RtcIceCandidate
  * @param onStreamRemoved Handler when a [MediaStream] gets removed.
  * @param onNegotiationNeeded Handler when there's a new negotiation.
  * @param onIceCandidate Handler whenever we receive [IceCandidate]s.
- * @param onConnectionChanged Handler whenever we receive [StreamPeerConnectionState] changes.
  */
 public class StreamPeerConnection(
     private val coroutineScope: CoroutineScope,
@@ -74,14 +71,13 @@ public class StreamPeerConnection(
     private val mediaConstraints: MediaConstraints,
     private val onStreamAdded: ((MediaStream) -> Unit)?,
     private val onStreamRemoved: ((MediaStream) -> Unit)?,
-    private val onNegotiationNeeded: ((StreamPeerConnection) -> Unit)?,
+    private val onNegotiationNeeded: ((StreamPeerConnection, StreamPeerType) -> Unit)?,
     private val onIceCandidate: ((IceCandidate, StreamPeerType) -> Unit)?,
-    private val onConnectionChanged: ((StreamPeerConnectionState, StreamPeerType) -> Unit)?
 ) : PeerConnection.Observer {
 
     private val typeTag = type.stringify()
 
-    private val logger = StreamLog.getLogger("Call:PeerConnection")
+    private val logger by taggedLogger("Call:PeerConnection")
 
     /**
      * The wrapped connection for all the WebRTC communication.
@@ -242,7 +238,7 @@ public class StreamPeerConnection(
     public fun addAudioTransceiver(
         track: MediaStreamTrack,
         streamIds: List<String>
-    ) { // TODO - do we need this
+    ) {
         logger.i { "[addAudioTransceiver] #sfu; #$typeTag; track: ${track.stringify()}, streamIds: $streamIds" }
         val fullQuality = RtpParameters.Encoding(
             "a",
@@ -360,7 +356,7 @@ public class StreamPeerConnection(
      */
     override fun onRenegotiationNeeded() {
         logger.i { "[onRenegotiationNeeded] #sfu; #$typeTag; no args" }
-        onNegotiationNeeded?.invoke(this)
+        onNegotiationNeeded?.invoke(this, type)
     }
 
     /**
@@ -445,9 +441,6 @@ public class StreamPeerConnection(
 
     override fun onConnectionChange(newState: PeerConnection.PeerConnectionState?) {
         logger.i { "[onConnectionChange] #sfu; #$typeTag; newState: $newState" }
-        newState?.also {
-            onConnectionChanged?.invoke(it.toDomainPeerConnectionState(), type)
-        }
     }
 
     override fun onSelectedCandidatePairChanged(event: CandidatePairChangeEvent?) {

@@ -21,7 +21,7 @@ import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import androidx.annotation.RequiresApi
-import io.getstream.logging.StreamLog
+import io.getstream.log.taggedLogger
 import io.getstream.video.android.utils.vibrator
 import io.getstream.video.android.utils.vibratorManager
 
@@ -35,7 +35,7 @@ public class StreamVibroManagerImpl(
     private val context: Context
 ) : StreamVibroManager {
 
-    private val logger = StreamLog.getLogger("Call:VibroManager")
+    private val logger by taggedLogger("Call:VibroManager")
 
     private val incomingPattern = longArrayOf(0, 100, 200, 300, 400)
 

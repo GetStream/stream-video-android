@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.call.signal.socket
 
-import io.getstream.logging.StreamLog
+import io.getstream.log.taggedLogger
 import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.errors.VideoErrorCode
 import io.getstream.video.android.errors.VideoNetworkError
@@ -27,10 +27,10 @@ import okio.ByteString
 import stream.video.sfu.event.SfuEvent
 
 internal class SignalEventsParser(
-    private val signalSocket: SignalSocket,
+    private val sfuSocket: SfuSocket,
 ) : okhttp3.WebSocketListener() {
 
-    private val logger = StreamLog.getLogger("Call:SFU-WS")
+    private val logger by taggedLogger("Call:SFU-WS")
 
     private var connectionEventReceived = false
     private var closedByClient = true
@@ -40,7 +40,7 @@ internal class SignalEventsParser(
         connectionEventReceived = false
         closedByClient = false
 
-        signalSocket.onConnectionResolved(ConnectedEvent(""))
+        sfuSocket.onConnectionResolved(ConnectedEvent(""))
     }
 
     override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
@@ -53,7 +53,7 @@ internal class SignalEventsParser(
             val rawEvent = SfuEvent.ADAPTER.decode(byteArray)
             logger.v { "[onMessage] rawEvent: $rawEvent" }
             val message = RTCEventMapper.mapEvent(rawEvent)
-            signalSocket.onEvent(message)
+            sfuSocket.onEvent(message)
         } catch (error: Throwable) {
             logger.e { "[onMessage] failed: $error" }
             error.printStackTrace()
@@ -92,7 +92,7 @@ internal class SignalEventsParser(
 
     private fun onSocketError(error: VideoError) {
         if (!closedByClient) {
-            signalSocket.onSocketError(error)
+            sfuSocket.onSocketError(error)
         }
     }
 

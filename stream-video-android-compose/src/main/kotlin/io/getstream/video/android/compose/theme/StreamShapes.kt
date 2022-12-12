@@ -25,14 +25,21 @@ import androidx.compose.ui.unit.dp
 /**
  * Contains all the shapes we provide for our components.
  *
- * @param callButton The avatar shape.
+ * @param avatar Used for avatar UIs in the SDK.
+ * @param dialog Used for dialog UIs in the SDK, such as user invites.
+ * @param callButton The shape of call buttons.
+ * @param callControls The shape of the call controls sheet when in a call.
+ * @param callControlsButton Tha shape of the buttons within Call Controls.
+ * @param participantsInfoMenuButton The shape of buttons in the Participants Info menu.
  */
 @Immutable
 public data class StreamShapes(
     public val avatar: Shape,
+    public val dialog: Shape,
     public val callButton: Shape,
     public val callControls: Shape,
-    public val callControlsButton: Shape
+    public val callControlsButton: Shape,
+    public val participantsInfoMenuButton: Shape
 ) {
     public companion object {
         /**
@@ -44,7 +51,9 @@ public data class StreamShapes(
             avatar = CircleShape,
             callButton = CircleShape,
             callControls = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
-            callControlsButton = CircleShape
+            callControlsButton = CircleShape,
+            participantsInfoMenuButton = RoundedCornerShape(32.dp),
+            dialog = RoundedCornerShape(16.dp)
         )
     }
 }

@@ -34,7 +34,6 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.mock.mockParticipantList
 import io.getstream.video.android.model.CallStatus
 import io.getstream.video.android.model.CallUser
-import io.getstream.video.android.model.CallUserState
 
 @Composable
 internal fun ParticipantInformation(
@@ -85,7 +84,7 @@ internal fun ParticipantInformation(
 
 // TODO - localize all this
 private fun buildSmallCallText(participants: List<CallUser>): String {
-    val names = participants.map { it.name }
+    val names = participants.map { it.name.ifBlank { it.id } }
 
     return if (names.isEmpty()) {
         "none"
@@ -112,14 +111,14 @@ private fun ParticipantInformationPreview() {
             callStatus = CallStatus.Incoming,
             participants = mockParticipantList.map {
                 CallUser(
-                    it.id,
-                    it.role,
-                    it.name,
-                    CallUserState.Idle,
-                    it.profileImageURL ?: "",
-                    null,
-                    null,
-                    emptyList()
+                    id = it.id,
+                    name = it.name,
+                    role = it.role,
+                    state = null,
+                    imageUrl = it.profileImageURL ?: "",
+                    createdAt = null,
+                    updatedAt = null,
+                    teams = emptyList()
                 )
             }
         )

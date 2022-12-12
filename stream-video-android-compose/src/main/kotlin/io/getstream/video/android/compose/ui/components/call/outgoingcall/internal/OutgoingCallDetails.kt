@@ -32,7 +32,6 @@ import io.getstream.video.android.model.CallParticipantState
 import io.getstream.video.android.model.CallStatus
 import io.getstream.video.android.model.CallType
 import io.getstream.video.android.model.CallUser
-import io.getstream.video.android.model.CallUserState
 
 @Composable
 internal fun OutgoingCallDetails(
@@ -45,18 +44,12 @@ internal fun OutgoingCallDetails(
             ParticipantAvatars(
                 participants = participants.map {
                     CallParticipantState(
-                        it.id,
-                        it.role,
-                        it.name,
-                        it.imageUrl,
-                        false,
-                        true,
-                        true,
-                        true,
-                        null,
-                        Pair(0, 0),
-                        audioLevel = 0f,
-                        idPrefix = ""
+                        id = it.id,
+                        role = it.role,
+                        name = it.name,
+                        profileImageURL = it.imageUrl,
+                        idPrefix = "",
+                        sessionId = ""
                     )
                 }
             )
@@ -79,14 +72,14 @@ private fun OutgoingCallDetailsPreview() {
             callType = CallType.VIDEO,
             participants = mockParticipantList.map {
                 CallUser(
-                    it.id,
-                    it.name,
-                    it.role,
-                    CallUserState.Idle,
-                    it.profileImageURL ?: "",
-                    null,
-                    null,
-                    emptyList()
+                    id = it.id,
+                    name = it.name,
+                    role = it.role,
+                    state = null,
+                    imageUrl = it.profileImageURL ?: "",
+                    createdAt = null,
+                    updatedAt = null,
+                    teams = emptyList()
                 )
             }
         )

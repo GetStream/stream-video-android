@@ -21,10 +21,33 @@ import io.getstream.video.android.errors.VideoError
 /**
  *  A class which encapsulates a successful outcome with a value of type [T] or a failure with [VideoError].
  */
-public sealed class Result<out T : Any>
+public sealed class Result<out T : Any> {
 
+    /**
+     * Checks if the result is a [Success].
+     */
+    public val isSuccess: Boolean
+        inline get() = this is Success
+
+    /**
+     * Check if the result is a [Failure].
+     */
+    public val isFailure: Boolean
+        inline get() = this is Failure
+}
+
+/**
+ * Represents successful result.
+ *
+ * @param data The [T] data associated with the result.
+ */
 public data class Success<out T : Any>(val data: T) : Result<T>()
 
+/**
+ * Represents failed result.
+ *
+ * @param error The [VideoError] associated with the result.
+ */
 public data class Failure(val error: VideoError) : Result<Nothing>()
 
 /**
@@ -101,12 +124,21 @@ public suspend inline fun <T : Any> Result<T>.onErrorSuspend(
  * @return A transformed instance of the [Result] or the original instance of the [Result].
  */
 @JvmSynthetic
-public inline fun <T : Any, K : Any> Result<T>.map(mapper: (T) -> K): Result<K> {
-    return when (this) {
-        is Success -> Success(mapper(data))
-        is Failure -> this
-    }
-}
+public inline fun <T : Any, K : Any> Result<T>.map(mapper: (T) -> K): Result<K> =
+    flatMap { Success(mapper(it)) }
+
+/**
+ * Returns a transformed [Result] of applying the given [mapper] function if the [Result]
+ * contains a successful data payload.
+ * Returns an original [Result] if the [Result] contains an error payload.
+ *
+ * @param mapper A lambda for mapping [T] to [K].
+ *
+ * @return A transformed instance of the [Result] or the original instance of the [Result].
+ */
+@JvmSynthetic
+public suspend inline fun <T : Any, K : Any> Result<T>.mapSuspend(crossinline mapper: suspend (T) -> K): Result<K> =
+    flatMap { Success(mapper(it)) }
 
 /**
  * Returns a transformed [Result] of applying the given suspending [mapper] function if the [Result]
@@ -118,9 +150,26 @@ public inline fun <T : Any, K : Any> Result<T>.map(mapper: (T) -> K): Result<K> 
  * @return A transformed instance of the [Result] or the original instance of the [Result].
  */
 @JvmSynthetic
-public suspend inline fun <T : Any, K : Any> Result<T>.flatMap(
-    crossinline mapper: suspend (T) -> Result<K>
-): Result<K> {
+public inline fun <T : Any, K : Any> Result<T>.flatMap(mapper: (T) -> Result<K>): Result<K> {
+    return when (this) {
+        is Success -> mapper(data)
+        is Failure -> this
+    }
+}
+
+/**
+ * Returns a transformed [Result] from results of the suspending [mapper] if the [Result] contains a successful data
+ * payload.
+ * Returns an original [Result] if the [Result] contains an error payload.
+ *
+ * @param mapper A suspending lambda that returns [Result] of [C].
+ *
+ * @return A transformed instance of the [Result] or the original instance of the [Result].
+ */
+@JvmSynthetic
+public suspend inline fun <T : Any, C : Any> Result<T>.flatMapSuspend(
+    crossinline mapper: suspend (T) -> Result<C>,
+): Result<C> {
     return when (this) {
         is Success -> mapper(data)
         is Failure -> this

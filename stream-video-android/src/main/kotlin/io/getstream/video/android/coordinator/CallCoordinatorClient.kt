@@ -16,20 +16,34 @@
 
 package io.getstream.video.android.coordinator
 
+import io.getstream.video.android.model.CallUser
+import io.getstream.video.android.model.StreamCallCid
+import io.getstream.video.android.model.User
 import io.getstream.video.android.utils.Result
 import stream.video.coordinator.call_v1.Call
 import stream.video.coordinator.client_v1_rpc.CreateCallRequest
 import stream.video.coordinator.client_v1_rpc.CreateCallResponse
+import stream.video.coordinator.client_v1_rpc.CreateDeviceRequest
+import stream.video.coordinator.client_v1_rpc.CreateDeviceResponse
 import stream.video.coordinator.client_v1_rpc.GetCallEdgeServerRequest
 import stream.video.coordinator.client_v1_rpc.GetCallEdgeServerResponse
 import stream.video.coordinator.client_v1_rpc.GetOrCreateCallRequest
 import stream.video.coordinator.client_v1_rpc.GetOrCreateCallResponse
 import stream.video.coordinator.client_v1_rpc.JoinCallRequest
 import stream.video.coordinator.client_v1_rpc.JoinCallResponse
+import stream.video.coordinator.client_v1_rpc.QueryUsersRequest
 import stream.video.coordinator.client_v1_rpc.SendCustomEventRequest
 import stream.video.coordinator.client_v1_rpc.SendEventRequest
 
 public interface CallCoordinatorClient {
+
+    /**
+     * Create a new Device used to receive Push Notifications.
+     *
+     * @param createDeviceRequest The device data.
+     * @return [CreateDeviceResponse] witch holds the device.
+     */
+    public suspend fun createDevice(createDeviceRequest: CreateDeviceRequest): Result<CreateDeviceResponse>
 
     /**
      * Creates a new call that users can connect to and communicate in.
@@ -46,7 +60,7 @@ public interface CallCoordinatorClient {
      * @param getOrCreateCallRequest The information used to describe the call.
      * @return [CreateCallResponse] which holds the cached or newly created [Call].
      */
-    public suspend fun getOrCreateCall(createCallRequest: GetOrCreateCallRequest): Result<GetOrCreateCallResponse>
+    public suspend fun getOrCreateCall(getOrCreateCallRequest: GetOrCreateCallRequest): Result<GetOrCreateCallResponse>
 
     /**
      * Asks the server to join a call. This gives the user information which servers they can
@@ -80,4 +94,21 @@ public interface CallCoordinatorClient {
      * @param sendCustomEventRequest The request holding the CID and the data.
      */
     public suspend fun sendCustomEvent(sendCustomEventRequest: SendCustomEventRequest): Result<Boolean>
+
+    /**
+     * Sends invite to people for an existing call.
+     *
+     * @param users The users to invite.
+     * @param cid The call ID.
+     * @return [Result] if the operation is successful or not.
+     */
+    public suspend fun inviteUsers(users: List<User>, cid: StreamCallCid): Result<Unit>
+
+    /**
+     * Queries users based on the given [request].
+     *
+     * @param request The request that describes the query filter, limit and sort.
+     * @return [List] of [CallUser]s that match the given query.
+     */
+    public suspend fun queryUsers(request: QueryUsersRequest): Result<List<CallUser>>
 }

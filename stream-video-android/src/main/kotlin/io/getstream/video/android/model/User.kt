@@ -16,6 +16,9 @@
 
 package io.getstream.video.android.model
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 public data class User(
     val id: String,
     val role: String,
@@ -24,14 +27,8 @@ public data class User(
     val imageUrl: String?,
     val teams: List<String>,
     val extraData: Map<String, String>
-)
-
-public fun User.toCredentials(): UserCredentials {
-    return UserCredentials(
-        id = id,
-        role = role,
-        name = name,
-        image = imageUrl ?: "",
-        token = token
-    )
+) {
+    public fun isValid(): Boolean {
+        return id.isNotEmpty() && token.isNotEmpty() && name.isNotEmpty()
+    }
 }

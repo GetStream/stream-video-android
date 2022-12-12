@@ -22,33 +22,31 @@ import io.getstream.video.android.events.VideoEvent
 import io.getstream.video.android.model.CallEventType
 import io.getstream.video.android.model.CallMetadata
 import io.getstream.video.android.model.JoinedCall
-import io.getstream.video.android.model.StreamPeerConnectionState
-import io.getstream.video.android.model.StreamPeerType
 import io.getstream.video.android.model.state.StreamCallState
 import kotlinx.coroutines.flow.StateFlow
 import stream.video.sfu.event.JoinRequest
 
-internal interface StreamCallEngine {
+public interface StreamCallEngine {
 
     /**
      * Represents the state of the currently active call.
      */
-    val callState: StateFlow<StreamCallState>
+    public val callState: StateFlow<StreamCallState>
 
     /**
      * Called when [VideoEvent] received from Coordinator.
      */
-    fun onCoordinatorEvent(event: VideoEvent)
+    public fun onCoordinatorEvent(event: VideoEvent)
 
     /**
      * Called when [SfuDataEvent] received from SFU.
      */
-    fun onSfuEvent(event: SfuDataEvent)
+    public fun onSfuEvent(event: SfuDataEvent)
 
     /**
      * Called when [JoinRequest] message is sent to SFU.
      */
-    fun onSfuJoinSent(request: JoinRequest)
+    public fun onSfuJoinSent(request: JoinRequest)
 
     /**
      * Called when one of the following actions happens:
@@ -57,7 +55,7 @@ internal interface StreamCallEngine {
      * - Caller joined a Call which has been accepted by Callee.
      * - Callee joined an accepted incoming Call.
      */
-    fun onCallJoined(joinedCall: JoinedCall)
+    public fun onCallJoined(joinedCall: JoinedCall)
 
     /**
      * Called when one of the following actions happens:
@@ -66,7 +64,7 @@ internal interface StreamCallEngine {
      * - Caller dials specified [participantIds].
      * - Callee accepts an incoming Call.
      */
-    fun onCallStarting(
+    public fun onCallStarting(
         type: String,
         id: String,
         participantIds: List<String>,
@@ -77,7 +75,7 @@ internal interface StreamCallEngine {
     /**
      * Called when Caller started a Call and waits it to be accepted by a Callee.
      */
-    fun onCallStarted(call: CallMetadata)
+    public fun onCallStarted(call: CallMetadata)
 
     /**
      * Called when one of the following actions happens:
@@ -86,30 +84,20 @@ internal interface StreamCallEngine {
      * - Caller joins a Call which has been accepted by Callee.
      * - Callee joins an accepted incoming Call.
      */
-    fun onCallJoining(call: CallMetadata)
+    public fun onCallJoining(call: CallMetadata)
 
     /**
      * Called when a Call has been failed.
      */
-    fun onCallFailed(error: VideoError)
+    public fun onCallFailed(error: VideoError)
 
     /**
      * Called when [CallEventType] message is about to be sent to Coordinator.
      */
-    fun onCallEventSending(callCid: String, eventType: CallEventType)
+    public fun onCallEventSending(callCid: String, eventType: CallEventType)
 
     /**
      * Called when [CallEventType] message is sent to Coordinator.
      */
-    fun onCallEventSent(callCid: String, eventType: CallEventType)
-
-    /**
-     * Called when peer connection state changes.
-     *
-     * @param sfuSessionId The id of SFU session.
-     * @param connectionState Represents the current state of peer connection.
-     *
-     * @see [io.getstream.video.android.call.connection.StreamPeerConnection]
-     */
-    fun onCallConnectionChange(sfuSessionId: String, peerType: StreamPeerType, connectionState: StreamPeerConnectionState)
+    public fun onCallEventSent(callCid: String, eventType: CallEventType)
 }

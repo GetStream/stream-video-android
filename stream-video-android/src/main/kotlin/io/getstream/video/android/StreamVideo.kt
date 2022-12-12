@@ -20,6 +20,7 @@ import io.getstream.video.android.call.CallClient
 import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.CallEventType
 import io.getstream.video.android.model.CallMetadata
+import io.getstream.video.android.model.Device
 import io.getstream.video.android.model.IceServer
 import io.getstream.video.android.model.JoinedCall
 import io.getstream.video.android.model.SfuToken
@@ -39,6 +40,24 @@ public interface StreamVideo {
      * keep intermediate states, such as [StreamCallState.Idle].
      */
     public val callState: StateFlow<StreamCallState>
+
+    /**
+     * Represents the default call config when starting a call.
+     */
+    public val config: StreamVideoConfig
+
+    /**
+     * Create a device that will be used to receive push notifications.
+     *
+     * @param token The Token obtained from the selected push provider.
+     * @param pushProvider The selected push provider.
+     *
+     * @return [Result] containing the [Device].
+     */
+    public suspend fun createDevice(
+        token: String,
+        pushProvider: String,
+    ): Result<Device>
 
     /**
      * Creates a call with given information. You can then use the [CallMetadata] and join it and get auth
@@ -116,6 +135,15 @@ public interface StreamVideo {
     public suspend fun joinCall(call: CallMetadata): Result<JoinedCall>
 
     /**
+     * Sends invite to people for an existing call.
+     *
+     * @param users The users to invite.
+     * @param cid The call ID.
+     * @return [Result] if the operation is successful or not.
+     */
+    public suspend fun inviteUsers(users: List<User>, cid: StreamCallCid): Result<Unit>
+
+    /**
      * Sends a specific event related to an active [Call].
      *
      * @param eventType The event type, such as accepting or declining a call.
@@ -184,11 +212,28 @@ public interface StreamVideo {
         iceServers: List<IceServer>
     ): CallClient
 
+    /**
+     * Returns current [CallClient] instance.
+     */
     public fun getActiveCallClient(): CallClient?
 
+    /**
+     * Awaits [CallClient] creation.
+     */
+    public suspend fun awaitCallClient(): CallClient
+
+    /**
+     * Accepts incoming call.
+     */
     public suspend fun acceptCall(cid: StreamCallCid): Result<JoinedCall>
 
+    /**
+     * Rejects incoming call.
+     */
     public suspend fun rejectCall(cid: StreamCallCid): Result<Boolean>
 
+    /**
+     * Cancels outgoing or active call.
+     */
     public suspend fun cancelCall(cid: StreamCallCid): Result<Boolean>
 }

@@ -3412,15 +3412,34 @@ func (m *CreateUserRequest) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for Id
-
-	// no validation rules for Role
-
-	// no validation rules for CustomJson
-
-	// no validation rules for Name
-
-	// no validation rules for ImageUrl
+	if all {
+		switch v := interface{}(m.GetUser()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, CreateUserRequestValidationError{
+					field:  "User",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, CreateUserRequestValidationError{
+					field:  "User",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetUser()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return CreateUserRequestValidationError{
+				field:  "User",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
 
 	if len(errors) > 0 {
 		return CreateUserRequestMultiError(errors)
@@ -4481,9 +4500,9 @@ func (m *StartBroadcastRequest) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for CallId
-
 	// no validation rules for CallType
+
+	// no validation rules for CallId
 
 	// no validation rules for HlsBroadcast
 
@@ -4748,6 +4767,10 @@ func (m *StopBroadcastRequest) validate(all bool) error {
 	}
 
 	var errors []error
+
+	// no validation rules for CallType
+
+	// no validation rules for CallId
 
 	if len(errors) > 0 {
 		return StopBroadcastRequestMultiError(errors)
@@ -5994,6 +6017,244 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = DeleteRecordingResponseValidationError{}
+
+// Validate checks the field values on QuerySessionsRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *QuerySessionsRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on QuerySessionsRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// QuerySessionsRequestMultiError, or nil if none found.
+func (m *QuerySessionsRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *QuerySessionsRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if len(errors) > 0 {
+		return QuerySessionsRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// QuerySessionsRequestMultiError is an error wrapping multiple validation
+// errors returned by QuerySessionsRequest.ValidateAll() if the designated
+// constraints aren't met.
+type QuerySessionsRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m QuerySessionsRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m QuerySessionsRequestMultiError) AllErrors() []error { return m }
+
+// QuerySessionsRequestValidationError is the validation error returned by
+// QuerySessionsRequest.Validate if the designated constraints aren't met.
+type QuerySessionsRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e QuerySessionsRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e QuerySessionsRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e QuerySessionsRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e QuerySessionsRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e QuerySessionsRequestValidationError) ErrorName() string {
+	return "QuerySessionsRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e QuerySessionsRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sQuerySessionsRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = QuerySessionsRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = QuerySessionsRequestValidationError{}
+
+// Validate checks the field values on QuerySessionsResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *QuerySessionsResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on QuerySessionsResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// QuerySessionsResponseMultiError, or nil if none found.
+func (m *QuerySessionsResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *QuerySessionsResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	for idx, item := range m.GetSessions() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, QuerySessionsResponseValidationError{
+						field:  fmt.Sprintf("Sessions[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, QuerySessionsResponseValidationError{
+						field:  fmt.Sprintf("Sessions[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return QuerySessionsResponseValidationError{
+					field:  fmt.Sprintf("Sessions[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if len(errors) > 0 {
+		return QuerySessionsResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// QuerySessionsResponseMultiError is an error wrapping multiple validation
+// errors returned by QuerySessionsResponse.ValidateAll() if the designated
+// constraints aren't met.
+type QuerySessionsResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m QuerySessionsResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m QuerySessionsResponseMultiError) AllErrors() []error { return m }
+
+// QuerySessionsResponseValidationError is the validation error returned by
+// QuerySessionsResponse.Validate if the designated constraints aren't met.
+type QuerySessionsResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e QuerySessionsResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e QuerySessionsResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e QuerySessionsResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e QuerySessionsResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e QuerySessionsResponseValidationError) ErrorName() string {
+	return "QuerySessionsResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e QuerySessionsResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sQuerySessionsResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = QuerySessionsResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = QuerySessionsResponseValidationError{}
 
 // Validate checks the field values on QuerySessionTimelineEventsRequest with
 // the rules defined in the proto definition for this message. If any rules

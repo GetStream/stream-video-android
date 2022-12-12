@@ -21,7 +21,7 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.IBinder
-import io.getstream.logging.StreamLog
+import io.getstream.log.taggedLogger
 import io.getstream.video.android.R
 import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.StreamVideoProvider
@@ -38,7 +38,7 @@ import io.getstream.video.android.model.state.StreamCallState as State
 
 public abstract class AbstractStreamCallService : Service(), StreamVideoProvider {
 
-    private val logger = StreamLog.getLogger("Call:StreamService")
+    private val logger by taggedLogger("Call:StreamService")
 
     private val scope = CoroutineScope(DispatcherProvider.Default)
 
