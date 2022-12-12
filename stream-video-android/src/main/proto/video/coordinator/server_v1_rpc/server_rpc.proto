@@ -155,7 +155,7 @@ message CreateCallTypeRequest {
   // the name of the call type, must be unique for the application
   string name = 1;
 
-  call_v1.CallOptions options = 2;
+  call_v1.CallSettings settings = 2;
 }
 
 message CreateCallTypeResponse {
@@ -183,7 +183,7 @@ message UpdateCallTypeRequest {
   // the name of the call type, must be unique for the application
   string name = 1;
 
-  call_v1.CallOptions options = 2;
+  call_v1.CallSettings settings = 2;
 }
 
 message UpdateCallTypeResponse {

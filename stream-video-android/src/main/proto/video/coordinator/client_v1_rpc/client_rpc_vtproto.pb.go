@@ -714,8 +714,8 @@ func (m *CallInput) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 		i -= len(m.unknownFields)
 		copy(dAtA[i:], m.unknownFields)
 	}
-	if m.Options != nil {
-		if marshalto, ok := interface{}(m.Options).(interface {
+	if m.SettingsOverrides != nil {
+		if marshalto, ok := interface{}(m.SettingsOverrides).(interface {
 			MarshalToSizedBufferVT([]byte) (int, error)
 		}); ok {
 			size, err := marshalto.MarshalToSizedBufferVT(dAtA[:i])
@@ -725,7 +725,7 @@ func (m *CallInput) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 			i -= size
 			i = encodeVarint(dAtA, i, uint64(size))
 		} else {
-			encoded, err := proto.Marshal(m.Options)
+			encoded, err := proto.Marshal(m.SettingsOverrides)
 			if err != nil {
 				return 0, err
 			}
@@ -3413,13 +3413,13 @@ func (m *CallInput) SizeVT() (n int) {
 	if l > 0 {
 		n += 1 + l + sov(uint64(l))
 	}
-	if m.Options != nil {
-		if size, ok := interface{}(m.Options).(interface {
+	if m.SettingsOverrides != nil {
+		if size, ok := interface{}(m.SettingsOverrides).(interface {
 			SizeVT() int
 		}); ok {
 			l = size.SizeVT()
 		} else {
-			l = proto.Size(m.Options)
+			l = proto.Size(m.SettingsOverrides)
 		}
 		n += 1 + l + sov(uint64(l))
 	}
@@ -5981,7 +5981,7 @@ func (m *CallInput) UnmarshalVT(dAtA []byte) error {
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Options", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field SettingsOverrides", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -6008,17 +6008,17 @@ func (m *CallInput) UnmarshalVT(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.Options == nil {
-				m.Options = &call_v1.CallOptions{}
+			if m.SettingsOverrides == nil {
+				m.SettingsOverrides = &call_v1.CallSettings{}
 			}
-			if unmarshal, ok := interface{}(m.Options).(interface {
+			if unmarshal, ok := interface{}(m.SettingsOverrides).(interface {
 				UnmarshalVT([]byte) error
 			}); ok {
 				if err := unmarshal.UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
 					return err
 				}
 			} else {
-				if err := proto.Unmarshal(dAtA[iNdEx:postIndex], m.Options); err != nil {
+				if err := proto.Unmarshal(dAtA[iNdEx:postIndex], m.SettingsOverrides); err != nil {
 					return err
 				}
 			}

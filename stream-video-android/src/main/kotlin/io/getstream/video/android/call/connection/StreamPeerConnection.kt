@@ -268,12 +268,13 @@ public class StreamPeerConnection(
      */
     public fun addVideoTransceiver(track: MediaStreamTrack, streamIds: List<String>) {
         logger.d { "[addVideoTransceiver] #sfu; #$typeTag; track: ${track.stringify()}, streamIds: $streamIds" }
-        val fullQuality = RtpParameters.Encoding(
-            "f",
+
+        val quarterQuality = RtpParameters.Encoding(
+            "q",
             true,
-            1.0
+            4.0
         ).apply {
-            maxBitrateBps = 1_200_000
+            maxBitrateBps = 125_000
         }
 
         val halfQuality = RtpParameters.Encoding(
@@ -284,15 +285,15 @@ public class StreamPeerConnection(
             maxBitrateBps = 500_000
         }
 
-        val quarterQuality = RtpParameters.Encoding(
-            "q",
+        val fullQuality = RtpParameters.Encoding(
+            "f",
             true,
-            4.0
+            1.0
         ).apply {
-            maxBitrateBps = 125_000
+            maxBitrateBps = 1_200_000
         }
 
-        val encodings = listOf(fullQuality, halfQuality, quarterQuality)
+        val encodings = listOf(quarterQuality, halfQuality, fullQuality)
 
         val transceiverInit = RtpTransceiverInit(
             RtpTransceiver.RtpTransceiverDirection.SEND_ONLY,

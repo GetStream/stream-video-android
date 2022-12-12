@@ -15,6 +15,7 @@ enum MediaType {
   MEDIA_TYPE_UNSPECIFIED = 0;
   MEDIA_TYPE_AUDIO = 1;
   MEDIA_TYPE_VIDEO = 2;
+  MEDIA_TYPE_SCREEN_SHARE = 3;
 }
 
 enum MediaStateChange {

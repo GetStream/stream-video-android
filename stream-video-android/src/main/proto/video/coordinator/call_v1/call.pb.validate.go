@@ -60,11 +60,11 @@ func (m *CallType) validate(all bool) error {
 	// no validation rules for Name
 
 	if all {
-		switch v := interface{}(m.GetOptions()).(type) {
+		switch v := interface{}(m.GetSettings()).(type) {
 		case interface{ ValidateAll() error }:
 			if err := v.ValidateAll(); err != nil {
 				errors = append(errors, CallTypeValidationError{
-					field:  "Options",
+					field:  "Settings",
 					reason: "embedded message failed validation",
 					cause:  err,
 				})
@@ -72,16 +72,16 @@ func (m *CallType) validate(all bool) error {
 		case interface{ Validate() error }:
 			if err := v.Validate(); err != nil {
 				errors = append(errors, CallTypeValidationError{
-					field:  "Options",
+					field:  "Settings",
 					reason: "embedded message failed validation",
 					cause:  err,
 				})
 			}
 		}
-	} else if v, ok := interface{}(m.GetOptions()).(interface{ Validate() error }); ok {
+	} else if v, ok := interface{}(m.GetSettings()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
 			return CallTypeValidationError{
-				field:  "Options",
+				field:  "Settings",
 				reason: "embedded message failed validation",
 				cause:  err,
 			}
@@ -282,11 +282,11 @@ func (m *Call) validate(all bool) error {
 	// no validation rules for CustomJson
 
 	if all {
-		switch v := interface{}(m.GetOptions()).(type) {
+		switch v := interface{}(m.GetSettingsOverrides()).(type) {
 		case interface{ ValidateAll() error }:
 			if err := v.ValidateAll(); err != nil {
 				errors = append(errors, CallValidationError{
-					field:  "Options",
+					field:  "SettingsOverrides",
 					reason: "embedded message failed validation",
 					cause:  err,
 				})
@@ -294,16 +294,16 @@ func (m *Call) validate(all bool) error {
 		case interface{ Validate() error }:
 			if err := v.Validate(); err != nil {
 				errors = append(errors, CallValidationError{
-					field:  "Options",
+					field:  "SettingsOverrides",
 					reason: "embedded message failed validation",
 					cause:  err,
 				})
 			}
 		}
-	} else if v, ok := interface{}(m.GetOptions()).(interface{ Validate() error }); ok {
+	} else if v, ok := interface{}(m.GetSettingsOverrides()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
 			return CallValidationError{
-				field:  "Options",
+				field:  "SettingsOverrides",
 				reason: "embedded message failed validation",
 				cause:  err,
 			}
@@ -367,6 +367,10 @@ func (m *Call) validate(all bool) error {
 			}
 		}
 	}
+
+	// no validation rules for RecordingActive
+
+	// no validation rules for BroadcastingActive
 
 	if len(errors) > 0 {
 		return CallMultiError(errors)
@@ -468,11 +472,11 @@ func (m *CallDetails) validate(all bool) error {
 	var errors []error
 
 	if all {
-		switch v := interface{}(m.GetOptions()).(type) {
+		switch v := interface{}(m.GetSettings()).(type) {
 		case interface{ ValidateAll() error }:
 			if err := v.ValidateAll(); err != nil {
 				errors = append(errors, CallDetailsValidationError{
-					field:  "Options",
+					field:  "Settings",
 					reason: "embedded message failed validation",
 					cause:  err,
 				})
@@ -480,16 +484,16 @@ func (m *CallDetails) validate(all bool) error {
 		case interface{ Validate() error }:
 			if err := v.Validate(); err != nil {
 				errors = append(errors, CallDetailsValidationError{
-					field:  "Options",
+					field:  "Settings",
 					reason: "embedded message failed validation",
 					cause:  err,
 				})
 			}
 		}
-	} else if v, ok := interface{}(m.GetOptions()).(interface{ Validate() error }); ok {
+	} else if v, ok := interface{}(m.GetSettings()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
 			return CallDetailsValidationError{
-				field:  "Options",
+				field:  "Settings",
 				reason: "embedded message failed validation",
 				cause:  err,
 			}
@@ -619,22 +623,22 @@ var _ interface {
 	ErrorName() string
 } = CallDetailsValidationError{}
 
-// Validate checks the field values on CallOptions with the rules defined in
+// Validate checks the field values on CallSettings with the rules defined in
 // the proto definition for this message. If any rules are violated, the first
 // error encountered is returned, or nil if there are no violations.
-func (m *CallOptions) Validate() error {
+func (m *CallSettings) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on CallOptions with the rules defined in
-// the proto definition for this message. If any rules are violated, the
-// result is a list of violation errors wrapped in CallOptionsMultiError, or
+// ValidateAll checks the field values on CallSettings with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in CallSettingsMultiError, or
 // nil if none found.
-func (m *CallOptions) ValidateAll() error {
+func (m *CallSettings) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *CallOptions) validate(all bool) error {
+func (m *CallSettings) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
@@ -645,7 +649,7 @@ func (m *CallOptions) validate(all bool) error {
 		switch v := interface{}(m.GetRecording()).(type) {
 		case interface{ ValidateAll() error }:
 			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, CallOptionsValidationError{
+				errors = append(errors, CallSettingsValidationError{
 					field:  "Recording",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -653,7 +657,7 @@ func (m *CallOptions) validate(all bool) error {
 			}
 		case interface{ Validate() error }:
 			if err := v.Validate(); err != nil {
-				errors = append(errors, CallOptionsValidationError{
+				errors = append(errors, CallSettingsValidationError{
 					field:  "Recording",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -662,7 +666,7 @@ func (m *CallOptions) validate(all bool) error {
 		}
 	} else if v, ok := interface{}(m.GetRecording()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
-			return CallOptionsValidationError{
+			return CallSettingsValidationError{
 				field:  "Recording",
 				reason: "embedded message failed validation",
 				cause:  err,
@@ -674,7 +678,7 @@ func (m *CallOptions) validate(all bool) error {
 		switch v := interface{}(m.GetBroadcasting()).(type) {
 		case interface{ ValidateAll() error }:
 			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, CallOptionsValidationError{
+				errors = append(errors, CallSettingsValidationError{
 					field:  "Broadcasting",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -682,7 +686,7 @@ func (m *CallOptions) validate(all bool) error {
 			}
 		case interface{ Validate() error }:
 			if err := v.Validate(); err != nil {
-				errors = append(errors, CallOptionsValidationError{
+				errors = append(errors, CallSettingsValidationError{
 					field:  "Broadcasting",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -691,7 +695,7 @@ func (m *CallOptions) validate(all bool) error {
 		}
 	} else if v, ok := interface{}(m.GetBroadcasting()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
-			return CallOptionsValidationError{
+			return CallSettingsValidationError{
 				field:  "Broadcasting",
 				reason: "embedded message failed validation",
 				cause:  err,
@@ -700,18 +704,18 @@ func (m *CallOptions) validate(all bool) error {
 	}
 
 	if len(errors) > 0 {
-		return CallOptionsMultiError(errors)
+		return CallSettingsMultiError(errors)
 	}
 
 	return nil
 }
 
-// CallOptionsMultiError is an error wrapping multiple validation errors
-// returned by CallOptions.ValidateAll() if the designated constraints aren't met.
-type CallOptionsMultiError []error
+// CallSettingsMultiError is an error wrapping multiple validation errors
+// returned by CallSettings.ValidateAll() if the designated constraints aren't met.
+type CallSettingsMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m CallOptionsMultiError) Error() string {
+func (m CallSettingsMultiError) Error() string {
 	var msgs []string
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -720,11 +724,11 @@ func (m CallOptionsMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m CallOptionsMultiError) AllErrors() []error { return m }
+func (m CallSettingsMultiError) AllErrors() []error { return m }
 
-// CallOptionsValidationError is the validation error returned by
-// CallOptions.Validate if the designated constraints aren't met.
-type CallOptionsValidationError struct {
+// CallSettingsValidationError is the validation error returned by
+// CallSettings.Validate if the designated constraints aren't met.
+type CallSettingsValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -732,22 +736,22 @@ type CallOptionsValidationError struct {
 }
 
 // Field function returns field value.
-func (e CallOptionsValidationError) Field() string { return e.field }
+func (e CallSettingsValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e CallOptionsValidationError) Reason() string { return e.reason }
+func (e CallSettingsValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e CallOptionsValidationError) Cause() error { return e.cause }
+func (e CallSettingsValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e CallOptionsValidationError) Key() bool { return e.key }
+func (e CallSettingsValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e CallOptionsValidationError) ErrorName() string { return "CallOptionsValidationError" }
+func (e CallSettingsValidationError) ErrorName() string { return "CallSettingsValidationError" }
 
 // Error satisfies the builtin error interface
-func (e CallOptionsValidationError) Error() string {
+func (e CallSettingsValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -759,14 +763,14 @@ func (e CallOptionsValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sCallOptions.%s: %s%s",
+		"invalid %sCallSettings.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = CallOptionsValidationError{}
+var _ error = CallSettingsValidationError{}
 
 var _ interface {
 	Field() string
@@ -774,7 +778,7 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = CallOptionsValidationError{}
+} = CallSettingsValidationError{}
 
 // Validate checks the field values on RecordingOptions with the rules defined
 // in the proto definition for this message. If any rules are violated, the

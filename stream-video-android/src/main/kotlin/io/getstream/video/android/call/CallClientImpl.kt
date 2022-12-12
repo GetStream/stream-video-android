@@ -115,14 +115,13 @@ import stream.video.sfu.models.TrackInfo
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
 import stream.video.sfu.models.VideoLayer
-import stream.video.sfu.signal.AudioMuteChanged
 import stream.video.sfu.signal.SendAnswerRequest
 import stream.video.sfu.signal.SetPublisherRequest
+import stream.video.sfu.signal.TrackMuteState
 import stream.video.sfu.signal.TrackSubscriptionDetails
-import stream.video.sfu.signal.UpdateMuteStateRequest
-import stream.video.sfu.signal.UpdateMuteStateResponse
+import stream.video.sfu.signal.UpdateMuteStatesRequest
+import stream.video.sfu.signal.UpdateMuteStatesResponse
 import stream.video.sfu.signal.UpdateSubscriptionsRequest
-import stream.video.sfu.signal.VideoMuteChanged
 import kotlin.math.absoluteValue
 import kotlin.random.Random
 
@@ -282,8 +281,14 @@ internal class CallClientImpl(
             if (!isCapturingVideo && isEnabled) {
                 startCapturingLocalVideo(CameraMetadata.LENS_FACING_FRONT)
             }
-            val request = UpdateMuteStateRequest(
-                sessionId, video_mute_changed = VideoMuteChanged(muted = !isEnabled)
+            val request = UpdateMuteStatesRequest(
+                session_id = sessionId,
+                mute_states = listOf(
+                    TrackMuteState(
+                        track_type = TrackType.TRACK_TYPE_VIDEO,
+                        muted = !isEnabled
+                    )
+                ),
             )
 
             updateMuteState(request).onSuccessSuspend {
@@ -306,9 +311,14 @@ internal class CallClientImpl(
 
             setupAudioTrack()
 
-            val request = UpdateMuteStateRequest(
-                sessionId,
-                audio_mute_changed = AudioMuteChanged(muted = !isEnabled),
+            val request = UpdateMuteStatesRequest(
+                session_id = sessionId,
+                mute_states = listOf(
+                    TrackMuteState(
+                        track_type = TrackType.TRACK_TYPE_AUDIO,
+                        muted = !isEnabled
+                    )
+                ),
             )
 
             updateMuteState(request).onSuccessSuspend {
@@ -335,7 +345,7 @@ internal class CallClientImpl(
         }
     }
 
-    private suspend fun updateMuteState(muteStateRequest: UpdateMuteStateRequest): Result<UpdateMuteStateResponse> {
+    private suspend fun updateMuteState(muteStateRequest: UpdateMuteStatesRequest): Result<UpdateMuteStatesResponse> {
         return sfuClient.updateMuteState(muteStateRequest)
     }
 

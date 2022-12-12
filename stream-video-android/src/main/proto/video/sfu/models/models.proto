@@ -90,6 +90,7 @@ message TrackInfo {
   string track_id = 1;
   TrackType track_type = 2;
   repeated VideoLayer layers = 5;
+  string mid = 6;
 }
 
 
@@ -106,4 +107,15 @@ message Call {
   google.protobuf.Struct custom = 5;
   google.protobuf.Timestamp created_at = 6;
   google.protobuf.Timestamp updated_at = 7;
+}
+
+
+enum ErrorCode {
+  ERROR_CODE_UNSPECIFIED = 0;
+  ERROR_CODE_PUBLISH_TRACK_MISMATCH = 1;
+}
+
+message Error {
+  ErrorCode code = 1;
+  string message = 2;
 }

@@ -6,8 +6,10 @@ option go_package = "egress_v1_rpc";
 
 message StartBroadcastRequest {
   int64 app_pk = 1;
-  string call_type = 2;
-  string call_id = 3;
+  string api_key = 2;
+  string token = 3;
+  string call_type = 4;
+  string call_id = 5;
 }
 
 message StartBroadcastResponse {
@@ -24,8 +26,10 @@ message StopBroadcastResponse {
 
 message StartRecordingRequest {
   int64 app_pk = 1;
-  string call_type = 2;
-  string call_id = 3;
+  string api_key = 2;
+  string token = 3;
+  string call_type = 4;
+  string call_id = 5;
 }
 
 message StartRecordingResponse {

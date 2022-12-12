@@ -95,8 +95,8 @@ func (m *CallType) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x1a
 	}
-	if m.Options != nil {
-		size, err := m.Options.MarshalToSizedBufferVT(dAtA[:i])
+	if m.Settings != nil {
+		size, err := m.Settings.MarshalToSizedBufferVT(dAtA[:i])
 		if err != nil {
 			return 0, err
 		}
@@ -145,6 +145,26 @@ func (m *Call) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 		i -= len(m.unknownFields)
 		copy(dAtA[i:], m.unknownFields)
 	}
+	if m.BroadcastingActive {
+		i--
+		if m.BroadcastingActive {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x50
+	}
+	if m.RecordingActive {
+		i--
+		if m.RecordingActive {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x48
+	}
 	if m.UpdatedAt != nil {
 		if marshalto, ok := interface{}(m.UpdatedAt).(interface {
 			MarshalToSizedBufferVT([]byte) (int, error)
@@ -189,8 +209,8 @@ func (m *Call) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x3a
 	}
-	if m.Options != nil {
-		size, err := m.Options.MarshalToSizedBufferVT(dAtA[:i])
+	if m.SettingsOverrides != nil {
+		size, err := m.SettingsOverrides.MarshalToSizedBufferVT(dAtA[:i])
 		if err != nil {
 			return 0, err
 		}
@@ -310,8 +330,8 @@ func (m *CallDetails) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 			dAtA[i] = 0x12
 		}
 	}
-	if m.Options != nil {
-		size, err := m.Options.MarshalToSizedBufferVT(dAtA[:i])
+	if m.Settings != nil {
+		size, err := m.Settings.MarshalToSizedBufferVT(dAtA[:i])
 		if err != nil {
 			return 0, err
 		}
@@ -323,7 +343,7 @@ func (m *CallDetails) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *CallOptions) MarshalVT() (dAtA []byte, err error) {
+func (m *CallSettings) MarshalVT() (dAtA []byte, err error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -336,12 +356,12 @@ func (m *CallOptions) MarshalVT() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *CallOptions) MarshalToVT(dAtA []byte) (int, error) {
+func (m *CallSettings) MarshalToVT(dAtA []byte) (int, error) {
 	size := m.SizeVT()
 	return m.MarshalToSizedBufferVT(dAtA[:size])
 }
 
-func (m *CallOptions) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
+func (m *CallSettings) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 	if m == nil {
 		return 0, nil
 	}
@@ -483,8 +503,8 @@ func (m *CallType) SizeVT() (n int) {
 	if l > 0 {
 		n += 1 + l + sov(uint64(l))
 	}
-	if m.Options != nil {
-		l = m.Options.SizeVT()
+	if m.Settings != nil {
+		l = m.Settings.SizeVT()
 		n += 1 + l + sov(uint64(l))
 	}
 	if m.CreatedAt != nil {
@@ -539,8 +559,8 @@ func (m *Call) SizeVT() (n int) {
 	if l > 0 {
 		n += 1 + l + sov(uint64(l))
 	}
-	if m.Options != nil {
-		l = m.Options.SizeVT()
+	if m.SettingsOverrides != nil {
+		l = m.SettingsOverrides.SizeVT()
 		n += 1 + l + sov(uint64(l))
 	}
 	if m.CreatedAt != nil {
@@ -563,6 +583,12 @@ func (m *Call) SizeVT() (n int) {
 		}
 		n += 1 + l + sov(uint64(l))
 	}
+	if m.RecordingActive {
+		n += 2
+	}
+	if m.BroadcastingActive {
+		n += 2
+	}
 	if m.unknownFields != nil {
 		n += len(m.unknownFields)
 	}
@@ -575,8 +601,8 @@ func (m *CallDetails) SizeVT() (n int) {
 	}
 	var l int
 	_ = l
-	if m.Options != nil {
-		l = m.Options.SizeVT()
+	if m.Settings != nil {
+		l = m.Settings.SizeVT()
 		n += 1 + l + sov(uint64(l))
 	}
 	if len(m.MemberUserIds) > 0 {
@@ -610,7 +636,7 @@ func (m *CallDetails) SizeVT() (n int) {
 	return n
 }
 
-func (m *CallOptions) SizeVT() (n int) {
+func (m *CallSettings) SizeVT() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -729,7 +755,7 @@ func (m *CallType) UnmarshalVT(dAtA []byte) error {
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Options", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Settings", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -756,10 +782,10 @@ func (m *CallType) UnmarshalVT(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.Options == nil {
-				m.Options = &CallOptions{}
+			if m.Settings == nil {
+				m.Settings = &CallSettings{}
 			}
-			if err := m.Options.UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
+			if err := m.Settings.UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -1066,7 +1092,7 @@ func (m *Call) UnmarshalVT(dAtA []byte) error {
 			iNdEx = postIndex
 		case 6:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Options", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field SettingsOverrides", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -1093,10 +1119,10 @@ func (m *Call) UnmarshalVT(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.Options == nil {
-				m.Options = &CallOptions{}
+			if m.SettingsOverrides == nil {
+				m.SettingsOverrides = &CallSettings{}
 			}
-			if err := m.Options.UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
+			if err := m.SettingsOverrides.UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -1188,6 +1214,46 @@ func (m *Call) UnmarshalVT(dAtA []byte) error {
 				}
 			}
 			iNdEx = postIndex
+		case 9:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field RecordingActive", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflow
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.RecordingActive = bool(v != 0)
+		case 10:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field BroadcastingActive", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflow
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.BroadcastingActive = bool(v != 0)
 		default:
 			iNdEx = preIndex
 			skippy, err := skip(dAtA[iNdEx:])
@@ -1241,7 +1307,7 @@ func (m *CallDetails) UnmarshalVT(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Options", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Settings", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -1268,10 +1334,10 @@ func (m *CallDetails) UnmarshalVT(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.Options == nil {
-				m.Options = &CallOptions{}
+			if m.Settings == nil {
+				m.Settings = &CallSettings{}
 			}
-			if err := m.Options.UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
+			if err := m.Settings.UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -1466,7 +1532,7 @@ func (m *CallDetails) UnmarshalVT(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *CallOptions) UnmarshalVT(dAtA []byte) error {
+func (m *CallSettings) UnmarshalVT(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -1489,10 +1555,10 @@ func (m *CallOptions) UnmarshalVT(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: CallOptions: wiretype end group for non-group")
+			return fmt.Errorf("proto: CallSettings: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: CallOptions: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: CallSettings: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
