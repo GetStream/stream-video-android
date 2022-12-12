@@ -19,13 +19,13 @@ package io.getstream.video.android.ui.xml.widget.active
 import android.content.Context
 import android.util.AttributeSet
 import androidx.constraintlayout.widget.ConstraintLayout
+import io.getstream.video.android.call.state.CallAction
 import io.getstream.video.android.model.CallParticipantState
 import io.getstream.video.android.ui.xml.databinding.ViewActiveCallBinding
 import io.getstream.video.android.ui.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.ui.xml.utils.extensions.initToolbar
 import io.getstream.video.android.ui.xml.utils.extensions.streamThemeInflater
 import io.getstream.video.android.ui.xml.widget.control.CallControlItem
-import io.getstream.video.android.ui.xml.widget.control.CallControlsView
 import io.getstream.video.android.ui.xml.widget.participant.RendererInitializer
 
 public class ActiveCallView : ConstraintLayout {
@@ -44,16 +44,19 @@ public class ActiveCallView : ConstraintLayout {
 
     private val binding by lazy { ViewActiveCallBinding.inflate(streamThemeInflater, this) }
 
+    public var callControlActionListener: (CallAction) -> Unit = {}
+
     private fun init(context: Context, attrs: AttributeSet?) {
         initToolbar(binding.toolbar)
-    }
-
-    public fun setOnControlItemClickListener(listener: CallControlsView.OnControlItemClickListener) {
-        binding.controlsView.setOnControlItemClickListener(listener)
+        binding.controlsView.callControlItemClickListener = { callControlActionListener(it) }
     }
 
     public fun setControlItems(items: List<CallControlItem>) {
         binding.controlsView.setItems(items)
+    }
+
+    public fun updateControlItems(items: List<CallControlItem>) {
+        binding.controlsView.updateItems(items)
     }
 
     public fun setToolbarTitle(title: String) {

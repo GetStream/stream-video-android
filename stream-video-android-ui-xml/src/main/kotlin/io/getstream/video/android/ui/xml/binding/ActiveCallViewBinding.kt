@@ -18,6 +18,7 @@ package io.getstream.video.android.ui.xml.binding
 
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import io.getstream.log.StreamLog
 import io.getstream.video.android.call.state.FlipCamera
 import io.getstream.video.android.call.state.LeaveCall
 import io.getstream.video.android.call.state.ToggleCamera
@@ -35,19 +36,11 @@ public fun ActiveCallView.bindView(
     viewModel: CallViewModel,
     lifecycleOwner: LifecycleOwner,
 ) {
-    setOnControlItemClickListener { item ->
-        viewModel.onCallAction(item.action)
+    callControlActionListener = { item ->
+        viewModel.onCallAction(item)
     }
 
-    setControlItems(
-        listOf(
-            CallControlItem(R.drawable.ic_speaker_on, ToggleSpeakerphone(isEnabled = true)),
-            CallControlItem(R.drawable.ic_videocam_on, ToggleCamera(isEnabled = true)),
-            CallControlItem(R.drawable.ic_mic_on, ToggleMicrophone(isEnabled = true)),
-            CallControlItem(R.drawable.ic_camera_flip, FlipCamera),
-            CallControlItem(R.drawable.ic_call_end, LeaveCall),
-        )
-    )
+    setControlItems(buildDefaultControlList())
 
     observeStreamCallState(viewModel, lifecycleOwner)
     observeCallState(viewModel, lifecycleOwner)
@@ -55,9 +48,19 @@ public fun ActiveCallView.bindView(
     observeMediaState(viewModel, lifecycleOwner)
 }
 
+private fun buildDefaultControlList(): List<CallControlItem> {
+    return listOf(
+        CallControlItem(R.drawable.ic_speaker_on, ToggleSpeakerphone(isEnabled = true)),
+        CallControlItem(R.drawable.ic_videocam_on, ToggleCamera(isEnabled = true)),
+        CallControlItem(R.drawable.ic_mic_on, ToggleMicrophone(isEnabled = true)),
+        CallControlItem(R.drawable.ic_camera_flip, FlipCamera),
+        CallControlItem(R.drawable.ic_call_end, LeaveCall),
+    )
+}
+
 private fun ActiveCallView.observeStreamCallState(
     viewModel: CallViewModel,
-    lifecycleOwner: LifecycleOwner
+    lifecycleOwner: LifecycleOwner,
 ) {
     lifecycleOwner.lifecycleScope.launchWhenCreated {
         viewModel.streamCallState.collect {
@@ -78,7 +81,7 @@ private fun ActiveCallView.observeStreamCallState(
 
 private fun ActiveCallView.observeCallState(
     viewModel: CallViewModel,
-    lifecycleOwner: LifecycleOwner
+    lifecycleOwner: LifecycleOwner,
 ) {
     lifecycleOwner.lifecycleScope.launchWhenResumed {
         viewModel.callState.filterNotNull().collectLatest { call ->
@@ -91,7 +94,7 @@ private fun ActiveCallView.observeCallState(
 
 private fun ActiveCallView.observeParticipantList(
     viewModel: CallViewModel,
-    lifecycleOwner: LifecycleOwner
+    lifecycleOwner: LifecycleOwner,
 ) {
     lifecycleOwner.lifecycleScope.launchWhenResumed {
         viewModel.participantList.collectLatest {
@@ -102,17 +105,34 @@ private fun ActiveCallView.observeParticipantList(
 
 private fun ActiveCallView.observeMediaState(
     viewModel: CallViewModel,
-    lifecycleOwner: LifecycleOwner
+    lifecycleOwner: LifecycleOwner,
 ) {
     lifecycleOwner.lifecycleScope.launchWhenResumed {
         viewModel.callMediaState.collectLatest {
-            setControlItems(
+            StreamLog.d("callMediaState") { it.toString() }
+            updateControlItems(
                 listOf(
-                    CallControlItem(R.drawable.ic_speaker_on, ToggleSpeakerphone(it.isSpeakerphoneEnabled)),
-                    CallControlItem(R.drawable.ic_videocam_on, ToggleCamera(it.isCameraEnabled)),
-                    CallControlItem(R.drawable.ic_mic_on, ToggleMicrophone(it.isMicrophoneEnabled)),
-                    CallControlItem(R.drawable.ic_camera_flip, FlipCamera),
-                    CallControlItem(R.drawable.ic_call_end, LeaveCall),
+                    CallControlItem(
+                        icon = if (it.isSpeakerphoneEnabled) {
+                            R.drawable.ic_speaker_on
+                        } else {
+                            R.drawable.ic_speaker_off
+                        },
+                        action = ToggleSpeakerphone(it.isSpeakerphoneEnabled)),
+                    CallControlItem(
+                        icon = if (it.isCameraEnabled) {
+                            R.drawable.ic_videocam_on
+                        } else {
+                            R.drawable.ic_videocam_off
+                        },
+                        action = ToggleCamera(it.isCameraEnabled)),
+                    CallControlItem(
+                        icon = if (it.isMicrophoneEnabled) {
+                            R.drawable.ic_mic_on
+                        } else {
+                            R.drawable.ic_mic_off
+                        },
+                        action = ToggleMicrophone(it.isMicrophoneEnabled))
                 )
             )
         }

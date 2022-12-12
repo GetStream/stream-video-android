@@ -259,7 +259,7 @@ public class CallViewModel(
     /**
      * Flips the camera for the current participant if possible.
      */
-    public fun flipCamera() {
+    private fun flipCamera() {
         client?.flipCamera()
     }
 
@@ -301,11 +301,11 @@ public class CallViewModel(
             is ToggleCamera -> onVideoChanged(callAction.isEnabled)
             is ToggleMicrophone -> onMicrophoneChanged(callAction.isEnabled)
             is SelectAudioDevice -> selectAudioDevice(callAction.audioDevice)
-            is FlipCamera -> flipCamera()
+            FlipCamera -> flipCamera()
             CancelCall -> cancelCall()
             AcceptCall -> acceptCall()
             DeclineCall -> hangUpCall()
-            is LeaveCall -> cancelCall()
+            LeaveCall -> cancelCall()
             is InviteUsersToCall -> inviteUsersToCall(callAction.users)
             is CustomAction -> {
                 // custom actions

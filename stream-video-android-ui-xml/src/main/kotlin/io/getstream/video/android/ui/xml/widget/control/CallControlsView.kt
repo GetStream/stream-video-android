@@ -24,6 +24,10 @@ import android.widget.ImageView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import io.getstream.log.StreamLog
+import io.getstream.video.android.call.state.CallAction
+import io.getstream.video.android.call.state.ToggleCamera
+import io.getstream.video.android.call.state.ToggleMicrophone
+import io.getstream.video.android.call.state.ToggleSpeakerphone
 import io.getstream.video.android.ui.xml.R
 import io.getstream.video.android.ui.xml.utils.extensions.constrainViewEndToStartOfView
 import io.getstream.video.android.ui.xml.utils.extensions.constrainViewStartToEndOfView
@@ -35,37 +39,56 @@ public class CallControlsView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
-) : ConstraintLayout(context, attrs, defStyleAttr), View.OnClickListener {
+) : ConstraintLayout(context, attrs, defStyleAttr) {
 
-    private val logger = StreamLog.getLogger("Call:ControlsView")
-    private val controlList = arrayListOf<StreamImageButton>()
+    private val controlList = mutableMapOf<CallAction, StreamImageButton>()
 
-    private var listener: OnControlItemClickListener? = null
-
-    public fun setOnControlItemClickListener(listener: OnControlItemClickListener) {
-        this.listener = listener
-    }
+    public var callControlItemClickListener: (CallAction) -> Unit = { }
 
     public fun setItems(items: List<CallControlItem>) {
-        logger.d { "[setItems] items: $items" }
-        controlList.forEach { removeView(it) }
+        controlList.forEach { removeView(it.value) }
         controlList.clear()
-        val buttonSize = context.resources.getDimension(RCommon.dimen.callControlButtonSize).toInt()
         items.forEach { item ->
-            val view = StreamImageButton(context).apply {
-                id = View.generateViewId()
-                tag = item
-                setOnClickListener(this@CallControlsView)
-                layoutParams = LayoutParams(buttonSize, buttonSize)
-                scaleType = ImageView.ScaleType.CENTER
-                setBackgroundResource(R.drawable.bg_call_control_option)
-                setImageResource(item.icon)
-            }
-
-            controlList.add(view)
+            val view = addControlView(item)
+            controlList[item.action] = view
             addView(view)
         }
-        defineConstraints(controlList)
+        defineConstraints(controlList.values.toList())
+    }
+
+    private fun addControlView(callControlItem: CallControlItem): StreamImageButton {
+        val buttonSize = context.resources.getDimension(RCommon.dimen.callControlButtonSize).toInt()
+        return StreamImageButton(context).apply {
+            id = View.generateViewId()
+            tag = callControlItem
+            layoutParams = LayoutParams(buttonSize, buttonSize)
+            scaleType = ImageView.ScaleType.CENTER
+            setBackgroundResource(R.drawable.bg_call_control_option)
+            setImageResource(callControlItem.icon)
+            setOnClickListener {
+                val data = it.tag as CallControlItem
+                when (data.action) {
+                    is ToggleCamera -> callControlItemClickListener(ToggleCamera(!data.action.isEnabled))
+                    is ToggleMicrophone -> callControlItemClickListener(ToggleMicrophone(!data.action.isEnabled))
+                    is ToggleSpeakerphone -> callControlItemClickListener(ToggleSpeakerphone(!data.action.isEnabled))
+                    else -> {
+                        callControlItemClickListener(data.action)
+                    }
+                }
+            }
+        }
+    }
+
+    public fun updateItems(items: List<CallControlItem>) {
+        items.forEach { callControlItem ->
+            controlList.keys
+                .firstOrNull { it::class == callControlItem.action::class }
+                ?.let {
+                    val view = controlList[it] ?: return@let
+                    view.setImageResource(callControlItem.icon)
+                    view.tag = callControlItem
+                }
+        }
     }
 
     private fun defineConstraints(controlList: List<ImageButton>) {
@@ -89,15 +112,5 @@ public class CallControlsView @JvmOverloads constructor(
                 }
             }
         }
-    }
-
-    override fun onClick(view: View) {
-        val item = view.tag as? CallControlItem ?: return
-        listener?.onControlItemClick(item)
-    }
-
-    public fun interface OnControlItemClickListener {
-
-        public fun onControlItemClick(item: CallControlItem)
     }
 }
