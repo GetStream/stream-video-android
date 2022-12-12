@@ -19,7 +19,7 @@ package io.getstream.video.android
 import android.content.Context
 import io.getstream.android.push.PushDevice
 import io.getstream.android.push.delegate.PushDelegate
-import io.getstream.log.StreamLog
+import io.getstream.log.taggedLogger
 import io.getstream.video.android.dispatchers.DispatcherProvider
 import io.getstream.video.android.token.AuthCredentialsProvider
 import io.getstream.video.android.user.UserCredentialsManager
@@ -32,7 +32,7 @@ import kotlinx.coroutines.launch
  * It is used by reflection by [io.getstream.android.push.delegate.PushDelegateProvider] class.
  */
 internal class VideoPushDelegate(context: Context) : PushDelegate(context) {
-    val logger = StreamLog.getLogger("VideoPushDelegate")
+    val logger by taggedLogger("VideoPushDelegate")
     val userPreferences: UserPreferences by lazy {
         UserCredentialsManager.initialize(context)
     }
@@ -98,7 +98,8 @@ internal class VideoPushDelegate(context: Context) : PushDelegate(context) {
     /**
      * Verify if the map contains key/value from Stream Server.
      */
-    private fun Map<String, Any?>.isFromStreamServer(): Boolean = this[KEY_SENDER] == VALUE_STREAM_SENDER
+    private fun Map<String, Any?>.isFromStreamServer(): Boolean =
+        this[KEY_SENDER] == VALUE_STREAM_SENDER
 
     /**
      * Verify if the map contains all keys/values for an incoming call.

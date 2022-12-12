@@ -24,7 +24,7 @@ import android.content.Intent
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
-import io.getstream.log.StreamLog
+import io.getstream.log.taggedLogger
 import io.getstream.video.android.R
 import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.utils.notificationManager
@@ -39,10 +39,18 @@ internal class StreamNotificationBuilderImpl(
     private val getNotificationId: () -> Int
 ) : StreamNotificationBuilder {
 
-    private val logger = StreamLog.getLogger("Call:NtfBuilder")
+    private val logger by taggedLogger("Call:NtfBuilder")
 
-    private val actionBuilder: NotificationActionBuilder by lazy { NotificationActionBuilderImpl(context) }
-    private val actionReceiver: NotificationActionReceiver by lazy { NotificationActionReceiverImpl(context) }
+    private val actionBuilder: NotificationActionBuilder by lazy {
+        NotificationActionBuilderImpl(
+            context
+        )
+    }
+    private val actionReceiver: NotificationActionReceiver by lazy {
+        NotificationActionReceiverImpl(
+            context
+        )
+    }
 
     init {
         initNotificationChannel()
@@ -84,7 +92,10 @@ internal class StreamNotificationBuilderImpl(
         return IdentifiedNotification(notificationId, notification)
     }
 
-    private fun buildNotificationActions(notificationId: Int, state: State.Active): Array<NotificationCompat.Action> {
+    private fun buildNotificationActions(
+        notificationId: Int,
+        state: State.Active
+    ): Array<NotificationCompat.Action> {
         return when (state) {
             is State.Incoming -> arrayOf(
                 actionBuilder.createRejectAction(notificationId, state.callGuid),
@@ -113,7 +124,8 @@ internal class StreamNotificationBuilderImpl(
 
     private fun getContentText(state: State.Active): String {
         return when (state) {
-            is State.Started -> state.users.values.filter { it.id != state.createdByUserId }.joinToString { it.name }
+            is State.Started -> state.users.values.filter { it.id != state.createdByUserId }
+                .joinToString { it.name }
             is State.Drop -> ""
         }
     }

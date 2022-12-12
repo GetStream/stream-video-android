@@ -24,7 +24,7 @@ import android.media.AudioAttributes.ALLOW_CAPTURE_BY_ALL
 import android.media.AudioManager
 import android.os.Build
 import androidx.core.content.getSystemService
-import io.getstream.log.StreamLog
+import io.getstream.log.taggedLogger
 import io.getstream.video.android.audio.AudioDevice
 import io.getstream.video.android.audio.AudioSwitchHandler
 import io.getstream.video.android.call.connection.StreamPeerConnection
@@ -137,7 +137,7 @@ internal class CallClientImpl(
     private val remoteIceServers: List<IceServer>,
 ) : CallClient, SfuSocketListener {
 
-    private val logger = StreamLog.getLogger("Call:WebRtcClient")
+    private val logger by taggedLogger("Call:WebRtcClient")
 
     private var connectionState: ConnectionState = ConnectionState.DISCONNECTED
     private var sessionId: String = ""

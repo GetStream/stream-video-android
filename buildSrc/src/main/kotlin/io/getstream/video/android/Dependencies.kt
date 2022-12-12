@@ -27,7 +27,7 @@ object Versions {
 
     internal const val WEBRTC = "104.5112.05"
     internal const val STREAM = "6.0.0-beta1"
-    internal const val STREAM_LOG = "1.0.0"
+    internal const val STREAM_LOG = "1.1.3"
     internal const val STREAM_PUSH = "1.0.2"
 
     internal const val ANDROIDX_TEST = "1.4.0"

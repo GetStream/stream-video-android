@@ -19,7 +19,7 @@ package io.getstream.video.android.viewmodel
 import android.hardware.camera2.CameraMetadata
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import io.getstream.log.StreamLog
+import io.getstream.log.taggedLogger
 import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.audio.AudioDevice
 import io.getstream.video.android.call.CallClient
@@ -60,7 +60,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
-import java.util.*
+import java.util.UUID
 import io.getstream.video.android.model.state.StreamCallState as State
 
 private const val CONNECT_TIMEOUT = 30_000L
@@ -71,7 +71,7 @@ public class CallViewModel(
     private val usersProvider: UsersProvider,
 ) : ViewModel() {
 
-    private val logger = StreamLog.getLogger("Call:ViewModel")
+    private val logger by taggedLogger("Call:ViewModel")
 
     private val _callState: MutableStateFlow<Call?> = MutableStateFlow(null)
     public val callState: StateFlow<Call?> = _callState

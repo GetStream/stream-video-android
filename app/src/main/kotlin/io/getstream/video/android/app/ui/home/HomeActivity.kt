@@ -56,7 +56,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
-import io.getstream.log.StreamLog
+import io.getstream.log.taggedLogger
 import io.getstream.video.android.app.model.HomeScreenOption
 import io.getstream.video.android.app.ui.components.UserList
 import io.getstream.video.android.app.ui.login.LoginActivity
@@ -73,7 +73,7 @@ import kotlinx.coroutines.launch
 
 class HomeActivity : AppCompatActivity() {
 
-    private val logger = StreamLog.getLogger("Call:HomeView")
+    private val logger by taggedLogger("Call:HomeView")
 
     private val streamVideo by lazy {
         logger.d { "[initStreamVideo] no args" }
