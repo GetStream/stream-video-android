@@ -48,7 +48,6 @@ import org.webrtc.PeerConnection
 import org.webrtc.RTCStatsReport
 import org.webrtc.RtpParameters
 import org.webrtc.RtpReceiver
-import org.webrtc.RtpSender
 import org.webrtc.RtpTransceiver
 import org.webrtc.RtpTransceiver.RtpTransceiverInit
 import org.webrtc.SessionDescription
@@ -221,25 +220,28 @@ public class StreamPeerConnection(
     }
 
     /**
-     * Adds a [MediaStreamTrack] to a given [connection], with its [streamIds].
+     * Adds a local [MediaStreamTrack] with audio to a given [connection], with its [streamIds].
+     * The audio is then sent through a transceiver.
      *
-     * @param mediaStreamTrack The track that contains audio or video.
+     * @param track The track that contains audio.
      * @param streamIds The IDs that represent the stream tracks.
-     * @return [RtpSender] that uses the tracks.
      */
-    public fun addTrack(
-        mediaStreamTrack: MediaStreamTrack,
-        streamIds: List<String>
-    ): RtpSender {
-        logger.i { "[addTrack] #sfu; #$typeTag; track: ${mediaStreamTrack.stringify()}, streamIds: $streamIds" }
-        return connection.addTrack(mediaStreamTrack, streamIds)
-    }
-
     public fun addAudioTransceiver(
         track: MediaStreamTrack,
         streamIds: List<String>
     ) {
         logger.i { "[addAudioTransceiver] #sfu; #$typeTag; track: ${track.stringify()}, streamIds: $streamIds" }
+        val transceiverInit = buildAudioTransceiverInit(streamIds)
+
+        audioTransceiver = connection.addTransceiver(track, transceiverInit)
+    }
+
+    /**
+     * Creates the initialization configuration for the [RtpTransceiver], when sending audio.
+     *
+     * @param streamIds The list of stream IDs to bind to this transceiver.
+     */
+    private fun buildAudioTransceiverInit(streamIds: List<String>): RtpTransceiverInit {
         val fullQuality = RtpParameters.Encoding(
             "a",
             true,
@@ -250,25 +252,33 @@ public class StreamPeerConnection(
 
         val encodings = listOf(fullQuality)
 
-        val transceiverInit = RtpTransceiverInit(
+        return RtpTransceiverInit(
             RtpTransceiver.RtpTransceiverDirection.SEND_ONLY,
             streamIds,
             encodings
         )
-
-        audioTransceiver = connection.addTransceiver(track, transceiverInit)
     }
 
     /**
      * Adds a local [MediaStreamTrack] with video to a given [connection], with its [streamIds].
-     * The video is then sent in three different resolutions using simulcast.
+     * The video is then sent in a few different resolutions using simulcast.
      *
      * @param track The track that contains video.
      * @param streamIds The IDs that represent the stream tracks.
      */
     public fun addVideoTransceiver(track: MediaStreamTrack, streamIds: List<String>) {
         logger.d { "[addVideoTransceiver] #sfu; #$typeTag; track: ${track.stringify()}, streamIds: $streamIds" }
+        val transceiverInit = buildVideoTransceiverInit(streamIds)
 
+        videoTransceiver = connection.addTransceiver(track, transceiverInit)
+    }
+
+    /**
+     * Creates the initialization configuration for the [RtpTransceiver], when sending video.
+     *
+     * @param streamIds The list of stream IDs to bind to this transceiver.
+     */
+    private fun buildVideoTransceiverInit(streamIds: List<String>): RtpTransceiverInit {
         val quarterQuality = RtpParameters.Encoding(
             "q",
             true,
@@ -295,13 +305,11 @@ public class StreamPeerConnection(
 
         val encodings = listOf(quarterQuality, halfQuality, fullQuality)
 
-        val transceiverInit = RtpTransceiverInit(
+        return RtpTransceiverInit(
             RtpTransceiver.RtpTransceiverDirection.SEND_ONLY,
             streamIds,
             encodings
         )
-
-        videoTransceiver = connection.addTransceiver(track, transceiverInit)
     }
 
     /**
