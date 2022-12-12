@@ -16,11 +16,14 @@
 
 package io.getstream.video.android.compose.theme
 
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import io.getstream.video.android.compose.utils.floatResource
+import io.getstream.video.android.compose.utils.textSizeResource
+import io.getstream.video.android.ui.common.R
 
 /**
  * Contains all the dimens we provide for our components.
@@ -60,7 +63,7 @@ public data class StreamDimens(
     public val callParticipantInfoMenuAppBarHeight: Dp,
     public val callParticipantInfoMenuOptionsHeight: Dp,
     public val callParticipantsInfoMenuOptionsButtonHeight: Dp,
-    public val callParticipantsInfoAvatarSize: Dp
+    public val callParticipantsInfoAvatarSize: Dp,
 ) {
     public companion object {
         /**
@@ -68,38 +71,41 @@ public data class StreamDimens(
          *
          * @return A [StreamDimens] instance holding our default dimensions.
          */
-        public fun defaultDimens(): StreamDimens = StreamDimens(
-            callAvatarSize = 80.dp,
-            singleAvatarSize = 160.dp,
-            headerElevation = 4.dp,
-            largeButtonSize = 80.dp,
-            mediumButtonSize = 64.dp,
-            smallButtonSize = 32.dp,
-            topAppbarHeightSize = 64.dp,
-            avatarAppbarPadding = 100.dp,
-            singleAvatarAppbarPadding = 20.dp,
-            participantsTextPadding = 65.dp,
-            topAppbarTextSize = 17.sp,
-            directCallUserNameTextSize = 34.sp,
-            groupCallUserNameTextSize = 24.sp,
-            onCallStatusTextSize = 20.sp,
-            onCallStatusTextAlpha = 0.6f,
-            buttonToggleOnAlpha = 0.4f,
-            buttonToggleOffAlpha = 1.0f,
-            incomingCallOptionsBottomPadding = 44.dp,
-            callAppBarPadding = 12.dp,
-            callAppBarLeadingContentSpacingStart = 0.dp,
-            callAppBarLeadingContentSpacingEnd = 0.dp,
-            callAppBarCenterContentSpacingStart = 8.dp,
-            callAppBarCenterContentSpacingEnd = 0.dp,
-            callAppBarTrailingContentSpacingStart = 8.dp,
-            callAppBarTrailingContentSpacingEnd = 8.dp,
-            callControlButtonSize = 50.dp,
-            callControlsSheetHeight = 96.dp,
-            callParticipantInfoMenuAppBarHeight = 64.dp,
-            callParticipantInfoMenuOptionsHeight = 56.dp,
-            callParticipantsInfoMenuOptionsButtonHeight = 40.dp,
-            callParticipantsInfoAvatarSize = 56.dp
-        )
+        @Composable
+        public fun defaultDimens(): StreamDimens {
+            return StreamDimens(
+                callAvatarSize = dimensionResource(id = R.dimen.callAvatarSize),
+                singleAvatarSize = dimensionResource(id = R.dimen.singleAvatarSize),
+                headerElevation = dimensionResource(id = R.dimen.headerElevation),
+                largeButtonSize = dimensionResource(id = R.dimen.largeButtonSize),
+                mediumButtonSize = dimensionResource(id = R.dimen.mediumButtonSize),
+                smallButtonSize = dimensionResource(id = R.dimen.smallButtonSize),
+                topAppbarHeightSize = dimensionResource(id = R.dimen.topAppbarHeightSize),
+                avatarAppbarPadding = dimensionResource(id = R.dimen.avatarAppbarPadding),
+                singleAvatarAppbarPadding = dimensionResource(id = R.dimen.singleAvatarAppbarPadding),
+                participantsTextPadding = dimensionResource(id = R.dimen.participantsTextPadding),
+                topAppbarTextSize = textSizeResource(id = R.dimen.topAppbarTextSize),
+                directCallUserNameTextSize = textSizeResource(id = R.dimen.directCallUserNameTextSize),
+                groupCallUserNameTextSize = textSizeResource(id = R.dimen.groupCallUserNameTextSize),
+                onCallStatusTextSize = textSizeResource(id = R.dimen.onCallStatusTextSize),
+                onCallStatusTextAlpha = floatResource(R.dimen.onCallStatusTextAlpha),
+                buttonToggleOnAlpha = floatResource(R.dimen.buttonToggleOnAlpha),
+                buttonToggleOffAlpha = floatResource(R.dimen.buttonToggleOffAlpha),
+                incomingCallOptionsBottomPadding = dimensionResource(id = R.dimen.incomingCallOptionsBottomPadding),
+                callAppBarPadding = dimensionResource(id = R.dimen.callAppBarPadding),
+                callAppBarLeadingContentSpacingStart = dimensionResource(id = R.dimen.callAppBarLeadingContentSpacingStart),
+                callAppBarLeadingContentSpacingEnd = dimensionResource(id = R.dimen.callAppBarLeadingContentSpacingEnd),
+                callAppBarCenterContentSpacingStart = dimensionResource(id = R.dimen.callAppBarCenterContentSpacingStart),
+                callAppBarTrailingContentSpacingStart = dimensionResource(id = R.dimen.callAppBarTrailingContentSpacingStart),
+                callAppBarTrailingContentSpacingEnd = dimensionResource(id = R.dimen.callAppBarTrailingContentSpacingEnd),
+                callAppBarCenterContentSpacingEnd = dimensionResource(id = R.dimen.callAppBarCenterContentSpacingEnd),
+                callControlButtonSize = dimensionResource(id = R.dimen.callControlButtonSize),
+                callControlsSheetHeight = dimensionResource(id = R.dimen.callControlsSheetHeight),
+                callParticipantInfoMenuAppBarHeight = dimensionResource(id = R.dimen.callParticipantInfoMenuAppBarHeight),
+                callParticipantInfoMenuOptionsHeight = dimensionResource(id = R.dimen.callParticipantInfoMenuOptionsHeight),
+                callParticipantsInfoMenuOptionsButtonHeight = dimensionResource(id = R.dimen.callParticipantsInfoMenuOptionsButtonHeight),
+                callParticipantsInfoAvatarSize = dimensionResource(id = R.dimen.callParticipantsInfoAvatarSize)
+            )
+        }
     }
 }

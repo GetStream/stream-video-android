@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CallMediaButton">
+        <attr name="iconSrc" format="reference" />
+        <attr name="isEnabled" format="boolean" />
+    </declare-styleable>
+</resources>

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.ui.xml.ui.components.mock
+package io.getstream.video.android.ui.xml.utils
 
 import io.getstream.video.android.model.CallParticipantState
-import stream.video.sfu.models.User
+import stream.video.coordinator.user_v1.User
 
 internal val mockParticipant: CallParticipantState
     inline get() = mockUsers[0].toCallParticipant()
@@ -31,14 +31,13 @@ private fun User.toCallParticipant() =
         name = this.name,
         profileImageURL = this.image_url,
         role = this.role,
-        hasAudio = false,
-        hasVideo = false,
         isOnline = false,
         track = null,
-        trackSize = 0 to 0,
+        videoTrackSize = 0 to 0,
         isLocal = false,
         audioLevel = 0f,
-        idPrefix = ""
+        idPrefix = "",
+        sessionId = ""
     )
 
 @PublishedApi

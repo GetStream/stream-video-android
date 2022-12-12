@@ -18,7 +18,6 @@ package io.getstream.video.android.ui.xml.binding
 
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
-import io.getstream.video.android.call.state.CustomAction
 import io.getstream.video.android.call.state.FlipCamera
 import io.getstream.video.android.call.state.LeaveCall
 import io.getstream.video.android.call.state.ToggleCamera
@@ -32,12 +31,12 @@ import io.getstream.video.android.viewmodel.CallViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 
-public fun ActiveCallView.bindTo(
+public fun ActiveCallView.bindView(
     viewModel: CallViewModel,
     lifecycleOwner: LifecycleOwner,
 ) {
-    setOnControlItemClickListener {
-        viewModel.onCallAction(it.action)
+    setOnControlItemClickListener { item ->
+        viewModel.onCallAction(item.action)
     }
 
     setControlItems(

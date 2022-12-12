@@ -17,28 +17,30 @@
 package io.getstream.video.android.ui.xml
 
 import android.Manifest
+import android.app.PictureInPictureParams
 import android.content.Intent
-import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Rational
 import android.view.WindowManager
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.CallViewModelFactoryProvider
 import io.getstream.video.android.PermissionManagerProvider
 import io.getstream.video.android.StreamVideoProvider
+import io.getstream.video.android.call.state.CancelCall
 import io.getstream.video.android.call.state.ToggleCamera
 import io.getstream.video.android.call.state.ToggleMicrophone
 import io.getstream.video.android.model.state.StreamCallState
 import io.getstream.video.android.permission.PermissionManager
 import io.getstream.video.android.permission.StreamPermissionManagerImpl
-import io.getstream.video.android.ui.xml.binding.bindTo
+import io.getstream.video.android.ui.xml.binding.bindView
 import io.getstream.video.android.ui.xml.databinding.ActivityCallBinding
 import io.getstream.video.android.viewmodel.CallViewModel
 import io.getstream.video.android.viewmodel.CallViewModelFactory
@@ -94,15 +96,33 @@ public abstract class AbstractXmlCallActivity :
         callPermissionManager = initPermissionManager()
         showWhenLockedAndTurnScreenOn()
         super.onCreate(savedInstanceState)
-
         setContentView(binding.root)
-        binding.activeCallView.bindTo(callViewModel, lifecycleOwner = this)
+
+        binding.activeCallView.bindView(callViewModel, lifecycleOwner = this)
+        binding.outgoingCallView.bindView(callViewModel, lifecycleOwner = this)
+        binding.outgoingCallView.backListener = { handleBackPressed() }
+        binding.incomingCallView.bindView(callViewModel, lifecycleOwner = this)
+        binding.incomingCallView.backListener = { handleBackPressed() }
 
         lifecycleScope.launchWhenCreated {
-            callViewModel.streamCallState.collect {
-                if (it is StreamCallState.Idle) {
-                    //TODO
-                    // finish()
+            callViewModel.streamCallState.collect { state ->
+                println(state)
+                when {
+                    state is StreamCallState.Incoming && !state.acceptedByMe -> {
+                        showIncomingScreen()
+                    }
+
+                    state is StreamCallState.Outgoing && !state.acceptedByCallee -> {
+                        showOutgoingScreen()
+                    }
+
+                    state is StreamCallState.Idle -> {
+                        finish()
+                    }
+
+                    else -> {
+                        showActiveCallScreen()
+                    }
                 }
             }
         }
@@ -111,6 +131,24 @@ public abstract class AbstractXmlCallActivity :
     override fun onResume() {
         super.onResume()
         startVideoFlow()
+    }
+
+    private fun showOutgoingScreen() {
+        binding.outgoingCallView.isVisible = true
+        binding.incomingCallView.isVisible = false
+        binding.activeCallView.isVisible = false
+    }
+
+    private fun showIncomingScreen() {
+        binding.outgoingCallView.isVisible = false
+        binding.incomingCallView.isVisible = true
+        binding.activeCallView.isVisible = false
+    }
+
+    private fun showActiveCallScreen() {
+        binding.outgoingCallView.isVisible = false
+        binding.incomingCallView.isVisible = false
+        binding.activeCallView.isVisible = true
     }
 
     private fun startSettings() {
@@ -152,6 +190,65 @@ public abstract class AbstractXmlCallActivity :
             window.addFlags(
                 WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
             )
+        }
+    }
+
+    /**
+     * Triggers when the user taps on the system or header back button.
+     *
+     * Attempts to show Picture in Picture mode, if the user allows it and your Application supports
+     * the feature.
+     */
+    protected open fun handleBackPressed() {
+        val callState = callViewModel.streamCallState.value
+
+        if (callState !is StreamCallState.Connected) {
+            closeCall()
+            return
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                callViewModel.dismissOptions()
+
+                enterPictureInPictureMode(
+                    PictureInPictureParams.Builder().setAspectRatio(Rational(9, 16)).apply {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                            this.setAutoEnterEnabled(true)
+                        }
+                    }.build()
+                )
+            } else {
+                enterPictureInPictureMode()
+            }
+        } else {
+            closeCall()
+        }
+    }
+
+    private fun closeCall() {
+        callViewModel.onCallAction(CancelCall)
+        callViewModel.clearState()
+        finish()
+    }
+
+    override fun onStop() {
+        super.onStop()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            val isInPiP = isInPictureInPictureMode
+
+            if (isInPiP) {
+                callViewModel.onCallAction(CancelCall)
+                callViewModel.clearState()
+            }
+        }
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            callViewModel.onPictureInPictureModeChanged(isInPictureInPictureMode)
         }
     }
 }

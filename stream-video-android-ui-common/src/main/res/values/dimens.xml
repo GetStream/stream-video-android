@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="callAvatarSize">80dp</dimen>
+    <dimen name="singleAvatarSize">160dp</dimen>
+    <dimen name="headerElevation">4dp</dimen>
+    <dimen name="largeButtonSize">80dp</dimen>
+    <dimen name="mediumButtonSize">64dp</dimen>
+    <dimen name="smallButtonSize">32dp</dimen>
+    <dimen name="topAppbarHeightSize">64dp</dimen>
+    <dimen name="avatarAppbarPadding">100dp</dimen>
+    <dimen name="singleAvatarAppbarPadding">20dp</dimen>
+    <dimen name="participantsTextPadding">65dp</dimen>
+    <dimen name="topAppbarTextSize">17sp</dimen>
+    <dimen name="directCallUserNameTextSize">34sp</dimen>
+    <dimen name="groupCallUserNameTextSize">24sp</dimen>
+    <dimen name="onCallStatusTextSize">20sp</dimen>
+    <item name="onCallStatusTextAlpha" type="dimen" format="float">0.6</item>
+    <item name="buttonToggleOnAlpha" type="dimen" format="float">1.0</item>
+    <item name="buttonToggleOffAlpha" type="dimen" format="float">0.4</item>
+    <dimen name="incomingCallOptionsBottomPadding">44dp</dimen>
+    <dimen name="callAppBarPadding">12dp</dimen>
+    <dimen name="callAppBarLeadingContentSpacingStart">0dp</dimen>
+    <dimen name="callAppBarLeadingContentSpacingEnd">0dp</dimen>
+    <dimen name="callAppBarCenterContentSpacingStart">8dp</dimen>
+    <dimen name="callAppBarCenterContentSpacingEnd">0dp</dimen>
+    <dimen name="callAppBarTrailingContentSpacingStart">8dp</dimen>
+    <dimen name="callAppBarTrailingContentSpacingEnd">8dp</dimen>
+    <dimen name="callControlButtonSize">50dp</dimen>
+    <dimen name="callControlsSheetHeight">96dp</dimen>
+    <dimen name="callParticipantInfoMenuAppBarHeight">64dp</dimen>
+    <dimen name="callParticipantInfoMenuOptionsHeight">56dp</dimen>
+    <dimen name="callParticipantsInfoMenuOptionsButtonHeight">40dp</dimen>
+    <dimen name="callParticipantsInfoAvatarSize">56dp</dimen>
+
+    <dimen name="title1TextSize">24sp</dimen>
+    <dimen name="title1LineHeight">34sp</dimen>
+    <dimen name="title3TextSize">18sp</dimen>
+    <dimen name="title3LineHeight">23sp</dimen>
+    <dimen name="bodyTextSize">14sp</dimen>
+    <dimen name="footnoteTextSize">12sp</dimen>
+    <dimen name="footnoteLineHeight">20sp</dimen>
+    <dimen name="captionTextSize">10sp</dimen>
+    <dimen name="captionLineHeight">16sp</dimen>
+    <dimen name="tabBarTextSize">10sp</dimen>
+
+</resources>

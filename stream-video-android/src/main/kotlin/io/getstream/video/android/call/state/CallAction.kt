@@ -91,3 +91,4 @@ public data class InviteUsersToCall(
 public data class CustomAction(
     val data: Map<Any, Any> = emptyMap()
 ) : CallAction()
+

@@ -1,6 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<io.getstream.video.android.ui.xml.widget.active.ActiveCallView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/activeCallView"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" />
+    android:layout_height="match_parent"
+    >
+
+    <io.getstream.video.android.ui.xml.widget.incoming.IncomingCallView
+        android:id="@+id/incomingCallView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        />
+
+    <io.getstream.video.android.ui.xml.widget.outgoing.OutgoingCallView
+        android:id="@+id/outgoingCallView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        />
+
+    <io.getstream.video.android.ui.xml.widget.active.ActiveCallView
+        android:id="@+id/activeCallView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        />
+
+</FrameLayout>
+

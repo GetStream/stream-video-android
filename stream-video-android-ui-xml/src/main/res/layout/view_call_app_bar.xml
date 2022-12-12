@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout"
+    >
+
+    <FrameLayout
+        android:id="@+id/leadingContent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/centerContent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+
+    <FrameLayout
+        android:id="@+id/centerContent"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/trailingContent"
+        app:layout_constraintStart_toStartOf="@id/leadingContent"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+
+    <FrameLayout
+        android:id="@+id/trailingContent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/centerContent"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+
+    <!--    <ImageView-->
+    <!--        android:id="@+id/backImageView"-->
+    <!--        android:layout_width="wrap_content"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:background="?attr/selectableItemBackgroundBorderless"-->
+    <!--        android:paddingStart="@dimen/callAppBarLeadingContentSpacingStart"-->
+    <!--        android:paddingEnd="@dimen/callAppBarLeadingContentSpacingEnd"-->
+    <!--        android:scaleType="center"-->
+    <!--        android:src="@drawable/ic_arrow_back"-->
+    <!--        app:layout_constraintBottom_toBottomOf="parent"-->
+    <!--        app:layout_constraintEnd_toStartOf="@id/toolbarTitle"-->
+    <!--        app:layout_constraintStart_toStartOf="parent"-->
+    <!--        app:layout_constraintTop_toTopOf="parent"-->
+    <!--        />-->
+
+    <!--    <TextView-->
+    <!--        android:id="@+id/toolbarTitle"-->
+    <!--        android:layout_width="0dp"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:layout_marginStart="@dimen/callAppBarCenterContentSpacingStart"-->
+    <!--        android:layout_marginEnd="@dimen/callAppBarCenterContentSpacingEnd"-->
+    <!--        android:text="@string/default_app_bar_title"-->
+    <!--        android:textColor="@color/stream_text_high_emphasis"-->
+    <!--        android:textSize="@dimen/topAppbarTextSize"-->
+    <!--        app:layout_constraintBottom_toBottomOf="parent"-->
+    <!--        app:layout_constraintEnd_toStartOf="@id/toolbarTrailingImage"-->
+    <!--        app:layout_constraintStart_toEndOf="@id/backImageView"-->
+    <!--        app:layout_constraintTop_toTopOf="parent"-->
+    <!--        />-->
+
+    <!--    <ImageView-->
+    <!--        android:id="@+id/toolbarTrailingImage"-->
+    <!--        android:layout_width="wrap_content"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:layout_marginStart="@dimen/callAppBarTrailingContentSpacingStart"-->
+    <!--        android:layout_marginEnd="@dimen/callAppBarTrailingContentSpacingEnd"-->
+    <!--        android:src="@drawable/ic_participants"-->
+    <!--        app:layout_constraintBottom_toBottomOf="parent"-->
+    <!--        app:layout_constraintEnd_toEndOf="parent"-->
+    <!--        app:layout_constraintStart_toEndOf="@id/toolbarTitle"-->
+    <!--        app:layout_constraintTop_toTopOf="parent"-->
+    <!--        />-->
+
+</merge>
