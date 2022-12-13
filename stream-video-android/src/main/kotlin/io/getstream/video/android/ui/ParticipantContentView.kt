@@ -93,7 +93,7 @@ public class ParticipantContentView : LinearLayout {
         renderTrack(
             findViewById(R.id.firstParticipant),
             call,
-            callParticipant.track
+            callParticipant.videoTrack
         )
     }
 
@@ -106,13 +106,13 @@ public class ParticipantContentView : LinearLayout {
         renderTrack(
             findViewById(R.id.firstParticipant),
             call,
-            first.track
+            first.videoTrack
         )
 
         renderTrack(
             findViewById(R.id.secondParticipant),
             call,
-            second.track
+            second.videoTrack
         )
     }
 
@@ -128,19 +128,19 @@ public class ParticipantContentView : LinearLayout {
         renderTrack(
             findViewById(R.id.firstParticipant),
             call,
-            first.track
+            first.videoTrack
         )
 
         renderTrack(
             findViewById(R.id.secondParticipant),
             call,
-            second.track
+            second.videoTrack
         )
 
         renderTrack(
             findViewById(R.id.thirdParticipant),
             call,
-            third.track
+            third.videoTrack
         )
     }
 
@@ -157,25 +157,25 @@ public class ParticipantContentView : LinearLayout {
         renderTrack(
             findViewById(R.id.firstParticipant),
             call,
-            first.track
+            first.videoTrack
         )
 
         renderTrack(
             findViewById(R.id.secondParticipant),
             call,
-            second.track
+            second.videoTrack
         )
 
         renderTrack(
             findViewById(R.id.thirdParticipant),
             call,
-            third.track
+            third.videoTrack
         )
 
         renderTrack(
             findViewById(R.id.fourthParticipant),
             call,
-            fourth.track
+            fourth.videoTrack
         )
     }
 

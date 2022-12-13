@@ -17,6 +17,7 @@
 package io.getstream.video.android.user
 
 import io.getstream.video.android.model.ApiKey
+import io.getstream.video.android.model.Device
 import io.getstream.video.android.model.User
 
 public interface UserPreferences {
@@ -48,6 +49,12 @@ public interface UserPreferences {
      * @param apiKey The [ApiKey] to store.
      */
     public fun storeApiKey(apiKey: ApiKey)
+
+    public fun storeDevice(device: Device)
+
+    public fun getDevices(): List<Device>
+
+    public fun removeDevices()
 
     /**
      * Used to clear the preferences from any credentials that are stored. Useful when logging out.

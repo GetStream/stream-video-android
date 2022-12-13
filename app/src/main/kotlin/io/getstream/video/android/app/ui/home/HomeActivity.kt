@@ -161,7 +161,7 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun logOut() {
-        videoApp.userPreferences.clear()
+        videoApp.logOut()
         startActivity(Intent(this, LoginActivity::class.java))
         finish()
     }

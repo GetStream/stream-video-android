@@ -61,7 +61,7 @@ public fun CallParticipant(
     isFocused: Boolean = false,
     onRender: (View) -> Unit = {}
 ) {
-    val track = participant.track
+    val track = participant.videoTrack
 
     val containerModifier =
         if (isFocused) modifier.border(

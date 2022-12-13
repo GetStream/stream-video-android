@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.model
 
+@kotlinx.serialization.Serializable
 public data class Device(
     val token: String,
     val pushProvider: String

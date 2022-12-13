@@ -38,7 +38,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import org.webrtc.AudioTrack
 import org.webrtc.EglBase
 import org.webrtc.MediaStream
 import org.webrtc.RendererCommon
@@ -81,6 +80,11 @@ public class Call(
 
     public val primarySpeaker: Flow<CallParticipantState?> = _primarySpeaker
 
+    private val _screenSharingSessions: MutableStateFlow<List<ScreenSharingSession>> =
+        MutableStateFlow(emptyList())
+
+    public val screenSharingSessions: Flow<List<ScreenSharingSession>> = _screenSharingSessions
+
     public val localParticipantId: String
         get() = getCurrentUserId()
 
@@ -90,8 +94,6 @@ public class Call(
     private val audioManager by lazy {
         context.getSystemService<AudioManager>()
     }
-
-    private val remoteAudioTracks = mutableSetOf<AudioTrack>()
 
     public var onStreamAdded: (MediaStream) -> Unit = {}
     public var onStreamRemoved: (MediaStream) -> Unit = {}
@@ -147,20 +149,43 @@ public class Call(
                 logger.v { "[addStream] #sfu; audioTrack: ${track.stringify()}" }
                 track.setEnabled(true)
             }
-
-            remoteAudioTracks.addAll(mediaStream.audioTracks)
-            logger.d { "[addStream] #sfu; remoteAudioTracks: $remoteAudioTracks" }
         }
+
+        if (mediaStream.videoTracks.isEmpty()) {
+            onStreamAdded(mediaStream)
+            return
+        }
+
+        var screenSharingSession: ScreenSharingSession? = null
 
         val updatedList = _callParticipants.value.updateValue(
             predicate = { it.idPrefix in mediaStream.id },
             transformer = {
-                val track = replaceTrackIfNeeded(mediaStream, it.track?.streamId)
+                val track = replaceTrackIfNeeded(mediaStream, it.videoTrack?.streamId)
 
                 if (track != null) {
                     logger.d { "[addStream] updating users with track $track" }
                     track.video.setEnabled(true)
-                    it.copy(track = track)
+
+                    val streamId = mediaStream.id
+                    val videoTrack =
+                        if (TrackType.TRACK_TYPE_VIDEO.name in streamId) track else it.videoTrack
+                    val screenShareTrack =
+                        if (TrackType.TRACK_TYPE_SCREEN_SHARE.name in streamId) track else it.screenSharingTrack
+
+                    val updatedParticipant = it.copy(
+                        videoTrack = videoTrack,
+                        screenSharingTrack = screenShareTrack
+                    )
+
+                    if (screenShareTrack != null) {
+                        screenSharingSession = ScreenSharingSession(
+                            track = screenShareTrack,
+                            participant = updatedParticipant
+                        )
+                    }
+
+                    updatedParticipant
                 } else {
                     it
                 }
@@ -168,6 +193,10 @@ public class Call(
         )
 
         logger.d { "[addStream] updated list $updatedList" }
+        val screenShare = screenSharingSession
+        if (screenShare != null) {
+            addScreenSharingSession(screenShare)
+        }
         _callParticipants.value = updatedList
         onStreamAdded(mediaStream)
     }
@@ -187,15 +216,48 @@ public class Call(
 
     internal fun removeStream(mediaStream: MediaStream) {
         logger.d { "[removeStream] #sfu; mediaStream: $mediaStream" }
+        val streamId = mediaStream.id
         val updatedList = _callParticipants.value.updateValue(
-            predicate = { it.id in mediaStream.id },
+            predicate = { it.id in streamId },
             transformer = {
-                it.copy(track = null, videoTrackSize = 0 to 0)
+                val videoTrack =
+                    if (TrackType.TRACK_TYPE_VIDEO.name in streamId) null else it.videoTrack
+
+                val videoTrackSize =
+                    if (TrackType.TRACK_TYPE_VIDEO.name in streamId) 0 to 0 else it.videoTrackSize
+
+                val screenShareTrack =
+                    if (TrackType.TRACK_TYPE_SCREEN_SHARE.name in streamId) null else it.screenSharingTrack
+
+                it.copy(
+                    videoTrack = videoTrack,
+                    videoTrackSize = videoTrackSize,
+                    screenSharingTrack = screenShareTrack
+                )
             }
         )
 
-        _callParticipants.value = updatedList
+        if (TrackType.TRACK_TYPE_SCREEN_SHARE.name in streamId) {
+            removeScreenShareSession(mediaStream.id)
+        }
         onStreamRemoved(mediaStream)
+        _callParticipants.value = updatedList
+    }
+
+    private fun addScreenSharingSession(screenSharingSession: ScreenSharingSession) {
+        logger.d { "[addScreenSharingSession] session: $screenSharingSession" }
+        val list = _screenSharingSessions.value.toMutableList()
+        val updated = list + screenSharingSession
+
+        _screenSharingSessions.value = updated
+    }
+
+    private fun removeScreenShareSession(id: String) {
+        logger.d { "[removeScreenShareSession] ID: $id" }
+        val list = _screenSharingSessions.value.toMutableList()
+        val updated = list.filter { it.track.streamId == id }
+
+        _screenSharingSessions.value = updated
     }
 
     internal fun setParticipants(participants: List<CallParticipantState>) {
@@ -247,7 +309,7 @@ public class Call(
         val localParticipant = participantsList.firstOrNull { it.isLocal }
 
         if (speaker?.isLocal == true) {
-            val remoteSpeaker = // Try not to display local participant as speaker.
+            val remoteSpeaker =
                 participantsList.filter { !it.isLocal }.maxByOrNull { it.audioLevel }
 
             if (remoteSpeaker != null) {
@@ -255,15 +317,13 @@ public class Call(
             }
         }
 
-        // If previous primary speaker leaves
         if (!participantsList.contains(speaker)) {
-            // Default to another person in room, or local participant.
             speaker = participantsList.filter { !it.isLocal }.maxByOrNull { it.audioLevel }
                 ?: localParticipant
         }
 
         if (speakers.isNotEmpty() && !speakers.contains(speaker)) {
-            val remoteSpeaker = // Try not to display local participant as speaker.
+            val remoteSpeaker =
                 participantsList.filter { !it.isLocal }.maxByOrNull { it.audioLevel }
 
             if (remoteSpeaker != null) {
@@ -285,13 +345,13 @@ public class Call(
         )
 
         val updatedParticipant = localParticipant.copy(
-            track = videoTrack
+            videoTrack = videoTrack
         )
 
         val updated = allParticipants.updateValue(
             predicate = { it.id == getCurrentUserId() },
             transformer = {
-                it.copy(track = videoTrack)
+                it.copy(videoTrack = videoTrack)
             }
         )
 
@@ -323,8 +383,8 @@ public class Call(
         logger.i { "[disconnect] #sfu; no args" }
         audioHandler.stop()
         _callParticipants.value.forEach {
-            val track = it.track
-            it.track = null
+            val track = it.videoTrack
+            it.videoTrack = null
             track?.video?.dispose()
         }
         _callParticipants.value = emptyList()

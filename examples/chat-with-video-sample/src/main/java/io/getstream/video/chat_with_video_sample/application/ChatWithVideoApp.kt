@@ -32,6 +32,7 @@ import io.getstream.video.android.input.CallActivityInput
 import io.getstream.video.android.input.CallServiceInput
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.token.CredentialsProvider
+import io.getstream.video.android.user.UserCredentialsManager
 import io.getstream.video.android.user.UsersProvider
 import io.getstream.video.chat_with_video_sample.BuildConfig
 import io.getstream.video.chat_with_video_sample.ui.call.CallActivity
@@ -113,9 +114,14 @@ class ChatWithVideoApp : Application() {
     }
 
     fun logOut() {
+        val preferences = UserCredentialsManager.initialize(this)
+
         chatClient.disconnect(true).enqueue()
         streamVideo.clearCallState()
+        streamVideo.removeDevices(preferences.getDevices())
     }
 }
+
+internal const val API_KEY = "us83cfwuhy8n"
 
 internal val Context.chatWithVideoApp get() = applicationContext as ChatWithVideoApp
