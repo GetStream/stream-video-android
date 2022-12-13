@@ -30,6 +30,7 @@ import io.getstream.video.android.ui.xml.widget.active.ActiveCallView
 import io.getstream.video.android.ui.xml.widget.control.CallControlItem
 import io.getstream.video.android.viewmodel.CallViewModel
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 
 public fun ActiveCallView.bindView(
@@ -84,7 +85,7 @@ private fun ActiveCallView.observeCallState(
     lifecycleOwner: LifecycleOwner,
 ) {
     lifecycleOwner.lifecycleScope.launchWhenResumed {
-        viewModel.callState.filterNotNull().collectLatest { call ->
+        viewModel.callState.filterNotNull().distinctUntilChanged().collectLatest { call ->
             setParticipantsRendererInitializer { videoRenderer, trackId, onRender ->
                 call.initRenderer(videoRenderer, trackId, onRender)
             }
@@ -98,7 +99,7 @@ private fun ActiveCallView.observeParticipantList(
 ) {
     lifecycleOwner.lifecycleScope.launchWhenResumed {
         viewModel.participantList.collectLatest {
-            setParticipants(it)
+            updateParticipants(it)
         }
     }
 }

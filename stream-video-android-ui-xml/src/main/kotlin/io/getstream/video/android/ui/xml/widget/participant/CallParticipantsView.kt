@@ -22,9 +22,7 @@ import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.constraintlayout.widget.Guideline
-import androidx.core.view.isVisible
 import androidx.transition.TransitionManager
-import io.getstream.log.StreamLog
 import io.getstream.video.android.model.CallParticipantState
 import io.getstream.video.android.ui.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.ui.xml.utils.extensions.updateConstraints
@@ -33,7 +31,11 @@ public class CallParticipantsView : ConstraintLayout {
 
     public constructor(context: Context) : this(context, null)
     public constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
-    public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : this(context, attrs, defStyleAttr, 0)
+    public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : this(context,
+        attrs,
+        defStyleAttr,
+        0)
+
     public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(
         context.createStreamThemeWrapper(),
         attrs,
@@ -42,8 +44,6 @@ public class CallParticipantsView : ConstraintLayout {
     ) {
         init(context, attrs)
     }
-
-    private val logger = StreamLog.getLogger("Call:ParticipantsView")
 
     private val verticalGuideline by lazy {
         context.buildGuideline(
@@ -59,51 +59,63 @@ public class CallParticipantsView : ConstraintLayout {
         )
     }
 
-    private val childList = arrayListOf(
-        context.buildParticipantView(),
-        context.buildParticipantView(),
-        context.buildParticipantView(),
-        context.buildParticipantView()
-    )
+    private val childList = arrayListOf<CallParticipantView>()
+
+    private lateinit var rendererInitializer: RendererInitializer
 
     private fun init(context: Context, attrs: AttributeSet?) {
         addView(verticalGuideline)
         addView(horizontalGuideline)
-
-        childList.forEach { addView(it) }
     }
 
     public fun setRendererInitializer(rendererInitializer: RendererInitializer) {
-        logger.i { "[setRendererInitializer] rendererInitializer: $rendererInitializer" }
+        this.rendererInitializer = rendererInitializer
         childList.forEach {
             it.setRendererInitializer(rendererInitializer)
         }
     }
 
-    public fun setParticipants(participants: List<CallParticipantState>) {
-        logger.i { "[setParticipants] participants: $participants" }
-        show(participants.size)
-        participants.take(4).forEachIndexed { index, state ->
-            childList.getOrNull(index)?.also { participantView ->
-                participantView.isVisible = true
-                participantView.setData(state.profileImageURL.orEmpty(), state.name.ifEmpty { state.id })
-                state.track?.also {
-                    participantView.setTrack(it)
+    public fun updateParticipants(participants: List<CallParticipantState>) {
+        when {
+            participants.size > childList.size -> {
+                val missingParticipants = participants.filter { !childList.map { it.tag }.contains(it.id) }
+                missingParticipants.forEach { participant ->
+                    val view = context.buildParticipantView(participant.id).also { view ->
+                        if (::rendererInitializer.isInitialized) view.setRendererInitializer(rendererInitializer)
+                        view.setData(participant.id, participant.name)
+                        participant.track?.let {
+                            view.setTrack(it)
+                        }
+                    }
+                    childList.add(view)
+                    addView(view)
+                }
+                updateConstraints()
+            }
+
+            participants.size < childList.size -> {
+                val surplusViews = childList.filter { !participants.map { it.id }.contains(it.tag) }.toSet()
+                childList.removeAll(surplusViews)
+                updateConstraints()
+                surplusViews.forEach {
+                    removeView(it)
+                }
+            }
+
+            else -> {
+                participants.forEach { participant ->
+                    participant.track?.let { track ->
+                        childList.firstOrNull { it.tag == participant.id }?.setTrack(track)
+                    }
                 }
             }
         }
     }
 
-    private fun show(count: Int) {
-        logger.i { "[show] count: $count" }
+    private fun updateConstraints() {
         TransitionManager.beginDelayedTransition(this)
-        childList.forEachIndexed { index, view ->
-            val isVisible = index < count
-            logger.v { "[show] index: $index, isVisible: $isVisible" }
-            view.isVisible = isVisible
-        }
         updateConstraints {
-            when (count) {
+            when (childList.size) {
                 1 -> {
                     toParent(childList[0])
                 }
@@ -181,14 +193,14 @@ public class CallParticipantsView : ConstraintLayout {
     }
 }
 
-private fun Context.buildParticipantView(): CallParticipantView {
+private fun Context.buildParticipantView(userId: String): CallParticipantView {
     return CallParticipantView(this).apply {
         this.id = View.generateViewId()
+        this.tag = userId
         this.layoutParams = ConstraintLayout.LayoutParams(
             ConstraintLayout.LayoutParams.MATCH_CONSTRAINT,
             ConstraintLayout.LayoutParams.MATCH_CONSTRAINT
         )
-        this.isVisible = false
     }
 }
 

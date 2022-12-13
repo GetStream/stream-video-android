@@ -67,7 +67,7 @@ public class ActiveCallView : ConstraintLayout {
         binding.participantsView.setRendererInitializer(rendererInitializer)
     }
 
-    public fun setParticipants(participants: List<CallParticipantState>) {
-        binding.participantsView.setParticipants(participants)
+    public fun updateParticipants(participants: List<CallParticipantState>) {
+        binding.participantsView.updateParticipants(participants)
     }
 }
