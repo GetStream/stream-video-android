@@ -467,6 +467,10 @@ public final class io/getstream/video/android/compose/ui/components/participants
 	public static final fun CallParticipants (Lio/getstream/video/android/model/Call;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 
+public final class io/getstream/video/android/compose/ui/components/participants/FloatingParticipantItemKt {
+	public static final fun FloatingParticipantItem (Lio/getstream/video/android/model/Call;Lio/getstream/video/android/model/CallParticipantState;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+}
+
 public final class io/getstream/video/android/compose/ui/components/participants/LocalVideoKt {
 	public static final fun LocalVideo (Lio/getstream/video/android/model/Call;Lio/getstream/video/android/model/CallParticipantState;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }

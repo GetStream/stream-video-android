@@ -31,12 +31,15 @@ import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.ui.components.participants.CallParticipant
 import io.getstream.video.android.model.Call
 
-// TODO - this should show _other_ participants, not the local one
 @Composable
-internal fun Participants(modifier: Modifier, call: Call, onRender: (View) -> Unit) {
+internal fun Participants(
+    call: Call,
+    onRender: (View) -> Unit,
+    modifier: Modifier = Modifier
+) {
     val primarySpeaker by call.primarySpeaker.collectAsState(initial = null)
     val roomParticipants by call.callParticipants.collectAsState(emptyList())
-    val participants = roomParticipants.distinctBy { it.id }
+    val participants = roomParticipants.filter { !it.isLocal }.distinctBy { it.id }
 
     when (participants.size) {
         0 -> {

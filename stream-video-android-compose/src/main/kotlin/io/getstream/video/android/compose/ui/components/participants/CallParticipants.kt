@@ -19,8 +19,16 @@ package io.getstream.video.android.compose.ui.components.participants
 import android.view.View
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.ui.components.participants.internal.Participants
 import io.getstream.video.android.model.Call
 
@@ -44,25 +52,18 @@ public fun CallParticipants(
             onRender = onRender
         )
 
-//        val localParticipantState by room.localParticipant.collectAsState(initial = null)
-//        val currentLocal = localParticipantState
-//
-//        if (currentLocal != null) { // TODO - fix once we import correct Surface views
-//            FloatingParticipantItem(
-//                room = room,
-//                callParticipant = currentLocal,
-//                modifier = Modifier
-//                    .align(Alignment.TopEnd)
-//                    .size(height = 150.dp, width = 125.dp)
-//                    .padding(16.dp)
-//                    .clip(RoundedCornerShape(16.dp)),
-//                onRender = {
-//                    (it as? SurfaceViewRenderer)?.apply {
-//                        setZOrderOnTop(true)
-//                        setZOrderMediaOverlay(true)
-//                    }
-//                }
-//            )
-//        }
+        val localParticipantState by call.localParticipant.collectAsState(initial = null)
+        val currentLocal = localParticipantState
+
+        if (currentLocal != null) {
+            FloatingParticipantItem(
+                call = call,
+                localParticipant = currentLocal,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .size(height = 150.dp, width = 125.dp)
+                    .clip(RoundedCornerShape(16.dp)),
+            )
+        }
     }
 }

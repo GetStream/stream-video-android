@@ -114,7 +114,8 @@ public fun ActiveCallContent(
                 if (!isInPiPMode) {
                     Box(modifier = Modifier.fillMaxSize()) {
                         CallParticipants(
-                            modifier = Modifier.fillMaxSize(), call = roomState
+                            modifier = Modifier.fillMaxSize(),
+                            call = roomState
                         )
 
                         CallControls(
