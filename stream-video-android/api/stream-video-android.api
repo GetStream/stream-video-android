@@ -954,7 +954,7 @@ public abstract interface class io/getstream/video/android/call/CallClient {
 }
 
 public final class io/getstream/video/android/call/connection/StreamPeerConnection : org/webrtc/PeerConnection$Observer {
-	public fun <init> (Lkotlinx/coroutines/CoroutineScope;Lio/getstream/video/android/model/StreamPeerType;Lorg/webrtc/MediaConstraints;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
+	public fun <init> (Lkotlinx/coroutines/CoroutineScope;Lio/getstream/video/android/model/StreamPeerType;Lorg/webrtc/MediaConstraints;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
 	public final fun addAudioTransceiver (Lorg/webrtc/MediaStreamTrack;Ljava/util/List;)V
 	public final fun addIceCandidate (Lio/getstream/video/android/model/IceCandidate;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun addVideoTransceiver (Lorg/webrtc/MediaStreamTrack;Ljava/util/List;)V
@@ -992,8 +992,8 @@ public final class io/getstream/video/android/call/connection/StreamPeerConnecti
 	public final fun makeAudioSource (Lorg/webrtc/MediaConstraints;)Lorg/webrtc/AudioSource;
 	public static synthetic fun makeAudioSource$default (Lio/getstream/video/android/call/connection/StreamPeerConnectionFactory;Lorg/webrtc/MediaConstraints;ILjava/lang/Object;)Lorg/webrtc/AudioSource;
 	public final fun makeAudioTrack (Lorg/webrtc/AudioSource;Ljava/lang/String;)Lorg/webrtc/AudioTrack;
-	public final fun makePeerConnection (Lkotlinx/coroutines/CoroutineScope;Lorg/webrtc/PeerConnection$RTCConfiguration;Lio/getstream/video/android/model/StreamPeerType;Lorg/webrtc/MediaConstraints;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)Lio/getstream/video/android/call/connection/StreamPeerConnection;
-	public static synthetic fun makePeerConnection$default (Lio/getstream/video/android/call/connection/StreamPeerConnectionFactory;Lkotlinx/coroutines/CoroutineScope;Lorg/webrtc/PeerConnection$RTCConfiguration;Lio/getstream/video/android/model/StreamPeerType;Lorg/webrtc/MediaConstraints;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)Lio/getstream/video/android/call/connection/StreamPeerConnection;
+	public final fun makePeerConnection (Lkotlinx/coroutines/CoroutineScope;Lorg/webrtc/PeerConnection$RTCConfiguration;Lio/getstream/video/android/model/StreamPeerType;Lorg/webrtc/MediaConstraints;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)Lio/getstream/video/android/call/connection/StreamPeerConnection;
+	public static synthetic fun makePeerConnection$default (Lio/getstream/video/android/call/connection/StreamPeerConnectionFactory;Lkotlinx/coroutines/CoroutineScope;Lorg/webrtc/PeerConnection$RTCConfiguration;Lio/getstream/video/android/model/StreamPeerType;Lorg/webrtc/MediaConstraints;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)Lio/getstream/video/android/call/connection/StreamPeerConnection;
 	public final fun makeVideoSource (Z)Lorg/webrtc/VideoSource;
 	public final fun makeVideoTrack (Lorg/webrtc/VideoSource;Ljava/lang/String;)Lorg/webrtc/VideoTrack;
 }
