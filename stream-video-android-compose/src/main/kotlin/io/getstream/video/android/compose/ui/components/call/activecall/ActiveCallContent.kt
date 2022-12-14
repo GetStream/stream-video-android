@@ -126,7 +126,8 @@ public fun ActiveCallContent(
                         call = roomState,
                     )
                 }
-            })
+            }
+        )
     } else {
         if (roomState != null) {
             pictureInPictureContent(roomState)

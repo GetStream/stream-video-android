@@ -50,7 +50,6 @@ import io.getstream.video.android.permission.StreamPermissionManagerImpl
 import io.getstream.video.android.viewmodel.CallViewModel
 import io.getstream.video.android.viewmodel.CallViewModelFactory
 
-
 public abstract class AbstractComposeCallActivity :
     AppCompatActivity(),
     StreamVideoProvider,
