@@ -60,7 +60,8 @@ public fun CallControls(
     Surface(
         modifier = modifier,
         shape = VideoTheme.shapes.callControls,
-        color = VideoTheme.colors.appBackground
+        color = VideoTheme.colors.barsBackground,
+        elevation = 8.dp
     ) {
         CallControlsActions(
             actions = buildDefaultCallControlActions(callMediaState),

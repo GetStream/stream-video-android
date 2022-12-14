@@ -19,6 +19,8 @@ package io.getstream.video.android.compose.ui.components.call.activecall
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -32,6 +34,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.call.state.CallAction
 import io.getstream.video.android.call.state.CallMediaState
@@ -122,7 +125,11 @@ public fun ActiveCallContent(
                     CallParticipants(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(it),
+                            .padding(
+                                top = it.calculateTopPadding(),
+                                start = it.calculateStartPadding(layoutDirection = LocalLayoutDirection.current),
+                                end = it.calculateEndPadding(layoutDirection = LocalLayoutDirection.current)
+                            ),
                         call = roomState,
                     )
                 }

@@ -25,6 +25,8 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -32,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.audio.SoundIndicator
@@ -90,7 +93,13 @@ private fun ParticipantVideo(
     track: VideoTrack?,
     onRender: (View) -> Unit
 ) {
-    if (track != null && track.video.enabled()) {
+    val isVideoEnabled = try {
+        track?.video?.enabled() == true
+    } catch (error: Throwable) {
+        false
+    }
+
+    if (track != null && isVideoEnabled) {
         VideoRenderer(
             call = call,
             videoTrack = track,
@@ -114,6 +123,7 @@ private fun BoxScope.ParticipantLabel(
             .align(labelPosition)
             .padding(16.dp)
             .height(36.dp)
+            .wrapContentWidth()
             .background(
                 Color.DarkGray,
                 shape = RoundedCornerShape(8.dp)
@@ -124,10 +134,14 @@ private fun BoxScope.ParticipantLabel(
             participant.id
         }
         Text(
-            modifier = Modifier.padding(start = 8.dp, end = 8.dp),
+            modifier = Modifier
+                .widthIn(max = 64.dp)
+                .padding(start = 8.dp),
             text = name,
             style = VideoTheme.typography.bodyBold,
-            color = Color.White
+            color = Color.White,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
 
         SoundIndicator(participant.hasAudio, participant.audioLevel)
