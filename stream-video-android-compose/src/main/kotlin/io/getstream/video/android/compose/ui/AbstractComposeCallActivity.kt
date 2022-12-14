@@ -31,7 +31,9 @@ import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.background
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.CallViewModelFactoryProvider
 import io.getstream.video.android.PermissionManagerProvider
@@ -119,6 +121,7 @@ public abstract class AbstractComposeCallActivity :
     protected open fun buildContent(): (@Composable () -> Unit) = {
         VideoTheme {
             CallContent(
+                modifier = Modifier.background(color = VideoTheme.colors.appBackground),
                 viewModel = callViewModel,
                 onCallAction = { action ->
                     when (action) {
