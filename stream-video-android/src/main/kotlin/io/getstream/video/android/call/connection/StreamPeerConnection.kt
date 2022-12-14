@@ -160,7 +160,8 @@ public class StreamPeerConnection(
         logger.d { "[setRemoteDescription] #sfu; #$typeTag; answerSdp: ${sessionDescription.stringify()}" }
         return setValue {
             connection.setRemoteDescription(
-                it, SessionDescription(
+                it,
+                SessionDescription(
                     sessionDescription.type, sessionDescription.description.mungeCodecs()
                 )
             )
@@ -221,7 +222,8 @@ public class StreamPeerConnection(
      * @param streamIds The IDs that represent the stream tracks.
      */
     public fun addAudioTransceiver(
-        track: MediaStreamTrack, streamIds: List<String>
+        track: MediaStreamTrack,
+        streamIds: List<String>
     ) {
         logger.i { "[addAudioTransceiver] #sfu; #$typeTag; track: ${track.stringify()}, streamIds: $streamIds" }
         val transceiverInit = buildAudioTransceiverInit(streamIds)
