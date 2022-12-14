@@ -173,9 +173,20 @@ public class Call(
                     val screenShareTrack =
                         if (TrackType.TRACK_TYPE_SCREEN_SHARE.name in streamId) track else it.screenSharingTrack
 
+                    val tracks = it.publishedTracks.toMutableSet()
+
+                    if (videoTrack != null) {
+                        tracks.add(TrackType.TRACK_TYPE_VIDEO)
+                    }
+
+                    if (screenShareTrack != null) {
+                        tracks.add(TrackType.TRACK_TYPE_SCREEN_SHARE)
+                    }
+
                     val updatedParticipant = it.copy(
                         videoTrack = videoTrack,
-                        screenSharingTrack = screenShareTrack
+                        screenSharingTrack = screenShareTrack,
+                        publishedTracks = tracks
                     )
 
                     if (screenShareTrack != null) {
@@ -214,48 +225,18 @@ public class Call(
         }
     }
 
-    internal fun removeStream(mediaStream: MediaStream) {
-        logger.d { "[removeStream] #sfu; mediaStream: $mediaStream" }
-        val streamId = mediaStream.id
-        val updatedList = _callParticipants.value.updateValue(
-            predicate = { it.id in streamId },
-            transformer = {
-                val videoTrack =
-                    if (TrackType.TRACK_TYPE_VIDEO.name in streamId) null else it.videoTrack
-
-                val videoTrackSize =
-                    if (TrackType.TRACK_TYPE_VIDEO.name in streamId) 0 to 0 else it.videoTrackSize
-
-                val screenShareTrack =
-                    if (TrackType.TRACK_TYPE_SCREEN_SHARE.name in streamId) null else it.screenSharingTrack
-
-                it.copy(
-                    videoTrack = videoTrack,
-                    videoTrackSize = videoTrackSize,
-                    screenSharingTrack = screenShareTrack
-                )
-            }
-        )
-
-        if (TrackType.TRACK_TYPE_SCREEN_SHARE.name in streamId) {
-            removeScreenShareSession(mediaStream.id)
-        }
-        onStreamRemoved(mediaStream)
-        _callParticipants.value = updatedList
-    }
-
     private fun addScreenSharingSession(screenSharingSession: ScreenSharingSession) {
         logger.d { "[addScreenSharingSession] session: $screenSharingSession" }
         val list = _screenSharingSessions.value.toMutableList()
         val updated = list + screenSharingSession
 
-        _screenSharingSessions.value = updated
+        _screenSharingSessions.value = updated.distinctBy { it.track.streamId }
     }
 
-    private fun removeScreenShareSession(id: String) {
-        logger.d { "[removeScreenShareSession] ID: $id" }
+    private fun removeScreenShareSession(userId: String) {
+        logger.d { "[removeScreenShareSession] User ID: $userId" }
         val list = _screenSharingSessions.value.toMutableList()
-        val updated = list.filter { it.track.streamId == id }
+        val updated = list.filter { it.participant.id != userId }
 
         _screenSharingSessions.value = updated
     }
@@ -280,13 +261,50 @@ public class Call(
         val updatedList = currentParticipants.updateValue(
             predicate = { it.id == userId },
             transformer = {
+                val videoTrack =
+                    if (trackType == TrackType.TRACK_TYPE_VIDEO) {
+                        if (isEnabled) {
+                            it.videoTrack
+                        } else {
+                            null
+                        }
+                    } else {
+                        it.videoTrack
+                    }
+
+                val videoTrackSize = if (trackType == TrackType.TRACK_TYPE_VIDEO) {
+                    if (isEnabled) {
+                        it.videoTrackSize
+                    } else {
+                        0 to 0
+                    }
+                } else {
+                    it.videoTrackSize
+                }
+
+                val screenShareTrack = if (trackType == TrackType.TRACK_TYPE_SCREEN_SHARE) {
+                    if (isEnabled) {
+                        it.screenSharingTrack
+                    } else {
+                        null
+                    }
+                } else {
+                    it.screenSharingTrack
+                }
+
                 it.copy(
+                    videoTrack = videoTrack,
+                    videoTrackSize = videoTrackSize,
+                    screenSharingTrack = screenShareTrack,
                     publishedTracks = if (isEnabled) it.publishedTracks + trackType else it.publishedTracks - trackType
                 )
             }
         )
 
         _callParticipants.value = updatedList
+        if (trackType == TrackType.TRACK_TYPE_SCREEN_SHARE && !isEnabled) {
+            removeScreenShareSession(userId)
+        }
     }
 
     internal fun addParticipant(participant: CallParticipantState) {
@@ -382,12 +400,14 @@ public class Call(
     internal fun disconnect() {
         logger.i { "[disconnect] #sfu; no args" }
         audioHandler.stop()
-        _callParticipants.value.forEach {
+        val participants = _callParticipants.value
+        _callParticipants.value = emptyList()
+
+        participants.forEach {
             val track = it.videoTrack
             it.videoTrack = null
             track?.video?.dispose()
         }
-        _callParticipants.value = emptyList()
     }
 
     public fun getLocalParticipant(): CallParticipantState? {

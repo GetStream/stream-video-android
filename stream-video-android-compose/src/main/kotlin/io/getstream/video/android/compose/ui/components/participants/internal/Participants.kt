@@ -17,17 +17,12 @@
 package io.getstream.video.android.compose.ui.components.participants.internal
 
 import android.view.View
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.material.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
-import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.ui.components.participants.CallParticipant
 import io.getstream.video.android.model.Call
 
@@ -42,15 +37,7 @@ internal fun Participants(
     val participants = roomParticipants.filter { !it.isLocal }.distinctBy { it.id }
 
     when (participants.size) {
-        0 -> {
-            Box(modifier = modifier) {
-                Icon(
-                    modifier = Modifier.align(Alignment.Center),
-                    painter = painterResource(id = R.drawable.ic_call),
-                    contentDescription = null
-                )
-            }
-        }
+        0 -> Unit
         1 -> {
             val participant = participants.first()
 

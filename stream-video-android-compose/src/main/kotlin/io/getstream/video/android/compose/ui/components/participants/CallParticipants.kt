@@ -17,30 +17,18 @@
 package io.getstream.video.android.compose.ui.components.participants
 
 import android.view.View
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.layout.boundsInParent
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.participants.internal.Participants
 import io.getstream.video.android.model.Call
 
 /**
  * Renders all the CallParticipants, based on the number of people in a call and the call state.
+ * Also takes into account if there are any screen sharing sessions active and adjusts the UI
+ * accordingly.
  *
  * @param call The call that contains all the participants state and tracks.
  * @param modifier Modifier for styling.
@@ -53,36 +41,22 @@ public fun CallParticipants(
     paddingValues: PaddingValues = PaddingValues(0.dp),
     onRender: (View) -> Unit = {}
 ) {
-    var bounds by remember { mutableStateOf(Rect(0f, 0f, 0f, 0f)) }
+    val screenSharingSessions by call.screenSharingSessions.collectAsState(initial = emptyList())
 
-    BoxWithConstraints(
-        modifier = modifier
-            .padding(paddingValues)
-            .onGloballyPositioned {
-                bounds = it.boundsInParent()
-            }
-    ) {
-        Participants(
-            modifier = Modifier.fillMaxSize(),
+    val screenSharing = screenSharingSessions.firstOrNull()
+
+    if (screenSharing == null) {
+        RegularCallParticipantsContent(call, modifier, paddingValues, onRender)
+    } else {
+        val participants by call.callParticipants.collectAsState()
+
+        ScreenSharingCallParticipantsContent(
             call = call,
+            session = screenSharing,
+            participants = participants,
+            modifier = modifier,
+            paddingValues = paddingValues,
             onRender = onRender
         )
-
-        val localParticipantState by call.localParticipant.collectAsState(initial = null)
-        val currentLocal = localParticipantState
-
-        if (currentLocal != null) {
-            FloatingParticipantItem(
-                call = call,
-                localParticipant = currentLocal,
-                parentBounds = bounds,
-                modifier = Modifier
-                    .size(
-                        height = VideoTheme.dimens.floatingVideoHeight,
-                        width = VideoTheme.dimens.floatingVideoWidth
-                    )
-                    .clip(RoundedCornerShape(16.dp))
-            )
-        }
     }
 }
