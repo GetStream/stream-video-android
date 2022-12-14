@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2014-2022 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.compose.ui.components.participants
 
 import androidx.compose.animation.core.animateOffsetAsState
@@ -27,6 +43,15 @@ import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.CallParticipantState
 
+/**
+ * Represents a floating item used to feature a participant video, usually the local participant.
+ *
+ * @param call The call containing state.
+ * @param localParticipant The participant to render.
+ * @param parentBounds Bounds of the parent, used to constrain the component to the parent bounds,
+ * when dragging the floating UI around the screen.
+ * @param modifier Modifier for styling.
+ */
 @Composable
 public fun FloatingParticipantItem(
     call: Call,

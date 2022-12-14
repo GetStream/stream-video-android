@@ -138,7 +138,7 @@ public final class io/getstream/video/android/compose/theme/StreamColors$Compani
 
 public final class io/getstream/video/android/compose/theme/StreamDimens {
 	public static final field Companion Lio/getstream/video/android/compose/theme/StreamDimens$Companion;
-	public synthetic fun <init> (FFFFFFFFFFJJJJFFFFFFFFFFFFFFFFFLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (FFFFFFFFFFJJJJFFFFFFFFFFFFFFFFFFFFLkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1-D9Ej5fM ()F
 	public final fun component10-D9Ej5fM ()F
 	public final fun component11-XSAIIZE ()J
@@ -164,14 +164,17 @@ public final class io/getstream/video/android/compose/theme/StreamDimens {
 	public final fun component3-D9Ej5fM ()F
 	public final fun component30-D9Ej5fM ()F
 	public final fun component31-D9Ej5fM ()F
+	public final fun component32-D9Ej5fM ()F
+	public final fun component33-D9Ej5fM ()F
+	public final fun component34-D9Ej5fM ()F
 	public final fun component4-D9Ej5fM ()F
 	public final fun component5-D9Ej5fM ()F
 	public final fun component6-D9Ej5fM ()F
 	public final fun component7-D9Ej5fM ()F
 	public final fun component8-D9Ej5fM ()F
 	public final fun component9-D9Ej5fM ()F
-	public final fun copy-FdP8yoc (FFFFFFFFFFJJJJFFFFFFFFFFFFFFFFF)Lio/getstream/video/android/compose/theme/StreamDimens;
-	public static synthetic fun copy-FdP8yoc$default (Lio/getstream/video/android/compose/theme/StreamDimens;FFFFFFFFFFJJJJFFFFFFFFFFFFFFFFFILjava/lang/Object;)Lio/getstream/video/android/compose/theme/StreamDimens;
+	public final fun copy-oMWXEig (FFFFFFFFFFJJJJFFFFFFFFFFFFFFFFFFFF)Lio/getstream/video/android/compose/theme/StreamDimens;
+	public static synthetic fun copy-oMWXEig$default (Lio/getstream/video/android/compose/theme/StreamDimens;FFFFFFFFFFJJJJFFFFFFFFFFFFFFFFFFFFIILjava/lang/Object;)Lio/getstream/video/android/compose/theme/StreamDimens;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAvatarAppbarPadding-D9Ej5fM ()F
 	public final fun getButtonToggleOffAlpha ()F
@@ -191,6 +194,9 @@ public final class io/getstream/video/android/compose/theme/StreamDimens {
 	public final fun getCallParticipantsInfoAvatarSize-D9Ej5fM ()F
 	public final fun getCallParticipantsInfoMenuOptionsButtonHeight-D9Ej5fM ()F
 	public final fun getDirectCallUserNameTextSize-XSAIIZE ()J
+	public final fun getFloatingVideoHeight-D9Ej5fM ()F
+	public final fun getFloatingVideoPadding-D9Ej5fM ()F
+	public final fun getFloatingVideoWidth-D9Ej5fM ()F
 	public final fun getGroupCallUserNameTextSize-XSAIIZE ()J
 	public final fun getHeaderElevation-D9Ej5fM ()F
 	public final fun getIncomingCallOptionsBottomPadding-D9Ej5fM ()F
@@ -464,11 +470,11 @@ public final class io/getstream/video/android/compose/ui/components/participants
 }
 
 public final class io/getstream/video/android/compose/ui/components/participants/CallParticipantsKt {
-	public static final fun CallParticipants (Lio/getstream/video/android/model/Call;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+	public static final fun CallParticipants (Lio/getstream/video/android/model/Call;Landroidx/compose/ui/Modifier;Landroidx/compose/foundation/layout/PaddingValues;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/participants/FloatingParticipantItemKt {
-	public static final fun FloatingParticipantItem (Lio/getstream/video/android/model/Call;Lio/getstream/video/android/model/CallParticipantState;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+	public static final fun FloatingParticipantItem (Lio/getstream/video/android/model/Call;Lio/getstream/video/android/model/CallParticipantState;Landroidx/compose/ui/geometry/Rect;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/participants/LocalVideoKt {
