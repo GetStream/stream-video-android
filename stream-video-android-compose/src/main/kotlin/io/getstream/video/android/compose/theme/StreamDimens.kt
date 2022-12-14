@@ -60,7 +60,10 @@ public data class StreamDimens(
     public val callParticipantInfoMenuAppBarHeight: Dp,
     public val callParticipantInfoMenuOptionsHeight: Dp,
     public val callParticipantsInfoMenuOptionsButtonHeight: Dp,
-    public val callParticipantsInfoAvatarSize: Dp
+    public val callParticipantsInfoAvatarSize: Dp,
+    public val floatingVideoPadding: Dp,
+    public val floatingVideoHeight: Dp,
+    public val floatingVideoWidth: Dp
 ) {
     public companion object {
         /**
@@ -99,7 +102,10 @@ public data class StreamDimens(
             callParticipantInfoMenuAppBarHeight = 64.dp,
             callParticipantInfoMenuOptionsHeight = 56.dp,
             callParticipantsInfoMenuOptionsButtonHeight = 40.dp,
-            callParticipantsInfoAvatarSize = 56.dp
+            callParticipantsInfoAvatarSize = 56.dp,
+            floatingVideoPadding = 16.dp,
+            floatingVideoHeight = 150.dp,
+            floatingVideoWidth = 125.dp
         )
     }
 }

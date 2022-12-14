@@ -19,10 +19,11 @@ package io.getstream.video.android.compose.ui.components.call.activecall
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.runtime.Composable
@@ -83,54 +84,52 @@ public fun ActiveCallContent(
 
     BackHandler { backAction() }
 
-    Box(
-        modifier = modifier, contentAlignment = Alignment.Center
-    ) {
-        val roomState = room
+    val roomState = room
 
-        Column(modifier = Modifier.fillMaxSize()) {
-
-            if (!isInPiPMode) {
+    if (!isInPiPMode) {
+        Scaffold(
+            modifier = modifier,
+            topBar = {
                 ActiveCallAppBar(
                     callViewModel = callViewModel,
                     onBackPressed = backAction,
                     onCallInfoSelected = onCallInfoSelected
                 )
-            }
-
-            if (roomState == null) {
-                Box(
+            },
+            bottomBar = {
+                CallControls(
                     modifier = Modifier
-                        .height(250.dp)
                         .fillMaxWidth()
-                ) {
-                    Image(
-                        modifier = Modifier.align(Alignment.Center),
-                        imageVector = Icons.Default.Call,
-                        contentDescription = null
-                    )
-                }
-            } else {
-                if (!isInPiPMode) {
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        CallParticipants(
-                            modifier = Modifier.fillMaxSize(),
-                            call = roomState
-                        )
-
-                        CallControls(
-                            modifier = Modifier
-                                .align(Alignment.BottomCenter)
-                                .fillMaxWidth()
-                                .height(VideoTheme.dimens.callControlsSheetHeight),
-                            callMediaState = callMediaState,
-                            onCallAction = onCallAction
+                        .height(VideoTheme.dimens.callControlsSheetHeight),
+                    callMediaState = callMediaState,
+                    onCallAction = onCallAction
+                )
+            },
+            content = {
+                if (roomState == null) {
+                    Box(
+                        modifier = Modifier
+                            .height(250.dp)
+                            .fillMaxWidth()
+                    ) {
+                        Image(
+                            modifier = Modifier.align(Alignment.Center),
+                            imageVector = Icons.Default.Call,
+                            contentDescription = null
                         )
                     }
                 } else {
-                    pictureInPictureContent(roomState)
+                    CallParticipants(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(it),
+                        call = roomState,
+                    )
                 }
-            }
+            })
+    } else {
+        if (roomState != null) {
+            pictureInPictureContent(roomState)
         }
     }
 }
@@ -170,7 +169,9 @@ internal fun DefaultPictureInPictureContent(roomState: Call) {
 
     if (currentPrimary != null) {
         CallParticipant(
-            call = roomState, participant = currentPrimary, labelPosition = Alignment.BottomStart
+            call = roomState,
+            participant = currentPrimary,
+            labelPosition = Alignment.BottomStart
         )
     }
 }

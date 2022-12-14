@@ -17,7 +17,8 @@
 package io.getstream.video.android.compose.ui.components.participants
 
 import android.view.View
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -25,10 +26,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.layout.boundsInParent
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.dp
+import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.participants.internal.Participants
 import io.getstream.video.android.model.Call
 
@@ -43,9 +50,18 @@ import io.getstream.video.android.model.Call
 public fun CallParticipants(
     call: Call,
     modifier: Modifier = Modifier,
+    paddingValues: PaddingValues = PaddingValues(0.dp),
     onRender: (View) -> Unit = {}
 ) {
-    Box(modifier = modifier) {
+    var bounds by remember { mutableStateOf(Rect(0f, 0f, 0f, 0f)) }
+
+    BoxWithConstraints(
+        modifier = modifier
+            .padding(paddingValues)
+            .onGloballyPositioned {
+                bounds = it.boundsInParent()
+            }
+    ) {
         Participants(
             modifier = Modifier.fillMaxSize(),
             call = call,
@@ -59,10 +75,13 @@ public fun CallParticipants(
             FloatingParticipantItem(
                 call = call,
                 localParticipant = currentLocal,
+                parentBounds = bounds,
                 modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .size(height = 150.dp, width = 125.dp)
-                    .clip(RoundedCornerShape(16.dp)),
+                    .size(
+                        height = VideoTheme.dimens.floatingVideoHeight,
+                        width = VideoTheme.dimens.floatingVideoWidth
+                    )
+                    .clip(RoundedCornerShape(16.dp))
             )
         }
     }
