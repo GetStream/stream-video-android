@@ -63,7 +63,8 @@ public data class StreamDimens(
     public val callParticipantsInfoAvatarSize: Dp,
     public val floatingVideoPadding: Dp,
     public val floatingVideoHeight: Dp,
-    public val floatingVideoWidth: Dp
+    public val floatingVideoWidth: Dp,
+    public val screenShareParticipantItemSize: Dp
 ) {
     public companion object {
         /**
@@ -105,7 +106,8 @@ public data class StreamDimens(
             callParticipantsInfoAvatarSize = 56.dp,
             floatingVideoPadding = 16.dp,
             floatingVideoHeight = 150.dp,
-            floatingVideoWidth = 125.dp
+            floatingVideoWidth = 125.dp,
+            screenShareParticipantItemSize = 150.dp
         )
     }
 }
