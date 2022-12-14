@@ -28,6 +28,7 @@ import android.util.Rational
 import android.view.WindowManager
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
@@ -48,6 +49,7 @@ import io.getstream.video.android.permission.PermissionManager
 import io.getstream.video.android.permission.StreamPermissionManagerImpl
 import io.getstream.video.android.viewmodel.CallViewModel
 import io.getstream.video.android.viewmodel.CallViewModelFactory
+
 
 public abstract class AbstractComposeCallActivity :
     AppCompatActivity(),
@@ -205,21 +207,30 @@ public abstract class AbstractComposeCallActivity :
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                callViewModel.dismissOptions()
-
-                enterPictureInPictureMode(
-                    PictureInPictureParams.Builder().setAspectRatio(Rational(9, 16)).apply {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                            this.setAutoEnterEnabled(true)
-                        }
-                    }.build()
-                )
-            } else {
-                enterPictureInPictureMode()
+            try {
+                enterPictureInPicture()
+            } catch (error: Throwable) {
+                closeCall()
             }
         } else {
             closeCall()
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.N)
+    private fun enterPictureInPicture() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            callViewModel.dismissOptions()
+
+            enterPictureInPictureMode(
+                PictureInPictureParams.Builder().setAspectRatio(Rational(9, 16)).apply {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        this.setAutoEnterEnabled(true)
+                    }
+                }.build()
+            )
+        } else {
+            enterPictureInPictureMode()
         }
     }
 
