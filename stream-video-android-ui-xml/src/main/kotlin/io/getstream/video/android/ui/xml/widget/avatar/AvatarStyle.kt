@@ -51,59 +51,59 @@ public data class AvatarStyle(
                 0,
             ).apply {
                 val avatarBorderWidth = getDimensionPixelSize(
-                    R.styleable.AvatarView_streamXmlAvatarBorderWidth,
+                    R.styleable.AvatarView_streamAvatarBorderWidth,
                     0
                 )
 
                 val avatarBorderColor = getColor(
-                    R.styleable.AvatarView_streamXmlAvatarBorderColor,
-                    context.getColorCompat(R.color.stream_xml_black)
+                    R.styleable.AvatarView_streamAvatarBorderColor,
+                    context.getColorCompat(R.color.stream_black)
                 )
 
                 val avatarInitialsTextStyle = TextStyle.Builder(this)
                     .size(
-                        R.styleable.AvatarView_streamXmlAvatarTextSize,
+                        R.styleable.AvatarView_streamAvatarTextSize,
                         context.getDimension(RCommon.dimen.title3TextSize)
                     )
                     .color(
-                        R.styleable.AvatarView_streamXmlAvatarTextColor,
+                        R.styleable.AvatarView_streamAvatarTextColor,
                         context.getColorCompat(RCommon.color.stream_text_avatar_initials)
                     )
                     .font(
-                        R.styleable.AvatarView_streamXmlAvatarTextFontAssets,
-                        R.styleable.AvatarView_streamXmlAvatarTextFont
+                        R.styleable.AvatarView_streamAvatarTextFontAssets,
+                        R.styleable.AvatarView_streamAvatarTextFont
                     )
                     .style(
-                        R.styleable.AvatarView_streamXmlAvatarTextStyle,
+                        R.styleable.AvatarView_streamAvatarTextStyle,
                         Typeface.BOLD
                     )
                     .build()
 
                 val groupAvatarInitialsTextStyle = TextStyle.Builder(this)
                     .size(
-                        R.styleable.AvatarView_streamXmlGroupAvatarTextSize,
+                        R.styleable.AvatarView_streamGroupAvatarTextSize,
                         context.getDimension(RCommon.dimen.title3TextSize)
                     )
                     .color(
-                        R.styleable.AvatarView_streamXmlGroupAvatarTextColor,
-                        context.getColorCompat(R.color.stream_xml_white)
+                        R.styleable.AvatarView_streamGroupAvatarTextColor,
+                        context.getColorCompat(R.color.stream_white)
                     )
                     .font(
-                        R.styleable.AvatarView_streamXmlGroupAvatarTextFontAssets,
-                        R.styleable.AvatarView_streamXmlGroupAvatarTextFont
+                        R.styleable.AvatarView_streamGroupAvatarTextFontAssets,
+                        R.styleable.AvatarView_streamGroupAvatarTextFont
                     )
                     .style(
-                        R.styleable.AvatarView_streamXmlGroupAvatarTextStyle,
+                        R.styleable.AvatarView_streamGroupAvatarTextStyle,
                         Typeface.BOLD
                     )
                     .build()
 
                 val avatarShape =
-                    getEnum(R.styleable.AvatarView_streamXmlAvatarShape, AvatarShape.CIRCLE)
+                    getEnum(R.styleable.AvatarView_streamAvatarShape, AvatarShape.CIRCLE)
 
                 val borderRadius =
                     getDimensionPixelSize(
-                        R.styleable.AvatarView_streamXmlAvatarBorderRadius,
+                        R.styleable.AvatarView_streamAvatarBorderRadius,
                         4.dpToPx()
                     ).toFloat()
 

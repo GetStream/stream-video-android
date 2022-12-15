@@ -59,7 +59,7 @@ class VideoApp : Application() {
      */
     fun initializeStreamVideo(
         credentialsProvider: CredentialsProvider,
-        loggingLevel: LoggingLevel
+        loggingLevel: LoggingLevel,
     ): StreamVideo {
         StreamLog.d(TAG) { "[initializeStreamCalls] loggingLevel: $loggingLevel" }
         this.credentialsProvider = credentialsProvider
@@ -69,7 +69,7 @@ class VideoApp : Application() {
             credentialsProvider = credentialsProvider,
             androidInputs = setOf(
                 CallServiceInput.from(CallService::class),
-               // CallActivityInput.from(CallActivity::class),
+                // CallActivityInput.from(CallActivity::class),
                 CallActivityInput.from(XmlCallActivity::class),
             ),
             loggingLevel = loggingLevel

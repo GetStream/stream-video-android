@@ -17,55 +17,55 @@
 <resources>
     <declare-styleable name="AvatarView">
         <!-- AvatarView border color -->
-        <attr name="streamXmlAvatarBorderColor" format="color|reference" />
+        <attr name="streamAvatarBorderColor" format="color|reference" />
         <!-- Border width of AvatarView -->
-        <attr name="streamXmlAvatarBorderWidth" format="dimension|reference" />
+        <attr name="streamAvatarBorderWidth" format="dimension|reference" />
         <!-- Text size of the AvatarView's initials letters -->
-        <attr name="streamXmlAvatarTextSize" format="dimension|reference" />
+        <attr name="streamAvatarTextSize" format="dimension|reference" />
         <!-- A color of the AvatarView's initials letters -->
-        <attr name="streamXmlAvatarTextColor" format="color|reference" />
+        <attr name="streamAvatarTextColor" format="color|reference" />
         <!-- Font name of the AvatarView's initials letters -->
-        <attr name="streamXmlAvatarTextFont" format="reference" />
+        <attr name="streamAvatarTextFont" format="reference" />
         <!-- Font assets reference for the AvatarView's initials letters -->
-        <attr name="streamXmlAvatarTextFontAssets" format="string" />
+        <attr name="streamAvatarTextFontAssets" format="string" />
         <!-- Text style of the AvatarView's initials letters -->
-        <attr name="streamXmlAvatarTextStyle">
+        <attr name="streamAvatarTextStyle">
             <flag name="normal" value="0" />
             <flag name="bold" value="1" />
             <flag name="italic" value="2" />
         </attr>
         <!-- Text size of the AvatarView's initials letters in group avatar -->
-        <attr name="streamXmlGroupAvatarTextSize" format="dimension|reference" />
+        <attr name="streamGroupAvatarTextSize" format="dimension|reference" />
         <!-- A color of the AvatarView's initials letters in group avatar -->
-        <attr name="streamXmlGroupAvatarTextColor" format="color|reference" />
+        <attr name="streamGroupAvatarTextColor" format="color|reference" />
         <!-- Font name of the AvatarView's initials letters in group avatar -->
-        <attr name="streamXmlGroupAvatarTextFont" format="reference" />
+        <attr name="streamGroupAvatarTextFont" format="reference" />
         <!-- Font assets reference for the AvatarView's initials letters in group avatar -->
-        <attr name="streamXmlGroupAvatarTextFontAssets" format="string" />
+        <attr name="streamGroupAvatarTextFontAssets" format="string" />
         <!-- Text style of the AvatarView's initials letters in group avatar -->
-        <attr name="streamXmlGroupAvatarTextStyle">
+        <attr name="streamGroupAvatarTextStyle">
             <flag name="normal" value="0" />
             <flag name="bold" value="1" />
             <flag name="italic" value="2" />
         </attr>
         <!-- Sets the visibility of the online indicator -->
-        <attr name="streamXmlAvatarOnlineIndicatorEnabled" format="boolean" />
+        <attr name="streamAvatarOnlineIndicatorEnabled" format="boolean" />
         <!-- Sets the position of the online indicator -->
-        <attr name="streamXmlAvatarOnlineIndicatorPosition" format="enum">
+        <attr name="streamAvatarOnlineIndicatorPosition" format="enum">
             <enum name="topLeft" value="0" />
             <enum name="topRight" value="1" />
             <enum name="bottomLeft" value="2" />
             <enum name="bottomRight" value="3" />
         </attr>
         <!-- Color of the online indicator -->
-        <attr name="streamXmlAvatarOnlineIndicatorColor" format="color|reference" />
+        <attr name="streamAvatarOnlineIndicatorColor" format="color|reference" />
         <!-- Border color of the online indicator -->
-        <attr name="streamXmlAvatarOnlineIndicatorBorderColor" format="color|reference" />
+        <attr name="streamAvatarOnlineIndicatorBorderColor" format="color|reference" />
         <!-- Avatar shapes -->
-        <attr name="streamXmlAvatarShape" format="enum">
+        <attr name="streamAvatarShape" format="enum">
             <enum name="circle" value="0"/>
             <enum name="round_rect" value="1"/>
         </attr>
-        <attr name="streamXmlAvatarBorderRadius" format="dimension|reference"/>
+        <attr name="streamAvatarBorderRadius" format="dimension|reference"/>
     </declare-styleable>
 </resources>

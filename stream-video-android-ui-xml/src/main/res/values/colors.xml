@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="stream_xml_black">#000000</color>
-    <color name="stream_xml_white">#FFFFFF</color>
+    <color name="stream_black">#000000</color>
+    <color name="stream_white">#FFFFFF</color>
 </resources>

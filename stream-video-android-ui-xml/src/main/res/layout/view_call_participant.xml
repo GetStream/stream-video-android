@@ -13,29 +13,65 @@
         android:layout_height="match_parent"
         />
 
-    <ImageView
-        android:id="@+id/overlayImage"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scaleType="center"
-        android:background="#498621"
-        />
-
     <io.getstream.video.android.ui.xml.widget.avatar.AvatarView
         android:id="@+id/participantAvatar"
-        android:layout_width="@dimen/callAvatarSize"
-        android:layout_height="@dimen/callAvatarSize"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:streamAvatarBorderRadius="0dp"
+        app:streamAvatarShape="round_rect"
         />
 
+    <ImageView
+        android:id="@+id/activeCallParticipantBorder"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/bg_active_call_participant"
+        android:visibility="gone"
+        />
 
-    <TextView
-        android:id="@+id/participantName"
+    <LinearLayout
+        android:id="@+id/nameHolder"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        />
+        android:layout_margin="8dp"
+        android:background="@drawable/bg_call_participant_name"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        >
+
+        <TextView
+            android:id="@+id/participantName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:textColor="@color/stream_white"
+            android:textSize="@dimen/bodyTextSize"
+            android:textStyle="bold"
+            tools:text="Some random user"
+            />
+
+        <ImageView
+            android:id="@+id/soundIndicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:paddingStart="0dp"
+            android:paddingEnd="8dp"
+            android:src="@drawable/ic_mic_on"
+            app:tint="@color/stream_white"
+            />
+
+    </LinearLayout>
+
 
 </merge>

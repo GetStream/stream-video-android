@@ -291,9 +291,9 @@ internal class CallClientImpl(
                 ),
             )
 
+            localVideoTrack?.setEnabled(isEnabled)
             updateMuteState(request).onSuccessSuspend {
                 call?.setCameraEnabled(isEnabled)
-                localVideoTrack?.setEnabled(isEnabled)
                 _isVideoEnabled.value = isEnabled
             }
         }
@@ -321,9 +321,9 @@ internal class CallClientImpl(
                 ),
             )
 
+            localAudioTrack?.setEnabled(isEnabled)
             updateMuteState(request).onSuccessSuspend {
                 call?.setMicrophoneEnabled(isEnabled)
-                localAudioTrack?.setEnabled(isEnabled)
                 _isAudioEnabled.value = isEnabled
             }
         }

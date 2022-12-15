@@ -69,7 +69,7 @@
             android:background="@drawable/bg_call_option_reject"
             android:scaleType="center"
             android:src="@drawable/ic_call_end"
-            android:tint="@color/stream_xml_white"
+            android:tint="@color/stream_white"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
