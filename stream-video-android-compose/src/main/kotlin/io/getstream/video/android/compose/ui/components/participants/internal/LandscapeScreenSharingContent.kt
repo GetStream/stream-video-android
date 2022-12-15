@@ -8,9 +8,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -19,7 +19,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.R
 import io.getstream.video.android.call.state.CallAction
+import io.getstream.video.android.call.state.CallMediaState
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.call.controls.LandscapeCallControls
 import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.CallParticipantState
 import io.getstream.video.android.model.ScreenSharingSession
@@ -30,15 +32,19 @@ import io.getstream.video.android.model.ScreenSharingSession
  * @param call The call containing state.
  * @param session Screen sharing session to render.
  * @param participants List of participants to render under the screen share track.
+ * @param callMediaState The state of the media devices for the current user.
  * @param paddingValues Padding values from the parent.
  * @param modifier Modifier for styling.
+ * @param isFullscreen If we're currently in fullscreen mode.
  * @param onRender Handler when the video renders.
+ * @param onCallAction Handler when the user performs various call actions.
  */
 @Composable
 public fun LandscapeScreenSharingContent(
     call: Call,
     session: ScreenSharingSession,
     participants: List<CallParticipantState>,
+    callMediaState: CallMediaState,
     paddingValues: PaddingValues,
     modifier: Modifier = Modifier,
     isFullscreen: Boolean,
@@ -47,19 +53,21 @@ public fun LandscapeScreenSharingContent(
 ) {
     val sharingParticipant = session.participant
 
-    Row(modifier = modifier.fillMaxSize()) {
+    Row(
+        modifier = modifier
+            .fillMaxSize()
+            .background(VideoTheme.colors.screenSharingBackground)
+            .padding(paddingValues)
+    ) {
         Column(
-            modifier = modifier
-                .fillMaxWidth(0.5f)
-                .background(VideoTheme.colors.screenSharingBackground)
-                .padding(paddingValues)
+            modifier = Modifier
+                .fillMaxHeight()
+                .weight(0.65f)
         ) {
             Text(
                 modifier = Modifier.padding(16.dp),
-                text = stringResource(
-                    id = R.string.stream_screen_sharing_title,
-                    sharingParticipant.name.ifEmpty { sharingParticipant.id }
-                ),
+                text = stringResource(id = R.string.stream_screen_sharing_title,
+                    sharingParticipant.name.ifEmpty { sharingParticipant.id }),
                 color = VideoTheme.colors.textHighEmphasis,
                 style = VideoTheme.typography.title3Bold,
                 maxLines = 1,
@@ -80,12 +88,24 @@ public fun LandscapeScreenSharingContent(
             Spacer(modifier = Modifier.height(16.dp))
         }
 
-        ParticipantsColumn(
-            modifier = Modifier
-                .fillMaxHeight()
-                .fillMaxWidth(0.5f),
+        if (!isFullscreen) {
+            ParticipantsColumn(
+                modifier = Modifier
+                    .width(125.dp)
+                    .fillMaxHeight(),
                 call = call,
-            participants = participants
-        )
+                participants = participants
+            )
+
+            LandscapeCallControls(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .width(64.dp)
+                    .padding(6.dp),
+                callMediaState = callMediaState,
+                onCallAction = onCallAction,
+                isScreenSharing = true
+            )
+        }
     }
 }

@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.compose.ui.components.call.activecall
 
+import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
@@ -33,6 +34,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
@@ -41,7 +43,7 @@ import io.getstream.video.android.call.state.CallMediaState
 import io.getstream.video.android.call.state.LeaveCall
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
-import io.getstream.video.android.compose.ui.components.call.CallControls
+import io.getstream.video.android.compose.ui.components.call.controls.CallControls
 import io.getstream.video.android.compose.ui.components.participants.CallParticipant
 import io.getstream.video.android.compose.ui.components.participants.CallParticipants
 import io.getstream.video.android.model.Call
@@ -77,6 +79,7 @@ public fun ActiveCallContent(
 
     val isInPiPMode by callViewModel.isInPictureInPicture.collectAsState()
     val isFullscreen by callViewModel.isFullscreen.collectAsState()
+    val orientation = LocalConfiguration.current.orientation
 
     val backAction = {
         if (isShowingParticipantsInfo) {
@@ -103,7 +106,7 @@ public fun ActiveCallContent(
                 }
             },
             bottomBar = {
-                if (!isFullscreen) {
+                if (!isFullscreen && orientation != ORIENTATION_LANDSCAPE) {
                     CallControls(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -138,7 +141,8 @@ public fun ActiveCallContent(
                         call = roomState,
                         paddingValues = it,
                         isFullscreen = isFullscreen,
-                        onCallAction = onCallAction
+                        onCallAction = onCallAction,
+                        callMediaState = callMediaState
                     )
                 }
             }

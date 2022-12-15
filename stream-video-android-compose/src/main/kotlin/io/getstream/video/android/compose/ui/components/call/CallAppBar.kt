@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.compose.ui.components.call
 
+import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -28,6 +29,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -67,10 +69,17 @@ public fun CallAppBar(
         )
     }
 ) {
+    val orientation = LocalConfiguration.current.orientation
+    val height = if (orientation == ORIENTATION_LANDSCAPE) {
+        VideoTheme.dimens.landscapeTopAppBarHeight
+    } else {
+        VideoTheme.dimens.topAppbarHeight
+    }
+
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(VideoTheme.dimens.topAppbarHeightSize)
+            .height(height)
             .background(color = VideoTheme.colors.barsBackground)
             .padding(VideoTheme.dimens.callAppBarPadding),
         verticalAlignment = Alignment.CenterVertically,

@@ -25,6 +25,7 @@ internal fun ParticipantsColumn(
     LazyColumn(
         modifier = modifier.padding(vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
         content = {
             items(participants) { participant ->
                 ParticipantListItem(call, participant)

@@ -24,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.call.state.CallAction
+import io.getstream.video.android.call.state.CallMediaState
 import io.getstream.video.android.model.Call
 
 /**
@@ -42,6 +43,7 @@ import io.getstream.video.android.model.Call
 public fun CallParticipants(
     call: Call,
     onCallAction: (CallAction) -> Unit,
+    callMediaState: CallMediaState,
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues = PaddingValues(0.dp),
     isFullscreen: Boolean = false,
@@ -52,7 +54,14 @@ public fun CallParticipants(
     val screenSharing = screenSharingSessions.firstOrNull()
 
     if (screenSharing == null) {
-        RegularCallParticipantsContent(call, modifier, paddingValues, onRender)
+        RegularCallParticipantsContent(
+            call = call,
+            modifier = modifier,
+            paddingValues = paddingValues,
+            onRender = onRender,
+            onCallAction = onCallAction,
+            callMediaState = callMediaState
+        )
     } else {
         val participants by call.callParticipants.collectAsState()
 
@@ -64,7 +73,8 @@ public fun CallParticipants(
             paddingValues = paddingValues,
             onRender = onRender,
             isFullscreen = isFullscreen,
-            onCallAction = onCallAction
+            onCallAction = onCallAction,
+            callMediaState = callMediaState
         )
     }
 }

@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.call.state.CallAction
+import io.getstream.video.android.call.state.CallMediaState
 import io.getstream.video.android.compose.ui.components.participants.internal.LandscapeScreenSharingContent
 import io.getstream.video.android.compose.ui.components.participants.internal.PortraitScreenSharingContent
 import io.getstream.video.android.model.Call
@@ -35,6 +36,7 @@ public fun ScreenSharingCallParticipantsContent(
     call: Call,
     session: ScreenSharingSession,
     participants: List<CallParticipantState>,
+    callMediaState: CallMediaState,
     onCallAction: (CallAction) -> Unit,
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues = PaddingValues(0.dp),
@@ -63,7 +65,8 @@ public fun ScreenSharingCallParticipantsContent(
             modifier = modifier,
             onRender = onRender,
             isFullscreen = isFullscreen,
-            onCallAction = onCallAction
+            onCallAction = onCallAction,
+            callMediaState = callMediaState
         )
     }
 }
