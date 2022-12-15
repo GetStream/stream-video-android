@@ -69,11 +69,13 @@ public fun RegularCallParticipantsContent(
                 .onGloballyPositioned {
                     val rectBounds = it.boundsInParent()
 
-                    bounds = rectBounds.copy(bottom = rectBounds.bottom - density.run {
-                        paddingValues
-                            .calculateBottomPadding()
-                            .toPx()
-                    })
+                    bounds = rectBounds.copy(
+                        bottom = rectBounds.bottom - density.run {
+                            paddingValues
+                                .calculateBottomPadding()
+                                .toPx()
+                        }
+                    )
                 }
         ) {
             val roomParticipants by call.callParticipants.collectAsState(emptyList())

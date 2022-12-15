@@ -1141,6 +1141,19 @@ public final class io/getstream/video/android/call/state/ToggleMicrophone : io/g
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class io/getstream/video/android/call/state/ToggleScreenConfiguration : io/getstream/video/android/call/state/CallAction {
+	public fun <init> (ZZ)V
+	public final fun component1 ()Z
+	public final fun component2 ()Z
+	public final fun copy (ZZ)Lio/getstream/video/android/call/state/ToggleScreenConfiguration;
+	public static synthetic fun copy$default (Lio/getstream/video/android/call/state/ToggleScreenConfiguration;ZZILjava/lang/Object;)Lio/getstream/video/android/call/state/ToggleScreenConfiguration;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public final fun isFullscreen ()Z
+	public final fun isLandscape ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class io/getstream/video/android/call/state/ToggleSpeakerphone : io/getstream/video/android/call/state/CallAction {
 	public fun <init> (Z)V
 	public final fun component1 ()Z
@@ -3097,6 +3110,7 @@ public final class io/getstream/video/android/viewmodel/CallViewModel : androidx
 	public final fun getStreamCallState ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getUsers ()Ljava/util/List;
 	public final fun getUsersState ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun isFullscreen ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun isInPictureInPicture ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun isShowingCallInfo ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun isVideoInitialized ()Lkotlinx/coroutines/flow/StateFlow;
