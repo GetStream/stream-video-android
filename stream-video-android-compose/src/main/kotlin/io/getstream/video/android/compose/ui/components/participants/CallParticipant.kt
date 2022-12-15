@@ -121,8 +121,8 @@ private fun BoxScope.ParticipantLabel(
     Row(
         modifier = Modifier
             .align(labelPosition)
-            .padding(16.dp)
-            .height(36.dp)
+            .padding(8.dp)
+            .height(24.dp)
             .wrapContentWidth()
             .background(
                 Color.DarkGray,
@@ -138,7 +138,7 @@ private fun BoxScope.ParticipantLabel(
                 .widthIn(max = 64.dp)
                 .padding(start = 8.dp),
             text = name,
-            style = VideoTheme.typography.bodyBold,
+            style = VideoTheme.typography.body,
             color = Color.White,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis

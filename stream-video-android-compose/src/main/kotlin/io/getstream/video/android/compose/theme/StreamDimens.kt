@@ -107,7 +107,7 @@ public data class StreamDimens(
             floatingVideoPadding = 16.dp,
             floatingVideoHeight = 150.dp,
             floatingVideoWidth = 125.dp,
-            screenShareParticipantItemSize = 150.dp
+            screenShareParticipantItemSize = 110.dp
         )
     }
 }

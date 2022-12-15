@@ -35,6 +35,7 @@ import io.getstream.video.android.call.state.LeaveCall
 import io.getstream.video.android.call.state.SelectAudioDevice
 import io.getstream.video.android.call.state.ToggleCamera
 import io.getstream.video.android.call.state.ToggleMicrophone
+import io.getstream.video.android.call.state.ToggleScreenConfiguration
 import io.getstream.video.android.call.state.ToggleSpeakerphone
 import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.CallParticipantState
@@ -60,7 +61,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
-import java.util.UUID
+import java.util.*
 import io.getstream.video.android.model.state.StreamCallState as State
 
 private const val CONNECT_TIMEOUT = 30_000L
@@ -182,6 +183,9 @@ public class CallViewModel(
 
     private val _isInPictureInPicture: MutableStateFlow<Boolean> = MutableStateFlow(false)
     public val isInPictureInPicture: StateFlow<Boolean> = _isInPictureInPicture
+
+    private val _isFullscreen: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    public val isFullscreen: StateFlow<Boolean> = _isFullscreen
 
     init {
         viewModelScope.launch {
@@ -307,6 +311,9 @@ public class CallViewModel(
             DeclineCall -> hangUpCall()
             is LeaveCall -> cancelCall()
             is InviteUsersToCall -> inviteUsersToCall(callAction.users)
+            is ToggleScreenConfiguration -> {
+                _isFullscreen.value = callAction.isFullscreen && callAction.isLandscape
+            }
             is CustomAction -> {
                 // custom actions
             }

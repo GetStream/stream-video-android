@@ -33,7 +33,7 @@ import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.CallParticipantState
 
 @Composable
-internal fun ParticipantsList(
+internal fun ParticipantsRow(
     call: Call,
     participants: List<CallParticipantState>,
     modifier: Modifier = Modifier

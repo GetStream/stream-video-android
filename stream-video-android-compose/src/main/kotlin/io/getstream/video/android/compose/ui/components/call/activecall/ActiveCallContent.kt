@@ -76,6 +76,7 @@ public fun ActiveCallContent(
     val callMediaState by callViewModel.callMediaState.collectAsState(initial = CallMediaState())
 
     val isInPiPMode by callViewModel.isInPictureInPicture.collectAsState()
+    val isFullscreen by callViewModel.isFullscreen.collectAsState()
 
     val backAction = {
         if (isShowingParticipantsInfo) {
@@ -93,20 +94,24 @@ public fun ActiveCallContent(
         Scaffold(
             modifier = modifier,
             topBar = {
-                ActiveCallAppBar(
-                    callViewModel = callViewModel,
-                    onBackPressed = backAction,
-                    onCallInfoSelected = onCallInfoSelected
-                )
+                if (!isFullscreen) {
+                    ActiveCallAppBar(
+                        callViewModel = callViewModel,
+                        onBackPressed = backAction,
+                        onCallInfoSelected = onCallInfoSelected
+                    )
+                }
             },
             bottomBar = {
-                CallControls(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(VideoTheme.dimens.callControlsSheetHeight),
-                    callMediaState = callMediaState,
-                    onCallAction = onCallAction
-                )
+                if (!isFullscreen) {
+                    CallControls(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(VideoTheme.dimens.callControlsSheetHeight),
+                        callMediaState = callMediaState,
+                        onCallAction = onCallAction
+                    )
+                }
             },
             content = {
                 if (roomState == null) {
@@ -128,10 +133,12 @@ public fun ActiveCallContent(
                             .padding(
                                 top = it.calculateTopPadding(),
                                 start = it.calculateStartPadding(layoutDirection = LocalLayoutDirection.current),
-                                end = it.calculateEndPadding(layoutDirection = LocalLayoutDirection.current)
+                                end = it.calculateEndPadding(layoutDirection = LocalLayoutDirection.current),
                             ),
                         call = roomState,
-                        paddingValues = it
+                        paddingValues = it,
+                        isFullscreen = isFullscreen,
+                        onCallAction = onCallAction
                     )
                 }
             }

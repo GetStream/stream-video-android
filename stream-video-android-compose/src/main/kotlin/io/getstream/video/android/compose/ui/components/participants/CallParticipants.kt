@@ -23,6 +23,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import io.getstream.video.android.call.state.CallAction
 import io.getstream.video.android.model.Call
 
 /**
@@ -32,13 +33,18 @@ import io.getstream.video.android.model.Call
  *
  * @param call The call that contains all the participants state and tracks.
  * @param modifier Modifier for styling.
+ * @param paddingValues Padding within the parent.
+ * @param isFullscreen If we're rendering a full screen activity.
  * @param onRender Handler when each of the Video views render their first frame.
+ * @param onCallAction Handler when the user triggers a Call Control Action.
  */
 @Composable
 public fun CallParticipants(
     call: Call,
+    onCallAction: (CallAction) -> Unit,
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues = PaddingValues(0.dp),
+    isFullscreen: Boolean = false,
     onRender: (View) -> Unit = {}
 ) {
     val screenSharingSessions by call.screenSharingSessions.collectAsState(initial = emptyList())
@@ -56,7 +62,9 @@ public fun CallParticipants(
             participants = participants,
             modifier = modifier,
             paddingValues = paddingValues,
-            onRender = onRender
+            onRender = onRender,
+            isFullscreen = isFullscreen,
+            onCallAction = onCallAction
         )
     }
 }
