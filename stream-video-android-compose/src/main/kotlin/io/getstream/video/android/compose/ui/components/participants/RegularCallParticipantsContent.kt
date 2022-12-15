@@ -20,7 +20,6 @@ import android.view.View
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -34,6 +33,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.participants.internal.Participants
@@ -47,12 +47,16 @@ public fun RegularCallParticipantsContent(
     onRender: (View) -> Unit = {}
 ) {
     var bounds by remember { mutableStateOf(Rect(0f, 0f, 0f, 0f)) }
+    val density = LocalDensity.current
 
     BoxWithConstraints(
         modifier = modifier
-            .padding(paddingValues)
             .onGloballyPositioned {
-                bounds = it.boundsInParent()
+                val rectBounds = it.boundsInParent()
+
+                bounds = rectBounds.copy(bottom = rectBounds.bottom - density.run {
+                    paddingValues.calculateBottomPadding().toPx()
+                })
             }
     ) {
         val roomParticipants by call.callParticipants.collectAsState(emptyList())

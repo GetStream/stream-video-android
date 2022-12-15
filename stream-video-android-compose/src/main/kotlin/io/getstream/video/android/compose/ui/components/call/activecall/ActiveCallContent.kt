@@ -131,6 +131,7 @@ public fun ActiveCallContent(
                                 end = it.calculateEndPadding(layoutDirection = LocalLayoutDirection.current)
                             ),
                         call = roomState,
+                        paddingValues = it
                     )
                 }
             }
