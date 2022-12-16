@@ -57,6 +57,7 @@ import io.getstream.video.android.permission.PermissionManager
 import io.getstream.video.android.permission.StreamPermissionManagerImpl
 import io.getstream.video.android.viewmodel.CallViewModel
 import io.getstream.video.android.viewmodel.CallViewModelFactory
+import kotlinx.coroutines.flow.collectLatest
 
 public abstract class AbstractComposeCallActivity :
     AppCompatActivity(),
@@ -115,6 +116,14 @@ public abstract class AbstractComposeCallActivity :
             callViewModel.streamCallState.collect {
                 if (it is StreamCallState.Idle) {
                     finish()
+                }
+            }
+        }
+
+        lifecycleScope.launchWhenCreated {
+            callViewModel.screenSharingSessions.collectLatest {
+                if (it.isEmpty()) {
+                    requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_USER
                 }
             }
         }

@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.compose.ui.components.call.controls
 
-import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.padding
@@ -28,25 +27,30 @@ import androidx.compose.material.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.call.state.CallAction
 import io.getstream.video.android.call.state.CallMediaState
 import io.getstream.video.android.call.state.FlipCamera
 import io.getstream.video.android.compose.theme.VideoTheme
 
+/**
+ * Shows the call controls in a different way when in landscape mode.
+ *
+ * @param callMediaState The state of the call media, such as video, audio.
+ * @param isScreenSharing If there's currently an active screen sharing session.
+ * @param modifier Modifier for styling.
+ * @param onCallAction Handler when the user triggers various call actions.
+ */
 @Composable
 public fun LandscapeCallControls(
     callMediaState: CallMediaState,
-    modifier: Modifier = Modifier,
     isScreenSharing: Boolean,
+    modifier: Modifier = Modifier,
     onCallAction: (CallAction) -> Unit
 ) {
-    val orientation = LocalConfiguration.current.orientation
-    val defaultActions =
-        buildDefaultCallControlActions(callMediaState = callMediaState)
+    val defaultActions = buildDefaultCallControlActions(callMediaState = callMediaState)
 
-    val actions = if (orientation == ORIENTATION_LANDSCAPE && isScreenSharing) {
+    val actions = if (isScreenSharing) {
         defaultActions.filter { it.callAction !is FlipCamera }
     } else {
         defaultActions
