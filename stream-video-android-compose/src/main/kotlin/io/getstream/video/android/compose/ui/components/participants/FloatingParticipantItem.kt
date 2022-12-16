@@ -87,7 +87,6 @@ public fun FloatingParticipantItem(
                     detectDragGestures { change, dragAmount ->
                         change.consume()
 
-
                         val newOffsetX = (offsetX + dragAmount.x)
                             .coerceAtLeast(0f)
                             .coerceAtMost(

@@ -3107,6 +3107,7 @@ public final class io/getstream/video/android/viewmodel/CallViewModel : androidx
 	public final fun getLocalParticipant ()Lkotlinx/coroutines/flow/Flow;
 	public final fun getParticipantList ()Lkotlinx/coroutines/flow/Flow;
 	public final fun getParticipants ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getScreenSharingSessions ()Lkotlinx/coroutines/flow/Flow;
 	public final fun getStreamCallState ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getUsers ()Ljava/util/List;
 	public final fun getUsersState ()Lkotlinx/coroutines/flow/StateFlow;
