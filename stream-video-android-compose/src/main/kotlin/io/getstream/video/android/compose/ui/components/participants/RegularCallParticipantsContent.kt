@@ -34,6 +34,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.onSizeChanged
@@ -96,7 +97,8 @@ public fun RegularCallParticipantsContent(
                                 height = VideoTheme.dimens.floatingVideoHeight,
                                 width = VideoTheme.dimens.floatingVideoWidth
                             )
-                            .clip(RoundedCornerShape(16.dp)),
+                            .clip(RoundedCornerShape(16.dp))
+                            .align(Alignment.TopEnd),
                         paddingValues = paddingValues
                     )
                 }

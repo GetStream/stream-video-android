@@ -88,15 +88,17 @@ public fun FloatingParticipantItem(
                         change.consume()
 
                         val newOffsetX = (offsetX + dragAmount.x)
-                            .coerceAtLeast(0f)
-                            .coerceAtMost(
-                                calculateHorizontalOffsetBounds(
+                            .coerceAtLeast(
+                                -calculateHorizontalOffsetBounds(
                                     parentBounds = parentBounds,
                                     paddingValues = paddingValues,
                                     floatingVideoSize = videoSize,
                                     density = density,
                                     offset = paddingOffset * 2
                                 )
+                            )
+                            .coerceAtMost(
+                                0f
                             )
 
                         val newOffsetY = (offsetY + dragAmount.y)
