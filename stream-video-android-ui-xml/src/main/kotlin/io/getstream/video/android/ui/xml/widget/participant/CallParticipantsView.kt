@@ -83,6 +83,11 @@ public class CallParticipantsView : ConstraintLayout {
         addView(horizontalGuideline)
     }
 
+    /**
+     * Sets the [RendererInitializer] handler.
+     *
+     * @param rendererInitializer Handler for initializing the renderer.
+     */
     public fun setRendererInitializer(rendererInitializer: RendererInitializer) {
         this.rendererInitializer = rendererInitializer
         childList.forEach {

@@ -25,14 +25,22 @@ import io.getstream.video.android.call.state.ToggleCamera
 import io.getstream.video.android.call.state.ToggleMicrophone
 import io.getstream.video.android.call.state.ToggleSpeakerphone
 import io.getstream.video.android.model.state.StreamCallState
-import io.getstream.video.android.ui.common.R
+import io.getstream.video.android.ui.xml.R
 import io.getstream.video.android.ui.xml.widget.active.ActiveCallView
 import io.getstream.video.android.ui.xml.widget.control.CallControlItem
 import io.getstream.video.android.viewmodel.CallViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
+import io.getstream.video.android.ui.common.R as RCommon
 
+/**
+ * Binds [ActiveCallView] with [CallViewModel], updating the view's state based on data provided by the ViewModel,
+ * and propagating view events to the ViewModel as needed.
+ *
+ * This function sets listeners on the view and ViewModel. Call this method
+ * before setting any additional listeners on these objects yourself.
+ */
 public fun ActiveCallView.bindView(
     viewModel: CallViewModel,
     lifecycleOwner: LifecycleOwner,
@@ -51,11 +59,36 @@ public fun ActiveCallView.bindView(
 
 private fun buildDefaultControlList(): List<CallControlItem> {
     return listOf(
-        CallControlItem(R.drawable.ic_speaker_on, ToggleSpeakerphone(isEnabled = true)),
-        CallControlItem(R.drawable.ic_videocam_on, ToggleCamera(isEnabled = true)),
-        CallControlItem(R.drawable.ic_mic_on, ToggleMicrophone(isEnabled = true)),
-        CallControlItem(R.drawable.ic_camera_flip, FlipCamera),
-        CallControlItem(R.drawable.ic_call_end, LeaveCall),
+        CallControlItem(
+            icon = RCommon.drawable.ic_speaker_on,
+            iconTint = R.color.stream_black,
+            backgroundTint = RCommon.color.stream_app_background,
+            action = ToggleSpeakerphone(isEnabled = true)
+        ),
+        CallControlItem(
+            icon = RCommon.drawable.ic_videocam_on,
+            iconTint = R.color.stream_black,
+            backgroundTint = RCommon.color.stream_app_background,
+            action = ToggleCamera(isEnabled = true)
+        ),
+        CallControlItem(
+            icon = RCommon.drawable.ic_mic_on,
+            iconTint = R.color.stream_black,
+            backgroundTint = RCommon.color.stream_app_background,
+            action = ToggleMicrophone(isEnabled = true)
+        ),
+        CallControlItem(
+            icon = RCommon.drawable.ic_camera_flip,
+            iconTint = R.color.stream_black,
+            backgroundTint = RCommon.color.stream_app_background,
+            action = FlipCamera
+        ),
+        CallControlItem(
+            icon = RCommon.drawable.ic_call_end,
+            iconTint = R.color.stream_black,
+            backgroundTint = RCommon.color.stream_error_accent,
+            action = LeaveCall
+        ),
     )
 }
 
@@ -115,25 +148,34 @@ private fun ActiveCallView.observeMediaState(
                 listOf(
                     CallControlItem(
                         icon = if (it.isSpeakerphoneEnabled) {
-                            R.drawable.ic_speaker_on
+                            RCommon.drawable.ic_speaker_on
                         } else {
-                            R.drawable.ic_speaker_off
+                            RCommon.drawable.ic_speaker_off
                         },
-                        action = ToggleSpeakerphone(it.isSpeakerphoneEnabled)),
+                        iconTint = R.color.stream_black,
+                        backgroundTint = RCommon.color.stream_app_background,
+                        action = ToggleSpeakerphone(it.isSpeakerphoneEnabled)
+                    ),
                     CallControlItem(
                         icon = if (it.isCameraEnabled) {
-                            R.drawable.ic_videocam_on
+                            RCommon.drawable.ic_videocam_on
                         } else {
-                            R.drawable.ic_videocam_off
+                            RCommon.drawable.ic_videocam_off
                         },
-                        action = ToggleCamera(it.isCameraEnabled)),
+                        iconTint = R.color.stream_black,
+                        backgroundTint = RCommon.color.stream_app_background,
+                        action = ToggleCamera(it.isCameraEnabled)
+                    ),
                     CallControlItem(
                         icon = if (it.isMicrophoneEnabled) {
-                            R.drawable.ic_mic_on
+                            RCommon.drawable.ic_mic_on
                         } else {
-                            R.drawable.ic_mic_off
+                            RCommon.drawable.ic_mic_off
                         },
-                        action = ToggleMicrophone(it.isMicrophoneEnabled))
+                        iconTint = R.color.stream_black,
+                        backgroundTint = RCommon.color.stream_app_background,
+                        action = ToggleMicrophone(it.isMicrophoneEnabled)
+                    )
                 )
             )
         }

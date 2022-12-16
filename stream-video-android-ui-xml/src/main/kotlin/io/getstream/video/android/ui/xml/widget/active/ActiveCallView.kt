@@ -28,11 +28,19 @@ import io.getstream.video.android.ui.xml.utils.extensions.streamThemeInflater
 import io.getstream.video.android.ui.xml.widget.control.CallControlItem
 import io.getstream.video.android.ui.xml.widget.participant.RendererInitializer
 
+/**
+ * Represents the UI in an Active call that shows participants and their video, as well as some
+ * extra UI features to control the call settings, browse participants and more.
+ */
 public class ActiveCallView : ConstraintLayout {
 
     public constructor(context: Context) : this(context, null)
     public constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
-    public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : this(context, attrs, defStyleAttr, 0)
+    public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : this(context,
+        attrs,
+        defStyleAttr,
+        0)
+
     public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(
         context.createStreamThemeWrapper(),
         attrs,
@@ -44,6 +52,9 @@ public class ActiveCallView : ConstraintLayout {
 
     private val binding by lazy { ViewActiveCallBinding.inflate(streamThemeInflater, this) }
 
+    /**
+     * Handler that notifies when a Call Action has been performed.
+     */
     public var callControlActionListener: (CallAction) -> Unit = {}
 
     private fun init(context: Context, attrs: AttributeSet?) {
@@ -51,22 +62,49 @@ public class ActiveCallView : ConstraintLayout {
         binding.controlsView.callControlItemClickListener = { callControlActionListener(it) }
     }
 
+    /**
+     * Sets the Call Controls with which the user can interact.
+     *
+     * @param items The CallActions wrapped in [CallControlItem]s which we wish to expose to the users.
+     */
     public fun setControlItems(items: List<CallControlItem>) {
         binding.controlsView.setItems(items)
     }
 
+    /**
+     * Updates the state of Call Controls previously set using [setControlItems].
+     *
+     * @param items Call Controls whose state we wish to update.
+     */
     public fun updateControlItems(items: List<CallControlItem>) {
         binding.controlsView.updateItems(items)
     }
 
+    /**
+     * Sets the toolbar title.
+     *
+     * @param title The toolbar title to be set.
+     */
     public fun setToolbarTitle(title: String) {
         binding.toolbar.title = title
     }
 
+    /**
+     * Sets the [RendererInitializer] handler used to initialize the renderer for each users video and to notify when
+     * the video has been rendered.
+     *
+     * @param rendererInitializer [RendererInitializer] handler used to initialize the renderer and notify when the
+     * video has been rendered.
+     */
     public fun setParticipantsRendererInitializer(rendererInitializer: RendererInitializer) {
         binding.participantsView.setRendererInitializer(rendererInitializer)
     }
 
+    /**
+     * Updates the participants that are inside the call.
+     *
+     * @param participants The list of participants that are inside the call.
+     */
     public fun updateParticipants(participants: List<CallParticipantState>) {
         binding.participantsView.updateParticipants(participants)
     }

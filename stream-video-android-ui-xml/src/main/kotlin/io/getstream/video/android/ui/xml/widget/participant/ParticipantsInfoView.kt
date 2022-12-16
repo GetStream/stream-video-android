@@ -16,6 +16,9 @@ import io.getstream.video.android.ui.xml.utils.extensions.dpToPx
 import io.getstream.video.android.ui.xml.utils.extensions.getDimension
 import io.getstream.video.android.ui.xml.widget.avatar.AvatarView
 
+/**
+ * TODO seprate to avatar and info view?
+ */
 internal class ParticipantsInfoView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,

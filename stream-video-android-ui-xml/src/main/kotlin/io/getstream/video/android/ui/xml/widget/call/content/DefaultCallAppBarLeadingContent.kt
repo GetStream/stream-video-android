@@ -9,22 +9,26 @@ import androidx.appcompat.widget.AppCompatImageView
 import io.getstream.video.android.ui.common.R
 import io.getstream.video.android.ui.xml.utils.extensions.getDimension
 
+/**
+ * Represents the default implementation of the AppBar leading content. By default shows a back button.
+ */
 public class DefaultCallAppBarLeadingContent @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
-): AppCompatImageView(
+) : AppCompatImageView(
     context, attrs, defStyleAttr
 ) {
 
+    /**
+     * Handler that notifies when the back button has been clicked.
+     */
     public var backListener: () -> Unit = {}
 
     init {
         setRipple()
         setImageResource(R.drawable.ic_arrow_back)
         setOnClickListener { backListener() }
-
-
     }
 
     override fun onAttachedToWindow() {
@@ -39,10 +43,12 @@ public class DefaultCallAppBarLeadingContent @JvmOverloads constructor(
         super.setLayoutParams(params)
     }
 
+    /**
+     * Adds a ripple effect on clicks.
+     */
     private fun setRipple() {
         val outValue = TypedValue()
         context.theme.resolveAttribute(android.R.attr.selectableItemBackgroundBorderless, outValue, true)
         setBackgroundResource(outValue.resourceId)
     }
-
 }

@@ -8,6 +8,9 @@ import androidx.appcompat.widget.AppCompatImageView
 import io.getstream.video.android.ui.common.R
 import io.getstream.video.android.ui.xml.utils.extensions.getDimension
 
+/**
+ * Represents the default implementation of the AppBar trailing content.
+ */
 public class DefaultCallAppBarTrailingContent @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -16,6 +19,9 @@ public class DefaultCallAppBarTrailingContent @JvmOverloads constructor(
     context, attrs, defStyleAttr
 ) {
 
+    /**
+     * Handler that notifies when the participants
+     */
     public var participantsClickListener: () -> Unit = {}
 
     init {
@@ -32,6 +38,9 @@ public class DefaultCallAppBarTrailingContent @JvmOverloads constructor(
         }
     }
 
+    /**
+     * Adds a ripple effect on clicks.
+     */
     private fun setRipple() {
         val outValue = TypedValue()
         context.theme.resolveAttribute(android.R.attr.selectableItemBackgroundBorderless, outValue, true)

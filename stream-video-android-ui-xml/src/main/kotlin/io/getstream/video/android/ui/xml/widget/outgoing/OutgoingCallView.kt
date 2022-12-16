@@ -32,6 +32,9 @@ import io.getstream.video.android.ui.xml.utils.extensions.getDimension
 import io.getstream.video.android.ui.xml.utils.extensions.inflater
 import io.getstream.video.android.ui.common.R as RCommon
 
+/**
+ *  Represents the Outgoing Call state and UI, when the user is calling other people.
+ */
 public class OutgoingCallView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -40,10 +43,22 @@ public class OutgoingCallView @JvmOverloads constructor(
 
     private val binding = ViewOutgoingCallBinding.inflate(inflater, this)
 
+    /**
+     * Whether the microphone is enabled or not.
+     */
     private var isMicrophoneEnabled: Boolean = false
+    /**
+     * Whether the microphone is camera or not.
+     */
     private var isCameraEnabled: Boolean = false
 
+    /**
+     * Handler that notifies when a call action has been performed.
+     */
     public var callActionListener: (CallAction) -> Unit = { }
+    /**
+     * Handler that notifies when the app bar back button was clicked.
+     */
     public var backListener: () -> Unit = { }
 
     init {
@@ -56,16 +71,31 @@ public class OutgoingCallView @JvmOverloads constructor(
         }
     }
 
+    /**
+     * Sets the participants avatars and updates the call background.
+     *
+     * @param participants The list of the participants inside the call.
+     */
     public fun setParticipants(participants: List<CallUser>) {
         binding.participantsInfo.setParticipants(participants)
         if (participants.size >= 2) setGroupCallControlsLayout()
         binding.callBackground.setParticipants(participants)
     }
 
+    /**
+     * Sets the call status in the outgoing screen.
+     *
+     * @param callStatus The current [CallStatus].
+     */
     public fun setCallStatus(callStatus: CallStatus) {
         binding.participantsInfo.setCallStatus(callStatus)
     }
 
+    /**
+     * Updates the microphone state shown in the ui.
+     *
+     * @param isEnabled Whether the microphone is enabled or not.
+     */
     public fun setMicrophoneEnabled(isEnabled: Boolean) {
         isMicrophoneEnabled = isEnabled
         val icon = if (isEnabled) RCommon.drawable.ic_mic_on else RCommon.drawable.ic_mic_off
@@ -73,6 +103,11 @@ public class OutgoingCallView @JvmOverloads constructor(
         binding.micToggle.isEnabled = isEnabled
     }
 
+    /**
+     * Updates the camera state shown in the ui.
+     *
+     * @param isEnabled Whether the camera is enabled or not.
+     */
     public fun setCameraEnabled(isEnabled: Boolean) {
         isCameraEnabled = isEnabled
         val icon = if (isEnabled) RCommon.drawable.ic_videocam_on else RCommon.drawable.ic_videocam_off
@@ -80,6 +115,9 @@ public class OutgoingCallView @JvmOverloads constructor(
         binding.cameraToggle.isEnabled = isEnabled
     }
 
+    /**
+     * Updates the call actions whether the call is 1:1 or more users are joining the call.
+     */
     private fun setGroupCallControlsLayout() {
         with(binding) {
             val constraintSet = ConstraintSet()

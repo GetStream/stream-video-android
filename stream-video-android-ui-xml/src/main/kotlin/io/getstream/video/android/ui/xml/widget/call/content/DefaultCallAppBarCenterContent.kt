@@ -7,6 +7,9 @@ import androidx.appcompat.widget.AppCompatTextView
 import io.getstream.video.android.ui.common.R
 import io.getstream.video.android.ui.xml.utils.extensions.getDimension
 
+/**
+ * Represents the default implementation of the AppBar center content.
+ */
 public class DefaultCallAppBarCenterContent @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,

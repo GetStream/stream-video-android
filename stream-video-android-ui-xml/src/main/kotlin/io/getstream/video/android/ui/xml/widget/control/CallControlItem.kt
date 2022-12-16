@@ -18,7 +18,17 @@ package io.getstream.video.android.ui.xml.widget.control
 
 import io.getstream.video.android.call.state.CallAction
 
+/**
+ * A singe call control item to be exposed to the user in the [CallControlsView].
+ *
+ * @param icon The icon in the center of the button.
+ * @param iconTint The color of the icon.
+ * @param backgroundTint The color of the button background.
+ * @param action The [CallAction] to be performed.
+ */
 public data class CallControlItem(
     val icon: Int,
+    val iconTint: Int,
+    val backgroundTint: Int,
     val action: CallAction
 )

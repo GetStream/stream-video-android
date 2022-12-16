@@ -19,6 +19,9 @@ package io.getstream.video.android.ui.xml.widget.participant
 import android.view.View
 import io.getstream.video.android.ui.TextureViewRenderer
 
+/**
+ * Handler to initialize the renderer when the [TextureViewRenderer] has been created.
+ */
 public fun interface RendererInitializer {
 
     public fun initRenderer(
