@@ -124,6 +124,13 @@ public abstract class AbstractComposeCallActivity :
             callViewModel.screenSharingSessions.collectLatest {
                 if (it.isEmpty()) {
                     requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_USER
+                    exitFullscreen()
+                    callViewModel.onCallAction(
+                        ToggleScreenConfiguration(
+                            isFullscreen = false,
+                            isLandscape = false
+                        )
+                    )
                 }
             }
         }
@@ -160,11 +167,11 @@ public abstract class AbstractComposeCallActivity :
         if (action.isFullscreen) {
             setFullscreen()
         } else if (action.isLandscape) {
-            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE
             exitFullscreen()
         } else {
             exitFullscreen()
-            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT
         }
     }
 
