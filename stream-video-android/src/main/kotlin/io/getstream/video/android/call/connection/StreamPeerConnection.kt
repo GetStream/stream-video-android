@@ -270,6 +270,15 @@ public class StreamPeerConnection(
      * @param streamIds The list of stream IDs to bind to this transceiver.
      */
     private fun buildVideoTransceiverInit(streamIds: List<String>): RtpTransceiverInit {
+        /**
+         * We create different RTP encodings for the transceiver.
+         * Full quality, represented by "f" ID.
+         * Half quality, represented by "h" ID.
+         * Quarter quality, represented by "q" ID.
+         *
+         * Their bitrate is also roughly as the name states - maximum for "full", ~half of that
+         * for "half" and another half, or total quarter of maximum, for "quarter".
+         */
         val quarterQuality = RtpParameters.Encoding(
             "q", true, 4.0
         ).apply {

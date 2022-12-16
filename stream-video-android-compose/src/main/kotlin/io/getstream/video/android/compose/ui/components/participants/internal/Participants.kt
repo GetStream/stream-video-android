@@ -26,6 +26,13 @@ import androidx.compose.ui.Modifier
 import io.getstream.video.android.compose.ui.components.participants.CallParticipant
 import io.getstream.video.android.model.Call
 
+/**
+ * Renders call participants based on the number of people in a call.
+ *
+ * @param call The state of the call.
+ * @param onRender Handler when the video content renders.
+ * @param modifier Modifier for styling.
+ */
 @Composable
 internal fun Participants(
     call: Call,

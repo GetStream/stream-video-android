@@ -33,11 +33,12 @@ import io.getstream.video.android.model.Call
  * accordingly.
  *
  * @param call The call that contains all the participants state and tracks.
+ * @param onCallAction Handler when the user triggers a Call Control Action.
+ * @param callMediaState The state of the call media, such as audio, video.
  * @param modifier Modifier for styling.
  * @param paddingValues Padding within the parent.
  * @param isFullscreen If we're rendering a full screen activity.
  * @param onRender Handler when each of the Video views render their first frame.
- * @param onCallAction Handler when the user triggers a Call Control Action.
  */
 @Composable
 public fun CallParticipants(

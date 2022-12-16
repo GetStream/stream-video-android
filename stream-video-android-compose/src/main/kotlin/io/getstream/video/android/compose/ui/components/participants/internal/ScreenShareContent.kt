@@ -42,12 +42,22 @@ import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.ScreenSharingSession
 
+/**
+ * Represents the content of a screen sharing session.
+ *
+ * @param call The call state.
+ * @param session The screen sharing session to show.
+ * @param isFullscreen If the UI is currently in full screen mode.
+ * @param modifier Modifier for styling.
+ * @param onCallAction Handler for various call actions.
+ * @param onRender Handler when the video content renders.
+ */
 @Composable
 internal fun ScreenShareContent(
     call: Call,
     session: ScreenSharingSession,
-    modifier: Modifier = Modifier,
     isFullscreen: Boolean,
+    modifier: Modifier = Modifier,
     onCallAction: (CallAction) -> Unit,
     onRender: (View) -> Unit
 ) {
@@ -63,9 +73,7 @@ internal fun ScreenShareContent(
         )
 
         Row(modifier = Modifier.align(Alignment.BottomEnd)) {
-            val configuration = LocalConfiguration.current
-
-            val orientation = configuration.orientation
+            val orientation = LocalConfiguration.current.orientation
 
             IconButton(
                 onClick = {
@@ -140,4 +148,8 @@ internal fun ScreenShareContent(
     }
 }
 
+/**
+ * TODO - we should fetch this info from the BE or something as we can't guess all screen sharing
+ * will be in 16:9, it can be 4:3, 1:1 or even ultra-wide aspect.
+ */
 private const val ScreenShareAspectRatio: Float = 16f / 9f

@@ -47,6 +47,16 @@ import io.getstream.video.android.compose.ui.components.call.controls.LandscapeC
 import io.getstream.video.android.compose.ui.components.participants.internal.Participants
 import io.getstream.video.android.model.Call
 
+/**
+ * Renders the CallParticipants when there are no screen sharing sessions, based on the orientation.
+ *
+ * @param call The call that contains all the participants state and tracks.
+ * @param callMediaState The state of the call media, such as audio, video.
+ * @param onCallAction Handler when the user triggers a Call Control Action.
+ * @param modifier Modifier for styling.
+ * @param paddingValues Padding within the parent.
+ * @param onRender Handler when each of the Video views render their first frame.
+ */
 @Composable
 public fun RegularCallParticipantsContent(
     call: Call,

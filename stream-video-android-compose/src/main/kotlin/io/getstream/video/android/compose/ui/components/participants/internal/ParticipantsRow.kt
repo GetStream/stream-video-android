@@ -32,6 +32,13 @@ import io.getstream.video.android.compose.ui.components.participants.CallPartici
 import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.CallParticipantState
 
+/**
+ * Shows a row of call participants.
+ *
+ * @param call The state of the call.
+ * @param participants List of participants to show.
+ * @param modifier Modifier for styling.
+ */
 @Composable
 internal fun ParticipantsRow(
     call: Call,
@@ -41,6 +48,7 @@ internal fun ParticipantsRow(
     LazyRow(
         modifier = modifier.padding(horizontal = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
         content = {
             items(participants) { participant ->
                 ParticipantListItem(call, participant)
@@ -49,18 +57,23 @@ internal fun ParticipantsRow(
     )
 }
 
+/**
+ * Shows a single call participant in a list.
+ *
+ * @param call The call state.
+ * @param participant The participant to render.
+ */
 @Composable
-private fun ParticipantListItem(call: Call, participant: CallParticipantState) {
-    val track = participant.videoTrack
-
-    if (track != null) {
-        CallParticipant(
-            modifier = Modifier
-                .size(VideoTheme.dimens.screenShareParticipantItemSize)
-                .clip(RoundedCornerShape(16.dp)),
-            call = call,
-            participant = participant,
-            labelPosition = Alignment.BottomStart
-        )
-    }
+private fun ParticipantListItem(
+    call: Call,
+    participant: CallParticipantState
+) {
+    CallParticipant(
+        modifier = Modifier
+            .size(VideoTheme.dimens.screenShareParticipantItemSize)
+            .clip(RoundedCornerShape(16.dp)),
+        call = call,
+        participant = participant,
+        labelPosition = Alignment.BottomStart
+    )
 }
