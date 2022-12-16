@@ -30,6 +30,7 @@ import stream.video.coordinator.client_v1_rpc.CreateCallRequest
 import stream.video.coordinator.client_v1_rpc.CreateCallResponse
 import stream.video.coordinator.client_v1_rpc.CreateDeviceRequest
 import stream.video.coordinator.client_v1_rpc.CreateDeviceResponse
+import stream.video.coordinator.client_v1_rpc.DeleteDeviceRequest
 import stream.video.coordinator.client_v1_rpc.GetCallEdgeServerRequest
 import stream.video.coordinator.client_v1_rpc.GetCallEdgeServerResponse
 import stream.video.coordinator.client_v1_rpc.GetOrCreateCallRequest
@@ -62,6 +63,20 @@ internal class CallCoordinatorClientImpl(
     } catch (error: Throwable) {
         Failure(VideoError(error.message, error))
     }
+
+    /**
+     * Delete a Device used to receive Push Notifications.
+     *
+     * @param deleteDeviceRequest The device data.
+     * @return Result if the operation was successful or not.
+     */
+    override suspend fun deleteDevice(deleteDeviceRequest: DeleteDeviceRequest): Result<Unit> =
+        try {
+            callCoordinatorService.deleteDevice(deleteDeviceRequest)
+            Success(Unit)
+        } catch (error: Throwable) {
+            Failure(VideoError(error.message, error))
+        }
 
     /**
      * Attempts to create a new [Call].
@@ -97,14 +112,13 @@ internal class CallCoordinatorClientImpl(
      * @return [Result] wrapper around the response from the server, or an error if something went
      * wrong.
      */
-    override suspend fun joinCall(request: JoinCallRequest): Result<JoinCallResponse> =
-        try {
-            val response = callCoordinatorService.joinCall(joinCallRequest = request)
+    override suspend fun joinCall(request: JoinCallRequest): Result<JoinCallResponse> = try {
+        val response = callCoordinatorService.joinCall(joinCallRequest = request)
 
-            Success(response)
-        } catch (error: Throwable) {
-            Failure(VideoError(error.message, error))
-        }
+        Success(response)
+    } catch (error: Throwable) {
+        Failure(VideoError(error.message, error))
+    }
 
     /**
      * Finds the correct server to connect to for given user and [request]. In case there are no
@@ -131,14 +145,13 @@ internal class CallCoordinatorClientImpl(
      * @param sendEventRequest The request holding information about the event type and the call.
      * @return a [Result] wrapper if the call succeeded or not.
      */
-    override suspend fun sendUserEvent(sendEventRequest: SendEventRequest): Result<Boolean> =
-        try {
-            callCoordinatorService.sendEvent(sendEventRequest = sendEventRequest)
+    override suspend fun sendUserEvent(sendEventRequest: SendEventRequest): Result<Boolean> = try {
+        callCoordinatorService.sendEvent(sendEventRequest = sendEventRequest)
 
-            Success(true)
-        } catch (error: Throwable) {
-            Failure(VideoError(error.message, error))
-        }
+        Success(true)
+    } catch (error: Throwable) {
+        Failure(VideoError(error.message, error))
+    }
 
     /**
      * Sends a custom event with encoded JSON data.
@@ -161,31 +174,28 @@ internal class CallCoordinatorClientImpl(
      * @param cid The call ID.
      * @return [Result] if the operation is successful or not.
      */
-    override suspend fun inviteUsers(users: List<User>, cid: StreamCallCid): Result<Unit> =
-        try {
-            callCoordinatorService.upsertCallMembers(
-                UpsertCallMembersRequest(
-                    call_cid = cid,
-                    members = users.map { user ->
-                        MemberInput(
-                            user_id = user.id,
-                            role = user.role
-                        )
-                    }
-                )
+    override suspend fun inviteUsers(users: List<User>, cid: StreamCallCid): Result<Unit> = try {
+        callCoordinatorService.upsertCallMembers(
+            UpsertCallMembersRequest(
+                call_cid = cid,
+                members = users.map { user ->
+                    MemberInput(
+                        user_id = user.id, role = user.role
+                    )
+                }
             )
+        )
 
-            Success(Unit)
-        } catch (error: Throwable) {
-            Failure(VideoError(error.message, error))
-        }
+        Success(Unit)
+    } catch (error: Throwable) {
+        Failure(VideoError(error.message, error))
+    }
 
-    override suspend fun queryUsers(request: QueryUsersRequest): Result<List<CallUser>> =
-        try {
-            val users = callCoordinatorService.queryUsers(request).users
+    override suspend fun queryUsers(request: QueryUsersRequest): Result<List<CallUser>> = try {
+        val users = callCoordinatorService.queryUsers(request).users
 
-            Success(users.map { it.toCallUser() })
-        } catch (error: Throwable) {
-            Failure(VideoError(error.message, error))
-        }
+        Success(users.map { it.toCallUser() })
+    } catch (error: Throwable) {
+        Failure(VideoError(error.message, error))
+    }
 }

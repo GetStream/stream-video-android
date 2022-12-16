@@ -69,6 +69,7 @@ class DogfoodingApp : Application() {
     fun logOut() {
         FirebaseAuth.getInstance().signOut()
         streamVideo.clearCallState()
+        streamVideo.removeDevices(userPreferences.getDevices())
         userPreferences.clear()
         calls = null
     }

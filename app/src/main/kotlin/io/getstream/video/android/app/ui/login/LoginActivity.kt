@@ -36,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.app.VideoApp
 import io.getstream.video.android.app.ui.components.UserList
 import io.getstream.video.android.app.ui.home.HomeActivity
 import io.getstream.video.android.app.user.AppUser
@@ -140,7 +141,7 @@ class LoginActivity : AppCompatActivity() {
         videoApp.initializeStreamVideo(
             credentialsProvider = AuthCredentialsProvider(
                 user = selectedUser,
-                apiKey = "key1",
+                apiKey = VideoApp.API_KEY,
                 userToken = selectedUser.token
             ),
             loggingLevel = LoggingLevel.BODY

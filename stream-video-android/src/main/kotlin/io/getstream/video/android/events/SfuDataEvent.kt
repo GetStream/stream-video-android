@@ -20,6 +20,7 @@ import io.getstream.video.android.model.StreamCallCid
 import stream.video.sfu.event.ChangePublishQuality
 import stream.video.sfu.models.CallState
 import stream.video.sfu.models.ConnectionQuality
+import stream.video.sfu.models.Error
 import stream.video.sfu.models.Participant
 import stream.video.sfu.models.PeerType
 import stream.video.sfu.models.TrackType
@@ -88,3 +89,5 @@ public object HealthCheckResponseEvent : SfuDataEvent()
 public data class JoinCallResponseEvent(
     val callState: CallState
 ) : SfuDataEvent()
+
+public data class ErrorEvent(val error: Error?) : SfuDataEvent()

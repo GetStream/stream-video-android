@@ -20,6 +20,7 @@ import io.getstream.video.android.events.AudioLevelChangedEvent
 import io.getstream.video.android.events.ChangePublishQualityEvent
 import io.getstream.video.android.events.ConnectionQualityChangeEvent
 import io.getstream.video.android.events.DominantSpeakerChangedEvent
+import io.getstream.video.android.events.ErrorEvent
 import io.getstream.video.android.events.HealthCheckResponseEvent
 import io.getstream.video.android.events.ICETrickleEvent
 import io.getstream.video.android.events.JoinCallResponseEvent
@@ -82,6 +83,8 @@ public object RTCEventMapper {
             event.ice_trickle != null -> with(event.ice_trickle) {
                 ICETrickleEvent(ice_candidate, peer_type)
             }
+            event.error != null -> ErrorEvent(event.error.error)
+
             else -> throw IllegalStateException("Unknown event")
         }
     }

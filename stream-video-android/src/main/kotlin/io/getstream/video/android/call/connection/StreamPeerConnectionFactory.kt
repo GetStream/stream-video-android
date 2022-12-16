@@ -181,7 +181,6 @@ public class StreamPeerConnectionFactory(private val context: Context) {
      * @param type The type of connection, either a subscriber of a publisher.
      * @param mediaConstraints Constraints used for audio and video tracks in the connection.
      * @param onStreamAdded Handler when a new [MediaStream] gets added.
-     * @param onStreamRemoved Handler when a [MediaStream] gets removed.
      * @param onNegotiationNeeded Handler when there's a new negotiation.
      * @param onIceCandidateRequest Handler whenever we receive [IceCandidate]s.
      * @return [StreamPeerConnection] That's fully set up and can be observed and used to send and
@@ -193,22 +192,20 @@ public class StreamPeerConnectionFactory(private val context: Context) {
         type: StreamPeerType,
         mediaConstraints: MediaConstraints,
         onStreamAdded: ((MediaStream) -> Unit)? = null,
-        onStreamRemoved: ((MediaStream) -> Unit)? = null,
         onNegotiationNeeded: ((StreamPeerConnection, StreamPeerType) -> Unit)? = null,
         onIceCandidateRequest: ((IceCandidate, StreamPeerType) -> Unit)? = null,
     ): StreamPeerConnection {
         val peerConnection = StreamPeerConnection(
-            coroutineScope,
-            type,
-            mediaConstraints,
-            onStreamAdded,
-            onStreamRemoved,
-            onNegotiationNeeded,
-            onIceCandidateRequest,
+            coroutineScope = coroutineScope,
+            type = type,
+            mediaConstraints = mediaConstraints,
+            onStreamAdded = onStreamAdded,
+            onNegotiationNeeded = onNegotiationNeeded,
+            onIceCandidate = onIceCandidateRequest,
         )
         val connection = makePeerConnectionInternal(
-            configuration,
-            peerConnection
+            configuration = configuration,
+            observer = peerConnection
         )
         return peerConnection.apply { initialize(connection) }
     }

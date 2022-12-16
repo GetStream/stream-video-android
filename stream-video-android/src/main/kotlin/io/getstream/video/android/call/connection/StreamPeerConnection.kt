@@ -60,7 +60,6 @@ import org.webrtc.IceCandidate as RtcIceCandidate
  * @param type The internal type of the PeerConnection. Check [StreamPeerType].
  * @param mediaConstraints Constraints used for the connections.
  * @param onStreamAdded Handler when a new [MediaStream] gets added.
- * @param onStreamRemoved Handler when a [MediaStream] gets removed.
  * @param onNegotiationNeeded Handler when there's a new negotiation.
  * @param onIceCandidate Handler whenever we receive [IceCandidate]s.
  */
@@ -69,7 +68,6 @@ public class StreamPeerConnection(
     private val type: StreamPeerType,
     private val mediaConstraints: MediaConstraints,
     private val onStreamAdded: ((MediaStream) -> Unit)?,
-    private val onStreamRemoved: ((MediaStream) -> Unit)?,
     private val onNegotiationNeeded: ((StreamPeerConnection, StreamPeerType) -> Unit)?,
     private val onIceCandidate: ((IceCandidate, StreamPeerType) -> Unit)?,
 ) : PeerConnection.Observer {
@@ -136,8 +134,7 @@ public class StreamPeerConnection(
         logger.d { "[createOffer] #sfu; #$typeTag; no args" }
         return createValue {
             connection.createOffer(
-                it,
-                MediaConstraints()
+                it, MediaConstraints()
             )
         }
     }
@@ -165,8 +162,7 @@ public class StreamPeerConnection(
             connection.setRemoteDescription(
                 it,
                 SessionDescription(
-                    sessionDescription.type,
-                    sessionDescription.description.mungeCodecs()
+                    sessionDescription.type, sessionDescription.description.mungeCodecs()
                 )
             )
         }.also {
@@ -190,8 +186,7 @@ public class StreamPeerConnection(
      */
     public suspend fun setLocalDescription(sessionDescription: SessionDescription): Result<Unit> {
         val sdp = SessionDescription(
-            sessionDescription.type,
-            sessionDescription.description.mungeCodecs()
+            sessionDescription.type, sessionDescription.description.mungeCodecs()
         )
         logger.d { "[setLocalDescription] #sfu; #$typeTag; offerSdp: ${sessionDescription.stringify()}" }
         return setValue { connection.setLocalDescription(it, sdp) }
@@ -243,9 +238,7 @@ public class StreamPeerConnection(
      */
     private fun buildAudioTransceiverInit(streamIds: List<String>): RtpTransceiverInit {
         val fullQuality = RtpParameters.Encoding(
-            "a",
-            true,
-            1.0
+            "a", true, 1.0
         ).apply {
             maxBitrateBps = 500_000
         }
@@ -253,9 +246,7 @@ public class StreamPeerConnection(
         val encodings = listOf(fullQuality)
 
         return RtpTransceiverInit(
-            RtpTransceiver.RtpTransceiverDirection.SEND_ONLY,
-            streamIds,
-            encodings
+            RtpTransceiver.RtpTransceiverDirection.SEND_ONLY, streamIds, encodings
         )
     }
 
@@ -279,26 +270,29 @@ public class StreamPeerConnection(
      * @param streamIds The list of stream IDs to bind to this transceiver.
      */
     private fun buildVideoTransceiverInit(streamIds: List<String>): RtpTransceiverInit {
+        /**
+         * We create different RTP encodings for the transceiver.
+         * Full quality, represented by "f" ID.
+         * Half quality, represented by "h" ID.
+         * Quarter quality, represented by "q" ID.
+         *
+         * Their bitrate is also roughly as the name states - maximum for "full", ~half of that
+         * for "half" and another half, or total quarter of maximum, for "quarter".
+         */
         val quarterQuality = RtpParameters.Encoding(
-            "q",
-            true,
-            4.0
+            "q", true, 4.0
         ).apply {
             maxBitrateBps = 125_000
         }
 
         val halfQuality = RtpParameters.Encoding(
-            "h",
-            true,
-            2.0
+            "h", true, 2.0
         ).apply {
             maxBitrateBps = 500_000
         }
 
         val fullQuality = RtpParameters.Encoding(
-            "f",
-            true,
-            1.0
+            "f", true, 1.0
         ).apply {
             maxBitrateBps = 1_200_000
         }
@@ -306,9 +300,7 @@ public class StreamPeerConnection(
         val encodings = listOf(quarterQuality, halfQuality, fullQuality)
 
         return RtpTransceiverInit(
-            RtpTransceiver.RtpTransceiverDirection.SEND_ONLY,
-            streamIds,
-            encodings
+            RtpTransceiver.RtpTransceiverDirection.SEND_ONLY, streamIds, encodings
         )
     }
 
@@ -373,12 +365,7 @@ public class StreamPeerConnection(
      *
      * @param stream The stream that was removed from the connection.
      */
-    override fun onRemoveStream(stream: MediaStream?) {
-        logger.i { "[onRemoveStream] #sfu; #$typeTag; stream: $stream" }
-        if (stream != null) {
-            onStreamRemoved?.invoke(stream)
-        }
-    }
+    override fun onRemoveStream(stream: MediaStream?) {}
 
     /**
      * Triggered when the connection state changes.  Used to start and stop the stats observing.
@@ -388,9 +375,7 @@ public class StreamPeerConnection(
     override fun onIceConnectionChange(newState: PeerConnection.IceConnectionState?) {
         logger.i { "[onIceConnectionChange] #sfu; #$typeTag; newState: $newState" }
         when (newState) {
-            PeerConnection.IceConnectionState.CLOSED,
-            PeerConnection.IceConnectionState.FAILED,
-            PeerConnection.IceConnectionState.DISCONNECTED -> {
+            PeerConnection.IceConnectionState.CLOSED, PeerConnection.IceConnectionState.FAILED, PeerConnection.IceConnectionState.DISCONNECTED -> {
                 statsJob?.cancel()
             }
             PeerConnection.IceConnectionState.CONNECTED -> {
@@ -466,8 +451,6 @@ public class StreamPeerConnection(
         "StreamPeerConnection(type='$typeTag', constraints=$mediaConstraints)"
 
     private fun String.mungeCodecs(): String {
-        return this.replace("vp9", "VP9")
-            .replace("vp8", "VP8")
-            .replace("h264", "H264")
+        return this.replace("vp9", "VP9").replace("vp8", "VP8").replace("h264", "H264")
     }
 }

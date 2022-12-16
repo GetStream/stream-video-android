@@ -523,7 +523,6 @@ internal class CallClientImpl(
             type = StreamPeerType.SUBSCRIBER,
             mediaConstraints = mediaConstraints,
             onStreamAdded = { call?.addStream(it) }, // addTrack
-            onStreamRemoved = { call?.removeStream(it) },
             onIceCandidateRequest = ::sendIceCandidate
         ).also {
             logger.i { "[createSubscriber] #sfu; subscriber: $it" }
