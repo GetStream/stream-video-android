@@ -42,6 +42,7 @@ import io.getstream.video.android.model.CallParticipantState
 import io.getstream.video.android.model.CallSettings
 import io.getstream.video.android.model.CallType
 import io.getstream.video.android.model.CallUser
+import io.getstream.video.android.model.ScreenSharingSession
 import io.getstream.video.android.model.User
 import io.getstream.video.android.permission.PermissionManager
 import io.getstream.video.android.user.UsersProvider
@@ -54,6 +55,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
@@ -178,6 +180,9 @@ public class CallViewModel(
 
     private val _participants: MutableStateFlow<List<CallUser>> = MutableStateFlow(emptyList())
     public val participants: StateFlow<List<CallUser>> = _participants
+
+    public val screenSharingSessions: Flow<List<ScreenSharingSession>> =
+        callState.flatMapLatest { it?.screenSharingSessions ?: emptyFlow() }
 
     private var prevState: State = State.Idle
 
