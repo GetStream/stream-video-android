@@ -118,7 +118,7 @@ public fun LandscapeScreenSharingContent(
             LandscapeCallControls(
                 modifier = Modifier
                     .fillMaxHeight()
-                    .width(64.dp)
+                    .width(VideoTheme.dimens.landscapeCallControlsSheetWidth)
                     .padding(6.dp),
                 callMediaState = callMediaState,
                 onCallAction = onCallAction,
