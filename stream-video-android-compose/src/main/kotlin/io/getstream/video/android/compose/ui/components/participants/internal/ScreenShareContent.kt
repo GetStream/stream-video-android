@@ -41,6 +41,7 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.ScreenSharingSession
+import io.getstream.video.android.ui.common.R as RCommon
 
 /**
  * Represents the content of a screen sharing session.
@@ -102,7 +103,7 @@ internal fun ScreenShareContent(
                             .padding(8.dp),
                         painter = painterResource(id = drawable),
                         contentDescription = stringResource(
-                            id = R.string.change_orientation
+                            id = RCommon.string.change_orientation
                         ),
                         tint = VideoTheme.colors.textHighEmphasis
                     )
@@ -138,7 +139,7 @@ internal fun ScreenShareContent(
                             .padding(8.dp),
                         painter = painterResource(id = drawable),
                         contentDescription = stringResource(
-                            id = R.string.toggle_fullscreen
+                            id = RCommon.string.toggle_fullscreen
                         ),
                         tint = VideoTheme.colors.textHighEmphasis
                     )

@@ -90,7 +90,7 @@ public class CallParticipantView @JvmOverloads constructor(
      */
     public fun setParticipant(participant: CallParticipantState) {
         setUserData(participant.toUser())
-        setTrack(participant.track, participant.hasVideo)
+        setTrack(participant.videoTrack, participant.hasVideo)
         setHasAudio(participant.hasAudio)
     }
 

@@ -79,6 +79,7 @@ public data class StreamDimens(
          *
          * @return A [StreamDimens] instance holding our default dimensions.
          */
+        @Composable
         public fun defaultDimens(): StreamDimens = StreamDimens(
             callAvatarSize = dimensionResource(id = R.dimen.callAvatarSize),
             singleAvatarSize = dimensionResource(id = R.dimen.singleAvatarSize),
@@ -107,7 +108,9 @@ public data class StreamDimens(
             callAppBarTrailingContentSpacingEnd = dimensionResource(id = R.dimen.callAppBarTrailingContentSpacingEnd),
             callAppBarCenterContentSpacingEnd = dimensionResource(id = R.dimen.callAppBarCenterContentSpacingEnd),
             callControlButtonSize = dimensionResource(id = R.dimen.callControlButtonSize),
+            landscapeCallControlButtonSize = 40.dp,
             callControlsSheetHeight = dimensionResource(id = R.dimen.callControlsSheetHeight),
+            landscapeCallControlsSheetWidth = 64.dp,
             callParticipantInfoMenuAppBarHeight = dimensionResource(id = R.dimen.callParticipantInfoMenuAppBarHeight),
             callParticipantInfoMenuOptionsHeight = dimensionResource(id = R.dimen.callParticipantInfoMenuOptionsHeight),
             callParticipantsInfoMenuOptionsButtonHeight = dimensionResource(id = R.dimen.callParticipantsInfoMenuOptionsButtonHeight),

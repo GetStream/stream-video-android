@@ -83,7 +83,7 @@ public data class StreamColors(
             infoAccent = colorResource(R.color.stream_info_accent),
             highlight = colorResource(R.color.stream_highlight),
             avatarInitials = colorResource(id = R.color.stream_text_avatar_initials),
-            screenSharingBackground = colorResource(io.getstream.video.android.compose.R.color.stream_compose_app_background)
+            screenSharingBackground = colorResource(R.color.stream_app_background)
         )
 
         /**
@@ -107,7 +107,7 @@ public data class StreamColors(
             errorAccent = colorResource(R.color.stream_error_accent_dark),
             infoAccent = colorResource(R.color.stream_info_accent_dark),
             highlight = colorResource(R.color.stream_highlight_dark),
-            screenSharingBackground = colorResource(io.getstream.video.android.compose.R.color.stream_compose_app_background_dark),
+            screenSharingBackground = colorResource(R.color.stream_app_background_dark),
             avatarInitials = colorResource(id = R.color.stream_text_avatar_initials)
         )
     }
