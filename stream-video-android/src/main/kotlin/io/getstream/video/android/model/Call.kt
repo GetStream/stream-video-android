@@ -204,10 +204,7 @@ public class Call(
         )
 
         logger.d { "[addStream] updated list $updatedList" }
-        val screenShare = screenSharingSession
-        if (screenShare != null) {
-            addScreenSharingSession(screenShare)
-        }
+        screenSharingSession?.let { addScreenSharingSession(it) }
         _callParticipants.value = updatedList
         onStreamAdded(mediaStream)
     }
