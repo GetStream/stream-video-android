@@ -33,6 +33,7 @@ import io.getstream.video.android.events.ChangePublishQualityEvent
 import io.getstream.video.android.events.ConnectedEvent
 import io.getstream.video.android.events.ConnectionQualityChangeEvent
 import io.getstream.video.android.events.DominantSpeakerChangedEvent
+import io.getstream.video.android.events.ErrorEvent
 import io.getstream.video.android.events.HealthCheckEvent
 import io.getstream.video.android.events.HealthCheckResponseEvent
 import io.getstream.video.android.events.ICETrickleEvent
@@ -138,20 +139,21 @@ internal class StreamCallEngineImpl(
             logger.v { "[onSfuEvent] event: $event" }
         }
         when (event) {
+            is JoinCallResponseEvent -> onSfuJoined(event)
+            is ParticipantJoinedEvent -> onSfuParticipantJoined(event)
+            is ParticipantLeftEvent -> onSfuParticipantLeft(event)
             is AudioLevelChangedEvent -> {}
             is ChangePublishQualityEvent -> {}
             is ConnectionQualityChangeEvent -> {}
             is DominantSpeakerChangedEvent -> {}
             is HealthCheckResponseEvent -> {}
             is ICETrickleEvent -> {}
-            is JoinCallResponseEvent -> onSfuJoined(event)
-            is ParticipantJoinedEvent -> onSfuParticipantJoined(event)
-            is ParticipantLeftEvent -> onSfuParticipantLeft(event)
             is SubscriberOfferEvent -> {}
             is VideoQualityChangedEvent -> {}
             is PublisherAnswerEvent -> {}
             is TrackPublishedEvent -> {}
             is TrackUnpublishedEvent -> {}
+            is ErrorEvent -> {}
         }
     }
 

@@ -16,16 +16,20 @@
 
 package io.getstream.video.android.compose.ui.components.participants
 
+import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import android.view.View
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.call.state.CallAction
 import io.getstream.video.android.call.state.CallMediaState
+import io.getstream.video.android.compose.ui.components.participants.internal.LandscapeScreenSharingContent
+import io.getstream.video.android.compose.ui.components.participants.internal.PortraitScreenSharingContent
 import io.getstream.video.android.model.Call
+import io.getstream.video.android.model.CallParticipantState
+import io.getstream.video.android.model.ScreenSharingSession
 
 /**
  * Renders all the CallParticipants, based on the number of people in a call and the call state.
@@ -33,45 +37,47 @@ import io.getstream.video.android.model.Call
  * accordingly.
  *
  * @param call The call that contains all the participants state and tracks.
- * @param onCallAction Handler when the user triggers a Call Control Action.
+ * @param session The screen sharing session which is active.
+ * @param participants List of participants currently in the call.
  * @param callMediaState The state of the call media, such as audio, video.
+ * @param onCallAction Handler when the user triggers a Call Control Action.
  * @param modifier Modifier for styling.
  * @param paddingValues Padding within the parent.
  * @param isFullscreen If we're rendering a full screen activity.
  * @param onRender Handler when each of the Video views render their first frame.
  */
 @Composable
-public fun CallParticipants(
+public fun ScreenSharingCallParticipantsContent(
     call: Call,
-    onCallAction: (CallAction) -> Unit,
+    session: ScreenSharingSession,
+    participants: List<CallParticipantState>,
     callMediaState: CallMediaState,
+    onCallAction: (CallAction) -> Unit,
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues = PaddingValues(0.dp),
     isFullscreen: Boolean = false,
     onRender: (View) -> Unit = {}
 ) {
-    val screenSharingSessions by call.screenSharingSessions.collectAsState(initial = emptyList())
+    val configuration = LocalConfiguration.current
+    val orientation = configuration.orientation
 
-    val screenSharing = screenSharingSessions.firstOrNull()
-
-    if (screenSharing == null) {
-        RegularCallParticipantsContent(
+    if (orientation == ORIENTATION_PORTRAIT) {
+        PortraitScreenSharingContent(
             call = call,
-            modifier = modifier,
+            session = session,
+            participants = participants,
             paddingValues = paddingValues,
+            modifier = modifier,
             onRender = onRender,
-            onCallAction = onCallAction,
-            callMediaState = callMediaState
+            onCallAction = onCallAction
         )
     } else {
-        val participants by call.callParticipants.collectAsState()
-
-        ScreenSharingCallParticipantsContent(
+        LandscapeScreenSharingContent(
             call = call,
-            session = screenSharing,
+            session = session,
             participants = participants,
-            modifier = modifier,
             paddingValues = paddingValues,
+            modifier = modifier,
             onRender = onRender,
             isFullscreen = isFullscreen,
             onCallAction = onCallAction,

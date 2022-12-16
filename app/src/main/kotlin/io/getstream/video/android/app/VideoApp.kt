@@ -79,8 +79,15 @@ class VideoApp : Application() {
         }
     }
 
-    private companion object {
+    fun logOut() {
+        streamVideo.clearCallState()
+        streamVideo.removeDevices(userPreferences.getDevices())
+        userPreferences.clear()
+    }
+
+    companion object {
         private const val TAG = "Call:App"
+        const val API_KEY = "us83cfwuhy8n"
     }
 }
 

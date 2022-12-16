@@ -19,7 +19,9 @@ package io.getstream.video.android.user
 import android.content.SharedPreferences
 import androidx.core.content.edit
 import io.getstream.video.android.model.ApiKey
+import io.getstream.video.android.model.Device
 import io.getstream.video.android.model.User
+import io.getstream.video.android.model.UserDevices
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -74,6 +76,34 @@ internal class UserPreferencesImpl(
         }
     }
 
+    private fun parseDevices(json: String?): List<Device> {
+        json ?: return emptyList()
+
+        return try {
+            val devices: UserDevices = Json.decodeFromString(json)
+
+            devices.devices
+        } catch (error: Throwable) {
+            emptyList()
+        }
+    }
+
+    override fun getDevices(): List<Device> {
+        return parseDevices(sharedPreferences.getString(KEY_DEVICES, ""))
+    }
+
+    override fun removeDevices() {
+    }
+
+    override fun storeDevice(device: Device) {
+        val devices = getDevices() + device
+        val json = Json.encodeToString(UserDevices(devices))
+
+        sharedPreferences.edit {
+            putString(KEY_DEVICES, json)
+        }
+    }
+
     /**
      * @see UserPreferences.clear
      */
@@ -84,5 +114,6 @@ internal class UserPreferencesImpl(
     internal companion object {
         private const val KEY_USER = "user_data"
         private const val KEY_APIKEY = "apikey"
+        private const val KEY_DEVICES = "devices"
     }
 }

@@ -49,7 +49,7 @@ public fun LocalVideo(
         modifier = modifier.shadow(elevation = 8.dp),
         elevation = 8.dp
     ) {
-        val videoTrack = callParticipant.track
+        val videoTrack = callParticipant.videoTrack
 
         if (videoTrack != null) {
             VideoRenderer(

@@ -48,7 +48,6 @@ import org.webrtc.PeerConnection
 import org.webrtc.RTCStatsReport
 import org.webrtc.RtpParameters
 import org.webrtc.RtpReceiver
-import org.webrtc.RtpSender
 import org.webrtc.RtpTransceiver
 import org.webrtc.RtpTransceiver.RtpTransceiverInit
 import org.webrtc.SessionDescription
@@ -61,7 +60,6 @@ import org.webrtc.IceCandidate as RtcIceCandidate
  * @param type The internal type of the PeerConnection. Check [StreamPeerType].
  * @param mediaConstraints Constraints used for the connections.
  * @param onStreamAdded Handler when a new [MediaStream] gets added.
- * @param onStreamRemoved Handler when a [MediaStream] gets removed.
  * @param onNegotiationNeeded Handler when there's a new negotiation.
  * @param onIceCandidate Handler whenever we receive [IceCandidate]s.
  */
@@ -70,7 +68,6 @@ public class StreamPeerConnection(
     private val type: StreamPeerType,
     private val mediaConstraints: MediaConstraints,
     private val onStreamAdded: ((MediaStream) -> Unit)?,
-    private val onStreamRemoved: ((MediaStream) -> Unit)?,
     private val onNegotiationNeeded: ((StreamPeerConnection, StreamPeerType) -> Unit)?,
     private val onIceCandidate: ((IceCandidate, StreamPeerType) -> Unit)?,
 ) : PeerConnection.Observer {
@@ -137,8 +134,7 @@ public class StreamPeerConnection(
         logger.d { "[createOffer] #sfu; #$typeTag; no args" }
         return createValue {
             connection.createOffer(
-                it,
-                MediaConstraints()
+                it, MediaConstraints()
             )
         }
     }
@@ -166,8 +162,7 @@ public class StreamPeerConnection(
             connection.setRemoteDescription(
                 it,
                 SessionDescription(
-                    sessionDescription.type,
-                    sessionDescription.description.mungeCodecs()
+                    sessionDescription.type, sessionDescription.description.mungeCodecs()
                 )
             )
         }.also {
@@ -191,8 +186,7 @@ public class StreamPeerConnection(
      */
     public suspend fun setLocalDescription(sessionDescription: SessionDescription): Result<Unit> {
         val sdp = SessionDescription(
-            sessionDescription.type,
-            sessionDescription.description.mungeCodecs()
+            sessionDescription.type, sessionDescription.description.mungeCodecs()
         )
         logger.d { "[setLocalDescription] #sfu; #$typeTag; offerSdp: ${sessionDescription.stringify()}" }
         return setValue { connection.setLocalDescription(it, sdp) }
@@ -221,87 +215,93 @@ public class StreamPeerConnection(
     }
 
     /**
-     * Adds a [MediaStreamTrack] to a given [connection], with its [streamIds].
+     * Adds a local [MediaStreamTrack] with audio to a given [connection], with its [streamIds].
+     * The audio is then sent through a transceiver.
      *
-     * @param mediaStreamTrack The track that contains audio or video.
+     * @param track The track that contains audio.
      * @param streamIds The IDs that represent the stream tracks.
-     * @return [RtpSender] that uses the tracks.
      */
-    public fun addTrack(
-        mediaStreamTrack: MediaStreamTrack,
-        streamIds: List<String>
-    ): RtpSender {
-        logger.i { "[addTrack] #sfu; #$typeTag; track: ${mediaStreamTrack.stringify()}, streamIds: $streamIds" }
-        return connection.addTrack(mediaStreamTrack, streamIds)
-    }
-
     public fun addAudioTransceiver(
         track: MediaStreamTrack,
         streamIds: List<String>
     ) {
         logger.i { "[addAudioTransceiver] #sfu; #$typeTag; track: ${track.stringify()}, streamIds: $streamIds" }
+        val transceiverInit = buildAudioTransceiverInit(streamIds)
+
+        audioTransceiver = connection.addTransceiver(track, transceiverInit)
+    }
+
+    /**
+     * Creates the initialization configuration for the [RtpTransceiver], when sending audio.
+     *
+     * @param streamIds The list of stream IDs to bind to this transceiver.
+     */
+    private fun buildAudioTransceiverInit(streamIds: List<String>): RtpTransceiverInit {
         val fullQuality = RtpParameters.Encoding(
-            "a",
-            true,
-            1.0
+            "a", true, 1.0
         ).apply {
             maxBitrateBps = 500_000
         }
 
         val encodings = listOf(fullQuality)
 
-        val transceiverInit = RtpTransceiverInit(
-            RtpTransceiver.RtpTransceiverDirection.SEND_ONLY,
-            streamIds,
-            encodings
+        return RtpTransceiverInit(
+            RtpTransceiver.RtpTransceiverDirection.SEND_ONLY, streamIds, encodings
         )
-
-        audioTransceiver = connection.addTransceiver(track, transceiverInit)
     }
 
     /**
      * Adds a local [MediaStreamTrack] with video to a given [connection], with its [streamIds].
-     * The video is then sent in three different resolutions using simulcast.
+     * The video is then sent in a few different resolutions using simulcast.
      *
      * @param track The track that contains video.
      * @param streamIds The IDs that represent the stream tracks.
      */
     public fun addVideoTransceiver(track: MediaStreamTrack, streamIds: List<String>) {
         logger.d { "[addVideoTransceiver] #sfu; #$typeTag; track: ${track.stringify()}, streamIds: $streamIds" }
+        val transceiverInit = buildVideoTransceiverInit(streamIds)
 
+        videoTransceiver = connection.addTransceiver(track, transceiverInit)
+    }
+
+    /**
+     * Creates the initialization configuration for the [RtpTransceiver], when sending video.
+     *
+     * @param streamIds The list of stream IDs to bind to this transceiver.
+     */
+    private fun buildVideoTransceiverInit(streamIds: List<String>): RtpTransceiverInit {
+        /**
+         * We create different RTP encodings for the transceiver.
+         * Full quality, represented by "f" ID.
+         * Half quality, represented by "h" ID.
+         * Quarter quality, represented by "q" ID.
+         *
+         * Their bitrate is also roughly as the name states - maximum for "full", ~half of that
+         * for "half" and another half, or total quarter of maximum, for "quarter".
+         */
         val quarterQuality = RtpParameters.Encoding(
-            "q",
-            true,
-            4.0
+            "q", true, 4.0
         ).apply {
             maxBitrateBps = 125_000
         }
 
         val halfQuality = RtpParameters.Encoding(
-            "h",
-            true,
-            2.0
+            "h", true, 2.0
         ).apply {
             maxBitrateBps = 500_000
         }
 
         val fullQuality = RtpParameters.Encoding(
-            "f",
-            true,
-            1.0
+            "f", true, 1.0
         ).apply {
             maxBitrateBps = 1_200_000
         }
 
         val encodings = listOf(quarterQuality, halfQuality, fullQuality)
 
-        val transceiverInit = RtpTransceiverInit(
-            RtpTransceiver.RtpTransceiverDirection.SEND_ONLY,
-            streamIds,
-            encodings
+        return RtpTransceiverInit(
+            RtpTransceiver.RtpTransceiverDirection.SEND_ONLY, streamIds, encodings
         )
-
-        videoTransceiver = connection.addTransceiver(track, transceiverInit)
     }
 
     /**
@@ -365,12 +365,7 @@ public class StreamPeerConnection(
      *
      * @param stream The stream that was removed from the connection.
      */
-    override fun onRemoveStream(stream: MediaStream?) {
-        logger.i { "[onRemoveStream] #sfu; #$typeTag; stream: $stream" }
-        if (stream != null) {
-            onStreamRemoved?.invoke(stream)
-        }
-    }
+    override fun onRemoveStream(stream: MediaStream?) {}
 
     /**
      * Triggered when the connection state changes.  Used to start and stop the stats observing.
@@ -380,9 +375,7 @@ public class StreamPeerConnection(
     override fun onIceConnectionChange(newState: PeerConnection.IceConnectionState?) {
         logger.i { "[onIceConnectionChange] #sfu; #$typeTag; newState: $newState" }
         when (newState) {
-            PeerConnection.IceConnectionState.CLOSED,
-            PeerConnection.IceConnectionState.FAILED,
-            PeerConnection.IceConnectionState.DISCONNECTED -> {
+            PeerConnection.IceConnectionState.CLOSED, PeerConnection.IceConnectionState.FAILED, PeerConnection.IceConnectionState.DISCONNECTED -> {
                 statsJob?.cancel()
             }
             PeerConnection.IceConnectionState.CONNECTED -> {
@@ -458,8 +451,6 @@ public class StreamPeerConnection(
         "StreamPeerConnection(type='$typeTag', constraints=$mediaConstraints)"
 
     private fun String.mungeCodecs(): String {
-        return this.replace("vp9", "VP9")
-            .replace("vp8", "VP8")
-            .replace("h264", "H264")
+        return this.replace("vp9", "VP9").replace("vp8", "VP8").replace("h264", "H264")
     }
 }

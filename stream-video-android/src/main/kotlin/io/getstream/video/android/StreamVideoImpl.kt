@@ -49,6 +49,7 @@ import io.getstream.video.android.socket.SocketState
 import io.getstream.video.android.socket.SocketStateService
 import io.getstream.video.android.socket.VideoSocket
 import io.getstream.video.android.token.CredentialsProvider
+import io.getstream.video.android.user.UserCredentialsManager
 import io.getstream.video.android.utils.Failure
 import io.getstream.video.android.utils.Result
 import io.getstream.video.android.utils.Success
@@ -61,6 +62,8 @@ import io.getstream.video.android.utils.onSuccess
 import io.getstream.video.android.utils.toCall
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
@@ -70,6 +73,7 @@ import okio.ByteString.Companion.encodeUtf8
 import stream.video.coordinator.client_v1_rpc.CreateCallInput
 import stream.video.coordinator.client_v1_rpc.CreateCallRequest
 import stream.video.coordinator.client_v1_rpc.CreateDeviceRequest
+import stream.video.coordinator.client_v1_rpc.DeleteDeviceRequest
 import stream.video.coordinator.client_v1_rpc.GetCallEdgeServerRequest
 import stream.video.coordinator.client_v1_rpc.GetCallEdgeServerResponse
 import stream.video.coordinator.client_v1_rpc.GetOrCreateCallRequest
@@ -183,7 +187,40 @@ public class StreamVideoImpl(
                     token = it.device?.id ?: error("CreateDeviceResponse has no device object "),
                     pushProvider = it.device.push_provider_name
                 )
+            }.also { storeDevice(it) }
+    }
+
+    private fun storeDevice(result: Result<Device>) {
+        if (result is Success) {
+            logger.d { "[storeDevice] device: ${result.data}" }
+            val device = result.data
+            val preferences = UserCredentialsManager.initialize(context)
+
+            preferences.storeDevice(device)
+        }
+    }
+
+    /**
+     * Remove a device used to receive push notifications.
+     *
+     * @param id The ID of the device, previously provided by [createDevice].
+     * @return Result if the operation was successful or not.
+     */
+    override suspend fun deleteDevice(id: String): Result<Unit> {
+        logger.d { "[deleteDevice] id: $id" }
+        return callCoordinatorClient.deleteDevice(
+            DeleteDeviceRequest(id = id)
+        ).also { logger.v { "[deleteDevice] result: $it" } }
+    }
+
+    override fun removeDevices(devices: List<Device>) {
+        scope.launch {
+            val operations = devices.map {
+                async { deleteDevice(it.token) }
             }
+
+            operations.awaitAll()
+        }
     }
 
     /**
@@ -326,8 +363,13 @@ public class StreamVideoImpl(
                     val credentials = selectEdgeServerResult.data.credentials
                     val url = credentials?.server?.url
                     val iceServers =
-                        selectEdgeServerResult.data.credentials?.ice_servers?.map { it.toIceServer() }
-                            ?: emptyList()
+                        selectEdgeServerResult
+                            .data
+                            .credentials
+                            ?.ice_servers
+                            ?.map { it.toIceServer() } ?: emptyList()
+
+                    credentialsProvider.setSfuToken(credentials?.token)
 
                     Success(
                         JoinedCall(
@@ -336,9 +378,7 @@ public class StreamVideoImpl(
                             sfuToken = credentials.token,
                             iceServers = iceServers
                         )
-                    ).also {
-                        credentialsProvider.setSfuToken(it.data.sfuToken)
-                    }
+                    )
                 }
                 is Failure -> Failure(selectEdgeServerResult.error)
             }

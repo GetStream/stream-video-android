@@ -21,6 +21,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.utils.floatResource
 import io.getstream.video.android.compose.utils.textSizeResource
 import io.getstream.video.android.ui.common.R
@@ -39,7 +40,8 @@ public data class StreamDimens(
     public val largeButtonSize: Dp,
     public val mediumButtonSize: Dp,
     public val smallButtonSize: Dp,
-    public val topAppbarHeightSize: Dp,
+    public val topAppbarHeight: Dp,
+    public val landscapeTopAppBarHeight: Dp,
     public val avatarAppbarPadding: Dp,
     public val singleAvatarAppbarPadding: Dp,
     public val participantsTextPadding: Dp,
@@ -59,11 +61,17 @@ public data class StreamDimens(
     public val callAppBarTrailingContentSpacingStart: Dp,
     public val callAppBarTrailingContentSpacingEnd: Dp,
     public val callControlButtonSize: Dp,
+    public val landscapeCallControlButtonSize: Dp,
     public val callControlsSheetHeight: Dp,
+    public val landscapeCallControlsSheetWidth: Dp,
     public val callParticipantInfoMenuAppBarHeight: Dp,
     public val callParticipantInfoMenuOptionsHeight: Dp,
     public val callParticipantsInfoMenuOptionsButtonHeight: Dp,
     public val callParticipantsInfoAvatarSize: Dp,
+    public val floatingVideoPadding: Dp,
+    public val floatingVideoHeight: Dp,
+    public val floatingVideoWidth: Dp,
+    public val screenShareParticipantItemSize: Dp,
 ) {
     public companion object {
         /**
@@ -71,41 +79,43 @@ public data class StreamDimens(
          *
          * @return A [StreamDimens] instance holding our default dimensions.
          */
-        @Composable
-        public fun defaultDimens(): StreamDimens {
-            return StreamDimens(
-                callAvatarSize = dimensionResource(id = R.dimen.callAvatarSize),
-                singleAvatarSize = dimensionResource(id = R.dimen.singleAvatarSize),
-                headerElevation = dimensionResource(id = R.dimen.headerElevation),
-                largeButtonSize = dimensionResource(id = R.dimen.largeButtonSize),
-                mediumButtonSize = dimensionResource(id = R.dimen.mediumButtonSize),
-                smallButtonSize = dimensionResource(id = R.dimen.smallButtonSize),
-                topAppbarHeightSize = dimensionResource(id = R.dimen.topAppbarHeightSize),
-                avatarAppbarPadding = dimensionResource(id = R.dimen.avatarAppbarPadding),
-                singleAvatarAppbarPadding = dimensionResource(id = R.dimen.singleAvatarAppbarPadding),
-                participantsTextPadding = dimensionResource(id = R.dimen.participantsTextPadding),
-                topAppbarTextSize = textSizeResource(id = R.dimen.topAppbarTextSize),
-                directCallUserNameTextSize = textSizeResource(id = R.dimen.directCallUserNameTextSize),
-                groupCallUserNameTextSize = textSizeResource(id = R.dimen.groupCallUserNameTextSize),
-                onCallStatusTextSize = textSizeResource(id = R.dimen.onCallStatusTextSize),
-                onCallStatusTextAlpha = floatResource(R.dimen.onCallStatusTextAlpha),
-                buttonToggleOnAlpha = floatResource(R.dimen.buttonToggleOnAlpha),
-                buttonToggleOffAlpha = floatResource(R.dimen.buttonToggleOffAlpha),
-                incomingCallOptionsBottomPadding = dimensionResource(id = R.dimen.incomingCallOptionsBottomPadding),
-                callAppBarPadding = dimensionResource(id = R.dimen.callAppBarPadding),
-                callAppBarLeadingContentSpacingStart = dimensionResource(id = R.dimen.callAppBarLeadingContentSpacingStart),
-                callAppBarLeadingContentSpacingEnd = dimensionResource(id = R.dimen.callAppBarLeadingContentSpacingEnd),
-                callAppBarCenterContentSpacingStart = dimensionResource(id = R.dimen.callAppBarCenterContentSpacingStart),
-                callAppBarTrailingContentSpacingStart = dimensionResource(id = R.dimen.callAppBarTrailingContentSpacingStart),
-                callAppBarTrailingContentSpacingEnd = dimensionResource(id = R.dimen.callAppBarTrailingContentSpacingEnd),
-                callAppBarCenterContentSpacingEnd = dimensionResource(id = R.dimen.callAppBarCenterContentSpacingEnd),
-                callControlButtonSize = dimensionResource(id = R.dimen.callControlButtonSize),
-                callControlsSheetHeight = dimensionResource(id = R.dimen.callControlsSheetHeight),
-                callParticipantInfoMenuAppBarHeight = dimensionResource(id = R.dimen.callParticipantInfoMenuAppBarHeight),
-                callParticipantInfoMenuOptionsHeight = dimensionResource(id = R.dimen.callParticipantInfoMenuOptionsHeight),
-                callParticipantsInfoMenuOptionsButtonHeight = dimensionResource(id = R.dimen.callParticipantsInfoMenuOptionsButtonHeight),
-                callParticipantsInfoAvatarSize = dimensionResource(id = R.dimen.callParticipantsInfoAvatarSize)
-            )
-        }
+        public fun defaultDimens(): StreamDimens = StreamDimens(
+            callAvatarSize = dimensionResource(id = R.dimen.callAvatarSize),
+            singleAvatarSize = dimensionResource(id = R.dimen.singleAvatarSize),
+            headerElevation = dimensionResource(id = R.dimen.headerElevation),
+            largeButtonSize = dimensionResource(id = R.dimen.largeButtonSize),
+            mediumButtonSize = dimensionResource(id = R.dimen.mediumButtonSize),
+            smallButtonSize = dimensionResource(id = R.dimen.smallButtonSize),
+            topAppbarHeight = dimensionResource(id = R.dimen.topAppbarHeightSize),
+            landscapeTopAppBarHeight = 48.dp,
+            avatarAppbarPadding = dimensionResource(id = R.dimen.avatarAppbarPadding),
+            singleAvatarAppbarPadding = dimensionResource(id = R.dimen.singleAvatarAppbarPadding),
+            participantsTextPadding = dimensionResource(id = R.dimen.participantsTextPadding),
+            topAppbarTextSize = textSizeResource(id = R.dimen.topAppbarTextSize),
+            directCallUserNameTextSize = textSizeResource(id = R.dimen.directCallUserNameTextSize),
+            groupCallUserNameTextSize = textSizeResource(id = R.dimen.groupCallUserNameTextSize),
+            onCallStatusTextSize = textSizeResource(id = R.dimen.onCallStatusTextSize),
+            onCallStatusTextAlpha = floatResource(R.dimen.onCallStatusTextAlpha),
+            buttonToggleOnAlpha = floatResource(R.dimen.buttonToggleOnAlpha),
+            buttonToggleOffAlpha = floatResource(R.dimen.buttonToggleOffAlpha),
+            incomingCallOptionsBottomPadding = dimensionResource(id = R.dimen.incomingCallOptionsBottomPadding),
+            callAppBarPadding = dimensionResource(id = R.dimen.callAppBarPadding),
+            callAppBarLeadingContentSpacingStart = dimensionResource(id = R.dimen.callAppBarLeadingContentSpacingStart),
+            callAppBarLeadingContentSpacingEnd = dimensionResource(id = R.dimen.callAppBarLeadingContentSpacingEnd),
+            callAppBarCenterContentSpacingStart = dimensionResource(id = R.dimen.callAppBarCenterContentSpacingStart),
+            callAppBarTrailingContentSpacingStart = dimensionResource(id = R.dimen.callAppBarTrailingContentSpacingStart),
+            callAppBarTrailingContentSpacingEnd = dimensionResource(id = R.dimen.callAppBarTrailingContentSpacingEnd),
+            callAppBarCenterContentSpacingEnd = dimensionResource(id = R.dimen.callAppBarCenterContentSpacingEnd),
+            callControlButtonSize = dimensionResource(id = R.dimen.callControlButtonSize),
+            callControlsSheetHeight = dimensionResource(id = R.dimen.callControlsSheetHeight),
+            callParticipantInfoMenuAppBarHeight = dimensionResource(id = R.dimen.callParticipantInfoMenuAppBarHeight),
+            callParticipantInfoMenuOptionsHeight = dimensionResource(id = R.dimen.callParticipantInfoMenuOptionsHeight),
+            callParticipantsInfoMenuOptionsButtonHeight = dimensionResource(id = R.dimen.callParticipantsInfoMenuOptionsButtonHeight),
+            callParticipantsInfoAvatarSize = dimensionResource(id = R.dimen.callParticipantsInfoAvatarSize),
+            floatingVideoPadding = 16.dp,
+            floatingVideoHeight = 150.dp,
+            floatingVideoWidth = 125.dp,
+            screenShareParticipantItemSize = 110.dp
+        )
     }
 }

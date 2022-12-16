@@ -24,7 +24,10 @@
 
         <activity android:name=".HomeActivity" />
 
-        <activity android:name=".CallActivity" />
+        <activity
+            android:name=".CallActivity"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:supportsPictureInPicture="true" />
 
         <activity
             android:name=".DeeplinkingActivity"
@@ -36,6 +39,7 @@
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
+
                 <data
                     android:host="stream-calls-dogfood.vercel.app"
                     android:pathPrefix="/join/"

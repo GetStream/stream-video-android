@@ -130,7 +130,7 @@ public open class TextureViewRenderer @JvmOverloads constructor(
      * is scaled correctly.
      */
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
-        eglRenderer.setLayoutAspectRatio((right - left) / (bottom - top).toFloat())
+        eglRenderer.setLayoutAspectRatio((right - left) / (bottom.toFloat() - top))
     }
 
     /**

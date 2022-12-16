@@ -17,37 +17,36 @@
 package io.getstream.video.android.compose.ui.components.participants.internal
 
 import android.view.View
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.material.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import io.getstream.video.android.ui.common.R
 import io.getstream.video.android.compose.ui.components.participants.CallParticipant
 import io.getstream.video.android.model.Call
 
-// TODO - this should show _other_ participants, not the local one
+/**
+ * Renders call participants based on the number of people in a call.
+ *
+ * @param call The state of the call.
+ * @param onRender Handler when the video content renders.
+ * @param modifier Modifier for styling.
+ */
 @Composable
-internal fun Participants(modifier: Modifier, call: Call, onRender: (View) -> Unit) {
+internal fun Participants(
+    call: Call,
+    onRender: (View) -> Unit,
+    modifier: Modifier = Modifier
+) {
     val primarySpeaker by call.primarySpeaker.collectAsState(initial = null)
     val roomParticipants by call.callParticipants.collectAsState(emptyList())
-    val participants = roomParticipants.distinctBy { it.id }
+    val participants = roomParticipants.filter { !it.isLocal }.distinctBy { it.id }
 
     when (participants.size) {
-        0 -> {
-            Box(modifier = modifier) {
-                Icon(
-                    modifier = Modifier.align(Alignment.Center),
-                    painter = painterResource(id = R.drawable.ic_call),
-                    contentDescription = null
-                )
-            }
-        }
+        0 -> Unit
         1 -> {
             val participant = participants.first()
 
