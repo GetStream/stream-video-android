@@ -79,7 +79,6 @@ public class CallParticipantView @JvmOverloads constructor(
      */
     public fun setRendererInitializer(rendererInitializer: RendererInitializer) {
         this.rendererInitializer = rendererInitializer
-        wasRendererInitialised = false
         initRenderer()
     }
 

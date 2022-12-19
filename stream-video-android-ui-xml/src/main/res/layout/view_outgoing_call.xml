@@ -13,19 +13,12 @@
         android:layout_height="match_parent"
         />
 
-    <io.getstream.video.android.ui.xml.widget.call.CallAppBarView
-        android:id="@+id/outgoingCallToolbar"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/topAppbarHeightSize"
-        app:layout_constraintTop_toTopOf="parent"
-        />
-
     <io.getstream.video.android.ui.xml.widget.participant.ParticipantsInfoView
         android:id="@+id/participantsInfo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/singleAvatarAppbarPadding"
-        app:layout_constraintTop_toBottomOf="@id/outgoingCallToolbar"
+        app:layout_constraintTop_toTopOf="parent"
         />
 
     <androidx.constraintlayout.widget.ConstraintLayout

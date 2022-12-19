@@ -1,38 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout"
-    android:orientation="vertical">
-
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:background="@android:color/holo_blue_dark"/>
-
-    <io.getstream.video.android.ui.xml.widget.control.CallControlsView
-        android:id="@+id/controlsView"
-        android:background="@drawable/rect_controls"
-        android:layout_width="0dp"
-        android:layout_height="96dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:contentDescription="" />
+    >
 
     <io.getstream.video.android.ui.xml.widget.participant.CallParticipantsView
         android:id="@+id/participantsView"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintStart_toStartOf="parent"
+        android:layout_height="match_parent"
+        />
+
+    <io.getstream.video.android.ui.xml.widget.control.CallControlsView
+        android:id="@+id/controlsView"
+        android:layout_width="0dp"
+        android:layout_height="96dp"
+        android:background="@drawable/rect_controls"
+        android:contentDescription=""
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toolbar"
-        app:layout_constraintBottom_toTopOf="@id/controlsView" />
+        app:layout_constraintStart_toStartOf="parent"
+        />
 
 </merge>

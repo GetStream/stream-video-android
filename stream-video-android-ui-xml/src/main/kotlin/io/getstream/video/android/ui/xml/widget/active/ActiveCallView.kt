@@ -23,7 +23,6 @@ import io.getstream.video.android.call.state.CallAction
 import io.getstream.video.android.model.CallParticipantState
 import io.getstream.video.android.ui.xml.databinding.ViewActiveCallBinding
 import io.getstream.video.android.ui.xml.utils.extensions.createStreamThemeWrapper
-import io.getstream.video.android.ui.xml.utils.extensions.initToolbar
 import io.getstream.video.android.ui.xml.utils.extensions.streamThemeInflater
 import io.getstream.video.android.ui.xml.widget.control.CallControlItem
 import io.getstream.video.android.ui.xml.widget.participant.RendererInitializer
@@ -58,7 +57,6 @@ public class ActiveCallView : ConstraintLayout {
     public var callControlActionListener: (CallAction) -> Unit = {}
 
     private fun init(context: Context, attrs: AttributeSet?) {
-        initToolbar(binding.toolbar)
         binding.controlsView.callControlItemClickListener = { callControlActionListener(it) }
     }
 
@@ -78,15 +76,6 @@ public class ActiveCallView : ConstraintLayout {
      */
     public fun updateControlItems(items: List<CallControlItem>) {
         binding.controlsView.updateItems(items)
-    }
-
-    /**
-     * Sets the toolbar title.
-     *
-     * @param title The toolbar title to be set.
-     */
-    public fun setToolbarTitle(title: String) {
-        binding.toolbar.title = title
     }
 
     /**

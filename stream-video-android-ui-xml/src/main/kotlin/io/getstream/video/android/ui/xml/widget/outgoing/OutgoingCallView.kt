@@ -56,15 +56,9 @@ public class OutgoingCallView @JvmOverloads constructor(
      * Handler that notifies when a call action has been performed.
      */
     public var callActionListener: (CallAction) -> Unit = { }
-    /**
-     * Handler that notifies when the app bar back button was clicked.
-     */
-    public var backListener: () -> Unit = { }
 
     init {
         with(binding) {
-            outgoingCallToolbar.backListener = { backListener() }
-
             cancelCall.setOnClickListener { callActionListener(CancelCall) }
             micToggle.setOnClickListener { callActionListener(ToggleMicrophone(!isMicrophoneEnabled)) }
             cameraToggle.setOnClickListener { callActionListener(ToggleCamera(!isCameraEnabled)) }

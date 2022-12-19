@@ -51,7 +51,6 @@ public fun ActiveCallView.bindView(
 
     setControlItems(buildDefaultControlList())
 
-    observeStreamCallState(viewModel, lifecycleOwner)
     observeCallState(viewModel, lifecycleOwner)
     observeParticipantList(viewModel, lifecycleOwner)
     observeMediaState(viewModel, lifecycleOwner)
@@ -90,27 +89,6 @@ private fun buildDefaultControlList(): List<CallControlItem> {
             action = LeaveCall
         ),
     )
-}
-
-private fun ActiveCallView.observeStreamCallState(
-    viewModel: CallViewModel,
-    lifecycleOwner: LifecycleOwner,
-) {
-    lifecycleOwner.lifecycleScope.launchWhenCreated {
-        viewModel.streamCallState.collect {
-            val callId = when (val state = it) {
-                is StreamCallState.Active -> state.callGuid.id
-                else -> ""
-            }
-            val status = it.formatAsTitle()
-
-            val title = when (callId.isBlank()) {
-                true -> status
-                else -> "$status: $callId"
-            }
-            setToolbarTitle(title)
-        }
-    }
 }
 
 private fun ActiveCallView.observeCallState(
@@ -180,15 +158,4 @@ private fun ActiveCallView.observeMediaState(
             )
         }
     }
-}
-
-private fun StreamCallState.formatAsTitle() = when (this) {
-    is StreamCallState.Drop -> "Drop"
-    is StreamCallState.Joined -> "Joined"
-    is StreamCallState.Connecting -> "Connecting"
-    is StreamCallState.Connected -> "Connected"
-    is StreamCallState.Incoming -> "Incoming"
-    is StreamCallState.Joining -> "Joining"
-    is StreamCallState.Outgoing -> "Outgoing"
-    StreamCallState.Idle -> "Idle"
 }

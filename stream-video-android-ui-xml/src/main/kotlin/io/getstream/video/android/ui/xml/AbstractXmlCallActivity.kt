@@ -26,7 +26,6 @@ import android.os.Bundle
 import android.provider.Settings
 import android.util.Rational
 import android.view.Menu
-import android.view.MenuInflater
 import android.view.WindowManager
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
@@ -92,6 +91,9 @@ public abstract class AbstractXmlCallActivity :
         )
     }
 
+    /**
+     * Returns the [PermissionManager] initialized in [initPermissionManager].
+     */
     override fun getPermissionManager(): PermissionManager = callPermissionManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -100,15 +102,11 @@ public abstract class AbstractXmlCallActivity :
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
-        binding.activeCallView.bindView(callViewModel, lifecycleOwner = this)
-        binding.outgoingCallView.bindView(callViewModel, lifecycleOwner = this)
-        binding.outgoingCallView.backListener = { handleBackPressed() }
-        binding.incomingCallView.bindView(callViewModel, lifecycleOwner = this)
-        binding.incomingCallView.backListener = { handleBackPressed() }
+        setupToolbar()
+        observeStreamCallState()
 
         lifecycleScope.launchWhenCreated {
             callViewModel.streamCallState.collect { state ->
-                println(state)
                 when {
                     state is StreamCallState.Incoming && !state.acceptedByMe -> {
                         showIncomingScreen()
@@ -135,24 +133,75 @@ public abstract class AbstractXmlCallActivity :
         startVideoFlow()
     }
 
+    /**
+     * Observes the current call state and sets the toolbar title accordingly.
+     */
+    private fun observeStreamCallState() {
+        lifecycleScope.launchWhenCreated {
+            callViewModel.streamCallState.collect {
+                val callId = when (val state = it) {
+                    is StreamCallState.Active -> state.callGuid.id
+                    else -> ""
+                }
+                val status = it.formatAsTitle()
+
+                val title = when (callId.isBlank()) {
+                    true -> status
+                    else -> "$status: $callId"
+                }
+                binding.callToolbar.title = title
+            }
+        }
+    }
+
+    /**
+     * Sets up the toolbar.
+     */
+    private fun setupToolbar() {
+        setSupportActionBar(binding.callToolbar)
+        supportActionBar?.let {
+            it.setDisplayShowTitleEnabled(false)
+            it.setDisplayShowHomeEnabled(true)
+            it.setDisplayHomeAsUpEnabled(true)
+        }
+        binding.callToolbar.setNavigationOnClickListener { handleBackPressed() }
+    }
+
+    /**
+     * Shows the outgoing call screen and initialises the state observers required to populate the screen.
+     */
     private fun showOutgoingScreen() {
+        binding.outgoingCallView.bindView(callViewModel, lifecycleOwner = this)
         binding.outgoingCallView.isVisible = true
-        binding.incomingCallView.isVisible = false
-        binding.activeCallView.isVisible = false
     }
 
+    /**
+     * Shows the incoming call screen and initialises the state observers required to populate the screen.
+     */
     private fun showIncomingScreen() {
-        binding.outgoingCallView.isVisible = false
+        binding.incomingCallView.bindView(callViewModel, lifecycleOwner = this)
         binding.incomingCallView.isVisible = true
-        binding.activeCallView.isVisible = false
     }
 
+    /**
+     * Shows the active call screen and initialises the state observers required to populate the screen.
+     */
     private fun showActiveCallScreen() {
+        binding.activeCallView.bindView(callViewModel, lifecycleOwner = this)
         binding.outgoingCallView.isVisible = false
         binding.incomingCallView.isVisible = false
         binding.activeCallView.isVisible = true
     }
 
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.call_menu, menu)
+        return true
+    }
+
+    /**
+     * If the user denied the permission and clicked don't ask again, will open settings so the user can enable the
+     * permissions.
+     */
     private fun startSettings() {
         startActivity(
             Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
@@ -162,12 +211,18 @@ public abstract class AbstractXmlCallActivity :
         )
     }
 
+    /**
+     * Starts the flow to connect to a call.
+     */
     private fun startVideoFlow() {
         val isInitialized = callViewModel.isVideoInitialized.value
         if (isInitialized) return
         callViewModel.connectToCall()
     }
 
+    /**
+     * Shows a dialog explaining why the permissions are needed.
+     */
     private fun showPermissionsDialog() {
         AlertDialog.Builder(this)
             .setTitle("Permissions required to launch the app")
@@ -184,6 +239,9 @@ public abstract class AbstractXmlCallActivity :
             .show()
     }
 
+    /**
+     * Keeps the app visible if the device enters the locked state.
+     */
     private fun showWhenLockedAndTurnScreenOn() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             setShowWhenLocked(true)
@@ -228,6 +286,9 @@ public abstract class AbstractXmlCallActivity :
         }
     }
 
+    /**
+     * Clears state when the user closes the call.
+     */
     private fun closeCall() {
         callViewModel.onCallAction(CancelCall)
         callViewModel.clearState()
@@ -252,5 +313,19 @@ public abstract class AbstractXmlCallActivity :
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             callViewModel.onPictureInPictureModeChanged(isInPictureInPictureMode)
         }
+    }
+
+    /**
+     * Formats the current call state so that we can show it in the toolbar.
+     */
+    private fun StreamCallState.formatAsTitle() = when (this) {
+        is StreamCallState.Drop -> "Drop"
+        is StreamCallState.Joined -> "Joined"
+        is StreamCallState.Connecting -> "Connecting"
+        is StreamCallState.Connected -> "Connected"
+        is StreamCallState.Incoming -> "Incoming"
+        is StreamCallState.Joining -> "Joining"
+        is StreamCallState.Outgoing -> "Outgoing"
+        StreamCallState.Idle -> "Idle"
     }
 }

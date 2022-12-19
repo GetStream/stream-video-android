@@ -52,15 +52,8 @@ public class IncomingCallView @JvmOverloads constructor(
      */
     public var callActionListener: (CallAction) -> Unit = {}
 
-    /**
-     * Handler that notifies when the app bar back button was clicked.
-     */
-    public var backListener: () -> Unit = {}
-
     init {
         with(binding) {
-            incomingCallToolbar.backListener = { backListener() }
-
             acceptCall.setOnClickListener { callActionListener(AcceptCall) }
             declineCall.setOnClickListener { callActionListener(DeclineCall) }
             cameraToggle.setOnClickListener { callActionListener(ToggleCamera(!isCameraEnabled)) }
