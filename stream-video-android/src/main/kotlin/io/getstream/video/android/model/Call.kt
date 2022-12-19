@@ -230,10 +230,10 @@ public class Call(
         _screenSharingSessions.value = updated.distinctBy { it.track.streamId }
     }
 
-    private fun removeScreenShareSession(userId: String) {
-        logger.d { "[removeScreenShareSession] User ID: $userId" }
+    private fun removeScreenShareSession(sessionId: String) {
+        logger.d { "[removeScreenShareSession] Session ID: $sessionId" }
         val list = _screenSharingSessions.value.toMutableList()
-        val updated = list.filter { it.participant.id != userId }
+        val updated = list.filter { it.participant.sessionId != sessionId }
 
         _screenSharingSessions.value = updated
     }
@@ -256,7 +256,7 @@ public class Call(
         val currentParticipants = _callParticipants.value
 
         val updatedList = currentParticipants.updateValue(
-            predicate = { it.id == userId },
+            predicate = { it.sessionId == sessionId },
             transformer = {
                 val videoTrack =
                     if (trackType == TrackType.TRACK_TYPE_VIDEO) {
@@ -300,7 +300,7 @@ public class Call(
 
         _callParticipants.value = updatedList
         if (trackType == TrackType.TRACK_TYPE_SCREEN_SHARE && !isEnabled) {
-            removeScreenShareSession(userId)
+            removeScreenShareSession(sessionId)
         }
     }
 

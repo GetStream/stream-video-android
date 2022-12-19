@@ -479,7 +479,7 @@ public final class io/getstream/video/android/compose/ui/components/mock/MockUti
 }
 
 public final class io/getstream/video/android/compose/ui/components/participants/CallParticipantKt {
-	public static final fun CallParticipant (Lio/getstream/video/android/model/Call;Lio/getstream/video/android/model/CallParticipantState;Landroidx/compose/ui/Modifier;Landroidx/compose/ui/Alignment;ZLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+	public static final fun CallParticipant (Lio/getstream/video/android/model/Call;Lio/getstream/video/android/model/CallParticipantState;Landroidx/compose/ui/Modifier;Landroidx/compose/foundation/layout/PaddingValues;Landroidx/compose/ui/Alignment;ZLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/participants/CallParticipantsInfoMenuKt {
