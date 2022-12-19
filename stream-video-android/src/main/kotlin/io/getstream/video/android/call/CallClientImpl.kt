@@ -453,20 +453,18 @@ internal class CallClientImpl(
             )
 
             if (userQueryResult is Success) {
-                val participantsMap = callState.participants.associateBy { it.user_id }
-
                 call?.setParticipants(
-                    userQueryResult.data.map {
-                        val participant = participantsMap[it.id]
-                        val isLocal = it.id == getCurrentUserId()
+                    callState.participants.map {
+                        val user = userQueryResult.data.firstOrNull { user -> user.id == it.user_id }
+                        val isLocal = it.user_id == getCurrentUserId()
 
                         CallParticipantState(
-                            id = it.id,
-                            role = it.role,
-                            name = it.name,
-                            profileImageURL = it.imageUrl,
-                            sessionId = participant?.session_id ?: "",
-                            idPrefix = participant?.track_lookup_prefix ?: "",
+                            id = it.user_id,
+                            role = user?.role ?: "",
+                            name = user?.name ?: "",
+                            profileImageURL = user?.imageUrl,
+                            sessionId = it.session_id,
+                            idPrefix = it.track_lookup_prefix,
                             isLocal = isLocal,
                             isOnline = !isLocal
                         )

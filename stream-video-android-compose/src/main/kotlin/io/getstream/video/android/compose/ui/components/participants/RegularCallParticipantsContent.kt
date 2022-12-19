@@ -73,7 +73,7 @@ public fun RegularCallParticipantsContent(
     Row(modifier = modifier.background(color = VideoTheme.colors.appBackground)) {
         BoxWithConstraints(modifier = Modifier.weight(1f)) {
             val roomParticipants by call.callParticipants.collectAsState(emptyList())
-            val participants = roomParticipants.filter { !it.isLocal }.distinctBy { it.id }
+            val participants = roomParticipants.filter { !it.isLocal }
 
             val localParticipantState by call.localParticipant.collectAsState(initial = null)
             val currentLocal = localParticipantState
@@ -84,7 +84,8 @@ public fun RegularCallParticipantsContent(
                         .fillMaxSize()
                         .onSizeChanged { parentSize = it },
                     call = call,
-                    onRender = onRender
+                    onRender = onRender,
+                    paddingValues = paddingValues
                 )
 
                 if (currentLocal != null) {
