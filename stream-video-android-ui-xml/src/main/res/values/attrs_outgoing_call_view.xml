@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="OutgoingCallView">
+        <attr name="streamAcceptCallIcon" format="reference" />
+        <attr name="streamAcceptCallIconTint" format="color|reference" />
+        <attr name="streamAcceptCallBackground" format="reference" />
+        <attr name="streamAcceptCallBackgroundTint" format="color|reference" />
+        <attr name="streamCancelCallIcon" format="reference" />
+        <attr name="streamCancelCallIconTint" format="color|reference" />
+        <attr name="streamCancelCallBackground" format="reference" />
+        <attr name="streamCancelCallBackgroundTint" format="color|reference" />
+    </declare-styleable>
+</resources>

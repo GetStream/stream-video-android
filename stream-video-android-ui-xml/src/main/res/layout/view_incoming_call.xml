@@ -13,12 +13,12 @@
         android:layout_height="match_parent"
         />
 
-    <io.getstream.video.android.ui.xml.widget.participant.ParticipantsInfoView
+    <io.getstream.video.android.ui.xml.widget.call.CallDetailsView
         android:id="@+id/participantsInfo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/singleAvatarAppbarPadding"
-        app:layout_constraintTop_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         />
 
     <io.getstream.video.android.ui.xml.widget.control.StreamImageButton

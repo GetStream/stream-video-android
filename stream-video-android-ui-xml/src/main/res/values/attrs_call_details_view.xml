@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CallDetailsView">
+        <!-- Avatar size for group calls -->
+        <attr name="streamCallAvatarSize" format="dimension|reference" />
+        <!-- Avatar size for direct calls -->
+        <attr name="streamDirectCallAvatarSize" format="dimension|reference" />
+        <!-- Avatar spacing for group calls -->
+        <attr name="streamAvatarSpacing" format="dimension|reference" />
+
+        <!-- Direct call info text size -->
+        <attr name="streamDirectCallParticipantInfoTextSize" format="dimension|reference" />
+        <!-- Group info text style -->
+        <attr name="streamParticipantsInfoTextSize" format="dimension|reference" />
+        <attr name="streamParticipantsInfoTextColor" format="color|reference" />
+        <attr name="streamParticipantsInfoFontAsset" format="reference" />
+        <attr name="streamParticipantsInfoFont" format="reference" />
+        <attr name="streamParticipantsInfoTextStyle">
+            <flag name="normal" value="0" />
+            <flag name="bold" value="1" />
+            <flag name="italic" value="2" />
+        </attr>
+
+        <!-- Call state text style attributes -->
+        <attr name="streamCallStateTextSize" format="dimension|reference" />
+        <attr name="streamCallStateTextColor" format="color|reference" />
+        <attr name="streamCallStateFontAsset" format="reference" />
+        <attr name="streamCallStateFont" format="reference" />
+        <attr name="streamCallStateTextStyle">
+            <flag name="normal" value="0" />
+            <flag name="bold" value="1" />
+            <flag name="italic" value="2" />
+        </attr>
+        <attr name="streamCallStateTextAlpha" format="float|reference" />
+
+    </declare-styleable>
+</resources>

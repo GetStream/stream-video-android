@@ -12,7 +12,7 @@ object Versions {
 
     internal const val MATERIAL = "1.6.1"
     internal const val ANDROIDX_APPCOMPAT = "1.4.2"
-    internal const val ANDROIDX_CORE = "1.8.0"
+    internal const val ANDROIDX_CORE = "1.9.0"
     internal const val ANDROIDX_LIFECYCLE = "2.5.1"
     internal const val ANDROIDX_STARTUP = "1.1.1"
     internal const val ANDROIDX_ACTIVITY = "1.5.1"

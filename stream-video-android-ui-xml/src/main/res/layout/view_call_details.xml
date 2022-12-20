@@ -16,7 +16,7 @@
         app:layout_constraintTop_toTopOf="parent"/>
 
     <TextView
-        android:id="@+id/participantsText"
+        android:id="@+id/participantsInfo"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="65dp"
@@ -31,7 +31,7 @@
         />
 
     <TextView
-        android:id="@+id/statusText"
+        android:id="@+id/callStatus"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="65dp"
@@ -43,7 +43,7 @@
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/participantsText"
+        app:layout_constraintTop_toBottomOf="@id/participantsInfo"
         tools:text="Connecting..."
         />
 

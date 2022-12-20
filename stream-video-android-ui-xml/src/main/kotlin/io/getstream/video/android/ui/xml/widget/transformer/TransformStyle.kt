@@ -17,10 +17,13 @@
 package io.getstream.video.android.ui.xml.widget.transformer
 
 import io.getstream.video.android.ui.xml.widget.avatar.AvatarStyle
+import io.getstream.video.android.ui.xml.widget.call.CallDetailsStyle
 
 public object TransformStyle {
     @JvmStatic
     public var avatarStyleTransformer: StyleTransformer<AvatarStyle> = noopTransformer()
+    @JvmStatic
+    public var callDetailsStyleTransformer: StyleTransformer<CallDetailsStyle> = noopTransformer()
 
     private fun <T> noopTransformer() = StyleTransformer<T> { it }
 }
