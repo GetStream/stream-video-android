@@ -20,6 +20,8 @@ import android.app.Application
 import android.content.Context
 import com.google.firebase.auth.FirebaseAuth
 import io.getstream.android.push.firebase.FirebasePushDeviceGenerator
+import io.getstream.log.StreamLog
+import io.getstream.log.android.AndroidStreamLogger
 import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.StreamVideoBuilder
 import io.getstream.video.android.logging.LoggingLevel
@@ -44,6 +46,10 @@ class DogfoodingApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        if (BuildConfig.DEBUG) {
+            StreamLog.setValidator { _, _ -> true }
+            StreamLog.install(AndroidStreamLogger())
+        }
         UserCredentialsManager.initialize(this)
     }
 

@@ -15,7 +15,7 @@ message Member {
   string call_cid = 1 [(validate.rules).string.min_len = 1];
   // The user ID of the member
   string user_id = 2 [(validate.rules).string.min_len = 1];
-  // The role of the member in this room
+  // The role of the member in this call
   string role = 3  [(validate.rules).string.min_len = 1];
   // Custom data for the member
   bytes custom_json = 4;

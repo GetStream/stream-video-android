@@ -18,26 +18,21 @@ package io.getstream.video.android.compose.ui.components.participants.internal
 
 import android.view.View
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.R
 import io.getstream.video.android.call.state.CallAction
 import io.getstream.video.android.call.state.CallMediaState
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.controls.LandscapeCallControls
+import io.getstream.video.android.compose.ui.components.internal.OverlayScreenSharingAppBar
 import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.CallParticipantState
 import io.getstream.video.android.model.ScreenSharingSession
@@ -66,6 +61,7 @@ public fun LandscapeScreenSharingContent(
     isFullscreen: Boolean,
     onRender: (View) -> Unit,
     onCallAction: (CallAction) -> Unit,
+    onBackPressed: () -> Unit
 ) {
     val sharingParticipant = session.participant
 
@@ -75,25 +71,11 @@ public fun LandscapeScreenSharingContent(
             .background(VideoTheme.colors.screenSharingBackground)
             .padding(paddingValues)
     ) {
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxHeight()
                 .weight(0.65f)
         ) {
-            Text(
-                modifier = Modifier.padding(16.dp),
-                text = stringResource(
-                    id = R.string.stream_screen_sharing_title,
-                    sharingParticipant.name.ifEmpty { sharingParticipant.id }
-                ),
-                color = VideoTheme.colors.textHighEmphasis,
-                style = VideoTheme.typography.title3Bold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
             ScreenShareContent(
                 modifier = Modifier.fillMaxSize(),
                 call = call,
@@ -103,7 +85,7 @@ public fun LandscapeScreenSharingContent(
                 onCallAction = onCallAction
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            OverlayScreenSharingAppBar(sharingParticipant, onBackPressed)
         }
 
         if (!isFullscreen) {
@@ -118,8 +100,7 @@ public fun LandscapeScreenSharingContent(
             LandscapeCallControls(
                 modifier = Modifier
                     .fillMaxHeight()
-                    .width(VideoTheme.dimens.landscapeCallControlsSheetWidth)
-                    .padding(6.dp),
+                    .width(VideoTheme.dimens.landscapeCallControlsSheetWidth),
                 callMediaState = callMediaState,
                 onCallAction = onCallAction,
                 isScreenSharing = true

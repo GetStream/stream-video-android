@@ -703,6 +703,35 @@ func (m *CallSettings) validate(all bool) error {
 		}
 	}
 
+	if all {
+		switch v := interface{}(m.GetGeofencing()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, CallSettingsValidationError{
+					field:  "Geofencing",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, CallSettingsValidationError{
+					field:  "Geofencing",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetGeofencing()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return CallSettingsValidationError{
+				field:  "Geofencing",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
 	if len(errors) > 0 {
 		return CallSettingsMultiError(errors)
 	}
@@ -780,22 +809,22 @@ var _ interface {
 	ErrorName() string
 } = CallSettingsValidationError{}
 
-// Validate checks the field values on RecordingOptions with the rules defined
+// Validate checks the field values on RecordingSettings with the rules defined
 // in the proto definition for this message. If any rules are violated, the
 // first error encountered is returned, or nil if there are no violations.
-func (m *RecordingOptions) Validate() error {
+func (m *RecordingSettings) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on RecordingOptions with the rules
+// ValidateAll checks the field values on RecordingSettings with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the result is a list of violation errors wrapped in
-// RecordingOptionsMultiError, or nil if none found.
-func (m *RecordingOptions) ValidateAll() error {
+// RecordingSettingsMultiError, or nil if none found.
+func (m *RecordingSettings) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *RecordingOptions) validate(all bool) error {
+func (m *RecordingSettings) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
@@ -807,19 +836,19 @@ func (m *RecordingOptions) validate(all bool) error {
 	}
 
 	if len(errors) > 0 {
-		return RecordingOptionsMultiError(errors)
+		return RecordingSettingsMultiError(errors)
 	}
 
 	return nil
 }
 
-// RecordingOptionsMultiError is an error wrapping multiple validation errors
-// returned by RecordingOptions.ValidateAll() if the designated constraints
+// RecordingSettingsMultiError is an error wrapping multiple validation errors
+// returned by RecordingSettings.ValidateAll() if the designated constraints
 // aren't met.
-type RecordingOptionsMultiError []error
+type RecordingSettingsMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m RecordingOptionsMultiError) Error() string {
+func (m RecordingSettingsMultiError) Error() string {
 	var msgs []string
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -828,11 +857,11 @@ func (m RecordingOptionsMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m RecordingOptionsMultiError) AllErrors() []error { return m }
+func (m RecordingSettingsMultiError) AllErrors() []error { return m }
 
-// RecordingOptionsValidationError is the validation error returned by
-// RecordingOptions.Validate if the designated constraints aren't met.
-type RecordingOptionsValidationError struct {
+// RecordingSettingsValidationError is the validation error returned by
+// RecordingSettings.Validate if the designated constraints aren't met.
+type RecordingSettingsValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -840,22 +869,24 @@ type RecordingOptionsValidationError struct {
 }
 
 // Field function returns field value.
-func (e RecordingOptionsValidationError) Field() string { return e.field }
+func (e RecordingSettingsValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e RecordingOptionsValidationError) Reason() string { return e.reason }
+func (e RecordingSettingsValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e RecordingOptionsValidationError) Cause() error { return e.cause }
+func (e RecordingSettingsValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e RecordingOptionsValidationError) Key() bool { return e.key }
+func (e RecordingSettingsValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e RecordingOptionsValidationError) ErrorName() string { return "RecordingOptionsValidationError" }
+func (e RecordingSettingsValidationError) ErrorName() string {
+	return "RecordingSettingsValidationError"
+}
 
 // Error satisfies the builtin error interface
-func (e RecordingOptionsValidationError) Error() string {
+func (e RecordingSettingsValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -867,14 +898,14 @@ func (e RecordingOptionsValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sRecordingOptions.%s: %s%s",
+		"invalid %sRecordingSettings.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = RecordingOptionsValidationError{}
+var _ error = RecordingSettingsValidationError{}
 
 var _ interface {
 	Field() string
@@ -882,24 +913,24 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = RecordingOptionsValidationError{}
+} = RecordingSettingsValidationError{}
 
-// Validate checks the field values on BroadcastingOptions with the rules
+// Validate checks the field values on BroadcastingSettings with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
-func (m *BroadcastingOptions) Validate() error {
+func (m *BroadcastingSettings) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on BroadcastingOptions with the rules
+// ValidateAll checks the field values on BroadcastingSettings with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the result is a list of violation errors wrapped in
-// BroadcastingOptionsMultiError, or nil if none found.
-func (m *BroadcastingOptions) ValidateAll() error {
+// BroadcastingSettingsMultiError, or nil if none found.
+func (m *BroadcastingSettings) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *BroadcastingOptions) validate(all bool) error {
+func (m *BroadcastingSettings) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
@@ -911,19 +942,19 @@ func (m *BroadcastingOptions) validate(all bool) error {
 	}
 
 	if len(errors) > 0 {
-		return BroadcastingOptionsMultiError(errors)
+		return BroadcastingSettingsMultiError(errors)
 	}
 
 	return nil
 }
 
-// BroadcastingOptionsMultiError is an error wrapping multiple validation
-// errors returned by BroadcastingOptions.ValidateAll() if the designated
+// BroadcastingSettingsMultiError is an error wrapping multiple validation
+// errors returned by BroadcastingSettings.ValidateAll() if the designated
 // constraints aren't met.
-type BroadcastingOptionsMultiError []error
+type BroadcastingSettingsMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m BroadcastingOptionsMultiError) Error() string {
+func (m BroadcastingSettingsMultiError) Error() string {
 	var msgs []string
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -932,11 +963,11 @@ func (m BroadcastingOptionsMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m BroadcastingOptionsMultiError) AllErrors() []error { return m }
+func (m BroadcastingSettingsMultiError) AllErrors() []error { return m }
 
-// BroadcastingOptionsValidationError is the validation error returned by
-// BroadcastingOptions.Validate if the designated constraints aren't met.
-type BroadcastingOptionsValidationError struct {
+// BroadcastingSettingsValidationError is the validation error returned by
+// BroadcastingSettings.Validate if the designated constraints aren't met.
+type BroadcastingSettingsValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -944,24 +975,24 @@ type BroadcastingOptionsValidationError struct {
 }
 
 // Field function returns field value.
-func (e BroadcastingOptionsValidationError) Field() string { return e.field }
+func (e BroadcastingSettingsValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e BroadcastingOptionsValidationError) Reason() string { return e.reason }
+func (e BroadcastingSettingsValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e BroadcastingOptionsValidationError) Cause() error { return e.cause }
+func (e BroadcastingSettingsValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e BroadcastingOptionsValidationError) Key() bool { return e.key }
+func (e BroadcastingSettingsValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e BroadcastingOptionsValidationError) ErrorName() string {
-	return "BroadcastingOptionsValidationError"
+func (e BroadcastingSettingsValidationError) ErrorName() string {
+	return "BroadcastingSettingsValidationError"
 }
 
 // Error satisfies the builtin error interface
-func (e BroadcastingOptionsValidationError) Error() string {
+func (e BroadcastingSettingsValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -973,14 +1004,14 @@ func (e BroadcastingOptionsValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sBroadcastingOptions.%s: %s%s",
+		"invalid %sBroadcastingSettings.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = BroadcastingOptionsValidationError{}
+var _ error = BroadcastingSettingsValidationError{}
 
 var _ interface {
 	Field() string
@@ -988,4 +1019,106 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = BroadcastingOptionsValidationError{}
+} = BroadcastingSettingsValidationError{}
+
+// Validate checks the field values on GeofencingSettings with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *GeofencingSettings) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GeofencingSettings with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// GeofencingSettingsMultiError, or nil if none found.
+func (m *GeofencingSettings) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GeofencingSettings) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if len(errors) > 0 {
+		return GeofencingSettingsMultiError(errors)
+	}
+
+	return nil
+}
+
+// GeofencingSettingsMultiError is an error wrapping multiple validation errors
+// returned by GeofencingSettings.ValidateAll() if the designated constraints
+// aren't met.
+type GeofencingSettingsMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GeofencingSettingsMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GeofencingSettingsMultiError) AllErrors() []error { return m }
+
+// GeofencingSettingsValidationError is the validation error returned by
+// GeofencingSettings.Validate if the designated constraints aren't met.
+type GeofencingSettingsValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GeofencingSettingsValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GeofencingSettingsValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GeofencingSettingsValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GeofencingSettingsValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GeofencingSettingsValidationError) ErrorName() string {
+	return "GeofencingSettingsValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GeofencingSettingsValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGeofencingSettings.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GeofencingSettingsValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GeofencingSettingsValidationError{}

@@ -43,10 +43,7 @@ public object RTCEventMapper {
             }
 
             event.connection_quality_changed != null -> with(event.connection_quality_changed) {
-                ConnectionQualityChangeEvent(
-                    user_id,
-                    connection_quality
-                )
+                ConnectionQualityChangeEvent(updates = connection_quality_updates)
             }
             event.audio_level_changed != null -> AudioLevelChangedEvent(
                 event.audio_level_changed.audio_levels.associate { it.user_id to it.level }

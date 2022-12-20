@@ -221,7 +221,7 @@ public abstract class AbstractComposeCallActivity :
 
     @Composable
     protected open fun PictureInPictureContent(call: Call) {
-        DefaultPictureInPictureContent(roomState = call)
+        DefaultPictureInPictureContent(call = call)
     }
 
     private fun toggleMicrophone(action: ToggleMicrophone) {
@@ -307,8 +307,18 @@ public abstract class AbstractComposeCallActivity :
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             callViewModel.dismissOptions()
 
+            val currentOrientation = resources.configuration.orientation
+            val screenSharing = callViewModel.callState.value?.isScreenSharingActive ?: false
+
+            val aspect =
+                if (currentOrientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT && !screenSharing) {
+                    Rational(9, 16)
+                } else {
+                    Rational(16, 9)
+                }
+
             enterPictureInPictureMode(
-                PictureInPictureParams.Builder().setAspectRatio(Rational(9, 16)).apply {
+                PictureInPictureParams.Builder().setAspectRatio(aspect).apply {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                         this.setAutoEnterEnabled(true)
                     }

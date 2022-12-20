@@ -76,7 +76,11 @@ message TimelineEvent {
 message CallParticipantTimeline {
   // The events in this timeline are from the perspective of the user with this ID
   string user_id = 1 [(validate.rules).string.min_len = 1];
-  repeated TimelineEvent events = 2;
+  // time when participant joined
+  google.protobuf.Timestamp start = 2;
+  // time when participant left
+  google.protobuf.Timestamp end = 3;
+  repeated TimelineEvent events = 4;
 }
 
 message Session {

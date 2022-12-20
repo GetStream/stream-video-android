@@ -373,6 +373,16 @@ func (m *CallSettings) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 		i -= len(m.unknownFields)
 		copy(dAtA[i:], m.unknownFields)
 	}
+	if m.Geofencing != nil {
+		size, err := m.Geofencing.MarshalToSizedBufferVT(dAtA[:i])
+		if err != nil {
+			return 0, err
+		}
+		i -= size
+		i = encodeVarint(dAtA, i, uint64(size))
+		i--
+		dAtA[i] = 0x1a
+	}
 	if m.Broadcasting != nil {
 		size, err := m.Broadcasting.MarshalToSizedBufferVT(dAtA[:i])
 		if err != nil {
@@ -396,7 +406,7 @@ func (m *CallSettings) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *RecordingOptions) MarshalVT() (dAtA []byte, err error) {
+func (m *RecordingSettings) MarshalVT() (dAtA []byte, err error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -409,12 +419,12 @@ func (m *RecordingOptions) MarshalVT() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *RecordingOptions) MarshalToVT(dAtA []byte) (int, error) {
+func (m *RecordingSettings) MarshalToVT(dAtA []byte) (int, error) {
 	size := m.SizeVT()
 	return m.MarshalToSizedBufferVT(dAtA[:size])
 }
 
-func (m *RecordingOptions) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
+func (m *RecordingSettings) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 	if m == nil {
 		return 0, nil
 	}
@@ -439,7 +449,7 @@ func (m *RecordingOptions) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *BroadcastingOptions) MarshalVT() (dAtA []byte, err error) {
+func (m *BroadcastingSettings) MarshalVT() (dAtA []byte, err error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -452,12 +462,12 @@ func (m *BroadcastingOptions) MarshalVT() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *BroadcastingOptions) MarshalToVT(dAtA []byte) (int, error) {
+func (m *BroadcastingSettings) MarshalToVT(dAtA []byte) (int, error) {
 	size := m.SizeVT()
 	return m.MarshalToSizedBufferVT(dAtA[:size])
 }
 
-func (m *BroadcastingOptions) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
+func (m *BroadcastingSettings) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 	if m == nil {
 		return 0, nil
 	}
@@ -478,6 +488,48 @@ func (m *BroadcastingOptions) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 		}
 		i--
 		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *GeofencingSettings) MarshalVT() (dAtA []byte, err error) {
+	if m == nil {
+		return nil, nil
+	}
+	size := m.SizeVT()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBufferVT(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *GeofencingSettings) MarshalToVT(dAtA []byte) (int, error) {
+	size := m.SizeVT()
+	return m.MarshalToSizedBufferVT(dAtA[:size])
+}
+
+func (m *GeofencingSettings) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
+	if m == nil {
+		return 0, nil
+	}
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.unknownFields != nil {
+		i -= len(m.unknownFields)
+		copy(dAtA[i:], m.unknownFields)
+	}
+	if len(m.Names) > 0 {
+		for iNdEx := len(m.Names) - 1; iNdEx >= 0; iNdEx-- {
+			i -= len(m.Names[iNdEx])
+			copy(dAtA[i:], m.Names[iNdEx])
+			i = encodeVarint(dAtA, i, uint64(len(m.Names[iNdEx])))
+			i--
+			dAtA[i] = 0xa
+		}
 	}
 	return len(dAtA) - i, nil
 }
@@ -650,13 +702,17 @@ func (m *CallSettings) SizeVT() (n int) {
 		l = m.Broadcasting.SizeVT()
 		n += 1 + l + sov(uint64(l))
 	}
+	if m.Geofencing != nil {
+		l = m.Geofencing.SizeVT()
+		n += 1 + l + sov(uint64(l))
+	}
 	if m.unknownFields != nil {
 		n += len(m.unknownFields)
 	}
 	return n
 }
 
-func (m *RecordingOptions) SizeVT() (n int) {
+func (m *RecordingSettings) SizeVT() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -671,7 +727,7 @@ func (m *RecordingOptions) SizeVT() (n int) {
 	return n
 }
 
-func (m *BroadcastingOptions) SizeVT() (n int) {
+func (m *BroadcastingSettings) SizeVT() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -679,6 +735,24 @@ func (m *BroadcastingOptions) SizeVT() (n int) {
 	_ = l
 	if m.Enabled != nil {
 		n += 2
+	}
+	if m.unknownFields != nil {
+		n += len(m.unknownFields)
+	}
+	return n
+}
+
+func (m *GeofencingSettings) SizeVT() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.Names) > 0 {
+		for _, s := range m.Names {
+			l = len(s)
+			n += 1 + l + sov(uint64(l))
+		}
 	}
 	if m.unknownFields != nil {
 		n += len(m.unknownFields)
@@ -1591,7 +1665,7 @@ func (m *CallSettings) UnmarshalVT(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			if m.Recording == nil {
-				m.Recording = &RecordingOptions{}
+				m.Recording = &RecordingSettings{}
 			}
 			if err := m.Recording.UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
 				return err
@@ -1627,9 +1701,45 @@ func (m *CallSettings) UnmarshalVT(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			if m.Broadcasting == nil {
-				m.Broadcasting = &BroadcastingOptions{}
+				m.Broadcasting = &BroadcastingSettings{}
 			}
 			if err := m.Broadcasting.UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Geofencing", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflow
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLength
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLength
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Geofencing == nil {
+				m.Geofencing = &GeofencingSettings{}
+			}
+			if err := m.Geofencing.UnmarshalVT(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -1655,7 +1765,7 @@ func (m *CallSettings) UnmarshalVT(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *RecordingOptions) UnmarshalVT(dAtA []byte) error {
+func (m *RecordingSettings) UnmarshalVT(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -1678,10 +1788,10 @@ func (m *RecordingOptions) UnmarshalVT(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: RecordingOptions: wiretype end group for non-group")
+			return fmt.Errorf("proto: RecordingSettings: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: RecordingOptions: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: RecordingSettings: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -1727,7 +1837,7 @@ func (m *RecordingOptions) UnmarshalVT(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *BroadcastingOptions) UnmarshalVT(dAtA []byte) error {
+func (m *BroadcastingSettings) UnmarshalVT(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -1750,10 +1860,10 @@ func (m *BroadcastingOptions) UnmarshalVT(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: BroadcastingOptions: wiretype end group for non-group")
+			return fmt.Errorf("proto: BroadcastingSettings: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: BroadcastingOptions: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: BroadcastingSettings: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -1777,6 +1887,89 @@ func (m *BroadcastingOptions) UnmarshalVT(dAtA []byte) error {
 			}
 			b := bool(v != 0)
 			m.Enabled = &b
+		default:
+			iNdEx = preIndex
+			skippy, err := skip(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLength
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.unknownFields = append(m.unknownFields, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *GeofencingSettings) UnmarshalVT(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflow
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: GeofencingSettings: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: GeofencingSettings: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Names", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflow
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLength
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLength
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Names = append(m.Names, string(dAtA[iNdEx:postIndex]))
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skip(dAtA[iNdEx:])

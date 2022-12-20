@@ -35,12 +35,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.call.state.CallAction
+import io.getstream.video.android.call.state.ShowCallInfo
 import io.getstream.video.android.call.state.ToggleScreenConfiguration
 import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.ScreenSharingSession
+import stream.video.sfu.models.TrackType
 
 /**
  * Represents the content of a screen sharing session.
@@ -69,11 +71,29 @@ internal fun ScreenShareContent(
                 .align(Alignment.Center),
             call = call,
             videoTrack = session.track,
-            onRender = onRender
+            onRender = onRender,
+            trackType = TrackType.TRACK_TYPE_SCREEN_SHARE,
+            sessionId = session.participant.sessionId
         )
 
         Row(modifier = Modifier.align(Alignment.BottomEnd)) {
             val orientation = LocalConfiguration.current.orientation
+
+            if (orientation == ORIENTATION_LANDSCAPE) {
+                IconButton(onClick = { onCallAction(ShowCallInfo) }) {
+                    Icon(
+                        modifier = Modifier
+                            .background(
+                                shape = CircleShape,
+                                color = VideoTheme.colors.barsBackground
+                            )
+                            .padding(8.dp),
+                        painter = painterResource(id = R.drawable.ic_participants),
+                        contentDescription = stringResource(id = R.string.call_participants_menu_content_description),
+                        tint = VideoTheme.colors.textHighEmphasis
+                    )
+                }
+            }
 
             IconButton(
                 onClick = {
@@ -152,4 +172,4 @@ internal fun ScreenShareContent(
  * TODO - we should fetch this info from the BE or something as we can't guess all screen sharing
  * will be in 16:9, it can be 4:3, 1:1 or even ultra-wide aspect.
  */
-private const val ScreenShareAspectRatio: Float = 16f / 9f
+internal const val ScreenShareAspectRatio: Float = 16f / 9f

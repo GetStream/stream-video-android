@@ -68,7 +68,7 @@ public class StreamPeerConnectionFactory(private val context: Context) {
      * Default encoder factory that supports Simulcast, used to send video tracks to the server.
      */
     private val videoEncoderFactory by lazy {
-        val hardwareEncoder = HardwareVideoEncoderFactory(eglBase.eglBaseContext, true, true)
+        val hardwareEncoder = HardwareVideoEncoderFactory(eglBase.eglBaseContext, false, true)
         SimulcastVideoEncoderFactory(hardwareEncoder, SoftwareVideoEncoderFactory())
     }
 
