@@ -31,7 +31,7 @@ type Member struct {
 	CallCid string `protobuf:"bytes,1,opt,name=call_cid,json=callCid,proto3" json:"call_cid,omitempty"`
 	// The user ID of the member
 	UserId string `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	// The role of the member in this room
+	// The role of the member in this call
 	Role string `protobuf:"bytes,3,opt,name=role,proto3" json:"role,omitempty"`
 	// Custom data for the member
 	CustomJson []byte `protobuf:"bytes,4,opt,name=custom_json,json=customJson,proto3" json:"custom_json,omitempty"`

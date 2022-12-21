@@ -225,6 +225,8 @@ func (m *Participant) validate(all bool) error {
 
 	// no validation rules for TrackLookupPrefix
 
+	// no validation rules for ConnectionQuality
+
 	if len(errors) > 0 {
 		return ParticipantMultiError(errors)
 	}
@@ -566,6 +568,8 @@ func (m *VideoLayer) validate(all bool) error {
 	// no validation rules for Bitrate
 
 	// no validation rules for Fps
+
+	// no validation rules for Quality
 
 	if len(errors) > 0 {
 		return VideoLayerMultiError(errors)

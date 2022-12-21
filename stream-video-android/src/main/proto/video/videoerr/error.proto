@@ -50,7 +50,7 @@ enum E {
 
   // CallType was not found
   CALL_TYPE_NOT_FOUND = 1401;
-  // RoomType already exists
+  // CallType already exists
   CALL_TYPE_ALREADY_EXISTS = 1403;
 
   // 15xx - Call errors
