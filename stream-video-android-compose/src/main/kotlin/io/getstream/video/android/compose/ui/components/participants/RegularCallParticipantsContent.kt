@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -45,8 +44,10 @@ import io.getstream.video.android.call.state.CallAction
 import io.getstream.video.android.call.state.CallMediaState
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.controls.LandscapeCallControls
+import io.getstream.video.android.compose.ui.components.internal.OverlayAppBar
 import io.getstream.video.android.compose.ui.components.participants.internal.Participants
 import io.getstream.video.android.model.Call
+import io.getstream.video.android.model.state.StreamCallState
 
 /**
  * Renders the CallParticipants when there are no screen sharing sessions, based on the orientation.
@@ -62,7 +63,9 @@ import io.getstream.video.android.model.Call
 public fun RegularCallParticipantsContent(
     call: Call,
     callMediaState: CallMediaState,
+    callState: StreamCallState,
     onCallAction: (CallAction) -> Unit,
+    onBackPressed: () -> Unit,
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues = PaddingValues(0.dp),
     onRender: (View) -> Unit = {}
@@ -88,6 +91,14 @@ public fun RegularCallParticipantsContent(
                     paddingValues = paddingValues
                 )
 
+                if (orientation == ORIENTATION_LANDSCAPE) {
+                    OverlayAppBar(
+                        callState = callState,
+                        onBackPressed = onBackPressed,
+                        onCallAction = onCallAction
+                    )
+                }
+
                 if (currentLocal != null) {
                     FloatingParticipantItem(
                         call = call,
@@ -104,7 +115,19 @@ public fun RegularCallParticipantsContent(
                     )
                 }
             } else if (currentLocal?.videoTrack?.video != null) {
-                CallParticipant(call = call, participant = currentLocal)
+                CallParticipant(
+                    call = call,
+                    participant = currentLocal,
+                    paddingValues = paddingValues
+                )
+
+                if (orientation == ORIENTATION_LANDSCAPE) {
+                    OverlayAppBar(
+                        callState = callState,
+                        onBackPressed = onBackPressed,
+                        onCallAction = onCallAction
+                    )
+                }
             }
         }
 
@@ -112,8 +135,7 @@ public fun RegularCallParticipantsContent(
             LandscapeCallControls(
                 modifier = Modifier
                     .fillMaxHeight()
-                    .width(VideoTheme.dimens.landscapeCallControlsSheetWidth)
-                    .padding(6.dp),
+                    .width(VideoTheme.dimens.landscapeCallControlsSheetWidth),
                 callMediaState = callMediaState,
                 onCallAction = onCallAction,
                 isScreenSharing = false
