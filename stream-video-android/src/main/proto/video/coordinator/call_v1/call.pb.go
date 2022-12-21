@@ -106,16 +106,18 @@ type Call struct {
 	Id string `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
 	// A concatenation of call type and call id with ":" inbetween
 	CallCid string `protobuf:"bytes,3,opt,name=call_cid,json=callCid,proto3" json:"call_cid,omitempty"`
-	// The id of the user that created this room.
+	// The id of the user that created this call.
 	CreatedByUserId string `protobuf:"bytes,4,opt,name=created_by_user_id,json=createdByUserId,proto3" json:"created_by_user_id,omitempty"`
 	CustomJson      []byte `protobuf:"bytes,5,opt,name=custom_json,json=customJson,proto3" json:"custom_json,omitempty"`
-	// Call settings overrides that are set explicitly in this room
+	// Call settings overrides that are set explicitly in this call
 	// This set of settings does not include CallType settings
-	SettingsOverrides  *CallSettings          `protobuf:"bytes,6,opt,name=settings_overrides,json=settingsOverrides,proto3" json:"settings_overrides,omitempty"`
-	CreatedAt          *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt          *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	RecordingActive    bool                   `protobuf:"varint,9,opt,name=recording_active,json=recordingActive,proto3" json:"recording_active,omitempty"`
-	BroadcastingActive bool                   `protobuf:"varint,10,opt,name=broadcasting_active,json=broadcastingActive,proto3" json:"broadcasting_active,omitempty"`
+	SettingsOverrides *CallSettings          `protobuf:"bytes,6,opt,name=settings_overrides,json=settingsOverrides,proto3" json:"settings_overrides,omitempty"`
+	CreatedAt         *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt         *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	// If true, the call is currently recording
+	RecordingActive bool `protobuf:"varint,9,opt,name=recording_active,json=recordingActive,proto3" json:"recording_active,omitempty"`
+	// If true, the call is currently broadcasting
+	BroadcastingActive bool `protobuf:"varint,10,opt,name=broadcasting_active,json=broadcastingActive,proto3" json:"broadcasting_active,omitempty"`
 }
 
 func (x *Call) Reset() {
@@ -230,7 +232,7 @@ type CallDetails struct {
 	Settings *CallSettings `protobuf:"bytes,1,opt,name=settings,proto3" json:"settings,omitempty"`
 	// Ordered list of member user IDs
 	MemberUserIds []string `protobuf:"bytes,2,rep,name=member_user_ids,json=memberUserIds,proto3" json:"member_user_ids,omitempty"`
-	// Room members map indexed by Member.user_id
+	// Call members map indexed by Member.user_id
 	// Cannot have more than 100 members
 	Members map[string]*member_v1.Member `protobuf:"bytes,3,rep,name=members,proto3" json:"members,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 }
@@ -296,8 +298,9 @@ type CallSettings struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Recording    *RecordingOptions    `protobuf:"bytes,1,opt,name=recording,proto3" json:"recording,omitempty"`
-	Broadcasting *BroadcastingOptions `protobuf:"bytes,2,opt,name=broadcasting,proto3" json:"broadcasting,omitempty"`
+	Recording    *RecordingSettings    `protobuf:"bytes,1,opt,name=recording,proto3" json:"recording,omitempty"`
+	Broadcasting *BroadcastingSettings `protobuf:"bytes,2,opt,name=broadcasting,proto3" json:"broadcasting,omitempty"`
+	Geofencing   *GeofencingSettings   `protobuf:"bytes,3,opt,name=geofencing,proto3" json:"geofencing,omitempty"`
 }
 
 func (x *CallSettings) Reset() {
@@ -332,22 +335,29 @@ func (*CallSettings) Descriptor() ([]byte, []int) {
 	return file_video_coordinator_call_v1_call_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *CallSettings) GetRecording() *RecordingOptions {
+func (x *CallSettings) GetRecording() *RecordingSettings {
 	if x != nil {
 		return x.Recording
 	}
 	return nil
 }
 
-func (x *CallSettings) GetBroadcasting() *BroadcastingOptions {
+func (x *CallSettings) GetBroadcasting() *BroadcastingSettings {
 	if x != nil {
 		return x.Broadcasting
 	}
 	return nil
 }
 
-// Contains all options regarding to call recording
-type RecordingOptions struct {
+func (x *CallSettings) GetGeofencing() *GeofencingSettings {
+	if x != nil {
+		return x.Geofencing
+	}
+	return nil
+}
+
+// Contains all settings regarding to call recording
+type RecordingSettings struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -357,8 +367,8 @@ type RecordingOptions struct {
 	Enabled *bool `protobuf:"varint,1,opt,name=enabled,proto3,oneof" json:"enabled,omitempty"`
 }
 
-func (x *RecordingOptions) Reset() {
-	*x = RecordingOptions{}
+func (x *RecordingSettings) Reset() {
+	*x = RecordingSettings{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_video_coordinator_call_v1_call_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -366,13 +376,13 @@ func (x *RecordingOptions) Reset() {
 	}
 }
 
-func (x *RecordingOptions) String() string {
+func (x *RecordingSettings) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*RecordingOptions) ProtoMessage() {}
+func (*RecordingSettings) ProtoMessage() {}
 
-func (x *RecordingOptions) ProtoReflect() protoreflect.Message {
+func (x *RecordingSettings) ProtoReflect() protoreflect.Message {
 	mi := &file_video_coordinator_call_v1_call_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -384,20 +394,20 @@ func (x *RecordingOptions) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use RecordingOptions.ProtoReflect.Descriptor instead.
-func (*RecordingOptions) Descriptor() ([]byte, []int) {
+// Deprecated: Use RecordingSettings.ProtoReflect.Descriptor instead.
+func (*RecordingSettings) Descriptor() ([]byte, []int) {
 	return file_video_coordinator_call_v1_call_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *RecordingOptions) GetEnabled() bool {
+func (x *RecordingSettings) GetEnabled() bool {
 	if x != nil && x.Enabled != nil {
 		return *x.Enabled
 	}
 	return false
 }
 
-// Contains all options regarding to call broadcasting
-type BroadcastingOptions struct {
+// Contains all settings regarding to call broadcasting
+type BroadcastingSettings struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -407,8 +417,8 @@ type BroadcastingOptions struct {
 	Enabled *bool `protobuf:"varint,1,opt,name=enabled,proto3,oneof" json:"enabled,omitempty"`
 }
 
-func (x *BroadcastingOptions) Reset() {
-	*x = BroadcastingOptions{}
+func (x *BroadcastingSettings) Reset() {
+	*x = BroadcastingSettings{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_video_coordinator_call_v1_call_proto_msgTypes[5]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -416,13 +426,13 @@ func (x *BroadcastingOptions) Reset() {
 	}
 }
 
-func (x *BroadcastingOptions) String() string {
+func (x *BroadcastingSettings) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*BroadcastingOptions) ProtoMessage() {}
+func (*BroadcastingSettings) ProtoMessage() {}
 
-func (x *BroadcastingOptions) ProtoReflect() protoreflect.Message {
+func (x *BroadcastingSettings) ProtoReflect() protoreflect.Message {
 	mi := &file_video_coordinator_call_v1_call_proto_msgTypes[5]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -434,16 +444,66 @@ func (x *BroadcastingOptions) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use BroadcastingOptions.ProtoReflect.Descriptor instead.
-func (*BroadcastingOptions) Descriptor() ([]byte, []int) {
+// Deprecated: Use BroadcastingSettings.ProtoReflect.Descriptor instead.
+func (*BroadcastingSettings) Descriptor() ([]byte, []int) {
 	return file_video_coordinator_call_v1_call_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *BroadcastingOptions) GetEnabled() bool {
+func (x *BroadcastingSettings) GetEnabled() bool {
 	if x != nil && x.Enabled != nil {
 		return *x.Enabled
 	}
 	return false
+}
+
+// Contains all settings regarding to call geofencing
+// Initialization of geofencing enables the feature
+type GeofencingSettings struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// Names of the geofences that are selected
+	Names []string `protobuf:"bytes,1,rep,name=names,proto3" json:"names,omitempty"`
+}
+
+func (x *GeofencingSettings) Reset() {
+	*x = GeofencingSettings{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_video_coordinator_call_v1_call_proto_msgTypes[6]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GeofencingSettings) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GeofencingSettings) ProtoMessage() {}
+
+func (x *GeofencingSettings) ProtoReflect() protoreflect.Message {
+	mi := &file_video_coordinator_call_v1_call_proto_msgTypes[6]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GeofencingSettings.ProtoReflect.Descriptor instead.
+func (*GeofencingSettings) Descriptor() ([]byte, []int) {
+	return file_video_coordinator_call_v1_call_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *GeofencingSettings) GetNames() []string {
+	if x != nil {
+		return x.Names
+	}
+	return nil
 }
 
 var File_video_coordinator_call_v1_call_proto protoreflect.FileDescriptor
@@ -524,30 +584,39 @@ var file_video_coordinator_call_v1_call_proto_rawDesc = []byte{
 	0x74, 0x72, 0x65, 0x61, 0x6d, 0x2e, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x2e, 0x63, 0x6f, 0x6f, 0x72,
 	0x64, 0x69, 0x6e, 0x61, 0x74, 0x6f, 0x72, 0x2e, 0x6d, 0x65, 0x6d, 0x62, 0x65, 0x72, 0x5f, 0x76,
 	0x31, 0x2e, 0x4d, 0x65, 0x6d, 0x62, 0x65, 0x72, 0x52, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x3a,
-	0x02, 0x38, 0x01, 0x22, 0xbb, 0x01, 0x0a, 0x0c, 0x43, 0x61, 0x6c, 0x6c, 0x53, 0x65, 0x74, 0x74,
-	0x69, 0x6e, 0x67, 0x73, 0x12, 0x50, 0x0a, 0x09, 0x72, 0x65, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x6e,
-	0x67, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x32, 0x2e, 0x73, 0x74, 0x72, 0x65, 0x61, 0x6d,
+	0x02, 0x38, 0x01, 0x22, 0x93, 0x02, 0x0a, 0x0c, 0x43, 0x61, 0x6c, 0x6c, 0x53, 0x65, 0x74, 0x74,
+	0x69, 0x6e, 0x67, 0x73, 0x12, 0x51, 0x0a, 0x09, 0x72, 0x65, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x6e,
+	0x67, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x33, 0x2e, 0x73, 0x74, 0x72, 0x65, 0x61, 0x6d,
 	0x2e, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x2e, 0x63, 0x6f, 0x6f, 0x72, 0x64, 0x69, 0x6e, 0x61, 0x74,
 	0x6f, 0x72, 0x2e, 0x63, 0x61, 0x6c, 0x6c, 0x5f, 0x76, 0x31, 0x2e, 0x52, 0x65, 0x63, 0x6f, 0x72,
-	0x64, 0x69, 0x6e, 0x67, 0x4f, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x52, 0x09, 0x72, 0x65, 0x63,
-	0x6f, 0x72, 0x64, 0x69, 0x6e, 0x67, 0x12, 0x59, 0x0a, 0x0c, 0x62, 0x72, 0x6f, 0x61, 0x64, 0x63,
-	0x61, 0x73, 0x74, 0x69, 0x6e, 0x67, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x35, 0x2e, 0x73,
-	0x74, 0x72, 0x65, 0x61, 0x6d, 0x2e, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x2e, 0x63, 0x6f, 0x6f, 0x72,
-	0x64, 0x69, 0x6e, 0x61, 0x74, 0x6f, 0x72, 0x2e, 0x63, 0x61, 0x6c, 0x6c, 0x5f, 0x76, 0x31, 0x2e,
-	0x42, 0x72, 0x6f, 0x61, 0x64, 0x63, 0x61, 0x73, 0x74, 0x69, 0x6e, 0x67, 0x4f, 0x70, 0x74, 0x69,
-	0x6f, 0x6e, 0x73, 0x52, 0x0c, 0x62, 0x72, 0x6f, 0x61, 0x64, 0x63, 0x61, 0x73, 0x74, 0x69, 0x6e,
-	0x67, 0x22, 0x3d, 0x0a, 0x10, 0x52, 0x65, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x6e, 0x67, 0x4f, 0x70,
-	0x74, 0x69, 0x6f, 0x6e, 0x73, 0x12, 0x1d, 0x0a, 0x07, 0x65, 0x6e, 0x61, 0x62, 0x6c, 0x65, 0x64,
-	0x18, 0x01, 0x20, 0x01, 0x28, 0x08, 0x48, 0x00, 0x52, 0x07, 0x65, 0x6e, 0x61, 0x62, 0x6c, 0x65,
-	0x64, 0x88, 0x01, 0x01, 0x42, 0x0a, 0x0a, 0x08, 0x5f, 0x65, 0x6e, 0x61, 0x62, 0x6c, 0x65, 0x64,
-	0x22, 0x40, 0x0a, 0x13, 0x42, 0x72, 0x6f, 0x61, 0x64, 0x63, 0x61, 0x73, 0x74, 0x69, 0x6e, 0x67,
-	0x4f, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x12, 0x1d, 0x0a, 0x07, 0x65, 0x6e, 0x61, 0x62, 0x6c,
-	0x65, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x08, 0x48, 0x00, 0x52, 0x07, 0x65, 0x6e, 0x61, 0x62,
-	0x6c, 0x65, 0x64, 0x88, 0x01, 0x01, 0x42, 0x0a, 0x0a, 0x08, 0x5f, 0x65, 0x6e, 0x61, 0x62, 0x6c,
-	0x65, 0x64, 0x42, 0x31, 0x42, 0x06, 0x43, 0x61, 0x6c, 0x6c, 0x56, 0x31, 0x50, 0x01, 0x5a, 0x07,
-	0x63, 0x61, 0x6c, 0x6c, 0x5f, 0x76, 0x31, 0xaa, 0x02, 0x1b, 0x53, 0x74, 0x72, 0x65, 0x61, 0x6d,
-	0x2e, 0x56, 0x69, 0x64, 0x65, 0x6f, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x6f, 0x6f, 0x72, 0x64, 0x69,
-	0x6e, 0x61, 0x74, 0x6f, 0x72, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x64, 0x69, 0x6e, 0x67, 0x53, 0x65, 0x74, 0x74, 0x69, 0x6e, 0x67, 0x73, 0x52, 0x09, 0x72, 0x65,
+	0x63, 0x6f, 0x72, 0x64, 0x69, 0x6e, 0x67, 0x12, 0x5a, 0x0a, 0x0c, 0x62, 0x72, 0x6f, 0x61, 0x64,
+	0x63, 0x61, 0x73, 0x74, 0x69, 0x6e, 0x67, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x36, 0x2e,
+	0x73, 0x74, 0x72, 0x65, 0x61, 0x6d, 0x2e, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x2e, 0x63, 0x6f, 0x6f,
+	0x72, 0x64, 0x69, 0x6e, 0x61, 0x74, 0x6f, 0x72, 0x2e, 0x63, 0x61, 0x6c, 0x6c, 0x5f, 0x76, 0x31,
+	0x2e, 0x42, 0x72, 0x6f, 0x61, 0x64, 0x63, 0x61, 0x73, 0x74, 0x69, 0x6e, 0x67, 0x53, 0x65, 0x74,
+	0x74, 0x69, 0x6e, 0x67, 0x73, 0x52, 0x0c, 0x62, 0x72, 0x6f, 0x61, 0x64, 0x63, 0x61, 0x73, 0x74,
+	0x69, 0x6e, 0x67, 0x12, 0x54, 0x0a, 0x0a, 0x67, 0x65, 0x6f, 0x66, 0x65, 0x6e, 0x63, 0x69, 0x6e,
+	0x67, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x34, 0x2e, 0x73, 0x74, 0x72, 0x65, 0x61, 0x6d,
+	0x2e, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x2e, 0x63, 0x6f, 0x6f, 0x72, 0x64, 0x69, 0x6e, 0x61, 0x74,
+	0x6f, 0x72, 0x2e, 0x63, 0x61, 0x6c, 0x6c, 0x5f, 0x76, 0x31, 0x2e, 0x47, 0x65, 0x6f, 0x66, 0x65,
+	0x6e, 0x63, 0x69, 0x6e, 0x67, 0x53, 0x65, 0x74, 0x74, 0x69, 0x6e, 0x67, 0x73, 0x52, 0x0a, 0x67,
+	0x65, 0x6f, 0x66, 0x65, 0x6e, 0x63, 0x69, 0x6e, 0x67, 0x22, 0x3e, 0x0a, 0x11, 0x52, 0x65, 0x63,
+	0x6f, 0x72, 0x64, 0x69, 0x6e, 0x67, 0x53, 0x65, 0x74, 0x74, 0x69, 0x6e, 0x67, 0x73, 0x12, 0x1d,
+	0x0a, 0x07, 0x65, 0x6e, 0x61, 0x62, 0x6c, 0x65, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x08, 0x48,
+	0x00, 0x52, 0x07, 0x65, 0x6e, 0x61, 0x62, 0x6c, 0x65, 0x64, 0x88, 0x01, 0x01, 0x42, 0x0a, 0x0a,
+	0x08, 0x5f, 0x65, 0x6e, 0x61, 0x62, 0x6c, 0x65, 0x64, 0x22, 0x41, 0x0a, 0x14, 0x42, 0x72, 0x6f,
+	0x61, 0x64, 0x63, 0x61, 0x73, 0x74, 0x69, 0x6e, 0x67, 0x53, 0x65, 0x74, 0x74, 0x69, 0x6e, 0x67,
+	0x73, 0x12, 0x1d, 0x0a, 0x07, 0x65, 0x6e, 0x61, 0x62, 0x6c, 0x65, 0x64, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x08, 0x48, 0x00, 0x52, 0x07, 0x65, 0x6e, 0x61, 0x62, 0x6c, 0x65, 0x64, 0x88, 0x01, 0x01,
+	0x42, 0x0a, 0x0a, 0x08, 0x5f, 0x65, 0x6e, 0x61, 0x62, 0x6c, 0x65, 0x64, 0x22, 0x2a, 0x0a, 0x12,
+	0x47, 0x65, 0x6f, 0x66, 0x65, 0x6e, 0x63, 0x69, 0x6e, 0x67, 0x53, 0x65, 0x74, 0x74, 0x69, 0x6e,
+	0x67, 0x73, 0x12, 0x14, 0x0a, 0x05, 0x6e, 0x61, 0x6d, 0x65, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28,
+	0x09, 0x52, 0x05, 0x6e, 0x61, 0x6d, 0x65, 0x73, 0x42, 0x31, 0x42, 0x06, 0x43, 0x61, 0x6c, 0x6c,
+	0x56, 0x31, 0x50, 0x01, 0x5a, 0x07, 0x63, 0x61, 0x6c, 0x6c, 0x5f, 0x76, 0x31, 0xaa, 0x02, 0x1b,
+	0x53, 0x74, 0x72, 0x65, 0x61, 0x6d, 0x2e, 0x56, 0x69, 0x64, 0x65, 0x6f, 0x2e, 0x76, 0x31, 0x2e,
+	0x43, 0x6f, 0x6f, 0x72, 0x64, 0x69, 0x6e, 0x61, 0x74, 0x6f, 0x72, 0x62, 0x06, 0x70, 0x72, 0x6f,
+	0x74, 0x6f, 0x33,
 }
 
 var (
@@ -562,35 +631,37 @@ func file_video_coordinator_call_v1_call_proto_rawDescGZIP() []byte {
 	return file_video_coordinator_call_v1_call_proto_rawDescData
 }
 
-var file_video_coordinator_call_v1_call_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_video_coordinator_call_v1_call_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_video_coordinator_call_v1_call_proto_goTypes = []interface{}{
 	(*CallType)(nil),              // 0: stream.video.coordinator.call_v1.CallType
 	(*Call)(nil),                  // 1: stream.video.coordinator.call_v1.Call
 	(*CallDetails)(nil),           // 2: stream.video.coordinator.call_v1.CallDetails
 	(*CallSettings)(nil),          // 3: stream.video.coordinator.call_v1.CallSettings
-	(*RecordingOptions)(nil),      // 4: stream.video.coordinator.call_v1.RecordingOptions
-	(*BroadcastingOptions)(nil),   // 5: stream.video.coordinator.call_v1.BroadcastingOptions
-	nil,                           // 6: stream.video.coordinator.call_v1.CallDetails.MembersEntry
-	(*timestamppb.Timestamp)(nil), // 7: google.protobuf.Timestamp
-	(*member_v1.Member)(nil),      // 8: stream.video.coordinator.member_v1.Member
+	(*RecordingSettings)(nil),     // 4: stream.video.coordinator.call_v1.RecordingSettings
+	(*BroadcastingSettings)(nil),  // 5: stream.video.coordinator.call_v1.BroadcastingSettings
+	(*GeofencingSettings)(nil),    // 6: stream.video.coordinator.call_v1.GeofencingSettings
+	nil,                           // 7: stream.video.coordinator.call_v1.CallDetails.MembersEntry
+	(*timestamppb.Timestamp)(nil), // 8: google.protobuf.Timestamp
+	(*member_v1.Member)(nil),      // 9: stream.video.coordinator.member_v1.Member
 }
 var file_video_coordinator_call_v1_call_proto_depIdxs = []int32{
 	3,  // 0: stream.video.coordinator.call_v1.CallType.settings:type_name -> stream.video.coordinator.call_v1.CallSettings
-	7,  // 1: stream.video.coordinator.call_v1.CallType.created_at:type_name -> google.protobuf.Timestamp
-	7,  // 2: stream.video.coordinator.call_v1.CallType.updated_at:type_name -> google.protobuf.Timestamp
+	8,  // 1: stream.video.coordinator.call_v1.CallType.created_at:type_name -> google.protobuf.Timestamp
+	8,  // 2: stream.video.coordinator.call_v1.CallType.updated_at:type_name -> google.protobuf.Timestamp
 	3,  // 3: stream.video.coordinator.call_v1.Call.settings_overrides:type_name -> stream.video.coordinator.call_v1.CallSettings
-	7,  // 4: stream.video.coordinator.call_v1.Call.created_at:type_name -> google.protobuf.Timestamp
-	7,  // 5: stream.video.coordinator.call_v1.Call.updated_at:type_name -> google.protobuf.Timestamp
+	8,  // 4: stream.video.coordinator.call_v1.Call.created_at:type_name -> google.protobuf.Timestamp
+	8,  // 5: stream.video.coordinator.call_v1.Call.updated_at:type_name -> google.protobuf.Timestamp
 	3,  // 6: stream.video.coordinator.call_v1.CallDetails.settings:type_name -> stream.video.coordinator.call_v1.CallSettings
-	6,  // 7: stream.video.coordinator.call_v1.CallDetails.members:type_name -> stream.video.coordinator.call_v1.CallDetails.MembersEntry
-	4,  // 8: stream.video.coordinator.call_v1.CallSettings.recording:type_name -> stream.video.coordinator.call_v1.RecordingOptions
-	5,  // 9: stream.video.coordinator.call_v1.CallSettings.broadcasting:type_name -> stream.video.coordinator.call_v1.BroadcastingOptions
-	8,  // 10: stream.video.coordinator.call_v1.CallDetails.MembersEntry.value:type_name -> stream.video.coordinator.member_v1.Member
-	11, // [11:11] is the sub-list for method output_type
-	11, // [11:11] is the sub-list for method input_type
-	11, // [11:11] is the sub-list for extension type_name
-	11, // [11:11] is the sub-list for extension extendee
-	0,  // [0:11] is the sub-list for field type_name
+	7,  // 7: stream.video.coordinator.call_v1.CallDetails.members:type_name -> stream.video.coordinator.call_v1.CallDetails.MembersEntry
+	4,  // 8: stream.video.coordinator.call_v1.CallSettings.recording:type_name -> stream.video.coordinator.call_v1.RecordingSettings
+	5,  // 9: stream.video.coordinator.call_v1.CallSettings.broadcasting:type_name -> stream.video.coordinator.call_v1.BroadcastingSettings
+	6,  // 10: stream.video.coordinator.call_v1.CallSettings.geofencing:type_name -> stream.video.coordinator.call_v1.GeofencingSettings
+	9,  // 11: stream.video.coordinator.call_v1.CallDetails.MembersEntry.value:type_name -> stream.video.coordinator.member_v1.Member
+	12, // [12:12] is the sub-list for method output_type
+	12, // [12:12] is the sub-list for method input_type
+	12, // [12:12] is the sub-list for extension type_name
+	12, // [12:12] is the sub-list for extension extendee
+	0,  // [0:12] is the sub-list for field type_name
 }
 
 func init() { file_video_coordinator_call_v1_call_proto_init() }
@@ -648,7 +719,7 @@ func file_video_coordinator_call_v1_call_proto_init() {
 			}
 		}
 		file_video_coordinator_call_v1_call_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RecordingOptions); i {
+			switch v := v.(*RecordingSettings); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -660,7 +731,19 @@ func file_video_coordinator_call_v1_call_proto_init() {
 			}
 		}
 		file_video_coordinator_call_v1_call_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*BroadcastingOptions); i {
+			switch v := v.(*BroadcastingSettings); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_video_coordinator_call_v1_call_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GeofencingSettings); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -680,7 +763,7 @@ func file_video_coordinator_call_v1_call_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_video_coordinator_call_v1_call_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   7,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

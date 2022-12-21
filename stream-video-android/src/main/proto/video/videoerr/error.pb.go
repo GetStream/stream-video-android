@@ -53,7 +53,7 @@ const (
 	E_REQUEST_VALIDATION_FAILED E = 1301
 	// CallType was not found
 	E_CALL_TYPE_NOT_FOUND E = 1401
-	// RoomType already exists
+	// CallType already exists
 	E_CALL_TYPE_ALREADY_EXISTS     E = 1403
 	E_CALL_NOT_FOUND               E = 1501
 	E_CALL_ALREADY_EXISTS          E = 1502
