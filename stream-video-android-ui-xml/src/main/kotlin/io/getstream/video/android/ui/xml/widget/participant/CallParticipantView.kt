@@ -20,28 +20,33 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import androidx.core.view.setMargins
 import io.getstream.video.android.model.CallParticipantState
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.VideoTrack
 import io.getstream.video.android.model.toUser
 import io.getstream.video.android.ui.xml.R
 import io.getstream.video.android.ui.xml.databinding.ViewCallParticipantBinding
+import io.getstream.video.android.ui.xml.font.setTextStyle
+import io.getstream.video.android.ui.xml.utils.extensions.constrainViewToParent
+import io.getstream.video.android.ui.xml.utils.extensions.createStreamThemeWrapper
+import io.getstream.video.android.ui.xml.utils.extensions.getDrawableCompat
 import io.getstream.video.android.ui.xml.utils.extensions.inflater
 import io.getstream.video.android.ui.xml.utils.extensions.load
+import io.getstream.video.android.ui.xml.utils.extensions.updateConstraints
 import io.getstream.video.android.ui.common.R as RCommon
 
 /**
  * Represents a single participant in a call.
  */
-public class CallParticipantView @JvmOverloads constructor(
-    context: Context,
-    attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0,
-) : ConstraintLayout(context, attrs, defStyleAttr) {
+public class CallParticipantView : ConstraintLayout {
 
     private val binding = ViewCallParticipantBinding.inflate(inflater, this)
+
+    private lateinit var style: CallParticipantStyle
 
     /**
      * Flag that notifies if we initialised the renderer for this view or not.
@@ -62,6 +67,31 @@ public class CallParticipantView @JvmOverloads constructor(
      * Handler when the video renders.
      */
     public var onRender: (View) -> Unit = {}
+
+    public constructor(context: Context) : this(context, null, 0)
+    public constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
+    public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
+        context.createStreamThemeWrapper(),
+        attrs,
+        defStyleAttr
+    ) {
+        init(attrs)
+    }
+
+    private fun init(attrs: AttributeSet?) {
+        style = CallParticipantStyle(context, attrs)
+
+        binding.activeCallParticipantBorder.setColorFilter(style.activeSpeakerBorderColor)
+
+        initNameHolder()
+    }
+
+    private fun initNameHolder() {
+        binding.participantName.setTextStyle(style.tagTextStyle)
+        (binding.nameHolder.layoutParams as LayoutParams).setMargins(style.tagPadding)
+        binding.nameHolder.background.setTint(style.tagBackgroundColor)
+        setTagAlignment(style.tagAlignment)
+    }
 
     /**
      * Sets this view as the active speaker.
@@ -100,10 +130,10 @@ public class CallParticipantView @JvmOverloads constructor(
      */
     // TODO build sound level view
     private fun setHasAudio(hasAudio: Boolean) {
-        val tint = ContextCompat.getColor(context, if (hasAudio) R.color.stream_white else RCommon.color.stream_error_accent)
-        val icon = if (hasAudio) RCommon.drawable.ic_mic_on else RCommon.drawable.ic_mic_off
+        val tint = if (hasAudio) style.participantAudioLevelTint else style.participantMicOffIconTint
+        val icon = if (hasAudio) context.getDrawableCompat(RCommon.drawable.ic_mic_on) else style.participantMicOffIcon
 
-        binding.soundIndicator.setImageResource(icon)
+        binding.soundIndicator.setImageDrawable(icon)
         binding.soundIndicator.setColorFilter(tint)
     }
 
@@ -145,6 +175,38 @@ public class CallParticipantView @JvmOverloads constructor(
             track?.let {
                 rendererInitializer?.initRenderer(binding.participantVideoRenderer, it.streamId) { onRender(it) }
                 wasRendererInitialised = true
+            }
+        }
+    }
+
+    /**
+     * Updates the tag alignment inside the view.
+     *
+     * @param tagAlignment [CallParticipantTagAlignment] to be applied to the name tag.
+     */
+    public fun setTagAlignment(tagAlignment: CallParticipantTagAlignment) {
+        val holderId = binding.nameHolder.id
+        val parentId = this.id
+
+        updateConstraints {
+            clear(binding.nameHolder.id)
+            when (tagAlignment) {
+                CallParticipantTagAlignment.TOP_LEFT -> {
+                    connect(holderId, ConstraintSet.TOP, parentId, ConstraintSet.TOP)
+                    connect(holderId, ConstraintSet.LEFT, parentId, ConstraintSet.LEFT)
+                }
+                CallParticipantTagAlignment.TOP_RIGHT -> {
+                    connect(holderId, ConstraintSet.TOP, parentId, ConstraintSet.TOP)
+                    connect(holderId, ConstraintSet.RIGHT, parentId, ConstraintSet.RIGHT)
+                }
+                CallParticipantTagAlignment.BOTTOM_LEFT -> {
+                    connect(holderId, ConstraintSet.BOTTOM, parentId, ConstraintSet.BOTTOM)
+                    connect(holderId, ConstraintSet.LEFT, parentId, ConstraintSet.LEFT)
+                }
+                CallParticipantTagAlignment.BOTTOM_RIGHT -> {
+                    connect(holderId, ConstraintSet.BOTTOM, parentId, ConstraintSet.BOTTOM)
+                    connect(holderId, ConstraintSet.RIGHT, parentId, ConstraintSet.RIGHT)
+                }
             }
         }
     }
