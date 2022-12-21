@@ -61,7 +61,7 @@ public class IncomingCallView : ConstraintLayout {
     private fun initDeclineButton() {
         with(binding.declineCall) {
             background = style.declineCallBackground
-            setBackgroundColor(style.declineCallBackgroundTint)
+            background.setTint(style.declineCallBackgroundTint)
             setImageDrawable(style.declineCallIcon)
             setColorFilter(style.declineCallIconTint)
         }
@@ -70,7 +70,7 @@ public class IncomingCallView : ConstraintLayout {
     private fun initAnswerButton() {
         with(binding.acceptCall) {
             background = style.acceptCallBackground
-            setBackgroundColor(style.acceptCallBackgroundTint)
+            background.setTint(style.acceptCallBackgroundTint)
             setImageDrawable(style.acceptCallIcon)
             setColorFilter(style.acceptCallIconTint)
         }
@@ -79,7 +79,7 @@ public class IncomingCallView : ConstraintLayout {
     private fun initVideoButton() {
         with(binding.cameraToggle) {
             background = style.acceptCallBackground
-            setBackgroundColor(style.acceptCallBackgroundTint)
+            background.setTint(style.videoButtonBackgroundTint)
             setColorFilter(style.acceptCallIconTint)
         }
     }

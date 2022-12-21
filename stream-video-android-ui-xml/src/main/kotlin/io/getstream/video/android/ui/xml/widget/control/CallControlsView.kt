@@ -32,6 +32,7 @@ import io.getstream.video.android.ui.xml.R
 import io.getstream.video.android.ui.xml.utils.extensions.constrainViewEndToStartOfView
 import io.getstream.video.android.ui.xml.utils.extensions.constrainViewStartToEndOfView
 import io.getstream.video.android.ui.xml.utils.extensions.constrainViewToParentBySide
+import io.getstream.video.android.ui.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.ui.xml.utils.extensions.getColorCompat
 import io.getstream.video.android.ui.xml.utils.extensions.updateConstraints
 import io.getstream.video.android.ui.common.R as RCommon
@@ -40,11 +41,12 @@ import io.getstream.video.android.ui.common.R as RCommon
  * Represents the set of controls the user can use to change their audio and video device state, or
  * browse other types of settings, leave the call, or implement something custom.
  */
-public class CallControlsView @JvmOverloads constructor(
-    context: Context,
-    attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0,
-) : ConstraintLayout(context, attrs, defStyleAttr) {
+public class CallControlsView : ConstraintLayout {
+
+    /**
+     * Style of the view.
+     */
+    private lateinit var style: CallControlsStyle
 
     /**
      * Map of call actions and their corresponding views inside the [CallControlsView].
@@ -55,6 +57,22 @@ public class CallControlsView @JvmOverloads constructor(
      * Handler for call controls click actions.
      */
     public var callControlItemClickListener: (CallAction) -> Unit = { }
+
+    public constructor(context: Context) : this(context, null, 0)
+    public constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
+    public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
+        context.createStreamThemeWrapper(),
+        attrs,
+        defStyleAttr
+    ) {
+        init(attrs)
+    }
+
+    private fun init(attrs: AttributeSet?) {
+        style = CallControlsStyle(context, attrs)
+
+        background.setTint(style.callControlsBackgroundColor)
+    }
 
     /**
      * Sets the call controls we wish to expose to the users.
@@ -78,11 +96,10 @@ public class CallControlsView @JvmOverloads constructor(
      * @param callControlItem The call control item we wish to expose to the user.
      */
     private fun buildControlView(callControlItem: CallControlItem): StreamImageButton {
-        val buttonSize = context.resources.getDimension(RCommon.dimen.callControlButtonSize).toInt()
         return StreamImageButton(context).apply {
             id = View.generateViewId()
             tag = callControlItem
-            layoutParams = LayoutParams(buttonSize, buttonSize)
+            layoutParams = LayoutParams(style.callControlButtonSize, style.callControlButtonSize)
             setImageResource(callControlItem.icon)
             setBackgroundResource(R.drawable.bg_call_control_option)
             setColorFilter(context.getColorCompat(callControlItem.iconTint))

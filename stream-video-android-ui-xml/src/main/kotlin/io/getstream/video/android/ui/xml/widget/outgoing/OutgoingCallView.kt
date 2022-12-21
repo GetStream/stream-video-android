@@ -55,6 +55,8 @@ public class OutgoingCallView : ConstraintLayout {
     private fun init(attrs: AttributeSet?) {
         style = OutgoingCallStyle(context, attrs)
 
+        binding.callBackground.background = style.outgoingScreenBackground
+
         initCancelCallButton()
         initMediaControlButton(binding.micToggle)
         initMediaControlButton(binding.cameraToggle)
