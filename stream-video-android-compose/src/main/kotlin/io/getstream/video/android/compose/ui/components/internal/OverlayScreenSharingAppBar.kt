@@ -19,7 +19,9 @@ package io.getstream.video.android.compose.ui.components.internal
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
@@ -30,6 +32,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import io.getstream.video.android.call.state.CallAction
+import io.getstream.video.android.call.state.ShowCallInfo
 import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.model.CallParticipantState
@@ -37,15 +42,17 @@ import io.getstream.video.android.model.CallParticipantState
 @Composable
 internal fun OverlayScreenSharingAppBar(
     sharingParticipant: CallParticipantState,
-    onBackPressed: () -> Unit
+    onBackPressed: () -> Unit,
+    onCallAction: (CallAction) -> Unit
 ) {
     Row(
-        modifier = Modifier.background(color = VideoTheme.colors.overlay),
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(color = VideoTheme.colors.overlay),
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(
-            enabled = true, // TODO - we would need the info of displayed overlays
             onClick = onBackPressed,
             modifier = Modifier.padding(
                 start = VideoTheme.dimens.callAppBarLeadingContentSpacingStart,
@@ -60,6 +67,7 @@ internal fun OverlayScreenSharingAppBar(
         }
 
         Text(
+            modifier = Modifier.weight(1f),
             text = stringResource(
                 id = io.getstream.video.android.R.string.stream_screen_sharing_title,
                 sharingParticipant.name.ifEmpty { sharingParticipant.id }
@@ -69,5 +77,19 @@ internal fun OverlayScreenSharingAppBar(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
+
+        IconButton(onClick = { onCallAction(ShowCallInfo) }) {
+            Icon(
+                modifier = Modifier
+                    .background(
+                        shape = CircleShape,
+                        color = VideoTheme.colors.barsBackground
+                    )
+                    .padding(8.dp),
+                painter = painterResource(id = R.drawable.ic_participants),
+                contentDescription = stringResource(id = R.string.call_participants_menu_content_description),
+                tint = VideoTheme.colors.textHighEmphasis
+            )
+        }
     }
 }

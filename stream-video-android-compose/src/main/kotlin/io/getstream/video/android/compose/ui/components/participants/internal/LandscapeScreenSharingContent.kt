@@ -85,7 +85,7 @@ public fun LandscapeScreenSharingContent(
                 onCallAction = onCallAction
             )
 
-            OverlayScreenSharingAppBar(sharingParticipant, onBackPressed)
+            OverlayScreenSharingAppBar(sharingParticipant, onBackPressed, onCallAction)
         }
 
         if (!isFullscreen) {
