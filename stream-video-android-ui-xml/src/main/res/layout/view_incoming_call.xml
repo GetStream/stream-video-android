@@ -21,14 +21,13 @@
         app:layout_constraintTop_toTopOf="parent"
         />
 
-    <io.getstream.video.android.ui.xml.widget.control.StreamImageButton
+    <io.getstream.video.android.ui.xml.widget.control.CallControlButton
         android:id="@+id/declineCall"
         android:layout_width="@dimen/largeButtonSize"
         android:layout_height="@dimen/largeButtonSize"
         android:layout_marginBottom="@dimen/incomingCallOptionsBottomPadding"
         android:background="@drawable/bg_call_option"
         android:backgroundTint="@color/stream_error_accent"
-        android:scaleType="center"
         android:src="@drawable/ic_call_end"
         android:tint="@color/stream_white"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -36,12 +35,11 @@
         app:layout_constraintStart_toStartOf="parent"
         />
 
-    <io.getstream.video.android.ui.xml.widget.control.StreamImageButton
+    <io.getstream.video.android.ui.xml.widget.control.CallControlButton
         android:id="@+id/cameraToggle"
         android:layout_width="@dimen/mediumButtonSize"
         android:layout_height="@dimen/mediumButtonSize"
         android:background="@drawable/bg_call_control_option"
-        android:scaleType="center"
         android:src="@drawable/ic_videocam_on"
         app:layout_constraintBottom_toBottomOf="@id/declineCall"
         app:layout_constraintEnd_toStartOf="@id/acceptCall"
@@ -49,14 +47,13 @@
         app:layout_constraintTop_toTopOf="@id/declineCall"
         />
 
-    <io.getstream.video.android.ui.xml.widget.control.StreamImageButton
+    <io.getstream.video.android.ui.xml.widget.control.CallControlButton
         android:id="@+id/acceptCall"
         android:layout_width="@dimen/largeButtonSize"
         android:layout_height="@dimen/largeButtonSize"
         android:layout_marginBottom="@dimen/incomingCallOptionsBottomPadding"
         android:background="@drawable/bg_call_option"
         android:backgroundTint="@color/stream_info_accent"
-        android:scaleType="center"
         android:src="@drawable/ic_call"
         android:tint="@color/stream_white"
         app:layout_constraintBottom_toBottomOf="parent"

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="ControlButton">
+        <attr name="android:background" format="reference" />
+        <attr name="android:backgroundTint" format="color|reference" />
+        <attr name="android:src" format="reference" />
+        <attr name="android:tint" format="color|reference" />
+        <attr name="android:enabled" format="reference" />
+        <attr name="streamBackgroundEnabledAlpha" format="float|reference" />
+        <attr name="streamBackgroundDisabledAlpha" format="float|reference" />
+     </declare-styleable>
+</resources>

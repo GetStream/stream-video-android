@@ -19,11 +19,8 @@ package io.getstream.video.android.ui.xml.widget.control
 import android.content.Context
 import android.util.AttributeSet
 import android.view.View
-import android.widget.ImageButton
-import android.widget.ImageView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
-import androidx.core.content.ContextCompat
 import io.getstream.video.android.call.state.CallAction
 import io.getstream.video.android.call.state.ToggleCamera
 import io.getstream.video.android.call.state.ToggleMicrophone
@@ -35,7 +32,6 @@ import io.getstream.video.android.ui.xml.utils.extensions.constrainViewToParentB
 import io.getstream.video.android.ui.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.ui.xml.utils.extensions.getColorCompat
 import io.getstream.video.android.ui.xml.utils.extensions.updateConstraints
-import io.getstream.video.android.ui.common.R as RCommon
 
 /**
  * Represents the set of controls the user can use to change their audio and video device state, or
@@ -51,7 +47,7 @@ public class CallControlsView : ConstraintLayout {
     /**
      * Map of call actions and their corresponding views inside the [CallControlsView].
      */
-    private val callControls = mutableMapOf<CallAction, StreamImageButton>()
+    private val callControls = mutableMapOf<CallAction, CallControlButton>()
 
     /**
      * Handler for call controls click actions.
@@ -91,12 +87,12 @@ public class CallControlsView : ConstraintLayout {
     }
 
     /**
-     * Adds a new [StreamImageButton] for each [CallControlItem] when [setItems] is called.
+     * Adds a new [CallControlButton] for each [CallControlItem] when [setItems] is called.
      *
      * @param callControlItem The call control item we wish to expose to the user.
      */
-    private fun buildControlView(callControlItem: CallControlItem): StreamImageButton {
-        return StreamImageButton(context).apply {
+    private fun buildControlView(callControlItem: CallControlItem): CallControlButton {
+        return CallControlButton(context).apply {
             id = View.generateViewId()
             tag = callControlItem
             layoutParams = LayoutParams(style.callControlButtonSize, style.callControlButtonSize)

@@ -31,7 +31,7 @@ import io.getstream.video.android.ui.xml.utils.extensions.createStreamThemeWrapp
 import io.getstream.video.android.ui.xml.utils.extensions.dpToPx
 import io.getstream.video.android.ui.xml.utils.extensions.getDimension
 import io.getstream.video.android.ui.xml.utils.extensions.inflater
-import io.getstream.video.android.ui.xml.widget.control.StreamImageButton
+import io.getstream.video.android.ui.xml.widget.control.CallControlButton
 
 /**
  *  Represents the Outgoing Call state and UI, when the user is calling other people.
@@ -65,10 +65,11 @@ public class OutgoingCallView : ConstraintLayout {
     /**
      * Initialises the media control buttons with the style.
      */
-    private fun initMediaControlButton(button: StreamImageButton) {
+    private fun initMediaControlButton(button: CallControlButton) {
         button.setColorFilter(style.mediaButtonIconTint)
-        button.disabledAlpha = style.mediaButtonBackgroundAlphaDisabled
-        button.enabledAlpha = style.mediaButtonBackgroundAlphaEnabled
+        // TODO
+        // button.disabledAlpha = style.mediaButtonBackgroundAlphaDisabled
+        // button.enabledAlpha = style.mediaButtonBackgroundAlphaEnabled
         button.background = style.mediaButtonBackground
         button.background.setTint(style.mediaButtonBackgroundTint)
     }
