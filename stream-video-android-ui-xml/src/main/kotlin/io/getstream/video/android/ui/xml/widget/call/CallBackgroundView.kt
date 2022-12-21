@@ -1,6 +1,7 @@
 package io.getstream.video.android.ui.xml.widget.call
 
 import android.content.Context
+import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.AppCompatImageView
@@ -19,7 +20,6 @@ public class CallBackgroundView @JvmOverloads constructor(
 ) : AppCompatImageView(context, attrs, defStyleAttr) {
 
     init {
-        setDefaultBackground()
         scaleType = ScaleType.CENTER_CROP
     }
 
@@ -27,20 +27,23 @@ public class CallBackgroundView @JvmOverloads constructor(
      * Set the call participants to show the background image.
      *
      * @param participants The list of participants in the call.
+     * @param groupCallBackground The background used if the call is group call.
      */
-    public fun setParticipants(participants: List<CallUser>) {
+    public fun setParticipants(participants: List<CallUser>, groupCallBackground: Drawable?) {
         if (participants.size == 1) {
             loadImage(participants)
         } else {
-            setDefaultBackground()
+            setGroupCallBackground(groupCallBackground)
         }
     }
 
     /**
      * Sets the default background.
+     *
+     * @param groupCallBackground The background drawable to be shown.
      */
-    private fun setDefaultBackground() {
-        background = AppCompatResources.getDrawable(context, R.drawable.bg_call)
+    private fun setGroupCallBackground(groupCallBackground: Drawable?) {
+        background = groupCallBackground
     }
 
     /**
@@ -50,5 +53,4 @@ public class CallBackgroundView @JvmOverloads constructor(
         val firstParticipant = participants.first()
         load(firstParticipant.imageUrl, R.drawable.bg_call)
     }
-
 }

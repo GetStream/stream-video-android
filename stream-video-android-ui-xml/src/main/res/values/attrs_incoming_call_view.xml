@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="IncomingCallView">
+        <attr name="streamIncomingScreenBackground" format="reference"/>
+
+        <!-- Call state text style attributes -->
+        <attr name="streamIncomingAcceptCallIcon" format="reference" />
+        <attr name="streamIncomingAcceptCallIconTint" format="color|reference" />
+        <attr name="streamIncomingAcceptCallBackground" format="reference" />
+        <attr name="streamIncomingAcceptCallBackgroundTint" format="color|reference" />
+        <attr name="streamIncomingDeclineCallIcon" format="reference" />
+        <attr name="streamIncomingDeclineCallIconTint" format="color|reference" />
+        <attr name="streamIncomingDeclineCallBackground" format="reference" />
+        <attr name="streamIncomingDeclineCallBackgroundTint" format="color|reference" />
+
+        <attr name="streamIncomingVideoEnabledIcon" format="reference" />
+        <attr name="streamIncomingVideoDisabledIcon" format="reference" />
+        <attr name="streamIncomingVideoIconTint" format="color|reference" />
+        <attr name="streamIncomingVideoBackground" format="reference" />
+        <attr name="streamIncomingVideoBackgroundTint" format="color|reference" />
+        <attr name="streamIncomingVideoBackgroundAlphaEnabled" format="float|reference" />
+        <attr name="streamIncomingVideoBackgroundAlphaDisabled" format="float|reference" />
+
+    </declare-styleable>
+</resources>

@@ -28,7 +28,7 @@ import io.getstream.video.android.ui.common.R as RCommon
  * @param callStateTextStyle Text style for the call state.
  * @param callStateTextAlpha Alpha value for the call state.
  */
-public class CallDetailsStyle(
+public data class CallDetailsStyle(
     @Px public val callAvatarSize: Int,
     @Px public val singleAvatarSize: Int,
     @Px public val avatarSpacing: Int,
@@ -52,12 +52,23 @@ public class CallDetailsStyle(
     }
 
     internal class Builder(private val context: Context, private val attributes: TypedArray) {
+        private val VALUE_NOT_SET = Int.MAX_VALUE
+        private fun Int.nullIfNotSet(): Int? {
+            return if (this == VALUE_NOT_SET) null else this
+        }
+
         private val DEFAULT_AVATAR_SPACING = 20.dpToPx()
 
         private val DIRECT_CALL_INFO_TEXT_SIZE = RCommon.dimen.directCallUserNameTextSize
         private val GROUP_CALL_INFO_TEXT_SIZE = RCommon.dimen.groupCallUserNameTextSize
 
         private val DEFAULT_TEXT_COLOR = RCommon.color.stream_text_high_emphasis
+
+        @Px
+        private var callAvatarSize: Int = VALUE_NOT_SET
+
+        @Px
+        private val singleAvatarSize: Int = VALUE_NOT_SET
 
         internal fun build(): CallDetailsStyle {
             val callAvatarSize = attributes.getDimensionPixelSize(

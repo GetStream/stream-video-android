@@ -27,26 +27,63 @@ import io.getstream.video.android.call.state.ToggleMicrophone
 import io.getstream.video.android.model.CallStatus
 import io.getstream.video.android.model.CallUser
 import io.getstream.video.android.ui.xml.databinding.ViewOutgoingCallBinding
+import io.getstream.video.android.ui.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.ui.xml.utils.extensions.dpToPx
 import io.getstream.video.android.ui.xml.utils.extensions.getDimension
 import io.getstream.video.android.ui.xml.utils.extensions.inflater
-import io.getstream.video.android.ui.common.R as RCommon
+import io.getstream.video.android.ui.xml.widget.control.StreamImageButton
 
 /**
  *  Represents the Outgoing Call state and UI, when the user is calling other people.
  */
-public class OutgoingCallView @JvmOverloads constructor(
-    context: Context,
-    attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0,
-) : ConstraintLayout(context, attrs, defStyleAttr) {
+public class OutgoingCallView : ConstraintLayout {
 
     private val binding = ViewOutgoingCallBinding.inflate(inflater, this)
+
+    private lateinit var style: OutgoingCallStyle
+
+    public constructor(context: Context) : this(context, null, 0)
+    public constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
+    public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
+        context.createStreamThemeWrapper(),
+        attrs,
+        defStyleAttr
+    ) {
+        init(attrs)
+    }
+
+    private fun init(attrs: AttributeSet?) {
+        style = OutgoingCallStyle(context, attrs)
+
+        initCancelCallButton()
+        initMediaControlButton(binding.micToggle)
+        initMediaControlButton(binding.cameraToggle)
+    }
+
+    /**
+     * Initialises the media control buttons with the style.
+     */
+    private fun initMediaControlButton(button: StreamImageButton) {
+        button.setColorFilter(style.mediaButtonIconTint)
+        button.disabledAlpha = style.mediaButtonBackgroundAlphaDisabled
+        button.enabledAlpha = style.mediaButtonBackgroundAlphaEnabled
+        button.background = style.mediaButtonBackground
+        button.background.setTint(style.mediaButtonBackgroundTint)
+    }
+
+    /**
+     * Initialises the cancel call button with the style.
+     */
+    private fun initCancelCallButton() {
+        binding.cancelCall.background = style.cancelCallBackground
+        binding.cancelCall.background.setTint(style.cancelCallBackgroundTint)
+    }
 
     /**
      * Whether the microphone is enabled or not.
      */
     private var isMicrophoneEnabled: Boolean = false
+
     /**
      * Whether the microphone is camera or not.
      */
@@ -71,9 +108,9 @@ public class OutgoingCallView @JvmOverloads constructor(
      * @param participants The list of the participants inside the call.
      */
     public fun setParticipants(participants: List<CallUser>) {
-        binding.participantsInfo.setParticipants(participants)
+        binding.callDetails.setParticipants(participants)
         if (participants.size >= 2) setGroupCallControlsLayout()
-        binding.callBackground.setParticipants(participants)
+        binding.callBackground.setParticipants(participants, style.outgoingScreenBackground)
     }
 
     /**
@@ -82,7 +119,7 @@ public class OutgoingCallView @JvmOverloads constructor(
      * @param callStatus The current [CallStatus].
      */
     public fun setCallStatus(callStatus: CallStatus) {
-        binding.participantsInfo.setCallStatus(callStatus)
+        binding.callDetails.setCallStatus(callStatus)
     }
 
     /**
@@ -92,8 +129,8 @@ public class OutgoingCallView @JvmOverloads constructor(
      */
     public fun setMicrophoneEnabled(isEnabled: Boolean) {
         isMicrophoneEnabled = isEnabled
-        val icon = if (isEnabled) RCommon.drawable.ic_mic_on else RCommon.drawable.ic_mic_off
-        binding.micToggle.setImageResource(icon)
+        val icon = if (isEnabled) style.microphoneIconEnabled else style.microphoneIconDisabled
+        binding.micToggle.setImageDrawable(icon)
         binding.micToggle.isEnabled = isEnabled
     }
 
@@ -104,8 +141,8 @@ public class OutgoingCallView @JvmOverloads constructor(
      */
     public fun setCameraEnabled(isEnabled: Boolean) {
         isCameraEnabled = isEnabled
-        val icon = if (isEnabled) RCommon.drawable.ic_videocam_on else RCommon.drawable.ic_videocam_off
-        binding.cameraToggle.setImageResource(icon)
+        val icon = if (isEnabled) style.videoIconEnabled else style.videoIconDisabled
+        binding.cameraToggle.setImageDrawable(icon)
         binding.cameraToggle.isEnabled = isEnabled
     }
 
@@ -128,7 +165,7 @@ public class OutgoingCallView @JvmOverloads constructor(
 
             controlsHolder.setConstraintSet(constraintSet)
 
-            (participantsInfo.layoutParams as LayoutParams).apply {
+            (callDetails.layoutParams as LayoutParams).apply {
                 this.topMargin = context.getDimension(io.getstream.video.android.ui.common.R.dimen.avatarAppbarPadding)
                 requestLayout()
             }

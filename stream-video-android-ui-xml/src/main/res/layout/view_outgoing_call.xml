@@ -14,7 +14,7 @@
         />
 
     <io.getstream.video.android.ui.xml.widget.call.CallDetailsView
-        android:id="@+id/participantsInfo"
+        android:id="@+id/callDetails"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/singleAvatarAppbarPadding"
@@ -35,7 +35,6 @@
             android:layout_height="@dimen/mediumButtonSize"
             android:layout_marginBottom="32dp"
             android:background="@drawable/bg_call_control_option"
-            android:scaleType="center"
             android:src="@drawable/ic_mic_on"
             app:layout_constraintBottom_toTopOf="@id/cancelCall"
             app:layout_constraintEnd_toStartOf="@id/cameraToggle"
@@ -48,7 +47,6 @@
             android:layout_height="@dimen/mediumButtonSize"
             android:layout_marginBottom="32dp"
             android:background="@drawable/bg_call_control_option"
-            android:scaleType="center"
             android:src="@drawable/ic_videocam_on"
             app:layout_constraintBottom_toTopOf="@id/cancelCall"
             app:layout_constraintEnd_toEndOf="parent"
@@ -59,8 +57,8 @@
             android:id="@+id/cancelCall"
             android:layout_width="@dimen/largeButtonSize"
             android:layout_height="@dimen/largeButtonSize"
-            android:background="@drawable/bg_call_option_reject"
-            android:scaleType="center"
+            android:background="@drawable/bg_call_option"
+            android:backgroundTint="@color/stream_error_accent"
             android:src="@drawable/ic_call_end"
             android:tint="@color/stream_white"
             app:layout_constraintBottom_toBottomOf="parent"

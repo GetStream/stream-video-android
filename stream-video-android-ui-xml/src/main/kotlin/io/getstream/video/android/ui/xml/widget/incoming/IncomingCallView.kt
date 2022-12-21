@@ -27,20 +27,62 @@ import io.getstream.video.android.model.CallStatus
 import io.getstream.video.android.model.CallUser
 import io.getstream.video.android.ui.common.R
 import io.getstream.video.android.ui.xml.databinding.ViewIncomingCallBinding
+import io.getstream.video.android.ui.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.ui.xml.utils.extensions.getDimension
 import io.getstream.video.android.ui.xml.utils.extensions.inflater
-import io.getstream.video.android.viewmodel.CallViewModel
 
 /**
  * Represents the Incoming Call state and UI, when the user receives a call from other people.
  */
-public class IncomingCallView @JvmOverloads constructor(
-    context: Context,
-    attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0,
-) : ConstraintLayout(context, attrs, defStyleAttr) {
+public class IncomingCallView : ConstraintLayout {
 
     private val binding = ViewIncomingCallBinding.inflate(inflater, this)
+
+    private lateinit var style: IncomingCallStyle
+
+    public constructor(context: Context) : this(context, null, 0)
+    public constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
+    public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
+        context.createStreamThemeWrapper(),
+        attrs,
+        defStyleAttr
+    ) {
+        init(attrs)
+    }
+
+    private fun init(attrs: AttributeSet?) {
+        style = IncomingCallStyle(context, attrs)
+
+        initAnswerButton()
+        initDeclineButton()
+        initVideoButton()
+    }
+
+    private fun initDeclineButton() {
+        with(binding.declineCall) {
+            background = style.declineCallBackground
+            setBackgroundColor(style.declineCallBackgroundTint)
+            setImageDrawable(style.declineCallIcon)
+            setColorFilter(style.declineCallIconTint)
+        }
+    }
+
+    private fun initAnswerButton() {
+        with(binding.acceptCall) {
+            background = style.acceptCallBackground
+            setBackgroundColor(style.acceptCallBackgroundTint)
+            setImageDrawable(style.acceptCallIcon)
+            setColorFilter(style.acceptCallIconTint)
+        }
+    }
+
+    private fun initVideoButton() {
+        with(binding.cameraToggle) {
+            background = style.acceptCallBackground
+            setBackgroundColor(style.acceptCallBackgroundTint)
+            setColorFilter(style.acceptCallIconTint)
+        }
+    }
 
     /**
      * Whether the camera is enabled or not.
@@ -67,8 +109,8 @@ public class IncomingCallView @JvmOverloads constructor(
      */
     public fun setCameraEnabled(isEnabled: Boolean) {
         isCameraEnabled = isEnabled
-        val icon = if (isEnabled) R.drawable.ic_videocam_on else R.drawable.ic_videocam_off
-        binding.cameraToggle.setImageResource(icon)
+        val icon = if (isEnabled) style.videoButtonIconEnabled else style.videoButtonIconDisabled
+        binding.cameraToggle.setImageDrawable(icon)
         binding.cameraToggle.isEnabled = isEnabled
     }
 
@@ -80,7 +122,7 @@ public class IncomingCallView @JvmOverloads constructor(
      */
     public fun setParticipants(participants: List<CallUser>) {
         binding.participantsInfo.setParticipants(participants)
-        binding.callBackground.setParticipants(participants)
+        binding.callBackground.setParticipants(participants, style.incomingScreenBackground)
 
         if (participants.size > 1) {
             (binding.participantsInfo.layoutParams as LayoutParams).apply {

@@ -10,7 +10,7 @@
                 android:height="@dimen/largeButtonSize"
                 />
 
-            <solid android:color="@color/stream_error_accent" />
+            <solid android:color="@color/stream_app_background" />
         </shape>
     </item>
 
