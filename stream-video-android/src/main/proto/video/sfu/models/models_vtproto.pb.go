@@ -96,6 +96,11 @@ func (m *Participant) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 		i -= len(m.unknownFields)
 		copy(dAtA[i:], m.unknownFields)
 	}
+	if m.ConnectionQuality != 0 {
+		i = encodeVarint(dAtA, i, uint64(m.ConnectionQuality))
+		i--
+		dAtA[i] = 0x30
+	}
 	if len(m.TrackLookupPrefix) > 0 {
 		i -= len(m.TrackLookupPrefix)
 		copy(dAtA[i:], m.TrackLookupPrefix)
@@ -280,6 +285,11 @@ func (m *VideoLayer) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 	if m.unknownFields != nil {
 		i -= len(m.unknownFields)
 		copy(dAtA[i:], m.unknownFields)
+	}
+	if m.Quality != 0 {
+		i = encodeVarint(dAtA, i, uint64(m.Quality))
+		i--
+		dAtA[i] = 0x30
 	}
 	if m.Fps != 0 {
 		i = encodeVarint(dAtA, i, uint64(m.Fps))
@@ -736,6 +746,9 @@ func (m *Participant) SizeVT() (n int) {
 	if l > 0 {
 		n += 1 + l + sov(uint64(l))
 	}
+	if m.ConnectionQuality != 0 {
+		n += 1 + sov(uint64(m.ConnectionQuality))
+	}
 	if m.unknownFields != nil {
 		n += len(m.unknownFields)
 	}
@@ -798,6 +811,9 @@ func (m *VideoLayer) SizeVT() (n int) {
 	}
 	if m.Fps != 0 {
 		n += 1 + sov(uint64(m.Fps))
+	}
+	if m.Quality != 0 {
+		n += 1 + sov(uint64(m.Quality))
 	}
 	if m.unknownFields != nil {
 		n += len(m.unknownFields)
@@ -1299,6 +1315,25 @@ func (m *Participant) UnmarshalVT(dAtA []byte) error {
 			}
 			m.TrackLookupPrefix = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
+		case 6:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ConnectionQuality", wireType)
+			}
+			m.ConnectionQuality = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflow
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.ConnectionQuality |= ConnectionQuality(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
 		default:
 			iNdEx = preIndex
 			skippy, err := skip(dAtA[iNdEx:])
@@ -1643,6 +1678,25 @@ func (m *VideoLayer) UnmarshalVT(dAtA []byte) error {
 				b := dAtA[iNdEx]
 				iNdEx++
 				m.Fps |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 6:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Quality", wireType)
+			}
+			m.Quality = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflow
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Quality |= VideoQuality(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}

@@ -22,6 +22,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -60,7 +61,8 @@ public fun CallParticipant(
     call: Call,
     participant: CallParticipantState,
     modifier: Modifier = Modifier,
-    labelPosition: Alignment = Alignment.TopStart,
+    paddingValues: PaddingValues = PaddingValues(0.dp),
+    labelPosition: Alignment = Alignment.BottomStart,
     isFocused: Boolean = false,
     onRender: (View) -> Unit = {}
 ) {
@@ -74,7 +76,7 @@ public fun CallParticipant(
             )
         ) else modifier
 
-    Box(modifier = containerModifier) {
+    Box(modifier = containerModifier.padding(paddingValues)) {
         ParticipantVideo(
             call = call,
             participant = participant,

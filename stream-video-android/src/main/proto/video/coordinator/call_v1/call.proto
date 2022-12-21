@@ -31,12 +31,12 @@ message Call {
   // A concatenation of call type and call id with ":" inbetween
   string call_cid = 3;
 
-  // The id of the user that created this room.
+  // The id of the user that created this call.
   string created_by_user_id = 4 [(validate.rules).string.min_len = 1];
 
   bytes custom_json = 5;
 
-  // Call settings overrides that are set explicitly in this room
+  // Call settings overrides that are set explicitly in this call
   // This set of settings does not include CallType settings
   CallSettings settings_overrides = 6;
 
@@ -44,8 +44,10 @@ message Call {
 
   google.protobuf.Timestamp updated_at = 8;
 
+  // If true, the call is currently recording
   bool recording_active = 9;
 
+  // If true, the call is currently broadcasting
   bool broadcasting_active = 10;
 }
 
@@ -55,7 +57,7 @@ message CallDetails {
   call_v1.CallSettings settings = 1;
   // Ordered list of member user IDs
   repeated string member_user_ids = 2;
-  // Room members map indexed by Member.user_id
+  // Call members map indexed by Member.user_id
   // Cannot have more than 100 members
   map<string, member_v1.Member> members = 3;
 }
@@ -64,20 +66,28 @@ message CallDetails {
 // Settings can also be set on the call level where they will be merged with call options using `json.Merge`
 // To make sure options can be overridden on the call level, all underlying option fields should be optional
 message CallSettings {
-  RecordingOptions recording = 1;
-  BroadcastingOptions broadcasting = 2;
+  RecordingSettings recording = 1;
+  BroadcastingSettings broadcasting = 2;
+  GeofencingSettings geofencing = 3;
 }
 
-// Contains all options regarding to call recording
-message RecordingOptions {
+// Contains all settings regarding to call recording
+message RecordingSettings {
   // Whether recording feature is enabled
   // Default: false
   optional bool enabled = 1;
 }
 
-// Contains all options regarding to call broadcasting
-message BroadcastingOptions {
+// Contains all settings regarding to call broadcasting
+message BroadcastingSettings {
   // Whether broadcasting feature is enabled
   // Default: false
   optional bool enabled = 1;
+}
+
+// Contains all settings regarding to call geofencing
+// Initialization of geofencing enables the feature
+message GeofencingSettings {
+  // Names of the geofences that are selected
+  repeated string names = 1;
 }
