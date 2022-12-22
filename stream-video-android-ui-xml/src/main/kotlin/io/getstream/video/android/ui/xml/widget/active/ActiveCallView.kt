@@ -33,12 +33,21 @@ import io.getstream.video.android.ui.xml.widget.participant.RendererInitializer
  */
 public class ActiveCallView : ConstraintLayout {
 
+    private val binding by lazy { ViewActiveCallBinding.inflate(streamThemeInflater, this) }
+
+    /**
+     * Handler that notifies when a Call Action has been performed.
+     */
+    public var callActionListener: (CallAction) -> Unit = {}
+
     public constructor(context: Context) : this(context, null)
     public constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
-    public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : this(context,
+    public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : this(
+        context,
         attrs,
         defStyleAttr,
-        0)
+        0
+    )
 
     public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(
         context.createStreamThemeWrapper(),
@@ -49,15 +58,8 @@ public class ActiveCallView : ConstraintLayout {
         init(context, attrs)
     }
 
-    private val binding by lazy { ViewActiveCallBinding.inflate(streamThemeInflater, this) }
-
-    /**
-     * Handler that notifies when a Call Action has been performed.
-     */
-    public var callControlActionListener: (CallAction) -> Unit = {}
-
     private fun init(context: Context, attrs: AttributeSet?) {
-        binding.controlsView.callControlItemClickListener = { callControlActionListener(it) }
+        binding.controlsView.callControlItemClickListener = { callActionListener(it) }
     }
 
     /**

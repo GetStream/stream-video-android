@@ -24,7 +24,6 @@ import io.getstream.video.android.call.state.LeaveCall
 import io.getstream.video.android.call.state.ToggleCamera
 import io.getstream.video.android.call.state.ToggleMicrophone
 import io.getstream.video.android.call.state.ToggleSpeakerphone
-import io.getstream.video.android.model.state.StreamCallState
 import io.getstream.video.android.ui.xml.R
 import io.getstream.video.android.ui.xml.widget.active.ActiveCallView
 import io.getstream.video.android.ui.xml.widget.control.CallControlItem
@@ -45,7 +44,7 @@ public fun ActiveCallView.bindView(
     viewModel: CallViewModel,
     lifecycleOwner: LifecycleOwner,
 ) {
-    callControlActionListener = { item ->
+    callActionListener = { item ->
         viewModel.onCallAction(item)
     }
 

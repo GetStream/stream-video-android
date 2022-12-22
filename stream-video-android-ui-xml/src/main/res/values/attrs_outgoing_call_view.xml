@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="OutgoingCallView">
-        <attr name="streamOutgoingScreenBackground" format="reference"/>
+        <attr name="streamOutgoingCallScreenBackground" format="reference"/>
 
         <!-- Call state text style attributes -->
-        <attr name="streamOutgoingCancelCallIcon" format="reference" />
-        <attr name="streamOutgoingCancelCallIconTint" format="color|reference" />
-        <attr name="streamOutgoingCancelCallBackground" format="reference" />
-        <attr name="streamOutgoingCancelCallBackgroundTint" format="color|reference" />
+        <attr name="streamOutgoingCallCancelCallIcon" format="reference" />
+        <attr name="streamOutgoingCallCancelCallIconTint" format="color|reference" />
+        <attr name="streamOutgoingCallCancelCallBackground" format="reference" />
+        <attr name="streamOutgoingCallCancelCallBackgroundTint" format="color|reference" />
 
-        <attr name="streamOutgoingVideoEnabledIcon" format="reference" />
-        <attr name="streamOutgoingVideoDisabledIcon" format="reference" />
-        <attr name="streamOutgoingMicrophoneEnabledIcon" format="reference" />
-        <attr name="streamOutgoingMicrophoneDisabledIcon" format="reference" />
-        <attr name="streamOutgoingMediaControlIconTint" format="color|reference" />
-        <attr name="streamOutgoingMediaButtonBackground" format="reference" />
-        <attr name="streamOutgoingMediaButtonBackgroundTint" format="color|reference" />
-        <attr name="streamOutgoingMediaButtonBackgroundAlphaEnabled" format="float|reference" />
-        <attr name="streamOutgoingMediaButtonBackgroundAlphaDisabled" format="float|reference" />
+        <attr name="streamOutgoingCallVideoEnabledIcon" format="reference" />
+        <attr name="streamOutgoingCallVideoDisabledIcon" format="reference" />
+        <attr name="streamOutgoingCallMicrophoneEnabledIcon" format="reference" />
+        <attr name="streamOutgoingCallMicrophoneDisabledIcon" format="reference" />
+        <attr name="streamOutgoingCallMediaControlIconTint" format="color|reference" />
+        <attr name="streamOutgoingCallMediaButtonBackground" format="reference" />
+        <attr name="streamOutgoingCallMediaButtonBackgroundTint" format="color|reference" />
+        <attr name="streamOutgoingCallMediaButtonBackgroundAlphaEnabled" format="float|reference" />
+        <attr name="streamOutgoingCallMediaButtonBackgroundAlphaDisabled" format="float|reference" />
 
     </declare-styleable>
 </resources>

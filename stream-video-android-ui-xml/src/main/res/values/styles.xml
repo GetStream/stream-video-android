@@ -1,6 +1,88 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <style name="StreamVideoTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="streamCallControlsViewStyle">@style/Stream.CallControls</item>
+        <item name="streamCallDetailsViewStyle">@style/Stream.CallDetails</item>
+        <item name="streamCallParticipantViewStyle">@style/Stream.CallParticipant</item>
+        <item name="streamIncomingViewStyle">@style/Stream.IncomingCall</item>
+        <item name="streamOutgoingViewStyle">@style/Stream.OutgoingCall</item>
+    </style>
 
+    <style name="Stream">
+        <!--Common styles properties-->
+    </style>
+
+    <style name="Stream.CallControls" parent="Stream">
+        <item name="streamCallControlsBackgroundColor">@color/stream_white</item>
+        <item name="streamCallControlsButtonSize">@dimen/callControlButtonSize</item>
+    </style>
+
+    <style name="Stream.CallDetails" parent="Stream">
+        <item name="streamCallDetailsAvatarSize">@dimen/callAvatarSize</item>
+        <item name="streamCallDetailsDirectCallAvatarSize">@dimen/singleAvatarSize</item>
+        <item name="streamCallDetailsAvatarSpacing">20dp</item>
+        <item name="streamCallDetailsDirectCallParticipantInfoTextSize">
+            @dimen/directCallUserNameTextSize
+        </item>
+        <item name="streamCallDetailsParticipantsInfoTextSize">@dimen/groupCallUserNameTextSize
+        </item>
+        <item name="streamCallDetailsParticipantsInfoTextColor">@color/stream_text_high_emphasis
+        </item>
+        <item name="streamCallDetailsParticipantsInfoTextStyle">normal</item>
+        <item name="streamCallDetailsCallStateTextSize">@dimen/onCallStatusTextSize</item>
+        <item name="streamCallDetailsCallStateTextColor">@color/stream_text_high_emphasis</item>
+        <item name="streamCallDetailsCallStateTextStyle">bold</item>
+        <item name="streamCallDetailsStateTextAlpha">@dimen/onCallStatusTextAlpha</item>
+    </style>
+
+    <style name="Stream.CallParticipant" parent="Stream">
+        <item name="streamCallParticipantTagAlignment">top_start</item>
+        <item name="streamCallParticipantTagMargin">8dp</item>
+        <item name="streamCallParticipantTagBackgroundColor">#444444</item>
+        <item name="streamCallParticipantTagTextSize">@dimen/bodyTextSize</item>
+        <item name="streamCallParticipantTagTextColor">@color/stream_white</item>
+        <item name="streamCallParticipantTagTextStyle">bold</item>
+        <item name="streamCallParticipantActiveSpeakerBorderColor">@color/stream_info_accent</item>
+        <item name="streamCallParticipantMicrophoneOffIcon">@drawable/ic_mic_off</item>
+        <item name="streamCallParticipantMicrophoneOffTint">@color/stream_error_accent</item>
+        <item name="streamCallParticipantAudioLevelTint">@color/stream_white</item>
+    </style>
+
+    <style name="Stream.IncomingCall" parent="Stream">
+        <item name="streamIncomingCallScreenBackground">@drawable/bg_call</item>
+        <item name="streamIncomingCallAcceptCallIcon">@drawable/ic_call</item>
+        <item name="streamIncomingCallAcceptCallIconTint">@color/stream_black</item>
+        <item name="streamIncomingCallAcceptCallBackground">@drawable/bg_call_control_option</item>
+        <item name="streamIncomingCallAcceptCallBackgroundTint">@color/stream_info_accent</item>
+        <item name="streamIncomingCallDeclineCallIcon">@drawable/ic_call_end</item>
+        <item name="streamIncomingCallDeclineCallIconTint">@color/stream_black</item>
+        <item name="streamIncomingCallDeclineCallBackground">@drawable/bg_call_control_option</item>
+        <item name="streamIncomingCallDeclineCallBackgroundTint">@color/stream_error_accent</item>
+        <item name="streamIncomingCallVideoEnabledIcon">@drawable/ic_videocam_on</item>
+        <item name="streamIncomingCallVideoDisabledIcon">@drawable/ic_videocam_off</item>
+        <item name="streamIncomingCallVideoIconTint">@color/stream_black</item>
+        <item name="streamIncomingCallVideoBackground">@drawable/bg_call_control_option</item>
+        <item name="streamIncomingCallVideoBackgroundTint">@color/stream_app_background</item>
+        <item name="streamIncomingCallVideoBackgroundAlphaEnabled">@dimen/buttonToggleOnAlpha</item>
+        <item name="streamIncomingCallVideoBackgroundAlphaDisabled">@dimen/buttonToggleOffAlpha</item>
+    </style>
+
+    <style name="Stream.OutgoingCall" parent="Stream">
+        <item name="streamOutgoingCallScreenBackground">@drawable/bg_call</item>
+        <item name="streamOutgoingCallCancelCallIcon">@drawable/ic_call_end</item>
+        <item name="streamOutgoingCallCancelCallIconTint">@color/stream_black</item>
+        <item name="streamOutgoingCallCancelCallBackground">@drawable/bg_call_control_option</item>
+        <item name="streamOutgoingCallCancelCallBackgroundTint">@color/stream_error_accent</item>
+        <item name="streamOutgoingCallVideoEnabledIcon">@drawable/ic_videocam_on</item>
+        <item name="streamOutgoingCallVideoDisabledIcon">@drawable/ic_videocam_off</item>
+        <item name="streamOutgoingCallMicrophoneEnabledIcon">@drawable/ic_mic_on</item>
+        <item name="streamOutgoingCallMicrophoneDisabledIcon">@drawable/ic_mic_off</item>
+        <item name="streamOutgoingCallMediaControlIconTint">@color/stream_black</item>
+        <item name="streamOutgoingCallMediaButtonBackground">@drawable/bg_call_control_option</item>
+        <item name="streamOutgoingCallMediaButtonBackgroundTint">@color/stream_app_background</item>
+        <item name="streamOutgoingCallMediaButtonBackgroundAlphaEnabled">@dimen/buttonToggleOnAlpha</item>
+        <item name="streamOutgoingCallMediaButtonBackgroundAlphaDisabled">@dimen/buttonToggleOffAlpha</item>
+    </style>
 
 </resources>

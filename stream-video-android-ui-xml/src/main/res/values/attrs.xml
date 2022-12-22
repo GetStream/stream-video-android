@@ -20,5 +20,10 @@
     <!--Themes attributes-->
     <declare-styleable name="StreamVideoStyleable">
         <attr name="streamVideoTheme" format="reference" />
+        <attr name="streamIncomingViewStyle" format="reference" />
+        <attr name="streamOutgoingViewStyle" format="reference" />
+        <attr name="streamCallControlsViewStyle" format="reference" />
+        <attr name="streamCallDetailsViewStyle" format="reference" />
+        <attr name="streamCallParticipantViewStyle" format="reference" />
     </declare-styleable>
 </resources>

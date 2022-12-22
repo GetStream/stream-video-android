@@ -32,22 +32,6 @@ import io.getstream.video.android.ui.xml.utils.extensions.updateConstraints
  */
 public class CallParticipantsView : ConstraintLayout {
 
-    public constructor(context: Context) : this(context, null)
-    public constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
-    public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : this(context,
-        attrs,
-        defStyleAttr,
-        0)
-
-    public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(
-        context.createStreamThemeWrapper(),
-        attrs,
-        defStyleAttr,
-        defStyleRes
-    ) {
-        init(context, attrs)
-    }
-
     /**
      * Guideline that helps constraining the view on half of the screen vertically.
      */
@@ -77,6 +61,22 @@ public class CallParticipantsView : ConstraintLayout {
      * Handler to initialise the renderer.
      */
     private lateinit var rendererInitializer: RendererInitializer
+
+    public constructor(context: Context) : this(context, null)
+    public constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
+    public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : this(context,
+        attrs,
+        defStyleAttr,
+        0)
+
+    public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(
+        context.createStreamThemeWrapper(),
+        attrs,
+        defStyleAttr,
+        defStyleRes
+    ) {
+        init(context, attrs)
+    }
 
     private fun init(context: Context, attrs: AttributeSet?) {
         addView(verticalGuideline)
@@ -246,6 +246,5 @@ public class CallParticipantsView : ConstraintLayout {
 
     private companion object {
         private const val HALF_OF_VIEW = 0.5f
-        private const val MAX_CHILD_COUNT = 4
     }
 }

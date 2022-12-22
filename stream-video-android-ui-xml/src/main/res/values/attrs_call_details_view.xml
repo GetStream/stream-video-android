@@ -2,36 +2,36 @@
 <resources>
     <declare-styleable name="CallDetailsView">
         <!-- Avatar size for group calls -->
-        <attr name="streamCallAvatarSize" format="dimension|reference" />
+        <attr name="streamCallDetailsAvatarSize" format="dimension|reference" />
         <!-- Avatar size for direct calls -->
-        <attr name="streamDirectCallAvatarSize" format="dimension|reference" />
+        <attr name="streamCallDetailsDirectCallAvatarSize" format="dimension|reference" />
         <!-- Avatar spacing for group calls -->
-        <attr name="streamAvatarSpacing" format="dimension|reference" />
+        <attr name="streamCallDetailsAvatarSpacing" format="dimension|reference" />
 
         <!-- Direct call info text size -->
-        <attr name="streamDirectCallParticipantInfoTextSize" format="dimension|reference" />
+        <attr name="streamCallDetailsDirectCallParticipantInfoTextSize" format="dimension|reference" />
         <!-- Group info text style -->
-        <attr name="streamParticipantsInfoTextSize" format="dimension|reference" />
-        <attr name="streamParticipantsInfoTextColor" format="color|reference" />
-        <attr name="streamParticipantsInfoFontAsset" format="reference" />
-        <attr name="streamParticipantsInfoFont" format="reference" />
-        <attr name="streamParticipantsInfoTextStyle">
+        <attr name="streamCallDetailsParticipantsInfoTextSize" format="dimension|reference" />
+        <attr name="streamCallDetailsParticipantsInfoTextColor" format="color|reference" />
+        <attr name="streamCallDetailsParticipantsInfoFontAsset" format="reference" />
+        <attr name="streamCallDetailsParticipantsInfoFont" format="reference" />
+        <attr name="streamCallDetailsParticipantsInfoTextStyle">
             <flag name="normal" value="0" />
             <flag name="bold" value="1" />
             <flag name="italic" value="2" />
         </attr>
 
         <!-- Call state text style attributes -->
-        <attr name="streamCallStateTextSize" format="dimension|reference" />
-        <attr name="streamCallStateTextColor" format="color|reference" />
-        <attr name="streamCallStateFontAsset" format="reference" />
-        <attr name="streamCallStateFont" format="reference" />
-        <attr name="streamCallStateTextStyle">
+        <attr name="streamCallDetailsCallStateTextSize" format="dimension|reference" />
+        <attr name="streamCallDetailsCallStateTextColor" format="color|reference" />
+        <attr name="streamCallDetailsCallStateFontAsset" format="reference" />
+        <attr name="streamCallDetailsCallStateFont" format="reference" />
+        <attr name="streamCallDetailsCallStateTextStyle">
             <flag name="normal" value="0" />
             <flag name="bold" value="1" />
             <flag name="italic" value="2" />
         </attr>
-        <attr name="streamCallStateTextAlpha" format="float|reference" />
+        <attr name="streamCallDetailsStateTextAlpha" format="float|reference" />
 
     </declare-styleable>
 </resources>

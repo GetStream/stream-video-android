@@ -1,29 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="CallParticipantView">
-        <attr name="streamParticipantTagAlignment" format="enum">
+        <attr name="streamCallParticipantTagAlignment" format="enum">
             <enum name="top_start" value="0" />
             <enum name="top_end" value="1" />
             <enum name="bottom_start" value="2" />
             <enum name="bottom_end" value="3" />
         </attr>
-        <attr name="streamParticipantTagMargin" format="dimension|reference" />
-        <attr name="streamParticipantTagBackgroundColor" format="color|reference" />
-        <attr name="streamParticipantTagTextSize" format="dimension|reference" />
-        <attr name="streamParticipantTagTextColor" format="color|reference" />
-        <attr name="streamParticipantTagTextFont" format="reference" />
-        <attr name="streamParticipantTagTextFontAssets" format="string" />
-        <attr name="streamParticipantTagTextStyle">
+        <attr name="streamCallParticipantTagMargin" format="dimension|reference" />
+        <attr name="streamCallParticipantTagBackgroundColor" format="color|reference" />
+        <attr name="streamCallParticipantTagTextSize" format="dimension|reference" />
+        <attr name="streamCallParticipantTagTextColor" format="color|reference" />
+        <attr name="streamCallParticipantTagTextFont" format="reference" />
+        <attr name="streamCallParticipantTagTextFontAssets" format="string" />
+        <attr name="streamCallParticipantTagTextStyle">
             <flag name="normal" value="0" />
             <flag name="bold" value="1" />
             <flag name="italic" value="2" />
         </attr>
 
-        <attr name="streamActiveSpeakerBorderColor" format="color|reference" />
+        <attr name="streamCallParticipantActiveSpeakerBorderColor" format="color|reference" />
 
-        <attr name="streamParticipantMicrophoneOffIcon" format="reference" />
-        <attr name="streamParticipantMicrophoneOffTint" format="color|reference" />
-        <attr name="streamParticipantAudioLevelTint" format="color|reference" />
+        <attr name="streamCallParticipantMicrophoneOffIcon" format="reference" />
+        <attr name="streamCallParticipantMicrophoneOffTint" format="color|reference" />
+        <attr name="streamCallParticipantAudioLevelTint" format="color|reference" />
 
     </declare-styleable>
 </resources>

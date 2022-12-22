@@ -63,12 +63,12 @@ public data class ControlButtonStyle(
                 )
 
                 val backgroundEnabledAlpha = it.getFloat(
-                    R.styleable.ControlButton_streamBackgroundEnabledAlpha,
+                    R.styleable.ControlButton_streamControlButtonBackgroundEnabledAlpha,
                     context.getFloatResource(RCommon.dimen.buttonToggleOnAlpha)
                 )
 
                 val backgroundDisabledAlpha = it.getFloat(
-                    R.styleable.ControlButton_streamBackgroundDisabledAlpha,
+                    R.styleable.ControlButton_streamControlButtonBackgroundDisabledAlpha,
                     context.getFloatResource(RCommon.dimen.buttonToggleOffAlpha)
                 )
 

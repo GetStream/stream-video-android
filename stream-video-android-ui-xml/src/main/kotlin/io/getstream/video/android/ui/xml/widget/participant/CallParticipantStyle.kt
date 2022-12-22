@@ -34,60 +34,60 @@ public data class CallParticipantStyle(
             context.obtainStyledAttributes(
                 attrs,
                 R.styleable.CallParticipantView,
-                0,
-                0
+                R.attr.streamCallParticipantViewStyle,
+                R.style.Stream_CallParticipant
             ).use {
 
                 val tagAlignment = it.getEnum(
-                    R.styleable.CallParticipantView_streamParticipantTagAlignment,
+                    R.styleable.CallParticipantView_streamCallParticipantTagAlignment,
                     CallParticipantTagAlignment.TOP_LEFT
                 )
 
                 val tagPadding = it.getDimension(
-                    R.styleable.CallParticipantView_streamParticipantTagMargin,
+                    R.styleable.CallParticipantView_streamCallParticipantTagMargin,
                     DEFAULT_TAG_MARGIN
                 )
 
                 val activeSpeakerBorderColor = it.getColor(
-                    R.styleable.CallParticipantView_streamActiveSpeakerBorderColor,
+                    R.styleable.CallParticipantView_streamCallParticipantActiveSpeakerBorderColor,
                     context.getColorCompat(RCommon.color.stream_info_accent)
                 )
 
                 val tagTextStyle = TextStyle.Builder(it)
                     .size(
-                        R.styleable.CallParticipantView_streamParticipantTagTextSize,
+                        R.styleable.CallParticipantView_streamCallParticipantTagTextSize,
                         context.getDimension(RCommon.dimen.bodyTextSize)
                     )
                     .color(
-                        R.styleable.CallParticipantView_streamParticipantTagTextColor,
+                        R.styleable.CallParticipantView_streamCallParticipantTagTextColor,
                         context.getColorCompat(R.color.stream_white)
                     )
                     .font(
-                        R.styleable.CallParticipantView_streamParticipantTagTextFontAssets,
-                        R.styleable.CallParticipantView_streamParticipantTagTextFont
+                        R.styleable.CallParticipantView_streamCallParticipantTagTextFontAssets,
+                        R.styleable.CallParticipantView_streamCallParticipantTagTextFont
                     )
                     .style(
-                        R.styleable.CallParticipantView_streamParticipantTagTextStyle,
+                        R.styleable.CallParticipantView_streamCallParticipantTagTextStyle,
                         Typeface.BOLD
                     )
                     .build()
 
                 val tagBackgroundColor = it.getColor(
-                    R.styleable.CallParticipantView_streamActiveSpeakerBorderColor,
+                    R.styleable.CallParticipantView_streamCallParticipantActiveSpeakerBorderColor,
                     context.getColorCompat(RCommon.color.stream_info_accent)
                 )
 
                 val participantMicOffIcon = it.getDrawable(
-                    R.styleable.CallParticipantView_streamParticipantMicrophoneOffIcon
+                    R.styleable.CallParticipantView_streamCallParticipantMicrophoneOffIcon
                 ) ?: context.getDrawableCompat(RCommon.drawable.ic_mic_off)!!
 
                 val participantMicOffIconTint = it.getColor(
-                    R.styleable.CallParticipantView_streamParticipantMicrophoneOffTint,
+                    R.styleable.CallParticipantView_streamCallParticipantMicrophoneOffTint,
                     context.getColorCompat(RCommon.color.stream_error_accent)
                 )
 
                 val participantAudioLevelTint = it.getColor(
-                    R.styleable.CallParticipantView_streamParticipantAudioLevelTint,
+                    R.styleable.CallParticipantView_streamCallParticipantAudioLevelTint,
                     context.getColorCompat(R.color.stream_white)
                 )
 

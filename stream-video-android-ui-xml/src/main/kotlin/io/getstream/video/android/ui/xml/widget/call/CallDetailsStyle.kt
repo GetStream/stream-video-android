@@ -43,8 +43,8 @@ public data class CallDetailsStyle(
             context.obtainStyledAttributes(
                 attrs,
                 R.styleable.CallDetailsView,
-                0,
-                0
+                R.attr.streamCallDetailsViewStyle,
+                R.style.Stream_CallDetails
             ).use {
                 return Builder(context, it).build()
             }
@@ -52,11 +52,6 @@ public data class CallDetailsStyle(
     }
 
     internal class Builder(private val context: Context, private val attributes: TypedArray) {
-        private val VALUE_NOT_SET = Int.MAX_VALUE
-        private fun Int.nullIfNotSet(): Int? {
-            return if (this == VALUE_NOT_SET) null else this
-        }
-
         private val DEFAULT_AVATAR_SPACING = 20.dpToPx()
 
         private val DIRECT_CALL_INFO_TEXT_SIZE = RCommon.dimen.directCallUserNameTextSize
@@ -64,87 +59,81 @@ public data class CallDetailsStyle(
 
         private val DEFAULT_TEXT_COLOR = RCommon.color.stream_text_high_emphasis
 
-        @Px
-        private var callAvatarSize: Int = VALUE_NOT_SET
-
-        @Px
-        private val singleAvatarSize: Int = VALUE_NOT_SET
-
         internal fun build(): CallDetailsStyle {
             val callAvatarSize = attributes.getDimensionPixelSize(
-                R.styleable.CallDetailsView_streamCallAvatarSize,
+                R.styleable.CallDetailsView_streamCallDetailsAvatarSize,
                 context.getDimension(RCommon.dimen.callAvatarSize)
             )
 
             val singleAvatarSize = attributes.getDimensionPixelSize(
-                R.styleable.CallDetailsView_streamDirectCallAvatarSize,
+                R.styleable.CallDetailsView_streamCallDetailsDirectCallAvatarSize,
                 context.getDimension(RCommon.dimen.singleAvatarSize)
             )
 
             val avatarSpacing = attributes.getDimensionPixelSize(
-                R.styleable.CallDetailsView_streamAvatarSpacing,
+                R.styleable.CallDetailsView_streamCallDetailsAvatarSpacing,
                 DEFAULT_AVATAR_SPACING
             )
 
             val participantsTextStyle = TextStyle.Builder(attributes)
                 .size(
-                    R.styleable.CallDetailsView_streamParticipantsInfoTextSize,
+                    R.styleable.CallDetailsView_streamCallDetailsParticipantsInfoTextSize,
                     context.getDimension(GROUP_CALL_INFO_TEXT_SIZE)
                 )
                 .color(
-                    R.styleable.CallDetailsView_streamParticipantsInfoTextColor,
+                    R.styleable.CallDetailsView_streamCallDetailsParticipantsInfoTextColor,
                     context.getColorCompat(DEFAULT_TEXT_COLOR)
                 )
                 .font(
-                    R.styleable.CallDetailsView_streamParticipantsInfoFontAsset,
-                    R.styleable.CallDetailsView_streamParticipantsInfoFont,
+                    R.styleable.CallDetailsView_streamCallDetailsParticipantsInfoFontAsset,
+                    R.styleable.CallDetailsView_streamCallDetailsParticipantsInfoFont,
                 )
                 .style(
-                    R.styleable.CallDetailsView_streamParticipantsInfoTextStyle,
+                    R.styleable.CallDetailsView_streamCallDetailsParticipantsInfoTextStyle,
                     Typeface.NORMAL
                 )
                 .build()
 
             val singleParticipantTextStyle = TextStyle.Builder(attributes)
                 .size(
-                    R.styleable.CallDetailsView_streamDirectCallParticipantInfoTextSize,
+                    R.styleable.CallDetailsView_streamCallDetailsDirectCallParticipantInfoTextSize,
                     context.getDimension(DIRECT_CALL_INFO_TEXT_SIZE)
                 )
                 .color(
-                    R.styleable.CallDetailsView_streamParticipantsInfoTextColor,
+                    R.styleable.CallDetailsView_streamCallDetailsParticipantsInfoTextColor,
                     context.getColorCompat(DEFAULT_TEXT_COLOR)
                 )
                 .font(
-                    R.styleable.CallDetailsView_streamParticipantsInfoFontAsset,
-                    R.styleable.CallDetailsView_streamParticipantsInfoFont,
+                    R.styleable.CallDetailsView_streamCallDetailsParticipantsInfoFontAsset,
+                    R.styleable.CallDetailsView_streamCallDetailsParticipantsInfoFont,
                 )
                 .style(
-                    R.styleable.CallDetailsView_streamParticipantsInfoTextStyle,
+                    R.styleable.CallDetailsView_streamCallDetailsParticipantsInfoTextStyle,
                     Typeface.NORMAL
                 )
                 .build()
 
             val callStateTextStyle = TextStyle.Builder(attributes)
                 .size(
-                    R.styleable.CallDetailsView_streamCallStateTextSize,
+                    R.styleable.CallDetailsView_streamCallDetailsCallStateTextSize,
                     context.getDimension(GROUP_CALL_INFO_TEXT_SIZE)
                 )
                 .color(
-                    R.styleable.CallDetailsView_streamCallStateTextColor,
+                    R.styleable.CallDetailsView_streamCallDetailsCallStateTextColor,
                     context.getColorCompat(DEFAULT_TEXT_COLOR)
                 )
                 .font(
-                    R.styleable.CallDetailsView_streamCallStateFontAsset,
-                    R.styleable.CallDetailsView_streamCallStateFont,
+                    R.styleable.CallDetailsView_streamCallDetailsCallStateFontAsset,
+                    R.styleable.CallDetailsView_streamCallDetailsCallStateFont,
                 )
                 .style(
-                    R.styleable.CallDetailsView_streamCallStateTextStyle,
+                    R.styleable.CallDetailsView_streamCallDetailsCallStateTextStyle,
                     Typeface.BOLD
                 )
                 .build()
 
             val callStateTextAlpha = attributes.getFloat(
-                R.styleable.CallDetailsView_streamCallStateTextAlpha,
+                R.styleable.CallDetailsView_streamCallDetailsStateTextAlpha,
                 context.getFloatResource(io.getstream.video.android.ui.common.R.dimen.onCallStatusTextAlpha)
             )
 
