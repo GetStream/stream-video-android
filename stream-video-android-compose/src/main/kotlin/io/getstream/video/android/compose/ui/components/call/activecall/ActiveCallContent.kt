@@ -51,6 +51,7 @@ import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.state.StreamCallState
 import io.getstream.video.android.viewmodel.CallViewModel
+import kotlinx.coroutines.flow.emptyFlow
 import stream.video.sfu.models.TrackType
 
 /**
@@ -72,7 +73,7 @@ public fun ActiveCallContent(
     onCallAction: (CallAction) -> Unit = callViewModel::onCallAction,
     pictureInPictureContent: @Composable (Call) -> Unit = { DefaultPictureInPictureContent(it) }
 ) {
-    val room by callViewModel.callState.collectAsState(initial = null)
+    val call by callViewModel.callState.collectAsState(initial = null)
     val isShowingParticipantsInfo by callViewModel.isShowingCallInfo.collectAsState(false)
 
     val callMediaState by callViewModel.callMediaState.collectAsState(initial = CallMediaState())
@@ -92,7 +93,11 @@ public fun ActiveCallContent(
 
     BackHandler { backAction() }
 
-    val roomState = room
+    val roomState = call
+    val screenShareFlow = roomState?.screenSharingSessions ?: emptyFlow()
+    val state by screenShareFlow.collectAsState(initial = emptyList())
+
+    val isScreenSharing = state.isNotEmpty()
 
     if (!isInPiPMode) {
         Scaffold(
@@ -113,6 +118,7 @@ public fun ActiveCallContent(
                             .fillMaxWidth()
                             .height(VideoTheme.dimens.callControlsSheetHeight),
                         callMediaState = callMediaState,
+                        isScreenSharing = isScreenSharing,
                         onCallAction = onCallAction
                     )
                 }

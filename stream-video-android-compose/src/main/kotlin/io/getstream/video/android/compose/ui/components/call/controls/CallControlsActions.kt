@@ -89,9 +89,9 @@ public fun buildDefaultCallControlActions(
             description = stringResource(R.string.call_controls_toggle_microphone)
         ),
         CallControlAction(
-            actionBackgroundTint = Color.LightGray,
+            actionBackgroundTint = Color.White,
             icon = painterResource(id = R.drawable.ic_camera_flip),
-            iconTint = Color.White,
+            iconTint = Color.DarkGray,
             callAction = FlipCamera,
             description = stringResource(R.string.call_controls_flip_camera)
         ),

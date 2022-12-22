@@ -103,7 +103,7 @@ public data class StreamDimens(
             callAppBarTrailingContentSpacingStart = 8.dp,
             callAppBarTrailingContentSpacingEnd = 8.dp,
             callControlButtonSize = 50.dp,
-            landscapeCallControlButtonSize = 40.dp,
+            landscapeCallControlButtonSize = 45.dp,
             callControlsSheetHeight = 96.dp,
             landscapeCallControlsSheetWidth = 64.dp,
             callParticipantInfoMenuAppBarHeight = 64.dp,

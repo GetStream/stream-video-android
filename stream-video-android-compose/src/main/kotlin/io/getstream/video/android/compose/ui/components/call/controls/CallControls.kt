@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.call.state.CallAction
 import io.getstream.video.android.call.state.CallMediaState
+import io.getstream.video.android.call.state.FlipCamera
 import io.getstream.video.android.compose.state.ui.call.CallControlAction
 import io.getstream.video.android.compose.theme.VideoTheme
 
@@ -39,12 +40,15 @@ import io.getstream.video.android.compose.theme.VideoTheme
  * browse other types of settings, leave the call, or implement something custom.
  *
  * @param callMediaState The state of the media devices for the current user.
- * @param onCallAction Handler when the user triggers an action.
+ * @param isScreenSharing If there is a screensharing session active.
  * @param modifier Modifier for styling.
+ * @param actions Actions to show to the user with different controls.
+ * @param onCallAction Handler when the user triggers an action.
  */
 @Composable
 public fun CallControls(
     callMediaState: CallMediaState,
+    isScreenSharing: Boolean,
     modifier: Modifier = Modifier,
     actions: List<CallControlAction> = buildDefaultCallControlActions(callMediaState = callMediaState),
     onCallAction: (CallAction) -> Unit
@@ -57,6 +61,7 @@ public fun CallControls(
     ) {
         CallControlsActions(
             actions = actions,
+            isScreenSharing = isScreenSharing,
             onCallAction = onCallAction
         )
     }
@@ -71,6 +76,7 @@ public fun CallControls(
 @Composable
 public fun CallControlsActions(
     actions: List<CallControlAction>,
+    isScreenSharing: Boolean,
     onCallAction: (CallAction) -> Unit
 ) {
     LazyRow(
@@ -78,15 +84,17 @@ public fun CallControlsActions(
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         items(actions) { action ->
+            val isEnabled = (action.callAction is FlipCamera && isScreenSharing).not()
+
             Card(
                 modifier = Modifier.size(VideoTheme.dimens.callControlButtonSize),
                 shape = VideoTheme.shapes.callControlsButton,
-                backgroundColor = action.actionBackgroundTint
+                backgroundColor = if (isEnabled) action.actionBackgroundTint else VideoTheme.colors.disabled
             ) {
                 Icon(
                     modifier = Modifier
                         .padding(10.dp)
-                        .clickable { onCallAction(action.callAction) },
+                        .clickable(enabled = isEnabled) { onCallAction(action.callAction) },
                     tint = action.iconTint,
                     painter = action.icon,
                     contentDescription = action.description
