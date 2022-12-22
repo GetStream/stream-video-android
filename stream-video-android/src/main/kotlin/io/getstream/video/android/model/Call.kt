@@ -41,6 +41,7 @@ import kotlinx.coroutines.flow.onEach
 import org.webrtc.EglBase
 import org.webrtc.MediaStream
 import org.webrtc.RendererCommon
+import stream.video.sfu.event.ConnectionQualityInfo
 import stream.video.sfu.models.TrackType
 
 public class Call(
@@ -85,6 +86,9 @@ public class Call(
 
     public val screenSharingSessions: Flow<List<ScreenSharingSession>> = _screenSharingSessions
 
+    public val isScreenSharingActive: Boolean
+        get() = _screenSharingSessions.value.isNotEmpty()
+
     public val localParticipantId: String
         get() = getCurrentUserId()
 
@@ -95,6 +99,8 @@ public class Call(
         context.getSystemService<AudioManager>()
     }
 
+    private val streamsToProcess: MutableList<MediaStream> = mutableListOf()
+
     public var onStreamAdded: (MediaStream) -> Unit = {}
     public var onStreamRemoved: (MediaStream) -> Unit = {}
 
@@ -103,39 +109,51 @@ public class Call(
      */
     public fun initRenderer(
         videoRenderer: TextureViewRenderer,
-        streamId: String,
+        sessionId: String,
+        trackType: TrackType,
         onRender: (View) -> Unit = {}
     ) {
-        logger.d { "[initRenderer] #sfu; streamId: $streamId" }
+        logger.d { "[initRenderer] #sfu; sessionId: $sessionId" }
         videoRenderer.init(
             eglBase.eglBaseContext,
             object : RendererCommon.RendererEvents {
                 override fun onFirstFrameRendered() {
-                    logger.v { "[initRenderer.onFirstFrameRendered] #sfu; streamId: $streamId" }
-                    updateParticipantTrackSize(
-                        streamId,
-                        videoRenderer.measuredWidth,
-                        videoRenderer.measuredHeight
-                    )
+                    logger.v { "[initRenderer.onFirstFrameRendered] #sfu; sessionId: $sessionId" }
+                    if (trackType != TrackType.TRACK_TYPE_SCREEN_SHARE) {
+                        updateParticipantTrackSize(
+                            sessionId,
+                            videoRenderer.measuredWidth,
+                            videoRenderer.measuredHeight
+                        )
+                    }
                     onRender(videoRenderer)
                 }
 
                 override fun onFrameResolutionChanged(p0: Int, p1: Int, p2: Int) {
-                    logger.v { "[initRenderer.onFrameResolutionChanged] #sfu; streamId: $streamId" }
+                    logger.v { "[initRenderer.onFrameResolutionChanged] #sfu; sessionId: $sessionId" }
+
+                    if (trackType != TrackType.TRACK_TYPE_SCREEN_SHARE) {
+                        updateParticipantTrackSize(
+                            sessionId,
+                            videoRenderer.measuredWidth,
+                            videoRenderer.measuredHeight
+                        )
+                    }
                 }
             }
         )
     }
 
-    private fun updateParticipantTrackSize(
-        streamId: String,
+    public fun updateParticipantTrackSize(
+        sessionId: String,
         measuredWidth: Int,
         measuredHeight: Int
     ) {
+        logger.v { "[updateParticipantTrackSize] SessionId: $sessionId, width:$measuredWidth, height:$measuredHeight" }
         val oldState = _callParticipants.value
 
         val newState = oldState.updateValue(
-            predicate = { it.id in streamId },
+            predicate = { it.sessionId == sessionId },
             transformer = { it.copy(videoTrackSize = measuredWidth to measuredHeight) }
         )
 
@@ -143,7 +161,13 @@ public class Call(
     }
 
     internal fun addStream(mediaStream: MediaStream) {
-        logger.i { "[addStream] #sfu; mediaStream: $mediaStream" }
+        val participants = _callParticipants.value
+        if (participants.isEmpty()) {
+            streamsToProcess.add(mediaStream)
+            return
+        }
+
+        logger.i { "[] #sfu; mediaStream: $mediaStream" }
         if (mediaStream.audioTracks.isNotEmpty()) {
             mediaStream.audioTracks.forEach { track ->
                 logger.v { "[addStream] #sfu; audioTrack: ${track.stringify()}" }
@@ -240,10 +264,18 @@ public class Call(
 
     internal fun setParticipants(participants: List<CallParticipantState>) {
         this._callParticipants.value = participants
-        logger.d { "[loadParticipants] #sfu; allParticipants: ${_callParticipants.value}" }
+        logger.d { "[setParticipants] #sfu; allParticipants: ${_callParticipants.value}" }
 
         this._localParticipant.value = participants.firstOrNull { it.isLocal }
-        logger.v { "[loadParticipants] #sfu; localParticipants: ${_localParticipant.value}" }
+        logger.v { "[setParticipants] #sfu; localParticipants: ${_localParticipant.value}" }
+
+        if (streamsToProcess.isNotEmpty()) {
+            logger.v { "[setParticipants] #sfu; Adding streams to participants $streamsToProcess" }
+            streamsToProcess.forEach(::addStream)
+            streamsToProcess.clear()
+
+            logger.v { "[setParticipants] #sfu; Added all streams to participants $streamsToProcess" }
+        }
     }
 
     internal fun updateMuteState(
@@ -258,17 +290,6 @@ public class Call(
         val updatedList = currentParticipants.updateValue(
             predicate = { it.sessionId == sessionId },
             transformer = {
-                val videoTrack =
-                    if (trackType == TrackType.TRACK_TYPE_VIDEO) {
-                        if (isEnabled) {
-                            it.videoTrack
-                        } else {
-                            null
-                        }
-                    } else {
-                        it.videoTrack
-                    }
-
                 val videoTrackSize = if (trackType == TrackType.TRACK_TYPE_VIDEO) {
                     if (isEnabled) {
                         it.videoTrackSize
@@ -290,7 +311,6 @@ public class Call(
                 }
 
                 it.copy(
-                    videoTrack = videoTrack,
                     videoTrackSize = videoTrackSize,
                     screenSharingTrack = screenShareTrack,
                     publishedTracks = if (isEnabled) it.publishedTracks + trackType else it.publishedTracks - trackType
@@ -465,5 +485,26 @@ public class Call(
         }
 
         _callParticipants.value = current.sortedByDescending { it.audioLevel }
+    }
+
+    /**
+     * Updates the information on the connection quality for each participant.
+     *
+     * @param updates A [List] of [ConnectionQualityInfo] containing the quality of each
+     * participant's connection.
+     */
+    internal fun updateConnectionQuality(updates: List<ConnectionQualityInfo>) {
+        val qualityMap = updates.associateBy { it.session_id }
+
+        val current = _callParticipants.value
+        current.map { user ->
+            val qualityInfo = qualityMap[user.sessionId]
+
+            if (qualityInfo != null) {
+                user.copy(connectionQuality = qualityInfo.connection_quality)
+            } else {
+                user
+            }
+        }
     }
 }

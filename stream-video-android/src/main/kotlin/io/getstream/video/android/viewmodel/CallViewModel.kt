@@ -33,6 +33,7 @@ import io.getstream.video.android.call.state.FlipCamera
 import io.getstream.video.android.call.state.InviteUsersToCall
 import io.getstream.video.android.call.state.LeaveCall
 import io.getstream.video.android.call.state.SelectAudioDevice
+import io.getstream.video.android.call.state.ShowCallInfo
 import io.getstream.video.android.call.state.ToggleCamera
 import io.getstream.video.android.call.state.ToggleMicrophone
 import io.getstream.video.android.call.state.ToggleScreenConfiguration
@@ -297,13 +298,6 @@ public class CallViewModel(
         clearState()
     }
 
-    /**
-     * Sets the flag used to display participants info menu in the UI to true.
-     */
-    public fun showCallInfo() {
-        this._isShowingCallInfo.value = true
-    }
-
     public fun onCallAction(callAction: CallAction) {
         when (callAction) {
             is ToggleSpeakerphone -> onSpeakerphoneChanged(callAction.isEnabled)
@@ -318,6 +312,9 @@ public class CallViewModel(
             is InviteUsersToCall -> inviteUsersToCall(callAction.users)
             is ToggleScreenConfiguration -> {
                 _isFullscreen.value = callAction.isFullscreen && callAction.isLandscape
+            }
+            is ShowCallInfo -> {
+                this._isShowingCallInfo.value = true
             }
             is CustomAction -> {
                 // custom actions

@@ -43,6 +43,7 @@ import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.events.AudioLevelChangedEvent
 import io.getstream.video.android.events.ChangePublishQualityEvent
 import io.getstream.video.android.events.ConnectedEvent
+import io.getstream.video.android.events.ConnectionQualityChangeEvent
 import io.getstream.video.android.events.ICETrickleEvent
 import io.getstream.video.android.events.JoinCallResponseEvent
 import io.getstream.video.android.events.ParticipantJoinedEvent
@@ -455,7 +456,8 @@ internal class CallClientImpl(
             if (userQueryResult is Success) {
                 call?.setParticipants(
                     callState.participants.map {
-                        val user = userQueryResult.data.firstOrNull { user -> user.id == it.user_id }
+                        val user =
+                            userQueryResult.data.firstOrNull { user -> user.id == it.user_id }
                         val isLocal = it.user_id == getCurrentUserId()
 
                         CallParticipantState(
@@ -668,6 +670,7 @@ internal class CallClientImpl(
                 is ChangePublishQualityEvent -> {
                     // updatePublishQuality(event) -> TODO - re-enable once we send the proper quality (dimensions)
                 }
+                is ConnectionQualityChangeEvent -> call?.updateConnectionQuality(event.updates)
                 is AudioLevelChangedEvent -> call?.updateAudioLevel(event)
                 is TrackPublishedEvent -> {
                     call?.updateMuteState(event.userId, event.sessionId, event.trackType, true)
@@ -976,6 +979,7 @@ internal class CallClientImpl(
                 val dimension = VideoDimension(
                     width = user.videoTrackSize.first, height = user.videoTrackSize.second
                 )
+                logger.d { "[updateParticipantsSubscriptions] #sfu; user.id: ${user.id}, dimension: $dimension" }
                 subscriptions[user] = dimension
             }
         }
@@ -1008,6 +1012,7 @@ internal class CallClientImpl(
                 )
             }
         )
+        logger.d { "[updateParticipantsSubscriptions] #sfu; request: $request" }
 
         coroutineScope.launch {
             when (val result = sfuClient.updateSubscriptions(request)) {

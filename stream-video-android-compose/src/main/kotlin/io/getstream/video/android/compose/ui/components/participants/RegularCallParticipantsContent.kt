@@ -24,19 +24,14 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.IntSize
@@ -45,8 +40,10 @@ import io.getstream.video.android.call.state.CallAction
 import io.getstream.video.android.call.state.CallMediaState
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.controls.LandscapeCallControls
+import io.getstream.video.android.compose.ui.components.internal.OverlayAppBar
 import io.getstream.video.android.compose.ui.components.participants.internal.Participants
 import io.getstream.video.android.model.Call
+import io.getstream.video.android.model.state.StreamCallState
 
 /**
  * Renders the CallParticipants when there are no screen sharing sessions, based on the orientation.
@@ -62,7 +59,9 @@ import io.getstream.video.android.model.Call
 public fun RegularCallParticipantsContent(
     call: Call,
     callMediaState: CallMediaState,
+    callState: StreamCallState,
     onCallAction: (CallAction) -> Unit,
+    onBackPressed: () -> Unit,
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues = PaddingValues(0.dp),
     onRender: (View) -> Unit = {}
@@ -73,38 +72,25 @@ public fun RegularCallParticipantsContent(
     Row(modifier = modifier.background(color = VideoTheme.colors.appBackground)) {
         BoxWithConstraints(modifier = Modifier.weight(1f)) {
             val roomParticipants by call.callParticipants.collectAsState(emptyList())
-            val participants = roomParticipants.filter { !it.isLocal }
 
-            val localParticipantState by call.localParticipant.collectAsState(initial = null)
-            val currentLocal = localParticipantState
-
-            if (participants.isNotEmpty()) {
+            if (roomParticipants.isNotEmpty()) {
                 Participants(
                     modifier = Modifier
                         .fillMaxSize()
                         .onSizeChanged { parentSize = it },
                     call = call,
                     onRender = onRender,
-                    paddingValues = paddingValues
+                    paddingValues = paddingValues,
+                    parentSize = parentSize
                 )
 
-                if (currentLocal != null) {
-                    FloatingParticipantItem(
-                        call = call,
-                        localParticipant = currentLocal,
-                        parentBounds = parentSize,
-                        modifier = Modifier
-                            .size(
-                                height = VideoTheme.dimens.floatingVideoHeight,
-                                width = VideoTheme.dimens.floatingVideoWidth
-                            )
-                            .clip(RoundedCornerShape(16.dp))
-                            .align(Alignment.TopEnd),
-                        paddingValues = paddingValues
+                if (orientation == ORIENTATION_LANDSCAPE) {
+                    OverlayAppBar(
+                        callState = callState,
+                        onBackPressed = onBackPressed,
+                        onCallAction = onCallAction
                     )
                 }
-            } else if (currentLocal?.videoTrack?.video != null) {
-                CallParticipant(call = call, participant = currentLocal)
             }
         }
 
@@ -112,8 +98,7 @@ public fun RegularCallParticipantsContent(
             LandscapeCallControls(
                 modifier = Modifier
                     .fillMaxHeight()
-                    .width(VideoTheme.dimens.landscapeCallControlsSheetWidth)
-                    .padding(6.dp),
+                    .width(VideoTheme.dimens.landscapeCallControlsSheetWidth),
                 callMediaState = callMediaState,
                 onCallAction = onCallAction,
                 isScreenSharing = false
