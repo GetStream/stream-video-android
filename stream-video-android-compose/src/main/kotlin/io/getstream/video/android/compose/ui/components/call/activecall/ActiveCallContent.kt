@@ -93,9 +93,9 @@ public fun ActiveCallContent(
 
     BackHandler { backAction() }
 
-    val roomState = call
-    val screenShareFlow = roomState?.screenSharingSessions ?: emptyFlow()
-    val state by screenShareFlow.collectAsState(initial = emptyList())
+    val currentCall = call
+    val screenShareSessionsState = currentCall?.screenSharingSessions ?: emptyFlow()
+    val state by screenShareSessionsState.collectAsState(initial = emptyList())
 
     val isScreenSharing = state.isNotEmpty()
 
@@ -124,7 +124,7 @@ public fun ActiveCallContent(
                 }
             },
             content = {
-                if (roomState == null) {
+                if (currentCall == null) {
                     Box(
                         modifier = Modifier
                             .height(250.dp)
@@ -145,7 +145,7 @@ public fun ActiveCallContent(
                                 start = it.calculateStartPadding(layoutDirection = LocalLayoutDirection.current),
                                 end = it.calculateEndPadding(layoutDirection = LocalLayoutDirection.current),
                             ),
-                        call = roomState,
+                        call = currentCall,
                         paddingValues = it,
                         isFullscreen = isFullscreen,
                         callMediaState = callMediaState,
@@ -157,8 +157,8 @@ public fun ActiveCallContent(
             }
         )
     } else {
-        if (roomState != null) {
-            pictureInPictureContent(roomState)
+        if (currentCall != null) {
+            pictureInPictureContent(currentCall)
         }
     }
 }
