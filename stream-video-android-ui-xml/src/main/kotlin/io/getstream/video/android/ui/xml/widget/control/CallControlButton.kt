@@ -27,10 +27,10 @@ internal class CallControlButton : CardView {
         attrs,
         defStyleAttr
     ) {
-        init(attrs)
+        init(context, attrs)
     }
 
-    private fun init(attrs: AttributeSet?) {
+    private fun init(context: Context, attrs: AttributeSet?) {
         style = ControlButtonStyle(context, attrs)
         initCard()
         initImageView()

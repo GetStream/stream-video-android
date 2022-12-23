@@ -5,6 +5,7 @@
         <item name="streamCallControlsViewStyle">@style/Stream.CallControls</item>
         <item name="streamCallDetailsViewStyle">@style/Stream.CallDetails</item>
         <item name="streamCallParticipantViewStyle">@style/Stream.CallParticipant</item>
+        <item name="streamCallParticipantsViewStyle">@style/Stream.CallParticipants</item>
         <item name="streamIncomingViewStyle">@style/Stream.IncomingCall</item>
         <item name="streamOutgoingViewStyle">@style/Stream.OutgoingCall</item>
     </style>
@@ -39,7 +40,7 @@
     <style name="Stream.CallParticipant" parent="Stream">
         <item name="streamCallParticipantTagAlignment">top_start</item>
         <item name="streamCallParticipantTagMargin">8dp</item>
-        <item name="streamCallParticipantTagBackgroundColor">#444444</item>
+        <item name="streamCallParticipantTagBackgroundColor">@color/stream_dark_gray</item>
         <item name="streamCallParticipantTagTextSize">@dimen/bodyTextSize</item>
         <item name="streamCallParticipantTagTextColor">@color/stream_white</item>
         <item name="streamCallParticipantTagTextStyle">bold</item>
@@ -47,6 +48,10 @@
         <item name="streamCallParticipantMicrophoneOffIcon">@drawable/ic_mic_off</item>
         <item name="streamCallParticipantMicrophoneOffTint">@color/stream_error_accent</item>
         <item name="streamCallParticipantAudioLevelTint">@color/stream_white</item>
+    </style>
+
+    <style name="Stream.CallParticipants" parent="Stream">
+        <!-- Leaves the default styling -->
     </style>
 
     <style name="Stream.IncomingCall" parent="Stream">
@@ -65,7 +70,8 @@
         <item name="streamIncomingCallVideoBackground">@drawable/bg_call_control_option</item>
         <item name="streamIncomingCallVideoBackgroundTint">@color/stream_app_background</item>
         <item name="streamIncomingCallVideoBackgroundAlphaEnabled">@dimen/buttonToggleOnAlpha</item>
-        <item name="streamIncomingCallVideoBackgroundAlphaDisabled">@dimen/buttonToggleOffAlpha</item>
+        <item name="streamIncomingCallVideoBackgroundAlphaDisabled">@dimen/buttonToggleOffAlpha
+        </item>
     </style>
 
     <style name="Stream.OutgoingCall" parent="Stream">
@@ -81,8 +87,13 @@
         <item name="streamOutgoingCallMediaControlIconTint">@color/stream_black</item>
         <item name="streamOutgoingCallMediaButtonBackground">@drawable/bg_call_control_option</item>
         <item name="streamOutgoingCallMediaButtonBackgroundTint">@color/stream_app_background</item>
-        <item name="streamOutgoingCallMediaButtonBackgroundAlphaEnabled">@dimen/buttonToggleOnAlpha</item>
-        <item name="streamOutgoingCallMediaButtonBackgroundAlphaDisabled">@dimen/buttonToggleOffAlpha</item>
+        <item name="streamOutgoingCallMediaButtonBackgroundAlphaEnabled">
+            @dimen/buttonToggleOnAlpha
+        </item>
+        <item name="streamOutgoingCallMediaButtonBackgroundAlphaDisabled">
+            @dimen/buttonToggleOffAlpha
+        </item>
     </style>
+
 
 </resources>

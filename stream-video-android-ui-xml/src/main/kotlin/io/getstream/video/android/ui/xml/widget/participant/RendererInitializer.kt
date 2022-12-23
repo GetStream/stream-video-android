@@ -18,6 +18,7 @@ package io.getstream.video.android.ui.xml.widget.participant
 
 import android.view.View
 import io.getstream.video.android.ui.TextureViewRenderer
+import stream.video.sfu.models.TrackType
 
 /**
  * Handler to initialize the renderer when the [TextureViewRenderer] has been created.
@@ -27,6 +28,7 @@ public fun interface RendererInitializer {
     public fun initRenderer(
         videoRenderer: TextureViewRenderer,
         streamId: String,
+        trackType: TrackType,
         onRender: (View) -> Unit
     )
 }

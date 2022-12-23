@@ -168,6 +168,9 @@ public class CallViewModel(
     public val localParticipant: Flow<CallParticipantState> =
         callState.filterNotNull().flatMapLatest { it.localParticipant }
 
+    public val primarySpeaker: Flow<CallParticipantState?> =
+        callState.filterNotNull().flatMapLatest { it.primarySpeaker }
+
     private val _isShowingCallInfo = MutableStateFlow(false)
     public val isShowingCallInfo: StateFlow<Boolean> = _isShowingCallInfo
 

@@ -30,7 +30,6 @@
         android:id="@+id/activeCallParticipantBorder"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:src="@drawable/bg_active_call_participant"
         android:visibility="gone"
         />
 

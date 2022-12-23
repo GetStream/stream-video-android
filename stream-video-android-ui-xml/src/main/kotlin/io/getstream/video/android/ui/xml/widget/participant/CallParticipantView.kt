@@ -17,26 +17,29 @@
 package io.getstream.video.android.ui.xml.widget.participant
 
 import android.content.Context
+import android.graphics.PorterDuff
+import android.graphics.drawable.Drawable
+import android.graphics.drawable.GradientDrawable
 import android.util.AttributeSet
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
-import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.core.view.setMargins
 import io.getstream.video.android.model.CallParticipantState
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.VideoTrack
 import io.getstream.video.android.model.toUser
-import io.getstream.video.android.ui.xml.R
 import io.getstream.video.android.ui.xml.databinding.ViewCallParticipantBinding
 import io.getstream.video.android.ui.xml.font.setTextStyle
-import io.getstream.video.android.ui.xml.utils.extensions.constrainViewToParent
+import io.getstream.video.android.ui.xml.utils.extensions.clearConstraints
 import io.getstream.video.android.ui.xml.utils.extensions.createStreamThemeWrapper
+import io.getstream.video.android.ui.xml.utils.extensions.dpToPx
 import io.getstream.video.android.ui.xml.utils.extensions.getDrawableCompat
 import io.getstream.video.android.ui.xml.utils.extensions.inflater
 import io.getstream.video.android.ui.xml.utils.extensions.load
 import io.getstream.video.android.ui.xml.utils.extensions.updateConstraints
+import stream.video.sfu.models.TrackType
 import io.getstream.video.android.ui.common.R as RCommon
 
 /**
@@ -70,20 +73,27 @@ public class CallParticipantView : ConstraintLayout {
 
     public constructor(context: Context) : this(context, null, 0)
     public constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
-    public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
+    public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : this(
+        context,
+        attrs,
+        defStyleAttr,
+        0
+    )
+
+    public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(
         context.createStreamThemeWrapper(),
         attrs,
-        defStyleAttr
+        defStyleAttr,
+        defStyleRes
     ) {
-        init(attrs)
+        init(context, attrs, defStyleAttr, defStyleRes)
     }
 
-    private fun init(attrs: AttributeSet?) {
-        style = CallParticipantStyle(context, attrs)
-
-        binding.activeCallParticipantBorder.setColorFilter(style.activeSpeakerBorderColor)
+    private fun init(context: Context, attrs: AttributeSet?, styleAttr: Int, styleRes: Int) {
+        style = CallParticipantStyle(context, attrs, styleAttr, styleRes)
 
         initNameHolder()
+        initSpeakerBorder()
     }
 
     private fun initNameHolder() {
@@ -91,6 +101,12 @@ public class CallParticipantView : ConstraintLayout {
         (binding.nameHolder.layoutParams as LayoutParams).setMargins(style.tagPadding)
         binding.nameHolder.background.setTint(style.tagBackgroundColor)
         setTagAlignment(style.tagAlignment)
+    }
+
+    private fun initSpeakerBorder() {
+        val borderDrawable = GradientDrawable()
+        borderDrawable.setStroke(3.dpToPx(), style.activeSpeakerBorderColor)
+        binding.activeCallParticipantBorder.background = borderDrawable
     }
 
     /**
@@ -173,7 +189,9 @@ public class CallParticipantView : ConstraintLayout {
     private fun initRenderer() {
         if (!wasRendererInitialised) {
             track?.let {
-                rendererInitializer?.initRenderer(binding.participantVideoRenderer, it.streamId) { onRender(it) }
+                rendererInitializer?.initRenderer(binding.participantVideoRenderer,
+                    it.streamId,
+                    TrackType.TRACK_TYPE_VIDEO) { onRender(it) }
                 wasRendererInitialised = true
             }
         }
@@ -184,28 +202,28 @@ public class CallParticipantView : ConstraintLayout {
      *
      * @param tagAlignment [CallParticipantTagAlignment] to be applied to the name tag.
      */
-    public fun setTagAlignment(tagAlignment: CallParticipantTagAlignment) {
+    private fun setTagAlignment(tagAlignment: CallParticipantTagAlignment) {
         val holderId = binding.nameHolder.id
-        val parentId = this.id
+        val parentId = LayoutParams.PARENT_ID
 
         updateConstraints {
-            clear(binding.nameHolder.id)
+            clearConstraints(holderId)
             when (tagAlignment) {
                 CallParticipantTagAlignment.TOP_LEFT -> {
-                    connect(holderId, ConstraintSet.TOP, parentId, ConstraintSet.TOP)
-                    connect(holderId, ConstraintSet.LEFT, parentId, ConstraintSet.LEFT)
+                    connect(holderId, ConstraintSet.TOP, parentId, ConstraintSet.TOP, style.tagPadding)
+                    connect(holderId, ConstraintSet.LEFT, parentId, ConstraintSet.LEFT, style.tagPadding)
                 }
                 CallParticipantTagAlignment.TOP_RIGHT -> {
-                    connect(holderId, ConstraintSet.TOP, parentId, ConstraintSet.TOP)
-                    connect(holderId, ConstraintSet.RIGHT, parentId, ConstraintSet.RIGHT)
+                    connect(holderId, ConstraintSet.TOP, parentId, ConstraintSet.TOP, style.tagPadding)
+                    connect(holderId, ConstraintSet.RIGHT, parentId, ConstraintSet.RIGHT, style.tagPadding)
                 }
                 CallParticipantTagAlignment.BOTTOM_LEFT -> {
-                    connect(holderId, ConstraintSet.BOTTOM, parentId, ConstraintSet.BOTTOM)
-                    connect(holderId, ConstraintSet.LEFT, parentId, ConstraintSet.LEFT)
+                    connect(holderId, ConstraintSet.BOTTOM, parentId, ConstraintSet.BOTTOM, style.tagPadding)
+                    connect(holderId, ConstraintSet.LEFT, parentId, ConstraintSet.LEFT, style.tagPadding)
                 }
                 CallParticipantTagAlignment.BOTTOM_RIGHT -> {
-                    connect(holderId, ConstraintSet.BOTTOM, parentId, ConstraintSet.BOTTOM)
-                    connect(holderId, ConstraintSet.RIGHT, parentId, ConstraintSet.RIGHT)
+                    connect(holderId, ConstraintSet.BOTTOM, parentId, ConstraintSet.BOTTOM, style.tagPadding)
+                    connect(holderId, ConstraintSet.RIGHT, parentId, ConstraintSet.RIGHT, style.tagPadding)
                 }
             }
         }

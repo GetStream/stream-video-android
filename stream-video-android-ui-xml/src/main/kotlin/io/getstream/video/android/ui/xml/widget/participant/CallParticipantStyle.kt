@@ -30,12 +30,15 @@ public data class CallParticipantStyle(
     internal companion object {
         private val DEFAULT_TAG_MARGIN = 8.dpToPxPrecise()
 
-        operator fun invoke(context: Context, attrs: AttributeSet?): CallParticipantStyle {
+        operator fun invoke(context: Context, attrs: AttributeSet?, styleAttrs: Int, styleRes: Int): CallParticipantStyle {
+            val viewStyleAttr = if (styleAttrs == 0) R.attr.streamCallParticipantViewStyle else styleAttrs
+            val viewStyleRes = if (styleRes == 0) R.style.Stream_CallParticipant else styleRes
+
             context.obtainStyledAttributes(
                 attrs,
                 R.styleable.CallParticipantView,
-                R.attr.streamCallParticipantViewStyle,
-                R.style.Stream_CallParticipant
+                viewStyleAttr,
+                viewStyleRes
             ).use {
 
                 val tagAlignment = it.getEnum(
@@ -73,8 +76,8 @@ public data class CallParticipantStyle(
                     .build()
 
                 val tagBackgroundColor = it.getColor(
-                    R.styleable.CallParticipantView_streamCallParticipantActiveSpeakerBorderColor,
-                    context.getColorCompat(RCommon.color.stream_info_accent)
+                    R.styleable.CallParticipantView_streamCallParticipantTagBackgroundColor,
+                    context.getColorCompat(R.color.stream_dark_gray)
                 )
 
                 val participantMicOffIcon = it.getDrawable(

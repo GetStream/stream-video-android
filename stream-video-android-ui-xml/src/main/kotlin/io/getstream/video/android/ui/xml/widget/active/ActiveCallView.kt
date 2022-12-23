@@ -23,9 +23,11 @@ import io.getstream.video.android.call.state.CallAction
 import io.getstream.video.android.model.CallParticipantState
 import io.getstream.video.android.ui.xml.databinding.ViewActiveCallBinding
 import io.getstream.video.android.ui.xml.utils.extensions.createStreamThemeWrapper
+import io.getstream.video.android.ui.xml.utils.extensions.getColorCompat
 import io.getstream.video.android.ui.xml.utils.extensions.streamThemeInflater
 import io.getstream.video.android.ui.xml.widget.control.CallControlItem
 import io.getstream.video.android.ui.xml.widget.participant.RendererInitializer
+import io.getstream.video.android.ui.common.R
 
 /**
  * Represents the UI in an Active call that shows participants and their video, as well as some
@@ -59,6 +61,7 @@ public class ActiveCallView : ConstraintLayout {
     }
 
     private fun init(context: Context, attrs: AttributeSet?) {
+        setBackgroundColor(context.getColorCompat(R.color.stream_app_background))
         binding.controlsView.callControlItemClickListener = { callActionListener(it) }
     }
 
@@ -98,5 +101,14 @@ public class ActiveCallView : ConstraintLayout {
      */
     public fun updateParticipants(participants: List<CallParticipantState>) {
         binding.participantsView.updateParticipants(participants)
+    }
+
+    /**
+     * Updates the current primary speaker and shows a border around the primary speaker.
+     *
+     * @param participant The call participant marked as a primary speaker.
+     */
+    public fun updatePrimarySpeaker(participant: CallParticipantState?) {
+        binding.participantsView.updatePrimarySpeaker(participant)
     }
 }

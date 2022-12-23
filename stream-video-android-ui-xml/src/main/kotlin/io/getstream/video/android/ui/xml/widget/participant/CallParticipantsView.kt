@@ -24,6 +24,7 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.constraintlayout.widget.Guideline
 import androidx.transition.TransitionManager
 import io.getstream.video.android.model.CallParticipantState
+import io.getstream.video.android.ui.xml.R
 import io.getstream.video.android.ui.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.ui.xml.utils.extensions.updateConstraints
 
@@ -31,6 +32,8 @@ import io.getstream.video.android.ui.xml.utils.extensions.updateConstraints
  * Renders the call participants depending on the number of the participants and the call state.
  */
 public class CallParticipantsView : ConstraintLayout {
+
+    private lateinit var style: CallParticipantsStyle
 
     /**
      * Guideline that helps constraining the view on half of the screen vertically.
@@ -79,6 +82,8 @@ public class CallParticipantsView : ConstraintLayout {
     }
 
     private fun init(context: Context, attrs: AttributeSet?) {
+        style = CallParticipantsStyle(context, attrs)
+
         addView(verticalGuideline)
         addView(horizontalGuideline)
     }
@@ -135,6 +140,17 @@ public class CallParticipantsView : ConstraintLayout {
     }
 
     /**
+     * Updates the current primary speaker and shows a border around the primary speaker.
+     *
+     * @param participant The call participant marked as a primary speaker.
+     */
+    public fun updatePrimarySpeaker(participant: CallParticipantState?) {
+        childList.forEach {
+            it.setActive(it.tag == participant?.id)
+        }
+    }
+
+    /**
      * Updates the constraints of the shown [CallParticipantView]s so they all fit in the viewport.
      */
     private fun updateConstraints() {
@@ -167,7 +183,12 @@ public class CallParticipantsView : ConstraintLayout {
      * Used to instantiate a new [CallParticipantView] when participants join the call.
      */
     private fun buildParticipantView(userId: String): CallParticipantView {
-        return CallParticipantView(context).apply {
+        return CallParticipantView(
+            context = context,
+            attrs = null,
+            defStyleAttr = R.attr.streamCallParticipantsCallParticipantStyle,
+            defStyleRes = style.callParticipantStyle
+        ).apply {
             this.id = View.generateViewId()
             this.tag = userId
             this.layoutParams = LayoutParams(

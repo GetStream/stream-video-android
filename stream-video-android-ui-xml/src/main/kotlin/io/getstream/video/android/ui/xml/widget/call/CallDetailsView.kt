@@ -31,10 +31,10 @@ public class CallDetailsView : ConstraintLayout {
         attrs,
         defStyleAttr
     ) {
-        init(attrs)
+        init(context, attrs)
     }
 
-    private fun init(attrs: AttributeSet?) {
+    private fun init(context: Context, attrs: AttributeSet?) {
         style = CallDetailsStyle(context, attrs)
 
         binding.callStatus.setTextStyle(style.callStateTextStyle)

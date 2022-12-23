@@ -50,77 +50,28 @@ public fun ActiveCallView.bindView(
 
     setControlItems(buildDefaultControlList())
 
-    observeCallState(viewModel, lifecycleOwner)
-    observeParticipantList(viewModel, lifecycleOwner)
-    observeMediaState(viewModel, lifecycleOwner)
-}
-
-private fun buildDefaultControlList(): List<CallControlItem> {
-    return listOf(
-        CallControlItem(
-            icon = RCommon.drawable.ic_speaker_on,
-            iconTint = R.color.stream_black,
-            backgroundTint = RCommon.color.stream_app_background,
-            action = ToggleSpeakerphone(isEnabled = true)
-        ),
-        CallControlItem(
-            icon = RCommon.drawable.ic_videocam_on,
-            iconTint = R.color.stream_black,
-            backgroundTint = RCommon.color.stream_app_background,
-            action = ToggleCamera(isEnabled = true)
-        ),
-        CallControlItem(
-            icon = RCommon.drawable.ic_mic_on,
-            iconTint = R.color.stream_black,
-            backgroundTint = RCommon.color.stream_app_background,
-            action = ToggleMicrophone(isEnabled = true)
-        ),
-        CallControlItem(
-            icon = RCommon.drawable.ic_camera_flip,
-            iconTint = R.color.stream_black,
-            backgroundTint = RCommon.color.stream_app_background,
-            action = FlipCamera
-        ),
-        CallControlItem(
-            icon = RCommon.drawable.ic_call_end,
-            iconTint = R.color.stream_black,
-            backgroundTint = RCommon.color.stream_error_accent,
-            action = LeaveCall
-        ),
-    )
-}
-
-private fun ActiveCallView.observeCallState(
-    viewModel: CallViewModel,
-    lifecycleOwner: LifecycleOwner,
-) {
     lifecycleOwner.lifecycleScope.launchWhenResumed {
         viewModel.callState.filterNotNull().distinctUntilChanged().collectLatest { call ->
-            setParticipantsRendererInitializer { videoRenderer, trackId, onRender ->
-                call.initRenderer(videoRenderer, trackId, onRender)
+            setParticipantsRendererInitializer { videoRenderer, trackId, trackType, onRender ->
+                call.initRenderer(videoRenderer, trackId, trackType, onRender)
             }
         }
     }
-}
 
-private fun ActiveCallView.observeParticipantList(
-    viewModel: CallViewModel,
-    lifecycleOwner: LifecycleOwner,
-) {
     lifecycleOwner.lifecycleScope.launchWhenResumed {
         viewModel.participantList.collectLatest {
             updateParticipants(it)
         }
     }
-}
 
-private fun ActiveCallView.observeMediaState(
-    viewModel: CallViewModel,
-    lifecycleOwner: LifecycleOwner,
-) {
+    lifecycleOwner.lifecycleScope.launchWhenResumed {
+        viewModel.primarySpeaker.collectLatest {
+            updatePrimarySpeaker(it)
+        }
+    }
+
     lifecycleOwner.lifecycleScope.launchWhenResumed {
         viewModel.callMediaState.collectLatest {
-            StreamLog.d("callMediaState") { it.toString() }
             updateControlItems(
                 listOf(
                     CallControlItem(
@@ -157,4 +108,39 @@ private fun ActiveCallView.observeMediaState(
             )
         }
     }
+}
+
+private fun buildDefaultControlList(): List<CallControlItem> {
+    return listOf(
+        CallControlItem(
+            icon = RCommon.drawable.ic_speaker_on,
+            iconTint = R.color.stream_black,
+            backgroundTint = RCommon.color.stream_app_background,
+            action = ToggleSpeakerphone(isEnabled = true)
+        ),
+        CallControlItem(
+            icon = RCommon.drawable.ic_videocam_on,
+            iconTint = R.color.stream_black,
+            backgroundTint = RCommon.color.stream_app_background,
+            action = ToggleCamera(isEnabled = true)
+        ),
+        CallControlItem(
+            icon = RCommon.drawable.ic_mic_on,
+            iconTint = R.color.stream_black,
+            backgroundTint = RCommon.color.stream_app_background,
+            action = ToggleMicrophone(isEnabled = true)
+        ),
+        CallControlItem(
+            icon = RCommon.drawable.ic_camera_flip,
+            iconTint = R.color.stream_black,
+            backgroundTint = RCommon.color.stream_app_background,
+            action = FlipCamera
+        ),
+        CallControlItem(
+            icon = RCommon.drawable.ic_call_end,
+            iconTint = R.color.stream_black,
+            backgroundTint = RCommon.color.stream_error_accent,
+            action = LeaveCall
+        ),
+    )
 }
