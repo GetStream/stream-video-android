@@ -1,14 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="CallParticipantView">
+        <!-- Alignment for the name tag inside the view. -->
         <attr name="streamCallParticipantTagAlignment" format="enum">
             <enum name="top_start" value="0" />
             <enum name="top_end" value="1" />
             <enum name="bottom_start" value="2" />
             <enum name="bottom_end" value="3" />
         </attr>
+        <!-- Padding between the borders of the name tag and parent. -->
         <attr name="streamCallParticipantTagMargin" format="dimension|reference" />
+        <!-- Participant name tag background color. -->
         <attr name="streamCallParticipantTagBackgroundColor" format="color|reference" />
+        <!-- Participant name tag text style. -->
         <attr name="streamCallParticipantTagTextSize" format="dimension|reference" />
         <attr name="streamCallParticipantTagTextColor" format="color|reference" />
         <attr name="streamCallParticipantTagTextFont" format="reference" />
@@ -19,10 +23,14 @@
             <flag name="italic" value="2" />
         </attr>
 
+        <!-- Color of the primary active speaker border. -->
         <attr name="streamCallParticipantActiveSpeakerBorderColor" format="color|reference" />
 
+        <!-- Icon for the participant muted state. -->
         <attr name="streamCallParticipantMicrophoneOffIcon" format="reference" />
+        <!-- Icon tint for the participant muted state. -->
         <attr name="streamCallParticipantMicrophoneOffTint" format="color|reference" />
+        <!-- Icon tint for the participant mic active   state. -->
         <attr name="streamCallParticipantAudioLevelTint" format="color|reference" />
 
     </declare-styleable>
