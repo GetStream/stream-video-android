@@ -67,9 +67,6 @@ public class OutgoingCallView : ConstraintLayout {
      */
     private fun initMediaControlButton(button: CallControlButton) {
         button.setColorFilter(style.mediaButtonIconTint)
-        // TODO
-        // button.disabledAlpha = style.mediaButtonBackgroundAlphaDisabled
-        // button.enabledAlpha = style.mediaButtonBackgroundAlphaEnabled
         button.background = style.mediaButtonBackground
         button.background.setTint(style.mediaButtonBackgroundTint)
     }

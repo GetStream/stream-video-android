@@ -12,8 +12,8 @@ import io.getstream.video.android.ui.xml.widget.transformer.TransformStyle
 import io.getstream.video.android.ui.common.R as RCommon
 
 /**
- * Style for [ControlButtonStyle].
- * Use this class together with [TransformStyle.controlButtonStyleTransformer] to change [ControlButtonStyle] styles
+ * Style for [CallControlButtonStyle].
+ * Use this class together with [TransformStyle.callControlButtonStyleTransformer] to change [CallControlButtonStyle] styles
  * programmatically.
  *
  * @param icon The icon for the button.
@@ -24,7 +24,7 @@ import io.getstream.video.android.ui.common.R as RCommon
  * @param backgroundEnabledAlpha Background opacity when the option is enabled.
  * @param backgroundDisabledAlpha Background opacity when the option is disabled.
  */
-public data class ControlButtonStyle(
+public data class CallControlButtonStyle(
     public val icon: Drawable?,
     @ColorInt public val iconTint: Int,
     public val background: Drawable?,
@@ -35,7 +35,7 @@ public data class ControlButtonStyle(
 ) {
 
     internal companion object {
-        operator fun invoke(context: Context, attrs: AttributeSet?): ControlButtonStyle {
+        operator fun invoke(context: Context, attrs: AttributeSet?): CallControlButtonStyle {
             context.obtainStyledAttributes(
                 attrs,
                 R.styleable.ControlButton,
@@ -72,7 +72,7 @@ public data class ControlButtonStyle(
                     context.getFloatResource(RCommon.dimen.buttonToggleOffAlpha)
                 )
 
-                return ControlButtonStyle(
+                return CallControlButtonStyle(
                     icon = icon,
                     iconTint = iconTint,
                     background = background,
@@ -80,7 +80,7 @@ public data class ControlButtonStyle(
                     enabled = enabled,
                     backgroundEnabledAlpha = backgroundEnabledAlpha,
                     backgroundDisabledAlpha = backgroundDisabledAlpha
-                ).let(TransformStyle.controlButtonStyleTransformer::transform)
+                ).let(TransformStyle.callControlButtonStyleTransformer::transform)
             }
         }
     }

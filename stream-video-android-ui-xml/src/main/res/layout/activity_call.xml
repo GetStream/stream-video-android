@@ -12,29 +12,10 @@
         app:layout_constraintTop_toTopOf="parent"
         />
 
-    <io.getstream.video.android.ui.xml.widget.incoming.IncomingCallView
-        android:id="@+id/incomingCallView"
+    <FrameLayout
+        android:id="@+id/contentHolder"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/callToolbar"
-        />
-
-    <io.getstream.video.android.ui.xml.widget.outgoing.OutgoingCallView
-        android:id="@+id/outgoingCallView"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/callToolbar"
-        />
-
-    <io.getstream.video.android.ui.xml.widget.active.ActiveCallView
-        android:id="@+id/activeCallView"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/callToolbar"
         />

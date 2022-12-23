@@ -16,8 +16,6 @@
         <attr name="streamOutgoingCallMediaControlIconTint" format="color|reference" />
         <attr name="streamOutgoingCallMediaButtonBackground" format="reference" />
         <attr name="streamOutgoingCallMediaButtonBackgroundTint" format="color|reference" />
-        <attr name="streamOutgoingCallMediaButtonBackgroundAlphaEnabled" format="float|reference" />
-        <attr name="streamOutgoingCallMediaButtonBackgroundAlphaDisabled" format="float|reference" />
 
     </declare-styleable>
 </resources>

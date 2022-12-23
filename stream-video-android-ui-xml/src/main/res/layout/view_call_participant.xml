@@ -53,9 +53,6 @@
             android:gravity="center"
             android:paddingStart="8dp"
             android:paddingEnd="8dp"
-            android:textColor="@color/stream_white"
-            android:textSize="@dimen/bodyTextSize"
-            android:textStyle="bold"
             tools:text="Some random user"
             />
 
@@ -66,8 +63,6 @@
             android:layout_gravity="center"
             android:paddingStart="0dp"
             android:paddingEnd="8dp"
-            android:src="@drawable/ic_mic_on"
-            app:tint="@color/stream_white"
             />
 
     </LinearLayout>

@@ -18,7 +18,7 @@ internal class CallControlButton : CardView {
 
     private val binding = ViewCallControlButtonBinding.inflate(streamThemeInflater, this)
 
-    private lateinit var style: ControlButtonStyle
+    private lateinit var style: CallControlButtonStyle
 
     public constructor(context: Context) : this(context, null, 0)
     public constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
@@ -31,7 +31,7 @@ internal class CallControlButton : CardView {
     }
 
     private fun init(context: Context, attrs: AttributeSet?) {
-        style = ControlButtonStyle(context, attrs)
+        style = CallControlButtonStyle(context, attrs)
         initCard()
         initImageView()
     }

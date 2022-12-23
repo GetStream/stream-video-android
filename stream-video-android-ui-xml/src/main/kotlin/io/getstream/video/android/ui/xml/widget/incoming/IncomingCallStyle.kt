@@ -1,16 +1,13 @@
 package io.getstream.video.android.ui.xml.widget.incoming
 
 import android.content.Context
-import android.content.res.TypedArray
 import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import androidx.annotation.ColorInt
-import io.getstream.video.android.common.util.getFloatResource
 import io.getstream.video.android.ui.xml.R
 import io.getstream.video.android.ui.xml.utils.extensions.getColorCompat
 import io.getstream.video.android.ui.xml.utils.extensions.getDrawableCompat
 import io.getstream.video.android.ui.xml.utils.extensions.use
-import io.getstream.video.android.ui.xml.widget.call.CallDetailsView
 import io.getstream.video.android.ui.xml.widget.transformer.TransformStyle
 
 /**
@@ -31,8 +28,6 @@ import io.getstream.video.android.ui.xml.widget.transformer.TransformStyle
  * @param videoButtonIconTint The color of the video button icon.
  * @param videoButtonBackground The background for the video button.
  * @param videoButtonBackgroundTint The background color for the video button.
- * @param videoButtonBackgroundAlphaEnabled The alpha to be applied when the video button is enabled.
- * @param videoButtonBackgroundAlphaDisabled The alpha to be applied when the video button is disabled.
  */
 public data class IncomingCallStyle(
     public val incomingScreenBackground: Drawable,
@@ -49,8 +44,6 @@ public data class IncomingCallStyle(
     @ColorInt val videoButtonIconTint: Int,
     public val videoButtonBackground: Drawable,
     @ColorInt public val videoButtonBackgroundTint: Int,
-    public val videoButtonBackgroundAlphaEnabled: Float,
-    public val videoButtonBackgroundAlphaDisabled: Float,
 ) {
 
     internal companion object {
@@ -123,16 +116,6 @@ public data class IncomingCallStyle(
                     context.getColorCompat(io.getstream.video.android.ui.common.R.color.stream_app_background)
                 )
 
-                val mediaControlBackgroundAlphaEnabled = it.getFloat(
-                    R.styleable.IncomingCallView_streamIncomingCallVideoBackgroundAlphaEnabled,
-                    context.getFloatResource(io.getstream.video.android.ui.common.R.dimen.buttonToggleOnAlpha)
-                )
-
-                val mediaControlBackgroundAlphaDisabled = it.getFloat(
-                    R.styleable.IncomingCallView_streamIncomingCallVideoBackgroundAlphaDisabled,
-                    context.getFloatResource(io.getstream.video.android.ui.common.R.dimen.buttonToggleOffAlpha)
-                )
-
                 return IncomingCallStyle(
                     incomingScreenBackground = callBackground,
                     acceptCallIcon = acceptCallIcon,
@@ -148,8 +131,6 @@ public data class IncomingCallStyle(
                     videoButtonIconTint = mediaControlIconTint,
                     videoButtonBackground = mediaControlBackground,
                     videoButtonBackgroundTint = mediaControlBackgroundTint,
-                    videoButtonBackgroundAlphaEnabled = mediaControlBackgroundAlphaEnabled,
-                    videoButtonBackgroundAlphaDisabled = mediaControlBackgroundAlphaDisabled
                 ).let(TransformStyle.incomingCallStyleTransformer::transform)
             }
         }

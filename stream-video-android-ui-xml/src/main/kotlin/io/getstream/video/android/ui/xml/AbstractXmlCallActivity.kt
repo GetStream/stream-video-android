@@ -26,10 +26,13 @@ import android.os.Bundle
 import android.provider.Settings
 import android.util.Rational
 import android.view.Menu
+import android.view.ViewGroup
 import android.view.WindowManager
+import android.widget.FrameLayout
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout.LayoutParams
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.CallViewModelFactoryProvider
@@ -43,6 +46,9 @@ import io.getstream.video.android.permission.PermissionManager
 import io.getstream.video.android.permission.StreamPermissionManagerImpl
 import io.getstream.video.android.ui.xml.binding.bindView
 import io.getstream.video.android.ui.xml.databinding.ActivityCallBinding
+import io.getstream.video.android.ui.xml.widget.active.ActiveCallView
+import io.getstream.video.android.ui.xml.widget.incoming.IncomingCallView
+import io.getstream.video.android.ui.xml.widget.outgoing.OutgoingCallView
 import io.getstream.video.android.viewmodel.CallViewModel
 import io.getstream.video.android.viewmodel.CallViewModelFactory
 
@@ -171,26 +177,48 @@ public abstract class AbstractXmlCallActivity :
      * Shows the outgoing call screen and initialises the state observers required to populate the screen.
      */
     private fun showOutgoingScreen() {
-        binding.outgoingCallView.bindView(callViewModel, lifecycleOwner = this)
-        binding.outgoingCallView.isVisible = true
+        binding.contentHolder.removeAllViews()
+        val outgoingScreen = OutgoingCallView(context = this)
+        binding.contentHolder.addView(
+            outgoingScreen,
+            FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            )
+        )
+        outgoingScreen.bindView(callViewModel, this)
     }
 
     /**
      * Shows the incoming call screen and initialises the state observers required to populate the screen.
      */
     private fun showIncomingScreen() {
-        binding.incomingCallView.bindView(callViewModel, lifecycleOwner = this)
-        binding.incomingCallView.isVisible = true
+        binding.contentHolder.removeAllViews()
+        val incomingScreen = IncomingCallView(context = this)
+        binding.contentHolder.addView(
+            incomingScreen,
+            FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            )
+        )
+        incomingScreen.bindView(callViewModel, this)
     }
 
     /**
      * Shows the active call screen and initialises the state observers required to populate the screen.
      */
     private fun showActiveCallScreen() {
-        binding.activeCallView.bindView(callViewModel, lifecycleOwner = this)
-        binding.outgoingCallView.isVisible = false
-        binding.incomingCallView.isVisible = false
-        binding.activeCallView.isVisible = true
+        binding.contentHolder.removeAllViews()
+        val activeCallView = ActiveCallView(context = this)
+        binding.contentHolder.addView(
+            activeCallView,
+            FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            )
+        )
+        activeCallView.bindView(callViewModel, this)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {

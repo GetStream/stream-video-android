@@ -1,16 +1,13 @@
 package io.getstream.video.android.ui.xml.widget.outgoing
 
 import android.content.Context
-import android.content.res.TypedArray
 import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import androidx.annotation.ColorInt
-import io.getstream.video.android.common.util.getFloatResource
 import io.getstream.video.android.ui.xml.R
 import io.getstream.video.android.ui.xml.utils.extensions.getColorCompat
 import io.getstream.video.android.ui.xml.utils.extensions.getDrawableCompat
 import io.getstream.video.android.ui.xml.utils.extensions.use
-import io.getstream.video.android.ui.xml.widget.call.CallDetailsView
 import io.getstream.video.android.ui.xml.widget.transformer.TransformStyle
 import io.getstream.video.android.ui.common.R as RCommon
 
@@ -32,8 +29,6 @@ import io.getstream.video.android.ui.common.R as RCommon
  * @param mediaButtonIconTint The color of the media control icons (camera and microphone).
  * @param mediaButtonBackground The background for media controls (camera and microphone)
  * @param mediaButtonBackgroundTint The background color for media controls (camera and microphone).
- * @param mediaButtonBackgroundAlphaEnabled The alpha to be applied when a media item is enabled (camera and mic).
- * @param mediaButtonBackgroundAlphaDisabled The alpha to be applied when a media item is disabled (camera and mic).
  */
 public data class OutgoingCallStyle(
     public val outgoingScreenBackground: Drawable,
@@ -48,8 +43,6 @@ public data class OutgoingCallStyle(
     @ColorInt val mediaButtonIconTint: Int,
     public val mediaButtonBackground: Drawable,
     @ColorInt public val mediaButtonBackgroundTint: Int,
-    public val mediaButtonBackgroundAlphaEnabled: Float,
-    public val mediaButtonBackgroundAlphaDisabled: Float,
 ) {
 
     internal companion object {
@@ -112,16 +105,6 @@ public data class OutgoingCallStyle(
                     context.getColorCompat(RCommon.color.stream_app_background)
                 )
 
-                val mediaButtonBackgroundAlphaEnabled = it.getFloat(
-                    R.styleable.OutgoingCallView_streamOutgoingCallMediaButtonBackgroundAlphaEnabled,
-                    context.getFloatResource(RCommon.dimen.buttonToggleOnAlpha)
-                )
-
-                val mediaButtonBackgroundAlphaDisabled = it.getFloat(
-                    R.styleable.OutgoingCallView_streamOutgoingCallMediaButtonBackgroundAlphaDisabled,
-                    context.getFloatResource(RCommon.dimen.buttonToggleOffAlpha)
-                )
-
                 return OutgoingCallStyle(
                     outgoingScreenBackground = outgoingScreenBackground,
                     cancelCallIcon = cancelCallIcon,
@@ -135,8 +118,6 @@ public data class OutgoingCallStyle(
                     mediaButtonIconTint = mediaButtonIconTint,
                     mediaButtonBackground = mediaButtonBackground,
                     mediaButtonBackgroundTint = mediaButtonBackgroundTint,
-                    mediaButtonBackgroundAlphaEnabled = mediaButtonBackgroundAlphaEnabled,
-                    mediaButtonBackgroundAlphaDisabled = mediaButtonBackgroundAlphaDisabled
                 ).let(TransformStyle.outgoingCallStyleTransformer::transform)
             }
         }
