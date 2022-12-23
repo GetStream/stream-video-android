@@ -21,7 +21,6 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.utils.floatResource
 import io.getstream.video.android.compose.utils.textSizeResource
 import io.getstream.video.android.ui.common.R
@@ -87,8 +86,8 @@ public data class StreamDimens(
             largeButtonSize = dimensionResource(id = R.dimen.largeButtonSize),
             mediumButtonSize = dimensionResource(id = R.dimen.mediumButtonSize),
             smallButtonSize = dimensionResource(id = R.dimen.smallButtonSize),
-            topAppbarHeight = dimensionResource(id = R.dimen.topAppbarHeightSize),
-            landscapeTopAppBarHeight = 48.dp,
+            topAppbarHeight = dimensionResource(id = R.dimen.topAppbarHeight),
+            landscapeTopAppBarHeight = dimensionResource(id = R.dimen.landscapeTopAppBarHeight),
             avatarAppbarPadding = dimensionResource(id = R.dimen.avatarAppbarPadding),
             singleAvatarAppbarPadding = dimensionResource(id = R.dimen.singleAvatarAppbarPadding),
             participantsTextPadding = dimensionResource(id = R.dimen.participantsTextPadding),
@@ -108,17 +107,17 @@ public data class StreamDimens(
             callAppBarTrailingContentSpacingEnd = dimensionResource(id = R.dimen.callAppBarTrailingContentSpacingEnd),
             callAppBarCenterContentSpacingEnd = dimensionResource(id = R.dimen.callAppBarCenterContentSpacingEnd),
             callControlButtonSize = dimensionResource(id = R.dimen.callControlButtonSize),
-            landscapeCallControlButtonSize = 40.dp,
+            landscapeCallControlButtonSize = dimensionResource(id = R.dimen.landscapeCallControlButtonSize),
             callControlsSheetHeight = dimensionResource(id = R.dimen.callControlsSheetHeight),
-            landscapeCallControlsSheetWidth = 64.dp,
+            landscapeCallControlsSheetWidth = dimensionResource(id = R.dimen.landscapeCallControlsSheetWidth),
             callParticipantInfoMenuAppBarHeight = dimensionResource(id = R.dimen.callParticipantInfoMenuAppBarHeight),
             callParticipantInfoMenuOptionsHeight = dimensionResource(id = R.dimen.callParticipantInfoMenuOptionsHeight),
             callParticipantsInfoMenuOptionsButtonHeight = dimensionResource(id = R.dimen.callParticipantsInfoMenuOptionsButtonHeight),
             callParticipantsInfoAvatarSize = dimensionResource(id = R.dimen.callParticipantsInfoAvatarSize),
-            floatingVideoPadding = 16.dp,
-            floatingVideoHeight = 150.dp,
-            floatingVideoWidth = 125.dp,
-            screenShareParticipantItemSize = 110.dp
+            floatingVideoPadding = dimensionResource(id = R.dimen.floatingVideoPadding),
+            floatingVideoHeight = dimensionResource(id = R.dimen.floatingVideoHeight),
+            floatingVideoWidth = dimensionResource(id = R.dimen.floatingVideoWidth),
+            screenShareParticipantItemSize = dimensionResource(id = R.dimen.screenShareParticipantItemSize)
         )
     }
 }

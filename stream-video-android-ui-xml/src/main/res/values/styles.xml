@@ -87,12 +87,6 @@
         <item name="streamOutgoingCallMediaControlIconTint">@color/stream_black</item>
         <item name="streamOutgoingCallMediaButtonBackground">@drawable/bg_call_control_option</item>
         <item name="streamOutgoingCallMediaButtonBackgroundTint">@color/stream_app_background</item>
-        <item name="streamOutgoingCallMediaButtonBackgroundAlphaEnabled">
-            @dimen/buttonToggleOnAlpha
-        </item>
-        <item name="streamOutgoingCallMediaButtonBackgroundAlphaDisabled">
-            @dimen/buttonToggleOffAlpha
-        </item>
     </style>
 
 
