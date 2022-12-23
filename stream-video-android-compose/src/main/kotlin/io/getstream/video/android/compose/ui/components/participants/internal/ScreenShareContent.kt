@@ -41,6 +41,7 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.ScreenSharingSession
+import stream.video.sfu.models.TrackType
 import io.getstream.video.android.ui.common.R as RCommon
 
 /**
@@ -70,7 +71,9 @@ internal fun ScreenShareContent(
                 .align(Alignment.Center),
             call = call,
             videoTrack = session.track,
-            onRender = onRender
+            onRender = onRender,
+            trackType = TrackType.TRACK_TYPE_SCREEN_SHARE,
+            sessionId = session.participant.sessionId
         )
 
         Row(modifier = Modifier.align(Alignment.BottomEnd)) {
@@ -153,4 +156,4 @@ internal fun ScreenShareContent(
  * TODO - we should fetch this info from the BE or something as we can't guess all screen sharing
  * will be in 16:9, it can be 4:3, 1:1 or even ultra-wide aspect.
  */
-private const val ScreenShareAspectRatio: Float = 16f / 9f
+internal const val ScreenShareAspectRatio: Float = 16f / 9f

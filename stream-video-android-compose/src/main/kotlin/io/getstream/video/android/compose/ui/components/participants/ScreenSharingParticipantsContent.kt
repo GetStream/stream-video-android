@@ -56,7 +56,8 @@ public fun ScreenSharingCallParticipantsContent(
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues = PaddingValues(0.dp),
     isFullscreen: Boolean = false,
-    onRender: (View) -> Unit = {}
+    onRender: (View) -> Unit = {},
+    onBackPressed: () -> Unit = {}
 ) {
     val configuration = LocalConfiguration.current
     val orientation = configuration.orientation
@@ -81,7 +82,8 @@ public fun ScreenSharingCallParticipantsContent(
             onRender = onRender,
             isFullscreen = isFullscreen,
             onCallAction = onCallAction,
-            callMediaState = callMediaState
+            callMediaState = callMediaState,
+            onBackPressed = onBackPressed
         )
     }
 }

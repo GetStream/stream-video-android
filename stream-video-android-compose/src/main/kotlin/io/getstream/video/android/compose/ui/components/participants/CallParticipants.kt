@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import io.getstream.video.android.call.state.CallAction
 import io.getstream.video.android.call.state.CallMediaState
 import io.getstream.video.android.model.Call
+import io.getstream.video.android.model.state.StreamCallState
 
 /**
  * Renders all the CallParticipants, based on the number of people in a call and the call state.
@@ -45,10 +46,12 @@ public fun CallParticipants(
     call: Call,
     onCallAction: (CallAction) -> Unit,
     callMediaState: CallMediaState,
+    callState: StreamCallState,
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues = PaddingValues(0.dp),
     isFullscreen: Boolean = false,
-    onRender: (View) -> Unit = {}
+    onRender: (View) -> Unit = {},
+    onBackPressed: () -> Unit = {}
 ) {
     val screenSharingSessions by call.screenSharingSessions.collectAsState(initial = emptyList())
 
@@ -61,7 +64,9 @@ public fun CallParticipants(
             paddingValues = paddingValues,
             onRender = onRender,
             onCallAction = onCallAction,
-            callMediaState = callMediaState
+            onBackPressed = onBackPressed,
+            callMediaState = callMediaState,
+            callState = callState
         )
     } else {
         val participants by call.callParticipants.collectAsState()
@@ -75,7 +80,8 @@ public fun CallParticipants(
             onRender = onRender,
             isFullscreen = isFullscreen,
             onCallAction = onCallAction,
-            callMediaState = callMediaState
+            callMediaState = callMediaState,
+            onBackPressed = onBackPressed
         )
     }
 }

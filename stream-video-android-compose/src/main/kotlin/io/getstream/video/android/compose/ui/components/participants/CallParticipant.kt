@@ -35,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -45,6 +46,7 @@ import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.CallParticipantState
 import io.getstream.video.android.model.VideoTrack
 import io.getstream.video.android.model.toUser
+import stream.video.sfu.models.TrackType
 
 /**
  * Represents a single participant in a call.
@@ -105,10 +107,19 @@ private fun ParticipantVideo(
         VideoRenderer(
             call = call,
             videoTrack = track,
-            onRender = onRender
+            sessionId = participant.sessionId,
+            onRender = onRender,
+            trackType = TrackType.TRACK_TYPE_VIDEO
         )
     } else {
         UserAvatar(
+            modifier = Modifier.onSizeChanged {
+                call.updateParticipantTrackSize(
+                    participant.sessionId,
+                    it.width,
+                    it.height
+                )
+            },
             shape = RectangleShape,
             user = participant.toUser()
         )

@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.model
 
+import stream.video.sfu.models.ConnectionQuality
 import stream.video.sfu.models.TrackType
 
 public data class CallParticipantState(
@@ -26,6 +27,7 @@ public data class CallParticipantState(
     public var sessionId: String,
     public val idPrefix: String,
     public val isLocal: Boolean = false,
+    public val connectionQuality: ConnectionQuality = ConnectionQuality.CONNECTION_QUALITY_UNSPECIFIED,
     public var isOnline: Boolean = false,
     public var videoTrack: VideoTrack? = null,
     public var screenSharingTrack: VideoTrack? = null,

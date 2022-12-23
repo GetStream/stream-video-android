@@ -42,7 +42,6 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.CallParticipantState
 
@@ -122,12 +121,12 @@ public fun FloatingParticipantItem(
                 .onGloballyPositioned { videoSize = it.size },
             shape = RoundedCornerShape(16.dp)
         ) {
-            VideoRenderer(
+            CallParticipant(
                 modifier = Modifier
                     .fillMaxSize()
                     .clip(RoundedCornerShape(16.dp)),
                 call = call,
-                videoTrack = track
+                participant = localParticipant
             )
         }
     }

@@ -58,6 +58,7 @@ internal fun CallParticipantsList(
         modifier = modifier,
         contentPadding = PaddingValues(16.dp),
         horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(participantsState) {
             CallParticipantInfoItem(it, onUserOptionsSelected)

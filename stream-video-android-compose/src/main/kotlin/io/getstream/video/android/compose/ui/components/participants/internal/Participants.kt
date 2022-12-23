@@ -17,17 +17,25 @@
 package io.getstream.video.android.compose.ui.components.participants.internal
 
 import android.view.View
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import io.getstream.video.android.ui.common.R
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.participants.CallParticipant
+import io.getstream.video.android.compose.ui.components.participants.FloatingParticipantItem
 import io.getstream.video.android.model.Call
 
 /**
@@ -38,20 +46,21 @@ import io.getstream.video.android.model.Call
  * @param modifier Modifier for styling.
  */
 @Composable
-internal fun Participants(
+internal fun BoxScope.Participants(
     call: Call,
     onRender: (View) -> Unit,
     modifier: Modifier = Modifier,
-    paddingValues: PaddingValues = PaddingValues(0.dp)
+    paddingValues: PaddingValues = PaddingValues(0.dp),
+    parentSize: IntSize = IntSize(0, 0)
 ) {
     val primarySpeaker by call.primarySpeaker.collectAsState(initial = null)
     val roomParticipants by call.callParticipants.collectAsState(emptyList())
-    val participants = roomParticipants.filter { !it.isLocal }
+    val nonLocal = roomParticipants.filter { !it.isLocal }
 
-    when (participants.size) {
+    when (roomParticipants.size) {
         0 -> Unit
         1 -> {
-            val participant = participants.first()
+            val participant = roomParticipants.first()
 
             CallParticipant(
                 modifier = modifier,
@@ -63,8 +72,20 @@ internal fun Participants(
             )
         }
         2 -> {
-            val firstParticipant = participants[0]
-            val secondParticipant = participants[1]
+            val participant = nonLocal.first()
+
+            CallParticipant(
+                modifier = modifier,
+                call = call,
+                participant = participant,
+                onRender = onRender,
+                isFocused = primarySpeaker?.id == participant.id,
+                paddingValues = paddingValues
+            )
+        }
+        3 -> {
+            val firstParticipant = nonLocal[0]
+            val secondParticipant = nonLocal[1]
 
             Column(modifier) {
                 CallParticipant(
@@ -84,46 +105,13 @@ internal fun Participants(
                 )
             }
         }
-        3 -> {
-            val firstParticipant = participants[0]
-            val secondParticipant = participants[1]
-            val thirdParticipant = participants[2]
-
-            Column(modifier) {
-                CallParticipant(
-                    modifier = Modifier.weight(1f),
-                    call = call,
-                    participant = firstParticipant,
-                    isFocused = primarySpeaker?.id == firstParticipant.id
-                )
-
-                Row(modifier = Modifier.weight(1f)) {
-                    CallParticipant(
-                        modifier = Modifier.weight(1f),
-                        call = call,
-                        participant = secondParticipant,
-                        isFocused = primarySpeaker?.id == secondParticipant.id,
-                        paddingValues = paddingValues
-                    )
-
-                    CallParticipant(
-                        modifier = Modifier.weight(1f),
-                        call = call,
-                        participant = thirdParticipant,
-                        onRender = onRender,
-                        isFocused = primarySpeaker?.id == thirdParticipant.id,
-                        paddingValues = paddingValues
-                    )
-                }
-            }
-        }
         else -> {
             /**
              * More than three participants, we only show the first four.
              */
-            val firstParticipant = participants[0]
-            val secondParticipant = participants[1]
-            val thirdParticipant = participants[2]
+            val firstParticipant = nonLocal[0]
+            val secondParticipant = nonLocal[1]
+            val thirdParticipant = nonLocal[2]
             val fourthParticipant = roomParticipants.first { it.isLocal }
 
             Column(modifier) {
@@ -163,5 +151,23 @@ internal fun Participants(
                 }
             }
         }
+    }
+
+    if (roomParticipants.size in 2..3) {
+        val currentLocal = roomParticipants.first { it.isLocal }
+
+        FloatingParticipantItem(
+            call = call,
+            localParticipant = currentLocal,
+            parentBounds = parentSize,
+            modifier = Modifier
+                .size(
+                    height = VideoTheme.dimens.floatingVideoHeight,
+                    width = VideoTheme.dimens.floatingVideoWidth
+                )
+                .clip(RoundedCornerShape(16.dp))
+                .align(Alignment.TopEnd),
+            paddingValues = paddingValues
+        )
     }
 }

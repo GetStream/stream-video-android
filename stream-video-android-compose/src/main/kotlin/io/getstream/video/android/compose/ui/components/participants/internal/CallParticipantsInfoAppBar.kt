@@ -18,6 +18,8 @@ package io.getstream.video.android.compose.ui.components.participants.internal
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -69,6 +71,9 @@ internal fun CallParticipantsInfoAppBar(
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(
+            modifier = Modifier
+                .fillMaxHeight()
+                .aspectRatio(1f, matchHeightConstraintsFirst = true),
             onClick = onBackPressed,
             content = {
                 Icon(

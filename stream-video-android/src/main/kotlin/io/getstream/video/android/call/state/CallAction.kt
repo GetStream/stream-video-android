@@ -96,6 +96,11 @@ public data class ToggleScreenConfiguration(
 ) : CallAction()
 
 /**
+ * Used to set the state to showing call info.
+ */
+public object ShowCallInfo : CallAction()
+
+/**
  * Custom action used to handle any custom behavior with the given [data], such as opening chat,
  * inviting people, sharing the screen and more.
  */
