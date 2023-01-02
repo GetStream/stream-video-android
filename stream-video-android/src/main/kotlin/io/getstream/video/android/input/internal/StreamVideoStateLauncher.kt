@@ -18,7 +18,6 @@ package io.getstream.video.android.input.internal
 
 import android.content.Context
 import io.getstream.log.taggedLogger
-import io.getstream.log.StreamLog
 import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.dispatchers.DispatcherProvider
 import io.getstream.video.android.input.CallAndroidInput
@@ -44,21 +43,21 @@ internal class StreamVideoStateLauncher(
                 logger.v { "[run] $state <= $lastState" }
                 when {
                     lastState is StreamCallState.Idle &&
-                            state is StreamCallState.Joining -> {
+                        state is StreamCallState.Joining -> {
                         androidInputs.forEach {
                             inputLauncher.launch(context, it)
                         }
                     }
                     lastState is StreamCallState.Idle &&
-                            state is StreamCallState.Outgoing &&
-                            !state.acceptedByCallee -> {
+                        state is StreamCallState.Outgoing &&
+                        !state.acceptedByCallee -> {
                         androidInputs.forEach {
                             inputLauncher.launch(context, it)
                         }
                     }
                     lastState is StreamCallState.Idle &&
-                            state is StreamCallState.Incoming &&
-                            !state.acceptedByMe -> {
+                        state is StreamCallState.Incoming &&
+                        !state.acceptedByMe -> {
                         androidInputs.forEach {
                             inputLauncher.launch(context, it)
                         }

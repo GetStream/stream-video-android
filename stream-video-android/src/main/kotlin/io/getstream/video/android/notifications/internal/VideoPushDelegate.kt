@@ -129,8 +129,7 @@ internal class VideoPushDelegate(
                         }
                     )
                 ).build()
-            )
-            .build()
+            ).build()
         notificationManager.notify(INCOMING_CALL_NOTIFICATION_ID, notification)
     }
 
