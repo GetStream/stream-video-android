@@ -41,9 +41,12 @@ import kotlinx.coroutines.launch
 
 /**
  * Class used to handle Push Notifications.
+ *
  * It is used by reflection by [io.getstream.android.push.delegate.PushDelegateProvider] class.
  */
-internal class VideoPushDelegate(context: Context) : PushDelegate(context) {
+internal class VideoPushDelegate(
+    context: Context
+) : PushDelegate(context) {
     private val logger = StreamLog.getLogger("VideoPushDelegate")
     private val userPreferences: UserPreferences by lazy {
         UserCredentialsManager.initialize(context)

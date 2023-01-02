@@ -56,8 +56,8 @@ import io.getstream.video.android.permission.PermissionManagerProvider
 import io.getstream.video.android.permission.StreamPermissionManagerImpl
 import io.getstream.video.android.viewmodel.CallViewModel
 import io.getstream.video.android.viewmodel.CallViewModelFactory
-import kotlinx.coroutines.flow.collectLatest
 import io.getstream.video.android.viewmodel.CallViewModelFactoryProvider
+import kotlinx.coroutines.flow.collectLatest
 
 public abstract class AbstractComposeCallActivity :
     AppCompatActivity(),
@@ -190,13 +190,13 @@ public abstract class AbstractComposeCallActivity :
         } else {
             @Suppress("DEPRECATION")
             window.decorView.systemUiVisibility = (
-                    View.SYSTEM_UI_FLAG_FULLSCREEN
-                            or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                            or View.SYSTEM_UI_FLAG_IMMERSIVE
-                            or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                            or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                            or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                    )
+                View.SYSTEM_UI_FLAG_FULLSCREEN
+                    or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                    or View.SYSTEM_UI_FLAG_IMMERSIVE
+                    or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                )
         }
 
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE

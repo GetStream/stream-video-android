@@ -134,7 +134,6 @@ class LoginActivity : AppCompatActivity() {
             credentialsProvider = AuthCredentialsProvider(
                 user = selectedUser,
                 apiKey = VideoApp.API_KEY,
-                userToken = selectedUser.token
             ),
             loggingLevel = LoggingLevel.BODY
         )

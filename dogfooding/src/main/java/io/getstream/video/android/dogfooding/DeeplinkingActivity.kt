@@ -81,7 +81,6 @@ class DeeplinkingActivity : AppCompatActivity() {
             dogfoodingApp.initializeStreamVideo(
                 credentialsProvider = AuthCredentialsProvider(
                     user = user,
-                    userToken = user.token,
                     apiKey = apiKey ?: API_KEY
                 ),
                 loggingLevel = LoggingLevel.BODY
