@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.internal
+package io.getstream.video.android.notifications.internal
 
 import android.app.NotificationManager
 import android.app.PendingIntent

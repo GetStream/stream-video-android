@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.app.ui.login
 
-import android.content.IntentFilter
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
@@ -44,8 +43,6 @@ import io.getstream.video.android.app.videoApp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.model.User
-import io.getstream.video.android.pushprovider.firebase.CallNotificationReceiver
-import io.getstream.video.android.pushprovider.firebase.CallNotificationReceiver.Companion.ACTION_CALL
 import io.getstream.video.android.token.AuthCredentialsProvider
 
 class LoginActivity : AppCompatActivity() {
@@ -64,11 +61,6 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        registerReceiver(
-            CallNotificationReceiver(),
-            IntentFilter(ACTION_CALL)
-        )
-
         checkIfUserLoggedIn()
 
         setContent {
