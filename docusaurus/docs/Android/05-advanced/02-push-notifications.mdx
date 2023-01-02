@@ -6,9 +6,37 @@ Additionally, for Video, we support notifications when engaging in **ringing cal
 
 There are only a few smaller steps to integrate push notifications with Stream Video. Let's see how.
 
-### Adding The NotificationActivity
+### Adding The PushDeviceGenerator
 
-The first step to integrating Push support is providing your app and our SDK with an `Activity` that handles push notification payload.
+The first step to integrating Push support is providing our SDK with a `PushDeviceGenerator`. These generators provide information and a way to register the user's device, for a given Push Provider, like Firebase.
+
+To set up `PushDeviceGenerator`s, simply pass them as a parameter, when setting up `StreamVideo`:
+
+```kotlin
+fun initializeStreamVideo(
+    credentialsProvider: CredentialsProvider,
+    loggingLevel: LoggingLevel
+): StreamVideo {
+    return StreamVideoBuilder(
+        context = this,
+        credentialsProvider = credentialsProvider,
+        loggingLevel = loggingLevel,
+        pushDeviceGenerators = listOf(FirebasePushDeviceGenerator()), // here
+        androidInputs = setOf(
+            CallServiceInput.from(CallService::class),
+            CallActivityInput.from(CallActivity::class),
+        )
+    )
+}
+```
+
+You can pass in a list of generators. This helps cover multiple device vendors and their corresponding providers. For example, devices which don't use Google Play Services.
+
+We also conveniently provide you with a few default `PushDeviceGenerator`s, but you can also implement custom solutions.
+
+### Integrating the NotificationActivity
+
+Now that you have the device generator, you need to add an `Activity` to your app that handles the push notification payload.
 
 We provide an `AbstractNotificationActivity` that implements most of the logic for you. You only need to provide it with an instance of `StreamVideo` and a way to intitialize the SDK in your app, if it hasn't been initialized.
 
@@ -52,7 +80,7 @@ Add the following code to the `AndroidManifest.xml`:
     android:name=".NotificationActivity"
     android:exported="false">
 
-    <intent-filter android:priority="-1">
+    <intent-filter android:priority="<your-priority>">
         <action android:name="io.getstream.video.android.action.INCOMING_CALL" />
         <action android:name="io.getstream.video.android.action.ACCEPT_CALL" />
     </intent-filter>
@@ -65,6 +93,8 @@ You declare two important actions:
 * `ACCEPT_CALL`: Triggered after the user accepts a call, by pressing on the **Accept** button our default notification.
 
 Both of these actions are added to our notification intents, so you can choose to handle them separately or together, but **both are required** for the push integration to work.
+
+Also notice the `android:priority` attribute. Our implementation uses `-1` by default, which allows you to easily declare higher priority. You can also omit this property, as `0` (zero) is the `AndroidManifest` default, which is higher than `-1`. Simply omit this attribute or put in a positive number and you're good to go.
 
 Now that you have the `Activity` declared in the manifest, you're able to receive notifications and process them in the `NotificationActivity`. And if you're using our launchers, it should automatically start the Call screen.
 
