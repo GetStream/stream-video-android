@@ -19,11 +19,12 @@ package io.getstream.video.android.call.signal.socket
 import android.os.Handler
 import android.os.Looper
 import androidx.annotation.VisibleForTesting
-import io.getstream.log.StreamLog
+import io.getstream.log.taggedLogger
 import io.getstream.video.android.errors.DisconnectCause
 import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.errors.VideoNetworkError
 import io.getstream.video.android.events.ConnectedEvent
+import io.getstream.video.android.events.HealthCheckResponseEvent
 import io.getstream.video.android.events.SfuDataEvent
 import io.getstream.video.android.network.NetworkStateProvider
 import io.getstream.video.android.socket.EventsParser
@@ -43,14 +44,13 @@ internal class SfuSocketImpl(
     private val coroutineScope: CoroutineScope,
 ) : SfuSocket {
 
-    private val logger = StreamLog.getLogger("Call:SfuSocket")
+    private val logger by taggedLogger("Call:SfuSocket")
 
     private var connectionConf: SfuSocketFactory.ConnectionConf? = null
     private val listeners: MutableList<SfuSocketListener> = mutableListOf()
 
     private var socket: Socket? = null
     private var eventsParser: SignalEventsParser? = null
-    private var clientId: String = ""
     private var sessionId: String = ""
 
     private var socketConnectionJob: Job? = null
@@ -67,7 +67,7 @@ internal class SfuSocketImpl(
             override fun check() {
                 (state as? State.Connected)?.let {
                     socket?.pingCall(
-                        HealthCheckRequest(sessionId)
+                        HealthCheckRequest()
                     )
                 }
             }
@@ -184,7 +184,12 @@ internal class SfuSocketImpl(
 
     override fun onEvent(event: SfuDataEvent) {
         healthMonitor.ack()
-        callListeners { listener -> listener.onEvent(event) }
+        callListeners { listener ->
+            if (event !is HealthCheckResponseEvent) {
+                logger.d { "[onEvent] Sfu Event: $event" }
+                listener.onEvent(event)
+            }
+        }
     }
 
     private fun reconnect(connectionConf: SfuSocketFactory.ConnectionConf?) {
@@ -240,11 +245,19 @@ internal class SfuSocketImpl(
 
     @VisibleForTesting
     internal sealed class State {
-        object Connecting : State() { override fun toString(): String = "Connecting" }
+        object Connecting : State() {
+            override fun toString(): String = "Connecting"
+        }
+
         data class Connected(val event: ConnectedEvent) : State()
-        object NetworkDisconnected : State() { override fun toString(): String = "NetworkDisconnected" }
+        object NetworkDisconnected : State() {
+            override fun toString(): String = "NetworkDisconnected"
+        }
+
         data class DisconnectedTemporarily(val error: VideoNetworkError?) : State()
         data class DisconnectedPermanently(val error: VideoNetworkError?) : State()
-        object DisconnectedByRequest : State() { override fun toString(): String = "DisconnectedByRequest" }
+        object DisconnectedByRequest : State() {
+            override fun toString(): String = "DisconnectedByRequest"
+        }
     }
 }

@@ -23,7 +23,7 @@ import android.media.AudioDeviceInfo
 import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.os.Build
-import io.getstream.log.StreamLog
+import io.getstream.log.taggedLogger
 
 internal class AudioManagerAdapterImpl(
     private val context: Context,
@@ -32,7 +32,7 @@ internal class AudioManagerAdapterImpl(
     private val audioFocusChangeListener: AudioManager.OnAudioFocusChangeListener
 ) : AudioManagerAdapter {
 
-    private val logger = StreamLog.getLogger("Call:AudioManager")
+    private val logger by taggedLogger("Call:AudioManager")
 
     private var savedAudioMode = 0
     private var savedIsMicrophoneMuted = false

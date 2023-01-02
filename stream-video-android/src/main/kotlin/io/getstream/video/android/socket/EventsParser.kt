@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.socket
 
-import io.getstream.log.StreamLog
+import io.getstream.log.taggedLogger
 import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.errors.VideoErrorCode
 import io.getstream.video.android.errors.VideoNetworkError
@@ -32,7 +32,7 @@ internal class EventsParser(
     private val videoSocket: VideoSocket,
 ) : okhttp3.WebSocketListener() {
 
-    private val logger = StreamLog.getLogger("Call:WS-Events")
+    private val logger by taggedLogger("Call:WS-Events")
 
     private var connectionEventReceived = false
     private var closedByClient = true

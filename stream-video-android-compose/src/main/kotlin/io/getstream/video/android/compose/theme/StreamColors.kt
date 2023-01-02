@@ -56,6 +56,7 @@ public data class StreamColors(
     public val errorAccent: Color,
     public val infoAccent: Color,
     public val highlight: Color,
+    public val screenSharingBackground: Color
 ) {
 
     public companion object {
@@ -80,6 +81,7 @@ public data class StreamColors(
             errorAccent = colorResource(R.color.stream_compose_error_accent),
             infoAccent = colorResource(R.color.stream_compose_info_accent),
             highlight = colorResource(R.color.stream_compose_highlight),
+            screenSharingBackground = colorResource(R.color.stream_compose_app_background)
         )
 
         /**
@@ -103,6 +105,7 @@ public data class StreamColors(
             errorAccent = colorResource(R.color.stream_compose_error_accent_dark),
             infoAccent = colorResource(R.color.stream_compose_info_accent_dark),
             highlight = colorResource(R.color.stream_compose_highlight_dark),
+            screenSharingBackground = colorResource(R.color.stream_compose_app_background_dark)
         )
     }
 }

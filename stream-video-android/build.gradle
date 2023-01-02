@@ -96,6 +96,10 @@ dependencies {
     implementation Dependencies.okhttpLoggingInterceptor
     implementation Dependencies.kotlinSerializationJson
 
+    implementation Dependencies.moshi
+    implementation Dependencies.moshiKotlin
+    implementation Dependencies.moshiAdapters
+
     // Stream
     implementation Dependencies.streamLog
     implementation Dependencies.streamPush

@@ -17,12 +17,11 @@
 package io.getstream.video.android.model
 
 import java.io.Serializable
-import java.util.Date
+import java.util.*
 import stream.video.coordinator.call_v1.Call as CoordinatorCall
 import stream.video.coordinator.call_v1.CallDetails as CoordinatorCallDetails
 import stream.video.coordinator.member_v1.Member as CoordinatorMember
 import stream.video.coordinator.user_v1.User as CoordinatorUser
-import stream.video.sfu.models.Participant as SfuParticipant
 
 public data class CallUser(
     val id: String,
@@ -84,9 +83,10 @@ public fun CoordinatorUser.toCallUser(): CallUser = CallUser(
     teams = teams
 )
 
-public fun Map<String, CoordinatorMember>.toCallMembers(): Map<String, CallMember> = map { (userId, protoMember) ->
-    userId to protoMember.toCallMember()
-}.toMap()
+public fun Map<String, CoordinatorMember>.toCallMembers(): Map<String, CallMember> =
+    map { (userId, protoMember) ->
+        userId to protoMember.toCallMember()
+    }.toMap()
 
 public fun CoordinatorMember.toCallMember(): CallMember = CallMember(
     callCid = call_cid,
@@ -101,8 +101,8 @@ public fun CoordinatorCallDetails?.toCallDetails(): CallDetails {
     return CallDetails(
         memberUserIds = member_user_ids,
         members = members.toCallMembers(),
-        broadcastingEnabled = options?.broadcasting?.enabled ?: false,
-        recordingEnabled = options?.recording?.enabled ?: false
+        broadcastingEnabled = settings?.broadcasting?.enabled ?: false,
+        recordingEnabled = settings?.recording?.enabled ?: false
     )
 }
 
@@ -113,39 +113,11 @@ public fun CoordinatorCall?.toCallInfo(): CallInfo {
         id = id,
         type = type,
         createdByUserId = created_by_user_id,
-        broadcastingEnabled = options?.broadcasting?.enabled ?: false,
-        recordingEnabled = options?.recording?.enabled ?: false,
+        broadcastingEnabled = settings_overrides?.broadcasting?.enabled ?: false,
+        recordingEnabled = settings_overrides?.recording?.enabled ?: false,
         createdAt = created_at?.let { Date(it.toEpochMilli()) },
         updatedAt = updated_at?.let { Date(it.toEpochMilli()) },
     )
-}
-
-/**
- * Converts [SfuParticipant] into [CallUser].
- */
-public fun SfuParticipant.toCallUser(): CallUser = CallUser(
-    id = user?.id ?: error("SfuParticipant has no userId"),
-    name = user.name,
-    role = user.role,
-    imageUrl = user.image_url,
-    state = CallUserState(
-        trackIdPrefix = track_lookup_prefix,
-        online = online,
-        audio = audio,
-        video = video,
-    ),
-    createdAt = /*TODO user.created_at*/ null,
-    updatedAt = /*TODO user.updated_at*/ null,
-    teams = user.teams
-)
-
-/**
- * Converts a list of [SfuParticipant] into a map associated by [CallUser.id] to [CallUser].
- */
-public fun List<SfuParticipant>.toCallUserMap(): Map<String, CallUser> = associate { participant ->
-    participant.toCallUser().let {
-        it.id to it
-    }
 }
 
 /**
@@ -162,14 +134,15 @@ public infix fun Map<String, CallUser>.merge(that: Map<String, CallUser>): Map<S
 /**
  * Merges [that] [CallUser] into [this] map.
  */
-public infix fun Map<String, CallUser>.merge(that: CallUser): Map<String, CallUser> = when (contains(that.id)) {
-    true -> this.map { (userId, user) ->
-        userId to user.merge(that)
-    }.toMap()
-    else -> this.toMutableMap().also {
-        it[that.id] = that
+public infix fun Map<String, CallUser>.merge(that: CallUser): Map<String, CallUser> =
+    when (contains(that.id)) {
+        true -> this.map { (userId, user) ->
+            userId to user.merge(that)
+        }.toMap()
+        else -> this.toMutableMap().also {
+            it[that.id] = that
+        }
     }
-}
 
 /**
  * Merges [that] into [this] CallUser to absorb as much data as possible from both instances.

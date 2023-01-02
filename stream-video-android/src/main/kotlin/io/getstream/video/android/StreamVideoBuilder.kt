@@ -81,9 +81,12 @@ public class StreamVideoBuilder(
         val scope = CoroutineScope(DispatcherProvider.IO)
 
         val engine: StreamCallEngine =
-            callEngineBuilder?.invoke(scope) ?: StreamCallEngineImpl(scope, config) {
-                credentialsProvider.getUserCredentials().id
-            }
+            callEngineBuilder?.invoke(scope) ?: StreamCallEngineImpl(
+                parentScope = scope,
+                coordinatorClient = callCoordinatorClientModule.callCoordinatorClient(),
+                config = config,
+                getCurrentUserId = { credentialsProvider.getUserCredentials().id }
+            )
 
         return StreamVideoImpl(
             context = context,

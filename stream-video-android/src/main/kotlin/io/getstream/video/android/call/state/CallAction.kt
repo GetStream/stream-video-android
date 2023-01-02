@@ -85,6 +85,22 @@ public data class InviteUsersToCall(
 ) : CallAction()
 
 /**
+ * Used to trigger Screen UI configuration changes when observing screen share sessions.
+ *
+ * @param isFullscreen If we should show full screen UI or not. This is usable only with landscape.
+ * @param isLandscape If the orientation should be landscape. Can be used without full screen.
+ */
+public data class ToggleScreenConfiguration(
+    val isFullscreen: Boolean,
+    val isLandscape: Boolean
+) : CallAction()
+
+/**
+ * Used to set the state to showing call info.
+ */
+public object ShowCallInfo : CallAction()
+
+/**
  * Custom action used to handle any custom behavior with the given [data], such as opening chat,
  * inviting people, sharing the screen and more.
  */

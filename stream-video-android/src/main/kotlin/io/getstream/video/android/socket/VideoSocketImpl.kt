@@ -19,7 +19,7 @@ package io.getstream.video.android.socket
 import android.os.Handler
 import android.os.Looper
 import androidx.annotation.VisibleForTesting
-import io.getstream.log.StreamLog
+import io.getstream.log.taggedLogger
 import io.getstream.video.android.coordinator.state.UserState
 import io.getstream.video.android.errors.DisconnectCause
 import io.getstream.video.android.errors.VideoError
@@ -58,7 +58,7 @@ internal class VideoSocketImpl(
     private val coroutineScope: CoroutineScope,
 ) : VideoSocket {
 
-    private val logger = StreamLog.getLogger("Call:CoordSocket")
+    private val logger by taggedLogger("Call:CoordSocket")
 
     private var connectionConf: SocketFactory.ConnectionConf? = null
     private var socket: Socket? = null
@@ -222,6 +222,7 @@ internal class VideoSocketImpl(
         socket?.authenticate(
             WebsocketAuthRequest(
                 user = UserInput(
+                    id = user.id,
                     name = user.name,
                     image_url = user.imageUrl ?: "",
                     role = user.role
@@ -325,11 +326,19 @@ internal class VideoSocketImpl(
 
     @VisibleForTesting
     internal sealed class State {
-        object Connecting : State() { override fun toString(): String = "Connecting" }
+        object Connecting : State() {
+            override fun toString(): String = "Connecting"
+        }
+
         data class Connected(val event: ConnectedEvent) : State()
-        object NetworkDisconnected : State() { override fun toString(): String = "NetworkDisconnected" }
+        object NetworkDisconnected : State() {
+            override fun toString(): String = "NetworkDisconnected"
+        }
+
         data class DisconnectedTemporarily(val error: VideoNetworkError?) : State()
         data class DisconnectedPermanently(val error: VideoNetworkError?) : State()
-        object DisconnectedByRequest : State() { override fun toString(): String = "DisconnectedByRequest" }
+        object DisconnectedByRequest : State() {
+            override fun toString(): String = "DisconnectedByRequest"
+        }
     }
 }

@@ -48,7 +48,7 @@ class VideoApp : Application() {
         super.onCreate()
         if (BuildConfig.DEBUG) {
             StreamLog.setValidator { _, _ -> true }
-            StreamLog.setLogger(AndroidStreamLogger())
+            StreamLog.install(AndroidStreamLogger())
         }
         StreamLog.i(TAG) { "[onCreate] no args" }
         UserCredentialsManager.initialize(this)
@@ -78,8 +78,15 @@ class VideoApp : Application() {
         }
     }
 
-    private companion object {
+    fun logOut() {
+        streamVideo.clearCallState()
+        streamVideo.removeDevices(userPreferences.getDevices())
+        userPreferences.clear()
+    }
+
+    companion object {
         private const val TAG = "Call:App"
+        const val API_KEY = "us83cfwuhy8n"
     }
 }
 

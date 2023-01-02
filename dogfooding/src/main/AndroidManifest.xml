@@ -26,7 +26,9 @@
 
         <activity
             android:name=".CallActivity"
-            android:exported="false" />
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:exported="false"
+            android:supportsPictureInPicture="true" />
 
         <service
             android:name=".CallService"
@@ -41,7 +43,6 @@
                 <action android:name="io.getstream.video.android.action.ACCEPT_CALL" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".DeeplinkingActivity"
             android:exported="true">
@@ -52,6 +53,7 @@
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
+
 
                 <data
                     android:host="stream-calls-dogfood.vercel.app"

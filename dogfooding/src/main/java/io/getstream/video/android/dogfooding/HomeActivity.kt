@@ -52,7 +52,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
-import io.getstream.log.StreamLog
+import io.getstream.log.taggedLogger
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.Avatar
 import io.getstream.video.android.compose.ui.components.avatar.InitialsAvatar
@@ -77,7 +77,7 @@ class HomeActivity : AppCompatActivity() {
         }
     }
 
-    private val logger = StreamLog.getLogger("Call:HomeView")
+    private val logger by taggedLogger("Call:HomeView")
 
     private val callIdState: MutableState<String> = mutableStateOf("call123")
 

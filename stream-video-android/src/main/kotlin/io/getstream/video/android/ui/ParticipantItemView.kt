@@ -21,6 +21,7 @@ import android.util.AttributeSet
 import android.view.View
 import io.getstream.video.android.model.Call
 import org.webrtc.VideoTrack
+import stream.video.sfu.models.TrackType
 
 public class ParticipantItemView : TextureViewRenderer {
 
@@ -43,7 +44,7 @@ public class ParticipantItemView : TextureViewRenderer {
     }
 
     public fun initialize(call: Call, streamId: String, onRender: (View) -> Unit = {}) {
-        call.initRenderer(this, streamId, onRender)
+        call.initRenderer(this, streamId, TrackType.TRACK_TYPE_VIDEO, onRender)
         this.isInitialized = true
     }
 }

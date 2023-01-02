@@ -16,12 +16,14 @@
 
 package io.getstream.video.android.events
 
+import io.getstream.video.android.model.StreamCallCid
 import stream.video.sfu.event.ChangePublishQuality
-import stream.video.sfu.models.Call
+import stream.video.sfu.event.ConnectionQualityInfo
 import stream.video.sfu.models.CallState
-import stream.video.sfu.models.ConnectionQuality
+import stream.video.sfu.models.Error
 import stream.video.sfu.models.Participant
 import stream.video.sfu.models.PeerType
+import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoQuality
 
 public sealed class SfuDataEvent
@@ -35,9 +37,12 @@ public data class SubscriberOfferEvent(
     val sdp: String
 ) : SfuDataEvent()
 
+public data class PublisherAnswerEvent(
+    val sdp: String
+) : SfuDataEvent()
+
 public data class ConnectionQualityChangeEvent(
-    val userId: String,
-    val connectionQuality: ConnectionQuality,
+    val updates: List<ConnectionQualityInfo>
 ) : SfuDataEvent()
 
 public data class AudioLevelChangedEvent(
@@ -48,10 +53,16 @@ public data class ChangePublishQualityEvent(
     val changePublishQuality: ChangePublishQuality
 ) : SfuDataEvent()
 
-public data class MuteStateChangeEvent(
+public data class TrackPublishedEvent(
     val userId: String,
-    val audioMuted: Boolean,
-    val videoMuted: Boolean
+    val sessionId: String,
+    val trackType: TrackType
+) : SfuDataEvent()
+
+public data class TrackUnpublishedEvent(
+    val userId: String,
+    val sessionId: String,
+    val trackType: TrackType
 ) : SfuDataEvent()
 
 public data class VideoQualityChangedEvent(
@@ -60,21 +71,22 @@ public data class VideoQualityChangedEvent(
 
 public data class ParticipantJoinedEvent(
     val participant: Participant,
-    val call: Call,
+    val callCid: StreamCallCid,
 ) : SfuDataEvent()
 
 public data class ParticipantLeftEvent(
     val participant: Participant,
-    val call: Call
+    val callCid: StreamCallCid
 ) : SfuDataEvent()
 
 public data class DominantSpeakerChangedEvent(
     val userId: String
 ) : SfuDataEvent()
 
-public data class HealthCheckResponseEvent(val sessionId: String) : SfuDataEvent()
+public object HealthCheckResponseEvent : SfuDataEvent()
 
 public data class JoinCallResponseEvent(
-    val callState: CallState,
-    val ownSessionId: String
+    val callState: CallState
 ) : SfuDataEvent()
+
+public data class ErrorEvent(val error: Error?) : SfuDataEvent()

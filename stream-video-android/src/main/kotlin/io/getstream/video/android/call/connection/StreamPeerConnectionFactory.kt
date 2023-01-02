@@ -17,9 +17,8 @@
 package io.getstream.video.android.call.connection
 
 import android.content.Context
-import android.media.MediaCodecList
 import android.os.Build
-import io.getstream.log.StreamLog
+import io.getstream.log.taggedLogger
 import io.getstream.video.android.model.IceCandidate
 import io.getstream.video.android.model.StreamPeerType
 import kotlinx.coroutines.CoroutineScope
@@ -38,7 +37,6 @@ import org.webrtc.SoftwareVideoEncoderFactory
 import org.webrtc.VideoSource
 import org.webrtc.VideoTrack
 import org.webrtc.audio.JavaAudioDeviceModule
-import stream.video.sfu.models.Codec
 
 /**
  * Builds a factory that provides [PeerConnection]s when requested.
@@ -47,8 +45,8 @@ import stream.video.sfu.models.Codec
  */
 public class StreamPeerConnectionFactory(private val context: Context) {
 
-    private val webRtcLogger = StreamLog.getLogger("Call:WebRTC")
-    private val audioLogger = StreamLog.getLogger("Call:AudioTrackCallback")
+    private val webRtcLogger by taggedLogger("Call:WebRTC")
+    private val audioLogger by taggedLogger("Call:AudioTrackCallback")
 
     /**
      * Represents the EGL rendering context.
@@ -175,140 +173,6 @@ public class StreamPeerConnectionFactory(private val context: Context) {
     }
 
     /**
-     * System-based codecs fetched from the Android Media API.
-     */
-    private val systemCodecs by lazy {
-        (0 until MediaCodecList.getCodecCount()).map {
-            MediaCodecList.getCodecInfoAt(it)
-        }
-    }
-
-    /**
-     * Uses the [systemCodecs] to process and provide codecs for encoding of video tracks
-     * before sending to the server.
-     *
-     * @return [List] of [Codec]s that we can use for encoding.
-     */
-    public fun getVideoEncoderCodecs(): List<Codec> {
-        val factoryCodecs = try {
-            videoEncoderFactory.supportedCodecs
-        } catch (error: Throwable) {
-            emptyArray()
-        }
-        val codecNames = factoryCodecs.map { it.name }
-
-        val supportedSystemCodecs = systemCodecs.filter {
-            it.isEncoder && codecNames.any { name ->
-                name.lowercase() in it.name.lowercase()
-            }
-        }
-
-        return factoryCodecs.map { codec ->
-            Codec(
-                mime = "video/${codec.name}",
-                hw_accelerated = supportedSystemCodecs.filter {
-                    codec.name.lowercase() in it.name.lowercase()
-                }.any {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        it.isHardwareAccelerated
-                    } else {
-                        false
-                    }
-                },
-                fmtp_line = codec.params.toString()
-            )
-        }
-    }
-
-    /**
-     * Uses the [systemCodecs] to process and provide codecs for decoding of video tracks
-     * before displaying to the user.
-     *
-     * @return [List] of [Codec]s that we can use for decoding.
-     */
-    public fun getVideoDecoderCodecs(): List<Codec> {
-        val factoryCodecs = try {
-            videoDecoderFactory.supportedCodecs
-        } catch (error: Throwable) {
-            emptyArray()
-        }
-
-        val codecNames = factoryCodecs.map { it.name }
-
-        val supportedSystemCodecs = systemCodecs.filter {
-            !it.isEncoder && codecNames.any { name ->
-                name.lowercase() in it.name.lowercase()
-            }
-        }
-
-        return factoryCodecs.map { codec ->
-            Codec(
-                mime = "video/${codec.name}",
-                hw_accelerated = supportedSystemCodecs.filter {
-                    codec.name.lowercase() in it.name.lowercase()
-                }.any {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        it.isHardwareAccelerated
-                    } else {
-                        false
-                    }
-                },
-                fmtp_line = codec.params.toString()
-            )
-        }
-    }
-
-    /**
-     * Uses the [systemCodecs] to process and provide codecs for encoding of audio tracks
-     * before sending to the server.
-     *
-     * @return [List] of [Codec]s that we can use for encoding.
-     */
-    public fun getAudioEncoderCoders(): List<Codec> {
-        val supportedSystemCodecs = systemCodecs.filter {
-            it.isEncoder && it.supportedTypes.any { type -> type.contains("audio") }
-        }
-
-        return supportedSystemCodecs.map { codec ->
-            Codec(
-                mime = codec.supportedTypes.firstOrNull() ?: "audio",
-                hw_accelerated = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    codec.isHardwareAccelerated
-                } else {
-                    false
-                }
-            )
-        }.also {
-            audioLogger.i { "[getAudioEncoderCoders] codecs: $it" }
-        }
-    }
-
-    /**
-     * Uses the [systemCodecs] to process and provide codecs for decoding of audio tracks
-     * before playing them to the user.
-     *
-     * @return [List] of [Codec]s that we can use for decoding.
-     */
-    public fun getAudioDecoderCoders(): List<Codec> {
-        val supportedSystemCodecs = systemCodecs.filter {
-            !it.isEncoder && it.supportedTypes.any { type -> type.contains("audio") }
-        }
-
-        return supportedSystemCodecs.map { codec ->
-            Codec(
-                mime = codec.supportedTypes.firstOrNull() ?: "audio",
-                hw_accelerated = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    codec.isHardwareAccelerated
-                } else {
-                    false
-                }
-            )
-        }.also {
-            audioLogger.i { "[getAudioDecoderCoders] codecs: $it" }
-        }
-    }
-
-    /**
      * Builds a [StreamPeerConnection] that wraps the WebRTC [PeerConnection] and exposes several
      * helpful handlers.
      *
@@ -317,7 +181,6 @@ public class StreamPeerConnectionFactory(private val context: Context) {
      * @param type The type of connection, either a subscriber of a publisher.
      * @param mediaConstraints Constraints used for audio and video tracks in the connection.
      * @param onStreamAdded Handler when a new [MediaStream] gets added.
-     * @param onStreamRemoved Handler when a [MediaStream] gets removed.
      * @param onNegotiationNeeded Handler when there's a new negotiation.
      * @param onIceCandidateRequest Handler whenever we receive [IceCandidate]s.
      * @return [StreamPeerConnection] That's fully set up and can be observed and used to send and
@@ -329,22 +192,20 @@ public class StreamPeerConnectionFactory(private val context: Context) {
         type: StreamPeerType,
         mediaConstraints: MediaConstraints,
         onStreamAdded: ((MediaStream) -> Unit)? = null,
-        onStreamRemoved: ((MediaStream) -> Unit)? = null,
         onNegotiationNeeded: ((StreamPeerConnection, StreamPeerType) -> Unit)? = null,
         onIceCandidateRequest: ((IceCandidate, StreamPeerType) -> Unit)? = null,
     ): StreamPeerConnection {
         val peerConnection = StreamPeerConnection(
-            coroutineScope,
-            type,
-            mediaConstraints,
-            onStreamAdded,
-            onStreamRemoved,
-            onNegotiationNeeded,
-            onIceCandidateRequest,
+            coroutineScope = coroutineScope,
+            type = type,
+            mediaConstraints = mediaConstraints,
+            onStreamAdded = onStreamAdded,
+            onNegotiationNeeded = onNegotiationNeeded,
+            onIceCandidate = onIceCandidateRequest,
         )
         val connection = makePeerConnectionInternal(
-            configuration,
-            peerConnection
+            configuration = configuration,
+            observer = peerConnection
         )
         return peerConnection.apply { initialize(connection) }
     }

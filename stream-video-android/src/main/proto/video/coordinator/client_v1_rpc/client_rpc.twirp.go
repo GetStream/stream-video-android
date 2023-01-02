@@ -70,6 +70,16 @@ type ClientRPC interface {
 
 	QueryDevices(context.Context, *QueryDevicesRequest) (*QueryDevicesResponse, error)
 
+	// starts broadcast to HLS and/or RTMP, replaces existing settings if broadcasting is already started
+	StartBroadcast(context.Context, *StartBroadcastRequest) (*StartBroadcastResponse, error)
+
+	// stops broadcasting to HLS and/or RTMP
+	StopBroadcast(context.Context, *StopBroadcastRequest) (*StopBroadcastResponse, error)
+
+	StartRecording(context.Context, *StartRecordingRequest) (*StartRecordingResponse, error)
+
+	StopRecording(context.Context, *StopRecordingRequest) (*StopRecordingResponse, error)
+
 	// Adds members to a call
 	UpsertCallMembers(context.Context, *UpsertCallMembersRequest) (*UpsertCallMembersResponse, error)
 
@@ -79,6 +89,10 @@ type ClientRPC interface {
 	SendEvent(context.Context, *SendEventRequest) (*SendEventResponse, error)
 
 	SendCustomEvent(context.Context, *SendCustomEventRequest) (*SendCustomEventResponse, error)
+
+	QueryUsers(context.Context, *QueryUsersRequest) (*QueryUsersResponse, error)
+
+	UpsertUsers(context.Context, *UpsertUsersRequest) (*UpsertUsersResponse, error)
 
 	// endpoint for storing stats (perhaps we should move this to the SFU layer though)
 	ReportCallStats(context.Context, *ReportCallStatsRequest) (*ReportCallStatsResponse, error)
@@ -99,7 +113,7 @@ type ClientRPC interface {
 
 type clientRPCProtobufClient struct {
 	client      HTTPClient
-	urls        [20]string
+	urls        [26]string
 	interceptor twirp.Interceptor
 	opts        twirp.ClientOptions
 }
@@ -127,7 +141,7 @@ func NewClientRPCProtobufClient(baseURL string, client HTTPClient, opts ...twirp
 	// Build method URLs: <baseURL>[<prefix>]/<package>.<Service>/<Method>
 	serviceURL := sanitizeBaseURL(baseURL)
 	serviceURL += baseServicePath(pathPrefix, "stream.video.coordinator.client_v1_rpc", "ClientRPC")
-	urls := [20]string{
+	urls := [26]string{
 		serviceURL + "CreateCall",
 		serviceURL + "GetOrCreateCall",
 		serviceURL + "JoinCall",
@@ -140,10 +154,16 @@ func NewClientRPCProtobufClient(baseURL string, client HTTPClient, opts ...twirp
 		serviceURL + "CreateDevice",
 		serviceURL + "DeleteDevice",
 		serviceURL + "QueryDevices",
+		serviceURL + "StartBroadcast",
+		serviceURL + "StopBroadcast",
+		serviceURL + "StartRecording",
+		serviceURL + "StopRecording",
 		serviceURL + "UpsertCallMembers",
 		serviceURL + "DeleteCallMembers",
 		serviceURL + "SendEvent",
 		serviceURL + "SendCustomEvent",
+		serviceURL + "QueryUsers",
+		serviceURL + "UpsertUsers",
 		serviceURL + "ReportCallStats",
 		serviceURL + "ReportCallStatEvent",
 		serviceURL + "ReviewCall",
@@ -710,6 +730,190 @@ func (c *clientRPCProtobufClient) callQueryDevices(ctx context.Context, in *Quer
 	return out, nil
 }
 
+func (c *clientRPCProtobufClient) StartBroadcast(ctx context.Context, in *StartBroadcastRequest) (*StartBroadcastResponse, error) {
+	ctx = ctxsetters.WithPackageName(ctx, "stream.video.coordinator.client_v1_rpc")
+	ctx = ctxsetters.WithServiceName(ctx, "ClientRPC")
+	ctx = ctxsetters.WithMethodName(ctx, "StartBroadcast")
+	caller := c.callStartBroadcast
+	if c.interceptor != nil {
+		caller = func(ctx context.Context, req *StartBroadcastRequest) (*StartBroadcastResponse, error) {
+			resp, err := c.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*StartBroadcastRequest)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*StartBroadcastRequest) when calling interceptor")
+					}
+					return c.callStartBroadcast(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*StartBroadcastResponse)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*StartBroadcastResponse) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+	return caller(ctx, in)
+}
+
+func (c *clientRPCProtobufClient) callStartBroadcast(ctx context.Context, in *StartBroadcastRequest) (*StartBroadcastResponse, error) {
+	out := new(StartBroadcastResponse)
+	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[12], in, out)
+	if err != nil {
+		twerr, ok := err.(twirp.Error)
+		if !ok {
+			twerr = twirp.InternalErrorWith(err)
+		}
+		callClientError(ctx, c.opts.Hooks, twerr)
+		return nil, err
+	}
+
+	callClientResponseReceived(ctx, c.opts.Hooks)
+
+	return out, nil
+}
+
+func (c *clientRPCProtobufClient) StopBroadcast(ctx context.Context, in *StopBroadcastRequest) (*StopBroadcastResponse, error) {
+	ctx = ctxsetters.WithPackageName(ctx, "stream.video.coordinator.client_v1_rpc")
+	ctx = ctxsetters.WithServiceName(ctx, "ClientRPC")
+	ctx = ctxsetters.WithMethodName(ctx, "StopBroadcast")
+	caller := c.callStopBroadcast
+	if c.interceptor != nil {
+		caller = func(ctx context.Context, req *StopBroadcastRequest) (*StopBroadcastResponse, error) {
+			resp, err := c.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*StopBroadcastRequest)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*StopBroadcastRequest) when calling interceptor")
+					}
+					return c.callStopBroadcast(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*StopBroadcastResponse)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*StopBroadcastResponse) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+	return caller(ctx, in)
+}
+
+func (c *clientRPCProtobufClient) callStopBroadcast(ctx context.Context, in *StopBroadcastRequest) (*StopBroadcastResponse, error) {
+	out := new(StopBroadcastResponse)
+	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[13], in, out)
+	if err != nil {
+		twerr, ok := err.(twirp.Error)
+		if !ok {
+			twerr = twirp.InternalErrorWith(err)
+		}
+		callClientError(ctx, c.opts.Hooks, twerr)
+		return nil, err
+	}
+
+	callClientResponseReceived(ctx, c.opts.Hooks)
+
+	return out, nil
+}
+
+func (c *clientRPCProtobufClient) StartRecording(ctx context.Context, in *StartRecordingRequest) (*StartRecordingResponse, error) {
+	ctx = ctxsetters.WithPackageName(ctx, "stream.video.coordinator.client_v1_rpc")
+	ctx = ctxsetters.WithServiceName(ctx, "ClientRPC")
+	ctx = ctxsetters.WithMethodName(ctx, "StartRecording")
+	caller := c.callStartRecording
+	if c.interceptor != nil {
+		caller = func(ctx context.Context, req *StartRecordingRequest) (*StartRecordingResponse, error) {
+			resp, err := c.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*StartRecordingRequest)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*StartRecordingRequest) when calling interceptor")
+					}
+					return c.callStartRecording(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*StartRecordingResponse)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*StartRecordingResponse) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+	return caller(ctx, in)
+}
+
+func (c *clientRPCProtobufClient) callStartRecording(ctx context.Context, in *StartRecordingRequest) (*StartRecordingResponse, error) {
+	out := new(StartRecordingResponse)
+	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[14], in, out)
+	if err != nil {
+		twerr, ok := err.(twirp.Error)
+		if !ok {
+			twerr = twirp.InternalErrorWith(err)
+		}
+		callClientError(ctx, c.opts.Hooks, twerr)
+		return nil, err
+	}
+
+	callClientResponseReceived(ctx, c.opts.Hooks)
+
+	return out, nil
+}
+
+func (c *clientRPCProtobufClient) StopRecording(ctx context.Context, in *StopRecordingRequest) (*StopRecordingResponse, error) {
+	ctx = ctxsetters.WithPackageName(ctx, "stream.video.coordinator.client_v1_rpc")
+	ctx = ctxsetters.WithServiceName(ctx, "ClientRPC")
+	ctx = ctxsetters.WithMethodName(ctx, "StopRecording")
+	caller := c.callStopRecording
+	if c.interceptor != nil {
+		caller = func(ctx context.Context, req *StopRecordingRequest) (*StopRecordingResponse, error) {
+			resp, err := c.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*StopRecordingRequest)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*StopRecordingRequest) when calling interceptor")
+					}
+					return c.callStopRecording(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*StopRecordingResponse)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*StopRecordingResponse) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+	return caller(ctx, in)
+}
+
+func (c *clientRPCProtobufClient) callStopRecording(ctx context.Context, in *StopRecordingRequest) (*StopRecordingResponse, error) {
+	out := new(StopRecordingResponse)
+	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[15], in, out)
+	if err != nil {
+		twerr, ok := err.(twirp.Error)
+		if !ok {
+			twerr = twirp.InternalErrorWith(err)
+		}
+		callClientError(ctx, c.opts.Hooks, twerr)
+		return nil, err
+	}
+
+	callClientResponseReceived(ctx, c.opts.Hooks)
+
+	return out, nil
+}
+
 func (c *clientRPCProtobufClient) UpsertCallMembers(ctx context.Context, in *UpsertCallMembersRequest) (*UpsertCallMembersResponse, error) {
 	ctx = ctxsetters.WithPackageName(ctx, "stream.video.coordinator.client_v1_rpc")
 	ctx = ctxsetters.WithServiceName(ctx, "ClientRPC")
@@ -741,7 +945,7 @@ func (c *clientRPCProtobufClient) UpsertCallMembers(ctx context.Context, in *Ups
 
 func (c *clientRPCProtobufClient) callUpsertCallMembers(ctx context.Context, in *UpsertCallMembersRequest) (*UpsertCallMembersResponse, error) {
 	out := new(UpsertCallMembersResponse)
-	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[12], in, out)
+	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[16], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
 		if !ok {
@@ -787,7 +991,7 @@ func (c *clientRPCProtobufClient) DeleteCallMembers(ctx context.Context, in *Del
 
 func (c *clientRPCProtobufClient) callDeleteCallMembers(ctx context.Context, in *DeleteCallMembersRequest) (*DeleteCallMembersResponse, error) {
 	out := new(DeleteCallMembersResponse)
-	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[13], in, out)
+	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[17], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
 		if !ok {
@@ -833,7 +1037,7 @@ func (c *clientRPCProtobufClient) SendEvent(ctx context.Context, in *SendEventRe
 
 func (c *clientRPCProtobufClient) callSendEvent(ctx context.Context, in *SendEventRequest) (*SendEventResponse, error) {
 	out := new(SendEventResponse)
-	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[14], in, out)
+	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[18], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
 		if !ok {
@@ -879,7 +1083,99 @@ func (c *clientRPCProtobufClient) SendCustomEvent(ctx context.Context, in *SendC
 
 func (c *clientRPCProtobufClient) callSendCustomEvent(ctx context.Context, in *SendCustomEventRequest) (*SendCustomEventResponse, error) {
 	out := new(SendCustomEventResponse)
-	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[15], in, out)
+	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[19], in, out)
+	if err != nil {
+		twerr, ok := err.(twirp.Error)
+		if !ok {
+			twerr = twirp.InternalErrorWith(err)
+		}
+		callClientError(ctx, c.opts.Hooks, twerr)
+		return nil, err
+	}
+
+	callClientResponseReceived(ctx, c.opts.Hooks)
+
+	return out, nil
+}
+
+func (c *clientRPCProtobufClient) QueryUsers(ctx context.Context, in *QueryUsersRequest) (*QueryUsersResponse, error) {
+	ctx = ctxsetters.WithPackageName(ctx, "stream.video.coordinator.client_v1_rpc")
+	ctx = ctxsetters.WithServiceName(ctx, "ClientRPC")
+	ctx = ctxsetters.WithMethodName(ctx, "QueryUsers")
+	caller := c.callQueryUsers
+	if c.interceptor != nil {
+		caller = func(ctx context.Context, req *QueryUsersRequest) (*QueryUsersResponse, error) {
+			resp, err := c.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*QueryUsersRequest)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*QueryUsersRequest) when calling interceptor")
+					}
+					return c.callQueryUsers(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*QueryUsersResponse)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*QueryUsersResponse) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+	return caller(ctx, in)
+}
+
+func (c *clientRPCProtobufClient) callQueryUsers(ctx context.Context, in *QueryUsersRequest) (*QueryUsersResponse, error) {
+	out := new(QueryUsersResponse)
+	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[20], in, out)
+	if err != nil {
+		twerr, ok := err.(twirp.Error)
+		if !ok {
+			twerr = twirp.InternalErrorWith(err)
+		}
+		callClientError(ctx, c.opts.Hooks, twerr)
+		return nil, err
+	}
+
+	callClientResponseReceived(ctx, c.opts.Hooks)
+
+	return out, nil
+}
+
+func (c *clientRPCProtobufClient) UpsertUsers(ctx context.Context, in *UpsertUsersRequest) (*UpsertUsersResponse, error) {
+	ctx = ctxsetters.WithPackageName(ctx, "stream.video.coordinator.client_v1_rpc")
+	ctx = ctxsetters.WithServiceName(ctx, "ClientRPC")
+	ctx = ctxsetters.WithMethodName(ctx, "UpsertUsers")
+	caller := c.callUpsertUsers
+	if c.interceptor != nil {
+		caller = func(ctx context.Context, req *UpsertUsersRequest) (*UpsertUsersResponse, error) {
+			resp, err := c.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*UpsertUsersRequest)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*UpsertUsersRequest) when calling interceptor")
+					}
+					return c.callUpsertUsers(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*UpsertUsersResponse)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*UpsertUsersResponse) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+	return caller(ctx, in)
+}
+
+func (c *clientRPCProtobufClient) callUpsertUsers(ctx context.Context, in *UpsertUsersRequest) (*UpsertUsersResponse, error) {
+	out := new(UpsertUsersResponse)
+	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[21], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
 		if !ok {
@@ -925,7 +1221,7 @@ func (c *clientRPCProtobufClient) ReportCallStats(ctx context.Context, in *Repor
 
 func (c *clientRPCProtobufClient) callReportCallStats(ctx context.Context, in *ReportCallStatsRequest) (*ReportCallStatsResponse, error) {
 	out := new(ReportCallStatsResponse)
-	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[16], in, out)
+	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[22], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
 		if !ok {
@@ -971,7 +1267,7 @@ func (c *clientRPCProtobufClient) ReportCallStatEvent(ctx context.Context, in *R
 
 func (c *clientRPCProtobufClient) callReportCallStatEvent(ctx context.Context, in *ReportCallStatEventRequest) (*ReportCallStatEventResponse, error) {
 	out := new(ReportCallStatEventResponse)
-	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[17], in, out)
+	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[23], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
 		if !ok {
@@ -1017,7 +1313,7 @@ func (c *clientRPCProtobufClient) ReviewCall(ctx context.Context, in *ReviewCall
 
 func (c *clientRPCProtobufClient) callReviewCall(ctx context.Context, in *ReviewCallRequest) (*ReviewCallResponse, error) {
 	out := new(ReviewCallResponse)
-	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[18], in, out)
+	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[24], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
 		if !ok {
@@ -1063,7 +1359,7 @@ func (c *clientRPCProtobufClient) ReportIssue(ctx context.Context, in *ReportIss
 
 func (c *clientRPCProtobufClient) callReportIssue(ctx context.Context, in *ReportIssueRequest) (*ReportIssueResponse, error) {
 	out := new(ReportIssueResponse)
-	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[19], in, out)
+	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[25], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
 		if !ok {
@@ -1084,7 +1380,7 @@ func (c *clientRPCProtobufClient) callReportIssue(ctx context.Context, in *Repor
 
 type clientRPCJSONClient struct {
 	client      HTTPClient
-	urls        [20]string
+	urls        [26]string
 	interceptor twirp.Interceptor
 	opts        twirp.ClientOptions
 }
@@ -1112,7 +1408,7 @@ func NewClientRPCJSONClient(baseURL string, client HTTPClient, opts ...twirp.Cli
 	// Build method URLs: <baseURL>[<prefix>]/<package>.<Service>/<Method>
 	serviceURL := sanitizeBaseURL(baseURL)
 	serviceURL += baseServicePath(pathPrefix, "stream.video.coordinator.client_v1_rpc", "ClientRPC")
-	urls := [20]string{
+	urls := [26]string{
 		serviceURL + "CreateCall",
 		serviceURL + "GetOrCreateCall",
 		serviceURL + "JoinCall",
@@ -1125,10 +1421,16 @@ func NewClientRPCJSONClient(baseURL string, client HTTPClient, opts ...twirp.Cli
 		serviceURL + "CreateDevice",
 		serviceURL + "DeleteDevice",
 		serviceURL + "QueryDevices",
+		serviceURL + "StartBroadcast",
+		serviceURL + "StopBroadcast",
+		serviceURL + "StartRecording",
+		serviceURL + "StopRecording",
 		serviceURL + "UpsertCallMembers",
 		serviceURL + "DeleteCallMembers",
 		serviceURL + "SendEvent",
 		serviceURL + "SendCustomEvent",
+		serviceURL + "QueryUsers",
+		serviceURL + "UpsertUsers",
 		serviceURL + "ReportCallStats",
 		serviceURL + "ReportCallStatEvent",
 		serviceURL + "ReviewCall",
@@ -1695,6 +1997,190 @@ func (c *clientRPCJSONClient) callQueryDevices(ctx context.Context, in *QueryDev
 	return out, nil
 }
 
+func (c *clientRPCJSONClient) StartBroadcast(ctx context.Context, in *StartBroadcastRequest) (*StartBroadcastResponse, error) {
+	ctx = ctxsetters.WithPackageName(ctx, "stream.video.coordinator.client_v1_rpc")
+	ctx = ctxsetters.WithServiceName(ctx, "ClientRPC")
+	ctx = ctxsetters.WithMethodName(ctx, "StartBroadcast")
+	caller := c.callStartBroadcast
+	if c.interceptor != nil {
+		caller = func(ctx context.Context, req *StartBroadcastRequest) (*StartBroadcastResponse, error) {
+			resp, err := c.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*StartBroadcastRequest)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*StartBroadcastRequest) when calling interceptor")
+					}
+					return c.callStartBroadcast(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*StartBroadcastResponse)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*StartBroadcastResponse) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+	return caller(ctx, in)
+}
+
+func (c *clientRPCJSONClient) callStartBroadcast(ctx context.Context, in *StartBroadcastRequest) (*StartBroadcastResponse, error) {
+	out := new(StartBroadcastResponse)
+	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[12], in, out)
+	if err != nil {
+		twerr, ok := err.(twirp.Error)
+		if !ok {
+			twerr = twirp.InternalErrorWith(err)
+		}
+		callClientError(ctx, c.opts.Hooks, twerr)
+		return nil, err
+	}
+
+	callClientResponseReceived(ctx, c.opts.Hooks)
+
+	return out, nil
+}
+
+func (c *clientRPCJSONClient) StopBroadcast(ctx context.Context, in *StopBroadcastRequest) (*StopBroadcastResponse, error) {
+	ctx = ctxsetters.WithPackageName(ctx, "stream.video.coordinator.client_v1_rpc")
+	ctx = ctxsetters.WithServiceName(ctx, "ClientRPC")
+	ctx = ctxsetters.WithMethodName(ctx, "StopBroadcast")
+	caller := c.callStopBroadcast
+	if c.interceptor != nil {
+		caller = func(ctx context.Context, req *StopBroadcastRequest) (*StopBroadcastResponse, error) {
+			resp, err := c.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*StopBroadcastRequest)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*StopBroadcastRequest) when calling interceptor")
+					}
+					return c.callStopBroadcast(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*StopBroadcastResponse)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*StopBroadcastResponse) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+	return caller(ctx, in)
+}
+
+func (c *clientRPCJSONClient) callStopBroadcast(ctx context.Context, in *StopBroadcastRequest) (*StopBroadcastResponse, error) {
+	out := new(StopBroadcastResponse)
+	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[13], in, out)
+	if err != nil {
+		twerr, ok := err.(twirp.Error)
+		if !ok {
+			twerr = twirp.InternalErrorWith(err)
+		}
+		callClientError(ctx, c.opts.Hooks, twerr)
+		return nil, err
+	}
+
+	callClientResponseReceived(ctx, c.opts.Hooks)
+
+	return out, nil
+}
+
+func (c *clientRPCJSONClient) StartRecording(ctx context.Context, in *StartRecordingRequest) (*StartRecordingResponse, error) {
+	ctx = ctxsetters.WithPackageName(ctx, "stream.video.coordinator.client_v1_rpc")
+	ctx = ctxsetters.WithServiceName(ctx, "ClientRPC")
+	ctx = ctxsetters.WithMethodName(ctx, "StartRecording")
+	caller := c.callStartRecording
+	if c.interceptor != nil {
+		caller = func(ctx context.Context, req *StartRecordingRequest) (*StartRecordingResponse, error) {
+			resp, err := c.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*StartRecordingRequest)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*StartRecordingRequest) when calling interceptor")
+					}
+					return c.callStartRecording(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*StartRecordingResponse)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*StartRecordingResponse) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+	return caller(ctx, in)
+}
+
+func (c *clientRPCJSONClient) callStartRecording(ctx context.Context, in *StartRecordingRequest) (*StartRecordingResponse, error) {
+	out := new(StartRecordingResponse)
+	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[14], in, out)
+	if err != nil {
+		twerr, ok := err.(twirp.Error)
+		if !ok {
+			twerr = twirp.InternalErrorWith(err)
+		}
+		callClientError(ctx, c.opts.Hooks, twerr)
+		return nil, err
+	}
+
+	callClientResponseReceived(ctx, c.opts.Hooks)
+
+	return out, nil
+}
+
+func (c *clientRPCJSONClient) StopRecording(ctx context.Context, in *StopRecordingRequest) (*StopRecordingResponse, error) {
+	ctx = ctxsetters.WithPackageName(ctx, "stream.video.coordinator.client_v1_rpc")
+	ctx = ctxsetters.WithServiceName(ctx, "ClientRPC")
+	ctx = ctxsetters.WithMethodName(ctx, "StopRecording")
+	caller := c.callStopRecording
+	if c.interceptor != nil {
+		caller = func(ctx context.Context, req *StopRecordingRequest) (*StopRecordingResponse, error) {
+			resp, err := c.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*StopRecordingRequest)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*StopRecordingRequest) when calling interceptor")
+					}
+					return c.callStopRecording(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*StopRecordingResponse)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*StopRecordingResponse) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+	return caller(ctx, in)
+}
+
+func (c *clientRPCJSONClient) callStopRecording(ctx context.Context, in *StopRecordingRequest) (*StopRecordingResponse, error) {
+	out := new(StopRecordingResponse)
+	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[15], in, out)
+	if err != nil {
+		twerr, ok := err.(twirp.Error)
+		if !ok {
+			twerr = twirp.InternalErrorWith(err)
+		}
+		callClientError(ctx, c.opts.Hooks, twerr)
+		return nil, err
+	}
+
+	callClientResponseReceived(ctx, c.opts.Hooks)
+
+	return out, nil
+}
+
 func (c *clientRPCJSONClient) UpsertCallMembers(ctx context.Context, in *UpsertCallMembersRequest) (*UpsertCallMembersResponse, error) {
 	ctx = ctxsetters.WithPackageName(ctx, "stream.video.coordinator.client_v1_rpc")
 	ctx = ctxsetters.WithServiceName(ctx, "ClientRPC")
@@ -1726,7 +2212,7 @@ func (c *clientRPCJSONClient) UpsertCallMembers(ctx context.Context, in *UpsertC
 
 func (c *clientRPCJSONClient) callUpsertCallMembers(ctx context.Context, in *UpsertCallMembersRequest) (*UpsertCallMembersResponse, error) {
 	out := new(UpsertCallMembersResponse)
-	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[12], in, out)
+	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[16], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
 		if !ok {
@@ -1772,7 +2258,7 @@ func (c *clientRPCJSONClient) DeleteCallMembers(ctx context.Context, in *DeleteC
 
 func (c *clientRPCJSONClient) callDeleteCallMembers(ctx context.Context, in *DeleteCallMembersRequest) (*DeleteCallMembersResponse, error) {
 	out := new(DeleteCallMembersResponse)
-	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[13], in, out)
+	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[17], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
 		if !ok {
@@ -1818,7 +2304,7 @@ func (c *clientRPCJSONClient) SendEvent(ctx context.Context, in *SendEventReques
 
 func (c *clientRPCJSONClient) callSendEvent(ctx context.Context, in *SendEventRequest) (*SendEventResponse, error) {
 	out := new(SendEventResponse)
-	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[14], in, out)
+	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[18], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
 		if !ok {
@@ -1864,7 +2350,99 @@ func (c *clientRPCJSONClient) SendCustomEvent(ctx context.Context, in *SendCusto
 
 func (c *clientRPCJSONClient) callSendCustomEvent(ctx context.Context, in *SendCustomEventRequest) (*SendCustomEventResponse, error) {
 	out := new(SendCustomEventResponse)
-	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[15], in, out)
+	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[19], in, out)
+	if err != nil {
+		twerr, ok := err.(twirp.Error)
+		if !ok {
+			twerr = twirp.InternalErrorWith(err)
+		}
+		callClientError(ctx, c.opts.Hooks, twerr)
+		return nil, err
+	}
+
+	callClientResponseReceived(ctx, c.opts.Hooks)
+
+	return out, nil
+}
+
+func (c *clientRPCJSONClient) QueryUsers(ctx context.Context, in *QueryUsersRequest) (*QueryUsersResponse, error) {
+	ctx = ctxsetters.WithPackageName(ctx, "stream.video.coordinator.client_v1_rpc")
+	ctx = ctxsetters.WithServiceName(ctx, "ClientRPC")
+	ctx = ctxsetters.WithMethodName(ctx, "QueryUsers")
+	caller := c.callQueryUsers
+	if c.interceptor != nil {
+		caller = func(ctx context.Context, req *QueryUsersRequest) (*QueryUsersResponse, error) {
+			resp, err := c.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*QueryUsersRequest)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*QueryUsersRequest) when calling interceptor")
+					}
+					return c.callQueryUsers(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*QueryUsersResponse)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*QueryUsersResponse) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+	return caller(ctx, in)
+}
+
+func (c *clientRPCJSONClient) callQueryUsers(ctx context.Context, in *QueryUsersRequest) (*QueryUsersResponse, error) {
+	out := new(QueryUsersResponse)
+	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[20], in, out)
+	if err != nil {
+		twerr, ok := err.(twirp.Error)
+		if !ok {
+			twerr = twirp.InternalErrorWith(err)
+		}
+		callClientError(ctx, c.opts.Hooks, twerr)
+		return nil, err
+	}
+
+	callClientResponseReceived(ctx, c.opts.Hooks)
+
+	return out, nil
+}
+
+func (c *clientRPCJSONClient) UpsertUsers(ctx context.Context, in *UpsertUsersRequest) (*UpsertUsersResponse, error) {
+	ctx = ctxsetters.WithPackageName(ctx, "stream.video.coordinator.client_v1_rpc")
+	ctx = ctxsetters.WithServiceName(ctx, "ClientRPC")
+	ctx = ctxsetters.WithMethodName(ctx, "UpsertUsers")
+	caller := c.callUpsertUsers
+	if c.interceptor != nil {
+		caller = func(ctx context.Context, req *UpsertUsersRequest) (*UpsertUsersResponse, error) {
+			resp, err := c.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*UpsertUsersRequest)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*UpsertUsersRequest) when calling interceptor")
+					}
+					return c.callUpsertUsers(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*UpsertUsersResponse)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*UpsertUsersResponse) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+	return caller(ctx, in)
+}
+
+func (c *clientRPCJSONClient) callUpsertUsers(ctx context.Context, in *UpsertUsersRequest) (*UpsertUsersResponse, error) {
+	out := new(UpsertUsersResponse)
+	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[21], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
 		if !ok {
@@ -1910,7 +2488,7 @@ func (c *clientRPCJSONClient) ReportCallStats(ctx context.Context, in *ReportCal
 
 func (c *clientRPCJSONClient) callReportCallStats(ctx context.Context, in *ReportCallStatsRequest) (*ReportCallStatsResponse, error) {
 	out := new(ReportCallStatsResponse)
-	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[16], in, out)
+	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[22], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
 		if !ok {
@@ -1956,7 +2534,7 @@ func (c *clientRPCJSONClient) ReportCallStatEvent(ctx context.Context, in *Repor
 
 func (c *clientRPCJSONClient) callReportCallStatEvent(ctx context.Context, in *ReportCallStatEventRequest) (*ReportCallStatEventResponse, error) {
 	out := new(ReportCallStatEventResponse)
-	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[17], in, out)
+	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[23], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
 		if !ok {
@@ -2002,7 +2580,7 @@ func (c *clientRPCJSONClient) ReviewCall(ctx context.Context, in *ReviewCallRequ
 
 func (c *clientRPCJSONClient) callReviewCall(ctx context.Context, in *ReviewCallRequest) (*ReviewCallResponse, error) {
 	out := new(ReviewCallResponse)
-	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[18], in, out)
+	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[24], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
 		if !ok {
@@ -2048,7 +2626,7 @@ func (c *clientRPCJSONClient) ReportIssue(ctx context.Context, in *ReportIssueRe
 
 func (c *clientRPCJSONClient) callReportIssue(ctx context.Context, in *ReportIssueRequest) (*ReportIssueResponse, error) {
 	out := new(ReportIssueResponse)
-	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[19], in, out)
+	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[25], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
 		if !ok {
@@ -2196,6 +2774,18 @@ func (s *clientRPCServer) ServeHTTP(resp http.ResponseWriter, req *http.Request)
 	case "QueryDevices":
 		s.serveQueryDevices(ctx, resp, req)
 		return
+	case "StartBroadcast":
+		s.serveStartBroadcast(ctx, resp, req)
+		return
+	case "StopBroadcast":
+		s.serveStopBroadcast(ctx, resp, req)
+		return
+	case "StartRecording":
+		s.serveStartRecording(ctx, resp, req)
+		return
+	case "StopRecording":
+		s.serveStopRecording(ctx, resp, req)
+		return
 	case "UpsertCallMembers":
 		s.serveUpsertCallMembers(ctx, resp, req)
 		return
@@ -2207,6 +2797,12 @@ func (s *clientRPCServer) ServeHTTP(resp http.ResponseWriter, req *http.Request)
 		return
 	case "SendCustomEvent":
 		s.serveSendCustomEvent(ctx, resp, req)
+		return
+	case "QueryUsers":
+		s.serveQueryUsers(ctx, resp, req)
+		return
+	case "UpsertUsers":
+		s.serveUpsertUsers(ctx, resp, req)
 		return
 	case "ReportCallStats":
 		s.serveReportCallStats(ctx, resp, req)
@@ -4387,6 +4983,726 @@ func (s *clientRPCServer) serveQueryDevicesProtobuf(ctx context.Context, resp ht
 	callResponseSent(ctx, s.hooks)
 }
 
+func (s *clientRPCServer) serveStartBroadcast(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	header := req.Header.Get("Content-Type")
+	i := strings.Index(header, ";")
+	if i == -1 {
+		i = len(header)
+	}
+	switch strings.TrimSpace(strings.ToLower(header[:i])) {
+	case "application/json":
+		s.serveStartBroadcastJSON(ctx, resp, req)
+	case "application/protobuf":
+		s.serveStartBroadcastProtobuf(ctx, resp, req)
+	default:
+		msg := fmt.Sprintf("unexpected Content-Type: %q", req.Header.Get("Content-Type"))
+		twerr := badRouteError(msg, req.Method, req.URL.Path)
+		s.writeError(ctx, resp, twerr)
+	}
+}
+
+func (s *clientRPCServer) serveStartBroadcastJSON(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	var err error
+	ctx = ctxsetters.WithMethodName(ctx, "StartBroadcast")
+	ctx, err = callRequestRouted(ctx, s.hooks)
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+
+	d := json.NewDecoder(req.Body)
+	rawReqBody := json.RawMessage{}
+	if err := d.Decode(&rawReqBody); err != nil {
+		s.handleRequestBodyError(ctx, resp, "the json request could not be decoded", err)
+		return
+	}
+	reqContent := new(StartBroadcastRequest)
+	unmarshaler := protojson.UnmarshalOptions{DiscardUnknown: true}
+	if err = unmarshaler.Unmarshal(rawReqBody, reqContent); err != nil {
+		s.handleRequestBodyError(ctx, resp, "the json request could not be decoded", err)
+		return
+	}
+
+	handler := s.ClientRPC.StartBroadcast
+	if s.interceptor != nil {
+		handler = func(ctx context.Context, req *StartBroadcastRequest) (*StartBroadcastResponse, error) {
+			resp, err := s.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*StartBroadcastRequest)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*StartBroadcastRequest) when calling interceptor")
+					}
+					return s.ClientRPC.StartBroadcast(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*StartBroadcastResponse)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*StartBroadcastResponse) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+
+	// Call service method
+	var respContent *StartBroadcastResponse
+	func() {
+		defer ensurePanicResponses(ctx, resp, s.hooks)
+		respContent, err = handler(ctx, reqContent)
+	}()
+
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+	if respContent == nil {
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *StartBroadcastResponse and nil error while calling StartBroadcast. nil responses are not supported"))
+		return
+	}
+
+	ctx = callResponsePrepared(ctx, s.hooks)
+
+	marshaler := &protojson.MarshalOptions{UseProtoNames: !s.jsonCamelCase, EmitUnpopulated: !s.jsonSkipDefaults}
+	respBytes, err := marshaler.Marshal(respContent)
+	if err != nil {
+		s.writeError(ctx, resp, wrapInternal(err, "failed to marshal json response"))
+		return
+	}
+
+	ctx = ctxsetters.WithStatusCode(ctx, http.StatusOK)
+	resp.Header().Set("Content-Type", "application/json")
+	resp.Header().Set("Content-Length", strconv.Itoa(len(respBytes)))
+	resp.WriteHeader(http.StatusOK)
+
+	if n, err := resp.Write(respBytes); err != nil {
+		msg := fmt.Sprintf("failed to write response, %d of %d bytes written: %s", n, len(respBytes), err.Error())
+		twerr := twirp.NewError(twirp.Unknown, msg)
+		ctx = callError(ctx, s.hooks, twerr)
+	}
+	callResponseSent(ctx, s.hooks)
+}
+
+func (s *clientRPCServer) serveStartBroadcastProtobuf(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	var err error
+	ctx = ctxsetters.WithMethodName(ctx, "StartBroadcast")
+	ctx, err = callRequestRouted(ctx, s.hooks)
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+
+	buf, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		s.handleRequestBodyError(ctx, resp, "failed to read request body", err)
+		return
+	}
+	reqContent := new(StartBroadcastRequest)
+	if err = reqContent.UnmarshalVT(buf); err != nil {
+		s.writeError(ctx, resp, malformedRequestError("the protobuf request could not be decoded"))
+		return
+	}
+
+	handler := s.ClientRPC.StartBroadcast
+	if s.interceptor != nil {
+		handler = func(ctx context.Context, req *StartBroadcastRequest) (*StartBroadcastResponse, error) {
+			resp, err := s.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*StartBroadcastRequest)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*StartBroadcastRequest) when calling interceptor")
+					}
+					return s.ClientRPC.StartBroadcast(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*StartBroadcastResponse)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*StartBroadcastResponse) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+
+	// Call service method
+	var respContent *StartBroadcastResponse
+	func() {
+		defer ensurePanicResponses(ctx, resp, s.hooks)
+		respContent, err = handler(ctx, reqContent)
+	}()
+
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+	if respContent == nil {
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *StartBroadcastResponse and nil error while calling StartBroadcast. nil responses are not supported"))
+		return
+	}
+
+	ctx = callResponsePrepared(ctx, s.hooks)
+
+	respBytes, err := respContent.MarshalVT()
+	if err != nil {
+		s.writeError(ctx, resp, wrapInternal(err, "failed to marshal proto response"))
+		return
+	}
+
+	ctx = ctxsetters.WithStatusCode(ctx, http.StatusOK)
+	resp.Header().Set("Content-Type", "application/protobuf")
+	resp.Header().Set("Content-Length", strconv.Itoa(len(respBytes)))
+	resp.WriteHeader(http.StatusOK)
+	if n, err := resp.Write(respBytes); err != nil {
+		msg := fmt.Sprintf("failed to write response, %d of %d bytes written: %s", n, len(respBytes), err.Error())
+		twerr := twirp.NewError(twirp.Unknown, msg)
+		ctx = callError(ctx, s.hooks, twerr)
+	}
+	callResponseSent(ctx, s.hooks)
+}
+
+func (s *clientRPCServer) serveStopBroadcast(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	header := req.Header.Get("Content-Type")
+	i := strings.Index(header, ";")
+	if i == -1 {
+		i = len(header)
+	}
+	switch strings.TrimSpace(strings.ToLower(header[:i])) {
+	case "application/json":
+		s.serveStopBroadcastJSON(ctx, resp, req)
+	case "application/protobuf":
+		s.serveStopBroadcastProtobuf(ctx, resp, req)
+	default:
+		msg := fmt.Sprintf("unexpected Content-Type: %q", req.Header.Get("Content-Type"))
+		twerr := badRouteError(msg, req.Method, req.URL.Path)
+		s.writeError(ctx, resp, twerr)
+	}
+}
+
+func (s *clientRPCServer) serveStopBroadcastJSON(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	var err error
+	ctx = ctxsetters.WithMethodName(ctx, "StopBroadcast")
+	ctx, err = callRequestRouted(ctx, s.hooks)
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+
+	d := json.NewDecoder(req.Body)
+	rawReqBody := json.RawMessage{}
+	if err := d.Decode(&rawReqBody); err != nil {
+		s.handleRequestBodyError(ctx, resp, "the json request could not be decoded", err)
+		return
+	}
+	reqContent := new(StopBroadcastRequest)
+	unmarshaler := protojson.UnmarshalOptions{DiscardUnknown: true}
+	if err = unmarshaler.Unmarshal(rawReqBody, reqContent); err != nil {
+		s.handleRequestBodyError(ctx, resp, "the json request could not be decoded", err)
+		return
+	}
+
+	handler := s.ClientRPC.StopBroadcast
+	if s.interceptor != nil {
+		handler = func(ctx context.Context, req *StopBroadcastRequest) (*StopBroadcastResponse, error) {
+			resp, err := s.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*StopBroadcastRequest)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*StopBroadcastRequest) when calling interceptor")
+					}
+					return s.ClientRPC.StopBroadcast(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*StopBroadcastResponse)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*StopBroadcastResponse) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+
+	// Call service method
+	var respContent *StopBroadcastResponse
+	func() {
+		defer ensurePanicResponses(ctx, resp, s.hooks)
+		respContent, err = handler(ctx, reqContent)
+	}()
+
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+	if respContent == nil {
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *StopBroadcastResponse and nil error while calling StopBroadcast. nil responses are not supported"))
+		return
+	}
+
+	ctx = callResponsePrepared(ctx, s.hooks)
+
+	marshaler := &protojson.MarshalOptions{UseProtoNames: !s.jsonCamelCase, EmitUnpopulated: !s.jsonSkipDefaults}
+	respBytes, err := marshaler.Marshal(respContent)
+	if err != nil {
+		s.writeError(ctx, resp, wrapInternal(err, "failed to marshal json response"))
+		return
+	}
+
+	ctx = ctxsetters.WithStatusCode(ctx, http.StatusOK)
+	resp.Header().Set("Content-Type", "application/json")
+	resp.Header().Set("Content-Length", strconv.Itoa(len(respBytes)))
+	resp.WriteHeader(http.StatusOK)
+
+	if n, err := resp.Write(respBytes); err != nil {
+		msg := fmt.Sprintf("failed to write response, %d of %d bytes written: %s", n, len(respBytes), err.Error())
+		twerr := twirp.NewError(twirp.Unknown, msg)
+		ctx = callError(ctx, s.hooks, twerr)
+	}
+	callResponseSent(ctx, s.hooks)
+}
+
+func (s *clientRPCServer) serveStopBroadcastProtobuf(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	var err error
+	ctx = ctxsetters.WithMethodName(ctx, "StopBroadcast")
+	ctx, err = callRequestRouted(ctx, s.hooks)
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+
+	buf, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		s.handleRequestBodyError(ctx, resp, "failed to read request body", err)
+		return
+	}
+	reqContent := new(StopBroadcastRequest)
+	if err = reqContent.UnmarshalVT(buf); err != nil {
+		s.writeError(ctx, resp, malformedRequestError("the protobuf request could not be decoded"))
+		return
+	}
+
+	handler := s.ClientRPC.StopBroadcast
+	if s.interceptor != nil {
+		handler = func(ctx context.Context, req *StopBroadcastRequest) (*StopBroadcastResponse, error) {
+			resp, err := s.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*StopBroadcastRequest)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*StopBroadcastRequest) when calling interceptor")
+					}
+					return s.ClientRPC.StopBroadcast(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*StopBroadcastResponse)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*StopBroadcastResponse) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+
+	// Call service method
+	var respContent *StopBroadcastResponse
+	func() {
+		defer ensurePanicResponses(ctx, resp, s.hooks)
+		respContent, err = handler(ctx, reqContent)
+	}()
+
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+	if respContent == nil {
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *StopBroadcastResponse and nil error while calling StopBroadcast. nil responses are not supported"))
+		return
+	}
+
+	ctx = callResponsePrepared(ctx, s.hooks)
+
+	respBytes, err := respContent.MarshalVT()
+	if err != nil {
+		s.writeError(ctx, resp, wrapInternal(err, "failed to marshal proto response"))
+		return
+	}
+
+	ctx = ctxsetters.WithStatusCode(ctx, http.StatusOK)
+	resp.Header().Set("Content-Type", "application/protobuf")
+	resp.Header().Set("Content-Length", strconv.Itoa(len(respBytes)))
+	resp.WriteHeader(http.StatusOK)
+	if n, err := resp.Write(respBytes); err != nil {
+		msg := fmt.Sprintf("failed to write response, %d of %d bytes written: %s", n, len(respBytes), err.Error())
+		twerr := twirp.NewError(twirp.Unknown, msg)
+		ctx = callError(ctx, s.hooks, twerr)
+	}
+	callResponseSent(ctx, s.hooks)
+}
+
+func (s *clientRPCServer) serveStartRecording(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	header := req.Header.Get("Content-Type")
+	i := strings.Index(header, ";")
+	if i == -1 {
+		i = len(header)
+	}
+	switch strings.TrimSpace(strings.ToLower(header[:i])) {
+	case "application/json":
+		s.serveStartRecordingJSON(ctx, resp, req)
+	case "application/protobuf":
+		s.serveStartRecordingProtobuf(ctx, resp, req)
+	default:
+		msg := fmt.Sprintf("unexpected Content-Type: %q", req.Header.Get("Content-Type"))
+		twerr := badRouteError(msg, req.Method, req.URL.Path)
+		s.writeError(ctx, resp, twerr)
+	}
+}
+
+func (s *clientRPCServer) serveStartRecordingJSON(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	var err error
+	ctx = ctxsetters.WithMethodName(ctx, "StartRecording")
+	ctx, err = callRequestRouted(ctx, s.hooks)
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+
+	d := json.NewDecoder(req.Body)
+	rawReqBody := json.RawMessage{}
+	if err := d.Decode(&rawReqBody); err != nil {
+		s.handleRequestBodyError(ctx, resp, "the json request could not be decoded", err)
+		return
+	}
+	reqContent := new(StartRecordingRequest)
+	unmarshaler := protojson.UnmarshalOptions{DiscardUnknown: true}
+	if err = unmarshaler.Unmarshal(rawReqBody, reqContent); err != nil {
+		s.handleRequestBodyError(ctx, resp, "the json request could not be decoded", err)
+		return
+	}
+
+	handler := s.ClientRPC.StartRecording
+	if s.interceptor != nil {
+		handler = func(ctx context.Context, req *StartRecordingRequest) (*StartRecordingResponse, error) {
+			resp, err := s.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*StartRecordingRequest)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*StartRecordingRequest) when calling interceptor")
+					}
+					return s.ClientRPC.StartRecording(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*StartRecordingResponse)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*StartRecordingResponse) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+
+	// Call service method
+	var respContent *StartRecordingResponse
+	func() {
+		defer ensurePanicResponses(ctx, resp, s.hooks)
+		respContent, err = handler(ctx, reqContent)
+	}()
+
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+	if respContent == nil {
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *StartRecordingResponse and nil error while calling StartRecording. nil responses are not supported"))
+		return
+	}
+
+	ctx = callResponsePrepared(ctx, s.hooks)
+
+	marshaler := &protojson.MarshalOptions{UseProtoNames: !s.jsonCamelCase, EmitUnpopulated: !s.jsonSkipDefaults}
+	respBytes, err := marshaler.Marshal(respContent)
+	if err != nil {
+		s.writeError(ctx, resp, wrapInternal(err, "failed to marshal json response"))
+		return
+	}
+
+	ctx = ctxsetters.WithStatusCode(ctx, http.StatusOK)
+	resp.Header().Set("Content-Type", "application/json")
+	resp.Header().Set("Content-Length", strconv.Itoa(len(respBytes)))
+	resp.WriteHeader(http.StatusOK)
+
+	if n, err := resp.Write(respBytes); err != nil {
+		msg := fmt.Sprintf("failed to write response, %d of %d bytes written: %s", n, len(respBytes), err.Error())
+		twerr := twirp.NewError(twirp.Unknown, msg)
+		ctx = callError(ctx, s.hooks, twerr)
+	}
+	callResponseSent(ctx, s.hooks)
+}
+
+func (s *clientRPCServer) serveStartRecordingProtobuf(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	var err error
+	ctx = ctxsetters.WithMethodName(ctx, "StartRecording")
+	ctx, err = callRequestRouted(ctx, s.hooks)
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+
+	buf, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		s.handleRequestBodyError(ctx, resp, "failed to read request body", err)
+		return
+	}
+	reqContent := new(StartRecordingRequest)
+	if err = reqContent.UnmarshalVT(buf); err != nil {
+		s.writeError(ctx, resp, malformedRequestError("the protobuf request could not be decoded"))
+		return
+	}
+
+	handler := s.ClientRPC.StartRecording
+	if s.interceptor != nil {
+		handler = func(ctx context.Context, req *StartRecordingRequest) (*StartRecordingResponse, error) {
+			resp, err := s.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*StartRecordingRequest)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*StartRecordingRequest) when calling interceptor")
+					}
+					return s.ClientRPC.StartRecording(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*StartRecordingResponse)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*StartRecordingResponse) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+
+	// Call service method
+	var respContent *StartRecordingResponse
+	func() {
+		defer ensurePanicResponses(ctx, resp, s.hooks)
+		respContent, err = handler(ctx, reqContent)
+	}()
+
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+	if respContent == nil {
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *StartRecordingResponse and nil error while calling StartRecording. nil responses are not supported"))
+		return
+	}
+
+	ctx = callResponsePrepared(ctx, s.hooks)
+
+	respBytes, err := respContent.MarshalVT()
+	if err != nil {
+		s.writeError(ctx, resp, wrapInternal(err, "failed to marshal proto response"))
+		return
+	}
+
+	ctx = ctxsetters.WithStatusCode(ctx, http.StatusOK)
+	resp.Header().Set("Content-Type", "application/protobuf")
+	resp.Header().Set("Content-Length", strconv.Itoa(len(respBytes)))
+	resp.WriteHeader(http.StatusOK)
+	if n, err := resp.Write(respBytes); err != nil {
+		msg := fmt.Sprintf("failed to write response, %d of %d bytes written: %s", n, len(respBytes), err.Error())
+		twerr := twirp.NewError(twirp.Unknown, msg)
+		ctx = callError(ctx, s.hooks, twerr)
+	}
+	callResponseSent(ctx, s.hooks)
+}
+
+func (s *clientRPCServer) serveStopRecording(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	header := req.Header.Get("Content-Type")
+	i := strings.Index(header, ";")
+	if i == -1 {
+		i = len(header)
+	}
+	switch strings.TrimSpace(strings.ToLower(header[:i])) {
+	case "application/json":
+		s.serveStopRecordingJSON(ctx, resp, req)
+	case "application/protobuf":
+		s.serveStopRecordingProtobuf(ctx, resp, req)
+	default:
+		msg := fmt.Sprintf("unexpected Content-Type: %q", req.Header.Get("Content-Type"))
+		twerr := badRouteError(msg, req.Method, req.URL.Path)
+		s.writeError(ctx, resp, twerr)
+	}
+}
+
+func (s *clientRPCServer) serveStopRecordingJSON(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	var err error
+	ctx = ctxsetters.WithMethodName(ctx, "StopRecording")
+	ctx, err = callRequestRouted(ctx, s.hooks)
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+
+	d := json.NewDecoder(req.Body)
+	rawReqBody := json.RawMessage{}
+	if err := d.Decode(&rawReqBody); err != nil {
+		s.handleRequestBodyError(ctx, resp, "the json request could not be decoded", err)
+		return
+	}
+	reqContent := new(StopRecordingRequest)
+	unmarshaler := protojson.UnmarshalOptions{DiscardUnknown: true}
+	if err = unmarshaler.Unmarshal(rawReqBody, reqContent); err != nil {
+		s.handleRequestBodyError(ctx, resp, "the json request could not be decoded", err)
+		return
+	}
+
+	handler := s.ClientRPC.StopRecording
+	if s.interceptor != nil {
+		handler = func(ctx context.Context, req *StopRecordingRequest) (*StopRecordingResponse, error) {
+			resp, err := s.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*StopRecordingRequest)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*StopRecordingRequest) when calling interceptor")
+					}
+					return s.ClientRPC.StopRecording(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*StopRecordingResponse)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*StopRecordingResponse) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+
+	// Call service method
+	var respContent *StopRecordingResponse
+	func() {
+		defer ensurePanicResponses(ctx, resp, s.hooks)
+		respContent, err = handler(ctx, reqContent)
+	}()
+
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+	if respContent == nil {
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *StopRecordingResponse and nil error while calling StopRecording. nil responses are not supported"))
+		return
+	}
+
+	ctx = callResponsePrepared(ctx, s.hooks)
+
+	marshaler := &protojson.MarshalOptions{UseProtoNames: !s.jsonCamelCase, EmitUnpopulated: !s.jsonSkipDefaults}
+	respBytes, err := marshaler.Marshal(respContent)
+	if err != nil {
+		s.writeError(ctx, resp, wrapInternal(err, "failed to marshal json response"))
+		return
+	}
+
+	ctx = ctxsetters.WithStatusCode(ctx, http.StatusOK)
+	resp.Header().Set("Content-Type", "application/json")
+	resp.Header().Set("Content-Length", strconv.Itoa(len(respBytes)))
+	resp.WriteHeader(http.StatusOK)
+
+	if n, err := resp.Write(respBytes); err != nil {
+		msg := fmt.Sprintf("failed to write response, %d of %d bytes written: %s", n, len(respBytes), err.Error())
+		twerr := twirp.NewError(twirp.Unknown, msg)
+		ctx = callError(ctx, s.hooks, twerr)
+	}
+	callResponseSent(ctx, s.hooks)
+}
+
+func (s *clientRPCServer) serveStopRecordingProtobuf(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	var err error
+	ctx = ctxsetters.WithMethodName(ctx, "StopRecording")
+	ctx, err = callRequestRouted(ctx, s.hooks)
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+
+	buf, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		s.handleRequestBodyError(ctx, resp, "failed to read request body", err)
+		return
+	}
+	reqContent := new(StopRecordingRequest)
+	if err = reqContent.UnmarshalVT(buf); err != nil {
+		s.writeError(ctx, resp, malformedRequestError("the protobuf request could not be decoded"))
+		return
+	}
+
+	handler := s.ClientRPC.StopRecording
+	if s.interceptor != nil {
+		handler = func(ctx context.Context, req *StopRecordingRequest) (*StopRecordingResponse, error) {
+			resp, err := s.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*StopRecordingRequest)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*StopRecordingRequest) when calling interceptor")
+					}
+					return s.ClientRPC.StopRecording(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*StopRecordingResponse)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*StopRecordingResponse) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+
+	// Call service method
+	var respContent *StopRecordingResponse
+	func() {
+		defer ensurePanicResponses(ctx, resp, s.hooks)
+		respContent, err = handler(ctx, reqContent)
+	}()
+
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+	if respContent == nil {
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *StopRecordingResponse and nil error while calling StopRecording. nil responses are not supported"))
+		return
+	}
+
+	ctx = callResponsePrepared(ctx, s.hooks)
+
+	respBytes, err := respContent.MarshalVT()
+	if err != nil {
+		s.writeError(ctx, resp, wrapInternal(err, "failed to marshal proto response"))
+		return
+	}
+
+	ctx = ctxsetters.WithStatusCode(ctx, http.StatusOK)
+	resp.Header().Set("Content-Type", "application/protobuf")
+	resp.Header().Set("Content-Length", strconv.Itoa(len(respBytes)))
+	resp.WriteHeader(http.StatusOK)
+	if n, err := resp.Write(respBytes); err != nil {
+		msg := fmt.Sprintf("failed to write response, %d of %d bytes written: %s", n, len(respBytes), err.Error())
+		twerr := twirp.NewError(twirp.Unknown, msg)
+		ctx = callError(ctx, s.hooks, twerr)
+	}
+	callResponseSent(ctx, s.hooks)
+}
+
 func (s *clientRPCServer) serveUpsertCallMembers(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
 	header := req.Header.Get("Content-Type")
 	i := strings.Index(header, ";")
@@ -5084,6 +6400,366 @@ func (s *clientRPCServer) serveSendCustomEventProtobuf(ctx context.Context, resp
 	}
 	if respContent == nil {
 		s.writeError(ctx, resp, twirp.InternalError("received a nil *SendCustomEventResponse and nil error while calling SendCustomEvent. nil responses are not supported"))
+		return
+	}
+
+	ctx = callResponsePrepared(ctx, s.hooks)
+
+	respBytes, err := respContent.MarshalVT()
+	if err != nil {
+		s.writeError(ctx, resp, wrapInternal(err, "failed to marshal proto response"))
+		return
+	}
+
+	ctx = ctxsetters.WithStatusCode(ctx, http.StatusOK)
+	resp.Header().Set("Content-Type", "application/protobuf")
+	resp.Header().Set("Content-Length", strconv.Itoa(len(respBytes)))
+	resp.WriteHeader(http.StatusOK)
+	if n, err := resp.Write(respBytes); err != nil {
+		msg := fmt.Sprintf("failed to write response, %d of %d bytes written: %s", n, len(respBytes), err.Error())
+		twerr := twirp.NewError(twirp.Unknown, msg)
+		ctx = callError(ctx, s.hooks, twerr)
+	}
+	callResponseSent(ctx, s.hooks)
+}
+
+func (s *clientRPCServer) serveQueryUsers(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	header := req.Header.Get("Content-Type")
+	i := strings.Index(header, ";")
+	if i == -1 {
+		i = len(header)
+	}
+	switch strings.TrimSpace(strings.ToLower(header[:i])) {
+	case "application/json":
+		s.serveQueryUsersJSON(ctx, resp, req)
+	case "application/protobuf":
+		s.serveQueryUsersProtobuf(ctx, resp, req)
+	default:
+		msg := fmt.Sprintf("unexpected Content-Type: %q", req.Header.Get("Content-Type"))
+		twerr := badRouteError(msg, req.Method, req.URL.Path)
+		s.writeError(ctx, resp, twerr)
+	}
+}
+
+func (s *clientRPCServer) serveQueryUsersJSON(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	var err error
+	ctx = ctxsetters.WithMethodName(ctx, "QueryUsers")
+	ctx, err = callRequestRouted(ctx, s.hooks)
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+
+	d := json.NewDecoder(req.Body)
+	rawReqBody := json.RawMessage{}
+	if err := d.Decode(&rawReqBody); err != nil {
+		s.handleRequestBodyError(ctx, resp, "the json request could not be decoded", err)
+		return
+	}
+	reqContent := new(QueryUsersRequest)
+	unmarshaler := protojson.UnmarshalOptions{DiscardUnknown: true}
+	if err = unmarshaler.Unmarshal(rawReqBody, reqContent); err != nil {
+		s.handleRequestBodyError(ctx, resp, "the json request could not be decoded", err)
+		return
+	}
+
+	handler := s.ClientRPC.QueryUsers
+	if s.interceptor != nil {
+		handler = func(ctx context.Context, req *QueryUsersRequest) (*QueryUsersResponse, error) {
+			resp, err := s.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*QueryUsersRequest)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*QueryUsersRequest) when calling interceptor")
+					}
+					return s.ClientRPC.QueryUsers(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*QueryUsersResponse)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*QueryUsersResponse) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+
+	// Call service method
+	var respContent *QueryUsersResponse
+	func() {
+		defer ensurePanicResponses(ctx, resp, s.hooks)
+		respContent, err = handler(ctx, reqContent)
+	}()
+
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+	if respContent == nil {
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *QueryUsersResponse and nil error while calling QueryUsers. nil responses are not supported"))
+		return
+	}
+
+	ctx = callResponsePrepared(ctx, s.hooks)
+
+	marshaler := &protojson.MarshalOptions{UseProtoNames: !s.jsonCamelCase, EmitUnpopulated: !s.jsonSkipDefaults}
+	respBytes, err := marshaler.Marshal(respContent)
+	if err != nil {
+		s.writeError(ctx, resp, wrapInternal(err, "failed to marshal json response"))
+		return
+	}
+
+	ctx = ctxsetters.WithStatusCode(ctx, http.StatusOK)
+	resp.Header().Set("Content-Type", "application/json")
+	resp.Header().Set("Content-Length", strconv.Itoa(len(respBytes)))
+	resp.WriteHeader(http.StatusOK)
+
+	if n, err := resp.Write(respBytes); err != nil {
+		msg := fmt.Sprintf("failed to write response, %d of %d bytes written: %s", n, len(respBytes), err.Error())
+		twerr := twirp.NewError(twirp.Unknown, msg)
+		ctx = callError(ctx, s.hooks, twerr)
+	}
+	callResponseSent(ctx, s.hooks)
+}
+
+func (s *clientRPCServer) serveQueryUsersProtobuf(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	var err error
+	ctx = ctxsetters.WithMethodName(ctx, "QueryUsers")
+	ctx, err = callRequestRouted(ctx, s.hooks)
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+
+	buf, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		s.handleRequestBodyError(ctx, resp, "failed to read request body", err)
+		return
+	}
+	reqContent := new(QueryUsersRequest)
+	if err = reqContent.UnmarshalVT(buf); err != nil {
+		s.writeError(ctx, resp, malformedRequestError("the protobuf request could not be decoded"))
+		return
+	}
+
+	handler := s.ClientRPC.QueryUsers
+	if s.interceptor != nil {
+		handler = func(ctx context.Context, req *QueryUsersRequest) (*QueryUsersResponse, error) {
+			resp, err := s.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*QueryUsersRequest)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*QueryUsersRequest) when calling interceptor")
+					}
+					return s.ClientRPC.QueryUsers(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*QueryUsersResponse)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*QueryUsersResponse) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+
+	// Call service method
+	var respContent *QueryUsersResponse
+	func() {
+		defer ensurePanicResponses(ctx, resp, s.hooks)
+		respContent, err = handler(ctx, reqContent)
+	}()
+
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+	if respContent == nil {
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *QueryUsersResponse and nil error while calling QueryUsers. nil responses are not supported"))
+		return
+	}
+
+	ctx = callResponsePrepared(ctx, s.hooks)
+
+	respBytes, err := respContent.MarshalVT()
+	if err != nil {
+		s.writeError(ctx, resp, wrapInternal(err, "failed to marshal proto response"))
+		return
+	}
+
+	ctx = ctxsetters.WithStatusCode(ctx, http.StatusOK)
+	resp.Header().Set("Content-Type", "application/protobuf")
+	resp.Header().Set("Content-Length", strconv.Itoa(len(respBytes)))
+	resp.WriteHeader(http.StatusOK)
+	if n, err := resp.Write(respBytes); err != nil {
+		msg := fmt.Sprintf("failed to write response, %d of %d bytes written: %s", n, len(respBytes), err.Error())
+		twerr := twirp.NewError(twirp.Unknown, msg)
+		ctx = callError(ctx, s.hooks, twerr)
+	}
+	callResponseSent(ctx, s.hooks)
+}
+
+func (s *clientRPCServer) serveUpsertUsers(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	header := req.Header.Get("Content-Type")
+	i := strings.Index(header, ";")
+	if i == -1 {
+		i = len(header)
+	}
+	switch strings.TrimSpace(strings.ToLower(header[:i])) {
+	case "application/json":
+		s.serveUpsertUsersJSON(ctx, resp, req)
+	case "application/protobuf":
+		s.serveUpsertUsersProtobuf(ctx, resp, req)
+	default:
+		msg := fmt.Sprintf("unexpected Content-Type: %q", req.Header.Get("Content-Type"))
+		twerr := badRouteError(msg, req.Method, req.URL.Path)
+		s.writeError(ctx, resp, twerr)
+	}
+}
+
+func (s *clientRPCServer) serveUpsertUsersJSON(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	var err error
+	ctx = ctxsetters.WithMethodName(ctx, "UpsertUsers")
+	ctx, err = callRequestRouted(ctx, s.hooks)
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+
+	d := json.NewDecoder(req.Body)
+	rawReqBody := json.RawMessage{}
+	if err := d.Decode(&rawReqBody); err != nil {
+		s.handleRequestBodyError(ctx, resp, "the json request could not be decoded", err)
+		return
+	}
+	reqContent := new(UpsertUsersRequest)
+	unmarshaler := protojson.UnmarshalOptions{DiscardUnknown: true}
+	if err = unmarshaler.Unmarshal(rawReqBody, reqContent); err != nil {
+		s.handleRequestBodyError(ctx, resp, "the json request could not be decoded", err)
+		return
+	}
+
+	handler := s.ClientRPC.UpsertUsers
+	if s.interceptor != nil {
+		handler = func(ctx context.Context, req *UpsertUsersRequest) (*UpsertUsersResponse, error) {
+			resp, err := s.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*UpsertUsersRequest)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*UpsertUsersRequest) when calling interceptor")
+					}
+					return s.ClientRPC.UpsertUsers(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*UpsertUsersResponse)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*UpsertUsersResponse) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+
+	// Call service method
+	var respContent *UpsertUsersResponse
+	func() {
+		defer ensurePanicResponses(ctx, resp, s.hooks)
+		respContent, err = handler(ctx, reqContent)
+	}()
+
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+	if respContent == nil {
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *UpsertUsersResponse and nil error while calling UpsertUsers. nil responses are not supported"))
+		return
+	}
+
+	ctx = callResponsePrepared(ctx, s.hooks)
+
+	marshaler := &protojson.MarshalOptions{UseProtoNames: !s.jsonCamelCase, EmitUnpopulated: !s.jsonSkipDefaults}
+	respBytes, err := marshaler.Marshal(respContent)
+	if err != nil {
+		s.writeError(ctx, resp, wrapInternal(err, "failed to marshal json response"))
+		return
+	}
+
+	ctx = ctxsetters.WithStatusCode(ctx, http.StatusOK)
+	resp.Header().Set("Content-Type", "application/json")
+	resp.Header().Set("Content-Length", strconv.Itoa(len(respBytes)))
+	resp.WriteHeader(http.StatusOK)
+
+	if n, err := resp.Write(respBytes); err != nil {
+		msg := fmt.Sprintf("failed to write response, %d of %d bytes written: %s", n, len(respBytes), err.Error())
+		twerr := twirp.NewError(twirp.Unknown, msg)
+		ctx = callError(ctx, s.hooks, twerr)
+	}
+	callResponseSent(ctx, s.hooks)
+}
+
+func (s *clientRPCServer) serveUpsertUsersProtobuf(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	var err error
+	ctx = ctxsetters.WithMethodName(ctx, "UpsertUsers")
+	ctx, err = callRequestRouted(ctx, s.hooks)
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+
+	buf, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		s.handleRequestBodyError(ctx, resp, "failed to read request body", err)
+		return
+	}
+	reqContent := new(UpsertUsersRequest)
+	if err = reqContent.UnmarshalVT(buf); err != nil {
+		s.writeError(ctx, resp, malformedRequestError("the protobuf request could not be decoded"))
+		return
+	}
+
+	handler := s.ClientRPC.UpsertUsers
+	if s.interceptor != nil {
+		handler = func(ctx context.Context, req *UpsertUsersRequest) (*UpsertUsersResponse, error) {
+			resp, err := s.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*UpsertUsersRequest)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*UpsertUsersRequest) when calling interceptor")
+					}
+					return s.ClientRPC.UpsertUsers(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*UpsertUsersResponse)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*UpsertUsersResponse) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+
+	// Call service method
+	var respContent *UpsertUsersResponse
+	func() {
+		defer ensurePanicResponses(ctx, resp, s.hooks)
+		respContent, err = handler(ctx, reqContent)
+	}()
+
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+	if respContent == nil {
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *UpsertUsersResponse and nil error while calling UpsertUsers. nil responses are not supported"))
 		return
 	}
 
@@ -6408,129 +8084,149 @@ func callClientError(ctx context.Context, h *twirp.ClientHooks, err twirp.Error)
 }
 
 var twirpFileDescriptor0 = []byte{
-	// 1975 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xc4, 0x59, 0xdd, 0x6f, 0xdc, 0x58,
-	0x15, 0x9f, 0x3b, 0xc9, 0x64, 0x32, 0x67, 0x92, 0xb6, 0xb9, 0x49, 0x93, 0xc9, 0x84, 0xd2, 0x60,
-	0xa0, 0x54, 0x54, 0x4c, 0x36, 0x2d, 0xfb, 0xd1, 0xee, 0xc2, 0x6e, 0xe3, 0x98, 0x4c, 0x4a, 0xd2,
-	0xce, 0xde, 0x24, 0x15, 0xed, 0x4a, 0x3b, 0x72, 0xed, 0x4b, 0xd6, 0x68, 0xfc, 0x51, 0xdb, 0x33,
-	0xab, 0x20, 0xad, 0x84, 0xb4, 0x12, 0x2c, 0xe2, 0x05, 0xed, 0xd3, 0xc2, 0x03, 0x4f, 0x48, 0x08,
-	0x1e, 0x11, 0xe2, 0x6f, 0x80, 0xff, 0x0a, 0xdd, 0x0f, 0x8f, 0xed, 0x19, 0x4f, 0x73, 0x27, 0x0d,
-	0xbb, 0x4f, 0xb6, 0xaf, 0xcf, 0xc7, 0xef, 0x9c, 0x73, 0x7d, 0x3e, 0xae, 0xe1, 0x8d, 0x81, 0x63,
-	0x53, 0x7f, 0xcb, 0xf2, 0xfd, 0xd0, 0x76, 0x3c, 0x33, 0xf6, 0xc3, 0x2d, 0xab, 0xe7, 0x50, 0x2f,
-	0xee, 0x0e, 0xb6, 0xbb, 0x61, 0x60, 0x25, 0x4f, 0x61, 0x60, 0xb5, 0x82, 0xd0, 0x8f, 0x7d, 0x7c,
-	0x2b, 0x8a, 0x43, 0x6a, 0xba, 0x2d, 0xce, 0xd8, 0xca, 0x30, 0xb6, 0x72, 0x8c, 0xcd, 0x9b, 0xa7,
-	0xbe, 0x7f, 0xda, 0xa3, 0x5b, 0x9c, 0xeb, 0x45, 0xff, 0x97, 0x5b, 0xb1, 0xe3, 0xd2, 0x28, 0x36,
-	0xdd, 0x40, 0x08, 0x6a, 0x7e, 0xaf, 0x40, 0xb5, 0xd9, 0xeb, 0x75, 0x07, 0xdb, 0xfc, 0x2a, 0xa9,
-	0xb6, 0xce, 0x03, 0x48, 0xbd, 0x01, 0xed, 0xf9, 0x01, 0x8d, 0x26, 0x8b, 0xa5, 0xf6, 0x29, 0x65,
-	0x62, 0xd9, 0x75, 0x32, 0x55, 0xd0, 0x8f, 0x3e, 0x61, 0x54, 0xec, 0x3a, 0x99, 0x2a, 0x8a, 0x4d,
-	0xa6, 0x9a, 0x5f, 0x27, 0x53, 0xf5, 0x23, 0x1a, 0x32, 0x2a, 0x76, 0x95, 0x54, 0xb7, 0x0a, 0xa8,
-	0x62, 0xa7, 0x17, 0x71, 0x32, 0x76, 0x23, 0xe8, 0xb4, 0x3b, 0x70, 0x65, 0x8f, 0xc6, 0xba, 0xd9,
-	0xeb, 0x11, 0xfa, 0xb2, 0x4f, 0xa3, 0x18, 0xaf, 0xc3, 0x3c, 0x77, 0x8c, 0xe5, 0xd8, 0x0d, 0xb4,
-	0x89, 0x6e, 0xd7, 0x48, 0x95, 0x3d, 0xeb, 0x8e, 0xad, 0x7d, 0x04, 0x57, 0x87, 0xc4, 0x51, 0xe0,
-	0x7b, 0x11, 0xc5, 0x6d, 0x98, 0x65, 0x6f, 0x39, 0x65, 0xfd, 0xee, 0x8f, 0x5b, 0x6a, 0xe1, 0x6a,
-	0x31, 0x19, 0x86, 0x74, 0x25, 0xe1, 0x12, 0xb4, 0xbf, 0x21, 0xa8, 0x1f, 0x52, 0xf7, 0x05, 0x0d,
-	0xf7, 0xbd, 0xa0, 0x1f, 0xe3, 0x35, 0xa8, 0x72, 0xbb, 0x86, 0x30, 0xe6, 0xd8, 0xe3, 0xbe, 0x8d,
-	0x31, 0xcc, 0x86, 0x7e, 0x8f, 0x36, 0xca, 0x7c, 0x95, 0xdf, 0xe3, 0x9b, 0x50, 0xb7, 0xfa, 0x51,
-	0xec, 0xbb, 0xdd, 0x5f, 0x45, 0xbe, 0xd7, 0x98, 0xd9, 0x44, 0xb7, 0x17, 0x08, 0x88, 0xa5, 0x47,
-	0x91, 0xef, 0xe1, 0x47, 0x00, 0x42, 0x1a, 0x93, 0xdd, 0x98, 0xe5, 0x68, 0xef, 0x4c, 0x46, 0x2b,
-	0x3d, 0xda, 0x3a, 0x89, 0x24, 0x1c, 0x52, 0xeb, 0x27, 0xb7, 0xda, 0x57, 0x08, 0x1a, 0x27, 0x41,
-	0x44, 0x43, 0xee, 0x0a, 0x81, 0x39, 0x3a, 0xdf, 0x7d, 0xf8, 0x10, 0xaa, 0xae, 0x20, 0x6e, 0x94,
-	0x37, 0x67, 0x6e, 0xd7, 0xef, 0xde, 0x53, 0x75, 0x57, 0xc6, 0x2f, 0x24, 0x91, 0xc1, 0xfd, 0xe0,
-	0x78, 0xa7, 0xdc, 0xd8, 0x79, 0xc2, 0xef, 0xb5, 0x0d, 0x58, 0x2f, 0x40, 0x26, 0x62, 0xa5, 0x75,
-	0xa0, 0xb1, 0x4b, 0x7b, 0x34, 0xa6, 0xd3, 0xc1, 0x5e, 0x87, 0x79, 0x19, 0x08, 0x81, 0xbb, 0x46,
-	0xaa, 0x22, 0x12, 0x11, 0x53, 0x57, 0x20, 0x51, 0xaa, 0xfb, 0x2f, 0x82, 0xab, 0x7a, 0x48, 0x4d,
-	0xf1, 0x56, 0x04, 0xd5, 0xc8, 0x6d, 0x97, 0xed, 0x69, 0xb6, 0x8b, 0xb0, 0x9e, 0xb3, 0x5f, 0xb6,
-	0x27, 0xd7, 0xb2, 0x9e, 0x6c, 0x97, 0x84, 0x2f, 0xbf, 0x40, 0x68, 0xa7, 0x0a, 0x95, 0x2e, 0xf7,
-	0xeb, 0x97, 0x08, 0x96, 0x52, 0x5b, 0x12, 0xa7, 0x61, 0x98, 0x8d, 0xcf, 0x02, 0x2a, 0x1d, 0xc6,
-	0xef, 0xf1, 0x32, 0x94, 0x1d, 0x5b, 0xec, 0xcd, 0x76, 0x89, 0x94, 0x1d, 0xfb, 0x0b, 0x84, 0xf0,
-	0x21, 0x54, 0xc4, 0xc6, 0x9b, 0xe1, 0x76, 0xbf, 0xad, 0x6c, 0x77, 0xde, 0x7d, 0x44, 0x48, 0xd9,
-	0xa9, 0xc0, 0x4c, 0xd7, 0xb1, 0xb5, 0x3f, 0x20, 0x58, 0xdd, 0xa3, 0xf1, 0x93, 0x50, 0x0d, 0xd9,
-	0x95, 0x14, 0x19, 0xc3, 0x75, 0xc9, 0xa0, 0xb4, 0xbf, 0x23, 0xb8, 0xfa, 0xc8, 0x77, 0xbc, 0x6f,
-	0x16, 0x06, 0xfe, 0x2e, 0x2c, 0xda, 0x66, 0x6c, 0x5a, 0xd4, 0x8b, 0x45, 0xf2, 0x98, 0xe5, 0x9a,
-	0x16, 0xd2, 0xc5, 0x7d, 0x5b, 0xfb, 0x17, 0x82, 0x6b, 0x29, 0xd6, 0xcb, 0x4e, 0x65, 0xb8, 0x01,
-	0x55, 0x8b, 0xa3, 0x13, 0x76, 0xce, 0x93, 0xe4, 0x11, 0xbf, 0x07, 0x15, 0x56, 0x16, 0xa2, 0xc6,
-	0x0c, 0xdf, 0xb6, 0xb7, 0x26, 0x2b, 0x91, 0x55, 0xa4, 0x65, 0xd8, 0xa7, 0x94, 0x08, 0x26, 0xad,
-	0x0f, 0xb5, 0xf4, 0x53, 0x1a, 0x49, 0x79, 0x68, 0x2c, 0xe5, 0xed, 0x41, 0xd5, 0x0f, 0x62, 0xc7,
-	0xf7, 0x22, 0x8e, 0xa2, 0x7e, 0xf7, 0x47, 0xaf, 0x30, 0x49, 0x94, 0x42, 0x6e, 0xcc, 0x13, 0xc1,
-	0x44, 0x12, 0x6e, 0xed, 0x33, 0x58, 0x1b, 0xdb, 0x66, 0x5f, 0x9f, 0xcf, 0xb4, 0x4f, 0x61, 0xe9,
-	0x24, 0xb0, 0x47, 0x36, 0xf8, 0x2b, 0xf2, 0xd5, 0x5e, 0xb2, 0xa1, 0xca, 0x17, 0x4d, 0x32, 0x72,
-	0x47, 0x7f, 0x0c, 0x38, 0xab, 0xf8, 0xd2, 0x2b, 0xde, 0x33, 0x58, 0x20, 0x7e, 0x8f, 0x3e, 0x19,
-	0xd0, 0x30, 0x74, 0x6c, 0x9a, 0x4b, 0xb4, 0x28, 0x97, 0x68, 0xf1, 0x26, 0xd4, 0x58, 0x9d, 0xeb,
-	0x7a, 0xa6, 0x4b, 0x87, 0xc9, 0x65, 0x9e, 0x2d, 0x3d, 0x36, 0x5d, 0xca, 0x52, 0xd5, 0x02, 0x40,
-	0x77, 0x48, 0xa2, 0x3d, 0x85, 0xb5, 0x0e, 0x0d, 0x5d, 0x27, 0x8a, 0x1c, 0xdf, 0xdb, 0x0b, 0x4d,
-	0x2f, 0x56, 0xd3, 0x52, 0x0f, 0x86, 0x5c, 0x49, 0xb2, 0xcf, 0x2e, 0x69, 0x7f, 0x2a, 0xc3, 0xb7,
-	0x52, 0x9f, 0xa4, 0x2a, 0x54, 0xea, 0xc8, 0x47, 0xb0, 0xc8, 0x01, 0xfa, 0x12, 0x89, 0x8c, 0x8f,
-	0xb2, 0x07, 0xb3, 0xbe, 0x6a, 0x97, 0xc8, 0x42, 0x98, 0xf5, 0x5d, 0x08, 0xcb, 0x29, 0xce, 0x54,
-	0x85, 0xc8, 0x29, 0xef, 0xab, 0xaa, 0x98, 0xe0, 0xb3, 0x76, 0x89, 0xe0, 0x54, 0x7a, 0xb2, 0xba,
-	0xb3, 0x08, 0xf5, 0x53, 0x46, 0x26, 0x9a, 0x0a, 0xed, 0x26, 0xdc, 0x98, 0xe0, 0x1a, 0x59, 0x10,
-	0xef, 0xc0, 0x15, 0xc3, 0xb3, 0x15, 0x7b, 0xad, 0x25, 0xb8, 0x3a, 0x24, 0x96, 0xfc, 0x1f, 0x03,
-	0xfe, 0x7f, 0x7e, 0x82, 0xda, 0x1f, 0x11, 0x2c, 0x7d, 0xd8, 0xa7, 0xe1, 0x19, 0x7b, 0x37, 0x8c,
-	0xe8, 0x1a, 0x54, 0xdd, 0x97, 0xd9, 0x1c, 0x33, 0xe7, 0xbe, 0xe4, 0xf9, 0x65, 0x1d, 0x2a, 0x3d,
-	0xc7, 0x75, 0xc4, 0x77, 0x56, 0x69, 0x97, 0x88, 0x78, 0x64, 0xf5, 0xee, 0x27, 0x50, 0x89, 0xfc,
-	0x30, 0x4e, 0xd2, 0xdc, 0x0f, 0x5e, 0xd1, 0x68, 0xc9, 0xa6, 0xb4, 0x75, 0xe4, 0x87, 0x31, 0x11,
-	0x5c, 0x3b, 0xf3, 0x30, 0xd7, 0xe5, 0xb2, 0x34, 0x13, 0x70, 0x16, 0x91, 0x34, 0xf9, 0xe7, 0x50,
-	0x61, 0x80, 0x23, 0x69, 0xf3, 0x9b, 0xd3, 0xd8, 0x1c, 0x0d, 0x8d, 0x16, 0x32, 0x58, 0x69, 0x5f,
-	0xe6, 0x3a, 0x46, 0x3a, 0xa2, 0x6f, 0xd4, 0x6e, 0x07, 0x56, 0xf2, 0x98, 0xa4, 0xe5, 0x1f, 0xa6,
-	0x8d, 0x0f, 0x9a, 0xae, 0x5c, 0x4a, 0x49, 0x43, 0xeb, 0x13, 0x39, 0x2c, 0xea, 0x0d, 0xd9, 0xd5,
-	0xb3, 0x5a, 0x73, 0x44, 0xc3, 0x01, 0x0d, 0x15, 0x3e, 0xe7, 0x67, 0xb0, 0xe0, 0x52, 0x33, 0xea,
-	0x87, 0xd4, 0xa5, 0x5e, 0x9c, 0xd4, 0x98, 0x37, 0xcf, 0xaf, 0x68, 0x07, 0x66, 0x4c, 0x3d, 0xeb,
-	0xec, 0x30, 0xc3, 0x4c, 0x72, 0xa2, 0xb4, 0x7f, 0x23, 0x58, 0x2f, 0x80, 0x74, 0xe9, 0x35, 0xe7,
-	0x09, 0xd4, 0xad, 0x90, 0xda, 0xd4, 0x8b, 0x1d, 0xb3, 0xa7, 0x50, 0x25, 0x13, 0x0b, 0xf4, 0x94,
-	0x89, 0x64, 0x25, 0x68, 0xcf, 0x61, 0x59, 0x7c, 0xa1, 0xbb, 0x74, 0xe0, 0x58, 0x34, 0xf1, 0xa2,
-	0x9e, 0x54, 0x24, 0x74, 0x9e, 0x06, 0x39, 0x15, 0xb6, 0x04, 0x7f, 0xae, 0x1a, 0xfd, 0x02, 0x56,
-	0xf2, 0xb2, 0xa5, 0x3b, 0x3e, 0x80, 0x39, 0x9b, 0xaf, 0x48, 0xe9, 0xb7, 0x55, 0xa5, 0x13, 0xc9,
-	0xa7, 0x7d, 0x1f, 0x96, 0x45, 0x17, 0x9f, 0x47, 0x2d, 0x1a, 0x35, 0x94, 0x34, 0x6a, 0xda, 0x2a,
-	0xac, 0xe4, 0xc9, 0x64, 0x5a, 0xba, 0x2e, 0xbf, 0x1f, 0xb1, 0x9c, 0x7c, 0x3f, 0xda, 0x73, 0xb9,
-	0x85, 0x87, 0xcb, 0x12, 0xef, 0x0e, 0x54, 0x85, 0x5e, 0x51, 0x7e, 0xa6, 0x01, 0x9c, 0x30, 0x6a,
-	0x9f, 0x23, 0xb8, 0x76, 0x44, 0x3d, 0xdb, 0x18, 0x50, 0x2f, 0x56, 0xd8, 0xab, 0xc7, 0x00, 0x94,
-	0x91, 0x76, 0x79, 0x37, 0xca, 0xe2, 0x7c, 0x45, 0x3d, 0x6b, 0xb0, 0x19, 0x90, 0x2b, 0x3a, 0x3e,
-	0x0b, 0x28, 0xa9, 0xd1, 0xe4, 0x56, 0x5b, 0x86, 0xa5, 0x0c, 0x08, 0xe9, 0x0d, 0x1b, 0x56, 0xd9,
-	0xa2, 0xce, 0xfb, 0x30, 0x55, 0x7c, 0x49, 0x9f, 0x5c, 0xce, 0xf4, 0xc9, 0x1b, 0x50, 0x63, 0x3d,
-	0x6b, 0x76, 0xa0, 0x9d, 0x67, 0x0b, 0x2c, 0x07, 0x69, 0xeb, 0xb0, 0x36, 0xa6, 0x45, 0x02, 0x20,
-	0xb0, 0x4a, 0x68, 0xe0, 0x8b, 0x11, 0xf0, 0x28, 0x36, 0x63, 0x95, 0xda, 0x7c, 0x03, 0x20, 0x62,
-	0xa4, 0x42, 0x5b, 0x99, 0x6b, 0xab, 0xf1, 0x95, 0x44, 0xdd, 0x98, 0x4c, 0xa9, 0xee, 0x3f, 0x33,
-	0xd0, 0xcc, 0xbf, 0x53, 0x35, 0xfa, 0x1d, 0xa8, 0x0d, 0x0f, 0x69, 0xe4, 0xb7, 0xd7, 0x6c, 0x89,
-	0x63, 0x9c, 0x56, 0x72, 0x8c, 0xd3, 0x3a, 0x4e, 0x28, 0x48, 0x4a, 0x8c, 0x5d, 0xb8, 0x1e, 0x98,
-	0x61, 0xec, 0x58, 0x4e, 0xc0, 0xca, 0xaf, 0xe5, 0x7b, 0x1e, 0xb5, 0x58, 0xe7, 0x28, 0xca, 0xfd,
-	0x5b, 0x93, 0x23, 0x2b, 0xcf, 0x53, 0x5a, 0x9d, 0x94, 0x5d, 0x4f, 0xb8, 0xdb, 0x25, 0xb2, 0x12,
-	0x14, 0xac, 0xe3, 0x01, 0x34, 0xb2, 0xea, 0x6c, 0x27, 0x4a, 0x35, 0x8a, 0x93, 0x84, 0xfb, 0x53,
-	0x69, 0xdc, 0xcd, 0x08, 0x68, 0x97, 0xc8, 0x5a, 0x50, 0xfc, 0x0a, 0x53, 0x58, 0x76, 0xa9, 0xed,
-	0x98, 0x5d, 0x26, 0x83, 0x76, 0xad, 0x4f, 0x4c, 0xef, 0x94, 0xda, 0x8d, 0x0a, 0x57, 0x79, 0xef,
-	0x7c, 0x95, 0x87, 0x8c, 0x99, 0x45, 0x84, 0xea, 0x82, 0xb5, 0x5d, 0x22, 0x4b, 0xee, 0xe8, 0x22,
-	0x1b, 0x72, 0xf9, 0x9e, 0xd6, 0x6e, 0xc0, 0x46, 0x61, 0x24, 0x65, 0xa4, 0xdf, 0x80, 0x65, 0x99,
-	0x94, 0x15, 0x77, 0x95, 0x16, 0x02, 0x16, 0x02, 0xf7, 0xa3, 0xa8, 0x4f, 0x15, 0xb6, 0xc4, 0x26,
-	0xd4, 0x6d, 0x1a, 0x59, 0xa1, 0xc3, 0x27, 0x0f, 0xf9, 0x39, 0x64, 0x97, 0xce, 0x3d, 0xe8, 0x61,
-	0xd9, 0x28, 0xa7, 0x53, 0x82, 0xff, 0x1d, 0x82, 0x25, 0x42, 0x07, 0x0e, 0xfd, 0x54, 0x71, 0x8a,
-	0x58, 0x81, 0x4a, 0x14, 0x9b, 0xa1, 0xa8, 0x0a, 0x65, 0x22, 0x1e, 0x46, 0x01, 0xce, 0x9c, 0x0b,
-	0x70, 0x76, 0x0c, 0xe0, 0x0a, 0x73, 0x4a, 0x0a, 0x44, 0xe0, 0xfb, 0xe1, 0x9f, 0x11, 0x2c, 0xe6,
-	0x12, 0x0d, 0xbe, 0x09, 0x1b, 0x27, 0x47, 0x06, 0xe9, 0x1a, 0x4f, 0x8d, 0xc7, 0xc7, 0xdd, 0xe3,
-	0x67, 0x1d, 0xa3, 0x7b, 0xf2, 0xf8, 0xa8, 0x63, 0xe8, 0xfb, 0x3f, 0xdb, 0x37, 0x76, 0xaf, 0x95,
-	0xf0, 0x77, 0xe0, 0xc6, 0x28, 0xc1, 0x43, 0x5d, 0x37, 0x3a, 0xc7, 0xc6, 0x6e, 0x57, 0x7f, 0x78,
-	0x70, 0x70, 0x0d, 0x15, 0x91, 0x10, 0xe3, 0x91, 0xa1, 0x0f, 0x49, 0xca, 0x58, 0x83, 0x6f, 0x8f,
-	0x92, 0xe8, 0x0f, 0x1f, 0xeb, 0xc6, 0xc1, 0x41, 0x42, 0x33, 0x73, 0xf7, 0x9f, 0xab, 0x50, 0xd3,
-	0x79, 0x4e, 0x24, 0x1d, 0x1d, 0x7f, 0x8e, 0x00, 0xd2, 0x3e, 0x14, 0xdf, 0x9f, 0x7e, 0x60, 0x97,
-	0xee, 0x6f, 0x3e, 0xb8, 0x08, 0xab, 0x2c, 0x23, 0x5f, 0x22, 0x7e, 0x18, 0x99, 0x9d, 0x4a, 0xf1,
-	0x4f, 0x55, 0xe5, 0x15, 0x9f, 0x9a, 0x34, 0xdf, 0xbf, 0x30, 0xbf, 0x04, 0xf5, 0x19, 0xcc, 0x27,
-	0xc7, 0x0a, 0x58, 0xb9, 0x33, 0x1b, 0x39, 0x34, 0x69, 0xbe, 0x33, 0x3d, 0xa3, 0x54, 0xff, 0x15,
-	0x82, 0xa5, 0xb1, 0xbe, 0x09, 0x7f, 0x30, 0x85, 0x55, 0x85, 0x5d, 0x60, 0xf3, 0xe1, 0x6b, 0x48,
-	0x90, 0xd0, 0xd8, 0xa6, 0x49, 0xa7, 0x23, 0xf5, 0x4d, 0x33, 0x36, 0xf9, 0xab, 0x6f, 0x9a, 0x82,
-	0xd9, 0xfd, 0xaf, 0x08, 0xae, 0x17, 0xce, 0x68, 0x78, 0x77, 0x7a, 0xa9, 0xe3, 0xd3, 0x6f, 0xd3,
-	0x78, 0x4d, 0x29, 0x12, 0xe6, 0xaf, 0xa1, 0x2a, 0x67, 0x3f, 0xfc, 0x96, 0xaa, 0xc4, 0xfc, 0x64,
-	0xd9, 0x7c, 0x7b, 0x6a, 0xbe, 0x4c, 0xa0, 0xd2, 0x91, 0x4b, 0x3d, 0x50, 0x63, 0x83, 0xa3, 0x7a,
-	0xa0, 0x0a, 0x26, 0xbc, 0xdf, 0x23, 0x58, 0xc8, 0x0e, 0x40, 0xf8, 0xdd, 0xa9, 0x84, 0xe5, 0x47,
-	0xb9, 0xe6, 0x7b, 0x17, 0x63, 0xce, 0x60, 0xc9, 0x76, 0xde, 0xea, 0x58, 0x0a, 0x66, 0x01, 0x75,
-	0x2c, 0x85, 0xcd, 0x3e, 0xc3, 0x92, 0x6d, 0xc2, 0xd5, 0xb1, 0x14, 0x74, 0xf8, 0xea, 0x58, 0x8a,
-	0xfa, 0xfe, 0x34, 0x46, 0xb2, 0xc3, 0x9f, 0x32, 0x46, 0xf9, 0x71, 0x61, 0xca, 0x18, 0x8d, 0x0e,
-	0x15, 0x2c, 0xf3, 0x8d, 0xfd, 0xf8, 0x50, 0xcf, 0x7c, 0x93, 0xfe, 0xe6, 0xa8, 0x67, 0xbe, 0x89,
-	0x7f, 0x5d, 0x38, 0xb4, 0xb1, 0x9f, 0x24, 0xea, 0xd0, 0x26, 0xfd, 0xb1, 0x51, 0x87, 0x36, 0xf1,
-	0x0f, 0x0d, 0xfe, 0x0d, 0x82, 0xda, 0x70, 0x82, 0xc1, 0xca, 0x75, 0x67, 0x74, 0xf2, 0x6a, 0xde,
-	0xbf, 0x00, 0x67, 0xa6, 0x8c, 0x8f, 0x4c, 0x32, 0xea, 0x65, 0xbc, 0x78, 0xd0, 0x52, 0x2f, 0xe3,
-	0x13, 0x46, 0x28, 0x0e, 0x6a, 0x64, 0xde, 0x51, 0x07, 0x55, 0x3c, 0x7c, 0xa9, 0x83, 0x9a, 0x30,
-	0x68, 0xe1, 0xbf, 0xa0, 0xa4, 0xb3, 0xcd, 0xb5, 0xe7, 0x78, 0xe7, 0x62, 0x82, 0x73, 0x1e, 0xd3,
-	0x5f, 0x4b, 0x46, 0xa6, 0x72, 0xa4, 0x9d, 0xad, 0x7a, 0xe5, 0x18, 0x6b, 0xcb, 0xd5, 0x2b, 0xc7,
-	0x78, 0x23, 0x8d, 0x7f, 0x8b, 0xa0, 0x9e, 0x19, 0x00, 0xf0, 0x83, 0xe9, 0x4c, 0xcb, 0x4e, 0x2a,
-	0xcd, 0x77, 0x2f, 0xc4, 0x2b, 0x80, 0xec, 0x3c, 0xd8, 0xa9, 0x8b, 0x9e, 0xf9, 0xe9, 0x36, 0xe9,
-	0xe8, 0xcf, 0x17, 0x73, 0x1c, 0xff, 0x28, 0x6f, 0x1c, 0x09, 0xd1, 0x4f, 0xb9, 0xe8, 0xc1, 0x76,
-	0x4b, 0x4f, 0xa5, 0xbf, 0x98, 0xe3, 0xf3, 0xef, 0xbd, 0xff, 0x05, 0x00, 0x00, 0xff, 0xff, 0xf3,
-	0x35, 0x3c, 0x36, 0x30, 0x21, 0x00, 0x00,
+	// 2300 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xcc, 0x5a, 0xdd, 0x6f, 0x1b, 0x59,
+	0x15, 0xcf, 0x38, 0x71, 0x1c, 0x1f, 0x27, 0x69, 0x73, 0x93, 0x26, 0x8e, 0x43, 0x68, 0x98, 0x85,
+	0x52, 0x51, 0xe1, 0xb4, 0x29, 0xfb, 0xd1, 0x6e, 0xbb, 0xbb, 0xf1, 0xc4, 0xdb, 0xa4, 0x24, 0x69,
+	0xf6, 0x3a, 0x29, 0xb4, 0x2b, 0xd6, 0x9a, 0x7a, 0x2e, 0xc9, 0x20, 0x7b, 0x66, 0x3a, 0x77, 0xec,
+	0x55, 0x91, 0x56, 0x42, 0xaa, 0x04, 0x8b, 0x40, 0x62, 0xb5, 0x4f, 0x0b, 0x0f, 0x3c, 0x21, 0x21,
+	0x78, 0x46, 0x3c, 0xf0, 0x17, 0xc0, 0x7f, 0x85, 0xee, 0xc7, 0x78, 0x66, 0xec, 0x71, 0x73, 0xc7,
+	0x0d, 0xec, 0x3e, 0xc5, 0x73, 0x7d, 0x3e, 0x7e, 0xe7, 0xdc, 0xe3, 0x73, 0xcf, 0xfd, 0x4d, 0xe0,
+	0x66, 0xcf, 0xb6, 0x88, 0xbb, 0xd9, 0x72, 0x5d, 0xdf, 0xb2, 0x1d, 0x33, 0x70, 0xfd, 0xcd, 0x56,
+	0xdb, 0x26, 0x4e, 0xd0, 0xec, 0xdd, 0x6a, 0xfa, 0x5e, 0x2b, 0x7c, 0xf2, 0xbd, 0x56, 0xd5, 0xf3,
+	0xdd, 0xc0, 0x45, 0xd7, 0x68, 0xe0, 0x13, 0xb3, 0x53, 0xe5, 0x8a, 0xd5, 0x98, 0x62, 0x35, 0xa1,
+	0x58, 0xb9, 0x7a, 0xea, 0xba, 0xa7, 0x6d, 0xb2, 0xc9, 0xb5, 0x9e, 0x75, 0x7f, 0xbe, 0x19, 0xd8,
+	0x1d, 0x42, 0x03, 0xb3, 0xe3, 0x09, 0x43, 0x95, 0xea, 0xb0, 0xeb, 0x67, 0xbe, 0x6b, 0x5a, 0x2d,
+	0x93, 0x32, 0x23, 0xd1, 0x83, 0x94, 0xff, 0x6e, 0x0a, 0x54, 0xb3, 0xdd, 0x66, 0xa2, 0xec, 0xaf,
+	0x94, 0xda, 0x3c, 0x2f, 0x20, 0xe2, 0xf4, 0x48, 0xdb, 0xf5, 0x08, 0x1d, 0x6d, 0x96, 0x58, 0xa7,
+	0x84, 0x99, 0x65, 0x7f, 0x47, 0x4b, 0x79, 0x5d, 0x7a, 0xc6, 0xa4, 0xd8, 0xdf, 0xd1, 0x52, 0x34,
+	0x30, 0x79, 0x34, 0xec, 0xef, 0x68, 0xa9, 0x2e, 0x25, 0x3e, 0x93, 0x62, 0x7f, 0xa5, 0xd4, 0xb5,
+	0x14, 0xa9, 0xc0, 0x6e, 0x53, 0x2e, 0xc6, 0x3e, 0x08, 0x39, 0xfd, 0x06, 0xcc, 0x3f, 0x20, 0x81,
+	0x61, 0xb6, 0xdb, 0x98, 0x3c, 0xef, 0x12, 0x1a, 0xa0, 0x55, 0x98, 0xe1, 0x89, 0x69, 0xd9, 0x56,
+	0x59, 0xdb, 0xd0, 0xae, 0x17, 0x71, 0x81, 0x3d, 0x1b, 0xb6, 0xa5, 0x7f, 0x0c, 0x97, 0xfa, 0xc2,
+	0xd4, 0x73, 0x1d, 0x4a, 0xd0, 0x2e, 0x4c, 0xb1, 0x6f, 0xb9, 0x64, 0x69, 0xeb, 0x47, 0x55, 0xb5,
+	0xed, 0xad, 0x32, 0x1b, 0x75, 0x99, 0x4a, 0xcc, 0x2d, 0xe8, 0x7f, 0xd5, 0xa0, 0x74, 0x40, 0x3a,
+	0xcf, 0x88, 0xbf, 0xe7, 0x78, 0xdd, 0x00, 0xad, 0x40, 0x81, 0xc7, 0xd5, 0x87, 0x31, 0xcd, 0x1e,
+	0xf7, 0x2c, 0x84, 0x60, 0xca, 0x77, 0xdb, 0xa4, 0x9c, 0xe3, 0xab, 0xfc, 0x33, 0xba, 0x0a, 0xa5,
+	0x56, 0x97, 0x06, 0x6e, 0xa7, 0xf9, 0x0b, 0xea, 0x3a, 0xe5, 0xc9, 0x0d, 0xed, 0xfa, 0x2c, 0x06,
+	0xb1, 0xf4, 0x90, 0xba, 0x0e, 0x7a, 0x08, 0x20, 0xac, 0x31, 0xdb, 0xe5, 0x29, 0x8e, 0xf6, 0xc6,
+	0x68, 0xb4, 0x32, 0xa3, 0xd5, 0x13, 0x2a, 0xe1, 0xe0, 0x62, 0x37, 0xfc, 0xa8, 0x7f, 0xa5, 0x41,
+	0xf9, 0xc4, 0xa3, 0xc4, 0xe7, 0xa9, 0x10, 0x98, 0xe9, 0xf9, 0xe9, 0x43, 0x07, 0x50, 0xe8, 0x08,
+	0xe1, 0x72, 0x6e, 0x63, 0xf2, 0x7a, 0x69, 0xeb, 0xb6, 0x6a, 0xba, 0x62, 0x79, 0xc1, 0xa1, 0x0d,
+	0x9e, 0x07, 0xdb, 0x39, 0xe5, 0xc1, 0xce, 0x60, 0xfe, 0x59, 0x5f, 0x83, 0xd5, 0x14, 0x64, 0x62,
+	0xaf, 0xf4, 0x23, 0x28, 0xef, 0x90, 0x36, 0x09, 0x48, 0x36, 0xd8, 0xab, 0x30, 0x23, 0x37, 0x42,
+	0xe0, 0x2e, 0xe2, 0x82, 0xd8, 0x09, 0xca, 0xdc, 0xa5, 0x58, 0x94, 0xee, 0xfe, 0xa3, 0xc1, 0x25,
+	0xc3, 0x27, 0xa6, 0xf8, 0x56, 0x6c, 0x6a, 0x3d, 0x51, 0x2e, 0xb7, 0xb2, 0x94, 0x8b, 0x88, 0x9e,
+	0xab, 0x5f, 0x74, 0x26, 0x57, 0xe2, 0x99, 0xdc, 0x9d, 0x10, 0xb9, 0xfc, 0x5c, 0xd3, 0x6a, 0x05,
+	0xc8, 0x37, 0x79, 0x5e, 0xbf, 0xd4, 0x60, 0x21, 0x8a, 0x25, 0x4c, 0x1a, 0x82, 0xa9, 0xe0, 0x85,
+	0x47, 0x64, 0xc2, 0xf8, 0x67, 0xb4, 0x08, 0x39, 0xdb, 0x12, 0xb5, 0xb9, 0x3b, 0x81, 0x73, 0xb6,
+	0xf5, 0xb9, 0xa6, 0xa1, 0x03, 0xc8, 0x8b, 0xc2, 0x9b, 0xe4, 0x71, 0xbf, 0xad, 0x1c, 0x77, 0x32,
+	0x7d, 0x58, 0x58, 0xa9, 0xe5, 0x61, 0xb2, 0x69, 0x5b, 0xfa, 0xef, 0x34, 0x58, 0x7e, 0x40, 0x82,
+	0x47, 0xbe, 0x1a, 0xb2, 0xf9, 0x08, 0x19, 0xc3, 0x75, 0xc1, 0xa0, 0xf4, 0xbf, 0x69, 0x70, 0xe9,
+	0xa1, 0x6b, 0x3b, 0x5f, 0x2f, 0x0c, 0xf4, 0x06, 0xcc, 0x59, 0x66, 0x60, 0xb6, 0x88, 0x13, 0x88,
+	0xe6, 0x31, 0xc5, 0x3d, 0xcd, 0x46, 0x8b, 0x7b, 0x96, 0xfe, 0x0f, 0x0d, 0x2e, 0x47, 0x58, 0x2f,
+	0xba, 0x95, 0xa1, 0x32, 0x14, 0x5a, 0x1c, 0x9d, 0x88, 0x73, 0x06, 0x87, 0x8f, 0xe8, 0x1e, 0xe4,
+	0xd9, 0xb1, 0x40, 0xcb, 0x93, 0xbc, 0x6c, 0xaf, 0x8d, 0x76, 0x22, 0x4f, 0x91, 0x6a, 0xdd, 0x3a,
+	0x25, 0x58, 0x28, 0xb1, 0x0d, 0x2f, 0x46, 0xbf, 0xa5, 0x81, 0x9e, 0xa7, 0x0d, 0xf5, 0xbc, 0x9f,
+	0x01, 0xa2, 0x24, 0x08, 0x6c, 0xe7, 0x94, 0x36, 0xdd, 0x1e, 0xf1, 0x7d, 0xdb, 0x22, 0x94, 0x23,
+	0x2a, 0x6d, 0x55, 0x5f, 0x11, 0x9e, 0x38, 0x16, 0x79, 0x60, 0x0d, 0xa9, 0x8f, 0x17, 0x42, 0x4b,
+	0x8f, 0x42, 0x43, 0xfa, 0x67, 0xb0, 0x32, 0x54, 0x7d, 0xff, 0xbf, 0x54, 0xea, 0x9f, 0xc2, 0xc2,
+	0x89, 0x67, 0x0d, 0xd4, 0xfd, 0x2b, 0xda, 0xd8, 0x83, 0xb0, 0xce, 0x72, 0xe3, 0xf6, 0x1e, 0x59,
+	0xe8, 0x9f, 0x00, 0x8a, 0x3b, 0xbe, 0xf0, 0x83, 0xf0, 0x09, 0xcc, 0x62, 0xb7, 0x4d, 0xc2, 0x44,
+	0x27, 0xfa, 0xaf, 0x96, 0xe8, 0xbf, 0x68, 0x03, 0x8a, 0xec, 0xf8, 0x6b, 0x3a, 0x66, 0x87, 0xf4,
+	0x7b, 0xce, 0x0c, 0x5b, 0x3a, 0x34, 0x3b, 0x84, 0x75, 0xb0, 0x59, 0x80, 0x66, 0x5f, 0x44, 0x7f,
+	0x0c, 0x2b, 0x47, 0xc4, 0xef, 0xd8, 0x94, 0xda, 0xae, 0xf3, 0xc0, 0x37, 0x9d, 0x40, 0xcd, 0x4b,
+	0xc9, 0xeb, 0x6b, 0x85, 0x67, 0x40, 0x7c, 0x49, 0xff, 0x63, 0x0e, 0xbe, 0x15, 0xe5, 0x24, 0x72,
+	0xa1, 0x72, 0xbc, 0x7c, 0x0c, 0x73, 0x1c, 0x60, 0x58, 0xa1, 0x72, 0x7f, 0x94, 0x33, 0x18, 0xcf,
+	0xd5, 0xee, 0x04, 0x9e, 0xf5, 0xe3, 0xb9, 0xf3, 0x61, 0x31, 0xc2, 0x19, 0xb9, 0x10, 0xad, 0xe6,
+	0x7d, 0x55, 0x17, 0x23, 0x72, 0xb6, 0x3b, 0x81, 0x51, 0x64, 0x3d, 0x5c, 0xad, 0xcd, 0x41, 0xe9,
+	0x94, 0x89, 0x89, 0x59, 0x43, 0xbf, 0x0a, 0xeb, 0x23, 0x52, 0x23, 0xcf, 0xc9, 0x1b, 0x30, 0x5f,
+	0x77, 0x2c, 0xc5, 0x11, 0x6c, 0x01, 0x2e, 0xf5, 0x85, 0xa5, 0xfe, 0x27, 0x80, 0xfe, 0x97, 0x3f,
+	0x41, 0xfd, 0x0b, 0x0d, 0x16, 0x3e, 0xea, 0x12, 0xff, 0x05, 0xfb, 0xae, 0xbf, 0xa3, 0x2b, 0x50,
+	0xe8, 0x3c, 0x8f, 0x77, 0x9e, 0xe9, 0xce, 0x73, 0xde, 0x75, 0x56, 0x21, 0xdf, 0xb6, 0x3b, 0xb6,
+	0xf8, 0x9d, 0xe5, 0x77, 0x27, 0xb0, 0x78, 0x64, 0xc7, 0xe0, 0x7d, 0xc8, 0x53, 0xd7, 0x0f, 0xc2,
+	0xee, 0xf7, 0xfd, 0x57, 0xcc, 0x5f, 0x72, 0x56, 0xad, 0x36, 0x5c, 0x3f, 0xc0, 0x42, 0xab, 0x36,
+	0x03, 0xd3, 0x4d, 0x6e, 0x4b, 0x37, 0x01, 0xc5, 0x11, 0xc9, 0x90, 0x7f, 0x0c, 0x79, 0x06, 0x98,
+	0xca, 0x98, 0xdf, 0xcc, 0x12, 0x33, 0xed, 0x07, 0x2d, 0x6c, 0xb0, 0x13, 0x7f, 0x91, 0xfb, 0x18,
+	0x18, 0x94, 0xbe, 0xd6, 0xb8, 0x6d, 0x58, 0x4a, 0x62, 0x92, 0x91, 0x7f, 0x14, 0xcd, 0x43, 0x5a,
+	0xb6, 0x53, 0x54, 0x5a, 0xea, 0x47, 0x1f, 0xda, 0x89, 0x76, 0x9d, 0x8d, 0xc0, 0xdf, 0x8c, 0xe8,
+	0xb1, 0xdc, 0x75, 0x89, 0x48, 0xc6, 0x7e, 0x0f, 0xf2, 0xac, 0x51, 0x89, 0xae, 0xf5, 0xca, 0x23,
+	0x35, 0x3e, 0xd4, 0x63, 0xa1, 0xa4, 0xff, 0x84, 0x35, 0x73, 0x36, 0x30, 0x27, 0xc2, 0xdc, 0x4e,
+	0xda, 0xcc, 0x74, 0x51, 0x90, 0x86, 0x1b, 0xb0, 0x98, 0x30, 0x7c, 0x21, 0x68, 0xbf, 0xd0, 0xa0,
+	0x2c, 0x6f, 0x60, 0x6c, 0x2e, 0x68, 0x10, 0xbf, 0x47, 0x7c, 0x85, 0x1e, 0xfb, 0x04, 0x66, 0x3b,
+	0xc4, 0xa4, 0x5d, 0x9f, 0x74, 0x88, 0x13, 0x84, 0x33, 0xc0, 0x9b, 0xe7, 0x4f, 0x1f, 0xfb, 0x66,
+	0x40, 0x9c, 0xd6, 0x8b, 0x83, 0x98, 0x32, 0x4e, 0x98, 0xd2, 0xff, 0xa9, 0xc1, 0x6a, 0x0a, 0xa4,
+	0x0b, 0x1f, 0x04, 0x1e, 0x41, 0xa9, 0xe5, 0x13, 0x8b, 0x38, 0x81, 0x6d, 0xb6, 0xc3, 0x08, 0x7e,
+	0x78, 0x7e, 0x04, 0x46, 0xa4, 0x84, 0xe3, 0x16, 0xf4, 0xa7, 0xb0, 0x28, 0xda, 0xe6, 0x0e, 0xe9,
+	0xd9, 0x2d, 0x12, 0x66, 0xd1, 0x08, 0xc7, 0x04, 0xed, 0x3c, 0x0f, 0xf2, 0x06, 0x5f, 0x15, 0xfa,
+	0x89, 0x11, 0xe1, 0xa7, 0xb0, 0x94, 0xb4, 0x2d, 0xd3, 0xf1, 0x01, 0x4c, 0x5b, 0x7c, 0x45, 0x5a,
+	0xbf, 0xae, 0x6a, 0x1d, 0x4b, 0x3d, 0xfd, 0x7b, 0xb0, 0x28, 0x6e, 0x5c, 0x49, 0xd4, 0x62, 0xa8,
+	0xd6, 0xc2, 0xa1, 0x5a, 0x5f, 0x86, 0xa5, 0xa4, 0x98, 0x3c, 0x2b, 0xae, 0xc8, 0xa6, 0x26, 0x96,
+	0xc3, 0x7a, 0xd7, 0x9f, 0xca, 0xbe, 0xd2, 0x5f, 0x96, 0x78, 0x6b, 0x50, 0x10, 0x7e, 0xc3, 0x7a,
+	0x55, 0x07, 0x1c, 0x2a, 0xea, 0x2f, 0x35, 0xb8, 0xdc, 0x20, 0x8e, 0x55, 0xef, 0x11, 0x27, 0x50,
+	0xa8, 0xd5, 0x63, 0x00, 0xc2, 0x44, 0x9b, 0xfc, 0xe6, 0xc0, 0xf6, 0x79, 0x5e, 0xbd, 0x95, 0xb3,
+	0x1f, 0x0b, 0x77, 0x74, 0xfc, 0xc2, 0x23, 0xb8, 0x48, 0xc2, 0x8f, 0xfa, 0x22, 0x2c, 0xc4, 0x40,
+	0xc8, 0x6c, 0x58, 0xb0, 0xcc, 0x16, 0x0d, 0x3e, 0x32, 0xab, 0xe2, 0x0b, 0xef, 0x34, 0xb9, 0xd8,
+	0x9d, 0x66, 0x0d, 0x8a, 0xec, 0x7e, 0x11, 0x27, 0x1f, 0x66, 0xd8, 0x02, 0x6b, 0x8d, 0xfa, 0x2a,
+	0xac, 0x0c, 0x79, 0x91, 0x00, 0x30, 0x2c, 0x63, 0xe2, 0xb9, 0xe2, 0xba, 0xde, 0x08, 0xcc, 0x40,
+	0x65, 0x60, 0x5a, 0x07, 0xa0, 0x4c, 0x54, 0x78, 0xcb, 0x71, 0x6f, 0x45, 0xbe, 0x12, 0xba, 0x1b,
+	0xb2, 0x29, 0xdd, 0xfd, 0x7b, 0x12, 0x2a, 0xc9, 0xef, 0x54, 0x83, 0x7e, 0x07, 0x8a, 0x7d, 0x02,
+	0x4e, 0xfe, 0xf6, 0x2a, 0x55, 0x41, 0xd1, 0x55, 0x43, 0x8a, 0xae, 0x7a, 0x1c, 0x4a, 0xe0, 0x48,
+	0x18, 0x75, 0xe0, 0x8a, 0x67, 0xfa, 0x81, 0xdd, 0xb2, 0x3d, 0x36, 0x13, 0xb5, 0x5c, 0xc7, 0x21,
+	0x2d, 0x36, 0xce, 0x8b, 0x19, 0xec, 0xad, 0xd1, 0x3b, 0x2b, 0xb9, 0xaf, 0xea, 0x51, 0xa4, 0x6e,
+	0x84, 0xda, 0xbb, 0x13, 0x78, 0xc9, 0x4b, 0x59, 0x47, 0x3d, 0x28, 0xc7, 0xdd, 0x59, 0x36, 0x8d,
+	0x3c, 0x0a, 0xd6, 0xe7, 0x4e, 0x26, 0x8f, 0x3b, 0x31, 0x03, 0xbb, 0x13, 0x78, 0xc5, 0x4b, 0xff,
+	0x0a, 0x11, 0x58, 0xec, 0x10, 0xcb, 0x36, 0x9b, 0xcc, 0x06, 0x69, 0xb6, 0xce, 0x4c, 0xe7, 0x94,
+	0x58, 0xe5, 0x3c, 0x77, 0x79, 0xfb, 0x7c, 0x97, 0x07, 0x4c, 0x99, 0xed, 0x08, 0x31, 0x84, 0xea,
+	0xee, 0x04, 0x5e, 0xe8, 0x0c, 0x2e, 0xd6, 0x0a, 0x90, 0xe7, 0x35, 0xad, 0xaf, 0xc3, 0x5a, 0xea,
+	0x4e, 0xca, 0x9d, 0xbe, 0x09, 0x8b, 0xb2, 0x29, 0x2b, 0x56, 0x95, 0xee, 0x03, 0x12, 0x06, 0xf7,
+	0x28, 0xed, 0x12, 0x85, 0x92, 0xd8, 0x80, 0x92, 0x45, 0x68, 0xcb, 0xb7, 0xbd, 0xc0, 0x96, 0x75,
+	0x58, 0xc4, 0xf1, 0xa5, 0x73, 0x49, 0x39, 0xd6, 0x8d, 0x12, 0x3e, 0x25, 0xf8, 0xdf, 0x68, 0xb0,
+	0x80, 0x49, 0xcf, 0x26, 0x9f, 0x2a, 0x5e, 0xed, 0x96, 0x20, 0x4f, 0x03, 0xd3, 0x17, 0xa7, 0x42,
+	0x0e, 0x8b, 0x87, 0x41, 0x80, 0x93, 0xe7, 0x02, 0x9c, 0x1a, 0x02, 0xb8, 0xc4, 0x92, 0x12, 0x01,
+	0x91, 0xf8, 0xfe, 0xa5, 0xc1, 0x95, 0x46, 0x60, 0xfa, 0x41, 0x2d, 0xe4, 0x98, 0x43, 0x8c, 0x6b,
+	0x50, 0xe4, 0x18, 0x63, 0xa4, 0x07, 0x07, 0xcd, 0x5a, 0x10, 0x9b, 0x9d, 0xf8, 0x97, 0x7d, 0xf6,
+	0x63, 0x9a, 0x3d, 0xee, 0x59, 0xe8, 0x0d, 0x98, 0x3b, 0x6b, 0xd3, 0x66, 0x9f, 0xb1, 0x96, 0x8c,
+	0xde, 0xec, 0x59, 0x9b, 0xf6, 0x3d, 0xa0, 0x0f, 0x61, 0xca, 0x0f, 0x3a, 0x9e, 0xac, 0xa8, 0xad,
+	0xd1, 0x15, 0x15, 0x67, 0xc1, 0xab, 0xf8, 0xf8, 0xe0, 0xe8, 0x11, 0x0f, 0x96, 0x62, 0xae, 0xaf,
+	0x9f, 0xc1, 0xf2, 0x20, 0x76, 0xd9, 0xec, 0x0f, 0xa1, 0x18, 0x41, 0x10, 0xe7, 0xd3, 0x4d, 0x45,
+	0x37, 0x91, 0xb1, 0xc8, 0x84, 0xbe, 0x0f, 0x4b, 0x8d, 0xc0, 0xf5, 0x2e, 0x26, 0x49, 0xfa, 0x0a,
+	0xcb, 0x79, 0xc2, 0x9a, 0xdc, 0x8d, 0x03, 0xb9, 0x19, 0x98, 0xb4, 0x38, 0xba, 0xd3, 0xd7, 0xf3,
+	0x53, 0x96, 0xf9, 0x89, 0x99, 0x93, 0x8e, 0x64, 0x3c, 0x17, 0xe4, 0x47, 0xc6, 0x33, 0xe4, 0xe6,
+	0x07, 0x7f, 0xd2, 0x60, 0x2e, 0x71, 0x8c, 0xa1, 0xab, 0xb0, 0x76, 0xd2, 0xa8, 0xe3, 0x66, 0xfd,
+	0x71, 0xfd, 0xf0, 0xb8, 0x79, 0xfc, 0xe4, 0xa8, 0xde, 0x3c, 0x39, 0x6c, 0x1c, 0xd5, 0x8d, 0xbd,
+	0x0f, 0xf7, 0xea, 0x3b, 0x97, 0x27, 0xd0, 0x77, 0x60, 0x7d, 0x50, 0x60, 0xdb, 0x30, 0xea, 0x47,
+	0xc7, 0xf5, 0x9d, 0xa6, 0xb1, 0xbd, 0xbf, 0x7f, 0x59, 0x4b, 0x13, 0xc1, 0xf5, 0x87, 0x75, 0xa3,
+	0x2f, 0x92, 0x43, 0x3a, 0x7c, 0x7b, 0x50, 0xc4, 0xd8, 0x3e, 0x34, 0xea, 0xfb, 0xfb, 0xa1, 0xcc,
+	0xe4, 0xd6, 0xcb, 0x75, 0x28, 0x1a, 0xfc, 0xc4, 0xc5, 0x47, 0x06, 0x7a, 0xa9, 0x01, 0x44, 0x57,
+	0x4f, 0x74, 0x27, 0x3b, 0x75, 0x27, 0x73, 0x58, 0xb9, 0x3b, 0x8e, 0xaa, 0xac, 0xdb, 0x2f, 0x35,
+	0xfe, 0x5a, 0x22, 0x4e, 0x44, 0xa1, 0xf7, 0x54, 0xed, 0xa5, 0xf3, 0xa7, 0x95, 0xf7, 0xc7, 0xd6,
+	0x97, 0xa0, 0x3e, 0x83, 0x99, 0x90, 0x60, 0x44, 0xca, 0x97, 0xb1, 0x01, 0xfa, 0xb4, 0xf2, 0x4e,
+	0x76, 0x45, 0xe9, 0xfe, 0x2b, 0x0d, 0x16, 0x86, 0xa6, 0x72, 0xf4, 0x41, 0x86, 0xa8, 0x52, 0xef,
+	0x18, 0x95, 0xed, 0xd7, 0xb0, 0x20, 0xa1, 0xb1, 0xa2, 0x89, 0x08, 0x11, 0xf5, 0xa2, 0x19, 0x22,
+	0xfb, 0xd4, 0x8b, 0x26, 0x85, 0xae, 0xfb, 0x8b, 0x06, 0x57, 0x52, 0x69, 0x19, 0xb4, 0x93, 0xdd,
+	0xea, 0x30, 0xe1, 0x55, 0xa9, 0xbf, 0xa6, 0x15, 0x09, 0xf3, 0x97, 0x50, 0x90, 0x74, 0x0f, 0x7a,
+	0x4b, 0xd5, 0x62, 0x92, 0x4c, 0xaa, 0xbc, 0x9d, 0x59, 0x2f, 0xb6, 0x51, 0x11, 0xcb, 0xa2, 0xbe,
+	0x51, 0x43, 0x5c, 0x91, 0xfa, 0x46, 0xa5, 0x90, 0x3a, 0xbf, 0xd5, 0x60, 0x36, 0xce, 0x79, 0xa0,
+	0x77, 0x33, 0x19, 0x4b, 0xb2, 0x37, 0x95, 0x7b, 0xe3, 0x29, 0xc7, 0xb0, 0xc4, 0xef, 0x75, 0xea,
+	0x58, 0x52, 0x6e, 0x9a, 0xea, 0x58, 0x52, 0xaf, 0x92, 0x0c, 0x4b, 0xfc, 0x8a, 0xa7, 0x8e, 0x25,
+	0xe5, 0xfe, 0xa8, 0x8e, 0x25, 0xed, 0x56, 0x19, 0xed, 0x91, 0xbc, 0x3f, 0x66, 0xdc, 0xa3, 0xe4,
+	0x65, 0x34, 0xe3, 0x1e, 0x0d, 0x5e, 0x59, 0xff, 0xa0, 0xc1, 0x7c, 0x72, 0xc0, 0x41, 0xf7, 0x55,
+	0x0d, 0xa6, 0x0e, 0x75, 0x95, 0xf7, 0xc6, 0x55, 0x97, 0x88, 0x7e, 0xaf, 0xc1, 0x5c, 0x62, 0x74,
+	0x41, 0xf7, 0xd4, 0x2d, 0x0e, 0xcf, 0x4f, 0x95, 0xfb, 0x63, 0x6a, 0x0f, 0x26, 0xa8, 0x3f, 0x7a,
+	0x64, 0x4c, 0xd0, 0xe0, 0x00, 0x94, 0x31, 0x41, 0x43, 0x13, 0x4f, 0x3f, 0x41, 0x11, 0xa0, 0x4c,
+	0x09, 0x1a, 0xc2, 0x73, 0x7f, 0x4c, 0xed, 0xd8, 0xd9, 0x39, 0xf4, 0x12, 0x5d, 0xfd, 0xec, 0x1c,
+	0xf5, 0x9f, 0x01, 0xea, 0x67, 0xe7, 0xc8, 0x37, 0xf8, 0x1c, 0xda, 0xd0, 0x0b, 0x77, 0x75, 0x68,
+	0xa3, 0xde, 0xfe, 0xab, 0x43, 0x1b, 0xf9, 0xb6, 0x1f, 0xfd, 0x4a, 0x83, 0x62, 0x9f, 0x61, 0x41,
+	0xca, 0x93, 0xcb, 0x20, 0x33, 0x54, 0xb9, 0x33, 0x86, 0x66, 0x6c, 0x10, 0x1c, 0x60, 0x5a, 0xd4,
+	0x07, 0xc1, 0x74, 0x22, 0x48, 0x7d, 0x10, 0x1c, 0x41, 0xf1, 0x44, 0xa7, 0x28, 0xe7, 0x81, 0x33,
+	0x9e, 0xa2, 0x71, 0x52, 0x3a, 0xe3, 0x29, 0x9a, 0xa4, 0x9d, 0x7f, 0xad, 0x41, 0x29, 0x46, 0x47,
+	0xa3, 0xbb, 0xd9, 0x6a, 0x31, 0x81, 0xe3, 0xdd, 0xb1, 0x74, 0x63, 0x7b, 0x34, 0x40, 0x4f, 0xa9,
+	0xef, 0x51, 0x3a, 0x57, 0xa6, 0xbe, 0x47, 0x23, 0x78, 0x31, 0xf4, 0x67, 0x2d, 0x24, 0x22, 0x12,
+	0x6c, 0x0a, 0xaa, 0x8d, 0x67, 0x38, 0x51, 0x40, 0xc6, 0x6b, 0xd9, 0x88, 0x15, 0x51, 0x44, 0x44,
+	0xa8, 0x17, 0xd1, 0x10, 0x8b, 0xa2, 0x5e, 0x44, 0xc3, 0xbc, 0x07, 0x2f, 0xa2, 0x18, 0x5f, 0x83,
+	0xee, 0x66, 0x0b, 0x2d, 0x4e, 0x2c, 0xa9, 0x17, 0x51, 0x0a, 0x41, 0x54, 0xbb, 0x5b, 0x2b, 0x89,
+	0x4b, 0xe8, 0xe3, 0x5b, 0xf8, 0xc8, 0x78, 0x3a, 0x97, 0xd0, 0xf8, 0x7b, 0x6e, 0xad, 0x21, 0x4c,
+	0x3f, 0xe6, 0xa6, 0x7b, 0xb7, 0xaa, 0x46, 0x64, 0xfd, 0xd9, 0x34, 0xa7, 0x2b, 0x6f, 0xff, 0x37,
+	0x00, 0x00, 0xff, 0xff, 0xec, 0x7b, 0xaf, 0x68, 0xbb, 0x28, 0x00, 0x00,
 }

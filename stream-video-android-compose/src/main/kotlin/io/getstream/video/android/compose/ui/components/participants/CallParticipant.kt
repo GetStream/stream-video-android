@@ -22,9 +22,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -32,6 +35,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.audio.SoundIndicator
@@ -41,6 +46,7 @@ import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.CallParticipantState
 import io.getstream.video.android.model.VideoTrack
 import io.getstream.video.android.model.toUser
+import stream.video.sfu.models.TrackType
 
 /**
  * Represents a single participant in a call.
@@ -57,11 +63,12 @@ public fun CallParticipant(
     call: Call,
     participant: CallParticipantState,
     modifier: Modifier = Modifier,
-    labelPosition: Alignment = Alignment.TopStart,
+    paddingValues: PaddingValues = PaddingValues(0.dp),
+    labelPosition: Alignment = Alignment.BottomStart,
     isFocused: Boolean = false,
     onRender: (View) -> Unit = {}
 ) {
-    val track = participant.track
+    val track = participant.videoTrack
 
     val containerModifier =
         if (isFocused) modifier.border(
@@ -71,7 +78,7 @@ public fun CallParticipant(
             )
         ) else modifier
 
-    Box(modifier = containerModifier) {
+    Box(modifier = containerModifier.padding(paddingValues)) {
         ParticipantVideo(
             call = call,
             participant = participant,
@@ -90,14 +97,29 @@ private fun ParticipantVideo(
     track: VideoTrack?,
     onRender: (View) -> Unit
 ) {
-    if (track != null && track.video.enabled()) {
+    val isVideoEnabled = try {
+        track?.video?.enabled() == true
+    } catch (error: Throwable) {
+        false
+    }
+
+    if (track != null && isVideoEnabled) {
         VideoRenderer(
             call = call,
             videoTrack = track,
-            onRender = onRender
+            sessionId = participant.sessionId,
+            onRender = onRender,
+            trackType = TrackType.TRACK_TYPE_VIDEO
         )
     } else {
         UserAvatar(
+            modifier = Modifier.onSizeChanged {
+                call.updateParticipantTrackSize(
+                    participant.sessionId,
+                    it.width,
+                    it.height
+                )
+            },
             shape = RectangleShape,
             user = participant.toUser()
         )
@@ -112,8 +134,9 @@ private fun BoxScope.ParticipantLabel(
     Row(
         modifier = Modifier
             .align(labelPosition)
-            .padding(16.dp)
-            .height(36.dp)
+            .padding(8.dp)
+            .height(24.dp)
+            .wrapContentWidth()
             .background(
                 Color.DarkGray,
                 shape = RoundedCornerShape(8.dp)
@@ -124,10 +147,14 @@ private fun BoxScope.ParticipantLabel(
             participant.id
         }
         Text(
-            modifier = Modifier.padding(start = 8.dp, end = 8.dp),
+            modifier = Modifier
+                .widthIn(max = 64.dp)
+                .padding(start = 8.dp),
             text = name,
-            style = VideoTheme.typography.bodyBold,
-            color = Color.White
+            style = VideoTheme.typography.body,
+            color = Color.White,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
 
         SoundIndicator(participant.hasAudio, participant.audioLevel)

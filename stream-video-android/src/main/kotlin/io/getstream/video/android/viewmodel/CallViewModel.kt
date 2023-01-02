@@ -19,7 +19,7 @@ package io.getstream.video.android.viewmodel
 import android.hardware.camera2.CameraMetadata
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import io.getstream.log.StreamLog
+import io.getstream.log.taggedLogger
 import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.audio.AudioDevice
 import io.getstream.video.android.call.CallClient
@@ -33,14 +33,17 @@ import io.getstream.video.android.call.state.FlipCamera
 import io.getstream.video.android.call.state.InviteUsersToCall
 import io.getstream.video.android.call.state.LeaveCall
 import io.getstream.video.android.call.state.SelectAudioDevice
+import io.getstream.video.android.call.state.ShowCallInfo
 import io.getstream.video.android.call.state.ToggleCamera
 import io.getstream.video.android.call.state.ToggleMicrophone
+import io.getstream.video.android.call.state.ToggleScreenConfiguration
 import io.getstream.video.android.call.state.ToggleSpeakerphone
 import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.CallParticipantState
 import io.getstream.video.android.model.CallSettings
 import io.getstream.video.android.model.CallType
 import io.getstream.video.android.model.CallUser
+import io.getstream.video.android.model.ScreenSharingSession
 import io.getstream.video.android.model.User
 import io.getstream.video.android.permission.PermissionManager
 import io.getstream.video.android.user.UsersProvider
@@ -53,6 +56,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
@@ -71,7 +75,7 @@ public class CallViewModel(
     private val usersProvider: UsersProvider,
 ) : ViewModel() {
 
-    private val logger = StreamLog.getLogger("Call:ViewModel")
+    private val logger by taggedLogger("Call:ViewModel")
 
     private val _callState: MutableStateFlow<Call?> = MutableStateFlow(null)
     public val callState: StateFlow<Call?> = _callState
@@ -178,10 +182,16 @@ public class CallViewModel(
     private val _participants: MutableStateFlow<List<CallUser>> = MutableStateFlow(emptyList())
     public val participants: StateFlow<List<CallUser>> = _participants
 
+    public val screenSharingSessions: Flow<List<ScreenSharingSession>> =
+        callState.flatMapLatest { it?.screenSharingSessions ?: emptyFlow() }
+
     private var prevState: State = State.Idle
 
     private val _isInPictureInPicture: MutableStateFlow<Boolean> = MutableStateFlow(false)
     public val isInPictureInPicture: StateFlow<Boolean> = _isInPictureInPicture
+
+    private val _isFullscreen: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    public val isFullscreen: StateFlow<Boolean> = _isFullscreen
 
     init {
         viewModelScope.launch {
@@ -288,13 +298,6 @@ public class CallViewModel(
         clearState()
     }
 
-    /**
-     * Sets the flag used to display participants info menu in the UI to true.
-     */
-    public fun showCallInfo() {
-        this._isShowingCallInfo.value = true
-    }
-
     public fun onCallAction(callAction: CallAction) {
         when (callAction) {
             is ToggleSpeakerphone -> onSpeakerphoneChanged(callAction.isEnabled)
@@ -307,6 +310,12 @@ public class CallViewModel(
             DeclineCall -> hangUpCall()
             is LeaveCall -> cancelCall()
             is InviteUsersToCall -> inviteUsersToCall(callAction.users)
+            is ToggleScreenConfiguration -> {
+                _isFullscreen.value = callAction.isFullscreen && callAction.isLandscape
+            }
+            is ShowCallInfo -> {
+                this._isShowingCallInfo.value = true
+            }
             is CustomAction -> {
                 // custom actions
             }

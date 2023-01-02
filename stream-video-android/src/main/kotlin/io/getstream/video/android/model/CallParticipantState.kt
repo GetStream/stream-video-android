@@ -16,38 +16,37 @@
 
 package io.getstream.video.android.model
 
-import stream.video.sfu.models.Participant
+import stream.video.sfu.models.ConnectionQuality
+import stream.video.sfu.models.TrackType
 
 public data class CallParticipantState(
     public val id: String,
     public val role: String,
     public val name: String,
     public val profileImageURL: String?,
-    public val isLocal: Boolean,
-    public var isOnline: Boolean,
-    public var hasVideo: Boolean,
-    public var hasAudio: Boolean,
-    public var track: VideoTrack?,
-    public var trackSize: Pair<Int, Int>,
-    public var audioLevel: Float,
-    public val idPrefix: String
-)
+    public var sessionId: String,
+    public val idPrefix: String,
+    public val isLocal: Boolean = false,
+    public val connectionQuality: ConnectionQuality = ConnectionQuality.CONNECTION_QUALITY_UNSPECIFIED,
+    public var isOnline: Boolean = false,
+    public var videoTrack: VideoTrack? = null,
+    public var screenSharingTrack: VideoTrack? = null,
+    public var publishedTracks: Set<TrackType> = emptySet(),
+    public var videoTrackSize: Pair<Int, Int> = Pair(0, 0),
+    public var audioLevel: Float = 0f
+) {
+    public val hasVideo: Boolean
+        get() = TrackType.TRACK_TYPE_VIDEO in publishedTracks && videoTrack != null
 
-public fun Participant.toCallParticipant(currentUserId: String): CallParticipantState =
-    CallParticipantState(
-        id = this.user?.id ?: "",
-        name = this.user?.name ?: "",
-        role = this.user?.role ?: "",
-        profileImageURL = this.user?.image_url,
-        isLocal = currentUserId == this.user?.id,
-        isOnline = true,
-        hasVideo = video,
-        hasAudio = audio,
-        track = null,
-        trackSize = 0 to 0,
-        audioLevel = 0f,
-        idPrefix = track_lookup_prefix
-    )
+    public val hasAudio: Boolean
+        get() = TrackType.TRACK_TYPE_AUDIO in publishedTracks
+
+    public val hasScreenShare: Boolean
+        get() = TrackType.TRACK_TYPE_SCREEN_SHARE in publishedTracks && screenSharingTrack != null
+
+    public val hasScreenShareAudio: Boolean
+        get() = TrackType.TRACK_TYPE_SCREEN_SHARE_AUDIO in publishedTracks
+}
 
 public fun CallParticipantState.toUser(): User {
     return User(

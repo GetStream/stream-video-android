@@ -48,9 +48,7 @@ type SignalServer interface {
 	// TODO: sync subscriptions based on this + update tracks using the dimension info sent by the user
 	UpdateSubscriptions(context.Context, *UpdateSubscriptionsRequest) (*UpdateSubscriptionsResponse, error)
 
-	UpdateMuteState(context.Context, *UpdateMuteStateRequest) (*UpdateMuteStateResponse, error)
-
-	RequestVideoQuality(context.Context, *UpdateVideoQualityRequest) (*UpdateVideoQualityResponse, error)
+	UpdateMuteStates(context.Context, *UpdateMuteStatesRequest) (*UpdateMuteStatesResponse, error)
 }
 
 // ============================
@@ -59,7 +57,7 @@ type SignalServer interface {
 
 type signalServerProtobufClient struct {
 	client      HTTPClient
-	urls        [6]string
+	urls        [5]string
 	interceptor twirp.Interceptor
 	opts        twirp.ClientOptions
 }
@@ -87,13 +85,12 @@ func NewSignalServerProtobufClient(baseURL string, client HTTPClient, opts ...tw
 	// Build method URLs: <baseURL>[<prefix>]/<package>.<Service>/<Method>
 	serviceURL := sanitizeBaseURL(baseURL)
 	serviceURL += baseServicePath(pathPrefix, "stream.video.sfu.signal", "SignalServer")
-	urls := [6]string{
+	urls := [5]string{
 		serviceURL + "SetPublisher",
 		serviceURL + "SendAnswer",
 		serviceURL + "IceTrickle",
 		serviceURL + "UpdateSubscriptions",
-		serviceURL + "UpdateMuteState",
-		serviceURL + "RequestVideoQuality",
+		serviceURL + "UpdateMuteStates",
 	}
 
 	return &signalServerProtobufClient{
@@ -288,26 +285,26 @@ func (c *signalServerProtobufClient) callUpdateSubscriptions(ctx context.Context
 	return out, nil
 }
 
-func (c *signalServerProtobufClient) UpdateMuteState(ctx context.Context, in *UpdateMuteStateRequest) (*UpdateMuteStateResponse, error) {
+func (c *signalServerProtobufClient) UpdateMuteStates(ctx context.Context, in *UpdateMuteStatesRequest) (*UpdateMuteStatesResponse, error) {
 	ctx = ctxsetters.WithPackageName(ctx, "stream.video.sfu.signal")
 	ctx = ctxsetters.WithServiceName(ctx, "SignalServer")
-	ctx = ctxsetters.WithMethodName(ctx, "UpdateMuteState")
-	caller := c.callUpdateMuteState
+	ctx = ctxsetters.WithMethodName(ctx, "UpdateMuteStates")
+	caller := c.callUpdateMuteStates
 	if c.interceptor != nil {
-		caller = func(ctx context.Context, req *UpdateMuteStateRequest) (*UpdateMuteStateResponse, error) {
+		caller = func(ctx context.Context, req *UpdateMuteStatesRequest) (*UpdateMuteStatesResponse, error) {
 			resp, err := c.interceptor(
 				func(ctx context.Context, req interface{}) (interface{}, error) {
-					typedReq, ok := req.(*UpdateMuteStateRequest)
+					typedReq, ok := req.(*UpdateMuteStatesRequest)
 					if !ok {
-						return nil, twirp.InternalError("failed type assertion req.(*UpdateMuteStateRequest) when calling interceptor")
+						return nil, twirp.InternalError("failed type assertion req.(*UpdateMuteStatesRequest) when calling interceptor")
 					}
-					return c.callUpdateMuteState(ctx, typedReq)
+					return c.callUpdateMuteStates(ctx, typedReq)
 				},
 			)(ctx, req)
 			if resp != nil {
-				typedResp, ok := resp.(*UpdateMuteStateResponse)
+				typedResp, ok := resp.(*UpdateMuteStatesResponse)
 				if !ok {
-					return nil, twirp.InternalError("failed type assertion resp.(*UpdateMuteStateResponse) when calling interceptor")
+					return nil, twirp.InternalError("failed type assertion resp.(*UpdateMuteStatesResponse) when calling interceptor")
 				}
 				return typedResp, err
 			}
@@ -317,55 +314,9 @@ func (c *signalServerProtobufClient) UpdateMuteState(ctx context.Context, in *Up
 	return caller(ctx, in)
 }
 
-func (c *signalServerProtobufClient) callUpdateMuteState(ctx context.Context, in *UpdateMuteStateRequest) (*UpdateMuteStateResponse, error) {
-	out := new(UpdateMuteStateResponse)
+func (c *signalServerProtobufClient) callUpdateMuteStates(ctx context.Context, in *UpdateMuteStatesRequest) (*UpdateMuteStatesResponse, error) {
+	out := new(UpdateMuteStatesResponse)
 	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[4], in, out)
-	if err != nil {
-		twerr, ok := err.(twirp.Error)
-		if !ok {
-			twerr = twirp.InternalErrorWith(err)
-		}
-		callClientError(ctx, c.opts.Hooks, twerr)
-		return nil, err
-	}
-
-	callClientResponseReceived(ctx, c.opts.Hooks)
-
-	return out, nil
-}
-
-func (c *signalServerProtobufClient) RequestVideoQuality(ctx context.Context, in *UpdateVideoQualityRequest) (*UpdateVideoQualityResponse, error) {
-	ctx = ctxsetters.WithPackageName(ctx, "stream.video.sfu.signal")
-	ctx = ctxsetters.WithServiceName(ctx, "SignalServer")
-	ctx = ctxsetters.WithMethodName(ctx, "RequestVideoQuality")
-	caller := c.callRequestVideoQuality
-	if c.interceptor != nil {
-		caller = func(ctx context.Context, req *UpdateVideoQualityRequest) (*UpdateVideoQualityResponse, error) {
-			resp, err := c.interceptor(
-				func(ctx context.Context, req interface{}) (interface{}, error) {
-					typedReq, ok := req.(*UpdateVideoQualityRequest)
-					if !ok {
-						return nil, twirp.InternalError("failed type assertion req.(*UpdateVideoQualityRequest) when calling interceptor")
-					}
-					return c.callRequestVideoQuality(ctx, typedReq)
-				},
-			)(ctx, req)
-			if resp != nil {
-				typedResp, ok := resp.(*UpdateVideoQualityResponse)
-				if !ok {
-					return nil, twirp.InternalError("failed type assertion resp.(*UpdateVideoQualityResponse) when calling interceptor")
-				}
-				return typedResp, err
-			}
-			return nil, err
-		}
-	}
-	return caller(ctx, in)
-}
-
-func (c *signalServerProtobufClient) callRequestVideoQuality(ctx context.Context, in *UpdateVideoQualityRequest) (*UpdateVideoQualityResponse, error) {
-	out := new(UpdateVideoQualityResponse)
-	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[5], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
 		if !ok {
@@ -386,7 +337,7 @@ func (c *signalServerProtobufClient) callRequestVideoQuality(ctx context.Context
 
 type signalServerJSONClient struct {
 	client      HTTPClient
-	urls        [6]string
+	urls        [5]string
 	interceptor twirp.Interceptor
 	opts        twirp.ClientOptions
 }
@@ -414,13 +365,12 @@ func NewSignalServerJSONClient(baseURL string, client HTTPClient, opts ...twirp.
 	// Build method URLs: <baseURL>[<prefix>]/<package>.<Service>/<Method>
 	serviceURL := sanitizeBaseURL(baseURL)
 	serviceURL += baseServicePath(pathPrefix, "stream.video.sfu.signal", "SignalServer")
-	urls := [6]string{
+	urls := [5]string{
 		serviceURL + "SetPublisher",
 		serviceURL + "SendAnswer",
 		serviceURL + "IceTrickle",
 		serviceURL + "UpdateSubscriptions",
-		serviceURL + "UpdateMuteState",
-		serviceURL + "RequestVideoQuality",
+		serviceURL + "UpdateMuteStates",
 	}
 
 	return &signalServerJSONClient{
@@ -615,26 +565,26 @@ func (c *signalServerJSONClient) callUpdateSubscriptions(ctx context.Context, in
 	return out, nil
 }
 
-func (c *signalServerJSONClient) UpdateMuteState(ctx context.Context, in *UpdateMuteStateRequest) (*UpdateMuteStateResponse, error) {
+func (c *signalServerJSONClient) UpdateMuteStates(ctx context.Context, in *UpdateMuteStatesRequest) (*UpdateMuteStatesResponse, error) {
 	ctx = ctxsetters.WithPackageName(ctx, "stream.video.sfu.signal")
 	ctx = ctxsetters.WithServiceName(ctx, "SignalServer")
-	ctx = ctxsetters.WithMethodName(ctx, "UpdateMuteState")
-	caller := c.callUpdateMuteState
+	ctx = ctxsetters.WithMethodName(ctx, "UpdateMuteStates")
+	caller := c.callUpdateMuteStates
 	if c.interceptor != nil {
-		caller = func(ctx context.Context, req *UpdateMuteStateRequest) (*UpdateMuteStateResponse, error) {
+		caller = func(ctx context.Context, req *UpdateMuteStatesRequest) (*UpdateMuteStatesResponse, error) {
 			resp, err := c.interceptor(
 				func(ctx context.Context, req interface{}) (interface{}, error) {
-					typedReq, ok := req.(*UpdateMuteStateRequest)
+					typedReq, ok := req.(*UpdateMuteStatesRequest)
 					if !ok {
-						return nil, twirp.InternalError("failed type assertion req.(*UpdateMuteStateRequest) when calling interceptor")
+						return nil, twirp.InternalError("failed type assertion req.(*UpdateMuteStatesRequest) when calling interceptor")
 					}
-					return c.callUpdateMuteState(ctx, typedReq)
+					return c.callUpdateMuteStates(ctx, typedReq)
 				},
 			)(ctx, req)
 			if resp != nil {
-				typedResp, ok := resp.(*UpdateMuteStateResponse)
+				typedResp, ok := resp.(*UpdateMuteStatesResponse)
 				if !ok {
-					return nil, twirp.InternalError("failed type assertion resp.(*UpdateMuteStateResponse) when calling interceptor")
+					return nil, twirp.InternalError("failed type assertion resp.(*UpdateMuteStatesResponse) when calling interceptor")
 				}
 				return typedResp, err
 			}
@@ -644,55 +594,9 @@ func (c *signalServerJSONClient) UpdateMuteState(ctx context.Context, in *Update
 	return caller(ctx, in)
 }
 
-func (c *signalServerJSONClient) callUpdateMuteState(ctx context.Context, in *UpdateMuteStateRequest) (*UpdateMuteStateResponse, error) {
-	out := new(UpdateMuteStateResponse)
+func (c *signalServerJSONClient) callUpdateMuteStates(ctx context.Context, in *UpdateMuteStatesRequest) (*UpdateMuteStatesResponse, error) {
+	out := new(UpdateMuteStatesResponse)
 	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[4], in, out)
-	if err != nil {
-		twerr, ok := err.(twirp.Error)
-		if !ok {
-			twerr = twirp.InternalErrorWith(err)
-		}
-		callClientError(ctx, c.opts.Hooks, twerr)
-		return nil, err
-	}
-
-	callClientResponseReceived(ctx, c.opts.Hooks)
-
-	return out, nil
-}
-
-func (c *signalServerJSONClient) RequestVideoQuality(ctx context.Context, in *UpdateVideoQualityRequest) (*UpdateVideoQualityResponse, error) {
-	ctx = ctxsetters.WithPackageName(ctx, "stream.video.sfu.signal")
-	ctx = ctxsetters.WithServiceName(ctx, "SignalServer")
-	ctx = ctxsetters.WithMethodName(ctx, "RequestVideoQuality")
-	caller := c.callRequestVideoQuality
-	if c.interceptor != nil {
-		caller = func(ctx context.Context, req *UpdateVideoQualityRequest) (*UpdateVideoQualityResponse, error) {
-			resp, err := c.interceptor(
-				func(ctx context.Context, req interface{}) (interface{}, error) {
-					typedReq, ok := req.(*UpdateVideoQualityRequest)
-					if !ok {
-						return nil, twirp.InternalError("failed type assertion req.(*UpdateVideoQualityRequest) when calling interceptor")
-					}
-					return c.callRequestVideoQuality(ctx, typedReq)
-				},
-			)(ctx, req)
-			if resp != nil {
-				typedResp, ok := resp.(*UpdateVideoQualityResponse)
-				if !ok {
-					return nil, twirp.InternalError("failed type assertion resp.(*UpdateVideoQualityResponse) when calling interceptor")
-				}
-				return typedResp, err
-			}
-			return nil, err
-		}
-	}
-	return caller(ctx, in)
-}
-
-func (c *signalServerJSONClient) callRequestVideoQuality(ctx context.Context, in *UpdateVideoQualityRequest) (*UpdateVideoQualityResponse, error) {
-	out := new(UpdateVideoQualityResponse)
-	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[5], in, out)
 	if err != nil {
 		twerr, ok := err.(twirp.Error)
 		if !ok {
@@ -816,11 +720,8 @@ func (s *signalServerServer) ServeHTTP(resp http.ResponseWriter, req *http.Reque
 	case "UpdateSubscriptions":
 		s.serveUpdateSubscriptions(ctx, resp, req)
 		return
-	case "UpdateMuteState":
-		s.serveUpdateMuteState(ctx, resp, req)
-		return
-	case "RequestVideoQuality":
-		s.serveRequestVideoQuality(ctx, resp, req)
+	case "UpdateMuteStates":
+		s.serveUpdateMuteStates(ctx, resp, req)
 		return
 	default:
 		msg := fmt.Sprintf("no handler for path %q", req.URL.Path)
@@ -1549,7 +1450,7 @@ func (s *signalServerServer) serveUpdateSubscriptionsProtobuf(ctx context.Contex
 	callResponseSent(ctx, s.hooks)
 }
 
-func (s *signalServerServer) serveUpdateMuteState(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+func (s *signalServerServer) serveUpdateMuteStates(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
 	header := req.Header.Get("Content-Type")
 	i := strings.Index(header, ";")
 	if i == -1 {
@@ -1557,9 +1458,9 @@ func (s *signalServerServer) serveUpdateMuteState(ctx context.Context, resp http
 	}
 	switch strings.TrimSpace(strings.ToLower(header[:i])) {
 	case "application/json":
-		s.serveUpdateMuteStateJSON(ctx, resp, req)
+		s.serveUpdateMuteStatesJSON(ctx, resp, req)
 	case "application/protobuf":
-		s.serveUpdateMuteStateProtobuf(ctx, resp, req)
+		s.serveUpdateMuteStatesProtobuf(ctx, resp, req)
 	default:
 		msg := fmt.Sprintf("unexpected Content-Type: %q", req.Header.Get("Content-Type"))
 		twerr := badRouteError(msg, req.Method, req.URL.Path)
@@ -1567,9 +1468,9 @@ func (s *signalServerServer) serveUpdateMuteState(ctx context.Context, resp http
 	}
 }
 
-func (s *signalServerServer) serveUpdateMuteStateJSON(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+func (s *signalServerServer) serveUpdateMuteStatesJSON(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
 	var err error
-	ctx = ctxsetters.WithMethodName(ctx, "UpdateMuteState")
+	ctx = ctxsetters.WithMethodName(ctx, "UpdateMuteStates")
 	ctx, err = callRequestRouted(ctx, s.hooks)
 	if err != nil {
 		s.writeError(ctx, resp, err)
@@ -1582,29 +1483,29 @@ func (s *signalServerServer) serveUpdateMuteStateJSON(ctx context.Context, resp 
 		s.handleRequestBodyError(ctx, resp, "the json request could not be decoded", err)
 		return
 	}
-	reqContent := new(UpdateMuteStateRequest)
+	reqContent := new(UpdateMuteStatesRequest)
 	unmarshaler := protojson.UnmarshalOptions{DiscardUnknown: true}
 	if err = unmarshaler.Unmarshal(rawReqBody, reqContent); err != nil {
 		s.handleRequestBodyError(ctx, resp, "the json request could not be decoded", err)
 		return
 	}
 
-	handler := s.SignalServer.UpdateMuteState
+	handler := s.SignalServer.UpdateMuteStates
 	if s.interceptor != nil {
-		handler = func(ctx context.Context, req *UpdateMuteStateRequest) (*UpdateMuteStateResponse, error) {
+		handler = func(ctx context.Context, req *UpdateMuteStatesRequest) (*UpdateMuteStatesResponse, error) {
 			resp, err := s.interceptor(
 				func(ctx context.Context, req interface{}) (interface{}, error) {
-					typedReq, ok := req.(*UpdateMuteStateRequest)
+					typedReq, ok := req.(*UpdateMuteStatesRequest)
 					if !ok {
-						return nil, twirp.InternalError("failed type assertion req.(*UpdateMuteStateRequest) when calling interceptor")
+						return nil, twirp.InternalError("failed type assertion req.(*UpdateMuteStatesRequest) when calling interceptor")
 					}
-					return s.SignalServer.UpdateMuteState(ctx, typedReq)
+					return s.SignalServer.UpdateMuteStates(ctx, typedReq)
 				},
 			)(ctx, req)
 			if resp != nil {
-				typedResp, ok := resp.(*UpdateMuteStateResponse)
+				typedResp, ok := resp.(*UpdateMuteStatesResponse)
 				if !ok {
-					return nil, twirp.InternalError("failed type assertion resp.(*UpdateMuteStateResponse) when calling interceptor")
+					return nil, twirp.InternalError("failed type assertion resp.(*UpdateMuteStatesResponse) when calling interceptor")
 				}
 				return typedResp, err
 			}
@@ -1613,7 +1514,7 @@ func (s *signalServerServer) serveUpdateMuteStateJSON(ctx context.Context, resp 
 	}
 
 	// Call service method
-	var respContent *UpdateMuteStateResponse
+	var respContent *UpdateMuteStatesResponse
 	func() {
 		defer ensurePanicResponses(ctx, resp, s.hooks)
 		respContent, err = handler(ctx, reqContent)
@@ -1624,7 +1525,7 @@ func (s *signalServerServer) serveUpdateMuteStateJSON(ctx context.Context, resp 
 		return
 	}
 	if respContent == nil {
-		s.writeError(ctx, resp, twirp.InternalError("received a nil *UpdateMuteStateResponse and nil error while calling UpdateMuteState. nil responses are not supported"))
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *UpdateMuteStatesResponse and nil error while calling UpdateMuteStates. nil responses are not supported"))
 		return
 	}
 
@@ -1650,9 +1551,9 @@ func (s *signalServerServer) serveUpdateMuteStateJSON(ctx context.Context, resp 
 	callResponseSent(ctx, s.hooks)
 }
 
-func (s *signalServerServer) serveUpdateMuteStateProtobuf(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+func (s *signalServerServer) serveUpdateMuteStatesProtobuf(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
 	var err error
-	ctx = ctxsetters.WithMethodName(ctx, "UpdateMuteState")
+	ctx = ctxsetters.WithMethodName(ctx, "UpdateMuteStates")
 	ctx, err = callRequestRouted(ctx, s.hooks)
 	if err != nil {
 		s.writeError(ctx, resp, err)
@@ -1664,28 +1565,28 @@ func (s *signalServerServer) serveUpdateMuteStateProtobuf(ctx context.Context, r
 		s.handleRequestBodyError(ctx, resp, "failed to read request body", err)
 		return
 	}
-	reqContent := new(UpdateMuteStateRequest)
+	reqContent := new(UpdateMuteStatesRequest)
 	if err = reqContent.UnmarshalVT(buf); err != nil {
 		s.writeError(ctx, resp, malformedRequestError("the protobuf request could not be decoded"))
 		return
 	}
 
-	handler := s.SignalServer.UpdateMuteState
+	handler := s.SignalServer.UpdateMuteStates
 	if s.interceptor != nil {
-		handler = func(ctx context.Context, req *UpdateMuteStateRequest) (*UpdateMuteStateResponse, error) {
+		handler = func(ctx context.Context, req *UpdateMuteStatesRequest) (*UpdateMuteStatesResponse, error) {
 			resp, err := s.interceptor(
 				func(ctx context.Context, req interface{}) (interface{}, error) {
-					typedReq, ok := req.(*UpdateMuteStateRequest)
+					typedReq, ok := req.(*UpdateMuteStatesRequest)
 					if !ok {
-						return nil, twirp.InternalError("failed type assertion req.(*UpdateMuteStateRequest) when calling interceptor")
+						return nil, twirp.InternalError("failed type assertion req.(*UpdateMuteStatesRequest) when calling interceptor")
 					}
-					return s.SignalServer.UpdateMuteState(ctx, typedReq)
+					return s.SignalServer.UpdateMuteStates(ctx, typedReq)
 				},
 			)(ctx, req)
 			if resp != nil {
-				typedResp, ok := resp.(*UpdateMuteStateResponse)
+				typedResp, ok := resp.(*UpdateMuteStatesResponse)
 				if !ok {
-					return nil, twirp.InternalError("failed type assertion resp.(*UpdateMuteStateResponse) when calling interceptor")
+					return nil, twirp.InternalError("failed type assertion resp.(*UpdateMuteStatesResponse) when calling interceptor")
 				}
 				return typedResp, err
 			}
@@ -1694,7 +1595,7 @@ func (s *signalServerServer) serveUpdateMuteStateProtobuf(ctx context.Context, r
 	}
 
 	// Call service method
-	var respContent *UpdateMuteStateResponse
+	var respContent *UpdateMuteStatesResponse
 	func() {
 		defer ensurePanicResponses(ctx, resp, s.hooks)
 		respContent, err = handler(ctx, reqContent)
@@ -1705,187 +1606,7 @@ func (s *signalServerServer) serveUpdateMuteStateProtobuf(ctx context.Context, r
 		return
 	}
 	if respContent == nil {
-		s.writeError(ctx, resp, twirp.InternalError("received a nil *UpdateMuteStateResponse and nil error while calling UpdateMuteState. nil responses are not supported"))
-		return
-	}
-
-	ctx = callResponsePrepared(ctx, s.hooks)
-
-	respBytes, err := respContent.MarshalVT()
-	if err != nil {
-		s.writeError(ctx, resp, wrapInternal(err, "failed to marshal proto response"))
-		return
-	}
-
-	ctx = ctxsetters.WithStatusCode(ctx, http.StatusOK)
-	resp.Header().Set("Content-Type", "application/protobuf")
-	resp.Header().Set("Content-Length", strconv.Itoa(len(respBytes)))
-	resp.WriteHeader(http.StatusOK)
-	if n, err := resp.Write(respBytes); err != nil {
-		msg := fmt.Sprintf("failed to write response, %d of %d bytes written: %s", n, len(respBytes), err.Error())
-		twerr := twirp.NewError(twirp.Unknown, msg)
-		ctx = callError(ctx, s.hooks, twerr)
-	}
-	callResponseSent(ctx, s.hooks)
-}
-
-func (s *signalServerServer) serveRequestVideoQuality(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
-	header := req.Header.Get("Content-Type")
-	i := strings.Index(header, ";")
-	if i == -1 {
-		i = len(header)
-	}
-	switch strings.TrimSpace(strings.ToLower(header[:i])) {
-	case "application/json":
-		s.serveRequestVideoQualityJSON(ctx, resp, req)
-	case "application/protobuf":
-		s.serveRequestVideoQualityProtobuf(ctx, resp, req)
-	default:
-		msg := fmt.Sprintf("unexpected Content-Type: %q", req.Header.Get("Content-Type"))
-		twerr := badRouteError(msg, req.Method, req.URL.Path)
-		s.writeError(ctx, resp, twerr)
-	}
-}
-
-func (s *signalServerServer) serveRequestVideoQualityJSON(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
-	var err error
-	ctx = ctxsetters.WithMethodName(ctx, "RequestVideoQuality")
-	ctx, err = callRequestRouted(ctx, s.hooks)
-	if err != nil {
-		s.writeError(ctx, resp, err)
-		return
-	}
-
-	d := json.NewDecoder(req.Body)
-	rawReqBody := json.RawMessage{}
-	if err := d.Decode(&rawReqBody); err != nil {
-		s.handleRequestBodyError(ctx, resp, "the json request could not be decoded", err)
-		return
-	}
-	reqContent := new(UpdateVideoQualityRequest)
-	unmarshaler := protojson.UnmarshalOptions{DiscardUnknown: true}
-	if err = unmarshaler.Unmarshal(rawReqBody, reqContent); err != nil {
-		s.handleRequestBodyError(ctx, resp, "the json request could not be decoded", err)
-		return
-	}
-
-	handler := s.SignalServer.RequestVideoQuality
-	if s.interceptor != nil {
-		handler = func(ctx context.Context, req *UpdateVideoQualityRequest) (*UpdateVideoQualityResponse, error) {
-			resp, err := s.interceptor(
-				func(ctx context.Context, req interface{}) (interface{}, error) {
-					typedReq, ok := req.(*UpdateVideoQualityRequest)
-					if !ok {
-						return nil, twirp.InternalError("failed type assertion req.(*UpdateVideoQualityRequest) when calling interceptor")
-					}
-					return s.SignalServer.RequestVideoQuality(ctx, typedReq)
-				},
-			)(ctx, req)
-			if resp != nil {
-				typedResp, ok := resp.(*UpdateVideoQualityResponse)
-				if !ok {
-					return nil, twirp.InternalError("failed type assertion resp.(*UpdateVideoQualityResponse) when calling interceptor")
-				}
-				return typedResp, err
-			}
-			return nil, err
-		}
-	}
-
-	// Call service method
-	var respContent *UpdateVideoQualityResponse
-	func() {
-		defer ensurePanicResponses(ctx, resp, s.hooks)
-		respContent, err = handler(ctx, reqContent)
-	}()
-
-	if err != nil {
-		s.writeError(ctx, resp, err)
-		return
-	}
-	if respContent == nil {
-		s.writeError(ctx, resp, twirp.InternalError("received a nil *UpdateVideoQualityResponse and nil error while calling RequestVideoQuality. nil responses are not supported"))
-		return
-	}
-
-	ctx = callResponsePrepared(ctx, s.hooks)
-
-	marshaler := &protojson.MarshalOptions{UseProtoNames: !s.jsonCamelCase, EmitUnpopulated: !s.jsonSkipDefaults}
-	respBytes, err := marshaler.Marshal(respContent)
-	if err != nil {
-		s.writeError(ctx, resp, wrapInternal(err, "failed to marshal json response"))
-		return
-	}
-
-	ctx = ctxsetters.WithStatusCode(ctx, http.StatusOK)
-	resp.Header().Set("Content-Type", "application/json")
-	resp.Header().Set("Content-Length", strconv.Itoa(len(respBytes)))
-	resp.WriteHeader(http.StatusOK)
-
-	if n, err := resp.Write(respBytes); err != nil {
-		msg := fmt.Sprintf("failed to write response, %d of %d bytes written: %s", n, len(respBytes), err.Error())
-		twerr := twirp.NewError(twirp.Unknown, msg)
-		ctx = callError(ctx, s.hooks, twerr)
-	}
-	callResponseSent(ctx, s.hooks)
-}
-
-func (s *signalServerServer) serveRequestVideoQualityProtobuf(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
-	var err error
-	ctx = ctxsetters.WithMethodName(ctx, "RequestVideoQuality")
-	ctx, err = callRequestRouted(ctx, s.hooks)
-	if err != nil {
-		s.writeError(ctx, resp, err)
-		return
-	}
-
-	buf, err := ioutil.ReadAll(req.Body)
-	if err != nil {
-		s.handleRequestBodyError(ctx, resp, "failed to read request body", err)
-		return
-	}
-	reqContent := new(UpdateVideoQualityRequest)
-	if err = reqContent.UnmarshalVT(buf); err != nil {
-		s.writeError(ctx, resp, malformedRequestError("the protobuf request could not be decoded"))
-		return
-	}
-
-	handler := s.SignalServer.RequestVideoQuality
-	if s.interceptor != nil {
-		handler = func(ctx context.Context, req *UpdateVideoQualityRequest) (*UpdateVideoQualityResponse, error) {
-			resp, err := s.interceptor(
-				func(ctx context.Context, req interface{}) (interface{}, error) {
-					typedReq, ok := req.(*UpdateVideoQualityRequest)
-					if !ok {
-						return nil, twirp.InternalError("failed type assertion req.(*UpdateVideoQualityRequest) when calling interceptor")
-					}
-					return s.SignalServer.RequestVideoQuality(ctx, typedReq)
-				},
-			)(ctx, req)
-			if resp != nil {
-				typedResp, ok := resp.(*UpdateVideoQualityResponse)
-				if !ok {
-					return nil, twirp.InternalError("failed type assertion resp.(*UpdateVideoQualityResponse) when calling interceptor")
-				}
-				return typedResp, err
-			}
-			return nil, err
-		}
-	}
-
-	// Call service method
-	var respContent *UpdateVideoQualityResponse
-	func() {
-		defer ensurePanicResponses(ctx, resp, s.hooks)
-		respContent, err = handler(ctx, reqContent)
-	}()
-
-	if err != nil {
-		s.writeError(ctx, resp, err)
-		return
-	}
-	if respContent == nil {
-		s.writeError(ctx, resp, twirp.InternalError("received a nil *UpdateVideoQualityResponse and nil error while calling RequestVideoQuality. nil responses are not supported"))
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *UpdateMuteStatesResponse and nil error while calling UpdateMuteStates. nil responses are not supported"))
 		return
 	}
 
@@ -2490,69 +2211,48 @@ func callClientError(ctx context.Context, h *twirp.ClientHooks, err twirp.Error)
 }
 
 var twirpFileDescriptor0 = []byte{
-	// 1014 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x56, 0xcf, 0x6f, 0xe3, 0x44,
-	0x14, 0xae, 0xdd, 0xed, 0x8f, 0xbc, 0x6e, 0x9b, 0x74, 0x52, 0xb1, 0xdd, 0x6c, 0x2b, 0xed, 0x06,
-	0x09, 0x0a, 0xcb, 0xba, 0xdd, 0x14, 0x24, 0x84, 0x04, 0xd2, 0x26, 0xdb, 0xd2, 0x20, 0xad, 0xe8,
-	0xda, 0xcb, 0x4a, 0x70, 0xc0, 0x72, 0xe3, 0x97, 0xee, 0xa8, 0x89, 0xed, 0xf5, 0x8c, 0x03, 0xb9,
-	0x20, 0x0e, 0x1c, 0xb8, 0x70, 0xe3, 0x3f, 0xe0, 0xc6, 0x89, 0x3b, 0x7f, 0x17, 0x77, 0x34, 0x9e,
-	0x71, 0x6d, 0x4f, 0xea, 0xa6, 0xdd, 0x53, 0x32, 0x6f, 0xde, 0xfb, 0xde, 0x37, 0xef, 0x7d, 0x6f,
-	0x3c, 0xf0, 0x68, 0x42, 0x7d, 0x0c, 0xf7, 0xd9, 0x30, 0xd9, 0x67, 0xf4, 0x3c, 0xf0, 0x46, 0x6e,
-	0x1c, 0x0d, 0xd4, 0x5f, 0x2b, 0x8a, 0x43, 0x1e, 0x92, 0x7b, 0x8c, 0xc7, 0xe8, 0x8d, 0xad, 0xd4,
-	0xd3, 0x62, 0xc3, 0xc4, 0x92, 0xdb, 0xad, 0xdd, 0x3c, 0x76, 0x1c, 0xfa, 0x38, 0x62, 0xea, 0x47,
-	0xc6, 0xb5, 0xff, 0x30, 0xe0, 0xfe, 0x77, 0x91, 0xef, 0x71, 0x7c, 0x2d, 0xfc, 0x5e, 0x26, 0xde,
-	0x88, 0xf2, 0xa9, 0x8d, 0x6f, 0x13, 0x64, 0x9c, 0xbc, 0x84, 0x86, 0xc4, 0x75, 0xdf, 0xa6, 0x1b,
-	0x14, 0xd9, 0xb6, 0xf1, 0x70, 0x71, 0x6f, 0xad, 0xf3, 0x81, 0x35, 0x93, 0x50, 0xe1, 0x3a, 0xa9,
-	0x3d, 0x03, 0xaa, 0xb3, 0xc2, 0x92, 0x22, 0x23, 0xbb, 0x00, 0x0c, 0x19, 0xa3, 0x61, 0xe0, 0x52,
-	0x7f, 0xdb, 0x7c, 0x68, 0xec, 0xd5, 0xec, 0x9a, 0xb2, 0xf4, 0xfd, 0xf6, 0x0e, 0xb4, 0xae, 0xa2,
-	0xc3, 0xa2, 0x30, 0x60, 0xd8, 0xfe, 0xcf, 0x80, 0xf7, 0xe4, 0xf6, 0x8b, 0x84, 0xa3, 0xc3, 0x3d,
-	0x8e, 0x19, 0xd5, 0x32, 0xae, 0xa1, 0xe1, 0x92, 0xef, 0x81, 0x78, 0x89, 0x4f, 0x43, 0x77, 0x9c,
-	0x70, 0x74, 0x07, 0x6f, 0xbc, 0xe0, 0x1c, 0x65, 0xfa, 0xb5, 0xce, 0x47, 0x56, 0x45, 0xf1, 0xac,
-	0x67, 0x22, 0x44, 0xa4, 0xea, 0xc9, 0x80, 0x93, 0x05, 0xbb, 0xe1, 0x69, 0x36, 0x01, 0x9d, 0x06,
-	0x96, 0xa1, 0x17, 0xe7, 0x40, 0xa7, 0xe7, 0xd3, 0xa0, 0x27, 0x9a, 0xad, 0xbb, 0x0c, 0x77, 0x04,
-	0x68, 0xfb, 0x3e, 0xdc, 0x9b, 0x39, 0xb6, 0x2a, 0xc9, 0x1e, 0x34, 0x74, 0x96, 0x64, 0x0b, 0x96,
-	0x44, 0x98, 0x2c, 0xc3, 0xaa, 0x2d, 0x17, 0xc2, 0x53, 0x4f, 0x9a, 0x7b, 0x9a, 0x45, 0xcf, 0x3f,
-	0xcd, 0xac, 0x0b, 0x4e, 0x72, 0xc6, 0x06, 0x31, 0x8d, 0x38, 0x0d, 0x03, 0x96, 0x95, 0x7a, 0x04,
-	0xeb, 0xac, 0x68, 0x57, 0x92, 0x38, 0xae, 0x3c, 0x6b, 0x35, 0x96, 0x55, 0x32, 0x1e, 0x05, 0x3c,
-	0x9e, 0xda, 0x65, 0xf0, 0x39, 0x82, 0x69, 0x51, 0x20, 0xb3, 0x18, 0xa4, 0x01, 0x8b, 0x17, 0x38,
-	0x55, 0x32, 0x10, 0x7f, 0xc9, 0x97, 0xb0, 0x34, 0xf1, 0x46, 0x09, 0xaa, 0x9e, 0x7f, 0x58, 0xa9,
-	0xdf, 0xb4, 0x46, 0xcf, 0xe9, 0x18, 0x03, 0x91, 0xc1, 0x96, 0x51, 0x5f, 0x98, 0x9f, 0x1b, 0xed,
-	0xdf, 0x0c, 0xd8, 0x74, 0x30, 0xf0, 0x9f, 0x05, 0xec, 0x27, 0x8c, 0xb3, 0x6a, 0x7c, 0x05, 0xb5,
-	0x08, 0x31, 0x76, 0xf9, 0x34, 0xc2, 0x34, 0xe1, 0x46, 0xe7, 0x51, 0x25, 0xf8, 0x29, 0x62, 0xfc,
-	0x6a, 0x1a, 0xa1, 0xbd, 0x1a, 0xa9, 0x7f, 0x82, 0x2a, 0xf3, 0x23, 0x75, 0x30, 0xf1, 0x57, 0x3b,
-	0xf1, 0x1d, 0x7d, 0x44, 0xb6, 0x80, 0x14, 0x59, 0x28, 0x1d, 0xfc, 0x65, 0x42, 0xb3, 0x3f, 0xc0,
-	0x9e, 0x17, 0xf8, 0xd4, 0x2f, 0xcc, 0xc5, 0x0e, 0xd4, 0xa2, 0xe4, 0x6c, 0x44, 0xd9, 0x1b, 0x8c,
-	0x95, 0x1e, 0x72, 0x83, 0xd8, 0x1d, 0x64, 0x11, 0x59, 0x6d, 0x2f, 0x0d, 0x64, 0x07, 0x56, 0x98,
-	0x1f, 0xb9, 0x63, 0x2a, 0xe5, 0x5c, 0x3b, 0x59, 0xb0, 0x97, 0x99, 0x1f, 0xbd, 0xa0, 0xfe, 0xef,
-	0x86, 0x41, 0x1e, 0x43, 0x3d, 0xdd, 0x1d, 0xd1, 0x00, 0x5d, 0x1a, 0xf8, 0xf8, 0x73, 0xca, 0x75,
-	0xfd, 0xc4, 0xb0, 0xd7, 0x85, 0x97, 0xb0, 0xf7, 0x85, 0x59, 0x38, 0x1f, 0xc0, 0x66, 0xc2, 0x30,
-	0x0e, 0xbc, 0x31, 0xba, 0xc3, 0xd8, 0x3b, 0x1f, 0x63, 0xc0, 0xb7, 0x97, 0x52, 0x50, 0xd3, 0x6e,
-	0x64, 0x5b, 0xc7, 0x6a, 0x47, 0x44, 0x94, 0xab, 0xb0, 0xa2, 0x55, 0xa1, 0x0b, 0xb0, 0xea, 0x2a,
-	0x72, 0x5d, 0x02, 0x0d, 0x57, 0xa3, 0xd2, 0xdd, 0x02, 0xe2, 0xce, 0x64, 0x14, 0xb5, 0xeb, 0xf7,
-	0x8e, 0x5e, 0xc5, 0x74, 0x70, 0x31, 0xca, 0x67, 0x68, 0x17, 0x1e, 0x5c, 0x29, 0x51, 0xb5, 0x7d,
-	0x0c, 0x4d, 0x07, 0xf9, 0x69, 0x56, 0xb4, 0xac, 0xb2, 0xaa, 0x71, 0x46, 0x55, 0xe3, 0x16, 0xf5,
-	0xc6, 0x7d, 0x0d, 0x5b, 0x65, 0x1c, 0x89, 0x7f, 0x7b, 0xa0, 0x1e, 0x6c, 0xf4, 0xc2, 0x20, 0xc0,
-	0x01, 0xcf, 0xb8, 0x3c, 0x80, 0x9a, 0x28, 0x40, 0x38, 0x1c, 0xaa, 0x2e, 0xd7, 0xec, 0x55, 0xe6,
-	0x47, 0xdf, 0x8a, 0xb5, 0x18, 0x72, 0x1e, 0x5e, 0x60, 0xa0, 0x1a, 0x2c, 0x17, 0xed, 0x03, 0xa8,
-	0x5f, 0x82, 0x28, 0x22, 0x22, 0xad, 0x1f, 0xb9, 0x5e, 0xaa, 0xac, 0xcb, 0x3b, 0xd4, 0x8f, 0xa4,
-	0xd4, 0xda, 0xff, 0x18, 0xb0, 0xee, 0xa4, 0x13, 0x9d, 0xa5, 0xed, 0x43, 0x4d, 0x0d, 0xeb, 0x99,
-	0xd4, 0xfe, 0x75, 0x37, 0x9e, 0x93, 0x79, 0xaa, 0xe8, 0x93, 0x05, 0x3b, 0x8f, 0x26, 0x3d, 0x58,
-	0x51, 0xb2, 0xac, 0x9e, 0x50, 0x05, 0xa4, 0x2a, 0x98, 0xc3, 0x64, 0x91, 0xdd, 0x3a, 0xac, 0xe3,
-	0x04, 0x03, 0xee, 0x46, 0xde, 0x74, 0x14, 0x7a, 0xbe, 0xa0, 0xbc, 0x26, 0x29, 0x1f, 0x09, 0x3b,
-	0xf9, 0x66, 0x96, 0xf0, 0xc7, 0x37, 0x21, 0x2c, 0x0b, 0x54, 0x66, 0xfc, 0x5c, 0x67, 0xbc, 0x37,
-	0x9f, 0xf1, 0x25, 0x4e, 0x35, 0x65, 0x17, 0x1a, 0x7a, 0xa5, 0xf2, 0x0e, 0x1a, 0x85, 0x0e, 0x96,
-	0x9b, 0x6e, 0x6a, 0x4d, 0xdf, 0x86, 0x15, 0xf9, 0xcd, 0x9e, 0x2a, 0xfd, 0x64, 0xcb, 0xf6, 0x13,
-	0xd8, 0x9c, 0x39, 0x59, 0xd1, 0xdd, 0x2c, 0xbb, 0xf7, 0x60, 0xa3, 0x5c, 0xf0, 0x77, 0x60, 0x23,
-	0xc4, 0xa6, 0xd5, 0x40, 0x13, 0x9b, 0xa9, 0x89, 0xad, 0xf3, 0xef, 0x12, 0xdc, 0x95, 0x9d, 0x73,
-	0x30, 0x9e, 0x60, 0x4c, 0x2e, 0xe0, 0x6e, 0x71, 0x7a, 0xc8, 0x27, 0xd5, 0x7d, 0x9b, 0x1d, 0xd6,
-	0xd6, 0x93, 0x1b, 0x7a, 0x2b, 0x72, 0x08, 0x90, 0xdf, 0xb1, 0xe4, 0x1a, 0x89, 0xe8, 0x9f, 0x83,
-	0xd6, 0xe3, 0x1b, 0xf9, 0xaa, 0x34, 0x3f, 0x02, 0xf4, 0x07, 0xa8, 0xae, 0x23, 0xf2, 0x7e, 0xe5,
-	0x67, 0x23, 0xbf, 0xb3, 0xae, 0xc1, 0x9f, 0xbd, 0xd8, 0xc8, 0xaf, 0x06, 0x34, 0xaf, 0xb8, 0xd9,
-	0xc8, 0xe1, 0x3b, 0x7c, 0xaa, 0x5b, 0x9f, 0xde, 0x2e, 0x48, 0x51, 0xe0, 0x50, 0xd7, 0x9e, 0x2e,
-	0x64, 0x7f, 0x0e, 0x90, 0xfe, 0xb6, 0x6b, 0x1d, 0xdc, 0x3c, 0x40, 0x65, 0xfd, 0x05, 0x9a, 0x2a,
-	0xb8, 0xf8, 0x8e, 0x24, 0x9d, 0x39, 0x40, 0x57, 0xbc, 0x81, 0x5b, 0x87, 0xb7, 0x8a, 0x91, 0xf9,
-	0xbb, 0x9f, 0x75, 0xd7, 0x9c, 0x61, 0x22, 0xf5, 0xfb, 0xfa, 0xe9, 0xa9, 0xf1, 0xc3, 0x06, 0x1b,
-	0x26, 0x6e, 0xfe, 0x78, 0xff, 0xdb, 0x6c, 0xca, 0x77, 0xb2, 0x7c, 0x6e, 0x58, 0x93, 0xa7, 0x96,
-	0x33, 0x4c, 0xce, 0x96, 0xd3, 0x47, 0xf9, 0xe1, 0xff, 0x01, 0x00, 0x00, 0xff, 0xff, 0x33, 0x03,
-	0x05, 0xcd, 0xf1, 0x0b, 0x00, 0x00,
+	// 677 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xa4, 0x56, 0xcb, 0x4e, 0xdb, 0x40,
+	0x14, 0xd5, 0x10, 0xa0, 0xe4, 0x06, 0x21, 0x3a, 0x20, 0x11, 0xa5, 0xa2, 0x0d, 0xee, 0x82, 0xa8,
+	0x0f, 0xd3, 0x04, 0xba, 0xe9, 0xa2, 0x12, 0x2f, 0xa9, 0x41, 0xaa, 0x14, 0xd9, 0x94, 0x45, 0x17,
+	0x8d, 0x8c, 0x7d, 0x0d, 0x23, 0x12, 0xdb, 0x9d, 0x07, 0x88, 0x5d, 0x85, 0xaa, 0x7e, 0x46, 0x3f,
+	0xa0, 0x1f, 0xd1, 0x2f, 0xe9, 0xc7, 0x54, 0xb6, 0x27, 0x38, 0x71, 0x62, 0x9e, 0xab, 0x8c, 0x27,
+	0xf7, 0x9e, 0x7b, 0xee, 0x3d, 0xc7, 0xe3, 0x81, 0xb5, 0x73, 0xe6, 0x61, 0xb8, 0x21, 0x7c, 0xb5,
+	0x21, 0xd8, 0x49, 0xe0, 0xf4, 0xba, 0x3c, 0x72, 0xf5, 0xd2, 0x8c, 0x78, 0x28, 0x43, 0xba, 0x22,
+	0x24, 0x47, 0xa7, 0x6f, 0x26, 0x91, 0xa6, 0xf0, 0x95, 0x99, 0xfe, 0x5d, 0x5b, 0xcd, 0x72, 0xfb,
+	0xa1, 0x87, 0x3d, 0xa1, 0x7f, 0xd2, 0x3c, 0xe3, 0x8a, 0xc0, 0xca, 0x97, 0xc8, 0x73, 0x24, 0x7e,
+	0x56, 0x12, 0x6d, 0xe9, 0x48, 0x14, 0x16, 0x7e, 0x57, 0x28, 0x24, 0x5d, 0x05, 0x10, 0x28, 0x04,
+	0x0b, 0x83, 0x2e, 0xf3, 0xaa, 0xa4, 0x4e, 0x1a, 0x65, 0xab, 0xac, 0x77, 0xda, 0x1e, 0xfd, 0x04,
+	0x95, 0xbe, 0x92, 0xd8, 0x15, 0x49, 0x52, 0xb5, 0x54, 0x2f, 0x35, 0x2a, 0xad, 0x75, 0xb3, 0x80,
+	0x88, 0x79, 0xc8, 0x1d, 0xf7, 0xec, 0xba, 0x88, 0x05, 0xfd, 0xeb, 0x7a, 0x46, 0x07, 0xaa, 0xe3,
+	0x1c, 0x44, 0x14, 0x06, 0x02, 0xe9, 0x16, 0xcc, 0x20, 0xe7, 0x21, 0xaf, 0x4e, 0xd7, 0x49, 0xa3,
+	0xd2, 0x7a, 0x3e, 0x8e, 0xaf, 0xfb, 0xd9, 0x8f, 0xa3, 0xac, 0x34, 0xd8, 0x60, 0xb0, 0x30, 0x5a,
+	0x8f, 0x6e, 0x03, 0xc8, 0x78, 0xa7, 0x2b, 0x2f, 0x23, 0x4c, 0x9a, 0x59, 0x68, 0x19, 0x85, 0x60,
+	0x49, 0xf2, 0xe1, 0x65, 0x84, 0x56, 0x59, 0x0e, 0x96, 0x74, 0x19, 0x66, 0x62, 0xd2, 0x5e, 0x75,
+	0xaa, 0x4e, 0x1a, 0x73, 0x56, 0xfa, 0x60, 0x34, 0x60, 0x71, 0x5b, 0x79, 0x2c, 0x8c, 0x4b, 0xed,
+	0x9e, 0x3a, 0xc1, 0x09, 0x7a, 0x59, 0x24, 0xc9, 0x45, 0x1e, 0xc5, 0x85, 0x26, 0x46, 0x8e, 0x60,
+	0xfe, 0x22, 0x50, 0x4b, 0x27, 0x62, 0xab, 0x63, 0xe1, 0x72, 0x16, 0x49, 0x16, 0x06, 0x05, 0xc2,
+	0x4c, 0xe5, 0x85, 0x69, 0xc3, 0x6c, 0x42, 0x7a, 0xa0, 0x49, 0xf3, 0x66, 0x4d, 0x86, 0x4b, 0xec,
+	0xa1, 0x74, 0x58, 0x4f, 0x58, 0x1a, 0xc0, 0xb0, 0xe1, 0xd9, 0x44, 0x1e, 0x8f, 0x12, 0xe7, 0x1f,
+	0x81, 0x6a, 0x51, 0x65, 0xba, 0x02, 0x4f, 0x94, 0x40, 0x9e, 0x39, 0x6e, 0x36, 0x7e, 0x6c, 0x7b,
+	0xb7, 0x35, 0x3d, 0xaa, 0x6f, 0xe9, 0x21, 0xfa, 0xee, 0x43, 0xd9, 0x63, 0x7d, 0x0c, 0x62, 0x44,
+	0xdd, 0xd1, 0x7a, 0x21, 0x42, 0xa2, 0xe4, 0xde, 0x20, 0xdc, 0xca, 0x32, 0x8d, 0x9f, 0x04, 0x9e,
+	0xda, 0x18, 0x78, 0xdb, 0x81, 0xb8, 0x40, 0x3e, 0xd0, 0xec, 0x23, 0x94, 0x23, 0x44, 0x3e, 0x6c,
+	0xbf, 0xb5, 0x42, 0xf0, 0x0e, 0x22, 0x4f, 0xd8, 0xcd, 0x45, 0x7a, 0x45, 0x17, 0xa1, 0x24, 0xbc,
+	0x48, 0xf7, 0x1d, 0x2f, 0x73, 0x03, 0x29, 0xe5, 0x06, 0x62, 0x1c, 0x00, 0x1d, 0x66, 0xf1, 0x28,
+	0xc5, 0x0e, 0x80, 0xb6, 0x77, 0xf7, 0x0f, 0x39, 0x73, 0xcf, 0x7a, 0xf8, 0x48, 0xac, 0x2b, 0x02,
+	0x4b, 0x36, 0xca, 0x8e, 0x3a, 0xee, 0x31, 0x71, 0x9a, 0x0d, 0x48, 0x37, 0x48, 0x8a, 0x1a, 0x1c,
+	0x53, 0xfc, 0x43, 0xce, 0xe6, 0xb7, 0xa8, 0xdd, 0x0e, 0xfc, 0xf0, 0xda, 0xd7, 0xbf, 0x09, 0x2c,
+	0x8f, 0x92, 0xd0, 0x3d, 0xdd, 0x9b, 0xc5, 0x0b, 0xa8, 0x30, 0x17, 0xbb, 0x1c, 0x85, 0x74, 0xb8,
+	0x4c, 0x64, 0x98, 0xb3, 0x80, 0xb9, 0xf1, 0x98, 0xe2, 0x9d, 0x87, 0x4d, 0xa9, 0xf5, 0x77, 0x1a,
+	0xe6, 0xed, 0xe4, 0x25, 0xb5, 0x91, 0x9f, 0x23, 0xa7, 0x67, 0x30, 0x3f, 0x4c, 0x98, 0xbe, 0x29,
+	0x7c, 0xa9, 0x27, 0x0c, 0xb7, 0xf6, 0xf6, 0x8e, 0xd1, 0x7a, 0x0a, 0x08, 0x90, 0x79, 0x87, 0xbe,
+	0xba, 0x21, 0x39, 0x67, 0xf3, 0xda, 0xeb, 0x3b, 0xc5, 0xea, 0x32, 0xdf, 0x00, 0xda, 0x2e, 0x6a,
+	0x5b, 0xd1, 0x97, 0x85, 0x93, 0xc9, 0xbc, 0x77, 0x03, 0xfe, 0x04, 0x83, 0xfe, 0x20, 0xb0, 0x34,
+	0xe1, 0xf8, 0xa2, 0x9b, 0x85, 0x20, 0xc5, 0x87, 0x6e, 0x6d, 0xeb, 0x7e, 0x49, 0x9a, 0xc2, 0x05,
+	0x2c, 0xe6, 0x3f, 0x6d, 0xf4, 0xdd, 0x2d, 0x48, 0x63, 0x5f, 0xe2, 0x5a, 0xf3, 0x1e, 0x19, 0x69,
+	0xe1, 0x9d, 0xf7, 0x3b, 0x15, 0xdb, 0x57, 0xa9, 0x85, 0x8e, 0x9a, 0x1d, 0xf2, 0x75, 0x41, 0xf8,
+	0xaa, 0x9b, 0x5d, 0x1f, 0xfe, 0x4c, 0x2d, 0xd9, 0x29, 0x66, 0x72, 0x92, 0x99, 0xe7, 0x4d, 0xd3,
+	0xf6, 0xd5, 0xf1, 0x6c, 0x72, 0x2d, 0xd8, 0xfc, 0x1f, 0x00, 0x00, 0xff, 0xff, 0xff, 0x02, 0x8e,
+	0x37, 0x73, 0x08, 0x00, 0x00,
 }

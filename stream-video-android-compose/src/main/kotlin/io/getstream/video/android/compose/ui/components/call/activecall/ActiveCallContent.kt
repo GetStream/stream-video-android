@@ -16,13 +16,18 @@
 
 package io.getstream.video.android.compose.ui.components.call.activecall
 
+import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.runtime.Composable
@@ -30,20 +35,23 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.call.state.CallAction
 import io.getstream.video.android.call.state.CallMediaState
 import io.getstream.video.android.call.state.LeaveCall
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.call.CallAppBar
-import io.getstream.video.android.compose.ui.components.call.CallControls
+import io.getstream.video.android.compose.ui.components.call.activecall.internal.ActiveCallAppBar
+import io.getstream.video.android.compose.ui.components.call.controls.CallControls
 import io.getstream.video.android.compose.ui.components.participants.CallParticipant
 import io.getstream.video.android.compose.ui.components.participants.CallParticipants
+import io.getstream.video.android.compose.ui.components.participants.internal.ScreenShareAspectRatio
+import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.state.StreamCallState
-import io.getstream.video.android.utils.formatAsTitle
 import io.getstream.video.android.viewmodel.CallViewModel
+import stream.video.sfu.models.TrackType
 
 /**
  * Represents the UI in an Active call that shows participants and their video, as well as some
@@ -53,7 +61,6 @@ import io.getstream.video.android.viewmodel.CallViewModel
  * @param modifier Modifier for styling.
  * @param onBackPressed Handler when the user taps on the back button.
  * @param onCallAction Handler when the user triggers a Call Control Action.
- * @param onCallInfoSelected Handler when the user taps on the participant menu.
  * @param pictureInPictureContent Content shown when the user enters Picture in Picture mode, if
  * it's been enabled in the app.
  */
@@ -63,7 +70,6 @@ public fun ActiveCallContent(
     modifier: Modifier = Modifier,
     onBackPressed: () -> Unit = { callViewModel.onCallAction(LeaveCall) },
     onCallAction: (CallAction) -> Unit = callViewModel::onCallAction,
-    onCallInfoSelected: () -> Unit = callViewModel::showCallInfo,
     pictureInPictureContent: @Composable (Call) -> Unit = { DefaultPictureInPictureContent(it) }
 ) {
     val room by callViewModel.callState.collectAsState(initial = null)
@@ -72,6 +78,9 @@ public fun ActiveCallContent(
     val callMediaState by callViewModel.callMediaState.collectAsState(initial = CallMediaState())
 
     val isInPiPMode by callViewModel.isInPictureInPicture.collectAsState()
+    val isFullscreen by callViewModel.isFullscreen.collectAsState()
+    val orientation = LocalConfiguration.current.orientation
+    val callState by callViewModel.streamCallState.collectAsState(StreamCallState.Idle)
 
     val backAction = {
         if (isShowingParticipantsInfo) {
@@ -83,93 +92,97 @@ public fun ActiveCallContent(
 
     BackHandler { backAction() }
 
-    Box(
-        modifier = modifier, contentAlignment = Alignment.Center
-    ) {
-        val roomState = room
+    val roomState = room
 
-        Column(modifier = Modifier.fillMaxSize()) {
-
-            if (!isInPiPMode) {
-                ActiveCallAppBar(
-                    callViewModel = callViewModel,
-                    onBackPressed = backAction,
-                    onCallInfoSelected = onCallInfoSelected
-                )
-            }
-
-            if (roomState == null) {
-                Box(
-                    modifier = Modifier
-                        .height(250.dp)
-                        .fillMaxWidth()
-                ) {
-                    Image(
-                        modifier = Modifier.align(Alignment.Center),
-                        imageVector = Icons.Default.Call,
-                        contentDescription = null
+    if (!isInPiPMode) {
+        Scaffold(
+            modifier = modifier,
+            topBar = {
+                if (!isFullscreen && orientation != ORIENTATION_LANDSCAPE) {
+                    ActiveCallAppBar(
+                        callViewModel = callViewModel,
+                        onBackPressed = backAction,
+                        onCallAction = onCallAction
                     )
                 }
-            } else {
-                if (!isInPiPMode) {
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        CallParticipants(
-                            modifier = Modifier.fillMaxSize(), call = roomState
-                        )
-
-                        CallControls(
-                            modifier = Modifier
-                                .align(Alignment.BottomCenter)
-                                .fillMaxWidth()
-                                .height(VideoTheme.dimens.callControlsSheetHeight),
-                            callMediaState = callMediaState,
-                            onCallAction = onCallAction
+            },
+            bottomBar = {
+                if (!isFullscreen && orientation != ORIENTATION_LANDSCAPE) {
+                    CallControls(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(VideoTheme.dimens.callControlsSheetHeight),
+                        callMediaState = callMediaState,
+                        onCallAction = onCallAction
+                    )
+                }
+            },
+            content = {
+                if (roomState == null) {
+                    Box(
+                        modifier = Modifier
+                            .height(250.dp)
+                            .fillMaxWidth()
+                    ) {
+                        Image(
+                            modifier = Modifier.align(Alignment.Center),
+                            imageVector = Icons.Default.Call,
+                            contentDescription = null
                         )
                     }
                 } else {
-                    pictureInPictureContent(roomState)
+                    CallParticipants(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(
+                                top = it.calculateTopPadding(),
+                                start = it.calculateStartPadding(layoutDirection = LocalLayoutDirection.current),
+                                end = it.calculateEndPadding(layoutDirection = LocalLayoutDirection.current),
+                            ),
+                        call = roomState,
+                        paddingValues = it,
+                        isFullscreen = isFullscreen,
+                        callMediaState = callMediaState,
+                        callState = callState,
+                        onCallAction = onCallAction,
+                        onBackPressed = onBackPressed
+                    )
                 }
             }
+        )
+    } else {
+        if (roomState != null) {
+            pictureInPictureContent(roomState)
         }
     }
 }
 
 @Composable
-internal fun ActiveCallAppBar(
-    callViewModel: CallViewModel,
-    onBackPressed: () -> Unit,
-    onCallInfoSelected: () -> Unit
-) {
-    val callState by callViewModel.streamCallState.collectAsState(initial = StreamCallState.Idle)
-    val isShowingCallInfo by callViewModel.isShowingCallInfo.collectAsState()
+internal fun DefaultPictureInPictureContent(call: Call) {
+    val screenSharingSessions by call.screenSharingSessions.collectAsState(initial = emptyList())
 
-    val callId = when (val state = callState) {
-        is StreamCallState.Active -> state.callGuid.id
-        else -> ""
-    }
-    val status = callState.formatAsTitle(LocalContext.current)
+    val currentSessions = screenSharingSessions
 
-    val title = when (callId.isBlank()) {
-        true -> status
-        else -> "$status: $callId"
-    }
+    if (currentSessions.isNotEmpty()) {
+        val session = currentSessions.first()
 
-    CallAppBar(
-        title = title,
-        isShowingOverlays = isShowingCallInfo,
-        onBackPressed = onBackPressed,
-        onCallInfoSelected = onCallInfoSelected
-    )
-}
-
-@Composable
-internal fun DefaultPictureInPictureContent(roomState: Call) {
-    val primarySpeaker by roomState.primarySpeaker.collectAsState(initial = null)
-    val currentPrimary = primarySpeaker
-
-    if (currentPrimary != null) {
-        CallParticipant(
-            call = roomState, participant = currentPrimary, labelPosition = Alignment.BottomStart
+        VideoRenderer(
+            modifier = Modifier.aspectRatio(ScreenShareAspectRatio, false),
+            call = call,
+            videoTrack = session.track,
+            trackType = TrackType.TRACK_TYPE_SCREEN_SHARE,
+            sessionId = session.participant.sessionId
         )
+    } else {
+        val primarySpeaker by call.primarySpeaker.collectAsState(initial = null)
+        val currentPrimary = primarySpeaker
+
+        if (currentPrimary != null) {
+            CallParticipant(
+                call = call,
+                participant = currentPrimary,
+                labelPosition = Alignment.BottomStart
+            )
+        }
     }
 }

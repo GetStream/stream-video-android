@@ -25,8 +25,8 @@ import stream.video.sfu.signal.SendAnswerRequest
 import stream.video.sfu.signal.SendAnswerResponse
 import stream.video.sfu.signal.SetPublisherRequest
 import stream.video.sfu.signal.SetPublisherResponse
-import stream.video.sfu.signal.UpdateMuteStateRequest
-import stream.video.sfu.signal.UpdateMuteStateResponse
+import stream.video.sfu.signal.UpdateMuteStatesRequest
+import stream.video.sfu.signal.UpdateMuteStatesResponse
 import stream.video.sfu.signal.UpdateSubscriptionsRequest
 import stream.video.sfu.signal.UpdateSubscriptionsResponse
 
@@ -45,6 +45,6 @@ public class SfuClientImpl(
     override suspend fun updateSubscriptions(request: UpdateSubscriptionsRequest): Result<UpdateSubscriptionsResponse> =
         fetchResult { signalService.updateSubscriptions(request) }
 
-    override suspend fun updateMuteState(muteStateRequest: UpdateMuteStateRequest): Result<UpdateMuteStateResponse> =
-        fetchResult { signalService.updateMuteState(muteStateRequest) }
+    override suspend fun updateMuteState(muteStateRequest: UpdateMuteStatesRequest): Result<UpdateMuteStatesResponse> =
+        fetchResult { signalService.updateMuteStates(muteStateRequest) }
 }

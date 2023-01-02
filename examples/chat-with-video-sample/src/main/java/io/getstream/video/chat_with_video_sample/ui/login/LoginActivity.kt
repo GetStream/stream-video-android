@@ -47,6 +47,7 @@ import io.getstream.video.android.compose.utils.rememberStreamImagePainter
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.model.User
 import io.getstream.video.android.token.AuthCredentialsProvider
+import io.getstream.video.chat_with_video_sample.application.API_KEY
 import io.getstream.video.chat_with_video_sample.application.chatWithVideoApp
 import io.getstream.video.chat_with_video_sample.ui.channels.ChannelsActivity
 
@@ -93,7 +94,8 @@ class LoginActivity : ComponentActivity() {
     private fun logInToVideo(user: User) {
         chatWithVideoApp.initializeStreamVideo(
             AuthCredentialsProvider(
-                "key1",
+                API_KEY,
+                userToken = user.token,
                 user = user
             ),
             loggingLevel = LoggingLevel.BODY

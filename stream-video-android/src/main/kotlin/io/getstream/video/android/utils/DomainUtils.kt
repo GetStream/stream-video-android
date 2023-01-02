@@ -35,8 +35,8 @@ internal fun CallEnvelope.toCall(kind: StreamCallKind): CallMetadata {
             createdByUserId = created_by_user_id,
             createdAt = created_at?.epochSecond ?: 0,
             updatedAt = updated_at?.epochSecond ?: 0,
-            recordingEnabled = options?.recording?.enabled ?: false,
-            broadcastingEnabled = options?.broadcasting?.enabled ?: false,
+            recordingEnabled = settings_overrides?.recording?.enabled ?: false,
+            broadcastingEnabled = settings_overrides?.broadcasting?.enabled ?: false,
             users = users.toCallUsers(),
             extraData = emptyMap() // Json.decodeFromString<Map<String, String>>(extraDataJson)
         )

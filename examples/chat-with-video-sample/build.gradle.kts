@@ -63,6 +63,7 @@ dependencies {
     implementation(Dependencies.androidxLifecycleRuntime)
 
     // Compose
+    implementation(platform(Dependencies.composeBom))
     implementation(Dependencies.composeRuntime)
     implementation(Dependencies.composeUi)
     implementation(Dependencies.composeUiTooling)

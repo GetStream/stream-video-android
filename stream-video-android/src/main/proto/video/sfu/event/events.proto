@@ -18,17 +18,27 @@ message SfuEvent {
     AudioLevelChanged audio_level_changed = 4;
     models.ICETrickle ice_trickle = 5;
     ChangePublishQuality change_publish_quality = 6;
-    LocalDeviceChange local_device_change = 7;
-    MuteStateChanged mute_state_changed = 8;
-    VideoQualityChanged video_quality_changed = 9;
     ParticipantJoined participant_joined = 10;
     ParticipantLeft participant_left = 11;
     DominantSpeakerChanged dominant_speaker_changed = 12;
     JoinResponse join_response = 13;
     HealthCheckResponse health_check_response = 14;
-    CallEnded call_ended = 15;
+    TrackPublished track_published = 16;
+    TrackUnpublished track_unpublished = 17;
+    Error error = 18;
   }
 }
+
+
+message Error{
+  models.Error error = 4;
+}
+
+message ICETrickle {
+  models.PeerType peer_type = 1;
+  string ice_candidate = 2;
+}
+
 
 // SfuRequest is a message that is sent from the client to the SFU.
 message SfuRequest {
@@ -39,99 +49,87 @@ message SfuRequest {
 }
 
 message HealthCheckRequest {
-  string session_id = 1;
 }
 
 message HealthCheckResponse {
-  string session_id = 1;
+}
+
+message TrackPublished {
+  string user_id = 1;
+  string session_id = 2;
+  models.TrackType type = 3;
+}
+
+message TrackUnpublished {
+  string user_id = 1;
+  string session_id = 2;
+  models.TrackType type = 3;
 }
 
 message JoinRequest {
   string token = 1;
   string session_id = 2;
-  bool publish = 3;
-  models.CodecSettings codec_settings = 4;
+  // dumb SDP that allow us to extract subscriber's decode codecs
+  string subscriber_sdp = 3;
   // TODO: we should know if this is going to be
   // - publishing and subscribing, or just subscribing for future routing
 }
 
 message JoinResponse {
-  models.CallState call_state = 1;
-  string own_session_id = 2;
   // TODO: include full list of participants with track and audio info
+  models.CallState call_state = 1;
 }
 
 // ParticipantJoined is fired when a user joins a call
 message ParticipantJoined {
-  models.Call call = 1;
+  string call_cid = 1;
   models.Participant participant = 2;
 }
 
 // ParticipantJoined is fired when a user leaves a call
 message ParticipantLeft {
-  models.Call call = 1;
+  string call_cid = 1;
   models.Participant participant = 2;
 }
 
-message MuteStateChanged{
-  string user_id = 1;
-  bool audio_muted = 2;
-  bool video_muted = 3;
-}
-
-message VideoQualityChanged{
-  repeated models.StreamQuality stream_qualities = 1;
-}
-
 // SubscriberOffer is sent when the SFU adds tracks to a subscription
-// this usually happens when a user joins a call and starts sending video
 message SubscriberOffer {
-  string sdp = 1;
+  bool ice_restart = 1;
+  string sdp = 2;
 }
 
 message PublisherAnswer {
   string sdp = 1;
 }
 
-
-message LocalDeviceChange {
-  string type = 1;
-}
-
-// ICECandidateTrickle is about the ICE nonsense stuff
-message ICECandidateTrickle {
-  string candidate = 1;
-}
-
 // ConnectionQuality is sent to inform about connection quality changes
 // eg. thierry's connection is not good -> render a red icon Zoom style
 message ConnectionQualityChanged {
+  repeated ConnectionQualityInfo connection_quality_updates = 1;
+}
+
+message ConnectionQualityInfo {
   string user_id = 1;
-  models.ConnectionQuality connection_quality = 2;
+  string session_id = 2;
+  models.ConnectionQuality connection_quality = 3;
 }
 
 // DominantSpeakerChanged is sent by the SFU to notify when there is a new dominant speaker in the call
 message DominantSpeakerChanged {
   string user_id = 1;
+  string session_id = 2;
+}
+
+message AudioLevel{
+  string user_id = 1;
+  string session_id = 2;
+  // 0.0 means complete silence, 1.0 loudest
+  float level = 3;
 }
 
 // AudioLevelChanged is sent by the SFU to notify about audio levels by user
 message AudioLevelChanged {
   repeated AudioLevel audio_levels = 1;
-}
-
-message CallEnded {
-  string message = 1;
-}
-
-message AudioLevel{
-  string user_id = 1;
-  // 0.0 means complete silence, 1.0 loudest
-  float level = 2;
-}
-
-message AudioLayerSetting {
-
 }
 
 message AudioMediaRequest {
@@ -141,7 +139,6 @@ message AudioMediaRequest {
 message AudioSender {
   AudioMediaRequest media_request = 1;
   models.Codec codec = 2;
-  repeated AudioLayerSetting layers = 3;
 }
 
 message VideoMediaRequest {

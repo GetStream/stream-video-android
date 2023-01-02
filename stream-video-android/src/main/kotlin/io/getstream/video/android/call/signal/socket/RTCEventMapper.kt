@@ -20,15 +20,17 @@ import io.getstream.video.android.events.AudioLevelChangedEvent
 import io.getstream.video.android.events.ChangePublishQualityEvent
 import io.getstream.video.android.events.ConnectionQualityChangeEvent
 import io.getstream.video.android.events.DominantSpeakerChangedEvent
+import io.getstream.video.android.events.ErrorEvent
 import io.getstream.video.android.events.HealthCheckResponseEvent
 import io.getstream.video.android.events.ICETrickleEvent
 import io.getstream.video.android.events.JoinCallResponseEvent
-import io.getstream.video.android.events.MuteStateChangeEvent
 import io.getstream.video.android.events.ParticipantJoinedEvent
 import io.getstream.video.android.events.ParticipantLeftEvent
+import io.getstream.video.android.events.PublisherAnswerEvent
 import io.getstream.video.android.events.SfuDataEvent
 import io.getstream.video.android.events.SubscriberOfferEvent
-import io.getstream.video.android.events.VideoQualityChangedEvent
+import io.getstream.video.android.events.TrackPublishedEvent
+import io.getstream.video.android.events.TrackUnpublishedEvent
 import stream.video.sfu.event.SfuEvent
 
 public object RTCEventMapper {
@@ -36,47 +38,50 @@ public object RTCEventMapper {
     public fun mapEvent(event: SfuEvent): SfuDataEvent {
         return when {
             event.subscriber_offer != null -> SubscriberOfferEvent(event.subscriber_offer.sdp)
+            event.publisher_answer != null -> with(event.publisher_answer) {
+                PublisherAnswerEvent(sdp)
+            }
+
             event.connection_quality_changed != null -> with(event.connection_quality_changed) {
-                ConnectionQualityChangeEvent(
-                    user_id,
-                    connection_quality
-                )
+                ConnectionQualityChangeEvent(updates = connection_quality_updates)
             }
             event.audio_level_changed != null -> AudioLevelChangedEvent(
                 event.audio_level_changed.audio_levels.associate { it.user_id to it.level }
             )
-
             event.change_publish_quality != null -> ChangePublishQualityEvent(event.change_publish_quality)
-            event.mute_state_changed != null -> with(event.mute_state_changed) {
-                MuteStateChangeEvent(
+
+            event.track_published != null -> with(event.track_published) {
+                TrackPublishedEvent(
                     user_id,
-                    audio_muted,
-                    video_muted
+                    session_id,
+                    type
                 )
             }
-            event.video_quality_changed != null -> VideoQualityChangedEvent(
-                event.video_quality_changed.stream_qualities.associate {
-                    it.user_id to it.video_quality
-                }
-            )
+
+            event.track_unpublished != null -> with(event.track_unpublished) {
+                TrackUnpublishedEvent(
+                    user_id,
+                    session_id,
+                    type
+                )
+            }
+
             event.participant_joined != null -> with(event.participant_joined) {
-                ParticipantJoinedEvent(participant!!, call!!)
+                ParticipantJoinedEvent(participant!!, call_cid)
             }
             event.participant_left != null -> with(event.participant_left) {
-                ParticipantLeftEvent(participant!!, call!!)
+                ParticipantLeftEvent(participant!!, call_cid)
             }
             event.dominant_speaker_changed != null -> DominantSpeakerChangedEvent(event.dominant_speaker_changed.user_id)
-
-            event.health_check_response != null -> HealthCheckResponseEvent(event.health_check_response.session_id)
+            event.health_check_response != null -> HealthCheckResponseEvent
             event.join_response != null -> with(event.join_response) {
-                JoinCallResponseEvent(
-                    call_state!!,
-                    own_session_id
-                )
+                JoinCallResponseEvent(call_state!!)
             }
             event.ice_trickle != null -> with(event.ice_trickle) {
                 ICETrickleEvent(ice_candidate, peer_type)
             }
+            event.error != null -> ErrorEvent(event.error.error)
+
             else -> throw IllegalStateException("Unknown event")
         }
     }

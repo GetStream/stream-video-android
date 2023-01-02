@@ -29,6 +29,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.VideoTrack
 import io.getstream.video.android.ui.TextureViewRenderer
+import stream.video.sfu.models.TrackType
 
 /**
  * Renders a single video track based on the call state.
@@ -42,6 +43,8 @@ import io.getstream.video.android.ui.TextureViewRenderer
 public fun VideoRenderer(
     call: Call,
     videoTrack: VideoTrack,
+    sessionId: String,
+    trackType: TrackType,
     modifier: Modifier = Modifier,
     onRender: (View) -> Unit = {},
 ) {
@@ -57,7 +60,12 @@ public fun VideoRenderer(
     AndroidView(
         factory = { context ->
             TextureViewRenderer(context).apply {
-                call.initRenderer(this, videoTrack.streamId, onRender = onRender)
+                call.initRenderer(
+                    videoRenderer = this,
+                    sessionId = sessionId,
+                    trackType = trackType,
+                    onRender = onRender
+                )
                 setupVideo(trackState, videoTrack, this)
 
                 view = this
