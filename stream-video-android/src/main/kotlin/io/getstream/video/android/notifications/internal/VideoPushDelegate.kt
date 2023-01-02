@@ -34,7 +34,6 @@ import io.getstream.video.android.dispatchers.DispatcherProvider
 import io.getstream.video.android.token.AuthCredentialsProvider
 import io.getstream.video.android.user.UserCredentialsManager
 import io.getstream.video.android.user.UserPreferences
-import io.getstream.video.android.utils.INTENT_EXTRA_CALL_ACCEPTED
 import io.getstream.video.android.utils.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.utils.INTENT_EXTRA_NOTIFICATION_ID
 import kotlinx.coroutines.CoroutineScope
@@ -172,9 +171,6 @@ internal class VideoPushDelegate(context: Context) : PushDelegate(context) {
                             resolveInfo.activityInfo.name
                         )
                         putExtra(INTENT_EXTRA_CALL_CID, callId)
-                        if (baseIntent.action == ACTION_ACCEPT_CALL) {
-                            putExtra(INTENT_EXTRA_CALL_ACCEPTED, true)
-                        }
                         putExtra(INTENT_EXTRA_NOTIFICATION_ID, INCOMING_CALL_NOTIFICATION_ID)
                     },
                     flags
@@ -236,8 +232,7 @@ internal class VideoPushDelegate(context: Context) : PushDelegate(context) {
      * Verify if the map contains all keys/values for an incoming call.
      */
     private fun Map<String, Any?>.isValidIncomingCall(): Boolean =
-        !(this[KEY_TYPE] as? String).isNullOrBlank() &&
-            !(this[KEY_CALL_CID] as? String).isNullOrBlank()
+        !(this[KEY_TYPE] as? String).isNullOrBlank() && !(this[KEY_CALL_CID] as? String).isNullOrBlank()
 
     private companion object {
         private const val KEY_SENDER = "sender"

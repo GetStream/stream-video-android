@@ -23,7 +23,6 @@ import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.StreamVideoProvider
 import io.getstream.video.android.utils.Failure
-import io.getstream.video.android.utils.INTENT_EXTRA_CALL_ACCEPTED
 import io.getstream.video.android.utils.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.utils.INTENT_EXTRA_NOTIFICATION_ID
 import io.getstream.video.android.utils.Success
@@ -53,7 +52,7 @@ public abstract class AbstractNotificationActivity : AppCompatActivity(), Stream
      * Otherwise, we load the call data for the internal state.
      */
     private fun processNotificationData() {
-        val hasAcceptedCall = intent.getBooleanExtra(INTENT_EXTRA_CALL_ACCEPTED, false)
+        val hasAcceptedCall = intent.action == ACTION_ACCEPT_CALL
         val callCid = intent.getStringExtra(INTENT_EXTRA_CALL_CID)
 
         if (callCid.isNullOrBlank()) {
@@ -100,4 +99,8 @@ public abstract class AbstractNotificationActivity : AppCompatActivity(), Stream
      * screen and similar.
      */
     protected abstract fun initializeVideoIfNeeded()
+
+    private companion object {
+        private const val ACTION_ACCEPT_CALL = "io.getstream.video.android.action.ACCEPT_CALL"
+    }
 }

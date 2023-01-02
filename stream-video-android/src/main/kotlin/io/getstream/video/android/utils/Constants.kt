@@ -18,4 +18,3 @@ package io.getstream.video.android.utils
 
 public const val INTENT_EXTRA_CALL_CID: String = "call_cid"
 public const val INTENT_EXTRA_NOTIFICATION_ID: String = "notification_id"
-public const val INTENT_EXTRA_CALL_ACCEPTED: String = "call_accepted"

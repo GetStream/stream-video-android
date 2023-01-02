@@ -2689,7 +2689,6 @@ public final class io/getstream/video/android/utils/AndroidUtilsKt {
 }
 
 public final class io/getstream/video/android/utils/ConstantsKt {
-	public static final field INTENT_EXTRA_CALL_ACCEPTED Ljava/lang/String;
 	public static final field INTENT_EXTRA_CALL_CID Ljava/lang/String;
 	public static final field INTENT_EXTRA_NOTIFICATION_ID Ljava/lang/String;
 }
