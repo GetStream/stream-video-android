@@ -1,6 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Theme.Streamvideoandroid" parent="Theme.MaterialComponents.Light.NoActionBar">
+    <style name="Theme.StreamVideoAndroid" parent="Theme.MaterialComponents.Light.NoActionBar">
         <item name="streamVideoTheme">@style/StreamTheme</item>
     </style>
 

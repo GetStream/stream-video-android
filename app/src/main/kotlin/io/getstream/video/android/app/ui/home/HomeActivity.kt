@@ -45,11 +45,12 @@ import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
+import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -58,6 +59,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.app.model.HomeScreenOption
+import io.getstream.video.android.app.ui.call.CallActivity
 import io.getstream.video.android.app.ui.call.XmlCallActivity
 import io.getstream.video.android.app.ui.components.UserList
 import io.getstream.video.android.app.ui.login.LoginActivity
@@ -70,6 +72,9 @@ import io.getstream.video.android.compose.ui.components.avatar.InitialsAvatar
 import io.getstream.video.android.utils.initials
 import io.getstream.video.android.utils.onError
 import io.getstream.video.android.utils.onSuccess
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 class HomeActivity : AppCompatActivity() {
@@ -102,6 +107,16 @@ class HomeActivity : AppCompatActivity() {
     private val loadingState: MutableState<Boolean> = mutableStateOf(false)
 
     private val ringingState: MutableState<Boolean> = mutableStateOf(true)
+
+    private val useXmlCallUi: MutableStateFlow<Boolean> by lazy {
+        MutableStateFlow(
+            getSharedPreferences("Def", Context.MODE_PRIVATE).getBoolean("ui_kit", false)
+        ).apply {
+            onEach {
+                getSharedPreferences("Def", Context.MODE_PRIVATE).edit().putBoolean("ui_kit", it).apply()
+            }.launchIn(lifecycleScope)
+        }
+    }
 
     init {
         logger.i { "<init> this: $this" }
@@ -150,8 +165,6 @@ class HomeActivity : AppCompatActivity() {
                     Text(text = "Log Out")
                 }
 
-                XML()
-
                 val isLoading by loadingState
 
                 if (isLoading) {
@@ -160,26 +173,6 @@ class HomeActivity : AppCompatActivity() {
                     CircularProgressIndicator(modifier = Modifier.align(CenterHorizontally))
                 }
             }
-        }
-    }
-
-    @Composable
-    private fun XML() {
-        Spacer(modifier = Modifier.height(16.dp))
-        Button(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            onClick = {
-                startActivity(
-                    Intent(this, XmlCallActivity::class.java)
-                )
-            },
-            colors = ButtonDefaults.buttonColors(
-                backgroundColor = VideoTheme.colors.infoAccent, contentColor = Color.White
-            )
-        ) {
-            Text(text = "XML")
         }
     }
 
@@ -205,7 +198,7 @@ class HomeActivity : AppCompatActivity() {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = CenterVertically
         ) {
             Text(text = "Call ringing")
 
@@ -256,7 +249,7 @@ class HomeActivity : AppCompatActivity() {
     private fun createCall(
         callId: String,
         participants: List<String> = emptyList(),
-        ringing: Boolean
+        ringing: Boolean,
     ) {
         // ringing with no participants doesn't make sense
         if (ringing && participants.isEmpty()) {
@@ -285,6 +278,7 @@ class HomeActivity : AppCompatActivity() {
             result.onSuccess { data ->
                 logger.v { "[createMeeting] successful: $data" }
                 loadingState.value = false
+                launchCallScreen()
             }
 
             result.onError {
@@ -306,6 +300,7 @@ class HomeActivity : AppCompatActivity() {
                 ringing = true
             ).onSuccess {
                 logger.v { "[dialUsers] completed: $it" }
+                launchCallScreen()
             }.onError {
                 logger.e { "[dialUsers] failed: $it" }
                 Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
@@ -325,11 +320,24 @@ class HomeActivity : AppCompatActivity() {
                 ringing = false
             ).onSuccess { data ->
                 logger.v { "[joinCall] succeed: $data" }
+                launchCallScreen()
             }.onError {
                 logger.e { "[joinCall] failed: $it" }
                 Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
             }
             loadingState.value = false
+        }
+    }
+
+    private fun launchCallScreen() {
+        if (useXmlCallUi.value) {
+            startActivity(
+                Intent(this, XmlCallActivity::class.java)
+            )
+        } else {
+            startActivity(
+                Intent(this, CallActivity::class.java)
+            )
         }
     }
 

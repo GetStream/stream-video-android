@@ -3,6 +3,7 @@ package io.getstream.video.android.ui.xml.widget.call
 import android.content.Context
 import android.util.AttributeSet
 import android.view.View
+import android.widget.ImageView
 import androidx.constraintlayout.widget.ConstraintLayout
 import io.getstream.video.android.common.util.buildLargeCallText
 import io.getstream.video.android.common.util.buildSmallCallText
@@ -119,6 +120,7 @@ public class CallDetailsView : ConstraintLayout {
         val avatarSize = if (isSingleAvatar) style.singleAvatarSize else style.callAvatarSize
         val avatar = AvatarView(context).apply {
             layoutParams = LayoutParams(avatarSize, avatarSize)
+            scaleType = ImageView.ScaleType.CENTER_CROP
         }
         avatar.setData(imageUrl ?: "", name)
         binding.avatarsHolder.addView(avatar)
