@@ -25,7 +25,6 @@ import androidx.constraintlayout.widget.Guideline
 import androidx.transition.TransitionManager
 import io.getstream.video.android.model.CallParticipantState
 import io.getstream.video.android.ui.xml.R
-import io.getstream.video.android.ui.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.ui.xml.utils.extensions.updateConstraints
 
 /**
@@ -67,7 +66,8 @@ public class CallParticipantsView : ConstraintLayout {
 
     public constructor(context: Context) : this(context, null)
     public constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
-    public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context,
+    public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
+        context,
         attrs,
         defStyleAttr
     ) {

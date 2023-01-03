@@ -17,7 +17,6 @@
 package io.getstream.video.android.ui.xml.utils.extensions
 
 import android.view.View
-import androidx.annotation.Px
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 

@@ -20,7 +20,6 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.util.AttributeSet
-import android.widget.ImageView
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.shape.AbsoluteCornerSize
 import com.google.android.material.shape.RelativeCornerSize

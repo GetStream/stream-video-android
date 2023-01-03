@@ -18,7 +18,6 @@ package io.getstream.video.android.ui.xml.binding
 
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
-import io.getstream.log.StreamLog
 import io.getstream.video.android.call.state.FlipCamera
 import io.getstream.video.android.call.state.LeaveCall
 import io.getstream.video.android.call.state.ToggleCamera

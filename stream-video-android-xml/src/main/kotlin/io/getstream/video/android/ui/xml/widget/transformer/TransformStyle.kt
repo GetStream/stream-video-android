@@ -18,8 +18,8 @@ package io.getstream.video.android.ui.xml.widget.transformer
 
 import io.getstream.video.android.ui.xml.widget.avatar.AvatarStyle
 import io.getstream.video.android.ui.xml.widget.call.CallDetailsStyle
-import io.getstream.video.android.ui.xml.widget.control.CallControlsStyle
 import io.getstream.video.android.ui.xml.widget.control.CallControlButtonStyle
+import io.getstream.video.android.ui.xml.widget.control.CallControlsStyle
 import io.getstream.video.android.ui.xml.widget.incoming.IncomingCallStyle
 import io.getstream.video.android.ui.xml.widget.outgoing.OutgoingCallStyle
 

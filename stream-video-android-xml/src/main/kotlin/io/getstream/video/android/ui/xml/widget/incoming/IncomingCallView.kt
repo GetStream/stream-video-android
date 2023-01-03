@@ -29,7 +29,6 @@ import io.getstream.video.android.ui.common.R
 import io.getstream.video.android.ui.xml.databinding.ViewIncomingCallBinding
 import io.getstream.video.android.ui.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.ui.xml.utils.extensions.getDimension
-import io.getstream.video.android.ui.xml.utils.extensions.inflater
 import io.getstream.video.android.ui.xml.utils.extensions.streamThemeInflater
 
 /**

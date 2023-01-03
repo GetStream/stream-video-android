@@ -27,9 +27,9 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImagePainter
-import io.getstream.video.android.ui.common.R
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.utils.rememberStreamImagePainter
+import io.getstream.video.android.ui.common.R
 
 /**
  * An avatar that renders an image from the provided image URL. In case the image URL

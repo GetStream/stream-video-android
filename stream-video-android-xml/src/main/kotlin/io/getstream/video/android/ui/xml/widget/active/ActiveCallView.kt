@@ -21,13 +21,12 @@ import android.util.AttributeSet
 import androidx.constraintlayout.widget.ConstraintLayout
 import io.getstream.video.android.call.state.CallAction
 import io.getstream.video.android.model.CallParticipantState
+import io.getstream.video.android.ui.common.R
 import io.getstream.video.android.ui.xml.databinding.ViewActiveCallBinding
-import io.getstream.video.android.ui.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.ui.xml.utils.extensions.getColorCompat
 import io.getstream.video.android.ui.xml.utils.extensions.streamThemeInflater
 import io.getstream.video.android.ui.xml.widget.control.CallControlItem
 import io.getstream.video.android.ui.xml.widget.participant.RendererInitializer
-import io.getstream.video.android.ui.common.R
 
 /**
  * Represents the UI in an Active call that shows participants and their video, as well as some

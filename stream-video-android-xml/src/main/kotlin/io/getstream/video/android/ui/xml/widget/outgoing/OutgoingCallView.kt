@@ -30,7 +30,6 @@ import io.getstream.video.android.ui.xml.databinding.ViewOutgoingCallBinding
 import io.getstream.video.android.ui.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.ui.xml.utils.extensions.dpToPx
 import io.getstream.video.android.ui.xml.utils.extensions.getDimension
-import io.getstream.video.android.ui.xml.utils.extensions.inflater
 import io.getstream.video.android.ui.xml.utils.extensions.streamThemeInflater
 import io.getstream.video.android.ui.xml.widget.control.CallControlButton
 

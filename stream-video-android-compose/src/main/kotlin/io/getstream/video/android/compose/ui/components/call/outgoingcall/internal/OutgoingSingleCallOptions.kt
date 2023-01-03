@@ -38,9 +38,9 @@ import io.getstream.video.android.call.state.CallMediaState
 import io.getstream.video.android.call.state.CancelCall
 import io.getstream.video.android.call.state.ToggleCamera
 import io.getstream.video.android.call.state.ToggleMicrophone
-import io.getstream.video.android.ui.common.R
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.extensions.toggleAlpha
+import io.getstream.video.android.ui.common.R
 
 @Composable
 internal fun OutgoingSingleCallOptions(

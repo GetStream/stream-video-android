@@ -33,9 +33,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import io.getstream.video.android.ui.common.R
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.model.User
+import io.getstream.video.android.ui.common.R
 
 /**
  * Simple dialog asking for invite confirmation from the user.

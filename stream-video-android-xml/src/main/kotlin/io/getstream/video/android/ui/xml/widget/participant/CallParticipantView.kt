@@ -187,9 +187,11 @@ public class CallParticipantView : ConstraintLayout {
     private fun initRenderer() {
         if (!wasRendererInitialised) {
             track?.let {
-                rendererInitializer?.initRenderer(binding.participantVideoRenderer,
+                rendererInitializer?.initRenderer(
+                    binding.participantVideoRenderer,
                     it.streamId,
-                    TrackType.TRACK_TYPE_VIDEO) { onRender(it) }
+                    TrackType.TRACK_TYPE_VIDEO
+                ) { onRender(it) }
                 wasRendererInitialised = true
             }
         }

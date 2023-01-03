@@ -31,11 +31,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.ui.common.R
 import io.getstream.video.android.compose.state.ui.internal.CallParticipantsInfoOption
 import io.getstream.video.android.compose.state.ui.internal.Invite
 import io.getstream.video.android.compose.state.ui.internal.ToggleMute
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.ui.common.R
 
 /**
  * Renders the options at the bottom of the

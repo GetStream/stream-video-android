@@ -23,8 +23,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.ui.common.R
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.ui.common.R
 
 /**
  * Used to indicate the sound state of a given participant. Either shows a mute icon or the sound
