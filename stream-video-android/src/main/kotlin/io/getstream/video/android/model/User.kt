@@ -29,6 +29,6 @@ public data class User(
     val extraData: Map<String, String>
 ) {
     public fun isValid(): Boolean {
-        return id.isNotEmpty() && token.isNotEmpty() && name.isNotEmpty()
+        return id.isNotEmpty() && token.isNotEmpty()
     }
 }

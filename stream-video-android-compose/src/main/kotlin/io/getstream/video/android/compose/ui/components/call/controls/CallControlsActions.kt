@@ -14,25 +14,12 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.call
+package io.getstream.video.android.compose.ui.components.call.controls
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Card
-import androidx.compose.material.Icon
-import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
-import io.getstream.video.android.call.state.CallAction
 import io.getstream.video.android.call.state.CallMediaState
 import io.getstream.video.android.call.state.FlipCamera
 import io.getstream.video.android.call.state.LeaveCall
@@ -42,66 +29,6 @@ import io.getstream.video.android.call.state.ToggleSpeakerphone
 import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.state.ui.call.CallControlAction
 import io.getstream.video.android.compose.theme.VideoTheme
-
-/**
- * Represents the set of controls the user can use to change their audio and video device state, or
- * browse other types of settings, leave the call, or implement something custom.
- *
- * @param callMediaState The state of the media devices for the current user.
- * @param onCallAction Handler when the user triggers an action.
- * @param modifier Modifier for styling.
- */
-@Composable
-public fun CallControls(
-    callMediaState: CallMediaState,
-    onCallAction: (CallAction) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Surface(
-        modifier = modifier,
-        shape = VideoTheme.shapes.callControls,
-        color = VideoTheme.colors.appBackground
-    ) {
-        CallControlsActions(
-            actions = buildDefaultCallControlActions(callMediaState),
-            onCallAction = onCallAction
-        )
-    }
-}
-
-/**
- * Represents the list of Call Control actions the user can trigger while in a call.
- *
- * @param actions The list of actions to render.
- * @param onCallAction Handler when a given action is triggered.
- */
-@Composable
-public fun CallControlsActions(
-    actions: List<CallControlAction>,
-    onCallAction: (CallAction) -> Unit
-) {
-    LazyRow(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceEvenly
-    ) {
-        items(actions) { action ->
-            Card(
-                modifier = Modifier.size(VideoTheme.dimens.callControlButtonSize),
-                shape = VideoTheme.shapes.callControlsButton,
-                backgroundColor = action.actionBackgroundTint
-            ) {
-                Icon(
-                    modifier = Modifier
-                        .padding(10.dp)
-                        .clickable { onCallAction(action.callAction) },
-                    tint = action.iconTint,
-                    painter = action.icon,
-                    contentDescription = action.description
-                )
-            }
-        }
-    }
-}
 
 /**
  * Builds the default set of Call Control actions based on the [callMediaState].

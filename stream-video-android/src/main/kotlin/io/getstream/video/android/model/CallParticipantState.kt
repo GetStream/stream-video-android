@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.model
 
+import stream.video.sfu.models.ConnectionQuality
 import stream.video.sfu.models.TrackType
 
 public data class CallParticipantState(
@@ -26,20 +27,22 @@ public data class CallParticipantState(
     public var sessionId: String,
     public val idPrefix: String,
     public val isLocal: Boolean = false,
+    public val connectionQuality: ConnectionQuality = ConnectionQuality.CONNECTION_QUALITY_UNSPECIFIED,
     public var isOnline: Boolean = false,
-    public var track: VideoTrack? = null,
+    public var videoTrack: VideoTrack? = null,
+    public var screenSharingTrack: VideoTrack? = null,
     public var publishedTracks: Set<TrackType> = emptySet(),
     public var videoTrackSize: Pair<Int, Int> = Pair(0, 0),
     public var audioLevel: Float = 0f
 ) {
     public val hasVideo: Boolean
-        get() = TrackType.TRACK_TYPE_VIDEO in publishedTracks
+        get() = TrackType.TRACK_TYPE_VIDEO in publishedTracks && videoTrack != null
 
     public val hasAudio: Boolean
         get() = TrackType.TRACK_TYPE_AUDIO in publishedTracks
 
     public val hasScreenShare: Boolean
-        get() = TrackType.TRACK_TYPE_SCREEN_SHARE in publishedTracks
+        get() = TrackType.TRACK_TYPE_SCREEN_SHARE in publishedTracks && screenSharingTrack != null
 
     public val hasScreenShareAudio: Boolean
         get() = TrackType.TRACK_TYPE_SCREEN_SHARE_AUDIO in publishedTracks

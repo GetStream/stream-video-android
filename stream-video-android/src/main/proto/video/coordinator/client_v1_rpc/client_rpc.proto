@@ -61,7 +61,7 @@ service ClientRPC {
 
   rpc StopRecording(StopRecordingRequest) returns (StopRecordingResponse);
 
-  // UpdateMembers creates or updates members in a room.
+  // UpdateMembers creates or updates members in a call.
 
   // Adds members to a call
   rpc UpsertCallMembers(UpsertCallMembersRequest) returns (UpsertCallMembersResponse);

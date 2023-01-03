@@ -78,7 +78,6 @@ internal class HttpModule(
     ): Interceptor = Interceptor {
         val original = it.request()
 
-        // TODO what if URL won't be containing 'sfu' keyword?
         val token = if (original.url.toString().contains("sfu")) {
             credentialsProvider.getSfuToken()
         } else {

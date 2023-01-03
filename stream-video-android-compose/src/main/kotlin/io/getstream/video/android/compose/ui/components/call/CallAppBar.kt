@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.compose.ui.components.call
 
+import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -28,10 +29,13 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import io.getstream.video.android.call.state.CallAction
+import io.getstream.video.android.call.state.ShowCallInfo
 import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.theme.VideoTheme
 
@@ -43,7 +47,6 @@ import io.getstream.video.android.compose.theme.VideoTheme
  *
  * @param modifier Modifier for styling.
  * @param onBackPressed Handler when the user taps on the default leading content slot.
- * @param onCallInfoSelected Handler when the user taps on the default trailing content slot.
  * @param leadingContent The leading content, by default [DefaultCallAppBarLeadingContent].
  * @param centerContent The center content, by default [DefaultCallAppBarCenterContent].
  * @param trailingContent The trailing content, by default [DefaultCallAppBarTrailingContent].
@@ -53,24 +56,31 @@ public fun CallAppBar(
     modifier: Modifier = Modifier,
     isShowingOverlays: Boolean = false,
     onBackPressed: () -> Unit = {},
-    onCallInfoSelected: () -> Unit = {},
+    onCallAction: (CallAction) -> Unit = {},
     title: String = stringResource(id = R.string.default_app_bar_title),
     leadingContent: @Composable () -> Unit = {
         DefaultCallAppBarLeadingContent(isShowingOverlays, onBackPressed)
     },
-    centerContent: @Composable RowScope.() -> Unit = {
+    centerContent: @Composable() (RowScope.() -> Unit) = {
         DefaultCallAppBarCenterContent(title)
     },
     trailingContent: @Composable () -> Unit = {
         DefaultCallAppBarTrailingContent(
-            onCallInfoSelected
+            onCallAction
         )
     }
 ) {
+    val orientation = LocalConfiguration.current.orientation
+    val height = if (orientation == ORIENTATION_LANDSCAPE) {
+        VideoTheme.dimens.landscapeTopAppBarHeight
+    } else {
+        VideoTheme.dimens.topAppbarHeight
+    }
+
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(VideoTheme.dimens.topAppbarHeightSize)
+            .height(height)
             .background(color = VideoTheme.colors.barsBackground)
             .padding(VideoTheme.dimens.callAppBarPadding),
         verticalAlignment = Alignment.CenterVertically,
@@ -130,9 +140,9 @@ internal fun RowScope.DefaultCallAppBarCenterContent(title: String) {
  * Default trailing content slot, representing an icon to show the call participants menu.
  */
 @Composable
-internal fun DefaultCallAppBarTrailingContent(onCallInfoSelected: () -> Unit) {
+internal fun DefaultCallAppBarTrailingContent(onCallAction: (CallAction) -> Unit) {
     IconButton(
-        onClick = onCallInfoSelected,
+        onClick = { onCallAction(ShowCallInfo) },
         modifier = Modifier.padding(
             start = VideoTheme.dimens.callAppBarLeadingContentSpacingStart,
             end = VideoTheme.dimens.callAppBarLeadingContentSpacingEnd
