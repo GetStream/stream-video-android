@@ -17,8 +17,6 @@
 package io.getstream.video.android.ui.xml.widget.participant
 
 import android.content.Context
-import android.graphics.PorterDuff
-import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.util.AttributeSet
 import android.view.View
@@ -36,8 +34,8 @@ import io.getstream.video.android.ui.xml.utils.extensions.clearConstraints
 import io.getstream.video.android.ui.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.ui.xml.utils.extensions.dpToPx
 import io.getstream.video.android.ui.xml.utils.extensions.getDrawableCompat
-import io.getstream.video.android.ui.xml.utils.extensions.inflater
 import io.getstream.video.android.ui.xml.utils.extensions.load
+import io.getstream.video.android.ui.xml.utils.extensions.streamThemeInflater
 import io.getstream.video.android.ui.xml.utils.extensions.updateConstraints
 import stream.video.sfu.models.TrackType
 import io.getstream.video.android.ui.common.R as RCommon
@@ -47,7 +45,7 @@ import io.getstream.video.android.ui.common.R as RCommon
  */
 public class CallParticipantView : ConstraintLayout {
 
-    private val binding = ViewCallParticipantBinding.inflate(inflater, this)
+    private val binding = ViewCallParticipantBinding.inflate(streamThemeInflater, this)
 
     private lateinit var style: CallParticipantStyle
 

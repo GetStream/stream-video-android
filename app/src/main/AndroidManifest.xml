@@ -13,7 +13,7 @@
         android:networkSecurityConfig="@xml/network_security_config"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Streamvideoandroid"
+        android:theme="@style/Theme.StreamVideoAndroid"
         tools:targetApi="31">
         <profileable
             android:shell="true"
@@ -33,6 +33,7 @@
             android:name=".ui.call.CallActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
             android:supportsPictureInPicture="true" />
+
         <activity android:name=".ui.call.XmlCallActivity" />
 
         <service

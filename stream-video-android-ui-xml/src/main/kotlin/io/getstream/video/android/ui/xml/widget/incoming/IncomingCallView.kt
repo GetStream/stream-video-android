@@ -30,15 +30,16 @@ import io.getstream.video.android.ui.xml.databinding.ViewIncomingCallBinding
 import io.getstream.video.android.ui.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.ui.xml.utils.extensions.getDimension
 import io.getstream.video.android.ui.xml.utils.extensions.inflater
+import io.getstream.video.android.ui.xml.utils.extensions.streamThemeInflater
 
 /**
  * Represents the Incoming Call state and UI, when the user receives a call from other people.
  */
 public class IncomingCallView : ConstraintLayout {
 
-    private val binding = ViewIncomingCallBinding.inflate(inflater, this)
-
     private lateinit var style: IncomingCallStyle
+
+    private val binding = ViewIncomingCallBinding.inflate(streamThemeInflater, this)
 
     public constructor(context: Context) : this(context, null, 0)
     public constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)

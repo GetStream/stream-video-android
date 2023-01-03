@@ -19,7 +19,10 @@ public data class CallParticipantsStyle(
             ).use {
                 val callParticipantStyle = it.getResourceId(
                     R.styleable.CallParticipantsView_streamCallParticipantsCallParticipantStyle,
-                    0
+                    context.theme.obtainStyledAttributes(
+                        R.style.StreamVideoTheme,
+                        intArrayOf(R.attr.streamCallParticipantViewStyle)
+                    ).getResourceId(0, 0)
                 )
 
                 return CallParticipantsStyle(

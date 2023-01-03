@@ -56,18 +56,10 @@ public class CallControlsView : ConstraintLayout {
 
     public constructor(context: Context) : this(context, null, 0)
     public constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
-    public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : this(
+    public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
         context.createStreamThemeWrapper(),
         attrs,
-        defStyleAttr,
-        0
-    )
-
-    public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, a: Int) : super(
-        context.createStreamThemeWrapper(),
-        attrs,
-        defStyleAttr,
-        a
+        defStyleAttr
     ) {
         init(context, attrs)
     }

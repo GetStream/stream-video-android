@@ -31,6 +31,7 @@ import io.getstream.video.android.ui.xml.utils.extensions.createStreamThemeWrapp
 import io.getstream.video.android.ui.xml.utils.extensions.dpToPx
 import io.getstream.video.android.ui.xml.utils.extensions.getDimension
 import io.getstream.video.android.ui.xml.utils.extensions.inflater
+import io.getstream.video.android.ui.xml.utils.extensions.streamThemeInflater
 import io.getstream.video.android.ui.xml.widget.control.CallControlButton
 
 /**
@@ -38,7 +39,7 @@ import io.getstream.video.android.ui.xml.widget.control.CallControlButton
  */
 public class OutgoingCallView : ConstraintLayout {
 
-    private val binding = ViewOutgoingCallBinding.inflate(inflater, this)
+    private val binding = ViewOutgoingCallBinding.inflate(streamThemeInflater, this)
 
     private lateinit var style: OutgoingCallStyle
 
@@ -66,17 +67,23 @@ public class OutgoingCallView : ConstraintLayout {
      * Initialises the media control buttons with the style.
      */
     private fun initMediaControlButton(button: CallControlButton) {
-        button.setColorFilter(style.mediaButtonIconTint)
-        button.background = style.mediaButtonBackground
-        button.background.setTint(style.mediaButtonBackgroundTint)
+        with(button) {
+            background = style.mediaButtonBackground
+            background.setTint(style.mediaButtonBackgroundTint)
+            setColorFilter(style.mediaButtonIconTint)
+        }
     }
 
     /**
      * Initialises the cancel call button with the style.
      */
     private fun initCancelCallButton() {
-        binding.cancelCall.background = style.cancelCallBackground
-        binding.cancelCall.background.setTint(style.cancelCallBackgroundTint)
+        with(binding.cancelCall) {
+            background = style.cancelCallBackground
+            background.setTint(style.cancelCallBackgroundTint)
+            setImageDrawable(style.cancelCallIcon)
+            setColorFilter(style.cancelCallIconTint)
+        }
     }
 
     /**
