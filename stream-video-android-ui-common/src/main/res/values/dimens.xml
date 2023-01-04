@@ -21,7 +21,7 @@
     <dimen name="callAppBarTrailingContentSpacingStart">8dp</dimen>
     <dimen name="callAppBarTrailingContentSpacingEnd">8dp</dimen>
     <dimen name="callControlButtonSize">50dp</dimen>
-    <dimen name="landscapeCallControlButtonSize">40dp</dimen>
+    <dimen name="landscapeCallControlButtonSize">45dp</dimen>
     <dimen name="callControlsSheetHeight">96dp</dimen>
     <dimen name="landscapeCallControlsSheetWidth">64dp</dimen>
     <dimen name="callParticipantInfoMenuAppBarHeight">64dp</dimen>
@@ -51,6 +51,6 @@
 
     <item name="onCallStatusTextAlpha" type="dimen" format="float">0.6</item>
     <item name="buttonToggleOnAlpha" type="dimen" format="float">1.0</item>
-    <item name="buttonToggleOffAlpha" type="dimen" format="float">0.4</item>
+    <item name="buttonToggleOffAlpha" type="dimen" format="float">0.6</item>
 
 </resources>
