@@ -17,13 +17,13 @@
 package io.getstream.video.android.moshi
 
 import com.squareup.moshi.Moshi
-import com.squareup.moshi.MultiMapJsonAdapter
+import com.squareup.moshi.StreamVideoMultiMapJsonAdapter
 import com.squareup.moshi.adapter
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 
 internal val moshi: Moshi = Moshi.Builder()
     .add(KotlinJsonAdapterFactory())
-    .add(MultiMapJsonAdapter.FACTORY)
+    .add(StreamVideoMultiMapJsonAdapter.FACTORY)
     .build()
 
 @OptIn(ExperimentalStdlibApi::class)
