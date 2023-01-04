@@ -1,0 +1,111 @@
+## Implement Stream Push Notification Providers
+
+Thanks to our [Stream Push](https://github.com/GetStream/stream-android-push) artifacts, it's very easy to integrate push notification handling within your Chat and Video apps.
+
+Additionally, for Video, we support notifications when engaging in **ringing calls**, where you can accept or decline calls with just a click of a button. This behavior is included in the `stream-video-android` dependency, so you don't have to add any other artifacts to your project.
+
+There are only a few smaller steps to integrate push notifications with Stream Video. Let's see how.
+
+### Adding The PushDeviceGenerator
+
+The first step to integrating Push support is providing our SDK with a `PushDeviceGenerator`. These generators provide information and a way to register the user's device, for a given Push Provider, like Firebase.
+
+To set up `PushDeviceGenerator`s, simply pass them as a parameter, when setting up `StreamVideo`:
+
+```kotlin
+fun initializeStreamVideo(
+    credentialsProvider: CredentialsProvider,
+    loggingLevel: LoggingLevel
+): StreamVideo {
+    return StreamVideoBuilder(
+        context = this,
+        credentialsProvider = credentialsProvider,
+        loggingLevel = loggingLevel,
+        pushDeviceGenerators = listOf(FirebasePushDeviceGenerator()), // here
+        androidInputs = setOf(
+            CallServiceInput.from(CallService::class),
+            CallActivityInput.from(CallActivity::class),
+        )
+    )
+}
+```
+
+You can pass in a list of generators. This helps cover multiple device vendors and their corresponding providers. For example, devices which don't use Google Play Services.
+
+We also conveniently provide you with a few default `PushDeviceGenerator`s, but you can also implement custom solutions.
+
+### Integrating the NotificationActivity
+
+Now that you have the device generator, you need to add an `Activity` to your app that handles the push notification payload.
+
+We provide an `AbstractNotificationActivity` that implements most of the logic for you. You only need to provide it with an instance of `StreamVideo` and a way to initialize the SDK in your app, if it hasn't been initialized.
+
+> **Note**: It's important to note that this guide assumes you're using our [call launchers](../01-basics/04-call-launchers.mdx), as well as the `AbstractComposeCallActivity` and its corresponding `Service`
+>
+> It's the fastest way to integrate our SDK seamlessly. If you're using a custom `CallActivity`, we recommend observing the `StreamCallState` within the `NotificationActivity` and starting your custom UI and logic based on the state.
+
+Create a new `Activity` in your project, called `NotificationActivity` and add the following code to the file:
+
+```kotlin
+class NotificationActivity : AbstractNotificationActivity() {
+
+    override fun getStreamVideo(context: Context): StreamVideo {
+        return // TODO - provide video
+    }
+
+    override fun initializeVideoIfNeeded() {
+        // TODO - initialize SDK
+    }
+}
+```
+
+These functions return a `StreamVideo` instance from your app, when required, and set up the SDK in case it hasn't been initialized yet. Make sure to fill in this logic according to your application implementation of our SDK.
+
+:::note
+
+Make sure to initialize the `StreamVideo` client in a long-running lifecycle scope, like your `Application` class. This makes it easy to reuse the instance, since the client should live as long as the user is logged in.
+
+:::
+
+Now what you've filled in the behavior for your `NotificationActivity`, you have to include it in your application `AndroidManifest.xml`.
+
+### Preparing the AndroidManifest
+
+Our Push Notification system automatically detects and starts the `Activity` that declares it can consume the notification actions. For this to work, you have to declare the `NotificationActivity` in your manifest and add the appropriate intent filters used to find it  
+
+Add the following code to the `AndroidManifest.xml`:
+
+```xml
+<activity
+    android:name=".NotificationActivity"
+    android:exported="false">
+
+    <intent-filter android:priority="<your-priority>">
+        <action android:name="io.getstream.video.android.action.INCOMING_CALL" />
+        <action android:name="io.getstream.video.android.action.ACCEPT_CALL" />
+    </intent-filter>
+</activity>
+```
+
+You declare two important actions:
+
+* `INCOMING_CALL`: Triggered and shown when the user receives an incoming call notification and their phone is currently locked. Internally we trigger and show a full-screen `PendingIntent` that helps users see the new incoming call.
+* `ACCEPT_CALL`: Triggered after the user accepts a call, by pressing on the **Accept** button our default notification.
+
+Both of these actions are added to our notification intents, so you can choose to handle them separately or together, but **both are required** for the push integration to work.
+
+Also notice the `android:priority` attribute. Our implementation uses `-1` by default, which allows you to easily declare higher priority. You can also omit this property, as `0` (zero) is the `AndroidManifest` default, which is higher than `-1`. Simply omit this attribute or put in a positive number and you're good to go.
+
+Now that you have the `Activity` declared in the manifest, you're able to receive notifications and process them in the `NotificationActivity`. And if you're using our launchers, it should automatically start the Call screen.
+
+Run your app and everything should be set up. If someone calls you using a **ringing** call, you should see the following UI:
+
+![Incoming Call Notification](https://user-images.githubusercontent.com/17215808/206200015-4aaa5cd6-afd6-4909-922e-906e0465418e.jpeg)
+
+You can see the **Accept** and **Reject** buttons, which you can use to trigger the respective call actions.
+
+In case your users are on the lock screen and they receive an incoming call notification, it should show the `IncomingCall` UI, like so:
+
+![Screenshot_1670421029](https://user-images.githubusercontent.com/17215808/206201222-45733464-637e-4476-b696-3002cc3e21e2.jpeg)
+
+It shows the information about who's calling you and gives you the options to reject or accept a call, as well as change the initial video state.

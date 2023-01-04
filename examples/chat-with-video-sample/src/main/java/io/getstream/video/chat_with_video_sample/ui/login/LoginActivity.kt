@@ -95,7 +95,6 @@ class LoginActivity : ComponentActivity() {
         chatWithVideoApp.initializeStreamVideo(
             AuthCredentialsProvider(
                 API_KEY,
-                userToken = user.token,
                 user = user
             ),
             loggingLevel = LoggingLevel.BODY

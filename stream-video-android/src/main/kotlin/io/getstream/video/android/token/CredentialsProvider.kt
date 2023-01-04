@@ -48,7 +48,6 @@ public interface CredentialsProvider {
     public fun getUserCredentials(): User
 
     public fun updateUser(
-        user: User,
-        userToken: String
+        user: User
     )
 }
