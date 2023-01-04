@@ -26,7 +26,7 @@ import java.lang.reflect.Type
  *
  * Custom implementation of [com.squareup.moshi.MapJsonAdapter] which handles duplicate entries.
  */
-internal class MultiMapJsonAdapter<K, V>(
+internal class StreamVideoMultiMapJsonAdapter<K, V>(
     moshi: Moshi,
     keyType: Type,
     valueType: Type,
@@ -45,7 +45,7 @@ internal class MultiMapJsonAdapter<K, V>(
                 throw JsonDataException("Map key is null at ${writer.path}")
             }
             if (keys.contains(key)) {
-                val exception = MultiMapJsonDataException(
+                val exception = StreamVideoMultiMapJsonDataException(
                     "Map key '$key' has multiple values at path ${writer.path};\nmap: $map"
                 )
                 StreamLog.e(TAG, exception) { "[toJson] failed: $exception" }
@@ -69,7 +69,7 @@ internal class MultiMapJsonAdapter<K, V>(
             val value = valueAdapter.fromJson(reader)
             val replaced = result.put(key, value)
             if (replaced != null) {
-                val exception = MultiMapJsonDataException(
+                val exception = StreamVideoMultiMapJsonDataException(
                     "Map key '$key' has multiple values at path ${reader.path}: $replaced and $value"
                 )
                 StreamLog.e(TAG, exception) { "[fromJson] failed: $exception" }
@@ -91,12 +91,12 @@ internal class MultiMapJsonAdapter<K, V>(
             val rawType = Types.getRawType(type)
             if (rawType != MutableMap::class.java) return@Factory null
             val keyAndValue = Types.mapKeyAndValueTypes(type, rawType) ?: return@Factory null
-            MultiMapJsonAdapter<Any?, Any>(moshi, keyAndValue[0], keyAndValue[1]).nullSafe()
+            StreamVideoMultiMapJsonAdapter<Any?, Any>(moshi, keyAndValue[0], keyAndValue[1]).nullSafe()
         }
     }
-}
 
-/**
- * An exception to highlight multiple key-value entries detection.
- */
-private class MultiMapJsonDataException(message: String) : Exception(message)
+    /**
+     * An exception to highlight multiple key-value entries detection.
+     */
+    private class StreamVideoMultiMapJsonDataException(message: String) : Exception(message)
+}
