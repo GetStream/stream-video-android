@@ -25,6 +25,7 @@ import io.getstream.chat.android.compose.ui.attachments.StreamAttachmentFactorie
 import io.getstream.chat.android.offline.plugin.factory.StreamOfflinePluginFactory
 import io.getstream.chat.android.state.plugin.config.StatePluginConfig
 import io.getstream.chat.android.state.plugin.factory.StreamStatePluginFactory
+import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.StreamVideoBuilder
 import io.getstream.video.android.StreamVideoConfig
@@ -34,7 +35,6 @@ import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.token.CredentialsProvider
 import io.getstream.video.android.user.UserCredentialsManager
 import io.getstream.video.android.user.UsersProvider
-import io.getstream.video.chat_with_video_sample.BuildConfig
 import io.getstream.video.chat_with_video_sample.ui.call.CallActivity
 import io.getstream.video.chat_with_video_sample.ui.call.CallService
 import io.getstream.video.chat_with_video_sample.ui.messages.attachment.CallAttachmentFactory
@@ -92,8 +92,7 @@ class ChatWithVideoApp : Application() {
     ): StreamVideo {
         if (this::credentialsProvider.isInitialized) {
             this.credentialsProvider.updateUser(
-                credentialsProvider.getUserCredentials(),
-                credentialsProvider.getCachedUserToken()
+                credentialsProvider.getUserCredentials()
             )
         } else {
             this.credentialsProvider = credentialsProvider

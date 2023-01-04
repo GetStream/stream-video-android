@@ -14,17 +14,9 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.moshi
+package io.getstream.video.android.lifecycle
 
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.StreamVideoMultiMapJsonAdapter
-import com.squareup.moshi.adapter
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-
-internal val moshi: Moshi = Moshi.Builder()
-    .add(KotlinJsonAdapterFactory())
-    .add(StreamVideoMultiMapJsonAdapter.FACTORY)
-    .build()
-
-@OptIn(ExperimentalStdlibApi::class)
-internal val filterAdapter = moshi.adapter<Map<String, Any>>()
+internal interface LifecycleHandler {
+    fun resume()
+    fun stopped()
+}

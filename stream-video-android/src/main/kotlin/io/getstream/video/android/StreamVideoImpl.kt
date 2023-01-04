@@ -26,6 +26,9 @@ import io.getstream.video.android.coordinator.state.UserState
 import io.getstream.video.android.engine.StreamCallEngine
 import io.getstream.video.android.engine.adapter.CoordinatorSocketListenerAdapter
 import io.getstream.video.android.errors.VideoError
+import io.getstream.video.android.events.CallCreatedEvent
+import io.getstream.video.android.lifecycle.LifecycleHandler
+import io.getstream.video.android.lifecycle.internal.StreamLifecycleObserver
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.model.CallEventType
 import io.getstream.video.android.model.CallMetadata
@@ -41,7 +44,9 @@ import io.getstream.video.android.model.mapper.toMetadata
 import io.getstream.video.android.model.mapper.toTypeAndId
 import io.getstream.video.android.model.state.DropReason
 import io.getstream.video.android.model.state.StreamCallState
+import io.getstream.video.android.model.toDetails
 import io.getstream.video.android.model.toIceServer
+import io.getstream.video.android.model.toInfo
 import io.getstream.video.android.model.toUserEventType
 import io.getstream.video.android.network.NetworkStateProvider
 import io.getstream.video.android.socket.SocketListener
@@ -51,6 +56,7 @@ import io.getstream.video.android.socket.VideoSocket
 import io.getstream.video.android.token.CredentialsProvider
 import io.getstream.video.android.user.UserCredentialsManager
 import io.getstream.video.android.utils.Failure
+import io.getstream.video.android.utils.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.utils.Result
 import io.getstream.video.android.utils.Success
 import io.getstream.video.android.utils.enrichSFUURL
@@ -590,5 +596,31 @@ public class StreamVideoImpl(
         withContext(scope.coroutineContext) {
             logger.d { "[cancelCall] cid: $cid" }
             sendEvent(callCid = cid, CallEventType.CANCELLED)
+        }
+
+    override suspend fun handlePushMessage(payload: Map<String, Any>): Result<Unit> =
+        withContext(scope.coroutineContext) {
+            val callCid = payload[INTENT_EXTRA_CALL_CID] as? String
+                ?: return@withContext Failure(VideoError("Missing Call CID!"))
+
+            val (type, id) = callCid.toTypeAndId()
+
+            when (val result = getOrCreateCall(type, id, emptyList(), false)) {
+                is Success -> {
+                    val callMetadata = result.data
+
+                    val event = CallCreatedEvent(
+                        callCid = callMetadata.cid,
+                        ringing = true,
+                        users = callMetadata.users,
+                        info = callMetadata.toInfo(),
+                        details = callMetadata.toDetails()
+                    )
+
+                    engine.onCoordinatorEvent(event)
+                    Success(Unit)
+                }
+                is Failure -> result
+            }
         }
 }

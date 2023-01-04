@@ -30,7 +30,7 @@
             >
 
             <meta-data
-                android:name="io.getstream.video.android.VideoPushDelegate"
+                android:name="io.getstream.video.android.notifications.internal.VideoPushDelegate"
                 android:value="io.getstream.android.push.PushDelegate"
                 />
         </provider>

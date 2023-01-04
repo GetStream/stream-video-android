@@ -14,17 +14,21 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.moshi
+package io.getstream.video.android.permission
 
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.StreamVideoMultiMapJsonAdapter
-import com.squareup.moshi.adapter
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+public interface PermissionManagerProvider {
 
-internal val moshi: Moshi = Moshi.Builder()
-    .add(KotlinJsonAdapterFactory())
-    .add(StreamVideoMultiMapJsonAdapter.FACTORY)
-    .build()
+    /**
+     * Used for [PermissionManager] setup and registration with the Activity that it's used in.
+     *
+     * @return The initialized and registered [PermissionManager].
+     */
+    public fun initPermissionManager(): PermissionManager
 
-@OptIn(ExperimentalStdlibApi::class)
-internal val filterAdapter = moshi.adapter<Map<String, Any>>()
+    /**
+     * Allows fetching of the [PermissionManager] instance created by [initPermissionManager].
+     *
+     * @return The initialized [PermissionManager] instance.
+     */
+    public fun getPermissionManager(): PermissionManager
+}

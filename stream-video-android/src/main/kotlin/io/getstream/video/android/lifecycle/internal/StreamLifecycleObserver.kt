@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android
+package io.getstream.video.android.lifecycle.internal
 
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import io.getstream.video.android.dispatchers.DispatcherProvider
+import io.getstream.video.android.lifecycle.LifecycleHandler
 import kotlinx.coroutines.withContext
 
 internal class StreamLifecycleObserver(
@@ -61,9 +62,4 @@ internal class StreamLifecycleObserver(
     override fun onStop(owner: LifecycleOwner) {
         handler.stopped()
     }
-}
-
-internal interface LifecycleHandler {
-    fun resume()
-    fun stopped()
 }
