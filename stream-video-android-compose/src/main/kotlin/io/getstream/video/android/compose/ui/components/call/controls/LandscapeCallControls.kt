@@ -56,7 +56,7 @@ public fun LandscapeCallControls(
         verticalArrangement = Arrangement.SpaceEvenly
     ) {
         items(actions) { action ->
-            val isEnabled = (action.callAction is FlipCamera && isScreenSharing).not()
+            val isEnabled = !(action.callAction is FlipCamera && isScreenSharing)
 
             Card(
                 modifier = Modifier.size(VideoTheme.dimens.landscapeCallControlButtonSize),

@@ -163,6 +163,11 @@ public fun ActiveCallContent(
     }
 }
 
+/**
+ * Renders the default PiP content, using the call state that's provided.
+ *
+ * @param call The state of the call, with its participants.
+ */
 @Composable
 internal fun DefaultPictureInPictureContent(call: Call) {
     val screenSharingSessions by call.screenSharingSessions.collectAsState(initial = emptyList())

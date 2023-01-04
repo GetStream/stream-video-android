@@ -40,7 +40,7 @@ import io.getstream.video.android.compose.theme.VideoTheme
  * browse other types of settings, leave the call, or implement something custom.
  *
  * @param callMediaState The state of the media devices for the current user.
- * @param isScreenSharing If there is a screensharing session active.
+ * @param isScreenSharing If there is a screen sharing session active.
  * @param modifier Modifier for styling.
  * @param actions Actions to show to the user with different controls.
  * @param onCallAction Handler when the user triggers an action.
@@ -71,6 +71,7 @@ public fun CallControls(
  * Represents the list of Call Control actions the user can trigger while in a call.
  *
  * @param actions The list of actions to render.
+ * @param isScreenSharing If there is a screen sharing session active.
  * @param onCallAction Handler when a given action is triggered.
  */
 @Composable

@@ -49,6 +49,7 @@ import io.getstream.video.android.model.ScreenSharingSession
  * @param isFullscreen If we're currently in fullscreen mode.
  * @param onRender Handler when the video renders.
  * @param onCallAction Handler when the user performs various call actions.
+ * @param onBackPressed Handler when the user taps back.
  */
 @Composable
 public fun LandscapeScreenSharingContent(
