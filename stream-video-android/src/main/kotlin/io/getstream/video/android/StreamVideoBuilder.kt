@@ -24,7 +24,8 @@ import io.getstream.video.android.engine.StreamCallEngine
 import io.getstream.video.android.engine.StreamCallEngineImpl
 import io.getstream.video.android.input.CallAndroidInput
 import io.getstream.video.android.input.CallAndroidInputLauncher
-import io.getstream.video.android.input.DefaultCallAndroidInputLauncher
+import io.getstream.video.android.input.internal.DefaultCallAndroidInputLauncher
+import io.getstream.video.android.input.internal.StreamVideoStateLauncher
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.module.CallCoordinatorClientModule
 import io.getstream.video.android.module.HttpModule
@@ -56,6 +57,7 @@ public class StreamVideoBuilder(
 
         UserCredentialsManager.initialize(context).apply {
             storeUserCredentials(user)
+            storeApiKey(credentialsProvider.getCachedApiKey())
         }
 
         val httpModule = HttpModule.getOrCreate(loggingLevel.httpLoggingLevel, credentialsProvider)

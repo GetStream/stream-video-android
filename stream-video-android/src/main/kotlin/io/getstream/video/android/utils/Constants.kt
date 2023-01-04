@@ -14,14 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android
+package io.getstream.video.android.utils
 
-import io.getstream.video.android.viewmodel.CallViewModelFactory
-
-public interface CallViewModelFactoryProvider {
-
-    /**
-     * Allows for a custom implementation of the [CallViewModelFactory].
-     */
-    public fun getCallViewModelFactory(): CallViewModelFactory? = null
-}
+public const val INTENT_EXTRA_CALL_CID: String = "call_cid"
+public const val INTENT_EXTRA_NOTIFICATION_ID: String = "notification_id"

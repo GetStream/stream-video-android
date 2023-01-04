@@ -14,11 +14,26 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.input
+package io.getstream.video.android.dogfooding
 
 import android.content.Context
+import io.getstream.video.android.StreamVideo
+import io.getstream.video.android.notifications.AbstractNotificationActivity
 
-public fun interface CallAndroidInputLauncher {
+class NotificationActivity : AbstractNotificationActivity() {
 
-    public fun launch(context: Context, input: CallAndroidInput)
+    override fun getStreamVideo(context: Context): StreamVideo {
+        return dogfoodingApp.streamVideo
+    }
+
+    override fun initializeVideoIfNeeded() {
+        if (!dogfoodingApp.isInitialized()) {
+            val hasInitialized = dogfoodingApp.initializeFromCredentials()
+
+            if (!hasInitialized) {
+                finish()
+                return
+            }
+        }
+    }
 }

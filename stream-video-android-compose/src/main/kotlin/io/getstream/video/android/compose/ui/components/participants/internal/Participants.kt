@@ -16,24 +16,17 @@
 
 package io.getstream.video.android.compose.ui.components.participants.internal
 
+import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import android.view.View
 import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.participants.CallParticipant
-import io.getstream.video.android.compose.ui.components.participants.FloatingParticipantItem
 import io.getstream.video.android.model.Call
 
 /**
@@ -42,6 +35,8 @@ import io.getstream.video.android.model.Call
  * @param call The state of the call.
  * @param onRender Handler when the video content renders.
  * @param modifier Modifier for styling.
+ * @param paddingValues The padding within the parent.
+ * @param parentSize The size of the parent.
  */
 @Composable
 internal fun BoxScope.Participants(
@@ -53,119 +48,28 @@ internal fun BoxScope.Participants(
 ) {
     val primarySpeaker by call.primarySpeaker.collectAsState(initial = null)
     val roomParticipants by call.callParticipants.collectAsState(emptyList())
-    val nonLocal = roomParticipants.filter { !it.isLocal }
 
-    when (roomParticipants.size) {
-        0 -> Unit
-        1 -> {
-            val participant = roomParticipants.first()
+    val orientation = LocalConfiguration.current.orientation
 
-            CallParticipant(
-                modifier = modifier,
-                call = call,
-                participant = participant,
-                onRender = onRender,
-                isFocused = primarySpeaker?.id == participant.id,
-                paddingValues = paddingValues
-            )
-        }
-        2 -> {
-            val participant = nonLocal.first()
-
-            CallParticipant(
-                modifier = modifier,
-                call = call,
-                participant = participant,
-                onRender = onRender,
-                isFocused = primarySpeaker?.id == participant.id,
-                paddingValues = paddingValues
-            )
-        }
-        3 -> {
-            val firstParticipant = nonLocal[0]
-            val secondParticipant = nonLocal[1]
-
-            Column(modifier) {
-                CallParticipant(
-                    modifier = Modifier.weight(1f),
-                    call = call,
-                    participant = firstParticipant,
-                    isFocused = primarySpeaker?.id == firstParticipant.id
-                )
-
-                CallParticipant(
-                    modifier = Modifier.weight(1f),
-                    call = call,
-                    participant = secondParticipant,
-                    onRender = onRender,
-                    isFocused = primarySpeaker?.id == secondParticipant.id,
-                    paddingValues = paddingValues
-                )
-            }
-        }
-        else -> {
-            /**
-             * More than three participants, we only show the first four.
-             */
-            val firstParticipant = nonLocal[0]
-            val secondParticipant = nonLocal[1]
-            val thirdParticipant = nonLocal[2]
-            val fourthParticipant = roomParticipants.first { it.isLocal }
-
-            Column(modifier) {
-                Row(modifier = Modifier.weight(1f)) {
-                    CallParticipant(
-                        modifier = Modifier.weight(1f),
-                        call = call,
-                        participant = firstParticipant,
-                        isFocused = primarySpeaker?.id == firstParticipant.id
-                    )
-
-                    CallParticipant(
-                        modifier = Modifier.weight(1f),
-                        call = call,
-                        participant = secondParticipant,
-                        isFocused = primarySpeaker?.id == secondParticipant.id
-                    )
-                }
-
-                Row(modifier = Modifier.weight(1f)) {
-                    CallParticipant(
-                        modifier = Modifier.weight(1f),
-                        call = call,
-                        participant = thirdParticipant,
-                        isFocused = primarySpeaker?.id == thirdParticipant.id,
-                        paddingValues = paddingValues
-                    )
-
-                    CallParticipant(
-                        modifier = Modifier.weight(1f),
-                        call = call,
-                        participant = fourthParticipant,
-                        onRender = onRender,
-                        isFocused = primarySpeaker?.id == fourthParticipant.id,
-                        paddingValues = paddingValues
-                    )
-                }
-            }
-        }
-    }
-
-    if (roomParticipants.size in 2..3) {
-        val currentLocal = roomParticipants.first { it.isLocal }
-
-        FloatingParticipantItem(
+    if (orientation == ORIENTATION_LANDSCAPE) {
+        LandscapeParticipants(
             call = call,
-            localParticipant = currentLocal,
-            parentBounds = parentSize,
-            modifier = Modifier
-                .size(
-                    height = VideoTheme.dimens.floatingVideoHeight,
-                    width = VideoTheme.dimens.floatingVideoWidth
-                )
-                .clip(RoundedCornerShape(16.dp))
-                .align(Alignment.TopEnd),
-            paddingValues = paddingValues
+            primarySpeaker = primarySpeaker,
+            callParticipants = roomParticipants,
+            modifier = modifier,
+            paddingValues = paddingValues,
+            parentSize = parentSize,
+            onRender = onRender
+        )
+    } else {
+        PortraitParticipants(
+            call = call,
+            primarySpeaker = primarySpeaker,
+            callParticipants = roomParticipants,
+            modifier = modifier,
+            paddingValues = paddingValues,
+            parentSize = parentSize,
+            onRender = onRender
         )
     }
 }

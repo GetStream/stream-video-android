@@ -48,13 +48,7 @@ public fun LandscapeCallControls(
     modifier: Modifier = Modifier,
     onCallAction: (CallAction) -> Unit
 ) {
-    val defaultActions = buildDefaultCallControlActions(callMediaState = callMediaState)
-
-    val actions = if (isScreenSharing) {
-        defaultActions.filter { it.callAction !is FlipCamera }
-    } else {
-        defaultActions
-    }
+    val actions = buildDefaultCallControlActions(callMediaState = callMediaState)
 
     LazyColumn(
         modifier = modifier,
@@ -62,15 +56,17 @@ public fun LandscapeCallControls(
         verticalArrangement = Arrangement.SpaceEvenly
     ) {
         items(actions) { action ->
+            val isEnabled = !(action.callAction is FlipCamera && isScreenSharing)
+
             Card(
                 modifier = Modifier.size(VideoTheme.dimens.landscapeCallControlButtonSize),
                 shape = VideoTheme.shapes.callControlsButton,
-                backgroundColor = action.actionBackgroundTint
+                backgroundColor = if (isEnabled) action.actionBackgroundTint else VideoTheme.colors.disabled
             ) {
                 Icon(
                     modifier = Modifier
                         .padding(10.dp)
-                        .clickable { onCallAction(action.callAction) },
+                        .clickable(enabled = isEnabled) { onCallAction(action.callAction) },
                     tint = action.iconTint,
                     painter = action.icon,
                     contentDescription = action.description

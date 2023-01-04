@@ -61,7 +61,7 @@ public fun CallAppBar(
     leadingContent: @Composable () -> Unit = {
         DefaultCallAppBarLeadingContent(isShowingOverlays, onBackPressed)
     },
-    centerContent: @Composable() (RowScope.() -> Unit) = {
+    centerContent: @Composable (RowScope.() -> Unit) = {
         DefaultCallAppBarCenterContent(title)
     },
     trailingContent: @Composable () -> Unit = {

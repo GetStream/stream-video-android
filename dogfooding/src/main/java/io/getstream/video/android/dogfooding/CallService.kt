@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.moshi
+package io.getstream.video.android.dogfooding
 
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.StreamVideoMultiMapJsonAdapter
-import com.squareup.moshi.adapter
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import android.content.Context
+import io.getstream.video.android.StreamVideo
+import io.getstream.video.android.service.AbstractStreamCallService
 
-internal val moshi: Moshi = Moshi.Builder()
-    .add(KotlinJsonAdapterFactory())
-    .add(StreamVideoMultiMapJsonAdapter.FACTORY)
-    .build()
+class CallService : AbstractStreamCallService() {
 
-@OptIn(ExperimentalStdlibApi::class)
-internal val filterAdapter = moshi.adapter<Map<String, Any>>()
+    override fun getStreamVideo(context: Context): StreamVideo {
+        return dogfoodingApp.streamVideo
+    }
+}

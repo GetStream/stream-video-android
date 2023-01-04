@@ -51,6 +51,7 @@ import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.state.StreamCallState
 import io.getstream.video.android.viewmodel.CallViewModel
+import kotlinx.coroutines.flow.emptyFlow
 import stream.video.sfu.models.TrackType
 
 /**
@@ -72,7 +73,7 @@ public fun ActiveCallContent(
     onCallAction: (CallAction) -> Unit = callViewModel::onCallAction,
     pictureInPictureContent: @Composable (Call) -> Unit = { DefaultPictureInPictureContent(it) }
 ) {
-    val room by callViewModel.callState.collectAsState(initial = null)
+    val call by callViewModel.callState.collectAsState(initial = null)
     val isShowingParticipantsInfo by callViewModel.isShowingCallInfo.collectAsState(false)
 
     val callMediaState by callViewModel.callMediaState.collectAsState(initial = CallMediaState())
@@ -92,7 +93,11 @@ public fun ActiveCallContent(
 
     BackHandler { backAction() }
 
-    val roomState = room
+    val currentCall = call
+    val screenShareSessionsState = currentCall?.screenSharingSessions ?: emptyFlow()
+    val state by screenShareSessionsState.collectAsState(initial = emptyList())
+
+    val isScreenSharing = state.isNotEmpty()
 
     if (!isInPiPMode) {
         Scaffold(
@@ -113,12 +118,13 @@ public fun ActiveCallContent(
                             .fillMaxWidth()
                             .height(VideoTheme.dimens.callControlsSheetHeight),
                         callMediaState = callMediaState,
+                        isScreenSharing = isScreenSharing,
                         onCallAction = onCallAction
                     )
                 }
             },
             content = {
-                if (roomState == null) {
+                if (currentCall == null) {
                     Box(
                         modifier = Modifier
                             .height(250.dp)
@@ -139,7 +145,7 @@ public fun ActiveCallContent(
                                 start = it.calculateStartPadding(layoutDirection = LocalLayoutDirection.current),
                                 end = it.calculateEndPadding(layoutDirection = LocalLayoutDirection.current),
                             ),
-                        call = roomState,
+                        call = currentCall,
                         paddingValues = it,
                         isFullscreen = isFullscreen,
                         callMediaState = callMediaState,
@@ -151,12 +157,17 @@ public fun ActiveCallContent(
             }
         )
     } else {
-        if (roomState != null) {
-            pictureInPictureContent(roomState)
+        if (currentCall != null) {
+            pictureInPictureContent(currentCall)
         }
     }
 }
 
+/**
+ * Renders the default PiP content, using the call state that's provided.
+ *
+ * @param call The state of the call, with its participants.
+ */
 @Composable
 internal fun DefaultPictureInPictureContent(call: Call) {
     val screenSharingSessions by call.screenSharingSessions.collectAsState(initial = emptyList())
