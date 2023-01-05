@@ -111,6 +111,7 @@ import stream.video.sfu.event.JoinRequest
 import stream.video.sfu.event.JoinResponse
 import stream.video.sfu.models.CallState
 import stream.video.sfu.models.ICETrickle
+import stream.video.sfu.models.Participant
 import stream.video.sfu.models.PeerType
 import stream.video.sfu.models.TrackInfo
 import stream.video.sfu.models.TrackType
@@ -442,6 +443,8 @@ internal class CallClientImpl(
     private suspend fun loadParticipantsData(callState: CallState?, callSettings: CallSettings) {
         logger.d { "[loadParticipantsData] #sfu; callState: $callState, callSettings: $callSettings" }
         if (callState != null) {
+            setPartialParticipants(callState.participants)
+
             val query = filterAdapter.toJson(
                 InFilterObject(
                     "id",
@@ -474,6 +477,22 @@ internal class CallClientImpl(
                 )
             }
         }
+    }
+
+    private fun setPartialParticipants(participants: List<Participant>) {
+        call?.setParticipants(
+            participants.map {
+                CallParticipantState(
+                    id = it.user_id,
+                    sessionId = it.session_id,
+                    idPrefix = it.track_lookup_prefix,
+                    isLocal = it.session_id == sessionId,
+                    name = "",
+                    profileImageURL = "",
+                    role = ""
+                )
+            }
+        )
     }
 
     private suspend fun initializeCall(

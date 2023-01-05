@@ -227,6 +227,12 @@ func (m *Participant) validate(all bool) error {
 
 	// no validation rules for ConnectionQuality
 
+	// no validation rules for IsSpeaking
+
+	// no validation rules for IsDominantSpeaker
+
+	// no validation rules for AudioLevel
+
 	if len(errors) > 0 {
 		return ParticipantMultiError(errors)
 	}

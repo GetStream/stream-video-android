@@ -32,6 +32,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
@@ -141,7 +142,7 @@ private fun BoxScope.ParticipantLabel(
                 Color.DarkGray,
                 shape = RoundedCornerShape(8.dp)
             ),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = CenterVertically,
     ) {
         val name = participant.name.ifEmpty {
             participant.id
@@ -149,7 +150,8 @@ private fun BoxScope.ParticipantLabel(
         Text(
             modifier = Modifier
                 .widthIn(max = 64.dp)
-                .padding(start = 8.dp),
+                .padding(start = 8.dp)
+                .align(CenterVertically),
             text = name,
             style = VideoTheme.typography.body,
             color = Color.White,
@@ -157,6 +159,10 @@ private fun BoxScope.ParticipantLabel(
             overflow = TextOverflow.Ellipsis
         )
 
-        SoundIndicator(participant.hasAudio, participant.audioLevel)
+        SoundIndicator(
+            modifier = Modifier.align(CenterVertically),
+            hasSound = participant.hasAudio,
+            isSpeaking = participant.isSpeaking
+        )
     }
 }

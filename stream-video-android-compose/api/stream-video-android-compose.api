@@ -321,11 +321,11 @@ public abstract class io/getstream/video/android/compose/ui/AbstractComposeCallA
 }
 
 public final class io/getstream/video/android/compose/ui/components/audio/SoundIndicatorKt {
-	public static final fun SoundIndicator (ZFLandroidx/compose/runtime/Composer;I)V
+	public static final fun SoundIndicator (ZZLandroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/audio/SoundLevelsKt {
-	public static final fun SoundLevels (FLandroidx/compose/runtime/Composer;I)V
+	public static final fun ActiveSoundLevels (Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;I)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/avatar/AvatarKt {

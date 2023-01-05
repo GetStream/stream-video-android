@@ -478,7 +478,10 @@ public class Call(
             val index = current.indexOfFirst { it.id == userId }
 
             if (index != -1) {
-                val updatedUser = current[index].copy(audioLevel = level)
+                val updatedUser = current[index].copy(
+                    audioLevel = level.audioLevel,
+                    isSpeaking = level.isSpeaking
+                )
                 current.removeAt(index)
                 current.add(index, updatedUser)
             }
@@ -497,7 +500,7 @@ public class Call(
         val qualityMap = updates.associateBy { it.session_id }
 
         val current = _callParticipants.value
-        current.map { user ->
+        val updated = current.map { user ->
             val qualityInfo = qualityMap[user.sessionId]
 
             if (qualityInfo != null) {
@@ -506,5 +509,7 @@ public class Call(
                 user
             }
         }
+
+        _callParticipants.value = updated
     }
 }

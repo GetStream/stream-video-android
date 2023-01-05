@@ -140,6 +140,11 @@ message CreateCallInput {
   repeated MemberInput members = 2;
   // Ringing option, used to signal to clients' UI
   optional bool ring = 3;
+  // The user that creating this call, only needed if the call is created server-side
+  oneof created_by {
+    string user_id = 4;
+    user_v1.UserInput user = 5;
+  };
 }
 
 // A request message for GetOrCreateCall endpoint
