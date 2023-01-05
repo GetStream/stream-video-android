@@ -458,7 +458,7 @@ internal class CallClientImpl(
                     callState.participants.map {
                         val user =
                             userQueryResult.data.firstOrNull { user -> user.id == it.user_id }
-                        val isLocal = it.user_id == getCurrentUserId()
+                        val isLocal = it.session_id == sessionId
 
                         CallParticipantState(
                             id = it.user_id,
@@ -694,7 +694,7 @@ internal class CallClientImpl(
 
         if (userQueryResult is Success) {
             val user = userQueryResult.data.first()
-            val isLocal = user.id == getCurrentUserId()
+            val isLocal = event.participant.session_id == sessionId
 
             call?.addParticipant(
                 CallParticipantState(
@@ -705,7 +705,6 @@ internal class CallClientImpl(
                     sessionId = event.participant.session_id,
                     idPrefix = event.participant.track_lookup_prefix,
                     isLocal = isLocal,
-                    isOnline = !isLocal
                 )
             )
         }
