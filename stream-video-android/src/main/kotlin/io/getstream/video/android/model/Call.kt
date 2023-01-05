@@ -263,7 +263,6 @@ public class Call(
     }
 
     internal fun setParticipants(participants: List<CallParticipantState>) {
-        this._callParticipants.value
         this._callParticipants.value = participants
         logger.d { "[setParticipants] #sfu; allParticipants: ${_callParticipants.value}" }
 
