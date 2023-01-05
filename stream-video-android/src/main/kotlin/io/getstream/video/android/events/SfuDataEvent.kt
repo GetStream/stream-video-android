@@ -18,8 +18,9 @@ package io.getstream.video.android.events
 
 import io.getstream.video.android.model.StreamCallCid
 import stream.video.sfu.event.ChangePublishQuality
+import stream.video.sfu.event.ConnectionQualityInfo
 import stream.video.sfu.models.CallState
-import stream.video.sfu.models.ConnectionQuality
+import stream.video.sfu.models.Error
 import stream.video.sfu.models.Participant
 import stream.video.sfu.models.PeerType
 import stream.video.sfu.models.TrackType
@@ -41,8 +42,7 @@ public data class PublisherAnswerEvent(
 ) : SfuDataEvent()
 
 public data class ConnectionQualityChangeEvent(
-    val userId: String,
-    val connectionQuality: ConnectionQuality,
+    val updates: List<ConnectionQualityInfo>
 ) : SfuDataEvent()
 
 public data class AudioLevelChangedEvent(
@@ -88,3 +88,5 @@ public object HealthCheckResponseEvent : SfuDataEvent()
 public data class JoinCallResponseEvent(
     val callState: CallState
 ) : SfuDataEvent()
+
+public data class ErrorEvent(val error: Error?) : SfuDataEvent()

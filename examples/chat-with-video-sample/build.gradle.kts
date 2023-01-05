@@ -51,12 +51,15 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+
+    lint {
+        baseline = file("lint-baseline.xml")
+    }
 }
 
 dependencies {
     implementation(project(":stream-video-android"))
     implementation(project(":stream-video-android-compose"))
-    implementation(project(":stream-video-android-pushprovider-firebase"))
 
     implementation(Dependencies.androidxCore)
     implementation(Dependencies.androidxAppcompat)

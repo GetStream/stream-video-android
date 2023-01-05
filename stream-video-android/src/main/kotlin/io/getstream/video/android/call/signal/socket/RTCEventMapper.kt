@@ -20,6 +20,7 @@ import io.getstream.video.android.events.AudioLevelChangedEvent
 import io.getstream.video.android.events.ChangePublishQualityEvent
 import io.getstream.video.android.events.ConnectionQualityChangeEvent
 import io.getstream.video.android.events.DominantSpeakerChangedEvent
+import io.getstream.video.android.events.ErrorEvent
 import io.getstream.video.android.events.HealthCheckResponseEvent
 import io.getstream.video.android.events.ICETrickleEvent
 import io.getstream.video.android.events.JoinCallResponseEvent
@@ -42,10 +43,7 @@ public object RTCEventMapper {
             }
 
             event.connection_quality_changed != null -> with(event.connection_quality_changed) {
-                ConnectionQualityChangeEvent(
-                    user_id,
-                    connection_quality
-                )
+                ConnectionQualityChangeEvent(updates = connection_quality_updates)
             }
             event.audio_level_changed != null -> AudioLevelChangedEvent(
                 event.audio_level_changed.audio_levels.associate { it.user_id to it.level }
@@ -82,6 +80,8 @@ public object RTCEventMapper {
             event.ice_trickle != null -> with(event.ice_trickle) {
                 ICETrickleEvent(ice_candidate, peer_type)
             }
+            event.error != null -> ErrorEvent(event.error.error)
+
             else -> throw IllegalStateException("Unknown event")
         }
     }

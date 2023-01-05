@@ -42,7 +42,6 @@ import io.getstream.video.android.viewmodel.CallViewModel
  * @param viewModel The [CallViewModel] used to provide state and various handlers in the call.
  * @param modifier Modifier for styling.
  * @param onBackPressed Handler when the user taps on the back button.
- * @param onCallInfoSelected Handler when the call participants info is selected.
  * @param onCallAction Handler used when the user interacts with Call UI.
  */
 @Composable
@@ -50,7 +49,6 @@ public fun IncomingCallContent(
     viewModel: CallViewModel,
     modifier: Modifier = Modifier,
     onBackPressed: () -> Unit,
-    onCallInfoSelected: () -> Unit = viewModel::showCallInfo,
     onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
 ) {
     val callType: CallType by viewModel.callType.collectAsState()
@@ -58,12 +56,11 @@ public fun IncomingCallContent(
     val callMediaState: CallMediaState by viewModel.callMediaState.collectAsState()
 
     IncomingCall(
-        modifier = modifier,
         participants = participants,
-        isVideoEnabled = callMediaState.isCameraEnabled,
         callType = callType,
+        isVideoEnabled = callMediaState.isCameraEnabled,
+        modifier = modifier,
         onBackPressed = onBackPressed,
-        onCallInfoSelected = onCallInfoSelected,
         onCallAction = onCallAction
     )
 }
@@ -76,8 +73,8 @@ public fun IncomingCallContent(
  * @param callType The type of call, Audio or Video.
  * @param isVideoEnabled Whether the video should be enabled when entering the call or not.
  * @param modifier Modifier for styling.
+ * @param showHeader If the app bar header is shown or not.
  * @param onBackPressed Handler when the user taps on the back button.
- * @param onCallInfoSelected Handler when the call participants info is selected.
  * @param onCallAction Handler used when the user interacts with Call UI.
  */
 @Composable
@@ -86,8 +83,8 @@ public fun IncomingCall(
     callType: CallType,
     isVideoEnabled: Boolean,
     modifier: Modifier = Modifier,
+    showHeader: Boolean = true,
     onBackPressed: () -> Unit,
-    onCallInfoSelected: () -> Unit,
     onCallAction: (CallAction) -> Unit,
 ) {
     CallBackground(
@@ -98,7 +95,12 @@ public fun IncomingCall(
     ) {
         Column {
 
-            CallAppBar(onBackPressed = onBackPressed, onCallInfoSelected = onCallInfoSelected)
+            if (showHeader) {
+                CallAppBar(
+                    onBackPressed = onBackPressed,
+                    onCallAction = onCallAction
+                )
+            }
 
             val topPadding = if (participants.size == 1) {
                 VideoTheme.dimens.singleAvatarAppbarPadding
@@ -142,11 +144,9 @@ private fun IncomingCallPreview() {
                     teams = emptyList()
                 )
             },
-            isVideoEnabled = false,
             callType = CallType.VIDEO,
-            onCallAction = {},
-            onBackPressed = {},
-            onCallInfoSelected = {}
-        )
+            isVideoEnabled = false,
+            onBackPressed = {}
+        ) {}
     }
 }

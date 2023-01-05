@@ -34,7 +34,7 @@ class FakeUsersProvider : UsersProvider {
                 name = "Vasil Valkanov",
                 role = "admin",
                 imageUrl = "https://payner.bg/images/uploads/Artist_images/VASIL_VALKANOV.jpg",
-                token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci92YXNpbCIsImlhdCI6MTY2OTIwMDMyNiwidXNlcl9pZCI6InZhc2lsIn0.ko8cIAZQyy1RZXt6fN6pYkqG6XJxmeNfT9qzHcABF-Q",
+                token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tZ28tY2xpZW50LTAuMC4xIiwic3ViIjoidXNlci92YXNpbCIsImlhdCI6MTY3MDkyOTk4MSwidXNlcl9pZCI6InZhc2lsIn0.YlbxW8zCgTPDUe_rofCta2eKubF-Km5xqsJi_geDsv0",
                 extraData = mapOf(
                     "chatToken" to "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidmFzaWwifQ.7xb2ns3CWqX1XpYwJy89OHyARuIvouISpEoUTRwvZGg"
                 ),
@@ -45,7 +45,7 @@ class FakeUsersProvider : UsersProvider {
                 name = "Veselin Marinov",
                 role = "admin",
                 imageUrl = "https://payner.bg/images/uploads/Artist_images/Veselin_Marinov_2021-08-04.jpg",
-                token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci92ZXNlbGluIiwiaWF0IjoxNjY5MjAwMzUwLCJ1c2VyX2lkIjoidmVzZWxpbiJ9.ytKhF1t66ur8lqQKizd3x6-pKTs9KIAYHRjJbpZ1Sig",
+                token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tZ28tY2xpZW50LTAuMC4xIiwic3ViIjoidXNlci92ZXNlbGluIiwiaWF0IjoxNjcwOTI5OTk4LCJ1c2VyX2lkIjoidmVzZWxpbiJ9.-scF4--7n3NGRE3wj5vfj7bJ4n5aWcYKdVg5uSqVNGc",
                 extraData = mapOf(
                     "chatToken" to "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidmVzZWxpbiJ9.8WJIIBHinLz80cSi_qy-xj45rT60nGdCBmarW7KEGeU"
                 ),
@@ -56,7 +56,7 @@ class FakeUsersProvider : UsersProvider {
                 name = "Valia",
                 role = "admin",
                 imageUrl = "https://payner.bg/images/uploads/Artist_images/Valia_-_Site_April.jpg",
-                token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci92YWxpYSIsImlhdCI6MTY2OTIwMDM3MiwidXNlcl9pZCI6InZhbGlhIn0.9INmMZxU2QDn5_ryJPAwPPvJCnMkTdkJL63y_tJPoUc",
+                token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tZ28tY2xpZW50LTAuMC4xIiwic3ViIjoidXNlci92YWxpYSIsImlhdCI6MTY3MDkzMDAxNywidXNlcl9pZCI6InZhbGlhIn0.SMz_Dggqf8ppxov3rjZtcs88v4FmKits0shVTfyObUQ",
                 extraData = mapOf(
                     "chatToken" to "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidmFsaWEifQ.MCm5GWwNeqOWdXnAReXt_9v7nIH7Xg6c94uBg1dxMOk"
                 ),
@@ -67,7 +67,7 @@ class FakeUsersProvider : UsersProvider {
                 name = "Damjan Popov",
                 role = "admin",
                 imageUrl = "https://payner.bg/images/uploads/Artist_images/DAMYAN_POPOV.jpg",
-                token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci9kYW1qYW4iLCJpYXQiOjE2NjkyMDAzOTMsInVzZXJfaWQiOiJkYW1qYW4ifQ.O0B6ffvEr-9FZqwhIiUr_IIYIWhxAVvQYTsuWa_VaTE",
+                token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tZ28tY2xpZW50LTAuMC4xIiwic3ViIjoidXNlci9kYW1qYW4iLCJpYXQiOjE2NzA5MzAwMzMsInVzZXJfaWQiOiJkYW1qYW4ifQ.ECGyzMLH1ZQEaWiM7iyGsdh3bdubcJRXwGBLZlYJlXM",
                 extraData = mapOf(
                     "chatToken" to "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiZGFtamFuIn0.BSeX6DPXC3YfVjHAf8gzl2hJ532DFmrJEhqT3pFLY3c"
                 ),
@@ -78,7 +78,7 @@ class FakeUsersProvider : UsersProvider {
                 name = "Jordan",
                 role = "admin",
                 imageUrl = "https://payner.bg/images/uploads/Artist_images/DJORDAN_-_SEPT_-_2022.jpg",
-                token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci9qb3JkYW4iLCJpYXQiOjE2NjkyMDA0MDgsInVzZXJfaWQiOiJqb3JkYW4ifQ.CRgu0wBtluXo7awRNzkim5zEklLKou2UXXv3BIelcVw",
+                token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tZ28tY2xpZW50LTAuMC4xIiwic3ViIjoidXNlci9qb3JkYW4iLCJpYXQiOjE2NzA5MzAwNTIsInVzZXJfaWQiOiJqb3JkYW4ifQ.reRIu94p1nJnR-487zC3ySEFeV1Er7hK3I-1b13mIyA",
                 extraData = mapOf(
                     "chatToken" to "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiam9yZGFuIn0.wwqn1Y2rwcDlO4-U3pmurIpK6CrIT0TQFvI4XovER88"
                 ),
@@ -89,7 +89,7 @@ class FakeUsersProvider : UsersProvider {
                 name = "Ina Garjadi",
                 role = "admin",
                 imageUrl = "https://payner.bg/images/uploads/Artist_images/INA_GAYARDI_-_PAYNER_-_OCTOBER_-_2022.jpg",
-                token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci9pbmEiLCJpYXQiOjE2NjkyMDA0MjAsInVzZXJfaWQiOiJpbmEifQ.lXeBykboLPuqIH8WWQh-xp4jlkwxQ4V9IGpzbLh0R5M",
+                token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tZ28tY2xpZW50LTAuMC4xIiwic3ViIjoidXNlci9pbmEiLCJpYXQiOjE2NzA5MzAwNjQsInVzZXJfaWQiOiJpbmEifQ.FTVAMAWsKoO413lPIIzgbHsxrM-q-I5OO_bEYoeDfYo",
                 extraData = mapOf(
                     "chatToken" to "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiaW5hIn0.3mTkk94zpzGbSHdkRXb_UHqboTq06WZ5zqDH8xtgyyg"
                 ),

@@ -17,52 +17,73 @@
 package io.getstream.video.android.compose.ui.components.participants
 
 import android.view.View
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import io.getstream.video.android.compose.ui.components.participants.internal.Participants
+import androidx.compose.ui.unit.dp
+import io.getstream.video.android.call.state.CallAction
+import io.getstream.video.android.call.state.CallMediaState
 import io.getstream.video.android.model.Call
+import io.getstream.video.android.model.state.StreamCallState
 
 /**
  * Renders all the CallParticipants, based on the number of people in a call and the call state.
+ * Also takes into account if there are any screen sharing sessions active and adjusts the UI
+ * accordingly.
  *
  * @param call The call that contains all the participants state and tracks.
+ * @param onCallAction Handler when the user triggers a Call Control Action.
+ * @param callMediaState The state of the call media, such as audio, video.
+ * @param callState The state of the call itself.
  * @param modifier Modifier for styling.
+ * @param paddingValues Padding within the parent.
+ * @param isFullscreen If we're rendering a full screen activity.
  * @param onRender Handler when each of the Video views render their first frame.
+ * @param onBackPressed Handler when the user taps back.
  */
 @Composable
 public fun CallParticipants(
     call: Call,
+    onCallAction: (CallAction) -> Unit,
+    callMediaState: CallMediaState,
+    callState: StreamCallState,
     modifier: Modifier = Modifier,
-    onRender: (View) -> Unit = {}
+    paddingValues: PaddingValues = PaddingValues(0.dp),
+    isFullscreen: Boolean = false,
+    onRender: (View) -> Unit = {},
+    onBackPressed: () -> Unit = {}
 ) {
-    Box(modifier = modifier) {
-        Participants(
-            modifier = Modifier.fillMaxSize(),
-            call = call,
-            onRender = onRender
-        )
+    val screenSharingSessions by call.screenSharingSessions.collectAsState(initial = emptyList())
 
-//        val localParticipantState by room.localParticipant.collectAsState(initial = null)
-//        val currentLocal = localParticipantState
-//
-//        if (currentLocal != null) { // TODO - fix once we import correct Surface views
-//            FloatingParticipantItem(
-//                room = room,
-//                callParticipant = currentLocal,
-//                modifier = Modifier
-//                    .align(Alignment.TopEnd)
-//                    .size(height = 150.dp, width = 125.dp)
-//                    .padding(16.dp)
-//                    .clip(RoundedCornerShape(16.dp)),
-//                onRender = {
-//                    (it as? SurfaceViewRenderer)?.apply {
-//                        setZOrderOnTop(true)
-//                        setZOrderMediaOverlay(true)
-//                    }
-//                }
-//            )
-//        }
+    val screenSharing = screenSharingSessions.firstOrNull()
+
+    if (screenSharing == null) {
+        RegularCallParticipantsContent(
+            call = call,
+            modifier = modifier,
+            paddingValues = paddingValues,
+            onRender = onRender,
+            onCallAction = onCallAction,
+            onBackPressed = onBackPressed,
+            callMediaState = callMediaState,
+            callState = callState
+        )
+    } else {
+        val participants by call.callParticipants.collectAsState()
+
+        ScreenSharingCallParticipantsContent(
+            call = call,
+            session = screenSharing,
+            participants = participants,
+            modifier = modifier,
+            paddingValues = paddingValues,
+            onRender = onRender,
+            isFullscreen = isFullscreen,
+            onCallAction = onCallAction,
+            callMediaState = callMediaState,
+            onBackPressed = onBackPressed
+        )
     }
 }

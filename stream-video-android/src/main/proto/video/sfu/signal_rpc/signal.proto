@@ -24,20 +24,21 @@ service SignalServer {
   // TODO: sync subscriptions based on this + update tracks using the dimension info sent by the user
   rpc UpdateSubscriptions(UpdateSubscriptionsRequest) returns (UpdateSubscriptionsResponse);
 
-  rpc UpdateMuteState(UpdateMuteStateRequest) returns (UpdateMuteStateResponse);
+  rpc UpdateMuteStates(UpdateMuteStatesRequest) returns (UpdateMuteStatesResponse);
 }
 
-
-message UpdateMuteStateRequest{
+message UpdateMuteStatesRequest{
   string session_id = 1;
-  oneof mute {
-    AudioMuteChanged  audio_mute_changed = 2;
-    VideoMuteChanged  video_mute_changed = 3;
-  }
+  repeated TrackMuteState mute_states= 3;
 }
 
-message UpdateMuteStateResponse{
+message UpdateMuteStatesResponse{
+  models.Error error = 4;
+}
 
+message TrackMuteState{
+  models.TrackType track_type = 1;
+  bool muted = 2;
 }
 
 message AudioMuteChanged {
@@ -53,6 +54,10 @@ message UpdateSubscriptionsRequest {
   repeated TrackSubscriptionDetails tracks = 3;
 }
 
+message UpdateSubscriptionsResponse {
+  models.Error error = 4;
+}
+
 message TrackSubscriptionDetails {
   string user_id = 1;
   string session_id = 2;
@@ -63,30 +68,29 @@ message TrackSubscriptionDetails {
 message SendAnswerRequest {
   stream.video.sfu.models.PeerType peer_type = 1;
   string sdp = 2;
-  string session_id = 4;
+  string session_id = 3;
 }
 
 message SendAnswerResponse {
-
+  models.Error error = 4;
 }
 
 message ICETrickleResponse{
-
+  models.Error error = 4;
 }
 
-message UpdateSubscriptionsResponse {
-}
 
 message SetPublisherRequest {
   // sdp offer
   string sdp = 1;
-  string session_id = 3;
-  repeated models.TrackInfo tracks = 5;
+  string session_id = 2;
+  repeated models.TrackInfo tracks = 3;
 }
 
 message SetPublisherResponse {
   // sdp answer
   string sdp = 1;
-  string session_id = 3;
-  bool ice_restart = 4;
+  string session_id = 2;
+  bool ice_restart = 3;
+  models.Error error = 4;
 }

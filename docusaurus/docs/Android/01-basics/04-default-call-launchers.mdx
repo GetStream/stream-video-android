@@ -1,0 +1,92 @@
+## Using Default Call Launchers
+
+When receiving push notifications and socket events, our [Call Engine](../02-guides/03-call-engine.mdx) processes the data and prepares different states for you to consume.
+
+Most commonly, this state can be used to show Incoming and Outgoing call UI. But you can also show persistent notification banners and similar features to your users, to notify them of the call state.
+
+Since there are many different states and events, manually processing them can be tedious and it's why we've prepared an out-of-the-box way for you to show the required UI based on the state, through our `CallAndroidInput`s and abstract `Activity` and `Service` constructs.
+
+Let's see how to implement them.
+
+### Implementing AbstractCallActivity & AbstractCallService
+
+Video calls require a lot of internal state management. You need to be aware of user permissions, call state, background and foreground modes as well as orientation. That's why we provide these two constructs:
+
+* `AbstractComposeCallActivity`: Fully featured wrapper for a Call, that handles Incoming, Outgoing and Active call states, as well as things like Picture-in-Picture mode, orientation changes and similar.
+
+  > **Note**: This Activity has an XML counterpart, called `AbstractCallActivity`. 
+
+* `AbstractStreamCallService`: Represents an out of the box handler that shows a notification banner when receiving or joining a call. It allows you to persist a call in the background, or to cancel/leave the call using its action.
+
+These two classes have a lot of behavior baked into them, to make it easier and faster for you to integrate a full Video experience, with the least amount of code possible. To implement them, you have to do the following:
+
+```kotlin
+class CallActivity : AbstractComposeCallActivity() {
+
+    override fun getStreamVideo(context: Context): StreamVideo =
+      // TODO Fetch your StreamVideo instance
+}
+
+class CallService : AbstractStreamCallService() {
+
+    override fun getStreamVideo(context: Context): StreamVideo =
+      // TODO Fetch your StreamVideo instance
+    }
+}
+```
+
+The implementation is very simple. All you have to do is provide an instance of `StreamVideo` that you initialize and use in your app. This is used to set up the state observation under the hood and trigger different API calls like accepting or rejecting a Call, based on the user input.
+
+Once you have these two classes implemented, you need to define them in your `AndroidManifest`:
+
+```xml
+<activity
+    android:name=".CallActivity"
+    android:exported="false"
+/>
+
+<service
+    android:name=".CallService"
+    android:enabled="true"
+    android:exported="false"
+/>
+```
+
+> **Note**: You'll have to add more attributes to `CallActivity` if you follow our [Picture-in-Picture mode](TODO) guide or if you want custom handling for configuration changes, but this is enough for it to work.
+
+Now that you have both the `Service` and the `Activity` declared, you're able to start both using our `CallAndroidInput`s.
+
+### Providing CallAndroidInput to StreamVideo
+
+The second part of our default integration is to give `StreamVideo` and its `StreamCallEngine` a way to start the `Activity` and `Service` you created. You can do that by simply providing a list of `CallAndroidInput`s, like so:
+
+```kotlin
+fun initializeStreamVideo(
+    credentialsProvider: CredentialsProvider,
+    loggingLevel: LoggingLevel
+): StreamVideo {
+    return StreamVideoBuilder(
+        context = this,
+        credentialsProvider = credentialsProvider,
+        loggingLevel = loggingLevel,
+        androidInputs = setOf( // here
+            CallServiceInput.from(CallService::class),
+            CallActivityInput.from(CallActivity::class),
+        )
+    ).build()
+}
+```
+
+As you have these two components declared in the manifest, you can create our `CallAndroidInput`s using `CallServiceInput.from(serviceClass)` and `CallActivityInput.from(activityClass)`.
+
+This is all you need to fully implement our default behavior, which allows for a quick and easy integration of Video calling in your apps. There are several things that are automatically integrated now:
+
+* When you **receive ringing calls**, you'll show incoming call UI and its actions.
+* When you **create a ringing call**, you'll show outgoing call UI and its actions.
+* Whenever there's a started call state (Incoming, Outgoing, Active), you'll show a persistent notification that allows the call to **work in the background**.
+* If you trigger the notification action, you'll leave/cancel the call.
+
+Feel free to continue exploring our guides for further integration. If you're using our default input from this guide, check out the following:
+
+* [Push notification guide](../05-advanced/02-push-notifications.mdx) - It pairs well with default inputs, because it further automates the notification handling.
+* [Deep linking guide](../05-advanced/01-deeplinking.mdx) - Similar to push notifications, deep linking is another way to immediately start a call from an event, like clicking on a call link.

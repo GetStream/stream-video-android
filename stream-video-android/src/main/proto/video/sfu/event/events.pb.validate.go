@@ -466,6 +466,37 @@ func (m *SfuEvent) validate(all bool) error {
 			}
 		}
 
+	case *SfuEvent_Error:
+
+		if all {
+			switch v := interface{}(m.GetError()).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, SfuEventValidationError{
+						field:  "Error",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, SfuEventValidationError{
+						field:  "Error",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(m.GetError()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return SfuEventValidationError{
+					field:  "Error",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
 	}
 
 	if len(errors) > 0 {
@@ -544,6 +575,133 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = SfuEventValidationError{}
+
+// Validate checks the field values on Error with the rules defined in the
+// proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *Error) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on Error with the rules defined in the
+// proto definition for this message. If any rules are violated, the result is
+// a list of violation errors wrapped in ErrorMultiError, or nil if none found.
+func (m *Error) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *Error) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetError()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, ErrorValidationError{
+					field:  "Error",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, ErrorValidationError{
+					field:  "Error",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetError()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return ErrorValidationError{
+				field:  "Error",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return ErrorMultiError(errors)
+	}
+
+	return nil
+}
+
+// ErrorMultiError is an error wrapping multiple validation errors returned by
+// Error.ValidateAll() if the designated constraints aren't met.
+type ErrorMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ErrorMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ErrorMultiError) AllErrors() []error { return m }
+
+// ErrorValidationError is the validation error returned by Error.Validate if
+// the designated constraints aren't met.
+type ErrorValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ErrorValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ErrorValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ErrorValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ErrorValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ErrorValidationError) ErrorName() string { return "ErrorValidationError" }
+
+// Error satisfies the builtin error interface
+func (e ErrorValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sError.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ErrorValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ErrorValidationError{}
 
 // Validate checks the field values on ICETrickle with the rules defined in the
 // proto definition for this message. If any rules are violated, the first
@@ -1954,11 +2112,39 @@ func (m *ConnectionQualityChanged) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for UserId
+	for idx, item := range m.GetConnectionQualityUpdates() {
+		_, _ = idx, item
 
-	// no validation rules for SessionId
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, ConnectionQualityChangedValidationError{
+						field:  fmt.Sprintf("ConnectionQualityUpdates[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, ConnectionQualityChangedValidationError{
+						field:  fmt.Sprintf("ConnectionQualityUpdates[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return ConnectionQualityChangedValidationError{
+					field:  fmt.Sprintf("ConnectionQualityUpdates[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
 
-	// no validation rules for ConnectionQuality
+	}
 
 	if len(errors) > 0 {
 		return ConnectionQualityChangedMultiError(errors)
@@ -2039,6 +2225,114 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = ConnectionQualityChangedValidationError{}
+
+// Validate checks the field values on ConnectionQualityInfo with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ConnectionQualityInfo) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ConnectionQualityInfo with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ConnectionQualityInfoMultiError, or nil if none found.
+func (m *ConnectionQualityInfo) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ConnectionQualityInfo) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for UserId
+
+	// no validation rules for SessionId
+
+	// no validation rules for ConnectionQuality
+
+	if len(errors) > 0 {
+		return ConnectionQualityInfoMultiError(errors)
+	}
+
+	return nil
+}
+
+// ConnectionQualityInfoMultiError is an error wrapping multiple validation
+// errors returned by ConnectionQualityInfo.ValidateAll() if the designated
+// constraints aren't met.
+type ConnectionQualityInfoMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ConnectionQualityInfoMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ConnectionQualityInfoMultiError) AllErrors() []error { return m }
+
+// ConnectionQualityInfoValidationError is the validation error returned by
+// ConnectionQualityInfo.Validate if the designated constraints aren't met.
+type ConnectionQualityInfoValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ConnectionQualityInfoValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ConnectionQualityInfoValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ConnectionQualityInfoValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ConnectionQualityInfoValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ConnectionQualityInfoValidationError) ErrorName() string {
+	return "ConnectionQualityInfoValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ConnectionQualityInfoValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sConnectionQualityInfo.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ConnectionQualityInfoValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ConnectionQualityInfoValidationError{}
 
 // Validate checks the field values on DominantSpeakerChanged with the rules
 // defined in the proto definition for this message. If any rules are

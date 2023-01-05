@@ -59,6 +59,10 @@ func (m *StartBroadcastRequest) validate(all bool) error {
 
 	// no validation rules for AppPk
 
+	// no validation rules for ApiKey
+
+	// no validation rules for Token
+
 	// no validation rules for CallType
 
 	// no validation rules for CallId
@@ -478,6 +482,10 @@ func (m *StartRecordingRequest) validate(all bool) error {
 	var errors []error
 
 	// no validation rules for AppPk
+
+	// no validation rules for ApiKey
+
+	// no validation rules for Token
 
 	// no validation rules for CallType
 

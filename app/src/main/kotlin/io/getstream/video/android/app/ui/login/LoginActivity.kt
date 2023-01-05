@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.app.ui.login
 
-import android.content.IntentFilter
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
@@ -36,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.app.VideoApp
 import io.getstream.video.android.app.ui.components.UserList
 import io.getstream.video.android.app.ui.home.HomeActivity
 import io.getstream.video.android.app.user.AppUser
@@ -44,8 +44,6 @@ import io.getstream.video.android.app.videoApp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.model.User
-import io.getstream.video.android.pushprovider.firebase.CallNotificationReceiver
-import io.getstream.video.android.pushprovider.firebase.CallNotificationReceiver.Companion.ACTION_CALL
 import io.getstream.video.android.token.AuthCredentialsProvider
 
 class LoginActivity : AppCompatActivity() {
@@ -64,11 +62,6 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        registerReceiver(
-            CallNotificationReceiver(),
-            IntentFilter(ACTION_CALL)
-        )
-
         checkIfUserLoggedIn()
 
         setContent {
@@ -140,8 +133,7 @@ class LoginActivity : AppCompatActivity() {
         videoApp.initializeStreamVideo(
             credentialsProvider = AuthCredentialsProvider(
                 user = selectedUser,
-                apiKey = "key1",
-                userToken = selectedUser.token
+                apiKey = VideoApp.API_KEY,
             ),
             loggingLevel = LoggingLevel.BODY
         )

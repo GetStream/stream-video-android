@@ -43,6 +43,7 @@ import io.getstream.video.android.errors.VideoError
 import io.getstream.video.android.events.AudioLevelChangedEvent
 import io.getstream.video.android.events.ChangePublishQualityEvent
 import io.getstream.video.android.events.ConnectedEvent
+import io.getstream.video.android.events.ConnectionQualityChangeEvent
 import io.getstream.video.android.events.ICETrickleEvent
 import io.getstream.video.android.events.JoinCallResponseEvent
 import io.getstream.video.android.events.ParticipantJoinedEvent
@@ -115,14 +116,13 @@ import stream.video.sfu.models.TrackInfo
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
 import stream.video.sfu.models.VideoLayer
-import stream.video.sfu.signal.AudioMuteChanged
 import stream.video.sfu.signal.SendAnswerRequest
 import stream.video.sfu.signal.SetPublisherRequest
+import stream.video.sfu.signal.TrackMuteState
 import stream.video.sfu.signal.TrackSubscriptionDetails
-import stream.video.sfu.signal.UpdateMuteStateRequest
-import stream.video.sfu.signal.UpdateMuteStateResponse
+import stream.video.sfu.signal.UpdateMuteStatesRequest
+import stream.video.sfu.signal.UpdateMuteStatesResponse
 import stream.video.sfu.signal.UpdateSubscriptionsRequest
-import stream.video.sfu.signal.VideoMuteChanged
 import kotlin.math.absoluteValue
 import kotlin.random.Random
 
@@ -282,8 +282,14 @@ internal class CallClientImpl(
             if (!isCapturingVideo && isEnabled) {
                 startCapturingLocalVideo(CameraMetadata.LENS_FACING_FRONT)
             }
-            val request = UpdateMuteStateRequest(
-                sessionId, video_mute_changed = VideoMuteChanged(muted = !isEnabled)
+            val request = UpdateMuteStatesRequest(
+                session_id = sessionId,
+                mute_states = listOf(
+                    TrackMuteState(
+                        track_type = TrackType.TRACK_TYPE_VIDEO,
+                        muted = !isEnabled
+                    )
+                ),
             )
 
             updateMuteState(request).onSuccessSuspend {
@@ -306,9 +312,14 @@ internal class CallClientImpl(
 
             setupAudioTrack()
 
-            val request = UpdateMuteStateRequest(
-                sessionId,
-                audio_mute_changed = AudioMuteChanged(muted = !isEnabled),
+            val request = UpdateMuteStatesRequest(
+                session_id = sessionId,
+                mute_states = listOf(
+                    TrackMuteState(
+                        track_type = TrackType.TRACK_TYPE_AUDIO,
+                        muted = !isEnabled
+                    )
+                ),
             )
 
             updateMuteState(request).onSuccessSuspend {
@@ -335,7 +346,7 @@ internal class CallClientImpl(
         }
     }
 
-    private suspend fun updateMuteState(muteStateRequest: UpdateMuteStateRequest): Result<UpdateMuteStateResponse> {
+    private suspend fun updateMuteState(muteStateRequest: UpdateMuteStatesRequest): Result<UpdateMuteStatesResponse> {
         return sfuClient.updateMuteState(muteStateRequest)
     }
 
@@ -443,20 +454,19 @@ internal class CallClientImpl(
             )
 
             if (userQueryResult is Success) {
-                val participantsMap = callState.participants.associateBy { it.user_id }
-
                 call?.setParticipants(
-                    userQueryResult.data.map {
-                        val participant = participantsMap[it.id]
-                        val isLocal = it.id == getCurrentUserId()
+                    callState.participants.map {
+                        val user =
+                            userQueryResult.data.firstOrNull { user -> user.id == it.user_id }
+                        val isLocal = it.user_id == getCurrentUserId()
 
                         CallParticipantState(
-                            id = it.id,
-                            role = it.role,
-                            name = it.name,
-                            profileImageURL = it.imageUrl,
-                            sessionId = participant?.session_id ?: "",
-                            idPrefix = participant?.track_lookup_prefix ?: "",
+                            id = it.user_id,
+                            role = user?.role ?: "",
+                            name = user?.name ?: "",
+                            profileImageURL = user?.imageUrl,
+                            sessionId = it.session_id,
+                            idPrefix = it.track_lookup_prefix,
                             isLocal = isLocal,
                             isOnline = !isLocal
                         )
@@ -513,7 +523,6 @@ internal class CallClientImpl(
             type = StreamPeerType.SUBSCRIBER,
             mediaConstraints = mediaConstraints,
             onStreamAdded = { call?.addStream(it) }, // addTrack
-            onStreamRemoved = { call?.removeStream(it) },
             onIceCandidateRequest = ::sendIceCandidate
         ).also {
             logger.i { "[createSubscriber] #sfu; subscriber: $it" }
@@ -661,6 +670,7 @@ internal class CallClientImpl(
                 is ChangePublishQualityEvent -> {
                     // updatePublishQuality(event) -> TODO - re-enable once we send the proper quality (dimensions)
                 }
+                is ConnectionQualityChangeEvent -> call?.updateConnectionQuality(event.updates)
                 is AudioLevelChangedEvent -> call?.updateAudioLevel(event)
                 is TrackPublishedEvent -> {
                     call?.updateMuteState(event.userId, event.sessionId, event.trackType, true)
@@ -969,6 +979,7 @@ internal class CallClientImpl(
                 val dimension = VideoDimension(
                     width = user.videoTrackSize.first, height = user.videoTrackSize.second
                 )
+                logger.d { "[updateParticipantsSubscriptions] #sfu; user.id: ${user.id}, dimension: $dimension" }
                 subscriptions[user] = dimension
             }
         }
@@ -1001,6 +1012,7 @@ internal class CallClientImpl(
                 )
             }
         )
+        logger.d { "[updateParticipantsSubscriptions] #sfu; request: $request" }
 
         coroutineScope.launch {
             when (val result = sfuClient.updateSubscriptions(request)) {

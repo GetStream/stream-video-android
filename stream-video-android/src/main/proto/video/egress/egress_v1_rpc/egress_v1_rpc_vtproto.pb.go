@@ -53,12 +53,26 @@ func (m *StartBroadcastRequest) MarshalToSizedBufferVT(dAtA []byte) (int, error)
 		copy(dAtA[i:], m.CallId)
 		i = encodeVarint(dAtA, i, uint64(len(m.CallId)))
 		i--
-		dAtA[i] = 0x1a
+		dAtA[i] = 0x2a
 	}
 	if len(m.CallType) > 0 {
 		i -= len(m.CallType)
 		copy(dAtA[i:], m.CallType)
 		i = encodeVarint(dAtA, i, uint64(len(m.CallType)))
+		i--
+		dAtA[i] = 0x22
+	}
+	if len(m.Token) > 0 {
+		i -= len(m.Token)
+		copy(dAtA[i:], m.Token)
+		i = encodeVarint(dAtA, i, uint64(len(m.Token)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.ApiKey) > 0 {
+		i -= len(m.ApiKey)
+		copy(dAtA[i:], m.ApiKey)
+		i = encodeVarint(dAtA, i, uint64(len(m.ApiKey)))
 		i--
 		dAtA[i] = 0x12
 	}
@@ -223,12 +237,26 @@ func (m *StartRecordingRequest) MarshalToSizedBufferVT(dAtA []byte) (int, error)
 		copy(dAtA[i:], m.CallId)
 		i = encodeVarint(dAtA, i, uint64(len(m.CallId)))
 		i--
-		dAtA[i] = 0x1a
+		dAtA[i] = 0x2a
 	}
 	if len(m.CallType) > 0 {
 		i -= len(m.CallType)
 		copy(dAtA[i:], m.CallType)
 		i = encodeVarint(dAtA, i, uint64(len(m.CallType)))
+		i--
+		dAtA[i] = 0x22
+	}
+	if len(m.Token) > 0 {
+		i -= len(m.Token)
+		copy(dAtA[i:], m.Token)
+		i = encodeVarint(dAtA, i, uint64(len(m.Token)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.ApiKey) > 0 {
+		i -= len(m.ApiKey)
+		copy(dAtA[i:], m.ApiKey)
+		i = encodeVarint(dAtA, i, uint64(len(m.ApiKey)))
 		i--
 		dAtA[i] = 0x12
 	}
@@ -378,6 +406,14 @@ func (m *StartBroadcastRequest) SizeVT() (n int) {
 	if m.AppPk != 0 {
 		n += 1 + sov(uint64(m.AppPk))
 	}
+	l = len(m.ApiKey)
+	if l > 0 {
+		n += 1 + l + sov(uint64(l))
+	}
+	l = len(m.Token)
+	if l > 0 {
+		n += 1 + l + sov(uint64(l))
+	}
 	l = len(m.CallType)
 	if l > 0 {
 		n += 1 + l + sov(uint64(l))
@@ -447,6 +483,14 @@ func (m *StartRecordingRequest) SizeVT() (n int) {
 	_ = l
 	if m.AppPk != 0 {
 		n += 1 + sov(uint64(m.AppPk))
+	}
+	l = len(m.ApiKey)
+	if l > 0 {
+		n += 1 + l + sov(uint64(l))
+	}
+	l = len(m.Token)
+	if l > 0 {
+		n += 1 + l + sov(uint64(l))
 	}
 	l = len(m.CallType)
 	if l > 0 {
@@ -565,6 +609,70 @@ func (m *StartBroadcastRequest) UnmarshalVT(dAtA []byte) error {
 			}
 		case 2:
 			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ApiKey", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflow
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLength
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLength
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ApiKey = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Token", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflow
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLength
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLength
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Token = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field CallType", wireType)
 			}
 			var stringLen uint64
@@ -595,7 +703,7 @@ func (m *StartBroadcastRequest) UnmarshalVT(dAtA []byte) error {
 			}
 			m.CallType = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
-		case 3:
+		case 5:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field CallId", wireType)
 			}
@@ -935,6 +1043,70 @@ func (m *StartRecordingRequest) UnmarshalVT(dAtA []byte) error {
 			}
 		case 2:
 			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ApiKey", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflow
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLength
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLength
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ApiKey = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Token", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflow
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLength
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLength
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Token = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field CallType", wireType)
 			}
 			var stringLen uint64
@@ -965,7 +1137,7 @@ func (m *StartRecordingRequest) UnmarshalVT(dAtA []byte) error {
 			}
 			m.CallType = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
-		case 3:
+		case 5:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field CallId", wireType)
 			}

@@ -36,7 +36,8 @@ public data class StreamDimens(
     public val largeButtonSize: Dp,
     public val mediumButtonSize: Dp,
     public val smallButtonSize: Dp,
-    public val topAppbarHeightSize: Dp,
+    public val topAppbarHeight: Dp,
+    public val landscapeTopAppBarHeight: Dp,
     public val avatarAppbarPadding: Dp,
     public val singleAvatarAppbarPadding: Dp,
     public val participantsTextPadding: Dp,
@@ -56,11 +57,17 @@ public data class StreamDimens(
     public val callAppBarTrailingContentSpacingStart: Dp,
     public val callAppBarTrailingContentSpacingEnd: Dp,
     public val callControlButtonSize: Dp,
+    public val landscapeCallControlButtonSize: Dp,
     public val callControlsSheetHeight: Dp,
+    public val landscapeCallControlsSheetWidth: Dp,
     public val callParticipantInfoMenuAppBarHeight: Dp,
     public val callParticipantInfoMenuOptionsHeight: Dp,
     public val callParticipantsInfoMenuOptionsButtonHeight: Dp,
-    public val callParticipantsInfoAvatarSize: Dp
+    public val callParticipantsInfoAvatarSize: Dp,
+    public val floatingVideoPadding: Dp,
+    public val floatingVideoHeight: Dp,
+    public val floatingVideoWidth: Dp,
+    public val screenShareParticipantItemSize: Dp
 ) {
     public companion object {
         /**
@@ -75,7 +82,8 @@ public data class StreamDimens(
             largeButtonSize = 80.dp,
             mediumButtonSize = 64.dp,
             smallButtonSize = 32.dp,
-            topAppbarHeightSize = 64.dp,
+            topAppbarHeight = 64.dp,
+            landscapeTopAppBarHeight = 48.dp,
             avatarAppbarPadding = 100.dp,
             singleAvatarAppbarPadding = 20.dp,
             participantsTextPadding = 65.dp,
@@ -95,11 +103,17 @@ public data class StreamDimens(
             callAppBarTrailingContentSpacingStart = 8.dp,
             callAppBarTrailingContentSpacingEnd = 8.dp,
             callControlButtonSize = 50.dp,
+            landscapeCallControlButtonSize = 45.dp,
             callControlsSheetHeight = 96.dp,
+            landscapeCallControlsSheetWidth = 64.dp,
             callParticipantInfoMenuAppBarHeight = 64.dp,
             callParticipantInfoMenuOptionsHeight = 56.dp,
             callParticipantsInfoMenuOptionsButtonHeight = 40.dp,
-            callParticipantsInfoAvatarSize = 56.dp
+            callParticipantsInfoAvatarSize = 56.dp,
+            floatingVideoPadding = 16.dp,
+            floatingVideoHeight = 150.dp,
+            floatingVideoWidth = 125.dp,
+            screenShareParticipantItemSize = 110.dp
         )
     }
 }

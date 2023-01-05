@@ -25,9 +25,14 @@ message SfuEvent {
     HealthCheckResponse health_check_response = 14;
     TrackPublished track_published = 16;
     TrackUnpublished track_unpublished = 17;
+    Error error = 18;
   }
 }
 
+
+message Error{
+  models.Error error = 4;
+}
 
 message ICETrickle {
   models.PeerType peer_type = 1;
@@ -100,6 +105,10 @@ message PublisherAnswer {
 // ConnectionQuality is sent to inform about connection quality changes
 // eg. thierry's connection is not good -> render a red icon Zoom style
 message ConnectionQualityChanged {
+  repeated ConnectionQualityInfo connection_quality_updates = 1;
+}
+
+message ConnectionQualityInfo {
   string user_id = 1;
   string session_id = 2;
   models.ConnectionQuality connection_quality = 3;

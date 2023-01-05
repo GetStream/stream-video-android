@@ -19,6 +19,8 @@
     <string name="invite_users_message">Are you sure you want to add %1$d new people to the conversation?</string>
     <string name="invite_users_cancel">Cancel</string>
     <string name="invite_users_accept">Invite</string>
+    <string name="change_orientation">Change orientation</string>
+    <string name="toggle_fullscreen">Toggle fullscreen mode</string>
 
     <plurals name="call_participants_info_number_of_participants">
         <item quantity="one">Participant (%d)</item>

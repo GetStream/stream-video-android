@@ -72,14 +72,16 @@ class DeeplinkingActivity : AppCompatActivity() {
     }
 
     private fun logIn() {
-        val user = dogfoodingApp.userPreferences.getCachedCredentials()
+        val userPreferences = dogfoodingApp.userPreferences
+        val user = userPreferences.getCachedCredentials()
+        val apiKey = userPreferences.getCachedApiKey()
+
         if (user != null) {
             logger.d { "[logIn] selectedUser: $user" }
             dogfoodingApp.initializeStreamVideo(
                 credentialsProvider = AuthCredentialsProvider(
                     user = user,
-                    userToken = user.token,
-                    apiKey = "key10"
+                    apiKey = apiKey ?: API_KEY
                 ),
                 loggingLevel = LoggingLevel.BODY
             )

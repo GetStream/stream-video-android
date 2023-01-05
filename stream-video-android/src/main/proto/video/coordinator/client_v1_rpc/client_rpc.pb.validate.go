@@ -1612,11 +1612,11 @@ func (m *CallInput) validate(all bool) error {
 	// no validation rules for CustomJson
 
 	if all {
-		switch v := interface{}(m.GetOptions()).(type) {
+		switch v := interface{}(m.GetSettingsOverrides()).(type) {
 		case interface{ ValidateAll() error }:
 			if err := v.ValidateAll(); err != nil {
 				errors = append(errors, CallInputValidationError{
-					field:  "Options",
+					field:  "SettingsOverrides",
 					reason: "embedded message failed validation",
 					cause:  err,
 				})
@@ -1624,16 +1624,16 @@ func (m *CallInput) validate(all bool) error {
 		case interface{ Validate() error }:
 			if err := v.Validate(); err != nil {
 				errors = append(errors, CallInputValidationError{
-					field:  "Options",
+					field:  "SettingsOverrides",
 					reason: "embedded message failed validation",
 					cause:  err,
 				})
 			}
 		}
-	} else if v, ok := interface{}(m.GetOptions()).(interface{ Validate() error }); ok {
+	} else if v, ok := interface{}(m.GetSettingsOverrides()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
 			return CallInputValidationError{
-				field:  "Options",
+				field:  "SettingsOverrides",
 				reason: "embedded message failed validation",
 				cause:  err,
 			}

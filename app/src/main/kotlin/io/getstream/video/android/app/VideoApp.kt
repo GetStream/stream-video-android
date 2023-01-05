@@ -20,6 +20,7 @@ import android.app.Application
 import android.content.Context
 import io.getstream.log.StreamLog
 import io.getstream.log.android.AndroidStreamLogger
+import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.StreamVideoBuilder
 import io.getstream.video.android.app.ui.call.CallActivity
@@ -77,8 +78,15 @@ class VideoApp : Application() {
         }
     }
 
-    private companion object {
+    fun logOut() {
+        streamVideo.clearCallState()
+        streamVideo.removeDevices(userPreferences.getDevices())
+        userPreferences.clear()
+    }
+
+    companion object {
         private const val TAG = "Call:App"
+        const val API_KEY = "us83cfwuhy8n"
     }
 }
 

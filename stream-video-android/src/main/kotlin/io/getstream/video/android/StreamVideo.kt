@@ -60,6 +60,21 @@ public interface StreamVideo {
     ): Result<Device>
 
     /**
+     * Remove a device used to receive push notifications.
+     *
+     * @param id The ID of the device, previously provided by [createDevice].
+     * @return Result if the operation was successful or not.
+     */
+    public suspend fun deleteDevice(id: String): Result<Unit>
+
+    /**
+     * Removes the given devices from the current user's list of registered push devices.
+     *
+     * @param devices The list of devices to remove.
+     */
+    public fun removeDevices(devices: List<Device>)
+
+    /**
      * Creates a call with given information. You can then use the [CallMetadata] and join it and get auth
      * information to fully connect. This is different from [getOrCreateCall] because if the
      * call already exists, we'll return an error.
@@ -236,4 +251,9 @@ public interface StreamVideo {
      * Cancels outgoing or active call.
      */
     public suspend fun cancelCall(cid: StreamCallCid): Result<Boolean>
+
+    /**
+     * Used to process push notification payloads.
+     */
+    public suspend fun handlePushMessage(payload: Map<String, Any>): Result<Unit>
 }
