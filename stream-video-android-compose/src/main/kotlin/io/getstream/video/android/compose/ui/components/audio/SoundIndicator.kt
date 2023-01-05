@@ -45,9 +45,8 @@ public fun SoundIndicator(
         hasSound && !isSpeaking -> {
             Icon(
                 modifier = modifier
-                    .size(24.dp)
-                    .padding(end = 4.dp)
-                    .padding(vertical = 3.dp),
+                    .size(20.dp)
+                    .padding(end = 4.dp),
                 painter = painterResource(id = R.drawable.ic_mic_on),
                 tint = Color.White,
                 contentDescription = null

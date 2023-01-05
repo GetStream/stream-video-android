@@ -144,6 +144,14 @@ private fun BoxScope.ParticipantLabel(
             ),
         verticalAlignment = CenterVertically,
     ) {
+        SoundIndicator(
+            hasSound = participant.hasAudio,
+            isSpeaking = participant.isSpeaking,
+            modifier = Modifier
+                .align(CenterVertically)
+                .padding(start = 8.dp)
+        )
+
         val name = participant.name.ifEmpty {
             participant.id
         }
@@ -157,12 +165,6 @@ private fun BoxScope.ParticipantLabel(
             color = Color.White,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
-        )
-
-        SoundIndicator(
-            modifier = Modifier.align(CenterVertically),
-            hasSound = participant.hasAudio,
-            isSpeaking = participant.isSpeaking
         )
     }
 }

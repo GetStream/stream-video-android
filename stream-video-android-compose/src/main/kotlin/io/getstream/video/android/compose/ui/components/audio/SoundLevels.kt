@@ -97,7 +97,7 @@ public fun ActiveSoundLevels(modifier: Modifier) {
     }
 
     Row(
-        modifier = modifier.size(height = 16.dp, width = 24.dp),
+        modifier = modifier.size(height = 16.dp, width = 20.dp),
         verticalAlignment = Alignment.Bottom
     ) {
         Spacer(
@@ -124,7 +124,5 @@ public fun ActiveSoundLevels(modifier: Modifier) {
                 .fillMaxHeight(fraction = thirdLevel.value)
                 .background(color = color, shape = RoundedCornerShape(16.dp))
         )
-
-        Spacer(modifier = Modifier.width(2.dp))
     }
 }
