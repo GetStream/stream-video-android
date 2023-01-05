@@ -263,6 +263,7 @@ public class Call(
     }
 
     internal fun setParticipants(participants: List<CallParticipantState>) {
+        this._callParticipants.value
         this._callParticipants.value = participants
         logger.d { "[setParticipants] #sfu; allParticipants: ${_callParticipants.value}" }
 
@@ -276,6 +277,26 @@ public class Call(
 
             logger.v { "[setParticipants] #sfu; Added all streams to participants $streamsToProcess" }
         }
+    }
+
+    /**
+     * Upserts the user data with personal information.
+     *
+     * @param data The list of user data items containing expanded information.
+     */
+    internal fun upsertParticipants(data: List<CallUser>) {
+        val current = this._callParticipants.value
+        val updated = current.map { participant ->
+            val user = data.firstOrNull { it.id == participant.id }
+
+            participant.copy(
+                role = user?.role ?: participant.role,
+                name = user?.name ?: participant.name,
+                profileImageURL = user?.imageUrl ?: participant.profileImageURL
+            )
+        }
+
+        this._callParticipants.value = updated
     }
 
     internal fun updateMuteState(

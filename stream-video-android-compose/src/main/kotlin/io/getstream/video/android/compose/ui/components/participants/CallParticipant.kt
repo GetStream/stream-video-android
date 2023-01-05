@@ -150,7 +150,7 @@ private fun BoxScope.ParticipantLabel(
         Text(
             modifier = Modifier
                 .widthIn(max = 64.dp)
-                .padding(start = 8.dp)
+                .padding(horizontal = 4.dp)
                 .align(CenterVertically),
             text = name,
             style = VideoTheme.typography.body,

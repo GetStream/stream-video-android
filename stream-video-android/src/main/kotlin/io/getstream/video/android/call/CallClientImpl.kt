@@ -457,24 +457,7 @@ internal class CallClientImpl(
             )
 
             if (userQueryResult is Success) {
-                call?.setParticipants(
-                    callState.participants.map {
-                        val user =
-                            userQueryResult.data.firstOrNull { user -> user.id == it.user_id }
-                        val isLocal = it.session_id == sessionId
-
-                        CallParticipantState(
-                            id = it.user_id,
-                            role = user?.role ?: "",
-                            name = user?.name ?: "",
-                            profileImageURL = user?.imageUrl,
-                            sessionId = it.session_id,
-                            idPrefix = it.track_lookup_prefix,
-                            isLocal = isLocal,
-                            isOnline = !isLocal
-                        )
-                    }
-                )
+                call?.upsertParticipants(userQueryResult.data)
             }
         }
     }
