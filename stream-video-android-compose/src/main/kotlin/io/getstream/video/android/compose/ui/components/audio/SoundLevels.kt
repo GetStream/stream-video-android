@@ -102,25 +102,25 @@ public fun ActiveSoundLevels(modifier: Modifier) {
     ) {
         Spacer(
             modifier = Modifier
-                .width(4.dp)
+                .width(3.dp)
                 .fillMaxHeight(firstLevel.value)
                 .background(color = color, shape = RoundedCornerShape(16.dp))
         )
 
-        Spacer(modifier = Modifier.width(2.dp))
+        Spacer(modifier = Modifier.width(3.dp))
 
         Spacer(
             modifier = Modifier
-                .width(4.dp)
+                .width(3.dp)
                 .fillMaxHeight(fraction = secondLevel.value)
                 .background(color = color, shape = RoundedCornerShape(16.dp))
         )
 
-        Spacer(modifier = Modifier.width(2.dp))
+        Spacer(modifier = Modifier.width(3.dp))
 
         Spacer(
             modifier = Modifier
-                .width(4.dp)
+                .width(3.dp)
                 .fillMaxHeight(fraction = thirdLevel.value)
                 .background(color = color, shape = RoundedCornerShape(16.dp))
         )
