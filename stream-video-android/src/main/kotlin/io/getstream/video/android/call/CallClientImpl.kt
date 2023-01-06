@@ -665,13 +665,10 @@ internal class CallClientImpl(
             when (event) {
                 is ICETrickleEvent -> handleTrickle(event)
                 is SubscriberOfferEvent -> handleSubscriberOffer(event)
-                is PublisherAnswerEvent -> { // TODO - do we need anyhting here?
-                }
+                is PublisherAnswerEvent -> Unit
                 is ParticipantJoinedEvent -> addParticipant(event)
                 is ParticipantLeftEvent -> call?.removeParticipant(event)
-                is ChangePublishQualityEvent -> {
-                    // updatePublishQuality(event) -> TODO - re-enable once we send the proper quality (dimensions)
-                }
+                is ChangePublishQualityEvent -> Unit
                 is ConnectionQualityChangeEvent -> call?.updateConnectionQuality(event.updates)
                 is AudioLevelChangedEvent -> call?.updateAudioLevel(event)
                 is TrackPublishedEvent -> {
