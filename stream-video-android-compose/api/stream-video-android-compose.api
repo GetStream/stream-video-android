@@ -558,10 +558,6 @@ public final class io/getstream/video/android/compose/ui/components/video/VideoR
 	public static final fun VideoRenderer (Lio/getstream/video/android/model/Call;Lio/getstream/video/android/model/VideoTrack;Ljava/lang/String;Lstream/video/sfu/models/TrackType;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 
-public final class io/getstream/video/android/compose/utils/ColorUtilsKt {
-	public static final fun adjustColorBrightness (IF)I
-}
-
 public final class io/getstream/video/android/compose/utils/ImageUtilsKt {
 	public static final fun rememberStreamImagePainter-MqR-F_0 (Ljava/lang/Object;Landroidx/compose/ui/graphics/painter/Painter;Landroidx/compose/ui/graphics/painter/Painter;Landroidx/compose/ui/graphics/painter/Painter;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Landroidx/compose/ui/layout/ContentScale;ILandroidx/compose/runtime/Composer;II)Lcoil/compose/AsyncImagePainter;
 }
