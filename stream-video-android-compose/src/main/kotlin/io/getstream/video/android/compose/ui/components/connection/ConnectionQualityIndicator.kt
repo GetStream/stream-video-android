@@ -17,6 +17,12 @@ import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import stream.video.sfu.models.ConnectionQuality
 
+/**
+ * Shows the quality of the user's connection.
+ *
+ * @param connectionQuality The quality level.
+ * @param modifier Modifier for styling.
+ */
 @Composable
 public fun ConnectionQualityIndicator(
     connectionQuality: ConnectionQuality,

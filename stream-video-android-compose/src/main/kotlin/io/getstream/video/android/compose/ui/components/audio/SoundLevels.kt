@@ -36,6 +36,8 @@ import io.getstream.video.android.compose.theme.VideoTheme
 
 /**
  * Used to indicate the active sound levels of a given participant.
+ *
+ * @param modifier Modifier for styling.
  */
 @Composable
 public fun ActiveSoundLevels(modifier: Modifier) {

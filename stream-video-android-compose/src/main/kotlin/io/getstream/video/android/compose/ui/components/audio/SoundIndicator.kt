@@ -33,6 +33,7 @@ import io.getstream.video.android.compose.theme.VideoTheme
  *
  * @param hasSound If the participant has sound active.
  * @param isSpeaking If the participant is speaking.
+ * @param modifier Modifier for styling.
  */
 @Composable
 public fun SoundIndicator(
