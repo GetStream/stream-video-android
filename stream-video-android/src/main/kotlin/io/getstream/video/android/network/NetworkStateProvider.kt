@@ -21,6 +21,7 @@ import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import android.os.Build
+import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -29,6 +30,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  * @property connectivityManager Android manager which provides information about the current
  * connection state.
  */
+@InternalStreamVideoApi
 public class NetworkStateProvider(private val connectivityManager: ConnectivityManager) {
 
     private val lock: Any = Any()
