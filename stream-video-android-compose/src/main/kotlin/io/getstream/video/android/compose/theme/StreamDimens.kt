@@ -67,7 +67,14 @@ public data class StreamDimens(
     public val floatingVideoPadding: Dp,
     public val floatingVideoHeight: Dp,
     public val floatingVideoWidth: Dp,
-    public val screenShareParticipantItemSize: Dp
+    public val screenShareParticipantItemSize: Dp,
+    public val connectionIndicatorBarMaxHeight: Dp,
+    public val connectionIndicatorBarWidth: Dp,
+    public val connectionIndicatorBarSeparatorWidth: Dp,
+    public val audioLevelIndicatorBarMaxHeight: Dp,
+    public val audioLevelIndicatorBarWidth: Dp,
+    public val audioLevelIndicatorBarSeparatorWidth: Dp,
+    public val audioStatusSize: Dp
 ) {
     public companion object {
         /**
@@ -113,7 +120,14 @@ public data class StreamDimens(
             floatingVideoPadding = 16.dp,
             floatingVideoHeight = 150.dp,
             floatingVideoWidth = 125.dp,
-            screenShareParticipantItemSize = 110.dp
+            screenShareParticipantItemSize = 110.dp,
+            connectionIndicatorBarMaxHeight = 14.dp,
+            connectionIndicatorBarWidth = 3.dp,
+            connectionIndicatorBarSeparatorWidth = 3.dp,
+            audioLevelIndicatorBarMaxHeight = 16.dp,
+            audioLevelIndicatorBarWidth = 3.dp,
+            audioLevelIndicatorBarSeparatorWidth = 3.dp,
+            audioStatusSize = 15.dp
         )
     }
 }

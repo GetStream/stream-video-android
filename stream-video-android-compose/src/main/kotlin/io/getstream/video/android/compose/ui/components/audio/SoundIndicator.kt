@@ -45,7 +45,7 @@ public fun SoundIndicator(
         hasSound && !isSpeaking -> {
             Icon(
                 modifier = modifier
-                    .size(20.dp)
+                    .size(VideoTheme.dimens.audioStatusSize)
                     .padding(end = 4.dp),
                 painter = painterResource(id = R.drawable.ic_mic_on),
                 tint = Color.White,
@@ -55,7 +55,7 @@ public fun SoundIndicator(
         else -> {
             Icon(
                 modifier = modifier
-                    .size(20.dp)
+                    .size(VideoTheme.dimens.audioStatusSize)
                     .padding(end = 4.dp),
                 painter = painterResource(id = R.drawable.ic_mic_off),
                 tint = VideoTheme.colors.errorAccent,

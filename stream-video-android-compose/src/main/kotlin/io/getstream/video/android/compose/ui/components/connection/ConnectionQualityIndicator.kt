@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -36,17 +35,17 @@ public fun ConnectionQualityIndicator(
     ) {
         Row(
             modifier = Modifier
-                .height(height = 14.dp)
+                .height(height = VideoTheme.dimens.connectionIndicatorBarMaxHeight)
                 .align(Alignment.Center),
             verticalAlignment = Alignment.Bottom
         ) {
             Spacer(
                 modifier = Modifier
-                    .width(3.dp)
+                    .width(VideoTheme.dimens.connectionIndicatorBarWidth)
                     .fillMaxHeight(0.33f)
                     .background(
                         color = if (quality >= 1) VideoTheme.colors.primaryAccent else Color.White,
-                        shape = RoundedCornerShape(16.dp)
+                        shape = VideoTheme.shapes.connectionIndicatorBar
                     )
             )
 
@@ -54,11 +53,11 @@ public fun ConnectionQualityIndicator(
 
             Spacer(
                 modifier = Modifier
-                    .width(3.dp)
+                    .width(VideoTheme.dimens.connectionIndicatorBarWidth)
                     .fillMaxHeight(fraction = 0.66f)
                     .background(
                         color = if (quality >= 2) VideoTheme.colors.primaryAccent else Color.White,
-                        shape = RoundedCornerShape(16.dp)
+                        shape = VideoTheme.shapes.connectionIndicatorBar
                     )
             )
 
@@ -66,11 +65,11 @@ public fun ConnectionQualityIndicator(
 
             Spacer(
                 modifier = Modifier
-                    .width(3.dp)
+                    .width(VideoTheme.dimens.connectionIndicatorBarWidth)
                     .fillMaxHeight(fraction = 1f)
                     .background(
                         color = if (quality >= 3) VideoTheme.colors.primaryAccent else Color.White,
-                        shape = RoundedCornerShape(16.dp)
+                        shape = VideoTheme.shapes.connectionIndicatorBar
                     )
             )
         }

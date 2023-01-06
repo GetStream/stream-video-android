@@ -23,7 +23,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -97,30 +97,30 @@ public fun ActiveSoundLevels(modifier: Modifier) {
     }
 
     Row(
-        modifier = modifier.size(height = 16.dp, width = 20.dp),
+        modifier = modifier.height(height = VideoTheme.dimens.audioLevelIndicatorBarMaxHeight),
         verticalAlignment = Alignment.Bottom
     ) {
         Spacer(
             modifier = Modifier
-                .width(3.dp)
+                .width(VideoTheme.dimens.audioLevelIndicatorBarWidth)
                 .fillMaxHeight(firstLevel.value)
                 .background(color = color, shape = RoundedCornerShape(16.dp))
         )
 
-        Spacer(modifier = Modifier.width(3.dp))
+        Spacer(modifier = Modifier.width(VideoTheme.dimens.audioLevelIndicatorBarSeparatorWidth))
 
         Spacer(
             modifier = Modifier
-                .width(3.dp)
+                .width(VideoTheme.dimens.audioLevelIndicatorBarWidth)
                 .fillMaxHeight(fraction = secondLevel.value)
                 .background(color = color, shape = RoundedCornerShape(16.dp))
         )
 
-        Spacer(modifier = Modifier.width(3.dp))
+        Spacer(modifier = Modifier.width(VideoTheme.dimens.audioLevelIndicatorBarSeparatorWidth))
 
         Spacer(
             modifier = Modifier
-                .width(3.dp)
+                .width(VideoTheme.dimens.audioLevelIndicatorBarWidth)
                 .fillMaxHeight(fraction = thirdLevel.value)
                 .background(color = color, shape = RoundedCornerShape(16.dp))
         )
