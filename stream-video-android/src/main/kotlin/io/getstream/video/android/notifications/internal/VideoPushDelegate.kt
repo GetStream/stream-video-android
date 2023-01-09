@@ -193,14 +193,7 @@ internal class VideoPushDelegate(
     ): PendingIntent {
         return PendingIntent.getActivity(
             context, 0,
-            Intent(baseIntent).apply {
-                component = ComponentName(
-                    resolveInfo.activityInfo.applicationInfo.packageName,
-                    resolveInfo.activityInfo.name
-                )
-                putExtra(INTENT_EXTRA_CALL_CID, callId)
-                putExtra(INTENT_EXTRA_NOTIFICATION_ID, INCOMING_CALL_NOTIFICATION_ID)
-            },
+            buildComponentIntent(baseIntent, resolveInfo, callId),
             flags
         )
     }
@@ -221,16 +214,31 @@ internal class VideoPushDelegate(
     ): PendingIntent {
         return PendingIntent.getBroadcast(
             context, 0,
-            Intent(baseIntent).apply {
-                component = ComponentName(
-                    resolveInfo.activityInfo.applicationInfo.packageName,
-                    resolveInfo.activityInfo.name
-                )
-                putExtra(INTENT_EXTRA_CALL_CID, callId)
-                putExtra(INTENT_EXTRA_NOTIFICATION_ID, INCOMING_CALL_NOTIFICATION_ID)
-            },
+            buildComponentIntent(baseIntent, resolveInfo, callId),
             flags
         )
+    }
+
+    /**
+     * Builds an intent used to start the target component for the [PendingIntent].
+     *
+     * @param baseIntent The base intent with fundamental data and actions.
+     * @param resolveInfo Info used to resolve a component matching the action.
+     * @param callId The ID of the call.
+     */
+    private fun buildComponentIntent(
+        baseIntent: Intent,
+        resolveInfo: ResolveInfo,
+        callId: String
+    ): Intent {
+        return Intent(baseIntent).apply {
+            component = ComponentName(
+                resolveInfo.activityInfo.applicationInfo.packageName,
+                resolveInfo.activityInfo.name
+            )
+            putExtra(INTENT_EXTRA_CALL_CID, callId)
+            putExtra(INTENT_EXTRA_NOTIFICATION_ID, INCOMING_CALL_NOTIFICATION_ID)
+        }
     }
 
     /**
