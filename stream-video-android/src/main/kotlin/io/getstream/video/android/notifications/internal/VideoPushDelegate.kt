@@ -134,7 +134,7 @@ internal class VideoPushDelegate(
      */
     private fun searchIncomingCallPendingIntent(
         callId: String
-    ): PendingIntent? = searchPendingIntent(Intent(ACTION_INCOMING_CALL), callId)
+    ): PendingIntent? = searchActivityPendingIntent(Intent(ACTION_INCOMING_CALL), callId)
 
     /**
      * Search for an activity that can accept call from Stream Server.
@@ -144,7 +144,7 @@ internal class VideoPushDelegate(
      */
     private fun searchAcceptCallPendingIntent(
         callId: String,
-    ): PendingIntent? = searchPendingIntent(Intent(ACTION_ACCEPT_CALL), callId)
+    ): PendingIntent? = searchActivityPendingIntent(Intent(ACTION_ACCEPT_CALL), callId)
 
     /**
      * Searches for a broadcast receiver that can consume the [ACTION_REJECT_CALL] intent to reject
@@ -155,36 +155,28 @@ internal class VideoPushDelegate(
      */
     private fun searchRejectCallPendingIntent(
         callId: String
-    ): PendingIntent? = searchPendingIntent(Intent(ACTION_REJECT_CALL), callId)
+    ): PendingIntent? = searchBroadcastPendingIntent(Intent(ACTION_REJECT_CALL), callId)
 
-    private fun searchPendingIntent(
+    private fun searchBroadcastPendingIntent(
         baseIntent: Intent,
         callId: String,
-    ): PendingIntent? {
-        val isRejectCall = baseIntent.action == ACTION_REJECT_CALL
-
-        val components = if (isRejectCall) {
-            context.packageManager.queryBroadcastReceivers(baseIntent, 0)
-        } else {
-            context.packageManager.queryIntentActivities(baseIntent, 0)
+    ): PendingIntent? =
+        searchResolveInfo { context.packageManager.queryBroadcastReceivers(baseIntent, 0) }?.let {
+            getBroadcastForIntent(baseIntent, it, callId)
         }
 
-        return components
-            .filter { it.activityInfo.packageName == context.packageName }
-            .maxByOrNull { it.priority }?.let { resolveInfo ->
-                val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                } else {
-                    PendingIntent.FLAG_UPDATE_CURRENT
-                }
+    private fun searchActivityPendingIntent(
+        baseIntent: Intent,
+        callId: String,
+    ): PendingIntent? =
+        searchResolveInfo { context.packageManager.queryIntentActivities(baseIntent, 0) }?.let {
+            getActivityForIntent(baseIntent, it, callId)
+        }
 
-                if (isRejectCall) {
-                    getBroadcastForIntent(baseIntent, resolveInfo, callId, flags)
-                } else {
-                    getActivityForIntent(baseIntent, resolveInfo, callId, flags)
-                }
-            }
-    }
+    private fun searchResolveInfo(availableComponents: () -> List<ResolveInfo>): ResolveInfo? =
+        availableComponents()
+            .filter { it.activityInfo.packageName == context.packageName }
+            .maxByOrNull { it.priority }
 
     /**
      * Uses the provided [ResolveInfo] to find an Activity which can consume the intent.
@@ -198,7 +190,7 @@ internal class VideoPushDelegate(
         baseIntent: Intent,
         resolveInfo: ResolveInfo,
         callId: String,
-        flags: Int
+        flags: Int = PENDING_INTENT_FLAG,
     ): PendingIntent {
         return PendingIntent.getActivity(
             context, 0,
@@ -219,7 +211,7 @@ internal class VideoPushDelegate(
         baseIntent: Intent,
         resolveInfo: ResolveInfo,
         callId: String,
-        flags: Int
+        flags: Int = PENDING_INTENT_FLAG,
     ): PendingIntent {
         return PendingIntent.getBroadcast(
             context, 0,
@@ -321,5 +313,13 @@ internal class VideoPushDelegate(
         private const val CHANNEL_NAME = "Incoming Calls"
         private const val CHANNEL_DESCRIPTION = "Incoming audio and video call alerts"
         private const val INCOMING_CALL_NOTIFICATION_ID = 24756
+
+        private val PENDING_INTENT_FLAG: Int by lazy {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            } else {
+                PendingIntent.FLAG_UPDATE_CURRENT
+            }
+        }
     }
 }
