@@ -32,6 +32,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.BottomEnd
+import androidx.compose.ui.Alignment.Companion.BottomStart
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -42,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.audio.SoundIndicator
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
+import io.getstream.video.android.compose.ui.components.connection.ConnectionQualityIndicator
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.CallParticipantState
@@ -87,7 +90,20 @@ public fun CallParticipant(
             onRender = onRender
         )
 
-        ParticipantLabel(participant, labelPosition)
+        if (!participant.isLocal) {
+            ParticipantLabel(participant, labelPosition)
+        }
+
+        val connectionIndicatorAlignment = if (participant.isLocal) {
+            BottomStart
+        } else {
+            BottomEnd
+        }
+
+        ConnectionQualityIndicator(
+            connectionQuality = participant.connectionQuality,
+            modifier = Modifier.align(connectionIndicatorAlignment)
+        )
     }
 }
 

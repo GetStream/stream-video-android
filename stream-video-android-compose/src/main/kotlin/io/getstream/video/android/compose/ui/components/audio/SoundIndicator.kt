@@ -33,6 +33,7 @@ import io.getstream.video.android.compose.theme.VideoTheme
  *
  * @param hasSound If the participant has sound active.
  * @param isSpeaking If the participant is speaking.
+ * @param modifier Modifier for styling.
  */
 @Composable
 public fun SoundIndicator(
@@ -45,7 +46,7 @@ public fun SoundIndicator(
         hasSound && !isSpeaking -> {
             Icon(
                 modifier = modifier
-                    .size(20.dp)
+                    .size(VideoTheme.dimens.audioStatusSize)
                     .padding(end = 4.dp),
                 painter = painterResource(id = R.drawable.ic_mic_on),
                 tint = Color.White,
@@ -55,7 +56,7 @@ public fun SoundIndicator(
         else -> {
             Icon(
                 modifier = modifier
-                    .size(20.dp)
+                    .size(VideoTheme.dimens.audioStatusSize)
                     .padding(end = 4.dp),
                 painter = painterResource(id = R.drawable.ic_mic_off),
                 tint = VideoTheme.colors.errorAccent,
