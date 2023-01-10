@@ -21,6 +21,7 @@ import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ResolveInfo
 import android.os.Build
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
@@ -55,10 +56,11 @@ internal class VideoPushDelegate(
         NotificationManagerCompat.from(context).also {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 it.createNotificationChannel(
-                    NotificationChannelCompat.Builder(
-                        CHANNEL_ID,
-                        NotificationManager.IMPORTANCE_HIGH
-                    )
+                    NotificationChannelCompat
+                        .Builder(
+                            CHANNEL_ID,
+                            NotificationManager.IMPORTANCE_HIGH
+                        )
                         .setName(CHANNEL_NAME)
                         .setDescription(CHANNEL_DESCRIPTION)
                         .build()
@@ -78,23 +80,25 @@ internal class VideoPushDelegate(
         return payload.ifValid {
             val users = payload[KEY_USER_NAMES] as String
             val callId = payload[KEY_CALL_CID] as String
-            searchIncomingCallPendingIntent(callId)
-                ?.let { fullScreenPendingIntent ->
-                    searchAcceptCallPendingIntent(callId)
-                        ?.let { acceptCallPendingIntent ->
-                            showIncomingCallNotification(
-                                fullScreenPendingIntent,
-                                acceptCallPendingIntent,
-                                users,
-                            )
-                        } ?: logger.e { "Couldn't find any activity for $ACTION_ACCEPT_CALL" }
-                } ?: logger.e { "Couldn't find any activity for $ACTION_INCOMING_CALL" }
+            searchIncomingCallPendingIntent(callId)?.let { fullScreenPendingIntent ->
+                searchAcceptCallPendingIntent(callId)?.let { acceptCallPendingIntent ->
+                    searchRejectCallPendingIntent(callId)?.let { rejectCallPendingIntent ->
+                        showIncomingCallNotification(
+                            fullScreenPendingIntent,
+                            acceptCallPendingIntent,
+                            rejectCallPendingIntent,
+                            users,
+                        )
+                    }
+                } ?: logger.e { "Couldn't find any activity for $ACTION_ACCEPT_CALL" }
+            } ?: logger.e { "Couldn't find any activity for $ACTION_INCOMING_CALL" }
         }
     }
 
     private fun showIncomingCallNotification(
         fullScreenPendingIntent: PendingIntent,
         acceptCallPendingIntent: PendingIntent,
+        rejectCallPendingIntent: PendingIntent,
         users: String,
     ) {
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
@@ -113,21 +117,11 @@ internal class VideoPushDelegate(
                     context.getString(R.string.stream_call_notification_action_accept),
                     acceptCallPendingIntent,
                 ).build()
-            )
-            .addAction(
+            ).addAction(
                 NotificationCompat.Action.Builder(
                     null,
                     context.getString(R.string.stream_call_notification_action_reject),
-                    PendingIntent.getBroadcast(
-                        context,
-                        0,
-                        Intent(),
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                            PendingIntent.FLAG_IMMUTABLE
-                        } else {
-                            0
-                        }
-                    )
+                    rejectCallPendingIntent
                 ).build()
             ).build()
         notificationManager.notify(INCOMING_CALL_NOTIFICATION_ID, notification)
@@ -140,44 +134,112 @@ internal class VideoPushDelegate(
      */
     private fun searchIncomingCallPendingIntent(
         callId: String
-    ): PendingIntent? = searchPendingIntent(Intent(ACTION_INCOMING_CALL), callId)
+    ): PendingIntent? = searchActivityPendingIntent(Intent(ACTION_INCOMING_CALL), callId)
 
     /**
      * Search for an activity that can accept call from Stream Server.
      *
      * @param callId The call id from the incoming call.
+     * @return The [PendingIntent] which can trigger a component to consume accept call events.
      */
     private fun searchAcceptCallPendingIntent(
         callId: String,
-    ): PendingIntent? = searchPendingIntent(Intent(ACTION_ACCEPT_CALL), callId)
+    ): PendingIntent? = searchActivityPendingIntent(Intent(ACTION_ACCEPT_CALL), callId)
 
-    private fun searchPendingIntent(
+    /**
+     * Searches for a broadcast receiver that can consume the [ACTION_REJECT_CALL] intent to reject
+     * a call from the Stream Server.
+     *
+     * @param callId The ID of the call.
+     * @return The [PendingIntent] which can trigger a component to consume the call rejection event.
+     */
+    private fun searchRejectCallPendingIntent(
+        callId: String
+    ): PendingIntent? = searchBroadcastPendingIntent(Intent(ACTION_REJECT_CALL), callId)
+
+    private fun searchBroadcastPendingIntent(
         baseIntent: Intent,
         callId: String,
-    ): PendingIntent? {
-        return context.packageManager.queryIntentActivities(baseIntent, 0)
+    ): PendingIntent? =
+        searchResolveInfo { context.packageManager.queryBroadcastReceivers(baseIntent, 0) }?.let {
+            getBroadcastForIntent(baseIntent, it, callId)
+        }
+
+    private fun searchActivityPendingIntent(
+        baseIntent: Intent,
+        callId: String,
+    ): PendingIntent? =
+        searchResolveInfo { context.packageManager.queryIntentActivities(baseIntent, 0) }?.let {
+            getActivityForIntent(baseIntent, it, callId)
+        }
+
+    private fun searchResolveInfo(availableComponents: () -> List<ResolveInfo>): ResolveInfo? =
+        availableComponents()
             .filter { it.activityInfo.packageName == context.packageName }
             .maxByOrNull { it.priority }
-            ?.let { resolveInfo ->
-                val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                } else {
-                    PendingIntent.FLAG_UPDATE_CURRENT
-                }
-                PendingIntent.getActivity(
-                    context,
-                    0,
-                    Intent(baseIntent).apply {
-                        component = ComponentName(
-                            resolveInfo.activityInfo.applicationInfo.packageName,
-                            resolveInfo.activityInfo.name
-                        )
-                        putExtra(INTENT_EXTRA_CALL_CID, callId)
-                        putExtra(INTENT_EXTRA_NOTIFICATION_ID, INCOMING_CALL_NOTIFICATION_ID)
-                    },
-                    flags
-                )
-            }
+
+    /**
+     * Uses the provided [ResolveInfo] to find an Activity which can consume the intent.
+     *
+     * @param baseIntent The base intent for the notification.
+     * @param resolveInfo Info used to resolve a component matching the action.
+     * @param callId The ID of the call.
+     * @param flags Any flags required by the component.
+     */
+    private fun getActivityForIntent(
+        baseIntent: Intent,
+        resolveInfo: ResolveInfo,
+        callId: String,
+        flags: Int = PENDING_INTENT_FLAG,
+    ): PendingIntent {
+        return PendingIntent.getActivity(
+            context, 0,
+            buildComponentIntent(baseIntent, resolveInfo, callId),
+            flags
+        )
+    }
+
+    /**
+     * Uses the provided [ResolveInfo] to find a BroadcastReceiver which can consume the intent.
+     *
+     * @param baseIntent The base intent for the notification.
+     * @param resolveInfo Info used to resolve a component matching the action.
+     * @param callId The ID of the call.
+     * @param flags Any flags required by the component.
+     */
+    private fun getBroadcastForIntent(
+        baseIntent: Intent,
+        resolveInfo: ResolveInfo,
+        callId: String,
+        flags: Int = PENDING_INTENT_FLAG,
+    ): PendingIntent {
+        return PendingIntent.getBroadcast(
+            context, 0,
+            buildComponentIntent(baseIntent, resolveInfo, callId),
+            flags
+        )
+    }
+
+    /**
+     * Builds an intent used to start the target component for the [PendingIntent].
+     *
+     * @param baseIntent The base intent with fundamental data and actions.
+     * @param resolveInfo Info used to resolve a component matching the action.
+     * @param callId The ID of the call.
+     */
+    private fun buildComponentIntent(
+        baseIntent: Intent,
+        resolveInfo: ResolveInfo,
+        callId: String
+    ): Intent {
+        return Intent(baseIntent).apply {
+            component = ComponentName(
+                resolveInfo.activityInfo.applicationInfo.packageName,
+                resolveInfo.activityInfo.name
+            )
+            putExtra(INTENT_EXTRA_CALL_CID, callId)
+            putExtra(INTENT_EXTRA_NOTIFICATION_ID, INCOMING_CALL_NOTIFICATION_ID)
+        }
     }
 
     /**
@@ -221,8 +283,7 @@ internal class VideoPushDelegate(
         return isValid
     }
 
-    private fun Map<String, Any?>.isValid(): Boolean =
-        isFromStreamServer() && isValidIncomingCall()
+    private fun Map<String, Any?>.isValid(): Boolean = isFromStreamServer() && isValidIncomingCall()
 
     /**
      * Verify if the map contains key/value from Stream Server.
@@ -246,10 +307,19 @@ internal class VideoPushDelegate(
 
         private const val ACTION_INCOMING_CALL = "io.getstream.video.android.action.INCOMING_CALL"
         private const val ACTION_ACCEPT_CALL = "io.getstream.video.android.action.ACCEPT_CALL"
+        private const val ACTION_REJECT_CALL = "io.getstream.video.android.action.REJECT_CALL"
 
         private const val CHANNEL_ID = "incoming_calls"
         private const val CHANNEL_NAME = "Incoming Calls"
         private const val CHANNEL_DESCRIPTION = "Incoming audio and video call alerts"
         private const val INCOMING_CALL_NOTIFICATION_ID = 24756
+
+        private val PENDING_INTENT_FLAG: Int by lazy {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            } else {
+                PendingIntent.FLAG_UPDATE_CURRENT
+            }
+        }
     }
 }
