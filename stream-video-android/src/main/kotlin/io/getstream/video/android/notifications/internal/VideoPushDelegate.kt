@@ -56,9 +56,14 @@ internal class VideoPushDelegate(
         NotificationManagerCompat.from(context).also {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 it.createNotificationChannel(
-                    NotificationChannelCompat.Builder(
-                        CHANNEL_ID, NotificationManager.IMPORTANCE_HIGH
-                    ).setName(CHANNEL_NAME).setDescription(CHANNEL_DESCRIPTION).build()
+                    NotificationChannelCompat
+                        .Builder(
+                            CHANNEL_ID,
+                            NotificationManager.IMPORTANCE_HIGH
+                        )
+                        .setName(CHANNEL_NAME)
+                        .setDescription(CHANNEL_DESCRIPTION)
+                        .build()
                 )
             }
         }
@@ -98,11 +103,15 @@ internal class VideoPushDelegate(
     ) {
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(androidx.loader.R.drawable.notification_bg)
-            .setContentTitle("Incoming call").setContentText(users).setOngoing(false)
-            .setAutoCancel(true).setContentIntent(fullScreenPendingIntent)
+            .setContentTitle("Incoming call")
+            .setContentText(users)
+            .setOngoing(false)
+            .setAutoCancel(true)
+            .setContentIntent(fullScreenPendingIntent)
             .setFullScreenIntent(fullScreenPendingIntent, true)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setCategory(NotificationCompat.CATEGORY_CALL).addAction(
+            .setCategory(NotificationCompat.CATEGORY_CALL)
+            .addAction(
                 NotificationCompat.Action.Builder(
                     null,
                     context.getString(R.string.stream_call_notification_action_accept),
