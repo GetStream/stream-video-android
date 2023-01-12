@@ -46,8 +46,8 @@ import io.getstream.chat.android.compose.viewmodel.messages.MessageListViewModel
 import io.getstream.chat.android.compose.viewmodel.messages.MessagesViewModelFactory
 import io.getstream.chat.android.uiutils.extension.getDisplayName
 import io.getstream.video.android.utils.Success
-import io.getstream.video.chat_with_video_starter_kit.application.chatWithVideoApp
 import io.getstream.video.chat_with_video_starter_kit.R
+import io.getstream.video.chat_with_video_starter_kit.application.chatWithVideoApp
 import kotlinx.coroutines.launch
 import java.util.*
 
