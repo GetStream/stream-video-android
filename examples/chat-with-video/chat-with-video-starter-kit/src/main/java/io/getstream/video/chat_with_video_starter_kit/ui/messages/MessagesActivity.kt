@@ -21,78 +21,25 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Icon
-import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.lifecycleScope
-import io.getstream.chat.android.client.models.Attachment
-import io.getstream.chat.android.compose.ui.messages.composer.MessageComposer
-import io.getstream.chat.android.compose.ui.messages.header.MessageListHeader
-import io.getstream.chat.android.compose.ui.messages.list.MessageList
 import io.getstream.chat.android.compose.ui.theme.ChatTheme
-import io.getstream.chat.android.compose.viewmodel.messages.MessageComposerViewModel
-import io.getstream.chat.android.compose.viewmodel.messages.MessageListViewModel
-import io.getstream.chat.android.compose.viewmodel.messages.MessagesViewModelFactory
-import io.getstream.chat.android.uiutils.extension.getDisplayName
-import io.getstream.video.android.utils.Success
-import io.getstream.video.chat_with_video_starter_kit.R
-import io.getstream.video.chat_with_video_starter_kit.application.chatWithVideoApp
-import kotlinx.coroutines.launch
-import java.util.*
 
 class MessagesActivity : ComponentActivity() {
 
-    private val factory by lazy {
-        MessagesViewModelFactory(
-            context = this,
-            channelId = intent.getStringExtra(KEY_CHANNEL_ID)!!
-        )
-    }
-
-    private val messageListViewModel by viewModels<MessageListViewModel> { factory }
-
-    private val composerViewModel by viewModels<MessageComposerViewModel> { factory }
+    // TODO initialize ViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
-            ChatTheme(attachmentFactories = chatWithVideoApp.attachmentFactories) {
-                val channelState = messageListViewModel.channel
-                val currentUser by messageListViewModel.user.collectAsState()
-
-                Scaffold(
-                    topBar = {
-                        MessageListHeader(
-                            channel = channelState,
-                            currentUser = currentUser,
-                            trailingContent = { CallButton() },
-                            onBackPressed = { finish() }
-                        )
-                    },
-                    bottomBar = { MessageComposer(viewModel = composerViewModel) },
-                    content = { paddingValues ->
-                        MessageList(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(ChatTheme.colors.appBackground)
-                                .padding(paddingValues),
-                            viewModel = messageListViewModel,
-                        )
-                    }
-                )
-            }
+            // TODO set the UI of the messages screen
         }
     }
 
@@ -109,38 +56,7 @@ class MessagesActivity : ComponentActivity() {
     }
 
     private fun startCall() {
-        val videoClient = chatWithVideoApp.streamVideo
-
-        lifecycleScope.launch {
-            val callId = UUID.randomUUID().toString()
-
-            val createCallResult = videoClient.createCall(
-                id = callId,
-                type = "default",
-                ringing = false,
-                participantIds = emptyList()
-            )
-
-            if (createCallResult is Success) {
-                val data = createCallResult.data
-
-                val customAttachment = Attachment(
-                    type = "custom",
-                    authorName = videoClient.getUser().name,
-                    extraData = mutableMapOf(
-                        "callCid" to data.cid,
-                        "members" to data.users.map { it.value.name },
-                        "callName" to messageListViewModel.channel.getDisplayName(
-                            context = this@MessagesActivity,
-                            fallback = R.string.call_name_placeholder
-                        )
-                    )
-                )
-
-                val newMessage = composerViewModel.buildNewMessage("", listOf(customAttachment))
-                composerViewModel.sendMessage(newMessage)
-            }
-        }
+        // TODO - start a call and send a custom attachment
     }
 
     companion object {
