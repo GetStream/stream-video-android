@@ -8,11 +8,11 @@ plugins {
 }
 
 android {
-    namespace = "io.getstream.video.chat_with_video_sample"
+    namespace = "io.getstream.video.chat_with_video_final"
     compileSdk = Configuration.compileSdk
 
     defaultConfig {
-        applicationId = "io.getstream.video.chat_with_video_sample"
+        applicationId = "io.getstream.video.chat_with_video_final"
         minSdk = Configuration.minSdk
         targetSdk = Configuration.targetSdk
         versionCode = Configuration.versionCode
@@ -58,7 +58,6 @@ android {
 }
 
 dependencies {
-    implementation(project(":stream-video-android"))
     implementation(project(":stream-video-android-compose"))
 
     implementation(Dependencies.androidxCore)
