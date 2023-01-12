@@ -44,10 +44,7 @@ import androidx.compose.ui.unit.sp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.ImageAvatar
 import io.getstream.video.android.compose.utils.rememberStreamImagePainter
-import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.model.User
-import io.getstream.video.android.token.AuthCredentialsProvider
-import io.getstream.video.chat_with_video_starter_kit.application.API_KEY
 import io.getstream.video.chat_with_video_starter_kit.application.chatWithVideoApp
 import io.getstream.video.chat_with_video_starter_kit.ui.channels.ChannelsActivity
 
@@ -79,26 +76,11 @@ class LoginActivity : ComponentActivity() {
     }
 
     private fun logInToChat(user: User) {
-        val userLogin = io.getstream.chat.android.client.models.User(
-            id = user.id,
-            name = user.name,
-            image = user.imageUrl ?: ""
-        )
-
-        chatWithVideoApp.chatClient.connectUser(
-            user = userLogin,
-            token = user.extraData["chatToken"] as String
-        ).enqueue()
+        // TODO
     }
 
     private fun logInToVideo(user: User) {
-        chatWithVideoApp.initializeStreamVideo(
-            AuthCredentialsProvider(
-                API_KEY,
-                user = user
-            ),
-            loggingLevel = LoggingLevel.BODY
-        )
+        // TODO
     }
 
     @Composable
