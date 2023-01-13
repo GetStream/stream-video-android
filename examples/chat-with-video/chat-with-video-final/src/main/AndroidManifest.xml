@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application
-        android:name="io.getstream.video.chat_with_video.application.ChatWithVideoApp"
+        android:name=".application.ChatWithVideoApp"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -10,7 +10,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.StreamChatWithVideo">
         <activity
-            android:name="io.getstream.video.chat_with_video.ui.login.LoginActivity"
+            android:name=".ui.login.LoginActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.StreamChatWithVideo">
@@ -24,18 +24,18 @@
                 android:name="android.app.lib_name"
                 android:value="" />
         </activity>
-        <activity android:name="io.getstream.video.chat_with_video.ui.channels.ChannelsActivity" />
+        <activity android:name=".ui.channels.ChannelsActivity" />
         <activity
-            android:name="io.getstream.video.chat_with_video.ui.messages.MessagesActivity"
+            android:name=".ui.messages.MessagesActivity"
             android:windowSoftInputMode="adjustResize" />
 
         <activity
-            android:name="io.getstream.video.chat_with_video.ui.call.CallActivity"
+            android:name=".ui.call.CallActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
             android:supportsPictureInPicture="true" />
 
         <service
-            android:name="io.getstream.video.chat_with_video.ui.call.CallService"
+            android:name=".ui.call.CallService"
             android:enabled="true"
             android:exported="false" />
     </application>

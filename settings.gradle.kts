@@ -27,6 +27,6 @@ include(":stream-video-android")
 include(":stream-video-android-core")
 include(":stream-video-android-compose")
 
-// Examples and guide starter kits
+// Examples and guide projects
 include(":examples:chat-with-video:chat-with-video-final")
-include(":examples:chat-with-video:chat-with-video-starter-kit")
+include(":examples:chat-with-video:chat-with-video-starter")
