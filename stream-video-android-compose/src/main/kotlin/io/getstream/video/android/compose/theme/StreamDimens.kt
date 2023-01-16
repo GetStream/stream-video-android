@@ -21,7 +21,6 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.utils.floatResource
 import io.getstream.video.android.compose.utils.textSizeResource
 import io.getstream.video.android.ui.common.R
@@ -78,7 +77,7 @@ public data class StreamDimens(
     public val audioLevelIndicatorBarMaxHeight: Dp,
     public val audioLevelIndicatorBarWidth: Dp,
     public val audioLevelIndicatorBarSeparatorWidth: Dp,
-    public val audioStatusSize: Dp
+    public val audioStatusSize: Dp,
 ) {
     public companion object {
         /**
@@ -126,13 +125,13 @@ public data class StreamDimens(
             floatingVideoHeight = dimensionResource(id = R.dimen.floatingVideoHeight),
             floatingVideoWidth = dimensionResource(id = R.dimen.floatingVideoWidth),
             screenShareParticipantItemSize = dimensionResource(id = R.dimen.screenShareParticipantItemSize),
-            connectionIndicatorBarMaxHeight = 14.dp,
-            connectionIndicatorBarWidth = 3.dp,
-            connectionIndicatorBarSeparatorWidth = 3.dp,
-            audioLevelIndicatorBarMaxHeight = 16.dp,
-            audioLevelIndicatorBarWidth = 3.dp,
-            audioLevelIndicatorBarSeparatorWidth = 3.dp,
-            audioStatusSize = 15.dp
+            connectionIndicatorBarMaxHeight = dimensionResource(id = R.dimen.connectionIndicatorBarMaxHeight),
+            connectionIndicatorBarWidth = dimensionResource(id = R.dimen.connectionIndicatorBarWidth),
+            connectionIndicatorBarSeparatorWidth = dimensionResource(id = R.dimen.connectionIndicatorBarSeparatorWidth),
+            audioLevelIndicatorBarMaxHeight = dimensionResource(id = R.dimen.audioLevelIndicatorBarMaxHeight),
+            audioLevelIndicatorBarWidth = dimensionResource(id = R.dimen.audioLevelIndicatorBarWidth),
+            audioLevelIndicatorBarSeparatorWidth = dimensionResource(id = R.dimen.audioLevelIndicatorBarSeparatorWidth),
+            audioStatusSize = dimensionResource(id = R.dimen.audioStatusSize)
         )
     }
 }

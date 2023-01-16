@@ -32,6 +32,13 @@
     <dimen name="floatingVideoHeight">150dp</dimen>
     <dimen name="floatingVideoWidth">125dp</dimen>
     <dimen name="screenShareParticipantItemSize">110dp</dimen>
+    <dimen name="connectionIndicatorBarMaxHeight">14dp</dimen>
+    <dimen name="connectionIndicatorBarWidth">3dp</dimen>
+    <dimen name="connectionIndicatorBarSeparatorWidth">3dp</dimen>
+    <dimen name="audioLevelIndicatorBarMaxHeight">16dp</dimen>
+    <dimen name="audioLevelIndicatorBarWidth">3dp</dimen>
+    <dimen name="audioLevelIndicatorBarSeparatorWidth">3dp</dimen>
+    <dimen name="audioStatusSize">15dp</dimen>
 
     <dimen name="title1TextSize">24sp</dimen>
     <dimen name="title1LineHeight">34sp</dimen>

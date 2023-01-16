@@ -6126,7 +6126,7 @@ func (m *CallInput) UnmarshalVT(dAtA []byte) error {
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field CustomJson", wireType)
 			}
-			var stringLen uint64
+			var byteLen int
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflow
@@ -6136,23 +6136,25 @@ func (m *CallInput) UnmarshalVT(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
+				byteLen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
+			if byteLen < 0 {
 				return ErrInvalidLength
 			}
-			postIndex := iNdEx + intStringLen
+			postIndex := iNdEx + byteLen
 			if postIndex < 0 {
 				return ErrInvalidLength
 			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.CustomJson = string(dAtA[iNdEx:postIndex])
+			m.CustomJson = append(m.CustomJson[:0], dAtA[iNdEx:postIndex]...)
+			if m.CustomJson == nil {
+				m.CustomJson = []byte{}
+			}
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {

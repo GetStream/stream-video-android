@@ -45,6 +45,7 @@ import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -57,6 +58,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.app.VideoApp
 import io.getstream.video.android.app.model.HomeScreenOption
 import io.getstream.video.android.app.ui.call.CallActivity
 import io.getstream.video.android.app.ui.call.XmlCallActivity
@@ -107,12 +109,16 @@ class HomeActivity : AppCompatActivity() {
 
     private val ringingState: MutableState<Boolean> = mutableStateOf(true)
 
+    /** Will only be used if join call is selected. In case of ringing calls the activity specified in [VideoApp] will
+     * be used.
+     * */
     private val useXmlCallUi: MutableStateFlow<Boolean> by lazy {
         MutableStateFlow(
-            getSharedPreferences("Def", Context.MODE_PRIVATE).getBoolean("ui_kit", false)
+            getSharedPreferences(JOIN_CALL_PREF_NAME, Context.MODE_PRIVATE).getBoolean(JOIN_CALL_UI_KIT, false)
         ).apply {
             onEach {
-                getSharedPreferences("Def", Context.MODE_PRIVATE).edit().putBoolean("ui_kit", it).apply()
+                getSharedPreferences(JOIN_CALL_PREF_NAME, Context.MODE_PRIVATE).edit().putBoolean(JOIN_CALL_UI_KIT, it)
+                    .apply()
             }.launchIn(lifecycleScope)
         }
     }
@@ -242,6 +248,23 @@ class HomeActivity : AppCompatActivity() {
             }
         ) {
             Text(text = "Join call")
+        }
+
+        Row(Modifier.align(CenterHorizontally)) {
+            Text(
+                modifier = Modifier.padding(4.dp),
+                text = "Compose"
+            )
+
+            Switch(
+                checked = useXmlCallUi.collectAsState().value,
+                onCheckedChange = { useXmlCallUi.value = !useXmlCallUi.value }
+            )
+
+            Text(
+                modifier = Modifier.padding(4.dp),
+                text = "XML"
+            )
         }
     }
 
@@ -450,6 +473,9 @@ class HomeActivity : AppCompatActivity() {
     }
 
     companion object {
+        private const val JOIN_CALL_PREF_NAME = "join_call"
+        private const val JOIN_CALL_UI_KIT = "ui_kit"
+
         fun getIntent(context: Context): Intent = Intent(context, HomeActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }

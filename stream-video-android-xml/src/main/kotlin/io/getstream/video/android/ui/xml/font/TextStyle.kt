@@ -51,7 +51,7 @@ public data class TextStyle(
         }
 
     public fun apply(textView: TextView) {
-        val chatFonts = VideoUI.fonts
+        val videoFonts = VideoUI.fonts
 
         if (size != UNSET_SIZE) {
             textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, size.toFloat())
@@ -66,7 +66,7 @@ public data class TextStyle(
             textView.setHintTextColor(hintColor)
         }
 
-        chatFonts.setFont(this, textView, defaultFont)
+        videoFonts.setFont(this, textView, defaultFont)
     }
 
     public fun hasFont(): Boolean {

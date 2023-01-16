@@ -1,4 +1,4 @@
-public abstract class io/getstream/video/android/ui/xml/AbstractXmlCallActivity : androidx/appcompat/app/AppCompatActivity, io/getstream/video/android/CallViewModelFactoryProvider, io/getstream/video/android/PermissionManagerProvider, io/getstream/video/android/StreamVideoProvider {
+public abstract class io/getstream/video/android/ui/xml/AbstractXmlCallActivity : androidx/appcompat/app/AppCompatActivity, io/getstream/video/android/StreamVideoProvider, io/getstream/video/android/permission/PermissionManagerProvider, io/getstream/video/android/viewmodel/CallViewModelFactoryProvider {
 	public fun <init> ()V
 	public final fun defaultViewModelFactory ()Lio/getstream/video/android/viewmodel/CallViewModelFactory;
 	public fun getCallViewModelFactory ()Lio/getstream/video/android/viewmodel/CallViewModelFactory;
