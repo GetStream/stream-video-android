@@ -33,7 +33,8 @@ public data class CallParticipantState(
     public var screenSharingTrack: VideoTrack? = null,
     public var publishedTracks: Set<TrackType> = emptySet(),
     public var videoTrackSize: Pair<Int, Int> = Pair(0, 0),
-    public var audioLevel: Float = 0f
+    public var audioLevel: Float = 0f,
+    public var isSpeaking: Boolean = false
 ) {
     public val hasVideo: Boolean
         get() = TrackType.TRACK_TYPE_VIDEO in publishedTracks

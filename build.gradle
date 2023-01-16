@@ -27,7 +27,11 @@ subprojects {
     apply from: "$rootDir/spotless/spotless.gradle"
     if (it.name != "app" && it.name != "dogfooding" && it.name != "chat-with-video-sample") {
         tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
-            kotlinOptions.freeCompilerArgs += ["-Xexplicit-api=strict", "-Xjvm-default=enable"]
+            kotlinOptions.freeCompilerArgs += [
+                    "-Xexplicit-api=strict",
+                    "-Xjvm-default=enable",
+                    "-opt-in=io.getstream.video.android.core.internal.InternalStreamVideoApi"
+            ]
         }
     }
 }

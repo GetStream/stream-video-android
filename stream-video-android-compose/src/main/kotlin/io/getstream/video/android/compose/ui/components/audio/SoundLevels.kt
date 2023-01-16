@@ -16,83 +16,115 @@
 
 package io.getstream.video.android.compose.ui.components.audio
 
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.size
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.keyframes
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 
 /**
- * Used to indicate the sound levels of a given participant.
+ * Used to indicate the active sound levels of a given participant.
  *
- * @param audioLevel The active level of audio of the participant.
+ * @param modifier Modifier for styling.
  */
 @Composable
-public fun SoundLevels(audioLevel: Float) {
-    val levels = remember { mutableStateOf(listOf<Float>()) }
-    val activeColor = VideoTheme.colors.primaryAccent
-    val inactiveColor = Color.White
+public fun ActiveSoundLevels(modifier: Modifier) {
+    val color = VideoTheme.colors.primaryAccent
 
-    calculateLevels(levels, audioLevel) // TODO - check the state and result of this
+    val firstLevel = remember { Animatable(0.5f) }
+    val secondLevel = remember { Animatable(1f) }
+    val thirdLevel = remember { Animatable(0.5f) }
 
-    Canvas(
-        modifier = Modifier.size(
-            height = 16.dp,
-            width = 24.dp
-        ),
-        onDraw = {
-            val values = levels.value
+    LaunchedEffect(Unit) {
+        firstLevel.animateTo(
+            1f,
+            animationSpec = infiniteRepeatable(
+                animation = keyframes {
+                    durationMillis = 800
 
-            val first = values.getOrNull(0) ?: -1f
-            drawAudioLevel(first, activeColor, inactiveColor, 0f)
-
-            val second = values.getOrNull(1) ?: -1f
-            drawAudioLevel(second, activeColor, inactiveColor, 15f)
-
-            val third = values.getOrNull(2) ?: -1f
-            drawAudioLevel(third, activeColor, inactiveColor, 30f)
-        }
-    )
-}
-
-private fun DrawScope.drawAudioLevel(
-    audioLevel: Float,
-    activeColor: Color,
-    inactiveColor: Color,
-    offsetX: Float
-) {
-    val offsetY = when {
-        audioLevel < 0f -> 25f
-        audioLevel in 0f..0.5f -> 25f
-        audioLevel > 0.5f -> 0f
-        else -> 25f
+                    0.5f at 0
+                    0.75f at 200
+                    1f at 400
+                    0.75f at 600
+                    0.5f at 800
+                }
+            )
+        )
     }
 
-    drawLine(
-        color = if (audioLevel <= 0f) inactiveColor else activeColor,
-        end = Offset(offsetX, offsetY),
-        start = Offset(offsetX, 50f),
-        strokeWidth = 6f
-    )
-}
+    LaunchedEffect(Unit) {
+        secondLevel.animateTo(
+            0.5f,
+            animationSpec = infiniteRepeatable(
+                animation = keyframes {
+                    durationMillis = 800
 
-private fun calculateLevels(levels: MutableState<List<Float>>, currentLevel: Float) {
-    val list = levels.value.toMutableList()
+                    1f at 0
+                    0.75f at 200
+                    0.5f at 400
+                    0.75f at 600
+                    1f at 800
+                }
+            )
+        )
+    }
 
-    if (list.size < 3) {
-        list.add(currentLevel)
+    LaunchedEffect(Unit) {
+        thirdLevel.animateTo(
+            1f,
+            animationSpec = infiniteRepeatable(
+                animation = keyframes {
+                    durationMillis = 800
 
-        levels.value = list
-    } else {
-        val lastTwo = list.takeLast(2)
+                    0.5f at 0
+                    0.75f at 200
+                    1f at 400
+                    0.75f at 600
+                    0.5f at 800
+                }
+            )
+        )
+    }
 
-        levels.value = lastTwo + currentLevel
+    Row(
+        modifier = modifier.height(height = VideoTheme.dimens.audioLevelIndicatorBarMaxHeight),
+        verticalAlignment = Alignment.Bottom
+    ) {
+        Spacer(
+            modifier = Modifier
+                .width(VideoTheme.dimens.audioLevelIndicatorBarWidth)
+                .fillMaxHeight(firstLevel.value)
+                .background(color = color, shape = RoundedCornerShape(16.dp))
+        )
+
+        Spacer(modifier = Modifier.width(VideoTheme.dimens.audioLevelIndicatorBarSeparatorWidth))
+
+        Spacer(
+            modifier = Modifier
+                .width(VideoTheme.dimens.audioLevelIndicatorBarWidth)
+                .fillMaxHeight(fraction = secondLevel.value)
+                .background(color = color, shape = RoundedCornerShape(16.dp))
+        )
+
+        Spacer(modifier = Modifier.width(VideoTheme.dimens.audioLevelIndicatorBarSeparatorWidth))
+
+        Spacer(
+            modifier = Modifier
+                .width(VideoTheme.dimens.audioLevelIndicatorBarWidth)
+                .fillMaxHeight(fraction = thirdLevel.value)
+                .background(color = color, shape = RoundedCornerShape(16.dp))
+        )
     }
 }

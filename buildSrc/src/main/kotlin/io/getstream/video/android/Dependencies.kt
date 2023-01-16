@@ -13,6 +13,7 @@ object Versions {
     internal const val MATERIAL = "1.6.1"
     internal const val ANDROIDX_APPCOMPAT = "1.4.2"
     internal const val ANDROIDX_CORE = "1.9.0"
+    internal const val ANDROIDX_ANNOTATIONS = "1.5.0"
     internal const val ANDROIDX_LIFECYCLE = "2.5.1"
     internal const val ANDROIDX_STARTUP = "1.1.1"
     internal const val ANDROIDX_ACTIVITY = "1.5.1"
@@ -61,6 +62,7 @@ object Dependencies {
     const val androidxAppcompat = "androidx.appcompat:appcompat:${Versions.ANDROIDX_APPCOMPAT}"
     const val androidxCore = "androidx.core:core-ktx:${Versions.ANDROIDX_CORE}"
     const val androidxActivity = "androidx.activity:activity-ktx:${Versions.ANDROIDX_ACTIVITY}"
+    const val androidxAnnotations = "androidx.annotation:annotation:${Versions.ANDROIDX_ANNOTATIONS}"
     const val androidxLifecycleViewModel =
         "androidx.lifecycle:lifecycle-viewmodel-ktx:${Versions.ANDROIDX_LIFECYCLE}"
     const val androidxLifecycleRuntime =

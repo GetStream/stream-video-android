@@ -111,6 +111,7 @@ import stream.video.sfu.event.JoinRequest
 import stream.video.sfu.event.JoinResponse
 import stream.video.sfu.models.CallState
 import stream.video.sfu.models.ICETrickle
+import stream.video.sfu.models.Participant
 import stream.video.sfu.models.PeerType
 import stream.video.sfu.models.TrackInfo
 import stream.video.sfu.models.TrackType
@@ -442,6 +443,8 @@ internal class CallClientImpl(
     private suspend fun loadParticipantsData(callState: CallState?, callSettings: CallSettings) {
         logger.d { "[loadParticipantsData] #sfu; callState: $callState, callSettings: $callSettings" }
         if (callState != null) {
+            setPartialParticipants(callState.participants)
+
             val query = filterAdapter.toJson(
                 InFilterObject(
                     "id",
@@ -454,26 +457,25 @@ internal class CallClientImpl(
             )
 
             if (userQueryResult is Success) {
-                call?.setParticipants(
-                    callState.participants.map {
-                        val user =
-                            userQueryResult.data.firstOrNull { user -> user.id == it.user_id }
-                        val isLocal = it.user_id == getCurrentUserId()
-
-                        CallParticipantState(
-                            id = it.user_id,
-                            role = user?.role ?: "",
-                            name = user?.name ?: "",
-                            profileImageURL = user?.imageUrl,
-                            sessionId = it.session_id,
-                            idPrefix = it.track_lookup_prefix,
-                            isLocal = isLocal,
-                            isOnline = !isLocal
-                        )
-                    }
-                )
+                call?.upsertParticipants(userQueryResult.data)
             }
         }
+    }
+
+    private fun setPartialParticipants(participants: List<Participant>) {
+        call?.setParticipants(
+            participants.map {
+                CallParticipantState(
+                    id = it.user_id,
+                    sessionId = it.session_id,
+                    idPrefix = it.track_lookup_prefix,
+                    isLocal = it.session_id == sessionId,
+                    name = "",
+                    profileImageURL = "",
+                    role = ""
+                )
+            }
+        )
     }
 
     private suspend fun initializeCall(
@@ -663,13 +665,10 @@ internal class CallClientImpl(
             when (event) {
                 is ICETrickleEvent -> handleTrickle(event)
                 is SubscriberOfferEvent -> handleSubscriberOffer(event)
-                is PublisherAnswerEvent -> { // TODO - do we need anyhting here?
-                }
+                is PublisherAnswerEvent -> Unit
                 is ParticipantJoinedEvent -> addParticipant(event)
                 is ParticipantLeftEvent -> call?.removeParticipant(event)
-                is ChangePublishQualityEvent -> {
-                    // updatePublishQuality(event) -> TODO - re-enable once we send the proper quality (dimensions)
-                }
+                is ChangePublishQualityEvent -> Unit
                 is ConnectionQualityChangeEvent -> call?.updateConnectionQuality(event.updates)
                 is AudioLevelChangedEvent -> call?.updateAudioLevel(event)
                 is TrackPublishedEvent -> {
@@ -694,7 +693,7 @@ internal class CallClientImpl(
 
         if (userQueryResult is Success) {
             val user = userQueryResult.data.first()
-            val isLocal = user.id == getCurrentUserId()
+            val isLocal = event.participant.session_id == sessionId
 
             call?.addParticipant(
                 CallParticipantState(
@@ -705,7 +704,6 @@ internal class CallClientImpl(
                     sessionId = event.participant.session_id,
                     idPrefix = event.participant.track_lookup_prefix,
                     isLocal = isLocal,
-                    isOnline = !isLocal
                 )
             )
         }

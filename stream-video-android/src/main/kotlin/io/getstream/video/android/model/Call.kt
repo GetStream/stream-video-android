@@ -278,6 +278,26 @@ public class Call(
         }
     }
 
+    /**
+     * Upserts the user data with personal information.
+     *
+     * @param data The list of user data items containing expanded information.
+     */
+    internal fun upsertParticipants(data: List<CallUser>) {
+        val current = this._callParticipants.value
+        val updated = current.map { participant ->
+            val user = data.firstOrNull { it.id == participant.id }
+
+            participant.copy(
+                role = user?.role ?: participant.role,
+                name = user?.name ?: participant.name,
+                profileImageURL = user?.imageUrl ?: participant.profileImageURL
+            )
+        }
+
+        this._callParticipants.value = updated
+    }
+
     internal fun updateMuteState(
         userId: String,
         sessionId: String,
@@ -478,7 +498,10 @@ public class Call(
             val index = current.indexOfFirst { it.id == userId }
 
             if (index != -1) {
-                val updatedUser = current[index].copy(audioLevel = level)
+                val updatedUser = current[index].copy(
+                    audioLevel = level.audioLevel,
+                    isSpeaking = level.isSpeaking
+                )
                 current.removeAt(index)
                 current.add(index, updatedUser)
             }
@@ -497,7 +520,7 @@ public class Call(
         val qualityMap = updates.associateBy { it.session_id }
 
         val current = _callParticipants.value
-        current.map { user ->
+        val updated = current.map { user ->
             val qualityInfo = qualityMap[user.sessionId]
 
             if (qualityInfo != null) {
@@ -506,5 +529,7 @@ public class Call(
                 user
             }
         }
+
+        _callParticipants.value = updated
     }
 }

@@ -24,6 +24,7 @@ import android.os.Looper
 import android.util.AttributeSet
 import android.view.TextureView
 import android.view.TextureView.SurfaceTextureListener
+import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import org.webrtc.EglBase
 import org.webrtc.EglRenderer
 import org.webrtc.GlRectDrawer
@@ -36,6 +37,7 @@ import java.util.concurrent.CountDownLatch
 /**
  * Custom [TextureView] used to render local/incoming videos on the screen.
  */
+@InternalStreamVideoApi
 public open class TextureViewRenderer @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
