@@ -118,6 +118,7 @@ class ChatWithVideoApp : Application() {
         chatClient.disconnect(true).enqueue()
         streamVideo.clearCallState()
         streamVideo.removeDevices(preferences.getDevices())
+        preferences.clear()
     }
 }
 
