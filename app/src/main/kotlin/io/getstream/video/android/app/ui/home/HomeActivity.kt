@@ -45,7 +45,6 @@ import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -58,10 +57,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.app.VideoApp
 import io.getstream.video.android.app.model.HomeScreenOption
-import io.getstream.video.android.app.ui.call.CallActivity
-import io.getstream.video.android.app.ui.call.XmlCallActivity
 import io.getstream.video.android.app.ui.components.UserList
 import io.getstream.video.android.app.ui.login.LoginActivity
 import io.getstream.video.android.app.user.AppUser
@@ -73,9 +69,6 @@ import io.getstream.video.android.compose.ui.components.avatar.InitialsAvatar
 import io.getstream.video.android.utils.initials
 import io.getstream.video.android.utils.onError
 import io.getstream.video.android.utils.onSuccess
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 class HomeActivity : AppCompatActivity() {
@@ -108,20 +101,6 @@ class HomeActivity : AppCompatActivity() {
     private val loadingState: MutableState<Boolean> = mutableStateOf(false)
 
     private val ringingState: MutableState<Boolean> = mutableStateOf(true)
-
-    /** Will only be used if join call is selected. In case of ringing calls the activity specified in [VideoApp] will
-     * be used.
-     * */
-    private val useXmlCallUi: MutableStateFlow<Boolean> by lazy {
-        MutableStateFlow(
-            getSharedPreferences(JOIN_CALL_PREF_NAME, Context.MODE_PRIVATE).getBoolean(JOIN_CALL_UI_KIT, false)
-        ).apply {
-            onEach {
-                getSharedPreferences(JOIN_CALL_PREF_NAME, Context.MODE_PRIVATE).edit().putBoolean(JOIN_CALL_UI_KIT, it)
-                    .apply()
-            }.launchIn(lifecycleScope)
-        }
-    }
 
     init {
         logger.i { "<init> this: $this" }
@@ -249,23 +228,6 @@ class HomeActivity : AppCompatActivity() {
         ) {
             Text(text = "Join call")
         }
-
-        Row(Modifier.align(CenterHorizontally)) {
-            Text(
-                modifier = Modifier.padding(4.dp),
-                text = "Compose"
-            )
-
-            Switch(
-                checked = useXmlCallUi.collectAsState().value,
-                onCheckedChange = { useXmlCallUi.value = !useXmlCallUi.value }
-            )
-
-            Text(
-                modifier = Modifier.padding(4.dp),
-                text = "XML"
-            )
-        }
     }
 
     private fun createCall(
@@ -300,7 +262,6 @@ class HomeActivity : AppCompatActivity() {
             result.onSuccess { data ->
                 logger.v { "[createMeeting] successful: $data" }
                 loadingState.value = false
-                launchCallScreen()
             }
 
             result.onError {
@@ -322,7 +283,6 @@ class HomeActivity : AppCompatActivity() {
                 ringing = true
             ).onSuccess {
                 logger.v { "[dialUsers] completed: $it" }
-                launchCallScreen()
             }.onError {
                 logger.e { "[dialUsers] failed: $it" }
                 Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
@@ -342,24 +302,11 @@ class HomeActivity : AppCompatActivity() {
                 ringing = false
             ).onSuccess { data ->
                 logger.v { "[joinCall] succeed: $data" }
-                launchCallScreen()
             }.onError {
                 logger.e { "[joinCall] failed: $it" }
                 Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
             }
             loadingState.value = false
-        }
-    }
-
-    private fun launchCallScreen() {
-        if (useXmlCallUi.value) {
-            startActivity(
-                Intent(this, XmlCallActivity::class.java)
-            )
-        } else {
-            startActivity(
-                Intent(this, CallActivity::class.java)
-            )
         }
     }
 
