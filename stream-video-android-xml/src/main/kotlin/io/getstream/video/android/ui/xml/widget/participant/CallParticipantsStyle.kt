@@ -18,11 +18,17 @@ package io.getstream.video.android.ui.xml.widget.participant
 
 import android.content.Context
 import android.util.AttributeSet
+import androidx.annotation.Px
 import io.getstream.video.android.ui.xml.R
+import io.getstream.video.android.ui.xml.utils.extensions.getDimension
 import io.getstream.video.android.ui.xml.utils.extensions.use
+import io.getstream.video.android.ui.common.R as RCommon
 
 public data class CallParticipantsStyle(
     public val callParticipantStyle: Int,
+    @Px public val localParticipantHeight: Float,
+    @Px public val localParticipantWidth: Float,
+    @Px public val localParticipantPadding: Float,
 ) {
 
     internal companion object {
@@ -33,6 +39,7 @@ public data class CallParticipantsStyle(
                 R.attr.streamCallParticipantsViewStyle,
                 R.style.Stream_CallParticipants
             ).use {
+
                 val callParticipantStyle = it.getResourceId(
                     R.styleable.CallParticipantsView_streamCallParticipantsCallParticipantStyle,
                     context.theme.obtainStyledAttributes(
@@ -41,8 +48,26 @@ public data class CallParticipantsStyle(
                     ).getResourceId(0, 0)
                 )
 
+                val localParticipantHeight = it.getDimension(
+                    R.styleable.CallParticipantsView_streamCallParticipantsLocalParticipantHeight,
+                    context.getDimension(RCommon.dimen.floatingVideoHeight).toFloat()
+                )
+
+                val localParticipantWidth = it.getDimension(
+                    R.styleable.CallParticipantsView_streamCallParticipantsLocalParticipantWidth,
+                    context.getDimension(RCommon.dimen.floatingVideoWidth).toFloat()
+                )
+
+                val localParticipantPadding = it.getDimension(
+                    R.styleable.CallParticipantsView_streamCallParticipantsLocalParticipantPadding,
+                    context.getDimension(RCommon.dimen.floatingVideoPadding).toFloat()
+                )
+
                 return CallParticipantsStyle(
-                    callParticipantStyle = callParticipantStyle
+                    callParticipantStyle = callParticipantStyle,
+                    localParticipantHeight = localParticipantHeight,
+                    localParticipantWidth = localParticipantWidth,
+                    localParticipantPadding = localParticipantPadding
                 )
             }
         }

@@ -16,16 +16,23 @@
 
 package io.getstream.video.android.ui.xml.widget.participant
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
+import android.view.MotionEvent
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.constraintlayout.widget.Guideline
+import androidx.core.view.setMargins
 import androidx.transition.TransitionManager
+import io.getstream.log.StreamLog
 import io.getstream.video.android.model.CallParticipantState
 import io.getstream.video.android.ui.xml.R
+import io.getstream.video.android.ui.xml.utils.extensions.dpToPx
+import io.getstream.video.android.ui.xml.utils.extensions.dpToPxPrecise
 import io.getstream.video.android.ui.xml.utils.extensions.updateConstraints
+import java.util.UUID
 
 /**
  * Renders the call participants depending on the number of the participants and the call state.
@@ -93,6 +100,8 @@ public class CallParticipantsView : ConstraintLayout {
         }
     }
 
+    private var localParticipant: FloatingParticipantView? = null
+
     /**
      * Updates the participants which are to be rendered on the screen. Up to 4 participants view will be shown at any
      * time. In case a new participant comes in or an old one leaves will add/remove [CallParticipantView] for that
@@ -101,6 +110,72 @@ public class CallParticipantsView : ConstraintLayout {
      * @param participants The list of the participants in the current call.
      */
     public fun updateParticipants(participants: List<CallParticipantState>) {
+        updateRemoteParticipants(participants.filter { !it.isLocal })
+        updateLocalParticipant(participants.firstOrNull { it.isLocal })
+    }
+
+    private fun updateLocalParticipant(participant: CallParticipantState?) {
+        if (participant != null) {
+            if (localParticipant == null) {
+                localParticipant = FloatingParticipantView(context)
+                if (::rendererInitializer.isInitialized) localParticipant?.setRendererInitializer(rendererInitializer)
+                localParticipant?.let { localParticipant ->
+                    localParticipant.id = UUID.randomUUID().hashCode()
+                    localParticipant.layoutParams =
+                        LayoutParams(style.localParticipantWidth.toInt(), style.localParticipantHeight.toInt())
+                    localParticipant.translationX = calculateFloatingParticipantMaxXOffset()
+                    localParticipant.translationY = style.localParticipantPadding
+                    addView(localParticipant)
+                    setLocalParticipantDragInteraction()
+                }
+            }
+            localParticipant?.setParticipant(participant)
+        } else if (localParticipant != null) {
+            removeView(localParticipant)
+            localParticipant = null
+        }
+        localParticipant?.bringToFront()
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private fun setLocalParticipantDragInteraction() {
+        val maxDx = calculateFloatingParticipantMaxXOffset()
+        val maxDy = calculateFloatingParticipantMaxYOffset()
+
+        var dx = 0f
+        var dy = 0f
+        localParticipant?.setOnTouchListener { view, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    dx = view.x - event.rawX
+                    dy = view.y - event.rawY
+                }
+
+                MotionEvent.ACTION_MOVE -> {
+                    val newX = event.rawX + dx
+                    val newY = event.rawY + dy
+
+                    view.animate()
+                        .x(newX.coerceIn(style.localParticipantPadding, maxDx))
+                        .y(newY.coerceIn(style.localParticipantPadding, maxDy))
+                        .setDuration(0)
+                        .start()
+                }
+            }
+
+            false
+        }
+    }
+
+    private fun calculateFloatingParticipantMaxXOffset(): Float {
+        return measuredWidth - style.localParticipantWidth - style.localParticipantPadding
+    }
+
+    private fun calculateFloatingParticipantMaxYOffset(): Float {
+        return measuredHeight - style.localParticipantHeight - style.localParticipantPadding
+    }
+
+    private fun updateRemoteParticipants(participants: List<CallParticipantState>) {
         when {
             participants.size > childList.size -> {
                 val missingParticipants = participants.filter { !childList.map { it.tag }.contains(it.id) }

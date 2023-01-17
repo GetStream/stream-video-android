@@ -14,27 +14,40 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.ui.xml.widget.local
+package io.getstream.video.android.ui.xml.widget.participant
 
 import android.content.Context
 import android.util.AttributeSet
-import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.cardview.widget.CardView
+import io.getstream.video.android.model.CallParticipantState
+import io.getstream.video.android.ui.xml.databinding.ViewFloatingParticipantBinding
 import io.getstream.video.android.ui.xml.utils.extensions.createStreamThemeWrapper
+import io.getstream.video.android.ui.xml.utils.extensions.streamThemeInflater
 
-public class LocalVideoView : ConstraintLayout {
+public class FloatingParticipantView : CardView {
+
+    private val binding = ViewFloatingParticipantBinding.inflate(streamThemeInflater, this)
 
     public constructor(context: Context) : this(context, null)
     public constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
-    public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : this(context, attrs, defStyleAttr, 0)
-    public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(
+    public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
         context.createStreamThemeWrapper(),
         attrs,
-        defStyleAttr,
-        defStyleRes
+        defStyleAttr
     ) {
         init(context, attrs)
     }
 
     private fun init(context: Context, attrs: AttributeSet?) {
+        isClickable = true
+        isFocusable = true
+    }
+
+    public fun setRendererInitializer(rendererInitializer: RendererInitializer) {
+        binding.localParticipant.setRendererInitializer(rendererInitializer)
+    }
+
+    public fun setParticipant(participant: CallParticipantState) {
+        binding.localParticipant.setParticipant(participant)
     }
 }

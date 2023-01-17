@@ -25,6 +25,7 @@ import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.StreamVideoBuilder
 import io.getstream.video.android.app.ui.call.CallActivity
 import io.getstream.video.android.app.ui.call.CallService
+import io.getstream.video.android.app.ui.call.XmlCallActivity
 import io.getstream.video.android.input.CallActivityInput
 import io.getstream.video.android.input.CallServiceInput
 import io.getstream.video.android.logging.LoggingLevel
@@ -69,8 +70,7 @@ class VideoApp : Application() {
             credentialsProvider = credentialsProvider,
             androidInputs = setOf(
                 CallServiceInput.from(CallService::class),
-                CallActivityInput.from(CallActivity::class),
-                // CallActivityInput.from(XmlCallActivity::class),
+                CallActivityInput.from(XmlCallActivity::class),
             ),
             loggingLevel = loggingLevel
         ).build().also {
