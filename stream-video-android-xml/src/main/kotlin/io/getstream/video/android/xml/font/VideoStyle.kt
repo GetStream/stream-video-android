@@ -14,17 +14,9 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.app.ui.call
+package io.getstream.video.android.xml.font
 
-import android.content.Context
-import io.getstream.video.android.StreamVideo
-import io.getstream.video.android.app.videoApp
-import io.getstream.video.android.xml.AbstractXmlCallActivity
-
-class XmlCallActivity : io.getstream.video.android.xml.AbstractXmlCallActivity() {
-
-    /**
-     * Provides the StreamVideo instance through the videoApp.
-     */
-    override fun getStreamVideo(context: Context): StreamVideo = videoApp.streamVideo
+public class VideoStyle {
+    public var defaultTextStyle: TextStyle? = null
+    public fun hasDefaultFont(): Boolean = defaultTextStyle?.hasFont() == true
 }

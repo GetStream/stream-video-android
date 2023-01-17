@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.app.ui.call
+package io.getstream.video.android.xml.widget.avatar
 
-import android.content.Context
-import io.getstream.video.android.StreamVideo
-import io.getstream.video.android.app.videoApp
-import io.getstream.video.android.xml.AbstractXmlCallActivity
-
-class XmlCallActivity : io.getstream.video.android.xml.AbstractXmlCallActivity() {
+/**
+ * Determines the shape of the avatar image in [AvatarView].
+ */
+public enum class AvatarShape(public val value: Int) {
+    /**
+     * Circle cropped image.
+     */
+    CIRCLE(0),
 
     /**
-     * Provides the StreamVideo instance through the videoApp.
+     * Round rect cropped image.
      */
-    override fun getStreamVideo(context: Context): StreamVideo = videoApp.streamVideo
+    ROUND_RECT(1)
 }

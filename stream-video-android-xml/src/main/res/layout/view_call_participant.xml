@@ -13,7 +13,7 @@
         android:layout_height="match_parent"
         />
 
-    <io.getstream.video.android.ui.xml.widget.avatar.AvatarView
+    <io.getstream.video.android.xml.widget.avatar.AvatarView
         android:id="@+id/participantAvatar"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

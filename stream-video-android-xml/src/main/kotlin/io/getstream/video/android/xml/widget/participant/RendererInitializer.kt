@@ -14,17 +14,21 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.app.ui.call
+package io.getstream.video.android.xml.widget.participant
 
-import android.content.Context
-import io.getstream.video.android.StreamVideo
-import io.getstream.video.android.app.videoApp
-import io.getstream.video.android.xml.AbstractXmlCallActivity
+import android.view.View
+import io.getstream.video.android.ui.TextureViewRenderer
+import stream.video.sfu.models.TrackType
 
-class XmlCallActivity : io.getstream.video.android.xml.AbstractXmlCallActivity() {
+/**
+ * Handler to initialize the renderer when the [TextureViewRenderer] has been created.
+ */
+public fun interface RendererInitializer {
 
-    /**
-     * Provides the StreamVideo instance through the videoApp.
-     */
-    override fun getStreamVideo(context: Context): StreamVideo = videoApp.streamVideo
+    public fun initRenderer(
+        videoRenderer: TextureViewRenderer,
+        streamId: String,
+        trackType: TrackType,
+        onRender: (View) -> Unit
+    )
 }

@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.app.ui.call
+package io.getstream.video.android.xml.utils
 
-import android.content.Context
-import io.getstream.video.android.StreamVideo
-import io.getstream.video.android.app.videoApp
-import io.getstream.video.android.xml.AbstractXmlCallActivity
+/**
+ * Disposable resource. Implementations of this interface can be disposed once their work is done or the result is
+ * no longer necessary
+ */
+public interface Disposable {
 
-class XmlCallActivity : io.getstream.video.android.xml.AbstractXmlCallActivity() {
+    public val isDisposed: Boolean
 
     /**
-     * Provides the StreamVideo instance through the videoApp.
+     * Disposes the resource
      */
-    override fun getStreamVideo(context: Context): StreamVideo = videoApp.streamVideo
+    public fun dispose()
 }

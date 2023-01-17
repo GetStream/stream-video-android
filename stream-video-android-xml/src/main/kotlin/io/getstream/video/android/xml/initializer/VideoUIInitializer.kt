@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.app.ui.call
+package io.getstream.video.android.xml.initializer
 
 import android.content.Context
-import io.getstream.video.android.StreamVideo
-import io.getstream.video.android.app.videoApp
-import io.getstream.video.android.xml.AbstractXmlCallActivity
+import androidx.startup.Initializer
+import io.getstream.video.android.xml.VideoUI
 
-class XmlCallActivity : io.getstream.video.android.xml.AbstractXmlCallActivity() {
+/**
+ * Jetpack Startup Initializer for Stream's Video UI Components.
+ */
+public class VideoUIInitializer : Initializer<Unit> {
 
-    /**
-     * Provides the StreamVideo instance through the videoApp.
-     */
-    override fun getStreamVideo(context: Context): StreamVideo = videoApp.streamVideo
+    override fun create(context: Context) {
+        VideoUI.appContext = context
+    }
+
+    override fun dependencies(): MutableList<Class<out Initializer<*>>> = mutableListOf()
 }
