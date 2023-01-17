@@ -94,6 +94,7 @@ public abstract class io/getstream/video/android/compose/state/ui/participants/P
 }
 
 public final class io/getstream/video/android/compose/theme/StreamColors {
+	public static final field $stable I
 	public static final field Companion Lio/getstream/video/android/compose/theme/StreamColors$Companion;
 	public synthetic fun <init> (JJJJJJJJJJJJJJJLkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1-0d7_KjU ()J
@@ -139,6 +140,7 @@ public final class io/getstream/video/android/compose/theme/StreamColors$Compani
 }
 
 public final class io/getstream/video/android/compose/theme/StreamDimens {
+	public static final field $stable I
 	public static final field Companion Lio/getstream/video/android/compose/theme/StreamDimens$Companion;
 	public synthetic fun <init> (FFFFFFFFFFFJJJJFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFLkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1-D9Ej5fM ()F
@@ -243,6 +245,7 @@ public final class io/getstream/video/android/compose/theme/StreamDimens$Compani
 }
 
 public final class io/getstream/video/android/compose/theme/StreamShapes {
+	public static final field $stable I
 	public static final field Companion Lio/getstream/video/android/compose/theme/StreamShapes$Companion;
 	public fun <init> (Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;)V
 	public final fun component1 ()Landroidx/compose/ui/graphics/Shape;
@@ -273,6 +276,7 @@ public final class io/getstream/video/android/compose/theme/StreamShapes$Compani
 }
 
 public final class io/getstream/video/android/compose/theme/StreamTypography {
+	public static final field $stable I
 	public static final field Companion Lio/getstream/video/android/compose/theme/StreamTypography$Companion;
 	public fun <init> (Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;)V
 	public final fun component1 ()Landroidx/compose/ui/text/TextStyle;
