@@ -22,8 +22,17 @@ import androidx.annotation.Px
 import io.getstream.video.android.ui.xml.R
 import io.getstream.video.android.ui.xml.utils.extensions.getDimension
 import io.getstream.video.android.ui.xml.utils.extensions.use
+import io.getstream.video.android.ui.xml.widget.transformer.TransformStyle
 import io.getstream.video.android.ui.common.R as RCommon
 
+/**
+ * Style for [CallParticipantsView].
+ * Use this class together with [TransformStyle.callParticipantsStyleTransformer] to change [CallParticipantsView]
+ * styles programmatically.
+ *
+ * @param callParticipantStyle The id of the custom style for [CallParticipantView] to be applied for each remote
+ * participant.
+ */
 public data class CallParticipantsStyle(
     public val callParticipantStyle: Int,
     @Px public val localParticipantHeight: Float,
@@ -75,7 +84,7 @@ public data class CallParticipantsStyle(
                     localParticipantWidth = localParticipantWidth,
                     localParticipantPadding = localParticipantPadding,
                     localParticipantRadius = localParticipantRadius
-                )
+                ).let(TransformStyle.callParticipantsStyleTransformer::transform)
             }
         }
     }

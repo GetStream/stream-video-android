@@ -22,6 +22,8 @@ import io.getstream.video.android.ui.xml.widget.control.CallControlButtonStyle
 import io.getstream.video.android.ui.xml.widget.control.CallControlsStyle
 import io.getstream.video.android.ui.xml.widget.incoming.IncomingCallStyle
 import io.getstream.video.android.ui.xml.widget.outgoing.OutgoingCallStyle
+import io.getstream.video.android.ui.xml.widget.participant.CallParticipantStyle
+import io.getstream.video.android.ui.xml.widget.participant.CallParticipantsStyle
 
 public object TransformStyle {
     @JvmStatic
@@ -36,6 +38,10 @@ public object TransformStyle {
     public var callControlsStyleTransformer: StyleTransformer<CallControlsStyle> = noopTransformer()
     @JvmStatic
     public var callControlButtonStyleTransformer: StyleTransformer<CallControlButtonStyle> = noopTransformer()
+    @JvmStatic
+    public var callParticipantStyleTransformer: StyleTransformer<CallParticipantStyle> = noopTransformer()
+    @JvmStatic
+    public var callParticipantsStyleTransformer: StyleTransformer<CallParticipantsStyle> = noopTransformer()
 
     private fun <T> noopTransformer() = StyleTransformer<T> { it }
 }
