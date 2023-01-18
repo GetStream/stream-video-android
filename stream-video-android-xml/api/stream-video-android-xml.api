@@ -553,12 +553,16 @@ public final class io/getstream/video/android/ui/xml/widget/transformer/Transfor
 	public static final fun getCallControlButtonStyleTransformer ()Lio/getstream/video/android/ui/xml/widget/transformer/StyleTransformer;
 	public static final fun getCallControlsStyleTransformer ()Lio/getstream/video/android/ui/xml/widget/transformer/StyleTransformer;
 	public static final fun getCallDetailsStyleTransformer ()Lio/getstream/video/android/ui/xml/widget/transformer/StyleTransformer;
+	public static final fun getCallParticipantStyleTransformer ()Lio/getstream/video/android/ui/xml/widget/transformer/StyleTransformer;
+	public static final fun getCallParticipantsStyleTransformer ()Lio/getstream/video/android/ui/xml/widget/transformer/StyleTransformer;
 	public static final fun getIncomingCallStyleTransformer ()Lio/getstream/video/android/ui/xml/widget/transformer/StyleTransformer;
 	public static final fun getOutgoingCallStyleTransformer ()Lio/getstream/video/android/ui/xml/widget/transformer/StyleTransformer;
 	public static final fun setAvatarStyleTransformer (Lio/getstream/video/android/ui/xml/widget/transformer/StyleTransformer;)V
 	public static final fun setCallControlButtonStyleTransformer (Lio/getstream/video/android/ui/xml/widget/transformer/StyleTransformer;)V
 	public static final fun setCallControlsStyleTransformer (Lio/getstream/video/android/ui/xml/widget/transformer/StyleTransformer;)V
 	public static final fun setCallDetailsStyleTransformer (Lio/getstream/video/android/ui/xml/widget/transformer/StyleTransformer;)V
+	public static final fun setCallParticipantStyleTransformer (Lio/getstream/video/android/ui/xml/widget/transformer/StyleTransformer;)V
+	public static final fun setCallParticipantsStyleTransformer (Lio/getstream/video/android/ui/xml/widget/transformer/StyleTransformer;)V
 	public static final fun setIncomingCallStyleTransformer (Lio/getstream/video/android/ui/xml/widget/transformer/StyleTransformer;)V
 	public static final fun setOutgoingCallStyleTransformer (Lio/getstream/video/android/ui/xml/widget/transformer/StyleTransformer;)V
 }

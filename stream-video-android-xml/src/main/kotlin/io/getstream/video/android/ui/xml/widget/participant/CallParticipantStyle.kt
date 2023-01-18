@@ -30,8 +30,23 @@ import io.getstream.video.android.ui.xml.utils.extensions.getDimension
 import io.getstream.video.android.ui.xml.utils.extensions.getDrawableCompat
 import io.getstream.video.android.ui.xml.utils.extensions.getEnum
 import io.getstream.video.android.ui.xml.utils.extensions.use
+import io.getstream.video.android.ui.xml.widget.transformer.TransformStyle
 import io.getstream.video.android.ui.common.R as RCommon
 
+/**
+ * Style for [CallParticipantView].
+ * Use this class together with [TransformStyle.callParticipantStyleTransformer] to change [CallParticipantView]
+ * styles programmatically.
+ *
+ * @param tagAlignment The alignment of the microphone off/on icon and name tag.
+ * @param tagPadding The padding between the name tag and the [CallParticipantView] borders.
+ * @param activeSpeakerBorderColor The colour of the active speaking participant border.
+ * @param tagTextStyle The text style for the participants name tag.
+ * @param tagBackgroundColor The colour of the participant name tag background.
+ * @param participantMicOffIcon The icon indicating when the participants microphone is off.
+ * @param participantMicOffIconTint The colour of the microphone off indicator drawable.
+ * @param participantAudioLevelTint The color of the audio level when the microphone is on.
+ */
 public data class CallParticipantStyle(
     public val tagAlignment: CallParticipantTagAlignment,
     @Px public val tagPadding: Int,
@@ -119,7 +134,7 @@ public data class CallParticipantStyle(
                     participantMicOffIcon = participantMicOffIcon,
                     participantMicOffIconTint = participantMicOffIconTint,
                     participantAudioLevelTint = participantAudioLevelTint
-                )
+                ).let(TransformStyle.callParticipantStyleTransformer::transform)
             }
         }
     }

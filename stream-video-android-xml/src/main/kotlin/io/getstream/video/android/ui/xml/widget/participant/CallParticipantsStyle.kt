@@ -20,7 +20,16 @@ import android.content.Context
 import android.util.AttributeSet
 import io.getstream.video.android.ui.xml.R
 import io.getstream.video.android.ui.xml.utils.extensions.use
+import io.getstream.video.android.ui.xml.widget.transformer.TransformStyle
 
+/**
+ * Style for [CallParticipantsView].
+ * Use this class together with [TransformStyle.callParticipantsStyleTransformer] to change [CallParticipantsView]
+ * styles programmatically.
+ *
+ * @param callParticipantStyle The id of the custom style for [CallParticipantView] to be applied for each remote
+ * participant.
+ */
 public data class CallParticipantsStyle(
     public val callParticipantStyle: Int,
 ) {
@@ -43,7 +52,7 @@ public data class CallParticipantsStyle(
 
                 return CallParticipantsStyle(
                     callParticipantStyle = callParticipantStyle
-                )
+                ).let(TransformStyle.callParticipantsStyleTransformer::transform)
             }
         }
     }
