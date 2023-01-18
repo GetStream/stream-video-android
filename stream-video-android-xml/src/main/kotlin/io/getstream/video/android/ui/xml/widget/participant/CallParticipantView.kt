@@ -132,6 +132,7 @@ public class CallParticipantView : ConstraintLayout {
      * @param participant The call participant whose video we wish to show.
      */
     public fun setParticipant(participant: CallParticipantState) {
+        binding.nameHolder.isVisible = !participant.isLocal
         setUserData(participant.toUser())
         setTrack(participant.videoTrack, participant.hasVideo)
         setHasAudio(participant.hasAudio)

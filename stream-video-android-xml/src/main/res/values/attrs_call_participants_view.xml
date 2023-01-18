@@ -5,5 +5,6 @@
         <attr name="streamCallParticipantsLocalParticipantHeight" format="dimension|reference" />
         <attr name="streamCallParticipantsLocalParticipantWidth" format="dimension|reference" />
         <attr name="streamCallParticipantsLocalParticipantPadding" format="dimension|reference" />
+        <attr name="streamCallParticipantsLocalParticipantRadius" format="dimension|reference" />
     </declare-styleable>
 </resources>

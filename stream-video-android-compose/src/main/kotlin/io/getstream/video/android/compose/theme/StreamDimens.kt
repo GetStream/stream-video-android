@@ -70,6 +70,7 @@ public data class StreamDimens(
     public val floatingVideoPadding: Dp,
     public val floatingVideoHeight: Dp,
     public val floatingVideoWidth: Dp,
+    public val floatingVideoRadius: Dp,
     public val screenShareParticipantItemSize: Dp,
     public val connectionIndicatorBarMaxHeight: Dp,
     public val connectionIndicatorBarWidth: Dp,
@@ -124,6 +125,7 @@ public data class StreamDimens(
             floatingVideoPadding = dimensionResource(id = R.dimen.floatingVideoPadding),
             floatingVideoHeight = dimensionResource(id = R.dimen.floatingVideoHeight),
             floatingVideoWidth = dimensionResource(id = R.dimen.floatingVideoWidth),
+            floatingVideoRadius = dimensionResource(id = R.dimen.floatingVideoRadius),
             screenShareParticipantItemSize = dimensionResource(id = R.dimen.screenShareParticipantItemSize),
             connectionIndicatorBarMaxHeight = dimensionResource(id = R.dimen.connectionIndicatorBarMaxHeight),
             connectionIndicatorBarWidth = dimensionResource(id = R.dimen.connectionIndicatorBarWidth),
@@ -131,7 +133,7 @@ public data class StreamDimens(
             audioLevelIndicatorBarMaxHeight = dimensionResource(id = R.dimen.audioLevelIndicatorBarMaxHeight),
             audioLevelIndicatorBarWidth = dimensionResource(id = R.dimen.audioLevelIndicatorBarWidth),
             audioLevelIndicatorBarSeparatorWidth = dimensionResource(id = R.dimen.audioLevelIndicatorBarSeparatorWidth),
-            audioStatusSize = dimensionResource(id = R.dimen.audioStatusSize)
+            audioStatusSize = dimensionResource(id = R.dimen.audioStatusSize),
         )
     }
 }

@@ -123,6 +123,7 @@ public class CallParticipantsView : ConstraintLayout {
                     localParticipant.id = UUID.randomUUID().hashCode()
                     localParticipant.layoutParams =
                         LayoutParams(style.localParticipantWidth.toInt(), style.localParticipantHeight.toInt())
+                    localParticipant.radius = style.localParticipantRadius
                     localParticipant.translationX = calculateFloatingParticipantMaxXOffset()
                     localParticipant.translationY = style.localParticipantPadding
                     addView(localParticipant)

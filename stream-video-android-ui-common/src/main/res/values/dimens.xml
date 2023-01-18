@@ -31,6 +31,7 @@
     <dimen name="floatingVideoPadding">16dp</dimen>
     <dimen name="floatingVideoHeight">150dp</dimen>
     <dimen name="floatingVideoWidth">125dp</dimen>
+    <dimen name="floatingVideoRadius">16dp</dimen>
     <dimen name="screenShareParticipantItemSize">110dp</dimen>
     <dimen name="connectionIndicatorBarMaxHeight">14dp</dimen>
     <dimen name="connectionIndicatorBarWidth">3dp</dimen>

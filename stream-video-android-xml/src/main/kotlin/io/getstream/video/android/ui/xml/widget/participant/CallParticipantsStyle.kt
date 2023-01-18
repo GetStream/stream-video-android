@@ -29,6 +29,7 @@ public data class CallParticipantsStyle(
     @Px public val localParticipantHeight: Float,
     @Px public val localParticipantWidth: Float,
     @Px public val localParticipantPadding: Float,
+    @Px public val localParticipantRadius: Float
 ) {
 
     internal companion object {
@@ -63,11 +64,17 @@ public data class CallParticipantsStyle(
                     context.getDimension(RCommon.dimen.floatingVideoPadding).toFloat()
                 )
 
+                val localParticipantRadius = it.getDimension(
+                    R.styleable.CallParticipantsView_streamCallParticipantsLocalParticipantRadius,
+                    context.getDimension(RCommon.dimen.floatingVideoRadius).toFloat()
+                )
+
                 return CallParticipantsStyle(
                     callParticipantStyle = callParticipantStyle,
                     localParticipantHeight = localParticipantHeight,
                     localParticipantWidth = localParticipantWidth,
-                    localParticipantPadding = localParticipantPadding
+                    localParticipantPadding = localParticipantPadding,
+                    localParticipantRadius = localParticipantRadius
                 )
             }
         }

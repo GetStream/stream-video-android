@@ -166,7 +166,7 @@ internal fun BoxScope.PortraitParticipants(
                     height = VideoTheme.dimens.floatingVideoHeight,
                     width = VideoTheme.dimens.floatingVideoWidth
                 )
-                .clip(RoundedCornerShape(16.dp))
+                .clip(RoundedCornerShape(VideoTheme.dimens.floatingVideoRadius))
                 .align(Alignment.TopEnd),
             paddingValues = paddingValues
         )
