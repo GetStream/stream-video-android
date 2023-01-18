@@ -24,13 +24,9 @@ import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.constraintlayout.widget.Guideline
-import androidx.core.view.setMargins
 import androidx.transition.TransitionManager
-import io.getstream.log.StreamLog
 import io.getstream.video.android.model.CallParticipantState
 import io.getstream.video.android.ui.xml.R
-import io.getstream.video.android.ui.xml.utils.extensions.dpToPx
-import io.getstream.video.android.ui.xml.utils.extensions.dpToPxPrecise
 import io.getstream.video.android.ui.xml.utils.extensions.updateConstraints
 import java.util.UUID
 
@@ -134,7 +130,6 @@ public class CallParticipantsView : ConstraintLayout {
                     localParticipant.translationY = style.localParticipantPadding
                     setLocalParticipantDragInteraction(localParticipant)
                     addView(localParticipant)
-
                 }
             }
             localParticipant?.setParticipant(participant)
