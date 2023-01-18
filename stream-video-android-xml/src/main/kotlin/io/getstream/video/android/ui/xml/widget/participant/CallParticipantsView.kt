@@ -103,9 +103,10 @@ public class CallParticipantsView : ConstraintLayout {
     private var localParticipant: FloatingParticipantView? = null
 
     /**
-     * Updates the participants which are to be rendered on the screen. Up to 4 participants view will be shown at any
-     * time. In case a new participant comes in or an old one leaves will add/remove [CallParticipantView] for that
-     * participant and will automatically arrange the views to fit inside the viewport.
+     * Updates the participants which are to be rendered on the screen. Up to 4 remote participants view will be shown
+     * at any time. In case a new participant comes in or an old one leaves will add/remove [CallParticipantView] for
+     * that participant and will automatically arrange the views to fit inside the viewport. The local participant will
+     * be overlaid over the remote participants in a floating  view.
      *
      * @param participants The list of the participants in the current call.
      */
@@ -114,6 +115,11 @@ public class CallParticipantsView : ConstraintLayout {
         updateLocalParticipant(participants.firstOrNull { it.isLocal })
     }
 
+    /**
+     * Creates and updates the local participant floating view.
+     *
+     * @param participant The local participant to be shown in a [FloatingParticipantView].
+     */
     private fun updateLocalParticipant(participant: CallParticipantState?) {
         if (participant != null) {
             if (localParticipant == null) {
@@ -138,6 +144,9 @@ public class CallParticipantsView : ConstraintLayout {
         localParticipant?.bringToFront()
     }
 
+    /**
+     * Sets the touch listener to the [FloatingParticipantView] showing the local user to enable dragging the view.
+     */
     @SuppressLint("ClickableViewAccessibility")
     private fun setLocalParticipantDragInteraction() {
         val maxDx = calculateFloatingParticipantMaxXOffset()
@@ -168,14 +177,30 @@ public class CallParticipantsView : ConstraintLayout {
         }
     }
 
+    /**
+     * Calculates the max X offset that can be applied to the overlaid [FloatingParticipantView] so that it can only be
+     * dragged inside this view accounting for the padding.
+     *
+     * @return The max X offset that can be applied to the overlaid [FloatingParticipantView].
+     */
     private fun calculateFloatingParticipantMaxXOffset(): Float {
         return measuredWidth - style.localParticipantWidth - style.localParticipantPadding
     }
 
+    /**
+     * Calculates the max Y offset that can be applied to the overlaid [FloatingParticipantView] so that it can only be
+     * dragged inside this view accounting for the padding.
+     *
+     * @return The max Y offset that can be applied to the overlaid [FloatingParticipantView].
+     */
     private fun calculateFloatingParticipantMaxYOffset(): Float {
         return measuredHeight - style.localParticipantHeight - style.localParticipantPadding
     }
 
+    /**
+     * Updates the remote participants. 4 remote participants will be shown at most in a grid. If a new participant
+     * joins the call or an old one leaves, a [CallParticipantView] will be added or removed.
+     */
     private fun updateRemoteParticipants(participants: List<CallParticipantState>) {
         when {
             participants.size > childList.size -> {

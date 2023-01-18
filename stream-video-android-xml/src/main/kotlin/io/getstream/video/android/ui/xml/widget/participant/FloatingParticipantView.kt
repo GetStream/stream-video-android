@@ -24,6 +24,9 @@ import io.getstream.video.android.ui.xml.databinding.ViewFloatingParticipantBind
 import io.getstream.video.android.ui.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.ui.xml.utils.extensions.streamThemeInflater
 
+/**
+ * Renders the call participant overlaid above the rest od the participants.
+ */
 public class FloatingParticipantView : CardView {
 
     private val binding = ViewFloatingParticipantBinding.inflate(streamThemeInflater, this)
@@ -34,19 +37,22 @@ public class FloatingParticipantView : CardView {
         context.createStreamThemeWrapper(),
         attrs,
         defStyleAttr
-    ) {
-        init(context, attrs)
-    }
+    )
 
-    private fun init(context: Context, attrs: AttributeSet?) {
-        isClickable = true
-        isFocusable = true
-    }
-
+    /**
+     * Sets the [RendererInitializer] handler so we can initialize the texture view with the renderer.
+     *
+     * @param rendererInitializer Handler to initialise the renderer.
+     */
     public fun setRendererInitializer(rendererInitializer: RendererInitializer) {
         binding.localParticipant.setRendererInitializer(rendererInitializer)
     }
 
+    /**
+     * Sets the participant for which we wish to display video for.
+     *
+     * @param participant The call participant whose video we wish to show.
+     */
     public fun setParticipant(participant: CallParticipantState) {
         binding.localParticipant.setParticipant(participant)
     }

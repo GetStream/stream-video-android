@@ -32,13 +32,18 @@ import io.getstream.video.android.ui.common.R as RCommon
  *
  * @param callParticipantStyle The id of the custom style for [CallParticipantView] to be applied for each remote
  * participant.
+ * @param localParticipantHeight The height of the [FloatingParticipantView] used fot the local user.
+ * @param localParticipantWidth The width of the [FloatingParticipantView] used fot the local user.
+ * @param localParticipantPadding The padding between the [FloatingParticipantView] used fot the local user and the
+ * borders of [CallParticipantsView].
+ * @param localParticipantRadius The corner radius of the [FloatingParticipantView] used fot the local user.
  */
 public data class CallParticipantsStyle(
     public val callParticipantStyle: Int,
     @Px public val localParticipantHeight: Float,
     @Px public val localParticipantWidth: Float,
     @Px public val localParticipantPadding: Float,
-    @Px public val localParticipantRadius: Float
+    @Px public val localParticipantRadius: Float,
 ) {
 
     internal companion object {
