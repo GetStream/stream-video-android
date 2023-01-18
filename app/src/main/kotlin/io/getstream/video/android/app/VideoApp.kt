@@ -70,8 +70,8 @@ class VideoApp : Application() {
             credentialsProvider = credentialsProvider,
             androidInputs = setOf(
                 CallServiceInput.from(CallService::class),
-                // CallActivityInput.from(CallActivity::class),
-                CallActivityInput.from(XmlCallActivity::class),
+                CallActivityInput.from(CallActivity::class),
+                // CallActivityInput.from(XmlCallActivity::class),
             ),
             loggingLevel = loggingLevel
         ).build().also {

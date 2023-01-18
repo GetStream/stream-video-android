@@ -132,8 +132,9 @@ public class CallParticipantsView : ConstraintLayout {
                     localParticipant.radius = style.localParticipantRadius
                     localParticipant.translationX = calculateFloatingParticipantMaxXOffset()
                     localParticipant.translationY = style.localParticipantPadding
+                    setLocalParticipantDragInteraction(localParticipant)
                     addView(localParticipant)
-                    setLocalParticipantDragInteraction()
+
                 }
             }
             localParticipant?.setParticipant(participant)
@@ -148,17 +149,18 @@ public class CallParticipantsView : ConstraintLayout {
      * Sets the touch listener to the [FloatingParticipantView] showing the local user to enable dragging the view.
      */
     @SuppressLint("ClickableViewAccessibility")
-    private fun setLocalParticipantDragInteraction() {
+    private fun setLocalParticipantDragInteraction(localParticipant: FloatingParticipantView) {
         val maxDx = calculateFloatingParticipantMaxXOffset()
         val maxDy = calculateFloatingParticipantMaxYOffset()
 
         var dx = 0f
         var dy = 0f
-        localParticipant?.setOnTouchListener { view, event ->
+        localParticipant.setOnTouchListener { view, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     dx = view.x - event.rawX
                     dy = view.y - event.rawY
+                    return@setOnTouchListener true
                 }
 
                 MotionEvent.ACTION_MOVE -> {
@@ -170,9 +172,9 @@ public class CallParticipantsView : ConstraintLayout {
                         .y(newY.coerceIn(style.localParticipantPadding, maxDy))
                         .setDuration(0)
                         .start()
+                    return@setOnTouchListener true
                 }
             }
-
             false
         }
     }
