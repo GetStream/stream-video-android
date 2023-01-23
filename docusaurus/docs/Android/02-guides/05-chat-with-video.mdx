@@ -11,7 +11,7 @@ Stream supports this use case, out-of-the-box. In this guide, you'll walk throug
 
 By the end of this guide, your app will look like this:
 
-![payner](https://user-images.githubusercontent.com/17215808/211816425-bcec37cb-5956-4a5b-be40-fdc76b092947.png)
+![Message List Example](https://user-images.githubusercontent.com/17215808/211816425-bcec37cb-5956-4a5b-be40-fdc76b092947.png)
 
 You'll have the ability to create messaging conversations, in which you can start calls as a custom attachment. Anyone in the chat will then be notified accordingly and can join the call.
 
@@ -47,11 +47,11 @@ For chat, you have a few dependencies:
 * `streamChatState`: Used to gain access to various state and its plugins for Chat.
 * `streamChatUiUtils`: Helper functionality to render custom UI or format data.
 
-The project already has a few screens set up for you with TODOs that you'll fill in later. Run the project and you should see the Login screen, followed by a blank Home screen after you select a user.
+The project already has a few screens set up for you with TODO items that you'll fill in later. Run the project and you should see the Login screen, followed by a blank Home screen after you select a user.
 
 | Login Screen | Home Screen |
 | ------------ | ----------- |
-| ![login_screen](https://user-images.githubusercontent.com/17215808/212090608-a8662a31-7a1e-47af-91a2-578808c15324.png) | ![home_screen](https://user-images.githubusercontent.com/17215808/212090715-e5b51bb8-6215-42a0-92a3-696f21a79c4b.png) |
+| ![Login Screen](https://user-images.githubusercontent.com/17215808/212090608-a8662a31-7a1e-47af-91a2-578808c15324.png) | ![Home Screen](https://user-images.githubusercontent.com/17215808/212090715-e5b51bb8-6215-42a0-92a3-696f21a79c4b.png) |
 
 The pre-baked code contains all the logic that is not related to Stream, so that you can focus solely on integrating our two SDKs. We recommend exploring the project to learn how to navigate it and what each part of the predefined code does. Some of the notable functionality in the starter kit contains:
 
@@ -210,7 +210,7 @@ ChannelList(
 
 There are only a few lines of code here that let you set up an entire screen and lots of functionality:
 
-1. You fetch the current user from the `channelListViewModel` using `collectAsState()`. This is a Jetpack Compose helper that tranforms a `Flow` into `State` that Compose can render and react to.
+1. You fetch the current user from the `channelListViewModel` using `collectAsState()`. This is a Jetpack Compose helper that transforms a `Flow` into `State` that Compose can render and react to.
 2. Using that user and a few other parameters, you call `ChannelListHeader`. This is a simple component that displays a `title` and allows for a few handlers and customizable slot APIs. In this case, you override the `trailingContent` to show a button used to log out the user from the app.
 3. Finally, using the `channelListViewModel`, you render a `ChannelList`, which shows a list of `Channel`s. Overriding `onChannelClick`, lets you set up functionality when a user selects any `Channel`. In your case, you call `openMessages()`.
 
@@ -284,7 +284,7 @@ The block of code here is mostly straightforward, as you're just composing a `Me
 
 Build and run the app now and try opening a channel. You should see something like this:
 
-![messages_screen](https://user-images.githubusercontent.com/17215808/212672433-f6d1d28a-5a95-4b23-973a-55ad7b4cea07.png)
+![Messages Screen](https://user-images.githubusercontent.com/17215808/212672433-f6d1d28a-5a95-4b23-973a-55ad7b4cea07.png)
 
 You have a full integration of chat features in your app now. You can see channels, open them, send messages and attachments, start threads and much more. If you notice the `Unsupported attachment` text, it's there because our SDK is trying to render custom Call attachments, but it doesn't yet know how.
 
@@ -315,7 +315,7 @@ val attachmentFactories by lazy {
 
 Build and run the app now and your custom Call attachments should render properly.
 
-![custom_attachments](https://user-images.githubusercontent.com/17215808/212690874-0e034b2e-d427-4e3f-9fb2-c13eeb6b3703.png)
+![Custom Attachments Example](https://user-images.githubusercontent.com/17215808/212690874-0e034b2e-d427-4e3f-9fb2-c13eeb6b3703.png)
 
 Great, you're ready to join calls. But for that, you need to integrate the Stream Video Android SDK.
 
@@ -357,7 +357,7 @@ fun initializeStreamVideo(
 }
 ```
 
-This is a larger snippet of code, but in essence it only sets up the the default Video SDK behavior:
+This is a larger snippet of code, but in essence it only sets up the default Video SDK behavior:
 
 1. By checking if the `credentialsProvider` is initialized or not, you know if you need to update the current user or initialize the provider. Over the course of a few log in and log out sessions, you might change the user, so it's important to keep the state fresh.
 2. Once you check the credentials, you use `StreamVideoBuilder` to create a new `StreamVideo` instance. You pass in various parameters, like the `Context`, the `CredentialsProvider`, `LogginGLevel` and more. By calling `build()` you get a new client.
@@ -386,7 +386,7 @@ You're now ready to log in the user and connect to a call when tapping on the cu
 
 For the login aspect of `StreamVideo`, there's not much to think about. The `StreamVideo` client is tied to a user instance. You cannot access any potential Calls or join an audio/video call, unless you're logged in. It's a server requirement and it makes things easy to think about.
 
-To log into `StreamVideo`, you, in fact, create the `StreamVideo` instance with a user construct. As long as the instance persists, we consider the user to be "logged in".
+To log into `StreamVideo`, you create the `StreamVideo` instance with a user construct. As long as the instance persists, we consider the user to be logged in.
 
 Open the `LoginActivity.kt` file and replace the `logInToVideo` code with the following:
 
@@ -519,12 +519,12 @@ Now, you're fully ready to start and enjoy the Chat + Video experience. Build an
 
 Play around with the controls, the default `CallActivity` and the SDK offer the following options:
 
-* Mute, unmute audio and video
+* Enable or disable audio and video
 * Switch to speakerphone
 * Flip your camera
 * Leave the call
 * Observe participants and invite new people to the call
-* Picture-In-Picture when backgrounding
+* Picture-In-Picture when going into the background
 
 And much more. You've implemented everything you need to achieve a good Chat + Video use case. Now you can focus on exploring more resources to add features to the project.
 
