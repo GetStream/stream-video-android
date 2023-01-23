@@ -21,13 +21,16 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.constraintlayout.widget.Guideline
+import androidx.core.view.children
 import androidx.transition.TransitionManager
 import io.getstream.video.android.model.CallParticipantState
 import io.getstream.video.android.ui.xml.R
 import io.getstream.video.android.ui.xml.utils.extensions.updateConstraints
+import io.getstream.video.android.ui.xml.widget.control.CallControlsView
 import java.util.UUID
 
 /**
@@ -191,7 +194,8 @@ public class CallParticipantsView : ConstraintLayout {
      * @return The max Y offset that can be applied to the overlaid [FloatingParticipantView].
      */
     private fun calculateFloatingParticipantMaxYOffset(): Float {
-        return measuredHeight - style.localParticipantHeight - style.localParticipantPadding
+        val controlsHeight = (parent as? ViewGroup)?.children?.firstOrNull { it is CallControlsView }?.measuredHeight ?: 0
+        return measuredHeight - style.localParticipantHeight - style.localParticipantPadding - controlsHeight
     }
 
     /**

@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -165,7 +164,7 @@ internal fun BoxScope.PortraitParticipants(
                     height = VideoTheme.dimens.floatingVideoHeight,
                     width = VideoTheme.dimens.floatingVideoWidth
                 )
-                .clip(RoundedCornerShape(VideoTheme.dimens.floatingVideoRadius))
+                .clip(VideoTheme.shapes.floatingParticipant)
                 .align(Alignment.TopEnd),
             paddingValues = paddingValues
         )

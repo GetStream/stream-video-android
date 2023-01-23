@@ -17,7 +17,7 @@
     <io.getstream.video.android.ui.xml.widget.control.CallControlsView
         android:id="@+id/controlsView"
         android:layout_width="0dp"
-        android:layout_height="96dp"
+        android:layout_height="@dimen/callControlsSheetHeight"
         android:background="@drawable/rect_controls"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
