@@ -1,0 +1,543 @@
+## Building Chat Apps With Video Support
+
+One of the most common chat app use cases is having a chat feature in your app that allows users to engage in audio and video communication. This direct integration allows for simple transition between text and images to more complex media.
+
+Stream supports this use case, out-of-the-box. In this guide, you'll walk through all the steps required to integrate our Chat and Video Android SDKs into a cohesive whole. You'll cover the following:
+
+* Adding Stream dependencies.
+* Creating Stream clients.
+* Authenticating Chat and Video users.
+* Building custom Call attachments and "Start Call" UI.
+
+By the end of this guide, your app will look like this:
+
+![Message List Example](https://user-images.githubusercontent.com/17215808/211816425-bcec37cb-5956-4a5b-be40-fdc76b092947.png)
+
+You'll have the ability to create messaging conversations, in which you can start calls as a custom attachment. Anyone in the chat will then be notified accordingly and can join the call.
+
+Let's see how to implement this.
+
+## Creating the project
+
+The easiest way to get a project working is using one of our [Starter Kits](https://github.com/GetStream/stream-video-android/tree/main/examples/chat-with-video). Within the `chat-with-video` directory, open `chat-with-video-starter-kit` in Android studio.
+
+> **Note**: Within the `chat-with-video` parent, there is a `chat-with-video-final` project that contains the final code for this guide. You can skip the starter kit and open that project instead if you want to see the finished solution.
+
+Let the project sync. It should have all the dependencies required for you to finish this guide. Some of the notable dependencies are the following:
+
+```groovy
+dependencies {
+    implementation(project(":stream-video-android-compose")) // TODO this should be a published dependency too
+
+    // ...
+    
+    // Stream Chat
+    implementation(Dependencies.streamChatCompose)
+    implementation(Dependencies.streamChatOffline)
+    implementation(Dependencies.streamChatState)
+    implementation(Dependencies.streamChatUiUtils)
+}
+```
+
+You'll be integrating two SDKs - Video and Chat. There is only one Video dependency right now, `stream-video-android-compose`, used to gain access to Jetpack Compose components and the low level client of the Video project.
+
+For chat, you have a few dependencies:
+* `streamChatCompose`: Similar to Video, gives access to Jetpack Components for Chat.
+* `streamChatOffline`: Used to integrate offline support in Chat.
+* `streamChatState`: Used to gain access to various state and its plugins for Chat.
+* `streamChatUiUtils`: Helper functionality to render custom UI or format data.
+
+The project already has a few screens set up for you with TODO items that you'll fill in later. Run the project and you should see the Login screen, followed by a blank Home screen after you select a user.
+
+| Login Screen | Home Screen |
+| ------------ | ----------- |
+| ![Login Screen](https://user-images.githubusercontent.com/17215808/212090608-a8662a31-7a1e-47af-91a2-578808c15324.png) | ![Home Screen](https://user-images.githubusercontent.com/17215808/212090715-e5b51bb8-6215-42a0-92a3-696f21a79c4b.png) |
+
+The pre-baked code contains all the logic that is not related to Stream, so that you can focus solely on integrating our two SDKs. We recommend exploring the project to learn how to navigate it and what each part of the predefined code does. Some of the notable functionality in the starter kit contains:
+
+* Application class as an entry point for initializing our SDK.
+* Fake user providers, with Chat and Video tokens prepared.
+* Login, Home, Channels and Messages Activities for a default messaging app navigation. Most of these are empty for now, you'll fill them in.
+* CallActivity and CallService placeholders. You'll use these to integrate the Video SDK.
+
+Now that you have an overview of the starter project, let's start integrating the SDKs.
+
+## Integrating the Chat SDK
+
+The first step of integrating our [Stream Chat SDK](https://getstream.io/chat/docs/sdk/android/basics/getting-started/) is initializing the `ChatClient`. You'll do that in the `Application` class, as it's recommended to initialize the client as soon as your app is launched. On top of that, you'll have to log in a user, to fetch their information and conversations.
+
+### Creating the Client
+
+Open the `ChatWithVideoApp` file and replace the `chatClient` initialization with the following:
+
+```kotlin
+val chatClient: ChatClient by lazy {
+    val offlinePlugin = StreamOfflinePluginFactory(this) // 1
+
+    val statePluginFactory = StreamStatePluginFactory( // 2
+        config = StatePluginConfig(
+            backgroundSyncEnabled = true,
+            userPresence = true,
+        ),
+        appContext = this
+    )
+
+    // 3
+    val logLevel = if (BuildConfig.DEBUG) ChatLogLevel.ALL else ChatLogLevel.NOTHING
+
+  	// 4
+    ChatClient.Builder("tp8sef43xcpc", this)
+        .withPlugins(offlinePlugin, statePluginFactory)
+        .logLevel(logLevel)
+        .uploadAttachmentsNetworkType(UploadAttachmentsNetworkType.NOT_ROAMING)
+        .build()
+}
+```
+
+There are a few parts to this initialization:
+
+1. You create the `StreamOfflinePluginFactory` that's used to provide offline support to the `ChatClient`. This helps users browse cached channels and messages, even if their network connection is missing.
+2. Following that, you set up a `StreamStatePluginFactory` which builds on top of the offline support, to provide background data sync as well as user online presence data. This is used to enrich the UI with online indicators.
+3. To help you debug, you can provide a `ChatLogLevel`, which will print information about the API calls and data in the SDK.
+4. Once you're ready, you initialize the `ChatClient`. You pass in the `API_KEY`, the `Context` and the rest of the components. You can pass in the key for your environment, but in this example we'll use a predefined environment instead.
+
+With this client initialization, you can proceed to log in a user when you choose them on the Login screen.
+
+### Logging in a User
+
+Open `LoginActivity.kt` and replace `logInToChat` with the following:
+
+```kotlin
+private fun logInToChat(user: User) {
+    val userLogin = io.getstream.chat.android.client.models.User( // 1
+        id = user.id,
+        name = user.name,
+        image = user.imageUrl ?: ""
+    )
+
+    chatWithVideoApp.chatClient.connectUser( // 2
+        user = userLogin,
+        token = user.extraData["chatToken"] as String
+    ).enqueue()
+}
+```
+
+On the Login screen, when you select a user, you call `logInToChat`. This lets you set up the user for both Chat and Video SDK. In this case, you're doing the following:
+
+1. You create a `User` object that holds the important information, such as the user ID, name and their image.
+2. You pass in the `user` to `chatClient.connectUser()`. Aside from that, you provide the `ChatClient` with the user token, that's stored in the `extraData` map of properties. This will initialize the Chat SDK with the provided user and you can proceed to fetch their `Channel`s, `Message`s and more.
+
+To finish up, you can add the logging out counterpart, by going back to `ChatWithVideoApp` and adding the following code to `logOut()`:
+
+```kotlin
+fun logOut() {
+    val preferences = UserCredentialsManager.initialize(this)
+
+    // TODO log out of clients
+    chatClient.disconnect(true).enqueue() // here
+    preferences.clear()
+}
+```
+
+Using `chatClient.disconnect(flushPersistence = true)`, you prepare a call to disconnect from the SDK and flush any cache. Our functions are wrapped as asynchronous call constructs, so calling `enqueue()` is necessary to start the operation.
+
+With all this, you'll be able to log in and log out any user from our predefined data set. The next step is to display their conversations.
+
+### Implementing ChannelsActivity
+
+There isn't much to the `ChannelsActivity` - it'll show a list of `Channel`s the user is a member of and let them open those `Channel`s. It'll also feature a custom header to allow the user to log out at will.
+
+Most of the navigation functionality, like opening a `Channel` and logging out is already there, you just need to use our Compose UI Components to implement the UI.
+
+Open `ChannelsActivity.kt`. Add the following code, to initialize the `ChannelListViewModel`, that'll help you load, fetch and display the required data:
+
+```kotlin
+private val factory by lazy { // 1
+    ChannelViewModelFactory(
+        chatClient = chatWithVideoApp.chatClient,
+        querySort = QuerySortByField.descByName("last_updated"), // 2
+        filters = null // 3
+    )
+}
+
+private val channelListViewModel by viewModels<ChannelListViewModel> { factory } // 4
+
+```
+
+While this is a simple piece of code, there are a few steps to analyze:
+
+1. Using `lazy` delegates, you can initialize the `ChannelViewModelFactory` used to build the `ViewModel`, without necessarily blocking any other initialization. The code will be called once the UI is ready to be rendered.
+2. The factory requires a few pieces of data. It requires the `ChatClient` instance to communicate with the API, a `querySort` to define the order of the `Channel`s and `filters` to specify which `Channel`s we want to fetch.
+3. The `querySort` is the default, sorted by the `last_updated` message, while passing in `null` filters dictates the default filter set, which only query for `Channel`s the current user is a member of. You can specify custom `filters` if you want to change this behavior.
+4. Finally, using the `factory`, you can create a `ChannelListViewModel` through the `viewModels` delegate.
+
+> **Note**: If you don't need any customization options and just want the default UI and behavior for browsing `Channel`s, you can simply use the `ChannelsScreen` as [per our documentation](https://getstream.io/chat/docs/sdk/android/compose/channel-components/channels-screen/). 
+
+With the `ViewModel` ready, add the following code to the `setContent` block within `onCreate()`. Specifically, you'll add a header which will allow the user to log out and a component that shows a list of channels and lets you open the `MessagesActivity`.
+
+Add the following code to the `Column` within `setContent()`:
+
+```kotlin
+val user by channelListViewModel.user.collectAsState() // 1
+
+ChannelListHeader(
+    modifier = Modifier.fillMaxWidth(),
+    title = "Chat with Video Sample",
+    currentUser = user,
+    trailingContent = { // 2
+        IconButton(
+            onClick = { logOut() },
+            content = {
+                Icon(
+                    imageVector = Icons.Default.Logout,
+                    contentDescription = null,
+                    tint = ChatTheme.colors.errorAccent
+                )
+            }
+        )
+    }
+)
+
+ChannelList(
+    modifier = Modifier.fillMaxSize(),
+    viewModel = channelListViewModel,
+    onChannelLongClick = {},
+    onChannelClick = { channel -> // 3
+        openMessages(channel)
+    }
+)
+```
+
+There are only a few lines of code here that let you set up an entire screen and lots of functionality:
+
+1. You fetch the current user from the `channelListViewModel` using `collectAsState()`. This is a Jetpack Compose helper that transforms a `Flow` into `State` that Compose can render and react to.
+2. Using that user and a few other parameters, you call `ChannelListHeader`. This is a simple component that displays a `title` and allows for a few handlers and customizable slot APIs. In this case, you override the `trailingContent` to show a button used to log out the user from the app.
+3. Finally, using the `channelListViewModel`, you render a `ChannelList`, which shows a list of `Channel`s. Overriding `onChannelClick`, lets you set up functionality when a user selects any `Channel`. In your case, you call `openMessages()`.
+
+Build and run the app and you should be able to log in or out with a user, as well as see and open the `Channel`s they're a part of.
+
+![Screenshot_1673592655](https://user-images.githubusercontent.com/17215808/212255922-2fb8ba0c-e14c-4d13-9791-a7c6234aa0c9.png)
+
+The next step to integrating the Chat SDK to replicate a chat-first-app which allows video calls, is to display the selected conversations and integrate custom attachments that render created calls.
+
+### Adding Messaging Functionality
+
+You're able to open the `MessagesActivity`, but it's fully empty at the moment. Let's change that. Open `MessagesActivity` and at the very top of the class, add the following code:
+
+```kotlin
+private val factory by lazy { // 1
+    MessagesViewModelFactory(
+        context = this,
+        channelId = intent.getStringExtra(MessagesActivity.KEY_CHANNEL_ID)!!
+    )
+}
+
+private val messageListViewModel by viewModels<MessageListViewModel> { factory } // 2
+
+private val composerViewModel by viewModels<MessageComposerViewModel> { factory } // 3
+```
+
+Like you did before, with `ChannelsActivity`, you need to set up the `ViewModel`s to power the data and business logic of the screen. In this snippet you're doing the following:
+
+1. Initializing the `MessagesViewModelFactory` that can provide the `MessageComposerViewModel`, `MessageListViewModel` and `AttachmentsPickerViewModel`. These are all used for different messaging functionality.
+2. Using the factory you create the `MessageListViewModel`, which will serve users with the list of messages in a `Channel` and anything related to the list data.
+3. Finally, you create the `MessageComposerViewModel` in the same way. This `ViewModel` will take care of all the logic around composing and sending messages.
+
+Now that you have the `ViewModel`s initialized, you can add the UI code. Replace the `setContent` block with the following:
+
+```kotlin
+setContent {
+    ChatTheme(attachmentFactories = chatWithVideoApp.attachmentFactories) { // 1
+        val channelState = messageListViewModel.channel
+        val currentUser by messageListViewModel.user.collectAsState()
+
+        Scaffold(
+            topBar = { // 2
+                MessageListHeader(
+                    channel = channelState,
+                    currentUser = currentUser,
+                    trailingContent = { CallButton() },
+                    onBackPressed = { finish() }
+                )
+            },
+            bottomBar = { MessageComposer(viewModel = composerViewModel) }, // 3
+            content = { paddingValues ->
+                MessageList( // 4
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(ChatTheme.colors.appBackground)
+                        .padding(paddingValues),
+                    viewModel = messageListViewModel,
+                )
+            }
+        )
+    }
+}
+```
+
+The block of code here is mostly straightforward, as you're just composing a `MessagesScreen`, with some custom UI. Let's go over it:
+
+1. You initialize the `ChatTheme` for the messaging UI, with the addition of custom `attachmentFactories`. This will be important, as you'll serve the `Channel` with custom Call attachments that let users join a video call.
+2. You add a `topBar` to the `Scaffold`, using `MessageListHeader`. Overriding the `trailingContent` allows you to set custom UI and behavior when the user interacts with that UI component, such as creating a Call.
+3. For the `bottomBar` you set the `MessageComposer`.
+4. Finally, for the main `content` you set the `MessageList`, with no special customization.
+
+Build and run the app now and try opening a channel. You should see something like this:
+
+![Messages Screen](https://user-images.githubusercontent.com/17215808/212672433-f6d1d28a-5a95-4b23-973a-55ad7b4cea07.png)
+
+You have a full integration of chat features in your app now. You can see channels, open them, send messages and attachments, start threads and much more. If you notice the `Unsupported attachment` text, it's there because our SDK is trying to render custom Call attachments, but it doesn't yet know how.
+
+For that to work, you need to add custom attachment factories to the SDK. There already is a factory prepared for you, you just need to connect it to the `MessageList`.
+
+### Supporting Custom Attachments
+
+Open the `CallAttachmentFactory.kt` file. Explore it to familiarize yourself with the logic behind the UI it shows and the way it allows users to join the call.
+
+Using the following snippet:
+
+```kotlin
+private suspend fun joinCall(callId: String, context: Context) {
+    val (type, id) = callId.split(":").take(2)
+    context.chatWithVideoApp.streamVideo.joinCall(type, id)
+}
+```
+
+It consumes the data stored in the custom attachment to join a call. Right now, the `streamVideo` instance is not yet set up, as you'll do that in the final step of the guide.
+
+To add the custom attachment factory, open the `ChatWithVideoApp.kt` file and replace the `attachmentFactories` property with the following:
+
+```kotlin
+val attachmentFactories by lazy {
+    listOf(CallAttachmentFactory()) + StreamAttachmentFactories.defaultFactories()
+}
+```
+
+Build and run the app now and your custom Call attachments should render properly.
+
+![Custom Attachments Example](https://user-images.githubusercontent.com/17215808/212690874-0e034b2e-d427-4e3f-9fb2-c13eeb6b3703.png)
+
+Great, you're ready to join calls. But for that, you need to integrate the Stream Video Android SDK.
+
+## Integrating the Video SDK
+
+To successfully connect to a Call, you need to use its `callCid` to get the detailed information and join it. The internal process to joining a Call has several steps, such as measuring the latency and choosing the best server to connect through, but all you care about now is the trigger to join a Call and show the corresponding UI.
+
+Firstly, you need to initialize the Video client, aptly called `StreamVideo`.
+
+### Initializing StreamVideo
+
+Open `ChatWithVideoApp.kt`. To initialize the client, there's already a predefined function that you need to fill, using the user credentials. Find and replace the `initializeStreamVideo` code with the following:
+
+```kotlin
+fun initializeStreamVideo(
+    credentialsProvider: CredentialsProvider,
+    loggingLevel: LoggingLevel
+): StreamVideo {
+    if (this::credentialsProvider.isInitialized) { // 1
+        this.credentialsProvider.updateUser(
+            credentialsProvider.getUserCredentials()
+        )
+    } else {
+        this.credentialsProvider = credentialsProvider
+    }
+
+    return StreamVideoBuilder( // 2
+        context = this,
+        credentialsProvider = credentialsProvider,
+        androidInputs = setOf(
+            CallServiceInput.from(CallService::class), // 3
+            CallActivityInput.from(CallActivity::class),
+        ),
+        loggingLevel = loggingLevel,
+        config = StreamVideoConfigDefault // 4
+    ).build().also {
+        streamVideo = it // 5
+    }
+}
+```
+
+This is a larger snippet of code, but in essence it only sets up the default Video SDK behavior:
+
+1. By checking if the `credentialsProvider` is initialized or not, you know if you need to update the current user or initialize the provider. Over the course of a few log in and log out sessions, you might change the user, so it's important to keep the state fresh.
+2. Once you check the credentials, you use `StreamVideoBuilder` to create a new `StreamVideo` instance. You pass in various parameters, like the `Context`, the `CredentialsProvider`, `LogginGLevel` and more. By calling `build()` you get a new client.
+3. For ease-of-use, you pass in `androidInputs` to the `StreamVideoBuilder`. These inputs serve as automatic starting points whenever there's a new call that is incoming or you're joining a call. To put it simply, when joining a call, you'll start the `CallService`, to keep the call alive in the background, and the `CallActivity`, to handle the call itself and show corresponding UI.
+4. For the `config` you pass in provided defaults. These defaults let you customize the call timeouts, automatic join or leave logic, if the user starts with their camera and/or microphone muted and similar. You can create your own custom instance of this class.
+5. Finally, once your client is built, you assign it to `streamVideo` for persistence. Note that unlike the `ChatClient`, `StreamVideo` isn't a singleton and you have to keep the instance yourself, which allows for more customization and better app lifecycle.
+
+To further integrate the client into the app, replace the `logOut` function code with the following:
+
+```kotlin
+fun logOut() {
+    val preferences = UserCredentialsManager.initialize(this)
+
+    chatClient.disconnect(true).enqueue()
+    streamVideo.clearCallState() // here
+    streamVideo.removeDevices(preferences.getDevices()) // here
+    preferences.clear()
+}
+```
+
+As a way to release resources when logging out, you call `streamVideo.clearCallState()` and `streamVideo.removeDevices(preferences.getDevices())`. This will clear up any active state, drop any calls and remove the registered push notification devices from the server.
+
+You're now ready to log in the user and connect to a call when tapping on the custom attachment or header action.
+
+### Logging in a User
+
+For the login aspect of `StreamVideo`, there's not much to think about. The `StreamVideo` client is tied to a user instance. You cannot access any potential Calls or join an audio/video call, unless you're logged in. It's a server requirement and it makes things easy to think about.
+
+To log into `StreamVideo`, you create the `StreamVideo` instance with a user construct. As long as the instance persists, we consider the user to be logged in.
+
+Open the `LoginActivity.kt` file and replace the `logInToVideo` code with the following:
+
+```kotlin
+private fun logInToVideo(user: User) {
+    chatWithVideoApp.initializeStreamVideo(
+        AuthCredentialsProvider( // 1
+            API_KEY,
+            user = user
+        ),
+        loggingLevel = LoggingLevel.BODY // 2
+    )
+}
+```
+
+It's very simple in what it does:
+
+1. You call the previously defined `initializeStreamVideo()` function, with a simple `AuthCredentialsProvider` containing the pre-baked `API_KEY` and the selected user.
+2. You pass in a `LoggingLevel` of your choice, in this case logging all of the information from all the API calls.
+
+With all of this, your attachments will be able to hit the Video API endpoints to join a call, but there are two small steps to show the appropriate UI and logic. Declaring the Android inputs in the `AndroidManifest.xml` file and allowing users to start new Calls.
+
+### Connecting CallActivity & CallService
+
+These two simple constructs are already provided in the starter project. They extend abstract variants that are built into our SDK and the only thing you need to define in them to make complex Video logic work is provide an instance of `StreamVideo`, like so:
+```kotlin
+// Activity
+class CallActivity : AbstractComposeCallActivity() {
+
+    /**
+     * Provides the StreamVideo instance through the videoApp.
+     */
+    override fun getStreamVideo(context: Context): StreamVideo =
+        context.chatWithVideoApp.streamVideo
+
+    /**
+     * Provides a custom factory for the ViewModel, that provides fake users for invites.
+     */
+    override fun getCallViewModelFactory(): CallViewModelFactory {
+        return CallViewModelFactory(
+            streamVideo = getStreamVideo(this),
+            permissionManager = getPermissionManager(),
+            usersProvider = chatWithVideoApp.usersLoginProvider
+        )
+    }
+}
+
+// Service
+class CallService : AbstractStreamCallService() {
+
+    override fun getStreamVideo(context: Context): StreamVideo = chatWithVideoApp.streamVideo
+}
+```
+
+Again, you don't have to implement this yourself as it's prepared in the project, but it's good to know how these classes work if you want to provide custom behavior.
+
+To finish the guide and the Chat + Video experience, simply add the following code within the `<application>` tag of the `AndroidManifest.xml` file:
+
+```xml
+<activity
+    android:name=".ui.call.CallActivity"
+    android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+    android:supportsPictureInPicture="true" />
+
+<service
+    android:name=".ui.call.CallService"
+    android:enabled="true"
+    android:exported="false" />
+```
+
+The `CallService` tag is fairly simple, you declare a `Service` which is enabled and isn't exported outside of your app. It'll serve as a way to keep active Calls running in the background, which also helps us implement more advanced features in the SDK.
+
+The `CallActivity` tag is more complex and much more interesting. You enable Picture-In-Picture mode for this screen, which will allow you to background active Calls, but still see the primary speaker UI while browsing other apps in the foreground. To fully enable PiP, you need to declare that the app, or our SDK in this case, will take care of the defined `configChanges`, such as orientation, layout or screen size changes.
+
+With the `AndroidManifest` declarations out of the way, you're ready for the final step - triggering the code to create new Calls when the user taps on the Call button in the `MessagesActivity` header.
+
+### Allowing Users To Start Calls
+
+Open the `MessagesActivity` and find `startCall()`. Within it, add the following code:
+
+```kotlin
+private fun startCall() {
+    val videoClient = chatWithVideoApp.streamVideo
+
+    lifecycleScope.launch {
+        val callId = UUID.randomUUID().toString()
+
+        val createCallResult = videoClient.createCall( // 1
+            id = callId,
+            type = "default",
+            ringing = false,
+            participantIds = emptyList()
+        )
+
+        if (createCallResult is Success) { // 2
+            val data = createCallResult.data
+
+            val customAttachment = Attachment(
+                type = "custom",
+                authorName = videoClient.getUser().name,
+                extraData = mutableMapOf( // 3
+                    "callCid" to data.cid,
+                    "members" to data.users.map { it.value.name },
+                    "callName" to messageListViewModel.channel.getDisplayName(
+                        context = this@MessagesActivity,
+                        fallback = R.string.call_name_placeholder
+                    )
+                )
+            )
+
+            val newMessage = composerViewModel.buildNewMessage("", listOf(customAttachment)) // 4
+            composerViewModel.sendMessage(newMessage)
+        }
+    }
+}
+```
+
+This snippet is larger than the previous integration steps, but it packs a few things to keep in mind when creating a Call:
+
+1. Using coroutines, you're able to `createCall()` by passing in a Call ID, its `type`, if you want to ring anyone in the Call and its `participantIds`. For simplicity, you'll create **meeting calls**, which don't require any initial Participants or ringing.
+2. If the API call is successful, you can proceed to build the Call attachment. If the API call fails, you can show custom UI to the user, but in this case we'll just ignore that case.
+3. To build the `Attachment`, you use its constructor, which lets you define the type of the `Attachment`, its author and any `extraData` you might need to render the UI. In this case, you pass in the `call.cid`, list of members if you define any and the `callName` used to show the UI in the list.
+4. Finally, when the attachment is ready, you can build a new `Message` using the `composerViewModel` and pass in your `customAttachment`. By calling `composerViewModel.sendMessage(newMessage)`, you create a new message in the channel, with the details required to join the Call.
+
+You could've approached this logic differently and shown special dialogs to the user for the call creation, give them more options for customization, like who to invite and similar. But for this basic use case of Chat + Video, you'll just create a simple call that's public in the Channel.
+
+Now, you're fully ready to start and enjoy the Chat + Video experience. Build and run the app, log in and join any call attachment, or create a new call and join like that.
+
+![call](https://user-images.githubusercontent.com/17215808/212706833-56e7f564-ea74-42f6-85dd-a0c174199773.png)
+
+Play around with the controls, the default `CallActivity` and the SDK offer the following options:
+
+* Enable or disable audio and video
+* Switch to speakerphone
+* Flip your camera
+* Leave the call
+* Observe participants and invite new people to the call
+* Picture-In-Picture when going into the background
+
+And much more. You've implemented everything you need to achieve a good Chat + Video use case. Now you can focus on exploring more resources to add features to the project.
+
+## Further Learning
+
+Now that you have the final project for the **Chat + Video** app, you can use it as a **template** for any kind of apps that feature Chat primarily, with the option to use Video. It's much easier to start with a [predefined project](https://github.com/GetStream/stream-video-android/tree/task/chat-with-video-guide-and-kits/examples/chat-with-video/chat-with-video-final) (TODO update link when merged) that's maintained by the SDK team, as you can skip ahead all the basic SDK integration if you need to.
+
+If you're looking to explore more Stream Video based topics, we suggest the following to further customize and improve your Video experience:
+
+* [Socket events documentation](https://github.com/GetStream/stream-video-android/blob/main/docusaurus/docs/Android/02-guides/04-socket-events.mdx) - Learn about different socket events and how to handle them to customize the app behavior.
+* [Deep Linking Guide](https://github.com/GetStream/stream-video-android/blob/main/docusaurus/docs/Android/05-advanced/01-deeplinking.mdx) - We'll guide you in implementing easy deep linking into your app, to further simplify calling other people.
+* [Push Notifications Guide](https://github.com/GetStream/stream-video-android/blob/main/docusaurus/docs/Android/05-advanced/02-push-notifications.mdx) - Every Chat and/or Video app needs rich and powerful Push Notifications to notify users. This guide will teach you how to set up different providers and seamlessly integrate push into your app.
+
+Aside from that, all of our public documentation is well maintained and will help you integrate and customize different components of our UI and low-level-client.
+
+## 

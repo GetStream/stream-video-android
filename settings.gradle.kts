@@ -16,10 +16,17 @@ dependencyResolutionManagement {
   }
 }
 rootProject.name = "stream-video-android"
+
+// Sample apps
 include(":app")
-include(":benchmark")
 include(":dogfooding")
+
+// SDK
+include(":benchmark")
 include(":stream-video-android")
 include(":stream-video-android-core")
 include(":stream-video-android-compose")
-include(":examples:chat-with-video-sample")
+
+// Examples and guide projects
+include(":examples:chat-with-video:chat-with-video-final")
+include(":examples:chat-with-video:chat-with-video-starter")
