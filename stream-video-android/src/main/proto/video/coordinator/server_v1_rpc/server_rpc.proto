@@ -4,7 +4,6 @@ package stream.video.coordinator.server_v1_rpc;
 
 import "google/protobuf/duration.proto";
 import "google/protobuf/timestamp.proto";
-import "google/protobuf/wrappers.proto";
 import "validate/validate.proto";
 import "video/coordinator/app_v1/app.proto";
 import "video/coordinator/broadcast_v1/broadcast.proto";
@@ -191,33 +190,6 @@ message UpdateCallTypeResponse {
   call_v1.CallType call_type = 1;
 }
 
-message CreateCallRequest {
-  // The call type.
-  // Required.
-  string type = 1;
-
-  // The call id, if not provided a unique value will be generated based on UUID v4.
-  // Required.
-  string id = 2;
-
-  // Call custom data.
-  bytes custom_json = 3;
-
-  // The list of participant ids.
-  repeated string participant_ids = 4;
-
-  // HLS broadcast, overrides the default call type setting if provided.
-  google.protobuf.BoolValue hls_broadcast = 6;
-
-  // Request video to be forwarded to a list of RTMP servers.
-  broadcast_v1.RTMPOptions rtmp = 7;
-
-  // The recording option, overrides the default call type setting if provided.
-  google.protobuf.BoolValue recording = 8;
-
-  // The ring option, overrides the default call type setting if provided.
-  google.protobuf.BoolValue notify = 9;
-}
 message CreateUserRequest {
   user_v1.UserInput user = 1;
 }

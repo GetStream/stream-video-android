@@ -39,7 +39,9 @@ public data class StreamShapes(
     public val callButton: Shape,
     public val callControls: Shape,
     public val callControlsButton: Shape,
-    public val participantsInfoMenuButton: Shape
+    public val participantsInfoMenuButton: Shape,
+    public val connectionIndicatorBar: Shape,
+    public val soundIndicatorBar: Shape
 ) {
     public companion object {
         /**
@@ -53,7 +55,9 @@ public data class StreamShapes(
             callControls = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
             callControlsButton = CircleShape,
             participantsInfoMenuButton = RoundedCornerShape(32.dp),
-            dialog = RoundedCornerShape(16.dp)
+            dialog = RoundedCornerShape(16.dp),
+            connectionIndicatorBar = RoundedCornerShape(16.dp),
+            soundIndicatorBar = RoundedCornerShape(16.dp)
         )
     }
 }

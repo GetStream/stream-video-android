@@ -50,6 +50,9 @@ message Participant {
   google.protobuf.Timestamp joined_at = 4;
   string track_lookup_prefix = 5;
   ConnectionQuality connection_quality = 6;
+  bool is_speaking = 7;
+  bool is_dominant_speaker = 8;
+  float audio_level = 9;
 }
 
 message StreamQuality {

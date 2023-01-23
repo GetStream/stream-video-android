@@ -5,12 +5,14 @@
 package sfu_models
 
 import (
+	binary "encoding/binary"
 	fmt "fmt"
 	proto "google.golang.org/protobuf/proto"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	structpb "google.golang.org/protobuf/types/known/structpb"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	io "io"
+	math "math"
 	bits "math/bits"
 )
 
@@ -95,6 +97,32 @@ func (m *Participant) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 	if m.unknownFields != nil {
 		i -= len(m.unknownFields)
 		copy(dAtA[i:], m.unknownFields)
+	}
+	if m.AudioLevel != 0 {
+		i -= 4
+		binary.LittleEndian.PutUint32(dAtA[i:], uint32(math.Float32bits(float32(m.AudioLevel))))
+		i--
+		dAtA[i] = 0x4d
+	}
+	if m.IsDominantSpeaker {
+		i--
+		if m.IsDominantSpeaker {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x40
+	}
+	if m.IsSpeaking {
+		i--
+		if m.IsSpeaking {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x38
 	}
 	if m.ConnectionQuality != 0 {
 		i = encodeVarint(dAtA, i, uint64(m.ConnectionQuality))
@@ -749,6 +777,15 @@ func (m *Participant) SizeVT() (n int) {
 	if m.ConnectionQuality != 0 {
 		n += 1 + sov(uint64(m.ConnectionQuality))
 	}
+	if m.IsSpeaking {
+		n += 2
+	}
+	if m.IsDominantSpeaker {
+		n += 2
+	}
+	if m.AudioLevel != 0 {
+		n += 5
+	}
 	if m.unknownFields != nil {
 		n += len(m.unknownFields)
 	}
@@ -1334,6 +1371,57 @@ func (m *Participant) UnmarshalVT(dAtA []byte) error {
 					break
 				}
 			}
+		case 7:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field IsSpeaking", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflow
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.IsSpeaking = bool(v != 0)
+		case 8:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field IsDominantSpeaker", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflow
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.IsDominantSpeaker = bool(v != 0)
+		case 9:
+			if wireType != 5 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AudioLevel", wireType)
+			}
+			var v uint32
+			if (iNdEx + 4) > l {
+				return io.ErrUnexpectedEOF
+			}
+			v = uint32(binary.LittleEndian.Uint32(dAtA[iNdEx:]))
+			iNdEx += 4
+			m.AudioLevel = float32(math.Float32frombits(v))
 		default:
 			iNdEx = preIndex
 			skippy, err := skip(dAtA[iNdEx:])

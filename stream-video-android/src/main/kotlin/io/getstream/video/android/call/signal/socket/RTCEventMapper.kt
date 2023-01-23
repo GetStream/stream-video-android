@@ -31,6 +31,7 @@ import io.getstream.video.android.events.SfuDataEvent
 import io.getstream.video.android.events.SubscriberOfferEvent
 import io.getstream.video.android.events.TrackPublishedEvent
 import io.getstream.video.android.events.TrackUnpublishedEvent
+import io.getstream.video.android.model.UserAudioLevel
 import stream.video.sfu.event.SfuEvent
 
 public object RTCEventMapper {
@@ -46,7 +47,12 @@ public object RTCEventMapper {
                 ConnectionQualityChangeEvent(updates = connection_quality_updates)
             }
             event.audio_level_changed != null -> AudioLevelChangedEvent(
-                event.audio_level_changed.audio_levels.associate { it.user_id to it.level }
+                event.audio_level_changed.audio_levels.associate {
+                    it.user_id to UserAudioLevel(
+                        it.is_speaking,
+                        it.level
+                    )
+                }
             )
             event.change_publish_quality != null -> ChangePublishQualityEvent(event.change_publish_quality)
 
