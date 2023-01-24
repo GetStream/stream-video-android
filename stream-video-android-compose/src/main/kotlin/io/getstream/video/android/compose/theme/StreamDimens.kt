@@ -131,7 +131,7 @@ public data class StreamDimens(
             audioLevelIndicatorBarMaxHeight = dimensionResource(id = R.dimen.audioLevelIndicatorBarMaxHeight),
             audioLevelIndicatorBarWidth = dimensionResource(id = R.dimen.audioLevelIndicatorBarWidth),
             audioLevelIndicatorBarSeparatorWidth = dimensionResource(id = R.dimen.audioLevelIndicatorBarSeparatorWidth),
-            audioStatusSize = dimensionResource(id = R.dimen.audioStatusSize)
+            audioStatusSize = dimensionResource(id = R.dimen.audioStatusSize),
         )
     }
 }

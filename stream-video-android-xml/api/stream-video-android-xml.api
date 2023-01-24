@@ -87,6 +87,13 @@ public final class io/getstream/video/android/ui/xml/databinding/ViewCallPartici
 	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;)Lio/getstream/video/android/ui/xml/databinding/ViewCallParticipantBinding;
 }
 
+public final class io/getstream/video/android/ui/xml/databinding/ViewFloatingParticipantBinding : androidx/viewbinding/ViewBinding {
+	public final field localParticipant Lio/getstream/video/android/ui/xml/widget/participant/CallParticipantView;
+	public static fun bind (Landroid/view/View;)Lio/getstream/video/android/ui/xml/databinding/ViewFloatingParticipantBinding;
+	public fun getRoot ()Landroid/view/View;
+	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;)Lio/getstream/video/android/ui/xml/databinding/ViewFloatingParticipantBinding;
+}
+
 public final class io/getstream/video/android/ui/xml/databinding/ViewIncomingCallBinding : androidx/viewbinding/ViewBinding {
 	public final field acceptCall Lio/getstream/video/android/ui/xml/widget/control/CallControlButton;
 	public final field callBackground Lio/getstream/video/android/ui/xml/widget/call/CallBackgroundView;
@@ -421,13 +428,6 @@ public final class io/getstream/video/android/ui/xml/widget/incoming/IncomingCal
 	public final fun setParticipants (Ljava/util/List;)V
 }
 
-public final class io/getstream/video/android/ui/xml/widget/local/LocalVideoView : androidx/constraintlayout/widget/ConstraintLayout {
-	public fun <init> (Landroid/content/Context;)V
-	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
-	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;I)V
-	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;II)V
-}
-
 public final class io/getstream/video/android/ui/xml/widget/outgoing/OutgoingCallStyle {
 	public fun <init> (Landroid/graphics/drawable/Drawable;Landroid/graphics/drawable/Drawable;ILandroid/graphics/drawable/Drawable;ILandroid/graphics/drawable/Drawable;Landroid/graphics/drawable/Drawable;Landroid/graphics/drawable/Drawable;Landroid/graphics/drawable/Drawable;ILandroid/graphics/drawable/Drawable;I)V
 	public final fun component1 ()Landroid/graphics/drawable/Drawable;
@@ -520,12 +520,20 @@ public final class io/getstream/video/android/ui/xml/widget/participant/CallPart
 }
 
 public final class io/getstream/video/android/ui/xml/widget/participant/CallParticipantsStyle {
-	public fun <init> (I)V
+	public fun <init> (IFFFF)V
 	public final fun component1 ()I
-	public final fun copy (I)Lio/getstream/video/android/ui/xml/widget/participant/CallParticipantsStyle;
-	public static synthetic fun copy$default (Lio/getstream/video/android/ui/xml/widget/participant/CallParticipantsStyle;IILjava/lang/Object;)Lio/getstream/video/android/ui/xml/widget/participant/CallParticipantsStyle;
+	public final fun component2 ()F
+	public final fun component3 ()F
+	public final fun component4 ()F
+	public final fun component5 ()F
+	public final fun copy (IFFFF)Lio/getstream/video/android/ui/xml/widget/participant/CallParticipantsStyle;
+	public static synthetic fun copy$default (Lio/getstream/video/android/ui/xml/widget/participant/CallParticipantsStyle;IFFFFILjava/lang/Object;)Lio/getstream/video/android/ui/xml/widget/participant/CallParticipantsStyle;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCallParticipantStyle ()I
+	public final fun getLocalParticipantHeight ()F
+	public final fun getLocalParticipantPadding ()F
+	public final fun getLocalParticipantRadius ()F
+	public final fun getLocalParticipantWidth ()F
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -537,6 +545,14 @@ public final class io/getstream/video/android/ui/xml/widget/participant/CallPart
 	public final fun setRendererInitializer (Lio/getstream/video/android/ui/xml/widget/participant/RendererInitializer;)V
 	public final fun updateParticipants (Ljava/util/List;)V
 	public final fun updatePrimarySpeaker (Lio/getstream/video/android/model/CallParticipantState;)V
+}
+
+public final class io/getstream/video/android/ui/xml/widget/participant/FloatingParticipantView : androidx/cardview/widget/CardView {
+	public fun <init> (Landroid/content/Context;)V
+	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
+	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;I)V
+	public final fun setParticipant (Lio/getstream/video/android/model/CallParticipantState;)V
+	public final fun setRendererInitializer (Lio/getstream/video/android/ui/xml/widget/participant/RendererInitializer;)V
 }
 
 public abstract interface class io/getstream/video/android/ui/xml/widget/participant/RendererInitializer {

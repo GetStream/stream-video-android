@@ -16,16 +16,22 @@
 
 package io.getstream.video.android.ui.xml.widget.participant
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
+import android.view.MotionEvent
 import android.view.View
+import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.constraintlayout.widget.Guideline
+import androidx.core.view.children
 import androidx.transition.TransitionManager
 import io.getstream.video.android.model.CallParticipantState
 import io.getstream.video.android.ui.xml.R
 import io.getstream.video.android.ui.xml.utils.extensions.updateConstraints
+import io.getstream.video.android.ui.xml.widget.control.CallControlsView
+import java.util.UUID
 
 /**
  * Renders the call participants depending on the number of the participants and the call state.
@@ -93,14 +99,110 @@ public class CallParticipantsView : ConstraintLayout {
         }
     }
 
+    private var localParticipant: FloatingParticipantView? = null
+
     /**
-     * Updates the participants which are to be rendered on the screen. Up to 4 participants view will be shown at any
-     * time. In case a new participant comes in or an old one leaves will add/remove [CallParticipantView] for that
-     * participant and will automatically arrange the views to fit inside the viewport.
+     * Updates the participants which are to be rendered on the screen. Up to 4 remote participants view will be shown
+     * at any time. In case a new participant comes in or an old one leaves will add/remove [CallParticipantView] for
+     * that participant and will automatically arrange the views to fit inside the viewport. The local participant will
+     * be overlaid over the remote participants in a floating  view.
      *
      * @param participants The list of the participants in the current call.
      */
     public fun updateParticipants(participants: List<CallParticipantState>) {
+        updateRemoteParticipants(participants.filter { !it.isLocal })
+        updateLocalParticipant(participants.firstOrNull { it.isLocal })
+    }
+
+    /**
+     * Creates and updates the local participant floating view.
+     *
+     * @param participant The local participant to be shown in a [FloatingParticipantView].
+     */
+    private fun updateLocalParticipant(participant: CallParticipantState?) {
+        if (participant != null) {
+            if (localParticipant == null) {
+                localParticipant = FloatingParticipantView(context)
+                if (::rendererInitializer.isInitialized) localParticipant?.setRendererInitializer(rendererInitializer)
+                localParticipant?.let { localParticipant ->
+                    localParticipant.id = UUID.randomUUID().hashCode()
+                    localParticipant.layoutParams =
+                        LayoutParams(style.localParticipantWidth.toInt(), style.localParticipantHeight.toInt())
+                    localParticipant.radius = style.localParticipantRadius
+                    localParticipant.translationX = calculateFloatingParticipantMaxXOffset()
+                    localParticipant.translationY = style.localParticipantPadding
+                    setLocalParticipantDragInteraction(localParticipant)
+                    addView(localParticipant)
+                }
+            }
+            localParticipant?.setParticipant(participant)
+        } else if (localParticipant != null) {
+            removeView(localParticipant)
+            localParticipant = null
+        }
+        localParticipant?.bringToFront()
+    }
+
+    /**
+     * Sets the touch listener to the [FloatingParticipantView] showing the local user to enable dragging the view.
+     */
+    @SuppressLint("ClickableViewAccessibility")
+    private fun setLocalParticipantDragInteraction(localParticipant: FloatingParticipantView) {
+        val maxDx = calculateFloatingParticipantMaxXOffset()
+        val maxDy = calculateFloatingParticipantMaxYOffset()
+
+        var dx = 0f
+        var dy = 0f
+        localParticipant.setOnTouchListener { view, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    dx = view.x - event.rawX
+                    dy = view.y - event.rawY
+                    return@setOnTouchListener true
+                }
+
+                MotionEvent.ACTION_MOVE -> {
+                    val newX = event.rawX + dx
+                    val newY = event.rawY + dy
+
+                    view.animate()
+                        .x(newX.coerceIn(style.localParticipantPadding, maxDx))
+                        .y(newY.coerceIn(style.localParticipantPadding, maxDy))
+                        .setDuration(0)
+                        .start()
+                    return@setOnTouchListener true
+                }
+            }
+            false
+        }
+    }
+
+    /**
+     * Calculates the max X offset that can be applied to the overlaid [FloatingParticipantView] so that it can only be
+     * dragged inside this view accounting for the padding.
+     *
+     * @return The max X offset that can be applied to the overlaid [FloatingParticipantView].
+     */
+    private fun calculateFloatingParticipantMaxXOffset(): Float {
+        return measuredWidth - style.localParticipantWidth - style.localParticipantPadding
+    }
+
+    /**
+     * Calculates the max Y offset that can be applied to the overlaid [FloatingParticipantView] so that it can only be
+     * dragged inside this view accounting for the padding.
+     *
+     * @return The max Y offset that can be applied to the overlaid [FloatingParticipantView].
+     */
+    private fun calculateFloatingParticipantMaxYOffset(): Float {
+        val controlsHeight = (parent as? ViewGroup)?.children?.firstOrNull { it is CallControlsView }?.measuredHeight ?: 0
+        return measuredHeight - style.localParticipantHeight - style.localParticipantPadding - controlsHeight
+    }
+
+    /**
+     * Updates the remote participants. 4 remote participants will be shown at most in a grid. If a new participant
+     * joins the call or an old one leaves, a [CallParticipantView] will be added or removed.
+     */
+    private fun updateRemoteParticipants(participants: List<CallParticipantState>) {
         when {
             participants.size > childList.size -> {
                 val missingParticipants = participants.filter { !childList.map { it.tag }.contains(it.id) }

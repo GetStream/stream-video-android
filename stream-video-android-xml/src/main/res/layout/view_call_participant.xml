@@ -45,17 +45,6 @@
         app:layout_constraintTop_toTopOf="parent"
         >
 
-        <TextView
-            android:id="@+id/participantName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
-            tools:text="Some random user"
-            />
-
         <ImageView
             android:id="@+id/soundIndicator"
             android:layout_width="wrap_content"
@@ -63,6 +52,20 @@
             android:layout_gravity="center"
             android:paddingStart="0dp"
             android:paddingEnd="8dp"
+            />
+
+        <TextView
+            android:id="@+id/participantName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:lines="1"
+            android:maxWidth="64dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            tools:text="Some random user"
             />
 
     </LinearLayout>
