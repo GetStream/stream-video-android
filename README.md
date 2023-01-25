@@ -12,16 +12,16 @@ This is the official Android SDK for [Stream Video](https://getstream.io/video/d
 
 Once you're familiarized with the SDK, you can rely on the low-level-client and build fully custom UI and behavior based on the state we provide.
 
-The Android SDK supports both Kotlin and Java, as well as Jetpack Compose and XML for UI. We _strongly recommend_ using Kotlin and Jetpack Composem as they provide the most flexibility, customizability and the best developer experience.
+The Android SDK supports both Kotlin and Java, as well as Jetpack Compose and XML for UI. We _strongly recommend_ using Kotlin and Jetpack Compose as they provide the most flexibility, customizability and the best developer experience.
 
 ### 🔗 Quick Links
 
 * [Register](getstream.io/video/trial): Create an account and get an API key for Stream Video and (optionally) Stream Chat.
 * [Video Tutorial](https://getstream.io/video/docs/android/basics/tutorial/): Learn what the easiest way to integrate our Video SDK is and how to build a Video app in just a few minutes.
 * [SDK Documentation](https://getstream.io/video/docs/android/): Read through our documentation to learn about different ways of using and customizing the Video SDK.
-* [Chat + Video Template project](https://github.com/GetStream/stream-video-android/tree/main/examples/chat-with-video/chat-with-video-final): Use our template Chat + Video project as a framework for any apps that focus on chat primarily and video second. Examples of apps are Messenger, WhatsApp, Telegram, Viber and more.
+* [Chat + Video Template project](https://github.com/GetStream/stream-video-android/tree/main/examples/chat-with-video/chat-with-video-final): Use our template Chat + Video project as a framework for any apps that focus on chat primarily and video second. Examples of apps are Messenger, WhatsApp, Telegram and more.
 * Video + Chat Template project: Use our template Video + Chat project as an alternate framework, where your app focuses primarily on Video, with secondary Chat features. Examples of apps are Zoom, Google Meet and similar.
-* API Docs: All of our code has well maintained documentation which is published using Dokka. 
+* API Docs: All of our code has well maintained documentation which is published using `Dokka`. 
 * [Video Team Planning project](https://github.com/orgs/GetStream/projects/15): All of our sprint planning, feature requests, backlog, blocker and in progress items are visible in our GitHub project. 
 
 ## 🗺️ Overview & Documentation 📚
@@ -38,7 +38,7 @@ You can find the easiest way to get started with our SDK in our [Basics](https:/
 
 ## 🔮 Sample Apps
 
-We have several different sample apps and example kits you can use to explore our SDK integration. These cater to both Jetpack Compose and XML UI toolkits. That way, you can choose which sample suits your preferred programming style and technology.
+We have several different sample apps and example kits you can use to explore our SDK integration. These cater to both Jetpack Compose and XML UI toolkit. That way, you can choose which sample suits your preferred programming style and technology.
 
 ### 🧩 Jetpack Compose Sample App
 
@@ -65,7 +65,7 @@ Next, open [Android Studio](https://developer.android.com/studio) and open the c
 
 ## 🏗️ Template Projects
 
-To allow easier integration of our Chat and Video SDKs as well as some other features like deeplinking, push notifications and more, we provided template projects that you can clone and use as a foundation for your app.
+To allow easier integration of our Chat and Video SDKs as well as some other features like deep linking, push notifications and more, we provided template projects that you can clone and use as a foundation for your app.
 
 Currently we expose the following templates:
 
@@ -92,8 +92,8 @@ Our Video SDK ships with a plethora of cool and modern features. Here are just s
 * Push notification providers support
 * Automatic Incoming/Outgoing call prompts based on state changes
 * Call configuration customization (timeouts, automatic rejections, showing prompts...)
-* Deeplinking support
-* Variable video quality streaming (Dynacast)
+* Deep linking support
+* Variable video quality streaming
 * Call recording
 * Screen sharing display
 * Portrait and landscape UI configuration support
