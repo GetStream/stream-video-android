@@ -31,4 +31,5 @@ include(":stream-video-android-compose")
 include(":examples:chat-with-video:chat-with-video-final")
 include(":examples:chat-with-video:chat-with-video-starter")
 
+include(":examples:video-with-chat:video-with-chat-final")
 include(":examples:video-with-chat:video-with-chat-starter")

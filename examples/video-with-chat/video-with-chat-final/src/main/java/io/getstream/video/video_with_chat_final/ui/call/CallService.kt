@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package io.getstream.video.video_with_chat_starter.ui.call
+package io.getstream.video.video_with_chat_final.ui.call
 
 import android.content.Context
 import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.service.AbstractStreamCallService
-import io.getstream.video.video_with_chat_starter.application.videoWithChatApp
+import io.getstream.video.video_with_chat_final.application.videoWithChatApp
 
 class CallService : AbstractStreamCallService() {
 

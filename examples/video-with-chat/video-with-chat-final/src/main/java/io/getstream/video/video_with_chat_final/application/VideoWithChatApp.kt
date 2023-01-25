@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.video_with_chat_starter.application
+package io.getstream.video.video_with_chat_final.application
 
 import android.app.Application
 import android.content.Context
@@ -25,7 +25,7 @@ import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.token.CredentialsProvider
 import io.getstream.video.android.user.UserCredentialsManager
 import io.getstream.video.android.user.UsersProvider
-import io.getstream.video.video_with_chat_starter.users.FakeUsersProvider
+import io.getstream.video.video_with_chat_final.users.FakeUsersProvider
 
 class ChatWithVideoApp : Application() {
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.video_with_chat_starter.ui.login
+package io.getstream.video.video_with_chat_final.ui.login
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -45,7 +45,7 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.ImageAvatar
 import io.getstream.video.android.compose.utils.rememberStreamImagePainter
 import io.getstream.video.android.model.User
-import io.getstream.video.video_with_chat_starter.application.videoWithChatApp
+import io.getstream.video.video_with_chat_final.application.videoWithChatApp
 
 class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -71,7 +71,7 @@ class LoginActivity : ComponentActivity() {
     private fun logIn(user: User) {
         logInToChat(user)
         logInToVideo(user)
-        // TODO home
+        // TODO - start Home
     }
 
     private fun logInToChat(user: User) {
