@@ -21,7 +21,7 @@ import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.app.videoApp
 import io.getstream.video.android.xml.AbstractXmlCallActivity
 
-class XmlCallActivity : io.getstream.video.android.xml.AbstractXmlCallActivity() {
+class XmlCallActivity : AbstractXmlCallActivity() {
 
     /**
      * Provides the StreamVideo instance through the videoApp.
