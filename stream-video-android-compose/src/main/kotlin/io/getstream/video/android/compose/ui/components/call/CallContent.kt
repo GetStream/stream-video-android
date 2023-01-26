@@ -34,6 +34,7 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.activecall.ActiveCallContent
 import io.getstream.video.android.compose.ui.components.call.activecall.DefaultPictureInPictureContent
 import io.getstream.video.android.compose.ui.components.call.activecall.internal.InviteUsersDialog
+import io.getstream.video.android.compose.ui.components.call.controls.internal.DefaultCallControlsContent
 import io.getstream.video.android.compose.ui.components.call.incomingcall.IncomingCallContent
 import io.getstream.video.android.compose.ui.components.call.outgoingcall.OutgoingCallContent
 import io.getstream.video.android.compose.ui.components.participants.CallParticipantsInfoMenu
@@ -63,6 +64,12 @@ public fun CallContent(
     modifier: Modifier = Modifier,
     onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = { viewModel.onCallAction(it) },
+    callControlsContent: @Composable () -> Unit = {
+        DefaultCallControlsContent(
+            viewModel,
+            onCallAction
+        )
+    },
     pictureInPictureContent: @Composable (Call) -> Unit = { DefaultPictureInPictureContent(it) }
 ) {
     val stateHolder = viewModel.streamCallState.collectAsState(initial = State.Idle)
@@ -89,6 +96,7 @@ public fun CallContent(
             callViewModel = viewModel,
             onBackPressed = onBackPressed,
             onCallAction = onCallAction,
+            callControlsContent = callControlsContent,
             pictureInPictureContent = pictureInPictureContent
         )
 
