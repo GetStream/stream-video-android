@@ -344,7 +344,7 @@ fun initializeStreamVideo(
 
     return StreamVideoBuilder( // 2
         context = this,
-        credentialsProvider = credentialsProvider,
+        credentialsProvider = this.credentialsProvider,
         androidInputs = setOf(
             CallServiceInput.from(CallService::class), // 3
             CallActivityInput.from(CallActivity::class),
