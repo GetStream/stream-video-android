@@ -336,6 +336,7 @@ public abstract class io/getstream/video/android/compose/ui/AbstractComposeCallA
 	public fun getCallViewModelFactory ()Lio/getstream/video/android/viewmodel/CallViewModelFactory;
 	public fun getPermissionManager ()Lio/getstream/video/android/permission/PermissionManager;
 	protected fun handleBackPressed ()V
+	protected fun handleCallAction (Lio/getstream/video/android/call/state/CallAction;)V
 	public fun initPermissionManager ()Lio/getstream/video/android/permission/PermissionManager;
 	public fun onConfigurationChanged (Landroid/content/res/Configuration;)V
 	protected fun onCreate (Landroid/os/Bundle;)V
@@ -375,7 +376,7 @@ public final class io/getstream/video/android/compose/ui/components/call/CallApp
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/CallContentKt {
-	public static final fun CallContent (Lio/getstream/video/android/viewmodel/CallViewModel;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;II)V
+	public static final fun CallContent (Lio/getstream/video/android/viewmodel/CallViewModel;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/ComposableSingletons$CallAppBarKt {
@@ -397,7 +398,7 @@ public final class io/getstream/video/android/compose/ui/components/call/Composa
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/activecall/ActiveCallContentKt {
-	public static final fun ActiveCallContent (Lio/getstream/video/android/viewmodel/CallViewModel;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;II)V
+	public static final fun ActiveCallContent (Lio/getstream/video/android/viewmodel/CallViewModel;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/activecall/ComposableSingletons$ActiveCallContentKt {
@@ -422,11 +423,15 @@ public final class io/getstream/video/android/compose/ui/components/call/control
 
 public final class io/getstream/video/android/compose/ui/components/call/controls/CallControlsKt {
 	public static final fun CallControls (Lio/getstream/video/android/call/state/CallMediaState;ZLandroidx/compose/ui/Modifier;Ljava/util/List;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
-	public static final fun CallControlsActions (Ljava/util/List;ZLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/controls/LandscapeCallControlsKt {
-	public static final fun LandscapeCallControls (Lio/getstream/video/android/call/state/CallMediaState;ZLandroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+	public static final fun LandscapeCallControls (Lio/getstream/video/android/call/state/CallMediaState;ZLandroidx/compose/ui/Modifier;Ljava/util/List;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class io/getstream/video/android/compose/ui/components/call/controls/RegularCallControlsKt {
+	public static final fun RegularCallControls (Lio/getstream/video/android/call/state/CallMediaState;ZLandroidx/compose/ui/Modifier;Ljava/util/List;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+	public static final fun RegularCallControlsActions (Ljava/util/List;ZLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/incomingcall/ComposableSingletons$IncomingCallContentKt {
@@ -531,7 +536,7 @@ public final class io/getstream/video/android/compose/ui/components/participants
 }
 
 public final class io/getstream/video/android/compose/ui/components/participants/CallParticipantsKt {
-	public static final fun CallParticipants (Lio/getstream/video/android/model/Call;Lkotlin/jvm/functions/Function1;Lio/getstream/video/android/call/state/CallMediaState;Lio/getstream/video/android/model/state/StreamCallState;Landroidx/compose/ui/Modifier;Landroidx/compose/foundation/layout/PaddingValues;ZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;II)V
+	public static final fun CallParticipants (Lio/getstream/video/android/model/Call;Lkotlin/jvm/functions/Function1;Lio/getstream/video/android/call/state/CallMediaState;Lio/getstream/video/android/model/state/StreamCallState;Landroidx/compose/ui/Modifier;Landroidx/compose/foundation/layout/PaddingValues;Lio/getstream/video/android/model/ScreenSharingSession;ZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;III)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/participants/FloatingParticipantItemKt {
@@ -539,11 +544,11 @@ public final class io/getstream/video/android/compose/ui/components/participants
 }
 
 public final class io/getstream/video/android/compose/ui/components/participants/RegularCallParticipantsContentKt {
-	public static final fun RegularCallParticipantsContent (Lio/getstream/video/android/model/Call;Lio/getstream/video/android/call/state/CallMediaState;Lio/getstream/video/android/model/state/StreamCallState;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;Landroidx/compose/ui/Modifier;Landroidx/compose/foundation/layout/PaddingValues;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+	public static final fun RegularCallParticipantsContent (Lio/getstream/video/android/model/Call;Lio/getstream/video/android/call/state/CallMediaState;Lio/getstream/video/android/model/state/StreamCallState;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;Landroidx/compose/ui/Modifier;Landroidx/compose/foundation/layout/PaddingValues;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/participants/ScreenSharingParticipantsContentKt {
-	public static final fun ScreenSharingCallParticipantsContent (Lio/getstream/video/android/model/Call;Lio/getstream/video/android/model/ScreenSharingSession;Ljava/util/List;Lio/getstream/video/android/call/state/CallMediaState;Lkotlin/jvm/functions/Function1;Landroidx/compose/ui/Modifier;Landroidx/compose/foundation/layout/PaddingValues;ZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;II)V
+	public static final fun ScreenSharingCallParticipantsContent (Lio/getstream/video/android/model/Call;Lio/getstream/video/android/model/ScreenSharingSession;Ljava/util/List;Lio/getstream/video/android/call/state/CallMediaState;Lkotlin/jvm/functions/Function1;Landroidx/compose/ui/Modifier;Landroidx/compose/foundation/layout/PaddingValues;ZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;III)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/participants/internal/ComposableSingletons$CallParticipantsInfoAppBarKt {
@@ -577,7 +582,7 @@ public final class io/getstream/video/android/compose/ui/components/participants
 }
 
 public final class io/getstream/video/android/compose/ui/components/participants/internal/LandscapeScreenSharingContentKt {
-	public static final fun LandscapeScreenSharingContent (Lio/getstream/video/android/model/Call;Lio/getstream/video/android/model/ScreenSharingSession;Ljava/util/List;Lio/getstream/video/android/call/state/CallMediaState;Landroidx/compose/foundation/layout/PaddingValues;Landroidx/compose/ui/Modifier;ZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;II)V
+	public static final fun LandscapeScreenSharingContent (Lio/getstream/video/android/model/Call;Lio/getstream/video/android/model/ScreenSharingSession;Ljava/util/List;Landroidx/compose/foundation/layout/PaddingValues;Landroidx/compose/ui/Modifier;ZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/video/VideoRendererKt {

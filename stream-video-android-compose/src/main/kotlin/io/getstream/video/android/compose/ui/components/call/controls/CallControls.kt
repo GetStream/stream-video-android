@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2022 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -16,24 +16,14 @@
 
 package io.getstream.video.android.compose.ui.components.call.controls
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Card
-import androidx.compose.material.Icon
-import androidx.compose.material.Surface
+import android.content.res.Configuration.ORIENTATION_LANDSCAPE
+import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalConfiguration
 import io.getstream.video.android.call.state.CallAction
 import io.getstream.video.android.call.state.CallMediaState
-import io.getstream.video.android.call.state.FlipCamera
 import io.getstream.video.android.compose.state.ui.call.CallControlAction
-import io.getstream.video.android.compose.theme.VideoTheme
 
 /**
  * Represents the set of controls the user can use to change their audio and video device state, or
@@ -53,54 +43,23 @@ public fun CallControls(
     actions: List<CallControlAction> = buildDefaultCallControlActions(callMediaState = callMediaState),
     onCallAction: (CallAction) -> Unit
 ) {
-    Surface(
-        modifier = modifier,
-        shape = VideoTheme.shapes.callControls,
-        color = VideoTheme.colors.barsBackground,
-        elevation = 8.dp
-    ) {
-        CallControlsActions(
-            actions = actions,
+    val orientation = LocalConfiguration.current.orientation
+
+    if (orientation == ORIENTATION_PORTRAIT) {
+        RegularCallControls(
+            modifier = modifier,
+            callMediaState = callMediaState,
             isScreenSharing = isScreenSharing,
-            onCallAction = onCallAction
+            onCallAction = onCallAction,
+            actions = actions
         )
-    }
-}
-
-/**
- * Represents the list of Call Control actions the user can trigger while in a call.
- *
- * @param actions The list of actions to render.
- * @param isScreenSharing If there is a screen sharing session active.
- * @param onCallAction Handler when a given action is triggered.
- */
-@Composable
-public fun CallControlsActions(
-    actions: List<CallControlAction>,
-    isScreenSharing: Boolean,
-    onCallAction: (CallAction) -> Unit
-) {
-    LazyRow(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceEvenly
-    ) {
-        items(actions) { action ->
-            val isEnabled = (action.callAction is FlipCamera && isScreenSharing).not()
-
-            Card(
-                modifier = Modifier.size(VideoTheme.dimens.callControlButtonSize),
-                shape = VideoTheme.shapes.callControlsButton,
-                backgroundColor = if (isEnabled) action.actionBackgroundTint else VideoTheme.colors.disabled
-            ) {
-                Icon(
-                    modifier = Modifier
-                        .padding(10.dp)
-                        .clickable(enabled = isEnabled) { onCallAction(action.callAction) },
-                    tint = action.iconTint,
-                    painter = action.icon,
-                    contentDescription = action.description
-                )
-            }
-        }
+    } else if (orientation == ORIENTATION_LANDSCAPE) {
+        LandscapeCallControls(
+            modifier = modifier,
+            callMediaState = callMediaState,
+            onCallAction = onCallAction,
+            isScreenSharing = true,
+            actions = actions
+        )
     }
 }

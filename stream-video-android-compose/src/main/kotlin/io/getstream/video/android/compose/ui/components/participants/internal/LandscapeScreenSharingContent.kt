@@ -29,9 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.call.state.CallAction
-import io.getstream.video.android.call.state.CallMediaState
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.call.controls.LandscapeCallControls
 import io.getstream.video.android.compose.ui.components.internal.OverlayScreenSharingAppBar
 import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.CallParticipantState
@@ -43,26 +41,26 @@ import io.getstream.video.android.model.ScreenSharingSession
  * @param call The call containing state.
  * @param session Screen sharing session to render.
  * @param participants List of participants to render under the screen share track.
- * @param callMediaState The state of the media devices for the current user.
  * @param paddingValues Padding values from the parent.
  * @param modifier Modifier for styling.
  * @param isFullscreen If we're currently in fullscreen mode.
  * @param onRender Handler when the video renders.
  * @param onCallAction Handler when the user performs various call actions.
  * @param onBackPressed Handler when the user taps back.
+ * @param callControlsContent Content shown that allows users to trigger different actions.
  */
 @Composable
 public fun LandscapeScreenSharingContent(
     call: Call,
     session: ScreenSharingSession,
     participants: List<CallParticipantState>,
-    callMediaState: CallMediaState,
     paddingValues: PaddingValues,
     modifier: Modifier = Modifier,
     isFullscreen: Boolean,
     onRender: (View) -> Unit,
     onCallAction: (CallAction) -> Unit,
-    onBackPressed: () -> Unit
+    onBackPressed: () -> Unit,
+    callControlsContent: @Composable () -> Unit
 ) {
     val sharingParticipant = session.participant
 
@@ -98,14 +96,7 @@ public fun LandscapeScreenSharingContent(
                 participants = participants
             )
 
-            LandscapeCallControls(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .width(VideoTheme.dimens.landscapeCallControlsSheetWidth),
-                callMediaState = callMediaState,
-                onCallAction = onCallAction,
-                isScreenSharing = true
-            )
+            callControlsContent()
         }
     }
 }
