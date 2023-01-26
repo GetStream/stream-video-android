@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">chat-with-video-starter-kit</string>
     <string name="call_name_placeholder">Video Call Request</string>
+    <string name="open_chat">Chat</string>
 </resources>

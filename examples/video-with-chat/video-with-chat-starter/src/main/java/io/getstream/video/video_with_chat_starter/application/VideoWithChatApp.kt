@@ -27,7 +27,7 @@ import io.getstream.video.android.user.UserCredentialsManager
 import io.getstream.video.android.user.UsersProvider
 import io.getstream.video.video_with_chat_starter.users.FakeUsersProvider
 
-class ChatWithVideoApp : Application() {
+class VideoWithChatApp : Application() {
 
     val usersLoginProvider: UsersProvider by lazy { FakeUsersProvider() }
 
@@ -62,4 +62,4 @@ class ChatWithVideoApp : Application() {
 
 internal const val API_KEY = "us83cfwuhy8n"
 
-internal val Context.videoWithChatApp get() = applicationContext as ChatWithVideoApp
+internal val Context.videoWithChatApp get() = applicationContext as VideoWithChatApp
