@@ -19,24 +19,59 @@ package io.getstream.video.video_with_chat_final.application
 import android.app.Application
 import android.content.Context
 import io.getstream.chat.android.client.ChatClient
-import io.getstream.chat.android.compose.ui.attachments.StreamAttachmentFactories
+import io.getstream.chat.android.client.logger.ChatLogLevel
+import io.getstream.chat.android.client.models.UploadAttachmentsNetworkType
+import io.getstream.chat.android.offline.plugin.factory.StreamOfflinePluginFactory
+import io.getstream.chat.android.state.plugin.config.StatePluginConfig
+import io.getstream.chat.android.state.plugin.factory.StreamStatePluginFactory
+import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.StreamVideo
+import io.getstream.video.android.StreamVideoBuilder
+import io.getstream.video.android.StreamVideoConfig
+import io.getstream.video.android.input.CallActivityInput
+import io.getstream.video.android.input.CallServiceInput
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.token.CredentialsProvider
 import io.getstream.video.android.user.UserCredentialsManager
 import io.getstream.video.android.user.UsersProvider
+import io.getstream.video.video_with_chat_final.ui.call.CallActivity
+import io.getstream.video.video_with_chat_final.ui.call.CallService
 import io.getstream.video.video_with_chat_final.users.FakeUsersProvider
 
 class VideoWithChatApp : Application() {
 
     val usersLoginProvider: UsersProvider by lazy { FakeUsersProvider() }
 
-    val chatClient: ChatClient by lazy {
-        TODO("Implement ChatClient")
+    private val videoConfig: StreamVideoConfig = object : StreamVideoConfig {
+        override val dropTimeout: Long = 30_000L
+        override val cancelOnTimeout: Boolean = true
+        override val joinOnAcceptedByCallee: Boolean = true
+        override val createCallClientInternally: Boolean = true
+
+        override val autoPublish: Boolean = true
+        override val defaultAudioOn: Boolean = false
+        override val defaultVideoOn: Boolean = true
+        override val defaultSpeakerPhoneOn: Boolean = false
     }
 
-    val attachmentFactories by lazy {
-        StreamAttachmentFactories.defaultFactories() // TODO add custom attachment
+    val chatClient: ChatClient by lazy {
+        val offlinePlugin = StreamOfflinePluginFactory(this)
+
+        val statePluginFactory = StreamStatePluginFactory(
+            config = StatePluginConfig(
+                backgroundSyncEnabled = true,
+                userPresence = true,
+            ),
+            appContext = this
+        )
+
+        val logLevel = if (BuildConfig.DEBUG) ChatLogLevel.ALL else ChatLogLevel.NOTHING
+
+        ChatClient.Builder("tp8sef43xcpc", this)
+            .withPlugins(offlinePlugin, statePluginFactory)
+            .logLevel(logLevel)
+            .uploadAttachmentsNetworkType(UploadAttachmentsNetworkType.NOT_ROAMING)
+            .build()
     }
 
     lateinit var credentialsProvider: CredentialsProvider
@@ -49,13 +84,34 @@ class VideoWithChatApp : Application() {
         credentialsProvider: CredentialsProvider,
         loggingLevel: LoggingLevel
     ): StreamVideo {
-        TODO()
+        if (this::credentialsProvider.isInitialized) {
+            this.credentialsProvider.updateUser(
+                credentialsProvider.getUserCredentials()
+            )
+        } else {
+            this.credentialsProvider = credentialsProvider
+        }
+
+        return StreamVideoBuilder(
+            context = this,
+            credentialsProvider = this.credentialsProvider,
+            androidInputs = setOf(
+                CallServiceInput.from(CallService::class),
+                CallActivityInput.from(CallActivity::class),
+            ),
+            loggingLevel = loggingLevel,
+            config = videoConfig
+        ).build().also {
+            streamVideo = it
+        }
     }
 
     fun logOut() {
         val preferences = UserCredentialsManager.initialize(this)
 
-        // TODO log out of clients
+        chatClient.disconnect(true).enqueue()
+        streamVideo.clearCallState()
+        streamVideo.removeDevices(preferences.getDevices())
         preferences.clear()
     }
 }

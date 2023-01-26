@@ -16,6 +16,7 @@
 
 package io.getstream.video.video_with_chat_final.ui.login
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -44,8 +45,12 @@ import androidx.compose.ui.unit.sp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.ImageAvatar
 import io.getstream.video.android.compose.utils.rememberStreamImagePainter
+import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.model.User
+import io.getstream.video.android.token.AuthCredentialsProvider
+import io.getstream.video.video_with_chat_final.application.API_KEY
 import io.getstream.video.video_with_chat_final.application.videoWithChatApp
+import io.getstream.video.video_with_chat_final.ui.home.HomeActivity
 
 class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -71,15 +76,31 @@ class LoginActivity : ComponentActivity() {
     private fun logIn(user: User) {
         logInToChat(user)
         logInToVideo(user)
-        // TODO - start Home
+        startActivity(Intent(this, HomeActivity::class.java))
+        finish()
     }
 
     private fun logInToChat(user: User) {
-        // TODO
+        val userLogin = io.getstream.chat.android.client.models.User(
+            id = user.id,
+            name = user.name,
+            image = user.imageUrl ?: ""
+        )
+
+        videoWithChatApp.chatClient.connectUser(
+            user = userLogin,
+            token = user.extraData["chatToken"] as String
+        ).enqueue()
     }
 
     private fun logInToVideo(user: User) {
-        // TODO
+        videoWithChatApp.initializeStreamVideo(
+            AuthCredentialsProvider(
+                API_KEY,
+                user = user
+            ),
+            loggingLevel = LoggingLevel.BODY
+        )
     }
 
     @Composable
