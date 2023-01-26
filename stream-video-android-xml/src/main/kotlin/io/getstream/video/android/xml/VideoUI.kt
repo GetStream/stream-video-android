@@ -14,17 +14,28 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.app.ui.call
+package io.getstream.video.android.xml
 
 import android.content.Context
-import io.getstream.video.android.StreamVideo
-import io.getstream.video.android.app.videoApp
-import io.getstream.video.android.xml.AbstractXmlCallActivity
+import io.getstream.video.android.xml.font.VideoFonts
+import io.getstream.video.android.xml.font.VideoFontsImpl
+import io.getstream.video.android.xml.font.VideoStyle
+import io.getstream.video.android.xml.utils.lazyVar
 
-class XmlCallActivity : AbstractXmlCallActivity() {
+/**
+ * VideoUI handles any configuration for the Video UI elements.
+ *
+ * @see VideoFonts
+ */
+public object VideoUI {
+    internal lateinit var appContext: Context
+
+    @JvmStatic
+    public var style: VideoStyle = VideoStyle()
 
     /**
-     * Provides the StreamVideo instance through the videoApp.
+     * Allows setting default fonts used by UI components.
      */
-    override fun getStreamVideo(context: Context): StreamVideo = videoApp.streamVideo
+    @JvmStatic
+    public var fonts: VideoFonts by lazyVar { VideoFontsImpl(style, appContext) }
 }

@@ -7,7 +7,7 @@
         errorLine1="                participants.forEach { participant ->"
         errorLine2="                             ~~~~~~~">
         <location
-            file="src/main/kotlin/io/getstream/video/android/ui/xml/widget/participant/CallParticipantsView.kt"
+            file="src/main/kotlin/io/getstream/video/android/xml/widget/participant/CallParticipantsView.kt"
             line="128"
             column="30"/>
     </issue>

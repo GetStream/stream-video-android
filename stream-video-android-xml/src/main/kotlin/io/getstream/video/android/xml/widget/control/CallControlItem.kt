@@ -14,17 +14,21 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.app.ui.call
+package io.getstream.video.android.xml.widget.control
 
-import android.content.Context
-import io.getstream.video.android.StreamVideo
-import io.getstream.video.android.app.videoApp
-import io.getstream.video.android.xml.AbstractXmlCallActivity
+import io.getstream.video.android.call.state.CallAction
 
-class XmlCallActivity : AbstractXmlCallActivity() {
-
-    /**
-     * Provides the StreamVideo instance through the videoApp.
-     */
-    override fun getStreamVideo(context: Context): StreamVideo = videoApp.streamVideo
-}
+/**
+ * A singe call control item to be exposed to the user in the [CallControlsView].
+ *
+ * @param icon The icon in the center of the button.
+ * @param iconTint The color of the icon.
+ * @param backgroundTint The color of the button background.
+ * @param action The [CallAction] to be performed.
+ */
+public data class CallControlItem(
+    val icon: Int,
+    val iconTint: Int,
+    val backgroundTint: Int,
+    val action: CallAction
+)

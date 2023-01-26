@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     >
 
-    <io.getstream.video.android.ui.xml.widget.participant.CallParticipantView
+    <io.getstream.video.android.xml.widget.participant.CallParticipantView
         android:id="@+id/localParticipant"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

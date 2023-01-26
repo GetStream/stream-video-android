@@ -2,7 +2,7 @@
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="io.getstream.video.android.ui.xml">
+    package="io.getstream.video.android.xml">
 
 
     <application>
@@ -14,7 +14,7 @@
             tools:node="merge"
             >
             <meta-data
-                android:name="io.getstream.video.android.ui.xml.initializer.VideoUIInitializer"
+                android:name="io.getstream.video.android.xml.initializer.VideoUIInitializer"
                 android:value="androidx.startup"
                 />
         </provider>

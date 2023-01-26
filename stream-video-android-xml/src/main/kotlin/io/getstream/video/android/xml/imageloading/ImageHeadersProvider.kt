@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.app.ui.call
+package io.getstream.video.android.xml.imageloading
 
-import android.content.Context
-import io.getstream.video.android.StreamVideo
-import io.getstream.video.android.app.videoApp
-import io.getstream.video.android.xml.AbstractXmlCallActivity
+/**
+ * Provides HTTP headers for image loading requests.
+ */
+public interface ImageHeadersProvider {
+    public fun getImageRequestHeaders(): Map<String, String>
+}
 
-class XmlCallActivity : AbstractXmlCallActivity() {
-
-    /**
-     * Provides the StreamVideo instance through the videoApp.
-     */
-    override fun getStreamVideo(context: Context): StreamVideo = videoApp.streamVideo
+internal object DefaultImageHeadersProvider : ImageHeadersProvider {
+    override fun getImageRequestHeaders(): Map<String, String> = emptyMap()
 }
