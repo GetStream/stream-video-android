@@ -22,6 +22,8 @@ import androidx.cardview.widget.CardView
 import io.getstream.video.android.model.CallParticipantState
 import io.getstream.video.android.xml.databinding.ViewFloatingParticipantBinding
 import io.getstream.video.android.xml.utils.extensions.createStreamThemeWrapper
+import io.getstream.video.android.xml.utils.extensions.dpToPx
+import io.getstream.video.android.xml.utils.extensions.dpToPxPrecise
 import io.getstream.video.android.xml.utils.extensions.streamThemeInflater
 
 /**
@@ -38,6 +40,10 @@ public class FloatingParticipantView : CardView {
         attrs,
         defStyleAttr
     )
+
+    init {
+        elevation = 8.dpToPxPrecise()
+    }
 
     /**
      * Sets the [RendererInitializer] handler so we can initialize the texture view with the renderer.

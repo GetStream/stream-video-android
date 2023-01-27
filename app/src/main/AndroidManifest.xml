@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="io.getstream.video.android.app">
+    package="io.getstream.video.android.app"
+    >
 
     <application
         android:name=".VideoApp"
@@ -14,14 +15,17 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.StreamVideoAndroid"
-        tools:targetApi="31">
+        tools:targetApi="31"
+        >
         <profileable
             android:shell="true"
-            tools:targetApi="29" />
+            tools:targetApi="29"
+            />
 
         <activity
             android:name=".ui.login.LoginActivity"
-            android:exported="true">
+            android:exported="true"
+            >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -32,14 +36,20 @@
         <activity
             android:name=".ui.call.CallActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
-            android:supportsPictureInPicture="true" />
+            android:supportsPictureInPicture="true"
+            />
 
-        <activity android:name=".ui.call.XmlCallActivity" />
+        <activity
+            android:name=".ui.call.XmlCallActivity"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:supportsPictureInPicture="true"
+            />
 
         <service
             android:name="io.getstream.video.android.app.ui.call.CallService"
             android:enabled="true"
-            android:exported="false" />
+            android:exported="false"
+            />
     </application>
 
 </manifest>

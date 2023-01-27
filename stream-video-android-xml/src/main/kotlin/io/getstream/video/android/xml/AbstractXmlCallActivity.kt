@@ -26,10 +26,14 @@ import android.os.Bundle
 import android.provider.Settings
 import android.util.Rational
 import android.view.Menu
+import android.view.View
+import android.view.ViewGroup
 import android.view.WindowManager
+import android.widget.FrameLayout
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.children
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.StreamVideoProvider
@@ -46,6 +50,13 @@ import io.getstream.video.android.viewmodel.CallViewModelFactoryProvider
 import io.getstream.video.android.xml.binding.bindView
 import io.getstream.video.android.xml.databinding.ActivityCallBinding
 import io.getstream.video.android.xml.utils.extensions.streamThemeInflater
+import io.getstream.video.android.xml.widget.active.ActiveCallView
+import io.getstream.video.android.xml.widget.incoming.IncomingCallView
+import io.getstream.video.android.xml.widget.outgoing.OutgoingCallView
+import io.getstream.video.android.xml.widget.participant.CallParticipantView
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
 
 public abstract class AbstractXmlCallActivity :
     AppCompatActivity(),
@@ -107,7 +118,7 @@ public abstract class AbstractXmlCallActivity :
         observeStreamCallState()
 
         lifecycleScope.launchWhenCreated {
-            callViewModel.streamCallState.collect { state ->
+            callViewModel.streamCallState.combine(callViewModel.isInPictureInPicture) { state, isPiP ->
                 when {
                     state is StreamCallState.Incoming && !state.acceptedByMe -> {
                         showIncomingScreen()
@@ -121,10 +132,20 @@ public abstract class AbstractXmlCallActivity :
                         finish()
                     }
 
+                    state is StreamCallState.Connected && isPiP -> {
+                        showPipLayout()
+                    }
+
                     else -> {
                         showActiveCallScreen()
                     }
                 }
+            }.collect()
+        }
+
+        lifecycleScope.launchWhenCreated {
+            callViewModel.isInPictureInPicture.collect {
+                binding.callToolbar.isVisible = !it
             }
         }
     }
@@ -172,26 +193,51 @@ public abstract class AbstractXmlCallActivity :
      * Shows the outgoing call screen and initialises the state observers required to populate the screen.
      */
     private fun showOutgoingScreen() {
-        binding.outgoingCallView.isVisible = true
-        binding.outgoingCallView.bindView(callViewModel, this)
+        if (binding.contentHolder.children.firstOrNull() is OutgoingCallView) return
+        val outgoingCallView = OutgoingCallView(this)
+        addContentView(outgoingCallView)
+        outgoingCallView.bindView(callViewModel, this)
     }
 
     /**
      * Shows the incoming call screen and initialises the state observers required to populate the screen.
      */
     private fun showIncomingScreen() {
-        binding.incomingCallView.isVisible = true
-        binding.incomingCallView.bindView(callViewModel, this)
+        if (binding.contentHolder.children.firstOrNull() is IncomingCallView) return
+        val incomingCallView = IncomingCallView(this)
+        addContentView(incomingCallView)
+        incomingCallView.bindView(callViewModel, this)
     }
 
     /**
      * Shows the active call screen and initialises the state observers required to populate the screen.
      */
     private fun showActiveCallScreen() {
-        binding.outgoingCallView.isVisible = false
-        binding.incomingCallView.isVisible = false
-        binding.activeCallView.isVisible = true
-        binding.activeCallView.bindView(callViewModel, this)
+        if (binding.contentHolder.children.firstOrNull() is ActiveCallView) return
+        val activeCallView = ActiveCallView(this)
+        addContentView(activeCallView)
+        activeCallView.bindView(callViewModel, this)
+    }
+
+    private fun showPipLayout() {
+        if (binding.contentHolder.children.firstOrNull() is CallParticipantView) return
+        val callParticipant = CallParticipantView(this)
+        callParticipant.setRendererInitializer { videoRenderer, streamId, trackType, onRender ->
+            callViewModel.callState.value?.initRenderer(videoRenderer, streamId, trackType, onRender)
+        }
+        addContentView(callParticipant)
+        lifecycleScope.launchWhenCreated {
+            callViewModel.primarySpeaker.filterNotNull().collect {
+                callParticipant.setParticipant(it)
+            }
+        }
+    }
+
+    private fun addContentView(view: View) {
+        view.layoutParams =
+            FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT)
+        binding.contentHolder.removeAllViews()
+        binding.contentHolder.addView(view)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {

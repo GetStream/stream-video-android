@@ -120,6 +120,7 @@ public class CallParticipantsView : ConstraintLayout {
      * @param participant The local participant to be shown in a [FloatingParticipantView].
      */
     private fun updateLocalParticipant(participant: CallParticipantState?) {
+        // println("update local participant: $participant")
         if (participant != null) {
             if (localParticipant == null) {
                 localParticipant = FloatingParticipantView(context)
