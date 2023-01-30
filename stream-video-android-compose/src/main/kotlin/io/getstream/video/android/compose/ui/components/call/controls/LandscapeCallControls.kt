@@ -18,6 +18,7 @@ package io.getstream.video.android.compose.ui.components.call.controls
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -65,14 +66,19 @@ public fun LandscapeCallControls(
                 shape = VideoTheme.shapes.callControlsButton,
                 backgroundColor = if (isEnabled) action.actionBackgroundTint else VideoTheme.colors.disabled
             ) {
-                Icon(
-                    modifier = Modifier
-                        .padding(10.dp)
-                        .clickable(enabled = isEnabled) { onCallAction(action.callAction) },
-                    tint = action.iconTint,
-                    painter = action.icon,
-                    contentDescription = action.description
-                )
+                Box {
+                    Icon(
+                        modifier = Modifier
+                            .padding(10.dp)
+                            .align(Alignment.Center)
+                            .clickable(enabled = isEnabled) { onCallAction(action.callAction) },
+                        tint = action.iconTint,
+                        painter = action.icon,
+                        contentDescription = action.description
+                    )
+
+                    action.decorator(this)
+                }
             }
         }
     }

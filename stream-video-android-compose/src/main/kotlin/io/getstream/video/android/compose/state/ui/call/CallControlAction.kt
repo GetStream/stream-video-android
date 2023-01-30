@@ -16,6 +16,8 @@
 
 package io.getstream.video.android.compose.state.ui.call
 
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import io.getstream.video.android.call.state.CallAction
@@ -34,5 +36,6 @@ public data class CallControlAction(
     val icon: Painter,
     val iconTint: Color,
     val callAction: CallAction,
-    val description: String? = null
+    val description: String? = null,
+    val decorator: @Composable BoxScope.() -> Unit = {}
 )
