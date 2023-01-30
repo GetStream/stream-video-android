@@ -25,7 +25,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.call.state.CallAction
 import io.getstream.video.android.call.state.CallMediaState
+import io.getstream.video.android.compose.ui.components.call.controls.internal.DefaultCallControlsContent
 import io.getstream.video.android.model.Call
+import io.getstream.video.android.model.ScreenSharingSession
 import io.getstream.video.android.model.state.StreamCallState
 
 /**
@@ -42,6 +44,7 @@ import io.getstream.video.android.model.state.StreamCallState
  * @param isFullscreen If we're rendering a full screen activity.
  * @param onRender Handler when each of the Video views render their first frame.
  * @param onBackPressed Handler when the user taps back.
+ * @param callControlsContent Content shown that allows users to trigger different actions.
  */
 @Composable
 public fun CallParticipants(
@@ -51,14 +54,18 @@ public fun CallParticipants(
     callState: StreamCallState,
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues = PaddingValues(0.dp),
+    screenSharing: ScreenSharingSession? = null,
     isFullscreen: Boolean = false,
     onRender: (View) -> Unit = {},
-    onBackPressed: () -> Unit = {}
+    onBackPressed: () -> Unit = {},
+    callControlsContent: @Composable () -> Unit = {
+        DefaultCallControlsContent(
+            call = call,
+            callMediaState = callMediaState,
+            onCallAction = onCallAction
+        )
+    }
 ) {
-    val screenSharingSessions by call.screenSharingSessions.collectAsState(initial = emptyList())
-
-    val screenSharing = screenSharingSessions.firstOrNull()
-
     if (screenSharing == null) {
         RegularCallParticipantsContent(
             call = call,
@@ -68,7 +75,8 @@ public fun CallParticipants(
             onCallAction = onCallAction,
             onBackPressed = onBackPressed,
             callMediaState = callMediaState,
-            callState = callState
+            callState = callState,
+            callControlsContent = callControlsContent
         )
     } else {
         val participants by call.callParticipants.collectAsState()
@@ -83,7 +91,8 @@ public fun CallParticipants(
             isFullscreen = isFullscreen,
             onCallAction = onCallAction,
             callMediaState = callMediaState,
-            onBackPressed = onBackPressed
+            onBackPressed = onBackPressed,
+            callControlsContent = callControlsContent
         )
     }
 }
