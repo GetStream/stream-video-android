@@ -1,0 +1,53 @@
+# AbstractComposeCallActivity
+
+The easiest way to set up a screen that allows you to show incoming, outgoing and active calls with the call participants and call controls is to extend `AbstractComposeCallActivity`.
+
+`AbstractComposeCallActivity` sets up the following functionality internally:
+
+* Automatic permission handling required to record and send audio and video.
+* `OutgoingCallContent` which provides information about other call participants and exposes outgoing call controls.
+* `IncomingCallContent` which provides information about the incoming call participants and exposes incoming call controls.
+* `ActiveCallContent` which provides complete UI showing videos of the current call participants and exposes active call controls.
+* Picture in picture mode and states handling.
+
+It also sets up all the business logic and styles the UI according to our default design system.
+
+Let's see how to integrate the component.
+
+## Usage
+
+<!-- TODO link tutorial -->
+To use the `AbstractComposeCallActivity`, you just need to create an activity extending it and overriding `getStreamVideo`, found inside `StreamVideoProvider` interface, to provide the `StreamVideo` instance, which we crated inside [tutorial](../../01-basics/01-tutorial).
+
+```kotlin
+class CallActivity : AbstractComposeCallActivity() {
+
+    override fun getStreamVideo(context: Context): StreamVideo = (applicationContext as VideoApp).streamVideo
+}
+```
+
+<!-- TODO PiP manifest setup -->
+
+This small snippet wil produce a fully-working solution, as shown in the images below.
+
+<!-- TODO add some images -->
+
+## Providing custom `CallViewModelFactory`
+
+The `AbstractComposeCallActivity` itself implements `CallViewModelFactoryProvider` interface which also allows you to override the `getCallViewModelFactory` that allows you to write custom logic on how to provide the factory. This way you can provide custom user providers, in our case it helps us provide test users:
+
+```
+override fun getCallViewModelFactory(): CallViewModelFactory {
+    return CallViewModelFactory(
+        streamVideo = getStreamVideo(this),
+        permissionManager = PermissionManagerImpl(applicationContext),
+        usersProvider = if (BuildConfig.DEBUG) FakeUsersProvider() else EmptyUsersProvider
+    )
+}
+```
+
+<!-- TODO update after https://github.com/GetStream/stream-video-android/pull/110 has been sorted out -->
+## Customising permission manager
+
+<!-- TODO update after https://github.com/GetStream/stream-video-android/pull/115 has been sorted out -->
+## Customising Picture in Picture mode
