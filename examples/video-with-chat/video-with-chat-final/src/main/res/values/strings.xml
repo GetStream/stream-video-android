@@ -2,4 +2,8 @@
     <string name="app_name">chat-with-video-starter-kit</string>
     <string name="call_name_placeholder">Video Call Request</string>
     <string name="open_chat">Chat</string>
+    <string name="start_a_call">Start a call</string>
+    <string name="log_out">Log out</string>
+    <string name="call_preview">You can check if everything seems fine here before you start the call.</string>
+    <string name="start_call">Start Call</string>
 </resources>

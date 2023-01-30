@@ -77,7 +77,6 @@ class LoginActivity : ComponentActivity() {
         logInToChat(user)
         logInToVideo(user)
         startActivity(Intent(this, HomeActivity::class.java))
-        finish()
     }
 
     private fun logInToChat(user: User) {

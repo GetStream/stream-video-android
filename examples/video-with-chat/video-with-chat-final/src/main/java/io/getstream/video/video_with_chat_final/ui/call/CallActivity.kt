@@ -18,21 +18,36 @@ package io.getstream.video.video_with_chat_final.ui.call
 
 import android.content.Context
 import android.content.res.Configuration
+import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import io.getstream.chat.android.client.extensions.cidToTypeAndId
+import io.getstream.chat.android.compose.ui.messages.composer.MessageComposer
+import io.getstream.chat.android.compose.ui.messages.header.MessageListHeader
+import io.getstream.chat.android.compose.ui.messages.list.MessageList
+import io.getstream.chat.android.compose.viewmodel.messages.MessageComposerViewModel
+import io.getstream.chat.android.compose.viewmodel.messages.MessageListViewModel
+import io.getstream.chat.android.compose.viewmodel.messages.MessagesViewModelFactory
 import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.call.state.CallAction
 import io.getstream.video.android.call.state.CallMediaState
@@ -91,9 +106,56 @@ class CallActivity : AbstractComposeCallActivity() {
         }
     }
 
+    private val factory by lazy {
+        val callState = callViewModel.streamCallState.value as StreamCallState.Connected
+
+        MessagesViewModelFactory(
+            context = this,
+            channelId = callState.callGuid.cid
+        )
+    }
+
+    private val messageListViewModel by viewModels<MessageListViewModel> { factory }
+
+    private val composerViewModel by viewModels<MessageComposerViewModel> { factory }
+
+
     @Composable
     private fun ChatContent() {
-        // TODO - build chat UI and logic for loading the data
+        Scaffold(modifier = Modifier.fillMaxSize(),
+            topBar = { ChatTopBar() },
+            bottomBar = { ChatComposer() },
+            content = {
+                MessageList(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(it),
+                    viewModel = messageListViewModel
+                )
+            }
+        )
+    }
+
+    @Composable
+    private fun ChatTopBar() {
+        val channel = messageListViewModel.channel
+        val currentUser by messageListViewModel.user.collectAsState()
+
+        MessageListHeader(
+            modifier = Modifier.fillMaxWidth(),
+            channel = channel,
+            currentUser = currentUser,
+            onBackPressed = { isShowingChatState.value = false }
+        )
+    }
+
+    @Composable
+    private fun ChatComposer() {
+        MessageComposer(
+            modifier = Modifier.fillMaxWidth(),
+            viewModel = composerViewModel,
+            integrations = {}
+        )
     }
 
     @Composable
@@ -126,7 +188,7 @@ class CallActivity : AbstractComposeCallActivity() {
         val actions = if (currentCallState is StreamCallState.Connected) {
             val customAction = CustomAction(
                 data = mapOf(
-                    "channelCid" to currentCallState.callGuid.cid
+                    KEY_CHANNEL_CID to currentCallState.callGuid.cid
                 )
             )
 
@@ -135,7 +197,23 @@ class CallActivity : AbstractComposeCallActivity() {
                 icon = painterResource(id = R.drawable.ic_chat_bubble),
                 iconTint = Color.DarkGray,
                 callAction = customAction,
-                description = stringResource(R.string.open_chat)
+                description = stringResource(R.string.open_chat),
+                decorator = {
+                    val unreadMessages = messageListViewModel.currentMessagesState.unreadCount
+
+                    if (unreadMessages > 1) {
+                        Text(
+                            modifier = Modifier
+                                .background(
+                                    VideoTheme.colors.errorAccent,
+                                    shape = CircleShape
+                                )
+                                .padding(3.dp)
+                                .align(Alignment.TopEnd),
+                            text = unreadMessages.toString()
+                        )
+                    }
+                }
             )
 
             listOf(customCallControlAction) + defaultActions
@@ -154,9 +232,34 @@ class CallActivity : AbstractComposeCallActivity() {
 
     override fun handleCallAction(action: CallAction) {
         if (action is CustomAction) {
-            isShowingChatState.value = true
+            val channelData =
+                callViewModel.streamCallState.value as? StreamCallState.Connected ?: return
+            val data = action.data[KEY_CHANNEL_CID] as? String
+
+            if (data.isNullOrBlank()) {
+                return
+            }
+
+            val (id, type) = data.cidToTypeAndId()
+
+            val channelRequest = videoWithChatApp.chatClient.createChannel(
+                channelType = type,
+                channelId = id,
+                memberIds = channelData.users.keys.toList(),
+                extraData = emptyMap()
+            )
+
+            channelRequest.enqueue {
+                if (it.isSuccess) {
+                    isShowingChatState.value = true
+                }
+            }
         } else {
             super.handleCallAction(action)
         }
+    }
+
+    private companion object {
+        private const val KEY_CHANNEL_CID = "channelCid"
     }
 }
