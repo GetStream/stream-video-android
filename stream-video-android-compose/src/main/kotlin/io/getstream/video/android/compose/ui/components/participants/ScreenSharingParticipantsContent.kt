@@ -25,6 +25,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.call.state.CallAction
 import io.getstream.video.android.call.state.CallMediaState
+import io.getstream.video.android.compose.ui.components.call.controls.internal.DefaultCallControlsContent
 import io.getstream.video.android.compose.ui.components.participants.internal.LandscapeScreenSharingContent
 import io.getstream.video.android.compose.ui.components.participants.internal.PortraitScreenSharingContent
 import io.getstream.video.android.model.Call
@@ -45,6 +46,7 @@ import io.getstream.video.android.model.ScreenSharingSession
  * @param paddingValues Padding within the parent.
  * @param isFullscreen If we're rendering a full screen activity.
  * @param onRender Handler when each of the Video views render their first frame.
+ * @param callControlsContent Content shown that allows users to trigger different actions.
  */
 @Composable
 public fun ScreenSharingCallParticipantsContent(
@@ -57,7 +59,14 @@ public fun ScreenSharingCallParticipantsContent(
     paddingValues: PaddingValues = PaddingValues(0.dp),
     isFullscreen: Boolean = false,
     onRender: (View) -> Unit = {},
-    onBackPressed: () -> Unit = {}
+    onBackPressed: () -> Unit = {},
+    callControlsContent: @Composable () -> Unit = {
+        DefaultCallControlsContent(
+            call = call,
+            callMediaState = callMediaState,
+            onCallAction = onCallAction
+        )
+    }
 ) {
     val configuration = LocalConfiguration.current
     val orientation = configuration.orientation
@@ -82,8 +91,8 @@ public fun ScreenSharingCallParticipantsContent(
             onRender = onRender,
             isFullscreen = isFullscreen,
             onCallAction = onCallAction,
-            callMediaState = callMediaState,
-            onBackPressed = onBackPressed
+            onBackPressed = onBackPressed,
+            callControlsContent = callControlsContent
         )
     }
 }

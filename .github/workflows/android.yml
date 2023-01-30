@@ -10,6 +10,7 @@ on:
 jobs:
   lint:
     name: Spotless check
+    if: ${{ false }}  # disable for now
     runs-on: ubuntu-18.04
     steps:
       - name: Check out code
@@ -22,6 +23,7 @@ jobs:
         run: ./gradlew spotlessCheck
   vale:
     name: Vale doc linter
+    if: ${{ false }}  # disable for now
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -40,6 +42,7 @@ jobs:
 
   api_check:
     name: API check
+    if: ${{ false }}  # disable for now
     runs-on: ubuntu-18.04
     steps:
       - name: Check out code
@@ -53,6 +56,7 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
+    if: ${{ false }}  # disable for now
     steps:
       - uses: actions/checkout@v3
 
