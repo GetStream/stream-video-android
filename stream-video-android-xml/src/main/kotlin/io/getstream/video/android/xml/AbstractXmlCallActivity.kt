@@ -54,6 +54,7 @@ import io.getstream.video.android.xml.widget.active.ActiveCallView
 import io.getstream.video.android.xml.widget.incoming.IncomingCallView
 import io.getstream.video.android.xml.widget.outgoing.OutgoingCallView
 import io.getstream.video.android.xml.widget.participant.CallParticipantView
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
@@ -65,6 +66,8 @@ public abstract class AbstractXmlCallActivity :
     PermissionManagerProvider {
 
     private lateinit var callPermissionManager: PermissionManager
+
+    private var pipJob: Job? = null
 
     private val binding by lazy { ActivityCallBinding.inflate(streamThemeInflater) }
 
@@ -226,7 +229,8 @@ public abstract class AbstractXmlCallActivity :
             callViewModel.callState.value?.initRenderer(videoRenderer, streamId, trackType, onRender)
         }
         addContentView(callParticipant)
-        lifecycleScope.launchWhenCreated {
+        pipJob?.cancel()
+        pipJob = lifecycleScope.launchWhenCreated {
             callViewModel.primarySpeaker.filterNotNull().collect {
                 callParticipant.setParticipant(it)
             }
@@ -359,6 +363,7 @@ public abstract class AbstractXmlCallActivity :
         super.onConfigurationChanged(newConfig)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             callViewModel.onPictureInPictureModeChanged(isInPictureInPictureMode)
+            if (!isInPictureInPictureMode) pipJob?.cancel()
         }
     }
 
