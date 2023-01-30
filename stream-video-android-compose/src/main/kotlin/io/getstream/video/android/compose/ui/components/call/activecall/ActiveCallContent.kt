@@ -41,9 +41,8 @@ import androidx.compose.ui.unit.dp
 import io.getstream.video.android.call.state.CallAction
 import io.getstream.video.android.call.state.CallMediaState
 import io.getstream.video.android.call.state.LeaveCall
-import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.activecall.internal.ActiveCallAppBar
-import io.getstream.video.android.compose.ui.components.call.controls.CallControls
+import io.getstream.video.android.compose.ui.components.call.controls.internal.DefaultCallControlsContent
 import io.getstream.video.android.compose.ui.components.participants.CallParticipant
 import io.getstream.video.android.compose.ui.components.participants.CallParticipants
 import io.getstream.video.android.compose.ui.components.participants.internal.ScreenShareAspectRatio
@@ -51,7 +50,6 @@ import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.state.StreamCallState
 import io.getstream.video.android.viewmodel.CallViewModel
-import kotlinx.coroutines.flow.emptyFlow
 import stream.video.sfu.models.TrackType
 
 /**
@@ -62,6 +60,7 @@ import stream.video.sfu.models.TrackType
  * @param modifier Modifier for styling.
  * @param onBackPressed Handler when the user taps on the back button.
  * @param onCallAction Handler when the user triggers a Call Control Action.
+ * @param callControlsContent Content shown that allows users to trigger different actions.
  * @param pictureInPictureContent Content shown when the user enters Picture in Picture mode, if
  * it's been enabled in the app.
  */
@@ -71,6 +70,12 @@ public fun ActiveCallContent(
     modifier: Modifier = Modifier,
     onBackPressed: () -> Unit = { callViewModel.onCallAction(LeaveCall) },
     onCallAction: (CallAction) -> Unit = callViewModel::onCallAction,
+    callControlsContent: @Composable () -> Unit = {
+        DefaultCallControlsContent(
+            callViewModel,
+            onCallAction
+        )
+    },
     pictureInPictureContent: @Composable (Call) -> Unit = { DefaultPictureInPictureContent(it) }
 ) {
     val call by callViewModel.callState.collectAsState(initial = null)
@@ -83,6 +88,9 @@ public fun ActiveCallContent(
     val orientation = LocalConfiguration.current.orientation
     val callState by callViewModel.streamCallState.collectAsState(StreamCallState.Idle)
 
+    val screenSharingSessions by callViewModel.screenSharingSessions.collectAsState(initial = emptyList())
+    val screenSharing = screenSharingSessions.firstOrNull()
+
     val backAction = {
         if (isShowingParticipantsInfo) {
             callViewModel.dismissOptions()
@@ -94,10 +102,6 @@ public fun ActiveCallContent(
     BackHandler { backAction() }
 
     val currentCall = call
-    val screenShareSessionsState = currentCall?.screenSharingSessions ?: emptyFlow()
-    val state by screenShareSessionsState.collectAsState(initial = emptyList())
-
-    val isScreenSharing = state.isNotEmpty()
 
     if (!isInPiPMode) {
         Scaffold(
@@ -113,14 +117,7 @@ public fun ActiveCallContent(
             },
             bottomBar = {
                 if (!isFullscreen && orientation != ORIENTATION_LANDSCAPE) {
-                    CallControls(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(VideoTheme.dimens.callControlsSheetHeight),
-                        callMediaState = callMediaState,
-                        isScreenSharing = isScreenSharing,
-                        onCallAction = onCallAction
-                    )
+                    callControlsContent()
                 }
             },
             content = {
@@ -151,7 +148,9 @@ public fun ActiveCallContent(
                         callMediaState = callMediaState,
                         callState = callState,
                         onCallAction = onCallAction,
-                        onBackPressed = onBackPressed
+                        onBackPressed = onBackPressed,
+                        callControlsContent = callControlsContent,
+                        screenSharing = screenSharing
                     )
                 }
             }

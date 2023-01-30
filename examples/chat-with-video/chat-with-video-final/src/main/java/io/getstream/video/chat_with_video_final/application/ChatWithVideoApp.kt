@@ -25,6 +25,8 @@ import io.getstream.chat.android.compose.ui.attachments.StreamAttachmentFactorie
 import io.getstream.chat.android.offline.plugin.factory.StreamOfflinePluginFactory
 import io.getstream.chat.android.state.plugin.config.StatePluginConfig
 import io.getstream.chat.android.state.plugin.factory.StreamStatePluginFactory
+import io.getstream.log.StreamLog
+import io.getstream.log.android.AndroidStreamLogger
 import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.StreamVideoBuilder
@@ -80,6 +82,14 @@ class ChatWithVideoApp : Application() {
         listOf(CallAttachmentFactory()) + StreamAttachmentFactories.defaultFactories()
     }
 
+    override fun onCreate() {
+        super.onCreate()
+        if (BuildConfig.DEBUG) {
+            StreamLog.setValidator { _, _ -> true }
+            StreamLog.install(AndroidStreamLogger())
+        }
+    }
+
     lateinit var credentialsProvider: CredentialsProvider
         private set
 
@@ -100,7 +110,7 @@ class ChatWithVideoApp : Application() {
 
         return StreamVideoBuilder(
             context = this,
-            credentialsProvider = credentialsProvider,
+            credentialsProvider = this.credentialsProvider,
             androidInputs = setOf(
                 CallServiceInput.from(CallService::class),
                 CallActivityInput.from(CallActivity::class),
