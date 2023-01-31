@@ -30,7 +30,7 @@ import io.getstream.video.android.viewmodel.CallViewModel
 internal fun ActiveCallAppBar(
     callViewModel: CallViewModel,
     onBackPressed: () -> Unit,
-    onCallAction: (CallAction) -> Unit
+    onCallAction: (CallAction) -> Unit,
 ) {
     val callState by callViewModel.streamCallState.collectAsState(initial = StreamCallState.Idle)
     val isShowingCallInfo by callViewModel.isShowingCallInfo.collectAsState()
