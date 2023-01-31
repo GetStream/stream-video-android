@@ -554,14 +554,12 @@ public final class io/getstream/video/android/xml/widget/participant/FloatingPar
 }
 
 public final class io/getstream/video/android/xml/widget/participant/PictureInPictureStyle {
-	public fun <init> (IF)V
+	public fun <init> (I)V
 	public final fun component1 ()I
-	public final fun component2 ()F
-	public final fun copy (IF)Lio/getstream/video/android/xml/widget/participant/PictureInPictureStyle;
-	public static synthetic fun copy$default (Lio/getstream/video/android/xml/widget/participant/PictureInPictureStyle;IFILjava/lang/Object;)Lio/getstream/video/android/xml/widget/participant/PictureInPictureStyle;
+	public final fun copy (I)Lio/getstream/video/android/xml/widget/participant/PictureInPictureStyle;
+	public static synthetic fun copy$default (Lio/getstream/video/android/xml/widget/participant/PictureInPictureStyle;IILjava/lang/Object;)Lio/getstream/video/android/xml/widget/participant/PictureInPictureStyle;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCallParticipantStyle ()I
-	public final fun getPipRadius ()F
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }

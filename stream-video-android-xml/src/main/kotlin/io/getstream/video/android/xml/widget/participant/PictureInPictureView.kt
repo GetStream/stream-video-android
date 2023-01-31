@@ -63,7 +63,6 @@ public class PictureInPictureView : CardView {
 
     private fun init(context: Context, attrs: AttributeSet?) {
         style = PictureInPictureStyle(context, attrs)
-        radius = style.pipRadius
 
         showCallParticipantView()
     }

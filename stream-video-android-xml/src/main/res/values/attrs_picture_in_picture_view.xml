@@ -2,6 +2,5 @@
 <resources>
     <declare-styleable name="PictureInPictureView">
         <attr name="streamPictureInPictureCallParticipantViewStyle" format="reference" />
-        <attr name="streamPictureInPictureCallRadius" format="dimension|reference" />
     </declare-styleable>
 </resources>

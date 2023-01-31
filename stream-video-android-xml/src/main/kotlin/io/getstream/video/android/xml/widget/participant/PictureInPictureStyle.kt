@@ -18,12 +18,9 @@ package io.getstream.video.android.xml.widget.participant
 
 import android.content.Context
 import android.util.AttributeSet
-import androidx.annotation.Px
 import io.getstream.video.android.xml.R
-import io.getstream.video.android.xml.utils.extensions.getDimension
 import io.getstream.video.android.xml.utils.extensions.getResourceId
 import io.getstream.video.android.xml.widget.transformer.TransformStyle
-import io.getstream.video.android.ui.common.R as RCommon
 
 /**
  * Style for [PictureInPictureView].
@@ -32,11 +29,9 @@ import io.getstream.video.android.ui.common.R as RCommon
  *
  * @param callParticipantStyle The id of the custom style for [CallParticipantView] to be applied for the primary
  * speaker.
- * @param pipRadius The radius of the picture in picture view.
  */
 public data class PictureInPictureStyle(
     public val callParticipantStyle: Int,
-    @Px public val pipRadius: Float,
 ) {
 
     internal companion object {
@@ -53,14 +48,8 @@ public data class PictureInPictureStyle(
                     context.getResourceId(R.style.StreamVideoTheme, R.attr.streamCallParticipantViewStyle)
                 )
 
-                val pipRadius = it.getDimension(
-                    R.styleable.PictureInPictureView_streamPictureInPictureCallRadius,
-                    context.getDimension(RCommon.dimen.floatingVideoRadius).toFloat()
-                )
-
                 return PictureInPictureStyle(
                     callParticipantStyle = callParticipantStyle,
-                    pipRadius = pipRadius
                 ).let(TransformStyle.pictureInPictureStyleTransformer::transform)
             }
         }

@@ -8,6 +8,7 @@
         <item name="streamCallParticipantsViewStyle">@style/Stream.CallParticipants</item>
         <item name="streamIncomingViewStyle">@style/Stream.IncomingCall</item>
         <item name="streamOutgoingViewStyle">@style/Stream.OutgoingCall</item>
+        <item name="streamPictureInPictureViewStyle">@style/Stream.PictureInPicture</item>
     </style>
 
     <style name="Stream">
@@ -90,7 +91,6 @@
     </style>
 
     <style name="Stream.PictureInPicture" parent="Stream">
-        <item name="streamPictureInPictureCallRadius">@dimen/floatingVideoRadius</item>
     </style>
 
 
