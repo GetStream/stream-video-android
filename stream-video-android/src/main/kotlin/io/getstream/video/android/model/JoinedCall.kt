@@ -20,7 +20,7 @@ import java.io.Serializable
 
 public data class JoinedCall(
     val call: CallMetadata,
-    private val callUrl: String,
-    private val sfuToken: SfuToken,
-    private val iceServers: List<IceServer>
+    internal val callUrl: String,
+    internal val sfuToken: SfuToken,
+    internal val iceServers: List<IceServer>
 ) : Serializable

@@ -646,7 +646,6 @@ public abstract interface class io/getstream/video/android/StreamVideo {
 	public abstract fun awaitCallClient (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun cancelCall (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun clearCallState ()V
-	public abstract fun createAndJoinCall (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun createCall (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun createCallClient (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lio/getstream/video/android/call/CallClient;
 	public abstract fun createDevice (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -659,7 +658,7 @@ public abstract interface class io/getstream/video/android/StreamVideo {
 	public abstract fun handlePushMessage (Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun inviteUsers (Ljava/util/List;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun joinCall (Lio/getstream/video/android/model/CallMetadata;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun joinCall (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun joinCall (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun rejectCall (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun removeDevices (Ljava/util/List;)V
 	public abstract fun removeSocketListener (Lio/getstream/video/android/socket/SocketListener;)V
@@ -670,6 +669,7 @@ public abstract interface class io/getstream/video/android/StreamVideo {
 public final class io/getstream/video/android/StreamVideo$DefaultImpls {
 	public static synthetic fun createCall$default (Lio/getstream/video/android/StreamVideo;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public static synthetic fun getOrCreateCall$default (Lio/getstream/video/android/StreamVideo;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static synthetic fun joinCall$default (Lio/getstream/video/android/StreamVideo;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 }
 
 public final class io/getstream/video/android/StreamVideoBuilder {
@@ -708,7 +708,6 @@ public final class io/getstream/video/android/StreamVideoImpl : io/getstream/vid
 	public fun awaitCallClient (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun cancelCall (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun clearCallState ()V
-	public fun createAndJoinCall (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun createCall (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun createCallClient (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lio/getstream/video/android/call/CallClient;
 	public fun createDevice (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -721,7 +720,7 @@ public final class io/getstream/video/android/StreamVideoImpl : io/getstream/vid
 	public fun handlePushMessage (Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun inviteUsers (Ljava/util/List;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun joinCall (Lio/getstream/video/android/model/CallMetadata;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun joinCall (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun joinCall (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun rejectCall (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun removeDevices (Ljava/util/List;)V
 	public fun removeSocketListener (Lio/getstream/video/android/socket/SocketListener;)V
@@ -2275,19 +2274,13 @@ public final class io/getstream/video/android/model/IceServerConfig : java/io/Se
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/model/JoinedCall {
+public final class io/getstream/video/android/model/JoinedCall : java/io/Serializable {
 	public fun <init> (Lio/getstream/video/android/model/CallMetadata;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)V
 	public final fun component1 ()Lio/getstream/video/android/model/CallMetadata;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Ljava/lang/String;
-	public final fun component4 ()Ljava/util/List;
 	public final fun copy (Lio/getstream/video/android/model/CallMetadata;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lio/getstream/video/android/model/JoinedCall;
 	public static synthetic fun copy$default (Lio/getstream/video/android/model/JoinedCall;Lio/getstream/video/android/model/CallMetadata;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lio/getstream/video/android/model/JoinedCall;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCall ()Lio/getstream/video/android/model/CallMetadata;
-	public final fun getCallUrl ()Ljava/lang/String;
-	public final fun getIceServers ()Ljava/util/List;
-	public final fun getSfuToken ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
