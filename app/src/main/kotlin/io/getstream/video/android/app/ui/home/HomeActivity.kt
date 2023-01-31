@@ -252,7 +252,7 @@ class HomeActivity : AppCompatActivity() {
             logger.d { "[createMeeting] callId: $callId, participants: $participants" }
 
             loadingState.value = true
-            val result = streamVideo.createAndJoinCall(
+            val result = streamVideo.joinCall(
                 "default",
                 callId,
                 participants,
@@ -295,7 +295,7 @@ class HomeActivity : AppCompatActivity() {
         lifecycleScope.launch {
             logger.d { "[joinCall] callId: $callId" }
             loadingState.value = true
-            streamVideo.createAndJoinCall(
+            streamVideo.joinCall(
                 "default",
                 id = callId,
                 participantIds = emptyList(),

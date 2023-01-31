@@ -413,8 +413,8 @@ public class StreamVideoImpl(
         return callCoordinatorClient.selectEdgeServer(request)
     }
 
-    // caller/callee: CREATE/JOIN meeting
-    override suspend fun createAndJoinCall(
+    // caller/callee: CREATE/JOIN meeting or ACCEPT call with no participants or ringing
+    override suspend fun joinCall(
         type: String,
         id: String,
         participantIds: List<String>,
@@ -449,13 +449,6 @@ public class StreamVideoImpl(
             .onSuccess { engine.onCallJoined(it) }
             .onError { engine.onCallFailed(it) }
             .also { logger.v { "[getOrCreateAndJoinCall] result: $it" } }
-    }
-
-    // callee: ACCEPT incoming call
-    override suspend fun joinCall(type: String, id: String): Result<JoinedCall> {
-        logger.d { "[joinCall] type: $type, id: $id" }
-        return createAndJoinCall(type, id, participantIds = emptyList(), ringing = false)
-            .also { logger.v { "[joinCall] result: $it" } }
     }
 
     // callee: SEND Accepted or Rejected

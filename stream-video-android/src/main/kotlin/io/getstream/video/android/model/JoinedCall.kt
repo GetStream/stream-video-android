@@ -16,9 +16,11 @@
 
 package io.getstream.video.android.model
 
+import java.io.Serializable
+
 public data class JoinedCall(
     val call: CallMetadata,
-    val callUrl: String,
-    val sfuToken: SfuToken,
-    val iceServers: List<IceServer>
-)
+    private val callUrl: String,
+    private val sfuToken: SfuToken,
+    private val iceServers: List<IceServer>
+) : Serializable

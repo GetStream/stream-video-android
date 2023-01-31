@@ -110,34 +110,24 @@ public interface StreamVideo {
     ): Result<CallMetadata>
 
     /**
-     * Creates a call with given information and then authenticates the user to join the said [CallMetadata].
+     * Queries or creates a call with given information and then authenticates the user to join the
+     * said [CallMetadata].
      *
      * @param type The call type.
      * @param id The call ID.
      * @param participantIds List of other people to invite to the call.
+     * @param ringing If we should ring any of the participants. This doesn't work if we're joining
+     * an existing call.
      *
      * @return [Result] which contains the [JoinedCall] with the auth information required to fully
      * connect.
      */
-    // TODO createAndJoin is misleading, because internally it uses getOrCreate and then join
-    //  we might need to choose a better name
-    public suspend fun createAndJoinCall(
+    public suspend fun joinCall(
         type: StreamCallType,
         id: StreamCallId,
-        participantIds: List<String>,
-        ringing: Boolean
+        participantIds: List<String> = emptyList(),
+        ringing: Boolean = false
     ): Result<JoinedCall>
-
-    /**
-     * Authenticates the user to join a given Call based on the [type] and [id].
-     *
-     * @param type The call type.
-     * @param id The call ID.
-     *
-     * @return [Result] which contains the [JoinedCall] with the auth information required to fully
-     * connect.
-     */
-    public suspend fun joinCall(type: StreamCallType, id: StreamCallId): Result<JoinedCall>
 
     /**
      * Authenticates the user to join a given Call using the [CallMetadata].
@@ -184,8 +174,6 @@ public interface StreamVideo {
     /**
      * Leaves the currently active call and clears up all connections to it.
      */
-    // TODO
-    //  can be called internally when [StreamCallState.Idle] comes into the place.
     public fun clearCallState()
 
     /**
