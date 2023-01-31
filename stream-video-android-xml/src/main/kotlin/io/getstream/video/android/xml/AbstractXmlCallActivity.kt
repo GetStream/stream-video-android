@@ -27,7 +27,6 @@ import android.provider.Settings
 import android.util.Rational
 import android.view.Menu
 import android.view.View
-import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.FrameLayout
 import androidx.activity.viewModels
@@ -54,6 +53,8 @@ import io.getstream.video.android.xml.widget.active.ActiveCallView
 import io.getstream.video.android.xml.widget.incoming.IncomingCallView
 import io.getstream.video.android.xml.widget.outgoing.OutgoingCallView
 import io.getstream.video.android.xml.widget.participant.CallParticipantView
+import io.getstream.video.android.xml.widget.participant.PictureInPictureView
+import io.getstream.video.android.xml.widget.participant.RendererInitializer
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
@@ -119,9 +120,22 @@ public abstract class AbstractXmlCallActivity :
 
         setupToolbar()
         observeStreamCallState()
+        observePipMode()
+    }
 
+    override fun onResume() {
+        super.onResume()
+        startVideoFlow()
+    }
+
+    /**
+     * Observes the current call state and sets the toolbar title accordingly.
+     */
+    private fun observeStreamCallState() {
         lifecycleScope.launchWhenCreated {
             callViewModel.streamCallState.combine(callViewModel.isInPictureInPicture) { state, isPiP ->
+                updateToolbar(state)
+
                 when {
                     state is StreamCallState.Incoming && !state.acceptedByMe -> {
                         showIncomingScreen()
@@ -145,7 +159,12 @@ public abstract class AbstractXmlCallActivity :
                 }
             }.collect()
         }
+    }
 
+    /**
+     * Tracks the state of PiP mode and shows/hides parts of the ui whether they are needed or not.
+     */
+    private fun observePipMode() {
         lifecycleScope.launchWhenCreated {
             callViewModel.isInPictureInPicture.collect {
                 binding.callToolbar.isVisible = !it
@@ -153,30 +172,23 @@ public abstract class AbstractXmlCallActivity :
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        startVideoFlow()
-    }
-
     /**
-     * Observes the current call state and sets the toolbar title accordingly.
+     * Updates the toolbar title depending on the call state.
+     *
+     * @param streamCallState The state of the call we are observing.
      */
-    private fun observeStreamCallState() {
-        lifecycleScope.launchWhenCreated {
-            callViewModel.streamCallState.collect {
-                val callId = when (val state = it) {
-                    is StreamCallState.Active -> state.callGuid.id
-                    else -> ""
-                }
-                val status = it.formatAsTitle()
-
-                val title = when (callId.isBlank()) {
-                    true -> status
-                    else -> "$status: $callId"
-                }
-                binding.callToolbar.title = title
-            }
+    private fun updateToolbar(streamCallState: StreamCallState) {
+        val callId = when (streamCallState) {
+            is StreamCallState.Active -> streamCallState.callGuid.id
+            else -> ""
         }
+        val status = streamCallState.formatAsTitle()
+
+        val title = when (callId.isBlank()) {
+            true -> status
+            else -> "$status: $callId"
+        }
+        binding.callToolbar.title = title
     }
 
     /**
@@ -222,17 +234,20 @@ public abstract class AbstractXmlCallActivity :
         activeCallView.bindView(callViewModel, this)
     }
 
+    /**
+     * Shows the picture in picture layout which consists of the primary call participants feed.
+     */
     private fun showPipLayout() {
         if (binding.contentHolder.children.firstOrNull() is CallParticipantView) return
-        val callParticipant = CallParticipantView(this)
-        callParticipant.setRendererInitializer { videoRenderer, streamId, trackType, onRender ->
+        val callParticipant = PictureInPictureView(this)
+        callParticipant.rendererInitializer = RendererInitializer { videoRenderer, streamId, trackType, onRender ->
             callViewModel.callState.value?.initRenderer(videoRenderer, streamId, trackType, onRender)
         }
         addContentView(callParticipant)
         pipJob?.cancel()
         pipJob = lifecycleScope.launchWhenCreated {
             callViewModel.primarySpeaker.filterNotNull().collect {
-                callParticipant.setParticipant(it)
+                callParticipant.participant = it
             }
         }
     }
@@ -363,7 +378,17 @@ public abstract class AbstractXmlCallActivity :
         super.onConfigurationChanged(newConfig)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             callViewModel.onPictureInPictureModeChanged(isInPictureInPictureMode)
-            if (!isInPictureInPictureMode) pipJob?.cancel()
+            if (!isInPictureInPictureMode) {
+                pipJob?.cancel()
+                (
+                    binding.contentHolder.children.firstOrNull {
+                        it is PictureInPictureView
+                    } as? PictureInPictureView
+                    )?.let {
+                    it.rendererInitializer = null
+                    it.participant = null
+                }
+            }
         }
     }
 

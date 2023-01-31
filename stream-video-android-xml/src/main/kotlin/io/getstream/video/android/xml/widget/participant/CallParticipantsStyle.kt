@@ -21,6 +21,7 @@ import android.util.AttributeSet
 import androidx.annotation.Px
 import io.getstream.video.android.xml.R
 import io.getstream.video.android.xml.utils.extensions.getDimension
+import io.getstream.video.android.xml.utils.extensions.getResourceId
 import io.getstream.video.android.xml.utils.extensions.use
 import io.getstream.video.android.xml.widget.transformer.TransformStyle
 import io.getstream.video.android.ui.common.R as RCommon
@@ -57,10 +58,7 @@ public data class CallParticipantsStyle(
 
                 val callParticipantStyle = it.getResourceId(
                     R.styleable.CallParticipantsView_streamCallParticipantsCallParticipantStyle,
-                    context.theme.obtainStyledAttributes(
-                        R.style.StreamVideoTheme,
-                        intArrayOf(R.attr.streamCallParticipantViewStyle)
-                    ).getResourceId(0, 0)
+                    context.getResourceId(R.style.StreamVideoTheme, R.attr.streamCallParticipantViewStyle)
                 )
 
                 val localParticipantHeight = it.getDimension(

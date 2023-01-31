@@ -22,7 +22,6 @@ import androidx.cardview.widget.CardView
 import io.getstream.video.android.model.CallParticipantState
 import io.getstream.video.android.xml.databinding.ViewFloatingParticipantBinding
 import io.getstream.video.android.xml.utils.extensions.createStreamThemeWrapper
-import io.getstream.video.android.xml.utils.extensions.dpToPx
 import io.getstream.video.android.xml.utils.extensions.dpToPxPrecise
 import io.getstream.video.android.xml.utils.extensions.streamThemeInflater
 

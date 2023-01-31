@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
     Copyright (c) 2014-2022 Stream.io Inc. All rights reserved.
 
     Licensed under the Stream License;
@@ -26,5 +25,6 @@
         <attr name="streamCallDetailsViewStyle" format="reference" />
         <attr name="streamCallParticipantViewStyle" format="reference" />
         <attr name="streamCallParticipantsViewStyle" format="reference" />
+        <attr name="streamPictureInPictureViewStyle" format="reference" />
     </declare-styleable>
 </resources>
