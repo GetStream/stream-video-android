@@ -17,6 +17,8 @@ import (
 	"unicode/utf8"
 
 	"google.golang.org/protobuf/types/known/anypb"
+
+	sfu_models "github.com/GetStream/video-proto/protobuf/video/sfu/models"
 )
 
 // ensure the imports are used
@@ -33,6 +35,8 @@ var (
 	_ = (*mail.Address)(nil)
 	_ = anypb.Any{}
 	_ = sort.Sort
+
+	_ = sfu_models.TrackType(0)
 )
 
 // Validate checks the field values on KickUserRequest with the rules defined
@@ -91,6 +95,8 @@ func (m *KickUserRequest) validate(all bool) error {
 			}
 		}
 	}
+
+	// no validation rules for InvalidateTokens
 
 	if len(errors) > 0 {
 		return KickUserRequestMultiError(errors)
@@ -269,6 +275,224 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = KickUserResponseValidationError{}
+
+// Validate checks the field values on UpdateParticipantsMuteStatusRequest with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, the first error encountered is returned, or nil if there are
+// no violations.
+func (m *UpdateParticipantsMuteStatusRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on UpdateParticipantsMuteStatusRequest
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the result is a list of violation errors wrapped in
+// UpdateParticipantsMuteStatusRequestMultiError, or nil if none found.
+func (m *UpdateParticipantsMuteStatusRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *UpdateParticipantsMuteStatusRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for AppPk
+
+	// no validation rules for CallId
+
+	// no validation rules for Message
+
+	// no validation rules for Muted
+
+	if len(errors) > 0 {
+		return UpdateParticipantsMuteStatusRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// UpdateParticipantsMuteStatusRequestMultiError is an error wrapping multiple
+// validation errors returned by
+// UpdateParticipantsMuteStatusRequest.ValidateAll() if the designated
+// constraints aren't met.
+type UpdateParticipantsMuteStatusRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m UpdateParticipantsMuteStatusRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m UpdateParticipantsMuteStatusRequestMultiError) AllErrors() []error { return m }
+
+// UpdateParticipantsMuteStatusRequestValidationError is the validation error
+// returned by UpdateParticipantsMuteStatusRequest.Validate if the designated
+// constraints aren't met.
+type UpdateParticipantsMuteStatusRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e UpdateParticipantsMuteStatusRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e UpdateParticipantsMuteStatusRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e UpdateParticipantsMuteStatusRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e UpdateParticipantsMuteStatusRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e UpdateParticipantsMuteStatusRequestValidationError) ErrorName() string {
+	return "UpdateParticipantsMuteStatusRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e UpdateParticipantsMuteStatusRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sUpdateParticipantsMuteStatusRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = UpdateParticipantsMuteStatusRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = UpdateParticipantsMuteStatusRequestValidationError{}
+
+// Validate checks the field values on UpdateParticipantsMuteStatusResponse
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the first error encountered is returned, or nil if
+// there are no violations.
+func (m *UpdateParticipantsMuteStatusResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on UpdateParticipantsMuteStatusResponse
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the result is a list of violation errors wrapped in
+// UpdateParticipantsMuteStatusResponseMultiError, or nil if none found.
+func (m *UpdateParticipantsMuteStatusResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *UpdateParticipantsMuteStatusResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if len(errors) > 0 {
+		return UpdateParticipantsMuteStatusResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// UpdateParticipantsMuteStatusResponseMultiError is an error wrapping multiple
+// validation errors returned by
+// UpdateParticipantsMuteStatusResponse.ValidateAll() if the designated
+// constraints aren't met.
+type UpdateParticipantsMuteStatusResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m UpdateParticipantsMuteStatusResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m UpdateParticipantsMuteStatusResponseMultiError) AllErrors() []error { return m }
+
+// UpdateParticipantsMuteStatusResponseValidationError is the validation error
+// returned by UpdateParticipantsMuteStatusResponse.Validate if the designated
+// constraints aren't met.
+type UpdateParticipantsMuteStatusResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e UpdateParticipantsMuteStatusResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e UpdateParticipantsMuteStatusResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e UpdateParticipantsMuteStatusResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e UpdateParticipantsMuteStatusResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e UpdateParticipantsMuteStatusResponseValidationError) ErrorName() string {
+	return "UpdateParticipantsMuteStatusResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e UpdateParticipantsMuteStatusResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sUpdateParticipantsMuteStatusResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = UpdateParticipantsMuteStatusResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = UpdateParticipantsMuteStatusResponseValidationError{}
 
 // Validate checks the field values on InvalidateTokenRequest with the rules
 // defined in the proto definition for this message. If any rules are

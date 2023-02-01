@@ -24,9 +24,9 @@ service RemoteControlRPC {
   // A disconnect should happen in a way that does not trigger automatic reconnection, and the client should
   // get appropriate message.
   rpc KickUser(KickUserRequest) returns (KickUserResponse);
-  // MuteParticipants mutes all specified participants in a call.
-  // Both audio and video could be muted via this endpoint.
-  rpc MuteParticipants(MuteParticipantsRequest) returns (MuteParticipantsResponse);
+  // UpdateParticipantsMuteStatus allows changing muted status for users in a call.
+  // Audio, Video and Screen share can be muted via this endpoint.
+  rpc UpdateParticipantsMuteStatus(UpdateParticipantsMuteStatusRequest) returns (UpdateParticipantsMuteStatusResponse);
   // GetCall returns a call information
   rpc GetCall(GetCallRequest) returns (GetCallResponse);
   // CreateCall creates a Call on SFU
@@ -48,10 +48,32 @@ message KickUserRequest {
   string message = 4;
   // Optional. A timestamp which tells SFU to deny all tokens issued before this date
   google.protobuf.Timestamp not_before = 5;
+  // When set, the user's tokens are invalidated
+  bool invalidate_tokens = 6;
 }
 
 // A response message for KickUser endpoint
 message KickUserResponse {
+}
+
+// A request message for UpdateParticipantsMuteStatus endpoint.
+message UpdateParticipantsMuteStatusRequest {
+  // App PK
+  int64 app_pk = 1;
+  // The call ID
+  string call_id = 2;
+  // List of users to mute
+  repeated string user_ids = 3;
+  // The message to send to users
+  string message = 4;
+  // Specifies what tracks to mute/unmute
+  repeated models.TrackType tracks = 6;
+  // Whether to set to muted or not
+  bool muted = 7;
+}
+
+// A response message for UpdateParticipantsMuteStatus endpoint.
+message UpdateParticipantsMuteStatusResponse {
 }
 
 // A request message for InvaludateUserToken endpoint

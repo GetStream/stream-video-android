@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import io.getstream.video.android.call.state.CallAction
 import io.getstream.video.android.call.state.CallMediaState
 import io.getstream.video.android.call.state.FlipCamera
+import io.getstream.video.android.compose.state.ui.call.CallControlAction
 import io.getstream.video.android.compose.theme.VideoTheme
 
 /**
@@ -39,6 +40,7 @@ import io.getstream.video.android.compose.theme.VideoTheme
  * @param callMediaState The state of the call media, such as video, audio.
  * @param isScreenSharing If there's currently an active screen sharing session.
  * @param modifier Modifier for styling.
+ * @param actions Actions to show to the user with different controls.
  * @param onCallAction Handler when the user triggers various call actions.
  */
 @Composable
@@ -46,9 +48,9 @@ public fun LandscapeCallControls(
     callMediaState: CallMediaState,
     isScreenSharing: Boolean,
     modifier: Modifier = Modifier,
+    actions: List<CallControlAction> = buildDefaultCallControlActions(callMediaState = callMediaState),
     onCallAction: (CallAction) -> Unit
 ) {
-    val actions = buildDefaultCallControlActions(callMediaState = callMediaState)
 
     LazyColumn(
         modifier = modifier,

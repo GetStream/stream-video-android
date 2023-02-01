@@ -2468,6 +2468,8 @@ func (m *AudioLevel) validate(all bool) error {
 
 	// no validation rules for Level
 
+	// no validation rules for IsSpeaking
+
 	if len(errors) > 0 {
 		return AudioLevelMultiError(errors)
 	}

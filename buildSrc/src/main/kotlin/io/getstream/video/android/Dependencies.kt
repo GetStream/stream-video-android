@@ -4,20 +4,21 @@ object Versions {
     internal const val ANDROID_GRADLE_PLUGIN = "7.3.1"
     internal const val ANDROID_GRADLE_SPOTLESS = "6.7.0"
     internal const val GRADLE_NEXUS_PUBLISH_PLUGIN = "1.1.0"
-    internal const val KOTLIN = "1.7.20"
+    internal const val KOTLIN = "1.8.0"
     internal const val KOTLIN_GRADLE_DOKKA = "1.7.20"
     internal const val KOTLIN_SERIALIZATION_JSON = "1.4.0"
-    internal const val KOTLIN_BINARY_VALIDATOR = "0.11.1"
+    internal const val KOTLIN_BINARY_VALIDATOR = "0.12.1"
     internal const val KOTLIN_COROUTINE = "1.6.4"
 
     internal const val MATERIAL = "1.6.1"
     internal const val ANDROIDX_APPCOMPAT = "1.4.2"
     internal const val ANDROIDX_CORE = "1.8.0"
+    internal const val ANDROIDX_ANNOTATIONS = "1.5.0"
     internal const val ANDROIDX_LIFECYCLE = "2.5.1"
     internal const val ACTIVITY_COMPOSE = "1.5.0"
 
     internal const val COMPOSE_BOM = "2022.12.00"
-    const val COMPOSE_COMPILER = "1.3.2"
+    const val COMPOSE_COMPILER = "1.4.0"
     internal const val COIL = "2.2.1"
 
     internal const val WIRE = "4.4.1"
@@ -58,6 +59,7 @@ object Dependencies {
     const val material = "com.google.android.material:material:${Versions.MATERIAL}"
     const val androidxAppcompat = "androidx.appcompat:appcompat:${Versions.ANDROIDX_APPCOMPAT}"
     const val androidxCore = "androidx.core:core-ktx:${Versions.ANDROIDX_CORE}"
+    const val androidxAnnotations = "androidx.annotation:annotation:${Versions.ANDROIDX_ANNOTATIONS}"
     const val androidxLifecycleViewModel =
         "androidx.lifecycle:lifecycle-viewmodel-ktx:${Versions.ANDROIDX_LIFECYCLE}"
     const val androidxLifecycleRuntime =

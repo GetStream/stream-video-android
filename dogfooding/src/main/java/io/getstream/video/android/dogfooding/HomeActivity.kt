@@ -151,14 +151,7 @@ class HomeActivity : AppCompatActivity() {
                 "default", id = callId
             )
             loadingState.value = false
-            result.onSuccess { joinedCall ->
-                logger.v { "[joinCall] succeed: $joinedCall" }
-                startActivity(
-                    CallActivity.getIntent(
-                        this@HomeActivity,
-                    )
-                )
-            }
+            result.onSuccess { joinedCall -> logger.v { "[joinCall] succeed: $joinedCall" } }
             result.onError {
                 logger.e { "[joinCall] failed: $it" }
                 Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()

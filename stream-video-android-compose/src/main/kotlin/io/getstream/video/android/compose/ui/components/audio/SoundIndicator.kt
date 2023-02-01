@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.R
@@ -31,23 +32,36 @@ import io.getstream.video.android.compose.theme.VideoTheme
  * levels.
  *
  * @param hasSound If the participant has sound active.
- * @param audioLevel The level of audio of the participant.
+ * @param isSpeaking If the participant is speaking.
+ * @param modifier Modifier for styling.
  */
 @Composable
 public fun SoundIndicator(
     hasSound: Boolean,
-    audioLevel: Float
+    isSpeaking: Boolean,
+    modifier: Modifier = Modifier
 ) {
-    if (hasSound) {
-        SoundLevels(audioLevel)
-    } else {
-        Icon(
-            modifier = Modifier
-                .size(20.dp)
-                .padding(end = 4.dp),
-            painter = painterResource(id = R.drawable.ic_mic_off),
-            tint = VideoTheme.colors.errorAccent,
-            contentDescription = null
-        )
+    when {
+        hasSound && isSpeaking -> ActiveSoundLevels(modifier)
+        hasSound && !isSpeaking -> {
+            Icon(
+                modifier = modifier
+                    .size(VideoTheme.dimens.audioStatusSize)
+                    .padding(end = 4.dp),
+                painter = painterResource(id = R.drawable.ic_mic_on),
+                tint = Color.White,
+                contentDescription = null
+            )
+        }
+        else -> {
+            Icon(
+                modifier = modifier
+                    .size(VideoTheme.dimens.audioStatusSize)
+                    .padding(end = 4.dp),
+                painter = painterResource(id = R.drawable.ic_mic_off),
+                tint = VideoTheme.colors.errorAccent,
+                contentDescription = null
+            )
+        }
     }
 }

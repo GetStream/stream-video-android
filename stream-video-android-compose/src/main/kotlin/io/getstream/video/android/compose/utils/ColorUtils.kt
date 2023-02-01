@@ -26,7 +26,7 @@ import kotlin.math.roundToInt
  * @param factor The factor by which we adjust the color.
  * @return [Int] ARGB value of the color after adjustment.
  */
-public fun adjustColorBrightness(color: Int, factor: Float): Int {
+internal fun adjustColorBrightness(color: Int, factor: Float): Int {
     val a = Color.alpha(color)
     val r = (Color.red(color) * factor).roundToInt()
     val g = (Color.green(color) * factor).roundToInt()

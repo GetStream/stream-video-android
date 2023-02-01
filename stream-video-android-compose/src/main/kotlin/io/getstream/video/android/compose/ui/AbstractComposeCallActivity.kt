@@ -42,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.StreamVideoProvider
+import io.getstream.video.android.call.state.CallAction
 import io.getstream.video.android.call.state.CancelCall
 import io.getstream.video.android.call.state.ToggleCamera
 import io.getstream.video.android.call.state.ToggleMicrophone
@@ -145,20 +146,27 @@ public abstract class AbstractComposeCallActivity :
             CallContent(
                 modifier = Modifier.background(color = VideoTheme.colors.appBackground),
                 viewModel = callViewModel,
-                onCallAction = { action ->
-                    when (action) {
-                        is ToggleMicrophone -> toggleMicrophone(action)
-                        is ToggleCamera -> toggleCamera(action)
-                        is ToggleScreenConfiguration -> {
-                            toggleFullscreen(action)
-                            callViewModel.onCallAction(action)
-                        }
-                        else -> callViewModel.onCallAction(action)
-                    }
-                },
+                onCallAction = ::handleCallAction,
                 onBackPressed = ::handleBackPressed,
                 pictureInPictureContent = { PictureInPictureContent(call = it) }
             )
+        }
+    }
+
+    /**
+     * Default handler for [CallAction]s triggered in the UI.
+     *
+     * @param action Action to handle.
+     */
+    protected open fun handleCallAction(action: CallAction) {
+        when (action) {
+            is ToggleMicrophone -> toggleMicrophone(action)
+            is ToggleCamera -> toggleCamera(action)
+            is ToggleScreenConfiguration -> {
+                toggleFullscreen(action)
+                callViewModel.onCallAction(action)
+            }
+            else -> callViewModel.onCallAction(action)
         }
     }
 

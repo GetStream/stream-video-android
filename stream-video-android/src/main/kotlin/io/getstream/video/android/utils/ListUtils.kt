@@ -16,6 +16,9 @@
 
 package io.getstream.video.android.utils
 
+import io.getstream.video.android.core.internal.InternalStreamVideoApi
+
+@InternalStreamVideoApi
 public inline fun <T> List<T>.updateValue(
     predicate: (T) -> Boolean,
     transformer: (T) -> T
@@ -35,6 +38,7 @@ public inline fun <T> List<T>.updateValue(
     return mutableList
 }
 
+@InternalStreamVideoApi
 public inline fun <T> List<T>.updateAll(transformer: (T) -> T): List<T> {
     val mutableList = toMutableList()
 

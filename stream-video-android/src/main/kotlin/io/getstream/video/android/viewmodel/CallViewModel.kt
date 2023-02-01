@@ -203,7 +203,9 @@ public class CallViewModel(
                     }
                     is State.Incoming -> {
                         _callType.value = CallType.fromType(state.callGuid.type)
-                        _participants.value = state.users.values.toList()
+                        _participants.value = state.users.values
+                            .filter { it.id != streamVideo.getUser().id }
+                            .toList()
                     }
                     is State.Joining -> {
                         _callType.value = CallType.fromType(state.callGuid.type)

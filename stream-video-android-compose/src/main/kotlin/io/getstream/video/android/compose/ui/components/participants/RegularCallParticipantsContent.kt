@@ -22,9 +22,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -39,7 +37,7 @@ import androidx.compose.ui.unit.dp
 import io.getstream.video.android.call.state.CallAction
 import io.getstream.video.android.call.state.CallMediaState
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.call.controls.LandscapeCallControls
+import io.getstream.video.android.compose.ui.components.call.controls.internal.DefaultCallControlsContent
 import io.getstream.video.android.compose.ui.components.internal.OverlayAppBar
 import io.getstream.video.android.compose.ui.components.participants.internal.Participants
 import io.getstream.video.android.model.Call
@@ -56,6 +54,7 @@ import io.getstream.video.android.model.state.StreamCallState
  * @param modifier Modifier for styling.
  * @param paddingValues Padding within the parent.
  * @param onRender Handler when each of the Video views render their first frame.
+ * @param callControlsContent Content shown that allows users to trigger different actions.
  */
 @Composable
 public fun RegularCallParticipantsContent(
@@ -66,7 +65,14 @@ public fun RegularCallParticipantsContent(
     onBackPressed: () -> Unit,
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues = PaddingValues(0.dp),
-    onRender: (View) -> Unit = {}
+    onRender: (View) -> Unit = {},
+    callControlsContent: @Composable () -> Unit = {
+        DefaultCallControlsContent(
+            call = call,
+            callMediaState = callMediaState,
+            onCallAction = onCallAction
+        )
+    }
 ) {
     var parentSize: IntSize by remember { mutableStateOf(IntSize(0, 0)) }
     val orientation = LocalConfiguration.current.orientation
@@ -97,14 +103,7 @@ public fun RegularCallParticipantsContent(
         }
 
         if (orientation == ORIENTATION_LANDSCAPE) {
-            LandscapeCallControls(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .width(VideoTheme.dimens.landscapeCallControlsSheetWidth),
-                callMediaState = callMediaState,
-                onCallAction = onCallAction,
-                isScreenSharing = false
-            )
+            callControlsContent()
         }
     }
 }

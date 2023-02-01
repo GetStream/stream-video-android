@@ -17,6 +17,7 @@
 package io.getstream.video.android.events
 
 import io.getstream.video.android.model.StreamCallCid
+import io.getstream.video.android.model.UserAudioLevel
 import stream.video.sfu.event.ChangePublishQuality
 import stream.video.sfu.event.ConnectionQualityInfo
 import stream.video.sfu.models.CallState
@@ -46,7 +47,7 @@ public data class ConnectionQualityChangeEvent(
 ) : SfuDataEvent()
 
 public data class AudioLevelChangedEvent(
-    val levels: Map<String, Float>
+    val levels: Map<String, UserAudioLevel>
 ) : SfuDataEvent()
 
 public data class ChangePublishQualityEvent(

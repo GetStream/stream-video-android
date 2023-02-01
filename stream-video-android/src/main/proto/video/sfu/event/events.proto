@@ -125,6 +125,7 @@ message AudioLevel{
   string session_id = 2;
   // 0.0 means complete silence, 1.0 loudest
   float level = 3;
+  bool is_speaking = 4;
 }
 
 // AudioLevelChanged is sent by the SFU to notify about audio levels by user
