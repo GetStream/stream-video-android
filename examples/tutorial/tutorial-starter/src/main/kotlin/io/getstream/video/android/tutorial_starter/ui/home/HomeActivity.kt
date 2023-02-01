@@ -57,18 +57,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.avatar.Avatar
+import io.getstream.video.android.compose.ui.components.avatar.InitialsAvatar
 import io.getstream.video.android.tutorial_starter.model.HomeScreenOption
 import io.getstream.video.android.tutorial_starter.ui.components.UserList
 import io.getstream.video.android.tutorial_starter.ui.login.LoginActivity
 import io.getstream.video.android.tutorial_starter.user.AppUser
 import io.getstream.video.android.tutorial_starter.utils.getUsers
 import io.getstream.video.android.tutorial_starter.videoApp
-import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.avatar.Avatar
-import io.getstream.video.android.compose.ui.components.avatar.InitialsAvatar
 import io.getstream.video.android.utils.initials
 import io.getstream.video.android.utils.onError
-import io.getstream.video.android.utils.onSuccess
 import kotlinx.coroutines.launch
 
 class HomeActivity : AppCompatActivity() {
@@ -161,7 +160,7 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun logOut() {
-        videoApp.logOut()
+        // TODO - log out
         startActivity(Intent(this, LoginActivity::class.java))
         finish()
     }
@@ -248,64 +247,26 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun createMeeting(callId: String, participants: List<String>) {
-        lifecycleScope.launch {
-            logger.d { "[createMeeting] callId: $callId, participants: $participants" }
 
-            loadingState.value = true
-            val result = streamVideo.joinCall(
-                "default",
-                callId,
-                participants,
-                false
-            )
-
-            result.onSuccess { data ->
-                logger.v { "[createMeeting] successful: $data" }
-                loadingState.value = false
-            }
-
-            result.onError {
-                logger.e { "[createMeeting] failed: $it" }
-                Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
-            }
-        }
     }
 
     private fun dialUsers(callId: String, participants: List<String>) {
-        lifecycleScope.launch {
-            logger.d { "[dialUsers] callId: $callId, participants: $participants" }
 
-            loadingState.value = true
-            streamVideo.getOrCreateCall(
-                "default",
-                callId,
-                participants,
-                ringing = true
-            ).onSuccess {
-                logger.v { "[dialUsers] completed: $it" }
-            }.onError {
-                logger.e { "[dialUsers] failed: $it" }
-                Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
-            }
-            loadingState.value = false
-        }
     }
 
     private fun joinCall(callId: String) {
         lifecycleScope.launch {
-            logger.d { "[joinCall] callId: $callId" }
             loadingState.value = true
+
             streamVideo.joinCall(
                 "default",
                 id = callId,
                 participantIds = emptyList(),
                 ringing = false
-            ).onSuccess { data ->
-                logger.v { "[joinCall] succeed: $data" }
-            }.onError {
-                logger.e { "[joinCall] failed: $it" }
+            ).onError {
                 Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
             }
+
             loadingState.value = false
         }
     }

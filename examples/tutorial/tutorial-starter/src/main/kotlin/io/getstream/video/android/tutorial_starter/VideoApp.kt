@@ -22,11 +22,6 @@ import io.getstream.log.StreamLog
 import io.getstream.log.android.AndroidStreamLogger
 import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.StreamVideo
-import io.getstream.video.android.StreamVideoBuilder
-import io.getstream.video.android.tutorial_starter.ui.call.CallActivity
-import io.getstream.video.android.tutorial_starter.ui.call.CallService
-import io.getstream.video.android.input.CallActivityInput
-import io.getstream.video.android.input.CallServiceInput
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.token.CredentialsProvider
 import io.getstream.video.android.user.UserCredentialsManager
@@ -61,33 +56,11 @@ class VideoApp : Application() {
         credentialsProvider: CredentialsProvider,
         loggingLevel: LoggingLevel
     ): StreamVideo {
-        StreamLog.d(TAG) { "[initializeStreamCalls] loggingLevel: $loggingLevel" }
-        if (this::credentialsProvider.isInitialized) {
-            this.credentialsProvider.updateUser(
-                credentialsProvider.getUserCredentials()
-            )
-        } else {
-            this.credentialsProvider = credentialsProvider
-        }
-
-        return StreamVideoBuilder(
-            context = this,
-            credentialsProvider = this.credentialsProvider,
-            androidInputs = setOf(
-                CallServiceInput.from(CallService::class),
-                CallActivityInput.from(CallActivity::class),
-            ),
-            loggingLevel = loggingLevel
-        ).build().also {
-            streamVideo = it
-            StreamLog.v(TAG) { "[initializeStreamCalls] completed" }
-        }
+        TODO("Implement Stream Video")
     }
 
     fun logOut() {
-        streamVideo.clearCallState()
-        streamVideo.removeDevices(userPreferences.getDevices())
-        userPreferences.clear()
+        // TODO - log the user out
     }
 
     companion object {

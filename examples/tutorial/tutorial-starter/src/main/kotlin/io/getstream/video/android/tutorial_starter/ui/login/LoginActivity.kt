@@ -35,16 +35,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.tutorial_starter.VideoApp
+import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.model.User
 import io.getstream.video.android.tutorial_starter.ui.components.UserList
 import io.getstream.video.android.tutorial_starter.ui.home.HomeActivity
 import io.getstream.video.android.tutorial_starter.user.AppUser
 import io.getstream.video.android.tutorial_starter.utils.getUsers
 import io.getstream.video.android.tutorial_starter.videoApp
-import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.logging.LoggingLevel
-import io.getstream.video.android.model.User
-import io.getstream.video.android.token.AuthCredentialsProvider
 
 class LoginActivity : AppCompatActivity() {
 
@@ -129,14 +126,7 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun logIn(selectedUser: User) {
-        logger.i { "[logIn] selectedUser: $selectedUser" }
-        videoApp.initializeStreamVideo(
-            credentialsProvider = AuthCredentialsProvider(
-                user = selectedUser,
-                apiKey = VideoApp.API_KEY,
-            ),
-            loggingLevel = LoggingLevel.BODY
-        )
+        // TODO - log in the user
         startActivity(HomeActivity.getIntent(this))
         finish()
     }
