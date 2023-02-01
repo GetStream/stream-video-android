@@ -62,11 +62,17 @@ class VideoApp : Application() {
         loggingLevel: LoggingLevel
     ): StreamVideo {
         StreamLog.d(TAG) { "[initializeStreamCalls] loggingLevel: $loggingLevel" }
-        this.credentialsProvider = credentialsProvider
+        if (this::credentialsProvider.isInitialized) {
+            this.credentialsProvider.updateUser(
+                credentialsProvider.getUserCredentials()
+            )
+        } else {
+            this.credentialsProvider = credentialsProvider
+        }
 
         return StreamVideoBuilder(
             context = this,
-            credentialsProvider = credentialsProvider,
+            credentialsProvider = this.credentialsProvider,
             androidInputs = setOf(
                 CallServiceInput.from(CallService::class),
                 CallActivityInput.from(CallActivity::class),

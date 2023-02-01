@@ -11,7 +11,6 @@ Hello there and welcome to our Stream Video Android tutorial.
 
 This makes the Stream Video SDK the best-in-class choice when integrating Audio and Video communication in your apps. With all that in mind, let's dive into the tutorial.
 
-
 ## Tutorial Content
 
 In this tutorial we'll cover the main steps required to produce a fully capable video chat app, using **Stream Video**. The application you're building is called `VideoTutorial` (fitting, I know), and its features will be the following:
@@ -22,23 +21,23 @@ In this tutorial we'll cover the main steps required to produce a fully capable 
 - Creating & joining a Call
 - Rendering Call UI and controls
 
-By the end of the tutorial, you'll be more than capable of building an app that powers video calls, with deep knowledge of how our internal state management works. The app has only a couple of screens to choose a Call ID and to participate in the call:
+By the end of the tutorial, you'll be more than capable of building an app that powers video calls, with deep knowledge of how our internal state management works. The app has only a few screens:
 
-| HomeActivity                                                 | CallActivity                  |
-| ------------------------------------------------------------ | ------------------------------------------------------------ |
-| ![Home Activity UI](https://user-images.githubusercontent.com/17215808/200299040-93396c6b-41ba-4020-895a-eb22058983d0.png) | ![Call Screen](https://user-images.githubusercontent.com/17215808/202099515-90ca68f0-fea6-4be8-a7d9-df590d6f357b.png) |
+* **Login screen**: Used to select a user for the Calls. 
+* **Home screen**: Used to choose a Call ID, its participate and if you want to start a ringing or meeting call.
+* **Call screen**: Central place for all the communication after joining a call.
 
-If you're interested in what the application looks like and a small demo of how it works, make sure to check out the full sample app or the video that walks through it below.
+| LoginActivity                                    | HomeActivity      | CallActivity |
+| ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| ![Screenshot_1675241285](https://user-images.githubusercontent.com/17215808/215994873-6ab8dd74-c40d-4b74-81f8-9fc2b88a709e.png) | ![Screenshot_1675241145](https://user-images.githubusercontent.com/17215808/215994945-9fd378de-12ef-42a7-b8d0-b831a50fa2f2.png) | ![Screenshot_1675242357](https://user-images.githubusercontent.com/17215808/216000813-86ebd384-f5d1-4e53-9b23-ce1f14b6de4e.png) |
 
-// TODO - video
+If you're interested in what the application looks like and a small demo of how it works, make sure to check out the full [sample app](https://github.com/GetStream/stream-video-android/tree/main/app) in our repository.
 
 Once you're ready, we can start with the project.
 
 ## Starting the Project
 
 > **Note**: In this tutorial, we'll be using Compose for the UI, but you can very much build this in XML too. Our state is pragmatic and can be integrated with the UI toolkit you prefer.
->
-> Additionally, the completed app for each step of the tutorial is available on GitHub. // TODO
 
 To get started with [Stream Video](https://github.com/GetStream/stream-video-android), we have a great starter project // TODO that pre-bakes all the boilerplate UI and dependency code for you.
 
