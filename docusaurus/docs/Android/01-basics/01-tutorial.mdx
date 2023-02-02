@@ -369,15 +369,96 @@ If you press the back or home buttons and go to the background, you should see t
 
 ![Picture-in-Picture mode](https://user-images.githubusercontent.com/17215808/216076317-0c25f9f1-f350-47c5-aa81-3844e16235be.png)
 
+Clicking on the PiP container gives you the option to close the Call or go back to it. You can move the container around and browse other apps while the call is running. Read through our documentation if you're interested in how our [Picture-In-Picture support](https://github.com/GetStream/stream-video-android/blob/docs/structure-improvement/docusaurus/docs/Android/05-advanced/04-enable-picture-in-picture.mdx) works.
 
+Now that you have a meeting Call created, anyone with the Call ID can join it. Alternatively, you can read up on our [Deep linking guide](https://github.com/GetStream/stream-video-android/blob/docs/structure-improvement/docusaurus/docs/Android/05-advanced/01-deeplinking.mdx) to see how to implement deep links and share call invites using them. **Run the app on another emulator or device** and attempt to join the Call with the same ID but a different user to test this.
+
+The next step is to explore ringing Calls and how they reflect the two UI cases - when you're calling other people and when other people are calling you.
 
 ## Ringing People
 
+The logic to implement ringing is quite similar to meeting Calls. However, these are the main differences:
 
+* Ringing **requires other participants** as you have to ring someone.
+* In ringing scenarios, you don't join the Call by default, instead you **wait for callees to respond**.
+* Callees can either **accept the Call** and fully initiate it for everyone who's been invited, or **reject the Call** and potentially cancel it if everyone rejected.
+* Unlike meetings which are created and exist as open rooms to join, ringing Calls have a **customizable timeout**, after which the Call is canceled if not a single callee accepted to initiate the Call.
 
-## Picture-In-Picture & Background Support
+These difference represent the user experience of a ringing Call. But when integrating the difference is minimal. Open the `HomeActivity.kt` and look for `dialUsers()` which is currently empty. Replace that function with the following code:
 
+```kotlin
+private fun dialUsers(callId: String, participants: List<String>) { // 1
+    lifecycleScope.launch {
+        loadingState.value = true
+      
+        streamVideo.getOrCreateCall( // 2
+            type = "default",
+            id = callId,
+            participantIds = participants,
+            ringing = true
+        ).onError {
+            Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show() // 3
+        }
+        loadingState.value = false // 4
+    }
+}
+```
 
+This implementation is _very_ similar to creating a meeting. But, as previously described, there are some key major differences in the steps:
+
+1. Because ringing or dialing requires participants, we need a list of `participants` to pass to the SDK.
+2. Instead of using `joinCall`, which automatically pushes the state to `Joined`, you use `getOrCreateCall()` which will only create the call. You also pass in the participants and `ringing = true`. This will change the internal state to the `Outgoing` Call state, which will show the appropriate UI. You'll see that in a minute.
+3. Like before, if something goes wrong, you show a message to the user.
+4. Finally, after the API call, you reset the loading state.
+
+If you think there's more to the implementation, there's really not. Our SDK was built with ease-of-use and simplicity in mind, allowing you to focus on what truly matters, like customizing the behavior or the UI of your apps.
+
+Run the app on two devices or emulators and connect with two different users. Then on the Home screen, start a new call with ringing enabled and select the other user. You should see the Incoming and Outgoing UI. 
+
+| HomeActivity                                                 | OutgoingCall Screen                                          | IncomingCall Screen                                          |
+| ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| ![Home Screen Ringing](https://user-images.githubusercontent.com/17215808/216303437-2db9f9b6-823d-456b-999e-1b2124b11222.png) | ![Outgoing Call](https://user-images.githubusercontent.com/17215808/216303052-55ee4d71-04bb-4ddc-9c16-d517850b87b7.png) | ![Screenshot_1675335355](https://user-images.githubusercontent.com/17215808/216306313-8ea73cea-31e0-44c6-8be7-81bf13789cc8.png) |
+
+Amazing work. With just a few lines of code you support Incoming and Outgoing Calls that are backed by the ringing Call type. Before that, you implemented meeting calls where people can join using the Call ID or deep links.
+
+This covers the basic implementation of our SDK. But our SDK allows for deep customization of the UI and behavior. Let's see how to build custom Call layout based on the state.
 
 ## Customizing Call Layout
 
+Our default Call layout features a very particular arrangement and behavior:
+
+* If you are the only person in the call, you're shown as the only participant.
+* If there are fewer than four participants, other participants are shown in a grid, but the local participant is shown as a floating item.
+* If there are four or more participants, the local participant is shown as the last item in the grid and the UI lets you paginate through the rest of participants.
+
+You can see that behavior in the following images.
+
+| Single participant (Local)                                   | Two Participants (One Remote + Local)                        | Three Participants (Two Remote + Local)                      | Four or More Participants (Three or More Remote + Local)     |
+| ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| ![Single Participant](https://user-images.githubusercontent.com/17215808/216321679-959b6523-2a15-4ced-9b00-61be17cffe3a.png) | ![Two Participants](https://user-images.githubusercontent.com/17215808/216321850-26426d3f-12e3-4c29-8966-ca94e121b5af.png) | ![Three Participants](https://user-images.githubusercontent.com/17215808/216321947-d7f60a1d-eb2b-4deb-a908-ecd244b78da5.png) | ![Untitled (2)](https://user-images.githubusercontent.com/17215808/216322097-3b60eb27-89c3-4d44-ac19-0930767c098f.png) |
+
+However, you might want to customize this UI if your app use case is different.
+
+For example, you might only want to customize or remove the header to conserve screen real estate. With Cideo Calls, the space is limited and you want to be able to see people and their feed clearly. That's why making the most of your space by removing unused or redundant items is a great option to have.
+
+In other case, you might only support audio calls, so having video support isn't that important. In that case you can tweak the participant UI to show only avatars and you can customize how these avatars look. Additionally, you can remove some of the buttons at the bottom of the Call UI, which trigger actions for Video, like flipping the camera or enabling/disabling Video feed.
+
+Let's customize the UI to try and build Audio only communication
+
+
+
+## Further Integration
+
+Congratulations on completing the Stream Video Android SDK tutorial. You've learned how to build two very popular use cases - Meeting and Ringing Calls. However, our SDK supports multiple other use cases and more advanced features. If you're looking to integrate more of our supported functionality, we recommend checking out the following guides:
+
+* [Call Lifecycle](https://github.com/GetStream/stream-video-android/blob/docs/structure-improvement/docusaurus/docs/Android/02-guides/02-call-lifecycle.mdx): It's important to understand the lifecycle of our SDK and Calls to properly build complex use cases for your users.
+* [Call Engine](https://github.com/GetStream/stream-video-android/blob/docs/structure-improvement/docusaurus/docs/Android/02-guides/03-call-engine.mdx): If you're looking to utilize our state machine to the fullest, explore what our internal CallEngine does and how to listen to state.
+* [Deep linking](https://github.com/GetStream/stream-video-android/blob/docs/structure-improvement/docusaurus/docs/Android/05-advanced/01-deeplinking.mdx): Deep linking is very useful for Meeting apps where you can simply send a link for the Call that lets people join.
+* [Push Notifications](https://github.com/GetStream/stream-video-android/blob/docs/structure-improvement/docusaurus/docs/Android/05-advanced/02-push-notifications.mdx): Apps where Ring people and invite them to Calls heavily rely on push notifications. Learn how to integrate them with our SDK.
+
+Alternatively, if you're modeling your app based on popular apps, like Messenger, Telegram, Zoom, Google Meet, Twitter Spaces or Twitch, we have several guides and template projects prepared for you:
+
+* [Chat + Video](https://github.com/GetStream/stream-video-android/blob/docs/structure-improvement/docusaurus/docs/Android/02-guides/06-chat-with-video.mdx): Messenger and Telegram like applications feature Chat as a primary source of communication, with Video being secondary. To build a similar app, folllow our Chat + Video guide that provides you with a template project to kick start your app, with all the UI and setup pre-baked.
+* [Video + Chat](https://github.com/GetStream/stream-video-android/blob/docs/structure-improvement/docusaurus/docs/Android/02-guides/07-video-with-chat.mdx): If you're building a Meeting based app, like Zoom or Google Meet, then the Video + Chat guide is for you. It provides you with a template project that pre-bakes all the UI and SDK setup, so you can focus on what matters.
+* [Audio Rooms](https://github.com/GetStream/stream-video-android/blob/docs/structure-improvement/docusaurus/docs/Android/02-guides/08-audio-rooms.mdx): Some apps feature live audio rooms where people gather to discuss ideas and fun topics. Apps like Twitter Spaces are popular and you can build them using our Audio Rooms guide. It also prepares a template project for you that cuts the time you need to start working on your app.
+* [Livestream](https://github.com/GetStream/stream-video-android/blob/docs/structure-improvement/docusaurus/docs/Android/02-guides/09-livestream.mdx): Last, but not least, our Livestream guide teaches you how to build an app where one person streams their tracks to a group of people in real time. By the end of the guide, you'll have a project that prepares most of the setup for you.
