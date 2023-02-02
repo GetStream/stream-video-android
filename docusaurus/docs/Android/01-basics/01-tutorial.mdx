@@ -443,9 +443,162 @@ For example, you might only want to customize or remove the header to conserve s
 
 In other case, you might only support audio calls, so having video support isn't that important. In that case you can tweak the participant UI to show only avatars and you can customize how these avatars look. Additionally, you can remove some of the buttons at the bottom of the Call UI, which trigger actions for Video, like flipping the camera or enabling/disabling Video feed.
 
-Let's customize the UI to try and build Audio only communication
+Let's customize the UI to try and build Audio only communication. Open `CallActivity.kt` and override the `buildContent()` function:
+
+```kotlin
+override fun buildContent(): @Composable () -> Unit {
+    return {
+        VideoTheme {
+          // TODO - add custom UI
+        }
+    }
+}
+```
+
+By providing a simple overrideable function that returns a `Composable`, you're able to render any content within the screen based on the call state. Within the `CallActivity` you have access to the `CallViewModel` for any state you might need to build custom UI.
+
+Now add the following helper functions to the file:
+
+```kotlin
+@Composable
+private fun CustomActiveCallContent() { // Whole custom UI in the active call state
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        topBar = { CustomTopBar() },
+        bottomBar = { AudioOnlyCallControls() },
+        content = { AudioOnlyParticipants(paddingValues = it) }
+    )
+}
+
+@Composable
+private fun CustomTopBar() { // Top bar content
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(VideoTheme.dimens.topAppbarHeight)
+            .background(color = VideoTheme.colors.barsBackground)
+            .padding(VideoTheme.dimens.callAppBarPadding),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        IconButton(
+            onClick = ::handleBackPressed,
+            modifier = Modifier.padding(
+                start = VideoTheme.dimens.callAppBarLeadingContentSpacingStart,
+                end = VideoTheme.dimens.callAppBarLeadingContentSpacingEnd
+            )
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_arrow_back),
+                contentDescription = stringResource(id = R.string.back_button_content_description),
+                tint = VideoTheme.colors.textHighEmphasis
+            )
+        }
+
+        Text(
+            modifier = Modifier
+                .weight(1f)
+                .padding(
+                    start = VideoTheme.dimens.callAppBarCenterContentSpacingStart,
+                    end = VideoTheme.dimens.callAppBarCenterContentSpacingEnd
+                ),
+            text = stringResource(id = R.string.default_app_bar_title),
+            fontSize = VideoTheme.dimens.topAppbarTextSize,
+            color = VideoTheme.colors.textHighEmphasis,
+            textAlign = TextAlign.Start,
+        )
+    }
+}
+
+@Composable
+private fun AudioOnlyParticipants(paddingValues: PaddingValues) { // Custom Participants UI to show up to two participants
+    val callParticipants by callViewModel.participantList.collectAsState(initial = emptyList())
+    val participantsToRender = callParticipants.take(2)
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(paddingValues)
+    ) {
+        participantsToRender.forEach {
+            UserAvatarItem(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                callParticipantState = it
+            )
+        }
+    }
+}
+
+@Composable
+private fun UserAvatarItem( // Participant item, which only shows an Avatar
+    callParticipantState: CallParticipantState,
+    modifier: Modifier = Modifier
+) {
+    UserAvatar(
+        modifier = modifier.padding(16.dp),
+        shape = RoundedCornerShape(16.dp),
+        user = callParticipantState.toUser()
+    )
+}
 
 
+@Composable
+private fun AudioOnlyCallControls() { // Custom CallControls
+    val callMediaState by callViewModel.callMediaState.collectAsState(initial = CallMediaState())
+
+    val modifier = Modifier
+        .fillMaxWidth()
+        .height(VideoTheme.dimens.callControlsSheetHeight)
+
+    val callControlsActions = buildDefaultCallControlActions(callMediaState = callMediaState)
+        .filter {
+            it.callAction !is FlipCamera && it.callAction !is ToggleCamera
+        }
+
+    CallControls(
+        modifier = modifier,
+        callMediaState = callMediaState,
+        actions = callControlsActions,
+        isScreenSharing = false,
+        onCallAction = callViewModel::onCallAction
+    )
+}
+```
+
+There is quite a bit of code here, but it's very simple in what it does:
+
+* `CustomActiveCallContent` is the main entry point, which will feature all of the UI you need in the Audio only use case.
+* The `CustomTopBar` prepares a small header where you have the back `Button` and a simple `Text` element.
+* `AudioOnlyParticipants` renders up to two participants in the Call. In this example we'll just serve 1:1 calls, but you can customize this to be more complex and feature many participants, not just two.
+* `UserAvatarItem` represents each participant item in the UI.
+* `AudioOnlyCallControls` is the customized set of actions the user can take, where you remove some of the default `CallControlAction`s.
+
+Now that you have these functions prepared, you can plug them into the default content. The main part of our SDK is that you can choose which parts to override - you don't have to rebuild the whole UI yourself. Instead, you can replace just a specific _slot_ or part of the default behavior. To do so for the active Call content, add the following code to `buildContent()`:
+
+```kotlin
+override fun buildContent(): @Composable () -> Unit {
+    return {
+        VideoTheme {
+            CallContent(
+                modifier = Modifier.background(color = VideoTheme.colors.appBackground),
+                viewModel = callViewModel,
+                onCallAction = ::handleCallAction,
+                onBackPressed = ::handleBackPressed,
+                activeCallContent = { CustomActiveCallContent() } // here
+            )
+        }
+    }
+}
+```
+
+With just a single parameter that you pass in, you can replace only the active content. Build and run the app, ring another participant and join the call. You should see the following UI:
+
+![Audio Only Call](https://user-images.githubusercontent.com/17215808/216340710-e96e311c-1fd1-4564-bbfe-2230ff213fa1.png)
+
+You can see how you've simplified the UI, removed the unnecessary header information, call actions and similar. This is just a small piece of how powerful our SDK and its UI Components are. You can replace almost everything you can think of, while still keeping the internal state and business logic behavior the same.
+
+This allows you to build rich and custom apps in less time than you would building everything yourself, or by using other third party providers. And the best part is, we support multiple programming paradigms, not just Kotlin and Jetpack Compose, but also the XML and View toolkit and Java.
 
 ## Further Integration
 
