@@ -55,85 +55,118 @@ import io.getstream.video.android.model.state.StreamCallState as State
  * @param modifier Modifier for styling.
  * @param onBackPressed Handler when the user taps on the back button.
  * @param onCallAction Handler when the user clicks on some of the call controls.
+ * @param callControlsContent Content shown for the
+ * [io.getstream.video.android.compose.ui.components.call.controls.CallControls] part of the UI.
  * @param pictureInPictureContent Content shown when the user enters Picture in Picture mode, if
  * it's been enabled in the app.
+ * @param incomingCallContent Content shown when we're receiving a [Call].
+ * @param outgoingCallContent Content shown when we're ringing other people.
+ * @param activeCallContent Content shown when we're connected to a [Call] successfully.
  */
 @Composable
 public fun CallContent(
     viewModel: CallViewModel,
     modifier: Modifier = Modifier,
     onBackPressed: () -> Unit = {},
-    onCallAction: (CallAction) -> Unit = { viewModel.onCallAction(it) },
+    onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
     callControlsContent: @Composable () -> Unit = {
         DefaultCallControlsContent(
             viewModel,
             onCallAction
         )
     },
-    pictureInPictureContent: @Composable (Call) -> Unit = { DefaultPictureInPictureContent(it) }
-) {
-    val stateHolder = viewModel.streamCallState.collectAsState(initial = State.Idle)
-    val state = stateHolder.value
-    var usersToInvite by remember { mutableStateOf(emptyList<User>()) }
-
-    if (state is State.Incoming && !state.acceptedByMe) {
+    pictureInPictureContent: @Composable (Call) -> Unit = { DefaultPictureInPictureContent(it) },
+    incomingCallContent: @Composable () -> Unit = {
         IncomingCallContent(
             modifier = modifier,
             viewModel = viewModel,
             onBackPressed = onBackPressed,
             onCallAction = onCallAction
         )
-    } else if (state is State.Outgoing && !state.acceptedByCallee) {
+    },
+    activeCallContent: @Composable () -> Unit = {
+        DefaultActiveCallContent(
+            viewModel = viewModel,
+            modifier = modifier,
+            onBackPressed = onBackPressed,
+            onCallAction = onCallAction,
+            callControlsContent = callControlsContent,
+            pictureInPictureContent = pictureInPictureContent
+        )
+    },
+    outgoingCallContent: @Composable () -> Unit = {
         OutgoingCallContent(
             modifier = modifier,
             viewModel = viewModel,
             onBackPressed = onBackPressed,
             onCallAction = onCallAction
         )
+    }
+) {
+    val stateHolder = viewModel.streamCallState.collectAsState(initial = State.Idle)
+    val state = stateHolder.value
+
+    if (state is State.Incoming && !state.acceptedByMe) {
+        incomingCallContent()
+    } else if (state is State.Outgoing && !state.acceptedByCallee) {
+        outgoingCallContent()
     } else {
-        ActiveCallContent(
-            modifier = modifier,
-            callViewModel = viewModel,
-            onBackPressed = onBackPressed,
-            onCallAction = onCallAction,
-            callControlsContent = callControlsContent,
-            pictureInPictureContent = pictureInPictureContent
-        )
+        activeCallContent()
+    }
+}
 
-        val isShowingParticipantsInfo by viewModel.isShowingCallInfo.collectAsState()
-        val participantsState by viewModel.participantList.collectAsState(initial = emptyList())
+@Composable
+internal fun DefaultActiveCallContent(
+    viewModel: CallViewModel,
+    modifier: Modifier = Modifier,
+    onBackPressed: () -> Unit = {},
+    onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
+    callControlsContent: @Composable () -> Unit,
+    pictureInPictureContent: @Composable (Call) -> Unit = { DefaultPictureInPictureContent(it) }
+) {
+    ActiveCallContent(
+        modifier = modifier,
+        callViewModel = viewModel,
+        onBackPressed = onBackPressed,
+        onCallAction = onCallAction,
+        callControlsContent = callControlsContent,
+        pictureInPictureContent = pictureInPictureContent
+    )
 
-        if (isShowingParticipantsInfo && participantsState.isNotEmpty()) {
-            val users by viewModel.getUsersState().collectAsState()
+    val isShowingParticipantsInfo by viewModel.isShowingCallInfo.collectAsState()
+    val participantsState by viewModel.participantList.collectAsState(initial = emptyList())
+    var usersToInvite by remember { mutableStateOf(emptyList<User>()) }
 
-            CallParticipantsInfoMenu(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(VideoTheme.colors.appBackground),
-                participantsState = participantsState,
-                users = users,
-                onDismiss = { viewModel.dismissOptions() },
-                onInfoMenuAction = { action ->
-                    when (action) {
-                        is InviteUsers -> {
-                            viewModel.dismissOptions()
-                            usersToInvite = action.users
-                        }
-                        is ChangeMuteState -> onCallAction(ToggleMicrophone(action.isEnabled))
+    if (isShowingParticipantsInfo && participantsState.isNotEmpty()) {
+        val users by viewModel.getUsersState().collectAsState()
+
+        CallParticipantsInfoMenu(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(VideoTheme.colors.appBackground),
+            participantsState = participantsState,
+            users = users,
+            onDismiss = { viewModel.dismissOptions() },
+            onInfoMenuAction = { action ->
+                when (action) {
+                    is InviteUsers -> {
+                        viewModel.dismissOptions()
+                        usersToInvite = action.users
                     }
+                    is ChangeMuteState -> onCallAction(ToggleMicrophone(action.isEnabled))
                 }
-            )
-        }
+            }
+        )
+    }
 
-        if (usersToInvite.isNotEmpty()) {
-            InviteUsersDialog(
-                users = usersToInvite,
-                onDismiss = { usersToInvite = emptyList() },
-                onInviteUsers = {
-                    usersToInvite = emptyList()
-                    viewModel.onCallAction(InviteUsersToCall(it))
-                }
-            )
-        }
+    if (usersToInvite.isNotEmpty()) {
+        InviteUsersDialog(
+            users = usersToInvite,
+            onDismiss = { usersToInvite = emptyList() },
+            onInviteUsers = {
+                usersToInvite = emptyList()
+                viewModel.onCallAction(InviteUsersToCall(it))
+            }
+        )
     }
 }
