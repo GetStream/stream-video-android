@@ -19,9 +19,9 @@ package io.getstream.video.android.tutorial_starter.ui.call
 import android.content.Context
 import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.app.BuildConfig
+import io.getstream.video.android.compose.ui.AbstractComposeCallActivity
 import io.getstream.video.android.tutorial_starter.user.FakeUsersProvider
 import io.getstream.video.android.tutorial_starter.videoApp
-import io.getstream.video.android.compose.ui.AbstractComposeCallActivity
 import io.getstream.video.android.user.EmptyUsersProvider
 import io.getstream.video.android.viewmodel.CallViewModelFactory
 

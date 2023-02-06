@@ -48,7 +48,7 @@ import io.getstream.video.android.call.state.ToggleCamera
 import io.getstream.video.android.call.state.ToggleMicrophone
 import io.getstream.video.android.call.state.ToggleScreenConfiguration
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.call.CallContent
+import io.getstream.video.android.compose.ui.components.call.CallScreen
 import io.getstream.video.android.compose.ui.components.call.activecall.DefaultPictureInPictureContent
 import io.getstream.video.android.model.Call
 import io.getstream.video.android.model.state.StreamCallState
@@ -143,7 +143,7 @@ public abstract class AbstractComposeCallActivity :
 
     protected open fun buildContent(): (@Composable () -> Unit) = {
         VideoTheme {
-            CallContent(
+            CallScreen(
                 modifier = Modifier.background(color = VideoTheme.colors.appBackground),
                 viewModel = callViewModel,
                 onCallAction = ::handleCallAction,

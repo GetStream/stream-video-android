@@ -49,7 +49,7 @@ import io.getstream.video.android.model.ScreenSharingSession
  * @param callControlsContent Content shown that allows users to trigger different actions.
  */
 @Composable
-public fun ScreenSharingCallParticipantsContent(
+internal fun ScreenSharingCallParticipantsContent(
     call: Call,
     session: ScreenSharingSession,
     participants: List<CallParticipantState>,

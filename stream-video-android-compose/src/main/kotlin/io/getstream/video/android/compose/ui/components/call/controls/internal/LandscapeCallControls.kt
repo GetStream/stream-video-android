@@ -20,11 +20,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
-import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,59 +35,33 @@ import io.getstream.video.android.compose.state.ui.call.CallControlAction
 import io.getstream.video.android.compose.theme.VideoTheme
 
 /**
- * Represents the set of controls the user can use to change their audio and video device state, or
- * browse other types of settings, leave the call, or implement something custom.
+ * Shows the call controls in a different way when in landscape mode.
  *
- * @param callMediaState The state of the media devices for the current user.
- * @param isScreenSharing If there is a screen sharing session active.
+ * @param callMediaState The state of the call media, such as video, audio.
+ * @param isScreenSharing If there's currently an active screen sharing session.
  * @param modifier Modifier for styling.
  * @param actions Actions to show to the user with different controls.
- * @param onCallAction Handler when the user triggers an action.
+ * @param onCallAction Handler when the user triggers various call actions.
  */
 @Composable
-public fun RegularCallControls(
+internal fun LandscapeCallControls(
     callMediaState: CallMediaState,
     isScreenSharing: Boolean,
     modifier: Modifier = Modifier,
     actions: List<CallControlAction> = buildDefaultCallControlActions(callMediaState = callMediaState),
     onCallAction: (CallAction) -> Unit
 ) {
-    Surface(
-        modifier = modifier,
-        shape = VideoTheme.shapes.callControls,
-        color = VideoTheme.colors.barsBackground,
-        elevation = 8.dp
-    ) {
-        RegularCallControlsActions(
-            actions = actions,
-            isScreenSharing = isScreenSharing,
-            onCallAction = onCallAction
-        )
-    }
-}
 
-/**
- * Represents the list of Call Control actions the user can trigger while in a call.
- *
- * @param actions The list of actions to render.
- * @param isScreenSharing If there is a screen sharing session active.
- * @param onCallAction Handler when a given action is triggered.
- */
-@Composable
-public fun RegularCallControlsActions(
-    actions: List<CallControlAction>,
-    isScreenSharing: Boolean,
-    onCallAction: (CallAction) -> Unit
-) {
-    LazyRow(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceEvenly
+    LazyColumn(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceEvenly
     ) {
         items(actions) { action ->
             val isEnabled = !(action.callAction is FlipCamera && isScreenSharing)
 
             Card(
-                modifier = Modifier.size(VideoTheme.dimens.callControlButtonSize),
+                modifier = Modifier.size(VideoTheme.dimens.landscapeCallControlButtonSize),
                 shape = VideoTheme.shapes.callControlsButton,
                 backgroundColor = if (isEnabled) action.actionBackgroundTint else VideoTheme.colors.disabled
             ) {

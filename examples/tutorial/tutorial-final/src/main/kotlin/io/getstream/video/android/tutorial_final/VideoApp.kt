@@ -23,12 +23,12 @@ import io.getstream.log.android.AndroidStreamLogger
 import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.StreamVideoBuilder
-import io.getstream.video.android.tutorial_final.ui.call.CallActivity
-import io.getstream.video.android.tutorial_final.ui.call.CallService
 import io.getstream.video.android.input.CallActivityInput
 import io.getstream.video.android.input.CallServiceInput
 import io.getstream.video.android.logging.LoggingLevel
 import io.getstream.video.android.token.CredentialsProvider
+import io.getstream.video.android.tutorial_final.ui.call.CallActivity
+import io.getstream.video.android.tutorial_final.ui.call.CallService
 import io.getstream.video.android.user.UserCredentialsManager
 import io.getstream.video.android.user.UserPreferences
 

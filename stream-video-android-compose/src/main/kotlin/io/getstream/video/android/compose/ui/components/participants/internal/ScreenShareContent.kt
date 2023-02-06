@@ -54,7 +54,7 @@ import stream.video.sfu.models.TrackType
  * @param onRender Handler when the video content renders.
  */
 @Composable
-internal fun ScreenShareContent(
+public fun ScreenShareContent(
     call: Call,
     session: ScreenSharingSession,
     isFullscreen: Boolean,

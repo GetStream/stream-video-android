@@ -65,7 +65,7 @@ import stream.video.sfu.models.TrackType
  * it's been enabled in the app.
  */
 @Composable
-public fun ActiveCallContent(
+public fun CallContent(
     callViewModel: CallViewModel,
     modifier: Modifier = Modifier,
     onBackPressed: () -> Unit = { callViewModel.onCallAction(LeaveCall) },

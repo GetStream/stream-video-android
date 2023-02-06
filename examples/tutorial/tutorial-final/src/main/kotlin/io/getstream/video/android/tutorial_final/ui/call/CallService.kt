@@ -18,8 +18,8 @@ package io.getstream.video.android.tutorial_final.ui.call
 
 import android.content.Context
 import io.getstream.video.android.StreamVideo
-import io.getstream.video.android.tutorial_final.videoApp
 import io.getstream.video.android.service.AbstractStreamCallService
+import io.getstream.video.android.tutorial_final.videoApp
 
 class CallService : AbstractStreamCallService() {
 

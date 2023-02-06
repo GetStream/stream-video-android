@@ -57,7 +57,7 @@ import io.getstream.video.android.model.state.StreamCallState
  * @param callControlsContent Content shown that allows users to trigger different actions.
  */
 @Composable
-public fun RegularCallParticipantsContent(
+internal fun RegularCallParticipantsContent(
     call: Call,
     callMediaState: CallMediaState,
     callState: StreamCallState,

@@ -35,16 +35,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.logging.LoggingLevel
+import io.getstream.video.android.model.User
+import io.getstream.video.android.token.AuthCredentialsProvider
 import io.getstream.video.android.tutorial_final.VideoApp
 import io.getstream.video.android.tutorial_final.ui.components.UserList
 import io.getstream.video.android.tutorial_final.ui.home.HomeActivity
 import io.getstream.video.android.tutorial_final.user.AppUser
 import io.getstream.video.android.tutorial_final.utils.getUsers
 import io.getstream.video.android.tutorial_final.videoApp
-import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.logging.LoggingLevel
-import io.getstream.video.android.model.User
-import io.getstream.video.android.token.AuthCredentialsProvider
 
 class LoginActivity : AppCompatActivity() {
 

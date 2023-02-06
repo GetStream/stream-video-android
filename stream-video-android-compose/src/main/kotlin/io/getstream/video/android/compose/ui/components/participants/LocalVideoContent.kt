@@ -55,7 +55,7 @@ import io.getstream.video.android.model.CallParticipantState
  * @param modifier Modifier for styling.
  */
 @Composable
-public fun FloatingParticipantItem(
+public fun LocalVideoContent(
     call: Call,
     localParticipant: CallParticipantState,
     parentBounds: IntSize,

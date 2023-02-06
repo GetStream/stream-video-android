@@ -31,7 +31,7 @@ import io.getstream.video.android.call.state.ToggleMicrophone
 import io.getstream.video.android.compose.state.ui.participants.ChangeMuteState
 import io.getstream.video.android.compose.state.ui.participants.InviteUsers
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.call.activecall.ActiveCallContent
+import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
 import io.getstream.video.android.compose.ui.components.call.activecall.DefaultPictureInPictureContent
 import io.getstream.video.android.compose.ui.components.call.activecall.internal.InviteUsersDialog
 import io.getstream.video.android.compose.ui.components.call.controls.internal.DefaultCallControlsContent
@@ -48,7 +48,7 @@ import io.getstream.video.android.model.state.StreamCallState as State
  *
  * The user can be in an Active Call state, if they've full joined the call, an Incoming Call state,
  * if they're being invited to join a call, or Outgoing Call state, if they're inviting other people
- * to join. Based on that, we show [ActiveCallContent], [IncomingCallContent] or [OutgoingCallContent],
+ * to join. Based on that, we show [CallContent], [IncomingCallContent] or [OutgoingCallContent],
  * respectively.
  *
  * @param viewModel The [CallViewModel] used to provide state and various handlers in the call.
@@ -61,10 +61,10 @@ import io.getstream.video.android.model.state.StreamCallState as State
  * it's been enabled in the app.
  * @param incomingCallContent Content shown when we're receiving a [Call].
  * @param outgoingCallContent Content shown when we're ringing other people.
- * @param activeCallContent Content shown when we're connected to a [Call] successfully.
+ * @param callContent Content shown when we're connected to a [Call] successfully.
  */
 @Composable
-public fun CallContent(
+public fun CallScreen(
     viewModel: CallViewModel,
     modifier: Modifier = Modifier,
     onBackPressed: () -> Unit = {},
@@ -84,8 +84,8 @@ public fun CallContent(
             onCallAction = onCallAction
         )
     },
-    activeCallContent: @Composable () -> Unit = {
-        DefaultActiveCallContent(
+    callContent: @Composable () -> Unit = {
+        DefaultCallContent(
             viewModel = viewModel,
             modifier = modifier,
             onBackPressed = onBackPressed,
@@ -111,12 +111,12 @@ public fun CallContent(
     } else if (state is State.Outgoing && !state.acceptedByCallee) {
         outgoingCallContent()
     } else {
-        activeCallContent()
+        callContent()
     }
 }
 
 @Composable
-internal fun DefaultActiveCallContent(
+internal fun DefaultCallContent(
     viewModel: CallViewModel,
     modifier: Modifier = Modifier,
     onBackPressed: () -> Unit = {},
@@ -124,7 +124,7 @@ internal fun DefaultActiveCallContent(
     callControlsContent: @Composable () -> Unit,
     pictureInPictureContent: @Composable (Call) -> Unit = { DefaultPictureInPictureContent(it) }
 ) {
-    ActiveCallContent(
+    CallContent(
         modifier = modifier,
         callViewModel = viewModel,
         onBackPressed = onBackPressed,

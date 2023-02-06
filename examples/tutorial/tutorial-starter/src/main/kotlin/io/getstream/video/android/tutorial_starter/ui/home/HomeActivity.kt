@@ -247,11 +247,9 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun createMeeting(callId: String, participants: List<String>) {
-
     }
 
     private fun dialUsers(callId: String, participants: List<String>) {
-
     }
 
     private fun joinCall(callId: String) {
