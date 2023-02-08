@@ -66,9 +66,9 @@ import io.getstream.video.android.app.videoApp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.Avatar
 import io.getstream.video.android.compose.ui.components.avatar.InitialsAvatar
-import io.getstream.video.android.utils.initials
-import io.getstream.video.android.utils.onError
-import io.getstream.video.android.utils.onSuccess
+import io.getstream.video.android.core.utils.initials
+import io.getstream.video.android.core.utils.onError
+import io.getstream.video.android.core.utils.onSuccess
 import kotlinx.coroutines.launch
 
 class HomeActivity : AppCompatActivity() {
@@ -252,7 +252,7 @@ class HomeActivity : AppCompatActivity() {
             logger.d { "[createMeeting] callId: $callId, participants: $participants" }
 
             loadingState.value = true
-            val result = streamVideo.createAndJoinCall(
+            val result = streamVideo.joinCall(
                 "default",
                 callId,
                 participants,
@@ -295,7 +295,7 @@ class HomeActivity : AppCompatActivity() {
         lifecycleScope.launch {
             logger.d { "[joinCall] callId: $callId" }
             loadingState.value = true
-            streamVideo.createAndJoinCall(
+            streamVideo.joinCall(
                 "default",
                 id = callId,
                 participantIds = emptyList(),

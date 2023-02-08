@@ -28,12 +28,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.call.state.CallAction
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.internal.OverlayScreenSharingAppBar
-import io.getstream.video.android.model.Call
-import io.getstream.video.android.model.CallParticipantState
-import io.getstream.video.android.model.ScreenSharingSession
+import io.getstream.video.android.core.call.state.CallAction
+import io.getstream.video.android.core.model.Call
+import io.getstream.video.android.core.model.CallParticipantState
+import io.getstream.video.android.core.model.ScreenSharingSession
 
 /**
  * Represents the landscape screen sharing content.
@@ -50,7 +50,7 @@ import io.getstream.video.android.model.ScreenSharingSession
  * @param callControlsContent Content shown that allows users to trigger different actions.
  */
 @Composable
-public fun LandscapeScreenSharingContent(
+internal fun LandscapeScreenSharingContent(
     call: Call,
     session: ScreenSharingSession,
     participants: List<CallParticipantState>,

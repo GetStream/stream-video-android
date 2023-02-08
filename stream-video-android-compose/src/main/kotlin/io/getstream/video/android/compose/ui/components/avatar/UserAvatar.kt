@@ -26,8 +26,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.model.User
-import io.getstream.video.android.utils.initials
+import io.getstream.video.android.core.model.User
+import io.getstream.video.android.core.utils.initials
 
 /**
  * Represents the [User] avatar that's shown on the Messages screen or in headers of DMs.

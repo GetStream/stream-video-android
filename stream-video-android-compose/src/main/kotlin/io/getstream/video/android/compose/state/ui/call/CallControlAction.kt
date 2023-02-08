@@ -18,7 +18,7 @@ package io.getstream.video.android.compose.state.ui.call
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
-import io.getstream.video.android.call.state.CallAction
+import io.getstream.video.android.core.call.state.CallAction
 
 /**
  * Represents a single Call Control item in the UI.
