@@ -51,8 +51,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.getstream.video.android.compose.ui.components.avatar.Avatar
+import io.getstream.video.android.core.utils.initials
 import io.getstream.video.android.tutorial_starter.user.AppUser
-import io.getstream.video.android.utils.initials
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable

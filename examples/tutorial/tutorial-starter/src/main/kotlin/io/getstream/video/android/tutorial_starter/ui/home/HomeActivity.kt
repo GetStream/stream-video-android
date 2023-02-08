@@ -60,14 +60,14 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.Avatar
 import io.getstream.video.android.compose.ui.components.avatar.InitialsAvatar
+import io.getstream.video.android.core.utils.initials
+import io.getstream.video.android.core.utils.onError
 import io.getstream.video.android.tutorial_starter.model.HomeScreenOption
 import io.getstream.video.android.tutorial_starter.ui.components.UserList
 import io.getstream.video.android.tutorial_starter.ui.login.LoginActivity
 import io.getstream.video.android.tutorial_starter.user.AppUser
 import io.getstream.video.android.tutorial_starter.utils.getUsers
 import io.getstream.video.android.tutorial_starter.videoApp
-import io.getstream.video.android.utils.initials
-import io.getstream.video.android.utils.onError
 import kotlinx.coroutines.launch
 
 class HomeActivity : AppCompatActivity() {

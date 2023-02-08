@@ -23,15 +23,13 @@ import io.getstream.android.push.firebase.FirebasePushDeviceGenerator
 import io.getstream.log.StreamLog
 import io.getstream.log.android.AndroidStreamLogger
 import io.getstream.video.android.BuildConfig
-import io.getstream.video.android.StreamVideo
-import io.getstream.video.android.StreamVideoBuilder
-import io.getstream.video.android.input.CallActivityInput
-import io.getstream.video.android.input.CallServiceInput
-import io.getstream.video.android.logging.LoggingLevel
-import io.getstream.video.android.token.AuthCredentialsProvider
-import io.getstream.video.android.token.CredentialsProvider
-import io.getstream.video.android.user.UserCredentialsManager
-import io.getstream.video.android.user.UserPreferences
+import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.StreamVideoBuilder
+import io.getstream.video.android.core.input.CallActivityInput
+import io.getstream.video.android.core.input.CallServiceInput
+import io.getstream.video.android.core.token.CredentialsProvider
+import io.getstream.video.android.core.user.UserCredentialsManager
+import io.getstream.video.android.core.user.UserPreferences
 
 class DogfoodingApp : Application() {
 
@@ -66,7 +64,7 @@ class DogfoodingApp : Application() {
      */
     fun initializeStreamVideo(
         credentialsProvider: CredentialsProvider,
-        loggingLevel: LoggingLevel
+        loggingLevel: io.getstream.video.android.core.logging.LoggingLevel
     ): StreamVideo {
         if (this::credentials.isInitialized) {
             this.credentialsProvider.updateUser(
@@ -108,11 +106,11 @@ class DogfoodingApp : Application() {
         }
 
         dogfoodingApp.initializeStreamVideo(
-            AuthCredentialsProvider(
+            io.getstream.video.android.core.token.AuthCredentialsProvider(
                 apiKey = apiKey,
                 user = user
             ),
-            loggingLevel = LoggingLevel.NONE
+            loggingLevel = io.getstream.video.android.core.logging.LoggingLevel.NONE
         )
         return true
     }

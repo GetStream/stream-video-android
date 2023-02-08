@@ -42,9 +42,9 @@ import io.getstream.video.android.app.user.AppUser
 import io.getstream.video.android.app.utils.getUsers
 import io.getstream.video.android.app.videoApp
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.logging.LoggingLevel
-import io.getstream.video.android.model.User
-import io.getstream.video.android.token.AuthCredentialsProvider
+import io.getstream.video.android.core.logging.LoggingLevel
+import io.getstream.video.android.core.model.User
+import io.getstream.video.android.core.token.AuthCredentialsProvider
 
 class LoginActivity : AppCompatActivity() {
 

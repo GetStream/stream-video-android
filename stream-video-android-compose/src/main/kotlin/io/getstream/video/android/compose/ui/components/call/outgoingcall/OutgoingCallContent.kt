@@ -25,8 +25,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.call.state.CallAction
-import io.getstream.video.android.call.state.CallMediaState
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.background.CallBackground
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
@@ -34,9 +32,11 @@ import io.getstream.video.android.compose.ui.components.call.outgoingcall.intern
 import io.getstream.video.android.compose.ui.components.call.outgoingcall.internal.OutgoingGroupCallOptions
 import io.getstream.video.android.compose.ui.components.call.outgoingcall.internal.OutgoingSingleCallOptions
 import io.getstream.video.android.compose.ui.components.mock.mockParticipant
-import io.getstream.video.android.model.CallType
-import io.getstream.video.android.model.CallUser
-import io.getstream.video.android.viewmodel.CallViewModel
+import io.getstream.video.android.core.call.state.CallAction
+import io.getstream.video.android.core.call.state.CallMediaState
+import io.getstream.video.android.core.model.CallType
+import io.getstream.video.android.core.model.CallUser
+import io.getstream.video.android.core.viewmodel.CallViewModel
 
 /**
  * Represents the Outgoing Call state and UI, when the user is calling other people.

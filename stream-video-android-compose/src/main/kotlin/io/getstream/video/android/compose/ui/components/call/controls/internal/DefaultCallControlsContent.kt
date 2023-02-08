@@ -26,12 +26,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
-import io.getstream.video.android.call.state.CallAction
-import io.getstream.video.android.call.state.CallMediaState
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.controls.CallControls
-import io.getstream.video.android.model.Call
-import io.getstream.video.android.viewmodel.CallViewModel
+import io.getstream.video.android.core.call.state.CallAction
+import io.getstream.video.android.core.call.state.CallMediaState
+import io.getstream.video.android.core.model.Call
+import io.getstream.video.android.core.viewmodel.CallViewModel
 import kotlinx.coroutines.flow.emptyFlow
 
 /**

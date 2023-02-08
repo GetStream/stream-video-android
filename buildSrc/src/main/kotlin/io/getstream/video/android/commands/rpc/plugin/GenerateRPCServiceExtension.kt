@@ -7,7 +7,7 @@ open class GenerateRPCServiceExtension {
     /**
      * Source directory from which to extract proto files.
      */
-    var srcDir = "stream-video-android/src/main/proto"
+    var srcDir = "stream-video-android-core/src/main/proto"
 
     /**
      * Output folder for the files. If the output folder is in build don't forget to add it to sources in the modules

@@ -56,9 +56,9 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.Avatar
 import io.getstream.video.android.compose.ui.components.avatar.InitialsAvatar
-import io.getstream.video.android.utils.initials
-import io.getstream.video.android.utils.onError
-import io.getstream.video.android.utils.onSuccess
+import io.getstream.video.android.core.utils.initials
+import io.getstream.video.android.core.utils.onError
+import io.getstream.video.android.core.utils.onSuccess
 import kotlinx.coroutines.launch
 
 class HomeActivity : AppCompatActivity() {

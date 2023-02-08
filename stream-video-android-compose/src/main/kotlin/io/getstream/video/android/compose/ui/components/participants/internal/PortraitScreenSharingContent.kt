@@ -31,11 +31,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.R
-import io.getstream.video.android.call.state.CallAction
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.model.Call
-import io.getstream.video.android.model.CallParticipantState
-import io.getstream.video.android.model.ScreenSharingSession
+import io.getstream.video.android.core.call.state.CallAction
+import io.getstream.video.android.core.model.Call
+import io.getstream.video.android.core.model.CallParticipantState
+import io.getstream.video.android.core.model.ScreenSharingSession
 
 /**
  * Represents the portrait screen sharing content.
