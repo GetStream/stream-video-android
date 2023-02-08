@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.tutorial_final.user
 
-import io.getstream.video.android.model.User
+import io.getstream.video.android.core.model.User
 
 data class AppUser(
     val user: User,

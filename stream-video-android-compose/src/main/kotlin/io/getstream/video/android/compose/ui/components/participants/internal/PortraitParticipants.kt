@@ -31,9 +31,9 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.participants.CallParticipant
-import io.getstream.video.android.compose.ui.components.participants.FloatingParticipantItem
-import io.getstream.video.android.model.Call
-import io.getstream.video.android.model.CallParticipantState
+import io.getstream.video.android.compose.ui.components.participants.LocalVideoContent
+import io.getstream.video.android.core.model.Call
+import io.getstream.video.android.core.model.CallParticipantState
 
 /**
  * Renders call participants based on the number of people in a call, in portrait mode.
@@ -157,7 +157,7 @@ internal fun BoxScope.PortraitParticipants(
     if (callParticipants.size in 2..3) {
         val currentLocal = callParticipants.first { it.isLocal }
 
-        FloatingParticipantItem(
+        LocalVideoContent(
             call = call,
             localParticipant = currentLocal,
             parentBounds = parentSize,

@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.compose.state.ui.internal
 
-import io.getstream.video.android.model.User
+import io.getstream.video.android.core.model.User
 
 /**
  * State for the invite users UI in Call Participants Info.

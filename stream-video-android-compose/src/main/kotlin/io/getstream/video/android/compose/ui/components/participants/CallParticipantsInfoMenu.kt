@@ -46,10 +46,10 @@ import io.getstream.video.android.compose.ui.components.participants.internal.Ca
 import io.getstream.video.android.compose.ui.components.participants.internal.CallParticipantsList
 import io.getstream.video.android.compose.ui.components.participants.internal.InviteUserList
 import io.getstream.video.android.compose.ui.components.participants.internal.SelectedCallParticipantOptions
-import io.getstream.video.android.model.CallParticipantState
-import io.getstream.video.android.model.User
-import io.getstream.video.android.utils.updateAll
-import io.getstream.video.android.utils.updateValue
+import io.getstream.video.android.core.model.CallParticipantState
+import io.getstream.video.android.core.model.User
+import io.getstream.video.android.core.utils.updateAll
+import io.getstream.video.android.core.utils.updateValue
 
 /**
  * Represents a menu that shows information on the current call participants, while allowing the user

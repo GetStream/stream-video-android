@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/firstParticipantRow"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toTopOf="@id/secondParticipantRow"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <io.getstream.video.android.core.ui.ParticipantItemView
+            android:id="@+id/firstParticipant"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:translationZ="4dp"
+            android:visibility="gone" />
+
+        <io.getstream.video.android.core.ui.ParticipantItemView
+            android:id="@+id/secondParticipant"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:translationZ="4dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/secondParticipantRow"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/firstParticipantRow">
+
+        <io.getstream.video.android.core.ui.ParticipantItemView
+            android:id="@+id/thirdParticipant"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:translationZ="4dp"
+            android:visibility="gone" />
+
+        <io.getstream.video.android.core.ui.ParticipantItemView
+            android:id="@+id/fourthParticipant"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:translationZ="4dp" />
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

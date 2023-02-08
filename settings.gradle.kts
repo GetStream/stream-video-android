@@ -23,7 +23,6 @@ include(":dogfooding")
 
 // SDK
 include(":benchmark")
-include(":stream-video-android")
 include(":stream-video-android-core")
 include(":stream-video-android-compose")
 

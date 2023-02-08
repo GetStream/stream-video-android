@@ -264,7 +264,7 @@ open class GenerateRPCServiceTask : DefaultTask() {
         imports: List<String>,
         functions: List<String>,
     ): String {
-        return """package io.getstream.video.android.api
+        return """package io.getstream.video.android.core.api
         
 import retrofit2.http.Body
 import retrofit2.http.Headers
