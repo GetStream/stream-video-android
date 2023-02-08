@@ -25,7 +25,7 @@ import android.widget.ImageView
 import coil.load
 import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
-import io.getstream.video.android.dispatchers.DispatcherProvider
+import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.xml.imageloading.StreamCoil.streamImageLoader
 import io.getstream.video.android.xml.utils.Disposable
 import kotlinx.coroutines.withContext

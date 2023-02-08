@@ -1,10 +1,10 @@
-public abstract class io/getstream/video/android/xml/AbstractXmlCallActivity : androidx/appcompat/app/AppCompatActivity, io/getstream/video/android/StreamVideoProvider, io/getstream/video/android/permission/PermissionManagerProvider, io/getstream/video/android/viewmodel/CallViewModelFactoryProvider {
+public abstract class io/getstream/video/android/xml/AbstractXmlCallActivity : androidx/appcompat/app/AppCompatActivity, io/getstream/video/android/core/StreamVideoProvider, io/getstream/video/android/core/permission/PermissionManagerProvider, io/getstream/video/android/core/viewmodel/CallViewModelFactoryProvider {
 	public fun <init> ()V
-	public final fun defaultViewModelFactory ()Lio/getstream/video/android/viewmodel/CallViewModelFactory;
-	public fun getCallViewModelFactory ()Lio/getstream/video/android/viewmodel/CallViewModelFactory;
-	public fun getPermissionManager ()Lio/getstream/video/android/permission/PermissionManager;
+	public final fun defaultViewModelFactory ()Lio/getstream/video/android/core/viewmodel/CallViewModelFactory;
+	public fun getCallViewModelFactory ()Lio/getstream/video/android/core/viewmodel/CallViewModelFactory;
+	public fun getPermissionManager ()Lio/getstream/video/android/core/permission/PermissionManager;
 	protected fun handleBackPressed ()V
-	public fun initPermissionManager ()Lio/getstream/video/android/permission/PermissionManager;
+	public fun initPermissionManager ()Lio/getstream/video/android/core/permission/PermissionManager;
 	public fun onConfigurationChanged (Landroid/content/res/Configuration;)V
 	protected fun onCreate (Landroid/os/Bundle;)V
 	public fun onCreateOptionsMenu (Landroid/view/Menu;)Z
@@ -28,15 +28,15 @@ public final class io/getstream/video/android/xml/VideoUI {
 }
 
 public final class io/getstream/video/android/xml/binding/ActiveCallViewBindingKt {
-	public static final fun bindView (Lio/getstream/video/android/xml/widget/active/ActiveCallView;Lio/getstream/video/android/viewmodel/CallViewModel;Landroidx/lifecycle/LifecycleOwner;)V
+	public static final fun bindView (Lio/getstream/video/android/xml/widget/active/ActiveCallView;Lio/getstream/video/android/core/viewmodel/CallViewModel;Landroidx/lifecycle/LifecycleOwner;)V
 }
 
 public final class io/getstream/video/android/xml/binding/IncomingCallBindingKt {
-	public static final fun bindView (Lio/getstream/video/android/xml/widget/incoming/IncomingCallView;Lio/getstream/video/android/viewmodel/CallViewModel;Landroidx/lifecycle/LifecycleOwner;)V
+	public static final fun bindView (Lio/getstream/video/android/xml/widget/incoming/IncomingCallView;Lio/getstream/video/android/core/viewmodel/CallViewModel;Landroidx/lifecycle/LifecycleOwner;)V
 }
 
 public final class io/getstream/video/android/xml/binding/OutgoingCallBindingKt {
-	public static final fun bindView (Lio/getstream/video/android/xml/widget/outgoing/OutgoingCallView;Lio/getstream/video/android/viewmodel/CallViewModel;Landroidx/lifecycle/LifecycleOwner;)V
+	public static final fun bindView (Lio/getstream/video/android/xml/widget/outgoing/OutgoingCallView;Lio/getstream/video/android/core/viewmodel/CallViewModel;Landroidx/lifecycle/LifecycleOwner;)V
 }
 
 public final class io/getstream/video/android/xml/databinding/ActivityCallBinding : androidx/viewbinding/ViewBinding {
@@ -78,7 +78,7 @@ public final class io/getstream/video/android/xml/databinding/ViewCallParticipan
 	public final field nameHolder Landroid/widget/LinearLayout;
 	public final field participantAvatar Lio/getstream/video/android/xml/widget/avatar/AvatarView;
 	public final field participantName Landroid/widget/TextView;
-	public final field participantVideoRenderer Lio/getstream/video/android/ui/TextureViewRenderer;
+	public final field participantVideoRenderer Lio/getstream/video/android/core/ui/TextureViewRenderer;
 	public final field soundIndicator Landroid/widget/ImageView;
 	public static fun bind (Landroid/view/View;)Lio/getstream/video/android/xml/databinding/ViewCallParticipantBinding;
 	public fun getRoot ()Landroid/view/View;
@@ -236,7 +236,7 @@ public final class io/getstream/video/android/xml/widget/active/ActiveCallView :
 	public final fun setParticipantsRendererInitializer (Lio/getstream/video/android/xml/widget/participant/RendererInitializer;)V
 	public final fun updateControlItems (Ljava/util/List;)V
 	public final fun updateParticipants (Ljava/util/List;)V
-	public final fun updatePrimarySpeaker (Lio/getstream/video/android/model/CallParticipantState;)V
+	public final fun updatePrimarySpeaker (Lio/getstream/video/android/core/model/CallParticipantState;)V
 }
 
 public final class io/getstream/video/android/xml/widget/avatar/AvatarShape : java/lang/Enum {
@@ -311,7 +311,7 @@ public final class io/getstream/video/android/xml/widget/call/CallDetailsView : 
 	public fun <init> (Landroid/content/Context;)V
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;I)V
-	public final fun setCallStatus (Lio/getstream/video/android/model/CallStatus;)V
+	public final fun setCallStatus (Lio/getstream/video/android/core/model/CallStatus;)V
 	public final fun setParticipants (Ljava/util/List;)V
 }
 
@@ -339,15 +339,15 @@ public final class io/getstream/video/android/xml/widget/control/CallControlButt
 }
 
 public final class io/getstream/video/android/xml/widget/control/CallControlItem {
-	public fun <init> (IIILio/getstream/video/android/call/state/CallAction;)V
+	public fun <init> (IIILio/getstream/video/android/core/call/state/CallAction;)V
 	public final fun component1 ()I
 	public final fun component2 ()I
 	public final fun component3 ()I
-	public final fun component4 ()Lio/getstream/video/android/call/state/CallAction;
-	public final fun copy (IIILio/getstream/video/android/call/state/CallAction;)Lio/getstream/video/android/xml/widget/control/CallControlItem;
-	public static synthetic fun copy$default (Lio/getstream/video/android/xml/widget/control/CallControlItem;IIILio/getstream/video/android/call/state/CallAction;ILjava/lang/Object;)Lio/getstream/video/android/xml/widget/control/CallControlItem;
+	public final fun component4 ()Lio/getstream/video/android/core/call/state/CallAction;
+	public final fun copy (IIILio/getstream/video/android/core/call/state/CallAction;)Lio/getstream/video/android/xml/widget/control/CallControlItem;
+	public static synthetic fun copy$default (Lio/getstream/video/android/xml/widget/control/CallControlItem;IIILio/getstream/video/android/core/call/state/CallAction;ILjava/lang/Object;)Lio/getstream/video/android/xml/widget/control/CallControlItem;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getAction ()Lio/getstream/video/android/call/state/CallAction;
+	public final fun getAction ()Lio/getstream/video/android/core/call/state/CallAction;
 	public final fun getBackgroundTint ()I
 	public final fun getIcon ()I
 	public final fun getIconTint ()I
@@ -421,7 +421,7 @@ public final class io/getstream/video/android/xml/widget/incoming/IncomingCallVi
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;I)V
 	public final fun getCallActionListener ()Lkotlin/jvm/functions/Function1;
 	public final fun setCallActionListener (Lkotlin/jvm/functions/Function1;)V
-	public final fun setCallStatus (Lio/getstream/video/android/model/CallStatus;)V
+	public final fun setCallStatus (Lio/getstream/video/android/core/model/CallStatus;)V
 	public final fun setCameraEnabled (Z)V
 	public final fun setParticipants (Ljava/util/List;)V
 }
@@ -465,7 +465,7 @@ public final class io/getstream/video/android/xml/widget/outgoing/OutgoingCallVi
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;I)V
 	public final fun getCallActionListener ()Lkotlin/jvm/functions/Function1;
 	public final fun setCallActionListener (Lkotlin/jvm/functions/Function1;)V
-	public final fun setCallStatus (Lio/getstream/video/android/model/CallStatus;)V
+	public final fun setCallStatus (Lio/getstream/video/android/core/model/CallStatus;)V
 	public final fun setCameraEnabled (Z)V
 	public final fun setMicrophoneEnabled (Z)V
 	public final fun setParticipants (Ljava/util/List;)V
@@ -513,7 +513,7 @@ public final class io/getstream/video/android/xml/widget/participant/CallPartici
 	public final fun getOnRender ()Lkotlin/jvm/functions/Function1;
 	public final fun setActive (Z)V
 	public final fun setOnRender (Lkotlin/jvm/functions/Function1;)V
-	public final fun setParticipant (Lio/getstream/video/android/model/CallParticipantState;)V
+	public final fun setParticipant (Lio/getstream/video/android/core/model/CallParticipantState;)V
 	public final fun setRendererInitializer (Lio/getstream/video/android/xml/widget/participant/RendererInitializer;)V
 }
 
@@ -542,14 +542,14 @@ public final class io/getstream/video/android/xml/widget/participant/CallPartici
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;I)V
 	public final fun setRendererInitializer (Lio/getstream/video/android/xml/widget/participant/RendererInitializer;)V
 	public final fun updateParticipants (Ljava/util/List;)V
-	public final fun updatePrimarySpeaker (Lio/getstream/video/android/model/CallParticipantState;)V
+	public final fun updatePrimarySpeaker (Lio/getstream/video/android/core/model/CallParticipantState;)V
 }
 
 public final class io/getstream/video/android/xml/widget/participant/FloatingParticipantView : androidx/cardview/widget/CardView {
 	public fun <init> (Landroid/content/Context;)V
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;I)V
-	public final fun setParticipant (Lio/getstream/video/android/model/CallParticipantState;)V
+	public final fun setParticipant (Lio/getstream/video/android/core/model/CallParticipantState;)V
 	public final fun setRendererInitializer (Lio/getstream/video/android/xml/widget/participant/RendererInitializer;)V
 }
 
@@ -575,7 +575,7 @@ public final class io/getstream/video/android/xml/widget/participant/PictureInPi
 }
 
 public abstract interface class io/getstream/video/android/xml/widget/participant/RendererInitializer {
-	public abstract fun initRenderer (Lio/getstream/video/android/ui/TextureViewRenderer;Ljava/lang/String;Lstream/video/sfu/models/TrackType;Lkotlin/jvm/functions/Function1;)V
+	public abstract fun initRenderer (Lio/getstream/video/android/core/ui/TextureViewRenderer;Ljava/lang/String;Lstream/video/sfu/models/TrackType;Lkotlin/jvm/functions/Function1;)V
 }
 
 public abstract interface class io/getstream/video/android/xml/widget/transformer/StyleTransformer {

@@ -18,8 +18,8 @@ package io.getstream.video.android.xml.binding
 
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
-import io.getstream.video.android.model.CallStatus
-import io.getstream.video.android.viewmodel.CallViewModel
+import io.getstream.video.android.core.model.CallStatus
+import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.xml.widget.outgoing.OutgoingCallView
 import kotlinx.coroutines.flow.collectLatest
 

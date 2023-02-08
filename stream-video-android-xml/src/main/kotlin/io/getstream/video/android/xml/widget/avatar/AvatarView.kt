@@ -24,7 +24,7 @@ import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.shape.AbsoluteCornerSize
 import com.google.android.material.shape.RelativeCornerSize
 import com.google.android.material.shape.ShapeAppearanceModel
-import io.getstream.video.android.utils.initials
+import io.getstream.video.android.core.utils.initials
 import io.getstream.video.android.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.xml.utils.extensions.load
 import io.getstream.video.android.xml.widget.avatar.internal.AvatarPlaceholderDrawable

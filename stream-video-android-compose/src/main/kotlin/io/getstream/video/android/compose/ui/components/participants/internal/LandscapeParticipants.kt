@@ -29,9 +29,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.IntSize
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.participants.CallParticipant
-import io.getstream.video.android.compose.ui.components.participants.FloatingParticipantItem
-import io.getstream.video.android.model.Call
-import io.getstream.video.android.model.CallParticipantState
+import io.getstream.video.android.compose.ui.components.participants.LocalVideoContent
+import io.getstream.video.android.core.model.Call
+import io.getstream.video.android.core.model.CallParticipantState
 
 /**
  * Renders call participants based on the number of people in a call, in landscape mode.
@@ -90,7 +90,7 @@ internal fun BoxScope.LandscapeParticipants(
     }
 
     if (renderedParticipantCount in 2..3) {
-        FloatingParticipantItem(
+        LocalVideoContent(
             call = call,
             localParticipant = callParticipants.first { it.isLocal },
             parentBounds = parentSize,

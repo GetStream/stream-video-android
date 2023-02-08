@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.xml.widget.control
 
-import io.getstream.video.android.call.state.CallAction
+import io.getstream.video.android.core.call.state.CallAction
 
 /**
  * A singe call control item to be exposed to the user in the [CallControlsView].

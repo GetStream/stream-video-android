@@ -23,10 +23,10 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.logging.LoggingLevel
-import io.getstream.video.android.token.AuthCredentialsProvider
-import io.getstream.video.android.utils.onError
-import io.getstream.video.android.utils.onSuccess
+import io.getstream.video.android.core.logging.LoggingLevel
+import io.getstream.video.android.core.token.AuthCredentialsProvider
+import io.getstream.video.android.core.utils.onError
+import io.getstream.video.android.core.utils.onSuccess
 import kotlinx.coroutines.launch
 
 class DeeplinkingActivity : AppCompatActivity() {

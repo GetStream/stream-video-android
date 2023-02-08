@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.common.util
 
-import io.getstream.video.android.model.CallUser
+import io.getstream.video.android.core.model.CallUser
 
 // TODO add internal annotation
 public fun buildSmallCallText(participants: List<CallUser>): String {

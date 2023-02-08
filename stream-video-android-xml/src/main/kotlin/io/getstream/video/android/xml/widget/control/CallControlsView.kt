@@ -21,10 +21,10 @@ import android.util.AttributeSet
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
-import io.getstream.video.android.call.state.CallAction
-import io.getstream.video.android.call.state.ToggleCamera
-import io.getstream.video.android.call.state.ToggleMicrophone
-import io.getstream.video.android.call.state.ToggleSpeakerphone
+import io.getstream.video.android.core.call.state.CallAction
+import io.getstream.video.android.core.call.state.ToggleCamera
+import io.getstream.video.android.core.call.state.ToggleMicrophone
+import io.getstream.video.android.core.call.state.ToggleSpeakerphone
 import io.getstream.video.android.xml.R
 import io.getstream.video.android.xml.utils.extensions.constrainViewEndToStartOfView
 import io.getstream.video.android.xml.utils.extensions.constrainViewStartToEndOfView

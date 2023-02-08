@@ -20,11 +20,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
-import io.getstream.video.android.call.state.CallAction
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
-import io.getstream.video.android.model.state.StreamCallState
-import io.getstream.video.android.utils.formatAsTitle
-import io.getstream.video.android.viewmodel.CallViewModel
+import io.getstream.video.android.core.call.state.CallAction
+import io.getstream.video.android.core.model.state.StreamCallState
+import io.getstream.video.android.core.utils.formatAsTitle
+import io.getstream.video.android.core.viewmodel.CallViewModel
 
 @Composable
 internal fun ActiveCallAppBar(

@@ -27,8 +27,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import io.getstream.video.android.model.CallType
-import io.getstream.video.android.model.CallUser
+import io.getstream.video.android.core.model.CallType
+import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.ui.common.R
 
 /**

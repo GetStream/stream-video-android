@@ -34,12 +34,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.call.state.CallAction
-import io.getstream.video.android.call.state.ShowCallInfo
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.model.state.StreamCallState
+import io.getstream.video.android.core.call.state.CallAction
+import io.getstream.video.android.core.call.state.ShowCallInfo
+import io.getstream.video.android.core.model.state.StreamCallState
+import io.getstream.video.android.core.utils.formatAsTitle
 import io.getstream.video.android.ui.common.R
-import io.getstream.video.android.utils.formatAsTitle
 
 @Composable
 internal fun OverlayAppBar(

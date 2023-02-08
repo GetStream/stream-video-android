@@ -17,7 +17,7 @@
 package io.getstream.video.android.xml.widget.participant
 
 import android.view.View
-import io.getstream.video.android.ui.TextureViewRenderer
+import io.getstream.video.android.core.ui.TextureViewRenderer
 import stream.video.sfu.models.TrackType
 
 /**

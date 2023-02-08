@@ -33,10 +33,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.call.state.CallAction
-import io.getstream.video.android.call.state.ShowCallInfo
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.model.CallParticipantState
+import io.getstream.video.android.core.call.state.CallAction
+import io.getstream.video.android.core.call.state.ShowCallInfo
+import io.getstream.video.android.core.model.CallParticipantState
 import io.getstream.video.android.ui.common.R
 
 @Composable

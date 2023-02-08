@@ -28,10 +28,10 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.mock.mockParticipantList
 import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantAvatars
 import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantInformation
-import io.getstream.video.android.model.CallParticipantState
-import io.getstream.video.android.model.CallStatus
-import io.getstream.video.android.model.CallType
-import io.getstream.video.android.model.CallUser
+import io.getstream.video.android.core.model.CallParticipantState
+import io.getstream.video.android.core.model.CallStatus
+import io.getstream.video.android.core.model.CallType
+import io.getstream.video.android.core.model.CallUser
 
 @Composable
 internal fun OutgoingCallDetails(

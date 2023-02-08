@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.xml.utils
 
-import io.getstream.video.android.model.CallParticipantState
+import io.getstream.video.android.core.model.CallParticipantState
 import stream.video.coordinator.user_v1.User
 
 internal val mockParticipant: CallParticipantState

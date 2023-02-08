@@ -44,9 +44,9 @@ import androidx.compose.ui.unit.sp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.ImageAvatar
 import io.getstream.video.android.compose.utils.rememberStreamImagePainter
-import io.getstream.video.android.logging.LoggingLevel
-import io.getstream.video.android.model.User
-import io.getstream.video.android.token.AuthCredentialsProvider
+import io.getstream.video.android.core.logging.LoggingLevel
+import io.getstream.video.android.core.model.User
+import io.getstream.video.android.core.token.AuthCredentialsProvider
 import io.getstream.video.chat_with_video_final.application.API_KEY
 import io.getstream.video.chat_with_video_final.application.chatWithVideoApp
 import io.getstream.video.chat_with_video_final.ui.channels.ChannelsActivity
