@@ -24,10 +24,10 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.isVisible
 import androidx.core.view.setMargins
-import io.getstream.video.android.model.CallParticipantState
-import io.getstream.video.android.model.User
-import io.getstream.video.android.model.VideoTrack
-import io.getstream.video.android.model.toUser
+import io.getstream.video.android.core.model.CallParticipantState
+import io.getstream.video.android.core.model.User
+import io.getstream.video.android.core.model.VideoTrack
+import io.getstream.video.android.core.model.toUser
 import io.getstream.video.android.xml.databinding.ViewCallParticipantBinding
 import io.getstream.video.android.xml.font.setTextStyle
 import io.getstream.video.android.xml.utils.extensions.clearConstraints

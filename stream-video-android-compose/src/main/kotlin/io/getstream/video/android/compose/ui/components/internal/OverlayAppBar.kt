@@ -38,8 +38,8 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.ShowCallInfo
 import io.getstream.video.android.core.model.state.StreamCallState
-import io.getstream.video.android.ui.common.R
 import io.getstream.video.android.core.utils.formatAsTitle
+import io.getstream.video.android.ui.common.R
 
 @Composable
 internal fun OverlayAppBar(

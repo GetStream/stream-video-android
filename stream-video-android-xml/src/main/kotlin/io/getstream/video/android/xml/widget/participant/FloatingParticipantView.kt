@@ -19,7 +19,7 @@ package io.getstream.video.android.xml.widget.participant
 import android.content.Context
 import android.util.AttributeSet
 import androidx.cardview.widget.CardView
-import io.getstream.video.android.model.CallParticipantState
+import io.getstream.video.android.core.model.CallParticipantState
 import io.getstream.video.android.xml.databinding.ViewFloatingParticipantBinding
 import io.getstream.video.android.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.xml.utils.extensions.streamThemeInflater

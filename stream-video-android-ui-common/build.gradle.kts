@@ -39,7 +39,7 @@ android {
 }
 
 dependencies {
-    api(project(":stream-video-android"))
+    api(project(":stream-video-android-core"))
 
     implementation(Dependencies.material)
     implementation(Dependencies.streamLog)

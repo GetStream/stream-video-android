@@ -7,7 +7,7 @@
     tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout"
     >
 
-    <io.getstream.video.android.ui.TextureViewRenderer
+    <io.getstream.video.android.core.ui.TextureViewRenderer
         android:id="@+id/participantVideoRenderer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

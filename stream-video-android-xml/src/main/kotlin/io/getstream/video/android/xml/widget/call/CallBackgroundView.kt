@@ -20,7 +20,7 @@ import android.content.Context
 import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatImageView
-import io.getstream.video.android.model.CallUser
+import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.ui.common.R
 import io.getstream.video.android.xml.utils.extensions.load
 

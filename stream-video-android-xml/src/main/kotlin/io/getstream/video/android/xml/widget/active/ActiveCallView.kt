@@ -19,8 +19,8 @@ package io.getstream.video.android.xml.widget.active
 import android.content.Context
 import android.util.AttributeSet
 import androidx.constraintlayout.widget.ConstraintLayout
-import io.getstream.video.android.call.state.CallAction
-import io.getstream.video.android.model.CallParticipantState
+import io.getstream.video.android.core.call.state.CallAction
+import io.getstream.video.android.core.model.CallParticipantState
 import io.getstream.video.android.ui.common.R
 import io.getstream.video.android.xml.databinding.ViewActiveCallBinding
 import io.getstream.video.android.xml.utils.extensions.getColorCompat
