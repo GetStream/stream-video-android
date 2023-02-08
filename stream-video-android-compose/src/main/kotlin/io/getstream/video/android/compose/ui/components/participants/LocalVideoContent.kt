@@ -42,8 +42,8 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.model.Call
-import io.getstream.video.android.model.CallParticipantState
+import io.getstream.video.android.core.model.Call
+import io.getstream.video.android.core.model.CallParticipantState
 
 /**
  * Represents a floating item used to feature a participant video, usually the local participant.

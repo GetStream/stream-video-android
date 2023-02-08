@@ -18,12 +18,12 @@ package io.getstream.video.android.tutorial_final.ui.call
 
 import android.content.Context
 import io.getstream.video.android.BuildConfig
-import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.compose.ui.AbstractComposeCallActivity
+import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.user.EmptyUsersProvider
+import io.getstream.video.android.core.viewmodel.CallViewModelFactory
 import io.getstream.video.android.tutorial_final.user.FakeUsersProvider
 import io.getstream.video.android.tutorial_final.videoApp
-import io.getstream.video.android.user.EmptyUsersProvider
-import io.getstream.video.android.viewmodel.CallViewModelFactory
 
 class CallActivity : AbstractComposeCallActivity() {
 

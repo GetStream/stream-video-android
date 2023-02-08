@@ -34,14 +34,14 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.call.state.CallAction
-import io.getstream.video.android.call.state.CallMediaState
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.controls.internal.DefaultCallControlsContent
 import io.getstream.video.android.compose.ui.components.internal.OverlayAppBar
 import io.getstream.video.android.compose.ui.components.participants.internal.Participants
-import io.getstream.video.android.model.Call
-import io.getstream.video.android.model.state.StreamCallState
+import io.getstream.video.android.core.call.state.CallAction
+import io.getstream.video.android.core.call.state.CallMediaState
+import io.getstream.video.android.core.model.Call
+import io.getstream.video.android.core.model.state.StreamCallState
 
 /**
  * Renders the CallParticipants when there are no screen sharing sessions, based on the orientation.

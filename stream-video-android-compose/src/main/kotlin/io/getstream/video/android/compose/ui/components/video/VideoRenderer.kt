@@ -26,9 +26,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
-import io.getstream.video.android.model.Call
-import io.getstream.video.android.model.VideoTrack
-import io.getstream.video.android.ui.TextureViewRenderer
+import io.getstream.video.android.core.model.Call
+import io.getstream.video.android.core.model.VideoTrack
+import io.getstream.video.android.core.ui.TextureViewRenderer
 import stream.video.sfu.models.TrackType
 
 /**

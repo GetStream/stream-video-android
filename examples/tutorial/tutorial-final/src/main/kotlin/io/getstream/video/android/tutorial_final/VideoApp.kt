@@ -21,16 +21,15 @@ import android.content.Context
 import io.getstream.log.StreamLog
 import io.getstream.log.android.AndroidStreamLogger
 import io.getstream.video.android.BuildConfig
-import io.getstream.video.android.StreamVideo
-import io.getstream.video.android.StreamVideoBuilder
-import io.getstream.video.android.input.CallActivityInput
-import io.getstream.video.android.input.CallServiceInput
-import io.getstream.video.android.logging.LoggingLevel
-import io.getstream.video.android.token.CredentialsProvider
+import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.StreamVideoBuilder
+import io.getstream.video.android.core.input.CallActivityInput
+import io.getstream.video.android.core.input.CallServiceInput
+import io.getstream.video.android.core.token.CredentialsProvider
+import io.getstream.video.android.core.user.UserCredentialsManager
+import io.getstream.video.android.core.user.UserPreferences
 import io.getstream.video.android.tutorial_final.ui.call.CallActivity
 import io.getstream.video.android.tutorial_final.ui.call.CallService
-import io.getstream.video.android.user.UserCredentialsManager
-import io.getstream.video.android.user.UserPreferences
 
 class VideoApp : Application() {
 
@@ -59,7 +58,7 @@ class VideoApp : Application() {
      */
     fun initializeStreamVideo(
         credentialsProvider: CredentialsProvider,
-        loggingLevel: LoggingLevel
+        loggingLevel: io.getstream.video.android.core.logging.LoggingLevel
     ): StreamVideo {
         StreamLog.d(TAG) { "[initializeStreamCalls] loggingLevel: $loggingLevel" }
         if (this::credentialsProvider.isInitialized) {

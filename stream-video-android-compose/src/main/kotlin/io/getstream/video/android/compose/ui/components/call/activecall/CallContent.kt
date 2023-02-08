@@ -38,18 +38,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.call.state.CallAction
-import io.getstream.video.android.call.state.CallMediaState
-import io.getstream.video.android.call.state.LeaveCall
 import io.getstream.video.android.compose.ui.components.call.activecall.internal.ActiveCallAppBar
 import io.getstream.video.android.compose.ui.components.call.controls.internal.DefaultCallControlsContent
 import io.getstream.video.android.compose.ui.components.participants.CallParticipant
 import io.getstream.video.android.compose.ui.components.participants.CallParticipants
 import io.getstream.video.android.compose.ui.components.participants.internal.ScreenShareAspectRatio
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
-import io.getstream.video.android.model.Call
-import io.getstream.video.android.model.state.StreamCallState
-import io.getstream.video.android.viewmodel.CallViewModel
+import io.getstream.video.android.core.call.state.CallAction
+import io.getstream.video.android.core.call.state.CallMediaState
+import io.getstream.video.android.core.call.state.LeaveCall
+import io.getstream.video.android.core.model.Call
+import io.getstream.video.android.core.model.state.StreamCallState
+import io.getstream.video.android.core.viewmodel.CallViewModel
 import stream.video.sfu.models.TrackType
 
 /**

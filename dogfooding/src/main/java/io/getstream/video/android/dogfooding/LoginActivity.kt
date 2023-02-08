@@ -44,9 +44,9 @@ import androidx.lifecycle.lifecycleScope
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.google.firebase.auth.FirebaseAuth
-import io.getstream.video.android.logging.LoggingLevel
-import io.getstream.video.android.model.User
-import io.getstream.video.android.token.AuthCredentialsProvider
+import io.getstream.video.android.core.logging.LoggingLevel
+import io.getstream.video.android.core.model.User
+import io.getstream.video.android.core.token.AuthCredentialsProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.json.JSONArray
@@ -133,7 +133,7 @@ class LoginActivity : ComponentActivity() {
             },
             content = {
                 Surface(modifier = Modifier.width(300.dp)) {
-                    Column() {
+                    Column {
                         TextField(
                             modifier = Modifier
                                 .fillMaxWidth()

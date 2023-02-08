@@ -28,11 +28,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.call.state.CallAction
-import io.getstream.video.android.call.state.CallMediaState
-import io.getstream.video.android.call.state.FlipCamera
 import io.getstream.video.android.compose.state.ui.call.CallControlAction
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.core.call.state.CallAction
+import io.getstream.video.android.core.call.state.CallMediaState
+import io.getstream.video.android.core.call.state.FlipCamera
 
 /**
  * Shows the call controls in a different way when in landscape mode.
