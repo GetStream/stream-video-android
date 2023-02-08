@@ -100,6 +100,8 @@ To implement this behavior, replace the TODO items with the following two pieces
 ```kotlin
 class VideoApp : Application() {
 
+    ... // The rest of the class
+
     fun initializeStreamVideo(
         credentialsProvider: CredentialsProvider,
         loggingLevel: LoggingLevel
@@ -564,6 +566,12 @@ private fun AudioOnlyCallControls() { // Custom CallControls
         onCallAction = callViewModel::onCallAction
     )
 }
+```
+
+Also, make sure to add the following import for the Android resources, within the import section, at the top of the file:
+
+```kotlin
+import io.getstream.video.android.compose.R
 ```
 
 There is quite a bit of code here, but it's very simple in what it does:
