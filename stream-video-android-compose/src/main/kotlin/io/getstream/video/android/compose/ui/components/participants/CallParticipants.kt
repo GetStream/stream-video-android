@@ -23,12 +23,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.call.state.CallAction
-import io.getstream.video.android.call.state.CallMediaState
 import io.getstream.video.android.compose.ui.components.call.controls.internal.DefaultCallControlsContent
-import io.getstream.video.android.model.Call
-import io.getstream.video.android.model.ScreenSharingSession
-import io.getstream.video.android.model.state.StreamCallState
+import io.getstream.video.android.core.call.state.CallAction
+import io.getstream.video.android.core.call.state.CallMediaState
+import io.getstream.video.android.core.model.Call
+import io.getstream.video.android.core.model.ScreenSharingSession
+import io.getstream.video.android.core.model.state.StreamCallState
 
 /**
  * Renders all the CallParticipants, based on the number of people in a call and the call state.

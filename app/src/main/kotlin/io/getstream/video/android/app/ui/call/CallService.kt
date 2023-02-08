@@ -17,9 +17,9 @@
 package io.getstream.video.android.app.ui.call
 
 import android.content.Context
-import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.app.videoApp
-import io.getstream.video.android.service.AbstractStreamCallService
+import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.service.AbstractStreamCallService
 
 class CallService : AbstractStreamCallService() {
 

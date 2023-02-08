@@ -20,11 +20,11 @@ import android.app.Application
 import android.content.Context
 import io.getstream.chat.android.client.ChatClient
 import io.getstream.chat.android.compose.ui.attachments.StreamAttachmentFactories
-import io.getstream.video.android.StreamVideo
-import io.getstream.video.android.logging.LoggingLevel
-import io.getstream.video.android.token.CredentialsProvider
-import io.getstream.video.android.user.UserCredentialsManager
-import io.getstream.video.android.user.UsersProvider
+import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.logging.LoggingLevel
+import io.getstream.video.android.core.token.CredentialsProvider
+import io.getstream.video.android.core.user.UserCredentialsManager
+import io.getstream.video.android.core.user.UsersProvider
 import io.getstream.video.chat_with_video_starter.users.FakeUsersProvider
 
 class ChatWithVideoApp : Application() {

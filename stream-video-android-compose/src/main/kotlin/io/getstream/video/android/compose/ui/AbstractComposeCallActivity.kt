@@ -40,24 +40,24 @@ import androidx.compose.foundation.background
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
-import io.getstream.video.android.StreamVideo
-import io.getstream.video.android.StreamVideoProvider
-import io.getstream.video.android.call.state.CallAction
-import io.getstream.video.android.call.state.CancelCall
-import io.getstream.video.android.call.state.ToggleCamera
-import io.getstream.video.android.call.state.ToggleMicrophone
-import io.getstream.video.android.call.state.ToggleScreenConfiguration
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.call.CallContent
+import io.getstream.video.android.compose.ui.components.call.CallContainer
 import io.getstream.video.android.compose.ui.components.call.activecall.DefaultPictureInPictureContent
-import io.getstream.video.android.model.Call
-import io.getstream.video.android.model.state.StreamCallState
-import io.getstream.video.android.permission.PermissionManager
-import io.getstream.video.android.permission.PermissionManagerProvider
-import io.getstream.video.android.permission.StreamPermissionManagerImpl
-import io.getstream.video.android.viewmodel.CallViewModel
-import io.getstream.video.android.viewmodel.CallViewModelFactory
-import io.getstream.video.android.viewmodel.CallViewModelFactoryProvider
+import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.StreamVideoProvider
+import io.getstream.video.android.core.call.state.CallAction
+import io.getstream.video.android.core.call.state.CancelCall
+import io.getstream.video.android.core.call.state.ToggleCamera
+import io.getstream.video.android.core.call.state.ToggleMicrophone
+import io.getstream.video.android.core.call.state.ToggleScreenConfiguration
+import io.getstream.video.android.core.model.Call
+import io.getstream.video.android.core.model.state.StreamCallState
+import io.getstream.video.android.core.permission.PermissionManager
+import io.getstream.video.android.core.permission.PermissionManagerProvider
+import io.getstream.video.android.core.permission.StreamPermissionManagerImpl
+import io.getstream.video.android.core.viewmodel.CallViewModel
+import io.getstream.video.android.core.viewmodel.CallViewModelFactory
+import io.getstream.video.android.core.viewmodel.CallViewModelFactoryProvider
 import kotlinx.coroutines.flow.collectLatest
 
 public abstract class AbstractComposeCallActivity :
@@ -143,7 +143,7 @@ public abstract class AbstractComposeCallActivity :
 
     protected open fun buildContent(): (@Composable () -> Unit) = {
         VideoTheme {
-            CallContent(
+            CallContainer(
                 modifier = Modifier.background(color = VideoTheme.colors.appBackground),
                 viewModel = callViewModel,
                 onCallAction = ::handleCallAction,

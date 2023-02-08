@@ -27,7 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.model.Call
+import io.getstream.video.android.core.model.Call
 
 /**
  * Renders call participants based on the number of people in a call.
@@ -40,7 +40,7 @@ import io.getstream.video.android.model.Call
  */
 @Composable
 internal fun BoxScope.Participants(
-    call: Call,
+    call: io.getstream.video.android.core.model.Call,
     onRender: (View) -> Unit,
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues = PaddingValues(0.dp),
