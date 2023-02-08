@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.core.internal.module
 
-import io.getstream.video.android.api.SignalServerService
+import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.call.signal.SfuClient
 import io.getstream.video.android.core.call.signal.SfuClientImpl
 import okhttp3.OkHttpClient

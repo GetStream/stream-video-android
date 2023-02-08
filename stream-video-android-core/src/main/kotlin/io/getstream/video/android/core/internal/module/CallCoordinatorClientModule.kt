@@ -18,7 +18,7 @@ package io.getstream.video.android.core.internal.module
 
 import android.content.Context
 import androidx.lifecycle.Lifecycle
-import io.getstream.video.android.api.ClientRPCService
+import io.getstream.video.android.core.api.ClientRPCService
 import io.getstream.video.android.core.coordinator.CallCoordinatorClient
 import io.getstream.video.android.core.coordinator.CallCoordinatorClientImpl
 import io.getstream.video.android.core.dispatchers.DispatcherProvider

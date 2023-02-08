@@ -20,7 +20,7 @@ class GenerateRPCServicePlugin : Plugin<Project> {
 
         project.tasks.create(COMMAND_NAME, GenerateRPCServiceTask::class.java) {
             // We take the projects build dir and set the output folder inside it.
-            extension.outputDir = "${project.buildDir}/generated/source/services/io/getstream/video/android/api"
+            extension.outputDir = "${project.buildDir}/generated/source/services/io/getstream/video/android/core/api"
             this.config = extension
         }
 

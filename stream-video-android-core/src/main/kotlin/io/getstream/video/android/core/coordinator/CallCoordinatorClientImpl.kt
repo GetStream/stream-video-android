@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.core.coordinator
 
-import io.getstream.video.android.api.ClientRPCService
+import io.getstream.video.android.core.api.ClientRPCService
 import io.getstream.video.android.core.errors.VideoError
 import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.core.model.StreamCallCid
