@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.compose.ui.components.mock
 
-import io.getstream.video.android.model.CallParticipantState
+import io.getstream.video.android.core.model.CallParticipantState
 
 internal val mockParticipant: CallParticipantState
     inline get() = mockUsers[0]

@@ -35,7 +35,7 @@
             android:supportsPictureInPicture="true" />
 
         <service
-            android:name="io.getstream.video.android.app.ui.call.CallService"
+            android:name=".ui.call.CallService"
             android:enabled="true"
             android:exported="false" />
     </application>

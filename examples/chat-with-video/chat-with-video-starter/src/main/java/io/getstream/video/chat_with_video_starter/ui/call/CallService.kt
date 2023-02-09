@@ -17,8 +17,8 @@
 package io.getstream.video.chat_with_video_starter.ui.call
 
 import android.content.Context
-import io.getstream.video.android.StreamVideo
-import io.getstream.video.android.service.AbstractStreamCallService
+import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.service.AbstractStreamCallService
 import io.getstream.video.chat_with_video_starter.application.chatWithVideoApp
 
 class CallService : AbstractStreamCallService() {

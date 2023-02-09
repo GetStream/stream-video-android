@@ -28,8 +28,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import io.getstream.video.android.compose.R
-import io.getstream.video.android.model.CallType
-import io.getstream.video.android.model.CallUser
+import io.getstream.video.android.core.model.CallType
+import io.getstream.video.android.core.model.CallUser
 
 /**
  * Renders a call background that shows either a static image or user images based on the call state.
