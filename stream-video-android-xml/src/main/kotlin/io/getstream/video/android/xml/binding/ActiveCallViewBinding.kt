@@ -17,7 +17,6 @@
 package io.getstream.video.android.xml.binding
 
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.core.call.state.FlipCamera
 import io.getstream.video.android.core.call.state.LeaveCall
 import io.getstream.video.android.core.call.state.ToggleCamera
@@ -49,7 +48,7 @@ public fun ActiveCallView.bindView(
 
     setControlItems(buildDefaultControlList())
 
-    lifecycleOwner.lifecycleScope.launchWhenResumed {
+    startJob(lifecycleOwner) {
         viewModel.callState.filterNotNull().distinctUntilChanged().collectLatest { call ->
             setParticipantsRendererInitializer { videoRenderer, trackId, trackType, onRender ->
                 call.initRenderer(videoRenderer, trackId, trackType, onRender)
@@ -57,19 +56,19 @@ public fun ActiveCallView.bindView(
         }
     }
 
-    lifecycleOwner.lifecycleScope.launchWhenResumed {
+    startJob(lifecycleOwner) {
         viewModel.participantList.collectLatest {
             updateParticipants(it)
         }
     }
 
-    lifecycleOwner.lifecycleScope.launchWhenResumed {
+    startJob(lifecycleOwner) {
         viewModel.primarySpeaker.collectLatest {
             updatePrimarySpeaker(it)
         }
     }
 
-    lifecycleOwner.lifecycleScope.launchWhenResumed {
+    startJob(lifecycleOwner) {
         viewModel.callMediaState.collectLatest {
             updateControlItems(
                 listOf(

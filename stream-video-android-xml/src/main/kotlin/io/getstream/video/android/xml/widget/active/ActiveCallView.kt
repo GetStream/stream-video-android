@@ -18,13 +18,13 @@ package io.getstream.video.android.xml.widget.active
 
 import android.content.Context
 import android.util.AttributeSet
-import androidx.constraintlayout.widget.ConstraintLayout
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.model.CallParticipantState
 import io.getstream.video.android.ui.common.R
 import io.getstream.video.android.xml.databinding.ViewActiveCallBinding
 import io.getstream.video.android.xml.utils.extensions.getColorCompat
 import io.getstream.video.android.xml.utils.extensions.streamThemeInflater
+import io.getstream.video.android.xml.widget.callcontent.CallContent
 import io.getstream.video.android.xml.widget.control.CallControlItem
 import io.getstream.video.android.xml.widget.participant.RendererInitializer
 
@@ -32,7 +32,7 @@ import io.getstream.video.android.xml.widget.participant.RendererInitializer
  * Represents the UI in an Active call that shows participants and their video, as well as some
  * extra UI features to control the call settings, browse participants and more.
  */
-public class ActiveCallView : ConstraintLayout {
+public class ActiveCallView : CallContent {
 
     private val binding by lazy { ViewActiveCallBinding.inflate(streamThemeInflater, this) }
 

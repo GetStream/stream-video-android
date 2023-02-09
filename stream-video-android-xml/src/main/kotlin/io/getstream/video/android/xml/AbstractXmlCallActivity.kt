@@ -101,7 +101,8 @@ public abstract class AbstractXmlCallActivity :
                     Manifest.permission.CAMERA -> callViewModel.onCallAction(ToggleCamera(isGranted))
                     Manifest.permission.RECORD_AUDIO -> callViewModel.onCallAction(ToggleMicrophone(isGranted))
                 }
-            }, onShowSettings = {
+            },
+            onShowSettings = {
                 showPermissionsDialog()
             }
         )
@@ -134,27 +135,12 @@ public abstract class AbstractXmlCallActivity :
         lifecycleScope.launchWhenCreated {
             callViewModel.streamCallState.combine(callViewModel.isInPictureInPicture) { state, isPictureInPicture ->
                 updateToolbar(state, isPictureInPicture)
-
                 when {
-                    state is StreamCallState.Incoming && !state.acceptedByMe -> {
-                        showIncomingScreen()
-                    }
-
-                    state is StreamCallState.Outgoing && !state.acceptedByCallee -> {
-                        showOutgoingScreen()
-                    }
-
-                    state is StreamCallState.Idle -> {
-                        finish()
-                    }
-
-                    state is StreamCallState.Connected && isPictureInPicture -> {
-                        showPipLayout()
-                    }
-
-                    else -> {
-                        showActiveCallScreen()
-                    }
+                    state is StreamCallState.Incoming && !state.acceptedByMe -> showIncomingScreen()
+                    state is StreamCallState.Outgoing && !state.acceptedByCallee -> showOutgoingScreen()
+                    state is StreamCallState.Connected && isPictureInPicture -> showPipLayout()
+                    state is StreamCallState.Idle -> finish()
+                    else -> showActiveCallScreen()
                 }
             }.collect()
         }

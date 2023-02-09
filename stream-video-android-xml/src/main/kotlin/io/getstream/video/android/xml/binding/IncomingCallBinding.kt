@@ -17,7 +17,6 @@
 package io.getstream.video.android.xml.binding
 
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.core.model.CallStatus
 import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.xml.widget.incoming.IncomingCallView
@@ -32,19 +31,19 @@ import kotlinx.coroutines.flow.collectLatest
  */
 public fun IncomingCallView.bindView(
     viewModel: CallViewModel,
-    lifecycleOwner: LifecycleOwner
+    lifecycleOwner: LifecycleOwner,
 ) {
     setCallStatus(CallStatus.Outgoing)
 
     callActionListener = viewModel::onCallAction
 
-    lifecycleOwner.lifecycleScope.launchWhenCreated {
+    startJob(lifecycleOwner) {
         viewModel.callMediaState.collectLatest {
             setCameraEnabled(it.isCameraEnabled)
         }
     }
 
-    lifecycleOwner.lifecycleScope.launchWhenCreated {
+    startJob(lifecycleOwner) {
         viewModel.participants.collectLatest {
             setParticipants(it)
         }

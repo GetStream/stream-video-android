@@ -18,7 +18,6 @@ package io.getstream.video.android.xml.widget.incoming
 
 import android.content.Context
 import android.util.AttributeSet
-import androidx.constraintlayout.widget.ConstraintLayout
 import io.getstream.video.android.core.call.state.AcceptCall
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.DeclineCall
@@ -30,11 +29,12 @@ import io.getstream.video.android.xml.databinding.ViewIncomingCallBinding
 import io.getstream.video.android.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.xml.utils.extensions.getDimension
 import io.getstream.video.android.xml.utils.extensions.streamThemeInflater
+import io.getstream.video.android.xml.widget.callcontent.CallContent
 
 /**
  * Represents the Incoming Call state and UI, when the user receives a call from other people.
  */
-public class IncomingCallView : ConstraintLayout {
+public class IncomingCallView : CallContent {
 
     private lateinit var style: IncomingCallStyle
 

@@ -226,7 +226,7 @@ public final class io/getstream/video/android/xml/utils/MockUtilsKt {
 	public static final fun getMockUsers ()Ljava/util/List;
 }
 
-public final class io/getstream/video/android/xml/widget/active/ActiveCallView : androidx/constraintlayout/widget/ConstraintLayout {
+public final class io/getstream/video/android/xml/widget/active/ActiveCallView : io/getstream/video/android/xml/widget/callcontent/CallContent {
 	public fun <init> (Landroid/content/Context;)V
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;I)V
@@ -313,6 +313,15 @@ public final class io/getstream/video/android/xml/widget/call/CallDetailsView : 
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;I)V
 	public final fun setCallStatus (Lio/getstream/video/android/core/model/CallStatus;)V
 	public final fun setParticipants (Ljava/util/List;)V
+}
+
+public abstract class io/getstream/video/android/xml/widget/callcontent/CallContent : androidx/constraintlayout/widget/ConstraintLayout {
+	public fun <init> (Landroid/content/Context;)V
+	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
+	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;I)V
+	protected fun onDetachedFromWindow ()V
+	public final fun startJob (Landroidx/lifecycle/LifecycleOwner;Lkotlin/jvm/functions/Function1;)V
+	public final fun stopAllJobs ()V
 }
 
 public final class io/getstream/video/android/xml/widget/control/CallControlButtonStyle {
@@ -415,7 +424,7 @@ public final class io/getstream/video/android/xml/widget/incoming/IncomingCallSt
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/xml/widget/incoming/IncomingCallView : androidx/constraintlayout/widget/ConstraintLayout {
+public final class io/getstream/video/android/xml/widget/incoming/IncomingCallView : io/getstream/video/android/xml/widget/callcontent/CallContent {
 	public fun <init> (Landroid/content/Context;)V
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;I)V
@@ -459,7 +468,7 @@ public final class io/getstream/video/android/xml/widget/outgoing/OutgoingCallSt
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/xml/widget/outgoing/OutgoingCallView : androidx/constraintlayout/widget/ConstraintLayout {
+public final class io/getstream/video/android/xml/widget/outgoing/OutgoingCallView : io/getstream/video/android/xml/widget/callcontent/CallContent {
 	public fun <init> (Landroid/content/Context;)V
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;I)V

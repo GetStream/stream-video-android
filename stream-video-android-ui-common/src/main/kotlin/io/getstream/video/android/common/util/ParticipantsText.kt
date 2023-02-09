@@ -16,9 +16,10 @@
 
 package io.getstream.video.android.common.util
 
+import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.model.CallUser
 
-// TODO add internal annotation
+@InternalStreamVideoApi
 public fun buildSmallCallText(participants: List<CallUser>): String {
     val names = participants.map { it.name }
 
