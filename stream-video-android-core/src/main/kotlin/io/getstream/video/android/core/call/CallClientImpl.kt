@@ -51,7 +51,6 @@ import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
 import io.getstream.video.android.core.filter.InFilterObject
 import io.getstream.video.android.core.filter.toMap
-import io.getstream.video.android.core.internal.module.SfuClientModule
 import io.getstream.video.android.core.internal.moshi.filterAdapter
 import io.getstream.video.android.core.model.CallParticipantState
 import io.getstream.video.android.core.model.CallSettings
