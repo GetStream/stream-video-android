@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.core.model
 
-import stream.video.coordinator.edge_v1.ICEServer
+import org.openapitools.client.models.ICEServer
 import java.io.Serializable
 
 public data class IceServerConfig(
@@ -31,6 +31,8 @@ public data class IceServer(
 
 internal fun ICEServer.toIceServer(): IceServer {
     return IceServer(
-        urls, username, password
+        urls = urls ?: emptyList(),
+        username = username ?: "",
+        password = password ?: ""
     )
 }

@@ -84,7 +84,7 @@ internal class HttpModule(
             credentialsProvider.getCachedUserToken()
         }
 
-        val updatedUrl = if (original.url.toString().contains("chat")) {
+        val updatedUrl = if (original.url.toString().contains("video")) {
             original.url.newBuilder()
                 .addQueryParameter(API_KEY, credentialsProvider.getCachedApiKey())
                 .build()
@@ -94,7 +94,8 @@ internal class HttpModule(
 
         val updated = original.newBuilder()
             .url(updatedUrl)
-            .addHeader(HEADER_AUTHORIZATION, "Bearer $token")
+            .addHeader(HEADER_AUTHORIZATION, token)
+            .header(STREAM_AUTH_TYPE, "jwt")
             .build()
 
         it.proceed(updated)
@@ -136,12 +137,13 @@ internal class HttpModule(
         /**
          * Key used to prove authorization to the API.
          */
-        private const val HEADER_AUTHORIZATION = "authorization"
+        private const val HEADER_AUTHORIZATION = "Authorization"
 
         /**
          * Query key used to authenticate to the API.
          */
         private const val API_KEY = "api_key"
+        private const val STREAM_AUTH_TYPE = "stream-auth-type"
 
         /**
          * Instance of the module, that's reused for HTTP communication.

@@ -646,7 +646,6 @@ public abstract interface class io/getstream/video/android/core/StreamVideo {
 	public abstract fun awaitCallClient (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun cancelCall (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun clearCallState ()V
-	public abstract fun createCall (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun createCallClient (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lio/getstream/video/android/core/call/CallClient;
 	public abstract fun createDevice (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun deleteDevice (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -667,7 +666,6 @@ public abstract interface class io/getstream/video/android/core/StreamVideo {
 }
 
 public final class io/getstream/video/android/core/StreamVideo$DefaultImpls {
-	public static synthetic fun createCall$default (Lio/getstream/video/android/core/StreamVideo;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public static synthetic fun getOrCreateCall$default (Lio/getstream/video/android/core/StreamVideo;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public static synthetic fun joinCall$default (Lio/getstream/video/android/core/StreamVideo;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 }
@@ -1128,19 +1126,6 @@ public final class io/getstream/video/android/core/call/state/ToggleSpeakerphone
 	public fun hashCode ()I
 	public final fun isEnabled ()Z
 	public fun toString ()Ljava/lang/String;
-}
-
-public abstract interface class io/getstream/video/android/core/coordinator/CallCoordinatorClient {
-	public abstract fun createCall (Lstream/video/coordinator/client_v1_rpc/CreateCallRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun createDevice (Lstream/video/coordinator/client_v1_rpc/CreateDeviceRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun deleteDevice (Lstream/video/coordinator/client_v1_rpc/DeleteDeviceRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun getOrCreateCall (Lstream/video/coordinator/client_v1_rpc/GetOrCreateCallRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun inviteUsers (Ljava/util/List;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun joinCall (Lstream/video/coordinator/client_v1_rpc/JoinCallRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun queryUsers (Lstream/video/coordinator/client_v1_rpc/QueryUsersRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun selectEdgeServer (Lstream/video/coordinator/client_v1_rpc/GetCallEdgeServerRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun sendCustomEvent (Lstream/video/coordinator/client_v1_rpc/SendCustomEventRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun sendUserEvent (Lstream/video/coordinator/client_v1_rpc/SendEventRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class io/getstream/video/android/core/coordinator/state/UserState {

@@ -260,7 +260,7 @@ class HomeActivity : AppCompatActivity() {
                 "default",
                 id = callId,
                 participantIds = emptyList(),
-                ringing = false
+                ring = false
             ).onError {
                 Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
             }

@@ -104,7 +104,7 @@ internal class CallCoordinatorClientModule(
     }
 
     internal companion object {
-        private const val BASE_URL = "https://chat.stream-io-api.com/"
+        private const val BASE_URL = "https://video-edge-frankfurt-ce1.stream-io-api.com/"
 
         /**
          * Used for testing on devices and redirecting from a public realm to localhost.

@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.core.socket.internal
 
-import io.getstream.video.android.core.utils.prepareUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.logging.HttpLoggingInterceptor
@@ -43,7 +42,7 @@ internal class SocketFactory(
      * @param connectionConf Configuration used to build the socket.
      */
     fun createSocket(eventsParser: EventsParser, connectionConf: ConnectionConf): Socket {
-        val url = prepareUrl(connectionConf.endpoint)
+        val url = connectionConf.endpoint
         val request = Request
             .Builder()
             .url(url)

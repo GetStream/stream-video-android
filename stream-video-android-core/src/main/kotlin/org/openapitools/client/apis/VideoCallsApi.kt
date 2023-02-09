@@ -43,7 +43,7 @@ internal interface VideoCallsApi {
      * @param id
      * @return [EndCallResponse]
      */
-    @POST("call/{type}/{id}/mark_ended")
+    @POST("/video/call/{type}/{id}/mark_ended")
     suspend fun endCall(
         @Path("type") type: String,
         @Path("id") id: String
@@ -62,12 +62,12 @@ internal interface VideoCallsApi {
      * @param getCallEdgeServerRequest
      * @return [GetCallEdgeServerResponse]
      */
-    @POST("get_call_edge_server/{type}/{id}")
+    @POST("/video/call/{type}/{id}/get_edge_server")
     suspend fun getCallEdgeServer(
         @Path("type") type: String,
         @Path("id") id: String,
         @Body getCallEdgeServerRequest: GetCallEdgeServerRequest
-    ): Response<GetCallEdgeServerResponse>
+    ): GetCallEdgeServerResponse
 
     /**
      * Get or create a call
@@ -82,12 +82,12 @@ internal interface VideoCallsApi {
      * @param getOrCreateCallRequest
      * @return [GetOrCreateCallResponse]
      */
-    @POST("call/{type}/{id}")
+    @POST("/video/call/{type}/{id}")
     suspend fun getOrCreateCall(
         @Path("type") type: String,
         @Path("id") id: String,
         @Body getOrCreateCallRequest: GetOrCreateCallRequest
-    ): Response<GetOrCreateCallResponse>
+    ): GetOrCreateCallResponse
 
     /**
      * Join call
@@ -102,12 +102,12 @@ internal interface VideoCallsApi {
      * @param getOrCreateCallRequest
      * @return [JoinCallResponse]
      */
-    @POST("join_call/{type}/{id}")
+    @POST("/video/join_call/{type}/{id}")
     suspend fun joinCall(
         @Path("type") type: String,
         @Path("id") id: String,
         @Body getOrCreateCallRequest: GetOrCreateCallRequest
-    ): Response<JoinCallResponse>
+    ): JoinCallResponse
 
     /**
      * Update Call
@@ -122,7 +122,7 @@ internal interface VideoCallsApi {
      * @param updateCallRequest
      * @return [UpdateCallResponse]
      */
-    @PATCH("call/{type}/{id}")
+    @PATCH("/video/call/{type}/{id}")
     suspend fun updateCall(
         @Path("type") type: String,
         @Path("id") id: String,

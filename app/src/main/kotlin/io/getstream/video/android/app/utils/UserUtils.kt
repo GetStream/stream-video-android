@@ -24,7 +24,7 @@ fun getUsers(): List<User> {
             id = "filip",
             name = "Filip",
             imageUrl = "https://avatars.githubusercontent.com/u/17215808?v=4",
-            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tZ28tY2xpZW50LTAuMC4xIiwic3ViIjoidXNlci9maWxpcCIsImlhdCI6MTY3MDkyNDA4NSwidXNlcl9pZCI6ImZpbGlwIn0.XiDNEnkdljujjtRkElYmUIFkzf6ctxhEbDQB2DAPbGg",
+            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiZmlsaXAifQ.NBYt9PdNrTnFFl5u2xVhZ93CCMSdM7uog-DNtb8DFAA",
             role = "admin",
             teams = emptyList(),
             extraData = emptyMap()
@@ -33,7 +33,7 @@ fun getUsers(): List<User> {
             id = "thierry",
             name = "Thierry",
             imageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Mile_Kitic_from_BISO0675.jpg/300px-Mile_Kitic_from_BISO0675.jpg",
-            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tZ28tY2xpZW50LTAuMC4xIiwic3ViIjoidXNlci90aGllcnJ5IiwiaWF0IjoxNjcwOTI0MTAxLCJ1c2VyX2lkIjoidGhpZXJyeSJ9.4UgSogpG6vSqdaIxWu6p7N9pCweiwVkh-NzY3VL10yQ",
+            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidGhpZXJyeSJ9.81Nhgjdnh7hnvpgqOXlGMRWkuUgCVbU-fp6gFtHymxA",
             role = "admin",
             teams = emptyList(),
             extraData = emptyMap()
@@ -42,7 +42,7 @@ fun getUsers(): List<User> {
             id = "martin",
             name = "Martin",
             imageUrl = "https://upload.wikimedia.org/wikipedia/commons/d/da/Toma_Zdravkovi%C4%87.jpg",
-            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tZ28tY2xpZW50LTAuMC4xIiwic3ViIjoidXNlci9tYXJ0aW4iLCJpYXQiOjE2NzA5MjQxMTQsInVzZXJfaWQiOiJtYXJ0aW4ifQ.fu7_35JefrLSraiXXS1oKSX8CX-mmxlkjEhhz45KU0k",
+            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoibWFydGluIn0._oishDWVBDRRKt9VXY9RIR3Z7NunOeJkyE7mjApTux4",
             role = "admin",
             teams = emptyList(),
             extraData = emptyMap()
@@ -51,7 +51,7 @@ fun getUsers(): List<User> {
             id = "oliver",
             name = "Oliver",
             imageUrl = "https://www.biografija.org/wp-content/uploads/2020/01/boban-rajovic.jpg",
-            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tZ28tY2xpZW50LTAuMC4xIiwic3ViIjoidXNlci9vbGl2ZXIiLCJpYXQiOjE2NzA5MjQyMDYsInVzZXJfaWQiOiJvbGl2ZXIifQ.QxMwqDoWEBO8jDmVc57pGdXE5w3YnKmHH2jV1DRIAxY",
+            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoib2xpdmVyIn0.edUI1bWxIxpPGJZeYa0k6HD58hk2FDg2Pmr2280RSGg",
             role = "admin",
             teams = emptyList(),
             extraData = emptyMap()
@@ -60,7 +60,7 @@ fun getUsers(): List<User> {
             id = "tomislav",
             name = "Tomislav",
             imageUrl = "https://i.scdn.co/image/ab67616d0000b2730ae491943a8668e81e212594",
-            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tZ28tY2xpZW50LTAuMC4xIiwic3ViIjoidXNlci90b21pc2xhdiIsImlhdCI6MTY3MDkyNDQzOSwidXNlcl9pZCI6InRvbWlzbGF2In0.uMxSQkztftF0YcAk1967aUcrvD7Mc9KteDdrRQh3ADM",
+            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidG9taXNsYXYifQ.aOxbaAr_UVSdpcDPJHwGwTBjDw_n4eGyHtojUUEVUt8",
             role = "admin",
             teams = emptyList(),
             extraData = emptyMap()

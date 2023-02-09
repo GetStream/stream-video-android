@@ -26,18 +26,15 @@ import io.getstream.video.android.core.utils.Failure
 import io.getstream.video.android.core.utils.Result
 import io.getstream.video.android.core.utils.Success
 import org.openapitools.client.apis.VideoCallsApi
+import org.openapitools.client.models.GetCallEdgeServerRequest
+import org.openapitools.client.models.GetCallEdgeServerResponse
+import org.openapitools.client.models.GetOrCreateCallRequest
+import org.openapitools.client.models.GetOrCreateCallResponse
+import org.openapitools.client.models.JoinCallResponse
 import stream.video.coordinator.call_v1.Call
-import stream.video.coordinator.client_v1_rpc.CreateCallRequest
-import stream.video.coordinator.client_v1_rpc.CreateCallResponse
 import stream.video.coordinator.client_v1_rpc.CreateDeviceRequest
 import stream.video.coordinator.client_v1_rpc.CreateDeviceResponse
 import stream.video.coordinator.client_v1_rpc.DeleteDeviceRequest
-import stream.video.coordinator.client_v1_rpc.GetCallEdgeServerRequest
-import stream.video.coordinator.client_v1_rpc.GetCallEdgeServerResponse
-import stream.video.coordinator.client_v1_rpc.GetOrCreateCallRequest
-import stream.video.coordinator.client_v1_rpc.GetOrCreateCallResponse
-import stream.video.coordinator.client_v1_rpc.JoinCallRequest
-import stream.video.coordinator.client_v1_rpc.JoinCallResponse
 import stream.video.coordinator.client_v1_rpc.MemberInput
 import stream.video.coordinator.client_v1_rpc.QueryUsersRequest
 import stream.video.coordinator.client_v1_rpc.SendCustomEventRequest
@@ -80,26 +77,17 @@ internal class CallCoordinatorClientImpl(
             Failure(VideoError(error.message, error))
         }
 
-    /**
-     * Attempts to create a new [Call].
-     *
-     * @param createCallRequest The information used to create a call.
-     * @return [Result] wrapper around the response from the server, or an error if something went
-     * wrong.
-     */
-    override suspend fun createCall(createCallRequest: CreateCallRequest): Result<CreateCallResponse> =
+    override suspend fun getOrCreateCall(
+        id: String,
+        type: String,
+        getOrCreateCallRequest: GetOrCreateCallRequest
+    ): Result<GetOrCreateCallResponse> =
         try {
-            val response = callCoordinatorService.createCall(createCallRequest = createCallRequest)
-
-            Success(response)
-        } catch (error: Throwable) {
-            Failure(VideoError(error.message, error))
-        }
-
-    override suspend fun getOrCreateCall(getOrCreateCallRequest: GetOrCreateCallRequest): Result<GetOrCreateCallResponse> =
-        try {
-            val response =
-                callCoordinatorService.getOrCreateCall(getOrCreateCallRequest = getOrCreateCallRequest)
+            val response = videoCallApi.getOrCreateCall(
+                type = type,
+                id = id,
+                getOrCreateCallRequest = getOrCreateCallRequest
+            )
 
             Success(response)
         } catch (error: Throwable) {
@@ -114,8 +102,16 @@ internal class CallCoordinatorClientImpl(
      * @return [Result] wrapper around the response from the server, or an error if something went
      * wrong.
      */
-    override suspend fun joinCall(request: JoinCallRequest): Result<JoinCallResponse> = try {
-        val response = callCoordinatorService.joinCall(joinCallRequest = request)
+    override suspend fun joinCall(
+        type: String,
+        id: String,
+        request: GetOrCreateCallRequest
+    ): Result<JoinCallResponse> = try {
+        val response = videoCallApi.joinCall(
+            type = type,
+            id = id,
+            getOrCreateCallRequest = request
+        )
 
         Success(response)
     } catch (error: Throwable) {
@@ -130,10 +126,17 @@ internal class CallCoordinatorClientImpl(
      * @return [Result] wrapper around the response from the server, or an error if something went
      * wrong.
      */
-    override suspend fun selectEdgeServer(request: GetCallEdgeServerRequest): Result<GetCallEdgeServerResponse> =
+    override suspend fun selectEdgeServer(
+        type: String,
+        id: String,
+        request: GetCallEdgeServerRequest
+    ): Result<GetCallEdgeServerResponse> =
         try {
-            val response =
-                callCoordinatorService.getCallEdgeServer(getCallEdgeServerRequest = request)
+            val response = videoCallApi.getCallEdgeServer(
+                type = type,
+                id = id,
+                getCallEdgeServerRequest = request
+            )
 
             Success(response)
         } catch (error: Throwable) {

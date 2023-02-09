@@ -76,24 +76,6 @@ public interface StreamVideo {
 
     /**
      * Creates a call with given information. You can then use the [CallMetadata] and join it and get auth
-     * information to fully connect. This is different from [getOrCreateCall] because if the
-     * call already exists, we'll return an error.
-     *
-     * @param type The call type.
-     * @param id The call ID.
-     * @param participantIds List of other people to invite to the call.
-     *
-     * @return [Result] which contains the [CallMetadata] and its information.
-     */
-    public suspend fun createCall(
-        type: StreamCallType,
-        id: StreamCallId,
-        participantIds: List<String> = emptyList(),
-        ringing: Boolean
-    ): Result<CallMetadata>
-
-    /**
-     * Creates a call with given information. You can then use the [CallMetadata] and join it and get auth
      * information to fully connect.
      *
      * @param type The call type.
@@ -106,7 +88,7 @@ public interface StreamVideo {
         type: StreamCallType,
         id: StreamCallId,
         participantIds: List<String> = emptyList(),
-        ringing: Boolean
+        ring: Boolean
     ): Result<CallMetadata>
 
     /**
@@ -116,7 +98,7 @@ public interface StreamVideo {
      * @param type The call type.
      * @param id The call ID.
      * @param participantIds List of other people to invite to the call.
-     * @param ringing If we should ring any of the participants. This doesn't work if we're joining
+     * @param ring If we should ring any of the participants. This doesn't work if we're joining
      * an existing call.
      *
      * @return [Result] which contains the [JoinedCall] with the auth information required to fully
@@ -126,7 +108,7 @@ public interface StreamVideo {
         type: StreamCallType,
         id: StreamCallId,
         participantIds: List<String> = emptyList(),
-        ringing: Boolean = false
+        ring: Boolean = false
     ): Result<JoinedCall>
 
     /**

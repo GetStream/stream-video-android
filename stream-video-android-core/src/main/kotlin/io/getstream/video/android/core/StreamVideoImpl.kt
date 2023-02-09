@@ -73,19 +73,16 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okio.ByteString.Companion.encodeUtf8
-import stream.video.coordinator.client_v1_rpc.CreateCallInput
-import stream.video.coordinator.client_v1_rpc.CreateCallRequest
+import org.openapitools.client.models.CallRequest
+import org.openapitools.client.models.GetCallEdgeServerRequest
+import org.openapitools.client.models.GetCallEdgeServerResponse
+import org.openapitools.client.models.GetOrCreateCallRequest
+import org.openapitools.client.models.MemberRequest
 import stream.video.coordinator.client_v1_rpc.CreateDeviceRequest
 import stream.video.coordinator.client_v1_rpc.DeleteDeviceRequest
-import stream.video.coordinator.client_v1_rpc.GetCallEdgeServerRequest
-import stream.video.coordinator.client_v1_rpc.GetCallEdgeServerResponse
-import stream.video.coordinator.client_v1_rpc.GetOrCreateCallRequest
-import stream.video.coordinator.client_v1_rpc.JoinCallRequest
-import stream.video.coordinator.client_v1_rpc.MemberInput
 import stream.video.coordinator.client_v1_rpc.SendCustomEventRequest
 import stream.video.coordinator.client_v1_rpc.SendEventRequest
 import stream.video.coordinator.edge_v1.Latency
-import stream.video.coordinator.edge_v1.LatencyMeasurements
 import stream.video.coordinator.push_v1.DeviceInput
 
 /**
@@ -230,73 +227,32 @@ internal class StreamVideoImpl(
     /**
      * Domain - Coordinator.
      */
-    override suspend fun createCall(
-        type: String,
-        id: String,
-        participantIds: List<String>,
-        ringing: Boolean
-    ): Result<CallMetadata> {
-        logger.d { "[createCall] type: $type, id: $id, participantIds: $participantIds" }
-        engine.onCallStarting(type, id, participantIds, ringing, forcedNewCall = true)
-        return callCoordinatorClient.createCall(
-            CreateCallRequest(
-                type = type,
-                id = id,
-                input = CreateCallInput(
-                    members = participantIds.map {
-                        MemberInput(
-                            user_id = it,
-                            role = "admin"
-                        )
-                    },
-                    ring = ringing
-                )
-            )
-        )
-            .also { logger.v { "[getOrCreateCall] result: $it" } }
-            .map {
-                StartedCall(
-                    call = it.call?.toCall(StreamCallKind.fromRinging(ringing))
-                        ?: error("CreateCallResponse has no call object")
-                )
-            }
-            .onSuccess { engine.onCallStarted(it.call) }
-            .onError { engine.onCallFailed(it) }
-            .map { it.call }
-            .also { logger.v { "[createCall] result: $it" } }
-    }
-
     // caller: DIAL and wait answer
     override suspend fun getOrCreateCall(
         type: String,
         id: String,
         participantIds: List<String>,
-        ringing: Boolean
+        ring: Boolean
     ): Result<CallMetadata> = withContext(scope.coroutineContext) {
         logger.d { "[getOrCreateCall] type: $type, id: $id, participantIds: $participantIds" }
-        engine.onCallStarting(type, id, participantIds, ringing, forcedNewCall = false)
+        engine.onCallStarting(type, id, participantIds, ring, forcedNewCall = false)
         callCoordinatorClient.getOrCreateCall(
-            GetOrCreateCallRequest(
-                type = type,
-                id = id,
-                input = CreateCallInput(
+            type = type,
+            id = id,
+            getOrCreateCallRequest = GetOrCreateCallRequest(
+                data = CallRequest(
                     members = participantIds.map {
-                        MemberInput(
-                            user_id = it,
+                        MemberRequest(
+                            userId = it,
                             role = "admin"
                         )
                     },
-                    ring = ringing
-                )
+                ),
+                ring = ring
             )
         )
             .also { logger.v { "[getOrCreateCall] Coordinator result: $it" } }
-            .map {
-                StartedCall(
-                    call = it.call?.toCall(StreamCallKind.fromRinging(ringing))
-                        ?: error("CreateCallResponse has no call object")
-                )
-            }
+            .map { response -> StartedCall(call = response.toCall(StreamCallKind.fromRinging(ring))) }
             .onSuccess { engine.onCallStarted(it.call) }
             .onError { engine.onCallFailed(it) }
             .map { it.call }
@@ -338,11 +294,9 @@ internal class StreamVideoImpl(
         return try {
             logger.d { "[joinCallInternal] call: $call" }
             val joinResult = callCoordinatorClient.joinCall(
-                JoinCallRequest(
-                    id = call.id,
-                    type = call.type,
-                    datacenter_id = ""
-                )
+                call.type,
+                call.id,
+                GetOrCreateCallRequest()
             )
             if (joinResult !is Success) {
                 logger.e { "[joinCallInternal] failed joinResult: $joinResult" }
@@ -350,14 +304,19 @@ internal class StreamVideoImpl(
             }
             logger.v { "[joinCallInternal] joinResult: $joinResult" }
 
-            val latencyResults = joinResult.data.edges.associate {
-                it.name to measureLatency(it.latency_url)
+            val validEdges = (joinResult.data.edges ?: emptyList()).filter {
+                !it.latencyUrl.isNullOrBlank() && !it.name.isNullOrBlank()
+            }
+
+            val latencyResults = validEdges.associate {
+                it.name!! to measureLatency(it.latencyUrl!!)
             }
             logger.v { "[joinCallInternal] latencyResults: $latencyResults" }
             val selectEdgeServerResult = selectEdgeServer(
+                type = call.type,
+                id = call.id,
                 request = GetCallEdgeServerRequest(
-                    call_cid = call.cid,
-                    measurements = LatencyMeasurements(measurements = latencyResults)
+                    latencyMeasurements = latencyResults
                 )
             )
             logger.v { "[joinCallInternal] selectEdgeServerResult: $selectEdgeServerResult" }
@@ -365,21 +324,21 @@ internal class StreamVideoImpl(
                 is Success -> {
                     socket.updateCallState(call)
                     val credentials = selectEdgeServerResult.data.credentials
-                    val url = credentials?.server?.url
+                    val url = credentials.server?.url
                     val iceServers =
                         selectEdgeServerResult
                             .data
                             .credentials
-                            ?.ice_servers
+                            .iceServers
                             ?.map { it.toIceServer() } ?: emptyList()
 
-                    credentialsProvider.setSfuToken(credentials?.token)
+                    credentialsProvider.setSfuToken(credentials.token)
 
                     Success(
                         JoinedCall(
                             call = call,
                             callUrl = url!!,
-                            sfuToken = credentials.token,
+                            sfuToken = credentials.token!!,
                             iceServers = iceServers
                         )
                     )
@@ -398,17 +357,21 @@ internal class StreamVideoImpl(
      * @param edgeUrl The edge we want to measure.
      * @return [Latency] which contains measurements from ping connections.
      */
-    private suspend fun measureLatency(edgeUrl: String): Latency = withContext(Dispatchers.IO) {
-        val measurements = getLatencyMeasurements(edgeUrl)
-
-        Latency(measurements_seconds = measurements)
+    // TODO - measure latencies in the following way:
+    // 5x links/servers in parallel, 3s timeout, 3x retries
+    private suspend fun measureLatency(edgeUrl: String): List<Float> = withContext(Dispatchers.IO) {
+        getLatencyMeasurements(edgeUrl)
     }
 
     /**
      * @see CallCoordinatorClient.selectEdgeServer for details.
      */
-    private suspend fun selectEdgeServer(request: GetCallEdgeServerRequest): Result<GetCallEdgeServerResponse> {
-        return callCoordinatorClient.selectEdgeServer(request)
+    private suspend fun selectEdgeServer(
+        type: String,
+        id: String,
+        request: GetCallEdgeServerRequest
+    ): Result<GetCallEdgeServerResponse> {
+        return callCoordinatorClient.selectEdgeServer(type, id, request)
     }
 
     // caller/callee: CREATE/JOIN meeting or ACCEPT call with no participants or ringing
@@ -416,32 +379,27 @@ internal class StreamVideoImpl(
         type: String,
         id: String,
         participantIds: List<String>,
-        ringing: Boolean
+        ring: Boolean
     ): Result<JoinedCall> = withContext(scope.coroutineContext) {
         logger.d { "[getOrCreateAndJoinCall] type: $type, id: $id, participantIds: $participantIds" }
-        engine.onCallStarting(type, id, participantIds, ringing, forcedNewCall = false)
+        engine.onCallStarting(type, id, participantIds, ring, forcedNewCall = false)
         callCoordinatorClient.getOrCreateCall(
-            GetOrCreateCallRequest(
-                type = type,
-                id = id,
-                input = CreateCallInput(
+            type = type,
+            id = id,
+            getOrCreateCallRequest = GetOrCreateCallRequest(
+                data = CallRequest(
                     members = participantIds.map {
-                        MemberInput(
-                            user_id = it,
+                        MemberRequest(
+                            userId = it,
                             role = "admin"
                         )
                     },
-                    ring = ringing
-                )
+                ),
+                ring = ring
             )
         )
             .also { logger.v { "[getOrCreateCall] Coordinator result: $it" } }
-            .map {
-                StartedCall(
-                    call = it.call?.toCall(StreamCallKind.fromRinging(ringing))
-                        ?: error("CreateCallResponse has no call object")
-                )
-            }
+            .map { response -> StartedCall(call = response.toCall(StreamCallKind.fromRinging(ring))) }
             .onSuccess { engine.onCallJoining(it.call) }
             .flatMap { joinCallInternal(it.call) }
             .onSuccess { engine.onCallJoined(it) }

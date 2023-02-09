@@ -17,28 +17,40 @@
 package io.getstream.video.android.core.utils
 
 import io.getstream.video.android.core.model.CallMetadata
+import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.core.model.StreamCallKind
 import io.getstream.video.android.core.model.toCallUsers
-import stream.video.coordinator.client_v1_rpc.CallEnvelope
+import org.openapitools.client.models.GetOrCreateCallResponse
+import org.openapitools.client.models.UserResponse
+import java.util.Date
 
-internal fun CallEnvelope.toCall(kind: StreamCallKind): CallMetadata {
-    // val extraDataJson = custom_json.toByteArray().decodeToString() // TODO - check this
-
-    val call = call!!
-
+internal fun GetOrCreateCallResponse.toCall(kind: StreamCallKind): CallMetadata {
     return with(call) {
         CallMetadata(
-            cid = call_cid,
-            id = id,
-            type = type,
+            cid = cid!!,
+            id = id!!,
+            type = type!!,
             kind = kind,
-            createdByUserId = created_by_user_id,
-            createdAt = created_at?.epochSecond ?: 0,
-            updatedAt = updated_at?.epochSecond ?: 0,
-            recordingEnabled = settings_overrides?.recording?.enabled ?: false,
-            broadcastingEnabled = settings_overrides?.broadcasting?.enabled ?: false,
-            users = users.toCallUsers(),
-            extraData = emptyMap() // Json.decodeFromString<Map<String, String>>(extraDataJson)
+            createdByUserId = createdBy.id!!,
+            createdAt = createdAt.toEpochSecond(),
+            updatedAt = updatedAt.toEpochSecond(),
+            recordingEnabled = settings.recording.enabled ?: false,
+            broadcastingEnabled = settings.broadcasting.enabled ?: false,
+            users = members?.toCallUsers() ?: emptyMap(),
+            extraData = emptyMap()
         )
     }
+}
+
+internal fun UserResponse.toCallUser(): CallUser {
+    return CallUser(
+        id = id ?: "",
+        name = name ?: "",
+        role = role ?: "",
+        imageUrl = image ?: "",
+        teams = teams ?: emptyList(),
+        state = null,
+        createdAt = Date.from(createdAt.toInstant()),
+        updatedAt = Date.from(updatedAt.toInstant()),
+    )
 }

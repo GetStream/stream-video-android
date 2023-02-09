@@ -16,8 +16,10 @@
 
 package io.getstream.video.android.core.model
 
+import io.getstream.video.android.core.utils.toCallUser
+import org.openapitools.client.models.MemberResponse
 import java.io.Serializable
-import java.util.*
+import java.util.Date
 import stream.video.coordinator.call_v1.Call as CoordinatorCall
 import stream.video.coordinator.call_v1.CallDetails as CoordinatorCallDetails
 import stream.video.coordinator.member_v1.Member as CoordinatorMember
@@ -71,6 +73,9 @@ public fun Map<String, CoordinatorUser>.toCallUsers(): Map<String, CallUser> =
     map { (userId, protoUser) ->
         userId to protoUser.toCallUser()
     }.toMap()
+
+internal fun List<MemberResponse>.toCallUsers(): Map<String, CallUser> =
+    associate { it.userId!! to it.user.toCallUser() }
 
 public fun CoordinatorUser.toCallUser(): CallUser = CallUser(
     id = id,

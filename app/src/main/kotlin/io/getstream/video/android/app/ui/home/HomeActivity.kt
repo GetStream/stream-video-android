@@ -280,7 +280,7 @@ class HomeActivity : AppCompatActivity() {
                 "default",
                 callId,
                 participants,
-                ringing = true
+                ring = true
             ).onSuccess {
                 logger.v { "[dialUsers] completed: $it" }
             }.onError {
@@ -299,7 +299,7 @@ class HomeActivity : AppCompatActivity() {
                 "default",
                 id = callId,
                 participantIds = emptyList(),
-                ringing = false
+                ring = false
             ).onSuccess { data ->
                 logger.v { "[joinCall] succeed: $data" }
             }.onError {
