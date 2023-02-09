@@ -568,9 +568,9 @@ public final class io/getstream/video/android/xml/widget/participant/PictureInPi
 	public fun <init> (Landroid/content/Context;)V
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;I)V
-	public final fun getParticipant ()Lio/getstream/video/android/model/CallParticipantState;
+	public final fun getParticipant ()Lio/getstream/video/android/core/model/CallParticipantState;
 	public final fun getRendererInitializer ()Lio/getstream/video/android/xml/widget/participant/RendererInitializer;
-	public final fun setParticipant (Lio/getstream/video/android/model/CallParticipantState;)V
+	public final fun setParticipant (Lio/getstream/video/android/core/model/CallParticipantState;)V
 	public final fun setRendererInitializer (Lio/getstream/video/android/xml/widget/participant/RendererInitializer;)V
 }
 

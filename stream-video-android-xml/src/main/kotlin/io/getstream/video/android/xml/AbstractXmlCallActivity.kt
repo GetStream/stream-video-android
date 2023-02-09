@@ -120,7 +120,6 @@ public abstract class AbstractXmlCallActivity :
 
         setupToolbar()
         observeStreamCallState()
-        observePipMode()
     }
 
     override fun onResume() {
@@ -133,8 +132,8 @@ public abstract class AbstractXmlCallActivity :
      */
     private fun observeStreamCallState() {
         lifecycleScope.launchWhenCreated {
-            callViewModel.streamCallState.combine(callViewModel.isInPictureInPicture) { state, isPiP ->
-                updateToolbar(state)
+            callViewModel.streamCallState.combine(callViewModel.isInPictureInPicture) { state, isPictureInPicture ->
+                updateToolbar(state, isPictureInPicture)
 
                 when {
                     state is StreamCallState.Incoming && !state.acceptedByMe -> {
@@ -149,7 +148,7 @@ public abstract class AbstractXmlCallActivity :
                         finish()
                     }
 
-                    state is StreamCallState.Connected && isPiP -> {
+                    state is StreamCallState.Connected && isPictureInPicture -> {
                         showPipLayout()
                     }
 
@@ -162,22 +161,15 @@ public abstract class AbstractXmlCallActivity :
     }
 
     /**
-     * Tracks the state of PiP mode and shows/hides parts of the ui whether they are needed or not.
-     */
-    private fun observePipMode() {
-        lifecycleScope.launchWhenCreated {
-            callViewModel.isInPictureInPicture.collect {
-                binding.callToolbar.isVisible = !it
-            }
-        }
-    }
-
-    /**
      * Updates the toolbar title depending on the call state.
      *
      * @param streamCallState The state of the call we are observing.
+     * @param isPictureInPicture Whether the app is in picture in picture mode. If true will hide the toolbar or hide it
+     * if it is false.
      */
-    private fun updateToolbar(streamCallState: StreamCallState) {
+    private fun updateToolbar(streamCallState: StreamCallState, isPictureInPicture: Boolean) {
+        binding.callToolbar.isVisible = !isPictureInPicture
+
         val callId = when (streamCallState) {
             is StreamCallState.Active -> streamCallState.callGuid.id
             else -> ""
@@ -208,7 +200,7 @@ public abstract class AbstractXmlCallActivity :
      * Shows the outgoing call screen and initialises the state observers required to populate the screen.
      */
     private fun showOutgoingScreen() {
-        if (binding.contentHolder.children.firstOrNull() is OutgoingCallView) return
+        if (isViewInsideContainer<OutgoingCallView>()) return
         val outgoingCallView = OutgoingCallView(this)
         addContentView(outgoingCallView)
         outgoingCallView.bindView(callViewModel, this)
@@ -218,7 +210,7 @@ public abstract class AbstractXmlCallActivity :
      * Shows the incoming call screen and initialises the state observers required to populate the screen.
      */
     private fun showIncomingScreen() {
-        if (binding.contentHolder.children.firstOrNull() is IncomingCallView) return
+        if (isViewInsideContainer<IncomingCallView>()) return
         val incomingCallView = IncomingCallView(this)
         addContentView(incomingCallView)
         incomingCallView.bindView(callViewModel, this)
@@ -228,7 +220,7 @@ public abstract class AbstractXmlCallActivity :
      * Shows the active call screen and initialises the state observers required to populate the screen.
      */
     private fun showActiveCallScreen() {
-        if (binding.contentHolder.children.firstOrNull() is ActiveCallView) return
+        if (isViewInsideContainer<ActiveCallView>()) return
         val activeCallView = ActiveCallView(this)
         addContentView(activeCallView)
         activeCallView.bindView(callViewModel, this)
@@ -238,7 +230,7 @@ public abstract class AbstractXmlCallActivity :
      * Shows the picture in picture layout which consists of the primary call participants feed.
      */
     private fun showPipLayout() {
-        if (binding.contentHolder.children.firstOrNull() is CallParticipantView) return
+        if (isViewInsideContainer<CallParticipantView>()) return
         val callParticipant = PictureInPictureView(this)
         callParticipant.rendererInitializer = RendererInitializer { videoRenderer, streamId, trackType, onRender ->
             callViewModel.callState.value?.initRenderer(videoRenderer, streamId, trackType, onRender)
@@ -380,11 +372,7 @@ public abstract class AbstractXmlCallActivity :
             callViewModel.onPictureInPictureModeChanged(isInPictureInPictureMode)
             if (!isInPictureInPictureMode) {
                 pipJob?.cancel()
-                (
-                    binding.contentHolder.children.firstOrNull {
-                        it is PictureInPictureView
-                    } as? PictureInPictureView
-                    )?.let {
+                getChildInstanceOf<PictureInPictureView>()?.let {
                     it.rendererInitializer = null
                     it.participant = null
                 }
@@ -404,5 +392,23 @@ public abstract class AbstractXmlCallActivity :
         is StreamCallState.Joining -> "Joining"
         is StreamCallState.Outgoing -> "Outgoing"
         StreamCallState.Idle -> "Idle"
+    }
+
+    /**
+     * Returns the view of type [T] if it is inside the content holder.
+     *
+     * @return The instance of [T] if one is inside the content holder, otherwise null.
+     */
+    private inline fun <reified T : View> getChildInstanceOf(): T? {
+        return binding.contentHolder.children.firstOrNull { it is T } as? T
+    }
+
+    /**
+     * Checks if the view inside the content is of type [T].
+     *
+     * @return Whether the instance of [T] is inside the content holder.
+     */
+    private inline fun <reified T : View> isViewInsideContainer(): Boolean {
+        return getChildInstanceOf<T>() != null
     }
 }

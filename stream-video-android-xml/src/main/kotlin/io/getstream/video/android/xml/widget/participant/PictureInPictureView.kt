@@ -20,7 +20,7 @@ import android.content.Context
 import android.util.AttributeSet
 import androidx.cardview.widget.CardView
 import androidx.core.view.children
-import io.getstream.video.android.model.CallParticipantState
+import io.getstream.video.android.core.model.CallParticipantState
 import io.getstream.video.android.xml.R
 import io.getstream.video.android.xml.utils.extensions.createStreamThemeWrapper
 
