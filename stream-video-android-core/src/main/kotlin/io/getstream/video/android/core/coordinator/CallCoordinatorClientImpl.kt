@@ -25,6 +25,7 @@ import io.getstream.video.android.core.model.toCallUser
 import io.getstream.video.android.core.utils.Failure
 import io.getstream.video.android.core.utils.Result
 import io.getstream.video.android.core.utils.Success
+import org.openapitools.client.apis.VideoCallsApi
 import stream.video.coordinator.call_v1.Call
 import stream.video.coordinator.client_v1_rpc.CreateCallRequest
 import stream.video.coordinator.client_v1_rpc.CreateCallResponse
@@ -48,6 +49,7 @@ import stream.video.coordinator.client_v1_rpc.UpsertCallMembersRequest
  */
 internal class CallCoordinatorClientImpl(
     private val callCoordinatorService: ClientRPCService,
+    private val videoCallApi: VideoCallsApi
 ) : CallCoordinatorClient {
 
     /**

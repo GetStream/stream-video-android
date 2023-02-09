@@ -84,7 +84,7 @@ internal class HttpModule(
             credentialsProvider.getCachedUserToken()
         }
 
-        val updatedUrl = if (original.url.toString().contains("coordinator")) {
+        val updatedUrl = if (original.url.toString().contains("chat")) {
             original.url.newBuilder()
                 .addQueryParameter(API_KEY, credentialsProvider.getCachedApiKey())
                 .build()

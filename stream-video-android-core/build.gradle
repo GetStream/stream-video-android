@@ -95,6 +95,8 @@ dependencies {
     implementation Dependencies.retrofitWireConverter
     implementation Dependencies.okhttpLoggingInterceptor
     implementation Dependencies.kotlinSerializationJson
+    implementation Dependencies.retrofitMoshi
+    implementation Dependencies.retrofitScalars
 
     implementation Dependencies.moshi
     implementation Dependencies.moshiKotlin

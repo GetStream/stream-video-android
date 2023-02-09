@@ -26,7 +26,11 @@ import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.token.CredentialsProvider
 import kotlinx.coroutines.CoroutineScope
 import okhttp3.OkHttpClient
+import org.openapitools.client.apis.VideoCallsApi
+import org.openapitools.client.infrastructure.Serializer
 import retrofit2.Retrofit
+import retrofit2.converter.moshi.MoshiConverterFactory
+import retrofit2.converter.scalars.ScalarsConverterFactory
 import retrofit2.converter.wire.WireConverterFactory
 
 /**
@@ -49,11 +53,20 @@ internal class CallCoordinatorClientModule(
     /**
      * Cached instance of the Retrofit client that builds API services.
      */
-    private val retrofitClient: Retrofit by lazy {
+    private val protoRetrofitClient: Retrofit by lazy {
         Retrofit.Builder()
             .client(okHttpClient)
             .addConverterFactory(WireConverterFactory.create())
-            .baseUrl(REDIRECT_BASE_URL ?: BASE_URL)
+            .baseUrl(BASE_URL)
+            .build()
+    }
+
+    private val retrofitClient: Retrofit by lazy {
+        Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .addConverterFactory(ScalarsConverterFactory.create())
+            .addConverterFactory(MoshiConverterFactory.create(Serializer.moshi))
+            .client(okHttpClient)
             .build()
     }
 
@@ -61,9 +74,10 @@ internal class CallCoordinatorClientModule(
      * Cached instance of the CallCoordinator service client for API calls.
      */
     private val callCoordinatorClient: CallCoordinatorClient by lazy {
-        val service = retrofitClient.create(ClientRPCService::class.java)
+        val oldService = protoRetrofitClient.create(ClientRPCService::class.java)
+        val service = retrofitClient.create(VideoCallsApi::class.java)
 
-        CallCoordinatorClientImpl(service)
+        CallCoordinatorClientImpl(oldService, service)
     }
 
     /**
@@ -90,19 +104,7 @@ internal class CallCoordinatorClientModule(
     }
 
     internal companion object {
-        /**
-         * Used for testing on devices and redirecting from a public realm to localhost.
-         *
-         * Will only be used if the value is non-null, so if you're able to test locally, just
-         * leave it as-is.
-         */
-        @Suppress("RedundantNullableReturnType")
-        private val REDIRECT_BASE_URL: String? = null // e.g. "https://dc54-83-131-252-51.eu.ngrok.io"
-
-        /**
-         * The base URL of the API.
-         */
-        private const val BASE_URL = "https://rpc-video-coordinator.oregon-v1.stream-io-video.com/"
+        private const val BASE_URL = "https://chat.stream-io-api.com/"
 
         /**
          * Used for testing on devices and redirecting from a public realm to localhost.
@@ -111,6 +113,7 @@ internal class CallCoordinatorClientModule(
          * leave it as-is.
          */
         @Suppress("RedundantNullableReturnType")
-        internal val REDIRECT_PING_URL: String? = null // "https://c99c-93-140-102-246.eu.ngrok.io/ping" // "<redirect-url>/ping"
+        internal val REDIRECT_PING_URL: String? =
+            null // "https://c99c-93-140-102-246.eu.ngrok.io/ping" // "<redirect-url>/ping"
     }
 }

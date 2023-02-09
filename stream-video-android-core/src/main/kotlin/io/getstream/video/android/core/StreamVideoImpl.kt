@@ -23,10 +23,12 @@ import io.getstream.video.android.core.call.CallClient
 import io.getstream.video.android.core.call.builder.CallClientBuilder
 import io.getstream.video.android.core.coordinator.CallCoordinatorClient
 import io.getstream.video.android.core.coordinator.state.UserState
+import io.getstream.video.android.core.engine.StreamCallEngine
 import io.getstream.video.android.core.engine.adapter.CoordinatorSocketListenerAdapter
 import io.getstream.video.android.core.errors.VideoError
 import io.getstream.video.android.core.events.CallCreatedEvent
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
+import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.CallEventType
 import io.getstream.video.android.core.model.CallMetadata
 import io.getstream.video.android.core.model.Device
@@ -55,7 +57,6 @@ import io.getstream.video.android.core.utils.Failure
 import io.getstream.video.android.core.utils.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.core.utils.Result
 import io.getstream.video.android.core.utils.Success
-import io.getstream.video.android.core.utils.enrichSFUURL
 import io.getstream.video.android.core.utils.flatMap
 import io.getstream.video.android.core.utils.getLatencyMeasurements
 import io.getstream.video.android.core.utils.map
@@ -94,9 +95,9 @@ internal class StreamVideoImpl(
     private val context: Context,
     private val scope: CoroutineScope,
     override val config: StreamVideoConfig,
-    private val engine: io.getstream.video.android.core.engine.StreamCallEngine,
+    private val engine: StreamCallEngine,
     private val lifecycle: Lifecycle,
-    private val loggingLevel: io.getstream.video.android.core.logging.LoggingLevel,
+    private val loggingLevel: LoggingLevel,
     private val callCoordinatorClient: CallCoordinatorClient,
     private val credentialsProvider: CredentialsProvider,
     private val socket: VideoSocket,
@@ -377,7 +378,7 @@ internal class StreamVideoImpl(
                     Success(
                         JoinedCall(
                             call = call,
-                            callUrl = enrichSFUURL(url!!),
+                            callUrl = url!!,
                             sfuToken = credentials.token,
                             iceServers = iceServers
                         )

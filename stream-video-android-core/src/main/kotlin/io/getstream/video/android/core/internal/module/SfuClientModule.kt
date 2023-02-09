@@ -43,14 +43,6 @@ internal class SfuClientModule(
     }
 
     companion object {
-        @Suppress("RedundantNullableReturnType")
-        val REDIRECT_SIGNAL_URL: String? = null // "https://46f3-93-140-102-246.eu.ngrok.io" // "https://6dd4-78-1-28-238.eu.ngrok.io"
-
-        internal const val SIGNAL_HOST_BASE: String =
-            "10.0.2.2:3031" // "sfu2.fra1.gtstrm.com"
-
-        const val SIGNAL_BASE_URL = "http://$SIGNAL_HOST_BASE/"
-
         /**
          * Reusable instance of the module.
          */

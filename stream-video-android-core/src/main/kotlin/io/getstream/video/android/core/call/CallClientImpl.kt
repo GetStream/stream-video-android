@@ -66,7 +66,6 @@ import io.getstream.video.android.core.utils.Result
 import io.getstream.video.android.core.utils.Success
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import io.getstream.video.android.core.utils.buildConnectionConfiguration
-import io.getstream.video.android.core.utils.buildLocalIceServers
 import io.getstream.video.android.core.utils.buildMediaConstraints
 import io.getstream.video.android.core.utils.buildRemoteIceServers
 import io.getstream.video.android.core.utils.onError
@@ -158,19 +157,14 @@ internal class CallClientImpl(
     override val isSpeakerPhoneEnabled: StateFlow<Boolean> = _isSpeakerPhoneEnabled
 
     private val supervisorJob = SupervisorJob()
-    private val coroutineScope = CoroutineScope(io.getstream.video.android.core.dispatchers.DispatcherProvider.IO + supervisorJob)
+    private val coroutineScope =
+        CoroutineScope(io.getstream.video.android.core.dispatchers.DispatcherProvider.IO + supervisorJob)
 
     /**
      * Connection and WebRTC.
      */
     private val peerConnectionFactory by lazy { StreamPeerConnectionFactory(context) }
-    private val iceServers by lazy {
-        if (SfuClientModule.REDIRECT_SIGNAL_URL == null) {
-            buildRemoteIceServers(remoteIceServers)
-        } else {
-            buildLocalIceServers()
-        }
-    }
+    private val iceServers by lazy { buildRemoteIceServers(remoteIceServers) }
 
     private val connectionConfiguration: PeerConnection.RTCConfiguration by lazy {
         buildConnectionConfiguration(iceServers)
@@ -379,7 +373,10 @@ internal class CallClientImpl(
         }
     }
 
-    override suspend fun connectToCall(sessionId: String, autoPublish: Boolean): Result<io.getstream.video.android.core.model.Call> {
+    override suspend fun connectToCall(
+        sessionId: String,
+        autoPublish: Boolean
+    ): Result<io.getstream.video.android.core.model.Call> {
         logger.d { "[connectToCall] #sfu; sessionId: $sessionId, autoPublish: $autoPublish" }
         if (connectionState != ConnectionState.DISCONNECTED) {
             return Failure(
