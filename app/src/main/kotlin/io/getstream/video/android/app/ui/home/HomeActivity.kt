@@ -420,9 +420,6 @@ class HomeActivity : AppCompatActivity() {
     }
 
     companion object {
-        private const val JOIN_CALL_PREF_NAME = "join_call"
-        private const val JOIN_CALL_UI_KIT = "ui_kit"
-
         fun getIntent(context: Context): Intent = Intent(context, HomeActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }

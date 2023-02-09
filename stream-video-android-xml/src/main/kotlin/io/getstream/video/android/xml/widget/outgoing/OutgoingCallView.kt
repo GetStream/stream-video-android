@@ -18,7 +18,6 @@ package io.getstream.video.android.xml.widget.outgoing
 
 import android.content.Context
 import android.util.AttributeSet
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CancelCall
@@ -31,12 +30,13 @@ import io.getstream.video.android.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.xml.utils.extensions.dpToPx
 import io.getstream.video.android.xml.utils.extensions.getDimension
 import io.getstream.video.android.xml.utils.extensions.streamThemeInflater
+import io.getstream.video.android.xml.widget.callcontent.CallContent
 import io.getstream.video.android.xml.widget.control.CallControlButton
 
 /**
  *  Represents the Outgoing Call state and UI, when the user is calling other people.
  */
-public class OutgoingCallView : ConstraintLayout {
+public class OutgoingCallView : CallContent {
 
     private val binding = ViewOutgoingCallBinding.inflate(streamThemeInflater, this)
 

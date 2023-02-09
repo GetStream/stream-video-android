@@ -86,7 +86,8 @@ public abstract class AbstractXmlCallActivity :
                     Manifest.permission.CAMERA -> callViewModel.onCallAction(ToggleCamera(isGranted))
                     Manifest.permission.RECORD_AUDIO -> callViewModel.onCallAction(ToggleMicrophone(isGranted))
                 }
-            }, onShowSettings = {
+            },
+            onShowSettings = {
                 showPermissionsDialog()
             }
         )
@@ -109,21 +110,10 @@ public abstract class AbstractXmlCallActivity :
         lifecycleScope.launchWhenCreated {
             callViewModel.streamCallState.collect { state ->
                 when {
-                    state is StreamCallState.Incoming && !state.acceptedByMe -> {
-                        showIncomingScreen()
-                    }
-
-                    state is StreamCallState.Outgoing && !state.acceptedByCallee -> {
-                        showOutgoingScreen()
-                    }
-
-                    state is StreamCallState.Idle -> {
-                        finish()
-                    }
-
-                    else -> {
-                        showActiveCallScreen()
-                    }
+                    state is StreamCallState.Incoming && !state.acceptedByMe -> showIncomingScreen()
+                    state is StreamCallState.Outgoing && !state.acceptedByCallee -> showOutgoingScreen()
+                    state is StreamCallState.Idle -> finish()
+                    else -> showActiveCallScreen()
                 }
             }
         }
@@ -226,13 +216,13 @@ public abstract class AbstractXmlCallActivity :
      */
     private fun showPermissionsDialog() {
         AlertDialog.Builder(this)
-            .setTitle("Permissions required to launch the app")
-            .setMessage("Open settings to allow camera and microphone permissions.")
-            .setPositiveButton("Launch settings") { dialog, _ ->
+            .setTitle(getString(io.getstream.video.android.ui.common.R.string.permissions_title))
+            .setMessage(getString(io.getstream.video.android.ui.common.R.string.permissions_message))
+            .setPositiveButton(getString(io.getstream.video.android.ui.common.R.string.permissions_settings)) { dialog, _ ->
                 startSettings()
                 dialog.dismiss()
             }
-            .setNegativeButton("Cancel") { dialog, _ ->
+            .setNegativeButton(getString(io.getstream.video.android.ui.common.R.string.permissions_cancel)) { dialog, _ ->
                 finish()
                 dialog.dismiss()
             }

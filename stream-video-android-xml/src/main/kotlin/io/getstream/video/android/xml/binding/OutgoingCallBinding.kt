@@ -17,7 +17,6 @@
 package io.getstream.video.android.xml.binding
 
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.core.model.CallStatus
 import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.xml.widget.outgoing.OutgoingCallView
@@ -27,25 +26,25 @@ import kotlinx.coroutines.flow.collectLatest
  * Binds [OutgoingCallView] with [CallViewModel], updating the view's state based on data provided by the ViewModel,
  * and propagating view events to the ViewModel as needed.
  *
- * This function sets listeners on the view and ViewModel. Call this method
- * before setting any additional listeners on these objects yourself.
+ * This function sets listeners on the view and ViewModel. Call this method before setting any additional listeners on
+ * these objects yourself.
  */
 public fun OutgoingCallView.bindView(
     viewModel: CallViewModel,
-    lifecycleOwner: LifecycleOwner
+    lifecycleOwner: LifecycleOwner,
 ) {
     setCallStatus(CallStatus.Outgoing)
 
     callActionListener = viewModel::onCallAction
 
-    lifecycleOwner.lifecycleScope.launchWhenCreated {
+    startJob(lifecycleOwner) {
         viewModel.callMediaState.collectLatest {
             setMicrophoneEnabled(it.isMicrophoneEnabled)
             setCameraEnabled(it.isCameraEnabled)
         }
     }
 
-    lifecycleOwner.lifecycleScope.launchWhenCreated {
+    startJob(lifecycleOwner) {
         viewModel.participants.collectLatest {
             setParticipants(it)
         }
