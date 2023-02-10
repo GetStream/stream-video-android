@@ -32,7 +32,6 @@ import io.getstream.video.android.xml.databinding.ViewCallParticipantBinding
 import io.getstream.video.android.xml.font.setTextStyle
 import io.getstream.video.android.xml.utils.extensions.clearConstraints
 import io.getstream.video.android.xml.utils.extensions.createStreamThemeWrapper
-import io.getstream.video.android.xml.utils.extensions.dpToPx
 import io.getstream.video.android.xml.utils.extensions.getDrawableCompat
 import io.getstream.video.android.xml.utils.extensions.load
 import io.getstream.video.android.xml.utils.extensions.streamThemeInflater
@@ -95,15 +94,15 @@ public class CallParticipantView : ConstraintLayout {
     }
 
     private fun initNameHolder() {
-        binding.participantName.setTextStyle(style.tagTextStyle)
-        (binding.nameHolder.layoutParams as LayoutParams).setMargins(style.tagPadding)
-        binding.nameHolder.background.setTint(style.tagBackgroundColor)
-        setTagAlignment(style.tagAlignment)
+        binding.participantLabel.setTextStyle(style.labelTextStyle)
+        (binding.labelHolder.layoutParams as LayoutParams).setMargins(style.labelPadding)
+        binding.labelHolder.background.setTint(style.labelBackgroundColor)
+        setLabelAlignment(style.labelAlignment)
     }
 
     private fun initSpeakerBorder() {
         val borderDrawable = GradientDrawable()
-        borderDrawable.setStroke(3.dpToPx(), style.activeSpeakerBorderColor)
+        borderDrawable.setStroke(style.activeSpeakerBorderWidth, style.activeSpeakerBorderColor)
         binding.activeCallParticipantBorder.background = borderDrawable
     }
 
@@ -132,7 +131,7 @@ public class CallParticipantView : ConstraintLayout {
      * @param participant The call participant whose video we wish to show.
      */
     public fun setParticipant(participant: CallParticipantState) {
-        binding.nameHolder.isVisible = !participant.isLocal
+        binding.labelHolder.isVisible = !participant.isLocal
         setUserData(participant.toUser())
         setTrack(participant.videoTrack, participant.hasVideo)
         setHasAudio(participant.hasAudio)
@@ -159,7 +158,7 @@ public class CallParticipantView : ConstraintLayout {
      */
     private fun setUserData(user: User) {
         binding.participantAvatar.load(user.imageUrl)
-        binding.participantName.text = user.name.ifBlank { user.id }
+        binding.participantLabel.text = user.name.ifBlank { user.id }
     }
 
     /**
@@ -199,32 +198,32 @@ public class CallParticipantView : ConstraintLayout {
     }
 
     /**
-     * Updates the tag alignment inside the view.
+     * Updates the label alignment inside the view.
      *
-     * @param tagAlignment [CallParticipantTagAlignment] to be applied to the name tag.
+     * @param labelAlignment [CallParticipantLabelAlignment] to be applied to the name label.
      */
-    private fun setTagAlignment(tagAlignment: CallParticipantTagAlignment) {
-        val holderId = binding.nameHolder.id
+    private fun setLabelAlignment(labelAlignment: CallParticipantLabelAlignment) {
+        val holderId = binding.labelHolder.id
         val parentId = LayoutParams.PARENT_ID
 
         updateConstraints {
             clearConstraints(holderId)
-            when (tagAlignment) {
-                CallParticipantTagAlignment.TOP_LEFT -> {
-                    connect(holderId, ConstraintSet.TOP, parentId, ConstraintSet.TOP, style.tagPadding)
-                    connect(holderId, ConstraintSet.LEFT, parentId, ConstraintSet.LEFT, style.tagPadding)
+            when (labelAlignment) {
+                CallParticipantLabelAlignment.TOP_LEFT -> {
+                    connect(holderId, ConstraintSet.TOP, parentId, ConstraintSet.TOP, style.labelPadding)
+                    connect(holderId, ConstraintSet.LEFT, parentId, ConstraintSet.LEFT, style.labelPadding)
                 }
-                CallParticipantTagAlignment.TOP_RIGHT -> {
-                    connect(holderId, ConstraintSet.TOP, parentId, ConstraintSet.TOP, style.tagPadding)
-                    connect(holderId, ConstraintSet.RIGHT, parentId, ConstraintSet.RIGHT, style.tagPadding)
+                CallParticipantLabelAlignment.TOP_RIGHT -> {
+                    connect(holderId, ConstraintSet.TOP, parentId, ConstraintSet.TOP, style.labelPadding)
+                    connect(holderId, ConstraintSet.RIGHT, parentId, ConstraintSet.RIGHT, style.labelPadding)
                 }
-                CallParticipantTagAlignment.BOTTOM_LEFT -> {
-                    connect(holderId, ConstraintSet.BOTTOM, parentId, ConstraintSet.BOTTOM, style.tagPadding)
-                    connect(holderId, ConstraintSet.LEFT, parentId, ConstraintSet.LEFT, style.tagPadding)
+                CallParticipantLabelAlignment.BOTTOM_LEFT -> {
+                    connect(holderId, ConstraintSet.BOTTOM, parentId, ConstraintSet.BOTTOM, style.labelPadding)
+                    connect(holderId, ConstraintSet.LEFT, parentId, ConstraintSet.LEFT, style.labelPadding)
                 }
-                CallParticipantTagAlignment.BOTTOM_RIGHT -> {
-                    connect(holderId, ConstraintSet.BOTTOM, parentId, ConstraintSet.BOTTOM, style.tagPadding)
-                    connect(holderId, ConstraintSet.RIGHT, parentId, ConstraintSet.RIGHT, style.tagPadding)
+                CallParticipantLabelAlignment.BOTTOM_RIGHT -> {
+                    connect(holderId, ConstraintSet.BOTTOM, parentId, ConstraintSet.BOTTOM, style.labelPadding)
+                    connect(holderId, ConstraintSet.RIGHT, parentId, ConstraintSet.RIGHT, style.labelPadding)
                 }
             }
         }

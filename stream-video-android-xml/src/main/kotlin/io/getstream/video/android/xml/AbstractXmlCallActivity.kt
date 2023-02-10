@@ -19,6 +19,7 @@ package io.getstream.video.android.xml
 import android.Manifest
 import android.app.PictureInPictureParams
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build
@@ -28,6 +29,7 @@ import android.util.Rational
 import android.view.Menu
 import android.view.WindowManager
 import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
@@ -40,6 +42,7 @@ import io.getstream.video.android.core.model.state.StreamCallState
 import io.getstream.video.android.core.permission.PermissionManager
 import io.getstream.video.android.core.permission.PermissionManagerProvider
 import io.getstream.video.android.core.permission.StreamPermissionManagerImpl
+import io.getstream.video.android.core.utils.formatAsTitle
 import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.core.viewmodel.CallViewModelFactory
 import io.getstream.video.android.core.viewmodel.CallViewModelFactoryProvider
@@ -134,7 +137,7 @@ public abstract class AbstractXmlCallActivity :
                     is StreamCallState.Active -> state.callGuid.id
                     else -> ""
                 }
-                val status = it.formatAsTitle()
+                val status = it.formatAsTitle(this@AbstractXmlCallActivity)
 
                 val title = when (callId.isBlank()) {
                     true -> status
@@ -259,21 +262,40 @@ public abstract class AbstractXmlCallActivity :
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                callViewModel.dismissOptions()
-
-                enterPictureInPictureMode(
-                    PictureInPictureParams.Builder().setAspectRatio(Rational(9, 16)).apply {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                            this.setAutoEnterEnabled(true)
-                        }
-                    }.build()
-                )
-            } else {
-                enterPictureInPictureMode()
+            try {
+                enterPictureInPicture()
+            } catch (error: Throwable) {
+                closeCall()
             }
         } else {
             closeCall()
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.N)
+    private fun enterPictureInPicture() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            callViewModel.dismissOptions()
+
+            val currentOrientation = resources.configuration.orientation
+            val screenSharing = callViewModel.callState.value?.isScreenSharingActive ?: false
+
+            val aspect =
+                if (currentOrientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT && !screenSharing) {
+                    Rational(9, 16)
+                } else {
+                    Rational(16, 9)
+                }
+
+            enterPictureInPictureMode(
+                PictureInPictureParams.Builder().setAspectRatio(aspect).apply {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        this.setAutoEnterEnabled(true)
+                    }
+                }.build()
+            )
+        } else {
+            enterPictureInPictureMode()
         }
     }
 
@@ -304,19 +326,5 @@ public abstract class AbstractXmlCallActivity :
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             callViewModel.onPictureInPictureModeChanged(isInPictureInPictureMode)
         }
-    }
-
-    /**
-     * Formats the current call state so that we can show it in the toolbar.
-     */
-    private fun StreamCallState.formatAsTitle() = when (this) {
-        is StreamCallState.Drop -> "Drop"
-        is StreamCallState.Joined -> "Joined"
-        is StreamCallState.Connecting -> "Connecting"
-        is StreamCallState.Connected -> "Connected"
-        is StreamCallState.Incoming -> "Incoming"
-        is StreamCallState.Joining -> "Joining"
-        is StreamCallState.Outgoing -> "Outgoing"
-        StreamCallState.Idle -> "Idle"
     }
 }

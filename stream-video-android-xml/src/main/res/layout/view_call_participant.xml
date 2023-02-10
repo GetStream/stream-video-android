@@ -34,7 +34,7 @@
         />
 
     <LinearLayout
-        android:id="@+id/nameHolder"
+        android:id="@+id/labelHolder"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
@@ -55,7 +55,7 @@
             />
 
         <TextView
-            android:id="@+id/participantName"
+            android:id="@+id/participantLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"

@@ -41,10 +41,9 @@ import io.getstream.video.android.ui.common.R as RCommon
 public fun ActiveCallView.bindView(
     viewModel: CallViewModel,
     lifecycleOwner: LifecycleOwner,
+
 ) {
-    callActionListener = { item ->
-        viewModel.onCallAction(item)
-    }
+    callActionListener = viewModel::onCallAction
 
     setControlItems(buildDefaultControlList())
 

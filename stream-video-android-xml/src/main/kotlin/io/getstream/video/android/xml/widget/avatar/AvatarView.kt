@@ -78,7 +78,6 @@ public class AvatarView : ShapeableImageView {
             data = imageUrl,
             placeholderDrawable = AvatarPlaceholderDrawable(context, name.initials(), avatarStyle.avatarInitialsTextStyle)
         )
-        invalidate()
     }
 
     private fun init(context: Context, attrs: AttributeSet?) {

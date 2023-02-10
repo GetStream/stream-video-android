@@ -77,9 +77,9 @@ public final class io/getstream/video/android/xml/databinding/ViewCallDetailsBin
 
 public final class io/getstream/video/android/xml/databinding/ViewCallParticipantBinding : androidx/viewbinding/ViewBinding {
 	public final field activeCallParticipantBorder Landroid/widget/ImageView;
-	public final field nameHolder Landroid/widget/LinearLayout;
+	public final field labelHolder Landroid/widget/LinearLayout;
 	public final field participantAvatar Lio/getstream/video/android/xml/widget/avatar/AvatarView;
-	public final field participantName Landroid/widget/TextView;
+	public final field participantLabel Landroid/widget/TextView;
 	public final field participantVideoRenderer Lio/getstream/video/android/core/ui/TextureViewRenderer;
 	public final field soundIndicator Landroid/widget/ImageView;
 	public static fun bind (Landroid/view/View;)Lio/getstream/video/android/xml/databinding/ViewCallParticipantBinding;
@@ -215,17 +215,9 @@ public final class io/getstream/video/android/xml/initializer/VideoUIInitializer
 	public fun dependencies ()Ljava/util/List;
 }
 
-public final class io/getstream/video/android/xml/utils/ColorUtilsKt {
-	public static final fun adjustColorBrightness (IF)I
-}
-
 public abstract interface class io/getstream/video/android/xml/utils/Disposable {
 	public abstract fun dispose ()V
 	public abstract fun isDisposed ()Z
-}
-
-public final class io/getstream/video/android/xml/utils/MockUtilsKt {
-	public static final fun getMockUsers ()Ljava/util/List;
 }
 
 public final class io/getstream/video/android/xml/widget/active/ActiveCallView : io/getstream/video/android/xml/widget/callcontent/CallContent {
@@ -482,38 +474,40 @@ public final class io/getstream/video/android/xml/widget/outgoing/OutgoingCallVi
 	public final fun setParticipants (Ljava/util/List;)V
 }
 
+public final class io/getstream/video/android/xml/widget/participant/CallParticipantLabelAlignment : java/lang/Enum {
+	public static final field BOTTOM_LEFT Lio/getstream/video/android/xml/widget/participant/CallParticipantLabelAlignment;
+	public static final field BOTTOM_RIGHT Lio/getstream/video/android/xml/widget/participant/CallParticipantLabelAlignment;
+	public static final field TOP_LEFT Lio/getstream/video/android/xml/widget/participant/CallParticipantLabelAlignment;
+	public static final field TOP_RIGHT Lio/getstream/video/android/xml/widget/participant/CallParticipantLabelAlignment;
+	public static fun valueOf (Ljava/lang/String;)Lio/getstream/video/android/xml/widget/participant/CallParticipantLabelAlignment;
+	public static fun values ()[Lio/getstream/video/android/xml/widget/participant/CallParticipantLabelAlignment;
+}
+
 public final class io/getstream/video/android/xml/widget/participant/CallParticipantStyle {
-	public fun <init> (Lio/getstream/video/android/xml/widget/participant/CallParticipantTagAlignment;IILio/getstream/video/android/xml/font/TextStyle;ILandroid/graphics/drawable/Drawable;II)V
-	public final fun component1 ()Lio/getstream/video/android/xml/widget/participant/CallParticipantTagAlignment;
+	public fun <init> (Lio/getstream/video/android/xml/widget/participant/CallParticipantLabelAlignment;IIILio/getstream/video/android/xml/font/TextStyle;ILandroid/graphics/drawable/Drawable;II)V
+	public final fun component1 ()Lio/getstream/video/android/xml/widget/participant/CallParticipantLabelAlignment;
 	public final fun component2 ()I
 	public final fun component3 ()I
-	public final fun component4 ()Lio/getstream/video/android/xml/font/TextStyle;
-	public final fun component5 ()I
-	public final fun component6 ()Landroid/graphics/drawable/Drawable;
-	public final fun component7 ()I
+	public final fun component4 ()I
+	public final fun component5 ()Lio/getstream/video/android/xml/font/TextStyle;
+	public final fun component6 ()I
+	public final fun component7 ()Landroid/graphics/drawable/Drawable;
 	public final fun component8 ()I
-	public final fun copy (Lio/getstream/video/android/xml/widget/participant/CallParticipantTagAlignment;IILio/getstream/video/android/xml/font/TextStyle;ILandroid/graphics/drawable/Drawable;II)Lio/getstream/video/android/xml/widget/participant/CallParticipantStyle;
-	public static synthetic fun copy$default (Lio/getstream/video/android/xml/widget/participant/CallParticipantStyle;Lio/getstream/video/android/xml/widget/participant/CallParticipantTagAlignment;IILio/getstream/video/android/xml/font/TextStyle;ILandroid/graphics/drawable/Drawable;IIILjava/lang/Object;)Lio/getstream/video/android/xml/widget/participant/CallParticipantStyle;
+	public final fun component9 ()I
+	public final fun copy (Lio/getstream/video/android/xml/widget/participant/CallParticipantLabelAlignment;IIILio/getstream/video/android/xml/font/TextStyle;ILandroid/graphics/drawable/Drawable;II)Lio/getstream/video/android/xml/widget/participant/CallParticipantStyle;
+	public static synthetic fun copy$default (Lio/getstream/video/android/xml/widget/participant/CallParticipantStyle;Lio/getstream/video/android/xml/widget/participant/CallParticipantLabelAlignment;IIILio/getstream/video/android/xml/font/TextStyle;ILandroid/graphics/drawable/Drawable;IIILjava/lang/Object;)Lio/getstream/video/android/xml/widget/participant/CallParticipantStyle;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getActiveSpeakerBorderColor ()I
+	public final fun getActiveSpeakerBorderWidth ()I
+	public final fun getLabelAlignment ()Lio/getstream/video/android/xml/widget/participant/CallParticipantLabelAlignment;
+	public final fun getLabelBackgroundColor ()I
+	public final fun getLabelPadding ()I
+	public final fun getLabelTextStyle ()Lio/getstream/video/android/xml/font/TextStyle;
 	public final fun getParticipantAudioLevelTint ()I
 	public final fun getParticipantMicOffIcon ()Landroid/graphics/drawable/Drawable;
 	public final fun getParticipantMicOffIconTint ()I
-	public final fun getTagAlignment ()Lio/getstream/video/android/xml/widget/participant/CallParticipantTagAlignment;
-	public final fun getTagBackgroundColor ()I
-	public final fun getTagPadding ()I
-	public final fun getTagTextStyle ()Lio/getstream/video/android/xml/font/TextStyle;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/xml/widget/participant/CallParticipantTagAlignment : java/lang/Enum {
-	public static final field BOTTOM_LEFT Lio/getstream/video/android/xml/widget/participant/CallParticipantTagAlignment;
-	public static final field BOTTOM_RIGHT Lio/getstream/video/android/xml/widget/participant/CallParticipantTagAlignment;
-	public static final field TOP_LEFT Lio/getstream/video/android/xml/widget/participant/CallParticipantTagAlignment;
-	public static final field TOP_RIGHT Lio/getstream/video/android/xml/widget/participant/CallParticipantTagAlignment;
-	public static fun valueOf (Ljava/lang/String;)Lio/getstream/video/android/xml/widget/participant/CallParticipantTagAlignment;
-	public static fun values ()[Lio/getstream/video/android/xml/widget/participant/CallParticipantTagAlignment;
 }
 
 public final class io/getstream/video/android/xml/widget/participant/CallParticipantView : androidx/constraintlayout/widget/ConstraintLayout {

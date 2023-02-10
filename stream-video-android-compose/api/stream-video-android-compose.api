@@ -523,10 +523,6 @@ public final class io/getstream/video/android/compose/ui/components/internal/Com
 	public final fun getLambda-2$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
 }
 
-public final class io/getstream/video/android/compose/ui/components/mock/MockUtilsKt {
-	public static final fun getMockUsers ()Ljava/util/List;
-}
-
 public final class io/getstream/video/android/compose/ui/components/participants/CallParticipantKt {
 	public static final fun CallParticipant (Lio/getstream/video/android/core/model/Call;Lio/getstream/video/android/core/model/CallParticipantState;Landroidx/compose/ui/Modifier;Landroidx/compose/foundation/layout/PaddingValues;Landroidx/compose/ui/Alignment;ZLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
