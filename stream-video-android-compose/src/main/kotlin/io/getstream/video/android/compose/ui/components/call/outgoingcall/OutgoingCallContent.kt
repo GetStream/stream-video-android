@@ -120,7 +120,7 @@ public fun OutgoingCall(
             OutgoingSingleCallOptions(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(bottom = 44.dp),
+                    .padding(bottom = VideoTheme.dimens.outgoingCallOptionsBottomPadding),
                 callMediaState = callMediaState,
                 onCallAction = onCallAction
             )
@@ -128,7 +128,7 @@ public fun OutgoingCall(
             OutgoingGroupCallOptions(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(bottom = 44.dp),
+                    .padding(bottom = VideoTheme.dimens.outgoingCallOptionsBottomPadding),
                 callMediaState = callMediaState,
                 onCallAction = onCallAction
             )

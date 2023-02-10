@@ -13,6 +13,7 @@
     <dimen name="singleAvatarAppbarPadding">20dp</dimen>
     <dimen name="participantsTextPadding">65dp</dimen>
     <dimen name="incomingCallOptionsBottomPadding">44dp</dimen>
+    <dimen name="outgoingCallOptionsBottomPadding">44dp</dimen>
     <dimen name="callAppBarPadding">12dp</dimen>
     <dimen name="callAppBarLeadingContentSpacingStart">0dp</dimen>
     <dimen name="callAppBarLeadingContentSpacingEnd">0dp</dimen>
@@ -28,6 +29,8 @@
     <dimen name="callParticipantInfoMenuOptionsHeight">56dp</dimen>
     <dimen name="callParticipantsInfoMenuOptionsButtonHeight">40dp</dimen>
     <dimen name="callParticipantsInfoAvatarSize">56dp</dimen>
+    <dimen name="callStatusParticipantsMargin">16dp</dimen>
+    <dimen name="callParticipantsAvatarsMargin">32dp</dimen>
     <dimen name="floatingVideoPadding">16dp</dimen>
     <dimen name="floatingVideoHeight">150dp</dimen>
     <dimen name="floatingVideoWidth">125dp</dimen>
@@ -41,6 +44,9 @@
     <dimen name="audioLevelIndicatorBarSeparatorWidth">3dp</dimen>
     <dimen name="audioStatusSize">15dp</dimen>
     <dimen name="activeSpeakerBoarderWidth">3dp</dimen>
+    <dimen name="callParticipantLabelPadding">8dp</dimen>
+    <dimen name="callParticipantLabelTextMaxWidth">64dp</dimen>
+    <dimen name="callParticipantLabelTextPadding">4dp</dimen>
 
     <dimen name="title1TextSize">24sp</dimen>
     <dimen name="title1LineHeight">34sp</dimen>

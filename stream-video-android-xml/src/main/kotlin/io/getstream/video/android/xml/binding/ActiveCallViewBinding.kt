@@ -48,7 +48,7 @@ public fun ActiveCallView.bindView(
     setControlItems(buildDefaultControlList())
 
     startJob(lifecycleOwner) {
-        viewModel.callState.filterNotNull().distinctUntilChanged().collectLatest { call ->
+        viewModel.callState.filterNotNull().collectLatest { call ->
             setParticipantsRendererInitializer { videoRenderer, trackId, trackType, onRender ->
                 call.initRenderer(videoRenderer, trackId, trackType, onRender)
             }

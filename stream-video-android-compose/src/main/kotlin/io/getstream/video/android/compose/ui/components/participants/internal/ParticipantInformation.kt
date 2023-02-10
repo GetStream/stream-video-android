@@ -66,7 +66,7 @@ internal fun ParticipantInformation(
             textAlign = TextAlign.Center,
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(VideoTheme.dimens.callStatusParticipantsMargin))
 
         Text(
             modifier = Modifier.alpha(VideoTheme.dimens.onCallStatusTextAlpha),

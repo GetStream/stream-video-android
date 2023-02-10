@@ -52,7 +52,7 @@ internal fun IncomingCallDetails(
             }
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(VideoTheme.dimens.callParticipantsAvatarsMargin))
 
         ParticipantInformation(
             callStatus = CallStatus.Incoming,

@@ -40,7 +40,7 @@
         android:layout_margin="8dp"
         android:background="@drawable/bg_call_participant_name"
         android:orientation="horizontal"
-        android:padding="8dp"
+        android:padding="@dimen/callParticipantLabelPadding"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         >
@@ -62,9 +62,8 @@
             android:ellipsize="end"
             android:gravity="center"
             android:lines="1"
-            android:maxWidth="64dp"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
+            android:maxWidth="@dimen/callParticipantLabelTextMaxWidth"
+            android:padding="@dimen/callParticipantLabelTextPadding"
             tools:text="Some random user"
             />
 

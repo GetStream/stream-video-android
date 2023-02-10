@@ -40,7 +40,7 @@ import io.getstream.video.android.core.model.Call
  */
 @Composable
 internal fun BoxScope.Participants(
-    call: io.getstream.video.android.core.model.Call,
+    call: Call,
     onRender: (View) -> Unit,
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues = PaddingValues(0.dp),
