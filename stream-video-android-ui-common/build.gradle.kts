@@ -44,4 +44,7 @@ dependencies {
     implementation(Dependencies.material)
     implementation(Dependencies.streamLog)
     implementation(Dependencies.coil)
+
+    implementation(Dependencies.androidxActivity)
+    implementation(Dependencies.androidxLifecycleRuntime)
 }
