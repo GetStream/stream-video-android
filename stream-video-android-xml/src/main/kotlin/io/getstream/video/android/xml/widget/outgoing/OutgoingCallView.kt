@@ -115,7 +115,7 @@ public class OutgoingCallView : CallContent {
      */
     public fun setParticipants(participants: List<CallUser>) {
         binding.callDetails.setParticipants(participants)
-        if (participants.size >= 2) setGroupCallControlsLayout()
+        if (participants.size > 1) setGroupCallControlsLayout()
         binding.callBackground.setParticipants(participants, style.outgoingScreenBackground)
     }
 

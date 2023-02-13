@@ -28,6 +28,7 @@ import androidx.compose.ui.platform.LocalContext
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
+import io.getstream.video.android.common.util.adjustColorBrightness
 import io.getstream.video.android.compose.imageloading.LocalStreamImageLoader
 import io.getstream.video.android.ui.common.R
 import kotlin.math.abs

@@ -112,7 +112,11 @@ public abstract class AbstractXmlCallActivity : AbstractCallActivity() {
         if (isViewInsideContainer<OutgoingCallView>()) return
         val outgoingCallView = OutgoingCallView(this)
         addContentView(outgoingCallView)
-        outgoingCallView.bindView(callViewModel, this)
+        outgoingCallView.bindView(
+            viewModel = callViewModel,
+            lifecycleOwner = this,
+            onCallAction = ::handleCallAction
+        )
     }
 
     /**
@@ -122,7 +126,11 @@ public abstract class AbstractXmlCallActivity : AbstractCallActivity() {
         if (isViewInsideContainer<IncomingCallView>()) return
         val incomingCallView = IncomingCallView(this)
         addContentView(incomingCallView)
-        incomingCallView.bindView(callViewModel, this)
+        incomingCallView.bindView(
+            viewModel = callViewModel,
+            lifecycleOwner = this,
+            onCallAction = ::handleCallAction
+        )
     }
 
     /**
@@ -132,7 +140,11 @@ public abstract class AbstractXmlCallActivity : AbstractCallActivity() {
         if (isViewInsideContainer<ActiveCallView>()) return
         val activeCallView = ActiveCallView(this)
         addContentView(activeCallView)
-        activeCallView.bindView(callViewModel, this)
+        activeCallView.bindView(
+            viewModel = callViewModel,
+            lifecycleOwner = this,
+            onCallAction = ::handleCallAction
+        )
     }
 
     /**

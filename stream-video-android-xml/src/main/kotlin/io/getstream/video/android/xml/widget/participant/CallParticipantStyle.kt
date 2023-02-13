@@ -38,28 +38,29 @@ import io.getstream.video.android.ui.common.R as RCommon
  * Use this class together with [TransformStyle.callParticipantStyleTransformer] to change [CallParticipantView]
  * styles programmatically.
  *
- * @param tagAlignment The alignment of the microphone off/on icon and name tag.
- * @param tagPadding The padding between the name tag and the [CallParticipantView] borders.
+ * @param labelAlignment The alignment of the microphone off/on icon and name label.
+ * @param labelPadding The padding between the name label and the [CallParticipantView] borders.
  * @param activeSpeakerBorderColor The colour of the active speaking participant border.
- * @param tagTextStyle The text style for the participants name tag.
- * @param tagBackgroundColor The colour of the participant name tag background.
+ * @param labelTextStyle The text style for the participants name label.
+ * @param labelBackgroundColor The colour of the participant name label background.
  * @param participantMicOffIcon The icon indicating when the participants microphone is off.
  * @param participantMicOffIconTint The colour of the microphone off indicator drawable.
  * @param participantAudioLevelTint The color of the audio level when the microphone is on.
  */
 public data class CallParticipantStyle(
-    public val tagAlignment: CallParticipantTagAlignment,
-    @Px public val tagPadding: Int,
+    public val labelAlignment: CallParticipantLabelAlignment,
+    @Px public val labelPadding: Int,
+    @Px public val activeSpeakerBorderWidth: Int,
     @ColorInt public val activeSpeakerBorderColor: Int,
-    public val tagTextStyle: TextStyle,
-    @ColorInt public val tagBackgroundColor: Int,
+    public val labelTextStyle: TextStyle,
+    @ColorInt public val labelBackgroundColor: Int,
     public val participantMicOffIcon: Drawable,
     @ColorInt public val participantMicOffIconTint: Int,
     @ColorInt public val participantAudioLevelTint: Int
 ) {
 
     internal companion object {
-        private val DEFAULT_TAG_MARGIN = 8.dpToPxPrecise()
+        private val DEFAULT_LABEL_MARGIN = 8.dpToPxPrecise()
 
         operator fun invoke(context: Context, attrs: AttributeSet?, styleAttrs: Int, styleRes: Int): CallParticipantStyle {
             val viewStyleAttr = if (styleAttrs == 0) R.attr.streamCallParticipantViewStyle else styleAttrs
@@ -72,42 +73,47 @@ public data class CallParticipantStyle(
                 viewStyleRes
             ).use {
 
-                val tagAlignment = it.getEnum(
-                    R.styleable.CallParticipantView_streamCallParticipantTagAlignment,
-                    CallParticipantTagAlignment.TOP_LEFT
+                val labelAlignment = it.getEnum(
+                    R.styleable.CallParticipantView_streamCallParticipantLabelAlignment,
+                    CallParticipantLabelAlignment.TOP_LEFT
                 )
 
-                val tagPadding = it.getDimension(
-                    R.styleable.CallParticipantView_streamCallParticipantTagMargin,
-                    DEFAULT_TAG_MARGIN
+                val labelPadding = it.getDimension(
+                    R.styleable.CallParticipantView_streamCallParticipantLabelMargin,
+                    DEFAULT_LABEL_MARGIN
                 )
+
+                val activeSpeakerBorderWidth = it.getDimension(
+                    R.styleable.CallParticipantView_streamCallParticipantActiveSpeakerBorderWidth,
+                    context.getDimension(RCommon.dimen.activeSpeakerBoarderWidth).toFloat()
+                ).toInt()
 
                 val activeSpeakerBorderColor = it.getColor(
                     R.styleable.CallParticipantView_streamCallParticipantActiveSpeakerBorderColor,
                     context.getColorCompat(RCommon.color.stream_info_accent)
                 )
 
-                val tagTextStyle = TextStyle.Builder(it)
+                val labelTextStyle = TextStyle.Builder(it)
                     .size(
-                        R.styleable.CallParticipantView_streamCallParticipantTagTextSize,
+                        R.styleable.CallParticipantView_streamCallParticipantLabelTextSize,
                         context.getDimension(RCommon.dimen.bodyTextSize)
                     )
                     .color(
-                        R.styleable.CallParticipantView_streamCallParticipantTagTextColor,
+                        R.styleable.CallParticipantView_streamCallParticipantLabelTextColor,
                         context.getColorCompat(R.color.stream_white)
                     )
                     .font(
-                        R.styleable.CallParticipantView_streamCallParticipantTagTextFontAssets,
-                        R.styleable.CallParticipantView_streamCallParticipantTagTextFont
+                        R.styleable.CallParticipantView_streamCallParticipantLabelTextFontAssets,
+                        R.styleable.CallParticipantView_streamCallParticipantLabelTextFont
                     )
                     .style(
-                        R.styleable.CallParticipantView_streamCallParticipantTagTextStyle,
+                        R.styleable.CallParticipantView_streamCallParticipantLabelTextStyle,
                         Typeface.BOLD
                     )
                     .build()
 
-                val tagBackgroundColor = it.getColor(
-                    R.styleable.CallParticipantView_streamCallParticipantTagBackgroundColor,
+                val labelBackgroundColor = it.getColor(
+                    R.styleable.CallParticipantView_streamCallParticipantLabelBackgroundColor,
                     context.getColorCompat(R.color.stream_dark_gray)
                 )
 
@@ -126,11 +132,12 @@ public data class CallParticipantStyle(
                 )
 
                 return CallParticipantStyle(
-                    tagAlignment = tagAlignment,
-                    tagPadding = tagPadding.toInt(),
+                    labelAlignment = labelAlignment,
+                    labelPadding = labelPadding.toInt(),
+                    activeSpeakerBorderWidth = activeSpeakerBorderWidth,
                     activeSpeakerBorderColor = activeSpeakerBorderColor,
-                    tagTextStyle = tagTextStyle,
-                    tagBackgroundColor = tagBackgroundColor,
+                    labelTextStyle = labelTextStyle,
+                    labelBackgroundColor = labelBackgroundColor,
                     participantMicOffIcon = participantMicOffIcon,
                     participantMicOffIconTint = participantMicOffIconTint,
                     participantAudioLevelTint = participantAudioLevelTint
@@ -138,11 +145,4 @@ public data class CallParticipantStyle(
             }
         }
     }
-}
-
-public enum class CallParticipantTagAlignment {
-    TOP_LEFT,
-    TOP_RIGHT,
-    BOTTOM_LEFT,
-    BOTTOM_RIGHT
 }

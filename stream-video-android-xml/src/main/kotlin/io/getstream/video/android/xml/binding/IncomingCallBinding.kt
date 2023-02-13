@@ -17,6 +17,7 @@
 package io.getstream.video.android.xml.binding
 
 import androidx.lifecycle.LifecycleOwner
+import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.model.CallStatus
 import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.xml.widget.incoming.IncomingCallView
@@ -28,14 +29,20 @@ import kotlinx.coroutines.flow.collectLatest
  *
  * This function sets listeners on the view and ViewModel. Call this method
  * before setting any additional listeners on these objects yourself.
+ *
+ * @param viewModel [CallViewModel] for observing data and running actions.
+ * @param lifecycleOwner The lifecycle owner, root component containing [IncomingCallView]. Usually an Activity or
+ * Fragment.
+ * @param onCallAction Handler that listens to interactions with call media controls.
  */
 public fun IncomingCallView.bindView(
     viewModel: CallViewModel,
     lifecycleOwner: LifecycleOwner,
+    onCallAction: (CallAction) -> Unit = viewModel::onCallAction
 ) {
     setCallStatus(CallStatus.Outgoing)
 
-    callActionListener = viewModel::onCallAction
+    callActionListener = onCallAction
 
     startJob(lifecycleOwner) {
         viewModel.callMediaState.collectLatest {
