@@ -35,9 +35,9 @@ internal data class DatacenterResponse(
     val coordinates: Coordinates,
 
     @Json(name = "latency_url")
-    val latencyUrl: kotlin.String? = null,
+    val latencyUrl: kotlin.String,
 
     @Json(name = "name")
-    val name: kotlin.String? = null
+    val name: kotlin.String
 
 )

@@ -28,10 +28,9 @@ import com.squareup.moshi.Json
 /**
  * *
  * @param createdAt Date/time of creation
- * @param updatedAt Date/time of the last update
- * @param user * @param custom Custom member response data
- * @param deletedAt Date/time of deletion
- * @param duration * @param role * @param userId User ID
+ * @param custom Custom member response data
+ * @param duration * @param role * @param updatedAt Date/time of the last update
+ * @param user * @param userId * @param deletedAt Date/time of deletion
  */
 
 internal data class MemberResponse(
@@ -40,6 +39,16 @@ internal data class MemberResponse(
     @Json(name = "created_at")
     val createdAt: java.time.OffsetDateTime,
 
+    /* Custom member response data */
+    @Json(name = "custom")
+    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any>?,
+
+    @Json(name = "duration")
+    val duration: kotlin.String,
+
+    @Json(name = "role")
+    val role: kotlin.String,
+
     /* Date/time of the last update */
     @Json(name = "updated_at")
     val updatedAt: java.time.OffsetDateTime,
@@ -47,22 +56,11 @@ internal data class MemberResponse(
     @Json(name = "user")
     val user: UserResponse,
 
-    /* Custom member response data */
-    @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null,
+    @Json(name = "user_id")
+    val userId: kotlin.String,
 
     /* Date/time of deletion */
     @Json(name = "deleted_at")
-    val deletedAt: java.time.OffsetDateTime? = null,
-
-    @Json(name = "duration")
-    val duration: kotlin.String? = null,
-
-    @Json(name = "role")
-    val role: kotlin.String? = null,
-
-    /* User ID */
-    @Json(name = "user_id")
-    val userId: kotlin.String? = null
+    val deletedAt: java.time.OffsetDateTime? = null
 
 )

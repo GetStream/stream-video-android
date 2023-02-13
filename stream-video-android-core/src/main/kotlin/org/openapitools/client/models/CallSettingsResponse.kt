@@ -27,9 +27,12 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param broadcasting * @param geofencing * @param recording * @param screensharing * @param video */
+ * @param audio * @param broadcasting * @param geofencing * @param recording * @param screensharing * @param video */
 
 internal data class CallSettingsResponse(
+
+    @Json(name = "audio")
+    val audio: AudioSettings,
 
     @Json(name = "broadcasting")
     val broadcasting: BroadcastSettings,

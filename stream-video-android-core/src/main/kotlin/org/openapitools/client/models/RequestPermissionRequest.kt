@@ -34,10 +34,4 @@ internal data class RequestPermissionRequest(
     @Json(name = "permissions")
     val permissions: kotlin.collections.List<kotlin.String>
 
-) {
-
-    /**
-     * *
-     * Values: */
-    enum class Permissions(val value: kotlin.String)
-}
+)

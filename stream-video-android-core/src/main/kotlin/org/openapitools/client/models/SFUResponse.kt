@@ -32,9 +32,9 @@ import com.squareup.moshi.Json
 internal data class SFUResponse(
 
     @Json(name = "edge_name")
-    val edgeName: kotlin.String? = null,
+    val edgeName: kotlin.String,
 
     @Json(name = "url")
-    val url: kotlin.String? = null
+    val url: kotlin.String
 
 )

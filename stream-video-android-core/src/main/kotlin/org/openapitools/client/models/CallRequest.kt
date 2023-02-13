@@ -27,12 +27,9 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param members * @param createdBy * @param createdById * @param custom * @param settingsOverride * @param team */
+ * @param createdBy * @param createdById * @param custom * @param members * @param settingsOverride * @param team */
 
 internal data class CallRequest(
-
-    @Json(name = "members")
-    val members: kotlin.collections.List<MemberRequest>,
 
     @Json(name = "created_by")
     val createdBy: UserRequest? = null,
@@ -42,6 +39,9 @@ internal data class CallRequest(
 
     @Json(name = "custom")
     val custom: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null,
+
+    @Json(name = "members")
+    val members: kotlin.collections.List<MemberRequest>? = null,
 
     @Json(name = "settings_override")
     val settingsOverride: CallSettingsRequest? = null,

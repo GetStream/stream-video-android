@@ -17,7 +17,6 @@
 package org.openapitools.client.apis
 
 import org.openapitools.client.models.VideoWSAuthMessageRequest
-import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 
@@ -33,5 +32,5 @@ internal interface UsersApi {
      * @return [Unit]
      */
     @GET("video/connect")
-    suspend fun videoConnect(@Body videoWSAuthMessageRequest: VideoWSAuthMessageRequest): Response<Unit>
+    suspend fun videoConnect(@Body videoWSAuthMessageRequest: VideoWSAuthMessageRequest): Unit
 }

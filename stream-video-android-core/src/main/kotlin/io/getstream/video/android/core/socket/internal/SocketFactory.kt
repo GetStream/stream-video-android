@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.socket.internal
 
+import io.getstream.log.taggedLogger
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.logging.HttpLoggingInterceptor
@@ -35,6 +36,8 @@ internal class SocketFactory(
         .build(),
 ) {
 
+    val logger by taggedLogger("SocketFactory")
+
     /**
      * Creates a socket that's used to observe events from the server.
      *
@@ -42,7 +45,12 @@ internal class SocketFactory(
      * @param connectionConf Configuration used to build the socket.
      */
     fun createSocket(eventsParser: EventsParser, connectionConf: ConnectionConf): Socket {
-        val url = connectionConf.endpoint
+        val url =
+            "${connectionConf.endpoint}?api_key=${connectionConf.apiKey}&stream-auth-type=jwt&X-Stream-Client=stream-video-android"
+        // wss://video-edge-frankfurt-ce1.stream-io-api.com/video/connect?api_key=<api_key>&stream-auth-type=jwt&X-Stream-Client=stream-video-javascript-client-browser
+
+        logger.d { "[createSocket] url: $url" }
+
         val request = Request
             .Builder()
             .url(url)
@@ -59,7 +67,11 @@ internal class SocketFactory(
      *
      * @property endpoint The URL endpoint to connect the socket to.
      */
-    internal data class ConnectionConf(val endpoint: String) {
+    internal data class ConnectionConf(
+        val endpoint: String,
+        val apiKey: String,
+        val client: String
+    ) {
         var isReconnection: Boolean = false
             private set
 

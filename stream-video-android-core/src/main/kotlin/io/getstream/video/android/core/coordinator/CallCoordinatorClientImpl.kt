@@ -21,24 +21,24 @@ import io.getstream.video.android.core.errors.VideoError
 import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.core.model.StreamCallCid
 import io.getstream.video.android.core.model.User
-import io.getstream.video.android.core.model.toCallUser
 import io.getstream.video.android.core.utils.Failure
 import io.getstream.video.android.core.utils.Result
 import io.getstream.video.android.core.utils.Success
+import io.getstream.video.android.core.utils.toCallUser
+import org.openapitools.client.apis.EventsApi
 import org.openapitools.client.apis.VideoCallsApi
 import org.openapitools.client.models.GetCallEdgeServerRequest
 import org.openapitools.client.models.GetCallEdgeServerResponse
 import org.openapitools.client.models.GetOrCreateCallRequest
 import org.openapitools.client.models.GetOrCreateCallResponse
 import org.openapitools.client.models.JoinCallResponse
+import org.openapitools.client.models.QueryMembersRequest
+import org.openapitools.client.models.SendEventRequest
 import stream.video.coordinator.call_v1.Call
 import stream.video.coordinator.client_v1_rpc.CreateDeviceRequest
 import stream.video.coordinator.client_v1_rpc.CreateDeviceResponse
 import stream.video.coordinator.client_v1_rpc.DeleteDeviceRequest
 import stream.video.coordinator.client_v1_rpc.MemberInput
-import stream.video.coordinator.client_v1_rpc.QueryUsersRequest
-import stream.video.coordinator.client_v1_rpc.SendCustomEventRequest
-import stream.video.coordinator.client_v1_rpc.SendEventRequest
 import stream.video.coordinator.client_v1_rpc.UpsertCallMembersRequest
 
 /**
@@ -46,7 +46,8 @@ import stream.video.coordinator.client_v1_rpc.UpsertCallMembersRequest
  */
 internal class CallCoordinatorClientImpl(
     private val callCoordinatorService: ClientRPCService,
-    private val videoCallApi: VideoCallsApi
+    private val videoCallApi: VideoCallsApi,
+    private val eventsApi: EventsApi
 ) : CallCoordinatorClient {
 
     /**
@@ -150,27 +151,17 @@ internal class CallCoordinatorClientImpl(
      * @param sendEventRequest The request holding information about the event type and the call.
      * @return a [Result] wrapper if the call succeeded or not.
      */
-    override suspend fun sendUserEvent(sendEventRequest: SendEventRequest): Result<Boolean> = try {
-        callCoordinatorService.sendEvent(sendEventRequest = sendEventRequest)
+    override suspend fun sendUserEvent(
+        id: String,
+        type: String,
+        sendEventRequest: SendEventRequest
+    ): Result<Boolean> = try {
+        eventsApi.sendEvent(type, id, sendEventRequest)
 
         Success(true)
     } catch (error: Throwable) {
         Failure(VideoError(error.message, error))
     }
-
-    /**
-     * Sends a custom event with encoded JSON data.
-     *
-     * @param sendCustomEventRequest The request holding the CID and the data.
-     */
-    override suspend fun sendCustomEvent(sendCustomEventRequest: SendCustomEventRequest): Result<Boolean> =
-        try {
-            callCoordinatorService.sendCustomEvent(sendCustomEventRequest = sendCustomEventRequest)
-
-            Success(true)
-        } catch (error: Throwable) {
-            Failure(VideoError(error.message, error))
-        }
 
     /**
      * Sends invite to people for an existing call.
@@ -196,8 +187,8 @@ internal class CallCoordinatorClientImpl(
         Failure(VideoError(error.message, error))
     }
 
-    override suspend fun queryUsers(request: QueryUsersRequest): Result<List<CallUser>> = try {
-        val users = callCoordinatorService.queryUsers(request).users
+    override suspend fun queryMembers(request: QueryMembersRequest): Result<List<CallUser>> = try {
+        val users = videoCallApi.queryMembers(request).members
 
         Success(users.map { it.toCallUser() })
     } catch (error: Throwable) {

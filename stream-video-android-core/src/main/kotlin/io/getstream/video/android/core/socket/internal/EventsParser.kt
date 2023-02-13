@@ -23,6 +23,10 @@ import io.getstream.video.android.core.errors.VideoNetworkError
 import io.getstream.video.android.core.events.ConnectedEvent
 import io.getstream.video.android.core.events.HealthCheckEvent
 import io.getstream.video.android.core.socket.VideoSocket
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import okhttp3.Response
 import okhttp3.WebSocket
 import okio.ByteString
@@ -45,7 +49,26 @@ internal class EventsParser(
         videoSocket.authenticateUser()
     }
 
-    override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
+    override fun onMessage(webSocket: WebSocket, text: String) {
+        super.onMessage(webSocket, text)
+
+        val data = Json.decodeFromString<JsonObject>(text)
+
+        // TODO - wait for BE to add health check events and parse properly. we'll still need to parse the type and figure out the events ourselves
+        logger.d { "[onMessage] $data" }
+
+        if (data["type"]?.jsonPrimitive?.content == "health.check") {
+            connectionEventReceived = true
+            val connectionId = data["connection_id"]?.jsonPrimitive?.content ?: ""
+
+            videoSocket.onConnectionResolved(ConnectedEvent(connectionId))
+        }
+    }
+
+    override fun onMessage(
+        webSocket: WebSocket,
+        bytes: ByteString
+    ) { // TODO transform this ^ into JSON parsing
         super.onMessage(webSocket, bytes)
         try {
             val rawEvent = WebsocketEvent.ADAPTER.decode(bytes)

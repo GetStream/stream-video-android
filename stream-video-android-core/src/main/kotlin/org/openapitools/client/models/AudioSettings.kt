@@ -27,23 +27,11 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param call * @param createdAt * @param members * @param ringing * @param type */
+ * @param accessRequestEnabled */
 
-internal data class CallCreated(
+internal data class AudioSettings(
 
-    @Json(name = "call")
-    val call: CallResponse,
-
-    @Json(name = "created_at")
-    val createdAt: java.time.OffsetDateTime,
-
-    @Json(name = "members")
-    val members: kotlin.collections.List<MemberResponse>,
-
-    @Json(name = "ringing")
-    val ringing: kotlin.Boolean,
-
-    @Json(name = "type")
-    val type: kotlin.String
+    @Json(name = "access_request_enabled")
+    val accessRequestEnabled: kotlin.Boolean
 
 )

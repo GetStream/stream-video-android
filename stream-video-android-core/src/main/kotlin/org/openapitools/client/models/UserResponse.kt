@@ -28,9 +28,9 @@ import com.squareup.moshi.Json
 /**
  * *
  * @param createdAt Date/time of creation
- * @param updatedAt Date/time of the last update
- * @param custom * @param deletedAt Date/time of deletion
- * @param id * @param image * @param name * @param role * @param teams */
+ * @param custom * @param id * @param role * @param updatedAt Date/time of the last update
+ * @param deletedAt Date/time of deletion
+ * @param image * @param name * @param teams */
 
 internal data class UserResponse(
 
@@ -38,28 +38,28 @@ internal data class UserResponse(
     @Json(name = "created_at")
     val createdAt: java.time.OffsetDateTime,
 
+    @Json(name = "custom")
+    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any>?,
+
+    @Json(name = "id")
+    val id: kotlin.String,
+
+    @Json(name = "role")
+    val role: kotlin.String,
+
     /* Date/time of the last update */
     @Json(name = "updated_at")
     val updatedAt: java.time.OffsetDateTime,
 
-    @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null,
-
     /* Date/time of deletion */
     @Json(name = "deleted_at")
     val deletedAt: java.time.OffsetDateTime? = null,
-
-    @Json(name = "id")
-    val id: kotlin.String? = null,
 
     @Json(name = "image")
     val image: kotlin.String? = null,
 
     @Json(name = "name")
     val name: kotlin.String? = null,
-
-    @Json(name = "role")
-    val role: kotlin.String? = null,
 
     @Json(name = "teams")
     val teams: kotlin.collections.List<kotlin.String>? = null

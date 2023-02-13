@@ -16,10 +16,11 @@
 
 package io.getstream.video.android.core.socket.internal
 
+import com.squareup.moshi.JsonAdapter
 import com.squareup.wire.Message
 import okhttp3.WebSocket
-import stream.video.coordinator.client_v1_rpc.WebsocketAuthRequest
-import stream.video.coordinator.client_v1_rpc.WebsocketClientEvent
+import org.openapitools.client.infrastructure.Serializer
+import org.openapitools.client.models.VideoWSAuthMessageRequest
 import stream.video.coordinator.client_v1_rpc.WebsocketHealthcheck
 import stream.video.sfu.event.HealthCheckRequest
 import stream.video.sfu.event.JoinRequest
@@ -33,11 +34,16 @@ import stream.video.sfu.event.SfuRequest
 internal class Socket(private val socket: WebSocket) {
 
     /**
-     * Sends the [authPayload] as a Binary message to the socket, attempting to authenticate the
+     * Sends the [authRequest] as a message to the socket, attempting to authenticate the
      * currently logged in user.
      */
-    fun authenticate(authPayload: WebsocketAuthRequest) {
-        socket.send(WebsocketClientEvent(auth_request = authPayload).encodeByteString())
+    fun authenticate(authRequest: VideoWSAuthMessageRequest) {
+        val adapter: JsonAdapter<VideoWSAuthMessageRequest> =
+            Serializer.moshi.adapter(VideoWSAuthMessageRequest::class.java)
+
+        val message = adapter.toJson(authRequest)
+
+        socket.send(message)
     }
 
     fun joinCall(joinRequest: JoinRequest) {

@@ -25,6 +25,7 @@ import io.getstream.video.android.core.model.IceServer
 import io.getstream.video.android.core.model.JoinedCall
 import io.getstream.video.android.core.model.SfuToken
 import io.getstream.video.android.core.model.StreamCallCid
+import io.getstream.video.android.core.model.StreamCallGuid
 import io.getstream.video.android.core.model.StreamCallId
 import io.getstream.video.android.core.model.StreamCallType
 import io.getstream.video.android.core.model.User
@@ -150,7 +151,8 @@ public interface StreamVideo {
      */
     public suspend fun sendCustomEvent(
         callCid: StreamCallCid,
-        dataJson: String
+        dataJson: Map<String, Any>,
+        eventType: String
     ): Result<Boolean>
 
     /**
@@ -192,6 +194,7 @@ public interface StreamVideo {
      * [CallClient.connectToCall] when you're ready to fully join a call.
      */
     public fun createCallClient(
+        callGuid: StreamCallGuid,
         signalUrl: String,
         sfuToken: SfuToken,
         iceServers: List<IceServer>

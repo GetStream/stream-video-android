@@ -16,16 +16,38 @@
 
 package org.openapitools.client.apis
 
+import org.openapitools.client.models.QueryCallRequest
+import org.openapitools.client.models.QueryCallsResponse
 import org.openapitools.client.models.RequestPermissionRequest
 import org.openapitools.client.models.RequestPermissionResponse
 import org.openapitools.client.models.UpdateUserPermissionsRequest
 import org.openapitools.client.models.UpdateUserPermissionsResponse
-import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.POST
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 internal interface DefaultApi {
+    /**
+     * Query call
+     * Query calls with filter query
+     * Responses:
+     *  - 201: Successful response
+     *  - 400: Bad request
+     *  - 429: Too many requests
+     *
+     * @param queryCallRequest
+     * @param clientId  (optional)
+     * @param connectionId  (optional)
+     * @return [QueryCallsResponse]
+     */
+    @POST("calls")
+    suspend fun queryCalls(
+        @Body queryCallRequest: QueryCallRequest,
+        @Query("client_id") clientId: String? = null,
+        @Query("connection_id") connectionId: String? = null
+    ): QueryCallsResponse
+
     /**
      * Request permission
      * Request permission to perform an action
@@ -44,7 +66,7 @@ internal interface DefaultApi {
         @Path("type") type: String,
         @Path("id") id: String,
         @Body requestPermissionRequest: RequestPermissionRequest
-    ): Response<RequestPermissionResponse>
+    ): RequestPermissionResponse
 
     /**
      * Update user permissions
@@ -64,5 +86,5 @@ internal interface DefaultApi {
         @Path("type") type: String,
         @Path("id") id: String,
         @Body updateUserPermissionsRequest: UpdateUserPermissionsRequest
-    ): Response<UpdateUserPermissionsResponse>
+    ): UpdateUserPermissionsResponse
 }

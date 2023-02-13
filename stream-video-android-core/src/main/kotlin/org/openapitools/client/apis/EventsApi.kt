@@ -18,7 +18,6 @@ package org.openapitools.client.apis
 
 import org.openapitools.client.models.SendEventRequest
 import org.openapitools.client.models.SendEventResponse
-import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.POST
 import retrofit2.http.Path
@@ -42,5 +41,5 @@ internal interface EventsApi {
         @Path("type") type: String,
         @Path("id") id: String,
         @Body sendEventRequest: SendEventRequest
-    ): Response<SendEventResponse>
+    ): SendEventResponse
 }

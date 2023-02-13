@@ -75,7 +75,7 @@ public fun Map<String, CoordinatorUser>.toCallUsers(): Map<String, CallUser> =
     }.toMap()
 
 internal fun List<MemberResponse>.toCallUsers(): Map<String, CallUser> =
-    associate { it.userId!! to it.user.toCallUser() }
+    associate { it.userId to it.toCallUser() }
 
 public fun CoordinatorUser.toCallUser(): CallUser = CallUser(
     id = id,

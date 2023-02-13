@@ -32,6 +32,6 @@ import com.squareup.moshi.Json
 internal data class GeofenceSettings(
 
     @Json(name = "names")
-    val names: kotlin.collections.List<kotlin.String>? = null
+    val names: kotlin.collections.List<kotlin.String>
 
 )

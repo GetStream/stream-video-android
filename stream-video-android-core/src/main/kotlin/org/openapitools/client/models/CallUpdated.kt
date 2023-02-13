@@ -27,20 +27,20 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param type * @param call * @param capabilitiesByRole * @param createdAt */
+ * @param call * @param capabilitiesByRole * @param createdAt * @param type */
 
 internal data class CallUpdated(
 
-    @Json(name = "type")
-    val type: kotlin.String,
-
     @Json(name = "call")
-    val call: CallResponse? = null,
+    val call: CallResponse,
 
     @Json(name = "capabilities_by_role")
-    val capabilitiesByRole: kotlin.collections.Map<kotlin.String, kotlin.collections.List<kotlin.String>>? = null,
+    val capabilitiesByRole: kotlin.collections.Map<kotlin.String, kotlin.collections.List<kotlin.String>>,
 
     @Json(name = "created_at")
-    val createdAt: java.time.OffsetDateTime? = null
+    val createdAt: java.time.OffsetDateTime,
+
+    @Json(name = "type")
+    val type: kotlin.String
 
 )

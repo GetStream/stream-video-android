@@ -26,10 +26,15 @@ package org.openapitools.client.models
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param enabled */
-
+ *
+ *
+ * @param accessRequestEnabled
+ * @param enabled
+ */
 internal data class VideoSettingsRequest(
+
+    @Json(name = "access_request_enabled")
+    val accessRequestEnabled: kotlin.Boolean? = null,
 
     @Json(name = "enabled")
     val enabled: kotlin.Boolean? = null

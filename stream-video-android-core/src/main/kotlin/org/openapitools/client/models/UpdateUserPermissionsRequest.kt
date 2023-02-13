@@ -40,14 +40,4 @@ internal data class UpdateUserPermissionsRequest(
     @Json(name = "revoke_permissions")
     val revokePermissions: kotlin.collections.List<kotlin.String>? = null
 
-) {
-
-    /**
-     * *
-     * Values: */
-    enum class GrantPermissions(val value: kotlin.String)
-    /**
-     * *
-     * Values: */
-    enum class RevokePermissions(val value: kotlin.String)
-}
+)

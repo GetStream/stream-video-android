@@ -34,6 +34,6 @@ internal data class UpdateUserPermissionsResponse(
 
     /* Duration of the request in human-readable format */
     @Json(name = "duration")
-    val duration: kotlin.String? = null
+    val duration: kotlin.String
 
 )

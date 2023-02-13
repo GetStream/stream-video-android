@@ -32,6 +32,6 @@ import com.squareup.moshi.Json
 internal data class RequestPermissionResponse(
 
     @Json(name = "duration")
-    val duration: kotlin.String? = null
+    val duration: kotlin.String
 
 )

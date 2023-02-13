@@ -36,6 +36,6 @@ internal data class UpdateCallResponse(
     val call: CallResponse,
 
     @Json(name = "duration")
-    val duration: kotlin.String? = null
+    val duration: kotlin.String
 
 )

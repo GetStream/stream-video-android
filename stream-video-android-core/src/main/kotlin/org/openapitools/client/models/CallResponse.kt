@@ -28,15 +28,23 @@ import com.squareup.moshi.Json
 /**
  * Represents a call
  *
- * @param createdAt Date/time of creation
- * @param createdBy * @param settings * @param updatedAt Date/time of the last update
  * @param broadcastEgress * @param cid The unique identifier for a call (<type>:<id>)
- * @param custom * @param endedAt Date/time of end
+ * @param createdAt Date/time of creation
+ * @param createdBy * @param custom Custom data for this object
  * @param id Call ID
- * @param ownCapabilities * @param recordEgress * @param team * @param type The type of call
- */
+ * @param ownCapabilities The capabilities of the current user
+ * @param recordEgress * @param settings * @param team * @param type The type of call
+ * @param updatedAt Date/time of the last update
+ * @param endedAt */
 
 internal data class CallResponse(
+
+    @Json(name = "broadcast_egress")
+    val broadcastEgress: kotlin.String,
+
+    /* The unique identifier for a call (<type>:<id>) */
+    @Json(name = "cid")
+    val cid: kotlin.String,
 
     /* Date/time of creation */
     @Json(name = "created_at")
@@ -45,42 +53,36 @@ internal data class CallResponse(
     @Json(name = "created_by")
     val createdBy: UserResponse,
 
+    /* Custom data for this object */
+    @Json(name = "custom")
+    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any>,
+
+    /* Call ID */
+    @Json(name = "id")
+    val id: kotlin.String,
+
+    /* The capabilities of the current user */
+    @Json(name = "own_capabilities")
+    val ownCapabilities: kotlin.collections.List<kotlin.String>,
+
+    @Json(name = "record_egress")
+    val recordEgress: kotlin.String,
+
     @Json(name = "settings")
     val settings: CallSettingsResponse,
+
+    @Json(name = "team")
+    val team: kotlin.String,
+
+    /* The type of call */
+    @Json(name = "type")
+    val type: kotlin.String,
 
     /* Date/time of the last update */
     @Json(name = "updated_at")
     val updatedAt: java.time.OffsetDateTime,
 
-    @Json(name = "broadcast_egress")
-    val broadcastEgress: kotlin.String? = null,
-
-    /* The unique identifier for a call (<type>:<id>) */
-    @Json(name = "cid")
-    val cid: kotlin.String? = null,
-
-    @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null,
-
-    /* Date/time of end */
     @Json(name = "ended_at")
-    val endedAt: java.time.OffsetDateTime? = null,
-
-    /* Call ID */
-    @Json(name = "id")
-    val id: kotlin.String? = null,
-
-    @Json(name = "own_capabilities")
-    val ownCapabilities: kotlin.collections.List<kotlin.String>? = null,
-
-    @Json(name = "record_egress")
-    val recordEgress: kotlin.String? = null,
-
-    @Json(name = "team")
-    val team: kotlin.String? = null,
-
-    /* The type of call */
-    @Json(name = "type")
-    val type: kotlin.String? = null
+    val endedAt: java.time.OffsetDateTime? = null
 
 )

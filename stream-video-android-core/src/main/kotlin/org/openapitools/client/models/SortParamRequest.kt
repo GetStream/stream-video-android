@@ -27,23 +27,14 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param call * @param createdAt * @param members * @param ringing * @param type */
+ * @param direction * @param `field` */
 
-internal data class CallCreated(
+internal data class SortParamRequest(
 
-    @Json(name = "call")
-    val call: CallResponse,
+    @Json(name = "direction")
+    val direction: java.math.BigDecimal? = null,
 
-    @Json(name = "created_at")
-    val createdAt: java.time.OffsetDateTime,
-
-    @Json(name = "members")
-    val members: kotlin.collections.List<MemberResponse>,
-
-    @Json(name = "ringing")
-    val ringing: kotlin.Boolean,
-
-    @Json(name = "type")
-    val type: kotlin.String
+    @Json(name = "field")
+    val `field`: kotlin.String? = null
 
 )

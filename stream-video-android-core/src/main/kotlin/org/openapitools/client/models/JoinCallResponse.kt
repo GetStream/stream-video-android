@@ -35,16 +35,16 @@ internal data class JoinCallResponse(
     val call: CallResponse,
 
     @Json(name = "created")
-    val created: kotlin.Boolean? = null,
+    val created: kotlin.Boolean,
 
     @Json(name = "duration")
-    val duration: kotlin.String? = null,
+    val duration: kotlin.String,
 
     @Json(name = "edges")
-    val edges: kotlin.collections.List<DatacenterResponse>? = null,
+    val edges: kotlin.collections.List<DatacenterResponse>,
 
     @Json(name = "members")
-    val members: kotlin.collections.List<MemberResponse>? = null,
+    val members: kotlin.collections.List<MemberResponse>,
 
     @Json(name = "membership")
     val membership: MemberResponse? = null

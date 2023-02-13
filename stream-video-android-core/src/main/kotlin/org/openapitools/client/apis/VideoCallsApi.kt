@@ -22,13 +22,17 @@ import org.openapitools.client.models.GetCallEdgeServerResponse
 import org.openapitools.client.models.GetOrCreateCallRequest
 import org.openapitools.client.models.GetOrCreateCallResponse
 import org.openapitools.client.models.JoinCallResponse
+import org.openapitools.client.models.MuteUsersRequest
+import org.openapitools.client.models.MuteUsersResponse
+import org.openapitools.client.models.QueryMembersRequest
+import org.openapitools.client.models.QueryMembersResponse
 import org.openapitools.client.models.UpdateCallRequest
 import org.openapitools.client.models.UpdateCallResponse
-import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 internal interface VideoCallsApi {
     /**
@@ -47,7 +51,7 @@ internal interface VideoCallsApi {
     suspend fun endCall(
         @Path("type") type: String,
         @Path("id") id: String
-    ): Response<EndCallResponse>
+    ): EndCallResponse
 
     /**
      * Get Call Edge Server
@@ -127,5 +131,45 @@ internal interface VideoCallsApi {
         @Path("type") type: String,
         @Path("id") id: String,
         @Body updateCallRequest: UpdateCallRequest
-    ): Response<UpdateCallResponse>
+    ): UpdateCallResponse
+
+    /**
+     * Mute users
+     * Mutes users in a call
+     * Responses:
+     *  - 201: Successful response
+     *  - 400: Bad request
+     *  - 429: Too many requests
+     *
+     * @param type
+     * @param id
+     * @param muteUsersRequest
+     * @return [MuteUsersResponse]
+     */
+    @POST("call/{type}/{id}/mute_users")
+    suspend fun muteUsers(
+        @Path("type") type: String,
+        @Path("id") id: String,
+        @Body muteUsersRequest: MuteUsersRequest
+    ): MuteUsersResponse
+
+    /**
+     * Query call members
+     * Query call members with filter query
+     * Responses:
+     *  - 201: Successful response
+     *  - 400: Bad request
+     *  - 429: Too many requests
+     *
+     * @param queryMembersRequest
+     * @param clientId  (optional)
+     * @param connectionId  (optional)
+     * @return [QueryMembersResponse]
+     */
+    @POST("call/members")
+    suspend fun queryMembers(
+        @Body queryMembersRequest: QueryMembersRequest,
+        @Query("client_id") clientId: String? = null,
+        @Query("connection_id") connectionId: String? = null
+    ): QueryMembersResponse
 }

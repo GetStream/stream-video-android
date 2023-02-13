@@ -28,6 +28,7 @@ import io.getstream.video.android.core.internal.module.SfuClientModule
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.IceServer
+import io.getstream.video.android.core.model.StreamCallGuid
 import io.getstream.video.android.core.token.CredentialsProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -50,6 +51,7 @@ internal class CallClientBuilder(
     private val callEngine: StreamCallEngine,
     private val signalUrl: String,
     private val iceServers: List<IceServer>,
+    private val callGuid: StreamCallGuid,
 ) {
 
     /**
@@ -100,6 +102,7 @@ internal class CallClientBuilder(
         return CallClientImpl(
             context = context,
             coordinatorClient = coordinatorClient,
+            callGuid = callGuid,
             getCurrentUserId = { credentialsProvider.getUserCredentials().id },
             getSfuToken = { credentialsProvider.getSfuToken() },
             callEngine = callEngine,
@@ -110,7 +113,7 @@ internal class CallClientBuilder(
                 networkStateProvider = networkStateProvider,
                 coroutineScope = CoroutineScope(Dispatchers.IO),
                 sfuSocketFactory = socketFactory
-            )
+            ),
         )
     }
 }

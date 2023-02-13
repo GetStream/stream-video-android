@@ -27,11 +27,14 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param enabled */
+ * @param accessRequestEnabled * @param enabled */
 
 internal data class VideoSettings(
 
+    @Json(name = "access_request_enabled")
+    val accessRequestEnabled: kotlin.Boolean,
+
     @Json(name = "enabled")
-    val enabled: kotlin.Boolean? = null
+    val enabled: kotlin.Boolean
 
 )

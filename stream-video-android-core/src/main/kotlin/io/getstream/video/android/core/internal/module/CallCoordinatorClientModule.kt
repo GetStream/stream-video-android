@@ -26,6 +26,7 @@ import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.token.CredentialsProvider
 import kotlinx.coroutines.CoroutineScope
 import okhttp3.OkHttpClient
+import org.openapitools.client.apis.EventsApi
 import org.openapitools.client.apis.VideoCallsApi
 import org.openapitools.client.infrastructure.Serializer
 import retrofit2.Retrofit
@@ -75,9 +76,14 @@ internal class CallCoordinatorClientModule(
      */
     private val callCoordinatorClient: CallCoordinatorClient by lazy {
         val oldService = protoRetrofitClient.create(ClientRPCService::class.java)
-        val service = retrofitClient.create(VideoCallsApi::class.java)
+        val videoCallsApi = retrofitClient.create(VideoCallsApi::class.java)
+        val eventsApi = retrofitClient.create(EventsApi::class.java)
 
-        CallCoordinatorClientImpl(oldService, service)
+        CallCoordinatorClientImpl(
+            callCoordinatorService = oldService,
+            videoCallApi = videoCallsApi,
+            eventsApi = eventsApi
+        )
     }
 
     /**
@@ -105,15 +111,5 @@ internal class CallCoordinatorClientModule(
 
     internal companion object {
         private const val BASE_URL = "https://video-edge-frankfurt-ce1.stream-io-api.com/"
-
-        /**
-         * Used for testing on devices and redirecting from a public realm to localhost.
-         *
-         * Will only be used if the value is non-null, so if you're able to test locally, just
-         * leave it as-is.
-         */
-        @Suppress("RedundantNullableReturnType")
-        internal val REDIRECT_PING_URL: String? =
-            null // "https://c99c-93-140-102-246.eu.ngrok.io/ping" // "<redirect-url>/ping"
     }
 }

@@ -52,34 +52,34 @@ public class Call(
 
     private val logger by taggedLogger("Call:Room")
 
-    internal val audioHandler: io.getstream.video.android.core.audio.AudioHandler by lazy {
-        io.getstream.video.android.core.audio.AudioSwitchHandler(context)
+    internal val audioHandler: AudioHandler by lazy {
+        AudioSwitchHandler(context)
     }
 
-    private val _callParticipants: MutableStateFlow<List<io.getstream.video.android.core.model.CallParticipantState>> =
+    private val _callParticipants: MutableStateFlow<List<CallParticipantState>> =
         MutableStateFlow(emptyList())
 
-    public val callParticipants: StateFlow<List<io.getstream.video.android.core.model.CallParticipantState>> = _callParticipants
+    public val callParticipants: StateFlow<List<CallParticipantState>> = _callParticipants
 
-    private val _localParticipant: MutableStateFlow<io.getstream.video.android.core.model.CallParticipantState?> = MutableStateFlow(null)
+    private val _localParticipant: MutableStateFlow<CallParticipantState?> = MutableStateFlow(null)
 
-    public val localParticipant: Flow<io.getstream.video.android.core.model.CallParticipantState> =
+    public val localParticipant: Flow<CallParticipantState> =
         _localParticipant.filterNotNull()
 
-    public val activeSpeakers: Flow<List<io.getstream.video.android.core.model.CallParticipantState>> = callParticipants.map { list ->
+    public val activeSpeakers: Flow<List<CallParticipantState>> = callParticipants.map { list ->
         list.filter { participant -> participant.hasAudio && participant.audioLevel > 0f }
     }
 
-    private var lastPrimarySpeaker: io.getstream.video.android.core.model.CallParticipantState? = null
+    private var lastPrimarySpeaker: CallParticipantState? = null
 
-    private val _primarySpeaker: Flow<io.getstream.video.android.core.model.CallParticipantState?> =
+    private val _primarySpeaker: Flow<CallParticipantState?> =
         callParticipants.combine(activeSpeakers) { participants, speakers ->
             selectPrimaryParticipant(participants, speakers)
         }.onEach {
             lastPrimarySpeaker = it
         }
 
-    public val primarySpeaker: Flow<io.getstream.video.android.core.model.CallParticipantState?> = _primarySpeaker
+    public val primarySpeaker: Flow<CallParticipantState?> = _primarySpeaker
 
     private val _screenSharingSessions: MutableStateFlow<List<ScreenSharingSession>> =
         MutableStateFlow(emptyList())
@@ -234,10 +234,10 @@ public class Call(
         onStreamAdded(mediaStream)
     }
 
-    private fun replaceTrackIfNeeded(mediaStream: MediaStream, streamId: String?): io.getstream.video.android.core.model.VideoTrack? {
+    private fun replaceTrackIfNeeded(mediaStream: MediaStream, streamId: String?): VideoTrack? {
         return if (streamId == null || streamId != mediaStream.id) {
             mediaStream.videoTracks?.firstOrNull()?.let { track ->
-                io.getstream.video.android.core.model.VideoTrack(
+                VideoTrack(
                     streamId = mediaStream.id,
                     video = track
                 )
@@ -263,7 +263,7 @@ public class Call(
         _screenSharingSessions.value = updated
     }
 
-    internal fun setParticipants(participants: List<io.getstream.video.android.core.model.CallParticipantState>) {
+    internal fun setParticipants(participants: List<CallParticipantState>) {
         this._callParticipants.value = participants
         logger.d { "[setParticipants] #sfu; allParticipants: ${_callParticipants.value}" }
 
@@ -284,7 +284,7 @@ public class Call(
      *
      * @param data The list of user data items containing expanded information.
      */
-    internal fun upsertParticipants(data: List<io.getstream.video.android.core.model.CallUser>) {
+    internal fun upsertParticipants(data: List<CallUser>) {
         val current = this._callParticipants.value
         val updated = current.map { participant ->
             val user = data.firstOrNull { it.id == participant.id }
@@ -345,7 +345,7 @@ public class Call(
         }
     }
 
-    internal fun addParticipant(participant: io.getstream.video.android.core.model.CallParticipantState) {
+    internal fun addParticipant(participant: CallParticipantState) {
         logger.d { "[addParticipant] #sfu; participant: $participant" }
         _callParticipants.value = _callParticipants.value + participant
     }
@@ -358,9 +358,9 @@ public class Call(
     }
 
     private fun selectPrimaryParticipant(
-        participantsList: List<io.getstream.video.android.core.model.CallParticipantState>,
-        speakers: List<io.getstream.video.android.core.model.CallParticipantState>,
-    ): io.getstream.video.android.core.model.CallParticipantState? {
+        participantsList: List<CallParticipantState>,
+        speakers: List<CallParticipantState>,
+    ): CallParticipantState? {
         var speaker = lastPrimarySpeaker
         val localParticipant = participantsList.firstOrNull { it.isLocal }
 
@@ -395,7 +395,7 @@ public class Call(
         val localParticipant = _localParticipant.value ?: return
         val allParticipants = callParticipants.value
 
-        val videoTrack = io.getstream.video.android.core.model.VideoTrack(
+        val videoTrack = VideoTrack(
             video = localVideoTrack,
             streamId = "${getCurrentUserId()}:${localVideoTrack.id()}"
         )
@@ -415,7 +415,7 @@ public class Call(
         _callParticipants.value = updated
     }
 
-    internal fun setupAudio(callSettings: io.getstream.video.android.core.model.CallSettings) {
+    internal fun setupAudio(callSettings: CallSettings) {
         logger.d { "[setupAudio] #sfu; no args" }
         audioHandler.start()
         audioManager?.mode = MODE_IN_COMMUNICATION
@@ -448,7 +448,7 @@ public class Call(
         }
     }
 
-    public fun getLocalParticipant(): io.getstream.video.android.core.model.CallParticipantState? {
+    public fun getLocalParticipant(): CallParticipantState? {
         return _callParticipants.value.firstOrNull { it.isLocal }
     }
 

@@ -31,39 +31,39 @@ import com.squareup.moshi.Json
  * @param code API error code
  * @param details Additional error-specific information
  * @param duration Request duration
- * @param exceptionFields Additional error info
  * @param message Message describing an error
  * @param moreInfo URL with additional information
+ * @param exceptionFields Additional error info
  */
 
 internal data class APIError(
 
     /* Response HTTP status code */
     @Json(name = "StatusCode")
-    val statusCode: java.math.BigDecimal? = null,
+    val statusCode: java.math.BigDecimal,
 
     /* API error code */
     @Json(name = "code")
-    val code: java.math.BigDecimal? = null,
+    val code: java.math.BigDecimal,
 
     /* Additional error-specific information */
     @Json(name = "details")
-    val details: kotlin.collections.List<java.math.BigDecimal>? = null,
+    val details: kotlin.collections.List<java.math.BigDecimal>,
 
     /* Request duration */
     @Json(name = "duration")
-    val duration: kotlin.String? = null,
-
-    /* Additional error info */
-    @Json(name = "exception_fields")
-    val exceptionFields: kotlin.collections.Map<kotlin.String, kotlin.String>? = null,
+    val duration: kotlin.String,
 
     /* Message describing an error */
     @Json(name = "message")
-    val message: kotlin.String? = null,
+    val message: kotlin.String,
 
     /* URL with additional information */
     @Json(name = "more_info")
-    val moreInfo: kotlin.String? = null
+    val moreInfo: kotlin.String,
+
+    /* Additional error info */
+    @Json(name = "exception_fields")
+    val exceptionFields: kotlin.collections.Map<kotlin.String, kotlin.String>? = null
 
 )

@@ -32,6 +32,6 @@ import com.squareup.moshi.Json
 internal data class RecordSettings(
 
     @Json(name = "enabled")
-    val enabled: kotlin.Boolean? = null
+    val enabled: kotlin.Boolean
 
 )

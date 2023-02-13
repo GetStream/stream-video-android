@@ -32,9 +32,9 @@ import com.squareup.moshi.Json
 internal data class Coordinates(
 
     @Json(name = "latitude")
-    val latitude: kotlin.Float? = null,
+    val latitude: kotlin.Float,
 
     @Json(name = "longitude")
-    val longitude: kotlin.Float? = null
+    val longitude: kotlin.Float
 
 )

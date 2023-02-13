@@ -36,9 +36,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import stream.video.coordinator.client_v1_rpc.WebsocketAuthRequest
+import org.openapitools.client.models.UserObjectRequest
+import org.openapitools.client.models.VideoWSAuthMessageRequest
 import stream.video.coordinator.client_v1_rpc.WebsocketHealthcheck
-import stream.video.coordinator.user_v1.UserInput
 import kotlin.math.pow
 import kotlin.properties.Delegates
 
@@ -214,7 +214,7 @@ internal class VideoSocketImpl(
 
     override fun connectSocket() {
         logger.d { "[connectSocket] wssUrl: $wssUrl" }
-        connect(SocketFactory.ConnectionConf(wssUrl))
+        connect(SocketFactory.ConnectionConf(wssUrl, credentialsManager.getApiKey(), ""))
     }
 
     override fun authenticateUser() {
@@ -222,22 +222,19 @@ internal class VideoSocketImpl(
         logger.d { "[authenticateUser] user: $user" }
 
         socket?.authenticate(
-            WebsocketAuthRequest(
-                user = UserInput(
+            VideoWSAuthMessageRequest( // TODO - add user device request
+                token = user.token,
+                userDetails = UserObjectRequest(
                     id = user.id,
-                    name = user.name,
-                    image_url = user.imageUrl ?: "",
                     role = user.role
-                ),
-                token = credentialsManager.getToken(),
-                api_key = credentialsManager.getApiKey()
+                )
             )
         )
     }
 
     override fun reconnect() {
         logger.d { "[reconnect] wssUrl: $wssUrl" }
-        reconnect(SocketFactory.ConnectionConf(wssUrl))
+        reconnect(SocketFactory.ConnectionConf(wssUrl, credentialsManager.getApiKey(), ""))
     }
 
     internal fun connect(connectionConf: SocketFactory.ConnectionConf) {

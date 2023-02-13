@@ -27,22 +27,20 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param type * @param callCid Call CID
- * @param createdAt * @param user */
+ * @param callCid * @param createdAt * @param type * @param user */
 
 internal data class CallCancelled(
+
+    @Json(name = "call_cid")
+    val callCid: kotlin.String,
+
+    @Json(name = "created_at")
+    val createdAt: java.time.OffsetDateTime,
 
     @Json(name = "type")
     val type: kotlin.String,
 
-    /* Call CID */
-    @Json(name = "call_cid")
-    val callCid: kotlin.String? = null,
-
-    @Json(name = "created_at")
-    val createdAt: java.time.OffsetDateTime? = null,
-
     @Json(name = "user")
-    val user: UserResponse? = null
+    val user: UserResponse
 
 )

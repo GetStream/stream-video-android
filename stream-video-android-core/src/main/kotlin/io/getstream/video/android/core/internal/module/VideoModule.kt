@@ -82,7 +82,7 @@ internal class VideoModule(
      */
     internal fun socket(): VideoSocket {
         return VideoSocketImpl(
-            wssUrl = REDIRECT_WS_BASE_URL ?: WS_BASE_URL,
+            wssUrl = WS_BASE_URL,
             credentialsManager = credentialsManager,
             socketFactory = socketFactory,
             networkStateProvider = networkStateProvider,
@@ -104,15 +104,7 @@ internal class VideoModule(
 
     internal companion object {
 
-        /**
-         * Used for testing on devices and redirecting from a public realm to localhost.
-         *
-         * Will only be used if the value is non-null, so if you're able to test locally, just
-         * leave it as-is.
-         */
-        @Suppress("RedundantNullableReturnType")
-        internal val REDIRECT_WS_BASE_URL: String? = null // "ws://0.tcp.eu.ngrok.io:17041/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect"
         internal const val WS_BASE_URL =
-            "wss://wss-video-coordinator.oregon-v1.stream-io-video.com/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect"
+            "wss://video-edge-frankfurt-ce1.stream-io-api.com/video/connect"
     }
 }

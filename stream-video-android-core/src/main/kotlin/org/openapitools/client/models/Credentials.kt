@@ -32,12 +32,12 @@ import com.squareup.moshi.Json
 internal data class Credentials(
 
     @Json(name = "ice_servers")
-    val iceServers: kotlin.collections.List<ICEServer>? = null,
+    val iceServers: kotlin.collections.List<ICEServer>,
 
     @Json(name = "server")
-    val server: SFUResponse? = null,
+    val server: SFUResponse,
 
     @Json(name = "token")
-    val token: kotlin.String? = null
+    val token: kotlin.String
 
 )

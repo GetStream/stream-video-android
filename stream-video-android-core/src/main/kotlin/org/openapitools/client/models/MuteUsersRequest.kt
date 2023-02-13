@@ -26,20 +26,24 @@ package org.openapitools.client.models
 import com.squareup.moshi.Json
 
 /**
- *
- *
- * @param type Event Type
- * @param createdAt Date/time of creation
- */
+ * *
+ * @param audio * @param muteAllUsers * @param screenshare * @param userIds * @param video */
 
-internal data class Any(
+internal data class MuteUsersRequest(
 
-    /* Event Type */
-    @Json(name = "type")
-    val type: kotlin.String,
+    @Json(name = "audio")
+    val audio: kotlin.Boolean? = null,
 
-    /* Date/time of creation */
-    @Json(name = "created_at")
-    val createdAt: java.time.OffsetDateTime? = null
+    @Json(name = "mute_all_users")
+    val muteAllUsers: kotlin.Boolean? = null,
+
+    @Json(name = "screenshare")
+    val screenshare: kotlin.Boolean? = null,
+
+    @Json(name = "user_ids")
+    val userIds: kotlin.collections.List<kotlin.String>? = null,
+
+    @Json(name = "video")
+    val video: kotlin.Boolean? = null
 
 )

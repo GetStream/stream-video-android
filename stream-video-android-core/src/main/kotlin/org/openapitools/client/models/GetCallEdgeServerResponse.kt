@@ -40,10 +40,10 @@ internal data class GetCallEdgeServerResponse(
 
     /* Duration of the request in human-readable format */
     @Json(name = "duration")
-    val duration: kotlin.String? = null,
+    val duration: kotlin.String,
 
     @Json(name = "members")
-    val members: kotlin.collections.List<MemberResponse>? = null,
+    val members: kotlin.collections.List<MemberResponse>,
 
     @Json(name = "membership")
     val membership: MemberResponse? = null

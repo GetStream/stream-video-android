@@ -21,34 +21,34 @@ import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.core.model.StreamCallKind
 import io.getstream.video.android.core.model.toCallUsers
 import org.openapitools.client.models.GetOrCreateCallResponse
-import org.openapitools.client.models.UserResponse
+import org.openapitools.client.models.MemberResponse
 import java.util.Date
 
 internal fun GetOrCreateCallResponse.toCall(kind: StreamCallKind): CallMetadata {
     return with(call) {
         CallMetadata(
-            cid = cid!!,
-            id = id!!,
-            type = type!!,
+            cid = cid,
+            id = id,
+            type = type,
             kind = kind,
-            createdByUserId = createdBy.id!!,
+            createdByUserId = createdBy.id,
             createdAt = createdAt.toEpochSecond(),
             updatedAt = updatedAt.toEpochSecond(),
-            recordingEnabled = settings.recording.enabled ?: false,
-            broadcastingEnabled = settings.broadcasting.enabled ?: false,
-            users = members?.toCallUsers() ?: emptyMap(),
+            recordingEnabled = settings.recording.enabled,
+            broadcastingEnabled = settings.broadcasting.enabled,
+            users = members.toCallUsers(),
             extraData = emptyMap()
         )
     }
 }
 
-internal fun UserResponse.toCallUser(): CallUser {
+internal fun MemberResponse.toCallUser(): CallUser {
     return CallUser(
-        id = id ?: "",
-        name = name ?: "",
-        role = role ?: "",
-        imageUrl = image ?: "",
-        teams = teams ?: emptyList(),
+        id = userId,
+        name = user.name ?: "",
+        role = role,
+        imageUrl = user.image ?: "",
+        teams = user.teams ?: emptyList(),
         state = null,
         createdAt = Date.from(createdAt.toInstant()),
         updatedAt = Date.from(updatedAt.toInstant()),

@@ -37,6 +37,7 @@ import io.getstream.video.android.core.model.JoinedCall
 import io.getstream.video.android.core.model.SfuToken
 import io.getstream.video.android.core.model.StartedCall
 import io.getstream.video.android.core.model.StreamCallCid
+import io.getstream.video.android.core.model.StreamCallGuid
 import io.getstream.video.android.core.model.StreamCallKind
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.mapper.toMetadata
@@ -46,7 +47,6 @@ import io.getstream.video.android.core.model.state.StreamCallState
 import io.getstream.video.android.core.model.toDetails
 import io.getstream.video.android.core.model.toIceServer
 import io.getstream.video.android.core.model.toInfo
-import io.getstream.video.android.core.model.toUserEventType
 import io.getstream.video.android.core.socket.SocketListener
 import io.getstream.video.android.core.socket.SocketStateService
 import io.getstream.video.android.core.socket.VideoSocket
@@ -72,16 +72,15 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okio.ByteString.Companion.encodeUtf8
 import org.openapitools.client.models.CallRequest
 import org.openapitools.client.models.GetCallEdgeServerRequest
 import org.openapitools.client.models.GetCallEdgeServerResponse
 import org.openapitools.client.models.GetOrCreateCallRequest
 import org.openapitools.client.models.MemberRequest
+import org.openapitools.client.models.SendEventRequest
+import org.openapitools.client.models.UserObjectRequest
 import stream.video.coordinator.client_v1_rpc.CreateDeviceRequest
 import stream.video.coordinator.client_v1_rpc.DeleteDeviceRequest
-import stream.video.coordinator.client_v1_rpc.SendCustomEventRequest
-import stream.video.coordinator.client_v1_rpc.SendEventRequest
 import stream.video.coordinator.edge_v1.Latency
 import stream.video.coordinator.push_v1.DeviceInput
 
@@ -143,6 +142,7 @@ internal class StreamVideoImpl(
                     is StreamCallState.Joined -> if (config.createCallClientInternally) {
                         logger.i { "[observeState] caller joins a call: $state" }
                         createCallClient(
+                            callGuid = state.callGuid,
                             signalUrl = state.callUrl,
                             sfuToken = state.sfuToken,
                             iceServers = state.iceServers,
@@ -244,7 +244,10 @@ internal class StreamVideoImpl(
                     members = participantIds.map {
                         MemberRequest(
                             userId = it,
-                            role = "admin"
+                            role = "admin",
+                            user = UserObjectRequest(
+                                id = it
+                            )
                         )
                     },
                 ),
@@ -304,12 +307,12 @@ internal class StreamVideoImpl(
             }
             logger.v { "[joinCallInternal] joinResult: $joinResult" }
 
-            val validEdges = (joinResult.data.edges ?: emptyList()).filter {
-                !it.latencyUrl.isNullOrBlank() && !it.name.isNullOrBlank()
+            val validEdges = joinResult.data.edges.filter {
+                it.latencyUrl.isNotBlank() && it.name.isNotBlank()
             }
 
             val latencyResults = validEdges.associate {
-                it.name!! to measureLatency(it.latencyUrl!!)
+                it.name to measureLatency(it.latencyUrl)
             }
             logger.v { "[joinCallInternal] latencyResults: $latencyResults" }
             val selectEdgeServerResult = selectEdgeServer(
@@ -324,21 +327,21 @@ internal class StreamVideoImpl(
                 is Success -> {
                     socket.updateCallState(call)
                     val credentials = selectEdgeServerResult.data.credentials
-                    val url = credentials.server?.url
+                    val url = credentials.server.url
                     val iceServers =
                         selectEdgeServerResult
                             .data
                             .credentials
                             .iceServers
-                            ?.map { it.toIceServer() } ?: emptyList()
+                            .map { it.toIceServer() }
 
                     credentialsProvider.setSfuToken(credentials.token)
 
                     Success(
                         JoinedCall(
                             call = call,
-                            callUrl = url!!,
-                            sfuToken = credentials.token!!,
+                            callUrl = url,
+                            sfuToken = credentials.token,
                             iceServers = iceServers
                         )
                     )
@@ -414,19 +417,30 @@ internal class StreamVideoImpl(
     ): Result<Boolean> {
         logger.d { "[sendEvent] callCid: $callCid, eventType: $eventType" }
         engine.onCallEventSending(callCid, eventType)
+        val (type, id) = callCid.toTypeAndId()
+
         return callCoordinatorClient.sendUserEvent(
-            SendEventRequest(call_cid = callCid, event_type = eventType.toUserEventType())
+            type = type,
+            id = id,
+            sendEventRequest = SendEventRequest(eventType = eventType.name) // TODO - check if we need to format the name
         )
             .onSuccess { engine.onCallEventSent(callCid, eventType) }
             .also { logger.v { "[sendEvent] result: $it" } }
     }
 
-    override suspend fun sendCustomEvent(callCid: String, dataJson: String): Result<Boolean> {
-        logger.d { "[sendCustomEvent] callCid: $callCid, dataJson: $dataJson" }
-        return callCoordinatorClient.sendCustomEvent(
-            SendCustomEventRequest(call_cid = callCid, data_json = dataJson.encodeUtf8())
-        )
-            .also { logger.v { "[sendCustomEvent] result: $it" } }
+    override suspend fun sendCustomEvent(
+        callCid: String,
+        dataJson: Map<String, Any>,
+        eventType: String
+    ): Result<Boolean> {
+        logger.d { "[sendCustomEvent] callCid: $callCid, dataJson: $dataJson, eventType: $eventType" }
+        val (type, id) = callCid.toTypeAndId()
+
+        return callCoordinatorClient.sendUserEvent(
+            id = id,
+            type = type,
+            sendEventRequest = SendEventRequest(custom = dataJson, eventType = eventType)
+        ).also { logger.v { "[sendCustomEvent] result: $it" } }
     }
 
     override fun clearCallState() {
@@ -479,6 +493,7 @@ internal class StreamVideoImpl(
      * [CallClient.connectToCall] when you're ready to fully join a call.
      */
     override fun createCallClient(
+        callGuid: StreamCallGuid,
         signalUrl: String,
         sfuToken: SfuToken,
         iceServers: List<IceServer>
@@ -492,7 +507,8 @@ internal class StreamVideoImpl(
             networkStateProvider = networkStateProvider,
             callEngine = engine,
             signalUrl = signalUrl,
-            iceServers = iceServers
+            iceServers = iceServers,
+            callGuid = callGuid
         ).apply {
             loggingLevel(loggingLevel)
         }.build().also {

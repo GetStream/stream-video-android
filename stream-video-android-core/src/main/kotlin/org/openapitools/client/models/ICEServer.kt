@@ -32,12 +32,12 @@ import com.squareup.moshi.Json
 internal data class ICEServer(
 
     @Json(name = "password")
-    val password: kotlin.String? = null,
+    val password: kotlin.String,
 
     @Json(name = "urls")
-    val urls: kotlin.collections.List<kotlin.String>? = null,
+    val urls: kotlin.collections.List<kotlin.String>,
 
     @Json(name = "username")
-    val username: kotlin.String? = null
+    val username: kotlin.String
 
 )

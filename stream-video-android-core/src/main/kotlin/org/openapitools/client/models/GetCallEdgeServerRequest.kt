@@ -32,6 +32,6 @@ import com.squareup.moshi.Json
 internal data class GetCallEdgeServerRequest(
 
     @Json(name = "latency_measurements")
-    val latencyMeasurements: kotlin.collections.Map<kotlin.String, kotlin.collections.List<kotlin.Float>>
+    val latencyMeasurements: kotlin.collections.Map<kotlin.String, kotlin.collections.List<kotlin.Float>>? = null
 
 )

@@ -27,23 +27,23 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param call * @param createdAt * @param members * @param ringing * @param type */
+ * @param callCid * @param createdAt * @param custom * @param type * @param user */
 
-internal data class CallCreated(
+internal data class LeftSquareBracketCustomRightSquareBracket(
 
-    @Json(name = "call")
-    val call: CallResponse,
+    @Json(name = "call_cid")
+    val callCid: kotlin.String,
 
     @Json(name = "created_at")
     val createdAt: java.time.OffsetDateTime,
 
-    @Json(name = "members")
-    val members: kotlin.collections.List<MemberResponse>,
-
-    @Json(name = "ringing")
-    val ringing: kotlin.Boolean,
+    @Json(name = "custom")
+    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any>,
 
     @Json(name = "type")
-    val type: kotlin.String
+    val type: kotlin.String,
+
+    @Json(name = "user")
+    val user: UserResponse
 
 )
