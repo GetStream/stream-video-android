@@ -4,8 +4,8 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
-import io.getstream.video.android.model.ScreenSharingSession
-import io.getstream.video.android.model.VideoTrack
+import io.getstream.video.android.core.model.ScreenSharingSession
+import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.xml.databinding.ViewScreenShareBinding
 import io.getstream.video.android.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.xml.utils.extensions.streamThemeInflater

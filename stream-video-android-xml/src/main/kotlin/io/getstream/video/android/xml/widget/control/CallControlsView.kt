@@ -80,7 +80,7 @@ public class CallControlsView : ConstraintLayout {
         }
 
         // Used to make sorting the controls a little bit easier
-        val views = mutableListOf<CallControlButton>()
+        val views = mutableListOf<ControlButtonView>()
         items.forEach { callControlItem ->
             val callControlView = callControls[callControlItem.action] ?: buildControlView(callControlItem)
             callControlView.setImageResource(callControlItem.icon)
@@ -102,10 +102,10 @@ public class CallControlsView : ConstraintLayout {
      *
      * @param callControlItem The call control item we wish to expose to the user.
      *
-     * @return The newly created [CallControlButton]
+     * @return The newly created [ControlButtonView]
      */
-    private fun buildControlView(callControlItem: CallControlItem): CallControlButton {
-        val callControlButton = CallControlButton(context).apply {
+    private fun buildControlView(callControlItem: CallControlItem): ControlButtonView {
+        val callControlButton = ControlButtonView(context).apply {
             id = View.generateViewId()
             tag = callControlItem
             layoutParams = LayoutParams(style.callControlButtonSize, style.callControlButtonSize)

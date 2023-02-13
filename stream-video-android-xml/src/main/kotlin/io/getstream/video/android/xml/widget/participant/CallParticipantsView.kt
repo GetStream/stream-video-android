@@ -22,19 +22,21 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
-import androidx.constraintlayout.widget.Guideline
 import androidx.core.view.children
 import androidx.transition.TransitionManager
 import io.getstream.log.StreamLog
 import io.getstream.video.android.core.model.CallParticipantState
 import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.xml.R
+import io.getstream.video.android.xml.databinding.ViewCallParticipantsBinding
+import io.getstream.video.android.xml.utils.extensions.dpToPx
 import io.getstream.video.android.xml.utils.extensions.dpToPxPrecise
-import io.getstream.video.android.xml.utils.extensions.updateConstraints
+import io.getstream.video.android.xml.utils.extensions.setConstraints
+import io.getstream.video.android.xml.utils.extensions.streamThemeInflater
 import io.getstream.video.android.xml.widget.control.CallControlsView
-import io.getstream.video.android.xml.widget.renderer.VideoRenderer
 import io.getstream.video.android.xml.widget.screenshare.ScreenSharingView
 import java.util.UUID
 
@@ -47,52 +49,12 @@ public class CallParticipantsView : ConstraintLayout {
 
     private lateinit var style: CallParticipantsStyle
 
-    /**
-     * Guideline that helps constraining the view on half of the screen vertically.
-     */
-    private val verticalGuideline by lazy {
-        buildGuideline(
-            orientation = LayoutParams.VERTICAL,
-            guidePercent = HALF_OF_VIEW
-        )
-    }
-
-    /**
-     * Guideline that helps constraining the view on half of the screen horizontally.
-     */
-    private val horizontalGuideline by lazy {
-        buildGuideline(
-            orientation = LayoutParams.HORIZONTAL,
-            guidePercent = HALF_OF_VIEW
-        )
-    }
-
-    private val screenSharingTopGuideline by lazy {
-        buildGuideline(
-            orientation = LayoutParams.HORIZONTAL,
-            guidePercent = calculateTopGuidePercent()
-        )
-    }
-
-    private val screenSharingBottomGuideline by lazy {
-        buildGuideline(
-            orientation = LayoutParams.HORIZONTAL,
-            guidePercent = calculateBottomGuidePercent()
-        )
-    }
-
-    private fun calculateTopGuidePercent(): Float {
-        return (measuredHeight - (getCallControlsHeight() + 32.dpToPxPrecise() + 125.dpToPxPrecise())) / measuredHeight
-    }
-
-    private fun calculateBottomGuidePercent(): Float {
-        return (measuredHeight - getCallControlsHeight().toFloat()) / measuredHeight
-    }
+    private val binding = ViewCallParticipantsBinding.inflate(streamThemeInflater, this)
 
     /**
      * The list of all [CallParticipantView]s for participants whose videos are being rendered.
      */
-    private val childList = arrayListOf<View>()
+    private val childList = arrayListOf<CallParticipantView>()
 
     /**
      * Handler to initialise the renderer.
@@ -120,11 +82,6 @@ public class CallParticipantsView : ConstraintLayout {
 
     private fun init(context: Context, attrs: AttributeSet?) {
         style = CallParticipantsStyle(context, attrs)
-
-        addView(verticalGuideline)
-        addView(horizontalGuideline)
-        addView(screenSharingTopGuideline)
-        addView(screenSharingBottomGuideline)
     }
 
     /**
@@ -135,8 +92,10 @@ public class CallParticipantsView : ConstraintLayout {
     public fun setRendererInitializer(rendererInitializer: RendererInitializer) {
         this.rendererInitializer = rendererInitializer
         childList.forEach {
-            if (it is VideoRenderer) it.setRendererInitializer(rendererInitializer)
+            it.setRendererInitializer(rendererInitializer)
         }
+        screenSharingView?.setRendererInitializer(rendererInitializer)
+        localParticipant?.setRendererInitializer(rendererInitializer)
     }
 
     /**
@@ -147,27 +106,21 @@ public class CallParticipantsView : ConstraintLayout {
      *
      * @param participants The list of the participants in the current call.
      */
-    public fun updateParticipants(participants: List<CallParticipantState>) {
+    public fun updateContent(participants: List<CallParticipantState>, screenSharingSession: ScreenSharingSession?) {
         this.participants = participants
+        this.screenSharingSession = screenSharingSession
 
         if (isScreenSharingActive) {
-            log.d { "update all participants state" }
+            enterScreenSharing()
             updateParticipantsState(participants)
         } else {
-            log.d { "update remote/local participants state" }
+            exitScreenSharing()
             updateParticipantsState(participants.filter { !it.isLocal })
             updateLocalParticipant(participants.firstOrNull { it.isLocal })
         }
     }
 
-    public fun updateScreenSharingSession(screenSharingSession: ScreenSharingSession?) {
-        this.screenSharingSession = screenSharingSession
-        log.d { "is screen sharing active: $isScreenSharingActive" }
-        if (isScreenSharingActive) enterScreenSharing() else exitScreenSharing()
-    }
-
     private fun enterScreenSharing() {
-        log.d { "enter screen sharing mode" }
         if (localParticipant != null) {
             removeView(localParticipant)
             localParticipant = null
@@ -175,24 +128,23 @@ public class CallParticipantsView : ConstraintLayout {
 
         if (screenSharingView == null) {
             screenSharingView = ScreenSharingView(context).apply {
-                layoutParams = LayoutParams(
-                    LayoutParams.MATCH_CONSTRAINT,
-                    LayoutParams.MATCH_CONSTRAINT
+                id = UUID.randomUUID().hashCode()
+                layoutParams = FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.MATCH_PARENT,
+                    FrameLayout.LayoutParams.MATCH_PARENT
                 )
             }
             screenSharingView?.setRendererInitializer(rendererInitializer)
-            addView(screenSharingView)
+            binding.screenShareHolder.addView(screenSharingView)
         }
         screenSharingSession?.let { screenSharingView?.setScreenSharingSession(it) }
-        updateParticipantsState(participants)
-        updateConstraints()
     }
 
     private fun exitScreenSharing() {
-        log.d { "exit screen sharing mode" }
-        removeView(screenSharingView)
-        screenSharingView = null
-        updateConstraints()
+        screenSharingView?.let {
+            binding.screenShareHolder.removeView(it)
+            screenSharingView = null
+        }
     }
 
     /**
@@ -216,7 +168,6 @@ public class CallParticipantsView : ConstraintLayout {
                     addView(localParticipant)
                 }
             }
-            log.d { "update local participant" }
             localParticipant?.setParticipant(participant)
         } else if (localParticipant != null) {
             removeView(localParticipant)
@@ -294,10 +245,8 @@ public class CallParticipantsView : ConstraintLayout {
      * joins the call or an old one leaves, a [CallParticipantView] will be added or removed.
      */
     private fun updateParticipantsState(participants: List<CallParticipantState>) {
-        log.d { "update remote state" }
-        val participantCount = childList.filterIsInstance<CallParticipantView>().size
         when {
-            participants.size > participantCount -> {
+            participants.size > childList.size -> {
                 val missingParticipants = participants.filter { !childList.map { it.tag }.contains(it.id) }
                 missingParticipants.forEach { participant ->
                     val view = buildParticipantView(participant.id).also { view ->
@@ -305,25 +254,23 @@ public class CallParticipantsView : ConstraintLayout {
                         view.setParticipant(participant)
                     }
                     childList.add(view)
-                    addView(view)
+                    binding.participantsHolder.addView(view)
                 }
                 updateConstraints()
             }
 
-            participants.size < participantCount -> {
+            participants.size < childList.size -> {
                 val surplusViews = childList.filter { !participants.map { it.id }.contains(it.tag) }.toSet()
                 childList.removeAll(surplusViews)
-                updateConstraints()
                 surplusViews.forEach {
-                    removeView(it)
+                    binding.participantsHolder.removeView(it)
                 }
+                updateConstraints()
             }
 
             else -> {
                 participants.forEach { participant ->
-                    (childList.firstOrNull { it.tag == participant.id && it is CallParticipantView } as? CallParticipantView)?.setParticipant(
-                        participant
-                    )
+                    (childList.firstOrNull { it.tag == participant.id })?.setParticipant(participant)
                 }
             }
         }
@@ -336,7 +283,7 @@ public class CallParticipantsView : ConstraintLayout {
      */
     public fun updatePrimarySpeaker(participant: CallParticipantState?) {
         childList.forEach {
-            if (it is CallParticipantView) it.setActive(it.tag == participant?.id)
+            it.setActive(it.tag == participant?.id)
         }
     }
 
@@ -345,21 +292,20 @@ public class CallParticipantsView : ConstraintLayout {
      */
     private fun updateConstraints() {
         TransitionManager.beginDelayedTransition(this)
-        updateConstraints {
-            screenSharingView?.let { constrainScreenSharingView(it) }
+        TransitionManager.beginDelayedTransition(((binding.participantsHolder)))
+        binding.dividerGuideline.setGuidelinePercent(if (isScreenSharingActive) calculateContentDividerOffset() else 0f)
 
+        binding.participantsHolder.setConstraints {
             if (isScreenSharingActive) {
                 childList.forEachIndexed { index, view ->
                     if (index == 0) {
                         toParentStart(view, childList.getOrNull(1))
-                        if (index != childList.lastIndex) toViewEnd(view, childList[1])
                     }
                     if (index in 1 until childList.lastIndex) {
                         toViewEnd(view, childList[index - 1])
                         toViewStart(view, childList[index + 1])
                     }
                     if (index == childList.lastIndex) {
-                        if (index != 0) toViewEnd(view, childList[index - 1])
                         toParentEnd(view, childList.getOrNull(index - 1))
                     }
                 }
@@ -385,7 +331,17 @@ public class CallParticipantsView : ConstraintLayout {
                     }
                 }
             }
+
+            childList.forEach { setViewSize(it) }
         }
+    }
+
+    private fun calculateOffsetWithControls(): Float {
+        return (measuredHeight - getCallControlsHeight().toFloat()) / measuredHeight
+    }
+
+    private fun calculateContentDividerOffset(): Float {
+        return (measuredHeight - (getCallControlsHeight().toFloat() + 32.dpToPxPrecise() + 125.dpToPxPrecise())) / measuredHeight
     }
 
     /**
@@ -407,17 +363,17 @@ public class CallParticipantsView : ConstraintLayout {
         }
     }
 
-    /**
-     * Used to instantiate a new [Guideline] which help us to divide the screen to sections.
-     */
-    private fun buildGuideline(orientation: Int, guidePercent: Float) = Guideline(context).apply {
-        this.id = View.generateViewId()
-        this.layoutParams = LayoutParams(
-            LayoutParams.WRAP_CONTENT,
-            LayoutParams.WRAP_CONTENT
-        ).apply {
-            this.orientation = orientation
-            this.guidePercent = guidePercent
+    private fun setViewSize(view: View) {
+        if (isScreenSharingActive) {
+            view.layoutParams = LayoutParams(
+                125.dpToPx(),
+                125.dpToPx()
+            )
+        } else {
+            view.layoutParams = LayoutParams(
+                LayoutParams.MATCH_CONSTRAINT,
+                LayoutParams.MATCH_CONSTRAINT
+            )
         }
     }
 
@@ -436,12 +392,12 @@ public class CallParticipantsView : ConstraintLayout {
         connect(target.id, ConstraintSet.START, LayoutParams.PARENT_ID, ConstraintSet.START)
         connect(target.id, ConstraintSet.TOP, LayoutParams.PARENT_ID, ConstraintSet.TOP)
         connect(target.id, ConstraintSet.END, LayoutParams.PARENT_ID, ConstraintSet.END)
-        connect(target.id, ConstraintSet.BOTTOM, horizontalGuideline.id, ConstraintSet.BOTTOM)
+        connect(target.id, ConstraintSet.BOTTOM, binding.horizontalGuideline.id, ConstraintSet.BOTTOM)
     }
 
     private fun ConstraintSet.toBottom(target: View) {
         connect(target.id, ConstraintSet.START, LayoutParams.PARENT_ID, ConstraintSet.START)
-        connect(target.id, ConstraintSet.TOP, horizontalGuideline.id, ConstraintSet.TOP)
+        connect(target.id, ConstraintSet.TOP, binding.horizontalGuideline.id, ConstraintSet.TOP)
         connect(target.id, ConstraintSet.END, LayoutParams.PARENT_ID, ConstraintSet.END)
         connect(target.id, ConstraintSet.BOTTOM, LayoutParams.PARENT_ID, ConstraintSet.BOTTOM)
     }
@@ -449,65 +405,64 @@ public class CallParticipantsView : ConstraintLayout {
     private fun ConstraintSet.toTopStart(target: View) {
         connect(target.id, ConstraintSet.START, LayoutParams.PARENT_ID, ConstraintSet.START)
         connect(target.id, ConstraintSet.TOP, LayoutParams.PARENT_ID, ConstraintSet.TOP)
-        connect(target.id, ConstraintSet.END, verticalGuideline.id, ConstraintSet.END)
-        connect(target.id, ConstraintSet.BOTTOM, horizontalGuideline.id, ConstraintSet.BOTTOM)
+        connect(target.id, ConstraintSet.END, binding.verticalGuideline.id, ConstraintSet.END)
+        connect(target.id, ConstraintSet.BOTTOM, binding.horizontalGuideline.id, ConstraintSet.BOTTOM)
     }
 
     private fun ConstraintSet.toTopEnd(target: View) {
-        connect(target.id, ConstraintSet.START, verticalGuideline.id, ConstraintSet.START)
+        connect(target.id, ConstraintSet.START, binding.verticalGuideline.id, ConstraintSet.START)
         connect(target.id, ConstraintSet.TOP, LayoutParams.PARENT_ID, ConstraintSet.TOP)
         connect(target.id, ConstraintSet.END, LayoutParams.PARENT_ID, ConstraintSet.END)
-        connect(target.id, ConstraintSet.BOTTOM, horizontalGuideline.id, ConstraintSet.BOTTOM)
+        connect(target.id, ConstraintSet.BOTTOM, binding.horizontalGuideline.id, ConstraintSet.BOTTOM)
     }
 
     private fun ConstraintSet.toBottomStart(target: View) {
         connect(target.id, ConstraintSet.START, LayoutParams.PARENT_ID, ConstraintSet.START)
-        connect(target.id, ConstraintSet.TOP, horizontalGuideline.id, ConstraintSet.TOP)
-        connect(target.id, ConstraintSet.END, verticalGuideline.id, ConstraintSet.END)
+        connect(target.id, ConstraintSet.TOP, binding.horizontalGuideline.id, ConstraintSet.TOP)
+        connect(target.id, ConstraintSet.END, binding.verticalGuideline.id, ConstraintSet.END)
         connect(target.id, ConstraintSet.BOTTOM, LayoutParams.PARENT_ID, ConstraintSet.BOTTOM)
     }
 
     private fun ConstraintSet.toBottomEnd(target: View) {
-        connect(target.id, ConstraintSet.START, verticalGuideline.id, ConstraintSet.START)
-        connect(target.id, ConstraintSet.TOP, horizontalGuideline.id, ConstraintSet.TOP)
+        connect(target.id, ConstraintSet.START, binding.verticalGuideline.id, ConstraintSet.START)
+        connect(target.id, ConstraintSet.TOP, binding.horizontalGuideline.id, ConstraintSet.TOP)
         connect(target.id, ConstraintSet.END, LayoutParams.PARENT_ID, ConstraintSet.END)
         connect(target.id, ConstraintSet.BOTTOM, LayoutParams.PARENT_ID, ConstraintSet.BOTTOM)
     }
 
     private fun ConstraintSet.toParentStart(target: View, endView: View?) {
         connect(target.id, ConstraintSet.START, LayoutParams.PARENT_ID, ConstraintSet.START)
-        connect(target.id, ConstraintSet.TOP, screenSharingTopGuideline.id, ConstraintSet.TOP)
-        endView?.let { connect(target.id, ConstraintSet.END, it.id, ConstraintSet.END) }
-        connect(target.id, ConstraintSet.BOTTOM, screenSharingBottomGuideline.id, ConstraintSet.BOTTOM)
+        connect(target.id, ConstraintSet.TOP, LayoutParams.PARENT_ID, ConstraintSet.TOP)
+        connect(
+            target.id,
+            ConstraintSet.END,
+            endView?.id ?: LayoutParams.PARENT_ID,
+            if (endView != null) ConstraintSet.START else ConstraintSet.END
+        )
+        connect(target.id, ConstraintSet.BOTTOM, LayoutParams.PARENT_ID, ConstraintSet.BOTTOM)
     }
 
     private fun ConstraintSet.toParentEnd(target: View, startView: View?) {
-        startView?.let { connect(target.id, ConstraintSet.START, it.id, ConstraintSet.START) }
-        connect(target.id, ConstraintSet.TOP, screenSharingTopGuideline.id, ConstraintSet.TOP)
+        connect(
+            target.id,
+            ConstraintSet.START,
+            startView?.id ?: LayoutParams.PARENT_ID,
+            if (startView != null) ConstraintSet.END else ConstraintSet.START
+        )
+        connect(target.id, ConstraintSet.TOP, LayoutParams.PARENT_ID, ConstraintSet.TOP)
         connect(target.id, ConstraintSet.END, LayoutParams.PARENT_ID, ConstraintSet.END)
-        connect(target.id, ConstraintSet.BOTTOM, screenSharingBottomGuideline.id, ConstraintSet.BOTTOM)
+        connect(target.id, ConstraintSet.BOTTOM, LayoutParams.PARENT_ID, ConstraintSet.BOTTOM)
     }
 
     private fun ConstraintSet.toViewEnd(target: View, endView: View) {
-        connect(target.id, ConstraintSet.TOP, screenSharingTopGuideline.id, ConstraintSet.TOP)
+        connect(target.id, ConstraintSet.TOP, LayoutParams.PARENT_ID, ConstraintSet.TOP)
         connect(target.id, ConstraintSet.START, endView.id, ConstraintSet.END)
-        connect(target.id, ConstraintSet.BOTTOM, screenSharingBottomGuideline.id, ConstraintSet.BOTTOM)
+        connect(target.id, ConstraintSet.BOTTOM, LayoutParams.PARENT_ID, ConstraintSet.BOTTOM)
     }
 
     private fun ConstraintSet.toViewStart(target: View, startView: View) {
-        connect(target.id, ConstraintSet.TOP, screenSharingTopGuideline.id, ConstraintSet.TOP)
-        connect(target.id, ConstraintSet.END, startView.id, ConstraintSet.START)
-        connect(target.id, ConstraintSet.BOTTOM, screenSharingBottomGuideline.id, ConstraintSet.BOTTOM)
-    }
-
-    private fun ConstraintSet.constrainScreenSharingView(target: View) {
-        connect(target.id, ConstraintSet.START, LayoutParams.PARENT_ID, ConstraintSet.START)
         connect(target.id, ConstraintSet.TOP, LayoutParams.PARENT_ID, ConstraintSet.TOP)
-        connect(target.id, ConstraintSet.END, LayoutParams.PARENT_ID, ConstraintSet.END)
-        connect(target.id, ConstraintSet.BOTTOM, screenSharingTopGuideline.id, ConstraintSet.BOTTOM)
-    }
-
-    private companion object {
-        private const val HALF_OF_VIEW = 0.5f
+        connect(target.id, ConstraintSet.END, startView.id, ConstraintSet.START)
+        connect(target.id, ConstraintSet.BOTTOM, LayoutParams.PARENT_ID, ConstraintSet.BOTTOM)
     }
 }
