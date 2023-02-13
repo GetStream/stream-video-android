@@ -29,7 +29,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         >
 
-        <io.getstream.video.android.xml.widget.control.CallControlButton
+        <io.getstream.video.android.xml.widget.control.ControlButtonView
             android:id="@+id/micToggle"
             android:layout_width="@dimen/mediumButtonSize"
             android:layout_height="@dimen/mediumButtonSize"
@@ -39,7 +39,7 @@
             app:layout_constraintStart_toStartOf="parent"
             />
 
-        <io.getstream.video.android.xml.widget.control.CallControlButton
+        <io.getstream.video.android.xml.widget.control.ControlButtonView
             android:id="@+id/cameraToggle"
             android:layout_width="@dimen/mediumButtonSize"
             android:layout_height="@dimen/mediumButtonSize"
@@ -49,7 +49,7 @@
             app:layout_constraintStart_toEndOf="@id/micToggle"
             />
 
-        <io.getstream.video.android.xml.widget.control.CallControlButton
+        <io.getstream.video.android.xml.widget.control.ControlButtonView
             android:id="@+id/cancelCall"
             android:layout_width="@dimen/largeButtonSize"
             android:layout_height="@dimen/largeButtonSize"

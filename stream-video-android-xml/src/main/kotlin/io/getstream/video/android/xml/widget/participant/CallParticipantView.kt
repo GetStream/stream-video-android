@@ -36,13 +36,14 @@ import io.getstream.video.android.xml.utils.extensions.getDrawableCompat
 import io.getstream.video.android.xml.utils.extensions.load
 import io.getstream.video.android.xml.utils.extensions.streamThemeInflater
 import io.getstream.video.android.xml.utils.extensions.updateConstraints
+import io.getstream.video.android.xml.widget.renderer.VideoRenderer
 import stream.video.sfu.models.TrackType
 import io.getstream.video.android.ui.common.R as RCommon
 
 /**
  * Represents a single participant in a call.
  */
-public class CallParticipantView : ConstraintLayout {
+public class CallParticipantView : ConstraintLayout, VideoRenderer {
 
     private val binding = ViewCallParticipantBinding.inflate(streamThemeInflater, this)
 
@@ -120,7 +121,7 @@ public class CallParticipantView : ConstraintLayout {
      *
      * @param rendererInitializer Handler to initialise the renderer.
      */
-    public fun setRendererInitializer(rendererInitializer: RendererInitializer) {
+    override fun setRendererInitializer(rendererInitializer: RendererInitializer) {
         this.rendererInitializer = rendererInitializer
         initRenderer()
     }

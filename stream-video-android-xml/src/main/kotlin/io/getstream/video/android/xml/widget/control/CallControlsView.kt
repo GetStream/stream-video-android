@@ -44,7 +44,7 @@ public class CallControlsView : ConstraintLayout {
     /**
      * Map of call actions and their corresponding views inside the [CallControlsView].
      */
-    private val callControls = mutableMapOf<CallAction, CallControlButton>()
+    private val callControls = mutableMapOf<CallAction, ControlButtonView>()
 
     /**
      * Handler for call controls click actions.
@@ -98,7 +98,7 @@ public class CallControlsView : ConstraintLayout {
     }
 
     /**
-     * Adds a new [CallControlButton] for each [CallControlItem] when [setItems] is called.
+     * Adds a new [ControlButtonView] for each [CallControlItem] when [setItems] is called.
      *
      * @param callControlItem The call control item we wish to expose to the user.
      *

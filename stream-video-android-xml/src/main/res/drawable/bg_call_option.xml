@@ -5,11 +5,6 @@
 
     <item>
         <shape android:shape="oval">
-            <size
-                android:width="@dimen/largeButtonSize"
-                android:height="@dimen/largeButtonSize"
-                />
-
             <solid android:color="@color/stream_app_background" />
         </shape>
     </item>

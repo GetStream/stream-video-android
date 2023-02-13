@@ -19,6 +19,7 @@ package io.getstream.video.android.xml.binding
 import androidx.lifecycle.LifecycleOwner
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CallMediaState
+import io.getstream.log.StreamLog
 import io.getstream.video.android.core.call.state.FlipCamera
 import io.getstream.video.android.core.call.state.LeaveCall
 import io.getstream.video.android.core.call.state.ToggleCamera
@@ -69,6 +70,13 @@ public fun ActiveCallView.bindView(
     }
 
     startJob(lifecycleOwner) {
+        viewModel.screenSharingSessions.collectLatest {
+            StreamLog.getLogger("CallParticipantsView").d { "update screen sharing: $it" }
+            updateScreenSharingSession(it.firstOrNull())
+        }
+    }
+
+    lifecycleOwner.lifecycleScope.launchWhenResumed {
         viewModel.primarySpeaker.collectLatest {
             updatePrimarySpeaker(it)
         }

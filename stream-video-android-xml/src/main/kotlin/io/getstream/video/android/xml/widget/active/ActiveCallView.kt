@@ -20,6 +20,7 @@ import android.content.Context
 import android.util.AttributeSet
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.model.CallParticipantState
+import io.getstream.video.android.model.ScreenSharingSession
 import io.getstream.video.android.ui.common.R
 import io.getstream.video.android.xml.databinding.ViewActiveCallBinding
 import io.getstream.video.android.xml.utils.extensions.getColorCompat
@@ -83,6 +84,10 @@ public class ActiveCallView : CallContent {
      */
     public fun updateParticipants(participants: List<CallParticipantState>) {
         binding.participantsView.updateParticipants(participants)
+    }
+
+    public fun updateScreenSharingSession(screenSharingSession: ScreenSharingSession?) {
+        binding.participantsView.updateScreenSharingSession(screenSharingSession)
     }
 
     /**

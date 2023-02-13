@@ -92,9 +92,9 @@ public fun ScreenShareContent(
                 },
                 content = {
                     val drawable = if (orientation == ORIENTATION_LANDSCAPE) {
-                        R.drawable.ic_portrait_mode
+                        RCommon.drawable.ic_portrait_mode
                     } else {
-                        R.drawable.ic_landscape_mode
+                        RCommon.drawable.ic_landscape_mode
                     }
 
                     Icon(
@@ -128,9 +128,9 @@ public fun ScreenShareContent(
                 },
                 content = {
                     val drawable = if (isFullscreen) {
-                        R.drawable.ic_fullscreen_exit
+                        RCommon.drawable.ic_fullscreen_exit
                     } else {
-                        R.drawable.ic_fullscreen
+                        RCommon.drawable.ic_fullscreen
                     }
 
                     Icon(
