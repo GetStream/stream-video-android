@@ -28,7 +28,8 @@ public final class io/getstream/video/android/xml/VideoUI {
 }
 
 public final class io/getstream/video/android/xml/binding/ActiveCallViewBindingKt {
-	public static final fun bindView (Lio/getstream/video/android/xml/widget/active/ActiveCallView;Lio/getstream/video/android/core/viewmodel/CallViewModel;Landroidx/lifecycle/LifecycleOwner;)V
+	public static final fun bindView (Lio/getstream/video/android/xml/widget/active/ActiveCallView;Lio/getstream/video/android/core/viewmodel/CallViewModel;Landroidx/lifecycle/LifecycleOwner;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun bindView$default (Lio/getstream/video/android/xml/widget/active/ActiveCallView;Lio/getstream/video/android/core/viewmodel/CallViewModel;Landroidx/lifecycle/LifecycleOwner;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 }
 
 public final class io/getstream/video/android/xml/binding/IncomingCallBindingKt {
@@ -228,7 +229,6 @@ public final class io/getstream/video/android/xml/widget/active/ActiveCallView :
 	public final fun setCallActionListener (Lkotlin/jvm/functions/Function1;)V
 	public final fun setControlItems (Ljava/util/List;)V
 	public final fun setParticipantsRendererInitializer (Lio/getstream/video/android/xml/widget/participant/RendererInitializer;)V
-	public final fun updateControlItems (Ljava/util/List;)V
 	public final fun updateParticipants (Ljava/util/List;)V
 	public final fun updatePrimarySpeaker (Lio/getstream/video/android/core/model/CallParticipantState;)V
 }
@@ -378,7 +378,6 @@ public final class io/getstream/video/android/xml/widget/control/CallControlsVie
 	public final fun getCallControlItemClickListener ()Lkotlin/jvm/functions/Function1;
 	public final fun setCallControlItemClickListener (Lkotlin/jvm/functions/Function1;)V
 	public final fun setItems (Ljava/util/List;)V
-	public final fun updateItems (Ljava/util/List;)V
 }
 
 public final class io/getstream/video/android/xml/widget/incoming/IncomingCallStyle {
