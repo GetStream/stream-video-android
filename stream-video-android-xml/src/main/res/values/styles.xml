@@ -27,9 +27,11 @@
         <item name="streamCallDetailsDirectCallParticipantInfoTextSize">
             @dimen/directCallUserNameTextSize
         </item>
-        <item name="streamCallDetailsParticipantsInfoTextSize">@dimen/groupCallUserNameTextSize
+        <item name="streamCallDetailsParticipantsInfoTextSize">
+            @dimen/groupCallUserNameTextSize
         </item>
-        <item name="streamCallDetailsParticipantsInfoTextColor">@color/stream_text_high_emphasis
+        <item name="streamCallDetailsParticipantsInfoTextColor">
+            @color/stream_text_high_emphasis
         </item>
         <item name="streamCallDetailsParticipantsInfoTextStyle">normal</item>
         <item name="streamCallDetailsCallStateTextSize">@dimen/onCallStatusTextSize</item>
@@ -39,12 +41,12 @@
     </style>
 
     <style name="Stream.CallParticipant" parent="Stream">
-        <item name="streamCallParticipantTagAlignment">top_start</item>
-        <item name="streamCallParticipantTagMargin">8dp</item>
-        <item name="streamCallParticipantTagBackgroundColor">@color/stream_dark_gray</item>
-        <item name="streamCallParticipantTagTextSize">@dimen/bodyTextSize</item>
-        <item name="streamCallParticipantTagTextColor">@color/stream_white</item>
-        <item name="streamCallParticipantTagTextStyle">bold</item>
+        <item name="streamCallParticipantLabelAlignment">top_start</item>
+        <item name="streamCallParticipantLabelMargin">8dp</item>
+        <item name="streamCallParticipantLabelBackgroundColor">@color/stream_dark_gray</item>
+        <item name="streamCallParticipantLabelTextSize">@dimen/bodyTextSize</item>
+        <item name="streamCallParticipantLabelTextColor">@color/stream_white</item>
+        <item name="streamCallParticipantLabelTextStyle">bold</item>
         <item name="streamCallParticipantActiveSpeakerBorderColor">@color/stream_info_accent</item>
         <item name="streamCallParticipantMicrophoneOffIcon">@drawable/ic_mic_off</item>
         <item name="streamCallParticipantMicrophoneOffTint">@color/stream_error_accent</item>

@@ -91,7 +91,7 @@ public class CallDetailsView : ConstraintLayout {
         val isSingleParticipant = participants.size == 1
 
         participants.take(2).forEachIndexed { index, participant ->
-            if (index > 0) {
+            if (index != 0) {
                 addAvatarSpacer()
             }
 

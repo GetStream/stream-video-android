@@ -19,6 +19,7 @@ package io.getstream.video.android.xml
 import android.Manifest
 import android.app.PictureInPictureParams
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build
@@ -30,19 +31,24 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.FrameLayout
 import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.children
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.core.StreamVideoProvider
+import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CancelCall
 import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
+import io.getstream.video.android.core.call.state.ToggleScreenConfiguration
+import io.getstream.video.android.core.call.state.ToggleSpeakerphone
 import io.getstream.video.android.core.model.state.StreamCallState
 import io.getstream.video.android.core.permission.PermissionManager
 import io.getstream.video.android.core.permission.PermissionManagerProvider
 import io.getstream.video.android.core.permission.StreamPermissionManagerImpl
+import io.getstream.video.android.core.utils.formatAsTitle
 import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.core.viewmodel.CallViewModelFactory
 import io.getstream.video.android.core.viewmodel.CallViewModelFactoryProvider
@@ -160,7 +166,7 @@ public abstract class AbstractXmlCallActivity :
             is StreamCallState.Active -> streamCallState.callGuid.id
             else -> ""
         }
-        val status = streamCallState.formatAsTitle()
+        val status = streamCallState.formatAsTitle(this@AbstractXmlCallActivity)
 
         val title = when (callId.isBlank()) {
             true -> status
@@ -189,7 +195,11 @@ public abstract class AbstractXmlCallActivity :
         if (isViewInsideContainer<OutgoingCallView>()) return
         val outgoingCallView = OutgoingCallView(this)
         addContentView(outgoingCallView)
-        outgoingCallView.bindView(callViewModel, this)
+        outgoingCallView.bindView(
+            viewModel = callViewModel,
+            lifecycleOwner = this,
+            onCallAction = ::handleCallAction
+        )
     }
 
     /**
@@ -199,7 +209,11 @@ public abstract class AbstractXmlCallActivity :
         if (isViewInsideContainer<IncomingCallView>()) return
         val incomingCallView = IncomingCallView(this)
         addContentView(incomingCallView)
-        incomingCallView.bindView(callViewModel, this)
+        incomingCallView.bindView(
+            viewModel = callViewModel,
+            lifecycleOwner = this,
+            onCallAction = ::handleCallAction
+        )
     }
 
     /**
@@ -209,7 +223,11 @@ public abstract class AbstractXmlCallActivity :
         if (isViewInsideContainer<ActiveCallView>()) return
         val activeCallView = ActiveCallView(this)
         addContentView(activeCallView)
-        activeCallView.bindView(callViewModel, this)
+        activeCallView.bindView(
+            viewModel = callViewModel,
+            lifecycleOwner = this,
+            onCallAction = ::handleCallAction
+        )
     }
 
     /**
@@ -243,6 +261,41 @@ public abstract class AbstractXmlCallActivity :
     }
 
     /**
+     * Default handler for [CallAction]s triggered in the UI.
+     *
+     * @param action Action to handle.
+     */
+    protected open fun handleCallAction(action: CallAction) {
+        when (action) {
+            is ToggleMicrophone -> toggleMicrophone(action.copy(!action.isEnabled))
+            is ToggleCamera -> toggleCamera(action.copy(!action.isEnabled))
+            is ToggleSpeakerphone -> callViewModel.onCallAction(action.copy(!action.isEnabled))
+            is ToggleScreenConfiguration -> {
+                // TODO when implementing fullscreen
+                // toggleFullscreen(action)
+                callViewModel.onCallAction(action)
+            }
+            else -> callViewModel.onCallAction(action)
+        }
+    }
+
+    private fun toggleMicrophone(action: ToggleMicrophone) {
+        if (!callPermissionManager.hasRecordAudioPermission.value && action.isEnabled) {
+            callPermissionManager.requestPermission(Manifest.permission.RECORD_AUDIO)
+        } else {
+            callViewModel.onCallAction(action)
+        }
+    }
+
+    private fun toggleCamera(action: ToggleCamera) {
+        if (!callPermissionManager.hasCameraPermission.value && action.isEnabled) {
+            callPermissionManager.requestPermission(Manifest.permission.CAMERA)
+        } else {
+            callViewModel.onCallAction(action)
+        }
+    }
+
+    /**
      * If the user denied the permission and clicked don't ask again, will open settings so the user can enable the
      * permissions.
      */
@@ -269,13 +322,13 @@ public abstract class AbstractXmlCallActivity :
      */
     private fun showPermissionsDialog() {
         AlertDialog.Builder(this)
-            .setTitle("Permissions required to launch the app")
-            .setMessage("Open settings to allow camera and microphone permissions.")
-            .setPositiveButton("Launch settings") { dialog, _ ->
+            .setTitle(getString(io.getstream.video.android.ui.common.R.string.permissions_title))
+            .setMessage(getString(io.getstream.video.android.ui.common.R.string.permissions_message))
+            .setPositiveButton(getString(io.getstream.video.android.ui.common.R.string.permissions_settings)) { dialog, _ ->
                 startSettings()
                 dialog.dismiss()
             }
-            .setNegativeButton("Cancel") { dialog, _ ->
+            .setNegativeButton(getString(io.getstream.video.android.ui.common.R.string.permissions_cancel)) { dialog, _ ->
                 finish()
                 dialog.dismiss()
             }
@@ -312,21 +365,40 @@ public abstract class AbstractXmlCallActivity :
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                callViewModel.dismissOptions()
-
-                enterPictureInPictureMode(
-                    PictureInPictureParams.Builder().setAspectRatio(Rational(9, 16)).apply {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                            this.setAutoEnterEnabled(true)
-                        }
-                    }.build()
-                )
-            } else {
-                enterPictureInPictureMode()
+            try {
+                enterPictureInPicture()
+            } catch (error: Throwable) {
+                closeCall()
             }
         } else {
             closeCall()
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.N)
+    private fun enterPictureInPicture() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            callViewModel.dismissOptions()
+
+            val currentOrientation = resources.configuration.orientation
+            val screenSharing = callViewModel.callState.value?.isScreenSharingActive ?: false
+
+            val aspect =
+                if (currentOrientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT && !screenSharing) {
+                    Rational(9, 16)
+                } else {
+                    Rational(16, 9)
+                }
+
+            enterPictureInPictureMode(
+                PictureInPictureParams.Builder().setAspectRatio(aspect).apply {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        this.setAutoEnterEnabled(true)
+                    }
+                }.build()
+            )
+        } else {
+            enterPictureInPictureMode()
         }
     }
 
@@ -364,20 +436,6 @@ public abstract class AbstractXmlCallActivity :
                 }
             }
         }
-    }
-
-    /**
-     * Formats the current call state so that we can show it in the toolbar.
-     */
-    private fun StreamCallState.formatAsTitle() = when (this) {
-        is StreamCallState.Drop -> "Drop"
-        is StreamCallState.Joined -> "Joined"
-        is StreamCallState.Connecting -> "Connecting"
-        is StreamCallState.Connected -> "Connected"
-        is StreamCallState.Incoming -> "Incoming"
-        is StreamCallState.Joining -> "Joining"
-        is StreamCallState.Outgoing -> "Outgoing"
-        StreamCallState.Idle -> "Idle"
     }
 
     /**

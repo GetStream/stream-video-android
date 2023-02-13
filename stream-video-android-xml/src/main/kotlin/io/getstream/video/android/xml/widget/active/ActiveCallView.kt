@@ -66,15 +66,6 @@ public class ActiveCallView : CallContent {
     }
 
     /**
-     * Updates the state of Call Controls previously set using [setControlItems].
-     *
-     * @param items Call Controls whose state we wish to update.
-     */
-    public fun updateControlItems(items: List<CallControlItem>) {
-        binding.controlsView.updateItems(items)
-    }
-
-    /**
      * Sets the [RendererInitializer] handler used to initialize the renderer for each users video and to notify when
      * the video has been rendered.
      *

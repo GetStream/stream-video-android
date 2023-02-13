@@ -22,9 +22,6 @@ import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.call.state.ToggleCamera
-import io.getstream.video.android.core.call.state.ToggleMicrophone
-import io.getstream.video.android.core.call.state.ToggleSpeakerphone
 import io.getstream.video.android.xml.R
 import io.getstream.video.android.xml.utils.extensions.constrainViewEndToStartOfView
 import io.getstream.video.android.xml.utils.extensions.constrainViewStartToEndOfView
@@ -76,13 +73,27 @@ public class CallControlsView : ConstraintLayout {
      * @param items The list of [CallControlItem]s containing the [CallAction]s we wish to expose to the user.
      */
     public fun setItems(items: List<CallControlItem>) {
-        callControls.forEach { removeView(it.value) }
-        callControls.clear()
-        items.forEach { item ->
-            val view = buildControlView(item)
-            callControls[item.action] = view
-            addView(view)
+        // Clear views we do not need any more in case some are removed
+        callControls.keys.subtract(items.map { it.action }.toSet()).forEach {
+            removeView(callControls[it])
+            callControls.remove(it)
         }
+
+        // Used to make sorting the controls a little bit easier
+        val views = mutableListOf<CallControlButton>()
+        items.forEach { callControlItem ->
+            val callControlView = callControls[callControlItem.action] ?: buildControlView(callControlItem)
+            callControlView.setImageResource(callControlItem.icon)
+            callControlView.setColorFilter(context.getColorCompat(callControlItem.iconTint))
+            callControlView.background.setTint(context.getColorCompat(callControlItem.backgroundTint))
+            views.add(callControlView)
+        }
+
+        callControls.clear()
+        items.forEachIndexed { index, callControlItem ->
+            callControls[callControlItem.action] = views[index]
+        }
+
         defineConstraints()
     }
 
@@ -90,47 +101,22 @@ public class CallControlsView : ConstraintLayout {
      * Adds a new [CallControlButton] for each [CallControlItem] when [setItems] is called.
      *
      * @param callControlItem The call control item we wish to expose to the user.
+     *
+     * @return The newly created [CallControlButton]
      */
     private fun buildControlView(callControlItem: CallControlItem): CallControlButton {
-        return CallControlButton(context).apply {
+        val callControlButton = CallControlButton(context).apply {
             id = View.generateViewId()
             tag = callControlItem
             layoutParams = LayoutParams(style.callControlButtonSize, style.callControlButtonSize)
-            setImageResource(callControlItem.icon)
             setBackgroundResource(R.drawable.bg_call_control_option)
-            setColorFilter(context.getColorCompat(callControlItem.iconTint))
-            background.setTint(context.getColorCompat(callControlItem.backgroundTint))
             setOnClickListener {
                 val data = it.tag as CallControlItem
-                when (data.action) {
-                    is ToggleCamera -> callControlItemClickListener(ToggleCamera(!data.action.isEnabled))
-                    is ToggleMicrophone -> callControlItemClickListener(ToggleMicrophone(!data.action.isEnabled))
-                    is ToggleSpeakerphone -> callControlItemClickListener(ToggleSpeakerphone(!data.action.isEnabled))
-                    else -> {
-                        callControlItemClickListener(data.action)
-                    }
-                }
+                callControlItemClickListener(data.action)
             }
         }
-    }
-
-    /**
-     * Updates the states of views that are currently inside the [CallControlsView].
-     *
-     * @param items The [CallControlItem] whose state we wish to update.
-     */
-    public fun updateItems(items: List<CallControlItem>) {
-        items.forEach { callControlItem ->
-            callControls.keys
-                .firstOrNull { it::class == callControlItem.action::class }
-                ?.let {
-                    val view = callControls[it] ?: return@let
-                    view.setImageResource(callControlItem.icon)
-                    view.setColorFilter(context.getColorCompat(callControlItem.iconTint))
-                    view.background.setTint(context.getColorCompat(callControlItem.backgroundTint))
-                    view.tag = callControlItem
-                }
-        }
+        addView(callControlButton)
+        return callControlButton
     }
 
     /**

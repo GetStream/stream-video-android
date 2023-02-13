@@ -19,8 +19,8 @@
         android:id="@+id/participantsInfo"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="65dp"
-        android:layout_marginTop="32dp"
+        android:layout_marginHorizontal="@dimen/participantsTextPadding"
+        android:layout_marginTop="@dimen/callParticipantsAvatarsMargin"
         android:gravity="center"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -30,10 +30,9 @@
 
     <TextView
         android:id="@+id/callStatus"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="65dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="@dimen/callStatusParticipantsMargin"
         android:gravity="center"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

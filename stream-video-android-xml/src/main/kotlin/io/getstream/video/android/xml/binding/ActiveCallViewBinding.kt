@@ -17,6 +17,8 @@
 package io.getstream.video.android.xml.binding
 
 import androidx.lifecycle.LifecycleOwner
+import io.getstream.video.android.core.call.state.CallAction
+import io.getstream.video.android.core.call.state.CallMediaState
 import io.getstream.video.android.core.call.state.FlipCamera
 import io.getstream.video.android.core.call.state.LeaveCall
 import io.getstream.video.android.core.call.state.ToggleCamera
@@ -27,7 +29,6 @@ import io.getstream.video.android.xml.R
 import io.getstream.video.android.xml.widget.active.ActiveCallView
 import io.getstream.video.android.xml.widget.control.CallControlItem
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import io.getstream.video.android.ui.common.R as RCommon
 
@@ -37,19 +38,24 @@ import io.getstream.video.android.ui.common.R as RCommon
  *
  * This function sets listeners on the view and ViewModel. Call this method
  * before setting any additional listeners on these objects yourself.
+ *
+ * @param viewModel [CallViewModel] for observing data and running actions.
+ * @param lifecycleOwner The lifecycle owner, root component containing [ActiveCallView]. Usually an Activity or
+ * Fragment.
+ * @param updateCallMediaState Called every time [CallMediaState] changes to update the UI.
+ * @param onCallAction Handler that listens to interactions with call media controls.
  */
 public fun ActiveCallView.bindView(
     viewModel: CallViewModel,
     lifecycleOwner: LifecycleOwner,
+    updateCallMediaState: (CallMediaState) -> List<CallControlItem> = { defaultControlList(it) },
+    onCallAction: (CallAction) -> Unit = viewModel::onCallAction
 ) {
-    callActionListener = { item ->
-        viewModel.onCallAction(item)
-    }
 
-    setControlItems(buildDefaultControlList())
+    this.callActionListener = onCallAction
 
     startJob(lifecycleOwner) {
-        viewModel.callState.filterNotNull().distinctUntilChanged().collectLatest { call ->
+        viewModel.callState.filterNotNull().collectLatest { call ->
             setParticipantsRendererInitializer { videoRenderer, trackId, trackType, onRender ->
                 call.initRenderer(videoRenderer, trackId, trackType, onRender)
             }
@@ -70,63 +76,42 @@ public fun ActiveCallView.bindView(
 
     startJob(lifecycleOwner) {
         viewModel.callMediaState.collectLatest {
-            updateControlItems(
-                listOf(
-                    CallControlItem(
-                        icon = if (it.isSpeakerphoneEnabled) {
-                            RCommon.drawable.ic_speaker_on
-                        } else {
-                            RCommon.drawable.ic_speaker_off
-                        },
-                        iconTint = R.color.stream_black,
-                        backgroundTint = RCommon.color.stream_app_background,
-                        action = ToggleSpeakerphone(it.isSpeakerphoneEnabled)
-                    ),
-                    CallControlItem(
-                        icon = if (it.isCameraEnabled) {
-                            RCommon.drawable.ic_videocam_on
-                        } else {
-                            RCommon.drawable.ic_videocam_off
-                        },
-                        iconTint = R.color.stream_black,
-                        backgroundTint = RCommon.color.stream_app_background,
-                        action = ToggleCamera(it.isCameraEnabled)
-                    ),
-                    CallControlItem(
-                        icon = if (it.isMicrophoneEnabled) {
-                            RCommon.drawable.ic_mic_on
-                        } else {
-                            RCommon.drawable.ic_mic_off
-                        },
-                        iconTint = R.color.stream_black,
-                        backgroundTint = RCommon.color.stream_app_background,
-                        action = ToggleMicrophone(it.isMicrophoneEnabled)
-                    )
-                )
-            )
+            setControlItems(updateCallMediaState(it))
         }
     }
 }
 
-private fun buildDefaultControlList(): List<CallControlItem> {
+private fun defaultControlList(callMediaState: CallMediaState): List<CallControlItem> {
     return listOf(
         CallControlItem(
-            icon = RCommon.drawable.ic_speaker_on,
+            icon = if (callMediaState.isSpeakerphoneEnabled) {
+                RCommon.drawable.ic_speaker_on
+            } else {
+                RCommon.drawable.ic_speaker_off
+            },
             iconTint = R.color.stream_black,
             backgroundTint = RCommon.color.stream_app_background,
-            action = ToggleSpeakerphone(isEnabled = true)
+            action = ToggleSpeakerphone(callMediaState.isSpeakerphoneEnabled)
         ),
         CallControlItem(
-            icon = RCommon.drawable.ic_videocam_on,
+            icon = if (callMediaState.isCameraEnabled) {
+                RCommon.drawable.ic_videocam_on
+            } else {
+                RCommon.drawable.ic_videocam_off
+            },
             iconTint = R.color.stream_black,
             backgroundTint = RCommon.color.stream_app_background,
-            action = ToggleCamera(isEnabled = true)
+            action = ToggleCamera(callMediaState.isCameraEnabled)
         ),
         CallControlItem(
-            icon = RCommon.drawable.ic_mic_on,
+            icon = if (callMediaState.isMicrophoneEnabled) {
+                RCommon.drawable.ic_mic_on
+            } else {
+                RCommon.drawable.ic_mic_off
+            },
             iconTint = R.color.stream_black,
             backgroundTint = RCommon.color.stream_app_background,
-            action = ToggleMicrophone(isEnabled = true)
+            action = ToggleMicrophone(callMediaState.isMicrophoneEnabled)
         ),
         CallControlItem(
             icon = RCommon.drawable.ic_camera_flip,

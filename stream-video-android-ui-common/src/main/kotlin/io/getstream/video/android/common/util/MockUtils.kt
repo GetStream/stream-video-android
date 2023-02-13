@@ -14,18 +14,21 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.mock
+package io.getstream.video.android.common.util
 
+import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.model.CallParticipantState
 
-internal val mockParticipant: CallParticipantState
+@InternalStreamVideoApi
+public val mockParticipant: CallParticipantState
     inline get() = mockUsers[0]
 
-internal val mockParticipantList: List<CallParticipantState>
+@InternalStreamVideoApi
+public val mockParticipantList: List<CallParticipantState>
     inline get() = mockUsers
 
-@PublishedApi
-internal val mockUsers: List<CallParticipantState>
+@InternalStreamVideoApi
+public val mockUsers: List<CallParticipantState>
     inline get() = listOf(
         CallParticipantState(
             id = "filip_babic",
