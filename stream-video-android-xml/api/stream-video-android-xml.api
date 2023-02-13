@@ -4,6 +4,7 @@ public abstract class io/getstream/video/android/xml/AbstractXmlCallActivity : a
 	public fun getCallViewModelFactory ()Lio/getstream/video/android/core/viewmodel/CallViewModelFactory;
 	public fun getPermissionManager ()Lio/getstream/video/android/core/permission/PermissionManager;
 	protected fun handleBackPressed ()V
+	protected fun handleCallAction (Lio/getstream/video/android/core/call/state/CallAction;)V
 	public fun initPermissionManager ()Lio/getstream/video/android/core/permission/PermissionManager;
 	public fun onConfigurationChanged (Landroid/content/res/Configuration;)V
 	protected fun onCreate (Landroid/os/Bundle;)V
@@ -33,11 +34,13 @@ public final class io/getstream/video/android/xml/binding/ActiveCallViewBindingK
 }
 
 public final class io/getstream/video/android/xml/binding/IncomingCallBindingKt {
-	public static final fun bindView (Lio/getstream/video/android/xml/widget/incoming/IncomingCallView;Lio/getstream/video/android/core/viewmodel/CallViewModel;Landroidx/lifecycle/LifecycleOwner;)V
+	public static final fun bindView (Lio/getstream/video/android/xml/widget/incoming/IncomingCallView;Lio/getstream/video/android/core/viewmodel/CallViewModel;Landroidx/lifecycle/LifecycleOwner;Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun bindView$default (Lio/getstream/video/android/xml/widget/incoming/IncomingCallView;Lio/getstream/video/android/core/viewmodel/CallViewModel;Landroidx/lifecycle/LifecycleOwner;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 }
 
 public final class io/getstream/video/android/xml/binding/OutgoingCallBindingKt {
-	public static final fun bindView (Lio/getstream/video/android/xml/widget/outgoing/OutgoingCallView;Lio/getstream/video/android/core/viewmodel/CallViewModel;Landroidx/lifecycle/LifecycleOwner;)V
+	public static final fun bindView (Lio/getstream/video/android/xml/widget/outgoing/OutgoingCallView;Lio/getstream/video/android/core/viewmodel/CallViewModel;Landroidx/lifecycle/LifecycleOwner;Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun bindView$default (Lio/getstream/video/android/xml/widget/outgoing/OutgoingCallView;Lio/getstream/video/android/core/viewmodel/CallViewModel;Landroidx/lifecycle/LifecycleOwner;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 }
 
 public final class io/getstream/video/android/xml/databinding/ActivityCallBinding : androidx/viewbinding/ViewBinding {

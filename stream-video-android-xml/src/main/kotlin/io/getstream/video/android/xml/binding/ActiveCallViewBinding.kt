@@ -43,23 +43,16 @@ import io.getstream.video.android.ui.common.R as RCommon
  * @param lifecycleOwner The lifecycle owner, root component containing [ActiveCallView]. Usually an Activity or
  * Fragment.
  * @param updateCallMediaState Called every time [CallMediaState] changes to update the UI.
- * @param callActionListener Handler that listens to interactions with call media controls.
+ * @param onCallAction Handler that listens to interactions with call media controls.
  */
 public fun ActiveCallView.bindView(
     viewModel: CallViewModel,
     lifecycleOwner: LifecycleOwner,
     updateCallMediaState: (CallMediaState) -> List<CallControlItem> = { defaultControlList(it) },
-    callActionListener: (CallAction) -> Unit = { callAction ->
-        when (callAction) {
-            is ToggleCamera -> viewModel.onCallAction(ToggleCamera(!callAction.isEnabled))
-            is ToggleMicrophone -> viewModel.onCallAction(ToggleMicrophone(!callAction.isEnabled))
-            is ToggleSpeakerphone -> viewModel.onCallAction(ToggleSpeakerphone(!callAction.isEnabled))
-            else -> viewModel.onCallAction(callAction)
-        }
-    },
+    onCallAction: (CallAction) -> Unit = viewModel::onCallAction
 ) {
 
-    this.callActionListener = callActionListener
+    this.callActionListener = onCallAction
 
     startJob(lifecycleOwner) {
         viewModel.callState.filterNotNull().collectLatest { call ->

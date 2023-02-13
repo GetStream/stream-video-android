@@ -35,9 +35,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.core.StreamVideoProvider
+import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CancelCall
 import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
+import io.getstream.video.android.core.call.state.ToggleScreenConfiguration
+import io.getstream.video.android.core.call.state.ToggleSpeakerphone
 import io.getstream.video.android.core.model.state.StreamCallState
 import io.getstream.video.android.core.permission.PermissionManager
 import io.getstream.video.android.core.permission.PermissionManagerProvider
@@ -166,7 +169,11 @@ public abstract class AbstractXmlCallActivity :
      */
     private fun showOutgoingScreen() {
         binding.outgoingCallView.isVisible = true
-        binding.outgoingCallView.bindView(callViewModel, this)
+        binding.outgoingCallView.bindView(
+            viewModel = callViewModel,
+            lifecycleOwner = this,
+            onCallAction = ::handleCallAction
+        )
     }
 
     /**
@@ -174,7 +181,11 @@ public abstract class AbstractXmlCallActivity :
      */
     private fun showIncomingScreen() {
         binding.incomingCallView.isVisible = true
-        binding.incomingCallView.bindView(callViewModel, this)
+        binding.incomingCallView.bindView(
+            viewModel = callViewModel,
+            lifecycleOwner = this,
+            onCallAction = ::handleCallAction
+        )
     }
 
     /**
@@ -184,12 +195,51 @@ public abstract class AbstractXmlCallActivity :
         binding.outgoingCallView.isVisible = false
         binding.incomingCallView.isVisible = false
         binding.activeCallView.isVisible = true
-        binding.activeCallView.bindView(callViewModel, this)
+        binding.activeCallView.bindView(
+            viewModel = callViewModel,
+            lifecycleOwner = this,
+            onCallAction = ::handleCallAction
+        )
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.call_menu, menu)
         return true
+    }
+
+    /**
+     * Default handler for [CallAction]s triggered in the UI.
+     *
+     * @param action Action to handle.
+     */
+    protected open fun handleCallAction(action: CallAction) {
+        when (action) {
+            is ToggleMicrophone -> toggleMicrophone(action.copy(!action.isEnabled))
+            is ToggleCamera -> toggleCamera(action.copy(!action.isEnabled))
+            is ToggleSpeakerphone -> callViewModel.onCallAction(action.copy(!action.isEnabled))
+            is ToggleScreenConfiguration -> {
+                // TODO when implementing fullscreen
+                // toggleFullscreen(action)
+                callViewModel.onCallAction(action)
+            }
+            else -> callViewModel.onCallAction(action)
+        }
+    }
+
+    private fun toggleMicrophone(action: ToggleMicrophone) {
+        if (!callPermissionManager.hasRecordAudioPermission.value && action.isEnabled) {
+            callPermissionManager.requestPermission(Manifest.permission.RECORD_AUDIO)
+        } else {
+            callViewModel.onCallAction(action)
+        }
+    }
+
+    private fun toggleCamera(action: ToggleCamera) {
+        if (!callPermissionManager.hasCameraPermission.value && action.isEnabled) {
+            callPermissionManager.requestPermission(Manifest.permission.CAMERA)
+        } else {
+            callViewModel.onCallAction(action)
+        }
     }
 
     /**
