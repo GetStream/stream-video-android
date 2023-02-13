@@ -646,7 +646,7 @@ public abstract interface class io/getstream/video/android/core/StreamVideo {
 	public abstract fun awaitCallClient (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun cancelCall (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun clearCallState ()V
-	public abstract fun createCallClient (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lio/getstream/video/android/core/call/CallClient;
+	public abstract fun createCallClient (Lio/getstream/video/android/core/model/StreamCallGuid;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lio/getstream/video/android/core/call/CallClient;
 	public abstract fun createDevice (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun deleteDevice (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun getActiveCallClient ()Lio/getstream/video/android/core/call/CallClient;
@@ -661,7 +661,7 @@ public abstract interface class io/getstream/video/android/core/StreamVideo {
 	public abstract fun rejectCall (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun removeDevices (Ljava/util/List;)V
 	public abstract fun removeSocketListener (Lio/getstream/video/android/core/socket/SocketListener;)V
-	public abstract fun sendCustomEvent (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun sendCustomEvent (Ljava/lang/String;Ljava/util/Map;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun sendEvent (Ljava/lang/String;Lio/getstream/video/android/core/model/CallEventType;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
