@@ -89,3 +89,10 @@ internal fun Context.createStreamThemeWrapper(): Context {
         else -> ContextThemeWrapper(this, R.style.StreamVideoTheme)
     }
 }
+
+internal fun Context.getResourceId(style: Int, attr: Int): Int {
+    return theme.obtainStyledAttributes(
+        style,
+        intArrayOf(attr)
+    ).getResourceId(0, 0)
+}

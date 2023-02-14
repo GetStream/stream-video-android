@@ -8,6 +8,7 @@
         <item name="streamCallParticipantsViewStyle">@style/Stream.CallParticipants</item>
         <item name="streamIncomingViewStyle">@style/Stream.IncomingCall</item>
         <item name="streamOutgoingViewStyle">@style/Stream.OutgoingCall</item>
+        <item name="streamPictureInPictureViewStyle">@style/Stream.PictureInPicture</item>
     </style>
 
     <style name="Stream">
@@ -89,6 +90,9 @@
         <item name="streamOutgoingCallMediaControlIconTint">@color/stream_black</item>
         <item name="streamOutgoingCallMediaButtonBackground">@drawable/bg_call_control_option</item>
         <item name="streamOutgoingCallMediaButtonBackgroundTint">@color/stream_app_background</item>
+    </style>
+
+    <style name="Stream.PictureInPicture" parent="Stream">
     </style>
 
 

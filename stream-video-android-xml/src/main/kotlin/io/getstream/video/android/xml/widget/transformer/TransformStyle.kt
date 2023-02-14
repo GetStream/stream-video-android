@@ -24,6 +24,7 @@ import io.getstream.video.android.xml.widget.incoming.IncomingCallStyle
 import io.getstream.video.android.xml.widget.outgoing.OutgoingCallStyle
 import io.getstream.video.android.xml.widget.participant.CallParticipantStyle
 import io.getstream.video.android.xml.widget.participant.CallParticipantsStyle
+import io.getstream.video.android.xml.widget.participant.PictureInPictureStyle
 
 public object TransformStyle {
     @JvmStatic
@@ -42,6 +43,8 @@ public object TransformStyle {
     public var callParticipantStyleTransformer: StyleTransformer<CallParticipantStyle> = noopTransformer()
     @JvmStatic
     public var callParticipantsStyleTransformer: StyleTransformer<CallParticipantsStyle> = noopTransformer()
+    @JvmStatic
+    public var pictureInPictureStyleTransformer: StyleTransformer<PictureInPictureStyle> = noopTransformer()
 
     private fun <T> noopTransformer() = StyleTransformer<T> { it }
 }
