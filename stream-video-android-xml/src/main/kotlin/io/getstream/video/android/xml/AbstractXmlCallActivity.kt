@@ -20,10 +20,6 @@ import android.view.Menu
 import android.view.View
 import android.widget.FrameLayout
 import androidx.activity.OnBackPressedCallback
-import androidx.activity.viewModels
-import androidx.annotation.RequiresApi
-import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.children
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
@@ -61,11 +57,14 @@ public abstract class AbstractXmlCallActivity : AbstractCallActivity() {
      * Sets up a back handler to override default back button behavior.
      */
     private fun setupBackHandler() {
-        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                handleBackPressed()
+        onBackPressedDispatcher.addCallback(
+            this,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    handleBackPressed()
+                }
             }
-        })
+        )
     }
 
     /**
