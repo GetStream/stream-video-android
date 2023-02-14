@@ -30,6 +30,7 @@ import android.view.Menu
 import android.view.View
 import android.view.WindowManager
 import android.widget.FrameLayout
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
@@ -125,6 +126,7 @@ public abstract class AbstractXmlCallActivity :
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
+        setupBackHandler()
         setupToolbar()
         observeStreamCallState()
     }
@@ -132,6 +134,17 @@ public abstract class AbstractXmlCallActivity :
     override fun onResume() {
         super.onResume()
         startVideoFlow()
+    }
+
+    /**
+     * Sets up a back handler to override default back button behavior.
+     */
+    private fun setupBackHandler() {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                handleBackPressed()
+            }
+        })
     }
 
     /**
