@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.common
 
 import android.Manifest
@@ -49,6 +65,8 @@ public abstract class AbstractCallActivity :
         getCallViewModelFactory() ?: defaultViewModelFactory()
     }
 
+    protected val callViewModel: CallViewModel by viewModels(factoryProducer = { factory })
+
     /**
      * Provides the default ViewModel factory.
      */
@@ -81,14 +99,28 @@ public abstract class AbstractCallActivity :
         )
     }
 
-    protected val callViewModel: CallViewModel by viewModels(factoryProducer = { factory })
+    override fun getPermissionManager(): PermissionManager = callPermissionManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         callPermissionManager = initPermissionManager()
         showWhenLockedAndTurnScreenOn()
         super.onCreate(savedInstanceState)
-        setContent()
+        setupUi()
 
+        observeStreamCallState()
+        observeScreenSharing()
+        startVideoFlow()
+    }
+
+    /**
+     * Override to setup ui.
+     */
+    public abstract fun setupUi()
+
+    /**
+     * Sets up stream call state observer. By default will end the call once it reaches [StreamCallState.Idle].
+     */
+    protected open fun observeStreamCallState() {
         lifecycleScope.launchWhenCreated {
             callViewModel.streamCallState.collect {
                 if (it is StreamCallState.Idle) {
@@ -96,7 +128,12 @@ public abstract class AbstractCallActivity :
                 }
             }
         }
+    }
 
+    /**
+     * Sets up screen share observer.
+     */
+    protected open fun observeScreenSharing() {
         lifecycleScope.launchWhenCreated {
             callViewModel.screenSharingSessions.collectLatest {
                 if (it.isEmpty()) {
@@ -111,13 +148,7 @@ public abstract class AbstractCallActivity :
                 }
             }
         }
-
-        startVideoFlow()
     }
-
-    public abstract fun setContent()
-
-    override fun getPermissionManager(): PermissionManager = callPermissionManager
 
     /**
      * Default handler for [CallAction]s triggered in the UI.

@@ -45,17 +45,16 @@ public abstract class AbstractXmlCallActivity : AbstractCallActivity() {
 
     private val binding by lazy { ActivityCallBinding.inflate(streamThemeInflater) }
 
-    override fun setContent() {
+    override fun setupUi() {
         setContentView(binding.root)
 
         setupToolbar()
-        observeStreamCallState()
     }
 
     /**
-     * Observes the current call state and sets the toolbar title accordingly.
+     * Observes the current call state and sets the screen state accordingly.
      */
-    private fun observeStreamCallState() {
+    override fun observeStreamCallState() {
         lifecycleScope.launchWhenCreated {
             callViewModel.streamCallState.combine(callViewModel.isInPictureInPicture) { state, isPictureInPicture ->
                 updateToolbar(state, isPictureInPicture)
@@ -63,6 +62,7 @@ public abstract class AbstractXmlCallActivity : AbstractCallActivity() {
                     state is StreamCallState.Incoming && !state.acceptedByMe -> showIncomingScreen()
                     state is StreamCallState.Outgoing && !state.acceptedByCallee -> showOutgoingScreen()
                     state is StreamCallState.Connected && isPictureInPicture -> showPipLayout()
+                    state is StreamCallState.Idle -> finish()
                     else -> showActiveCallScreen()
                 }
             }.collect()

@@ -28,7 +28,7 @@ import io.getstream.video.android.core.model.Call
 
 public abstract class AbstractComposeCallActivity : AbstractCallActivity() {
 
-    override fun setContent() {
+    override fun setupUi() {
         setContent(content = buildContent())
     }
 
