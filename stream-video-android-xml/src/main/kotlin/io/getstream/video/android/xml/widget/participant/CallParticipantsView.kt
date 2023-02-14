@@ -45,8 +45,7 @@ public class CallParticipantsView : ConstraintLayout {
      */
     private val verticalGuideline by lazy {
         buildGuideline(
-            orientation = LayoutParams.VERTICAL,
-            guidePercent = HALF_OF_VIEW
+            orientation = LayoutParams.VERTICAL, guidePercent = HALF_OF_VIEW
         )
     }
 
@@ -55,8 +54,7 @@ public class CallParticipantsView : ConstraintLayout {
      */
     private val horizontalGuideline by lazy {
         buildGuideline(
-            orientation = LayoutParams.HORIZONTAL,
-            guidePercent = HALF_OF_VIEW
+            orientation = LayoutParams.HORIZONTAL, guidePercent = HALF_OF_VIEW
         )
     }
 
@@ -73,9 +71,7 @@ public class CallParticipantsView : ConstraintLayout {
     public constructor(context: Context) : this(context, null)
     public constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
     public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
-        context,
-        attrs,
-        defStyleAttr
+        context, attrs, defStyleAttr
     ) {
         init(context, attrs)
     }
@@ -110,8 +106,13 @@ public class CallParticipantsView : ConstraintLayout {
      * @param participants The list of the participants in the current call.
      */
     public fun updateParticipants(participants: List<CallParticipantState>) {
-        updateRemoteParticipants(participants.filter { !it.isLocal })
-        updateLocalParticipant(participants.firstOrNull { it.isLocal })
+        if (participants.size == 1) {
+            updateGridParticipants(participants)
+            updateFloatingParticipant(null)
+        } else {
+            updateGridParticipants(participants.filter { !it.isLocal })
+            updateFloatingParticipant(participants.firstOrNull { it.isLocal })
+        }
     }
 
     /**
@@ -119,7 +120,7 @@ public class CallParticipantsView : ConstraintLayout {
      *
      * @param participant The local participant to be shown in a [FloatingParticipantView].
      */
-    private fun updateLocalParticipant(participant: CallParticipantState?) {
+    private fun updateFloatingParticipant(participant: CallParticipantState?) {
         if (participant != null) {
             if (localParticipant == null) {
                 localParticipant = FloatingParticipantView(context)
@@ -165,11 +166,8 @@ public class CallParticipantsView : ConstraintLayout {
                     val newX = event.rawX + dx
                     val newY = event.rawY + dy
 
-                    view.animate()
-                        .x(newX.coerceIn(style.localParticipantPadding, maxDx))
-                        .y(newY.coerceIn(style.localParticipantPadding, maxDy))
-                        .setDuration(0)
-                        .start()
+                    view.animate().x(newX.coerceIn(style.localParticipantPadding, maxDx))
+                        .y(newY.coerceIn(style.localParticipantPadding, maxDy)).setDuration(0).start()
                     return@setOnTouchListener true
                 }
             }
@@ -194,7 +192,8 @@ public class CallParticipantsView : ConstraintLayout {
      * @return The max Y offset that can be applied to the overlaid [FloatingParticipantView].
      */
     private fun calculateFloatingParticipantMaxYOffset(): Float {
-        val controlsHeight = (parent as? ViewGroup)?.children?.firstOrNull { it is CallControlsView }?.measuredHeight ?: 0
+        val controlsHeight =
+            (parent as? ViewGroup)?.children?.firstOrNull { it is CallControlsView }?.measuredHeight ?: 0
         return measuredHeight - style.localParticipantHeight - style.localParticipantPadding - controlsHeight
     }
 
@@ -202,36 +201,32 @@ public class CallParticipantsView : ConstraintLayout {
      * Updates the remote participants. 4 remote participants will be shown at most in a grid. If a new participant
      * joins the call or an old one leaves, a [CallParticipantView] will be added or removed.
      */
-    private fun updateRemoteParticipants(participants: List<CallParticipantState>) {
-        when {
-            participants.size > childList.size -> {
-                val missingParticipants = participants.filter { !childList.map { it.tag }.contains(it.id) }
-                missingParticipants.forEach { participant ->
-                    val view = buildParticipantView(participant.id).also { view ->
-                        if (::rendererInitializer.isInitialized) view.setRendererInitializer(rendererInitializer)
-                        view.setParticipant(participant)
-                    }
-                    childList.add(view)
-                    addView(view)
-                }
-                updateConstraints()
-            }
-
-            participants.size < childList.size -> {
-                val surplusViews = childList.filter { !participants.map { it.id }.contains(it.tag) }.toSet()
-                childList.removeAll(surplusViews)
-                updateConstraints()
-                surplusViews.forEach {
-                    removeView(it)
-                }
-            }
-
-            else -> {
-                participants.forEach { participant ->
-                    childList.firstOrNull { it.tag == participant.id }?.setParticipant(participant)
-                }
-            }
+    private fun updateGridParticipants(participants: List<CallParticipantState>) {
+        val newParticipants = participants.filter { callParticipant ->
+            !childList.any { it.tag == callParticipant.id }
         }
+        val removedParticipants = childList.filter { participantView ->
+            !participants.any { it.id == participantView.tag }
+        }
+
+        removedParticipants.forEach { participantView ->
+            childList.remove(participantView)
+            removeView(participantView)
+        }
+
+        participants.forEach { participant ->
+            val participantView = if (newParticipants.contains(participant)) {
+                buildParticipantView(participant.id).also {
+                    if (::rendererInitializer.isInitialized) it.setRendererInitializer(rendererInitializer)
+                    childList.add(it)
+                    addView(it)
+                }
+            } else {
+                childList.first { it.tag == participant.id }
+            }
+            participantView.setParticipant(participant)
+        }
+        updateConstraints()
     }
 
     /**
@@ -287,8 +282,7 @@ public class CallParticipantsView : ConstraintLayout {
             this.id = View.generateViewId()
             this.tag = userId
             this.layoutParams = LayoutParams(
-                LayoutParams.MATCH_CONSTRAINT,
-                LayoutParams.MATCH_CONSTRAINT
+                LayoutParams.MATCH_CONSTRAINT, LayoutParams.MATCH_CONSTRAINT
             )
         }
     }
@@ -299,8 +293,7 @@ public class CallParticipantsView : ConstraintLayout {
     private fun buildGuideline(orientation: Int, guidePercent: Float) = Guideline(context).apply {
         this.id = View.generateViewId()
         this.layoutParams = LayoutParams(
-            LayoutParams.WRAP_CONTENT,
-            LayoutParams.WRAP_CONTENT
+            LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT
         ).apply {
             this.orientation = orientation
             this.guidePercent = guidePercent
