@@ -444,7 +444,7 @@ public final class io/getstream/video/android/compose/ui/components/call/control
 	public static final fun CallControls (Lio/getstream/video/android/core/call/state/CallMediaState;ZLandroidx/compose/ui/Modifier;Ljava/util/List;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 
-public final class io/getstream/video/android/compose/ui/components/call/controls/RegularCallControlsKt {
+public final class io/getstream/video/android/compose/ui/components/call/controls/internal/RegularCallControlsKt {
 	public static final fun RegularCallControlsActions (Ljava/util/List;ZLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)V
 }
 

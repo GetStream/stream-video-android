@@ -79,7 +79,7 @@ public final class io/getstream/video/android/xml/databinding/ViewCallDetailsBin
 
 public final class io/getstream/video/android/xml/databinding/ViewCallParticipantBinding : androidx/viewbinding/ViewBinding {
 	public final field activeCallParticipantBorder Landroid/widget/ImageView;
-	public final field labelHolder Landroid/widget/LinearLayout;
+	public final field labelHolder Landroidx/constraintlayout/widget/ConstraintLayout;
 	public final field participantAvatar Lio/getstream/video/android/xml/widget/avatar/AvatarView;
 	public final field participantLabel Landroid/widget/TextView;
 	public final field participantVideoRenderer Lio/getstream/video/android/core/ui/TextureViewRenderer;
@@ -501,7 +501,7 @@ public final class io/getstream/video/android/xml/widget/participant/CallPartici
 	public final fun getActiveSpeakerBorderWidth ()I
 	public final fun getLabelAlignment ()Lio/getstream/video/android/xml/widget/participant/CallParticipantLabelAlignment;
 	public final fun getLabelBackgroundColor ()I
-	public final fun getLabelPadding ()I
+	public final fun getLabelMargin ()I
 	public final fun getLabelTextStyle ()Lio/getstream/video/android/xml/font/TextStyle;
 	public final fun getParticipantAudioLevelTint ()I
 	public final fun getParticipantMicOffIcon ()Landroid/graphics/drawable/Drawable;
@@ -517,6 +517,7 @@ public final class io/getstream/video/android/xml/widget/participant/CallPartici
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;II)V
 	public final fun getOnRender ()Lkotlin/jvm/functions/Function1;
 	public final fun setActive (Z)V
+	public final fun setLabelBottomOffset (I)V
 	public final fun setOnRender (Lkotlin/jvm/functions/Function1;)V
 	public final fun setParticipant (Lio/getstream/video/android/core/model/CallParticipantState;)V
 	public final fun setRendererInitializer (Lio/getstream/video/android/xml/widget/participant/RendererInitializer;)V

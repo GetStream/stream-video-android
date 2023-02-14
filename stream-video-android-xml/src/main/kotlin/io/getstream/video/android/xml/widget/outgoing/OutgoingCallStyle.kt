@@ -79,7 +79,7 @@ public data class OutgoingCallStyle(
 
                 val streamCancelCallIconTint = it.getColor(
                     R.styleable.OutgoingCallView_streamOutgoingCallCancelCallIconTint,
-                    context.getColorCompat(R.color.stream_black)
+                    context.getColorCompat(R.color.stream_white)
                 )
 
                 val cancelCallBackground = it.getDrawable(
@@ -109,7 +109,7 @@ public data class OutgoingCallStyle(
 
                 val mediaButtonIconTint = it.getColor(
                     R.styleable.OutgoingCallView_streamOutgoingCallMediaControlIconTint,
-                    context.getColorCompat(R.color.stream_black)
+                    context.getColorCompat(RCommon.color.stream_text_high_emphasis)
                 )
 
                 val mediaButtonBackground = it.getDrawable(

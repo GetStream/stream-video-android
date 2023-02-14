@@ -35,6 +35,7 @@ import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.children
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
@@ -66,6 +67,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
+import io.getstream.video.android.ui.common.R as RCommon
 
 public abstract class AbstractXmlCallActivity :
     AppCompatActivity(),
@@ -140,11 +142,14 @@ public abstract class AbstractXmlCallActivity :
      * Sets up a back handler to override default back button behavior.
      */
     private fun setupBackHandler() {
-        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                handleBackPressed()
+        onBackPressedDispatcher.addCallback(
+            this,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    handleBackPressed()
+                }
             }
-        })
+        )
     }
 
     /**
@@ -270,6 +275,9 @@ public abstract class AbstractXmlCallActivity :
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.call_menu, menu)
+        menu?.findItem(R.id.callParticipants)?.let {
+            it.icon?.setTint(ContextCompat.getColor(this, RCommon.color.stream_text_high_emphasis))
+        }
         return true
     }
 

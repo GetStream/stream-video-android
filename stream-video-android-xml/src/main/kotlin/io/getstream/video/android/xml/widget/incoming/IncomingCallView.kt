@@ -78,9 +78,9 @@ public class IncomingCallView : CallContent {
 
     private fun initVideoButton() {
         with(binding.cameraToggle) {
-            background = style.acceptCallBackground
+            background = style.videoButtonBackground
             background.setTint(style.videoButtonBackgroundTint)
-            setColorFilter(style.acceptCallIconTint)
+            setColorFilter(style.videoButtonIconTint)
         }
     }
 
@@ -98,7 +98,7 @@ public class IncomingCallView : CallContent {
         with(binding) {
             acceptCall.setOnClickListener { callActionListener(AcceptCall) }
             declineCall.setOnClickListener { callActionListener(DeclineCall) }
-            cameraToggle.setOnClickListener { callActionListener(ToggleCamera(!isCameraEnabled)) }
+            cameraToggle.setOnClickListener { callActionListener(ToggleCamera(isCameraEnabled)) }
         }
     }
 
