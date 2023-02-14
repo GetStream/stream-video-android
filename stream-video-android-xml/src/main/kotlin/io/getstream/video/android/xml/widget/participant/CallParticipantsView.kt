@@ -73,9 +73,7 @@ public class CallParticipantsView : ConstraintLayout {
     public constructor(context: Context) : this(context, null)
     public constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
     public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
-        context,
-        attrs,
-        defStyleAttr
+        context, attrs, defStyleAttr
     ) {
         init(context, attrs)
     }
@@ -152,7 +150,7 @@ public class CallParticipantsView : ConstraintLayout {
      *
      * @param participant The local participant to be shown in a [FloatingParticipantView].
      */
-    private fun updateLocalParticipant(participant: CallParticipantState?) {
+    private fun updateFloatingParticipant(participant: CallParticipantState?) {
         if (participant != null) {
             if (localParticipant == null) {
                 localParticipant = FloatingParticipantView(context)
@@ -198,11 +196,8 @@ public class CallParticipantsView : ConstraintLayout {
                     val newX = event.rawX + dx
                     val newY = event.rawY + dy
 
-                    view.animate()
-                        .x(newX.coerceIn(style.localParticipantPadding, maxDx))
-                        .y(newY.coerceIn(style.localParticipantPadding, maxDy))
-                        .setDuration(0)
-                        .start()
+                    view.animate().x(newX.coerceIn(style.localParticipantPadding, maxDx))
+                        .y(newY.coerceIn(style.localParticipantPadding, maxDy)).setDuration(0).start()
                     return@setOnTouchListener true
                 }
             }
@@ -244,36 +239,34 @@ public class CallParticipantsView : ConstraintLayout {
      * Updates the remote participants. 4 remote participants will be shown at most in a grid. If a new participant
      * joins the call or an old one leaves, a [CallParticipantView] will be added or removed.
      */
-    private fun updateParticipantsState(participants: List<CallParticipantState>) {
-        when {
-            participants.size > childList.size -> {
-                val missingParticipants = participants.filter { !childList.map { it.tag }.contains(it.id) }
-                missingParticipants.forEach { participant ->
-                    val view = buildParticipantView(participant.id).also { view ->
-                        if (::rendererInitializer.isInitialized) view.setRendererInitializer(rendererInitializer)
-                        view.setParticipant(participant)
-                    }
-                    childList.add(view)
-                    binding.participantsHolder.addView(view)
-                }
-                updateConstraints()
-            }
-
-            participants.size < childList.size -> {
-                val surplusViews = childList.filter { !participants.map { it.id }.contains(it.tag) }.toSet()
-                childList.removeAll(surplusViews)
-                surplusViews.forEach {
-                    binding.participantsHolder.removeView(it)
-                }
-                updateConstraints()
-            }
-
-            else -> {
-                participants.forEach { participant ->
-                    (childList.firstOrNull { it.tag == participant.id })?.setParticipant(participant)
-                }
-            }
+    private fun updateGridParticipants(participants: List<CallParticipantState>) {
+        val newParticipants = participants.filter { callParticipant ->
+            !childList.any { it.tag == callParticipant.id }
         }
+        val removedParticipants = childList.filter { participantView ->
+            !participants.any { it.id == participantView.tag }
+        }
+
+        removedParticipants.forEach { participantView ->
+            childList.remove(participantView)
+            removeView(participantView)
+        }
+
+        participants.forEach { participant ->
+            val participantView = if (newParticipants.contains(participant)) {
+                buildParticipantView(participant.id).also {
+                    if (::rendererInitializer.isInitialized) it.setRendererInitializer(rendererInitializer)
+                    childList.add(it)
+                    addView(it)
+                }
+            } else {
+                childList.first { it.tag == participant.id }
+            }
+            participantView.setParticipant(participant)
+        }
+        childList.sortBy { participants.map { it.id }.indexOf(it.tag) }
+
+        updateConstraints()
     }
 
     /**
@@ -334,6 +327,19 @@ public class CallParticipantsView : ConstraintLayout {
 
             childList.forEach { setViewSize(it) }
         }
+
+        childList.forEach {
+            it.setLabelBottomOffset(if (isBottomChild(it)) getControlsHeight() else 0)
+        }
+    }
+
+    private fun isBottomChild(view: CallParticipantView): Boolean {
+        return when {
+            childList.size == 1 -> true
+            childList.size == 2 && childList.indexOf(view) == 1 -> true
+            childList.size > 2 && childList.indexOf(view) > 1 -> true
+            else -> false
+        }
     }
 
     private fun calculateOffsetWithControls(): Float {
@@ -357,8 +363,7 @@ public class CallParticipantsView : ConstraintLayout {
             this.id = View.generateViewId()
             this.tag = userId
             this.layoutParams = LayoutParams(
-                LayoutParams.MATCH_CONSTRAINT,
-                LayoutParams.MATCH_CONSTRAINT
+                LayoutParams.MATCH_CONSTRAINT, LayoutParams.MATCH_CONSTRAINT
             )
         }
     }

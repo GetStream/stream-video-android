@@ -94,7 +94,7 @@ private fun defaultControlList(callMediaState: CallMediaState): List<CallControl
                 RCommon.drawable.ic_speaker_off
             },
             iconTint = R.color.stream_black,
-            backgroundTint = RCommon.color.stream_app_background,
+            backgroundTint = R.color.stream_white,
             action = ToggleSpeakerphone(callMediaState.isSpeakerphoneEnabled)
         ),
         CallControlItem(
@@ -104,7 +104,7 @@ private fun defaultControlList(callMediaState: CallMediaState): List<CallControl
                 RCommon.drawable.ic_videocam_off
             },
             iconTint = R.color.stream_black,
-            backgroundTint = RCommon.color.stream_app_background,
+            backgroundTint = R.color.stream_white,
             action = ToggleCamera(callMediaState.isCameraEnabled)
         ),
         CallControlItem(
@@ -114,18 +114,18 @@ private fun defaultControlList(callMediaState: CallMediaState): List<CallControl
                 RCommon.drawable.ic_mic_off
             },
             iconTint = R.color.stream_black,
-            backgroundTint = RCommon.color.stream_app_background,
+            backgroundTint = R.color.stream_white,
             action = ToggleMicrophone(callMediaState.isMicrophoneEnabled)
         ),
         CallControlItem(
             icon = RCommon.drawable.ic_camera_flip,
             iconTint = R.color.stream_black,
-            backgroundTint = RCommon.color.stream_app_background,
+            backgroundTint = R.color.stream_white,
             action = FlipCamera
         ),
         CallControlItem(
             icon = RCommon.drawable.ic_call_end,
-            iconTint = R.color.stream_black,
+            iconTint = R.color.stream_white,
             backgroundTint = RCommon.color.stream_error_accent,
             action = LeaveCall
         ),

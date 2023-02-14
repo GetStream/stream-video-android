@@ -39,7 +39,7 @@ import io.getstream.video.android.ui.common.R as RCommon
  * styles programmatically.
  *
  * @param labelAlignment The alignment of the microphone off/on icon and name label.
- * @param labelPadding The padding between the name label and the [CallParticipantView] borders.
+ * @param labelMargin The margin between the name label and the [CallParticipantView] borders.
  * @param activeSpeakerBorderColor The colour of the active speaking participant border.
  * @param labelTextStyle The text style for the participants name label.
  * @param labelBackgroundColor The colour of the participant name label background.
@@ -49,7 +49,7 @@ import io.getstream.video.android.ui.common.R as RCommon
  */
 public data class CallParticipantStyle(
     public val labelAlignment: CallParticipantLabelAlignment,
-    @Px public val labelPadding: Int,
+    @Px public val labelMargin: Int,
     @Px public val activeSpeakerBorderWidth: Int,
     @ColorInt public val activeSpeakerBorderColor: Int,
     public val labelTextStyle: TextStyle,
@@ -75,10 +75,10 @@ public data class CallParticipantStyle(
 
                 val labelAlignment = it.getEnum(
                     R.styleable.CallParticipantView_streamCallParticipantLabelAlignment,
-                    CallParticipantLabelAlignment.TOP_LEFT
+                    CallParticipantLabelAlignment.BOTTOM_LEFT
                 )
 
-                val labelPadding = it.getDimension(
+                val labelMargin = it.getDimension(
                     R.styleable.CallParticipantView_streamCallParticipantLabelMargin,
                     DEFAULT_LABEL_MARGIN
                 )
@@ -108,7 +108,7 @@ public data class CallParticipantStyle(
                     )
                     .style(
                         R.styleable.CallParticipantView_streamCallParticipantLabelTextStyle,
-                        Typeface.BOLD
+                        Typeface.NORMAL
                     )
                     .build()
 
@@ -133,7 +133,7 @@ public data class CallParticipantStyle(
 
                 return CallParticipantStyle(
                     labelAlignment = labelAlignment,
-                    labelPadding = labelPadding.toInt(),
+                    labelMargin = labelMargin.toInt(),
                     activeSpeakerBorderWidth = activeSpeakerBorderWidth,
                     activeSpeakerBorderColor = activeSpeakerBorderColor,
                     labelTextStyle = labelTextStyle,

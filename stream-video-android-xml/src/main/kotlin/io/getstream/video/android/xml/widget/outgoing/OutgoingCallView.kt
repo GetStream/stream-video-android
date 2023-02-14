@@ -103,8 +103,8 @@ public class OutgoingCallView : CallContent {
     init {
         with(binding) {
             cancelCall.setOnClickListener { callActionListener(CancelCall) }
-            micToggle.setOnClickListener { callActionListener(ToggleMicrophone(!isMicrophoneEnabled)) }
-            cameraToggle.setOnClickListener { callActionListener(ToggleCamera(!isCameraEnabled)) }
+            micToggle.setOnClickListener { callActionListener(ToggleMicrophone(isMicrophoneEnabled)) }
+            cameraToggle.setOnClickListener { callActionListener(ToggleCamera(isCameraEnabled)) }
         }
     }
 

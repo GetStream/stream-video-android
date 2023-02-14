@@ -33,25 +33,29 @@
         android:visibility="gone"
         />
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/labelHolder"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
         android:background="@drawable/bg_call_participant_name"
         android:orientation="horizontal"
-        android:padding="@dimen/callParticipantLabelPadding"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         >
 
         <ImageView
             android:id="@+id/soundIndicator"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
             android:layout_gravity="center"
-            android:paddingStart="0dp"
-            android:paddingEnd="8dp"
+            android:padding="6dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_mic_off"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintDimensionRatio="1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             />
 
         <TextView
@@ -64,10 +68,14 @@
             android:lines="1"
             android:maxWidth="@dimen/callParticipantLabelTextMaxWidth"
             android:padding="@dimen/callParticipantLabelTextPadding"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/soundIndicator"
+            app:layout_constraintTop_toTopOf="parent"
             tools:text="Some random user"
             />
 
-    </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 
 </merge>
