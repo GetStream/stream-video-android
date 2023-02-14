@@ -29,8 +29,6 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import okhttp3.Response
 import okhttp3.WebSocket
-import okio.ByteString
-import stream.video.coordinator.client_v1_rpc.WebsocketEvent
 
 @Suppress("TooManyFunctions")
 internal class EventsParser(
@@ -52,29 +50,13 @@ internal class EventsParser(
     override fun onMessage(webSocket: WebSocket, text: String) {
         super.onMessage(webSocket, text)
 
-        val data = Json.decodeFromString<JsonObject>(text)
-
-        // TODO - wait for BE to add health check events and parse properly. we'll still need to parse the type and figure out the events ourselves
-        logger.d { "[onMessage] $data" }
-
-        if (data["type"]?.jsonPrimitive?.content == "health.check") {
-            connectionEventReceived = true
-            val connectionId = data["connection_id"]?.jsonPrimitive?.content ?: ""
-
-            videoSocket.onConnectionResolved(ConnectedEvent(connectionId))
-        }
-    }
-
-    override fun onMessage(
-        webSocket: WebSocket,
-        bytes: ByteString
-    ) { // TODO transform this ^ into JSON parsing
-        super.onMessage(webSocket, bytes)
         try {
-            val rawEvent = WebsocketEvent.ADAPTER.decode(bytes)
+            val data = Json.decodeFromString<JsonObject>(text)
+            logger.d { "[onMessage] $data" }
 
-            if (rawEvent.healthcheck == null) logger.v { "[onMessage] rawEvent: $rawEvent" }
-            val processedEvent = EventMapper.mapEvent(rawEvent)
+            val eventType = EventType.from(data["type"]?.jsonPrimitive?.content ?: return)
+            val processedEvent = EventMapper.mapEvent(eventType, text)
+
             if (processedEvent !is HealthCheckEvent) logger.v { "[onMessage] processedEvent: $processedEvent" }
 
             if (!connectionEventReceived && processedEvent is HealthCheckEvent) {

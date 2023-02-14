@@ -37,7 +37,6 @@ public data class ConnectedEvent(
  */
 public data class HealthCheckEvent(
     val clientId: String,
-    val userId: String
 ) : VideoEvent()
 
 /**
@@ -48,7 +47,6 @@ public data class CallCreatedEvent(
     val ringing: Boolean,
     val users: Map<String, CallUser>,
     val info: CallInfo,
-    val details: CallDetails
 ) : VideoEvent()
 
 /**

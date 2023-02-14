@@ -44,7 +44,6 @@ import io.getstream.video.android.core.model.mapper.toMetadata
 import io.getstream.video.android.core.model.mapper.toTypeAndId
 import io.getstream.video.android.core.model.state.DropReason
 import io.getstream.video.android.core.model.state.StreamCallState
-import io.getstream.video.android.core.model.toDetails
 import io.getstream.video.android.core.model.toIceServer
 import io.getstream.video.android.core.model.toInfo
 import io.getstream.video.android.core.socket.SocketListener
@@ -579,7 +578,6 @@ internal class StreamVideoImpl(
                         ringing = true,
                         users = callMetadata.users,
                         info = callMetadata.toInfo(),
-                        details = callMetadata.toDetails()
                     )
 
                     engine.onCoordinatorEvent(event)

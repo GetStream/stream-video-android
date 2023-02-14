@@ -17,9 +17,10 @@
 package io.getstream.video.android.core.model
 
 import io.getstream.video.android.core.utils.toCallUser
+import org.openapitools.client.models.CallResponse
 import org.openapitools.client.models.MemberResponse
 import java.io.Serializable
-import java.util.Date
+import java.util.*
 import stream.video.coordinator.call_v1.Call as CoordinatorCall
 import stream.video.coordinator.call_v1.CallDetails as CoordinatorCallDetails
 import stream.video.coordinator.member_v1.Member as CoordinatorMember
@@ -65,8 +66,6 @@ public data class CallInfo(
 public data class CallDetails(
     val memberUserIds: List<String>,
     val members: Map<String, CallMember>,
-    val broadcastingEnabled: Boolean,
-    val recordingEnabled: Boolean,
 ) : Serializable
 
 public fun Map<String, CoordinatorUser>.toCallUsers(): Map<String, CallUser> =
@@ -106,8 +105,6 @@ public fun CoordinatorCallDetails?.toCallDetails(): CallDetails {
     return CallDetails(
         memberUserIds = member_user_ids,
         members = members.toCallMembers(),
-        broadcastingEnabled = settings?.broadcasting?.enabled ?: false,
-        recordingEnabled = settings?.recording?.enabled ?: false
     )
 }
 
@@ -122,6 +119,19 @@ public fun CoordinatorCall?.toCallInfo(): CallInfo {
         recordingEnabled = settings_overrides?.recording?.enabled ?: false,
         createdAt = created_at?.let { Date(it.toEpochMilli()) },
         updatedAt = updated_at?.let { Date(it.toEpochMilli()) },
+    )
+}
+
+internal fun CallResponse.toCallInfo(): CallInfo { // TODO - expose more properties based on what the events have
+    return CallInfo(
+        cid = cid,
+        id = id,
+        type = type,
+        createdByUserId = createdBy.id,
+        broadcastingEnabled = settings.broadcasting.enabled,
+        recordingEnabled = settings.recording.enabled,
+        createdAt = Date(createdAt.toEpochSecond() * 1000L),
+        updatedAt = Date(updatedAt.toEpochSecond() * 1000L),
     )
 }
 

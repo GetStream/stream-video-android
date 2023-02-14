@@ -17,7 +17,7 @@
 package io.getstream.video.android.core.model
 
 import java.io.Serializable
-import java.util.Date
+import java.util.*
 
 public data class CallMetadata(
     val cid: StreamCallCid,
@@ -47,8 +47,6 @@ public fun CallMetadata.toInfo(): CallInfo = CallInfo(
 public fun CallMetadata.toDetails(): CallDetails = CallDetails(
     members = users.toMembers(cid),
     memberUserIds = users.keys.toList(),
-    broadcastingEnabled = broadcastingEnabled,
-    recordingEnabled = recordingEnabled
 )
 
 public fun Map<String, CallUser>.toMembers(callCid: String): Map<String, CallMember> =
