@@ -216,6 +216,7 @@ internal class StreamCallEngineImpl(
 
         val queryUsersResult = coordinatorClient.queryMembers(
             QueryMembersRequest(
+                id = state.callGuid.id,
                 type = state.callGuid.type,
                 filterConditions = query
             )
@@ -254,6 +255,7 @@ internal class StreamCallEngineImpl(
 
             val userQueryResult = coordinatorClient.queryMembers(
                 QueryMembersRequest(
+                    id = state.callGuid.id,
                     type = state.callGuid.type,
                     filterConditions = query
                 )

@@ -59,6 +59,7 @@ import io.getstream.video.android.core.model.IceCandidate
 import io.getstream.video.android.core.model.IceServer
 import io.getstream.video.android.core.model.SfuToken
 import io.getstream.video.android.core.model.StreamCallGuid
+import io.getstream.video.android.core.model.StreamCallId
 import io.getstream.video.android.core.model.StreamPeerType
 import io.getstream.video.android.core.model.state.StreamCallState
 import io.getstream.video.android.core.model.toPeerType
@@ -72,6 +73,8 @@ import io.getstream.video.android.core.utils.buildRemoteIceServers
 import io.getstream.video.android.core.utils.onError
 import io.getstream.video.android.core.utils.onSuccessSuspend
 import io.getstream.video.android.core.utils.stringify
+import kotlin.math.absoluteValue
+import kotlin.random.Random
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelChildren
@@ -118,8 +121,6 @@ import stream.video.sfu.signal.TrackSubscriptionDetails
 import stream.video.sfu.signal.UpdateMuteStatesRequest
 import stream.video.sfu.signal.UpdateMuteStatesResponse
 import stream.video.sfu.signal.UpdateSubscriptionsRequest
-import kotlin.math.absoluteValue
-import kotlin.random.Random
 
 internal class CallClientImpl(
     private val context: Context,
@@ -434,9 +435,10 @@ internal class CallClientImpl(
     }
 
     private suspend fun loadParticipantsData(
-        callType: String,
+        callId: StreamCallId,
         callState: CallState?,
-        callSettings: CallSettings
+        callSettings: CallSettings,
+        callType: String
     ) {
         logger.d { "[loadParticipantsData] #sfu; callState: $callState, callSettings: $callSettings" }
         if (callState != null) {
@@ -449,6 +451,7 @@ internal class CallClientImpl(
 
             val userQueryResult = coordinatorClient.queryMembers(
                 QueryMembersRequest(
+                    id = callId,
                     type = callType,
                     filterConditions = query
                 )
@@ -498,6 +501,7 @@ internal class CallClientImpl(
             is Success -> {
                 createPeerConnections(autoPublish)
                 loadParticipantsData(
+                    callId = callGuid.id,
                     callType = callGuid.type,
                     callState = result.data.call_state,
                     callSettings = callSettings
@@ -689,6 +693,7 @@ internal class CallClientImpl(
 
         val userQueryResult = coordinatorClient.queryMembers(
             QueryMembersRequest(
+                id = callGuid.id,
                 type = callGuid.type,
                 filterConditions = query
             )
