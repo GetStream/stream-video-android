@@ -574,6 +574,7 @@ internal class StreamVideoImpl(
                         ringing = true,
                         users = callMetadata.users,
                         info = callMetadata.toInfo(),
+                        callDetails = callMetadata.callDetails
                     )
 
                     engine.onCoordinatorEvent(event)

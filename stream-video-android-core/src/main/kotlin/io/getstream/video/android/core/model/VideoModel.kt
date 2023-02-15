@@ -18,13 +18,10 @@ package io.getstream.video.android.core.model
 
 import io.getstream.video.android.core.utils.toCallUser
 import org.openapitools.client.models.CallResponse
+import org.openapitools.client.models.Callcreated
 import org.openapitools.client.models.MemberResponse
 import java.io.Serializable
 import java.util.Date
-import stream.video.coordinator.call_v1.Call as CoordinatorCall
-import stream.video.coordinator.call_v1.CallDetails as CoordinatorCallDetails
-import stream.video.coordinator.member_v1.Member as CoordinatorMember
-import stream.video.coordinator.user_v1.User as CoordinatorUser
 
 public data class CallUser(
     val id: String,
@@ -60,69 +57,26 @@ public data class CallInfo(
     val broadcastingEnabled: Boolean,
     val recordingEnabled: Boolean,
     val createdAt: Date?,
-    val updatedAt: Date?
+    val updatedAt: Date?,
+    val callEgress: CallEgress,
+    val custom: Map<String, Any>
 ) : Serializable
 
 public data class CallDetails(
     val memberUserIds: List<String>,
-    val members: Map<String, CallMember>,
+    val members: Map<String, CallUser>,
+    val ownCapabilities: List<String>
 ) : Serializable
 
-public fun Map<String, CoordinatorUser>.toCallUsers(): Map<String, CallUser> =
-    map { (userId, protoUser) ->
-        userId to protoUser.toCallUser()
-    }.toMap()
+public data class CallEgress(
+    val broadcastEgress: String,
+    val recordEgress: String
+)
 
 internal fun List<MemberResponse>.toCallUsers(): Map<String, CallUser> =
     associate { it.userId to it.toCallUser() }
 
-public fun CoordinatorUser.toCallUser(): CallUser = CallUser(
-    id = id,
-    name = name,
-    role = role,
-    imageUrl = image_url,
-    state = null,
-    createdAt = created_at?.let { Date(it.toEpochMilli()) },
-    updatedAt = updated_at?.let { Date(it.toEpochMilli()) },
-    teams = teams
-)
-
-public fun Map<String, CoordinatorMember>.toCallMembers(): Map<String, CallMember> =
-    map { (userId, protoMember) ->
-        userId to protoMember.toCallMember()
-    }.toMap()
-
-public fun CoordinatorMember.toCallMember(): CallMember = CallMember(
-    callCid = call_cid,
-    role = role,
-    userId = user_id,
-    createdAt = created_at?.let { Date(it.toEpochMilli()) },
-    updatedAt = updated_at?.let { Date(it.toEpochMilli()) },
-)
-
-public fun CoordinatorCallDetails?.toCallDetails(): CallDetails {
-    this ?: error("CallDetails is not provided")
-    return CallDetails(
-        memberUserIds = member_user_ids,
-        members = members.toCallMembers(),
-    )
-}
-
-public fun CoordinatorCall?.toCallInfo(): CallInfo {
-    this ?: error("CallInfo is not provided")
-    return CallInfo(
-        cid = call_cid,
-        id = id,
-        type = type,
-        createdByUserId = created_by_user_id,
-        broadcastingEnabled = settings_overrides?.broadcasting?.enabled ?: false,
-        recordingEnabled = settings_overrides?.recording?.enabled ?: false,
-        createdAt = created_at?.let { Date(it.toEpochMilli()) },
-        updatedAt = updated_at?.let { Date(it.toEpochMilli()) },
-    )
-}
-
-internal fun CallResponse.toCallInfo(): CallInfo { // TODO - expose more properties based on what the events have
+internal fun CallResponse.toCallInfo(): CallInfo {
     return CallInfo(
         cid = cid,
         id = id,
@@ -132,6 +86,19 @@ internal fun CallResponse.toCallInfo(): CallInfo { // TODO - expose more propert
         recordingEnabled = settings.recording.audioOnly, // TODO - how do we know if it's enabled or not
         createdAt = Date(createdAt.toEpochSecond() * 1000L),
         updatedAt = Date(updatedAt.toEpochSecond() * 1000L),
+        callEgress = CallEgress(
+            broadcastEgress = broadcastEgress,
+            recordEgress = recordEgress
+        ),
+        custom = custom
+    )
+}
+
+internal fun Callcreated.toCallDetails(): CallDetails {
+    return CallDetails(
+        members = members.associate { it.userId to it.toCallUser() },
+        memberUserIds = members.map { it.userId },
+        ownCapabilities = call.ownCapabilities
     )
 }
 

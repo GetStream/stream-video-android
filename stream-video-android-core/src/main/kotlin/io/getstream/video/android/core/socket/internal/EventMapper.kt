@@ -16,14 +16,7 @@
 
 package io.getstream.video.android.core.socket.internal
 
-import io.getstream.video.android.core.events.CallAcceptedEvent
-import io.getstream.video.android.core.events.CallCanceledEvent
 import io.getstream.video.android.core.events.CallCreatedEvent
-import io.getstream.video.android.core.events.CallEndedEvent
-import io.getstream.video.android.core.events.CallMembersDeletedEvent
-import io.getstream.video.android.core.events.CallMembersUpdatedEvent
-import io.getstream.video.android.core.events.CallRejectedEvent
-import io.getstream.video.android.core.events.CallUpdatedEvent
 import io.getstream.video.android.core.events.HealthCheckEvent
 import io.getstream.video.android.core.events.UnknownEvent
 import io.getstream.video.android.core.events.VideoEvent
@@ -76,6 +69,7 @@ internal object EventMapper {
                 ringing = event.ringing,
                 users = event.members.toCallUsers(),
                 info = event.call.toCallInfo(),
+                callDetails = event.toCallDetails()
             )
         }
         CALL_ACCEPTED -> TODO()
@@ -86,95 +80,6 @@ internal object EventMapper {
         PERMISSION_REQUEST -> TODO()
         UPDATED_CALL_PERMISSIONS -> TODO()
         CUSTOM -> TODO()
-
-        else -> UnknownEvent
-    }
-
-    /**
-     * Maps [WebsocketEvent]s to our [VideoEvent] that corresponds to the data.
-     *
-     * @param socketEvent The event we received through the WebSocket.
-     * @return [VideoEvent] representation of the data.
-     */
-    internal fun mapEvent(socketEvent: WebsocketEvent): VideoEvent = when {
-        socketEvent.healthcheck != null -> with(socketEvent.healthcheck) {
-            HealthCheckEvent(clientId = client_id)
-        }
-
-        socketEvent.call_created != null -> with(socketEvent.call_created) {
-            CallCreatedEvent(
-                callCid = call!!.call_cid,
-                ringing = ringing,
-                users = socketEvent.users.toCallUsers(),
-                info = call.toCallInfo(),
-            )
-        }
-
-        socketEvent.call_updated != null -> with(socketEvent.call_updated) {
-            CallUpdatedEvent(
-                callCid = call!!.call_cid,
-                users = socketEvent.users.toCallUsers(),
-                info = call.toCallInfo(),
-                details = call_details.toCallDetails(),
-            )
-        }
-
-        socketEvent.call_ended != null -> with(socketEvent.call_ended) {
-            CallEndedEvent(
-                callCid = call!!.call_cid,
-                users = socketEvent.users.toCallUsers(),
-                info = call.toCallInfo(),
-                details = call_details.toCallDetails(),
-            )
-        }
-
-        socketEvent.call_members_updated != null -> with(socketEvent.call_members_updated) {
-            CallMembersUpdatedEvent(
-                callCid = call!!.call_cid,
-                users = socketEvent.users.toCallUsers(),
-                info = call.toCallInfo(),
-                details = call_details.toCallDetails(),
-            )
-        }
-
-        socketEvent.call_members_deleted != null -> with(socketEvent.call_members_deleted) {
-            CallMembersDeletedEvent(
-                callCid = call!!.call_cid,
-                users = socketEvent.users.toCallUsers(),
-                info = call.toCallInfo(),
-                details = call_details.toCallDetails(),
-            )
-        }
-
-        socketEvent.call_accepted != null -> with(socketEvent.call_accepted) {
-            CallAcceptedEvent(
-                callCid = call!!.call_cid,
-                sentByUserId = sender_user_id,
-                users = socketEvent.users.toCallUsers(),
-                info = call.toCallInfo(),
-                details = call_details.toCallDetails(),
-            )
-        }
-
-        socketEvent.call_rejected != null -> with(socketEvent.call_rejected) {
-            CallRejectedEvent(
-                callCid = call!!.call_cid,
-                sentByUserId = sender_user_id,
-                users = socketEvent.users.toCallUsers(),
-                info = call.toCallInfo(),
-                details = call_details.toCallDetails(),
-            )
-        }
-
-        socketEvent.call_cancelled != null -> with(socketEvent.call_cancelled) {
-            CallCanceledEvent(
-                callCid = call!!.call_cid,
-                sentByUserId = sender_user_id,
-                users = socketEvent.users.toCallUsers(),
-                info = call.toCallInfo(),
-                details = call_details.toCallDetails(),
-            )
-        }
 
         else -> UnknownEvent
     }

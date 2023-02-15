@@ -387,6 +387,9 @@ internal class StreamCallEngineImpl(
                     callUrl = callUrl,
                     sfuToken = sfuToken,
                     iceServers = iceServers,
+                    callDetails = call.callDetails,
+                    callEgress = call.callEgress,
+                    custom = call.custom
                 )
             }
         )
@@ -447,7 +450,10 @@ internal class StreamCallEngineImpl(
                 createdAt = StreamDate.from(call.createdAt),
                 updatedAt = StreamDate.from(call.updatedAt),
                 users = call.users,
-                acceptedByCallee = false
+                acceptedByCallee = false,
+                callDetails = call.callDetails,
+                callEgress = call.callEgress,
+                custom = call.custom
             )
         )
         waitForCallToBeAccepted()
@@ -543,6 +549,9 @@ internal class StreamCallEngineImpl(
                 updatedAt = StreamDate.from(call.updatedAt),
                 users = call.users,
                 callKind = call.kind,
+                callDetails = call.callDetails,
+                callEgress = call.callEgress,
+                custom = call.custom
             )
         )
     }
@@ -624,7 +633,10 @@ internal class StreamCallEngineImpl(
                     createdAt = StreamDate.from(info.createdAt),
                     updatedAt = StreamDate.from(info.updatedAt),
                     users = users,
-                    acceptedByMe = false
+                    acceptedByMe = false,
+                    callDetails = event.callDetails,
+                    callEgress = event.info.callEgress,
+                    custom = event.info.custom
                 )
             }
         )

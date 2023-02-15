@@ -73,8 +73,6 @@ import io.getstream.video.android.core.utils.buildRemoteIceServers
 import io.getstream.video.android.core.utils.onError
 import io.getstream.video.android.core.utils.onSuccessSuspend
 import io.getstream.video.android.core.utils.stringify
-import kotlin.math.absoluteValue
-import kotlin.random.Random
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelChildren
@@ -121,6 +119,8 @@ import stream.video.sfu.signal.TrackSubscriptionDetails
 import stream.video.sfu.signal.UpdateMuteStatesRequest
 import stream.video.sfu.signal.UpdateMuteStatesResponse
 import stream.video.sfu.signal.UpdateSubscriptionsRequest
+import kotlin.math.absoluteValue
+import kotlin.random.Random
 
 internal class CallClientImpl(
     private val context: Context,

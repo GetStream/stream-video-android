@@ -47,6 +47,7 @@ public data class CallCreatedEvent(
     val ringing: Boolean,
     val users: Map<String, CallUser>,
     val info: CallInfo,
+    val callDetails: CallDetails,
 ) : VideoEvent()
 
 /**
