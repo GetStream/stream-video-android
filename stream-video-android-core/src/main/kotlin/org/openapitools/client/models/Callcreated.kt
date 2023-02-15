@@ -27,18 +27,21 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param callCid * @param createdAt * @param ownCapabilities * @param type */
+ * @param call * @param createdAt * @param members * @param ringing * @param type */
 
-internal data class CallPermissionsUpdated(
+data class Callcreated(
 
-    @Json(name = "call_cid")
-    val callCid: kotlin.String,
+    @Json(name = "call")
+    val call: CallResponse,
 
     @Json(name = "created_at")
     val createdAt: java.time.OffsetDateTime,
 
-    @Json(name = "own_capabilities")
-    val ownCapabilities: kotlin.collections.List<kotlin.String>,
+    @Json(name = "members")
+    val members: kotlin.collections.List<MemberResponse>,
+
+    @Json(name = "ringing")
+    val ringing: kotlin.Boolean,
 
     @Json(name = "type")
     val type: kotlin.String

@@ -30,7 +30,7 @@ import com.squareup.moshi.Json
  * @param duration Duration of the request in human-readable format
  */
 
-internal data class UpdateUserPermissionsResponse(
+data class UpdateUserPermissionsResponse(
 
     /* Duration of the request in human-readable format */
     @Json(name = "duration")

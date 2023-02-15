@@ -32,14 +32,14 @@ import com.squareup.moshi.Json
  * @param deletedAt Date/time of deletion
  * @param image * @param name * @param teams */
 
-internal data class UserResponse(
+data class UserResponse(
 
     /* Date/time of creation */
     @Json(name = "created_at")
     val createdAt: java.time.OffsetDateTime,
 
     @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any>?,
+    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any>,
 
     @Json(name = "id")
     val id: kotlin.String,

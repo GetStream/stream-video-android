@@ -29,7 +29,7 @@ import com.squareup.moshi.Json
  * *
  * @param permissions */
 
-internal data class RequestPermissionRequest(
+data class RequestPermissionRequest(
 
     @Json(name = "permissions")
     val permissions: kotlin.collections.List<kotlin.String>

@@ -30,7 +30,7 @@ import com.squareup.moshi.Json
  *
  * @param call * @param duration */
 
-internal data class UpdateCallResponse(
+data class UpdateCallResponse(
 
     @Json(name = "call")
     val call: CallResponse,

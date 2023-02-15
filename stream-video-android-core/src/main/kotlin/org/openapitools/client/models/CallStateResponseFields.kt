@@ -30,7 +30,7 @@ import com.squareup.moshi.Json
  * @param call * @param members List of call members
  * @param membership */
 
-internal data class CallStateResponseFields(
+data class CallStateResponseFields(
 
     @Json(name = "call")
     val call: CallResponse,

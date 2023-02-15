@@ -29,7 +29,7 @@ import com.squareup.moshi.Json
  * *
  * @param direction * @param `field` */
 
-internal data class SortParamRequest(
+data class SortParamRequest(
 
     @Json(name = "direction")
     val direction: java.math.BigDecimal? = null,

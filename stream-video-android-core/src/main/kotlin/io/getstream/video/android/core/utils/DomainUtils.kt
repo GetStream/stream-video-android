@@ -34,7 +34,7 @@ internal fun GetOrCreateCallResponse.toCall(kind: StreamCallKind): CallMetadata 
             createdByUserId = createdBy.id,
             createdAt = createdAt.toEpochSecond(),
             updatedAt = updatedAt.toEpochSecond(),
-            recordingEnabled = settings.recording.enabled,
+            recordingEnabled = settings.recording.audioOnly, // TODO
             broadcastingEnabled = settings.broadcasting.enabled,
             users = members.toCallUsers(),
             extraData = emptyMap()

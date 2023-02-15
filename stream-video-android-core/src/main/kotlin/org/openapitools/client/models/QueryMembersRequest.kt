@@ -27,9 +27,9 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param filterConditions * @param type * @param clientId * @param connectionId * @param custom * @param id * @param image * @param limit * @param name * @param next * @param prev * @param role * @param sort * @param teams */
+ * @param filterConditions * @param type * @param id * @param limit * @param next * @param prev * @param sort */
 
-internal data class QueryMembersRequest(
+data class QueryMembersRequest(
 
     @Json(name = "filter_conditions")
     val filterConditions: kotlin.collections.Map<kotlin.String, kotlin.Any>,
@@ -37,26 +37,11 @@ internal data class QueryMembersRequest(
     @Json(name = "type")
     val type: kotlin.String,
 
-    @Json(name = "client_id")
-    val clientId: kotlin.String? = null,
-
-    @Json(name = "connection_id")
-    val connectionId: kotlin.String? = null,
-
-    @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null,
-
     @Json(name = "id")
     val id: kotlin.String? = null,
 
-    @Json(name = "image")
-    val image: kotlin.String? = null,
-
     @Json(name = "limit")
     val limit: java.math.BigDecimal? = null,
-
-    @Json(name = "name")
-    val name: kotlin.String? = null,
 
     @Json(name = "next")
     val next: kotlin.String? = null,
@@ -64,13 +49,7 @@ internal data class QueryMembersRequest(
     @Json(name = "prev")
     val prev: kotlin.String? = null,
 
-    @Json(name = "role")
-    val role: kotlin.String? = null,
-
     @Json(name = "sort")
-    val sort: kotlin.collections.List<SortParamRequest>? = null,
-
-    @Json(name = "teams")
-    val teams: kotlin.collections.List<kotlin.String>? = null
+    val sort: kotlin.collections.List<SortParamRequest>? = null
 
 )

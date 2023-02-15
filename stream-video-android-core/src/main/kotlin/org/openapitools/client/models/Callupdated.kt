@@ -27,16 +27,20 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param custom call custom data
- * @param settingsOverride */
+ * @param call * @param capabilitiesByRole * @param createdAt * @param type */
 
-data class UpdateCallRequest(
+data class Callupdated(
 
-    /* call custom data */
-    @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null,
+    @Json(name = "call")
+    val call: CallResponse,
 
-    @Json(name = "settings_override")
-    val settingsOverride: CallSettingsRequest? = null
+    @Json(name = "capabilities_by_role")
+    val capabilitiesByRole: kotlin.collections.Map<kotlin.String, kotlin.collections.List<kotlin.String>>,
+
+    @Json(name = "created_at")
+    val createdAt: java.time.OffsetDateTime,
+
+    @Json(name = "type")
+    val type: kotlin.String
 
 )

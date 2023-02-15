@@ -77,7 +77,6 @@ import org.openapitools.client.models.GetCallEdgeServerResponse
 import org.openapitools.client.models.GetOrCreateCallRequest
 import org.openapitools.client.models.MemberRequest
 import org.openapitools.client.models.SendEventRequest
-import org.openapitools.client.models.UserObjectRequest
 import stream.video.coordinator.client_v1_rpc.CreateDeviceRequest
 import stream.video.coordinator.client_v1_rpc.DeleteDeviceRequest
 import stream.video.coordinator.edge_v1.Latency
@@ -243,10 +242,7 @@ internal class StreamVideoImpl(
                     members = participantIds.map {
                         MemberRequest(
                             userId = it,
-                            role = "admin",
-                            user = UserObjectRequest(
-                                id = it
-                            )
+                            role = "admin"
                         )
                     },
                 ),

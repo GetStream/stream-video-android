@@ -29,7 +29,7 @@ import com.squareup.moshi.Json
  * *
  * @param `data` * @param members * @param ring */
 
-internal data class GetOrCreateCallRequest(
+data class GetOrCreateCallRequest(
 
     @Json(name = "data")
     val `data`: CallRequest? = null,

@@ -27,11 +27,14 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param enabled */
+ * @param enabled * @param hls */
 
-internal data class BroadcastSettings(
+data class BroadcastSettings(
 
     @Json(name = "enabled")
-    val enabled: kotlin.Boolean
+    val enabled: kotlin.Boolean,
+
+    @Json(name = "hls")
+    val hls: HLSSettings
 
 )

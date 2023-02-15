@@ -27,23 +27,23 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param call * @param createdAt * @param members * @param ringing * @param type */
+ * @param connectionId * @param `data` * @param datacenterHintedId * @param members * @param ring */
 
-internal data class CallCreated(
+data class JoinCallRequest(
 
-    @Json(name = "call")
-    val call: CallResponse,
+    @Json(name = "connection_id")
+    val connectionId: kotlin.String? = null,
 
-    @Json(name = "created_at")
-    val createdAt: java.time.OffsetDateTime,
+    @Json(name = "data")
+    val `data`: CallRequest? = null,
+
+    @Json(name = "datacenter_hinted_id")
+    val datacenterHintedId: kotlin.String? = null,
 
     @Json(name = "members")
-    val members: kotlin.collections.List<MemberResponse>,
+    val members: PaginationParamsRequest? = null,
 
-    @Json(name = "ringing")
-    val ringing: kotlin.Boolean,
-
-    @Json(name = "type")
-    val type: kotlin.String
+    @Json(name = "ring")
+    val ring: kotlin.Boolean? = null
 
 )

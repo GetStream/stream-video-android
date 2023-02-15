@@ -29,7 +29,7 @@ import com.squareup.moshi.Json
  * *
  * @param createdAt * @param type */
 
-internal data class LeftSquareBracketAnyRightSquareBracket(
+data class LeftSquareBracketAnyRightSquareBracket(
 
     @Json(name = "created_at")
     val createdAt: java.time.OffsetDateTime,

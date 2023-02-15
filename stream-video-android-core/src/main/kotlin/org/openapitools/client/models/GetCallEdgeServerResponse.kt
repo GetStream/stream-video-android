@@ -30,7 +30,7 @@ import com.squareup.moshi.Json
  * @param call * @param credentials * @param duration Duration of the request in human-readable format
  * @param members * @param membership */
 
-internal data class GetCallEdgeServerResponse(
+data class GetCallEdgeServerResponse(
 
     @Json(name = "call")
     val call: CallResponse,

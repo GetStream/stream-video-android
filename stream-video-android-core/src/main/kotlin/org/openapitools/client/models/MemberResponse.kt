@@ -33,7 +33,7 @@ import com.squareup.moshi.Json
  * @param user * @param userId * @param deletedAt Date/time of deletion
  */
 
-internal data class MemberResponse(
+data class MemberResponse(
 
     /* Date/time of creation */
     @Json(name = "created_at")
@@ -41,7 +41,7 @@ internal data class MemberResponse(
 
     /* Custom member response data */
     @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any>?,
+    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any>,
 
     @Json(name = "duration")
     val duration: kotlin.String,

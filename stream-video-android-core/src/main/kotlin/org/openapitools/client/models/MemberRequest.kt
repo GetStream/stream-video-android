@@ -27,20 +27,19 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param custom * @param role * @param user * @param userId */
+ * @param userId * @param custom Custom data for this object
+ * @param role */
 
-internal data class MemberRequest(
+data class MemberRequest(
 
+    @Json(name = "user_id")
+    val userId: kotlin.String,
+
+    /* Custom data for this object */
     @Json(name = "custom")
     val custom: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null,
 
     @Json(name = "role")
-    val role: kotlin.String? = null,
-
-    @Json(name = "user")
-    val user: UserObjectRequest? = null,
-
-    @Json(name = "user_id")
-    val userId: kotlin.String? = null
+    val role: kotlin.String? = null
 
 )

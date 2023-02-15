@@ -29,7 +29,7 @@ import com.squareup.moshi.Json
  * *
  * @param names */
 
-internal data class GeofenceSettings(
+data class GeofenceSettings(
 
     @Json(name = "names")
     val names: kotlin.collections.List<kotlin.String>

@@ -29,7 +29,7 @@ import com.squareup.moshi.Json
  * *
  * @param coordinates * @param latencyUrl * @param name */
 
-internal data class DatacenterResponse(
+data class DatacenterResponse(
 
     @Json(name = "coordinates")
     val coordinates: Coordinates,

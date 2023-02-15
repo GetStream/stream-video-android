@@ -27,9 +27,10 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param callCid * @param createdAt * @param custom * @param type * @param user */
+ * @param callCid * @param createdAt * @param custom Custom data for this object
+ * @param type * @param user */
 
-internal data class LeftSquareBracketCustomRightSquareBracket(
+data class LeftSquareBracketCustomRightSquareBracket(
 
     @Json(name = "call_cid")
     val callCid: kotlin.String,
@@ -37,6 +38,7 @@ internal data class LeftSquareBracketCustomRightSquareBracket(
     @Json(name = "created_at")
     val createdAt: java.time.OffsetDateTime,
 
+    /* Custom data for this object */
     @Json(name = "custom")
     val custom: kotlin.collections.Map<kotlin.String, kotlin.Any>,
 

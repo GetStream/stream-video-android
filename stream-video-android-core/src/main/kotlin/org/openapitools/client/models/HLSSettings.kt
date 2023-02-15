@@ -27,20 +27,17 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param callCid * @param createdAt * @param type * @param user */
+ * @param autoOn * @param enabled * @param qualityTracks */
 
-internal data class CallEnded(
+data class HLSSettings(
 
-    @Json(name = "call_cid")
-    val callCid: kotlin.String,
+    @Json(name = "auto_on")
+    val autoOn: kotlin.Boolean,
 
-    @Json(name = "created_at")
-    val createdAt: java.time.OffsetDateTime,
+    @Json(name = "enabled")
+    val enabled: kotlin.Boolean,
 
-    @Json(name = "type")
-    val type: kotlin.String,
-
-    @Json(name = "user")
-    val user: UserResponse
+    @Json(name = "quality_tracks")
+    val qualityTracks: kotlin.collections.List<kotlin.String>
 
 )

@@ -29,7 +29,7 @@ import com.squareup.moshi.Json
  * *
  * @param duration */
 
-internal data class EndCallResponse(
+data class EndCallResponse(
 
     @Json(name = "duration")
     val duration: kotlin.String

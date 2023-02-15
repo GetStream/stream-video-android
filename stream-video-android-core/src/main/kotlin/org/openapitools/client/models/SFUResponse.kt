@@ -29,7 +29,7 @@ import com.squareup.moshi.Json
  * *
  * @param edgeName * @param url */
 
-internal data class SFUResponse(
+data class SFUResponse(
 
     @Json(name = "edge_name")
     val edgeName: kotlin.String,

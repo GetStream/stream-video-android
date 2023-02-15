@@ -27,18 +27,18 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param custom * @param id User ID
- * @param image * @param name Optional name of user
+ * @param id User ID
+ * @param custom * @param image * @param name Optional name of user
  * @param role * @param teams */
 
-internal data class UserRequest(
-
-    @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null,
+data class UserRequest(
 
     /* User ID */
     @Json(name = "id")
-    val id: kotlin.String? = null,
+    val id: kotlin.String,
+
+    @Json(name = "custom")
+    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null,
 
     @Json(name = "image")
     val image: kotlin.String? = null,

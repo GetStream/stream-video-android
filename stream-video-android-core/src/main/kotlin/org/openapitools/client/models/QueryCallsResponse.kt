@@ -27,15 +27,13 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param calls * @param duration Duration of the request in human-readable format
- * @param next * @param prev */
+ * @param calls * @param duration * @param next * @param prev */
 
-internal data class QueryCallsResponse(
+data class QueryCallsResponse(
 
     @Json(name = "calls")
     val calls: kotlin.collections.List<CallStateResponseFields>,
 
-    /* Duration of the request in human-readable format */
     @Json(name = "duration")
     val duration: kotlin.String,
 

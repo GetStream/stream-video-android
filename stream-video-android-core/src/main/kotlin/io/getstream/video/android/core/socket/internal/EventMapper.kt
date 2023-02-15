@@ -45,7 +45,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import org.openapitools.client.infrastructure.Serializer
-import org.openapitools.client.models.CallCreated
+import org.openapitools.client.models.Callcreated
 import stream.video.coordinator.client_v1_rpc.WebsocketEvent
 
 internal object EventMapper {
@@ -69,7 +69,7 @@ internal object EventMapper {
         }
 
         CALL_CREATED -> {
-            val event = Serializer.moshi.adapter(CallCreated::class.java).fromJson(text)!!
+            val event = Serializer.moshi.adapter(Callcreated::class.java).fromJson(text)!!
 
             CallCreatedEvent(
                 callCid = event.call.cid,

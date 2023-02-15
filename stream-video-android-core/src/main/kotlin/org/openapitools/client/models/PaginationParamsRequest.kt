@@ -29,7 +29,7 @@ import com.squareup.moshi.Json
  * *
  * @param idGt * @param idGte * @param idLt * @param idLte * @param limit * @param offset */
 
-internal data class PaginationParamsRequest(
+data class PaginationParamsRequest(
 
     @Json(name = "id_gt")
     val idGt: java.math.BigDecimal? = null,

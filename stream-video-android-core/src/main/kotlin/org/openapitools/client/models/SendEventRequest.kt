@@ -29,7 +29,7 @@ import com.squareup.moshi.Json
  * *
  * @param eventType * @param custom */
 
-internal data class SendEventRequest(
+data class SendEventRequest(
 
     @Json(name = "event_type")
     val eventType: kotlin.String,

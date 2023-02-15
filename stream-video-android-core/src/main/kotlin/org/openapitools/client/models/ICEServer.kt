@@ -29,7 +29,7 @@ import com.squareup.moshi.Json
  * *
  * @param password * @param urls * @param username */
 
-internal data class ICEServer(
+data class ICEServer(
 
     @Json(name = "password")
     val password: kotlin.String,

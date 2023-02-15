@@ -29,7 +29,7 @@ import com.squareup.moshi.Json
  * *
  * @param userId * @param grantPermissions * @param revokePermissions */
 
-internal data class UpdateUserPermissionsRequest(
+data class UpdateUserPermissionsRequest(
 
     @Json(name = "user_id")
     val userId: kotlin.String,

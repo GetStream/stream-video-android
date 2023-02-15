@@ -29,7 +29,7 @@ import com.squareup.moshi.Json
  * *
  * @param audio * @param broadcasting * @param geofencing * @param recording * @param screensharing * @param video */
 
-internal data class CallSettingsResponse(
+data class CallSettingsResponse(
 
     @Json(name = "audio")
     val audio: AudioSettings,

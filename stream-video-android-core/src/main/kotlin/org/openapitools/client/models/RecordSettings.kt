@@ -27,11 +27,17 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param enabled */
+ * @param audioOnly * @param mode * @param quality */
 
-internal data class RecordSettings(
+data class RecordSettings(
 
-    @Json(name = "enabled")
-    val enabled: kotlin.Boolean
+    @Json(name = "audio_only")
+    val audioOnly: kotlin.Boolean,
+
+    @Json(name = "mode")
+    val mode: kotlin.String,
+
+    @Json(name = "quality")
+    val quality: kotlin.String
 
 )

@@ -29,7 +29,7 @@ import com.squareup.moshi.Json
  * *
  * @param callCid * @param createdAt * @param type * @param user */
 
-internal data class CallAccepted(
+data class Callcancelled(
 
     @Json(name = "call_cid")
     val callCid: kotlin.String,

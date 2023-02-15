@@ -29,7 +29,7 @@ import com.squareup.moshi.Json
  * *
  * @param accessRequestEnabled * @param enabled */
 
-internal data class ScreensharingSettings(
+data class ScreensharingSettings(
 
     @Json(name = "access_request_enabled")
     val accessRequestEnabled: kotlin.Boolean,

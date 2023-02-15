@@ -29,7 +29,7 @@ import com.squareup.moshi.Json
  * *
  * @param geofencing * @param recording * @param screensharing * @param video */
 
-internal data class CallSettingsRequest(
+data class CallSettingsRequest(
 
     @Json(name = "geofencing")
     val geofencing: GeofenceSettingsRequest? = null,

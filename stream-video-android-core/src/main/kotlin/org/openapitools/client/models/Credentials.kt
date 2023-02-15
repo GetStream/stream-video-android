@@ -29,7 +29,7 @@ import com.squareup.moshi.Json
  * *
  * @param iceServers * @param server * @param token */
 
-internal data class Credentials(
+data class Credentials(
 
     @Json(name = "ice_servers")
     val iceServers: kotlin.collections.List<ICEServer>,

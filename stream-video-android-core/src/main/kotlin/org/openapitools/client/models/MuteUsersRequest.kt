@@ -29,7 +29,7 @@ import com.squareup.moshi.Json
  * *
  * @param audio * @param muteAllUsers * @param screenshare * @param userIds * @param video */
 
-internal data class MuteUsersRequest(
+data class MuteUsersRequest(
 
     @Json(name = "audio")
     val audio: kotlin.Boolean? = null,

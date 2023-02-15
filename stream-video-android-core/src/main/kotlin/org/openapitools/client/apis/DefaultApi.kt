@@ -25,7 +25,6 @@ import org.openapitools.client.models.UpdateUserPermissionsResponse
 import retrofit2.http.Body
 import retrofit2.http.POST
 import retrofit2.http.Path
-import retrofit2.http.Query
 
 internal interface DefaultApi {
     /**
@@ -37,16 +36,10 @@ internal interface DefaultApi {
      *  - 429: Too many requests
      *
      * @param queryCallRequest
-     * @param clientId  (optional)
-     * @param connectionId  (optional)
      * @return [QueryCallsResponse]
      */
-    @POST("calls")
-    suspend fun queryCalls(
-        @Body queryCallRequest: QueryCallRequest,
-        @Query("client_id") clientId: String? = null,
-        @Query("connection_id") connectionId: String? = null
-    ): QueryCallsResponse
+    @POST("/video/calls")
+    suspend fun queryCalls(@Body queryCallRequest: QueryCallRequest): QueryCallsResponse
 
     /**
      * Request permission
@@ -61,7 +54,7 @@ internal interface DefaultApi {
      * @param requestPermissionRequest
      * @return [RequestPermissionResponse]
      */
-    @POST("call/{type}/{id}/request_permission")
+    @POST("/video/call/{type}/{id}/request_permission")
     suspend fun requestPermission(
         @Path("type") type: String,
         @Path("id") id: String,
@@ -81,10 +74,66 @@ internal interface DefaultApi {
      * @param updateUserPermissionsRequest
      * @return [UpdateUserPermissionsResponse]
      */
-    @POST("call/{type}/{id}/user_permissions")
+    @POST("/video/call/{type}/{id}/user_permissions")
     suspend fun updateUserPermissions(
         @Path("type") type: String,
         @Path("id") id: String,
         @Body updateUserPermissionsRequest: UpdateUserPermissionsRequest
     ): UpdateUserPermissionsResponse
+
+    /**
+     * Start broadcasting
+     * Starts broadcasting
+     * Responses:
+     *  - 400: Bad request
+     *  - 429: Too many requests
+     *
+     * @param type
+     * @param id
+     * @return [Unit]
+     */
+    @POST("/video/call/{type}/{id}/start_broadcasting")
+    suspend fun startBroadcasting(@Path("type") type: String, @Path("id") id: String): Unit
+
+    /**
+     * Start recording
+     * Starts recording
+     * Responses:
+     *  - 400: Bad request
+     *  - 429: Too many requests
+     *
+     * @param type
+     * @param id
+     * @return [Unit]
+     */
+    @POST("/video/call/{type}/{id}/start_recording")
+    suspend fun startRecording(@Path("type") type: String, @Path("id") id: String): Unit
+
+    /**
+     * Stop broadcasting
+     * Stops broadcasting
+     * Responses:
+     *  - 400: Bad request
+     *  - 429: Too many requests
+     *
+     * @param type
+     * @param id
+     * @return [Unit]
+     */
+    @POST("/video/call/{type}/{id}/stop_broadcasting")
+    suspend fun stopBroadcasting(@Path("type") type: String, @Path("id") id: String): Unit
+
+    /**
+     * Stop recording
+     * Stops recording
+     * Responses:
+     *  - 400: Bad request
+     *  - 429: Too many requests
+     *
+     * @param type
+     * @param id
+     * @return [Unit]
+     */
+    @POST("/video/call/{type}/{id}/stop_recording")
+    suspend fun stopRecording(@Path("type") type: String, @Path("id") id: String): Unit
 }

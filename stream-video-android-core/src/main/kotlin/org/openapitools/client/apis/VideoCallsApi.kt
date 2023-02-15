@@ -32,7 +32,6 @@ import retrofit2.http.Body
 import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Path
-import retrofit2.http.Query
 
 internal interface VideoCallsApi {
     /**
@@ -146,7 +145,7 @@ internal interface VideoCallsApi {
      * @param muteUsersRequest
      * @return [MuteUsersResponse]
      */
-    @POST("call/{type}/{id}/mute_users")
+    @POST("/video/call/{type}/{id}/mute_users")
     suspend fun muteUsers(
         @Path("type") type: String,
         @Path("id") id: String,
@@ -162,14 +161,10 @@ internal interface VideoCallsApi {
      *  - 429: Too many requests
      *
      * @param queryMembersRequest
-     * @param clientId  (optional)
-     * @param connectionId  (optional)
      * @return [QueryMembersResponse]
      */
-    @POST("call/members")
+    @POST("/video/call/members")
     suspend fun queryMembers(
         @Body queryMembersRequest: QueryMembersRequest,
-        @Query("client_id") clientId: String? = null,
-        @Query("connection_id") connectionId: String? = null
     ): QueryMembersResponse
 }

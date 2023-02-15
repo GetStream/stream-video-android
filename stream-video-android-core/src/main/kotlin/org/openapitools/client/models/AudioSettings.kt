@@ -29,7 +29,7 @@ import com.squareup.moshi.Json
  * *
  * @param accessRequestEnabled */
 
-internal data class AudioSettings(
+data class AudioSettings(
 
     @Json(name = "access_request_enabled")
     val accessRequestEnabled: kotlin.Boolean

@@ -37,7 +37,7 @@ import com.squareup.moshi.Json
  * @param updatedAt Date/time of the last update
  * @param endedAt */
 
-internal data class CallResponse(
+data class CallResponse(
 
     @Json(name = "broadcast_egress")
     val broadcastEgress: kotlin.String,

@@ -29,7 +29,7 @@ import com.squareup.moshi.Json
  * *
  * @param call * @param created * @param duration * @param edges * @param members * @param membership */
 
-internal data class JoinCallResponse(
+data class JoinCallResponse(
 
     @Json(name = "call")
     val call: CallResponse,

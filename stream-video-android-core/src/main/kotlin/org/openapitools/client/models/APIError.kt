@@ -36,7 +36,7 @@ import com.squareup.moshi.Json
  * @param exceptionFields Additional error info
  */
 
-internal data class APIError(
+data class APIError(
 
     /* Response HTTP status code */
     @Json(name = "StatusCode")

@@ -29,7 +29,7 @@ import com.squareup.moshi.Json
  * *
  * @param createdBy * @param createdById * @param custom * @param members * @param settingsOverride * @param team */
 
-internal data class CallRequest(
+data class CallRequest(
 
     @Json(name = "created_by")
     val createdBy: UserRequest? = null,

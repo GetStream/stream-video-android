@@ -27,16 +27,25 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param custom call custom data
- * @param settingsOverride */
+ * @param callCid * @param createdAt * @param permissions The list of permissions requested by the user
+ * @param type * @param user */
 
-data class UpdateCallRequest(
+data class CallpermissionRequest(
 
-    /* call custom data */
-    @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null,
+    @Json(name = "call_cid")
+    val callCid: kotlin.String,
 
-    @Json(name = "settings_override")
-    val settingsOverride: CallSettingsRequest? = null
+    @Json(name = "created_at")
+    val createdAt: java.time.OffsetDateTime,
+
+    /* The list of permissions requested by the user */
+    @Json(name = "permissions")
+    val permissions: kotlin.collections.List<kotlin.String>,
+
+    @Json(name = "type")
+    val type: kotlin.String,
+
+    @Json(name = "user")
+    val user: UserResponse
 
 )

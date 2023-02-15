@@ -20,7 +20,7 @@ import io.getstream.video.android.core.utils.toCallUser
 import org.openapitools.client.models.CallResponse
 import org.openapitools.client.models.MemberResponse
 import java.io.Serializable
-import java.util.*
+import java.util.Date
 import stream.video.coordinator.call_v1.Call as CoordinatorCall
 import stream.video.coordinator.call_v1.CallDetails as CoordinatorCallDetails
 import stream.video.coordinator.member_v1.Member as CoordinatorMember
@@ -129,7 +129,7 @@ internal fun CallResponse.toCallInfo(): CallInfo { // TODO - expose more propert
         type = type,
         createdByUserId = createdBy.id,
         broadcastingEnabled = settings.broadcasting.enabled,
-        recordingEnabled = settings.recording.enabled,
+        recordingEnabled = settings.recording.audioOnly, // TODO - how do we know if it's enabled or not
         createdAt = Date(createdAt.toEpochSecond() * 1000L),
         updatedAt = Date(updatedAt.toEpochSecond() * 1000L),
     )
