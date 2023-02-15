@@ -110,11 +110,17 @@ public class CallParticipantsView : ConstraintLayout {
 
         if (isScreenSharingActive) {
             enterScreenSharing()
-            updateParticipantsState(participants)
+            updateGridParticipants(participants)
+            updateFloatingParticipant(null)
         } else {
             exitScreenSharing()
-            updateParticipantsState(participants.filter { !it.isLocal })
-            updateLocalParticipant(participants.firstOrNull { it.isLocal })
+            if (participants.size == 1 || participants.size == 4) {
+                updateGridParticipants(participants)
+                updateFloatingParticipant(null)
+            } else {
+                updateGridParticipants(participants.filter { !it.isLocal })
+                updateFloatingParticipant(participants.firstOrNull { it.isLocal })
+            }
         }
     }
 
@@ -249,7 +255,7 @@ public class CallParticipantsView : ConstraintLayout {
 
         removedParticipants.forEach { participantView ->
             childList.remove(participantView)
-            removeView(participantView)
+            binding.participantsHolder.removeView(participantView)
         }
 
         participants.forEach { participant ->
@@ -257,7 +263,7 @@ public class CallParticipantsView : ConstraintLayout {
                 buildParticipantView(participant.id).also {
                     if (::rendererInitializer.isInitialized) it.setRendererInitializer(rendererInitializer)
                     childList.add(it)
-                    addView(it)
+                    binding.participantsHolder.addView(it)
                 }
             } else {
                 childList.first { it.tag == participant.id }
@@ -284,7 +290,6 @@ public class CallParticipantsView : ConstraintLayout {
      * Updates the constraints of the shown [CallParticipantView]s so they all fit in the viewport.
      */
     private fun updateConstraints() {
-        TransitionManager.beginDelayedTransition(this)
         TransitionManager.beginDelayedTransition(((binding.participantsHolder)))
         binding.dividerGuideline.setGuidelinePercent(if (isScreenSharingActive) calculateContentDividerOffset() else 0f)
 
@@ -329,7 +334,7 @@ public class CallParticipantsView : ConstraintLayout {
         }
 
         childList.forEach {
-            it.setLabelBottomOffset(if (isBottomChild(it)) getControlsHeight() else 0)
+            it.setLabelBottomOffset(if (isBottomChild(it)) getCallControlsHeight() else 0)
         }
     }
 
@@ -397,12 +402,12 @@ public class CallParticipantsView : ConstraintLayout {
         connect(target.id, ConstraintSet.START, LayoutParams.PARENT_ID, ConstraintSet.START)
         connect(target.id, ConstraintSet.TOP, LayoutParams.PARENT_ID, ConstraintSet.TOP)
         connect(target.id, ConstraintSet.END, LayoutParams.PARENT_ID, ConstraintSet.END)
-        connect(target.id, ConstraintSet.BOTTOM, binding.horizontalGuideline.id, ConstraintSet.BOTTOM)
+        connect(target.id, ConstraintSet.BOTTOM, binding.horizontalGuideline.id, ConstraintSet.TOP)
     }
 
     private fun ConstraintSet.toBottom(target: View) {
         connect(target.id, ConstraintSet.START, LayoutParams.PARENT_ID, ConstraintSet.START)
-        connect(target.id, ConstraintSet.TOP, binding.horizontalGuideline.id, ConstraintSet.TOP)
+        connect(target.id, ConstraintSet.TOP, binding.horizontalGuideline.id, ConstraintSet.BOTTOM)
         connect(target.id, ConstraintSet.END, LayoutParams.PARENT_ID, ConstraintSet.END)
         connect(target.id, ConstraintSet.BOTTOM, LayoutParams.PARENT_ID, ConstraintSet.BOTTOM)
     }
@@ -410,27 +415,27 @@ public class CallParticipantsView : ConstraintLayout {
     private fun ConstraintSet.toTopStart(target: View) {
         connect(target.id, ConstraintSet.START, LayoutParams.PARENT_ID, ConstraintSet.START)
         connect(target.id, ConstraintSet.TOP, LayoutParams.PARENT_ID, ConstraintSet.TOP)
-        connect(target.id, ConstraintSet.END, binding.verticalGuideline.id, ConstraintSet.END)
-        connect(target.id, ConstraintSet.BOTTOM, binding.horizontalGuideline.id, ConstraintSet.BOTTOM)
+        connect(target.id, ConstraintSet.END, binding.verticalGuideline.id, ConstraintSet.START)
+        connect(target.id, ConstraintSet.BOTTOM, binding.horizontalGuideline.id, ConstraintSet.TOP)
     }
 
     private fun ConstraintSet.toTopEnd(target: View) {
-        connect(target.id, ConstraintSet.START, binding.verticalGuideline.id, ConstraintSet.START)
+        connect(target.id, ConstraintSet.START, binding.verticalGuideline.id, ConstraintSet.END)
         connect(target.id, ConstraintSet.TOP, LayoutParams.PARENT_ID, ConstraintSet.TOP)
         connect(target.id, ConstraintSet.END, LayoutParams.PARENT_ID, ConstraintSet.END)
-        connect(target.id, ConstraintSet.BOTTOM, binding.horizontalGuideline.id, ConstraintSet.BOTTOM)
+        connect(target.id, ConstraintSet.BOTTOM, binding.horizontalGuideline.id, ConstraintSet.TOP)
     }
 
     private fun ConstraintSet.toBottomStart(target: View) {
         connect(target.id, ConstraintSet.START, LayoutParams.PARENT_ID, ConstraintSet.START)
-        connect(target.id, ConstraintSet.TOP, binding.horizontalGuideline.id, ConstraintSet.TOP)
-        connect(target.id, ConstraintSet.END, binding.verticalGuideline.id, ConstraintSet.END)
+        connect(target.id, ConstraintSet.TOP, binding.horizontalGuideline.id, ConstraintSet.BOTTOM)
+        connect(target.id, ConstraintSet.END, binding.verticalGuideline.id, ConstraintSet.START)
         connect(target.id, ConstraintSet.BOTTOM, LayoutParams.PARENT_ID, ConstraintSet.BOTTOM)
     }
 
     private fun ConstraintSet.toBottomEnd(target: View) {
-        connect(target.id, ConstraintSet.START, binding.verticalGuideline.id, ConstraintSet.START)
-        connect(target.id, ConstraintSet.TOP, binding.horizontalGuideline.id, ConstraintSet.TOP)
+        connect(target.id, ConstraintSet.START, binding.verticalGuideline.id, ConstraintSet.END)
+        connect(target.id, ConstraintSet.TOP, binding.horizontalGuideline.id, ConstraintSet.BOTTOM)
         connect(target.id, ConstraintSet.END, LayoutParams.PARENT_ID, ConstraintSet.END)
         connect(target.id, ConstraintSet.BOTTOM, LayoutParams.PARENT_ID, ConstraintSet.BOTTOM)
     }

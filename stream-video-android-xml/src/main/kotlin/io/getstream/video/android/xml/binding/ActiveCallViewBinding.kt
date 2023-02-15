@@ -30,6 +30,7 @@ import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.xml.R
 import io.getstream.video.android.xml.widget.active.ActiveCallView
 import io.getstream.video.android.xml.widget.control.CallControlItem
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -66,13 +67,13 @@ public fun ActiveCallView.bindView(
         }
     }
 
-    lifecycleOwner.lifecycleScope.launchWhenResumed {
+    startJob(lifecycleOwner) {
         viewModel.participantList.combine(viewModel.screenSharingSessions) { participants, screenSharingSessions ->
             updateContent(participants, screenSharingSessions.firstOrNull())
-        }
+        }.collect()
     }
 
-    lifecycleOwner.lifecycleScope.launchWhenResumed {
+    startJob(lifecycleOwner) {
         viewModel.primarySpeaker.collectLatest {
             updatePrimarySpeaker(it)
         }

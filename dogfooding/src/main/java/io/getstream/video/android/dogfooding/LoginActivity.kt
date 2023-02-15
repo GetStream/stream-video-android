@@ -176,8 +176,10 @@ class LoginActivity : ComponentActivity() {
 
     private fun onSignInSuccess(email: String) {
         lifecycleScope.launch(Dispatchers.IO) {
+            // TODO switch back to https://stream-calls-dogfood.vercel.app/api/auth/create-token?user_id=$email once
+            //  new coordinator has been implemented
             val request =
-                URL("https://stream-calls-dogfood.vercel.app/api/auth/create-token?user_id=$email")
+                URL("https://stream-calls-dogfood-8znyqvfoo-getstreamio.vercel.app/api/auth/create-token?user_id=$email")
             val connection = request.openConnection()
 
             connection.connect()
