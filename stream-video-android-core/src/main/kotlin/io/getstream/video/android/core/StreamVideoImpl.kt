@@ -79,7 +79,6 @@ import org.openapitools.client.models.MemberRequest
 import org.openapitools.client.models.SendEventRequest
 import stream.video.coordinator.client_v1_rpc.CreateDeviceRequest
 import stream.video.coordinator.client_v1_rpc.DeleteDeviceRequest
-import stream.video.coordinator.edge_v1.Latency
 import stream.video.coordinator.push_v1.DeviceInput
 
 /**
@@ -292,8 +291,8 @@ internal class StreamVideoImpl(
         return try {
             logger.d { "[joinCallInternal] call: $call" }
             val joinResult = callCoordinatorClient.joinCall(
-                call.type,
                 call.id,
+                call.type,
                 GetOrCreateCallRequest()
             )
             if (joinResult !is Success) {
@@ -353,7 +352,8 @@ internal class StreamVideoImpl(
      * Measures and prepares the latency which describes how much time it takes to ping the server.
      *
      * @param edgeUrl The edge we want to measure.
-     * @return [Latency] which contains measurements from ping connections.
+     *
+     * @return [List] of [Float] values which represent measurements from ping connections.
      */
     // TODO - measure latencies in the following way:
     // 5x links/servers in parallel, 3s timeout, 3x retries
@@ -369,7 +369,7 @@ internal class StreamVideoImpl(
         id: String,
         request: GetCallEdgeServerRequest
     ): Result<GetCallEdgeServerResponse> {
-        return callCoordinatorClient.selectEdgeServer(type, id, request)
+        return callCoordinatorClient.selectEdgeServer(id, type, request)
     }
 
     // caller/callee: CREATE/JOIN meeting or ACCEPT call with no participants or ringing
@@ -415,8 +415,8 @@ internal class StreamVideoImpl(
         val (type, id) = callCid.toTypeAndId()
 
         return callCoordinatorClient.sendUserEvent(
-            type = type,
             id = id,
+            type = type,
             sendEventRequest = SendEventRequest(eventType = eventType.name) // TODO - check if we need to format the name
         )
             .onSuccess { engine.onCallEventSent(callCid, eventType) }
@@ -493,9 +493,11 @@ internal class StreamVideoImpl(
      *
      * Use it to control the track state, mute/unmute devices and listen to call events.
      *
+     * @param callGuid The GUID of the Call, containing the ID and its type.
      * @param signalUrl The URL of the server in which the call is being hosted.
      * @param sfuToken User's ticket to enter the call.
      * @param iceServers Servers required to appropriately connect to the call and receive tracks.
+     *
      * @return An instance of [CallClient] ready to connect to a call. Make sure to call
      * [CallClient.connectToCall] when you're ready to fully join a call.
      */

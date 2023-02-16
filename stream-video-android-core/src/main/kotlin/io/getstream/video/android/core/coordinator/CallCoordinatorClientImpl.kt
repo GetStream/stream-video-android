@@ -54,6 +54,7 @@ internal class CallCoordinatorClientImpl(
      * Create a new Device used to receive Push Notifications.
      *
      * @param createDeviceRequest The device data.
+     *
      * @return [CreateDeviceResponse] witch holds the device.
      */
     override suspend fun createDevice(
@@ -68,7 +69,8 @@ internal class CallCoordinatorClientImpl(
      * Delete a Device used to receive Push Notifications.
      *
      * @param deleteDeviceRequest The device data.
-     * @return Result if the operation was successful or not.
+     *
+     * @return [Result] if the operation was successful or not.
      */
     override suspend fun deleteDevice(deleteDeviceRequest: DeleteDeviceRequest): Result<Unit> =
         try {
@@ -78,6 +80,15 @@ internal class CallCoordinatorClientImpl(
             Failure(VideoError(error.message, error))
         }
 
+    /**
+     * Returns an existing call or creates and returns a new one, based on the given request data.
+     *
+     * @param id The ID of the call.
+     * @param type The type of the call.
+     * @param getOrCreateCallRequest The request data describing the call.
+     *
+     * @return [GetOrCreateCallResponse] Containing the call information.
+     */
     override suspend fun getOrCreateCall(
         id: String,
         type: String,
@@ -99,13 +110,16 @@ internal class CallCoordinatorClientImpl(
      * Attempts to join a [Call]. If successful, gives us more information about the
      * user and the call itself.
      *
+     * @param id The ID of the call.
+     * @param type The type of the call.
      * @param request The details of the call, like the ID and its type.
+     *
      * @return [Result] wrapper around the response from the server, or an error if something went
      * wrong.
      */
     override suspend fun joinCall(
-        type: String,
         id: String,
+        type: String,
         request: GetOrCreateCallRequest
     ): Result<JoinCallResponse> = try {
         val response = videoCallApi.joinCall(
@@ -123,13 +137,16 @@ internal class CallCoordinatorClientImpl(
      * Finds the correct server to connect to for given user and [request]. In case there are no
      * servers, returns an error to the user.
      *
+     * @param id The ID of the call.
+     * @param type The type of the call.
      * @param request The data used to find the best server.
+     *
      * @return [Result] wrapper around the response from the server, or an error if something went
      * wrong.
      */
     override suspend fun selectEdgeServer(
-        type: String,
         id: String,
+        type: String,
         request: GetCallEdgeServerRequest
     ): Result<GetCallEdgeServerResponse> =
         try {
@@ -148,7 +165,10 @@ internal class CallCoordinatorClientImpl(
      * Sends a user-based event to the API to notify if we've changed something in the state of the
      * call.
      *
+     * @param id The ID of the call.
+     * @param type The type of the call.
      * @param sendEventRequest The request holding information about the event type and the call.
+     *
      * @return a [Result] wrapper if the call succeeded or not.
      */
     override suspend fun sendUserEvent(
@@ -168,6 +188,7 @@ internal class CallCoordinatorClientImpl(
      *
      * @param users The users to invite.
      * @param cid The call ID.
+     *
      * @return [Result] if the operation is successful or not.
      */
     override suspend fun inviteUsers(users: List<User>, cid: StreamCallCid): Result<Unit> = try {
@@ -187,6 +208,14 @@ internal class CallCoordinatorClientImpl(
         Failure(VideoError(error.message, error))
     }
 
+    /**
+     * Queries the API for members of a call.
+     *
+     * @param request The [QueryMembersRequest] containing specific information about the query and
+     * the call
+     *
+     * @return [List] of [CallUser]s that match the given query.
+     */
     override suspend fun queryMembers(request: QueryMembersRequest): Result<List<CallUser>> = try {
         val users = videoCallApi.queryMembers(request).members
 

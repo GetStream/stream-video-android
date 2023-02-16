@@ -37,11 +37,13 @@ import okhttp3.logging.HttpLoggingInterceptor
 
 /**
  * @param context Used to set up internal factories that depend on Android.
+ * @param coordinatorClient The client used to communicate to the Video Call API.
  * @param preferences Used to propagate logged in user's credentials.
  * @param networkStateProvider Listens to events of the network state, used for socket connections.
  * @param callEngine Provides the state of active calls.
  * @param signalUrl The URL used to connect to a call.
  * @param iceServers Servers used to authenticate and connect to the call and its tracks.
+ * @param callGuid The GUID of the Call, containing the ID and its type.
  */
 internal class CallClientBuilder(
     private val context: Context,

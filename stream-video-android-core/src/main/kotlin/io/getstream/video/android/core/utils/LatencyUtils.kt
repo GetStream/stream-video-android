@@ -32,14 +32,9 @@ private const val TAG = "Call:LatencyUtils"
 public fun getLatencyMeasurements(latencyUrl: String): List<Float> {
     val measurements = mutableListOf<Float>()
 
-    /**
-     * Used for setting up testing on devices.
-     */
-    val url = latencyUrl
-
     repeat(3) {
         try {
-            val request = URL(url)
+            val request = URL(latencyUrl)
             val start = System.currentTimeMillis()
             val connection = request.openConnection()
 

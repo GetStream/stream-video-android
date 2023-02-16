@@ -82,6 +82,7 @@ public interface StreamVideo {
      * @param type The call type.
      * @param id The call ID.
      * @param participantIds List of other people to invite to the call.
+     * @param ring If you want to ring participants or not.
      *
      * @return [Result] which contains the [CallMetadata] and its information.
      */
@@ -147,6 +148,8 @@ public interface StreamVideo {
      *
      * @param callCid The CID of the channel, describing the type and id.
      * @param dataJson The data JSON encoded.
+     * @param eventType The type of the event to send.
+     *
      * @return [Result] which contains if the event was successfully sent.
      */
     public suspend fun sendCustomEvent(
@@ -192,9 +195,11 @@ public interface StreamVideo {
      *
      * Use it to control the track state, mute/unmute devices and listen to call events.
      *
+     * @param callGuid The GUID of the Call, containing the ID and the type.
      * @param signalUrl The URL of the server in which the call is being hosted.
      * @param sfuToken User's ticket to enter the call.
      * @param iceServers Servers required to appropriately connect to the call and receive tracks.
+     *
      * @return An instance of [CallClient] ready to connect to a call. Make sure to call
      * [CallClient.connectToCall] when you're ready to fully join a call.
      */
