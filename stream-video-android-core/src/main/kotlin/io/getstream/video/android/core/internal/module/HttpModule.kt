@@ -24,18 +24,18 @@ import okhttp3.logging.HttpLoggingInterceptor
 
 /**
  * @property loggingLevel Log level used for all HTTP requests towards the API.
- * @property credentialsProvider Provider used to fetch user based credentials.
+ * @property preferences Used to fetch user based credentials.
  */
 internal class HttpModule(
     private val loggingLevel: HttpLoggingInterceptor.Level = HttpLoggingInterceptor.Level.NONE,
-    private val credentialsProvider: UserPreferences,
+    private val preferences: UserPreferences,
 ) {
 
     /**
      * Cached instance of the HTTP client.
      */
     internal val okHttpClient: OkHttpClient by lazy {
-        buildOkHttpClient(credentialsProvider)
+        buildOkHttpClient(preferences)
     }
 
     /**

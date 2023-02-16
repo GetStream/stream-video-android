@@ -28,6 +28,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import io.getstream.android.push.PushDevice
 import io.getstream.android.push.delegate.PushDelegate
+import io.getstream.android.push.delegate.PushDelegateProvider
 import io.getstream.log.StreamLog
 import io.getstream.video.android.R
 import io.getstream.video.android.core.StreamVideoBuilder
@@ -42,7 +43,7 @@ import kotlinx.coroutines.launch
 /**
  * Class used to handle Push Notifications.
  *
- * It is used by reflection by [io.getstream.android.push.delegate.PushDelegateProvider] class.
+ * It is used by reflection by [PushDelegateProvider] class.
  */
 internal class VideoPushDelegate(
     context: Context
