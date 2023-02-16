@@ -23,7 +23,7 @@ import io.getstream.video.android.core.coordinator.CallCoordinatorClient
 import io.getstream.video.android.core.coordinator.CallCoordinatorClientImpl
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.model.User
-import io.getstream.video.android.core.token.CredentialsProvider
+import io.getstream.video.android.core.user.UserPreferences
 import kotlinx.coroutines.CoroutineScope
 import okhttp3.OkHttpClient
 import org.openapitools.client.apis.EventsApi
@@ -39,13 +39,13 @@ import retrofit2.converter.wire.WireConverterFactory
  * SDK.
  *
  * @property user The currently logged in user.
- * @property credentialsProvider Provider of user-tokens.
+ * @property preferences Provider of user-tokens.
  * @property appContext The context of the app, used for Android-based dependencies.
  * @property lifecycle The lifecycle of the process.
  */
 internal class CallCoordinatorClientModule(
     private val user: User,
-    private val credentialsProvider: CredentialsProvider,
+    private val preferences: UserPreferences,
     private val appContext: Context,
     private val lifecycle: Lifecycle,
     private val okHttpClient: OkHttpClient

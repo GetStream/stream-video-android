@@ -24,7 +24,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.logging.LoggingLevel
-import io.getstream.video.android.core.token.AuthCredentialsProvider
+import io.getstream.video.android.core.user.UserPreferencesManager
 import io.getstream.video.android.core.utils.onError
 import io.getstream.video.android.core.utils.onSuccess
 import kotlinx.coroutines.launch
@@ -72,17 +72,15 @@ class DeeplinkingActivity : AppCompatActivity() {
     }
 
     private fun logIn() {
-        val userPreferences = dogfoodingApp.userPreferences
-        val user = userPreferences.getCachedCredentials()
-        val apiKey = userPreferences.getCachedApiKey()
+        val userPreferences = UserPreferencesManager.initialize(this)
+        val user = userPreferences.getUserCredentials()
+        val apiKey = userPreferences.getApiKey()
 
         if (user != null) {
             logger.d { "[logIn] selectedUser: $user" }
             dogfoodingApp.initializeStreamVideo(
-                credentialsProvider = AuthCredentialsProvider(
-                    user = user,
-                    apiKey = apiKey ?: API_KEY
-                ),
+                user = user,
+                apiKey = apiKey,
                 loggingLevel = LoggingLevel.BODY
             )
         }

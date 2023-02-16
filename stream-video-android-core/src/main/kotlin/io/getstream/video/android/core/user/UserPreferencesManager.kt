@@ -19,7 +19,7 @@ package io.getstream.video.android.core.user
 import android.app.Application
 import android.content.Context
 
-public object UserCredentialsManager {
+public object UserPreferencesManager {
 
     private lateinit var userPreferences: UserPreferences
 

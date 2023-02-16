@@ -32,9 +32,8 @@ import io.getstream.log.StreamLog
 import io.getstream.video.android.R
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
-import io.getstream.video.android.core.token.AuthCredentialsProvider
-import io.getstream.video.android.core.user.UserCredentialsManager
 import io.getstream.video.android.core.user.UserPreferences
+import io.getstream.video.android.core.user.UserPreferencesManager
 import io.getstream.video.android.core.utils.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.core.utils.INTENT_EXTRA_NOTIFICATION_ID
 import kotlinx.coroutines.CoroutineScope
@@ -50,7 +49,7 @@ internal class VideoPushDelegate(
 ) : PushDelegate(context) {
     private val logger = StreamLog.getLogger("VideoPushDelegate")
     private val userPreferences: UserPreferences by lazy {
-        UserCredentialsManager.initialize(context)
+        UserPreferencesManager.initialize(context)
     }
     private val notificationManager: NotificationManagerCompat by lazy {
         NotificationManagerCompat.from(context).also {
@@ -249,18 +248,16 @@ internal class VideoPushDelegate(
      */
     override fun registerPushDevice(pushDevice: PushDevice) {
         logger.d { "[registerPushDevice] pushDevice: $pushDevice" }
-        userPreferences.getCachedCredentials()?.let { user ->
-            userPreferences.getCachedApiKey()?.let { apiKey ->
-                AuthCredentialsProvider(
-                    user = user,
-                    apiKey = apiKey
-                )
+        userPreferences.getUserCredentials()?.let { user ->
+            userPreferences.getApiKey().let { apiKey ->
+                user to apiKey
             }
-        }?.let { authCredentialsProvider ->
+        }?.let { (user, apiKey) ->
             CoroutineScope(DispatcherProvider.IO).launch {
                 StreamVideoBuilder(
                     context = context,
-                    credentialsProvider = authCredentialsProvider,
+                    user = user,
+                    apiKey = apiKey,
                 ).build()
                     .createDevice(
                         token = pushDevice.token,

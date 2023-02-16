@@ -34,8 +34,8 @@ public class UserState {
      *
      * @param [user] The new user instance to set.
      */
-    public fun setUser(user: User) {
-        this.userFlow.value = user
+    public fun setUser(user: User?) {
+        this.userFlow.value = user ?: EMPTY_USER
     }
 
     public companion object {

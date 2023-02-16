@@ -30,14 +30,16 @@ import io.getstream.video.android.core.internal.module.CallCoordinatorClientModu
 import io.getstream.video.android.core.internal.module.HttpModule
 import io.getstream.video.android.core.internal.module.VideoModule
 import io.getstream.video.android.core.logging.LoggingLevel
-import io.getstream.video.android.core.token.CredentialsProvider
-import io.getstream.video.android.core.user.UserCredentialsManager
+import io.getstream.video.android.core.model.ApiKey
+import io.getstream.video.android.core.model.User
+import io.getstream.video.android.core.user.UserPreferencesManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 public class StreamVideoBuilder(
     private val context: Context,
-    private val credentialsProvider: CredentialsProvider,
+    private val user: User,
+    private val apiKey: ApiKey,
     private val config: StreamVideoConfig = StreamVideoConfigDefault,
     private val androidInputs: Set<CallAndroidInput> = emptySet(),
     private val inputLauncher: CallAndroidInputLauncher = DefaultCallAndroidInputLauncher,
@@ -48,23 +50,22 @@ public class StreamVideoBuilder(
 
     public fun build(): StreamVideo {
         val lifecycle = ProcessLifecycleOwner.get().lifecycle
-        val user = credentialsProvider.getUserCredentials()
 
-        if (credentialsProvider.loadApiKey().isBlank() ||
+        if (apiKey.isBlank() ||
             user.id.isBlank() ||
             user.token.isBlank()
         ) throw IllegalArgumentException("The API key, user ID and token cannot be empty!")
 
-        UserCredentialsManager.initialize(context).apply {
+        val preferences = UserPreferencesManager.initialize(context).apply {
             storeUserCredentials(user)
-            storeApiKey(credentialsProvider.getCachedApiKey())
+            storeApiKey(apiKey)
         }
 
-        val httpModule = HttpModule.getOrCreate(loggingLevel.httpLoggingLevel, credentialsProvider)
+        val httpModule = HttpModule.getOrCreate(loggingLevel.httpLoggingLevel, preferences)
 
         val module = VideoModule(
             appContext = context,
-            credentialsProvider = credentialsProvider
+            preferences = preferences
         )
 
         val socket = module.socket()
@@ -72,7 +73,7 @@ public class StreamVideoBuilder(
 
         val callCoordinatorClientModule = CallCoordinatorClientModule(
             user = user,
-            credentialsProvider = credentialsProvider,
+            preferences = preferences,
             appContext = context,
             lifecycle = lifecycle,
             okHttpClient = httpModule.okHttpClient
@@ -85,7 +86,7 @@ public class StreamVideoBuilder(
                 parentScope = scope,
                 coordinatorClient = callCoordinatorClientModule.callCoordinatorClient(),
                 config = config,
-                getCurrentUserId = { credentialsProvider.getUserCredentials().id }
+                getCurrentUserId = { preferences.getUserCredentials()?.id ?: "" }
             )
 
         return StreamVideoImpl(
@@ -95,7 +96,7 @@ public class StreamVideoBuilder(
             engine = engine,
             loggingLevel = loggingLevel,
             callCoordinatorClient = callCoordinatorClientModule.callCoordinatorClient(),
-            credentialsProvider = credentialsProvider,
+            preferences = preferences,
             lifecycle = lifecycle,
             socket = socket,
             socketStateService = module.socketStateService(),

@@ -24,14 +24,12 @@ import io.getstream.video.android.core.socket.SocketStateService
 import io.getstream.video.android.core.socket.VideoSocket
 import io.getstream.video.android.core.socket.internal.SocketFactory
 import io.getstream.video.android.core.socket.internal.VideoSocketImpl
-import io.getstream.video.android.core.token.CredentialsProvider
-import io.getstream.video.android.core.token.internal.CredentialsManager
-import io.getstream.video.android.core.token.internal.CredentialsManagerImpl
+import io.getstream.video.android.core.user.UserPreferences
 import kotlinx.coroutines.CoroutineScope
 
 internal class VideoModule(
     private val appContext: Context,
-    private val credentialsProvider: CredentialsProvider
+    private val preferences: UserPreferences
 ) {
     /**
      * The [CoroutineScope] used for all business logic related operations.
@@ -50,15 +48,6 @@ internal class VideoModule(
     }
 
     /**
-     * Cached user token manager.
-     */
-    private val credentialsManager: CredentialsManager by lazy {
-        CredentialsManagerImpl().apply {
-            setCredentialsProvider(credentialsProvider)
-        }
-    }
-
-    /**
      * Provider that handles connectivity and listens to state changes, exposing them to listeners.
      */
     private val networkStateProvider: NetworkStateProvider by lazy {
@@ -73,7 +62,7 @@ internal class VideoModule(
      */
     private val userState: UserState by lazy {
         UserState().apply {
-            setUser(credentialsProvider.getUserCredentials())
+            setUser(preferences.getUserCredentials())
         }
     }
 
@@ -83,7 +72,7 @@ internal class VideoModule(
     internal fun socket(): VideoSocket {
         return VideoSocketImpl(
             wssUrl = WS_BASE_URL,
-            credentialsManager = credentialsManager,
+            preferences = preferences,
             socketFactory = socketFactory,
             networkStateProvider = networkStateProvider,
             userState = userState,

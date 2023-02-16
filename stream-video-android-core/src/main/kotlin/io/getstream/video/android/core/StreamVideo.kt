@@ -161,6 +161,11 @@ public interface StreamVideo {
     public fun clearCallState()
 
     /**
+     * Clears the internal user state.
+     */
+    public fun logOut()
+
+    /**
      * Gets the current user information.
      *
      * @return The currently logged in [User].

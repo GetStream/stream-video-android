@@ -46,7 +46,7 @@ import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.google.firebase.auth.FirebaseAuth
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.User
-import io.getstream.video.android.core.token.AuthCredentialsProvider
+import io.getstream.video.android.core.user.UserPreferencesManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.json.JSONArray
@@ -79,7 +79,7 @@ class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val user = dogfoodingApp.userPreferences.getCachedCredentials()
+        val user = UserPreferencesManager.initialize(this).getUserCredentials()
 
         if (user != null && user.isValid()) {
             startHome(
@@ -215,10 +215,8 @@ class LoginActivity : ComponentActivity() {
 
     private fun startHome(user: User) {
         dogfoodingApp.initializeStreamVideo(
-            AuthCredentialsProvider(
-                apiKey = API_KEY,
-                user = user
-            ),
+            apiKey = API_KEY,
+            user = user,
             loggingLevel = LoggingLevel.BODY
         )
         startActivity(HomeActivity.getIntent(this))
