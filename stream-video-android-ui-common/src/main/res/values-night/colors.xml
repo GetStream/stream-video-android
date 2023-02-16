@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (c) 2014-2022 Stream.io Inc. All rights reserved.
+
+    Licensed under the Stream License;
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+      https://github.com/GetStream/stream-chat-android/blob/main/LICENSE
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<resources>
+    <color name="stream_text_high_emphasis">@color/stream_text_high_emphasis_dark</color>
+    <color name="stream_text_low_emphasis">@color/stream_text_low_emphasis_dark</color>
+    <color name="stream_disabled">@color/stream_disabled_dark</color>
+    <color name="stream_borders">@color/stream_borders_dark</color>
+    <color name="stream_input_background">@color/stream_input_background_dark</color>
+    <color name="stream_app_background">@color/stream_app_background_dark</color>
+    <color name="stream_bars_background">@color/stream_bars_background_dark</color>
+    <color name="stream_link_background">@color/stream_link_background_dark</color>
+    <color name="stream_overlay_regular">@color/stream_overlay_regular_dark</color>
+    <color name="stream_overlay_dark">@color/stream_overlay_dark_dark</color>
+    <color name="stream_primary_accent">@color/stream_primary_accent_dark</color>
+    <color name="stream_error_accent">@color/stream_error_accent_dark</color>
+    <color name="stream_info_accent">@color/stream_info_accent_dark</color>
+    <color name="stream_highlight">@color/stream_highlight_dark</color>
+</resources>

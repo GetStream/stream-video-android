@@ -77,7 +77,7 @@ public fun CallParticipant(
     val containerModifier =
         if (isFocused) modifier.border(
             BorderStroke(
-                3.dp,
+                VideoTheme.dimens.callParticipantFocusedBorderWidth,
                 VideoTheme.colors.infoAccent
             )
         ) else modifier
@@ -151,8 +151,8 @@ private fun BoxScope.ParticipantLabel(
     Row(
         modifier = Modifier
             .align(labelPosition)
-            .padding(8.dp)
-            .height(24.dp)
+            .padding(VideoTheme.dimens.callParticipantLabelPadding)
+            .height(VideoTheme.dimens.callParticipantLabelHeight)
             .wrapContentWidth()
             .background(
                 Color.DarkGray,
@@ -165,7 +165,7 @@ private fun BoxScope.ParticipantLabel(
             isSpeaking = participant.isSpeaking,
             modifier = Modifier
                 .align(CenterVertically)
-                .padding(start = 8.dp)
+                .padding(start = VideoTheme.dimens.callParticipantSoundIndicatorPaddingStart)
         )
 
         val name = participant.name.ifEmpty {
@@ -173,8 +173,8 @@ private fun BoxScope.ParticipantLabel(
         }
         Text(
             modifier = Modifier
-                .widthIn(max = 64.dp)
-                .padding(horizontal = 4.dp)
+                .widthIn(max = VideoTheme.dimens.callParticipantLabelTextMaxWidth)
+                .padding(horizontal = VideoTheme.dimens.callParticipantLabelTextPadding)
                 .align(CenterVertically),
             text = name,
             style = VideoTheme.typography.body,

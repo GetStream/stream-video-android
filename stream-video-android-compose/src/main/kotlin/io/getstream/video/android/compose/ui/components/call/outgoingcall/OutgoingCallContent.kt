@@ -24,14 +24,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
+import io.getstream.video.android.common.util.mockParticipant
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.background.CallBackground
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.call.outgoingcall.internal.OutgoingCallDetails
 import io.getstream.video.android.compose.ui.components.call.outgoingcall.internal.OutgoingGroupCallOptions
 import io.getstream.video.android.compose.ui.components.call.outgoingcall.internal.OutgoingSingleCallOptions
-import io.getstream.video.android.compose.ui.components.mock.mockParticipant
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CallMediaState
 import io.getstream.video.android.core.model.CallType
@@ -120,7 +119,7 @@ public fun OutgoingCall(
             OutgoingSingleCallOptions(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(bottom = 44.dp),
+                    .padding(bottom = VideoTheme.dimens.outgoingCallOptionsBottomPadding),
                 callMediaState = callMediaState,
                 onCallAction = onCallAction
             )
@@ -128,7 +127,7 @@ public fun OutgoingCall(
             OutgoingGroupCallOptions(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(bottom = 44.dp),
+                    .padding(bottom = VideoTheme.dimens.outgoingCallOptionsBottomPadding),
                 callMediaState = callMediaState,
                 onCallAction = onCallAction
             )

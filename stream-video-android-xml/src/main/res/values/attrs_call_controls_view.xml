@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CallControlsView">
+        <!-- Size of the call control buttons -->
+        <attr name="streamCallControlsButtonSize" format="dimension|reference" />
+        <!-- Background color of the call controls view -->
+        <attr name="streamCallControlsBackgroundColor" format="color|reference" />
+    </declare-styleable>
+</resources>

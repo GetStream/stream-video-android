@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="ControlButton">
+        <!-- Sets the button background. -->
+        <attr name="android:background" format="reference" />
+        <!-- Sets the button background. -->
+        <attr name="android:backgroundTint" format="color|reference" />
+        <!-- Sets the button background. -->
+        <attr name="android:src" format="reference" />
+        <!-- Sets the button background. -->
+        <attr name="android:tint" format="color|reference" />
+        <!-- Sets the button background. -->
+        <attr name="android:enabled" format="reference" />
+        <!-- Sets the button background. -->
+        <attr name="streamControlButtonBackgroundEnabledAlpha" format="float|reference" />
+        <!-- Sets the button background. -->
+        <attr name="streamControlButtonBackgroundDisabledAlpha" format="float|reference" />
+    </declare-styleable>
+</resources>

@@ -28,7 +28,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.DpOffset
@@ -79,7 +78,7 @@ public fun InitialsAvatar(
                 .offset(avatarOffset.x, avatarOffset.y),
             text = initials,
             style = textStyle,
-            color = Color.White
+            color = VideoTheme.colors.avatarInitials
         )
     }
 }

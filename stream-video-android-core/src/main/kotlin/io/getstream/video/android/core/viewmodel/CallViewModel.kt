@@ -168,6 +168,9 @@ public class CallViewModel(
     public val localParticipant: Flow<CallParticipantState> =
         callState.filterNotNull().flatMapLatest { it.localParticipant }
 
+    public val primarySpeaker: Flow<CallParticipantState?> =
+        callState.filterNotNull().flatMapLatest { it.primarySpeaker }
+
     private val _isShowingCallInfo = MutableStateFlow(false)
     public val isShowingCallInfo: StateFlow<Boolean> = _isShowingCallInfo
 
@@ -205,7 +208,7 @@ public class CallViewModel(
                         _callType.value = CallType.fromType(state.callGuid.type)
                         _participants.value = state.users.values
                             .filter { it.id != streamVideo.getUser().id }
-                            .toList()
+                            .toList().filter { it.id != streamVideo.getUser().id }
                     }
                     is State.Joining -> {
                         _callType.value = CallType.fromType(state.callGuid.type)
@@ -271,7 +274,7 @@ public class CallViewModel(
     /**
      * Flips the camera for the current participant if possible.
      */
-    public fun flipCamera() {
+    private fun flipCamera() {
         client?.flipCamera()
     }
 
@@ -306,11 +309,11 @@ public class CallViewModel(
             is ToggleCamera -> onVideoChanged(callAction.isEnabled)
             is ToggleMicrophone -> onMicrophoneChanged(callAction.isEnabled)
             is SelectAudioDevice -> selectAudioDevice(callAction.audioDevice)
-            is FlipCamera -> flipCamera()
+            FlipCamera -> flipCamera()
             CancelCall -> cancelCall()
             AcceptCall -> acceptCall()
             DeclineCall -> hangUpCall()
-            is LeaveCall -> cancelCall()
+            LeaveCall -> cancelCall()
             is InviteUsersToCall -> inviteUsersToCall(callAction.users)
             is ToggleScreenConfiguration -> {
                 _isFullscreen.value = callAction.isFullscreen && callAction.isLandscape

@@ -32,10 +32,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.state.ui.internal.InviteUserItemState
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
+import io.getstream.video.android.ui.common.R
 
 /**
  * Represents a list of users who can be invited to the call.

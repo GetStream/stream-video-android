@@ -27,14 +27,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.extensions.toggleAlpha
 import io.getstream.video.android.core.call.state.CallAction
@@ -42,6 +40,7 @@ import io.getstream.video.android.core.call.state.CallMediaState
 import io.getstream.video.android.core.call.state.CancelCall
 import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
+import io.getstream.video.android.ui.common.R
 
 @Composable
 internal fun OutgoingSingleCallOptions(

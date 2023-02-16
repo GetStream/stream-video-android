@@ -1,0 +1,26 @@
+public final class io/getstream/video/android/common/util/ColorUtilsKt {
+	public static final fun adjustColorBrightness (IF)I
+}
+
+public final class io/getstream/video/android/common/util/MockUtilsKt {
+	public static final fun getMockParticipant ()Lio/getstream/video/android/core/model/CallParticipantState;
+	public static final fun getMockParticipantList ()Ljava/util/List;
+	public static final fun getMockUsers ()Ljava/util/List;
+}
+
+public final class io/getstream/video/android/common/util/ParticipantsTextKt {
+	public static final fun buildLargeCallText (Ljava/util/List;)Ljava/lang/String;
+	public static final fun buildSmallCallText (Ljava/util/List;)Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/common/util/ResourcesKt {
+	public static final fun getFloatResource (Landroid/content/Context;I)F
+}
+
+public final class io/getstream/video/android/ui/common/BuildConfig {
+	public static final field BUILD_TYPE Ljava/lang/String;
+	public static final field DEBUG Z
+	public static final field LIBRARY_PACKAGE_NAME Ljava/lang/String;
+	public fun <init> ()V
+}
+

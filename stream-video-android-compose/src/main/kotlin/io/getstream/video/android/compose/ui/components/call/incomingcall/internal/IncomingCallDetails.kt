@@ -23,9 +23,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
+import io.getstream.video.android.common.util.mockParticipantList
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.mock.mockParticipantList
 import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantAvatars
 import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantInformation
 import io.getstream.video.android.core.model.CallParticipantState
@@ -52,7 +51,7 @@ internal fun IncomingCallDetails(
             }
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(VideoTheme.dimens.callParticipantsAvatarsMargin))
 
         ParticipantInformation(
             callStatus = CallStatus.Incoming,

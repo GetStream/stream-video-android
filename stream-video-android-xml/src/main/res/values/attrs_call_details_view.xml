@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CallDetailsView">
+        <!-- Avatar size for group calls -->
+        <attr name="streamCallDetailsAvatarSize" format="dimension|reference" />
+        <!-- Avatar size for direct calls -->
+        <attr name="streamCallDetailsDirectCallAvatarSize" format="dimension|reference" />
+        <!-- Avatar spacing for group calls -->
+        <attr name="streamCallDetailsAvatarSpacing" format="dimension|reference" />
+
+        <!-- Direct call info text size -->
+        <attr name="streamCallDetailsDirectCallParticipantInfoTextSize" format="dimension|reference" />
+        <!-- Group info text style -->
+        <attr name="streamCallDetailsParticipantsInfoTextSize" format="dimension|reference" />
+        <attr name="streamCallDetailsParticipantsInfoTextColor" format="color|reference" />
+        <attr name="streamCallDetailsParticipantsInfoFontAsset" format="reference" />
+        <attr name="streamCallDetailsParticipantsInfoFont" format="reference" />
+        <attr name="streamCallDetailsParticipantsInfoTextStyle">
+            <flag name="normal" value="0" />
+            <flag name="bold" value="1" />
+            <flag name="italic" value="2" />
+        </attr>
+
+        <!-- Call state text style attributes -->
+        <attr name="streamCallDetailsCallStateTextSize" format="dimension|reference" />
+        <attr name="streamCallDetailsCallStateTextColor" format="color|reference" />
+        <attr name="streamCallDetailsCallStateFontAsset" format="reference" />
+        <attr name="streamCallDetailsCallStateFont" format="reference" />
+        <attr name="streamCallDetailsCallStateTextStyle">
+            <flag name="normal" value="0" />
+            <flag name="bold" value="1" />
+            <flag name="italic" value="2" />
+        </attr>
+        <attr name="streamCallDetailsStateTextAlpha" format="float|reference" />
+
+    </declare-styleable>
+</resources>
