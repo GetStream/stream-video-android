@@ -67,6 +67,7 @@ import io.getstream.video.android.core.model.state.StreamDate
 import io.getstream.video.android.core.model.state.copy
 import io.getstream.video.android.core.utils.Jobs
 import io.getstream.video.android.core.utils.Success
+import io.getstream.video.android.core.utils.toPartialUser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -262,6 +263,15 @@ internal class StreamCallEngineImpl(
             )
 
             if (userQueryResult is Success) {
+                if (userQueryResult.data.isEmpty()) {
+                    _callState.post(
+                        state.copy(
+                            users = state.users merge event.participant.toPartialUser()
+                        )
+                    )
+                    return@launchWithLock
+                }
+
                 val user = userQueryResult.data.first()
 
                 _callState.post(
