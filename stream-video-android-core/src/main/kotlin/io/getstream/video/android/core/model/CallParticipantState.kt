@@ -37,7 +37,7 @@ public data class CallParticipantState(
     public var isSpeaking: Boolean = false
 ) {
     public val hasVideo: Boolean
-        get() = TrackType.TRACK_TYPE_VIDEO in publishedTracks && videoTrack != null
+        get() = TrackType.TRACK_TYPE_VIDEO in publishedTracks
 
     public val hasAudio: Boolean
         get() = TrackType.TRACK_TYPE_AUDIO in publishedTracks

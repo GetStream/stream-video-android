@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.utils
+package io.getstream.video.android.common.util
 
 import android.graphics.Color
 import kotlin.math.roundToInt
@@ -26,7 +26,7 @@ import kotlin.math.roundToInt
  * @param factor The factor by which we adjust the color.
  * @return [Int] ARGB value of the color after adjustment.
  */
-internal fun adjustColorBrightness(color: Int, factor: Float): Int {
+public fun adjustColorBrightness(color: Int, factor: Float): Int {
     val a = Color.alpha(color)
     val r = (Color.red(color) * factor).roundToInt()
     val g = (Color.green(color) * factor).roundToInt()

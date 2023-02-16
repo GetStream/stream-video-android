@@ -58,6 +58,7 @@ import io.getstream.video.android.core.permission.StreamPermissionManagerImpl
 import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.core.viewmodel.CallViewModelFactory
 import io.getstream.video.android.core.viewmodel.CallViewModelFactoryProvider
+import io.getstream.video.android.ui.common.R
 import kotlinx.coroutines.flow.collectLatest
 
 public abstract class AbstractComposeCallActivity :
@@ -264,14 +265,19 @@ public abstract class AbstractComposeCallActivity :
     }
 
     private fun showPermissionsDialog() {
-        AlertDialog.Builder(this).setTitle("Permissions required to launch the app")
-            .setMessage("Open settings to allow camera and microphone permissions.")
-            .setPositiveButton("Launch settings") { dialog, _ ->
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.permissions_title))
+            .setMessage(getString(R.string.permissions_message))
+            .setPositiveButton(getString(R.string.permissions_settings)) { dialog, _ ->
                 startSettings()
                 dialog.dismiss()
-            }.setNegativeButton("Cancel") { dialog, _ ->
+            }
+            .setNegativeButton(getString(R.string.permissions_cancel)) { dialog, _ ->
+                finish()
                 dialog.dismiss()
-            }.create().show()
+            }
+            .create()
+            .show()
     }
 
     private fun showWhenLockedAndTurnScreenOn() {

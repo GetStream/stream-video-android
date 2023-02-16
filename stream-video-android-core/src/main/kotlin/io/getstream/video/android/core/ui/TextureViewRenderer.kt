@@ -184,4 +184,8 @@ public open class TextureViewRenderer @JvmOverloads constructor(
             ""
         }
     }
+
+    public fun release() {
+        eglRenderer.release()
+    }
 }

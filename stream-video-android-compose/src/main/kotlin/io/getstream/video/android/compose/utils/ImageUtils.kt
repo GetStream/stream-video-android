@@ -28,8 +28,9 @@ import androidx.compose.ui.platform.LocalContext
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
-import io.getstream.video.android.compose.R
+import io.getstream.video.android.common.util.adjustColorBrightness
 import io.getstream.video.android.compose.imageloading.LocalStreamImageLoader
+import io.getstream.video.android.ui.common.R
 import kotlin.math.abs
 
 private const val GradientDarkerColorFactor = 1.3f
@@ -45,7 +46,7 @@ private const val GradientLighterColorFactor = 0.7f
 @ReadOnlyComposable
 internal fun initialsGradient(initials: String): Brush {
     val gradientBaseColors =
-        LocalContext.current.resources.getIntArray(R.array.stream_compose_avatar_gradient_colors)
+        LocalContext.current.resources.getIntArray(R.array.stream_avatar_gradient_colors)
 
     val baseColorIndex = abs(initials.hashCode()) % gradientBaseColors.size
     val baseColor = gradientBaseColors[baseColorIndex]

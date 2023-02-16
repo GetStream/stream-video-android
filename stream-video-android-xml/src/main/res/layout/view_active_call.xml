@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout"
+    >
+
+    <io.getstream.video.android.xml.widget.participant.CallParticipantsView
+        android:id="@+id/participantsView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        />
+
+    <io.getstream.video.android.xml.widget.control.CallControlsView
+        android:id="@+id/controlsView"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/callControlsSheetHeight"
+        android:background="@drawable/rect_controls"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        />
+
+</merge>

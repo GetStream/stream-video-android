@@ -34,13 +34,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.state.ui.internal.CallParticipantInfoMode
 import io.getstream.video.android.compose.state.ui.internal.InviteUserItemState
 import io.getstream.video.android.compose.state.ui.internal.ParticipantInvites
 import io.getstream.video.android.compose.state.ui.participants.InviteUsers
 import io.getstream.video.android.compose.state.ui.participants.ParticipantInfoAction
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.ui.common.R
 
 /**
  * Renders the AppBar at the top of the

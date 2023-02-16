@@ -42,6 +42,7 @@ import io.getstream.video.android.core.call.state.ToggleScreenConfiguration
 import io.getstream.video.android.core.model.Call
 import io.getstream.video.android.core.model.ScreenSharingSession
 import stream.video.sfu.models.TrackType
+import io.getstream.video.android.ui.common.R as RCommon
 
 /**
  * Represents the content of a screen sharing session.
@@ -105,7 +106,7 @@ public fun ScreenShareContent(
                             .padding(8.dp),
                         painter = painterResource(id = drawable),
                         contentDescription = stringResource(
-                            id = R.string.change_orientation
+                            id = RCommon.string.change_orientation
                         ),
                         tint = VideoTheme.colors.textHighEmphasis
                     )
@@ -141,7 +142,7 @@ public fun ScreenShareContent(
                             .padding(8.dp),
                         painter = painterResource(id = drawable),
                         contentDescription = stringResource(
-                            id = R.string.toggle_fullscreen
+                            id = RCommon.string.toggle_fullscreen
                         ),
                         tint = VideoTheme.colors.textHighEmphasis
                     )

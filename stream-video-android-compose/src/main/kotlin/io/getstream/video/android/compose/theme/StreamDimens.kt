@@ -16,11 +16,14 @@
 
 package io.getstream.video.android.compose.theme
 
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import io.getstream.video.android.compose.utils.floatResource
+import io.getstream.video.android.compose.utils.textSizeResource
+import io.getstream.video.android.ui.common.R
 
 /**
  * Contains all the dimens we provide for our components.
@@ -49,6 +52,9 @@ public data class StreamDimens(
     public val buttonToggleOnAlpha: Float,
     public val buttonToggleOffAlpha: Float,
     public val incomingCallOptionsBottomPadding: Dp,
+    public val outgoingCallOptionsBottomPadding: Dp,
+    public val callParticipantsAvatarsMargin: Dp,
+    public val callStatusParticipantsMargin: Dp,
     public val callAppBarPadding: Dp,
     public val callAppBarLeadingContentSpacingStart: Dp,
     public val callAppBarLeadingContentSpacingEnd: Dp,
@@ -59,6 +65,12 @@ public data class StreamDimens(
     public val callControlButtonSize: Dp,
     public val landscapeCallControlButtonSize: Dp,
     public val callControlsSheetHeight: Dp,
+    public val callParticipantFocusedBorderWidth: Dp,
+    public val callParticipantLabelHeight: Dp,
+    public val callParticipantLabelPadding: Dp,
+    public val callParticipantLabelTextMaxWidth: Dp,
+    public val callParticipantLabelTextPadding: Dp,
+    public val callParticipantSoundIndicatorPaddingStart: Dp,
     public val landscapeCallControlsSheetWidth: Dp,
     public val callParticipantInfoMenuAppBarHeight: Dp,
     public val callParticipantInfoMenuOptionsHeight: Dp,
@@ -74,7 +86,7 @@ public data class StreamDimens(
     public val audioLevelIndicatorBarMaxHeight: Dp,
     public val audioLevelIndicatorBarWidth: Dp,
     public val audioLevelIndicatorBarSeparatorWidth: Dp,
-    public val audioStatusSize: Dp
+    public val audioStatusSize: Dp,
 ) {
     public companion object {
         /**
@@ -82,52 +94,62 @@ public data class StreamDimens(
          *
          * @return A [StreamDimens] instance holding our default dimensions.
          */
+        @Composable
         public fun defaultDimens(): StreamDimens = StreamDimens(
-            callAvatarSize = 80.dp,
-            singleAvatarSize = 160.dp,
-            headerElevation = 4.dp,
-            largeButtonSize = 80.dp,
-            mediumButtonSize = 64.dp,
-            smallButtonSize = 32.dp,
-            topAppbarHeight = 64.dp,
-            landscapeTopAppBarHeight = 48.dp,
-            avatarAppbarPadding = 100.dp,
-            singleAvatarAppbarPadding = 20.dp,
-            participantsTextPadding = 65.dp,
-            topAppbarTextSize = 17.sp,
-            directCallUserNameTextSize = 34.sp,
-            groupCallUserNameTextSize = 24.sp,
-            onCallStatusTextSize = 20.sp,
-            onCallStatusTextAlpha = 0.6f,
-            buttonToggleOnAlpha = 0.4f,
-            buttonToggleOffAlpha = 1.0f,
-            incomingCallOptionsBottomPadding = 44.dp,
-            callAppBarPadding = 12.dp,
-            callAppBarLeadingContentSpacingStart = 0.dp,
-            callAppBarLeadingContentSpacingEnd = 0.dp,
-            callAppBarCenterContentSpacingStart = 8.dp,
-            callAppBarCenterContentSpacingEnd = 0.dp,
-            callAppBarTrailingContentSpacingStart = 8.dp,
-            callAppBarTrailingContentSpacingEnd = 8.dp,
-            callControlButtonSize = 50.dp,
-            landscapeCallControlButtonSize = 45.dp,
-            callControlsSheetHeight = 96.dp,
-            landscapeCallControlsSheetWidth = 64.dp,
-            callParticipantInfoMenuAppBarHeight = 64.dp,
-            callParticipantInfoMenuOptionsHeight = 56.dp,
-            callParticipantsInfoMenuOptionsButtonHeight = 40.dp,
-            callParticipantsInfoAvatarSize = 56.dp,
-            floatingVideoPadding = 16.dp,
-            floatingVideoHeight = 150.dp,
-            floatingVideoWidth = 125.dp,
-            screenShareParticipantItemSize = 110.dp,
-            connectionIndicatorBarMaxHeight = 14.dp,
-            connectionIndicatorBarWidth = 3.dp,
-            connectionIndicatorBarSeparatorWidth = 3.dp,
-            audioLevelIndicatorBarMaxHeight = 16.dp,
-            audioLevelIndicatorBarWidth = 3.dp,
-            audioLevelIndicatorBarSeparatorWidth = 3.dp,
-            audioStatusSize = 15.dp
+            callAvatarSize = dimensionResource(id = R.dimen.callAvatarSize),
+            singleAvatarSize = dimensionResource(id = R.dimen.singleAvatarSize),
+            headerElevation = dimensionResource(id = R.dimen.headerElevation),
+            largeButtonSize = dimensionResource(id = R.dimen.largeButtonSize),
+            mediumButtonSize = dimensionResource(id = R.dimen.mediumButtonSize),
+            smallButtonSize = dimensionResource(id = R.dimen.smallButtonSize),
+            topAppbarHeight = dimensionResource(id = R.dimen.topAppbarHeight),
+            landscapeTopAppBarHeight = dimensionResource(id = R.dimen.landscapeTopAppBarHeight),
+            avatarAppbarPadding = dimensionResource(id = R.dimen.avatarAppbarPadding),
+            singleAvatarAppbarPadding = dimensionResource(id = R.dimen.singleAvatarAppbarPadding),
+            participantsTextPadding = dimensionResource(id = R.dimen.participantsTextPadding),
+            topAppbarTextSize = textSizeResource(id = R.dimen.topAppbarTextSize),
+            directCallUserNameTextSize = textSizeResource(id = R.dimen.directCallUserNameTextSize),
+            groupCallUserNameTextSize = textSizeResource(id = R.dimen.groupCallUserNameTextSize),
+            onCallStatusTextSize = textSizeResource(id = R.dimen.onCallStatusTextSize),
+            onCallStatusTextAlpha = floatResource(R.dimen.onCallStatusTextAlpha),
+            buttonToggleOnAlpha = floatResource(R.dimen.buttonToggleOnAlpha),
+            buttonToggleOffAlpha = floatResource(R.dimen.buttonToggleOffAlpha),
+            incomingCallOptionsBottomPadding = dimensionResource(id = R.dimen.incomingCallOptionsBottomPadding),
+            outgoingCallOptionsBottomPadding = dimensionResource(id = R.dimen.outgoingCallOptionsBottomPadding),
+            callParticipantsAvatarsMargin = dimensionResource(id = R.dimen.callParticipantsAvatarsMargin),
+            callStatusParticipantsMargin = dimensionResource(id = R.dimen.callStatusParticipantsMargin),
+            callAppBarPadding = dimensionResource(id = R.dimen.callAppBarPadding),
+            callAppBarLeadingContentSpacingStart = dimensionResource(id = R.dimen.callAppBarLeadingContentSpacingStart),
+            callAppBarLeadingContentSpacingEnd = dimensionResource(id = R.dimen.callAppBarLeadingContentSpacingEnd),
+            callAppBarCenterContentSpacingStart = dimensionResource(id = R.dimen.callAppBarCenterContentSpacingStart),
+            callAppBarCenterContentSpacingEnd = dimensionResource(id = R.dimen.callAppBarCenterContentSpacingEnd),
+            callAppBarTrailingContentSpacingStart = dimensionResource(id = R.dimen.callAppBarTrailingContentSpacingStart),
+            callAppBarTrailingContentSpacingEnd = dimensionResource(id = R.dimen.callAppBarTrailingContentSpacingEnd),
+            callControlButtonSize = dimensionResource(id = R.dimen.callControlButtonSize),
+            callParticipantFocusedBorderWidth = dimensionResource(id = R.dimen.activeSpeakerBoarderWidth),
+            callParticipantLabelHeight = dimensionResource(id = R.dimen.callParticipantLabelHeight),
+            callParticipantLabelPadding = dimensionResource(id = R.dimen.callParticipantLabelPadding),
+            callParticipantLabelTextMaxWidth = dimensionResource(id = R.dimen.callParticipantLabelTextMaxWidth),
+            callParticipantLabelTextPadding = dimensionResource(id = R.dimen.callParticipantLabelTextPadding),
+            callParticipantSoundIndicatorPaddingStart = dimensionResource(id = R.dimen.callParticipantSoundIndicatorPaddingStart),
+            landscapeCallControlButtonSize = dimensionResource(id = R.dimen.landscapeCallControlButtonSize),
+            callControlsSheetHeight = dimensionResource(id = R.dimen.callControlsSheetHeight),
+            landscapeCallControlsSheetWidth = dimensionResource(id = R.dimen.landscapeCallControlsSheetWidth),
+            callParticipantInfoMenuAppBarHeight = dimensionResource(id = R.dimen.callParticipantInfoMenuAppBarHeight),
+            callParticipantInfoMenuOptionsHeight = dimensionResource(id = R.dimen.callParticipantInfoMenuOptionsHeight),
+            callParticipantsInfoMenuOptionsButtonHeight = dimensionResource(id = R.dimen.callParticipantsInfoMenuOptionsButtonHeight),
+            callParticipantsInfoAvatarSize = dimensionResource(id = R.dimen.callParticipantsInfoAvatarSize),
+            floatingVideoPadding = dimensionResource(id = R.dimen.floatingVideoPadding),
+            floatingVideoHeight = dimensionResource(id = R.dimen.floatingVideoHeight),
+            floatingVideoWidth = dimensionResource(id = R.dimen.floatingVideoWidth),
+            screenShareParticipantItemSize = dimensionResource(id = R.dimen.screenShareParticipantItemSize),
+            connectionIndicatorBarMaxHeight = dimensionResource(id = R.dimen.connectionIndicatorBarMaxHeight),
+            connectionIndicatorBarWidth = dimensionResource(id = R.dimen.connectionIndicatorBarWidth),
+            connectionIndicatorBarSeparatorWidth = dimensionResource(id = R.dimen.connectionIndicatorBarSeparatorWidth),
+            audioLevelIndicatorBarMaxHeight = dimensionResource(id = R.dimen.audioLevelIndicatorBarMaxHeight),
+            audioLevelIndicatorBarWidth = dimensionResource(id = R.dimen.audioLevelIndicatorBarWidth),
+            audioLevelIndicatorBarSeparatorWidth = dimensionResource(id = R.dimen.audioLevelIndicatorBarSeparatorWidth),
+            audioStatusSize = dimensionResource(id = R.dimen.audioStatusSize),
         )
     }
 }

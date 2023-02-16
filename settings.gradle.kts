@@ -24,6 +24,8 @@ include(":dogfooding")
 // SDK
 include(":benchmark")
 include(":stream-video-android-core")
+include(":stream-video-android-ui-common")
+include(":stream-video-android-xml")
 include(":stream-video-android-compose")
 
 // Examples and guide projects

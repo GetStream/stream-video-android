@@ -2968,6 +2968,7 @@ public class io/getstream/video/android/core/ui/TextureViewRenderer : android/vi
 	public fun onSurfaceTextureDestroyed (Landroid/graphics/SurfaceTexture;)Z
 	public fun onSurfaceTextureSizeChanged (Landroid/graphics/SurfaceTexture;II)V
 	public fun onSurfaceTextureUpdated (Landroid/graphics/SurfaceTexture;)V
+	public final fun release ()V
 	public final fun setMirror (Z)V
 }
 
@@ -3071,7 +3072,6 @@ public final class io/getstream/video/android/core/viewmodel/CallViewModel : and
 	public final fun clearState ()V
 	public final fun connectToCall ()V
 	public final fun dismissOptions ()V
-	public final fun flipCamera ()V
 	public final fun getActiveSpeakers ()Lkotlinx/coroutines/flow/Flow;
 	public final fun getAudioDevices ()Ljava/util/List;
 	public final fun getCallId ()Lkotlinx/coroutines/flow/StateFlow;
@@ -3081,6 +3081,7 @@ public final class io/getstream/video/android/core/viewmodel/CallViewModel : and
 	public final fun getLocalParticipant ()Lkotlinx/coroutines/flow/Flow;
 	public final fun getParticipantList ()Lkotlinx/coroutines/flow/Flow;
 	public final fun getParticipants ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getPrimarySpeaker ()Lkotlinx/coroutines/flow/Flow;
 	public final fun getScreenSharingSessions ()Lkotlinx/coroutines/flow/Flow;
 	public final fun getStreamCallState ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getUsers ()Ljava/util/List;

@@ -1,0 +1,54 @@
+/*
+ * Copyright (c) 2014-2022 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package io.getstream.video.android.xml.widget.transformer
+
+import io.getstream.video.android.xml.widget.avatar.AvatarStyle
+import io.getstream.video.android.xml.widget.call.CallDetailsStyle
+import io.getstream.video.android.xml.widget.control.CallControlButtonStyle
+import io.getstream.video.android.xml.widget.control.CallControlsStyle
+import io.getstream.video.android.xml.widget.incoming.IncomingCallStyle
+import io.getstream.video.android.xml.widget.outgoing.OutgoingCallStyle
+import io.getstream.video.android.xml.widget.participant.CallParticipantStyle
+import io.getstream.video.android.xml.widget.participant.CallParticipantsStyle
+import io.getstream.video.android.xml.widget.participant.PictureInPictureStyle
+
+public object TransformStyle {
+    @JvmStatic
+    public var avatarStyleTransformer: StyleTransformer<AvatarStyle> = noopTransformer()
+    @JvmStatic
+    public var callDetailsStyleTransformer: StyleTransformer<CallDetailsStyle> = noopTransformer()
+    @JvmStatic
+    public var outgoingCallStyleTransformer: StyleTransformer<OutgoingCallStyle> = noopTransformer()
+    @JvmStatic
+    public var incomingCallStyleTransformer: StyleTransformer<IncomingCallStyle> = noopTransformer()
+    @JvmStatic
+    public var callControlsStyleTransformer: StyleTransformer<CallControlsStyle> = noopTransformer()
+    @JvmStatic
+    public var callControlButtonStyleTransformer: StyleTransformer<CallControlButtonStyle> = noopTransformer()
+    @JvmStatic
+    public var callParticipantStyleTransformer: StyleTransformer<CallParticipantStyle> = noopTransformer()
+    @JvmStatic
+    public var callParticipantsStyleTransformer: StyleTransformer<CallParticipantsStyle> = noopTransformer()
+    @JvmStatic
+    public var pictureInPictureStyleTransformer: StyleTransformer<PictureInPictureStyle> = noopTransformer()
+
+    private fun <T> noopTransformer() = StyleTransformer<T> { it }
+}
+
+public fun interface StyleTransformer<T> {
+    public fun transform(source: T): T
+}
