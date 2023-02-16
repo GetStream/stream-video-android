@@ -81,8 +81,8 @@ public class CallDetailsView : ConstraintLayout {
     }
 
     /**
-     * Populates the ui with the participants. Up to 3 avatars will be visible. If there are 3 participants the last
-     * it will be the last avatar, otherwise the avatar will display the remaining participants count.
+     * Populates the ui with the participant avatars. Up to 3 avatars will be visible. If there are 3 participants the
+     * last avatar will be the last participant, otherwise the avatar will display the remaining participants count.
      *
      * @param participants The list of the current call participants.
      */
