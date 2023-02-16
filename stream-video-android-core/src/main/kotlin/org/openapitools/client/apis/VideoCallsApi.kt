@@ -1,0 +1,170 @@
+/*
+ * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.openapitools.client.apis
+
+import org.openapitools.client.models.EndCallResponse
+import org.openapitools.client.models.GetCallEdgeServerRequest
+import org.openapitools.client.models.GetCallEdgeServerResponse
+import org.openapitools.client.models.GetOrCreateCallRequest
+import org.openapitools.client.models.GetOrCreateCallResponse
+import org.openapitools.client.models.JoinCallResponse
+import org.openapitools.client.models.MuteUsersRequest
+import org.openapitools.client.models.MuteUsersResponse
+import org.openapitools.client.models.QueryMembersRequest
+import org.openapitools.client.models.QueryMembersResponse
+import org.openapitools.client.models.UpdateCallRequest
+import org.openapitools.client.models.UpdateCallResponse
+import retrofit2.http.Body
+import retrofit2.http.PATCH
+import retrofit2.http.POST
+import retrofit2.http.Path
+
+internal interface VideoCallsApi {
+    /**
+     * End call
+     *
+     * Responses:
+     *  - 201: Successful response
+     *  - 400: Bad request
+     *  - 429: Too many requests
+     *
+     * @param type
+     * @param id
+     * @return [EndCallResponse]
+     */
+    @POST("/video/call/{type}/{id}/mark_ended")
+    suspend fun endCall(
+        @Path("type") type: String,
+        @Path("id") id: String
+    ): EndCallResponse
+
+    /**
+     * Get Call Edge Server
+     *
+     * Responses:
+     *  - 201: Successful response
+     *  - 400: Bad request
+     *  - 429: Too many requests
+     *
+     * @param type
+     * @param id
+     * @param getCallEdgeServerRequest
+     * @return [GetCallEdgeServerResponse]
+     */
+    @POST("/video/call/{type}/{id}/get_edge_server")
+    suspend fun getCallEdgeServer(
+        @Path("type") type: String,
+        @Path("id") id: String,
+        @Body getCallEdgeServerRequest: GetCallEdgeServerRequest
+    ): GetCallEdgeServerResponse
+
+    /**
+     * Get or create a call
+     * Gets or creates a new call
+     * Responses:
+     *  - 201: Successful response
+     *  - 400: Bad request
+     *  - 429: Too many requests
+     *
+     * @param type
+     * @param id
+     * @param getOrCreateCallRequest
+     * @return [GetOrCreateCallResponse]
+     */
+    @POST("/video/call/{type}/{id}")
+    suspend fun getOrCreateCall(
+        @Path("type") type: String,
+        @Path("id") id: String,
+        @Body getOrCreateCallRequest: GetOrCreateCallRequest
+    ): GetOrCreateCallResponse
+
+    /**
+     * Join call
+     * Request to join a call
+     * Responses:
+     *  - 201: Successful response
+     *  - 400: Bad request
+     *  - 429: Too many requests
+     *
+     * @param type
+     * @param id
+     * @param getOrCreateCallRequest
+     * @return [JoinCallResponse]
+     */
+    @POST("/video/join_call/{type}/{id}")
+    suspend fun joinCall(
+        @Path("type") type: String,
+        @Path("id") id: String,
+        @Body getOrCreateCallRequest: GetOrCreateCallRequest
+    ): JoinCallResponse
+
+    /**
+     * Update Call
+     *
+     * Responses:
+     *  - 200: Call
+     *  - 400: Bad request
+     *  - 429: Too many requests
+     *
+     * @param type
+     * @param id
+     * @param updateCallRequest
+     * @return [UpdateCallResponse]
+     */
+    @PATCH("/video/call/{type}/{id}")
+    suspend fun updateCall(
+        @Path("type") type: String,
+        @Path("id") id: String,
+        @Body updateCallRequest: UpdateCallRequest
+    ): UpdateCallResponse
+
+    /**
+     * Mute users
+     * Mutes users in a call
+     * Responses:
+     *  - 201: Successful response
+     *  - 400: Bad request
+     *  - 429: Too many requests
+     *
+     * @param type
+     * @param id
+     * @param muteUsersRequest
+     * @return [MuteUsersResponse]
+     */
+    @POST("/video/call/{type}/{id}/mute_users")
+    suspend fun muteUsers(
+        @Path("type") type: String,
+        @Path("id") id: String,
+        @Body muteUsersRequest: MuteUsersRequest
+    ): MuteUsersResponse
+
+    /**
+     * Query call members
+     * Query call members with filter query
+     * Responses:
+     *  - 201: Successful response
+     *  - 400: Bad request
+     *  - 429: Too many requests
+     *
+     * @param queryMembersRequest
+     * @return [QueryMembersResponse]
+     */
+    @POST("/video/call/members")
+    suspend fun queryMembers(
+        @Body queryMembersRequest: QueryMembersRequest,
+    ): QueryMembersResponse
+}

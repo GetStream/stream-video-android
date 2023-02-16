@@ -17,7 +17,6 @@
 package io.getstream.video.android.core.utils
 
 import io.getstream.log.StreamLog
-import io.getstream.video.android.core.internal.module.CallCoordinatorClientModule
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.URL
@@ -30,17 +29,12 @@ private const val TAG = "Call:LatencyUtils"
  * @param latencyUrl The URL of the server where we ping a connection.
  * @return A [List] of [Double] values representing the portion of a second it takes to connect.
  */
-public fun getLatencyMeasurements(latencyUrl: String): List<Double> {
-    val measurements = mutableListOf<Double>()
-
-    /**
-     * Used for setting up testing on devices.
-     */
-    val url = CallCoordinatorClientModule.REDIRECT_PING_URL ?: prepareUrl(latencyUrl)
+public fun getLatencyMeasurements(latencyUrl: String): List<Float> {
+    val measurements = mutableListOf<Float>()
 
     repeat(3) {
         try {
-            val request = URL(url)
+            val request = URL(latencyUrl)
             val start = System.currentTimeMillis()
             val connection = request.openConnection()
 
@@ -53,25 +47,12 @@ public fun getLatencyMeasurements(latencyUrl: String): List<Double> {
 
             val end = System.currentTimeMillis()
 
-            val seconds = (end - start) / 1000.0
+            val seconds = (end - start) / 1000f
             measurements.add(seconds)
         } catch (e: Throwable) {
             StreamLog.e(TAG, e) { "[getLatencyMeasurements] failed: $e" }
-            measurements.add(Double.MAX_VALUE)
+            measurements.add(Float.MAX_VALUE)
         }
     }
     return measurements
 }
-
-/**
- * Prepares the URL for localhost/emulator observation.
- *
- * @param url The original URL.
- * @return [String] representation of the valid URL.
- */
-internal fun prepareUrl(url: String): String =
-    if (url.contains("localhost")) {
-        url.replace("localhost", "10.0.2.2")
-    } else {
-        url
-    }

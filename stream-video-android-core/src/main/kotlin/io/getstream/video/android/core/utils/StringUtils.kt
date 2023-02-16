@@ -17,14 +17,8 @@
 package io.getstream.video.android.core.utils
 
 import android.content.Context
-import io.getstream.video.android.core.internal.module.SfuClientModule.Companion.REDIRECT_SIGNAL_URL
-import io.getstream.video.android.core.internal.module.SfuClientModule.Companion.SIGNAL_BASE_URL
 import io.getstream.video.android.core.model.StreamPeerType
 import io.getstream.video.android.core.model.state.StreamCallState
-
-internal fun enrichSFUURL(url: String?): String {
-    return REDIRECT_SIGNAL_URL ?: url ?: SIGNAL_BASE_URL
-}
 
 public fun String.initials(): String {
     return trim().split("\\s+".toRegex()).take(2)

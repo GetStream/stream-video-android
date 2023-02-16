@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2022 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,24 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.internal.moshi
+@file:Suppress(
+    "ArrayInDataClass",
+    "EnumEntryName",
+    "RemoveRedundantQualifierName",
+    "UnusedImport"
+)
 
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.StreamVideoMultiMapJsonAdapter
-import com.squareup.moshi.adapter
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+package org.openapitools.client.models
 
-internal val moshi: Moshi = Moshi.Builder()
-    .add(KotlinJsonAdapterFactory())
-    .add(StreamVideoMultiMapJsonAdapter.FACTORY)
-    .build()
+import com.squareup.moshi.Json
 
-@OptIn(ExperimentalStdlibApi::class)
-internal val filterAdapter = moshi.adapter<Map<String, Any>>()
+/**
+ * *
+ * @param duration */
+
+data class RequestPermissionResponse(
+
+    @Json(name = "duration")
+    val duration: kotlin.String
+
+)

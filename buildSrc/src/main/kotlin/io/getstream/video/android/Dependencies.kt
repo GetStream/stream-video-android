@@ -62,7 +62,8 @@ object Dependencies {
     const val androidxAppcompat = "androidx.appcompat:appcompat:${Versions.ANDROIDX_APPCOMPAT}"
     const val androidxCore = "androidx.core:core-ktx:${Versions.ANDROIDX_CORE}"
     const val androidxActivity = "androidx.activity:activity-ktx:${Versions.ANDROIDX_ACTIVITY}"
-    const val androidxAnnotations = "androidx.annotation:annotation:${Versions.ANDROIDX_ANNOTATIONS}"
+    const val androidxAnnotations =
+        "androidx.annotation:annotation:${Versions.ANDROIDX_ANNOTATIONS}"
     const val androidxLifecycleViewModel =
         "androidx.lifecycle:lifecycle-viewmodel-ktx:${Versions.ANDROIDX_LIFECYCLE}"
     const val androidxLifecycleRuntime =
@@ -86,6 +87,8 @@ object Dependencies {
 
     const val wireRuntime = "com.squareup.wire:wire-runtime:${Versions.WIRE}"
     const val retrofit = "com.squareup.retrofit2:retrofit:${Versions.RETROFIT}"
+    const val retrofitMoshi = "com.squareup.retrofit2:converter-moshi:${Versions.RETROFIT}"
+    const val retrofitScalars = "com.squareup.retrofit2:converter-scalars:${Versions.RETROFIT}"
     const val retrofitWireConverter = "com.squareup.retrofit2:converter-wire:${Versions.RETROFIT}"
     const val okhttpLoggingInterceptor =
         "com.squareup.okhttp3:logging-interceptor:${Versions.OKHTTP}"

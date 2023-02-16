@@ -50,7 +50,6 @@ import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.events.VideoQualityChangedEvent
 import io.getstream.video.android.core.filter.InFilterObject
 import io.getstream.video.android.core.filter.toMap
-import io.getstream.video.android.core.internal.moshi.filterAdapter
 import io.getstream.video.android.core.model.CallEventType
 import io.getstream.video.android.core.model.CallEventType.ACCEPTED
 import io.getstream.video.android.core.model.CallEventType.CANCELLED
@@ -68,6 +67,7 @@ import io.getstream.video.android.core.model.state.StreamDate
 import io.getstream.video.android.core.model.state.copy
 import io.getstream.video.android.core.utils.Jobs
 import io.getstream.video.android.core.utils.Success
+import io.getstream.video.android.core.utils.toPartialUser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -79,8 +79,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import okio.ByteString.Companion.encode
-import stream.video.coordinator.client_v1_rpc.QueryUsersRequest
+import org.openapitools.client.models.QueryMembersRequest
 import stream.video.sfu.event.JoinRequest
 import io.getstream.video.android.core.model.StreamCallCid as CallCid
 import io.getstream.video.android.core.model.StreamCallId as CallId
@@ -101,7 +100,7 @@ internal class StreamCallEngineImpl(
     private val coordinatorClient: CallCoordinatorClient,
     private val config: StreamVideoConfig,
     private inline val getCurrentUserId: () -> String,
-) : io.getstream.video.android.core.engine.StreamCallEngine {
+) : StreamCallEngine {
 
     private val logger by taggedLogger("Call:Engine")
 
@@ -212,15 +211,15 @@ internal class StreamCallEngineImpl(
 
         jobs.cancel(ID_TIMEOUT_SFU_JOINED)
 
-        val query = filterAdapter.toJson(
-            InFilterObject(
-                "id", event.callState.participants.map { it.user_id }.toSet()
-            ).toMap()
-        ).encode()
+        val query = InFilterObject(
+            "id", event.callState.participants.map { it.user_id }.toSet()
+        ).toMap()
 
-        val queryUsersResult = coordinatorClient.queryUsers(
-            QueryUsersRequest(
-                mq_json = query
+        val queryUsersResult = coordinatorClient.queryMembers(
+            QueryMembersRequest(
+                id = state.callGuid.id,
+                type = state.callGuid.type,
+                filterConditions = query
             )
         )
 
@@ -253,15 +252,26 @@ internal class StreamCallEngineImpl(
                 }
                 return@launchWithLock
             }
-            val query = filterAdapter.toJson(
-                InFilterObject("id", setOf(event.participant.user_id)).toMap()
-            ).encode()
+            val query = InFilterObject("id", setOf(event.participant.user_id)).toMap()
 
-            val userQueryResult = coordinatorClient.queryUsers(
-                QueryUsersRequest(mq_json = query)
+            val userQueryResult = coordinatorClient.queryMembers(
+                QueryMembersRequest(
+                    id = state.callGuid.id,
+                    type = state.callGuid.type,
+                    filterConditions = query
+                )
             )
 
             if (userQueryResult is Success) {
+                if (userQueryResult.data.isEmpty()) {
+                    _callState.post(
+                        state.copy(
+                            users = state.users merge event.participant.toPartialUser()
+                        )
+                    )
+                    return@launchWithLock
+                }
+
                 val user = userQueryResult.data.first()
 
                 _callState.post(
@@ -387,6 +397,9 @@ internal class StreamCallEngineImpl(
                     callUrl = callUrl,
                     sfuToken = sfuToken,
                     iceServers = iceServers,
+                    callDetails = call.callDetails,
+                    callEgress = call.callEgress,
+                    custom = call.custom
                 )
             }
         )
@@ -447,7 +460,10 @@ internal class StreamCallEngineImpl(
                 createdAt = StreamDate.from(call.createdAt),
                 updatedAt = StreamDate.from(call.updatedAt),
                 users = call.users,
-                acceptedByCallee = false
+                acceptedByCallee = false,
+                callDetails = call.callDetails,
+                callEgress = call.callEgress,
+                custom = call.custom
             )
         )
         waitForCallToBeAccepted()
@@ -543,6 +559,9 @@ internal class StreamCallEngineImpl(
                 updatedAt = StreamDate.from(call.updatedAt),
                 users = call.users,
                 callKind = call.kind,
+                callDetails = call.callDetails,
+                callEgress = call.callEgress,
+                custom = call.custom
             )
         )
     }
@@ -624,7 +643,10 @@ internal class StreamCallEngineImpl(
                     createdAt = StreamDate.from(info.createdAt),
                     updatedAt = StreamDate.from(info.updatedAt),
                     users = users,
-                    acceptedByMe = false
+                    acceptedByMe = false,
+                    callDetails = event.callDetails,
+                    callEgress = event.info.callEgress,
+                    custom = event.info.custom
                 )
             }
         )

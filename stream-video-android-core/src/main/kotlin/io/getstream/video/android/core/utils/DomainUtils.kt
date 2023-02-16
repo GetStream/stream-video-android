@@ -16,29 +16,73 @@
 
 package io.getstream.video.android.core.utils
 
+import io.getstream.video.android.core.model.CallDetails
+import io.getstream.video.android.core.model.CallEgress
 import io.getstream.video.android.core.model.CallMetadata
+import io.getstream.video.android.core.model.CallUser
+import io.getstream.video.android.core.model.CallUserState
 import io.getstream.video.android.core.model.StreamCallKind
 import io.getstream.video.android.core.model.toCallUsers
-import stream.video.coordinator.client_v1_rpc.CallEnvelope
+import org.openapitools.client.models.GetOrCreateCallResponse
+import org.openapitools.client.models.MemberResponse
+import stream.video.sfu.models.Participant
+import stream.video.sfu.models.TrackType
+import java.util.*
 
-internal fun CallEnvelope.toCall(kind: StreamCallKind): CallMetadata {
-    // val extraDataJson = custom_json.toByteArray().decodeToString() // TODO - check this
-
-    val call = call!!
-
+internal fun GetOrCreateCallResponse.toCall(kind: StreamCallKind): CallMetadata {
     return with(call) {
         CallMetadata(
-            cid = call_cid,
+            cid = cid,
             id = id,
             type = type,
             kind = kind,
-            createdByUserId = created_by_user_id,
-            createdAt = created_at?.epochSecond ?: 0,
-            updatedAt = updated_at?.epochSecond ?: 0,
-            recordingEnabled = settings_overrides?.recording?.enabled ?: false,
-            broadcastingEnabled = settings_overrides?.broadcasting?.enabled ?: false,
-            users = users.toCallUsers(),
-            extraData = emptyMap() // Json.decodeFromString<Map<String, String>>(extraDataJson)
+            createdByUserId = createdBy.id,
+            createdAt = createdAt.toEpochSecond(),
+            updatedAt = updatedAt.toEpochSecond(),
+            recordingEnabled = settings.recording.audioOnly, // TODO
+            broadcastingEnabled = settings.broadcasting.enabled,
+            users = members.toCallUsers(),
+            callEgress = CallEgress(
+                broadcastEgress = broadcastEgress,
+                recordEgress = recordEgress
+            ),
+            callDetails = CallDetails(
+                members = members.map { it.toCallUser() }.associateBy { it.id },
+                memberUserIds = members.map { it.userId },
+                ownCapabilities = ownCapabilities
+            ),
+            custom = custom
         )
     }
+}
+
+internal fun MemberResponse.toCallUser(): CallUser {
+    return CallUser(
+        id = userId,
+        name = user.name ?: "",
+        role = role,
+        imageUrl = user.image ?: "",
+        teams = user.teams ?: emptyList(),
+        state = null,
+        createdAt = Date.from(createdAt.toInstant()),
+        updatedAt = Date.from(updatedAt.toInstant()),
+    )
+}
+
+internal fun Participant.toPartialUser(): CallUser {
+    return CallUser(
+        id = user_id,
+        role = "",
+        name = "",
+        imageUrl = "",
+        createdAt = null,
+        updatedAt = null,
+        teams = emptyList(),
+        state = CallUserState(
+            trackIdPrefix = track_lookup_prefix,
+            audio = TrackType.TRACK_TYPE_AUDIO in published_tracks,
+            video = TrackType.TRACK_TYPE_VIDEO in published_tracks,
+            online = true
+        )
+    )
 }

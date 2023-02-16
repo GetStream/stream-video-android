@@ -24,14 +24,12 @@ import io.getstream.video.android.core.socket.SocketStateService
 import io.getstream.video.android.core.socket.VideoSocket
 import io.getstream.video.android.core.socket.internal.SocketFactory
 import io.getstream.video.android.core.socket.internal.VideoSocketImpl
-import io.getstream.video.android.core.token.CredentialsProvider
-import io.getstream.video.android.core.token.internal.CredentialsManager
-import io.getstream.video.android.core.token.internal.CredentialsManagerImpl
+import io.getstream.video.android.core.user.UserPreferences
 import kotlinx.coroutines.CoroutineScope
 
 internal class VideoModule(
     private val appContext: Context,
-    private val credentialsProvider: CredentialsProvider
+    private val preferences: UserPreferences
 ) {
     /**
      * The [CoroutineScope] used for all business logic related operations.
@@ -50,15 +48,6 @@ internal class VideoModule(
     }
 
     /**
-     * Cached user token manager.
-     */
-    private val credentialsManager: CredentialsManager by lazy {
-        CredentialsManagerImpl().apply {
-            setCredentialsProvider(credentialsProvider)
-        }
-    }
-
-    /**
      * Provider that handles connectivity and listens to state changes, exposing them to listeners.
      */
     private val networkStateProvider: NetworkStateProvider by lazy {
@@ -73,7 +62,7 @@ internal class VideoModule(
      */
     private val userState: UserState by lazy {
         UserState().apply {
-            setUser(credentialsProvider.getUserCredentials())
+            setUser(preferences.getUserCredentials())
         }
     }
 
@@ -82,8 +71,8 @@ internal class VideoModule(
      */
     internal fun socket(): VideoSocket {
         return VideoSocketImpl(
-            wssUrl = REDIRECT_WS_BASE_URL ?: WS_BASE_URL,
-            credentialsManager = credentialsManager,
+            wssUrl = WS_BASE_URL,
+            preferences = preferences,
             socketFactory = socketFactory,
             networkStateProvider = networkStateProvider,
             userState = userState,
@@ -104,15 +93,7 @@ internal class VideoModule(
 
     internal companion object {
 
-        /**
-         * Used for testing on devices and redirecting from a public realm to localhost.
-         *
-         * Will only be used if the value is non-null, so if you're able to test locally, just
-         * leave it as-is.
-         */
-        @Suppress("RedundantNullableReturnType")
-        internal val REDIRECT_WS_BASE_URL: String? = null // "ws://0.tcp.eu.ngrok.io:17041/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect"
         internal const val WS_BASE_URL =
-            "wss://wss-video-coordinator.oregon-v1.stream-io-video.com/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect"
+            "wss://video-edge-frankfurt-ce1.stream-io-api.com/video/connect"
     }
 }

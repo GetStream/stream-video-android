@@ -19,12 +19,13 @@ package io.getstream.video.android.core.user
 import android.app.Application
 import android.content.Context
 
-public object UserCredentialsManager {
+public object UserPreferencesManager {
 
     private lateinit var userPreferences: UserPreferences
 
     /**
-     * Used to initialize the internal preferences at the start of your app.
+     * Used to initialize the internal preferences at the start of your app, or return the
+     * initialized instance.
      *
      * @param context The context used to create the preferences.
      * @return [UserPreferences] instance used to store and expose credentials.
