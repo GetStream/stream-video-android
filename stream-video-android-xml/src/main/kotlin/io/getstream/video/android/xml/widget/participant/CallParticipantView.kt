@@ -95,7 +95,7 @@ public class CallParticipantView : ConstraintLayout {
 
     private fun initNameHolder() {
         binding.participantLabel.setTextStyle(style.labelTextStyle)
-        (binding.labelHolder.layoutParams as LayoutParams).setMargins(style.labelPadding)
+        (binding.labelHolder.layoutParams as LayoutParams).setMargins(style.labelMargin)
         binding.labelHolder.background.setTint(style.labelBackgroundColor)
         setLabelAlignment(style.labelAlignment)
     }
@@ -198,6 +198,15 @@ public class CallParticipantView : ConstraintLayout {
     }
 
     /**
+     * Use to offset label when they are covered by call controls.
+     */
+    public fun setLabelBottomOffset(offset: Int) {
+        val layoutParams = (binding.labelHolder.layoutParams as LayoutParams)
+        layoutParams.bottomMargin = offset + style.labelMargin
+        binding.labelHolder.layoutParams = layoutParams
+    }
+
+    /**
      * Updates the label alignment inside the view.
      *
      * @param labelAlignment [CallParticipantLabelAlignment] to be applied to the name label.
@@ -210,20 +219,20 @@ public class CallParticipantView : ConstraintLayout {
             clearConstraints(holderId)
             when (labelAlignment) {
                 CallParticipantLabelAlignment.TOP_LEFT -> {
-                    connect(holderId, ConstraintSet.TOP, parentId, ConstraintSet.TOP, style.labelPadding)
-                    connect(holderId, ConstraintSet.LEFT, parentId, ConstraintSet.LEFT, style.labelPadding)
+                    connect(holderId, ConstraintSet.TOP, parentId, ConstraintSet.TOP, style.labelMargin)
+                    connect(holderId, ConstraintSet.LEFT, parentId, ConstraintSet.LEFT, style.labelMargin)
                 }
                 CallParticipantLabelAlignment.TOP_RIGHT -> {
-                    connect(holderId, ConstraintSet.TOP, parentId, ConstraintSet.TOP, style.labelPadding)
-                    connect(holderId, ConstraintSet.RIGHT, parentId, ConstraintSet.RIGHT, style.labelPadding)
+                    connect(holderId, ConstraintSet.TOP, parentId, ConstraintSet.TOP, style.labelMargin)
+                    connect(holderId, ConstraintSet.RIGHT, parentId, ConstraintSet.RIGHT, style.labelMargin)
                 }
                 CallParticipantLabelAlignment.BOTTOM_LEFT -> {
-                    connect(holderId, ConstraintSet.BOTTOM, parentId, ConstraintSet.BOTTOM, style.labelPadding)
-                    connect(holderId, ConstraintSet.LEFT, parentId, ConstraintSet.LEFT, style.labelPadding)
+                    connect(holderId, ConstraintSet.BOTTOM, parentId, ConstraintSet.BOTTOM, style.labelMargin)
+                    connect(holderId, ConstraintSet.LEFT, parentId, ConstraintSet.LEFT, style.labelMargin)
                 }
                 CallParticipantLabelAlignment.BOTTOM_RIGHT -> {
-                    connect(holderId, ConstraintSet.BOTTOM, parentId, ConstraintSet.BOTTOM, style.labelPadding)
-                    connect(holderId, ConstraintSet.RIGHT, parentId, ConstraintSet.RIGHT, style.labelPadding)
+                    connect(holderId, ConstraintSet.BOTTOM, parentId, ConstraintSet.BOTTOM, style.labelMargin)
+                    connect(holderId, ConstraintSet.RIGHT, parentId, ConstraintSet.RIGHT, style.labelMargin)
                 }
             }
         }

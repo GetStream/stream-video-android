@@ -20,6 +20,7 @@ import android.view.Menu
 import android.view.View
 import android.widget.FrameLayout
 import androidx.activity.OnBackPressedCallback
+import androidx.core.content.ContextCompat
 import androidx.core.view.children
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
@@ -39,6 +40,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
+import io.getstream.video.android.ui.common.R as RCommon
 
 public abstract class AbstractXmlCallActivity : AbstractCallActivity() {
 
@@ -190,6 +192,9 @@ public abstract class AbstractXmlCallActivity : AbstractCallActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.call_menu, menu)
+        menu?.findItem(R.id.callParticipants)?.let {
+            it.icon?.setTint(ContextCompat.getColor(this, RCommon.color.stream_text_high_emphasis))
+        }
         return true
     }
 

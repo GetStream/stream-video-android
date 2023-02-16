@@ -106,7 +106,7 @@ public class CallParticipantsView : ConstraintLayout {
      * @param participants The list of the participants in the current call.
      */
     public fun updateParticipants(participants: List<CallParticipantState>) {
-        if (participants.size == 1) {
+        if (participants.size == 1 || participants.size > 3) {
             updateGridParticipants(participants)
             updateFloatingParticipant(null)
         } else {
@@ -192,9 +192,14 @@ public class CallParticipantsView : ConstraintLayout {
      * @return The max Y offset that can be applied to the overlaid [FloatingParticipantView].
      */
     private fun calculateFloatingParticipantMaxYOffset(): Float {
-        val controlsHeight =
-            (parent as? ViewGroup)?.children?.firstOrNull { it is CallControlsView }?.measuredHeight ?: 0
-        return measuredHeight - style.localParticipantHeight - style.localParticipantPadding - controlsHeight
+        return measuredHeight - style.localParticipantHeight - style.localParticipantPadding - getControlsHeight()
+    }
+
+    /**
+     * @return call controls height if they are inside the parent.
+     */
+    private fun getControlsHeight(): Int {
+        return (parent as? ViewGroup)?.children?.firstOrNull { it is CallControlsView }?.measuredHeight ?: 0
     }
 
     /**
@@ -226,6 +231,8 @@ public class CallParticipantsView : ConstraintLayout {
             }
             participantView.setParticipant(participant)
         }
+        childList.sortBy { participants.map { it.id }.indexOf(it.tag) }
+
         updateConstraints()
     }
 
@@ -266,6 +273,19 @@ public class CallParticipantsView : ConstraintLayout {
                     toBottomEnd(childList[3])
                 }
             }
+        }
+
+        childList.forEach {
+            it.setLabelBottomOffset(if (isBottomChild(it)) getControlsHeight() else 0)
+        }
+    }
+
+    private fun isBottomChild(view: CallParticipantView): Boolean {
+        return when {
+            childList.size == 1 -> true
+            childList.size == 2 && childList.indexOf(view) == 1 -> true
+            childList.size > 2 && childList.indexOf(view) > 1 -> true
+            else -> false
         }
     }
 
