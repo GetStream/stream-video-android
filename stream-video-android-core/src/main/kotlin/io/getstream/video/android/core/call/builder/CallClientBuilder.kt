@@ -29,7 +29,7 @@ import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.IceServer
 import io.getstream.video.android.core.model.StreamCallGuid
-import io.getstream.video.android.core.token.CredentialsProvider
+import io.getstream.video.android.core.user.UserPreferences
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -37,7 +37,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 
 /**
  * @param context Used to set up internal factories that depend on Android.
- * @param credentialsProvider Used to propagate logged in user's credentials.
+ * @param preferences Used to propagate logged in user's credentials.
  * @param networkStateProvider Listens to events of the network state, used for socket connections.
  * @param callEngine Provides the state of active calls.
  * @param signalUrl The URL used to connect to a call.
@@ -46,7 +46,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 internal class CallClientBuilder(
     private val context: Context,
     private val coordinatorClient: CallCoordinatorClient,
-    private val credentialsProvider: CredentialsProvider,
+    private val preferences: UserPreferences,
     private val networkStateProvider: NetworkStateProvider,
     private val callEngine: StreamCallEngine,
     private val signalUrl: String,
@@ -78,16 +78,16 @@ internal class CallClientBuilder(
      * @return [CallClient] used for this particular call.
      */
     fun build(): CallClient {
-        val user = credentialsProvider.getUserCredentials()
-        if (credentialsProvider.loadApiKey().isBlank() ||
-            user.id.isBlank() ||
-            credentialsProvider.getSfuToken().isBlank()
+        val user = preferences.getUserCredentials()
+        if (preferences.getApiKey().isNullOrBlank() ||
+            user?.id.isNullOrBlank() ||
+            preferences.getSfuToken().isBlank()
         ) throw IllegalArgumentException("The API key, user ID and token cannot be empty!")
 
         val updatedSignalUrl = signalUrl.removeSuffix(suffix = "/twirp")
         val httpModule = HttpModule.getOrCreate(
             loggingLevel = loggingLevel,
-            credentialsProvider = credentialsProvider
+            credentialsProvider = preferences
         ).apply {
             this.baseUrl = updatedSignalUrl.toHttpUrl()
         }
@@ -103,8 +103,8 @@ internal class CallClientBuilder(
             context = context,
             coordinatorClient = coordinatorClient,
             callGuid = callGuid,
-            getCurrentUserId = { credentialsProvider.getUserCredentials().id },
-            getSfuToken = { credentialsProvider.getSfuToken() },
+            getCurrentUserId = { preferences.getUserCredentials()?.id ?: "" },
+            getSfuToken = { preferences.getSfuToken() },
             callEngine = callEngine,
             sfuClient = sfuClientModule.sfuClient,
             remoteIceServers = iceServers,

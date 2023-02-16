@@ -50,8 +50,8 @@ import io.getstream.video.android.core.socket.SocketListener
 import io.getstream.video.android.core.socket.SocketStateService
 import io.getstream.video.android.core.socket.VideoSocket
 import io.getstream.video.android.core.socket.internal.SocketState
-import io.getstream.video.android.core.token.CredentialsProvider
-import io.getstream.video.android.core.user.UserCredentialsManager
+import io.getstream.video.android.core.user.UserPreferences
+import io.getstream.video.android.core.user.UserPreferencesManager
 import io.getstream.video.android.core.utils.Failure
 import io.getstream.video.android.core.utils.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.core.utils.Result
@@ -93,7 +93,7 @@ internal class StreamVideoImpl(
     private val lifecycle: Lifecycle,
     private val loggingLevel: LoggingLevel,
     private val callCoordinatorClient: CallCoordinatorClient,
-    private val credentialsProvider: CredentialsProvider,
+    private val preferences: UserPreferences,
     private val socket: VideoSocket,
     private val socketStateService: SocketStateService,
     private val userState: UserState,
@@ -193,7 +193,7 @@ internal class StreamVideoImpl(
         if (result is Success) {
             logger.d { "[storeDevice] device: ${result.data}" }
             val device = result.data
-            val preferences = UserCredentialsManager.initialize(context)
+            val preferences = UserPreferencesManager.initialize(context)
 
             preferences.storeDevice(device)
         }
@@ -330,7 +330,7 @@ internal class StreamVideoImpl(
                             .iceServers
                             .map { it.toIceServer() }
 
-                    credentialsProvider.setSfuToken(credentials.token)
+                    preferences.storeSfuToken(credentials.token)
 
                     Success(
                         JoinedCall(
@@ -440,10 +440,22 @@ internal class StreamVideoImpl(
 
     override fun clearCallState() {
         logger.i { "[clearCallState] no args" }
-        credentialsProvider.setSfuToken(null)
+        preferences.storeSfuToken(null)
         socket.updateCallState(null)
         callClientHolder.value?.clear()
         callClientHolder.value = null
+    }
+
+    /**
+     * Logs out the user by clearing the credentials preferences, unregistering any push devices
+     * and clearing the call state.
+     */
+    override fun logOut() {
+        val preferences = UserPreferencesManager.getPreferences()
+
+        clearCallState()
+        removeDevices(preferences.getDevices())
+        preferences.clear()
     }
 
     /**
@@ -498,7 +510,7 @@ internal class StreamVideoImpl(
         return CallClientBuilder(
             context = context,
             coordinatorClient = callCoordinatorClient,
-            credentialsProvider = credentialsProvider,
+            preferences = preferences,
             networkStateProvider = networkStateProvider,
             callEngine = engine,
             signalUrl = signalUrl,

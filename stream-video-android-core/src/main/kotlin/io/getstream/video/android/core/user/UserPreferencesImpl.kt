@@ -20,6 +20,7 @@ import android.content.SharedPreferences
 import androidx.core.content.edit
 import io.getstream.video.android.core.model.ApiKey
 import io.getstream.video.android.core.model.Device
+import io.getstream.video.android.core.model.SfuToken
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.UserDevices
 import kotlinx.serialization.decodeFromString
@@ -31,9 +32,9 @@ internal class UserPreferencesImpl(
 ) : UserPreferences {
 
     /**
-     * @see UserPreferences.getCachedCredentials
+     * @see UserPreferences.getUserCredentials
      */
-    override fun getCachedCredentials(): User? {
+    override fun getUserCredentials(): User? {
         return parseUser(sharedPreferences.getString(KEY_USER, ""))
     }
 
@@ -47,10 +48,10 @@ internal class UserPreferencesImpl(
     }
 
     /**
-     * @see UserPreferences.getCachedApiKey
+     * @see UserPreferences.getApiKey
      */
-    override fun getCachedApiKey(): ApiKey? =
-        sharedPreferences.getString(KEY_APIKEY, null)
+    override fun getApiKey(): ApiKey =
+        sharedPreferences.getString(KEY_APIKEY, null) ?: ""
 
     /**
      * @see UserPreferences.storeApiKey
@@ -58,6 +59,15 @@ internal class UserPreferencesImpl(
     override fun storeApiKey(apiKey: ApiKey) {
         sharedPreferences.edit {
             putString(KEY_APIKEY, apiKey)
+        }
+    }
+
+    override fun getSfuToken(): SfuToken =
+        sharedPreferences.getString(KEY_SFU_TOKEN, "") ?: ""
+
+    override fun storeSfuToken(sfuToken: SfuToken?) {
+        sharedPreferences.edit {
+            putString(KEY_SFU_TOKEN, sfuToken)
         }
     }
 
@@ -115,5 +125,6 @@ internal class UserPreferencesImpl(
         private const val KEY_USER = "user_data"
         private const val KEY_APIKEY = "apikey"
         private const val KEY_DEVICES = "devices"
+        private const val KEY_SFU_TOKEN = "sfu_token"
     }
 }

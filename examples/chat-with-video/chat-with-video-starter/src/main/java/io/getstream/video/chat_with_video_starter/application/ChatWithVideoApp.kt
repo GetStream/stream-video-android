@@ -22,8 +22,8 @@ import io.getstream.chat.android.client.ChatClient
 import io.getstream.chat.android.compose.ui.attachments.StreamAttachmentFactories
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.logging.LoggingLevel
-import io.getstream.video.android.core.token.CredentialsProvider
-import io.getstream.video.android.core.user.UserCredentialsManager
+import io.getstream.video.android.core.model.ApiKey
+import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.user.UsersProvider
 import io.getstream.video.chat_with_video_starter.users.FakeUsersProvider
 
@@ -39,24 +39,21 @@ class ChatWithVideoApp : Application() {
         StreamAttachmentFactories.defaultFactories() // TODO add custom attachment
     }
 
-    lateinit var credentialsProvider: CredentialsProvider
-        private set
+    private var video: StreamVideo? = null
 
-    lateinit var streamVideo: StreamVideo
-        private set
+    val streamVideo: StreamVideo
+        get() = requireNotNull(video)
 
     fun initializeStreamVideo(
-        credentialsProvider: CredentialsProvider,
+        user: User,
+        apiKey: ApiKey,
         loggingLevel: LoggingLevel
     ): StreamVideo {
         TODO()
     }
 
     fun logOut() {
-        val preferences = UserCredentialsManager.initialize(this)
-
         // TODO log out of clients
-        preferences.clear()
     }
 }
 

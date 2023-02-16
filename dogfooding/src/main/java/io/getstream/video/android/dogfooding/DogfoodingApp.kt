@@ -27,24 +27,17 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.input.CallActivityInput
 import io.getstream.video.android.core.input.CallServiceInput
-import io.getstream.video.android.core.token.CredentialsProvider
-import io.getstream.video.android.core.user.UserCredentialsManager
-import io.getstream.video.android.core.user.UserPreferences
+import io.getstream.video.android.core.logging.LoggingLevel
+import io.getstream.video.android.core.model.ApiKey
+import io.getstream.video.android.core.model.User
+import io.getstream.video.android.core.user.UserPreferencesManager
 
 class DogfoodingApp : Application() {
 
-    private lateinit var credentials: CredentialsProvider
     private var video: StreamVideo? = null
-
-    val credentialsProvider: CredentialsProvider
-        get() = credentials
 
     val streamVideo: StreamVideo
         get() = requireNotNull(video)
-
-    val userPreferences: UserPreferences by lazy {
-        UserCredentialsManager.getPreferences()
-    }
 
     fun isInitialized(): Boolean {
         return video != null
@@ -56,27 +49,21 @@ class DogfoodingApp : Application() {
             StreamLog.setValidator { _, _ -> true }
             StreamLog.install(AndroidStreamLogger())
         }
-        UserCredentialsManager.initialize(this)
+        UserPreferencesManager.initialize(this)
     }
 
     /**
      * Sets up and returns the [streamVideo] required to connect to the API.
      */
     fun initializeStreamVideo(
-        credentialsProvider: CredentialsProvider,
-        loggingLevel: io.getstream.video.android.core.logging.LoggingLevel
+        user: User,
+        apiKey: ApiKey,
+        loggingLevel: LoggingLevel
     ): StreamVideo {
-        if (this::credentials.isInitialized) {
-            this.credentialsProvider.updateUser(
-                credentialsProvider.getUserCredentials()
-            )
-        } else {
-            this.credentials = credentialsProvider
-        }
-
         return StreamVideoBuilder(
             context = this,
-            credentialsProvider = this.credentialsProvider,
+            user = user,
+            apiKey = apiKey,
             loggingLevel = loggingLevel,
             pushDeviceGenerators = listOf(FirebasePushDeviceGenerator()),
             androidInputs = setOf(
@@ -90,27 +77,23 @@ class DogfoodingApp : Application() {
 
     fun logOut() {
         FirebaseAuth.getInstance().signOut()
-        streamVideo.clearCallState()
-        streamVideo.removeDevices(userPreferences.getDevices())
-        userPreferences.clear()
+        streamVideo.logOut()
         video = null
     }
 
     fun initializeFromCredentials(): Boolean {
-        val credentials = UserCredentialsManager.initialize(this)
-        val user = credentials.getCachedCredentials()
-        val apiKey = credentials.getCachedApiKey()
+        val credentials = UserPreferencesManager.initialize(this)
+        val user = credentials.getUserCredentials()
+        val apiKey = credentials.getApiKey()
 
-        if (user == null || apiKey.isNullOrBlank()) {
+        if (user == null || apiKey.isBlank()) {
             return false
         }
 
         dogfoodingApp.initializeStreamVideo(
-            io.getstream.video.android.core.token.AuthCredentialsProvider(
-                apiKey = apiKey,
-                user = user
-            ),
-            loggingLevel = io.getstream.video.android.core.logging.LoggingLevel.NONE
+            apiKey = apiKey,
+            user = user,
+            loggingLevel = LoggingLevel.NONE
         )
         return true
     }

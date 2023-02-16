@@ -60,6 +60,7 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.Avatar
 import io.getstream.video.android.compose.ui.components.avatar.InitialsAvatar
+import io.getstream.video.android.core.user.UserPreferencesManager
 import io.getstream.video.android.core.utils.initials
 import io.getstream.video.android.core.utils.onError
 import io.getstream.video.android.core.utils.onSuccess
@@ -378,7 +379,8 @@ class HomeActivity : AppCompatActivity() {
 
     @Composable
     fun UserIcon() {
-        val user = videoApp.credentialsProvider.getUserCredentials()
+        val user = UserPreferencesManager.initialize(this).getUserCredentials() ?: return
+
         if (user.imageUrl.isNullOrEmpty()) {
             val initials = if (user.name.isNotEmpty()) {
                 user.name.first()

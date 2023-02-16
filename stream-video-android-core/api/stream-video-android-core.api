@@ -658,6 +658,7 @@ public abstract interface class io/getstream/video/android/core/StreamVideo {
 	public abstract fun inviteUsers (Ljava/util/List;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun joinCall (Lio/getstream/video/android/core/model/CallMetadata;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun joinCall (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun logOut ()V
 	public abstract fun rejectCall (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun removeDevices (Ljava/util/List;)V
 	public abstract fun removeSocketListener (Lio/getstream/video/android/core/socket/SocketListener;)V
@@ -671,8 +672,8 @@ public final class io/getstream/video/android/core/StreamVideo$DefaultImpls {
 }
 
 public final class io/getstream/video/android/core/StreamVideoBuilder {
-	public fun <init> (Landroid/content/Context;Lio/getstream/video/android/core/token/CredentialsProvider;Lio/getstream/video/android/core/StreamVideoConfig;Ljava/util/Set;Lio/getstream/video/android/core/input/CallAndroidInputLauncher;Lio/getstream/video/android/core/logging/LoggingLevel;Lkotlin/jvm/functions/Function1;Ljava/util/List;)V
-	public synthetic fun <init> (Landroid/content/Context;Lio/getstream/video/android/core/token/CredentialsProvider;Lio/getstream/video/android/core/StreamVideoConfig;Ljava/util/Set;Lio/getstream/video/android/core/input/CallAndroidInputLauncher;Lio/getstream/video/android/core/logging/LoggingLevel;Lkotlin/jvm/functions/Function1;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Landroid/content/Context;Lio/getstream/video/android/core/model/User;Ljava/lang/String;Lio/getstream/video/android/core/StreamVideoConfig;Ljava/util/Set;Lio/getstream/video/android/core/input/CallAndroidInputLauncher;Lio/getstream/video/android/core/logging/LoggingLevel;Lkotlin/jvm/functions/Function1;Ljava/util/List;)V
+	public synthetic fun <init> (Landroid/content/Context;Lio/getstream/video/android/core/model/User;Ljava/lang/String;Lio/getstream/video/android/core/StreamVideoConfig;Ljava/util/Set;Lio/getstream/video/android/core/input/CallAndroidInputLauncher;Lio/getstream/video/android/core/logging/LoggingLevel;Lkotlin/jvm/functions/Function1;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun build ()Lio/getstream/video/android/core/StreamVideo;
 }
 
@@ -2947,29 +2948,6 @@ public abstract interface class io/getstream/video/android/core/socket/VideoSock
 	public abstract fun updateCallState (Lio/getstream/video/android/core/model/CallMetadata;)V
 }
 
-public final class io/getstream/video/android/core/token/AuthCredentialsProvider : io/getstream/video/android/core/token/CredentialsProvider {
-	public fun <init> (Ljava/lang/String;Lio/getstream/video/android/core/model/User;)V
-	public fun getCachedApiKey ()Ljava/lang/String;
-	public fun getCachedUserToken ()Ljava/lang/String;
-	public fun getSfuToken ()Ljava/lang/String;
-	public fun getUserCredentials ()Lio/getstream/video/android/core/model/User;
-	public fun loadApiKey ()Ljava/lang/String;
-	public fun loadUserToken ()Ljava/lang/String;
-	public fun setSfuToken (Ljava/lang/String;)V
-	public fun updateUser (Lio/getstream/video/android/core/model/User;)V
-}
-
-public abstract interface class io/getstream/video/android/core/token/CredentialsProvider {
-	public abstract fun getCachedApiKey ()Ljava/lang/String;
-	public abstract fun getCachedUserToken ()Ljava/lang/String;
-	public abstract fun getSfuToken ()Ljava/lang/String;
-	public abstract fun getUserCredentials ()Lio/getstream/video/android/core/model/User;
-	public abstract fun loadApiKey ()Ljava/lang/String;
-	public abstract fun loadUserToken ()Ljava/lang/String;
-	public abstract fun setSfuToken (Ljava/lang/String;)V
-	public abstract fun updateUser (Lio/getstream/video/android/core/model/User;)V
-}
-
 public final class io/getstream/video/android/core/ui/ParticipantContentView : android/widget/LinearLayout {
 	public fun <init> (Landroid/content/Context;)V
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
@@ -3010,21 +2988,23 @@ public final class io/getstream/video/android/core/user/EmptyUsersProvider : io/
 	public fun provideUsers ()Ljava/util/List;
 }
 
-public final class io/getstream/video/android/core/user/UserCredentialsManager {
-	public static final field INSTANCE Lio/getstream/video/android/core/user/UserCredentialsManager;
-	public final fun getPreferences ()Lio/getstream/video/android/core/user/UserPreferences;
-	public final fun initialize (Landroid/content/Context;)Lio/getstream/video/android/core/user/UserPreferences;
-}
-
 public abstract interface class io/getstream/video/android/core/user/UserPreferences {
 	public abstract fun clear ()V
-	public abstract fun getCachedApiKey ()Ljava/lang/String;
-	public abstract fun getCachedCredentials ()Lio/getstream/video/android/core/model/User;
+	public abstract fun getApiKey ()Ljava/lang/String;
 	public abstract fun getDevices ()Ljava/util/List;
+	public abstract fun getSfuToken ()Ljava/lang/String;
+	public abstract fun getUserCredentials ()Lio/getstream/video/android/core/model/User;
 	public abstract fun removeDevices ()V
 	public abstract fun storeApiKey (Ljava/lang/String;)V
 	public abstract fun storeDevice (Lio/getstream/video/android/core/model/Device;)V
+	public abstract fun storeSfuToken (Ljava/lang/String;)V
 	public abstract fun storeUserCredentials (Lio/getstream/video/android/core/model/User;)V
+}
+
+public final class io/getstream/video/android/core/user/UserPreferencesManager {
+	public static final field INSTANCE Lio/getstream/video/android/core/user/UserPreferencesManager;
+	public final fun getPreferences ()Lio/getstream/video/android/core/user/UserPreferences;
+	public final fun initialize (Landroid/content/Context;)Lio/getstream/video/android/core/user/UserPreferences;
 }
 
 public abstract interface class io/getstream/video/android/core/user/UsersProvider {
