@@ -57,6 +57,6 @@ class ChatWithVideoApp : Application() {
     }
 }
 
-internal const val API_KEY = "us83cfwuhy8n"
+internal const val API_KEY = "w6yaq5388uym"
 
 internal val Context.chatWithVideoApp get() = applicationContext as ChatWithVideoApp

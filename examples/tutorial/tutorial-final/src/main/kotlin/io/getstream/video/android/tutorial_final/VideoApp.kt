@@ -81,7 +81,7 @@ class VideoApp : Application() {
 
     companion object {
         private const val TAG = "Call:App"
-        const val API_KEY = "us83cfwuhy8n"
+        const val API_KEY = "w6yaq5388uym"
     }
 }
 

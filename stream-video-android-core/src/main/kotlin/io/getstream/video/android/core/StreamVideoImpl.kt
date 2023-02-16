@@ -417,7 +417,7 @@ internal class StreamVideoImpl(
         return callCoordinatorClient.sendUserEvent(
             id = id,
             type = type,
-            sendEventRequest = SendEventRequest(eventType = eventType.name) // TODO - check if we need to format the name
+            sendEventRequest = SendEventRequest(eventType = eventType.eventType)
         )
             .onSuccess { engine.onCallEventSent(callCid, eventType) }
             .also { logger.v { "[sendEvent] result: $it" } }
@@ -587,7 +587,7 @@ internal class StreamVideoImpl(
                         callCid = callMetadata.cid,
                         ringing = true,
                         users = callMetadata.users,
-                        info = callMetadata.toInfo(),
+                        callInfo = callMetadata.toInfo(),
                         callDetails = callMetadata.callDetails
                     )
 

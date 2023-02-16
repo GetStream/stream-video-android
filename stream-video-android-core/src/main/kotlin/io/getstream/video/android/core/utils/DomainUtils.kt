@@ -22,9 +22,11 @@ import io.getstream.video.android.core.model.CallMetadata
 import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.core.model.CallUserState
 import io.getstream.video.android.core.model.StreamCallKind
+import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.toCallUsers
 import org.openapitools.client.models.GetOrCreateCallResponse
 import org.openapitools.client.models.MemberResponse
+import org.openapitools.client.models.UserResponse
 import stream.video.sfu.models.Participant
 import stream.video.sfu.models.TrackType
 import java.util.*
@@ -84,5 +86,17 @@ internal fun Participant.toPartialUser(): CallUser {
             video = TrackType.TRACK_TYPE_VIDEO in published_tracks,
             online = true
         )
+    )
+}
+
+internal fun UserResponse.toUser(): User {
+    return User(
+        id = id,
+        role = role,
+        name = name ?: "",
+        token = "",
+        imageUrl = image,
+        teams = teams ?: emptyList(),
+        extraData = custom.mapValues { it.value.toString() }
     )
 }

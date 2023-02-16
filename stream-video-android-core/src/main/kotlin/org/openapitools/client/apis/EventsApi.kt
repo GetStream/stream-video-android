@@ -36,7 +36,7 @@ internal interface EventsApi {
      * @param sendEventRequest
      * @return [SendEventResponse]
      */
-    @POST("call/{type}/{id}/event")
+    @POST("/video/call/{type}/{id}/event")
     suspend fun sendEvent(
         @Path("type") type: String,
         @Path("id") id: String,

@@ -1256,39 +1256,27 @@ public final class io/getstream/video/android/core/events/AudioLevelChangedEvent
 }
 
 public final class io/getstream/video/android/core/events/CallAcceptedEvent : io/getstream/video/android/core/events/VideoEvent {
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lio/getstream/video/android/core/model/CallInfo;Lio/getstream/video/android/core/model/CallDetails;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Ljava/util/Map;
-	public final fun component4 ()Lio/getstream/video/android/core/model/CallInfo;
-	public final fun component5 ()Lio/getstream/video/android/core/model/CallDetails;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lio/getstream/video/android/core/model/CallInfo;Lio/getstream/video/android/core/model/CallDetails;)Lio/getstream/video/android/core/events/CallAcceptedEvent;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/events/CallAcceptedEvent;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lio/getstream/video/android/core/model/CallInfo;Lio/getstream/video/android/core/model/CallDetails;ILjava/lang/Object;)Lio/getstream/video/android/core/events/CallAcceptedEvent;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lio/getstream/video/android/core/events/CallAcceptedEvent;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/events/CallAcceptedEvent;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/events/CallAcceptedEvent;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCallCid ()Ljava/lang/String;
-	public final fun getDetails ()Lio/getstream/video/android/core/model/CallDetails;
-	public final fun getInfo ()Lio/getstream/video/android/core/model/CallInfo;
 	public final fun getSentByUserId ()Ljava/lang/String;
-	public final fun getUsers ()Ljava/util/Map;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/events/CallCanceledEvent : io/getstream/video/android/core/events/VideoEvent {
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lio/getstream/video/android/core/model/CallInfo;Lio/getstream/video/android/core/model/CallDetails;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Ljava/util/Map;
-	public final fun component4 ()Lio/getstream/video/android/core/model/CallInfo;
-	public final fun component5 ()Lio/getstream/video/android/core/model/CallDetails;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lio/getstream/video/android/core/model/CallInfo;Lio/getstream/video/android/core/model/CallDetails;)Lio/getstream/video/android/core/events/CallCanceledEvent;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/events/CallCanceledEvent;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lio/getstream/video/android/core/model/CallInfo;Lio/getstream/video/android/core/model/CallDetails;ILjava/lang/Object;)Lio/getstream/video/android/core/events/CallCanceledEvent;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lio/getstream/video/android/core/events/CallCanceledEvent;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/events/CallCanceledEvent;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/events/CallCanceledEvent;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCallCid ()Ljava/lang/String;
-	public final fun getDetails ()Lio/getstream/video/android/core/model/CallDetails;
-	public final fun getInfo ()Lio/getstream/video/android/core/model/CallInfo;
 	public final fun getSentByUserId ()Ljava/lang/String;
-	public final fun getUsers ()Ljava/util/Map;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -1305,7 +1293,7 @@ public final class io/getstream/video/android/core/events/CallCreatedEvent : io/
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCallCid ()Ljava/lang/String;
 	public final fun getCallDetails ()Lio/getstream/video/android/core/model/CallDetails;
-	public final fun getInfo ()Lio/getstream/video/android/core/model/CallInfo;
+	public final fun getCallInfo ()Lio/getstream/video/android/core/model/CallInfo;
 	public final fun getRinging ()Z
 	public final fun getUsers ()Ljava/util/Map;
 	public fun hashCode ()I
@@ -1313,18 +1301,14 @@ public final class io/getstream/video/android/core/events/CallCreatedEvent : io/
 }
 
 public final class io/getstream/video/android/core/events/CallEndedEvent : io/getstream/video/android/core/events/VideoEvent {
-	public fun <init> (Ljava/lang/String;Ljava/util/Map;Lio/getstream/video/android/core/model/CallInfo;Lio/getstream/video/android/core/model/CallDetails;)V
+	public fun <init> (Ljava/lang/String;Lio/getstream/video/android/core/model/User;)V
 	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/util/Map;
-	public final fun component3 ()Lio/getstream/video/android/core/model/CallInfo;
-	public final fun component4 ()Lio/getstream/video/android/core/model/CallDetails;
-	public final fun copy (Ljava/lang/String;Ljava/util/Map;Lio/getstream/video/android/core/model/CallInfo;Lio/getstream/video/android/core/model/CallDetails;)Lio/getstream/video/android/core/events/CallEndedEvent;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/events/CallEndedEvent;Ljava/lang/String;Ljava/util/Map;Lio/getstream/video/android/core/model/CallInfo;Lio/getstream/video/android/core/model/CallDetails;ILjava/lang/Object;)Lio/getstream/video/android/core/events/CallEndedEvent;
+	public final fun component2 ()Lio/getstream/video/android/core/model/User;
+	public final fun copy (Ljava/lang/String;Lio/getstream/video/android/core/model/User;)Lio/getstream/video/android/core/events/CallEndedEvent;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/events/CallEndedEvent;Ljava/lang/String;Lio/getstream/video/android/core/model/User;ILjava/lang/Object;)Lio/getstream/video/android/core/events/CallEndedEvent;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCallCid ()Ljava/lang/String;
-	public final fun getDetails ()Lio/getstream/video/android/core/model/CallDetails;
-	public final fun getInfo ()Lio/getstream/video/android/core/model/CallInfo;
-	public final fun getUsers ()Ljava/util/Map;
+	public final fun getEndedByUser ()Lio/getstream/video/android/core/model/User;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -1364,37 +1348,33 @@ public final class io/getstream/video/android/core/events/CallMembersUpdatedEven
 }
 
 public final class io/getstream/video/android/core/events/CallRejectedEvent : io/getstream/video/android/core/events/VideoEvent {
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lio/getstream/video/android/core/model/CallInfo;Lio/getstream/video/android/core/model/CallDetails;)V
+	public fun <init> (Ljava/lang/String;Lio/getstream/video/android/core/model/User;Ljava/util/Date;)V
 	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Ljava/util/Map;
-	public final fun component4 ()Lio/getstream/video/android/core/model/CallInfo;
-	public final fun component5 ()Lio/getstream/video/android/core/model/CallDetails;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lio/getstream/video/android/core/model/CallInfo;Lio/getstream/video/android/core/model/CallDetails;)Lio/getstream/video/android/core/events/CallRejectedEvent;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/events/CallRejectedEvent;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lio/getstream/video/android/core/model/CallInfo;Lio/getstream/video/android/core/model/CallDetails;ILjava/lang/Object;)Lio/getstream/video/android/core/events/CallRejectedEvent;
+	public final fun component2 ()Lio/getstream/video/android/core/model/User;
+	public final fun component3 ()Ljava/util/Date;
+	public final fun copy (Ljava/lang/String;Lio/getstream/video/android/core/model/User;Ljava/util/Date;)Lio/getstream/video/android/core/events/CallRejectedEvent;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/events/CallRejectedEvent;Ljava/lang/String;Lio/getstream/video/android/core/model/User;Ljava/util/Date;ILjava/lang/Object;)Lio/getstream/video/android/core/events/CallRejectedEvent;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCallCid ()Ljava/lang/String;
-	public final fun getDetails ()Lio/getstream/video/android/core/model/CallDetails;
-	public final fun getInfo ()Lio/getstream/video/android/core/model/CallInfo;
-	public final fun getSentByUserId ()Ljava/lang/String;
-	public final fun getUsers ()Ljava/util/Map;
+	public final fun getUpdatedAt ()Ljava/util/Date;
+	public final fun getUser ()Lio/getstream/video/android/core/model/User;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/events/CallUpdatedEvent : io/getstream/video/android/core/events/VideoEvent {
-	public fun <init> (Ljava/lang/String;Ljava/util/Map;Lio/getstream/video/android/core/model/CallInfo;Lio/getstream/video/android/core/model/CallDetails;)V
+	public fun <init> (Ljava/lang/String;Ljava/util/Map;Lio/getstream/video/android/core/model/CallInfo;Ljava/util/List;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/util/Map;
 	public final fun component3 ()Lio/getstream/video/android/core/model/CallInfo;
-	public final fun component4 ()Lio/getstream/video/android/core/model/CallDetails;
-	public final fun copy (Ljava/lang/String;Ljava/util/Map;Lio/getstream/video/android/core/model/CallInfo;Lio/getstream/video/android/core/model/CallDetails;)Lio/getstream/video/android/core/events/CallUpdatedEvent;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/events/CallUpdatedEvent;Ljava/lang/String;Ljava/util/Map;Lio/getstream/video/android/core/model/CallInfo;Lio/getstream/video/android/core/model/CallDetails;ILjava/lang/Object;)Lio/getstream/video/android/core/events/CallUpdatedEvent;
+	public final fun component4 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;Ljava/util/Map;Lio/getstream/video/android/core/model/CallInfo;Ljava/util/List;)Lio/getstream/video/android/core/events/CallUpdatedEvent;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/events/CallUpdatedEvent;Ljava/lang/String;Ljava/util/Map;Lio/getstream/video/android/core/model/CallInfo;Ljava/util/List;ILjava/lang/Object;)Lio/getstream/video/android/core/events/CallUpdatedEvent;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCallCid ()Ljava/lang/String;
-	public final fun getDetails ()Lio/getstream/video/android/core/model/CallDetails;
+	public final fun getCapabilitiesByRole ()Ljava/util/Map;
 	public final fun getInfo ()Lio/getstream/video/android/core/model/CallInfo;
-	public final fun getUsers ()Ljava/util/Map;
+	public final fun getOwnCapabilities ()Ljava/util/List;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -1428,6 +1408,21 @@ public final class io/getstream/video/android/core/events/ConnectionQualityChang
 	public static synthetic fun copy$default (Lio/getstream/video/android/core/events/ConnectionQualityChangeEvent;Ljava/util/List;ILjava/lang/Object;)Lio/getstream/video/android/core/events/ConnectionQualityChangeEvent;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getUpdates ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/events/CustomEvent : io/getstream/video/android/core/events/VideoEvent {
+	public fun <init> (Ljava/lang/String;Lio/getstream/video/android/core/model/User;Ljava/util/Map;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lio/getstream/video/android/core/model/User;
+	public final fun component3 ()Ljava/util/Map;
+	public final fun copy (Ljava/lang/String;Lio/getstream/video/android/core/model/User;Ljava/util/Map;)Lio/getstream/video/android/core/events/CustomEvent;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/events/CustomEvent;Ljava/lang/String;Lio/getstream/video/android/core/model/User;Ljava/util/Map;ILjava/lang/Object;)Lio/getstream/video/android/core/events/CustomEvent;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCid ()Ljava/lang/String;
+	public final fun getCustom ()Ljava/util/Map;
+	public final fun getSentByUser ()Lio/getstream/video/android/core/model/User;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -1915,13 +1910,9 @@ public final class io/getstream/video/android/core/model/CallEventType : java/la
 	public static final field CANCELLED Lio/getstream/video/android/core/model/CallEventType;
 	public static final field REJECTED Lio/getstream/video/android/core/model/CallEventType;
 	public static final field UNDEFINED Lio/getstream/video/android/core/model/CallEventType;
+	public final fun getEventType ()Ljava/lang/String;
 	public static fun valueOf (Ljava/lang/String;)Lio/getstream/video/android/core/model/CallEventType;
 	public static fun values ()[Lio/getstream/video/android/core/model/CallEventType;
-}
-
-public final class io/getstream/video/android/core/model/CallEventTypeKt {
-	public static final fun toCallEventType (Lstream/video/coordinator/client_v1_rpc/UserEventType;)Lio/getstream/video/android/core/model/CallEventType;
-	public static final fun toUserEventType (Lio/getstream/video/android/core/model/CallEventType;)Lstream/video/coordinator/client_v1_rpc/UserEventType;
 }
 
 public final class io/getstream/video/android/core/model/CallInfo : java/io/Serializable {
@@ -2716,11 +2707,12 @@ public final class io/getstream/video/android/core/model/state/StreamCallState$J
 }
 
 public final class io/getstream/video/android/core/model/state/StreamCallState$Outgoing : io/getstream/video/android/core/model/state/StreamCallState$Started, io/getstream/video/android/core/model/state/StreamCallState$Joinable {
-	public fun <init> (Lio/getstream/video/android/core/model/StreamCallGuid;Lio/getstream/video/android/core/model/StreamCallKind;Ljava/lang/String;ZZLio/getstream/video/android/core/model/state/StreamDate;Lio/getstream/video/android/core/model/state/StreamDate;Ljava/util/Map;Lio/getstream/video/android/core/model/CallDetails;Lio/getstream/video/android/core/model/CallEgress;Ljava/util/Map;Z)V
+	public fun <init> (Lio/getstream/video/android/core/model/StreamCallGuid;Lio/getstream/video/android/core/model/StreamCallKind;Ljava/lang/String;ZZLio/getstream/video/android/core/model/state/StreamDate;Lio/getstream/video/android/core/model/state/StreamDate;Ljava/util/Map;Lio/getstream/video/android/core/model/CallDetails;Lio/getstream/video/android/core/model/CallEgress;Ljava/util/Map;Ljava/util/List;Z)V
 	public final fun component1 ()Lio/getstream/video/android/core/model/StreamCallGuid;
 	public final fun component10 ()Lio/getstream/video/android/core/model/CallEgress;
 	public final fun component11 ()Ljava/util/Map;
-	public final fun component12 ()Z
+	public final fun component12 ()Ljava/util/List;
+	public final fun component13 ()Z
 	public final fun component2 ()Lio/getstream/video/android/core/model/StreamCallKind;
 	public final fun component3 ()Ljava/lang/String;
 	public final fun component4 ()Z
@@ -2729,8 +2721,8 @@ public final class io/getstream/video/android/core/model/state/StreamCallState$O
 	public final fun component7 ()Lio/getstream/video/android/core/model/state/StreamDate;
 	public final fun component8 ()Ljava/util/Map;
 	public final fun component9 ()Lio/getstream/video/android/core/model/CallDetails;
-	public final fun copy (Lio/getstream/video/android/core/model/StreamCallGuid;Lio/getstream/video/android/core/model/StreamCallKind;Ljava/lang/String;ZZLio/getstream/video/android/core/model/state/StreamDate;Lio/getstream/video/android/core/model/state/StreamDate;Ljava/util/Map;Lio/getstream/video/android/core/model/CallDetails;Lio/getstream/video/android/core/model/CallEgress;Ljava/util/Map;Z)Lio/getstream/video/android/core/model/state/StreamCallState$Outgoing;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/model/state/StreamCallState$Outgoing;Lio/getstream/video/android/core/model/StreamCallGuid;Lio/getstream/video/android/core/model/StreamCallKind;Ljava/lang/String;ZZLio/getstream/video/android/core/model/state/StreamDate;Lio/getstream/video/android/core/model/state/StreamDate;Ljava/util/Map;Lio/getstream/video/android/core/model/CallDetails;Lio/getstream/video/android/core/model/CallEgress;Ljava/util/Map;ZILjava/lang/Object;)Lio/getstream/video/android/core/model/state/StreamCallState$Outgoing;
+	public final fun copy (Lio/getstream/video/android/core/model/StreamCallGuid;Lio/getstream/video/android/core/model/StreamCallKind;Ljava/lang/String;ZZLio/getstream/video/android/core/model/state/StreamDate;Lio/getstream/video/android/core/model/state/StreamDate;Ljava/util/Map;Lio/getstream/video/android/core/model/CallDetails;Lio/getstream/video/android/core/model/CallEgress;Ljava/util/Map;Ljava/util/List;Z)Lio/getstream/video/android/core/model/state/StreamCallState$Outgoing;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/model/state/StreamCallState$Outgoing;Lio/getstream/video/android/core/model/StreamCallGuid;Lio/getstream/video/android/core/model/StreamCallKind;Ljava/lang/String;ZZLio/getstream/video/android/core/model/state/StreamDate;Lio/getstream/video/android/core/model/state/StreamDate;Ljava/util/Map;Lio/getstream/video/android/core/model/CallDetails;Lio/getstream/video/android/core/model/CallEgress;Ljava/util/Map;Ljava/util/List;ZILjava/lang/Object;)Lio/getstream/video/android/core/model/state/StreamCallState$Outgoing;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAcceptedByCallee ()Z
 	public fun getBroadcastingEnabled ()Z
@@ -2742,6 +2734,7 @@ public final class io/getstream/video/android/core/model/state/StreamCallState$O
 	public fun getCreatedByUserId ()Ljava/lang/String;
 	public fun getCustom ()Ljava/util/Map;
 	public fun getRecordingEnabled ()Z
+	public final fun getRejections ()Ljava/util/List;
 	public fun getUpdatedAt ()Lio/getstream/video/android/core/model/state/StreamDate;
 	public fun getUsers ()Ljava/util/Map;
 	public fun hashCode ()I

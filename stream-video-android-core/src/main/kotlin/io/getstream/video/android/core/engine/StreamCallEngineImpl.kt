@@ -32,6 +32,7 @@ import io.getstream.video.android.core.events.CallUpdatedEvent
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.ConnectedEvent
 import io.getstream.video.android.core.events.ConnectionQualityChangeEvent
+import io.getstream.video.android.core.events.CustomEvent
 import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
 import io.getstream.video.android.core.events.ErrorEvent
 import io.getstream.video.android.core.events.HealthCheckEvent
@@ -129,6 +130,7 @@ internal class StreamCallEngineImpl(
             is CallCanceledEvent -> onCallCancelled(event)
             is ConnectedEvent -> {}
             is HealthCheckEvent -> {}
+            is CustomEvent -> {}
             is UnknownEvent -> {}
         }
     }
@@ -345,29 +347,39 @@ internal class StreamCallEngineImpl(
             }
             return@launchWithLock
         }
-        if (!state.users.contains(event.sentByUserId)) {
+        if (!state.users.contains(event.user.id)) {
             logger.w { "[onCallRejected] rejected (rejected by non-Member): $event" }
             return@launchWithLock
         }
-        _callState.post(
-            state.copy(
-                broadcastingEnabled = event.info.broadcastingEnabled,
-                recordingEnabled = event.info.recordingEnabled,
-                createdAt = StreamDate.from(event.info.createdAt),
-                updatedAt = StreamDate.from(event.info.updatedAt),
-                users = event.users
+        if (state is State.Outgoing) {
+            _callState.post(
+                state.copy(
+                    updatedAt = StreamDate.from(event.updatedAt),
+                    rejections = state.rejections + event.user
+                )
             )
-        )
-        val otherUsers = event.users - getCurrentUserId()
-        if (otherUsers.isNotEmpty()) {
-            logger.w { "[onCallRejected] rejected (rejected not by all members): $event" }
-            return@launchWithLock
+            logger.w { "[onCallRejected] state: $state" }
+
+            val rejections = state.rejections
+            val otherUsers = state.users.filter { it.key != getCurrentUserId() }
+
+            logger.w { "[onCallRejected] rejections: $rejections otherUsers: $otherUsers" }
+
+            if (rejections.size != otherUsers.size) {
+                logger.w { "[onCallRejected] processed (not all members rejected the call): $event" }
+                return@launchWithLock
+            }
+
+            logger.w { "[onCallRejected] dropping call" }
+            dropCall(
+                State.Drop(
+                    callGuid = state.callGuid,
+                    callKind = state.callKind,
+                    reason = DropReason.Rejected(event.user.id)
+                )
+            )
+            logger.w { "[onCallRejected] call dropped, state: ${_callState.value}" }
         }
-        dropCall(
-            State.Drop(
-                state.callGuid, state.callKind, DropReason.Rejected(event.sentByUserId)
-            )
-        )
     }
 
     override fun onCallJoined(joinedCall: JoinedCall) = scope.launchWithLock(mutex) {
@@ -463,7 +475,8 @@ internal class StreamCallEngineImpl(
                 acceptedByCallee = false,
                 callDetails = call.callDetails,
                 callEgress = call.callEgress,
-                custom = call.custom
+                custom = call.custom,
+                rejections = emptyList()
             )
         )
         waitForCallToBeAccepted()
@@ -627,29 +640,35 @@ internal class StreamCallEngineImpl(
             logger.w { "[onCallCreated] rejected (ringing is False): $event" }
             return@launchWithLock
         }
+        if (event.callInfo.createdByUserId == getCurrentUserId()) {
+            logger.w { "[onCallCreated] rejected (Call created by current user): $event" }
+            return@launchWithLock
+        }
+
         logger.d { "[onCallCreated] state: $state" }
         _callState.post(
             event.run {
                 State.Incoming(
                     callGuid = StreamCallGuid(
-                        type = info.type,
-                        id = info.id,
-                        cid = info.cid,
+                        type = callInfo.type,
+                        id = callInfo.id,
+                        cid = callInfo.cid,
                     ),
                     callKind = StreamCallKind.RINGING,
-                    createdByUserId = info.createdByUserId,
-                    broadcastingEnabled = info.broadcastingEnabled,
-                    recordingEnabled = info.recordingEnabled,
-                    createdAt = StreamDate.from(info.createdAt),
-                    updatedAt = StreamDate.from(info.updatedAt),
+                    createdByUserId = callInfo.createdByUserId,
+                    broadcastingEnabled = callInfo.broadcastingEnabled,
+                    recordingEnabled = callInfo.recordingEnabled,
+                    createdAt = StreamDate.from(callInfo.createdAt),
+                    updatedAt = StreamDate.from(callInfo.updatedAt),
                     users = users,
                     acceptedByMe = false,
                     callDetails = event.callDetails,
-                    callEgress = event.info.callEgress,
-                    custom = event.info.custom
+                    callEgress = event.callInfo.callEgress,
+                    custom = event.callInfo.custom
                 )
             }
         )
+        logger.v { "[onCallCreated] state: ${_callState.value}" }
     }
 
     /**

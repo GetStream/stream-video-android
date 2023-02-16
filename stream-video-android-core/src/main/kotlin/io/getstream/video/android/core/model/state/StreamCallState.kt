@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.model.state
 
+import io.getstream.video.android.core.engine.StreamCallEngine
 import io.getstream.video.android.core.errors.VideoError
 import io.getstream.video.android.core.model.CallDetails
 import io.getstream.video.android.core.model.CallEgress
@@ -25,11 +26,12 @@ import io.getstream.video.android.core.model.SfuToken
 import io.getstream.video.android.core.model.StreamCallGuid
 import io.getstream.video.android.core.model.StreamCallKind
 import io.getstream.video.android.core.model.StreamSfuSessionId
+import io.getstream.video.android.core.model.User
 import java.io.Serializable
-import java.util.Date
+import java.util.*
 
 /**
- * Represents possible state of [io.getstream.video.android.engine.StreamCallEngine].
+ * Represents possible state of [StreamCallEngine].
  */
 public sealed interface StreamCallState : Serializable {
 
@@ -80,6 +82,7 @@ public sealed interface StreamCallState : Serializable {
         override val callDetails: CallDetails,
         override val callEgress: CallEgress,
         override val custom: Map<String, Any>,
+        val rejections: List<User>,
         val acceptedByCallee: Boolean
     ) : Started(), Joinable
 
