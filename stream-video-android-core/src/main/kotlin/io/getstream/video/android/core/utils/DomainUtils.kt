@@ -20,11 +20,14 @@ import io.getstream.video.android.core.model.CallDetails
 import io.getstream.video.android.core.model.CallEgress
 import io.getstream.video.android.core.model.CallMetadata
 import io.getstream.video.android.core.model.CallUser
+import io.getstream.video.android.core.model.CallUserState
 import io.getstream.video.android.core.model.StreamCallKind
 import io.getstream.video.android.core.model.toCallUsers
 import org.openapitools.client.models.GetOrCreateCallResponse
 import org.openapitools.client.models.MemberResponse
-import java.util.Date
+import stream.video.sfu.models.Participant
+import stream.video.sfu.models.TrackType
+import java.util.*
 
 internal fun GetOrCreateCallResponse.toCall(kind: StreamCallKind): CallMetadata {
     return with(call) {
@@ -63,5 +66,23 @@ internal fun MemberResponse.toCallUser(): CallUser {
         state = null,
         createdAt = Date.from(createdAt.toInstant()),
         updatedAt = Date.from(updatedAt.toInstant()),
+    )
+}
+
+internal fun Participant.toPartialUser(): CallUser {
+    return CallUser(
+        id = user_id,
+        role = "",
+        name = "",
+        imageUrl = "",
+        createdAt = null,
+        updatedAt = null,
+        teams = emptyList(),
+        state = CallUserState(
+            trackIdPrefix = track_lookup_prefix,
+            audio = TrackType.TRACK_TYPE_AUDIO in published_tracks,
+            video = TrackType.TRACK_TYPE_VIDEO in published_tracks,
+            online = true
+        )
     )
 }

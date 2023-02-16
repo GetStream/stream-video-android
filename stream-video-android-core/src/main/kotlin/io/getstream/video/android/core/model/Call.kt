@@ -261,6 +261,7 @@ public class Call(
         val updated = list.filter { it.participant.sessionId != sessionId }
 
         _screenSharingSessions.value = updated
+        logger.d { "[removeScreenShareSession] screenSharingSessions: $updated" }
     }
 
     internal fun setParticipants(participants: List<CallParticipantState>) {
@@ -340,6 +341,8 @@ public class Call(
         )
 
         _callParticipants.value = updatedList
+        logger.d { "[updateMuteState] #sfu; updatedList: $updatedList" }
+
         if (trackType == TrackType.TRACK_TYPE_SCREEN_SHARE && !isEnabled) {
             removeScreenShareSession(sessionId)
         }
@@ -391,8 +394,12 @@ public class Call(
     }
 
     internal fun updateLocalVideoTrack(localVideoTrack: org.webrtc.VideoTrack) {
-        logger.d { "[updateLocalVideoTrack] #sfu; localVideoTrack: $localVideoTrack" }
-        val localParticipant = _localParticipant.value ?: return
+        val localParticipant = _localParticipant.value
+        logger.d { "[updateLocalVideoTrack] #sfu; localVideoTrack: $localVideoTrack, localParticipant: $localParticipant" }
+        if (localParticipant == null) {
+            return
+        }
+
         val allParticipants = callParticipants.value
 
         val videoTrack = VideoTrack(
@@ -413,6 +420,8 @@ public class Call(
 
         _localParticipant.value = updatedParticipant
         _callParticipants.value = updated
+
+        logger.d { "[updateLocalVideoTrack] #sfu; localParticipant: $updatedParticipant, callParticipants: ${callParticipants.value}" }
     }
 
     internal fun setupAudio(callSettings: CallSettings) {

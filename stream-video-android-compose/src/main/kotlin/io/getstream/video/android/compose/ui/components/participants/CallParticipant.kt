@@ -120,7 +120,7 @@ private fun ParticipantVideo(
         false
     }
 
-    if (track != null && isVideoEnabled) {
+    if (track != null && isVideoEnabled && TrackType.TRACK_TYPE_VIDEO in participant.publishedTracks) {
         VideoRenderer(
             call = call,
             videoTrack = track,

@@ -473,7 +473,8 @@ internal class CallClientImpl(
                     isLocal = it.session_id == sessionId,
                     name = "",
                     profileImageURL = "",
-                    role = ""
+                    role = "",
+                    publishedTracks = it.published_tracks.toSet()
                 )
             }
         )
@@ -700,6 +701,11 @@ internal class CallClientImpl(
         )
 
         if (userQueryResult is Success) {
+            if (userQueryResult.data.isEmpty()) {
+                addPartialParticipant(event.participant)
+                return
+            }
+
             val user = userQueryResult.data.first()
             val isLocal = event.participant.session_id == sessionId
 
@@ -714,7 +720,22 @@ internal class CallClientImpl(
                     isLocal = isLocal,
                 )
             )
+        } else {
+            addPartialParticipant(event.participant)
         }
+    }
+
+    private fun addPartialParticipant(participant: Participant) {
+        call?.addParticipant(
+            CallParticipantState(
+                id = participant.user_id,
+                idPrefix = participant.track_lookup_prefix,
+                sessionId = participant.session_id,
+                name = "",
+                profileImageURL = "",
+                role = ""
+            )
+        )
     }
 
     private suspend fun handleTrickle(event: ICETrickleEvent) {
