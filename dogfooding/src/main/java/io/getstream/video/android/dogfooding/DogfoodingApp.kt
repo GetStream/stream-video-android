@@ -27,6 +27,7 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.input.CallActivityInput
 import io.getstream.video.android.core.input.CallServiceInput
+import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.token.CredentialsProvider
 import io.getstream.video.android.core.user.UserCredentialsManager
 import io.getstream.video.android.core.user.UserPreferences
@@ -64,7 +65,7 @@ class DogfoodingApp : Application() {
      */
     fun initializeStreamVideo(
         credentialsProvider: CredentialsProvider,
-        loggingLevel: io.getstream.video.android.core.logging.LoggingLevel
+        loggingLevel: LoggingLevel
     ): StreamVideo {
         if (this::credentials.isInitialized) {
             this.credentialsProvider.updateUser(
@@ -111,7 +112,7 @@ class DogfoodingApp : Application() {
                 apiKey = apiKey,
                 user = user
             ),
-            loggingLevel = io.getstream.video.android.core.logging.LoggingLevel.NONE
+            loggingLevel = LoggingLevel.NONE
         )
         return true
     }

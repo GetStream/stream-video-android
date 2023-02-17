@@ -26,6 +26,7 @@ import android.widget.FrameLayout
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.children
+import androidx.core.view.setPadding
 import androidx.transition.TransitionManager
 import io.getstream.log.StreamLog
 import io.getstream.video.android.core.model.CallParticipantState
@@ -290,8 +291,13 @@ public class CallParticipantsView : ConstraintLayout {
      * Updates the constraints of the shown [CallParticipantView]s so they all fit in the viewport.
      */
     private fun updateConstraints() {
-        TransitionManager.beginDelayedTransition(((binding.participantsHolder)))
-        binding.dividerGuideline.setGuidelinePercent(if (isScreenSharingActive) calculateContentDividerOffset() else 0f)
+        TransitionManager.beginDelayedTransition(this)
+
+        val participantsHolderParams = (binding.participantsHolder.layoutParams as LayoutParams)
+        participantsHolderParams.height = if (isScreenSharingActive) 125.dpToPx() else LayoutParams.MATCH_PARENT
+        participantsHolderParams.bottomMargin = if (isScreenSharingActive) calculateOffsetWithControls() else 0
+        binding.participantsHolder.layoutParams = participantsHolderParams
+        binding.participantsHolder.setPadding(if (isScreenSharingActive) 8.dpToPx() else 0)
 
         binding.participantsHolder.setConstraints {
             if (isScreenSharingActive) {
@@ -306,8 +312,24 @@ public class CallParticipantsView : ConstraintLayout {
                     if (index == childList.lastIndex) {
                         toParentEnd(view, childList.getOrNull(index - 1))
                     }
+                    setDimensionRatio(view.id, "1")
+                    if (index == 0) setHorizontalBias(view.id, 0f)
+
+                    val viewLayoutParams = view.layoutParams as LayoutParams
+                    if (index != 0) setMargin(view.id, ConstraintSet.START, 4.dpToPx())
+                    if (index != childList.lastIndex) setMargin(view.id, ConstraintSet.END, 4.dpToPx())
+                    view.layoutParams = viewLayoutParams
+                    view.setLabelBottomOffset(0)
                 }
             } else {
+                childList.forEach { view ->
+                    val viewLayoutParams = view.layoutParams as LayoutParams
+                    viewLayoutParams.marginStart = 0
+                    viewLayoutParams.marginEnd = 0
+                    view.layoutParams = viewLayoutParams
+                    if (isBottomChild(view)) view.setLabelBottomOffset(getCallControlsHeight())
+                }
+
                 when (childList.size) {
                     1 -> {
                         toParent(childList[0])
@@ -329,12 +351,6 @@ public class CallParticipantsView : ConstraintLayout {
                     }
                 }
             }
-
-            childList.forEach { setViewSize(it) }
-        }
-
-        childList.forEach {
-            it.setLabelBottomOffset(if (isBottomChild(it)) getCallControlsHeight() else 0)
         }
     }
 
@@ -347,12 +363,8 @@ public class CallParticipantsView : ConstraintLayout {
         }
     }
 
-    private fun calculateOffsetWithControls(): Float {
-        return (measuredHeight - getCallControlsHeight().toFloat()) / measuredHeight
-    }
-
-    private fun calculateContentDividerOffset(): Float {
-        return (measuredHeight - (getCallControlsHeight().toFloat() + 32.dpToPxPrecise() + 125.dpToPxPrecise())) / measuredHeight
+    private fun calculateOffsetWithControls(): Int {
+        return getCallControlsHeight()
     }
 
     /**
@@ -369,20 +381,6 @@ public class CallParticipantsView : ConstraintLayout {
             this.tag = userId
             this.layoutParams = LayoutParams(
                 LayoutParams.MATCH_CONSTRAINT, LayoutParams.MATCH_CONSTRAINT
-            )
-        }
-    }
-
-    private fun setViewSize(view: View) {
-        if (isScreenSharingActive) {
-            view.layoutParams = LayoutParams(
-                125.dpToPx(),
-                125.dpToPx()
-            )
-        } else {
-            view.layoutParams = LayoutParams(
-                LayoutParams.MATCH_CONSTRAINT,
-                LayoutParams.MATCH_CONSTRAINT
             )
         }
     }

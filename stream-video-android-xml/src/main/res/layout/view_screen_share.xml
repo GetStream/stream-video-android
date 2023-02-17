@@ -4,14 +4,19 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout"
     >
 
     <io.getstream.video.android.core.ui.TextureViewRenderer
         android:id="@+id/screenShare"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintDimensionRatio="16:9"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
         />
 
+    <!--  TODO sort out when adding landscape/fullscreen support  -->
     <io.getstream.video.android.xml.widget.control.ControlButtonView
         android:id="@+id/changeOrientationButton"
         android:layout_width="wrap_content"
@@ -27,6 +32,7 @@
         tools:src="@drawable/ic_landscape_mode"
         />
 
+    <!--  TODO sort out when adding landscape/fullscreen support  -->
     <io.getstream.video.android.xml.widget.control.ControlButtonView
         android:id="@+id/fullscreenButton"
         android:layout_width="wrap_content"
