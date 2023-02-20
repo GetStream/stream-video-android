@@ -102,7 +102,6 @@ public class Call(
     private val streamsToProcess: MutableList<MediaStream> = mutableListOf()
 
     public var onStreamAdded: (MediaStream) -> Unit = {}
-    public var onStreamRemoved: (MediaStream) -> Unit = {}
 
     /**
      * Public API.
