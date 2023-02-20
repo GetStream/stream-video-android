@@ -14,5 +14,5 @@
 
 awk '/getstream/ && !/compose/ && !/core/ && !/android-xml/ && !/app/' app/src/main/baseline-prof.txt > stream-video-android/src/main/baseline-prof.txt
 awk '/getstream/ && /compose/ && !/core/ && !/android-xml/ && !/app/' app/src/main/baseline-prof.txt > stream-video-android-compose/src/main/baseline-prof.txt
-awk '/getstream/ && !/compose/ && /core/ && !/android-xml/ !/app/' app/src/main/baseline-prof.txt > stream-video-android-core/src/main/baseline-prof.txt
+awk '/getstream/ && !/compose/ && /core/ && !/android-xml/ && !/app/' app/src/main/baseline-prof.txt > stream-video-android-core/src/main/baseline-prof.txt
 awk '/getstream/ && !/compose/ && !/core/ && /android-xml/ && !/app/' app/src/main/baseline-prof.txt > stream-video-android-xml/src/main/baseline-prof.txt
