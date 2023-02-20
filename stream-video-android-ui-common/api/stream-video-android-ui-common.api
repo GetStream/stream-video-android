@@ -17,6 +17,14 @@ public final class io/getstream/video/android/common/util/ResourcesKt {
 	public static final fun getFloatResource (Landroid/content/Context;I)F
 }
 
+public final class io/getstream/video/android/common/viewmodel/CallLobbyViewModel : androidx/lifecycle/AndroidViewModel {
+	public fun <init> (Landroid/app/Application;Lio/getstream/video/android/core/StreamVideo;)V
+	public final fun flipCamera ()V
+	public final fun isCapturingAudio ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun isCapturingVideo ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun startCapturingLocalVideo (I)V
+}
+
 public final class io/getstream/video/android/ui/common/BuildConfig {
 	public static final field BUILD_TYPE Ljava/lang/String;
 	public static final field DEBUG Z
