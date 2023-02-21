@@ -253,16 +253,22 @@ public abstract class AbstractXmlCallActivity :
      */
     private fun showPipLayout() {
         if (isViewInsideContainer<CallParticipantView>()) return
-        val callParticipant = PictureInPictureView(this)
-        callParticipant.rendererInitializer = RendererInitializer { videoRenderer, streamId, trackType, onRender ->
+        val pictureInPicture = PictureInPictureView(this)
+        pictureInPicture.rendererInitializer = RendererInitializer { videoRenderer, streamId, trackType, onRender ->
             callViewModel.callState.value?.initRenderer(videoRenderer, streamId, trackType, onRender)
         }
-        addContentView(callParticipant)
+        addContentView(pictureInPicture)
         pipJob?.cancel()
         pipJob = lifecycleScope.launchWhenCreated {
-            callViewModel.primarySpeaker.filterNotNull().collect {
-                callParticipant.participant = it
-            }
+            callViewModel.primarySpeaker.filterNotNull()
+                .combine(callViewModel.screenSharingSessions) { primarySpeaker, screenSharingSessions ->
+                    val screenSharingSession = screenSharingSessions.firstOrNull()
+                    if (screenSharingSession == null) {
+                        pictureInPicture.showCallParticipantView(primarySpeaker)
+                    } else {
+                        pictureInPicture.showScreenShare(screenSharingSession)
+                    }
+                }.collect()
         }
     }
 
@@ -453,7 +459,6 @@ public abstract class AbstractXmlCallActivity :
                 pipJob?.cancel()
                 getChildInstanceOf<PictureInPictureView>()?.let {
                     it.rendererInitializer = null
-                    it.participant = null
                 }
             }
         }

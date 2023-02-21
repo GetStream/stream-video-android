@@ -17,10 +17,16 @@
 package io.getstream.video.android.xml.utils.extensions
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.children
 
 internal inline val ViewGroup.inflater: LayoutInflater
     get() = LayoutInflater.from(context)
 
 internal val ViewGroup.streamThemeInflater: LayoutInflater
     get() = LayoutInflater.from(context.createStreamThemeWrapper())
+
+internal inline fun <reified T: View>ViewGroup.getFirstViewInstance(): T? {
+    return children.firstOrNull { it is T } as? T
+}
