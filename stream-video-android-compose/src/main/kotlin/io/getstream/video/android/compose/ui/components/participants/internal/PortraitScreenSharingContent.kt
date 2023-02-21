@@ -89,10 +89,10 @@ internal fun PortraitScreenSharingContent(
             onCallAction = onCallAction
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(VideoTheme.dimens.screenShareParticipantsScreenShareListMargin))
 
         ParticipantsRow(
-            modifier = Modifier.height(125.dp),
+            modifier = Modifier.height(VideoTheme.dimens.screenShareParticipantsRowHeight),
             call = call,
             participants = participants
         )

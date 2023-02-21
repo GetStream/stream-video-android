@@ -33,15 +33,28 @@ internal class CallParticipantsGridView : ConstraintLayout, VideoRenderer {
         childList.forEach { it.setRendererInitializer(rendererInitializer) }
     }
 
-    public constructor(context: Context) : this(context, null)
-    public constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
-    public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
+    internal constructor(context: Context) : this(context, null)
+    internal constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
+    internal constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
         context.createStreamThemeWrapper(), attrs, defStyleAttr
-    ) {}
+    )
 
-    internal var callControlsHeight: () -> Int = { 0 }
+    /**
+     * Handler to acquire the height of call controls.
+     */
+    internal lateinit var callControlsHeight: () -> Int
+
+    /**
+     * Handler that provides new [CallParticipantView].
+     */
     internal lateinit var buildParticipantView: () -> CallParticipantView
 
+    /**
+     * Updates the participants grid. If there are more or less views than participants, the views will be added or
+     * removed from the view and constraints updated.
+     *
+     * @param participants The list of participants to show on the screen.
+     */
     internal fun updateParticipants(participants: List<CallParticipantState>) {
         when {
             childList.size > participants.size -> {
@@ -56,9 +69,7 @@ internal class CallParticipantsGridView : ConstraintLayout, VideoRenderer {
             childList.size < participants.size -> {
                 val diff = participants.size - childList.size
                 for (index in 0 until diff) {
-                    val view = buildParticipantView().apply {
-                        layoutParams = LayoutParams(LayoutParams.MATCH_CONSTRAINT, LayoutParams.MATCH_CONSTRAINT)
-                    }
+                    val view = buildParticipantView()
                     childList.add(view)
                     addView(view)
                 }
@@ -140,6 +151,11 @@ internal class CallParticipantsGridView : ConstraintLayout, VideoRenderer {
         }
     }
 
+    /**
+     * Determines if the view is on the bottom half.
+     *
+     * @param index The index of the [CallParticipantView] in the list.
+     */
     private fun isBottomChild(index: Int): Boolean {
         return when {
             childList.size == 1 -> true
@@ -156,18 +172,5 @@ internal class CallParticipantsGridView : ConstraintLayout, VideoRenderer {
      */
     internal fun updatePrimarySpeaker(participant: CallParticipantState?) {
         childList.forEach { it.setActive(it.tag == participant?.id) }
-    }
-
-    /**
-     * Used to instantiate a new [Guideline] which help us to divide the screen to sections.
-     */
-    private fun buildGuideline(orientation: Int, guidePercent: Float) = Guideline(context).apply {
-        this.id = View.generateViewId()
-        this.layoutParams = LayoutParams(
-            LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT
-        ).apply {
-            this.orientation = orientation
-            this.guidePercent = guidePercent
-        }
     }
 }

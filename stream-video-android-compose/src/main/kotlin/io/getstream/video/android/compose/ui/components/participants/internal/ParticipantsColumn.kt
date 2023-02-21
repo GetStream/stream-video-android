@@ -43,11 +43,11 @@ import io.getstream.video.android.core.model.CallParticipantState
 internal fun ParticipantsColumn(
     call: Call,
     participants: List<CallParticipantState>,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     LazyColumn(
-        modifier = modifier.padding(vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = modifier.padding(vertical = VideoTheme.dimens.screenShareParticipantsRowPadding),
+        verticalArrangement = Arrangement.spacedBy(VideoTheme.dimens.screenShareParticipantsListItemMargin),
         horizontalAlignment = Alignment.CenterHorizontally,
         content = {
             items(participants) { participant ->
@@ -66,12 +66,12 @@ internal fun ParticipantsColumn(
 @Composable
 private fun ParticipantListItem(
     call: Call,
-    participant: CallParticipantState
+    participant: CallParticipantState,
 ) {
     CallParticipant(
         modifier = Modifier
             .size(VideoTheme.dimens.screenShareParticipantItemSize)
-            .clip(RoundedCornerShape(16.dp)),
+            .clip(RoundedCornerShape(VideoTheme.dimens.screenShareParticipantsRadius)),
         call = call,
         participant = participant,
         labelPosition = Alignment.BottomStart

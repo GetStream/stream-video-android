@@ -22,9 +22,11 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.children
+import androidx.core.view.setPadding
 import io.getstream.log.StreamLog
 import io.getstream.video.android.core.model.CallParticipantState
 import io.getstream.video.android.core.model.ScreenSharingSession
@@ -77,10 +79,14 @@ public class CallParticipantsView : ConstraintLayout {
     }
 
     /**
-     * Updates the participants which are to be rendered on the screen. Up to 4 remote participants view will be shown
-     * at any time. In case a new participant comes in or an old one leaves will add/remove [CallParticipantView] for
-     * that participant and will automatically arrange the views to fit inside the viewport. The local participant will
-     * be overlaid over the remote participants in a floating  view.
+     * Updates participants and screen share previews on screen.
+     *
+     * In case there is no screen share up to 4 participants will be rendered in a grid. The current user will be in the
+     * grid if he is the only participant in the call or if there are at least 4 participant, otherwise he is shown in a
+     * draggable floating view.
+     *
+     * When there ia an active screen share session all users are shown in a scrollable list under the preview which
+     * is the main focus.
      *
      * @param participants The list of the participants in the current call.
      * @param screenSharingSession The currently active screen sharing session if there or null if there is none.
@@ -108,6 +114,10 @@ public class CallParticipantsView : ConstraintLayout {
         }
     }
 
+    /**
+     * Populates the view with the screen share content. Will remove all views that are used when there is no screen
+     * share content and add [ScreenSharingView] and [CallParticipantsListView].
+     */
     private fun enterScreenSharing() {
         if (children.firstOrNull { it is ScreenSharingView } != null) return
 
@@ -122,8 +132,12 @@ public class CallParticipantsView : ConstraintLayout {
         val listView = CallParticipantsListView(context).apply {
             id = ViewGroup.generateViewId()
             if (::rendererInitializer.isInitialized) setRendererInitializer(rendererInitializer)
-            buildParticipantView = { this@CallParticipantsView.buildParticipantView() }
+            buildParticipantView = { this@CallParticipantsView.buildParticipantView(true) }
             this@CallParticipantsView.addView(this)
+            setPadding(style.participantListPadding)
+            setItemMargin(style.participantListItemMargin)
+            clipToPadding = false
+            clipChildren = false
         }
 
 
@@ -131,7 +145,7 @@ public class CallParticipantsView : ConstraintLayout {
             constrainViewToParentBySide(screenShareView, ConstraintSet.TOP)
             constrainViewToParentBySide(screenShareView, ConstraintSet.START)
             constrainViewToParentBySide(screenShareView, ConstraintSet.END)
-            constrainViewBottomToTopOfView(screenShareView, listView)
+            constrainViewBottomToTopOfView(screenShareView, listView, style.screenShareMargin.toInt())
 
             constrainViewToParentBySide(listView, ConstraintSet.BOTTOM, getCallControlsHeight())
             constrainViewToParentBySide(listView, ConstraintSet.START)
@@ -139,10 +153,14 @@ public class CallParticipantsView : ConstraintLayout {
         }
 
         val listViewParams = listView.layoutParams as LayoutParams
-        listViewParams.height = 125.dpToPx()
+        listViewParams.height = style.participantListHeight
         listView.layoutParams = listViewParams
     }
 
+    /**
+     * Populates the view with the regular screen content. Will remove all views that are used when a screen share
+     * session is active and will add a [CallParticipantsGridView].
+     */
     private fun exitScreenSharing() {
         if (children.firstOrNull { it is CallParticipantsGridView } != null) return
 
@@ -154,19 +172,19 @@ public class CallParticipantsView : ConstraintLayout {
             id = ViewGroup.generateViewId()
             layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
             if (::rendererInitializer.isInitialized) setRendererInitializer(rendererInitializer)
-            buildParticipantView = { this@CallParticipantsView.buildParticipantView() }
+            buildParticipantView = { this@CallParticipantsView.buildParticipantView(false) }
             callControlsHeight = { this@CallParticipantsView.getCallControlsHeight() }
         }
         addView(gridView)
     }
 
     /**
-     * Creates and updates the local participant floating view.
+     * Creates and updates the local participant floating view. If null is passed will remove the view.
      *
      * @param participant The local participant to be shown in a [FloatingParticipantView].
      */
     private fun updateFloatingParticipant(participant: CallParticipantState?) {
-        var localParticipant = children.find { it is FloatingParticipantView } as? FloatingParticipantView
+        var localParticipant = getViewByInstance<FloatingParticipantView>()
 
         if (participant != null) {
             if (localParticipant == null) {
@@ -180,6 +198,11 @@ public class CallParticipantsView : ConstraintLayout {
         localParticipant?.bringToFront()
     }
 
+    /**
+     * Builds a [FloatingParticipantView] to be used for the local participant.
+     *
+     * @return [FloatingParticipantView]
+     */
     private fun buildFloatingView(): FloatingParticipantView {
         return FloatingParticipantView(context).apply {
             if (::rendererInitializer.isInitialized) setRendererInitializer(rendererInitializer)
@@ -248,15 +271,6 @@ public class CallParticipantsView : ConstraintLayout {
     }
 
     /**
-     * Calculates the margin necessary to push the participant list above the call controls.
-     *
-     * @return The offset of the participants list.
-     */
-    private fun getParticipantListOffset(): Int {
-        return getCallControlsHeight()
-    }
-
-    /**
      * Gets the [CallControlsView] height from the parent screen if there is any.
      *
      * @return The height of the [CallControlsView].
@@ -280,17 +294,32 @@ public class CallParticipantsView : ConstraintLayout {
     }
 
     /**
-     * Used to instantiate a new [CallParticipantView] when participants join the call.
+     * Used to instantiate a new [CallParticipantView] when participants join the call. Will apply different styles
+     * whether the view is in the [CallParticipantsGridView] od [CallParticipantsListView].
+     *
+     * @return [CallParticipantView] to be used to render participants.
      */
-    private fun buildParticipantView(): CallParticipantView {
+    private fun buildParticipantView(isListView: Boolean): CallParticipantView {
+        val defStyleAttr = if (isListView) {
+            R.attr.streamCallParticipantsListParticipantStyle
+        } else {
+            R.attr.streamCallParticipantsGridParticipantStyle
+        }
+
+        val defStyleRes = if (isListView) style.listCallParticipantStyle else style.gridCallParticipantStyle
+
         return CallParticipantView(
             context = context,
             attrs = null,
-            defStyleAttr = R.attr.streamCallParticipantsCallParticipantStyle,
-            defStyleRes = style.callParticipantStyle
+            defStyleAttr = defStyleAttr,
+            defStyleRes = defStyleRes
         ).apply {
             this.id = View.generateViewId()
             if (::rendererInitializer.isInitialized) setRendererInitializer(rendererInitializer)
+            if (isListView) {
+                layoutParams =
+                    LinearLayout.LayoutParams(style.participantListItemWidth, LinearLayout.LayoutParams.MATCH_PARENT)
+            }
         }
     }
 

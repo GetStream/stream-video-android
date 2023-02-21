@@ -20,6 +20,7 @@ import android.content.Context
 import android.graphics.drawable.GradientDrawable
 import android.util.AttributeSet
 import android.view.View
+import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.isVisible
@@ -43,7 +44,7 @@ import io.getstream.video.android.ui.common.R as RCommon
 /**
  * Represents a single participant in a call.
  */
-public class CallParticipantView : ConstraintLayout, VideoRenderer {
+public class CallParticipantView : CardView, VideoRenderer {
 
     private val binding = ViewCallParticipantBinding.inflate(streamThemeInflater, this)
 
@@ -81,8 +82,7 @@ public class CallParticipantView : ConstraintLayout, VideoRenderer {
     public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(
         context.createStreamThemeWrapper(),
         attrs,
-        defStyleAttr,
-        defStyleRes
+        defStyleAttr
     ) {
         init(context, attrs, defStyleAttr, defStyleRes)
     }
@@ -90,13 +90,16 @@ public class CallParticipantView : ConstraintLayout, VideoRenderer {
     private fun init(context: Context, attrs: AttributeSet?, styleAttr: Int, styleRes: Int) {
         style = CallParticipantStyle(context, attrs, styleAttr, styleRes)
 
+        elevation = style.elevation
+        radius = style.cornerRadius
+
         initNameHolder()
         initSpeakerBorder()
     }
 
     private fun initNameHolder() {
         binding.participantLabel.setTextStyle(style.labelTextStyle)
-        (binding.labelHolder.layoutParams as LayoutParams).setMargins(style.labelMargin)
+        (binding.labelHolder.layoutParams as ConstraintLayout.LayoutParams).setMargins(style.labelMargin)
         binding.labelHolder.background.setTint(style.labelBackgroundColor)
         setLabelAlignment(style.labelAlignment)
     }
@@ -104,6 +107,7 @@ public class CallParticipantView : ConstraintLayout, VideoRenderer {
     private fun initSpeakerBorder() {
         val borderDrawable = GradientDrawable()
         borderDrawable.setStroke(style.activeSpeakerBorderWidth, style.activeSpeakerBorderColor)
+        borderDrawable.cornerRadius = style.cornerRadius
         binding.activeCallParticipantBorder.background = borderDrawable
     }
 
@@ -202,7 +206,7 @@ public class CallParticipantView : ConstraintLayout, VideoRenderer {
      * Use to offset label when they are covered by call controls.
      */
     public fun setLabelBottomOffset(offset: Int) {
-        val layoutParams = (binding.labelHolder.layoutParams as LayoutParams)
+        val layoutParams = (binding.labelHolder.layoutParams as ConstraintLayout.LayoutParams)
         layoutParams.bottomMargin = offset + style.labelMargin
         binding.labelHolder.layoutParams = layoutParams
     }
@@ -214,9 +218,9 @@ public class CallParticipantView : ConstraintLayout, VideoRenderer {
      */
     private fun setLabelAlignment(labelAlignment: CallParticipantLabelAlignment) {
         val holderId = binding.labelHolder.id
-        val parentId = LayoutParams.PARENT_ID
+        val parentId = ConstraintLayout.LayoutParams.PARENT_ID
 
-        updateConstraints {
+        binding.contentHolder.updateConstraints {
             clearConstraints(holderId)
             when (labelAlignment) {
                 CallParticipantLabelAlignment.TOP_LEFT -> {

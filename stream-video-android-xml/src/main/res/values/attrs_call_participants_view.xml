@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="CallParticipantsView">
-        <attr name="streamCallParticipantsCallParticipantStyle" format="reference" />
+        <attr name="streamCallParticipantsGridParticipantStyle" format="reference" />
+        <attr name="streamCallParticipantsListParticipantStyle" format="reference" />
         <attr name="streamCallParticipantsLocalParticipantHeight" format="dimension|reference" />
         <attr name="streamCallParticipantsLocalParticipantWidth" format="dimension|reference" />
         <attr name="streamCallParticipantsLocalParticipantPadding" format="dimension|reference" />
         <attr name="streamCallParticipantsLocalParticipantRadius" format="dimension|reference" />
+        <attr name="streamCallParticipantsListHeight" format="dimension|reference" />
+        <attr name="streamCallParticipantsListPadding" format="dimension|reference" />
+        <attr name="streamCallParticipantsListItemMargin" format="dimension|reference" />
+        <attr name="streamCallParticipantsListItemWidth" format="dimension|reference" />
+        <attr name="streamCallParticipantsScreenShareListMargin" format="dimension|reference" />
     </declare-styleable>
 </resources>

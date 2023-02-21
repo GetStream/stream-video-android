@@ -46,24 +46,24 @@ internal fun ConstraintSet.constrainViewToParentBySide(view: View, side: Int, ma
     connect(view.id, side, ConstraintSet.PARENT_ID, side, margin)
 }
 
-internal fun ConstraintSet.constrainViewStartToEndOfView(startView: View, endView: View) {
-    connect(startView.id, ConstraintSet.START, endView.id, ConstraintSet.END)
+internal fun ConstraintSet.constrainViewStartToEndOfView(startView: View, endView: View, margin: Int = 0) {
+    connect(startView.id, ConstraintSet.START, endView.id, ConstraintSet.END, margin)
 }
 
-internal fun ConstraintSet.constrainViewEndToEndOfView(startView: View, endView: View) {
-    connect(startView.id, ConstraintSet.END, endView.id, ConstraintSet.END)
+internal fun ConstraintSet.constrainViewEndToEndOfView(startView: View, endView: View, margin: Int = 0) {
+    connect(startView.id, ConstraintSet.END, endView.id, ConstraintSet.END, margin)
 }
 
-internal fun ConstraintSet.constrainViewEndToStartOfView(startView: View, endView: View) {
-    connect(startView.id, ConstraintSet.END, endView.id, ConstraintSet.START)
+internal fun ConstraintSet.constrainViewEndToStartOfView(startView: View, endView: View, margin: Int = 0) {
+    connect(startView.id, ConstraintSet.END, endView.id, ConstraintSet.START, margin)
 }
 
-internal fun ConstraintSet.constrainViewBottomToTopOfView(startView: View, endView: View) {
-    connect(startView.id, ConstraintSet.BOTTOM, endView.id, ConstraintSet.TOP)
+internal fun ConstraintSet.constrainViewBottomToTopOfView(startView: View, endView: View, margin: Int = 0) {
+    connect(startView.id, ConstraintSet.BOTTOM, endView.id, ConstraintSet.TOP, margin)
 }
 
-internal fun ConstraintSet.constrainViewTopToBottomOfView(startView: View, endView: View) {
-    connect(startView.id, ConstraintSet.TOP, endView.id, ConstraintSet.BOTTOM)
+internal fun ConstraintSet.constrainViewTopToBottomOfView(startView: View, endView: View, margin: Int = 0) {
+    connect(startView.id, ConstraintSet.TOP, endView.id, ConstraintSet.BOTTOM, margin)
 }
 
 internal fun ConstraintSet.constrainViewToParent(view: View) {

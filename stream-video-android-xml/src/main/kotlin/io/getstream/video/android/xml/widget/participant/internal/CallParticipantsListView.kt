@@ -10,6 +10,7 @@ import android.util.AttributeSet
 import android.widget.FrameLayout
 import android.widget.HorizontalScrollView
 import android.widget.LinearLayout
+import androidx.annotation.Px
 import androidx.constraintlayout.widget.ConstraintLayout
 import io.getstream.video.android.core.model.CallParticipantState
 import io.getstream.video.android.xml.R
@@ -32,10 +33,6 @@ internal class CallParticipantsListView : HorizontalScrollView, VideoRenderer {
             this@CallParticipantsListView.addView(this)
             layoutParams = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT)
             showDividers = LinearLayout.SHOW_DIVIDER_MIDDLE
-            dividerDrawable = ShapeDrawable(RectShape()).apply {
-                intrinsicWidth = 10.dpToPx()
-                paint.color = Color.TRANSPARENT
-            }
         }
     }
 
@@ -48,12 +45,12 @@ internal class CallParticipantsListView : HorizontalScrollView, VideoRenderer {
         childList.forEach { it.setRendererInitializer(rendererInitializer) }
     }
 
-    public constructor(context: Context) : this(context, null)
-    public constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
-    public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) :
+    internal constructor(context: Context) : this(context, null)
+    internal constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
+    internal constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) :
         this(context, attrs, defStyleAttr, 0)
 
-    public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(
+    internal constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(
         context.createStreamThemeWrapper(),
         attrs,
         defStyleAttr,
@@ -61,8 +58,23 @@ internal class CallParticipantsListView : HorizontalScrollView, VideoRenderer {
     )
 
     /**
-     * Updates the remote participants. 4 remote participants will be shown at most in a grid. If a new participant
-     * joins the call or an old one leaves, a [CallParticipantView] will be added or removed.
+     * Set the margin between participant views in the list.
+     *
+     * @param size The size of the divider.
+     */
+    internal fun setItemMargin(@Px size: Int) {
+        participantsList.dividerDrawable = ShapeDrawable(RectShape()).apply {
+            intrinsicWidth = size
+            intrinsicHeight = size
+            paint.color = Color.TRANSPARENT
+        }
+    }
+
+    /**
+     * Updates the participants list. If there are more or less views than participants, the views will be added or
+     * removed from the view.
+     *
+     * @param participants The list of participants to show on the screen.
      */
     internal fun updateParticipants(participants: List<CallParticipantState>) {
         when {
@@ -78,9 +90,7 @@ internal class CallParticipantsListView : HorizontalScrollView, VideoRenderer {
             childList.size < participants.size -> {
                 val diff = participants.size - childList.size
                 for (index in 0 until diff) {
-                    val view = buildParticipantView().apply {
-                        layoutParams = LinearLayout.LayoutParams(125.dpToPx(), LinearLayout.LayoutParams.MATCH_PARENT)
-                    }
+                    val view = buildParticipantView()
                     childList.add(view)
                     participantsList.addView(view)
                 }

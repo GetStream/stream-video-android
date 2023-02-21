@@ -24,6 +24,9 @@ import io.getstream.video.android.xml.utils.extensions.getDimension
 import io.getstream.video.android.xml.utils.extensions.getResourceId
 import io.getstream.video.android.xml.utils.extensions.use
 import io.getstream.video.android.xml.widget.transformer.TransformStyle
+import io.getstream.video.android.xml.widget.participant.internal.CallParticipantsGridView
+import io.getstream.video.android.xml.widget.participant.internal.CallParticipantsListView
+import io.getstream.video.android.xml.widget.screenshare.ScreenSharingView
 import io.getstream.video.android.ui.common.R as RCommon
 
 /**
@@ -31,20 +34,34 @@ import io.getstream.video.android.ui.common.R as RCommon
  * Use this class together with [TransformStyle.callParticipantsStyleTransformer] to change [CallParticipantsView]
  * styles programmatically.
  *
- * @param callParticipantStyle The id of the custom style for [CallParticipantView] to be applied for each remote
- * participant.
+ * @param gridCallParticipantStyle The id of the custom style for [CallParticipantView] to be applied for each call
+ * participant in the [CallParticipantsGridView].
+ * @param listCallParticipantStyle The id of the custom style for [CallParticipantView] to be applied for each call
+ * participant in the [CallParticipantsListView].
  * @param localParticipantHeight The height of the [FloatingParticipantView] used fot the local user.
  * @param localParticipantWidth The width of the [FloatingParticipantView] used fot the local user.
  * @param localParticipantPadding The padding between the [FloatingParticipantView] used fot the local user and the
  * borders of [CallParticipantsView].
  * @param localParticipantRadius The corner radius of the [FloatingParticipantView] used fot the local user.
+ * @param participantListHeight The height of the participants list when there is a screen share session active.
+ * @param participantListPadding The padding applied to the participants list.
+ * @param participantListItemMargin The margin between two adjacent [CallParticipantView]s inside
+ * [CallParticipantsListView].
+ * @param participantListItemWidth The width of a [CallParticipantView] inside [CallParticipantsListView].
+ * @param screenShareMargin Size of the margin between [ScreenSharingView] and [CallParticipantsListView].
  */
 public data class CallParticipantsStyle(
-    public val callParticipantStyle: Int,
+    public val gridCallParticipantStyle: Int,
+    public val listCallParticipantStyle: Int,
     @Px public val localParticipantHeight: Float,
     @Px public val localParticipantWidth: Float,
     @Px public val localParticipantPadding: Float,
     @Px public val localParticipantRadius: Float,
+    @Px public val participantListHeight: Int,
+    @Px public val participantListPadding: Int,
+    @Px public val participantListItemMargin: Int,
+    @Px public val participantListItemWidth: Int,
+    @Px public val screenShareMargin: Float,
 ) {
 
     internal companion object {
@@ -56,8 +73,13 @@ public data class CallParticipantsStyle(
                 R.style.Stream_CallParticipants
             ).use {
 
-                val callParticipantStyle = it.getResourceId(
-                    R.styleable.CallParticipantsView_streamCallParticipantsCallParticipantStyle,
+                val gridCallParticipantStyle = it.getResourceId(
+                    R.styleable.CallParticipantsView_streamCallParticipantsGridParticipantStyle,
+                    context.getResourceId(R.style.StreamVideoTheme, R.attr.streamCallParticipantViewStyle)
+                )
+
+                val listCallParticipantStyle = it.getResourceId(
+                    R.styleable.CallParticipantsView_streamCallParticipantsListParticipantStyle,
                     context.getResourceId(R.style.StreamVideoTheme, R.attr.streamCallParticipantViewStyle)
                 )
 
@@ -81,12 +103,43 @@ public data class CallParticipantsStyle(
                     context.getDimension(RCommon.dimen.floatingVideoRadius).toFloat()
                 )
 
+                val participantListHeight = it.getDimension(
+                    R.styleable.CallParticipantsView_streamCallParticipantsListHeight,
+                    context.getDimension(RCommon.dimen.screenShareParticipantsListHeight).toFloat()
+                ).toInt()
+
+                val participantListPadding = it.getDimension(
+                    R.styleable.CallParticipantsView_streamCallParticipantsListPadding,
+                    context.getDimension(RCommon.dimen.screenShareParticipantsListPadding).toFloat()
+                ).toInt()
+
+                val participantListItemMargin = it.getDimension(
+                    R.styleable.CallParticipantsView_streamCallParticipantsListItemMargin,
+                    context.getDimension(RCommon.dimen.screenShareParticipantsListItemMargin).toFloat()
+                ).toInt()
+
+                val participantListItemWidth = it.getDimension(
+                    R.styleable.CallParticipantsView_streamCallParticipantsListItemWidth,
+                    context.getDimension(RCommon.dimen.screenShareParticipantItemSize).toFloat()
+                ).toInt()
+
+                val screenShareMargin = it.getDimension(
+                    R.styleable.CallParticipantsView_streamCallParticipantsScreenShareListMargin,
+                    context.getDimension(RCommon.dimen.screenShareParticipantsRadius).toFloat()
+                )
+
                 return CallParticipantsStyle(
-                    callParticipantStyle = callParticipantStyle,
+                    gridCallParticipantStyle = gridCallParticipantStyle,
+                    listCallParticipantStyle = listCallParticipantStyle,
                     localParticipantHeight = localParticipantHeight,
                     localParticipantWidth = localParticipantWidth,
                     localParticipantPadding = localParticipantPadding,
-                    localParticipantRadius = localParticipantRadius
+                    localParticipantRadius = localParticipantRadius,
+                    participantListHeight = participantListHeight,
+                    participantListPadding = participantListPadding,
+                    participantListItemMargin = participantListItemMargin,
+                    participantListItemWidth = participantListItemWidth,
+                    screenShareMargin = screenShareMargin
                 ).let(TransformStyle.callParticipantsStyleTransformer::transform)
             }
         }

@@ -42,7 +42,7 @@
 
     <style name="Stream.CallParticipant" parent="Stream">
         <item name="streamCallParticipantLabelAlignment">bottom_start</item>
-        <item name="streamCallParticipantLabelMargin">8dp</item>
+        <item name="streamCallParticipantLabelMargin">@dimen/callParticipantLabelPadding</item>
         <item name="streamCallParticipantLabelBackgroundColor">@color/stream_dark_gray</item>
         <item name="streamCallParticipantLabelTextSize">@dimen/bodyTextSize</item>
         <item name="streamCallParticipantLabelTextColor">@color/stream_white</item>
@@ -51,10 +51,21 @@
         <item name="streamCallParticipantMicrophoneOffIcon">@drawable/ic_mic_off</item>
         <item name="streamCallParticipantMicrophoneOffTint">@color/stream_error_accent</item>
         <item name="streamCallParticipantAudioLevelTint">@color/stream_white</item>
+        <item name="streamCallParticipantElevation">0dp</item>
+        <item name="streamCallParticipantCornerRadius">0dp</item>
+    </style>
+
+    <style name="Stream.CallParticipant.Grid" parent="Stream.CallParticipant">
+        <!-- Leaves the default styling -->
+    </style>
+
+    <style name="Stream.CallParticipant.List" parent="Stream.CallParticipant">
+        <item name="streamCallParticipantCornerRadius">8dp</item>
     </style>
 
     <style name="Stream.CallParticipants" parent="Stream">
-        <!-- Leaves the default styling -->
+        <item name="streamCallParticipantsGridParticipantStyle">@style/Stream.CallParticipant.Grid</item>
+        <item name="streamCallParticipantsListParticipantStyle">@style/Stream.CallParticipant.List</item>
     </style>
 
     <style name="Stream.IncomingCall" parent="Stream">

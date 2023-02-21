@@ -46,8 +46,8 @@ internal fun ParticipantsRow(
     modifier: Modifier = Modifier
 ) {
     LazyRow(
-        modifier = modifier.padding(horizontal = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = modifier.padding(horizontal = VideoTheme.dimens.screenShareParticipantsRowPadding),
+        horizontalArrangement = Arrangement.spacedBy(VideoTheme.dimens.screenShareParticipantsListItemMargin),
         verticalAlignment = Alignment.CenterVertically,
         content = {
             items(participants) { participant ->
@@ -71,7 +71,7 @@ private fun ParticipantListItem(
     CallParticipant(
         modifier = Modifier
             .size(VideoTheme.dimens.screenShareParticipantItemSize)
-            .clip(RoundedCornerShape(16.dp)),
+            .clip(RoundedCornerShape(VideoTheme.dimens.screenShareParticipantsRadius)),
         call = call,
         participant = participant,
         labelPosition = Alignment.BottomStart

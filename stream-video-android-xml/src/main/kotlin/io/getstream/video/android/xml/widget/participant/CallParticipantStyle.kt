@@ -46,6 +46,8 @@ import io.getstream.video.android.ui.common.R as RCommon
  * @param participantMicOffIcon The icon indicating when the participants microphone is off.
  * @param participantMicOffIconTint The colour of the microphone off indicator drawable.
  * @param participantAudioLevelTint The color of the audio level when the microphone is on.
+ * @param elevation The elevation of the [CallParticipantView].
+ * @param cornerRadius The radius of the [CallParticipantView] corners.
  */
 public data class CallParticipantStyle(
     public val labelAlignment: CallParticipantLabelAlignment,
@@ -56,7 +58,9 @@ public data class CallParticipantStyle(
     @ColorInt public val labelBackgroundColor: Int,
     public val participantMicOffIcon: Drawable,
     @ColorInt public val participantMicOffIconTint: Int,
-    @ColorInt public val participantAudioLevelTint: Int
+    @ColorInt public val participantAudioLevelTint: Int,
+    @Px val elevation: Float,
+    @Px val cornerRadius: Float
 ) {
 
     internal companion object {
@@ -131,6 +135,16 @@ public data class CallParticipantStyle(
                     context.getColorCompat(R.color.stream_white)
                 )
 
+                val elevation = it.getDimension(
+                    R.styleable.CallParticipantView_streamCallParticipantElevation,
+                    0.dpToPxPrecise()
+                )
+
+                val cornersRadius = it.getDimension(
+                    R.styleable.CallParticipantView_streamCallParticipantCornerRadius,
+                    0.dpToPxPrecise()
+                )
+
                 return CallParticipantStyle(
                     labelAlignment = labelAlignment,
                     labelMargin = labelMargin.toInt(),
@@ -140,7 +154,9 @@ public data class CallParticipantStyle(
                     labelBackgroundColor = labelBackgroundColor,
                     participantMicOffIcon = participantMicOffIcon,
                     participantMicOffIconTint = participantMicOffIconTint,
-                    participantAudioLevelTint = participantAudioLevelTint
+                    participantAudioLevelTint = participantAudioLevelTint,
+                    elevation = elevation,
+                    cornerRadius = cornersRadius
                 ).let(TransformStyle.callParticipantStyleTransformer::transform)
             }
         }
