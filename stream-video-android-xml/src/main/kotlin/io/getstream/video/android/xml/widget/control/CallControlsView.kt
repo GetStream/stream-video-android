@@ -110,9 +110,11 @@ public class CallControlsView : ConstraintLayout {
             tag = callControlItem
             layoutParams = LayoutParams(style.callControlButtonSize, style.callControlButtonSize)
             setBackgroundResource(R.drawable.bg_call_control_option)
-            setOnClickListener {
-                val data = it.tag as CallControlItem
-                callControlItemClickListener(data.action)
+            if (callControlItem.enabled) {
+                setOnClickListener {
+                    val data = it.tag as CallControlItem
+                    callControlItemClickListener(data.action)
+                }
             }
         }
         addView(callControlButton)

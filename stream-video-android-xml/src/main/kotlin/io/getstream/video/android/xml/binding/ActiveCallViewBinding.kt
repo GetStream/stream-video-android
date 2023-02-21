@@ -53,8 +53,10 @@ import io.getstream.video.android.ui.common.R as RCommon
 public fun ActiveCallView.bindView(
     viewModel: CallViewModel,
     lifecycleOwner: LifecycleOwner,
-    updateCallMediaState: (CallMediaState) -> List<CallControlItem> = { defaultControlList(it) },
-    onCallAction: (CallAction) -> Unit = viewModel::onCallAction
+    updateCallMediaState: (CallMediaState, Boolean) -> List<CallControlItem> = { mediaState, isScreenSharingActive ->
+        defaultControlList(mediaState, isScreenSharingActive)
+    },
+    onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
 ) {
 
     this.callActionListener = onCallAction
@@ -80,13 +82,13 @@ public fun ActiveCallView.bindView(
     }
 
     startJob(lifecycleOwner) {
-        viewModel.callMediaState.collectLatest {
-            setControlItems(updateCallMediaState(it))
-        }
+        viewModel.callMediaState.combine(viewModel.screenSharingSessions) { mediaState, screenShares ->
+            setControlItems(updateCallMediaState(mediaState, screenShares.firstOrNull() != null))
+        }.collect()
     }
 }
 
-private fun defaultControlList(callMediaState: CallMediaState): List<CallControlItem> {
+private fun defaultControlList(callMediaState: CallMediaState, isScreenSharingActive: Boolean): List<CallControlItem> {
     return listOf(
         CallControlItem(
             icon = if (callMediaState.isSpeakerphoneEnabled) {
@@ -121,8 +123,9 @@ private fun defaultControlList(callMediaState: CallMediaState): List<CallControl
         CallControlItem(
             icon = RCommon.drawable.ic_camera_flip,
             iconTint = R.color.stream_black,
-            backgroundTint = R.color.stream_white,
-            action = FlipCamera
+            backgroundTint = if (!isScreenSharingActive) R.color.stream_white else RCommon.color.stream_disabled,
+            action = FlipCamera,
+            enabled = !isScreenSharingActive
         ),
         CallControlItem(
             icon = RCommon.drawable.ic_call_end,

@@ -60,7 +60,7 @@
     </style>
 
     <style name="Stream.CallParticipant.List" parent="Stream.CallParticipant">
-        <item name="streamCallParticipantCornerRadius">8dp</item>
+        <item name="streamCallParticipantCornerRadius">@dimen/screenShareParticipantsRadius</item>
     </style>
 
     <style name="Stream.CallParticipants" parent="Stream">
