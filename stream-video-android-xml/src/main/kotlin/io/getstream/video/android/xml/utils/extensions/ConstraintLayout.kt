@@ -42,8 +42,8 @@ internal fun ConstraintSet.clearConstraints(viewId: Int) {
     clear(viewId, ConstraintSet.RIGHT)
 }
 
-internal fun ConstraintSet.constrainViewToParentBySide(view: View, side: Int) {
-    connect(view.id, side, ConstraintSet.PARENT_ID, side)
+internal fun ConstraintSet.constrainViewToParentBySide(view: View, side: Int, margin: Int = 0) {
+    connect(view.id, side, ConstraintSet.PARENT_ID, side, margin)
 }
 
 internal fun ConstraintSet.constrainViewStartToEndOfView(startView: View, endView: View) {
@@ -58,12 +58,12 @@ internal fun ConstraintSet.constrainViewEndToStartOfView(startView: View, endVie
     connect(startView.id, ConstraintSet.END, endView.id, ConstraintSet.START)
 }
 
-internal fun ConstraintSet.constrainViewTopToTopOfView(startView: View, endView: View) {
-    connect(startView.id, ConstraintSet.BOTTOM, endView.id, ConstraintSet.BOTTOM)
+internal fun ConstraintSet.constrainViewBottomToTopOfView(startView: View, endView: View) {
+    connect(startView.id, ConstraintSet.BOTTOM, endView.id, ConstraintSet.TOP)
 }
 
-internal fun ConstraintSet.constrainViewBottomToBottomOfView(startView: View, endView: View) {
-    connect(startView.id, ConstraintSet.BOTTOM, endView.id, ConstraintSet.BOTTOM)
+internal fun ConstraintSet.constrainViewTopToBottomOfView(startView: View, endView: View) {
+    connect(startView.id, ConstraintSet.TOP, endView.id, ConstraintSet.BOTTOM)
 }
 
 internal fun ConstraintSet.constrainViewToParent(view: View) {

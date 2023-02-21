@@ -243,7 +243,6 @@ public class CallParticipantView : ConstraintLayout, VideoRenderer {
         super.onDetachedFromWindow()
         binding.participantVideoRenderer.apply {
             track?.video?.removeSink(this)
-            release()
         }
         track = null
     }

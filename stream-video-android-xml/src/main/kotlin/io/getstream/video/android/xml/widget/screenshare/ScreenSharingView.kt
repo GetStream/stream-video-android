@@ -95,7 +95,6 @@ public class ScreenSharingView : ConstraintLayout, VideoRenderer {
         super.onDetachedFromWindow()
         binding.screenShare.apply {
             track?.video?.removeSink(this)
-            release()
         }
         track = null
     }
