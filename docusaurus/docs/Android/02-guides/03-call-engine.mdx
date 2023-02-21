@@ -1,1 +1,100 @@
 ## Observing the Call Engine State
+
+The core part of our Video SDK experience lies within the `StreamCallState`. It represents different types of states a user can be when using our SDK. These states define layers of information you can use to build custom UI, observe what's going on and trigger events that represent flows in your app.
+
+Visually, these events and their lifecycle is represented like this:
+
+// TODO - diagram of state and events
+
+There are a few major state groups. Based on which state group is active, the user can go in different directions using our API and events:
+
+* `Joinable`: The default state group. Represents a situation where a user hasn't fully joined a call or is not a part of an active call. The only state within this group is `Idle`. From this state, the user can join a call with or without connecting to the server.
+* `Active`: The state when the call is active and the user is a part of it. From here, the user can either join the `Started` call state or be in the `Drop` state when a call fails, is cancelled or finished or they decide to leave the call.
+* `Started`: Represents the state when a call has been successfully started. Within this group, the user can be in an `Outgoing` or `Incoming` call state, or they can be in the process of joining the call. The call can still be cancelled or dropped or rejected by the user.
+* `InCall`: The state when the user is in a call, participating. They could be in the `Joined` state if they successfully joined through our API, but haven't connected yet, `Connecting` if they've started the WebSocket and WebRTC connection process or a full `Connected` state if the WebRTC client is set up, the subscriber and publishers are created and they're ready to receive and send tracks. Similar to other groups, the user can choose to `Drop` the call for various reasons, such as leaving the call, it being cancelled and more.
+
+## Listening To StreamCallEngine
+
+By default, we set up the engine in a way that it doesn't require almost any input or work from you. This allows you to focus on building your customized UI, feature set and integrating the rest of our SDK in your app.
+
+However, if your use case requires that you observe and react to our engine state, then there are two ways you can go about it:
+
+* **Observe StreamCallState**: Notably easier, as you don't have to implement state machine logic yourself, you can observe the state directly in your UI or in your business logic layers and trigger different flows when required. This is the recommended approach for the average integrator, as you can achieve powerful behavior with very little work.
+* **Build a custom StreamCallEngine**: Alternatively, you might choose to build your own implementation of the engine. In this case, you'll have to provide business logic for all the different event triggers that can happen in our SDK, but you're able to customize the behavior completely. This is recommended for advanced integrators that want to completely customize the state handling, but still want to piggyback on our events.
+
+Let's see how to go about these two ways of observing the state.
+
+### Observing StreamCallState
+
+When you want to observe the `StreamCallState`, you're able to consume it using a `StreamVideo` instance. The process is very simple, you fetch the underlying `StateFlow` that holds the state and apply a collector or any number of operators that will let you use the data in the way you need.
+
+Here's an example:
+
+```kotlin
+private fun observeCallState() {
+    lifecycleScope.launchWhenCreated {
+        streamVideo.callState
+            .filter { it is StreamCallState.Incoming }
+            .collectLatest { state ->
+                val incoming = state as StreamCallState.Incoming
+
+                if (!incoming.acceptedByMe) {
+                    // TODO - Show Push Notification or Ringing UI
+                }
+            }
+    }
+}
+```
+
+In this small snippet, you're using the `lifecycleScope` to observe, filter and collect the `StreamCallState`. Specifically, you're filtering out only the `Incoming` states.
+
+If the state is `Incoming` and you haven't accepted the call yet, you can trigger custom UI actions and start an Android `Service`, for example, to show the ringing UI or a persistent push notification.
+
+This allows you to easily respond to what's going on in the SDK and the call, without requiring complex logic and much code.
+
+### Building a Custom StreamCallEngine
+
+When you're looking to build a truly custom experience, you might want to override some of the default business logic and write your own flows of state. In those cases it helps that you can provide your own implementation of the `StreamCallEngine`, which allows you to expose state and mutate it whenever and however you wish.
+
+This works by injecting the custom engine into our `StreamVideo` implementation, which allows you to control how the SDK exposes state and how it reacts to triggered events. Here's an example of customizing the default engine:
+
+```kotlin
+val streamVideo = StreamVideoBuilder(
+    ..., // rest of params & config
+    callEngineBuilder = { buildCustomCallEngine(it) } // 1
+).build()
+
+private fun buildCustomCallEngine(scope: CoroutineScope): StreamCallEngine {
+    return object : StreamCallEngine {
+      
+        // 2
+      	val _callState: MutableStateFlow<StreamCallState> = MutableStateFlow(StreamCallState.Idle)
+
+        // ... the rest of the implementation
+        override val callState: StateFlow<StreamCallState> = _callState // 3
+
+        override fun onCoordinatorEvent(event: VideoEvent) { // 4
+            if (
+              event is CallCreatedEvent && 
+              blockedUserIds.contains(event.callInfo.createdByUserId)
+            ) { 
+                // 5: TODO - reject call
+            }
+        }
+    }
+}
+```
+
+We omitted some of the `StreamVideo` parameters for the sake of simplicity, as well as most of the `StreamCallEngine` implementation. You only have to implement the `StreamCallEngine` interface functions which you want to utilize. We recommend exposing the `callState`, while keeping a `MutableStateFlow` property within the class, where you can change the state and reflect it in your app.
+
+There are a few steps in the snippet, so let's go through them:
+
+1. You pass in the `callEngineBuilder` to `StreamVideo,` allowing you to customize what instance and implementation of `StreamCallEngine` is used in the SDK
+2. Within an anonymous object implementation, you declare a piece of `_callState` that you can use to store and mutate the internal SDK state.
+3. You expose this state to the app, by overriding `callState`.
+4. To build custom event handling, you override `onCoordinatorEvent`. This lets you react to various events in the SDK, around calls, healthcheck pings and custom events.
+5. In the `onCoordinatorEvent` implementation, you add a simple check. If you receive a `CallCreatedEvent`, which signals someone is ringing you, you check if the ID of the user who created the call is in your block list. If it is, you can proceed to ignore or reject the call and not show any UI. This allows for a simple yet powerful integration, where users can block each other or mute calls from other people, so they're not disturbed.
+
+In this small example, you're focusing only on `onCoordinatorEvent(event: VideoEvent)`. This function is triggered whenever there's an event that describes new and active calls or a custom event is triggered. In reality, you'll probably implement all or most of the functions `StreamCallEngine` exposes, rather than just one or two.
+
+However you choose to deal with the call state, you have plenty of tools at your disposal to fully customize the SDK. Be sure to check out our [Call Lifecycle guide](02-call-lifecycle.mdx), which will teach you about our SDK lifecycle. It'll surely be of help when customizing the engine and the internal state.
