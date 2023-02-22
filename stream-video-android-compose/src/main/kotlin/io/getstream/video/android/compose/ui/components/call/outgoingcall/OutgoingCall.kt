@@ -46,7 +46,7 @@ import io.getstream.video.android.core.viewmodel.CallViewModel
  * @param onCallAction Handler when the user clicks on some of the call controls.
  */
 @Composable
-public fun OutgoingCallContent(
+public fun OutgoingCall(
     viewModel: CallViewModel,
     modifier: Modifier = Modifier,
     onBackPressed: () -> Unit,
