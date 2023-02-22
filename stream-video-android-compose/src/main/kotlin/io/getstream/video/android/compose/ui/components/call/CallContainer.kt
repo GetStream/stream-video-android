@@ -34,7 +34,7 @@ import io.getstream.video.android.compose.ui.components.call.activecall.internal
 import io.getstream.video.android.compose.ui.components.call.controls.CallControls
 import io.getstream.video.android.compose.ui.components.call.controls.internal.DefaultCallControlsContent
 import io.getstream.video.android.compose.ui.components.call.incomingcall.IncomingCallContent
-import io.getstream.video.android.compose.ui.components.call.outgoingcall.OutgoingCallContent
+import io.getstream.video.android.compose.ui.components.call.outgoingcall.OutgoingCall
 import io.getstream.video.android.compose.ui.components.participants.CallParticipantsInfoMenu
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.InviteUsersToCall
@@ -49,7 +49,7 @@ import io.getstream.video.android.core.model.state.StreamCallState as State
  *
  * The user can be in an Active Call state, if they've full joined the call, an Incoming Call state,
  * if they're being invited to join a call, or Outgoing Call state, if they're inviting other people
- * to join. Based on that, we show [CallContent], [IncomingCallContent] or [OutgoingCallContent],
+ * to join. Based on that, we show [CallContent], [IncomingCallContent] or [OutgoingCall],
  * respectively.
  *
  * @param viewModel The [CallViewModel] used to provide state and various handlers in the call.
@@ -85,6 +85,14 @@ public fun CallContainer(
             onCallAction = onCallAction
         )
     },
+    outgoingCallContent: @Composable () -> Unit = {
+        OutgoingCall(
+            modifier = modifier,
+            viewModel = viewModel,
+            onBackPressed = onBackPressed,
+            onCallAction = onCallAction
+        )
+    },
     callContent: @Composable () -> Unit = {
         DefaultCallContent(
             viewModel = viewModel,
@@ -93,14 +101,6 @@ public fun CallContainer(
             onCallAction = onCallAction,
             callControlsContent = callControlsContent,
             pictureInPictureContent = pictureInPictureContent
-        )
-    },
-    outgoingCallContent: @Composable () -> Unit = {
-        OutgoingCallContent(
-            modifier = modifier,
-            viewModel = viewModel,
-            onBackPressed = onBackPressed,
-            onCallAction = onCallAction
         )
     }
 ) {
