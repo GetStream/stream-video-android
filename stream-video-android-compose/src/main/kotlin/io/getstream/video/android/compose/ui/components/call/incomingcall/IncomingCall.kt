@@ -45,7 +45,7 @@ import io.getstream.video.android.core.viewmodel.CallViewModel
  * @param onCallAction Handler used when the user interacts with Call UI.
  */
 @Composable
-public fun IncomingCallContent(
+public fun IncomingCall(
     viewModel: CallViewModel,
     modifier: Modifier = Modifier,
     onBackPressed: () -> Unit,
@@ -69,8 +69,8 @@ public fun IncomingCallContent(
  * Stateless variant of the Incoming call UI, which you can use to build your own custom logic that
  * powers the state and handlers.
  *
- * @param participants People participating in the call.
  * @param callType The type of call, Audio or Video.
+ * @param participants People participating in the call.
  * @param isVideoEnabled Whether the video should be enabled when entering the call or not.
  * @param modifier Modifier for styling.
  * @param showHeader If the app bar header is shown or not.
@@ -79,8 +79,8 @@ public fun IncomingCallContent(
  */
 @Composable
 public fun IncomingCall(
-    participants: List<CallUser>,
     callType: CallType,
+    participants: List<CallUser>,
     isVideoEnabled: Boolean,
     modifier: Modifier = Modifier,
     showHeader: Boolean = true,
