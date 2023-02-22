@@ -27,14 +27,20 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param type * @param custom */
+ * @param callCid * @param createdAt * @param type * @param userId */
 
-data class SendEventRequest(
+data class CallblockedUser(
+
+    @Json(name = "call_cid")
+    val callCid: kotlin.String,
+
+    @Json(name = "created_at")
+    val createdAt: java.time.OffsetDateTime,
 
     @Json(name = "type")
     val type: kotlin.String,
 
-    @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null
+    @Json(name = "user_id")
+    val userId: kotlin.String
 
 )

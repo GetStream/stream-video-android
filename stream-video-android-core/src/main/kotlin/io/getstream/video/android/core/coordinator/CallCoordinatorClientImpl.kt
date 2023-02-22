@@ -120,11 +120,13 @@ internal class CallCoordinatorClientImpl(
     override suspend fun joinCall(
         id: String,
         type: String,
+        connectionId: String,
         request: GetOrCreateCallRequest
     ): Result<JoinCallResponse> = try {
         val response = videoCallApi.joinCall(
             type = type,
             id = id,
+            connectionId = connectionId,
             getOrCreateCallRequest = request
         )
 

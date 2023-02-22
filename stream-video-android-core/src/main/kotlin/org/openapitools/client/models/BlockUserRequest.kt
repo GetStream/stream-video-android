@@ -27,14 +27,13 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param type * @param custom */
+ * @param userId the user to block
+ */
 
-data class SendEventRequest(
+data class BlockUserRequest(
 
-    @Json(name = "type")
-    val type: kotlin.String,
-
-    @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null
+    /* the user to block */
+    @Json(name = "user_id")
+    val userId: kotlin.String
 
 )
