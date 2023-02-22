@@ -356,6 +356,7 @@ public abstract class io/getstream/video/android/compose/ui/AbstractComposeCallA
 	protected final fun getCallViewModel ()Lio/getstream/video/android/core/viewmodel/CallViewModel;
 	public fun getCallViewModelFactory ()Lio/getstream/video/android/core/viewmodel/CallViewModelFactory;
 	public fun getPermissionManager ()Lio/getstream/video/android/core/permission/PermissionManager;
+	protected fun getPictureInPictureParams ()Landroid/app/PictureInPictureParams;
 	protected fun handleBackPressed ()V
 	protected fun handleCallAction (Lio/getstream/video/android/core/call/state/CallAction;)V
 	public fun initPermissionManager ()Lio/getstream/video/android/core/permission/PermissionManager;

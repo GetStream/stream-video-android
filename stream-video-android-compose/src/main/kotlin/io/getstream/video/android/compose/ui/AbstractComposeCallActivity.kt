@@ -316,28 +316,31 @@ public abstract class AbstractComposeCallActivity :
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
+    protected open fun getPictureInPictureParams(): PictureInPictureParams {
+        val currentOrientation = resources.configuration.orientation
+        val screenSharing = callViewModel.callState.value?.isScreenSharingActive ?: false
+
+        val aspect =
+            if (currentOrientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT && !screenSharing) {
+                Rational(9, 16)
+            } else {
+                Rational(16, 9)
+            }
+
+        return PictureInPictureParams.Builder().setAspectRatio(aspect).apply {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                this.setAutoEnterEnabled(true)
+            }
+        }.build()
+    }
+
     @RequiresApi(Build.VERSION_CODES.N)
     private fun enterPictureInPicture() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             callViewModel.dismissOptions()
 
-            val currentOrientation = resources.configuration.orientation
-            val screenSharing = callViewModel.callState.value?.isScreenSharingActive ?: false
-
-            val aspect =
-                if (currentOrientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT && !screenSharing) {
-                    Rational(9, 16)
-                } else {
-                    Rational(16, 9)
-                }
-
-            enterPictureInPictureMode(
-                PictureInPictureParams.Builder().setAspectRatio(aspect).apply {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        this.setAutoEnterEnabled(true)
-                    }
-                }.build()
-            )
+            enterPictureInPictureMode(getPictureInPictureParams())
         } else {
             enterPictureInPictureMode()
         }
