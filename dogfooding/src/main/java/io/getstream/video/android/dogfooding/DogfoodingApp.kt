@@ -28,7 +28,6 @@ import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.input.CallActivityInput
 import io.getstream.video.android.core.input.CallServiceInput
 import io.getstream.video.android.core.logging.LoggingLevel
-import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.ApiKey
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.user.UserPreferencesManager
@@ -69,8 +68,8 @@ class DogfoodingApp : Application() {
             pushDeviceGenerators = listOf(FirebasePushDeviceGenerator()),
             androidInputs = setOf(
                 CallServiceInput.from(CallService::class),
-                CallActivityInput.from(XmlCallActivity::class),
-                // CallActivityInput.from(CallActivity::class),
+                // CallActivityInput.from(XmlCallActivity::class),
+                CallActivityInput.from(CallActivity::class),
             )
         ).build().also {
             video = it
