@@ -66,6 +66,7 @@ import io.getstream.video.android.app.videoApp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.Avatar
 import io.getstream.video.android.compose.ui.components.avatar.InitialsAvatar
+import io.getstream.video.android.core.user.UserPreferencesManager
 import io.getstream.video.android.core.utils.initials
 import io.getstream.video.android.core.utils.onError
 import io.getstream.video.android.core.utils.onSuccess
@@ -280,7 +281,7 @@ class HomeActivity : AppCompatActivity() {
                 "default",
                 callId,
                 participants,
-                ringing = true
+                ring = true
             ).onSuccess {
                 logger.v { "[dialUsers] completed: $it" }
             }.onError {
@@ -299,7 +300,7 @@ class HomeActivity : AppCompatActivity() {
                 "default",
                 id = callId,
                 participantIds = emptyList(),
-                ringing = false
+                ring = false
             ).onSuccess { data ->
                 logger.v { "[joinCall] succeed: $data" }
             }.onError {
@@ -378,7 +379,8 @@ class HomeActivity : AppCompatActivity() {
 
     @Composable
     fun UserIcon() {
-        val user = videoApp.credentialsProvider.getUserCredentials()
+        val user = UserPreferencesManager.initialize(this).getUserCredentials() ?: return
+
         if (user.imageUrl.isNullOrEmpty()) {
             val initials = if (user.name.isNotEmpty()) {
                 user.name.first()

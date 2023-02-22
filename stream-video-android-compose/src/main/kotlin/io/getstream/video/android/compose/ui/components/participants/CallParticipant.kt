@@ -120,7 +120,7 @@ private fun ParticipantVideo(
         false
     }
 
-    if (track != null && isVideoEnabled) {
+    if (track != null && isVideoEnabled && TrackType.TRACK_TYPE_VIDEO in participant.publishedTracks) {
         VideoRenderer(
             call = call,
             videoTrack = track,
@@ -152,7 +152,7 @@ private fun BoxScope.ParticipantLabel(
         modifier = Modifier
             .align(labelPosition)
             .padding(VideoTheme.dimens.callParticipantLabelPadding)
-            .height(24.dp)
+            .height(VideoTheme.dimens.callParticipantLabelHeight)
             .wrapContentWidth()
             .background(
                 Color.DarkGray,
@@ -165,7 +165,7 @@ private fun BoxScope.ParticipantLabel(
             isSpeaking = participant.isSpeaking,
             modifier = Modifier
                 .align(CenterVertically)
-                .padding(start = 8.dp)
+                .padding(start = VideoTheme.dimens.callParticipantSoundIndicatorPaddingStart)
         )
 
         val name = participant.name.ifEmpty {

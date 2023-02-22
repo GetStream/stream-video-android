@@ -36,26 +36,32 @@ internal fun StreamCallState.Outgoing.toMetadata(): CallMetadata =
         createdByUserId = createdByUserId,
         broadcastingEnabled = broadcastingEnabled,
         recordingEnabled = recordingEnabled,
-        extraData = emptyMap()
+        custom = custom,
+        callEgress = callEgress,
+        callDetails = callDetails
     )
 
 /**
  * Converts [StreamCallState.InCall] into [StreamCallState.Connecting].
  */
-internal fun StreamCallState.Joined.toConnecting(sfuSessionId: StreamSfuSessionId) = StreamCallState.Connecting(
-    callGuid = callGuid,
-    callKind = callKind,
-    callUrl = callUrl,
-    createdByUserId = createdByUserId,
-    broadcastingEnabled = broadcastingEnabled,
-    recordingEnabled = recordingEnabled,
-    createdAt = createdAt,
-    updatedAt = updatedAt,
-    users = users,
-    iceServers = iceServers,
-    sfuSessionId = sfuSessionId,
-    sfuToken = sfuToken,
-)
+internal fun StreamCallState.Joined.toConnecting(sfuSessionId: StreamSfuSessionId) =
+    StreamCallState.Connecting(
+        callGuid = callGuid,
+        callKind = callKind,
+        callUrl = callUrl,
+        createdByUserId = createdByUserId,
+        broadcastingEnabled = broadcastingEnabled,
+        recordingEnabled = recordingEnabled,
+        createdAt = createdAt,
+        updatedAt = updatedAt,
+        users = users,
+        iceServers = iceServers,
+        sfuSessionId = sfuSessionId,
+        sfuToken = sfuToken,
+        custom = custom,
+        callDetails = callDetails,
+        callEgress = callEgress
+    )
 
 /**
  * Converts [StreamCallState.Connecting] into [StreamCallState.Connected].
@@ -73,4 +79,7 @@ internal fun StreamCallState.Connecting.toConnected() = StreamCallState.Connecte
     iceServers = iceServers,
     sfuSessionId = sfuSessionId,
     sfuToken = sfuToken,
+    custom = custom,
+    callDetails = callDetails,
+    callEgress = callEgress
 )

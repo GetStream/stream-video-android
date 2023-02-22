@@ -21,25 +21,17 @@ import android.content.Context
 import io.getstream.log.StreamLog
 import io.getstream.log.android.AndroidStreamLogger
 import io.getstream.video.android.BuildConfig
+import io.getstream.video.android.app.ui.call.CallActivity
 import io.getstream.video.android.app.ui.call.CallService
-import io.getstream.video.android.app.ui.call.XmlCallActivity
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.input.CallActivityInput
 import io.getstream.video.android.core.input.CallServiceInput
 import io.getstream.video.android.core.logging.LoggingLevel
-import io.getstream.video.android.core.token.CredentialsProvider
-import io.getstream.video.android.core.user.UserCredentialsManager
-import io.getstream.video.android.core.user.UserPreferences
+import io.getstream.video.android.core.model.User
+import io.getstream.video.android.core.user.UserPreferencesManager
 
 class VideoApp : Application() {
-
-    val userPreferences: UserPreferences by lazy {
-        UserCredentialsManager.getPreferences()
-    }
-
-    lateinit var credentialsProvider: CredentialsProvider
-        private set
 
     lateinit var streamVideo: StreamVideo
         private set
@@ -51,32 +43,27 @@ class VideoApp : Application() {
             StreamLog.install(AndroidStreamLogger())
         }
         StreamLog.i(TAG) { "[onCreate] no args" }
-        UserCredentialsManager.initialize(this)
+        UserPreferencesManager.initialize(this)
     }
 
     /**
      * Sets up and returns the [streamVideo] required to connect to the API.
      */
     fun initializeStreamVideo(
-        credentialsProvider: CredentialsProvider,
+        user: User,
+        apiKey: String,
         loggingLevel: LoggingLevel,
     ): StreamVideo {
         StreamLog.d(TAG) { "[initializeStreamCalls] loggingLevel: $loggingLevel" }
-        if (this::credentialsProvider.isInitialized) {
-            this.credentialsProvider.updateUser(
-                credentialsProvider.getUserCredentials()
-            )
-        } else {
-            this.credentialsProvider = credentialsProvider
-        }
 
         return StreamVideoBuilder(
             context = this,
-            credentialsProvider = this.credentialsProvider,
+            user = user,
+            apiKey = apiKey,
             androidInputs = setOf(
                 CallServiceInput.from(CallService::class),
-                // CallActivityInput.from(CallActivity::class),
-                CallActivityInput.from(XmlCallActivity::class),
+                CallActivityInput.from(CallActivity::class),
+                // CallActivityInput.from(XmlCallActivity::class),
             ),
             loggingLevel = loggingLevel
         ).build().also {
@@ -86,14 +73,12 @@ class VideoApp : Application() {
     }
 
     fun logOut() {
-        streamVideo.clearCallState()
-        streamVideo.removeDevices(userPreferences.getDevices())
-        userPreferences.clear()
+        streamVideo.logOut()
     }
 
     companion object {
         private const val TAG = "Call:App"
-        const val API_KEY = "us83cfwuhy8n"
+        const val API_KEY = "w6yaq5388uym"
     }
 }
 

@@ -23,7 +23,7 @@ import androidx.core.app.NotificationManagerCompat
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.notifications.internal.RejectCallBroadcastReceiver.Companion.ACTION_REJECT_CALL
-import io.getstream.video.android.core.user.UserCredentialsManager
+import io.getstream.video.android.core.user.UserPreferencesManager
 import io.getstream.video.android.core.utils.Failure
 import io.getstream.video.android.core.utils.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.core.utils.INTENT_EXTRA_NOTIFICATION_ID
@@ -57,18 +57,16 @@ internal class RejectCallBroadcastReceiver : BroadcastReceiver() {
             if (callCid.isNullOrBlank()) {
                 return
             }
-            val preferences = UserCredentialsManager.initialize(context)
+            val preferences = UserPreferencesManager.initialize(context)
 
-            val user = preferences.getCachedCredentials()
-            val apiKey = preferences.getCachedApiKey()
+            val user = preferences.getUserCredentials()
+            val apiKey = preferences.getApiKey()
 
-            if (user != null && !apiKey.isNullOrBlank()) {
+            if (user != null && apiKey.isNotBlank()) {
                 val streamVideo = StreamVideoBuilder(
                     context,
-                    credentialsProvider = io.getstream.video.android.core.token.AuthCredentialsProvider(
-                        user = user,
-                        apiKey = apiKey
-                    )
+                    user = user,
+                    apiKey = apiKey
                 ).build()
 
                 CoroutineScope(Dispatchers.IO).launch {

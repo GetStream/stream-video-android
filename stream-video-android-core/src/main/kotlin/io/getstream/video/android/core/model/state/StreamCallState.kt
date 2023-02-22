@@ -16,18 +16,22 @@
 
 package io.getstream.video.android.core.model.state
 
+import io.getstream.video.android.core.engine.StreamCallEngine
 import io.getstream.video.android.core.errors.VideoError
+import io.getstream.video.android.core.model.CallDetails
+import io.getstream.video.android.core.model.CallEgress
 import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.core.model.IceServer
 import io.getstream.video.android.core.model.SfuToken
 import io.getstream.video.android.core.model.StreamCallGuid
 import io.getstream.video.android.core.model.StreamCallKind
 import io.getstream.video.android.core.model.StreamSfuSessionId
+import io.getstream.video.android.core.model.User
 import java.io.Serializable
-import java.util.Date
+import java.util.*
 
 /**
- * Represents possible state of [io.getstream.video.android.engine.StreamCallEngine].
+ * Represents possible state of [StreamCallEngine].
  */
 public sealed interface StreamCallState : Serializable {
 
@@ -39,7 +43,9 @@ public sealed interface StreamCallState : Serializable {
     /**
      * Signifies there is no active call.
      */
-    public object Idle : StreamCallState, Joinable { override fun toString(): String = "Idle" }
+    public object Idle : StreamCallState, Joinable {
+        override fun toString(): String = "Idle"
+    }
 
     /**
      * Represents an active state.
@@ -56,6 +62,9 @@ public sealed interface StreamCallState : Serializable {
         public abstract val createdAt: StreamDate
         public abstract val updatedAt: StreamDate
         public abstract val users: Map<String, CallUser>
+        public abstract val callDetails: CallDetails
+        public abstract val callEgress: CallEgress
+        public abstract val custom: Map<String, Any>
     }
 
     /**
@@ -70,6 +79,10 @@ public sealed interface StreamCallState : Serializable {
         override val createdAt: StreamDate,
         override val updatedAt: StreamDate,
         override val users: Map<String, CallUser>,
+        override val callDetails: CallDetails,
+        override val callEgress: CallEgress,
+        override val custom: Map<String, Any>,
+        val rejections: List<User>,
         val acceptedByCallee: Boolean
     ) : Started(), Joinable
 
@@ -85,6 +98,9 @@ public sealed interface StreamCallState : Serializable {
         override val createdAt: StreamDate,
         override val updatedAt: StreamDate,
         override val users: Map<String, CallUser>,
+        override val callDetails: CallDetails,
+        override val callEgress: CallEgress,
+        override val custom: Map<String, Any>,
         val acceptedByMe: Boolean,
     ) : Started(), Joinable
 
@@ -97,6 +113,9 @@ public sealed interface StreamCallState : Serializable {
         override val createdAt: StreamDate,
         override val updatedAt: StreamDate,
         override val users: Map<String, CallUser>,
+        override val callDetails: CallDetails,
+        override val callEgress: CallEgress,
+        override val custom: Map<String, Any>
     ) : Started()
 
     public sealed class InCall : Started() {
@@ -121,6 +140,9 @@ public sealed interface StreamCallState : Serializable {
         override val callUrl: String,
         override val sfuToken: SfuToken,
         override val iceServers: List<IceServer>,
+        override val callDetails: CallDetails,
+        override val callEgress: CallEgress,
+        override val custom: Map<String, Any>
     ) : InCall()
 
     /**
@@ -141,6 +163,9 @@ public sealed interface StreamCallState : Serializable {
         override val callUrl: String,
         override val sfuToken: SfuToken,
         override val iceServers: List<IceServer>,
+        override val callDetails: CallDetails,
+        override val callEgress: CallEgress,
+        override val custom: Map<String, Any>
     ) : InCall()
 
     /**
@@ -161,6 +186,9 @@ public sealed interface StreamCallState : Serializable {
         override val callUrl: String,
         override val sfuToken: SfuToken,
         override val iceServers: List<IceServer>,
+        override val callDetails: CallDetails,
+        override val callEgress: CallEgress,
+        override val custom: Map<String, Any>
     ) : InCall()
 
     /**
@@ -181,14 +209,19 @@ public sealed class DropReason : Serializable {
     public data class Failure(val error: VideoError) : DropReason()
     public data class Rejected(val byUserId: String) : DropReason()
     public data class Cancelled(val byUserId: String) : DropReason()
-    public object Ended : DropReason() { override fun toString(): String = "Ended" }
+    public object Ended : DropReason() {
+        override fun toString(): String = "Ended"
+    }
 }
 
 public sealed class StreamDate : Serializable {
     public data class Specified(val date: Date) : StreamDate() {
         public constructor(ts: Long) : this(Date(ts))
     }
-    public object Undefined : StreamDate() { override fun toString(): String = "Undefined" }
+
+    public object Undefined : StreamDate() {
+        override fun toString(): String = "Undefined"
+    }
 
     public companion object {
         public fun from(ts: Long): StreamDate = when (ts) {

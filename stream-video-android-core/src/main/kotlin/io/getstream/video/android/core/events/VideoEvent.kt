@@ -19,6 +19,9 @@ package io.getstream.video.android.core.events
 import io.getstream.video.android.core.model.CallDetails
 import io.getstream.video.android.core.model.CallInfo
 import io.getstream.video.android.core.model.CallUser
+import io.getstream.video.android.core.model.StreamCallCid
+import io.getstream.video.android.core.model.User
+import java.util.*
 
 /**
  * Represents the events coming in from the socket.
@@ -37,7 +40,6 @@ public data class ConnectedEvent(
  */
 public data class HealthCheckEvent(
     val clientId: String,
-    val userId: String
 ) : VideoEvent()
 
 /**
@@ -47,8 +49,8 @@ public data class CallCreatedEvent(
     val callCid: String,
     val ringing: Boolean,
     val users: Map<String, CallUser>,
-    val info: CallInfo,
-    val details: CallDetails
+    val callInfo: CallInfo,
+    val callDetails: CallDetails,
 ) : VideoEvent()
 
 /**
@@ -56,9 +58,9 @@ public data class CallCreatedEvent(
  */
 public data class CallUpdatedEvent(
     val callCid: String,
-    val users: Map<String, CallUser>,
+    val capabilitiesByRole: Map<String, List<String>>,
     val info: CallInfo,
-    val details: CallDetails
+    val ownCapabilities: List<String>
 ) : VideoEvent()
 
 /**
@@ -66,9 +68,7 @@ public data class CallUpdatedEvent(
  */
 public data class CallEndedEvent(
     val callCid: String,
-    val users: Map<String, CallUser>,
-    val info: CallInfo,
-    val details: CallDetails
+    val endedByUser: User
 ) : VideoEvent()
 
 /**
@@ -94,25 +94,23 @@ public data class CallMembersDeletedEvent(
 public data class CallAcceptedEvent(
     val callCid: String,
     val sentByUserId: String,
-    val users: Map<String, CallUser>,
-    val info: CallInfo,
-    val details: CallDetails
 ) : VideoEvent()
 
 public data class CallRejectedEvent(
     val callCid: String,
-    val sentByUserId: String,
-    val users: Map<String, CallUser>,
-    val info: CallInfo,
-    val details: CallDetails
+    val user: User,
+    val updatedAt: Date
 ) : VideoEvent()
 
 public data class CallCanceledEvent(
     val callCid: String,
     val sentByUserId: String,
-    val users: Map<String, CallUser>,
-    val info: CallInfo,
-    val details: CallDetails
+) : VideoEvent()
+
+public data class CustomEvent(
+    val cid: StreamCallCid?,
+    val sentByUser: User?,
+    val custom: Map<String, Any>?,
 ) : VideoEvent()
 
 public object UnknownEvent : VideoEvent()

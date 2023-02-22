@@ -312,7 +312,7 @@ public class CallViewModel(
             FlipCamera -> flipCamera()
             CancelCall -> cancelCall()
             AcceptCall -> acceptCall()
-            DeclineCall -> hangUpCall()
+            DeclineCall -> rejectCall()
             LeaveCall -> cancelCall()
             is InviteUsersToCall -> inviteUsersToCall(callAction.users)
             is ToggleScreenConfiguration -> {
@@ -345,7 +345,7 @@ public class CallViewModel(
     /**
      * @return A [List] of [AudioDevice] that can be used for playback.
      */
-    public fun getAudioDevices(): List<io.getstream.video.android.core.audio.AudioDevice> {
+    public fun getAudioDevices(): List<AudioDevice> {
         return client?.getAudioDevices() ?: listOf()
     }
 
@@ -373,7 +373,7 @@ public class CallViewModel(
      *
      * @param device The device to use.
      */
-    private fun selectAudioDevice(device: io.getstream.video.android.core.audio.AudioDevice) {
+    private fun selectAudioDevice(device: AudioDevice) {
         client?.selectAudioDevice(device)
     }
 
@@ -406,18 +406,6 @@ public class CallViewModel(
         viewModelScope.launch {
             val result = streamVideo.rejectCall(state.callGuid.cid)
             logger.d { "[declineCall] result: $result" }
-        }
-    }
-
-    private fun hangUpCall() {
-        val state = streamVideo.callState.value
-        if (state !is State.Active) {
-            logger.w { "[hangUpCall] rejected (state is not Active): $state" }
-            return
-        }
-        logger.d { "[hangUpCall] state: $state" }
-        viewModelScope.launch {
-            streamVideo.cancelCall(state.callGuid.cid)
         }
     }
 

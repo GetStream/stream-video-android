@@ -33,6 +33,7 @@ import io.getstream.video.android.core.call.signal.socket.SfuSocketListener
 import io.getstream.video.android.core.call.state.ConnectionState
 import io.getstream.video.android.core.call.utils.stringify
 import io.getstream.video.android.core.coordinator.CallCoordinatorClient
+import io.getstream.video.android.core.engine.StreamCallEngine
 import io.getstream.video.android.core.engine.adapter.SfuSocketListenerAdapter
 import io.getstream.video.android.core.errors.DisconnectCause
 import io.getstream.video.android.core.errors.VideoError
@@ -51,13 +52,14 @@ import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
 import io.getstream.video.android.core.filter.InFilterObject
 import io.getstream.video.android.core.filter.toMap
-import io.getstream.video.android.core.internal.module.SfuClientModule
-import io.getstream.video.android.core.internal.moshi.filterAdapter
+import io.getstream.video.android.core.model.Call
 import io.getstream.video.android.core.model.CallParticipantState
 import io.getstream.video.android.core.model.CallSettings
 import io.getstream.video.android.core.model.IceCandidate
 import io.getstream.video.android.core.model.IceServer
 import io.getstream.video.android.core.model.SfuToken
+import io.getstream.video.android.core.model.StreamCallGuid
+import io.getstream.video.android.core.model.StreamCallId
 import io.getstream.video.android.core.model.StreamPeerType
 import io.getstream.video.android.core.model.state.StreamCallState
 import io.getstream.video.android.core.model.toPeerType
@@ -66,7 +68,6 @@ import io.getstream.video.android.core.utils.Result
 import io.getstream.video.android.core.utils.Success
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import io.getstream.video.android.core.utils.buildConnectionConfiguration
-import io.getstream.video.android.core.utils.buildLocalIceServers
 import io.getstream.video.android.core.utils.buildMediaConstraints
 import io.getstream.video.android.core.utils.buildRemoteIceServers
 import io.getstream.video.android.core.utils.onError
@@ -85,7 +86,7 @@ import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import okio.ByteString.Companion.encode
+import org.openapitools.client.models.QueryMembersRequest
 import org.webrtc.AudioTrack
 import org.webrtc.Camera2Capturer
 import org.webrtc.Camera2Enumerator
@@ -101,7 +102,6 @@ import org.webrtc.SessionDescription
 import org.webrtc.SurfaceTextureHelper
 import org.webrtc.VideoCapturer
 import org.webrtc.VideoTrack
-import stream.video.coordinator.client_v1_rpc.QueryUsersRequest
 import stream.video.sfu.event.JoinRequest
 import stream.video.sfu.event.JoinResponse
 import stream.video.sfu.models.CallState
@@ -125,9 +125,10 @@ import kotlin.random.Random
 internal class CallClientImpl(
     private val context: Context,
     private val coordinatorClient: CallCoordinatorClient,
+    private val callGuid: StreamCallGuid,
     private inline val getCurrentUserId: () -> String,
     private inline val getSfuToken: () -> SfuToken,
-    private val callEngine: io.getstream.video.android.core.engine.StreamCallEngine,
+    private val callEngine: StreamCallEngine,
     private val sfuClient: SfuClient,
     private val sfuSocket: SfuSocket,
     private val remoteIceServers: List<IceServer>,
@@ -137,7 +138,7 @@ internal class CallClientImpl(
 
     private var connectionState: ConnectionState = ConnectionState.DISCONNECTED
     private var sessionId: String = ""
-    private var call: io.getstream.video.android.core.model.Call? = null
+    private var call: Call? = null
 
     /**
      * State that indicates whether the camera is capturing and sending video or not.
@@ -158,19 +159,14 @@ internal class CallClientImpl(
     override val isSpeakerPhoneEnabled: StateFlow<Boolean> = _isSpeakerPhoneEnabled
 
     private val supervisorJob = SupervisorJob()
-    private val coroutineScope = CoroutineScope(io.getstream.video.android.core.dispatchers.DispatcherProvider.IO + supervisorJob)
+    private val coroutineScope =
+        CoroutineScope(io.getstream.video.android.core.dispatchers.DispatcherProvider.IO + supervisorJob)
 
     /**
      * Connection and WebRTC.
      */
     private val peerConnectionFactory by lazy { StreamPeerConnectionFactory(context) }
-    private val iceServers by lazy {
-        if (SfuClientModule.REDIRECT_SIGNAL_URL == null) {
-            buildRemoteIceServers(remoteIceServers)
-        } else {
-            buildLocalIceServers()
-        }
-    }
+    private val iceServers by lazy { buildRemoteIceServers(remoteIceServers) }
 
     private val connectionConfiguration: PeerConnection.RTCConfiguration by lazy {
         buildConnectionConfiguration(iceServers)
@@ -370,16 +366,19 @@ internal class CallClientImpl(
     }
 
     private fun listenToParticipants() {
-        val room = call ?: throw IllegalStateException("Call is in an incorrect state, null!")
+        val call = call ?: throw IllegalStateException("Call is in an incorrect state, null!")
 
         coroutineScope.launch {
-            room.callParticipants.collectLatest { participants ->
+            call.callParticipants.collectLatest { participants ->
                 updateParticipantsSubscriptions(participants)
             }
         }
     }
 
-    override suspend fun connectToCall(sessionId: String, autoPublish: Boolean): Result<io.getstream.video.android.core.model.Call> {
+    override suspend fun connectToCall(
+        sessionId: String,
+        autoPublish: Boolean
+    ): Result<Call> {
         logger.d { "[connectToCall] #sfu; sessionId: $sessionId, autoPublish: $autoPublish" }
         if (connectionState != ConnectionState.DISCONNECTED) {
             return Failure(
@@ -403,7 +402,7 @@ internal class CallClientImpl(
     /**
      * @return The active call instance, if it exists.
      */
-    override fun getActiveCall(): io.getstream.video.android.core.model.Call? = call
+    override fun getActiveCall(): Call? = call
 
     /**
      * @return [StateFlow] that holds [RTCStatsReport] that the publisher exposes.
@@ -419,36 +418,43 @@ internal class CallClientImpl(
         return subscriber?.getStats() ?: MutableStateFlow(null)
     }
 
-    private fun createCall(sessionId: String): io.getstream.video.android.core.model.Call {
+    private fun createCall(sessionId: String): Call {
         logger.d { "[createCall] #sfu; sessionId: $sessionId" }
         this.sessionId = sessionId
 
         return buildCall()
     }
 
-    private fun buildCall(): io.getstream.video.android.core.model.Call {
+    private fun buildCall(): Call {
         logger.d { "[buildCall] #sfu; sessionId: $sessionId" }
-        return io.getstream.video.android.core.model.Call(
+        return Call(
             context = context,
             getCurrentUserId = getCurrentUserId,
             eglBase = peerConnectionFactory.eglBase,
         )
     }
 
-    private suspend fun loadParticipantsData(callState: CallState?, callSettings: CallSettings) {
+    private suspend fun loadParticipantsData(
+        callId: StreamCallId,
+        callState: CallState?,
+        callSettings: CallSettings,
+        callType: String
+    ) {
         logger.d { "[loadParticipantsData] #sfu; callState: $callState, callSettings: $callSettings" }
         if (callState != null) {
             setPartialParticipants(callState.participants)
 
-            val query = filterAdapter.toJson(
-                InFilterObject(
-                    "id",
-                    callState.participants.map { it.user_id }.toSet()
-                ).toMap()
-            )
+            val query = InFilterObject(
+                "id",
+                callState.participants.map { it.user_id }.toSet()
+            ).toMap()
 
-            val userQueryResult = coordinatorClient.queryUsers(
-                QueryUsersRequest(mq_json = query.encode())
+            val userQueryResult = coordinatorClient.queryMembers(
+                QueryMembersRequest(
+                    id = callId,
+                    type = callType,
+                    filterConditions = query
+                )
             )
 
             if (userQueryResult is Success) {
@@ -467,7 +473,8 @@ internal class CallClientImpl(
                     isLocal = it.session_id == sessionId,
                     name = "",
                     profileImageURL = "",
-                    role = ""
+                    role = "",
+                    publishedTracks = it.published_tracks.toSet()
                 )
             }
         )
@@ -494,7 +501,12 @@ internal class CallClientImpl(
         return when (result) {
             is Success -> {
                 createPeerConnections(autoPublish)
-                loadParticipantsData(result.data.call_state, callSettings)
+                loadParticipantsData(
+                    callId = callGuid.id,
+                    callType = callGuid.type,
+                    callState = result.data.call_state,
+                    callSettings = callSettings
+                )
                 createUserTracks(callSettings)
                 call.setupAudio(callSettings)
 
@@ -678,15 +690,22 @@ internal class CallClientImpl(
     }
 
     private suspend fun addParticipant(event: ParticipantJoinedEvent) {
-        val query = filterAdapter.toJson(
-            InFilterObject("id", setOf(event.participant.user_id)).toMap()
-        ).encode()
+        val query = InFilterObject("id", setOf(event.participant.user_id)).toMap()
 
-        val userQueryResult = coordinatorClient.queryUsers(
-            QueryUsersRequest(mq_json = query)
+        val userQueryResult = coordinatorClient.queryMembers(
+            QueryMembersRequest(
+                id = callGuid.id,
+                type = callGuid.type,
+                filterConditions = query
+            )
         )
 
         if (userQueryResult is Success) {
+            if (userQueryResult.data.isEmpty()) {
+                addPartialParticipant(event.participant)
+                return
+            }
+
             val user = userQueryResult.data.first()
             val isLocal = event.participant.session_id == sessionId
 
@@ -701,7 +720,22 @@ internal class CallClientImpl(
                     isLocal = isLocal,
                 )
             )
+        } else {
+            addPartialParticipant(event.participant)
         }
+    }
+
+    private fun addPartialParticipant(participant: Participant) {
+        call?.addParticipant(
+            CallParticipantState(
+                id = participant.user_id,
+                idPrefix = participant.track_lookup_prefix,
+                sessionId = participant.session_id,
+                name = "",
+                profileImageURL = "",
+                role = ""
+            )
+        )
     }
 
     private suspend fun handleTrickle(event: ICETrickleEvent) {

@@ -38,7 +38,7 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.User
-import io.getstream.video.android.core.token.AuthCredentialsProvider
+import io.getstream.video.android.core.user.UserPreferencesManager
 import io.getstream.video.android.tutorial_final.VideoApp
 import io.getstream.video.android.tutorial_final.ui.components.UserList
 import io.getstream.video.android.tutorial_final.ui.home.HomeActivity
@@ -72,9 +72,9 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun checkIfUserLoggedIn() {
-        val preferences = videoApp.userPreferences
+        val preferences = UserPreferencesManager.initialize(this)
 
-        val user = preferences.getCachedCredentials()
+        val user = preferences.getUserCredentials()
 
         if (user != null && user.isValid()) {
             logIn(user)
@@ -131,10 +131,8 @@ class LoginActivity : AppCompatActivity() {
     private fun logIn(selectedUser: User) {
         logger.i { "[logIn] selectedUser: $selectedUser" }
         videoApp.initializeStreamVideo(
-            credentialsProvider = AuthCredentialsProvider(
-                user = selectedUser,
-                apiKey = VideoApp.API_KEY,
-            ),
+            user = selectedUser,
+            apiKey = VideoApp.API_KEY,
             loggingLevel = LoggingLevel.BODY
         )
         startActivity(HomeActivity.getIntent(this))

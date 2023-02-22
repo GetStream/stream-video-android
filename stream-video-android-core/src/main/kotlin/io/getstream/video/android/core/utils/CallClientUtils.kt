@@ -16,53 +16,9 @@
 
 package io.getstream.video.android.core.utils
 
-import io.getstream.video.android.core.internal.module.SfuClientModule
 import io.getstream.video.android.core.model.IceServer
 import org.webrtc.MediaConstraints
 import org.webrtc.PeerConnection
-
-internal fun buildIceServers(servers: List<IceServer>?): List<PeerConnection.IceServer> {
-    return if (servers != null && servers.isNotEmpty()) {
-        servers.map {
-            PeerConnection.IceServer.builder(it.urls.first())
-                .setUsername(it.username)
-                .setPassword(it.password)
-                .createIceServer()
-        }
-    } else {
-        if (SfuClientModule.REDIRECT_SIGNAL_URL == null) {
-            buildRemoteIceServers(SfuClientModule.SIGNAL_HOST_BASE)
-        } else {
-            buildLocalIceServers()
-        }
-    }
-}
-
-internal fun buildTestIceServers(): List<PeerConnection.IceServer> {
-    return if (SfuClientModule.REDIRECT_SIGNAL_URL == null) {
-        buildRemoteIceServers(SfuClientModule.SIGNAL_HOST_BASE)
-    } else {
-        buildLocalIceServers()
-    }
-}
-
-internal fun buildLocalIceServers(): List<PeerConnection.IceServer> {
-    return listOf(
-        PeerConnection.IceServer.builder("turn:openrelay.metered.ca:80")
-            .setUsername("openrelayproject")
-            .setPassword("openrelayproject")
-            .createIceServer(),
-
-        PeerConnection.IceServer.builder("turn:openrelay.metered.ca:443")
-            .setUsername("openrelayproject")
-            .setPassword("openrelayproject")
-            .createIceServer(),
-        PeerConnection.IceServer.builder("turn:openrelay.metered.ca:443?transport=tcp")
-            .setUsername("openrelayproject")
-            .setPassword("openrelayproject")
-            .createIceServer(),
-    )
-}
 
 internal fun buildRemoteIceServers(iceServers: List<IceServer>): List<PeerConnection.IceServer> {
     return iceServers.map {
@@ -71,17 +27,6 @@ internal fun buildRemoteIceServers(iceServers: List<IceServer>): List<PeerConnec
             .setPassword(it.password)
             .createIceServer()
     }
-}
-
-internal fun buildRemoteIceServers(hostUrl: String): List<PeerConnection.IceServer> {
-    return listOf(
-        PeerConnection.IceServer.builder("stun:stun.l.google.com:19302")
-            .createIceServer(),
-        PeerConnection.IceServer.builder("turn:$hostUrl:3478")
-            .setUsername("video")
-            .setPassword("video")
-            .createIceServer(),
-    )
 }
 
 internal fun buildConnectionConfiguration(

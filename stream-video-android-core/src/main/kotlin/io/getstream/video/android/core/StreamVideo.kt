@@ -25,6 +25,7 @@ import io.getstream.video.android.core.model.IceServer
 import io.getstream.video.android.core.model.JoinedCall
 import io.getstream.video.android.core.model.SfuToken
 import io.getstream.video.android.core.model.StreamCallCid
+import io.getstream.video.android.core.model.StreamCallGuid
 import io.getstream.video.android.core.model.StreamCallId
 import io.getstream.video.android.core.model.StreamCallType
 import io.getstream.video.android.core.model.User
@@ -76,29 +77,12 @@ public interface StreamVideo {
 
     /**
      * Creates a call with given information. You can then use the [CallMetadata] and join it and get auth
-     * information to fully connect. This is different from [getOrCreateCall] because if the
-     * call already exists, we'll return an error.
-     *
-     * @param type The call type.
-     * @param id The call ID.
-     * @param participantIds List of other people to invite to the call.
-     *
-     * @return [Result] which contains the [CallMetadata] and its information.
-     */
-    public suspend fun createCall(
-        type: StreamCallType,
-        id: StreamCallId,
-        participantIds: List<String> = emptyList(),
-        ringing: Boolean
-    ): Result<CallMetadata>
-
-    /**
-     * Creates a call with given information. You can then use the [CallMetadata] and join it and get auth
      * information to fully connect.
      *
      * @param type The call type.
      * @param id The call ID.
      * @param participantIds List of other people to invite to the call.
+     * @param ring If you want to ring participants or not.
      *
      * @return [Result] which contains the [CallMetadata] and its information.
      */
@@ -106,7 +90,7 @@ public interface StreamVideo {
         type: StreamCallType,
         id: StreamCallId,
         participantIds: List<String> = emptyList(),
-        ringing: Boolean
+        ring: Boolean
     ): Result<CallMetadata>
 
     /**
@@ -116,7 +100,7 @@ public interface StreamVideo {
      * @param type The call type.
      * @param id The call ID.
      * @param participantIds List of other people to invite to the call.
-     * @param ringing If we should ring any of the participants. This doesn't work if we're joining
+     * @param ring If we should ring any of the participants. This doesn't work if we're joining
      * an existing call.
      *
      * @return [Result] which contains the [JoinedCall] with the auth information required to fully
@@ -126,7 +110,7 @@ public interface StreamVideo {
         type: StreamCallType,
         id: StreamCallId,
         participantIds: List<String> = emptyList(),
-        ringing: Boolean = false
+        ring: Boolean = false
     ): Result<JoinedCall>
 
     /**
@@ -164,17 +148,25 @@ public interface StreamVideo {
      *
      * @param callCid The CID of the channel, describing the type and id.
      * @param dataJson The data JSON encoded.
+     * @param eventType The type of the event to send.
+     *
      * @return [Result] which contains if the event was successfully sent.
      */
     public suspend fun sendCustomEvent(
         callCid: StreamCallCid,
-        dataJson: String
+        dataJson: Map<String, Any>,
+        eventType: String
     ): Result<Boolean>
 
     /**
      * Leaves the currently active call and clears up all connections to it.
      */
     public fun clearCallState()
+
+    /**
+     * Clears the internal user state.
+     */
+    public fun logOut()
 
     /**
      * Gets the current user information.
@@ -203,13 +195,16 @@ public interface StreamVideo {
      *
      * Use it to control the track state, mute/unmute devices and listen to call events.
      *
+     * @param callGuid The GUID of the Call, containing the ID and the type.
      * @param signalUrl The URL of the server in which the call is being hosted.
      * @param sfuToken User's ticket to enter the call.
      * @param iceServers Servers required to appropriately connect to the call and receive tracks.
+     *
      * @return An instance of [CallClient] ready to connect to a call. Make sure to call
      * [CallClient.connectToCall] when you're ready to fully join a call.
      */
     public fun createCallClient(
+        callGuid: StreamCallGuid,
         signalUrl: String,
         sfuToken: SfuToken,
         iceServers: List<IceServer>

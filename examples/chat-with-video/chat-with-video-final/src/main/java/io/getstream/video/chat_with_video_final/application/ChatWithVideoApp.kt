@@ -34,8 +34,7 @@ import io.getstream.video.android.core.StreamVideoConfig
 import io.getstream.video.android.core.input.CallActivityInput
 import io.getstream.video.android.core.input.CallServiceInput
 import io.getstream.video.android.core.logging.LoggingLevel
-import io.getstream.video.android.core.token.CredentialsProvider
-import io.getstream.video.android.core.user.UserCredentialsManager
+import io.getstream.video.android.core.model.ApiKey
 import io.getstream.video.android.core.user.UsersProvider
 import io.getstream.video.chat_with_video_final.ui.call.CallActivity
 import io.getstream.video.chat_with_video_final.ui.call.CallService
@@ -90,27 +89,20 @@ class ChatWithVideoApp : Application() {
         }
     }
 
-    lateinit var credentialsProvider: CredentialsProvider
-        private set
+    private var video: StreamVideo? = null
 
-    lateinit var streamVideo: StreamVideo
-        private set
+    val streamVideo: StreamVideo
+        get() = requireNotNull(video)
 
     fun initializeStreamVideo(
-        credentialsProvider: CredentialsProvider,
+        user: io.getstream.video.android.core.model.User,
+        apiKey: ApiKey,
         loggingLevel: LoggingLevel
     ): StreamVideo {
-        if (this::credentialsProvider.isInitialized) {
-            this.credentialsProvider.updateUser(
-                credentialsProvider.getUserCredentials()
-            )
-        } else {
-            this.credentialsProvider = credentialsProvider
-        }
-
         return StreamVideoBuilder(
             context = this,
-            credentialsProvider = this.credentialsProvider,
+            user = user,
+            apiKey = apiKey,
             androidInputs = setOf(
                 CallServiceInput.from(CallService::class),
                 CallActivityInput.from(CallActivity::class),
@@ -118,20 +110,17 @@ class ChatWithVideoApp : Application() {
             loggingLevel = loggingLevel,
             config = videoConfig
         ).build().also {
-            streamVideo = it
+            video = it
         }
     }
 
     fun logOut() {
-        val preferences = UserCredentialsManager.initialize(this)
-
         chatClient.disconnect(true).enqueue()
-        streamVideo.clearCallState()
-        streamVideo.removeDevices(preferences.getDevices())
-        preferences.clear()
+        streamVideo.logOut()
+        video = null
     }
 }
 
-internal const val API_KEY = "us83cfwuhy8n"
+internal const val API_KEY = "w6yaq5388uym"
 
 internal val Context.chatWithVideoApp get() = applicationContext as ChatWithVideoApp

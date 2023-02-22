@@ -31,14 +31,14 @@ import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.model.CallMetadata
 import io.getstream.video.android.core.socket.SocketListener
 import io.getstream.video.android.core.socket.VideoSocket
-import io.getstream.video.android.core.token.internal.CredentialsManager
+import io.getstream.video.android.core.user.UserPreferences
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import stream.video.coordinator.client_v1_rpc.WebsocketAuthRequest
+import org.openapitools.client.models.UserObjectRequest
+import org.openapitools.client.models.VideoWSAuthMessageRequest
 import stream.video.coordinator.client_v1_rpc.WebsocketHealthcheck
-import stream.video.coordinator.user_v1.UserInput
 import kotlin.math.pow
 import kotlin.properties.Delegates
 
@@ -46,14 +46,14 @@ import kotlin.properties.Delegates
  * Socket implementation used to handle the lifecycle of a WebSocket and its related state.
  *
  * @property wssUrl Base URL for the API socket.
- * @property credentialsManager Wrapper around a token providing service that manages its validity.
+ * @property preferences Wrapper around a token providing service that manages its validity.
  * @property socketFactory Factory used to build new socket instances.
  * @property networkStateProvider Provides the network state and lifecycle handles.
  * @property coroutineScope The scope used to launch any operations.
  */
 internal class VideoSocketImpl(
     private val wssUrl: String,
-    private val credentialsManager: CredentialsManager,
+    private val preferences: UserPreferences,
     private val socketFactory: SocketFactory,
     private val networkStateProvider: NetworkStateProvider,
     private val userState: UserState,
@@ -168,10 +168,6 @@ internal class VideoSocketImpl(
     }
 
     private fun onNetworkError(error: VideoNetworkError) {
-        if (VideoErrorCode.isAuthenticationError(error.streamCode)) {
-            credentialsManager.expireToken()
-        }
-
         when (error.streamCode) {
             VideoErrorCode.PARSER_ERROR.code,
             VideoErrorCode.CANT_PARSE_CONNECTION_EVENT.code,
@@ -214,7 +210,7 @@ internal class VideoSocketImpl(
 
     override fun connectSocket() {
         logger.d { "[connectSocket] wssUrl: $wssUrl" }
-        connect(SocketFactory.ConnectionConf(wssUrl))
+        connect(SocketFactory.ConnectionConf(wssUrl, preferences.getApiKey(), ""))
     }
 
     override fun authenticateUser() {
@@ -222,22 +218,19 @@ internal class VideoSocketImpl(
         logger.d { "[authenticateUser] user: $user" }
 
         socket?.authenticate(
-            WebsocketAuthRequest(
-                user = UserInput(
+            VideoWSAuthMessageRequest( // TODO - add user device request
+                token = user.token,
+                userDetails = UserObjectRequest(
                     id = user.id,
-                    name = user.name,
-                    image_url = user.imageUrl ?: "",
                     role = user.role
-                ),
-                token = credentialsManager.getToken(),
-                api_key = credentialsManager.getApiKey()
+                )
             )
         )
     }
 
     override fun reconnect() {
         logger.d { "[reconnect] wssUrl: $wssUrl" }
-        reconnect(SocketFactory.ConnectionConf(wssUrl))
+        reconnect(SocketFactory.ConnectionConf(wssUrl, preferences.getApiKey(), ""))
     }
 
     internal fun connect(connectionConf: SocketFactory.ConnectionConf) {
@@ -291,8 +284,6 @@ internal class VideoSocketImpl(
             null -> State.DisconnectedPermanently(null)
             else -> {
                 socketConnectionJob = coroutineScope.launch {
-                    credentialsManager.ensureTokenLoaded()
-
                     socket = socketFactory.createSocket(createNewEventsParser(), connectionConf)
                 }
                 State.Connecting

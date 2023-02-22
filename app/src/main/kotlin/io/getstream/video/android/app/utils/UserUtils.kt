@@ -21,28 +21,46 @@ import io.getstream.video.android.core.model.User
 fun getUsers(): List<User> {
     return listOf(
         User(
-            id = "djuropalica",
-            name = "Djuro Palica",
-            imageUrl = "https://ichef.bbci.co.uk/news/976/cpsprodpb/16620/production/_91408619_55df76d5-2245-41c1-8031-07a4da3f313f.jpg",
-            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tZ28tY2xpZW50LTAuMC4xIiwic3ViIjoidXNlci9kanVyb3BhbGljYSIsImlhdCI6MTY3NTA3NjQyOSwidXNlcl9pZCI6ImRqdXJvcGFsaWNhIn0.gHeBCWb2QIQejmgh1CAFKIx39EqjephifrNUnJEi4ew",
+            id = "filip",
+            name = "Filip",
+            imageUrl = "https://avatars.githubusercontent.com/u/17215808?v=4",
+            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiZmlsaXAifQ.NBYt9PdNrTnFFl5u2xVhZ93CCMSdM7uog-DNtb8DFAA",
             role = "admin",
             teams = emptyList(),
             extraData = emptyMap()
         ),
         User(
-            id = "georgegeorgorovic",
-            name = "George Georgorovic",
-            imageUrl = "https://resizing.flixster.com/WPmZJiBi-xmd9ZRsuSdM8tU064k=/206x305/v2/https://flxt.tmsimg.com/assets/p16599906_e_v10_aa.jpg",
-            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tZ28tY2xpZW50LTAuMC4xIiwic3ViIjoidXNlci9nZW9yZ2VnZW9yZ29yb3ZpYyIsImlhdCI6MTY3NTA3NjQzNiwidXNlcl9pZCI6Imdlb3JnZWdlb3Jnb3JvdmljIn0.r1DOfWOhl1PIZt3FXgaZbhCtGdk9xMBP7H2nMoYNvWI",
+            id = "thierry",
+            name = "Thierry",
+            imageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Mile_Kitic_from_BISO0675.jpg/300px-Mile_Kitic_from_BISO0675.jpg",
+            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidGhpZXJyeSJ9.81Nhgjdnh7hnvpgqOXlGMRWkuUgCVbU-fp6gFtHymxA",
             role = "admin",
             teams = emptyList(),
             extraData = emptyMap()
         ),
         User(
-            id = "willpantera",
-            name = "Will Pantera",
-            imageUrl = "https://w0.peakpx.com/wallpaper/299/280/HD-wallpaper-this-is-fine-dreams-wolf-thumbnail.jpg",
-            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tZ28tY2xpZW50LTAuMC4xIiwic3ViIjoidXNlci93aWxscGFudGVyYSIsImlhdCI6MTY3NTA3NjQ0MiwidXNlcl9pZCI6IndpbGxwYW50ZXJhIn0.mvu7V8MbOD_7s4OY2rdvgcv47x0BjERFfg6RYa5pDWI",
+            id = "martin",
+            name = "Martin",
+            imageUrl = "https://upload.wikimedia.org/wikipedia/commons/d/da/Toma_Zdravkovi%C4%87.jpg",
+            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoibWFydGluIn0._oishDWVBDRRKt9VXY9RIR3Z7NunOeJkyE7mjApTux4",
+            role = "admin",
+            teams = emptyList(),
+            extraData = emptyMap()
+        ),
+        User(
+            id = "oliver",
+            name = "Oliver",
+            imageUrl = "https://www.biografija.org/wp-content/uploads/2020/01/boban-rajovic.jpg",
+            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoib2xpdmVyIn0.edUI1bWxIxpPGJZeYa0k6HD58hk2FDg2Pmr2280RSGg",
+            role = "admin",
+            teams = emptyList(),
+            extraData = emptyMap()
+        ),
+        User(
+            id = "tomislav",
+            name = "Tomislav",
+            imageUrl = "https://i.scdn.co/image/ab67616d0000b2730ae491943a8668e81e212594",
+            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidG9taXNsYXYifQ.aOxbaAr_UVSdpcDPJHwGwTBjDw_n4eGyHtojUUEVUt8",
             role = "admin",
             teams = emptyList(),
             extraData = emptyMap()

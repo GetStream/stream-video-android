@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.core.internal.module
 
-import io.getstream.video.android.core.token.CredentialsProvider
+import io.getstream.video.android.core.user.UserPreferences
 import okhttp3.HttpUrl
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -24,18 +24,18 @@ import okhttp3.logging.HttpLoggingInterceptor
 
 /**
  * @property loggingLevel Log level used for all HTTP requests towards the API.
- * @property credentialsProvider Provider used to fetch user based credentials.
+ * @property preferences Used to fetch user based credentials.
  */
 internal class HttpModule(
     private val loggingLevel: HttpLoggingInterceptor.Level = HttpLoggingInterceptor.Level.NONE,
-    private val credentialsProvider: CredentialsProvider,
+    private val preferences: UserPreferences,
 ) {
 
     /**
      * Cached instance of the HTTP client.
      */
     internal val okHttpClient: OkHttpClient by lazy {
-        buildOkHttpClient(credentialsProvider)
+        buildOkHttpClient(preferences)
     }
 
     /**
@@ -46,15 +46,15 @@ internal class HttpModule(
     /**
      * Builds the [OkHttpClient] used for all API calls.
      *
-     * @param credentialsProvider The user-token and API key provider used to attach authorization
+     * @param preferences The user-token and API key provider used to attach authorization
      * headers.
      * @return [OkHttpClient] that allows us API calls.
      */
-    private fun buildOkHttpClient(credentialsProvider: CredentialsProvider): OkHttpClient {
+    private fun buildOkHttpClient(preferences: UserPreferences): OkHttpClient {
         return OkHttpClient.Builder()
             .addInterceptor(
                 buildCredentialsInterceptor(
-                    credentialsProvider = credentialsProvider
+                    preferences = preferences
                 )
             )
             .addInterceptor(
@@ -69,24 +69,24 @@ internal class HttpModule(
     /**
      * Builds the HTTP interceptor that adds headers to all API calls.
      *
-     * @param credentialsProvider Provider of the user token and API key.
+     * @param preferences Provider of the user token and API key.
      *
      * @return [Interceptor] which adds headers.
      */
     private fun buildCredentialsInterceptor(
-        credentialsProvider: CredentialsProvider
+        preferences: UserPreferences
     ): Interceptor = Interceptor {
         val original = it.request()
 
         val token = if (original.url.toString().contains("sfu")) {
-            credentialsProvider.getSfuToken()
+            preferences.getSfuToken()
         } else {
-            credentialsProvider.getCachedUserToken()
-        }
+            preferences.getUserCredentials()?.token
+        } ?: ""
 
-        val updatedUrl = if (original.url.toString().contains("coordinator")) {
+        val updatedUrl = if (original.url.toString().contains("video")) {
             original.url.newBuilder()
-                .addQueryParameter(API_KEY, credentialsProvider.getCachedApiKey())
+                .addQueryParameter(API_KEY, preferences.getApiKey())
                 .build()
         } else {
             original.url
@@ -94,7 +94,8 @@ internal class HttpModule(
 
         val updated = original.newBuilder()
             .url(updatedUrl)
-            .addHeader(HEADER_AUTHORIZATION, "Bearer $token")
+            .addHeader(HEADER_AUTHORIZATION, token)
+            .header(STREAM_AUTH_TYPE, "jwt")
             .build()
 
         it.proceed(updated)
@@ -136,12 +137,13 @@ internal class HttpModule(
         /**
          * Key used to prove authorization to the API.
          */
-        private const val HEADER_AUTHORIZATION = "authorization"
+        private const val HEADER_AUTHORIZATION = "Authorization"
 
         /**
          * Query key used to authenticate to the API.
          */
         private const val API_KEY = "api_key"
+        private const val STREAM_AUTH_TYPE = "stream-auth-type"
 
         /**
          * Instance of the module, that's reused for HTTP communication.
@@ -150,7 +152,7 @@ internal class HttpModule(
 
         internal fun create(
             loggingLevel: HttpLoggingInterceptor.Level = HttpLoggingInterceptor.Level.NONE,
-            credentialsProvider: CredentialsProvider
+            credentialsProvider: UserPreferences
         ): HttpModule {
             return HttpModule(loggingLevel, credentialsProvider)
         }
@@ -161,7 +163,7 @@ internal class HttpModule(
          */
         internal fun getOrCreate(
             loggingLevel: HttpLoggingInterceptor.Level = HttpLoggingInterceptor.Level.NONE,
-            credentialsProvider: CredentialsProvider,
+            credentialsProvider: UserPreferences,
             forceCreate: Boolean = false
         ): HttpModule {
             if (this::module.isInitialized.not() || forceCreate) {

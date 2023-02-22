@@ -23,10 +23,12 @@ import io.getstream.video.android.core.errors.VideoNetworkError
 import io.getstream.video.android.core.events.ConnectedEvent
 import io.getstream.video.android.core.events.HealthCheckEvent
 import io.getstream.video.android.core.socket.VideoSocket
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import okhttp3.Response
 import okhttp3.WebSocket
-import okio.ByteString
-import stream.video.coordinator.client_v1_rpc.WebsocketEvent
 
 @Suppress("TooManyFunctions")
 internal class EventsParser(
@@ -45,13 +47,16 @@ internal class EventsParser(
         videoSocket.authenticateUser()
     }
 
-    override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
-        super.onMessage(webSocket, bytes)
-        try {
-            val rawEvent = WebsocketEvent.ADAPTER.decode(bytes)
+    override fun onMessage(webSocket: WebSocket, text: String) {
+        super.onMessage(webSocket, text)
 
-            if (rawEvent.healthcheck == null) logger.v { "[onMessage] rawEvent: $rawEvent" }
-            val processedEvent = EventMapper.mapEvent(rawEvent)
+        try {
+            val data = Json.decodeFromString<JsonObject>(text)
+            logger.d { "[onMessage] $data" }
+
+            val eventType = EventType.from(data["type"]?.jsonPrimitive?.content ?: return)
+            val processedEvent = EventMapper.mapEvent(eventType, text)
+
             if (processedEvent !is HealthCheckEvent) logger.v { "[onMessage] processedEvent: $processedEvent" }
 
             if (!connectionEventReceived && processedEvent is HealthCheckEvent) {
