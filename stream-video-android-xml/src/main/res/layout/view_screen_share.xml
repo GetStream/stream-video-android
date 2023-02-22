@@ -11,40 +11,32 @@
         android:id="@+id/screenShare"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintDimensionRatio="16:9"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
         />
 
-    <!--  TODO sort out when adding landscape/fullscreen support  -->
     <io.getstream.video.android.xml.widget.control.ControlButtonView
         android:id="@+id/changeOrientationButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="@dimen/screenShareButtonSize"
+        android:layout_height="@dimen/screenShareButtonSize"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
         android:background="@drawable/bg_call_option"
-        android:backgroundTint="@color/stream_bars_background"
         android:padding="8dp"
-        app:contentPadding="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/fullscreenButton"
-        tools:src="@drawable/ic_landscape_mode"
         />
 
-    <!--  TODO sort out when adding landscape/fullscreen support  -->
     <io.getstream.video.android.xml.widget.control.ControlButtonView
         android:id="@+id/fullscreenButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="@dimen/screenShareButtonSize"
+        android:layout_height="@dimen/screenShareButtonSize"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
         android:background="@drawable/bg_call_option"
-        android:backgroundTint="@color/stream_bars_background"
-        app:contentPadding="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        tools:src="@drawable/ic_fullscreen"
         />
 
 </merge>

@@ -9,6 +9,7 @@
         <item name="streamIncomingViewStyle">@style/Stream.IncomingCall</item>
         <item name="streamOutgoingViewStyle">@style/Stream.OutgoingCall</item>
         <item name="streamPictureInPictureViewStyle">@style/Stream.PictureInPicture</item>
+        <item name="streamScreenShareStyle">@style/Stream.ScreenShare</item>
     </style>
 
     <style name="Stream">
@@ -104,6 +105,9 @@
     </style>
 
     <style name="Stream.PictureInPicture" parent="Stream">
+    </style>
+
+    <style name="Stream.ScreenShare" parent="Stream">
     </style>
 
 

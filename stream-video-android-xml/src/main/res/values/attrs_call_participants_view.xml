@@ -12,5 +12,16 @@
         <attr name="streamCallParticipantsListItemMargin" format="dimension|reference" />
         <attr name="streamCallParticipantsListItemWidth" format="dimension|reference" />
         <attr name="streamCallParticipantsScreenShareListMargin" format="dimension|reference" />
+        <attr name="streamCallParticipantsPresenterTextMargin" format="dimension|reference" />
+        <attr name="streamCallParticipantsPresenterTextPadding" format="dimension|reference" />
+        <attr name="streamCallParticipantsPresenterInfoTextSize" format="dimension|reference" />
+        <attr name="streamCallParticipantsPresenterInfoTextColor" format="color|reference" />
+        <attr name="streamCallParticipantsPresenterInfoFontAsset" format="reference" />
+        <attr name="streamCallParticipantsPresenterInfoFont" format="reference" />
+        <attr name="streamCallParticipantsPresenterInfoTextStyle">
+            <flag name="normal" value="0" />
+            <flag name="bold" value="1" />
+            <flag name="italic" value="2" />
+        </attr>
     </declare-styleable>
 </resources>

@@ -90,6 +90,8 @@ public data class StreamDimens(
     public val screenShareParticipantsListItemMargin: Dp,
     public val screenShareParticipantsScreenShareListMargin: Dp,
     public val screenShareParticipantsRadius: Dp,
+    public val screenSharePresenterPadding: Dp,
+    public val screenSharePresenterMargin: Dp,
 ) {
     public companion object {
         /**
@@ -155,7 +157,9 @@ public data class StreamDimens(
             screenShareParticipantsRowPadding = dimensionResource(id = R.dimen.screenShareParticipantsListPadding),
             screenShareParticipantsListItemMargin = dimensionResource(id = R.dimen.screenShareParticipantsListItemMargin),
             screenShareParticipantsScreenShareListMargin = dimensionResource(id = R.dimen.screenShareParticipantsMargin),
-            screenShareParticipantsRadius = dimensionResource(id = R.dimen.screenShareParticipantsRadius)
+            screenShareParticipantsRadius = dimensionResource(id = R.dimen.screenShareParticipantsRadius),
+            screenSharePresenterMargin = dimensionResource(id = R.dimen.screenSharePresenterTitleMargin),
+            screenSharePresenterPadding = dimensionResource(id = R.dimen.screenSharePresenterPadding)
         )
     }
 }

@@ -26,7 +26,7 @@ import io.getstream.video.android.xml.R
 import io.getstream.video.android.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.xml.utils.extensions.getFirstViewInstance
 import io.getstream.video.android.xml.widget.renderer.VideoRenderer
-import io.getstream.video.android.xml.widget.screenshare.ScreenSharingView
+import io.getstream.video.android.xml.widget.screenshare.ScreenShareView
 
 /**
  * View to ve shown when inside a call and the app enter picture in picture mode. Will show the primary speaker.
@@ -83,14 +83,14 @@ public class PictureInPictureView : CardView {
     }
 
     /**
-     * Populates the PiP ui with the [ScreenSharingView] to preview the primary speaker.
+     * Populates the PiP ui with the [ScreenShareView] to preview the primary speaker.
      */
     public fun showScreenShare(screenSharingSession: ScreenSharingSession) {
-        var screenShareView = getFirstViewInstance<ScreenSharingView>()
+        var screenShareView = getFirstViewInstance<ScreenShareView>()
 
         if (screenShareView == null) {
             removeAllViews()
-            screenShareView = getFirstViewInstance() ?: ScreenSharingView(context).apply {
+            screenShareView = getFirstViewInstance() ?: ScreenShareView(context).apply {
                 layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
                 rendererInitializer?.let { setRendererInitializer(it) }
                 this@PictureInPictureView.addView(this)

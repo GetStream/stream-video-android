@@ -52,6 +52,9 @@
     <dimen name="screenShareParticipantsListItemMargin">8dp</dimen>
     <dimen name="screenShareParticipantsMargin">16dp</dimen>
     <dimen name="screenShareParticipantsRadius">16dp</dimen>
+    <dimen name="screenSharePresenterPadding">16dp</dimen>
+    <dimen name="screenSharePresenterTitleMargin">16dp</dimen>
+    <dimen name="screenShareButtonSize">40dp</dimen>
 
     <dimen name="title1TextSize">24sp</dimen>
     <dimen name="title1LineHeight">34sp</dimen>

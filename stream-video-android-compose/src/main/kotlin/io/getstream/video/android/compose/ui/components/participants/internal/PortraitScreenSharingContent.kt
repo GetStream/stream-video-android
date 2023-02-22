@@ -29,13 +29,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
-import io.getstream.video.android.R
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.model.Call
 import io.getstream.video.android.core.model.CallParticipantState
 import io.getstream.video.android.core.model.ScreenSharingSession
+import io.getstream.video.android.ui.common.R
 
 /**
  * Represents the portrait screen sharing content.
@@ -65,7 +64,7 @@ internal fun PortraitScreenSharingContent(
             .padding(paddingValues)
     ) {
         Text(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(VideoTheme.dimens.screenSharePresenterPadding),
             text = stringResource(
                 id = R.string.stream_screen_sharing_title,
                 sharingParticipant.name.ifEmpty { sharingParticipant.id }
@@ -76,7 +75,7 @@ internal fun PortraitScreenSharingContent(
             overflow = TextOverflow.Ellipsis
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(VideoTheme.dimens.screenSharePresenterMargin))
 
         ScreenShareContent(
             call = call,

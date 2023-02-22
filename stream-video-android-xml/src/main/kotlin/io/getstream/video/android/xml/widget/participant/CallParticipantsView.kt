@@ -23,24 +23,27 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.children
 import androidx.core.view.setPadding
-import io.getstream.log.StreamLog
 import io.getstream.video.android.core.model.CallParticipantState
 import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.xml.R
+import io.getstream.video.android.xml.font.setTextStyle
 import io.getstream.video.android.xml.utils.extensions.constrainViewBottomToTopOfView
 import io.getstream.video.android.xml.utils.extensions.constrainViewToParentBySide
-import io.getstream.video.android.xml.utils.extensions.dpToPx
+import io.getstream.video.android.xml.utils.extensions.constrainViewTopToBottomOfView
+import io.getstream.video.android.xml.utils.extensions.getFirstViewInstance
 import io.getstream.video.android.xml.utils.extensions.setConstraints
 import io.getstream.video.android.xml.widget.control.CallControlsView
 import io.getstream.video.android.xml.widget.participant.internal.CallParticipantsGridView
 import io.getstream.video.android.xml.widget.participant.internal.CallParticipantsListView
 import io.getstream.video.android.xml.widget.renderer.VideoRenderer
-import io.getstream.video.android.xml.widget.screenshare.ScreenSharingView
+import io.getstream.video.android.xml.widget.screenshare.ScreenShareView
 import java.util.UUID
+import io.getstream.video.android.ui.common.R as RCommon
 
 /**
  * Renders the call participants depending on the number of the participants and the call state.
@@ -97,9 +100,15 @@ public class CallParticipantsView : ConstraintLayout {
         if (isScreenSharingActive) {
             enterScreenSharing()
             screenSharingSession?.let {
-                getViewByInstance<ScreenSharingView>()?.setScreenSharingSession(screenSharingSession)
+                val sharingParticipant = it.participant
+                getFirstViewInstance<ScreenShareView>()?.setScreenSharingSession(it)
+                getFirstViewInstance<TextView>()?.text =
+                    context.getString(
+                        RCommon.string.stream_screen_sharing_title,
+                        sharingParticipant.name.ifEmpty { sharingParticipant.id }
+                    )
             }
-            getViewByInstance<CallParticipantsListView>()?.updateParticipants(participants)
+            getFirstViewInstance<CallParticipantsListView>()?.updateParticipants(participants)
             updateFloatingParticipant(null)
         } else {
             exitScreenSharing()
@@ -110,20 +119,28 @@ public class CallParticipantsView : ConstraintLayout {
                 if (participants.size == 1 || participants.size == 4) participants else participants.filter { !it.isLocal }
 
             updateFloatingParticipant(floatingParticipant)
-            getViewByInstance<CallParticipantsGridView>()?.updateParticipants(gridParticipants)
+            getFirstViewInstance<CallParticipantsGridView>()?.updateParticipants(gridParticipants)
         }
     }
 
     /**
      * Populates the view with the screen share content. Will remove all views that are used when there is no screen
-     * share content and add [ScreenSharingView] and [CallParticipantsListView].
+     * share content and add [ScreenShareView] and [CallParticipantsListView].
      */
     private fun enterScreenSharing() {
-        if (children.firstOrNull { it is ScreenSharingView } != null) return
+        if (getFirstViewInstance<ScreenShareView>() != null) return
 
         removeAllViews()
 
-        val screenShareView = ScreenSharingView(context).apply {
+        val presenterText = TextView(context).apply {
+            id = ViewGroup.generateViewId()
+            maxLines = 1
+            setTextStyle(style.presenterTextStyle)
+            setPadding(style.presenterTextPadding)
+            this@CallParticipantsView.addView(this)
+        }
+
+        val screenShareView = ScreenShareView(context).apply {
             id = ViewGroup.generateViewId()
             if (::rendererInitializer.isInitialized) setRendererInitializer(rendererInitializer)
             this@CallParticipantsView.addView(this)
@@ -140,12 +157,15 @@ public class CallParticipantsView : ConstraintLayout {
             clipChildren = false
         }
 
-
         setConstraints {
-            constrainViewToParentBySide(screenShareView, ConstraintSet.TOP)
+            constrainViewToParentBySide(presenterText, ConstraintSet.START)
+            constrainViewToParentBySide(presenterText, ConstraintSet.END)
+            constrainViewToParentBySide(presenterText, ConstraintSet.TOP)
+
+            constrainViewTopToBottomOfView(screenShareView, presenterText, style.presenterTextMargin)
             constrainViewToParentBySide(screenShareView, ConstraintSet.START)
             constrainViewToParentBySide(screenShareView, ConstraintSet.END)
-            constrainViewBottomToTopOfView(screenShareView, listView, style.screenShareMargin.toInt())
+            constrainViewBottomToTopOfView(screenShareView, listView, style.screenShareMargin)
 
             constrainViewToParentBySide(listView, ConstraintSet.BOTTOM, getCallControlsHeight())
             constrainViewToParentBySide(listView, ConstraintSet.START)
@@ -155,6 +175,10 @@ public class CallParticipantsView : ConstraintLayout {
         val listViewParams = listView.layoutParams as LayoutParams
         listViewParams.height = style.participantListHeight
         listView.layoutParams = listViewParams
+
+        val presenterTextViewParams = presenterText.layoutParams as LayoutParams
+        presenterTextViewParams.height = LayoutParams.WRAP_CONTENT
+        presenterText.layoutParams = presenterTextViewParams
     }
 
     /**
@@ -162,9 +186,7 @@ public class CallParticipantsView : ConstraintLayout {
      * session is active and will add a [CallParticipantsGridView].
      */
     private fun exitScreenSharing() {
-        if (children.firstOrNull { it is CallParticipantsGridView } != null) return
-
-        StreamLog.d("pleaseShow") { "exit screen sharing and remove all views" }
+        if (getFirstViewInstance<CallParticipantsGridView>() != null) return
 
         removeAllViews()
 
@@ -184,7 +206,7 @@ public class CallParticipantsView : ConstraintLayout {
      * @param participant The local participant to be shown in a [FloatingParticipantView].
      */
     private fun updateFloatingParticipant(participant: CallParticipantState?) {
-        var localParticipant = getViewByInstance<FloatingParticipantView>()
+        var localParticipant = getFirstViewInstance<FloatingParticipantView>()
 
         if (participant != null) {
             if (localParticipant == null) {
@@ -321,9 +343,5 @@ public class CallParticipantsView : ConstraintLayout {
                     LinearLayout.LayoutParams(style.participantListItemWidth, LinearLayout.LayoutParams.MATCH_PARENT)
             }
         }
-    }
-
-    private inline fun <reified T : View> getViewByInstance(): T? {
-        return children.firstOrNull { it is T } as? T
     }
 }

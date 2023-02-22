@@ -86,6 +86,11 @@ public class CallControlsView : ConstraintLayout {
             callControlView.setImageResource(callControlItem.icon)
             callControlView.setColorFilter(context.getColorCompat(callControlItem.iconTint))
             callControlView.background.setTint(context.getColorCompat(callControlItem.backgroundTint))
+            callControlView.setOnClickListener {
+                if (callControlItem.enabled) {
+                    callControlItemClickListener(callControlItem.action)
+                }
+            }
             views.add(callControlView)
         }
 
@@ -110,12 +115,6 @@ public class CallControlsView : ConstraintLayout {
             tag = callControlItem
             layoutParams = LayoutParams(style.callControlButtonSize, style.callControlButtonSize)
             setBackgroundResource(R.drawable.bg_call_control_option)
-            if (callControlItem.enabled) {
-                setOnClickListener {
-                    val data = it.tag as CallControlItem
-                    callControlItemClickListener(data.action)
-                }
-            }
         }
         addView(callControlButton)
         return callControlButton

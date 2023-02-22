@@ -27,6 +27,6 @@ internal inline val ViewGroup.inflater: LayoutInflater
 internal val ViewGroup.streamThemeInflater: LayoutInflater
     get() = LayoutInflater.from(context.createStreamThemeWrapper())
 
-internal inline fun <reified T: View>ViewGroup.getFirstViewInstance(): T? {
+internal inline fun <reified T : View>ViewGroup.getFirstViewInstance(): T? {
     return children.firstOrNull { it is T } as? T
 }
