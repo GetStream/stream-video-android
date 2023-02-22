@@ -27,14 +27,17 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param type * @param custom */
+ * @param callCid * @param createdAt * @param type */
 
-data class SendEventRequest(
+data class CallrecordingStarted(
+
+    @Json(name = "call_cid")
+    val callCid: kotlin.String,
+
+    @Json(name = "created_at")
+    val createdAt: java.time.OffsetDateTime,
 
     @Json(name = "type")
-    val type: kotlin.String,
-
-    @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null
+    val type: kotlin.String
 
 )

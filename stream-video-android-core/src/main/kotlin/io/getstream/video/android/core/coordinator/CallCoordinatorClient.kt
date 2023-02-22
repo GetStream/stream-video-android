@@ -81,6 +81,7 @@ internal interface CallCoordinatorClient {
     suspend fun joinCall(
         id: String,
         type: String,
+        connectionId: String,
         request: GetOrCreateCallRequest
     ): Result<JoinCallResponse>
 
