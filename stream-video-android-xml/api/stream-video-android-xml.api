@@ -1,16 +1,8 @@
-public abstract class io/getstream/video/android/xml/AbstractXmlCallActivity : androidx/appcompat/app/AppCompatActivity, io/getstream/video/android/core/StreamVideoProvider, io/getstream/video/android/core/permission/PermissionManagerProvider, io/getstream/video/android/core/viewmodel/CallViewModelFactoryProvider {
+public abstract class io/getstream/video/android/xml/AbstractXmlCallActivity : io/getstream/video/android/common/AbstractCallActivity {
 	public fun <init> ()V
-	public final fun defaultViewModelFactory ()Lio/getstream/video/android/core/viewmodel/CallViewModelFactory;
-	public fun getCallViewModelFactory ()Lio/getstream/video/android/core/viewmodel/CallViewModelFactory;
-	public fun getPermissionManager ()Lio/getstream/video/android/core/permission/PermissionManager;
-	protected fun handleBackPressed ()V
-	protected fun handleCallAction (Lio/getstream/video/android/core/call/state/CallAction;)V
-	public fun initPermissionManager ()Lio/getstream/video/android/core/permission/PermissionManager;
-	public fun onConfigurationChanged (Landroid/content/res/Configuration;)V
-	protected fun onCreate (Landroid/os/Bundle;)V
+	protected fun observeStreamCallState ()V
 	public fun onCreateOptionsMenu (Landroid/view/Menu;)Z
-	protected fun onResume ()V
-	protected fun onStop ()V
+	public fun setupUi ()V
 }
 
 public final class io/getstream/video/android/xml/BuildConfig {

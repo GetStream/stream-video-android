@@ -347,21 +347,12 @@ public final class io/getstream/video/android/compose/theme/VideoThemeKt {
 	public static final fun VideoTheme (ZLio/getstream/video/android/compose/theme/StreamColors;Lio/getstream/video/android/compose/theme/StreamDimens;Lio/getstream/video/android/compose/theme/StreamTypography;Lio/getstream/video/android/compose/theme/StreamShapes;Landroidx/compose/material/ripple/RippleTheme;Lio/getstream/video/android/compose/imageloading/StreamCoilImageLoaderFactory;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
 }
 
-public abstract class io/getstream/video/android/compose/ui/AbstractComposeCallActivity : androidx/appcompat/app/AppCompatActivity, io/getstream/video/android/core/StreamVideoProvider, io/getstream/video/android/core/permission/PermissionManagerProvider, io/getstream/video/android/core/viewmodel/CallViewModelFactoryProvider {
+public abstract class io/getstream/video/android/compose/ui/AbstractComposeCallActivity : io/getstream/video/android/common/AbstractCallActivity {
 	public static final field $stable I
 	public fun <init> ()V
 	protected fun PictureInPictureContent (Lio/getstream/video/android/core/model/Call;Landroidx/compose/runtime/Composer;I)V
 	protected fun buildContent ()Lkotlin/jvm/functions/Function2;
-	public final fun defaultViewModelFactory ()Lio/getstream/video/android/core/viewmodel/CallViewModelFactory;
-	protected final fun getCallViewModel ()Lio/getstream/video/android/core/viewmodel/CallViewModel;
-	public fun getCallViewModelFactory ()Lio/getstream/video/android/core/viewmodel/CallViewModelFactory;
-	public fun getPermissionManager ()Lio/getstream/video/android/core/permission/PermissionManager;
-	protected fun handleBackPressed ()V
-	protected fun handleCallAction (Lio/getstream/video/android/core/call/state/CallAction;)V
-	public fun initPermissionManager ()Lio/getstream/video/android/core/permission/PermissionManager;
-	public fun onConfigurationChanged (Landroid/content/res/Configuration;)V
-	protected fun onCreate (Landroid/os/Bundle;)V
-	protected fun onStop ()V
+	public fun setupUi ()V
 }
 
 public final class io/getstream/video/android/compose/ui/components/audio/SoundIndicatorKt {
