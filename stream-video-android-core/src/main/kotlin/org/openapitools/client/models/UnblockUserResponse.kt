@@ -27,14 +27,13 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param type * @param custom */
+ * @param duration Duration of the request in human-readable format
+ */
 
-data class SendEventRequest(
+data class UnblockUserResponse(
 
-    @Json(name = "type")
-    val type: kotlin.String,
-
-    @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null
+    /* Duration of the request in human-readable format */
+    @Json(name = "duration")
+    val duration: kotlin.String
 
 )
