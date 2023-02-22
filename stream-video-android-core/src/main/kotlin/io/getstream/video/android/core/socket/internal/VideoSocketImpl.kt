@@ -60,7 +60,7 @@ internal class VideoSocketImpl(
     private val coroutineScope: CoroutineScope,
 ) : VideoSocket {
 
-    private val logger by taggedLogger("Call:CoordSocket")
+    private val logger by taggedLogger("Call:CoordinatorSocket")
 
     private var connectionConf: SocketFactory.ConnectionConf? = null
     private var socket: Socket? = null
@@ -266,6 +266,10 @@ internal class VideoSocketImpl(
     override fun onEvent(event: VideoEvent) {
         healthMonitor.ack()
         callListeners { listener -> listener.onEvent(event) }
+    }
+
+    override fun getConnectionId(): String {
+        return clientId
     }
 
     internal fun sendPing(state: WebsocketHealthcheck) {

@@ -27,25 +27,35 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param callCid * @param createdAt * @param custom Custom data for this object
- * @param type * @param user */
+ * @param createdAt Date/time of creation
+ * @param id * @param pushProvider * @param userId * @param disabled Whether device is disabled or not
+ * @param disabledReason Reason explaining why device had been disabled
+ * @param pushProviderName */
 
-data class Custom(
+data class Device(
 
-    @Json(name = "call_cid")
-    val callCid: kotlin.String,
-
+    /* Date/time of creation */
     @Json(name = "created_at")
     val createdAt: java.time.OffsetDateTime,
 
-    /* Custom data for this object */
-    @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any>,
+    @Json(name = "id")
+    val id: kotlin.String,
 
-    @Json(name = "type")
-    val type: kotlin.String,
+    @Json(name = "push_provider")
+    val pushProvider: kotlin.String,
 
-    @Json(name = "user")
-    val user: UserResponse
+    @Json(name = "user_id")
+    val userId: kotlin.String,
+
+    /* Whether device is disabled or not */
+    @Json(name = "disabled")
+    val disabled: kotlin.Boolean? = null,
+
+    /* Reason explaining why device had been disabled */
+    @Json(name = "disabled_reason")
+    val disabledReason: kotlin.String? = null,
+
+    @Json(name = "push_provider_name")
+    val pushProviderName: kotlin.String? = null
 
 )

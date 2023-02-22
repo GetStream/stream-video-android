@@ -119,4 +119,8 @@ public class CallLobbyViewModel(
 
         capturer.initialize(surfaceTextureHelper, getApplication(), videoSource.capturerObserver)
     }
+
+    private fun joinCallLobby() {
+        // TODO - join call lobby
+    }
 }

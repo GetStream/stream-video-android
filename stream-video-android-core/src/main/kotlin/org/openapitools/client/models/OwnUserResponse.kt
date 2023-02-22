@@ -27,25 +27,38 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param callCid * @param createdAt * @param custom Custom data for this object
- * @param type * @param user */
+ * @param createdAt * @param custom * @param devices * @param id * @param role * @param updatedAt * @param deletedAt * @param image * @param name * @param teams */
 
-data class Custom(
-
-    @Json(name = "call_cid")
-    val callCid: kotlin.String,
+data class OwnUserResponse(
 
     @Json(name = "created_at")
     val createdAt: java.time.OffsetDateTime,
 
-    /* Custom data for this object */
     @Json(name = "custom")
     val custom: kotlin.collections.Map<kotlin.String, kotlin.Any>,
 
-    @Json(name = "type")
-    val type: kotlin.String,
+    @Json(name = "devices")
+    val devices: kotlin.collections.List<Device>,
 
-    @Json(name = "user")
-    val user: UserResponse
+    @Json(name = "id")
+    val id: kotlin.String,
+
+    @Json(name = "role")
+    val role: kotlin.String,
+
+    @Json(name = "updated_at")
+    val updatedAt: java.time.OffsetDateTime,
+
+    @Json(name = "deleted_at")
+    val deletedAt: java.time.OffsetDateTime? = null,
+
+    @Json(name = "image")
+    val image: kotlin.String? = null,
+
+    @Json(name = "name")
+    val name: kotlin.String? = null,
+
+    @Json(name = "teams")
+    val teams: kotlin.collections.List<kotlin.String>? = null
 
 )

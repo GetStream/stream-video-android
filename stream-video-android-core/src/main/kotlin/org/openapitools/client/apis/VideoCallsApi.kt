@@ -16,6 +16,8 @@
 
 package org.openapitools.client.apis
 
+import org.openapitools.client.models.BlockUserRequest
+import org.openapitools.client.models.BlockUserResponse
 import org.openapitools.client.models.EndCallResponse
 import org.openapitools.client.models.GetCallEdgeServerRequest
 import org.openapitools.client.models.GetCallEdgeServerResponse
@@ -26,14 +28,59 @@ import org.openapitools.client.models.MuteUsersRequest
 import org.openapitools.client.models.MuteUsersResponse
 import org.openapitools.client.models.QueryMembersRequest
 import org.openapitools.client.models.QueryMembersResponse
+import org.openapitools.client.models.UnblockUserRequest
+import org.openapitools.client.models.UnblockUserResponse
 import org.openapitools.client.models.UpdateCallRequest
 import org.openapitools.client.models.UpdateCallResponse
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 internal interface VideoCallsApi {
+
+    /**
+     * Block user on a call
+     * Block a user, preventing them from joining the call until they are unblocked.
+     * Responses:
+     *  - 201: Successful response
+     *  - 400: Bad request
+     *  - 429: Too many requests
+     *
+     * @param type
+     * @param id
+     * @param blockUserRequest
+     * @return [BlockUserResponse]
+     */
+    @POST("call/{type}/{id}/block")
+    suspend fun blockUser(
+        @Path("type") type: String,
+        @Path("id") id: String,
+        @Body blockUserRequest: BlockUserRequest
+    ): Response<BlockUserResponse>
+
+    /**
+     * Unblocks user on a call
+     * Removes the block for a user on a call. The user will be able to join the call again.
+     * Responses:
+     *  - 201: Successful response
+     *  - 400: Bad request
+     *  - 429: Too many requests
+     *
+     * @param type
+     * @param id
+     * @param unblockUserRequest
+     * @return [UnblockUserResponse]
+     */
+    @POST("call/{type}/{id}/unblock")
+    suspend fun unblockUser(
+        @Path("type") type: String,
+        @Path("id") id: String,
+        @Body unblockUserRequest: UnblockUserRequest
+    ): Response<UnblockUserResponse>
+
     /**
      * End call
      *
@@ -109,6 +156,7 @@ internal interface VideoCallsApi {
     suspend fun joinCall(
         @Path("type") type: String,
         @Path("id") id: String,
+        @Query("connection_id") connectionId: String,
         @Body getOrCreateCallRequest: GetOrCreateCallRequest
     ): JoinCallResponse
 
