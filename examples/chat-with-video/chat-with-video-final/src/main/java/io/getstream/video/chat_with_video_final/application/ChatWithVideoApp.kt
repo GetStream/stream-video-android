@@ -47,7 +47,6 @@ class ChatWithVideoApp : Application() {
         override val dropTimeout: Long = 30_000L
         override val cancelOnTimeout: Boolean = true
         override val joinOnAcceptedByCallee: Boolean = true
-        override val createCallClientInternally: Boolean = true
 
         override val autoPublish: Boolean = true
         override val defaultAudioOn: Boolean = false
