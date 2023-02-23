@@ -54,9 +54,9 @@ internal class CallParticipantsGridView : ConstraintLayout, VideoRenderer {
     )
 
     /**
-     * Handler to acquire the height of call controls.
+     * Handler to acquire the offset for the participant label.
      */
-    internal lateinit var callControlsHeight: () -> Int
+    internal lateinit var getBottomLabelOffset: () -> Int
 
     /**
      * Handler that provides new [CallParticipantView].
@@ -106,7 +106,7 @@ internal class CallParticipantsGridView : ConstraintLayout, VideoRenderer {
         TransitionManager.beginDelayedTransition(this)
         setConstraints {
             childList.forEachIndexed { index, callParticipantView ->
-                if (isBottomChild(index)) callParticipantView.setLabelBottomOffset(callControlsHeight())
+                if (isBottomChild(index)) callParticipantView.setLabelBottomOffset(getBottomLabelOffset())
             }
 
             when (childList.size) {

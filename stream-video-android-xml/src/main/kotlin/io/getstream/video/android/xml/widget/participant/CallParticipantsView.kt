@@ -195,7 +195,9 @@ public class CallParticipantsView : ConstraintLayout {
             layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
             if (::rendererInitializer.isInitialized) setRendererInitializer(rendererInitializer)
             buildParticipantView = { this@CallParticipantsView.buildParticipantView(false) }
-            callControlsHeight = { this@CallParticipantsView.getCallControlsHeight() }
+            getBottomLabelOffset = {
+                if (isScreenSharingActive) 0 else this@CallParticipantsView.getCallControlsHeight()
+            }
         }
         addView(gridView)
     }
