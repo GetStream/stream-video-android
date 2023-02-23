@@ -28,7 +28,7 @@ object Versions {
     internal const val OKHTTP = "4.10.0"
     internal const val MOSHI = "1.14.0"
 
-    internal const val WEBRTC = "104.5112.05"
+    internal const val STREAM_WEBRTC = "1.0.0"
     internal const val STREAM = "6.0.0-beta1"
     internal const val STREAM_LOG = "1.1.3"
     internal const val STREAM_PUSH = "1.0.2"
@@ -96,8 +96,7 @@ object Dependencies {
     const val moshiKotlin = "com.squareup.moshi:moshi-kotlin:${Versions.MOSHI}"
     const val moshiAdapters = "com.squareup.moshi:moshi-adapters:${Versions.MOSHI}"
 
-    const val webRTC = "com.github.webrtc-sdk:android:${Versions.WEBRTC}"
-
+    const val streamWebRTC = "io.getstream:stream-webrtc-android:${Versions.STREAM_WEBRTC}"
     const val streamLog = "io.getstream:stream-log:${Versions.STREAM_LOG}"
     const val streamLogAndroid = "io.getstream:stream-log-android:${Versions.STREAM_LOG}"
     const val streamPush = "io.getstream:stream-android-push:${Versions.STREAM_PUSH}"
