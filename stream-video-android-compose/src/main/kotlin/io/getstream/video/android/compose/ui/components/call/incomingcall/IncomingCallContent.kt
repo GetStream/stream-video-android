@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.call.outgoingcall
+package io.getstream.video.android.compose.ui.components.call.incomingcall
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -24,13 +24,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import io.getstream.video.android.common.util.mockParticipant
+import io.getstream.video.android.common.util.mockParticipantList
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.background.CallBackground
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
-import io.getstream.video.android.compose.ui.components.call.outgoingcall.internal.OutgoingCallDetails
-import io.getstream.video.android.compose.ui.components.call.outgoingcall.internal.OutgoingGroupCallOptions
-import io.getstream.video.android.compose.ui.components.call.outgoingcall.internal.OutgoingSingleCallOptions
+import io.getstream.video.android.compose.ui.components.call.incomingcall.internal.IncomingCallDetails
+import io.getstream.video.android.compose.ui.components.call.incomingcall.internal.IncomingCallOptions
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CallMediaState
 import io.getstream.video.android.core.model.CallType
@@ -38,15 +37,15 @@ import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.core.viewmodel.CallViewModel
 
 /**
- * Represents the Outgoing Call state and UI, when the user is calling other people.
+ * Represents the Incoming Call state and UI, when the user receives a call from other people.
  *
  * @param viewModel The [CallViewModel] used to provide state and various handlers in the call.
  * @param modifier Modifier for styling.
  * @param onBackPressed Handler when the user taps on the back button.
- * @param onCallAction Handler when the user clicks on some of the call controls.
+ * @param onCallAction Handler used when the user interacts with Call UI.
  */
 @Composable
-public fun OutgoingCall(
+public fun IncomingCallContent(
     viewModel: CallViewModel,
     modifier: Modifier = Modifier,
     onBackPressed: () -> Unit,
@@ -56,10 +55,10 @@ public fun OutgoingCall(
     val participants: List<CallUser> by viewModel.participants.collectAsState()
     val callMediaState: CallMediaState by viewModel.callMediaState.collectAsState()
 
-    OutgoingCall(
-        callType = callType,
+    IncomingCallContent(
         participants = participants,
-        callMediaState = callMediaState,
+        callType = callType,
+        isVideoEnabled = callMediaState.isCameraEnabled,
         modifier = modifier,
         onBackPressed = onBackPressed,
         onCallAction = onCallAction
@@ -67,22 +66,24 @@ public fun OutgoingCall(
 }
 
 /**
- * Stateless variant of the Outgoing call UI, which you can use to build your own custom logic that
+ * Stateless variant of the Incoming call UI, which you can use to build your own custom logic that
  * powers the state and handlers.
  *
  * @param callType The type of call, Audio or Video.
  * @param participants People participating in the call.
- * @param callMediaState The state of current user media (camera on, audio on, etc.).
+ * @param isVideoEnabled Whether the video should be enabled when entering the call or not.
  * @param modifier Modifier for styling.
- * @param onBackPressed Handler when the user taps on back.
- * @param onCallAction Handler when the user clicks on some of the call controls.
+ * @param showHeader If the app bar header is shown or not.
+ * @param onBackPressed Handler when the user taps on the back button.
+ * @param onCallAction Handler used when the user interacts with Call UI.
  */
 @Composable
-public fun OutgoingCall(
+public fun IncomingCallContent(
     callType: CallType,
     participants: List<CallUser>,
-    callMediaState: CallMediaState,
+    isVideoEnabled: Boolean,
     modifier: Modifier = Modifier,
+    showHeader: Boolean = true,
     onBackPressed: () -> Unit,
     onCallAction: (CallAction) -> Unit,
 ) {
@@ -90,72 +91,61 @@ public fun OutgoingCall(
         modifier = modifier,
         participants = participants,
         callType = callType,
-        isIncoming = false
+        isIncoming = true
     ) {
-
         Column {
 
-            CallAppBar(
-                onBackPressed = onBackPressed,
-                onCallAction = onCallAction
-            )
+            if (showHeader) {
+                CallAppBar(
+                    onBackPressed = onBackPressed,
+                    onCallAction = onCallAction
+                )
+            }
 
-            val topPadding = if (participants.size == 1 || callType == CallType.VIDEO) {
+            val topPadding = if (participants.size == 1) {
                 VideoTheme.dimens.singleAvatarAppbarPadding
             } else {
                 VideoTheme.dimens.avatarAppbarPadding
             }
 
-            OutgoingCallDetails(
+            IncomingCallDetails(
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .padding(top = topPadding),
-                participants = participants,
-                callType = callType
+                participants = participants
             )
         }
 
-        if (participants.size == 1) {
-            OutgoingSingleCallOptions(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = VideoTheme.dimens.outgoingCallOptionsBottomPadding),
-                callMediaState = callMediaState,
-                onCallAction = onCallAction
-            )
-        } else {
-            OutgoingGroupCallOptions(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = VideoTheme.dimens.outgoingCallOptionsBottomPadding),
-                callMediaState = callMediaState,
-                onCallAction = onCallAction
-            )
-        }
+        IncomingCallOptions(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = VideoTheme.dimens.incomingCallOptionsBottomPadding),
+            isVideoCall = callType == CallType.VIDEO,
+            isVideoEnabled = isVideoEnabled,
+            onCallAction = onCallAction
+        )
     }
 }
 
 @Preview
 @Composable
-private fun OutgoingCallPreview() {
+private fun IncomingCallPreview() {
     VideoTheme {
-        OutgoingCall(
+        IncomingCallContent(
+            participants = mockParticipantList.map {
+                CallUser(
+                    id = it.id,
+                    name = it.name,
+                    role = it.role,
+                    state = null,
+                    createdAt = null,
+                    updatedAt = null,
+                    imageUrl = it.profileImageURL ?: "",
+                    teams = emptyList()
+                )
+            },
             callType = CallType.VIDEO,
-            participants = listOf(
-                mockParticipant.let {
-                    CallUser(
-                        id = it.id,
-                        name = it.name,
-                        role = it.role,
-                        state = null,
-                        imageUrl = it.profileImageURL ?: "",
-                        createdAt = null,
-                        updatedAt = null,
-                        teams = emptyList()
-                    )
-                }
-            ),
-            callMediaState = CallMediaState(),
+            isVideoEnabled = false,
             onBackPressed = {}
         ) {}
     }
