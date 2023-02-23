@@ -1,6 +1,6 @@
 ## Dependencies
 
-All Stream Android libraries are available from MavenCentral, with some of their transitive dependencies hosted on Jitpack.
+All Stream Android libraries are available from MavenCentral, so you may not need to do an additional setup.
 
 Before you add Stream dependencies, update your repositories in the settings.gradle file to include these two repositories:
 
@@ -10,7 +10,6 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        maven { url "https://jitpack.io" }
     }
 }
 ```
@@ -22,7 +21,6 @@ allprojects {
     repositories {
         google()
         mavenCentral()
-        maven { url "https://jitpack.io" }
     }
 }
 ```

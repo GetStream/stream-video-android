@@ -76,7 +76,7 @@ android {
 }
 
 dependencies {
-    api Dependencies.webRTC
+    api Dependencies.streamWebRTC
 
     implementation Dependencies.androidxCore
     implementation Dependencies.androidxAppcompat
