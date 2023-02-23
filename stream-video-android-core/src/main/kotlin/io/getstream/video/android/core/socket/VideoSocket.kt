@@ -87,4 +87,6 @@ public interface VideoSocket {
      * Detaches a listener from the socket to stop receiving events.
      */
     public fun removeListener(socketListener: SocketListener)
+
+    public fun getConnectionId(): String
 }

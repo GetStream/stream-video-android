@@ -28,6 +28,8 @@ import io.getstream.video.android.core.engine.adapter.CoordinatorSocketListenerA
 import io.getstream.video.android.core.errors.VideoError
 import io.getstream.video.android.core.events.CallCreatedEvent
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
+import io.getstream.video.android.core.lifecycle.LifecycleHandler
+import io.getstream.video.android.core.lifecycle.internal.StreamLifecycleObserver
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.CallEventType
 import io.getstream.video.android.core.model.CallMetadata
@@ -105,9 +107,9 @@ internal class StreamVideoImpl(
      * Observes the app lifecycle and attempts to reconnect/release the socket connection.
      */
     private val lifecycleObserver =
-        io.getstream.video.android.core.lifecycle.internal.StreamLifecycleObserver(
+        StreamLifecycleObserver(
             lifecycle,
-            object : io.getstream.video.android.core.lifecycle.LifecycleHandler {
+            object : LifecycleHandler {
                 override fun resume() = reconnectSocket()
                 override fun stopped() {
                     socket.releaseConnection()
@@ -291,9 +293,10 @@ internal class StreamVideoImpl(
         return try {
             logger.d { "[joinCallInternal] call: $call" }
             val joinResult = callCoordinatorClient.joinCall(
-                call.id,
-                call.type,
-                GetOrCreateCallRequest()
+                id = call.id,
+                type = call.type,
+                connectionId = socket.getConnectionId(),
+                request = GetOrCreateCallRequest()
             )
             if (joinResult !is Success) {
                 logger.e { "[joinCallInternal] failed joinResult: $joinResult" }
@@ -417,7 +420,7 @@ internal class StreamVideoImpl(
         return callCoordinatorClient.sendUserEvent(
             id = id,
             type = type,
-            sendEventRequest = SendEventRequest(eventType = eventType.eventType)
+            sendEventRequest = SendEventRequest(type = eventType.eventType)
         )
             .onSuccess { engine.onCallEventSent(callCid, eventType) }
             .also { logger.v { "[sendEvent] result: $it" } }
@@ -434,7 +437,7 @@ internal class StreamVideoImpl(
         return callCoordinatorClient.sendUserEvent(
             id = id,
             type = type,
-            sendEventRequest = SendEventRequest(custom = dataJson, eventType = eventType)
+            sendEventRequest = SendEventRequest(custom = dataJson, type = eventType)
         ).also { logger.v { "[sendCustomEvent] result: $it" } }
     }
 

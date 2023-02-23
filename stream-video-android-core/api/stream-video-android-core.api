@@ -2927,6 +2927,7 @@ public abstract interface class io/getstream/video/android/core/socket/VideoSock
 	public abstract fun authenticateUser ()V
 	public abstract fun connectSocket ()V
 	public abstract fun getCallState ()Lio/getstream/video/android/core/model/CallMetadata;
+	public abstract fun getConnectionId ()Ljava/lang/String;
 	public abstract fun onConnectionResolved (Lio/getstream/video/android/core/events/ConnectedEvent;)V
 	public abstract fun onEvent (Lio/getstream/video/android/core/events/VideoEvent;)V
 	public abstract fun onSocketError (Lio/getstream/video/android/core/errors/VideoError;)V
@@ -3134,6 +3135,19 @@ public final class org/openapitools/client/models/APIError {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class org/openapitools/client/models/Any {
+	public fun <init> (Ljava/time/OffsetDateTime;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/time/OffsetDateTime;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/time/OffsetDateTime;Ljava/lang/String;)Lorg/openapitools/client/models/Any;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/Any;Ljava/time/OffsetDateTime;Ljava/lang/String;ILjava/lang/Object;)Lorg/openapitools/client/models/Any;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCreatedAt ()Ljava/time/OffsetDateTime;
+	public final fun getType ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class org/openapitools/client/models/AudioSettings {
 	public fun <init> (Z)V
 	public final fun component1 ()Z
@@ -3141,6 +3155,28 @@ public final class org/openapitools/client/models/AudioSettings {
 	public static synthetic fun copy$default (Lorg/openapitools/client/models/AudioSettings;ZILjava/lang/Object;)Lorg/openapitools/client/models/AudioSettings;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAccessRequestEnabled ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/openapitools/client/models/BlockUserRequest {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lorg/openapitools/client/models/BlockUserRequest;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/BlockUserRequest;Ljava/lang/String;ILjava/lang/Object;)Lorg/openapitools/client/models/BlockUserRequest;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getUserId ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/openapitools/client/models/BlockUserResponse {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lorg/openapitools/client/models/BlockUserResponse;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/BlockUserResponse;Ljava/lang/String;ILjava/lang/Object;)Lorg/openapitools/client/models/BlockUserResponse;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDuration ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -3290,6 +3326,23 @@ public final class org/openapitools/client/models/Callaccepted {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class org/openapitools/client/models/CallblockedUser {
+	public fun <init> (Ljava/lang/String;Ljava/time/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/time/OffsetDateTime;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/time/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;)Lorg/openapitools/client/models/CallblockedUser;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/CallblockedUser;Ljava/lang/String;Ljava/time/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lorg/openapitools/client/models/CallblockedUser;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCallCid ()Ljava/lang/String;
+	public final fun getCreatedAt ()Ljava/time/OffsetDateTime;
+	public final fun getType ()Ljava/lang/String;
+	public final fun getUserId ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class org/openapitools/client/models/Callcancelled {
 	public fun <init> (Ljava/lang/String;Ljava/time/OffsetDateTime;Ljava/lang/String;Lorg/openapitools/client/models/UserResponse;)V
 	public final fun component1 ()Ljava/lang/String;
@@ -3381,6 +3434,36 @@ public final class org/openapitools/client/models/CallpermissionsUpdated {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class org/openapitools/client/models/CallrecordingStarted {
+	public fun <init> (Ljava/lang/String;Ljava/time/OffsetDateTime;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/time/OffsetDateTime;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/time/OffsetDateTime;Ljava/lang/String;)Lorg/openapitools/client/models/CallrecordingStarted;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/CallrecordingStarted;Ljava/lang/String;Ljava/time/OffsetDateTime;Ljava/lang/String;ILjava/lang/Object;)Lorg/openapitools/client/models/CallrecordingStarted;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCallCid ()Ljava/lang/String;
+	public final fun getCreatedAt ()Ljava/time/OffsetDateTime;
+	public final fun getType ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/openapitools/client/models/CallrecordingStopped {
+	public fun <init> (Ljava/lang/String;Ljava/time/OffsetDateTime;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/time/OffsetDateTime;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/time/OffsetDateTime;Ljava/lang/String;)Lorg/openapitools/client/models/CallrecordingStopped;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/CallrecordingStopped;Ljava/lang/String;Ljava/time/OffsetDateTime;Ljava/lang/String;ILjava/lang/Object;)Lorg/openapitools/client/models/CallrecordingStopped;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCallCid ()Ljava/lang/String;
+	public final fun getCreatedAt ()Ljava/time/OffsetDateTime;
+	public final fun getType ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class org/openapitools/client/models/Callrejected {
 	public fun <init> (Ljava/lang/String;Ljava/time/OffsetDateTime;Ljava/lang/String;Lorg/openapitools/client/models/UserResponse;)V
 	public final fun component1 ()Ljava/lang/String;
@@ -3394,6 +3477,23 @@ public final class org/openapitools/client/models/Callrejected {
 	public final fun getCreatedAt ()Ljava/time/OffsetDateTime;
 	public final fun getType ()Ljava/lang/String;
 	public final fun getUser ()Lorg/openapitools/client/models/UserResponse;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/openapitools/client/models/CallunblockedUser {
+	public fun <init> (Ljava/lang/String;Ljava/time/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/time/OffsetDateTime;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/time/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;)Lorg/openapitools/client/models/CallunblockedUser;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/CallunblockedUser;Ljava/lang/String;Ljava/time/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lorg/openapitools/client/models/CallunblockedUser;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCallCid ()Ljava/lang/String;
+	public final fun getCreatedAt ()Ljava/time/OffsetDateTime;
+	public final fun getType ()Ljava/lang/String;
+	public final fun getUserId ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -3443,6 +3543,25 @@ public final class org/openapitools/client/models/Credentials {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class org/openapitools/client/models/Custom {
+	public fun <init> (Ljava/lang/String;Ljava/time/OffsetDateTime;Ljava/util/Map;Ljava/lang/String;Lorg/openapitools/client/models/UserResponse;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/time/OffsetDateTime;
+	public final fun component3 ()Ljava/util/Map;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Lorg/openapitools/client/models/UserResponse;
+	public final fun copy (Ljava/lang/String;Ljava/time/OffsetDateTime;Ljava/util/Map;Ljava/lang/String;Lorg/openapitools/client/models/UserResponse;)Lorg/openapitools/client/models/Custom;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/Custom;Ljava/lang/String;Ljava/time/OffsetDateTime;Ljava/util/Map;Ljava/lang/String;Lorg/openapitools/client/models/UserResponse;ILjava/lang/Object;)Lorg/openapitools/client/models/Custom;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCallCid ()Ljava/lang/String;
+	public final fun getCreatedAt ()Ljava/time/OffsetDateTime;
+	public final fun getCustom ()Ljava/util/Map;
+	public final fun getType ()Ljava/lang/String;
+	public final fun getUser ()Lorg/openapitools/client/models/UserResponse;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class org/openapitools/client/models/DatacenterResponse {
 	public fun <init> (Lorg/openapitools/client/models/Coordinates;Ljava/lang/String;Ljava/lang/String;)V
 	public final fun component1 ()Lorg/openapitools/client/models/Coordinates;
@@ -3454,6 +3573,30 @@ public final class org/openapitools/client/models/DatacenterResponse {
 	public final fun getCoordinates ()Lorg/openapitools/client/models/Coordinates;
 	public final fun getLatencyUrl ()Ljava/lang/String;
 	public final fun getName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/openapitools/client/models/Device {
+	public fun <init> (Ljava/time/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/time/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/time/OffsetDateTime;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/Boolean;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun component7 ()Ljava/lang/String;
+	public final fun copy (Ljava/time/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/String;)Lorg/openapitools/client/models/Device;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/Device;Ljava/time/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lorg/openapitools/client/models/Device;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCreatedAt ()Ljava/time/OffsetDateTime;
+	public final fun getDisabled ()Ljava/lang/Boolean;
+	public final fun getDisabledReason ()Ljava/lang/String;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getPushProvider ()Ljava/lang/String;
+	public final fun getPushProviderName ()Ljava/lang/String;
+	public final fun getUserId ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -3572,6 +3715,24 @@ public final class org/openapitools/client/models/HLSSettings {
 	public final fun getAutoOn ()Z
 	public final fun getEnabled ()Z
 	public final fun getQualityTracks ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/openapitools/client/models/Healthcheck {
+	public fun <init> (Ljava/lang/String;Ljava/time/OffsetDateTime;Ljava/lang/String;Lorg/openapitools/client/models/OwnUserResponse;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/time/OffsetDateTime;Ljava/lang/String;Lorg/openapitools/client/models/OwnUserResponse;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/time/OffsetDateTime;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Lorg/openapitools/client/models/OwnUserResponse;
+	public final fun copy (Ljava/lang/String;Ljava/time/OffsetDateTime;Ljava/lang/String;Lorg/openapitools/client/models/OwnUserResponse;)Lorg/openapitools/client/models/Healthcheck;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/Healthcheck;Ljava/lang/String;Ljava/time/OffsetDateTime;Ljava/lang/String;Lorg/openapitools/client/models/OwnUserResponse;ILjava/lang/Object;)Lorg/openapitools/client/models/Healthcheck;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCid ()Ljava/lang/String;
+	public final fun getCreatedAt ()Ljava/time/OffsetDateTime;
+	public final fun getMe ()Lorg/openapitools/client/models/OwnUserResponse;
+	public final fun getType ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -3736,6 +3897,36 @@ public final class org/openapitools/client/models/MuteUsersResponse {
 	public static synthetic fun copy$default (Lorg/openapitools/client/models/MuteUsersResponse;Ljava/lang/String;ILjava/lang/Object;)Lorg/openapitools/client/models/MuteUsersResponse;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getDuration ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/openapitools/client/models/OwnUserResponse {
+	public fun <init> (Ljava/time/OffsetDateTime;Ljava/util/Map;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/time/OffsetDateTime;Ljava/time/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/time/OffsetDateTime;Ljava/util/Map;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/time/OffsetDateTime;Ljava/time/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/time/OffsetDateTime;
+	public final fun component10 ()Ljava/util/List;
+	public final fun component2 ()Ljava/util/Map;
+	public final fun component3 ()Ljava/util/List;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Ljava/time/OffsetDateTime;
+	public final fun component7 ()Ljava/time/OffsetDateTime;
+	public final fun component8 ()Ljava/lang/String;
+	public final fun component9 ()Ljava/lang/String;
+	public final fun copy (Ljava/time/OffsetDateTime;Ljava/util/Map;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/time/OffsetDateTime;Ljava/time/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lorg/openapitools/client/models/OwnUserResponse;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/OwnUserResponse;Ljava/time/OffsetDateTime;Ljava/util/Map;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/time/OffsetDateTime;Ljava/time/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lorg/openapitools/client/models/OwnUserResponse;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCreatedAt ()Ljava/time/OffsetDateTime;
+	public final fun getCustom ()Ljava/util/Map;
+	public final fun getDeletedAt ()Ljava/time/OffsetDateTime;
+	public final fun getDevices ()Ljava/util/List;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getImage ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getRole ()Ljava/lang/String;
+	public final fun getTeams ()Ljava/util/List;
+	public final fun getUpdatedAt ()Ljava/time/OffsetDateTime;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -3953,7 +4144,7 @@ public final class org/openapitools/client/models/SendEventRequest {
 	public static synthetic fun copy$default (Lorg/openapitools/client/models/SendEventRequest;Ljava/lang/String;Ljava/util/Map;ILjava/lang/Object;)Lorg/openapitools/client/models/SendEventRequest;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCustom ()Ljava/util/Map;
-	public final fun getEventType ()Ljava/lang/String;
+	public final fun getType ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -3980,6 +4171,28 @@ public final class org/openapitools/client/models/SortParamRequest {
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getDirection ()Ljava/math/BigDecimal;
 	public final fun getField ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/openapitools/client/models/UnblockUserRequest {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lorg/openapitools/client/models/UnblockUserRequest;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/UnblockUserRequest;Ljava/lang/String;ILjava/lang/Object;)Lorg/openapitools/client/models/UnblockUserRequest;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getUserId ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/openapitools/client/models/UnblockUserResponse {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lorg/openapitools/client/models/UnblockUserResponse;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/UnblockUserResponse;Ljava/lang/String;ILjava/lang/Object;)Lorg/openapitools/client/models/UnblockUserResponse;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDuration ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
