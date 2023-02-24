@@ -32,8 +32,6 @@ import io.getstream.video.android.core.model.CallMetadata
 import io.getstream.video.android.core.socket.SocketListener
 import io.getstream.video.android.core.socket.VideoSocket
 import io.getstream.video.android.core.user.UserPreferences
-import kotlin.math.pow
-import kotlin.properties.Delegates
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -41,6 +39,8 @@ import kotlinx.coroutines.launch
 import org.openapitools.client.models.UserObjectRequest
 import org.openapitools.client.models.VideoWSAuthMessageRequest
 import stream.video.coordinator.client_v1_rpc.WebsocketHealthcheck
+import kotlin.math.pow
+import kotlin.properties.Delegates
 
 /**
  * Socket implementation used to handle the lifecycle of a WebSocket and its related state.
