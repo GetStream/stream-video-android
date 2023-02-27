@@ -76,7 +76,8 @@ Open the file called `VideoApp.kt` and you'll find two TODO items:
 
 ```kotlin
 fun initializeStreamVideo(
-    credentialsProvider: CredentialsProvider,
+    user: User,
+    apiKey: ApiKey,
     loggingLevel: LoggingLevel
 ): StreamVideo {
     TODO("Implement Stream Video")
@@ -103,32 +104,25 @@ class VideoApp : Application() {
     ... // The rest of the class
 
     fun initializeStreamVideo(
-        credentialsProvider: CredentialsProvider,
+        user: User,
+        apiKey: ApiKey,
         loggingLevel: LoggingLevel
-    ): StreamVideo { 
-        if (this::credentialsProvider.isInitialized) { // 1
-            this.credentialsProvider.updateUser(
-                credentialsProvider.getUserCredentials()
-            )
-        } else {
-            this.credentialsProvider = credentialsProvider
-        }
-
-        return StreamVideoBuilder( // 2
+    ): StreamVideo {
+        return StreamVideoBuilder( // 1
             context = this,
-            credentialsProvider = this.credentialsProvider, // 3
-            androidInputs = emptySet(), // 4
+            user = user,
+            apiKey = apiKey,
+            androidInputs = emptySet(), // 2
             loggingLevel = loggingLevel
         ).build().also {
-            streamVideo = it // 5
+            video = it // 3
         }
     }
 
     fun logOut() {
-        // 6
-        streamVideo.clearCallState()
-        streamVideo.removeDevices(userPreferences.getDevices())
-        userPreferences.clear() // 7
+        // 4
+        streamVideo.logOut()
+        video = null
     }
 }
 ```
@@ -137,21 +131,15 @@ There are a few steps and important parts of this setup. If you look at the rest
 
 In the snippets themselves, you're doing the following:
 
-1. You check if the `credentialsProvider` is already initialized or not. If it is, you update the user data, otherwise you initialize the provider. This is helpful when logging a user in or out, as you're able to persist the data accordingly.
+1. Using `StreamVideoBuilder`,  you gain access to our client. You pass in the `context` used for internal preferences setup, the `user` and `apiKey` for authentication, `androidInputs` and the `loggingLevel` used to log information to Logcat.
 
-2. Using `StreamVideoBuilder`,  you gain access to our client. You pass in the `context` used for internal preferences setup, the `credentialsProvider` for the user and API key data, `androidInputs` and the `loggingLevel` used to log information to Logcat.
+2. We'll touch upon `androidInputs` later, but they're used to automate the navigation to Calls when you receive or start a Call.
 
-3. It's important to pass in the persisted `credentialsProvider` instance in case you log in/out, to update the internal SDK.
+3. After building the client using `StreamVideoBuilder.build()`, you set the local `video` instance so you can reuse it.
 
-4. We'll touch upon `androidInputs` later, but they're used to automate the navigation to Calls when you receive or start a Call.
+   > **Note**: We're using the `video` property as a nullable field, while the `streamVideo` public value is exposed to customers. We recommend releasing the instance of the `StreamVideo` client as soon as your user logs out.
 
-5. After building the client using `StreamVideoBuilder.build()`, you set the local instance so you can reuse it.
-
-   > **Note**: For the sake of simplicity, we're not using nullable properties for the client here, but rather `lateinit var`. We recommend releasing the instance of the `StreamVideo` client as soon as your user logs out.
-
-6. Finally, when the user logs out, you have to clear up the state. Read more about our [SDK lifecycle](../02-guides/02-call-lifecycle.mdx) to learn how to best handle this scenario.
-
-7. After clearing the client and the Call state, you can also clear the `userPreferences`, to remove the stored credentials and the API key.
+4. When the user logs out, you have to clear up the state. Read more about our [SDK lifecycle](../02-guides/02-call-lifecycle.mdx) to learn how to best handle this scenario. After clearing the client, you set the `video` instance to null, to free up memory.
 
 With this in place, you've built all the code required to initialize the client and you can move on to logging in the user.
 
@@ -174,21 +162,18 @@ To fully initialize the client, you need to use the provided `selectedUser` and 
 ```kotlin
 private fun logIn(selectedUser: User) {
     videoApp.initializeStreamVideo(
-        credentialsProvider = AuthCredentialsProvider( // 1
-            user = selectedUser,
-            apiKey = VideoApp.API_KEY, // 2
-        ),
-        loggingLevel = LoggingLevel.BODY // 3
+        user = selectedUser, // 1
+        apiKey = VideoApp.API_KEY,
+        loggingLevel = LoggingLevel.BODY // 2
     )
-    startActivity(HomeActivity.getIntent(this)) // 4
+    startActivity(HomeActivity.getIntent(this)) // 3
     finish()
 }
 ```
 
 Since the UI is already there, you only need to do the following:
 
-1. You wrap the `selectedUser` and the `apiKey` into a `CredentialsProvider` that'll be used under the hood for all API calls.
-2. Notice the `VideoApp.API_KEY`. Right now this is a hardcoded value to our tutorial environment, but in real-world, you'll need to pass in **your environment API key**.
+1. You pass in the `selectedUser` and the `apiKey` to the initializer. Notice the `VideoApp.API_KEY`. Right now this is a hardcoded value to our tutorial environment, but in real-world, you'll need to pass in **your environment API key**.
 3. To have a good overview of details from the SDK, we pass in `LoggingLevel.BODY`. This will log all the information we have for our API calls.
 4. As soon as the client is initialized, you can start the `HomeActivity` and finish with login.
 
@@ -332,27 +317,21 @@ You'll learn more about our PiP support later in the tutorial. Now that you've d
 Open `VideoApp.kt` and change the following piece of code in `initializeStreamVideo()`:
 ```kotlin
 fun initializeStreamVideo(
-    credentialsProvider: CredentialsProvider,
+    user: User,
+    apiKey: ApiKey,
     loggingLevel: LoggingLevel
 ): StreamVideo {
-    if (this::credentialsProvider.isInitialized) {
-        this.credentialsProvider.updateUser(
-            credentialsProvider.getUserCredentials()
-        )
-    } else {
-        this.credentialsProvider = credentialsProvider
-    }
-
     return StreamVideoBuilder(
         context = this,
-        credentialsProvider = this.credentialsProvider,
+        user = user,
+        apiKey = apiKey,
         androidInputs = setOf( // here
             CallServiceInput.from(CallService::class),
             CallActivityInput.from(CallActivity::class),
         ), 
         loggingLevel = loggingLevel
     ).build().also {
-        streamVideo = it
+        video = it
     }
 }
 ```
