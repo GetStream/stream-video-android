@@ -66,6 +66,7 @@ public class ScreenShareView : ConstraintLayout, VideoRenderer {
         style = ScreenShareStyle(context, attrs)
 
         // TODO fullscreen and orientation support will be added in later pr
+        // https://github.com/GetStream/stream-video-android/issues/150
         binding.changeOrientationButton.apply {
             setImageDrawable(style.landscapeIcon)
             setColorFilter(style.controlButtonIconTint)

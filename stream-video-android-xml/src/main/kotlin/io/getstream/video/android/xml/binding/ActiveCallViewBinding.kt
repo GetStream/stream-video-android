@@ -68,8 +68,10 @@ public fun ActiveCallView.bindView(
 
     startJob(lifecycleOwner) {
         viewModel.participantList.combine(viewModel.screenSharingSessions) { participants, screenSharingSessions ->
-            updateContent(participants, screenSharingSessions.firstOrNull())
-        }.collect()
+            participants to screenSharingSessions.firstOrNull()
+        }.collect { (participants, screenSharingSession) ->
+            updateContent(participants, screenSharingSession)
+        }
     }
 
     startJob(lifecycleOwner) {
@@ -79,9 +81,11 @@ public fun ActiveCallView.bindView(
     }
 
     startJob(lifecycleOwner) {
-        viewModel.callMediaState.combine(viewModel.screenSharingSessions) { mediaState, screenShares ->
-            setControlItems(updateCallMediaState(mediaState, screenShares.firstOrNull() != null))
-        }.collect()
+        viewModel.callMediaState.combine(viewModel.screenSharingSessions) { mediaState, screenSharingSessions ->
+            mediaState to screenSharingSessions.firstOrNull()
+        }.collect { (mediaState, screenSharingSession) ->
+            setControlItems(updateCallMediaState(mediaState, screenSharingSession != null))
+        }
     }
 }
 

@@ -59,8 +59,8 @@ public data class CallParticipantStyle(
     public val participantMicOffIcon: Drawable,
     @ColorInt public val participantMicOffIconTint: Int,
     @ColorInt public val participantAudioLevelTint: Int,
-    @Px val elevation: Float,
-    @Px val cornerRadius: Float
+    @Px public val elevation: Float,
+    @Px public val cornerRadius: Float
 ) {
 
     internal companion object {

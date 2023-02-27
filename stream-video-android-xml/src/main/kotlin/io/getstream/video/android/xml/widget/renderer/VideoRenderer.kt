@@ -16,9 +16,19 @@
 
 package io.getstream.video.android.xml.widget.renderer
 
+import io.getstream.video.android.core.ui.TextureViewRenderer
 import io.getstream.video.android.xml.widget.participant.RendererInitializer
 
+/**
+ * Interface used to identify any container that had a video renderer inside of it. Used so we can easily initialise
+ * the renderer for [TextureViewRenderer].
+ */
 internal interface VideoRenderer {
 
+    /**
+     * Used to set the renderer initializer for a view containing [TextureViewRenderer].
+     *
+     * @param rendererInitializer The initializer to be used for the [TextureViewRenderer].
+     */
     public fun setRendererInitializer(rendererInitializer: RendererInitializer)
 }

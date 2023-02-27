@@ -53,16 +53,6 @@ public final class io/getstream/video/android/xml/databinding/ViewActiveCallBind
 	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;)Lio/getstream/video/android/xml/databinding/ViewActiveCallBinding;
 }
 
-public final class io/getstream/video/android/xml/databinding/ViewAsdBinding : androidx/viewbinding/ViewBinding {
-	public final field bottom Landroid/view/View;
-	public final field top Landroid/view/View;
-	public static fun bind (Landroid/view/View;)Lio/getstream/video/android/xml/databinding/ViewAsdBinding;
-	public synthetic fun getRoot ()Landroid/view/View;
-	public fun getRoot ()Landroidx/constraintlayout/widget/ConstraintLayout;
-	public static fun inflate (Landroid/view/LayoutInflater;)Lio/getstream/video/android/xml/databinding/ViewAsdBinding;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lio/getstream/video/android/xml/databinding/ViewAsdBinding;
-}
-
 public final class io/getstream/video/android/xml/databinding/ViewCallDetailsBinding : androidx/viewbinding/ViewBinding {
 	public final field avatarsHolder Landroid/widget/LinearLayout;
 	public final field callStatus Landroid/widget/TextView;

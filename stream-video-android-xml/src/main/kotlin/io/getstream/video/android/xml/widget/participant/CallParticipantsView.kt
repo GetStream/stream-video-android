@@ -195,9 +195,7 @@ public class CallParticipantsView : ConstraintLayout {
             layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
             if (::rendererInitializer.isInitialized) setRendererInitializer(rendererInitializer)
             buildParticipantView = { this@CallParticipantsView.buildParticipantView(false) }
-            getBottomLabelOffset = {
-                if (isScreenSharingActive) 0 else this@CallParticipantsView.getCallControlsHeight()
-            }
+            getBottomLabelOffset = { this@CallParticipantsView.getCallControlsHeight() }
         }
         addView(gridView)
     }
@@ -229,7 +227,9 @@ public class CallParticipantsView : ConstraintLayout {
      */
     private fun buildFloatingView(): FloatingParticipantView {
         return FloatingParticipantView(context).apply {
-            if (::rendererInitializer.isInitialized) setRendererInitializer(rendererInitializer)
+            if (::rendererInitializer.isInitialized) {
+                setRendererInitializer(rendererInitializer)
+            }
             id = UUID.randomUUID().hashCode()
             layoutParams = LayoutParams(
                 style.localParticipantWidth.toInt(),
