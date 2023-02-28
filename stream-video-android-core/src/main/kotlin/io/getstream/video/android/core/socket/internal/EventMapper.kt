@@ -47,12 +47,16 @@ import io.getstream.video.android.core.socket.internal.EventType.HEALTH_CHECK
 import io.getstream.video.android.core.socket.internal.EventType.PERMISSION_REQUEST
 import io.getstream.video.android.core.socket.internal.EventType.UPDATED_CALL_PERMISSIONS
 import io.getstream.video.android.core.utils.toUser
+import java.util.Date
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import org.openapitools.client.infrastructure.Serializer
 import org.openapitools.client.models.CallRecordingStartedEvent
 import org.openapitools.client.models.CallRecordingStoppedEvent
 import org.openapitools.client.models.CustomVideoEvent
 import stream.video.coordinator.client_v1_rpc.WebsocketEvent
-import java.util.Date
 
 internal object EventMapper {
 
@@ -68,12 +72,17 @@ internal object EventMapper {
         text: String
     ): VideoEvent = when (eventType) {
         HEALTH_CHECK -> {
-            val event =
-                Serializer.moshi.adapter(
-                    org.openapitools.client.models.HealthCheckEvent::class.java
-                ).fromJson(text)!!
+//            val event =
+//                Serializer.moshi.adapter(
+//                    org.openapitools.client.models.HealthCheckEvent::class.java
+//                ).fromJson(text)!!
+//
+//            HealthCheckEvent(clientId = "") // TODO - missing from BE, reimpl when available
 
-            HealthCheckEvent(clientId = "") // TODO - missing from BE
+            val data = Json.decodeFromString<JsonObject>(text)
+            val connectionId = data["connection_id"]?.jsonPrimitive?.content ?: ""
+
+            HealthCheckEvent(clientId = connectionId)
         }
 
         CALL_CREATED -> {

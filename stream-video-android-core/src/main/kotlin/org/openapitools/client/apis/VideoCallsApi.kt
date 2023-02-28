@@ -151,7 +151,7 @@ internal interface VideoCallsApi {
      * @param getOrCreateCallRequest
      * @return [JoinCallResponse]
      */
-    @POST("/video/call/{type}/{id}/join")
+    @POST("/video/join_call/{type}/{id}")
     suspend fun joinCall(
         @Path("type") type: String,
         @Path("id") id: String,
