@@ -14,33 +14,11 @@
  * limitations under the License.
  */
 
-@file:Suppress(
-    "ArrayInDataClass",
-    "EnumEntryName",
-    "RemoveRedundantQualifierName",
-    "UnusedImport"
-)
+package io.getstream.video.android.core.model
 
-package org.openapitools.client.models
-
-import com.squareup.moshi.Json
-
-/**
- * *
- * @param callCid * @param createdAt * @param type * @param userId */
-
-data class CallunblockedUser(
-
-    @Json(name = "call_cid")
-    val callCid: kotlin.String,
-
-    @Json(name = "created_at")
-    val createdAt: java.time.OffsetDateTime,
-
-    @Json(name = "type")
-    val type: kotlin.String,
-
-    @Json(name = "user_id")
-    val userId: kotlin.String
-
+public data class CallData(
+    public val blockedUsers: List<User>,
+    public val call: CallInfo,
+    public val members: List<CallUser>,
+    public val ownMembership: CallUser?
 )

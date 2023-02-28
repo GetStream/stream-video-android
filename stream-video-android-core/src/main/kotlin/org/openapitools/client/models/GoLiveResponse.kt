@@ -27,23 +27,16 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param call * @param createdAt * @param members * @param ringing * @param type */
+ * @param call * @param duration Duration of the request in human-readable format
+ */
 
-data class Callcreated(
+data class GoLiveResponse(
 
     @Json(name = "call")
     val call: CallResponse,
 
-    @Json(name = "created_at")
-    val createdAt: java.time.OffsetDateTime,
-
-    @Json(name = "members")
-    val members: kotlin.collections.List<MemberResponse>,
-
-    @Json(name = "ringing")
-    val ringing: kotlin.Boolean,
-
-    @Json(name = "type")
-    val type: kotlin.String
+    /* Duration of the request in human-readable format */
+    @Json(name = "duration")
+    val duration: kotlin.String
 
 )

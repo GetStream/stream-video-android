@@ -27,32 +27,20 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param sort * @param filterConditions * @param limit * @param memberLimit * @param messageLimit * @param next * @param prev * @param watch */
+ * @param callCid * @param createdAt * @param type * @param userId */
 
-data class QueryCallRequest(
+data class BlockedUserEvent(
 
-    @Json(name = "sort")
-    val sort: kotlin.collections.List<SortParamRequest>,
+    @Json(name = "call_cid")
+    val callCid: kotlin.String,
 
-    @Json(name = "filter_conditions")
-    val filterConditions: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null,
+    @Json(name = "created_at")
+    val createdAt: java.time.OffsetDateTime,
 
-    @Json(name = "limit")
-    val limit: java.math.BigDecimal? = null,
+    @Json(name = "type")
+    val type: kotlin.String,
 
-    @Json(name = "member_limit")
-    val memberLimit: java.math.BigDecimal? = null,
-
-    @Json(name = "message_limit")
-    val messageLimit: java.math.BigDecimal? = null,
-
-    @Json(name = "next")
-    val next: kotlin.String? = null,
-
-    @Json(name = "prev")
-    val prev: kotlin.String? = null,
-
-    @Json(name = "watch")
-    val watch: kotlin.Boolean? = null
+    @Json(name = "user_id")
+    val userId: kotlin.String
 
 )

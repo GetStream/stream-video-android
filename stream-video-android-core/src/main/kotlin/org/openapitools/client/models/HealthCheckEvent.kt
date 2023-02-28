@@ -27,14 +27,22 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param createdAt * @param type */
+ * @param cid The unique identifier for a call (<type>:<id>)
+ * @param createdAt * @param type * @param me */
 
-data class LeftSquareBracketAnyRightSquareBracket(
+data class HealthCheckEvent(
+
+    /* The unique identifier for a call (<type>:<id>) */
+    @Json(name = "cid")
+    val cid: kotlin.String,
 
     @Json(name = "created_at")
     val createdAt: java.time.OffsetDateTime,
 
     @Json(name = "type")
-    val type: kotlin.String
+    val type: kotlin.String,
+
+    @Json(name = "me")
+    val me: OwnUserResponse? = null
 
 )

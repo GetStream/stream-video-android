@@ -27,20 +27,20 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param callCid * @param createdAt * @param type * @param user */
+ * @param call * @param capabilitiesByRole * @param createdAt * @param type */
 
-data class Callcancelled(
+data class CallUpdatedEvent(
 
-    @Json(name = "call_cid")
-    val callCid: kotlin.String,
+    @Json(name = "call")
+    val call: CallResponse,
+
+    @Json(name = "capabilities_by_role")
+    val capabilitiesByRole: kotlin.collections.Map<kotlin.String, kotlin.collections.List<kotlin.String>>,
 
     @Json(name = "created_at")
     val createdAt: java.time.OffsetDateTime,
 
     @Json(name = "type")
-    val type: kotlin.String,
-
-    @Json(name = "user")
-    val user: UserResponse
+    val type: kotlin.String
 
 )

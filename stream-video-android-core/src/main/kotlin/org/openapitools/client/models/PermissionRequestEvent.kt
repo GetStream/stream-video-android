@@ -27,22 +27,25 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param cid The unique identifier for a call (<type>:<id>)
- * @param createdAt * @param type * @param me */
+ * @param callCid * @param createdAt * @param permissions The list of permissions requested by the user
+ * @param type * @param user */
 
-data class Healthcheck(
+data class PermissionRequestEvent(
 
-    /* The unique identifier for a call (<type>:<id>) */
-    @Json(name = "cid")
-    val cid: kotlin.String,
+    @Json(name = "call_cid")
+    val callCid: kotlin.String,
 
     @Json(name = "created_at")
     val createdAt: java.time.OffsetDateTime,
 
+    /* The list of permissions requested by the user */
+    @Json(name = "permissions")
+    val permissions: kotlin.collections.List<kotlin.String>,
+
     @Json(name = "type")
     val type: kotlin.String,
 
-    @Json(name = "me")
-    val me: OwnUserResponse? = null
+    @Json(name = "user")
+    val user: UserResponse
 
 )

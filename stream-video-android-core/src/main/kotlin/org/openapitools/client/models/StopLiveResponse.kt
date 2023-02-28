@@ -27,17 +27,16 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param callCid * @param createdAt * @param type */
+ * @param call * @param duration Duration of the request in human-readable format
+ */
 
-data class CallrecordingStarted(
+data class StopLiveResponse(
 
-    @Json(name = "call_cid")
-    val callCid: kotlin.String,
+    @Json(name = "call")
+    val call: CallResponse,
 
-    @Json(name = "created_at")
-    val createdAt: java.time.OffsetDateTime,
-
-    @Json(name = "type")
-    val type: kotlin.String
+    /* Duration of the request in human-readable format */
+    @Json(name = "duration")
+    val duration: kotlin.String
 
 )

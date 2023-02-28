@@ -16,20 +16,25 @@
 
 package io.getstream.video.android.core.utils
 
+import io.getstream.video.android.core.model.CallData
 import io.getstream.video.android.core.model.CallDetails
 import io.getstream.video.android.core.model.CallEgress
 import io.getstream.video.android.core.model.CallMetadata
 import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.core.model.CallUserState
+import io.getstream.video.android.core.model.QueriedCalls
 import io.getstream.video.android.core.model.StreamCallKind
 import io.getstream.video.android.core.model.User
+import io.getstream.video.android.core.model.toCallInfo
 import io.getstream.video.android.core.model.toCallUsers
+import org.openapitools.client.models.CallStateResponseFields
 import org.openapitools.client.models.GetOrCreateCallResponse
 import org.openapitools.client.models.MemberResponse
+import org.openapitools.client.models.QueryCallsResponse
 import org.openapitools.client.models.UserResponse
 import stream.video.sfu.models.Participant
 import stream.video.sfu.models.TrackType
-import java.util.*
+import java.util.Date
 
 internal fun GetOrCreateCallResponse.toCall(kind: StreamCallKind): CallMetadata {
     return with(call) {
@@ -98,5 +103,26 @@ internal fun UserResponse.toUser(): User {
         imageUrl = image,
         teams = teams ?: emptyList(),
         extraData = custom.mapValues { it.value.toString() }
+    )
+}
+
+internal fun QueryCallsResponse.toQueriedCalls(): QueriedCalls {
+    return QueriedCalls(
+        calls = calls.toCallData(),
+        next = next,
+        prev = prev
+    )
+}
+
+internal fun List<CallStateResponseFields>.toCallData(): List<CallData> {
+    return map { it.toCallData() }
+}
+
+internal fun CallStateResponseFields.toCallData(): CallData {
+    return CallData(
+        blockedUsers = blockedUsers.map { it.toUser() },
+        call = call.toCallInfo(),
+        members = members.map { it.toCallUser() },
+        ownMembership = membership?.toCallUser()
     )
 }

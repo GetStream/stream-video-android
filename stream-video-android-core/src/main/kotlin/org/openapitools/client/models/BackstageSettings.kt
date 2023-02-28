@@ -27,20 +27,11 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param callCid * @param createdAt * @param type * @param user */
+ * @param enabled */
 
-data class Callaccepted(
+data class BackstageSettings(
 
-    @Json(name = "call_cid")
-    val callCid: kotlin.String,
-
-    @Json(name = "created_at")
-    val createdAt: java.time.OffsetDateTime,
-
-    @Json(name = "type")
-    val type: kotlin.String,
-
-    @Json(name = "user")
-    val user: UserResponse
+    @Json(name = "enabled")
+    val enabled: kotlin.Boolean
 
 )
