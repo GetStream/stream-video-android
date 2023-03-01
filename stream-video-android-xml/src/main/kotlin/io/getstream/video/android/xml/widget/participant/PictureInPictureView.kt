@@ -18,16 +18,16 @@ package io.getstream.video.android.xml.widget.participant
 
 import android.content.Context
 import android.util.AttributeSet
-import androidx.cardview.widget.CardView
 import androidx.core.view.children
 import io.getstream.video.android.core.model.CallParticipantState
 import io.getstream.video.android.xml.R
 import io.getstream.video.android.xml.utils.extensions.createStreamThemeWrapper
+import io.getstream.video.android.xml.widget.view.CallCardView
 
 /**
  * View to ve shown when inside a call and the app enter picture in picture mode. Will show the primary speaker.
  */
-public class PictureInPictureView : CardView {
+public class PictureInPictureView : CallCardView {
 
     private lateinit var style: PictureInPictureStyle
 

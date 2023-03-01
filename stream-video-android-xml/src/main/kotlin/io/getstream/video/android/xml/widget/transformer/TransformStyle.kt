@@ -17,7 +17,7 @@
 package io.getstream.video.android.xml.widget.transformer
 
 import io.getstream.video.android.xml.widget.avatar.AvatarStyle
-import io.getstream.video.android.xml.widget.call.CallDetailsStyle
+import io.getstream.video.android.xml.widget.calldetails.CallDetailsStyle
 import io.getstream.video.android.xml.widget.control.CallControlButtonStyle
 import io.getstream.video.android.xml.widget.control.CallControlsStyle
 import io.getstream.video.android.xml.widget.incoming.IncomingCallStyle

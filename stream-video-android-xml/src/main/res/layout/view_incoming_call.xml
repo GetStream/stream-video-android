@@ -7,13 +7,13 @@
     tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout"
     >
 
-    <io.getstream.video.android.xml.widget.call.CallBackgroundView
+    <io.getstream.video.android.xml.widget.calldetails.CallBackgroundView
         android:id="@+id/callBackground"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         />
 
-    <io.getstream.video.android.xml.widget.call.CallDetailsView
+    <io.getstream.video.android.xml.widget.calldetails.CallDetailsView
         android:id="@+id/participantsInfo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

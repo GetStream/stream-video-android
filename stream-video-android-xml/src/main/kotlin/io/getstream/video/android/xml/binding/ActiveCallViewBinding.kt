@@ -91,7 +91,7 @@ private fun defaultControlList(callMediaState: CallMediaState): List<CallControl
             },
             iconTint = R.color.stream_black,
             backgroundTint = R.color.stream_white,
-            action = ToggleSpeakerphone(callMediaState.isSpeakerphoneEnabled)
+            action = ToggleSpeakerphone(!callMediaState.isSpeakerphoneEnabled)
         ),
         CallControlItem(
             icon = if (callMediaState.isCameraEnabled) {
@@ -101,7 +101,7 @@ private fun defaultControlList(callMediaState: CallMediaState): List<CallControl
             },
             iconTint = R.color.stream_black,
             backgroundTint = R.color.stream_white,
-            action = ToggleCamera(callMediaState.isCameraEnabled)
+            action = ToggleCamera(!callMediaState.isCameraEnabled)
         ),
         CallControlItem(
             icon = if (callMediaState.isMicrophoneEnabled) {
@@ -111,7 +111,7 @@ private fun defaultControlList(callMediaState: CallMediaState): List<CallControl
             },
             iconTint = R.color.stream_black,
             backgroundTint = R.color.stream_white,
-            action = ToggleMicrophone(callMediaState.isMicrophoneEnabled)
+            action = ToggleMicrophone(!callMediaState.isMicrophoneEnabled)
         ),
         CallControlItem(
             icon = RCommon.drawable.ic_camera_flip,

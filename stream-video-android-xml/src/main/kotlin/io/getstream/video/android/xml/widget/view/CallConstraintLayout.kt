@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.xml.widget.callcontent
+package io.getstream.video.android.xml.widget.view
 
 import android.content.Context
 import android.util.AttributeSet
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Job
 
 /**
@@ -28,40 +26,13 @@ import kotlinx.coroutines.Job
  * screen if they are attached programmatically. If they are used with XML and you wish to stop observing to clean
  * up resources when hiding content call [stopAllJobs].
  */
-public abstract class CallContent : ConstraintLayout {
+public abstract class CallConstraintLayout : ConstraintLayout, JobCallContent {
 
     public constructor(context: Context) : this(context, null, 0)
     public constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
     public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
-    /**
-     * List of the currently running jobs collecting data for the screen.
-     */
-    private val runningJobs: MutableList<Job> = mutableListOf()
-
-    /**
-     * Used to start a job for this screen. The started job will be added to the [runningJobs] list so we can clean them
-     * up when not needed any more.
-     *
-     * @param lifecycleOwner The [LifecycleOwner] under which we are starting the job, usually the parent Activity
-     * or fragment.
-     * @param job The job we want to run, eg. collecting data from a flow.
-     */
-    public fun startJob(lifecycleOwner: LifecycleOwner, job: suspend () -> Unit) {
-        runningJobs.add(
-            lifecycleOwner.lifecycleScope.launchWhenResumed {
-                job()
-            }
-        )
-    }
-
-    /**
-     * Stops and clears all of the currently running jobs.
-     */
-    public fun stopAllJobs() {
-        runningJobs.forEach { it.cancel() }
-        runningJobs.clear()
-    }
+    override val runningJobs: MutableList<Job> = mutableListOf()
 
     override fun onDetachedFromWindow() {
         stopAllJobs()

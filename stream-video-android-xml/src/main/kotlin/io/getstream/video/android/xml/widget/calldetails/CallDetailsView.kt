@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.xml.widget.call
+package io.getstream.video.android.xml.widget.calldetails
 
 import android.content.Context
 import android.util.AttributeSet
