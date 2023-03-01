@@ -87,6 +87,7 @@ import kotlinx.coroutines.plus
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.openapitools.client.models.QueryMembersRequest
+import org.openapitools.client.models.SortParamRequest
 import stream.video.sfu.event.JoinRequest
 import io.getstream.video.android.core.model.StreamCallCid as CallCid
 import io.getstream.video.android.core.model.StreamCallId as CallId
@@ -226,15 +227,22 @@ internal class StreamCallEngineImpl(
 
         jobs.cancel(ID_TIMEOUT_SFU_JOINED)
 
+        // TODO - check which param to query by
         val query = InFilterObject(
-            "id", event.callState.participants.map { it.user_id }.toSet()
+            "user_id", event.callState.participants.map { it.user_id }.toSet()
         ).toMap()
 
         val queryUsersResult = coordinatorClient.queryMembers(
             QueryMembersRequest(
                 id = state.callGuid.id,
                 type = state.callGuid.type,
-                filterConditions = query
+                filterConditions = query,
+                sort = listOf(
+                    SortParamRequest(
+                        direction = 1,
+                        field = "user_id"
+                    )
+                )
             )
         )
 

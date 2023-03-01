@@ -27,23 +27,20 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param sort * @param filterConditions * @param limit * @param next * @param prev */
+ * @param callCid * @param createdAt * @param reaction * @param type */
 
-data class QueryCallsRequest(
+data class CallReactionEvent(
 
-    @Json(name = "sort")
-    val sort: kotlin.collections.List<SortParamRequest>,
+    @Json(name = "call_cid")
+    val callCid: kotlin.String,
 
-    @Json(name = "filter_conditions")
-    val filterConditions: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null,
+    @Json(name = "created_at")
+    val createdAt: java.time.OffsetDateTime,
 
-    @Json(name = "limit")
-    val limit: kotlin.Int? = null,
+    @Json(name = "reaction")
+    val reaction: ReactionResponse,
 
-    @Json(name = "next")
-    val next: kotlin.String? = null,
-
-    @Json(name = "prev")
-    val prev: kotlin.String? = null
+    @Json(name = "type")
+    val type: kotlin.String
 
 )

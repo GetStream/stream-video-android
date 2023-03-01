@@ -27,23 +27,20 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param sort * @param filterConditions * @param limit * @param next * @param prev */
+ * @param custom * @param type * @param user * @param emojiCode */
 
-data class QueryCallsRequest(
+data class ReactionResponse(
 
-    @Json(name = "sort")
-    val sort: kotlin.collections.List<SortParamRequest>,
+    @Json(name = "custom")
+    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any>,
 
-    @Json(name = "filter_conditions")
-    val filterConditions: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null,
+    @Json(name = "type")
+    val type: kotlin.String,
 
-    @Json(name = "limit")
-    val limit: kotlin.Int? = null,
+    @Json(name = "user")
+    val user: UserResponse,
 
-    @Json(name = "next")
-    val next: kotlin.String? = null,
-
-    @Json(name = "prev")
-    val prev: kotlin.String? = null
+    @Json(name = "emoji_code")
+    val emojiCode: kotlin.String? = null
 
 )

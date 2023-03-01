@@ -27,23 +27,20 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param sort * @param filterConditions * @param limit * @param next * @param prev */
+ * @param endTime * @param filename * @param startTime * @param url */
 
-data class QueryCallsRequest(
+data class CallRecording(
 
-    @Json(name = "sort")
-    val sort: kotlin.collections.List<SortParamRequest>,
+    @Json(name = "end_time")
+    val endTime: java.time.OffsetDateTime,
 
-    @Json(name = "filter_conditions")
-    val filterConditions: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null,
+    @Json(name = "filename")
+    val filename: kotlin.String,
 
-    @Json(name = "limit")
-    val limit: kotlin.Int? = null,
+    @Json(name = "start_time")
+    val startTime: java.time.OffsetDateTime,
 
-    @Json(name = "next")
-    val next: kotlin.String? = null,
-
-    @Json(name = "prev")
-    val prev: kotlin.String? = null
+    @Json(name = "url")
+    val url: kotlin.String
 
 )

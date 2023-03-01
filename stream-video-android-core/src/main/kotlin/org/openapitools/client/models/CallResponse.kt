@@ -28,19 +28,12 @@ import com.squareup.moshi.Json
 /**
  * Represents a call
  *
- * @param backstage
- * @param blockedUserIds
- * @param broadcastEgress
- * @param cid The unique identifier for a call (<type>:<id>)
+ * @param backstage * @param blockedUserIds * @param broadcastEgress * @param cid The unique identifier for a call (<type>:<id>)
  * @param createdAt Date/time of creation
- * @param createdBy
- * @param custom Custom data for this object
+ * @param createdBy * @param custom Custom data for this object
  * @param id Call ID
  * @param ownCapabilities The capabilities of the current user
- * @param recordEgress
- * @param settings
- * @param team
- * @param type The type of call
+ * @param recordEgress * @param settings * @param team * @param type The type of call
  * @param updatedAt Date/time of the last update
  * @param endedAt Date/time when the call ended
  * @param startsAt Date/time when the call will start

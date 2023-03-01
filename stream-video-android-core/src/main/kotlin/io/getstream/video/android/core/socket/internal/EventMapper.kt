@@ -47,7 +47,6 @@ import io.getstream.video.android.core.socket.internal.EventType.HEALTH_CHECK
 import io.getstream.video.android.core.socket.internal.EventType.PERMISSION_REQUEST
 import io.getstream.video.android.core.socket.internal.EventType.UPDATED_CALL_PERMISSIONS
 import io.getstream.video.android.core.utils.toUser
-import java.util.Date
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
@@ -57,6 +56,7 @@ import org.openapitools.client.models.CallRecordingStartedEvent
 import org.openapitools.client.models.CallRecordingStoppedEvent
 import org.openapitools.client.models.CustomVideoEvent
 import stream.video.coordinator.client_v1_rpc.WebsocketEvent
+import java.util.Date
 
 internal object EventMapper {
 

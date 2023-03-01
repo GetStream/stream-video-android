@@ -27,23 +27,16 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param sort * @param filterConditions * @param limit * @param next * @param prev */
+ * @param duration Duration of the request in human-readable format
+ * @param reaction */
 
-data class QueryCallsRequest(
+data class SendReactionResponse(
 
-    @Json(name = "sort")
-    val sort: kotlin.collections.List<SortParamRequest>,
+    /* Duration of the request in human-readable format */
+    @Json(name = "duration")
+    val duration: kotlin.String,
 
-    @Json(name = "filter_conditions")
-    val filterConditions: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null,
-
-    @Json(name = "limit")
-    val limit: kotlin.Int? = null,
-
-    @Json(name = "next")
-    val next: kotlin.String? = null,
-
-    @Json(name = "prev")
-    val prev: kotlin.String? = null
+    @Json(name = "reaction")
+    val reaction: ReactionResponse
 
 )
