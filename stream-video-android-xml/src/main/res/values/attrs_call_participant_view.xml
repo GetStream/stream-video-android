@@ -35,5 +35,8 @@
         <!-- Icon tint for the participant mic active   state. -->
         <attr name="streamCallParticipantAudioLevelTint" format="color|reference" />
 
+        <attr name="streamCallParticipantElevation" format="dimension|reference" />
+        <attr name="streamCallParticipantCornerRadius" format="dimension|reference" />
+
     </declare-styleable>
 </resources>

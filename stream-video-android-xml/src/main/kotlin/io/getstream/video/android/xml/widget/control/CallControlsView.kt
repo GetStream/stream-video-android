@@ -44,7 +44,7 @@ public class CallControlsView : ConstraintLayout {
     /**
      * Map of call actions and their corresponding views inside the [CallControlsView].
      */
-    private val callControls = mutableMapOf<CallAction, CallControlButton>()
+    private val callControls = mutableMapOf<CallAction, ControlButtonView>()
 
     /**
      * Handler for call controls click actions.
@@ -80,12 +80,17 @@ public class CallControlsView : ConstraintLayout {
         }
 
         // Used to make sorting the controls a little bit easier
-        val views = mutableListOf<CallControlButton>()
+        val views = mutableListOf<ControlButtonView>()
         items.forEach { callControlItem ->
             val callControlView = callControls[callControlItem.action] ?: buildControlView(callControlItem)
             callControlView.setImageResource(callControlItem.icon)
             callControlView.setColorFilter(context.getColorCompat(callControlItem.iconTint))
             callControlView.background.setTint(context.getColorCompat(callControlItem.backgroundTint))
+            callControlView.setOnClickListener {
+                if (callControlItem.enabled) {
+                    callControlItemClickListener(callControlItem.action)
+                }
+            }
             views.add(callControlView)
         }
 
@@ -98,22 +103,18 @@ public class CallControlsView : ConstraintLayout {
     }
 
     /**
-     * Adds a new [CallControlButton] for each [CallControlItem] when [setItems] is called.
+     * Adds a new [ControlButtonView] for each [CallControlItem] when [setItems] is called.
      *
      * @param callControlItem The call control item we wish to expose to the user.
      *
-     * @return The newly created [CallControlButton]
+     * @return The newly created [ControlButtonView]
      */
-    private fun buildControlView(callControlItem: CallControlItem): CallControlButton {
-        val callControlButton = CallControlButton(context).apply {
+    private fun buildControlView(callControlItem: CallControlItem): ControlButtonView {
+        val callControlButton = ControlButtonView(context).apply {
             id = View.generateViewId()
             tag = callControlItem
             layoutParams = LayoutParams(style.callControlButtonSize, style.callControlButtonSize)
             setBackgroundResource(R.drawable.bg_call_control_option)
-            setOnClickListener {
-                val data = it.tag as CallControlItem
-                callControlItemClickListener(data.action)
-            }
         }
         addView(callControlButton)
         return callControlButton

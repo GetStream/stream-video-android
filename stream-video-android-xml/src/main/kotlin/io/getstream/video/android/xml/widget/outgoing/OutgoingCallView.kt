@@ -30,8 +30,8 @@ import io.getstream.video.android.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.xml.utils.extensions.dpToPx
 import io.getstream.video.android.xml.utils.extensions.getDimension
 import io.getstream.video.android.xml.utils.extensions.streamThemeInflater
-import io.getstream.video.android.xml.widget.control.CallControlButton
-import io.getstream.video.android.xml.widget.view.CallConstraintLayout
+import io.getstream.video.android.xml.widget.callcontent.CallContent
+import io.getstream.video.android.xml.widget.control.ControlButtonView
 
 /**
  *  Represents the Outgoing Call state and UI, when the user is calling other people.
@@ -65,7 +65,7 @@ public class OutgoingCallView : CallConstraintLayout {
     /**
      * Initialises the media control buttons with the style.
      */
-    private fun initMediaControlButton(button: CallControlButton) {
+    private fun initMediaControlButton(button: ControlButtonView) {
         with(button) {
             background = style.mediaButtonBackground
             background.setTint(style.mediaButtonBackgroundTint)

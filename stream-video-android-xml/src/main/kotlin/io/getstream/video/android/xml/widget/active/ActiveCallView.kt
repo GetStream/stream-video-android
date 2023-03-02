@@ -20,6 +20,7 @@ import android.content.Context
 import android.util.AttributeSet
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.model.CallParticipantState
+import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.ui.common.R
 import io.getstream.video.android.xml.databinding.ViewActiveCallBinding
 import io.getstream.video.android.xml.utils.extensions.getColorCompat
@@ -81,8 +82,8 @@ public class ActiveCallView : CallConstraintLayout {
      *
      * @param participants The list of participants that are inside the call.
      */
-    public fun updateParticipants(participants: List<CallParticipantState>) {
-        binding.participantsView.updateParticipants(participants)
+    public fun updateContent(participants: List<CallParticipantState>, screenSharingSession: ScreenSharingSession?) {
+        binding.participantsView.updateContent(participants, screenSharingSession)
     }
 
     /**

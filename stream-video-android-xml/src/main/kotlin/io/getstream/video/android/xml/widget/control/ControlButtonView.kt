@@ -22,7 +22,7 @@ import android.util.AttributeSet
 import androidx.annotation.ColorInt
 import androidx.annotation.DrawableRes
 import androidx.cardview.widget.CardView
-import io.getstream.video.android.xml.databinding.ViewCallControlButtonBinding
+import io.getstream.video.android.xml.databinding.ViewControlButtonBinding
 import io.getstream.video.android.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.xml.utils.extensions.dpToPxPrecise
 import io.getstream.video.android.xml.utils.extensions.streamThemeInflater
@@ -30,11 +30,11 @@ import io.getstream.video.android.xml.utils.extensions.streamThemeInflater
 /**
  * Class used to show call actions. Call [setEnabled] to make the button opaque or not depending on state.
  */
-internal class CallControlButton : CardView {
+internal class ControlButtonView : CardView {
 
-    private val binding = ViewCallControlButtonBinding.inflate(streamThemeInflater, this)
+    private val binding = ViewControlButtonBinding.inflate(streamThemeInflater, this)
 
-    private lateinit var style: CallControlButtonStyle
+    private lateinit var style: ControlButtonStyle
 
     public constructor(context: Context) : this(context, null, 0)
     public constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
@@ -47,7 +47,7 @@ internal class CallControlButton : CardView {
     }
 
     private fun init(context: Context, attrs: AttributeSet?) {
-        style = CallControlButtonStyle(context, attrs)
+        style = ControlButtonStyle(context, attrs)
         initCard()
         initImageView()
     }
