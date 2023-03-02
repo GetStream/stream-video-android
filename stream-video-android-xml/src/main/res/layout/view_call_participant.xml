@@ -7,76 +7,84 @@
     tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout"
     >
 
-    <io.getstream.video.android.core.ui.TextureViewRenderer
-        android:id="@+id/participantVideoRenderer"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        />
-
-    <io.getstream.video.android.xml.widget.avatar.AvatarView
-        android:id="@+id/participantAvatar"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scaleType="centerCrop"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:streamAvatarBorderRadius="0dp"
-        app:streamAvatarShape="round_rect"
-        />
-
-    <ImageView
-        android:id="@+id/activeCallParticipantBorder"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone"
-        />
-
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/labelHolder"
-        android:layout_width="0dp"
-        android:layout_height="@dimen/callParticipantLabelHeight"
-        android:layout_margin="@dimen/callParticipantLabelPadding"
-        android:background="@drawable/bg_call_participant_name"
-        android:orientation="horizontal"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        android:id="@+id/contentHolder"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         >
 
-        <ImageView
-            android:id="@+id/soundIndicator"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_gravity="center"
-            android:layout_marginStart="@dimen/callParticipantSoundIndicatorPaddingStart"
-            android:scaleType="centerInside"
-            android:src="@drawable/ic_mic_off"
-            app:layout_constraintBottom_toBottomOf="@id/participantLabel"
-            app:layout_constraintDimensionRatio="1"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@id/participantLabel"
+        <io.getstream.video.android.core.ui.TextureViewRenderer
+            android:id="@+id/participantVideoRenderer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             />
 
-        <TextView
-            android:id="@+id/participantLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginStart="@dimen/callParticipantLabelTextPadding"
-            android:layout_marginEnd="@dimen/callParticipantLabelTextPadding"
-            android:ellipsize="end"
-            android:gravity="center"
-            android:lines="1"
-            android:maxWidth="@dimen/callParticipantLabelTextMaxWidth"
+        <io.getstream.video.android.xml.widget.avatar.AvatarView
+            android:id="@+id/participantAvatar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/soundIndicator"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="Some random user"
+            app:streamAvatarBorderRadius="0dp"
+            app:streamAvatarShape="round_rect"
             />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        <ImageView
+            android:id="@+id/activeCallParticipantBorder"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            />
 
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/labelHolder"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/callParticipantLabelHeight"
+            android:layout_margin="@dimen/callParticipantLabelPadding"
+            android:background="@drawable/bg_call_participant_name"
+            android:orientation="horizontal"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            >
+
+            <ImageView
+                android:id="@+id/soundIndicator"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_gravity="center"
+                android:layout_marginStart="@dimen/callParticipantSoundIndicatorPaddingStart"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_mic_off"
+                app:layout_constraintBottom_toBottomOf="@id/participantLabel"
+                app:layout_constraintDimensionRatio="1"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/participantLabel"
+                />
+
+            <TextView
+                android:id="@+id/participantLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginStart="@dimen/callParticipantLabelTextPadding"
+                android:layout_marginEnd="@dimen/callParticipantLabelTextPadding"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:lines="1"
+                android:maxWidth="@dimen/callParticipantLabelTextMaxWidth"
+
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/soundIndicator"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="Some random user"
+                />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </merge>

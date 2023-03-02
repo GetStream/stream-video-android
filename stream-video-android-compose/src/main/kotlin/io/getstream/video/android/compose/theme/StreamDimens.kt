@@ -79,7 +79,6 @@ public data class StreamDimens(
     public val floatingVideoPadding: Dp,
     public val floatingVideoHeight: Dp,
     public val floatingVideoWidth: Dp,
-    public val screenShareParticipantItemSize: Dp,
     public val connectionIndicatorBarMaxHeight: Dp,
     public val connectionIndicatorBarWidth: Dp,
     public val connectionIndicatorBarSeparatorWidth: Dp,
@@ -87,6 +86,14 @@ public data class StreamDimens(
     public val audioLevelIndicatorBarWidth: Dp,
     public val audioLevelIndicatorBarSeparatorWidth: Dp,
     public val audioStatusSize: Dp,
+    public val screenShareParticipantItemSize: Dp,
+    public val screenShareParticipantsRowHeight: Dp,
+    public val screenShareParticipantsRowPadding: Dp,
+    public val screenShareParticipantsListItemMargin: Dp,
+    public val screenShareParticipantsScreenShareListMargin: Dp,
+    public val screenShareParticipantsRadius: Dp,
+    public val screenSharePresenterPadding: Dp,
+    public val screenSharePresenterMargin: Dp,
 ) {
     public companion object {
         /**
@@ -142,7 +149,6 @@ public data class StreamDimens(
             floatingVideoPadding = dimensionResource(id = R.dimen.floatingVideoPadding),
             floatingVideoHeight = dimensionResource(id = R.dimen.floatingVideoHeight),
             floatingVideoWidth = dimensionResource(id = R.dimen.floatingVideoWidth),
-            screenShareParticipantItemSize = dimensionResource(id = R.dimen.screenShareParticipantItemSize),
             connectionIndicatorBarMaxHeight = dimensionResource(id = R.dimen.connectionIndicatorBarMaxHeight),
             connectionIndicatorBarWidth = dimensionResource(id = R.dimen.connectionIndicatorBarWidth),
             connectionIndicatorBarSeparatorWidth = dimensionResource(id = R.dimen.connectionIndicatorBarSeparatorWidth),
@@ -150,6 +156,14 @@ public data class StreamDimens(
             audioLevelIndicatorBarWidth = dimensionResource(id = R.dimen.audioLevelIndicatorBarWidth),
             audioLevelIndicatorBarSeparatorWidth = dimensionResource(id = R.dimen.audioLevelIndicatorBarSeparatorWidth),
             audioStatusSize = dimensionResource(id = R.dimen.audioStatusSize),
+            screenShareParticipantItemSize = dimensionResource(id = R.dimen.screenShareParticipantItemSize),
+            screenShareParticipantsRowHeight = dimensionResource(id = R.dimen.screenShareParticipantsListHeight),
+            screenShareParticipantsRowPadding = dimensionResource(id = R.dimen.screenShareParticipantsListPadding),
+            screenShareParticipantsListItemMargin = dimensionResource(id = R.dimen.screenShareParticipantsListItemMargin),
+            screenShareParticipantsScreenShareListMargin = dimensionResource(id = R.dimen.screenShareParticipantsMargin),
+            screenShareParticipantsRadius = dimensionResource(id = R.dimen.screenShareParticipantsRadius),
+            screenSharePresenterMargin = dimensionResource(id = R.dimen.screenSharePresenterTitleMargin),
+            screenSharePresenterPadding = dimensionResource(id = R.dimen.screenSharePresenterPadding)
         )
     }
 }
