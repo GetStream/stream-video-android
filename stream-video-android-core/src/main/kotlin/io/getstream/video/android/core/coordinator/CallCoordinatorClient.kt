@@ -215,6 +215,7 @@ internal interface CallCoordinatorClient {
      *
      * @param id Call ID.
      * @param type Call type.
+     * @param muteUsersRequest The request containing information about muting users.
      */
     suspend fun muteUsers(
         id: String,
@@ -238,7 +239,8 @@ internal interface CallCoordinatorClient {
     /**
      * Queries calls with a given filter predicate and pagination.
      *
-     * @param queryCallsRequest Request with the data describing the calls.
+     * @param queryCallsRequest Request with the data describing the calls. Contains the filters
+     * as well as pagination logic to be used when querying.
      * @return [Result] containing the [QueriedCalls].
      */
     suspend fun queryCalls(
