@@ -28,10 +28,10 @@ import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.xml.R
 import io.getstream.video.android.xml.widget.active.ActiveCallView
 import io.getstream.video.android.xml.widget.control.CallControlItem
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.onStart
 import io.getstream.video.android.ui.common.R as RCommon
 
 /**
@@ -83,6 +83,8 @@ public fun ActiveCallView.bindView(
     startJob(lifecycleOwner) {
         viewModel.callMediaState.combine(viewModel.screenSharingSessions) { mediaState, screenSharingSessions ->
             mediaState to screenSharingSessions.firstOrNull()
+        }.onStart {
+            setControlItems(updateCallMediaState(viewModel.callMediaState.value, false))
         }.collect { (mediaState, screenSharingSession) ->
             setControlItems(updateCallMediaState(mediaState, screenSharingSession != null))
         }

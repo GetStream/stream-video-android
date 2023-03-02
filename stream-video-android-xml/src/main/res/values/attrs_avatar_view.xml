@@ -34,8 +34,6 @@
             <flag name="bold" value="1" />
             <flag name="italic" value="2" />
         </attr>
-        <!-- Text size of the AvatarView's initials letters in group avatar -->
-        <attr name="streamGroupAvatarTextSize" format="dimension|reference" />
         <!-- A color of the AvatarView's initials letters in group avatar -->
         <attr name="streamGroupAvatarTextColor" format="color|reference" />
         <!-- Font name of the AvatarView's initials letters in group avatar -->

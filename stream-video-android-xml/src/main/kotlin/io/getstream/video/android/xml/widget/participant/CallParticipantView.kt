@@ -25,6 +25,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.isVisible
 import androidx.core.view.setMargins
+import io.getstream.log.StreamLog
 import io.getstream.video.android.core.model.CallParticipantState
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.VideoTrack
@@ -138,7 +139,8 @@ public class CallParticipantView : CardView, VideoRenderer {
     public fun setParticipant(participant: CallParticipantState) {
         binding.labelHolder.isVisible = !participant.isLocal
         setUserData(participant.toUser())
-        setTrack(participant.videoTrack, participant.hasVideo)
+        setTrack(participant.videoTrack)
+        setAvatarVisibility(participant)
         setHasAudio(participant.hasAudio)
     }
 
@@ -170,11 +172,8 @@ public class CallParticipantView : CardView, VideoRenderer {
      * Updates the current track which contains the current participants video.
      *
      * @param track The [VideoTrack] of the participant.
-     * @param hasVideo Whether the participants video is being sent or not.
      */
-    private fun setTrack(track: VideoTrack?, hasVideo: Boolean) {
-        binding.participantAvatar.isVisible = !hasVideo
-
+    private fun setTrack(track: VideoTrack?) {
         if (this.track == track) return
 
         this.track?.video?.removeSink(binding.participantVideoRenderer)
@@ -200,6 +199,21 @@ public class CallParticipantView : CardView, VideoRenderer {
                 wasRendererInitialised = true
             }
         }
+    }
+
+    private fun setAvatarVisibility(participant: CallParticipantState) {
+        val track = participant.videoTrack
+        val isVideoEnabled = try {
+            track?.video?.enabled() == true
+        } catch (error: Throwable) {
+            false
+        }
+        val shouldShowAvatar =
+            track == null || !isVideoEnabled || TrackType.TRACK_TYPE_VIDEO !in participant.publishedTracks
+
+        StreamLog.d("shouldshowavatar") { "shouldShowAvatar: $shouldShowAvatar, isTrackNull: ${track == null}, isVideoEnabled: $isVideoEnabled, isVideoInPublishedTracks: ${TrackType.TRACK_TYPE_VIDEO in participant.publishedTracks}" }
+
+        binding.participantAvatar.isVisible = shouldShowAvatar
     }
 
     /**

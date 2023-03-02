@@ -19,15 +19,21 @@ package io.getstream.video.android.xml.binding
 import androidx.lifecycle.LifecycleOwner
 import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.xml.widget.participant.PictureInPictureView
-import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.combine
 
 fun PictureInPictureView.bindView(
     viewModel: CallViewModel,
-    lifecycleOwner: LifecycleOwner
+    lifecycleOwner: LifecycleOwner,
 ) {
     startJob(lifecycleOwner) {
-        viewModel.primarySpeaker.filterNotNull().collect {
-            participant = it
+        viewModel.primarySpeaker.combine(viewModel.screenSharingSessions) { primarySpeaker, screenSharingSessions ->
+            primarySpeaker to screenSharingSessions.firstOrNull()
+        }.collect { (screenShareParticipant, screenShareSession) ->
+            if (screenShareSession != null) {
+                showScreenShare(screenShareSession)
+            } else {
+                screenShareParticipant?.let { showCallParticipantView(it) }
+            }
         }
     }
 }

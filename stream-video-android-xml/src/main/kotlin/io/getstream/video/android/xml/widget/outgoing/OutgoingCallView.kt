@@ -30,8 +30,8 @@ import io.getstream.video.android.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.xml.utils.extensions.dpToPx
 import io.getstream.video.android.xml.utils.extensions.getDimension
 import io.getstream.video.android.xml.utils.extensions.streamThemeInflater
-import io.getstream.video.android.xml.widget.callcontent.CallContent
 import io.getstream.video.android.xml.widget.control.ControlButtonView
+import io.getstream.video.android.xml.widget.view.CallConstraintLayout
 
 /**
  *  Represents the Outgoing Call state and UI, when the user is calling other people.

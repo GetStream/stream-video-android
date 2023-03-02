@@ -18,12 +18,14 @@ package io.getstream.video.android.xml.widget.participant
 
 import android.content.Context
 import android.graphics.Typeface
+import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import androidx.annotation.Px
 import io.getstream.video.android.xml.R
 import io.getstream.video.android.xml.font.TextStyle
 import io.getstream.video.android.xml.utils.extensions.getColorCompat
 import io.getstream.video.android.xml.utils.extensions.getDimension
+import io.getstream.video.android.xml.utils.extensions.getDrawableCompat
 import io.getstream.video.android.xml.utils.extensions.getResourceId
 import io.getstream.video.android.xml.utils.extensions.use
 import io.getstream.video.android.xml.widget.participant.internal.CallParticipantsGridView
@@ -70,7 +72,8 @@ public data class CallParticipantsStyle(
     @Px public val screenShareMargin: Int,
     public val presenterTextStyle: TextStyle,
     @Px public val presenterTextPadding: Int,
-    @Px public val presenterTextMargin: Int
+    @Px public val presenterTextMargin: Int,
+    public val preConnectionImage: Drawable
 ) {
 
     internal companion object {
@@ -166,6 +169,10 @@ public data class CallParticipantsStyle(
                     context.getDimension(RCommon.dimen.screenSharePresenterPadding).toFloat()
                 ).toInt()
 
+                val preConnectionImage = it.getDrawable(
+                    R.styleable.CallParticipantsView_streamCallParticipantsPreConnectionImage
+                ) ?: context.getDrawableCompat(RCommon.drawable.ic_call)!!
+
                 return CallParticipantsStyle(
                     gridCallParticipantStyle = gridCallParticipantStyle,
                     listCallParticipantStyle = listCallParticipantStyle,
@@ -180,7 +187,8 @@ public data class CallParticipantsStyle(
                     screenShareMargin = screenShareMargin,
                     presenterTextStyle = presenterTextStyle,
                     presenterTextMargin = presenterTextMargin,
-                    presenterTextPadding = presenterTextPadding
+                    presenterTextPadding = presenterTextPadding,
+                    preConnectionImage = preConnectionImage
                 ).let(TransformStyle.callParticipantsStyleTransformer::transform)
             }
         }

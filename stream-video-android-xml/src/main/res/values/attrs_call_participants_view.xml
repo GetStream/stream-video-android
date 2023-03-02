@@ -23,5 +23,6 @@
             <flag name="bold" value="1" />
             <flag name="italic" value="2" />
         </attr>
+        <attr name="streamCallParticipantsPreConnectionImage" format="reference" />
     </declare-styleable>
 </resources>

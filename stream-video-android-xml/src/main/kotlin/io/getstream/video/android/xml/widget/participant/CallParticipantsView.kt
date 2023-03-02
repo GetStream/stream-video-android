@@ -22,8 +22,10 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.appcompat.widget.ViewUtils
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.children
@@ -33,6 +35,7 @@ import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.xml.R
 import io.getstream.video.android.xml.font.setTextStyle
 import io.getstream.video.android.xml.utils.extensions.constrainViewBottomToTopOfView
+import io.getstream.video.android.xml.utils.extensions.constrainViewToParent
 import io.getstream.video.android.xml.utils.extensions.constrainViewToParentBySide
 import io.getstream.video.android.xml.utils.extensions.constrainViewTopToBottomOfView
 import io.getstream.video.android.xml.utils.extensions.getFirstViewInstance
@@ -69,6 +72,26 @@ public class CallParticipantsView : ConstraintLayout {
 
     private fun init(context: Context, attrs: AttributeSet?) {
         style = CallParticipantsStyle(context, attrs)
+
+        showPreConnectedHolder()
+    }
+
+    private fun showPreConnectedHolder() {
+        if (getFirstViewInstance<ImageView> { it.tag == PRECONNECTION_IMAGE_TAG } != null) return
+        val preConnectionImage = ImageView(context).apply {
+            id = ViewGroup.generateViewId()
+            setImageDrawable(style.preConnectionImage)
+            scaleType = ImageView.ScaleType.CENTER
+        }
+        addView(preConnectionImage)
+        setConstraints {
+            constrainViewToParent(preConnectionImage)
+        }
+    }
+
+    private fun removePreConnectionHolder() {
+        val preConnectionImage = getFirstViewInstance<ImageView> { it.tag == PRECONNECTION_IMAGE_TAG } ?: return
+        removeView(preConnectionImage)
     }
 
     /**
@@ -96,17 +119,21 @@ public class CallParticipantsView : ConstraintLayout {
      */
     public fun updateContent(participants: List<CallParticipantState>, screenSharingSession: ScreenSharingSession?) {
         isScreenSharingActive = screenSharingSession != null
+        if (participants.isNotEmpty() || screenSharingSession != null) {
+            removePreConnectionHolder()
+        } else {
+            showPreConnectedHolder()
+        }
 
         if (isScreenSharingActive) {
             enterScreenSharing()
             screenSharingSession?.let {
                 val sharingParticipant = it.participant
                 getFirstViewInstance<ScreenShareView>()?.setScreenSharingSession(it)
-                getFirstViewInstance<TextView>()?.text =
-                    context.getString(
-                        RCommon.string.stream_screen_sharing_title,
-                        sharingParticipant.name.ifEmpty { sharingParticipant.id }
-                    )
+                getFirstViewInstance<TextView>()?.text = context.getString(
+                    RCommon.string.stream_screen_sharing_title,
+                    sharingParticipant.name.ifEmpty { sharingParticipant.id }
+                )
             }
             getFirstViewInstance<CallParticipantsListView>()?.updateParticipants(participants)
             updateFloatingParticipant(null)
@@ -345,5 +372,9 @@ public class CallParticipantsView : ConstraintLayout {
                     LinearLayout.LayoutParams(style.participantListItemWidth, LinearLayout.LayoutParams.MATCH_PARENT)
             }
         }
+    }
+
+    companion object {
+        private const val PRECONNECTION_IMAGE_TAG = "preconeection_image"
     }
 }
