@@ -21,6 +21,7 @@ android {
         versionCode = 1
         versionName = "1.0"
 
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
@@ -76,6 +77,19 @@ android {
                 "proguard-rules.pro"
             )
             signingConfig = signingConfigs.getByName("release")
+        }
+    }
+
+    val envProps: File = rootProject.file(".env.properties")
+    if (envProps.exists()) {
+        val properties = Properties()
+        properties.load(FileInputStream(envProps))
+        buildTypes.forEach { buildType ->
+            properties
+                .filterKeys { "$it".startsWith("DOGFOODING") }
+                .forEach {
+                buildType.buildConfigField("String", "${it.key}", "\"${it.value}\"")
+            }
         }
     }
 

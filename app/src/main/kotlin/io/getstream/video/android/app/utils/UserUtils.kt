@@ -16,52 +16,62 @@
 
 package io.getstream.video.android.app.utils
 
+import io.getstream.video.android.app.BuildConfig
 import io.getstream.video.android.core.model.User
 
 fun getUsers(): List<User> {
     return listOf(
         User(
-            id = "filip",
-            name = "Filip",
-            imageUrl = "https://avatars.githubusercontent.com/u/17215808?v=4",
-            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiZmlsaXAifQ.NBYt9PdNrTnFFl5u2xVhZ93CCMSdM7uog-DNtb8DFAA",
-            role = "admin",
+            id = BuildConfig.SAMPLE_USER_00_ID,
+            name = BuildConfig.SAMPLE_USER_00_NAME,
+            imageUrl = BuildConfig.SAMPLE_USER_00_IMAGE,
+            token = BuildConfig.SAMPLE_USER_00_VIDEO_TOKEN,
+            role = BuildConfig.SAMPLE_USER_00_ROLE,
             teams = emptyList(),
             extraData = emptyMap()
         ),
         User(
-            id = "thierry",
-            name = "Thierry",
-            imageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Mile_Kitic_from_BISO0675.jpg/300px-Mile_Kitic_from_BISO0675.jpg",
-            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidGhpZXJyeSJ9.81Nhgjdnh7hnvpgqOXlGMRWkuUgCVbU-fp6gFtHymxA",
-            role = "admin",
+            id = BuildConfig.SAMPLE_USER_01_ID,
+            name = BuildConfig.SAMPLE_USER_01_NAME,
+            imageUrl = BuildConfig.SAMPLE_USER_01_IMAGE,
+            token = BuildConfig.SAMPLE_USER_01_VIDEO_TOKEN,
+            role = BuildConfig.SAMPLE_USER_01_ROLE,
             teams = emptyList(),
             extraData = emptyMap()
         ),
         User(
-            id = "martin",
-            name = "Martin",
-            imageUrl = "https://upload.wikimedia.org/wikipedia/commons/d/da/Toma_Zdravkovi%C4%87.jpg",
-            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoibWFydGluIn0._oishDWVBDRRKt9VXY9RIR3Z7NunOeJkyE7mjApTux4",
-            role = "admin",
+            id = BuildConfig.SAMPLE_USER_02_ID,
+            name = BuildConfig.SAMPLE_USER_02_NAME,
+            imageUrl = BuildConfig.SAMPLE_USER_02_IMAGE,
+            token = BuildConfig.SAMPLE_USER_02_VIDEO_TOKEN,
+            role = BuildConfig.SAMPLE_USER_02_ROLE,
             teams = emptyList(),
             extraData = emptyMap()
         ),
         User(
-            id = "oliver",
-            name = "Oliver",
-            imageUrl = "https://www.biografija.org/wp-content/uploads/2020/01/boban-rajovic.jpg",
-            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoib2xpdmVyIn0.edUI1bWxIxpPGJZeYa0k6HD58hk2FDg2Pmr2280RSGg",
-            role = "admin",
+            id = BuildConfig.SAMPLE_USER_03_ID,
+            name = BuildConfig.SAMPLE_USER_03_NAME,
+            imageUrl = BuildConfig.SAMPLE_USER_03_IMAGE,
+            token = BuildConfig.SAMPLE_USER_03_VIDEO_TOKEN,
+            role = BuildConfig.SAMPLE_USER_03_ROLE,
             teams = emptyList(),
             extraData = emptyMap()
         ),
         User(
-            id = "tomislav",
-            name = "Tomislav",
-            imageUrl = "https://i.scdn.co/image/ab67616d0000b2730ae491943a8668e81e212594",
-            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidG9taXNsYXYifQ.aOxbaAr_UVSdpcDPJHwGwTBjDw_n4eGyHtojUUEVUt8",
-            role = "admin",
+            id = BuildConfig.SAMPLE_USER_04_ID,
+            name = BuildConfig.SAMPLE_USER_04_NAME,
+            imageUrl = BuildConfig.SAMPLE_USER_04_IMAGE,
+            token = BuildConfig.SAMPLE_USER_04_VIDEO_TOKEN,
+            role = BuildConfig.SAMPLE_USER_04_ROLE,
+            teams = emptyList(),
+            extraData = emptyMap()
+        ),
+        User(
+            id = BuildConfig.SAMPLE_USER_05_ID,
+            name = BuildConfig.SAMPLE_USER_05_NAME,
+            imageUrl = BuildConfig.SAMPLE_USER_05_IMAGE,
+            token = BuildConfig.SAMPLE_USER_05_VIDEO_TOKEN,
+            role = BuildConfig.SAMPLE_USER_05_ROLE,
             teams = emptyList(),
             extraData = emptyMap()
         )

@@ -18,6 +18,7 @@ package io.getstream.video.android.tutorial_starter.user
 
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.user.UsersProvider
+import io.getstream.video.android.tutorial_starter.BuildConfig
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -30,57 +31,69 @@ class FakeUsersProvider : UsersProvider {
     private fun mockUsers(): List<User> {
         return listOf(
             User(
-                id = "vasil",
-                name = "Vasil Valkanov",
-                role = "admin",
-                imageUrl = "https://payner.bg/images/uploads/Artist_images/VASIL_VALKANOV.jpg",
-                token = "",
-                extraData = emptyMap(),
+                id = BuildConfig.SAMPLE_USER_00_ID,
+                name = BuildConfig.SAMPLE_USER_00_NAME,
+                role = BuildConfig.SAMPLE_USER_00_ROLE,
+                imageUrl = BuildConfig.SAMPLE_USER_00_IMAGE,
+                token = BuildConfig.SAMPLE_USER_00_VIDEO_TOKEN,
+                extraData = mapOf(
+                    "chatToken" to BuildConfig.SAMPLE_USER_00_CHAT_TOKEN
+                ),
                 teams = emptyList()
             ),
             User(
-                id = "veselin",
-                name = "Veselin Marinov",
-                role = "admin",
-                imageUrl = "https://payner.bg/images/uploads/Artist_images/Veselin_Marinov_2021-08-04.jpg",
-                token = "",
-                extraData = emptyMap(),
+                id = BuildConfig.SAMPLE_USER_01_ID,
+                name = BuildConfig.SAMPLE_USER_01_NAME,
+                role = BuildConfig.SAMPLE_USER_01_ROLE,
+                imageUrl = BuildConfig.SAMPLE_USER_01_IMAGE,
+                token = BuildConfig.SAMPLE_USER_01_VIDEO_TOKEN,
+                extraData = mapOf(
+                    "chatToken" to BuildConfig.SAMPLE_USER_01_CHAT_TOKEN
+                ),
                 teams = emptyList()
             ),
             User(
-                id = "valia",
-                name = "Valia",
-                role = "admin",
-                imageUrl = "https://payner.bg/images/uploads/Artist_images/Valia_-_Site_April.jpg",
-                token = "",
-                extraData = emptyMap(),
+                id = BuildConfig.SAMPLE_USER_02_ID,
+                name = BuildConfig.SAMPLE_USER_02_NAME,
+                role = BuildConfig.SAMPLE_USER_02_ROLE,
+                imageUrl = BuildConfig.SAMPLE_USER_02_IMAGE,
+                token = BuildConfig.SAMPLE_USER_02_VIDEO_TOKEN,
+                extraData = mapOf(
+                    "chatToken" to BuildConfig.SAMPLE_USER_02_CHAT_TOKEN
+                ),
                 teams = emptyList()
             ),
             User(
-                id = "damjan",
-                name = "Damjan Popov",
-                role = "admin",
-                imageUrl = "https://payner.bg/images/uploads/Artist_images/DAMYAN_POPOV.jpg",
-                token = "",
-                extraData = emptyMap(),
+                id = BuildConfig.SAMPLE_USER_03_ID,
+                name = BuildConfig.SAMPLE_USER_03_NAME,
+                role = BuildConfig.SAMPLE_USER_03_ROLE,
+                imageUrl = BuildConfig.SAMPLE_USER_03_IMAGE,
+                token = BuildConfig.SAMPLE_USER_03_VIDEO_TOKEN,
+                extraData = mapOf(
+                    "chatToken" to BuildConfig.SAMPLE_USER_03_CHAT_TOKEN
+                ),
                 teams = emptyList()
             ),
             User(
-                id = "jordan",
-                name = "Jordan",
-                role = "admin",
-                imageUrl = "https://payner.bg/images/uploads/Artist_images/DJORDAN_-_SEPT_-_2022.jpg",
-                token = "",
-                extraData = emptyMap(),
+                id = BuildConfig.SAMPLE_USER_04_ID,
+                name = BuildConfig.SAMPLE_USER_04_NAME,
+                role = BuildConfig.SAMPLE_USER_04_ROLE,
+                imageUrl = BuildConfig.SAMPLE_USER_04_IMAGE,
+                token = BuildConfig.SAMPLE_USER_04_VIDEO_TOKEN,
+                extraData = mapOf(
+                    "chatToken" to BuildConfig.SAMPLE_USER_04_CHAT_TOKEN
+                ),
                 teams = emptyList()
             ),
             User(
-                id = "ina",
-                name = "Ina Garjadi",
-                role = "admin",
-                imageUrl = "https://payner.bg/images/uploads/Artist_images/INA_GAYARDI_-_PAYNER_-_OCTOBER_-_2022.jpg",
-                token = "",
-                extraData = emptyMap(),
+                id = BuildConfig.SAMPLE_USER_05_ID,
+                name = BuildConfig.SAMPLE_USER_05_NAME,
+                role = BuildConfig.SAMPLE_USER_05_ROLE,
+                imageUrl = BuildConfig.SAMPLE_USER_05_IMAGE,
+                token = BuildConfig.SAMPLE_USER_05_VIDEO_TOKEN,
+                extraData = mapOf(
+                    "chatToken" to BuildConfig.SAMPLE_USER_05_CHAT_TOKEN
+                ),
                 teams = emptyList()
             ),
         )

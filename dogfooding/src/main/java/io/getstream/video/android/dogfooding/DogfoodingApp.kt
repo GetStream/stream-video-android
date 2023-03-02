@@ -22,7 +22,6 @@ import com.google.firebase.auth.FirebaseAuth
 import io.getstream.android.push.firebase.FirebasePushDeviceGenerator
 import io.getstream.log.StreamLog
 import io.getstream.log.android.AndroidStreamLogger
-import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.input.CallActivityInput
@@ -100,6 +99,6 @@ class DogfoodingApp : Application() {
     }
 }
 
-internal const val API_KEY = "w6yaq5388uym"
+internal const val API_KEY = BuildConfig.DOGFOODING_API_KEY
 
 val Context.dogfoodingApp get() = applicationContext as DogfoodingApp
