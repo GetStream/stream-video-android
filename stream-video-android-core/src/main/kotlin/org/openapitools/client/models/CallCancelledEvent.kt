@@ -27,9 +27,9 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param callCid * @param createdAt * @param type * @param userId */
+ * @param callCid * @param createdAt * @param type * @param user */
 
-data class CallblockedUser(
+data class CallCancelledEvent(
 
     @Json(name = "call_cid")
     val callCid: kotlin.String,
@@ -40,7 +40,7 @@ data class CallblockedUser(
     @Json(name = "type")
     val type: kotlin.String,
 
-    @Json(name = "user_id")
-    val userId: kotlin.String
+    @Json(name = "user")
+    val user: UserResponse
 
 )

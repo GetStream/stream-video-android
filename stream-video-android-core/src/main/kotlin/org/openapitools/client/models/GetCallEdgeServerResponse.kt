@@ -27,10 +27,13 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param call * @param credentials * @param duration Duration of the request in human-readable format
+ * @param blockedUsers * @param call * @param credentials * @param duration Duration of the request in human-readable format
  * @param members * @param membership */
 
 data class GetCallEdgeServerResponse(
+
+    @Json(name = "blocked_users")
+    val blockedUsers: kotlin.collections.List<UserResponse>,
 
     @Json(name = "call")
     val call: CallResponse,

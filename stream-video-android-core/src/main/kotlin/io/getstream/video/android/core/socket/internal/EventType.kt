@@ -26,6 +26,10 @@ internal enum class EventType(val type: String) {
     CALL_ENDED("call.ended"),
     PERMISSION_REQUEST("call.permission_request"),
     UPDATED_CALL_PERMISSIONS("call.permissions_updated"),
+    RECORDING_STARTED("call.recording_started"),
+    RECORDING_STOPPED("call.recording_stopped"),
+    BLOCKED_USER("call.blocked_user"),
+    UNBLOCKED_USER("call.unblocked_user"),
     CUSTOM("custom"),
     UNKNOWN("unknown");
 

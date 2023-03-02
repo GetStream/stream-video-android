@@ -16,7 +16,7 @@
 
 package org.openapitools.client.apis
 
-import org.openapitools.client.models.QueryCallRequest
+import org.openapitools.client.models.QueryCallsRequest
 import org.openapitools.client.models.QueryCallsResponse
 import org.openapitools.client.models.RequestPermissionRequest
 import org.openapitools.client.models.RequestPermissionResponse
@@ -35,11 +35,11 @@ internal interface DefaultApi {
      *  - 400: Bad request
      *  - 429: Too many requests
      *
-     * @param queryCallRequest
+     * @param queryCallsRequest
      * @return [QueryCallsResponse]
      */
     @POST("/video/calls")
-    suspend fun queryCalls(@Body queryCallRequest: QueryCallRequest): QueryCallsResponse
+    suspend fun queryCalls(@Body queryCallsRequest: QueryCallsRequest): QueryCallsResponse
 
     /**
      * Request permission
@@ -60,26 +60,6 @@ internal interface DefaultApi {
         @Path("id") id: String,
         @Body requestPermissionRequest: RequestPermissionRequest
     ): RequestPermissionResponse
-
-    /**
-     * Update user permissions
-     * Updates user permissions
-     * Responses:
-     *  - 201: Successful response
-     *  - 400: Bad request
-     *  - 429: Too many requests
-     *
-     * @param type
-     * @param id
-     * @param updateUserPermissionsRequest
-     * @return [UpdateUserPermissionsResponse]
-     */
-    @POST("/video/call/{type}/{id}/user_permissions")
-    suspend fun updateUserPermissions(
-        @Path("type") type: String,
-        @Path("id") id: String,
-        @Body updateUserPermissionsRequest: UpdateUserPermissionsRequest
-    ): UpdateUserPermissionsResponse
 
     /**
      * Start broadcasting
@@ -136,4 +116,24 @@ internal interface DefaultApi {
      */
     @POST("/video/call/{type}/{id}/stop_recording")
     suspend fun stopRecording(@Path("type") type: String, @Path("id") id: String): Unit
+
+    /**
+     * Update user permissions
+     * Updates user permissions
+     * Responses:
+     *  - 201: Successful response
+     *  - 400: Bad request
+     *  - 429: Too many requests
+     *
+     * @param type
+     * @param id
+     * @param updateUserPermissionsRequest
+     * @return [UpdateUserPermissionsResponse]
+     */
+    @POST("/video/call/{type}/{id}/user_permissions")
+    suspend fun updateUserPermissions(
+        @Path("type") type: String,
+        @Path("id") id: String,
+        @Body updateUserPermissionsRequest: UpdateUserPermissionsRequest
+    ): UpdateUserPermissionsResponse
 }
