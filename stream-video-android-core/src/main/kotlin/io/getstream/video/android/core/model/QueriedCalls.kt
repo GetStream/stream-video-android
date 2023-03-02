@@ -14,27 +14,10 @@
  * limitations under the License.
  */
 
-@file:Suppress(
-    "ArrayInDataClass",
-    "EnumEntryName",
-    "RemoveRedundantQualifierName",
-    "UnusedImport"
-)
+package io.getstream.video.android.core.model
 
-package org.openapitools.client.models
-
-import com.squareup.moshi.Json
-
-/**
- * *
- * @param direction * @param `field` */
-
-data class SortParamRequest(
-
-    @Json(name = "direction")
-    val direction: kotlin.Int? = null,
-
-    @Json(name = "field")
-    val `field`: kotlin.String? = null
-
+public data class QueriedCalls(
+    public val calls: List<CallData>,
+    public val next: String?,
+    public val prev: String?
 )

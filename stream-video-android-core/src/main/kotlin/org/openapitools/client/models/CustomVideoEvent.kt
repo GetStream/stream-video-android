@@ -27,15 +27,20 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param callCid * @param createdAt * @param type * @param user */
+ * @param callCid * @param createdAt * @param custom Custom data for this object
+ * @param type * @param user */
 
-data class Callended(
+data class CustomVideoEvent(
 
     @Json(name = "call_cid")
     val callCid: kotlin.String,
 
     @Json(name = "created_at")
     val createdAt: java.time.OffsetDateTime,
+
+    /* Custom data for this object */
+    @Json(name = "custom")
+    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any>,
 
     @Json(name = "type")
     val type: kotlin.String,

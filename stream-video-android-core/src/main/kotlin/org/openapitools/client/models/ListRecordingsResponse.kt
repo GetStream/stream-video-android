@@ -27,32 +27,14 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param sort * @param filterConditions * @param limit * @param memberLimit * @param messageLimit * @param next * @param prev * @param watch */
+ * @param duration * @param recordings */
 
-data class QueryCallRequest(
+data class ListRecordingsResponse(
 
-    @Json(name = "sort")
-    val sort: kotlin.collections.List<SortParamRequest>,
+    @Json(name = "duration")
+    val duration: kotlin.String,
 
-    @Json(name = "filter_conditions")
-    val filterConditions: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null,
-
-    @Json(name = "limit")
-    val limit: java.math.BigDecimal? = null,
-
-    @Json(name = "member_limit")
-    val memberLimit: java.math.BigDecimal? = null,
-
-    @Json(name = "message_limit")
-    val messageLimit: java.math.BigDecimal? = null,
-
-    @Json(name = "next")
-    val next: kotlin.String? = null,
-
-    @Json(name = "prev")
-    val prev: kotlin.String? = null,
-
-    @Json(name = "watch")
-    val watch: kotlin.Boolean? = null
+    @Json(name = "recordings")
+    val recordings: kotlin.collections.List<CallRecording>
 
 )

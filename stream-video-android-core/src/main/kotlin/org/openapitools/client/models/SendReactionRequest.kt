@@ -27,14 +27,17 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param createdAt * @param type */
+ * @param type * @param custom * @param emojiCode */
 
-data class Any(
-
-    @Json(name = "created_at")
-    val createdAt: java.time.OffsetDateTime,
+data class SendReactionRequest(
 
     @Json(name = "type")
-    val type: kotlin.String
+    val type: kotlin.String,
+
+    @Json(name = "custom")
+    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null,
+
+    @Json(name = "emoji_code")
+    val emojiCode: kotlin.String? = null
 
 )

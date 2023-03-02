@@ -28,16 +28,24 @@ import com.squareup.moshi.Json
 /**
  * Represents a call
  *
- * @param broadcastEgress * @param cid The unique identifier for a call (<type>:<id>)
+ * @param backstage * @param blockedUserIds * @param broadcastEgress * @param cid The unique identifier for a call (<type>:<id>)
  * @param createdAt Date/time of creation
  * @param createdBy * @param custom Custom data for this object
  * @param id Call ID
  * @param ownCapabilities The capabilities of the current user
  * @param recordEgress * @param settings * @param team * @param type The type of call
  * @param updatedAt Date/time of the last update
- * @param endedAt */
+ * @param endedAt Date/time when the call ended
+ * @param startsAt Date/time when the call will start
+ */
 
 data class CallResponse(
+
+    @Json(name = "backstage")
+    val backstage: kotlin.Boolean,
+
+    @Json(name = "blocked_user_ids")
+    val blockedUserIds: kotlin.collections.List<kotlin.String>,
 
     @Json(name = "broadcast_egress")
     val broadcastEgress: kotlin.String,
@@ -82,7 +90,12 @@ data class CallResponse(
     @Json(name = "updated_at")
     val updatedAt: java.time.OffsetDateTime,
 
+    /* Date/time when the call ended */
     @Json(name = "ended_at")
-    val endedAt: java.time.OffsetDateTime? = null
+    val endedAt: java.time.OffsetDateTime? = null,
+
+    /* Date/time when the call will start */
+    @Json(name = "starts_at")
+    val startsAt: java.time.OffsetDateTime? = null
 
 )

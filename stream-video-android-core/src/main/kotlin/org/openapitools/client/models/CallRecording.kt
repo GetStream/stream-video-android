@@ -27,20 +27,20 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param callCid * @param createdAt * @param type * @param user */
+ * @param endTime * @param filename * @param startTime * @param url */
 
-data class Callrejected(
+data class CallRecording(
 
-    @Json(name = "call_cid")
-    val callCid: kotlin.String,
+    @Json(name = "end_time")
+    val endTime: java.time.OffsetDateTime,
 
-    @Json(name = "created_at")
-    val createdAt: java.time.OffsetDateTime,
+    @Json(name = "filename")
+    val filename: kotlin.String,
 
-    @Json(name = "type")
-    val type: kotlin.String,
+    @Json(name = "start_time")
+    val startTime: java.time.OffsetDateTime,
 
-    @Json(name = "user")
-    val user: UserResponse
+    @Json(name = "url")
+    val url: kotlin.String
 
 )

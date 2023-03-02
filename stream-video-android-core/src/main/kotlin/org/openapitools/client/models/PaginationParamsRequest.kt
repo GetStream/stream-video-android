@@ -32,21 +32,21 @@ import com.squareup.moshi.Json
 data class PaginationParamsRequest(
 
     @Json(name = "id_gt")
-    val idGt: java.math.BigDecimal? = null,
+    val idGt: kotlin.Int? = null,
 
     @Json(name = "id_gte")
-    val idGte: java.math.BigDecimal? = null,
+    val idGte: kotlin.Int? = null,
 
     @Json(name = "id_lt")
-    val idLt: java.math.BigDecimal? = null,
+    val idLt: kotlin.Int? = null,
 
     @Json(name = "id_lte")
-    val idLte: java.math.BigDecimal? = null,
+    val idLte: kotlin.Int? = null,
 
     @Json(name = "limit")
-    val limit: java.math.BigDecimal? = null,
+    val limit: kotlin.Int? = null,
 
     @Json(name = "offset")
-    val offset: java.math.BigDecimal? = null
+    val offset: kotlin.Int? = null
 
 )

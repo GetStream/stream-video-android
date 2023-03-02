@@ -16,17 +16,26 @@
 
 package io.getstream.video.android.core.coordinator
 
+import io.getstream.video.android.core.model.CallInfo
 import io.getstream.video.android.core.model.CallUser
+import io.getstream.video.android.core.model.QueriedCalls
 import io.getstream.video.android.core.model.StreamCallCid
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.utils.Result
+import org.openapitools.client.models.BlockUserRequest
 import org.openapitools.client.models.GetCallEdgeServerRequest
 import org.openapitools.client.models.GetCallEdgeServerResponse
 import org.openapitools.client.models.GetOrCreateCallRequest
 import org.openapitools.client.models.GetOrCreateCallResponse
 import org.openapitools.client.models.JoinCallResponse
+import org.openapitools.client.models.MuteUsersRequest
+import org.openapitools.client.models.QueryCallsRequest
 import org.openapitools.client.models.QueryMembersRequest
+import org.openapitools.client.models.RequestPermissionRequest
 import org.openapitools.client.models.SendEventRequest
+import org.openapitools.client.models.UnblockUserRequest
+import org.openapitools.client.models.UpdateCallRequest
+import org.openapitools.client.models.UpdateUserPermissionsRequest
 import stream.video.coordinator.call_v1.Call
 import stream.video.coordinator.client_v1_rpc.CreateDeviceRequest
 import stream.video.coordinator.client_v1_rpc.CreateDeviceResponse
@@ -137,4 +146,174 @@ internal interface CallCoordinatorClient {
      * @return [List] of [CallUser]s that match the given query.
      */
     suspend fun queryMembers(request: QueryMembersRequest): Result<List<CallUser>>
+
+    /**
+     * Blocks the user from a call so they cannot join.
+     *
+     * @param id Call ID.
+     * @param type Call type.
+     * @param blockUserRequest The request to block the user.
+     */
+    suspend fun blockUser(
+        id: String,
+        type: String,
+        blockUserRequest: BlockUserRequest
+    ): Result<Unit>
+
+    /**
+     * Unblocks the user from a call so they can again join.
+     *
+     * @param id Call ID.
+     * @param type Call type.
+     * @param unblockUserRequest The request to unblock the user.
+     */
+    suspend fun unblockUser(
+        id: String,
+        type: String,
+        unblockUserRequest: UnblockUserRequest
+    ): Result<Unit>
+
+    /**
+     * End the call.
+     *
+     * @param id Call ID.
+     * @param type Call type.
+     */
+    suspend fun endCall(
+        id: String,
+        type: String
+    ): Result<Unit>
+
+    /**
+     * Marks the call as live.
+     *
+     * @param id Call ID.
+     * @param type Call type.
+     *
+     * @return [Result] with the [CallInfo].
+     */
+    suspend fun goLive(
+        id: String,
+        type: String
+    ): Result<CallInfo>
+
+    /**
+     * Stops the call from being live.
+     *
+     * @param id Call ID.
+     * @param type Call type.
+     *
+     * @return [Result] with the [CallInfo].
+     */
+    suspend fun stopLive(
+        id: String,
+        type: String
+    ): Result<CallInfo>
+
+    /**
+     * Attempts to mute users and their tracks in a call.
+     *
+     * @param id Call ID.
+     * @param type Call type.
+     * @param muteUsersRequest The request containing information about muting users.
+     */
+    suspend fun muteUsers(
+        id: String,
+        type: String,
+        muteUsersRequest: MuteUsersRequest
+    ): Result<Unit>
+
+    /**
+     * Updates the call with new information.
+     *
+     * @param id Call ID.
+     * @param type Call type.
+     * @param updateCallRequest The request to update the call.
+     */
+    suspend fun updateCall(
+        id: String,
+        type: String,
+        updateCallRequest: UpdateCallRequest
+    ): Result<CallInfo>
+
+    /**
+     * Queries calls with a given filter predicate and pagination.
+     *
+     * @param queryCallsRequest Request with the data describing the calls. Contains the filters
+     * as well as pagination logic to be used when querying.
+     * @return [Result] containing the [QueriedCalls].
+     */
+    suspend fun queryCalls(
+        queryCallsRequest: QueryCallsRequest
+    ): Result<QueriedCalls>
+
+    /**
+     * Requests permissions within a call for the current user.
+     *
+     * @param id Call ID.
+     * @param type Call Type.
+     * @param requestPermissionRequest The request holding permissions user wants to request.
+     */
+    suspend fun requestPermission(
+        id: String,
+        type: String,
+        requestPermissionRequest: RequestPermissionRequest
+    ): Result<Unit>
+
+    /**
+     * Starts broadcasting the call.
+     *
+     * @param id Call ID.
+     * @param type Call Type.
+     */
+    suspend fun startBroadcasting(
+        id: String,
+        type: String
+    ): Result<Unit>
+
+    /**
+     * Stops broadcasting the call.
+     *
+     * @param id Call ID.
+     * @param type Call Type.
+     */
+    suspend fun stopBroadcasting(
+        id: String,
+        type: String
+    ): Result<Unit>
+
+    /**
+     * Starts recording the call.
+     *
+     * @param id Call ID.
+     * @param type Call Type.
+     */
+    suspend fun startRecording(
+        id: String,
+        type: String
+    ): Result<Unit>
+
+    /**
+     * Stops recording the call.
+     *
+     * @param id Call ID.
+     * @param type Call Type.
+     */
+    suspend fun stopRecording(
+        id: String,
+        type: String
+    ): Result<Unit>
+
+    /**
+     * Grants or revokes a user's set of permissions, updating what they have access to feature-wise.
+     *
+     * @param id Call ID.
+     * @param type Call Type.
+     * @param updateUserPermissionsRequest The request holding permissions to grant or revoke.
+     */
+    suspend fun updateUserPermissions(
+        id: String,
+        type: String,
+        updateUserPermissionsRequest: UpdateUserPermissionsRequest
+    ): Result<Unit>
 }

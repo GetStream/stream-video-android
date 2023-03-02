@@ -17,8 +17,8 @@
 package io.getstream.video.android.core.model
 
 import io.getstream.video.android.core.utils.toCallUser
+import org.openapitools.client.models.CallCreatedEvent
 import org.openapitools.client.models.CallResponse
-import org.openapitools.client.models.Callcreated
 import org.openapitools.client.models.MemberResponse
 import java.io.Serializable
 import java.util.Date
@@ -94,7 +94,7 @@ internal fun CallResponse.toCallInfo(): CallInfo {
     )
 }
 
-internal fun Callcreated.toCallDetails(): CallDetails {
+internal fun CallCreatedEvent.toCallDetails(): CallDetails {
     return CallDetails(
         members = members.associate { it.userId to it.toCallUser() },
         memberUserIds = members.map { it.userId },
