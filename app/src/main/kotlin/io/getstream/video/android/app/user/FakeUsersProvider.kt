@@ -16,74 +16,20 @@
 
 package io.getstream.video.android.app.user
 
+import io.getstream.video.android.app.utils.getUsers
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.user.UsersProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-class FakeUsersProvider : UsersProvider {
+class FakeUsersProvider(private val currentUserId: String) : UsersProvider {
 
     override fun provideUsers(): List<User> {
         return mockUsers()
     }
 
     private fun mockUsers(): List<User> {
-        return listOf(
-            User(
-                id = "vasil",
-                name = "Vasil Valkanov",
-                role = "admin",
-                imageUrl = "https://payner.bg/images/uploads/Artist_images/VASIL_VALKANOV.jpg",
-                token = "",
-                extraData = emptyMap(),
-                teams = emptyList()
-            ),
-            User(
-                id = "veselin",
-                name = "Veselin Marinov",
-                role = "admin",
-                imageUrl = "https://payner.bg/images/uploads/Artist_images/Veselin_Marinov_2021-08-04.jpg",
-                token = "",
-                extraData = emptyMap(),
-                teams = emptyList()
-            ),
-            User(
-                id = "valia",
-                name = "Valia",
-                role = "admin",
-                imageUrl = "https://payner.bg/images/uploads/Artist_images/Valia_-_Site_April.jpg",
-                token = "",
-                extraData = emptyMap(),
-                teams = emptyList()
-            ),
-            User(
-                id = "damjan",
-                name = "Damjan Popov",
-                role = "admin",
-                imageUrl = "https://payner.bg/images/uploads/Artist_images/DAMYAN_POPOV.jpg",
-                token = "",
-                extraData = emptyMap(),
-                teams = emptyList()
-            ),
-            User(
-                id = "jordan",
-                name = "Jordan",
-                role = "admin",
-                imageUrl = "https://payner.bg/images/uploads/Artist_images/DJORDAN_-_SEPT_-_2022.jpg",
-                token = "",
-                extraData = emptyMap(),
-                teams = emptyList()
-            ),
-            User(
-                id = "ina",
-                name = "Ina Garjadi",
-                role = "admin",
-                imageUrl = "https://payner.bg/images/uploads/Artist_images/INA_GAYARDI_-_PAYNER_-_OCTOBER_-_2022.jpg",
-                token = "",
-                extraData = emptyMap(),
-                teams = emptyList()
-            ),
-        )
+        return getUsers().filter { it.id != currentUserId }
     }
 
     override val userState: StateFlow<List<User>> = MutableStateFlow(provideUsers())
