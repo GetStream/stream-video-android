@@ -21,7 +21,7 @@ import io.getstream.video.android.core.model.CallInfo
 import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.core.model.StreamCallCid
 import io.getstream.video.android.core.model.User
-import java.util.*
+import java.util.Date
 
 /**
  * Represents the events coming in from the socket.
@@ -68,7 +68,7 @@ public data class CallUpdatedEvent(
  */
 public data class CallEndedEvent(
     val callCid: String,
-    val endedByUser: User
+    val endedByUser: User?
 ) : VideoEvent()
 
 /**
@@ -102,7 +102,7 @@ public data class CallRejectedEvent(
     val updatedAt: Date
 ) : VideoEvent()
 
-public data class CallCanceledEvent(
+public data class CallCancelledEvent(
     val callCid: String,
     val sentByUserId: String,
 ) : VideoEvent()
@@ -111,6 +111,42 @@ public data class CustomEvent(
     val cid: StreamCallCid?,
     val sentByUser: User?,
     val custom: Map<String, Any>?,
+) : VideoEvent()
+
+public data class BlockedUserEvent(
+    val cid: StreamCallCid?,
+    val type: String,
+    val userId: String
+) : VideoEvent()
+
+public data class UnblockedUserEvent(
+    val cid: StreamCallCid?,
+    val type: String,
+    val userId: String
+) : VideoEvent()
+
+public data class RecordingStartedEvent(
+    val cid: StreamCallCid?,
+    val type: String
+) : VideoEvent()
+
+public data class RecordingStoppedEvent(
+    val cid: StreamCallCid?,
+    val type: String
+) : VideoEvent()
+
+public data class PermissionRequestEvent(
+    val cid: StreamCallCid?,
+    val type: String,
+    val permissions: List<String>,
+    val user: User
+) : VideoEvent()
+
+public data class UpdatedCallPermissionsEvent(
+    val cid: StreamCallCid?,
+    val type: String,
+    val ownCapabilities: List<String>,
+    val user: User
 ) : VideoEvent()
 
 public object UnknownEvent : VideoEvent()

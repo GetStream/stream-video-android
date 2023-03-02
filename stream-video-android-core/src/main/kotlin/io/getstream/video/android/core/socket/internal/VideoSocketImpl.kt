@@ -218,12 +218,18 @@ internal class VideoSocketImpl(
         logger.d { "[authenticateUser] user: $user" }
 
         socket?.authenticate(
-            VideoWSAuthMessageRequest( // TODO - add user device request
+            VideoWSAuthMessageRequest( // TODO - double check and see about user device
                 token = user.token,
                 userDetails = UserObjectRequest(
                     id = user.id,
                     role = user.role
-                )
+                ).apply {
+                    /**
+                     * Should be exposed on the BE to store user's custom data like name and image.
+                     */
+                    this["name"] = user.name
+                    user.imageUrl?.let { this["image"] = it }
+                }
             )
         )
     }

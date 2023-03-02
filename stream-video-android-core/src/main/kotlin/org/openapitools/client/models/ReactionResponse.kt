@@ -27,26 +27,20 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param blockedUsers * @param call * @param created * @param duration * @param members * @param membership */
+ * @param custom * @param type * @param user * @param emojiCode */
 
-data class GetOrCreateCallResponse(
+data class ReactionResponse(
 
-    @Json(name = "blocked_users")
-    val blockedUsers: kotlin.collections.List<UserResponse>,
+    @Json(name = "custom")
+    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any>,
 
-    @Json(name = "call")
-    val call: CallResponse,
+    @Json(name = "type")
+    val type: kotlin.String,
 
-    @Json(name = "created")
-    val created: kotlin.Boolean,
+    @Json(name = "user")
+    val user: UserResponse,
 
-    @Json(name = "duration")
-    val duration: kotlin.String,
-
-    @Json(name = "members")
-    val members: kotlin.collections.List<MemberResponse>,
-
-    @Json(name = "membership")
-    val membership: MemberResponse? = null
+    @Json(name = "emoji_code")
+    val emojiCode: kotlin.String? = null
 
 )

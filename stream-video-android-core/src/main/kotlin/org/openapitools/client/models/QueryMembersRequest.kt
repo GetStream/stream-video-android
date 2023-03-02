@@ -41,7 +41,7 @@ data class QueryMembersRequest(
     val id: kotlin.String? = null,
 
     @Json(name = "limit")
-    val limit: java.math.BigDecimal? = null,
+    val limit: kotlin.Int? = null,
 
     @Json(name = "next")
     val next: kotlin.String? = null,

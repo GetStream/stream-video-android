@@ -27,26 +27,16 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param blockedUsers * @param call * @param created * @param duration * @param members * @param membership */
+ * @param call * @param duration Duration of the request in human-readable format
+ */
 
-data class GetOrCreateCallResponse(
-
-    @Json(name = "blocked_users")
-    val blockedUsers: kotlin.collections.List<UserResponse>,
+data class GoLiveResponse(
 
     @Json(name = "call")
     val call: CallResponse,
 
-    @Json(name = "created")
-    val created: kotlin.Boolean,
-
+    /* Duration of the request in human-readable format */
     @Json(name = "duration")
-    val duration: kotlin.String,
-
-    @Json(name = "members")
-    val members: kotlin.collections.List<MemberResponse>,
-
-    @Json(name = "membership")
-    val membership: MemberResponse? = null
+    val duration: kotlin.String
 
 )

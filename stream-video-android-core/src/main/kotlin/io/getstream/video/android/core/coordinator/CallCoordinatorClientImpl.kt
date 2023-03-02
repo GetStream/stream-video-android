@@ -18,23 +18,34 @@ package io.getstream.video.android.core.coordinator
 
 import io.getstream.video.android.core.api.ClientRPCService
 import io.getstream.video.android.core.errors.VideoError
+import io.getstream.video.android.core.model.CallInfo
 import io.getstream.video.android.core.model.CallUser
+import io.getstream.video.android.core.model.QueriedCalls
 import io.getstream.video.android.core.model.StreamCallCid
 import io.getstream.video.android.core.model.User
+import io.getstream.video.android.core.model.toCallInfo
 import io.getstream.video.android.core.utils.Failure
 import io.getstream.video.android.core.utils.Result
 import io.getstream.video.android.core.utils.Success
 import io.getstream.video.android.core.utils.toCallUser
+import io.getstream.video.android.core.utils.toQueriedCalls
+import org.openapitools.client.apis.DefaultApi
 import org.openapitools.client.apis.EventsApi
 import org.openapitools.client.apis.VideoCallsApi
+import org.openapitools.client.models.BlockUserRequest
 import org.openapitools.client.models.GetCallEdgeServerRequest
 import org.openapitools.client.models.GetCallEdgeServerResponse
 import org.openapitools.client.models.GetOrCreateCallRequest
 import org.openapitools.client.models.GetOrCreateCallResponse
 import org.openapitools.client.models.JoinCallResponse
+import org.openapitools.client.models.MuteUsersRequest
+import org.openapitools.client.models.QueryCallsRequest
 import org.openapitools.client.models.QueryMembersRequest
+import org.openapitools.client.models.RequestPermissionRequest
 import org.openapitools.client.models.SendEventRequest
-import stream.video.coordinator.call_v1.Call
+import org.openapitools.client.models.UnblockUserRequest
+import org.openapitools.client.models.UpdateCallRequest
+import org.openapitools.client.models.UpdateUserPermissionsRequest
 import stream.video.coordinator.client_v1_rpc.CreateDeviceRequest
 import stream.video.coordinator.client_v1_rpc.CreateDeviceResponse
 import stream.video.coordinator.client_v1_rpc.DeleteDeviceRequest
@@ -47,15 +58,12 @@ import stream.video.coordinator.client_v1_rpc.UpsertCallMembersRequest
 internal class CallCoordinatorClientImpl(
     private val callCoordinatorService: ClientRPCService,
     private val videoCallApi: VideoCallsApi,
-    private val eventsApi: EventsApi
+    private val eventsApi: EventsApi,
+    private val defaultApi: DefaultApi
 ) : CallCoordinatorClient {
 
     /**
-     * Create a new Device used to receive Push Notifications.
-     *
-     * @param createDeviceRequest The device data.
-     *
-     * @return [CreateDeviceResponse] witch holds the device.
+     * @see CallCoordinatorClient.createDevice
      */
     override suspend fun createDevice(
         createDeviceRequest: CreateDeviceRequest
@@ -66,11 +74,7 @@ internal class CallCoordinatorClientImpl(
     }
 
     /**
-     * Delete a Device used to receive Push Notifications.
-     *
-     * @param deleteDeviceRequest The device data.
-     *
-     * @return [Result] if the operation was successful or not.
+     * @see CallCoordinatorClient.deleteDevice
      */
     override suspend fun deleteDevice(deleteDeviceRequest: DeleteDeviceRequest): Result<Unit> =
         try {
@@ -81,13 +85,7 @@ internal class CallCoordinatorClientImpl(
         }
 
     /**
-     * Returns an existing call or creates and returns a new one, based on the given request data.
-     *
-     * @param id The ID of the call.
-     * @param type The type of the call.
-     * @param getOrCreateCallRequest The request data describing the call.
-     *
-     * @return [GetOrCreateCallResponse] Containing the call information.
+     * @see CallCoordinatorClient.getOrCreateCall
      */
     override suspend fun getOrCreateCall(
         id: String,
@@ -107,15 +105,7 @@ internal class CallCoordinatorClientImpl(
         }
 
     /**
-     * Attempts to join a [Call]. If successful, gives us more information about the
-     * user and the call itself.
-     *
-     * @param id The ID of the call.
-     * @param type The type of the call.
-     * @param request The details of the call, like the ID and its type.
-     *
-     * @return [Result] wrapper around the response from the server, or an error if something went
-     * wrong.
+     * @see CallCoordinatorClient.joinCall
      */
     override suspend fun joinCall(
         id: String,
@@ -136,15 +126,7 @@ internal class CallCoordinatorClientImpl(
     }
 
     /**
-     * Finds the correct server to connect to for given user and [request]. In case there are no
-     * servers, returns an error to the user.
-     *
-     * @param id The ID of the call.
-     * @param type The type of the call.
-     * @param request The data used to find the best server.
-     *
-     * @return [Result] wrapper around the response from the server, or an error if something went
-     * wrong.
+     * @see CallCoordinatorClient.selectEdgeServer
      */
     override suspend fun selectEdgeServer(
         id: String,
@@ -164,14 +146,7 @@ internal class CallCoordinatorClientImpl(
         }
 
     /**
-     * Sends a user-based event to the API to notify if we've changed something in the state of the
-     * call.
-     *
-     * @param id The ID of the call.
-     * @param type The type of the call.
-     * @param sendEventRequest The request holding information about the event type and the call.
-     *
-     * @return a [Result] wrapper if the call succeeded or not.
+     * @see CallCoordinatorClient.sendUserEvent
      */
     override suspend fun sendUserEvent(
         id: String,
@@ -186,12 +161,7 @@ internal class CallCoordinatorClientImpl(
     }
 
     /**
-     * Sends invite to people for an existing call.
-     *
-     * @param users The users to invite.
-     * @param cid The call ID.
-     *
-     * @return [Result] if the operation is successful or not.
+     * @see CallCoordinatorClient.inviteUsers
      */
     override suspend fun inviteUsers(users: List<User>, cid: StreamCallCid): Result<Unit> = try {
         callCoordinatorService.upsertCallMembers(
@@ -211,17 +181,185 @@ internal class CallCoordinatorClientImpl(
     }
 
     /**
-     * Queries the API for members of a call.
-     *
-     * @param request The [QueryMembersRequest] containing specific information about the query and
-     * the call
-     *
-     * @return [List] of [CallUser]s that match the given query.
+     * @see CallCoordinatorClient.queryMembers
      */
     override suspend fun queryMembers(request: QueryMembersRequest): Result<List<CallUser>> = try {
         val users = videoCallApi.queryMembers(request).members
 
         Success(users.map { it.toCallUser() })
+    } catch (error: Throwable) {
+        Failure(VideoError(error.message, error))
+    }
+
+    override suspend fun blockUser(
+        id: String,
+        type: String,
+        blockUserRequest: BlockUserRequest
+    ): Result<Unit> = try {
+        videoCallApi.blockUser(type, id, blockUserRequest)
+
+        Success(Unit)
+    } catch (error: Throwable) {
+        Failure(VideoError(error.message, error))
+    }
+
+    /**
+     * @see CallCoordinatorClient.unblockUser
+     */
+    override suspend fun unblockUser(
+        id: String,
+        type: String,
+        unblockUserRequest: UnblockUserRequest
+    ): Result<Unit> = try {
+        videoCallApi.unblockUser(type, id, unblockUserRequest)
+
+        Success(Unit)
+    } catch (error: Throwable) {
+        Failure(VideoError(error.message, error))
+    }
+
+    /**
+     * @see CallCoordinatorClient.endCall
+     */
+    override suspend fun endCall(id: String, type: String): Result<Unit> = try {
+        videoCallApi.endCall(type, id)
+
+        Success(Unit)
+    } catch (error: Throwable) {
+        Failure(VideoError(error.message, error))
+    }
+
+    /**
+     * @see CallCoordinatorClient.goLive
+     */
+    override suspend fun goLive(id: String, type: String): Result<CallInfo> = try {
+        val result = videoCallApi.goLive(type, id)
+
+        Success(result.call.toCallInfo())
+    } catch (error: Throwable) {
+        Failure(VideoError(error.message, error))
+    }
+
+    /**
+     * @see CallCoordinatorClient.stopLive
+     */
+    override suspend fun stopLive(id: String, type: String): Result<CallInfo> = try {
+        val result = videoCallApi.stopLive(type, id)
+
+        Success(result.call.toCallInfo())
+    } catch (error: Throwable) {
+        Failure(VideoError(error.message, error))
+    }
+
+    /**
+     * @see CallCoordinatorClient.muteUsers
+     */
+    override suspend fun muteUsers(
+        id: String,
+        type: String,
+        muteUsersRequest: MuteUsersRequest
+    ): Result<Unit> = try {
+        videoCallApi.muteUsers(type, id, muteUsersRequest)
+
+        Success(Unit)
+    } catch (error: Throwable) {
+        Failure(VideoError(error.message, error))
+    }
+
+    /**
+     * @see CallCoordinatorClient.updateCall
+     */
+    override suspend fun updateCall(
+        id: String,
+        type: String,
+        updateCallRequest: UpdateCallRequest
+    ): Result<CallInfo> = try {
+        val result = videoCallApi.updateCall(type, id, updateCallRequest)
+
+        Success(result.call.toCallInfo())
+    } catch (error: Throwable) {
+        Failure(VideoError(error.message, error))
+    }
+
+    /**
+     * @see CallCoordinatorClient.queryCalls
+     */
+    override suspend fun queryCalls(queryCallsRequest: QueryCallsRequest): Result<QueriedCalls> =
+        try {
+            val result = defaultApi.queryCalls(queryCallsRequest)
+
+            Success(result.toQueriedCalls())
+        } catch (error: Throwable) {
+            Failure(VideoError(error.message, error))
+        }
+
+    /**
+     * @see CallCoordinatorClient.requestPermission
+     */
+    override suspend fun requestPermission(
+        id: String,
+        type: String,
+        requestPermissionRequest: RequestPermissionRequest
+    ): Result<Unit> = try {
+        defaultApi.requestPermission(type, id, requestPermissionRequest)
+
+        Success(Unit)
+    } catch (error: Throwable) {
+        Failure(VideoError(error.message, error))
+    }
+
+    /**
+     * @see CallCoordinatorClient.startBroadcasting
+     */
+    override suspend fun startBroadcasting(id: String, type: String): Result<Unit> = try {
+        defaultApi.startBroadcasting(type, id)
+
+        Success(Unit)
+    } catch (error: Throwable) {
+        Failure(VideoError(error.message, error))
+    }
+
+    /**
+     * @see CallCoordinatorClient.stopBroadcasting
+     */
+    override suspend fun stopBroadcasting(id: String, type: String): Result<Unit> = try {
+        defaultApi.stopBroadcasting(type, id)
+
+        Success(Unit)
+    } catch (error: Throwable) {
+        Failure(VideoError(error.message, error))
+    }
+
+    /**
+     * @see CallCoordinatorClient.startRecording
+     */
+    override suspend fun startRecording(id: String, type: String): Result<Unit> = try {
+        defaultApi.startRecording(type, id)
+
+        Success(Unit)
+    } catch (error: Throwable) {
+        Failure(VideoError(error.message, error))
+    }
+
+    /**
+     * @see CallCoordinatorClient.stopRecording
+     */
+    override suspend fun stopRecording(id: String, type: String): Result<Unit> = try {
+        defaultApi.stopRecording(type, id)
+
+        Success(Unit)
+    } catch (error: Throwable) {
+        Failure(VideoError(error.message, error))
+    }
+
+    override suspend fun updateUserPermissions(
+        id: String,
+        type: String,
+        updateUserPermissionsRequest: UpdateUserPermissionsRequest
+    ): Result<Unit> = try {
+        defaultApi.updateUserPermissions(type, id, updateUserPermissionsRequest)
+
+        Success(Unit)
     } catch (error: Throwable) {
         Failure(VideoError(error.message, error))
     }
