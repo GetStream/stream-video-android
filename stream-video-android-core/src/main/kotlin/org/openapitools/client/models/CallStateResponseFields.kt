@@ -27,10 +27,13 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param call * @param members List of call members
+ * @param blockedUsers * @param call * @param members List of call members
  * @param membership */
 
 data class CallStateResponseFields(
+
+    @Json(name = "blocked_users")
+    val blockedUsers: kotlin.collections.List<UserResponse>,
 
     @Json(name = "call")
     val call: CallResponse,

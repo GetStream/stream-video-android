@@ -27,9 +27,12 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param createdAt * @param type */
+ * @param callCid * @param createdAt * @param type */
 
-data class LeftSquareBracketAnyRightSquareBracket(
+data class CallRecordingStartedEvent(
+
+    @Json(name = "call_cid")
+    val callCid: kotlin.String,
 
     @Json(name = "created_at")
     val createdAt: java.time.OffsetDateTime,

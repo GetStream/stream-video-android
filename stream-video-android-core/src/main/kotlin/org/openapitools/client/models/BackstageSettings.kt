@@ -27,17 +27,11 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param callCid * @param createdAt * @param type */
+ * @param enabled */
 
-data class CallrecordingStopped(
+data class BackstageSettings(
 
-    @Json(name = "call_cid")
-    val callCid: kotlin.String,
-
-    @Json(name = "created_at")
-    val createdAt: java.time.OffsetDateTime,
-
-    @Json(name = "type")
-    val type: kotlin.String
+    @Json(name = "enabled")
+    val enabled: kotlin.Boolean
 
 )

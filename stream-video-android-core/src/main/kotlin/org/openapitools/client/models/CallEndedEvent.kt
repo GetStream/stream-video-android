@@ -27,26 +27,20 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param blockedUsers * @param call * @param created * @param duration * @param members * @param membership */
+ * @param callCid * @param createdAt * @param type * @param user */
 
-data class GetOrCreateCallResponse(
+data class CallEndedEvent(
 
-    @Json(name = "blocked_users")
-    val blockedUsers: kotlin.collections.List<UserResponse>,
+    @Json(name = "call_cid")
+    val callCid: kotlin.String,
 
-    @Json(name = "call")
-    val call: CallResponse,
+    @Json(name = "created_at")
+    val createdAt: java.time.OffsetDateTime,
 
-    @Json(name = "created")
-    val created: kotlin.Boolean,
+    @Json(name = "type")
+    val type: kotlin.String,
 
-    @Json(name = "duration")
-    val duration: kotlin.String,
-
-    @Json(name = "members")
-    val members: kotlin.collections.List<MemberResponse>,
-
-    @Json(name = "membership")
-    val membership: MemberResponse? = null
+    @Json(name = "user")
+    val user: UserResponse? = null
 
 )

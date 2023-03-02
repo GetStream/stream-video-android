@@ -23,16 +23,17 @@ import org.openapitools.client.models.GetCallEdgeServerRequest
 import org.openapitools.client.models.GetCallEdgeServerResponse
 import org.openapitools.client.models.GetOrCreateCallRequest
 import org.openapitools.client.models.GetOrCreateCallResponse
+import org.openapitools.client.models.GoLiveResponse
 import org.openapitools.client.models.JoinCallResponse
 import org.openapitools.client.models.MuteUsersRequest
 import org.openapitools.client.models.MuteUsersResponse
 import org.openapitools.client.models.QueryMembersRequest
 import org.openapitools.client.models.QueryMembersResponse
+import org.openapitools.client.models.StopLiveResponse
 import org.openapitools.client.models.UnblockUserRequest
 import org.openapitools.client.models.UnblockUserResponse
 import org.openapitools.client.models.UpdateCallRequest
 import org.openapitools.client.models.UpdateCallResponse
-import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.PATCH
 import retrofit2.http.POST
@@ -54,32 +55,12 @@ internal interface VideoCallsApi {
      * @param blockUserRequest
      * @return [BlockUserResponse]
      */
-    @POST("call/{type}/{id}/block")
+    @POST("video/call/{type}/{id}/block")
     suspend fun blockUser(
         @Path("type") type: String,
         @Path("id") id: String,
         @Body blockUserRequest: BlockUserRequest
-    ): Response<BlockUserResponse>
-
-    /**
-     * Unblocks user on a call
-     * Removes the block for a user on a call. The user will be able to join the call again.
-     * Responses:
-     *  - 201: Successful response
-     *  - 400: Bad request
-     *  - 429: Too many requests
-     *
-     * @param type
-     * @param id
-     * @param unblockUserRequest
-     * @return [UnblockUserResponse]
-     */
-    @POST("call/{type}/{id}/unblock")
-    suspend fun unblockUser(
-        @Path("type") type: String,
-        @Path("id") id: String,
-        @Body unblockUserRequest: UnblockUserRequest
-    ): Response<UnblockUserResponse>
+    ): BlockUserResponse
 
     /**
      * End call
@@ -140,6 +121,24 @@ internal interface VideoCallsApi {
     ): GetOrCreateCallResponse
 
     /**
+     * Set call as live
+     *
+     * Responses:
+     *  - 201: Successful response
+     *  - 400: Bad request
+     *  - 429: Too many requests
+     *
+     * @param type
+     * @param id
+     * @return [GoLiveResponse]
+     */
+    @POST("video/call/{type}/{id}/go_live")
+    suspend fun goLive(
+        @Path("type") type: String,
+        @Path("id") id: String
+    ): GoLiveResponse
+
+    /**
      * Join call
      * Request to join a call
      * Responses:
@@ -159,26 +158,6 @@ internal interface VideoCallsApi {
         @Query("connection_id") connectionId: String,
         @Body getOrCreateCallRequest: GetOrCreateCallRequest
     ): JoinCallResponse
-
-    /**
-     * Update Call
-     *
-     * Responses:
-     *  - 200: Call
-     *  - 400: Bad request
-     *  - 429: Too many requests
-     *
-     * @param type
-     * @param id
-     * @param updateCallRequest
-     * @return [UpdateCallResponse]
-     */
-    @PATCH("/video/call/{type}/{id}")
-    suspend fun updateCall(
-        @Path("type") type: String,
-        @Path("id") id: String,
-        @Body updateCallRequest: UpdateCallRequest
-    ): UpdateCallResponse
 
     /**
      * Mute users
@@ -215,4 +194,62 @@ internal interface VideoCallsApi {
     suspend fun queryMembers(
         @Body queryMembersRequest: QueryMembersRequest,
     ): QueryMembersResponse
+
+    /**
+     * Set call as not live
+     *
+     * Responses:
+     *  - 201: Successful response
+     *  - 400: Bad request
+     *  - 429: Too many requests
+     *
+     * @param type
+     * @param id
+     * @return [StopLiveResponse]
+     */
+    @POST("video/call/{type}/{id}/stop_live")
+    suspend fun stopLive(
+        @Path("type") type: String,
+        @Path("id") id: String
+    ): StopLiveResponse
+
+    /**
+     * Unblocks user on a call
+     * Removes the block for a user on a call. The user will be able to join the call again.
+     * Responses:
+     *  - 201: Successful response
+     *  - 400: Bad request
+     *  - 429: Too many requests
+     *
+     * @param type
+     * @param id
+     * @param unblockUserRequest
+     * @return [UnblockUserResponse]
+     */
+    @POST("call/{type}/{id}/unblock")
+    suspend fun unblockUser(
+        @Path("type") type: String,
+        @Path("id") id: String,
+        @Body unblockUserRequest: UnblockUserRequest
+    ): UnblockUserResponse
+
+    /**
+     * Update Call
+     *
+     * Responses:
+     *  - 200: Call
+     *  - 400: Bad request
+     *  - 429: Too many requests
+     *
+     * @param type
+     * @param id
+     * @param updateCallRequest
+     * @return [UpdateCallResponse]
+     */
+    @PATCH("/video/call/{type}/{id}")
+    suspend fun updateCall(
+        @Path("type") type: String,
+        @Path("id") id: String,
+        @Body updateCallRequest: UpdateCallRequest
+    ): UpdateCallResponse
 }

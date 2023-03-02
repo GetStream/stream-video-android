@@ -40,15 +40,15 @@ data class APIError(
 
     /* Response HTTP status code */
     @Json(name = "StatusCode")
-    val statusCode: java.math.BigDecimal,
+    val statusCode: kotlin.Int,
 
     /* API error code */
     @Json(name = "code")
-    val code: java.math.BigDecimal,
+    val code: kotlin.Int,
 
     /* Additional error-specific information */
     @Json(name = "details")
-    val details: kotlin.collections.List<java.math.BigDecimal>,
+    val details: kotlin.collections.List<kotlin.Int>,
 
     /* Request duration */
     @Json(name = "duration")
