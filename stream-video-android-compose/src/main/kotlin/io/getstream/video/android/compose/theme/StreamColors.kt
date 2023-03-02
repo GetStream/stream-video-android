@@ -57,7 +57,8 @@ public data class StreamColors(
     public val infoAccent: Color,
     public val highlight: Color,
     public val screenSharingBackground: Color,
-    public val avatarInitials: Color
+    public val avatarInitials: Color,
+    public val soundLevels: Color
 ) {
 
     public companion object {
@@ -83,7 +84,8 @@ public data class StreamColors(
             infoAccent = colorResource(R.color.stream_info_accent),
             highlight = colorResource(R.color.stream_highlight),
             avatarInitials = colorResource(id = R.color.stream_text_avatar_initials),
-            screenSharingBackground = colorResource(R.color.stream_app_background)
+            screenSharingBackground = colorResource(R.color.stream_app_background),
+            soundLevels = colorResource(id = R.color.stream_primary_accent)
         )
 
         /**
@@ -108,7 +110,8 @@ public data class StreamColors(
             infoAccent = colorResource(R.color.stream_info_accent_dark),
             highlight = colorResource(R.color.stream_highlight_dark),
             screenSharingBackground = colorResource(R.color.stream_app_background_dark),
-            avatarInitials = colorResource(id = R.color.stream_text_avatar_initials)
+            avatarInitials = colorResource(id = R.color.stream_text_avatar_initials),
+            soundLevels = colorResource(id = R.color.stream_primary_accent)
         )
     }
 }

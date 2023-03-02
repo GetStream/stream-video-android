@@ -15,6 +15,25 @@ public abstract class io/getstream/video/android/common/AbstractCallActivity : a
 	public abstract fun setupUi ()V
 }
 
+public final class io/getstream/video/android/common/model/Muted : io/getstream/video/android/common/model/SoundState {
+	public static final field INSTANCE Lio/getstream/video/android/common/model/Muted;
+}
+
+public abstract class io/getstream/video/android/common/model/SoundState {
+}
+
+public final class io/getstream/video/android/common/model/SoundStateKt {
+	public static final fun getSoundIndicatorState (ZZ)Lio/getstream/video/android/common/model/SoundState;
+}
+
+public final class io/getstream/video/android/common/model/Speaking : io/getstream/video/android/common/model/SoundState {
+	public static final field INSTANCE Lio/getstream/video/android/common/model/Speaking;
+}
+
+public final class io/getstream/video/android/common/model/Unmuted : io/getstream/video/android/common/model/SoundState {
+	public static final field INSTANCE Lio/getstream/video/android/common/model/Unmuted;
+}
+
 public final class io/getstream/video/android/common/util/ColorUtilsKt {
 	public static final fun adjustColorBrightness (IF)I
 }
