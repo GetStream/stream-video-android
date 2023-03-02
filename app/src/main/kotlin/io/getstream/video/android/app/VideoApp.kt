@@ -20,7 +20,6 @@ import android.app.Application
 import android.content.Context
 import io.getstream.log.StreamLog
 import io.getstream.log.android.AndroidStreamLogger
-import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.app.ui.call.CallActivity
 import io.getstream.video.android.app.ui.call.CallService
 import io.getstream.video.android.core.StreamVideo
@@ -78,7 +77,7 @@ class VideoApp : Application() {
 
     companion object {
         private const val TAG = "Call:App"
-        const val API_KEY = "w6yaq5388uym"
+        const val API_KEY = BuildConfig.SAMPLE_STREAM_VIDEO_API_KEY
     }
 }
 

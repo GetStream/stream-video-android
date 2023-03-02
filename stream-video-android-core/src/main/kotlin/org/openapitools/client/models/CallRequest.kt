@@ -27,7 +27,7 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param createdBy * @param createdById * @param custom * @param members * @param settingsOverride * @param team */
+ * @param createdBy * @param createdById * @param custom * @param members * @param settingsOverride * @param startsAt * @param team */
 
 data class CallRequest(
 
@@ -45,6 +45,9 @@ data class CallRequest(
 
     @Json(name = "settings_override")
     val settingsOverride: CallSettingsRequest? = null,
+
+    @Json(name = "starts_at")
+    val startsAt: java.time.OffsetDateTime? = null,
 
     @Json(name = "team")
     val team: kotlin.String? = null

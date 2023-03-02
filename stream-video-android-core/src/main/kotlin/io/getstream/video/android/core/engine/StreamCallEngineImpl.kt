@@ -21,8 +21,9 @@ import io.getstream.video.android.core.StreamVideoConfig
 import io.getstream.video.android.core.coordinator.CallCoordinatorClient
 import io.getstream.video.android.core.errors.VideoError
 import io.getstream.video.android.core.events.AudioLevelChangedEvent
+import io.getstream.video.android.core.events.BlockedUserEvent
 import io.getstream.video.android.core.events.CallAcceptedEvent
-import io.getstream.video.android.core.events.CallCanceledEvent
+import io.getstream.video.android.core.events.CallCancelledEvent
 import io.getstream.video.android.core.events.CallCreatedEvent
 import io.getstream.video.android.core.events.CallEndedEvent
 import io.getstream.video.android.core.events.CallMembersDeletedEvent
@@ -41,12 +42,17 @@ import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.ParticipantJoinedEvent
 import io.getstream.video.android.core.events.ParticipantLeftEvent
+import io.getstream.video.android.core.events.PermissionRequestEvent
 import io.getstream.video.android.core.events.PublisherAnswerEvent
+import io.getstream.video.android.core.events.RecordingStartedEvent
+import io.getstream.video.android.core.events.RecordingStoppedEvent
 import io.getstream.video.android.core.events.SfuDataEvent
 import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
+import io.getstream.video.android.core.events.UnblockedUserEvent
 import io.getstream.video.android.core.events.UnknownEvent
+import io.getstream.video.android.core.events.UpdatedCallPermissionsEvent
 import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.events.VideoQualityChangedEvent
 import io.getstream.video.android.core.filter.InFilterObject
@@ -81,6 +87,7 @@ import kotlinx.coroutines.plus
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.openapitools.client.models.QueryMembersRequest
+import org.openapitools.client.models.SortParamRequest
 import stream.video.sfu.event.JoinRequest
 import io.getstream.video.android.core.model.StreamCallCid as CallCid
 import io.getstream.video.android.core.model.StreamCallId as CallId
@@ -127,10 +134,17 @@ internal class StreamCallEngineImpl(
             is CallAcceptedEvent -> onCallAccepted(event)
             is CallRejectedEvent -> onCallRejected(event)
             is CallEndedEvent -> onCallFinished(event)
-            is CallCanceledEvent -> onCallCancelled(event)
+            is CallCancelledEvent -> onCallCancelled(event)
             is ConnectedEvent -> {}
             is HealthCheckEvent -> {}
             is CustomEvent -> {}
+            // TODO - handle some of these to update the internal state
+            is BlockedUserEvent -> {}
+            is PermissionRequestEvent -> {}
+            is RecordingStartedEvent -> {}
+            is RecordingStoppedEvent -> {}
+            is UnblockedUserEvent -> {}
+            is UpdatedCallPermissionsEvent -> {}
             is UnknownEvent -> {}
         }
     }
@@ -213,15 +227,22 @@ internal class StreamCallEngineImpl(
 
         jobs.cancel(ID_TIMEOUT_SFU_JOINED)
 
+        // TODO - check which param to query by
         val query = InFilterObject(
-            "id", event.callState.participants.map { it.user_id }.toSet()
+            "user_id", event.callState.participants.map { it.user_id }.toSet()
         ).toMap()
 
         val queryUsersResult = coordinatorClient.queryMembers(
             QueryMembersRequest(
                 id = state.callGuid.id,
                 type = state.callGuid.type,
-                filterConditions = query
+                filterConditions = query,
+                sort = listOf(
+                    SortParamRequest(
+                        direction = 1,
+                        field = "user_id"
+                    )
+                )
             )
         )
 
@@ -605,7 +626,7 @@ internal class StreamCallEngineImpl(
         dropCall(State.Drop(state.callGuid, state.callKind, DropReason.Ended))
     }
 
-    private fun onCallCancelled(event: CallCanceledEvent) = scope.launchWithLock(mutex) {
+    private fun onCallCancelled(event: CallCancelledEvent) = scope.launchWithLock(mutex) {
         val state = _callState.value
         if (state !is State.Active) {
             logger.w { "[onCallCancelled] rejected (state is not Active): $state" }

@@ -27,9 +27,12 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param call * @param created * @param duration * @param members * @param membership */
+ * @param blockedUsers * @param call * @param created * @param duration * @param members * @param membership */
 
 data class GetOrCreateCallResponse(
+
+    @Json(name = "blocked_users")
+    val blockedUsers: kotlin.collections.List<UserResponse>,
 
     @Json(name = "call")
     val call: CallResponse,

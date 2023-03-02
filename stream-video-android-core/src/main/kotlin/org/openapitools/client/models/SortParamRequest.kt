@@ -32,7 +32,7 @@ import com.squareup.moshi.Json
 data class SortParamRequest(
 
     @Json(name = "direction")
-    val direction: java.math.BigDecimal? = null,
+    val direction: kotlin.Int? = null,
 
     @Json(name = "field")
     val `field`: kotlin.String? = null

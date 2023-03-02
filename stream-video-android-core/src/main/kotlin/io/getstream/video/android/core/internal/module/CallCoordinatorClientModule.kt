@@ -26,6 +26,7 @@ import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.user.UserPreferences
 import kotlinx.coroutines.CoroutineScope
 import okhttp3.OkHttpClient
+import org.openapitools.client.apis.DefaultApi
 import org.openapitools.client.apis.EventsApi
 import org.openapitools.client.apis.VideoCallsApi
 import org.openapitools.client.infrastructure.Serializer
@@ -78,11 +79,13 @@ internal class CallCoordinatorClientModule(
         val oldService = protoRetrofitClient.create(ClientRPCService::class.java)
         val videoCallsApi = retrofitClient.create(VideoCallsApi::class.java)
         val eventsApi = retrofitClient.create(EventsApi::class.java)
+        val defaultApi = retrofitClient.create(DefaultApi::class.java)
 
         CallCoordinatorClientImpl(
             callCoordinatorService = oldService,
             videoCallApi = videoCallsApi,
-            eventsApi = eventsApi
+            eventsApi = eventsApi,
+            defaultApi = defaultApi
         )
     }
 

@@ -80,7 +80,7 @@ class HomeActivity : AppCompatActivity() {
 
     private val logger by taggedLogger("Call:HomeView")
 
-    private val callIdState: MutableState<String> = mutableStateOf("call123")
+    private val callIdState: MutableState<String> = mutableStateOf("call321")
 
     private val loadingState: MutableState<Boolean> = mutableStateOf(false)
 

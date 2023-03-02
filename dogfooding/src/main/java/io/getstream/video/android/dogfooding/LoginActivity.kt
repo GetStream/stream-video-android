@@ -82,9 +82,7 @@ class LoginActivity : ComponentActivity() {
         val user = UserPreferencesManager.initialize(this).getUserCredentials()
 
         if (user != null && user.isValid()) {
-            startHome(
-                user
-            )
+            startHome(user)
             finish()
         }
 
@@ -176,8 +174,9 @@ class LoginActivity : ComponentActivity() {
 
     private fun onSignInSuccess(email: String) {
         lifecycleScope.launch(Dispatchers.IO) {
-            val request =
-                URL("https://stream-calls-dogfood.vercel.app/api/auth/create-token?user_id=$email")
+            val request = URL(
+                "https://stream-calls-dogfood.vercel.app/api/auth/create-token?user_id=$email&api_key=$API_KEY"
+            )
             val connection = request.openConnection()
 
             connection.connect()

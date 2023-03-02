@@ -25,6 +25,7 @@ import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.ApiKey
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.user.UsersProvider
+import io.getstream.video.chat_with_video_starter.BuildConfig
 import io.getstream.video.chat_with_video_starter.users.FakeUsersProvider
 
 class ChatWithVideoApp : Application() {
@@ -57,6 +58,6 @@ class ChatWithVideoApp : Application() {
     }
 }
 
-internal const val API_KEY = "w6yaq5388uym"
+internal const val API_KEY = BuildConfig.SAMPLE_STREAM_VIDEO_API_KEY
 
 internal val Context.chatWithVideoApp get() = applicationContext as ChatWithVideoApp
