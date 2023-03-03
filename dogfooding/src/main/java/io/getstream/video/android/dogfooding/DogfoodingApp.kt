@@ -67,8 +67,8 @@ class DogfoodingApp : Application() {
             pushDeviceGenerators = listOf(FirebasePushDeviceGenerator()),
             androidInputs = setOf(
                 CallServiceInput.from(CallService::class),
-                CallActivityInput.from(XmlCallActivity::class),
-                // CallActivityInput.from(CallActivity::class),
+                // CallActivityInput.from(XmlCallActivity::class),
+                CallActivityInput.from(CallActivity::class),
             )
         ).build().also {
             video = it

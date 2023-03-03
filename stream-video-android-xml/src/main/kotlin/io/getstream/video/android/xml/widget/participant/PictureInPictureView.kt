@@ -23,10 +23,10 @@ import io.getstream.video.android.core.model.CallParticipantState
 import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.xml.R
 import io.getstream.video.android.xml.utils.extensions.createStreamThemeWrapper
-import io.getstream.video.android.xml.widget.view.CallCardView
 import io.getstream.video.android.xml.utils.extensions.getFirstViewInstance
 import io.getstream.video.android.xml.widget.renderer.VideoRenderer
 import io.getstream.video.android.xml.widget.screenshare.ScreenShareView
+import io.getstream.video.android.xml.widget.view.CallCardView
 
 /**
  * View to ve shown when inside a call and the app enter picture in picture mode. Will show the primary speaker.

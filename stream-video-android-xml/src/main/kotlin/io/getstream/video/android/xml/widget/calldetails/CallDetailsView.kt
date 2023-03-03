@@ -95,18 +95,18 @@ public class CallDetailsView : ConstraintLayout {
                 addAvatarSpacer()
             }
 
-            addAvatar(participant.imageUrl, participant.name, isSingleParticipant)
+            addAvatar(participant, "", isSingleParticipant)
         }
 
         if (participants.size == 3) {
             val participant = participants[2]
             addAvatarSpacer()
-            addAvatar(participant.imageUrl, participant.name, isSingleParticipant)
+            addAvatar(participant, "", isSingleParticipant)
         }
 
         if (participants.size > 3) {
             addAvatarSpacer()
-            addAvatar("", "+${participants.size - 2}", isSingleParticipant)
+            addAvatar(null, "+${participants.size - 2}", isSingleParticipant)
         }
     }
 
@@ -132,13 +132,17 @@ public class CallDetailsView : ConstraintLayout {
      * @param imageUrl The avatar url of the participant.
      * @param isSingleAvatar Whether there is one participant (direct call) or multiple participants (group call).
      */
-    private fun addAvatar(imageUrl: String?, name: String, isSingleAvatar: Boolean) {
+    private fun addAvatar(user: CallUser?, text: String, isSingleAvatar: Boolean) {
         val avatarSize = if (isSingleAvatar) style.singleAvatarSize else style.callAvatarSize
         val avatar = AvatarView(context).apply {
             layoutParams = LayoutParams(avatarSize, avatarSize)
             scaleType = ImageView.ScaleType.CENTER_CROP
         }
-        avatar.setData(imageUrl ?: "", name)
+        if (user != null) {
+            avatar.setData(user)
+        } else {
+            avatar.setData(text)
+        }
         binding.avatarsHolder.addView(avatar)
     }
 

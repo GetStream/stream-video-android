@@ -25,7 +25,6 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.isVisible
 import androidx.core.view.setMargins
-import io.getstream.log.StreamLog
 import io.getstream.video.android.core.model.CallParticipantState
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.VideoTrack
@@ -35,7 +34,6 @@ import io.getstream.video.android.xml.font.setTextStyle
 import io.getstream.video.android.xml.utils.extensions.clearConstraints
 import io.getstream.video.android.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.xml.utils.extensions.getDrawableCompat
-import io.getstream.video.android.xml.utils.extensions.load
 import io.getstream.video.android.xml.utils.extensions.streamThemeInflater
 import io.getstream.video.android.xml.utils.extensions.updateConstraints
 import io.getstream.video.android.xml.widget.renderer.VideoRenderer
@@ -164,7 +162,7 @@ public class CallParticipantView : CardView, VideoRenderer {
      * @param user The [User] whose video we are viewing.
      */
     private fun setUserData(user: User) {
-        binding.participantAvatar.load(user.imageUrl)
+        binding.participantAvatar.setData(user)
         binding.participantLabel.text = user.name.ifBlank { user.id }
     }
 
@@ -210,8 +208,6 @@ public class CallParticipantView : CardView, VideoRenderer {
         }
         val shouldShowAvatar =
             track == null || !isVideoEnabled || TrackType.TRACK_TYPE_VIDEO !in participant.publishedTracks
-
-        StreamLog.d("shouldshowavatar") { "shouldShowAvatar: $shouldShowAvatar, isTrackNull: ${track == null}, isVideoEnabled: $isVideoEnabled, isVideoInPublishedTracks: ${TrackType.TRACK_TYPE_VIDEO in participant.publishedTracks}" }
 
         binding.participantAvatar.isVisible = shouldShowAvatar
     }
