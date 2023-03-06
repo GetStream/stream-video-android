@@ -188,13 +188,15 @@ public class CallParticipantView : CardView, VideoRenderer {
      */
     private fun initRenderer() {
         if (!wasRendererInitialised) {
-            track?.let {
-                rendererInitializer?.initRenderer(
-                    binding.participantVideoRenderer,
-                    it.streamId,
-                    TrackType.TRACK_TYPE_VIDEO
-                ) { onRender(it) }
-                wasRendererInitialised = true
+            track?.let { videoTrack ->
+                rendererInitializer?.let { rendererInitializer ->
+                    rendererInitializer.initRenderer(
+                        binding.participantVideoRenderer,
+                        videoTrack.streamId,
+                        TrackType.TRACK_TYPE_VIDEO
+                    ) { onRender(it) }
+                    wasRendererInitialised = true
+                }
             }
         }
     }

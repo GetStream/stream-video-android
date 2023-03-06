@@ -26,7 +26,7 @@ import kotlinx.coroutines.Job
  * Only thing that need to be overridden from the interface is [runningJobs]. There should also be a way to clear the
  * running jobs, eg. calling [stopAllJobs] inside [View.onDetachedFromWindow].
  */
-internal interface JobCallContent {
+internal interface JobHolder {
 
     /**
      * List of the currently running jobs collecting data for the screen.
@@ -43,7 +43,7 @@ internal interface JobCallContent {
      */
     fun startJob(lifecycleOwner: LifecycleOwner, job: suspend () -> Unit) {
         runningJobs.add(
-            lifecycleOwner.lifecycleScope.launchWhenResumed {
+            lifecycleOwner.lifecycleScope.launchWhenCreated {
                 job()
             }
         )

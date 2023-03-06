@@ -39,6 +39,7 @@ import io.getstream.video.android.xml.utils.extensions.constrainViewToParentBySi
 import io.getstream.video.android.xml.utils.extensions.constrainViewTopToBottomOfView
 import io.getstream.video.android.xml.utils.extensions.getFirstViewInstance
 import io.getstream.video.android.xml.utils.extensions.setConstraints
+import io.getstream.video.android.xml.utils.extensions.updateConstraints
 import io.getstream.video.android.xml.widget.control.CallControlsView
 import io.getstream.video.android.xml.widget.participant.internal.CallParticipantsGridView
 import io.getstream.video.android.xml.widget.participant.internal.CallParticipantsListView
@@ -183,7 +184,7 @@ public class CallParticipantsView : ConstraintLayout {
             clipChildren = false
         }
 
-        setConstraints {
+        updateConstraints(true) {
             constrainViewToParentBySide(presenterText, ConstraintSet.START)
             constrainViewToParentBySide(presenterText, ConstraintSet.END)
             constrainViewToParentBySide(presenterText, ConstraintSet.TOP)
@@ -197,14 +198,6 @@ public class CallParticipantsView : ConstraintLayout {
             constrainViewToParentBySide(listView, ConstraintSet.START)
             constrainViewToParentBySide(listView, ConstraintSet.END)
         }
-
-        val listViewParams = listView.layoutParams as LayoutParams
-        listViewParams.height = style.participantListHeight
-        listView.layoutParams = listViewParams
-
-        val presenterTextViewParams = presenterText.layoutParams as LayoutParams
-        presenterTextViewParams.height = LayoutParams.WRAP_CONTENT
-        presenterText.layoutParams = presenterTextViewParams
     }
 
     /**

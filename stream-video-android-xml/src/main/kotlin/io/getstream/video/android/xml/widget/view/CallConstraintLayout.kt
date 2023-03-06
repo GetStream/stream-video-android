@@ -26,7 +26,7 @@ import kotlinx.coroutines.Job
  * screen if they are attached programmatically. If they are used with XML and you wish to stop observing to clean
  * up resources when hiding content call [stopAllJobs].
  */
-public abstract class CallConstraintLayout : ConstraintLayout, JobCallContent {
+public abstract class CallConstraintLayout : ConstraintLayout, JobHolder {
 
     public constructor(context: Context) : this(context, null, 0)
     public constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)

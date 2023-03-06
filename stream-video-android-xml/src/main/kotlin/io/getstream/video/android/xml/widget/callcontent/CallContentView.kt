@@ -36,9 +36,7 @@ import io.getstream.video.android.xml.utils.extensions.streamThemeInflater
 import io.getstream.video.android.xml.widget.active.ActiveCallView
 import io.getstream.video.android.xml.widget.incoming.IncomingCallView
 import io.getstream.video.android.xml.widget.outgoing.OutgoingCallView
-import io.getstream.video.android.xml.widget.participant.CallParticipantView
 import io.getstream.video.android.xml.widget.participant.PictureInPictureView
-import io.getstream.video.android.xml.widget.participant.RendererInitializer
 
 /**
  * View that is the highest in the hierarchy that handles switching of [IncomingCallView], [OutgoingCallView],
@@ -154,18 +152,21 @@ class CallContentView : ConstraintLayout {
         callViewModel: CallViewModel,
         lifecycleOwner: LifecycleOwner,
     ) {
-        if (isViewInsideContainer<CallParticipantView>()) return
+        if (isViewInsideContainer<PictureInPictureView>()) return
+
         val pictureInPicture = PictureInPictureView(context)
-        pictureInPicture.rendererInitializer = RendererInitializer { videoRenderer, streamId, trackType, onRender ->
-            callViewModel.callState.value?.initRenderer(videoRenderer, streamId, trackType, onRender)
-        }
         addContentView(pictureInPicture)
-        pictureInPicture.bindView(callViewModel, lifecycleOwner)
+        pictureInPicture.bindView(
+            viewModel = callViewModel,
+            lifecycleOwner = lifecycleOwner
+        )
     }
 
     private fun addContentView(view: View) {
-        view.layoutParams =
-            FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT)
+        view.layoutParams = FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.MATCH_PARENT,
+            FrameLayout.LayoutParams.MATCH_PARENT
+        )
         binding.contentHolder.removeAllViews()
         binding.contentHolder.addView(view)
     }

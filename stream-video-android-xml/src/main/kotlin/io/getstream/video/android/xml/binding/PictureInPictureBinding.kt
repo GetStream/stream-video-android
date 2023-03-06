@@ -19,20 +19,55 @@ package io.getstream.video.android.xml.binding
 import androidx.lifecycle.LifecycleOwner
 import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.xml.widget.participant.PictureInPictureView
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.onStart
 
 fun PictureInPictureView.bindView(
     viewModel: CallViewModel,
     lifecycleOwner: LifecycleOwner,
 ) {
     startJob(lifecycleOwner) {
-        viewModel.primarySpeaker.combine(viewModel.screenSharingSessions) { primarySpeaker, screenSharingSessions ->
-            primarySpeaker to screenSharingSessions.firstOrNull()
-        }.collect { (screenShareParticipant, screenShareSession) ->
-            if (screenShareSession != null) {
-                showScreenShare(screenShareSession)
-            } else {
-                screenShareParticipant?.let { showCallParticipantView(it) }
+        viewModel.callState.filterNotNull().collectLatest { call ->
+            setRendererInitializer { videoRenderer, trackId, trackType, onRender ->
+                call.initRenderer(videoRenderer, trackId, trackType, onRender)
+            }
+        }
+    }
+
+    startJob(lifecycleOwner) {
+        combine(
+            viewModel.primarySpeaker,
+            viewModel.screenSharingSessions,
+            viewModel.localParticipant
+        ) { primarySpeaker, screenSharingSessions, localParticipant ->
+            Triple(primarySpeaker, screenSharingSessions.firstOrNull(), localParticipant)
+        }.onStart {
+            when {
+                viewModel.screenSharingSessions.value.firstOrNull() != null -> {
+                    showScreenShare(viewModel.screenSharingSessions.value.first())
+                }
+                viewModel.primarySpeaker.value != null -> {
+                    viewModel.primarySpeaker.value?.let {
+                        showCallParticipantView(it)
+                    }
+                }
+                else -> {
+                    viewModel.localParticipant.value?.let {
+                        showCallParticipantView(it)
+                    }
+                }
+            }
+        }.collect { (primarySpeaker, screenSharingSession, localParticipant) ->
+            when {
+                screenSharingSession != null -> showScreenShare(screenSharingSession)
+                primarySpeaker != null -> {
+                    showCallParticipantView(primarySpeaker)
+                }
+                localParticipant != null -> {
+                    showCallParticipantView(localParticipant)
+                }
             }
         }
     }

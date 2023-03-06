@@ -31,7 +31,7 @@ import io.getstream.video.android.xml.widget.view.CallCardView
 /**
  * View to ve shown when inside a call and the app enter picture in picture mode. Will show the primary speaker.
  */
-public class PictureInPictureView : CallCardView {
+public class PictureInPictureView : CallCardView, VideoRenderer {
 
     private lateinit var style: PictureInPictureStyle
 
@@ -39,11 +39,7 @@ public class PictureInPictureView : CallCardView {
      * Handler to initialise the renderer. If the participant view was created before the renderer has been initialised
      * will take care of init.
      */
-    public var rendererInitializer: RendererInitializer? = null
-        set(value) {
-            field = value
-            field?.let { getVideoRenderer()?.setRendererInitializer(it) }
-        }
+    private var rendererInitializer: RendererInitializer? = null
 
     public constructor(context: Context) : this(context, null)
     public constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
@@ -57,6 +53,18 @@ public class PictureInPictureView : CallCardView {
 
     private fun init(context: Context, attrs: AttributeSet?) {
         style = PictureInPictureStyle(context, attrs)
+    }
+
+    /**
+     * Used to set the [RendererInitializer] for the [CallParticipantView].
+     *
+     * @param rendererInitializer The [RendererInitializer] used to initialize the renderer.
+     */
+    override fun setRendererInitializer(rendererInitializer: RendererInitializer) {
+        this.rendererInitializer = rendererInitializer
+        getVideoRenderer()?.let {
+            it.setRendererInitializer(rendererInitializer)
+        }
     }
 
     /**
