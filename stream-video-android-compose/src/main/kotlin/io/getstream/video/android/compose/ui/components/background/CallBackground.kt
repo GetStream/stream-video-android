@@ -21,14 +21,20 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import io.getstream.video.android.common.util.mockUsers
+import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.avatar.AvatarPreview
 import io.getstream.video.android.core.model.CallType
 import io.getstream.video.android.core.model.CallUser
+import io.getstream.video.android.core.model.CallUserState
 import io.getstream.video.android.ui.common.R
 
 /**
@@ -112,4 +118,31 @@ private fun DefaultCallBackground() {
         contentScale = ContentScale.FillBounds,
         contentDescription = null
     )
+}
+
+@Preview
+@Composable
+private fun CallBackgroundPreview() {
+    VideoTheme {
+        CallBackground(
+            participants = listOf(mockUsers.first().let {
+                CallUser(
+                    id = it.id,
+                    name = it.name,
+                    imageUrl = it.profileImageURL ?: "",
+                    role = it.role,
+                    teams = emptyList(),
+                    updatedAt = null,
+                    createdAt = null,
+                    state = CallUserState("", false, false, false)
+                )
+            }),
+            callType = CallType.VIDEO,
+            isIncoming = true
+        ) {
+            Box(modifier = Modifier.align(Alignment.Center)) {
+                AvatarPreview()
+            }
+        }
+    }
 }
