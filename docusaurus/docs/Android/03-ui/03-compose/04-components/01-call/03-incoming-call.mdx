@@ -1,26 +1,26 @@
-# IncomingCall
+# IncomingCallContent
 
-The `IncomingCall` lets you easily build UI when you're being called or ringed by other people in an app. It's used to show more information about the participants and the call itself, as well as give you the option to reject or accept the call. We provide two versions of the `IncomingCall`:
+The `IncomingCallContent` lets you easily build UI when you're being called or ringed by other people in an app. It's used to show more information about the participants and the call itself, as well as give you the option to reject or accept the call. We provide two versions of the `IncomingCallContent`:
 
 * **Bound**: This version binds itself to a `CallViewModel` and loads all the required data. It also connects the action handlers for video and rejecting or accepting a call.
-* **Stateless**: This is a stateless version of the `IncomingCall`, which doesn't depend on a `ViewModel` and instead depends on pure state from external sources to render its UI.
+* **Stateless**: This is a stateless version of the `IncomingCallContent`, which doesn't depend on a `ViewModel` and instead depends on pure state from external sources to render its UI.
 
 > **Note**: If you want to learn more about our component types, make sure to read through our [Compose Components Overview](../../01-overview.mdx).
 
-Based on the state, the `IncomingCall` provides a list of participants, with their avatars and names, or a background with the avatar of the person you're being called by, if it's a 1:1 conversation.
+Based on the state, the `IncomingCallContent` provides a list of participants, with their avatars and names, or a background with the avatar of the person you're being called by, if it's a 1:1 conversation.
 
-Let's see how to show the `IncomingCall` UI.
+Let's see how to show the `IncomingCallContent` UI.
 
 ## Usage
 
-To use the **bound** `IncomingCall`, add it to your UI within `setContent()`:
+To use the **bound** `IncomingCallContent`, add it to your UI within `setContent()`:
 
 ```kotlin
 override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContent {
         VideoTheme {
-            IncomingCall(viewModel = callViewModel, onBackPressed = { rejectCall() }) // here
+            IncomingCallContent(viewModel = callViewModel, onBackPressed = { rejectCall() }) // here
         }
     }
 }
@@ -65,7 +65,7 @@ override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContent {
         VideoTheme {
-            IncomingCall(
+            IncomingCallContent(
               viewModel = callViewModel,
               onBackPressed = { rejectCall() },
               onCallAction = { action -> handleAction(action) }
@@ -87,4 +87,4 @@ Using this you can build custom behavior that shows the user more options or inf
 
 ## Customization
 
-The `IncomingCall` is very simple and doesn't offer any customization other than the root `Modifier`. We strongly suggest building custom Incoming UI if your app requires something that's different from our default.
+The `IncomingCallContent` is very simple and doesn't offer any customization other than the root `Modifier`. We strongly suggest building custom Incoming UI if your app requires something that's different from our default.
