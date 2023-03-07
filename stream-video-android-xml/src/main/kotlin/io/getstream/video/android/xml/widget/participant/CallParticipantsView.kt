@@ -76,6 +76,16 @@ public class CallParticipantsView : ConstraintLayout {
         showPreConnectedHolder()
     }
 
+    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
+        super.onLayout(changed, left, top, right, bottom)
+        if (changed) {
+            getFirstViewInstance<FloatingParticipantView>()?.apply {
+                radius = style.localParticipantRadius
+                translationX = calculateFloatingParticipantMaxXOffset()
+            }
+        }
+    }
+
     private fun showPreConnectedHolder() {
         if (getFirstViewInstance<ImageView> { it.tag == PRECONNECTION_IMAGE_TAG } != null) return
         val preConnectionImage = ImageView(context).apply {
@@ -145,8 +155,8 @@ public class CallParticipantsView : ConstraintLayout {
             val gridParticipants =
                 if (participants.size == 1 || participants.size == 4) participants else participants.filter { !it.isLocal }
 
-            updateFloatingParticipant(floatingParticipant)
             getFirstViewInstance<CallParticipantsGridView>()?.updateParticipants(gridParticipants)
+            updateFloatingParticipant(floatingParticipant)
         }
     }
 
@@ -178,6 +188,10 @@ public class CallParticipantsView : ConstraintLayout {
             if (::rendererInitializer.isInitialized) setRendererInitializer(rendererInitializer)
             buildParticipantView = { this@CallParticipantsView.buildParticipantView(true) }
             this@CallParticipantsView.addView(this)
+            layoutParams = LayoutParams(
+                LayoutParams.MATCH_PARENT,
+                style.participantListHeight
+            )
             setPadding(style.participantListPadding)
             setItemMargin(style.participantListItemMargin)
             clipToPadding = false
@@ -225,18 +239,18 @@ public class CallParticipantsView : ConstraintLayout {
      * @param participant The local participant to be shown in a [FloatingParticipantView].
      */
     private fun updateFloatingParticipant(participant: CallParticipantState?) {
-        var localParticipant = getFirstViewInstance<FloatingParticipantView>()
+        var floatingParticipant = getFirstViewInstance<FloatingParticipantView>()
 
         if (participant != null) {
-            if (localParticipant == null) {
-                localParticipant = buildFloatingView()
-                addView(localParticipant)
+            if (floatingParticipant == null) {
+                floatingParticipant = buildFloatingView()
+                addView(floatingParticipant)
             }
-            localParticipant.setParticipant(participant)
-        } else if (localParticipant != null) {
-            removeView(localParticipant)
+            floatingParticipant.setParticipant(participant)
+        } else {
+            removeView(floatingParticipant)
         }
-        localParticipant?.bringToFront()
+        floatingParticipant?.bringToFront()
     }
 
     /**
@@ -266,12 +280,12 @@ public class CallParticipantsView : ConstraintLayout {
      */
     @SuppressLint("ClickableViewAccessibility")
     private fun setLocalParticipantDragInteraction(localParticipant: FloatingParticipantView) {
-        val maxDx = calculateFloatingParticipantMaxXOffset()
-        val maxDy = calculateFloatingParticipantMaxYOffset()
-
         var dx = 0f
         var dy = 0f
         localParticipant.setOnTouchListener { view, event ->
+            val maxDx = calculateFloatingParticipantMaxXOffset()
+            val maxDy = calculateFloatingParticipantMaxYOffset()
+
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     dx = view.x - event.rawX
@@ -282,6 +296,12 @@ public class CallParticipantsView : ConstraintLayout {
                 MotionEvent.ACTION_MOVE -> {
                     val newX = event.rawX + dx
                     val newY = event.rawY + dy
+
+                    if (maxDx < style.localParticipantPadding
+                        || maxDy < style.localParticipantPadding
+                    ) {
+                        return@setOnTouchListener false
+                    }
 
                     view.animate().x(newX.coerceIn(style.localParticipantPadding, maxDx))
                         .y(newY.coerceIn(style.localParticipantPadding, maxDy)).setDuration(0).start()
@@ -299,7 +319,7 @@ public class CallParticipantsView : ConstraintLayout {
      * @return The max X offset that can be applied to the overlaid [FloatingParticipantView].
      */
     private fun calculateFloatingParticipantMaxXOffset(): Float {
-        return measuredWidth - style.localParticipantWidth - style.localParticipantPadding
+        return width - style.localParticipantWidth - style.localParticipantPadding
     }
 
     /**
@@ -310,7 +330,7 @@ public class CallParticipantsView : ConstraintLayout {
      */
     private fun calculateFloatingParticipantMaxYOffset(): Float {
         val controlsHeight = getCallControlsHeight()
-        return measuredHeight - style.localParticipantHeight - style.localParticipantPadding - controlsHeight
+        return height - style.localParticipantHeight - style.localParticipantPadding - controlsHeight
     }
 
     /**
@@ -319,7 +339,7 @@ public class CallParticipantsView : ConstraintLayout {
      * @return The height of the [CallControlsView].
      */
     private fun getCallControlsHeight(): Int {
-        return (parent as? ViewGroup)?.children?.firstOrNull { it is CallControlsView }?.measuredHeight ?: 0
+        return (parent as? ViewGroup)?.children?.firstOrNull { it is CallControlsView }?.height ?: 0
     }
 
     /**

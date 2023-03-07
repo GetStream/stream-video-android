@@ -103,7 +103,7 @@ class CallContentView : ConstraintLayout {
     ) {
         if (isViewInsideContainer<OutgoingCallView>()) return
         val outgoingCallView = OutgoingCallView(context)
-        addContentView(outgoingCallView)
+        setContentView(outgoingCallView)
         outgoingCallView.bindView(
             viewModel = callViewModel,
             lifecycleOwner = lifecycleOwner,
@@ -120,7 +120,7 @@ class CallContentView : ConstraintLayout {
     ) {
         if (isViewInsideContainer<IncomingCallView>()) return
         val incomingCallView = IncomingCallView(context)
-        addContentView(incomingCallView)
+        setContentView(incomingCallView)
         incomingCallView.bindView(
             viewModel = callViewModel,
             lifecycleOwner = lifecycleOwner,
@@ -137,7 +137,7 @@ class CallContentView : ConstraintLayout {
     ) {
         if (isViewInsideContainer<ActiveCallView>()) return
         val activeCallView = ActiveCallView(context)
-        addContentView(activeCallView)
+        setContentView(activeCallView)
         activeCallView.bindView(
             viewModel = callViewModel,
             lifecycleOwner = lifecycleOwner,
@@ -155,14 +155,14 @@ class CallContentView : ConstraintLayout {
         if (isViewInsideContainer<PictureInPictureView>()) return
 
         val pictureInPicture = PictureInPictureView(context)
-        addContentView(pictureInPicture)
+        setContentView(pictureInPicture)
         pictureInPicture.bindView(
             viewModel = callViewModel,
             lifecycleOwner = lifecycleOwner
         )
     }
 
-    private fun addContentView(view: View) {
+    private fun setContentView(view: View) {
         view.layoutParams = FrameLayout.LayoutParams(
             FrameLayout.LayoutParams.MATCH_PARENT,
             FrameLayout.LayoutParams.MATCH_PARENT

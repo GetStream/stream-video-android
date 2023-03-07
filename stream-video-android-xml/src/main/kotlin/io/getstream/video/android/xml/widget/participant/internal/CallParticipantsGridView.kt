@@ -106,7 +106,7 @@ internal class CallParticipantsGridView : ConstraintLayout, VideoRenderer {
         TransitionManager.beginDelayedTransition(this)
         setConstraints {
             childList.forEachIndexed { index, callParticipantView ->
-                if (isBottomChild(index)) callParticipantView.setLabelBottomOffset(getBottomLabelOffset())
+                callParticipantView.setLabelBottomOffset(if (isBottomChild(index)) getBottomLabelOffset() else 0)
             }
 
             when (childList.size) {
