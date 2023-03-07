@@ -28,6 +28,7 @@ import io.getstream.video.android.xml.utils.extensions.constrainViewStartToEndOf
 import io.getstream.video.android.xml.utils.extensions.constrainViewToParentBySide
 import io.getstream.video.android.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.xml.utils.extensions.getColorCompat
+import io.getstream.video.android.xml.utils.extensions.getDrawableCompat
 import io.getstream.video.android.xml.utils.extensions.updateConstraints
 
 /**
@@ -63,7 +64,7 @@ public class CallControlsView : ConstraintLayout {
 
     private fun init(context: Context, attrs: AttributeSet?) {
         style = CallControlsStyle(context, attrs)
-
+        background = context.getDrawableCompat(R.drawable.rect_controls)
         background.setTint(style.callControlsBackgroundColor)
     }
 

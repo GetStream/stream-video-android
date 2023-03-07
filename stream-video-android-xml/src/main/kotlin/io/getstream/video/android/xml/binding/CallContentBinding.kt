@@ -17,42 +17,113 @@
 package io.getstream.video.android.xml.binding
 
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.model.state.StreamCallState
+import io.getstream.video.android.core.call.state.CallMediaState
+import io.getstream.video.android.core.call.state.FlipCamera
+import io.getstream.video.android.core.call.state.LeaveCall
+import io.getstream.video.android.core.call.state.ToggleCamera
+import io.getstream.video.android.core.call.state.ToggleMicrophone
+import io.getstream.video.android.core.call.state.ToggleSpeakerphone
 import io.getstream.video.android.core.viewmodel.CallViewModel
+import io.getstream.video.android.xml.R
+import io.getstream.video.android.xml.utils.extensions.getFirstViewInstance
 import io.getstream.video.android.xml.widget.callcontent.CallContentView
+import io.getstream.video.android.xml.widget.control.CallControlItem
+import io.getstream.video.android.xml.widget.control.CallControlsView
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.onStart
+import io.getstream.video.android.ui.common.R as RCommon
 
 public fun CallContentView.bindView(
     viewModel: CallViewModel,
     lifecycleOwner: LifecycleOwner,
-    handleCallAction: (CallAction) -> Unit = { viewModel.onCallAction(it) },
-    handleBackPressed: () -> Unit = { },
-    onIdle: () -> Unit = { },
+    updateCallMediaState: (CallMediaState, Boolean) -> List<CallControlItem> = { mediaState, isScreenSharingActive ->
+        defaultControlList(mediaState, isScreenSharingActive)
+    },
+    onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
 ) {
-    this.handleBackPressed = { handleBackPressed() }
-    this.handleCallAction = { handleCallAction(it) }
 
-    lifecycleOwner.lifecycleScope.launchWhenCreated {
-        viewModel.streamCallState.combine(viewModel.isInPictureInPicture) { state, isPictureInPicture ->
-            state to isPictureInPicture
-        }.collect { (state, isPictureInPicture) ->
-            updateToolbar(state, isPictureInPicture)
-            when {
-                state is StreamCallState.Incoming && !state.acceptedByMe ->
-                    showIncomingScreen()?.apply { bindView(viewModel, lifecycleOwner) }
+    getFirstViewInstance<CallControlsView>()?.callControlItemClickListener = { onCallAction(it) }
 
-                state is StreamCallState.Outgoing && !state.acceptedByCallee ->
-                    showOutgoingScreen()?.apply { bindView(viewModel, lifecycleOwner) }
-
-                state is StreamCallState.Connected && isPictureInPicture ->
-                    showPipLayout()?.apply { bindView(viewModel, lifecycleOwner) }
-
-                state is StreamCallState.Idle -> onIdle()
-
-                else -> showActiveCallScreen()?.apply { bindView(viewModel, lifecycleOwner) }
+    startJob(lifecycleOwner) {
+        viewModel.callState.filterNotNull().collectLatest { call ->
+            setRendererInitializer { videoRenderer, streamId, trackType, onRender ->
+                call.initRenderer(videoRenderer, streamId, trackType, onRender)
             }
         }
     }
+
+    startJob(lifecycleOwner) {
+        viewModel.participantList.combine(viewModel.screenSharingSessions) { participants, screenSharingSessions ->
+            participants to screenSharingSessions.firstOrNull()
+        }.collect { (participants, screenSharingSession) ->
+            updateContent(participants, screenSharingSession)
+        }
+    }
+
+    startJob(lifecycleOwner) {
+        viewModel.primarySpeaker.collectLatest {
+            updatePrimarySpeaker(it)
+        }
+    }
+
+    startJob(lifecycleOwner) {
+        viewModel.callMediaState.combine(viewModel.screenSharingSessions) { mediaState, screenSharingSessions ->
+            mediaState to screenSharingSessions.firstOrNull()
+        }.onStart {
+            setControlItems(updateCallMediaState(viewModel.callMediaState.value, false))
+        }.collect { (mediaState, screenSharingSession) ->
+            setControlItems(updateCallMediaState(mediaState, screenSharingSession != null))
+        }
+    }
+}
+
+private fun defaultControlList(callMediaState: CallMediaState, isScreenSharingActive: Boolean): List<CallControlItem> {
+    return listOf(
+        CallControlItem(
+            icon = if (callMediaState.isSpeakerphoneEnabled) {
+                RCommon.drawable.ic_speaker_on
+            } else {
+                RCommon.drawable.ic_speaker_off
+            },
+            iconTint = R.color.stream_black,
+            backgroundTint = R.color.stream_white,
+            action = ToggleSpeakerphone(!callMediaState.isSpeakerphoneEnabled)
+        ),
+        CallControlItem(
+            icon = if (callMediaState.isCameraEnabled) {
+                RCommon.drawable.ic_videocam_on
+            } else {
+                RCommon.drawable.ic_videocam_off
+            },
+            iconTint = R.color.stream_black,
+            backgroundTint = R.color.stream_white,
+            action = ToggleCamera(!callMediaState.isCameraEnabled)
+        ),
+        CallControlItem(
+            icon = if (callMediaState.isMicrophoneEnabled) {
+                RCommon.drawable.ic_mic_on
+            } else {
+                RCommon.drawable.ic_mic_off
+            },
+            iconTint = R.color.stream_black,
+            backgroundTint = R.color.stream_white,
+            action = ToggleMicrophone(!callMediaState.isMicrophoneEnabled)
+        ),
+        CallControlItem(
+            icon = RCommon.drawable.ic_camera_flip,
+            iconTint = R.color.stream_black,
+            backgroundTint = if (!isScreenSharingActive) R.color.stream_white else RCommon.color.stream_disabled,
+            action = FlipCamera,
+            enabled = !isScreenSharingActive
+        ),
+        CallControlItem(
+            icon = RCommon.drawable.ic_call_end,
+            iconTint = R.color.stream_white,
+            backgroundTint = RCommon.color.stream_error_accent,
+            action = LeaveCall
+        ),
+    )
 }

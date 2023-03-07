@@ -21,13 +21,13 @@ import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
 import io.getstream.video.android.common.AbstractCallActivity
 import io.getstream.video.android.xml.binding.bindView
-import io.getstream.video.android.xml.widget.callcontent.CallContentView
+import io.getstream.video.android.xml.widget.callcontainer.CallContainerView
 import io.getstream.video.android.ui.common.R as RCommon
 
 public abstract class AbstractXmlCallActivity : AbstractCallActivity() {
 
     override fun setupUi() {
-        val callContent = CallContentView(this)
+        val callContent = CallContainerView(this)
         callContent.bindView(
             viewModel = callViewModel,
             lifecycleOwner = this,

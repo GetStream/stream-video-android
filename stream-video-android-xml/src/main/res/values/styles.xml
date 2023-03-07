@@ -5,7 +5,7 @@
         <item name="streamCallControlsViewStyle">@style/Stream.CallControls</item>
         <item name="streamCallDetailsViewStyle">@style/Stream.CallDetails</item>
         <item name="streamCallParticipantViewStyle">@style/Stream.CallParticipant</item>
-        <item name="streamCallParticipantsViewStyle">@style/Stream.CallParticipants</item>
+        <item name="streamCallContentViewStyle">@style/Stream.CallParticipants</item>
         <item name="streamIncomingViewStyle">@style/Stream.IncomingCall</item>
         <item name="streamOutgoingViewStyle">@style/Stream.OutgoingCall</item>
         <item name="streamPictureInPictureViewStyle">@style/Stream.PictureInPicture</item>
@@ -65,8 +65,8 @@
     </style>
 
     <style name="Stream.CallParticipants" parent="Stream">
-        <item name="streamCallParticipantsGridParticipantStyle">@style/Stream.CallParticipant.Grid</item>
-        <item name="streamCallParticipantsListParticipantStyle">@style/Stream.CallParticipant.List</item>
+        <item name="streamCallContentGridParticipantStyle">@style/Stream.CallParticipant.Grid</item>
+        <item name="streamCallContentListParticipantStyle">@style/Stream.CallParticipant.List</item>
     </style>
 
     <style name="Stream.IncomingCall" parent="Stream">

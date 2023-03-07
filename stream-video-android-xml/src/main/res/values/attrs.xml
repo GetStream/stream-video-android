@@ -24,7 +24,7 @@
         <attr name="streamCallControlsViewStyle" format="reference" />
         <attr name="streamCallDetailsViewStyle" format="reference" />
         <attr name="streamCallParticipantViewStyle" format="reference" />
-        <attr name="streamCallParticipantsViewStyle" format="reference" />
+        <attr name="streamCallContentViewStyle" format="reference" />
         <attr name="streamPictureInPictureViewStyle" format="reference" />
         <attr name="streamScreenShareStyle" format="reference" />
     </declare-styleable>
