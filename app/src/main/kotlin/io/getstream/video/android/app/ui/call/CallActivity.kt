@@ -17,22 +17,13 @@
 package io.getstream.video.android.app.ui.call
 
 import android.content.Context
-import android.os.Bundle
-import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
 import io.getstream.video.android.app.BuildConfig
 import io.getstream.video.android.app.user.FakeUsersProvider
 import io.getstream.video.android.app.videoApp
-import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.AbstractComposeCallActivity
-import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.user.EmptyUsersProvider
 import io.getstream.video.android.core.viewmodel.CallViewModelFactory
-import stream.video.sfu.models.TrackType
 
 class CallActivity : AbstractComposeCallActivity() {
 
@@ -52,33 +43,5 @@ class CallActivity : AbstractComposeCallActivity() {
             permissionManager = getPermissionManager(),
             usersProvider = if (BuildConfig.DEBUG) FakeUsersProvider(currentUserId) else EmptyUsersProvider
         )
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            val callState by callViewModel.callState.collectAsState()
-            val call = callState
-
-            VideoTheme {
-                if (call != null) {
-                    val participants by call.callParticipants.collectAsState()
-                    val localParticipant = participants.firstOrNull { it.isLocal }
-
-                    val localVideoTrack = localParticipant?.videoTrack
-                    val sessionId = localParticipant?.sessionId ?: ""
-
-                    if (localVideoTrack != null) {
-                        VideoRenderer(
-                            modifier = Modifier.fillMaxSize(),
-                            call = call,
-                            videoTrack = localVideoTrack,
-                            sessionId = sessionId,
-                            trackType = TrackType.TRACK_TYPE_VIDEO
-                        )
-                    }
-                }
-            }
-        }
     }
 }
