@@ -42,7 +42,7 @@ import io.getstream.video.android.xml.widget.participant.PictureInPictureView
  * View that is the highest in the hierarchy that handles switching of [IncomingCallView], [OutgoingCallView],
  * [ActiveCallView] and [PictureInPictureView] based on the call state.
  */
-class CallContentView : ConstraintLayout {
+public class CallContentView : ConstraintLayout {
 
     private val binding = ViewCallContentBinding.inflate(streamThemeInflater, this)
 
@@ -65,8 +65,9 @@ class CallContentView : ConstraintLayout {
      * @param isPictureInPicture Whether the app is in picture in picture mode. If true will hide the toolbar or hide it
      * if it is false.
      */
-    public fun updateToolbar(streamCallState: StreamCallState, isPictureInPicture: Boolean) {
+    internal fun updateToolbar(streamCallState: StreamCallState, isPictureInPicture: Boolean) {
         binding.callToolbar.isVisible = !isPictureInPicture
+        if (isPictureInPicture) return
 
         val callId = when (streamCallState) {
             is StreamCallState.Active -> streamCallState.callGuid.id
@@ -84,7 +85,7 @@ class CallContentView : ConstraintLayout {
     /**
      * Sets up the toolbar.
      */
-    public fun setupToolbar(activity: AppCompatActivity) {
+    internal fun setupToolbar(activity: AppCompatActivity) {
         activity.setSupportActionBar(binding.callToolbar)
         activity.supportActionBar?.let {
             it.setDisplayShowTitleEnabled(false)
@@ -97,69 +98,41 @@ class CallContentView : ConstraintLayout {
     /**
      * Shows the outgoing call screen and initialises the state observers required to populate the screen.
      */
-    public fun showOutgoingScreen(
-        callViewModel: CallViewModel,
-        lifecycleOwner: LifecycleOwner,
-    ) {
-        if (isViewInsideContainer<OutgoingCallView>()) return
+    internal fun showOutgoingScreen(): OutgoingCallView? {
+        if (isViewInsideContainer<OutgoingCallView>()) return null
         val outgoingCallView = OutgoingCallView(context)
         setContentView(outgoingCallView)
-        outgoingCallView.bindView(
-            viewModel = callViewModel,
-            lifecycleOwner = lifecycleOwner,
-            onCallAction = { handleCallAction(it) }
-        )
+        return outgoingCallView
     }
 
     /**
      * Shows the incoming call screen and initialises the state observers required to populate the screen.
      */
-    public fun showIncomingScreen(
-        callViewModel: CallViewModel,
-        lifecycleOwner: LifecycleOwner,
-    ) {
-        if (isViewInsideContainer<IncomingCallView>()) return
+    internal fun showIncomingScreen(): IncomingCallView? {
+        if (isViewInsideContainer<IncomingCallView>()) return null
         val incomingCallView = IncomingCallView(context)
         setContentView(incomingCallView)
-        incomingCallView.bindView(
-            viewModel = callViewModel,
-            lifecycleOwner = lifecycleOwner,
-            onCallAction = { handleCallAction(it) }
-        )
+        return incomingCallView
     }
 
     /**
      * Shows the active call screen and initialises the state observers required to populate the screen.
      */
-    public fun showActiveCallScreen(
-        callViewModel: CallViewModel,
-        lifecycleOwner: LifecycleOwner,
-    ) {
-        if (isViewInsideContainer<ActiveCallView>()) return
+    internal fun showActiveCallScreen(): ActiveCallView? {
+        if (isViewInsideContainer<ActiveCallView>()) return null
         val activeCallView = ActiveCallView(context)
         setContentView(activeCallView)
-        activeCallView.bindView(
-            viewModel = callViewModel,
-            lifecycleOwner = lifecycleOwner,
-            onCallAction = { handleCallAction(it) }
-        )
+        return activeCallView
     }
 
     /**
      * Shows the picture in picture layout which consists of the primary call participants feed.
      */
-    public fun showPipLayout(
-        callViewModel: CallViewModel,
-        lifecycleOwner: LifecycleOwner,
-    ) {
-        if (isViewInsideContainer<PictureInPictureView>()) return
-
+    internal fun showPipLayout(): PictureInPictureView? {
+        if (isViewInsideContainer<PictureInPictureView>()) return null
         val pictureInPicture = PictureInPictureView(context)
         setContentView(pictureInPicture)
-        pictureInPicture.bindView(
-            viewModel = callViewModel,
-            lifecycleOwner = lifecycleOwner
-        )
+        return pictureInPicture
     }
 
     private fun setContentView(view: View) {

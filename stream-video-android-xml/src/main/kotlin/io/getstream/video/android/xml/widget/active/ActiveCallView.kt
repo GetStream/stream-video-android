@@ -55,6 +55,7 @@ public class ActiveCallView : CallConstraintLayout {
     private fun init(context: Context, attrs: AttributeSet?) {
         setBackgroundColor(context.getColorCompat(R.color.stream_app_background))
         binding.controlsView.callControlItemClickListener = { callActionListener(it) }
+        binding.participantsView.getCallControlsHeight = { binding.controlsView.layoutParams.height }
     }
 
     /**

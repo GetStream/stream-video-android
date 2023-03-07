@@ -33,7 +33,7 @@ public abstract class AbstractXmlCallActivity : AbstractCallActivity() {
             lifecycleOwner = this,
             handleCallAction = { handleCallAction(it) },
             handleBackPressed = { handleBackPressed() },
-            finish = { finish() }
+            onIdle = { finish() }
         )
         callContent.setupToolbar(this)
         setContentView(callContent)

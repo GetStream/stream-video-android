@@ -62,6 +62,11 @@ public class CallParticipantsView : ConstraintLayout {
 
     private var isScreenSharingActive: Boolean = false
 
+    /**
+     * Handler that returns the call control height used to offset content.
+     */
+    public var getCallControlsHeight: () -> Int = { 0 }
+
     public constructor(context: Context) : this(context, null)
     public constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
     public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
@@ -333,14 +338,6 @@ public class CallParticipantsView : ConstraintLayout {
         return height - style.localParticipantHeight - style.localParticipantPadding - controlsHeight
     }
 
-    /**
-     * Gets the [CallControlsView] height from the parent screen if there is any.
-     *
-     * @return The height of the [CallControlsView].
-     */
-    private fun getCallControlsHeight(): Int {
-        return (parent as? ViewGroup)?.children?.firstOrNull { it is CallControlsView }?.height ?: 0
-    }
 
     /**
      * Updates the current primary speaker and shows a border around the primary speaker.
