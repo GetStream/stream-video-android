@@ -26,17 +26,13 @@ import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.call.state.ToggleSpeakerphone
 import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.xml.R
-import io.getstream.video.android.xml.utils.extensions.getFirstViewInstance
-import io.getstream.video.android.xml.widget.callcontent.CallContentView
 import io.getstream.video.android.xml.widget.control.CallControlItem
 import io.getstream.video.android.xml.widget.control.CallControlsView
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.onStart
 import io.getstream.video.android.ui.common.R as RCommon
 
-public fun CallContentView.bindView(
+public fun CallControlsView.bindView(
     viewModel: CallViewModel,
     lifecycleOwner: LifecycleOwner,
     updateCallMediaState: (CallMediaState, Boolean) -> List<CallControlItem> = { mediaState, isScreenSharingActive ->
@@ -44,43 +40,20 @@ public fun CallContentView.bindView(
     },
     onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
 ) {
-
-    getFirstViewInstance<CallControlsView>()?.callControlItemClickListener = { onCallAction(it) }
-
-    startJob(lifecycleOwner) {
-        viewModel.callState.filterNotNull().collectLatest { call ->
-            setRendererInitializer { videoRenderer, streamId, trackType, onRender ->
-                call.initRenderer(videoRenderer, streamId, trackType, onRender)
-            }
-        }
-    }
-
-    startJob(lifecycleOwner) {
-        viewModel.participantList.combine(viewModel.screenSharingSessions) { participants, screenSharingSessions ->
-            participants to screenSharingSessions.firstOrNull()
-        }.collect { (participants, screenSharingSession) ->
-            updateContent(participants, screenSharingSession)
-        }
-    }
-
-    startJob(lifecycleOwner) {
-        viewModel.primarySpeaker.collectLatest {
-            updatePrimarySpeaker(it)
-        }
-    }
+    this.onCallAction = onCallAction
 
     startJob(lifecycleOwner) {
         viewModel.callMediaState.combine(viewModel.screenSharingSessions) { mediaState, screenSharingSessions ->
             mediaState to screenSharingSessions.firstOrNull()
         }.onStart {
-            setControlItems(updateCallMediaState(viewModel.callMediaState.value, false))
+            emit(viewModel.callMediaState.value to null)
         }.collect { (mediaState, screenSharingSession) ->
-            setControlItems(updateCallMediaState(mediaState, screenSharingSession != null))
+            setItems(updateCallMediaState(mediaState, screenSharingSession != null))
         }
     }
 }
 
-private fun defaultControlList(callMediaState: CallMediaState, isScreenSharingActive: Boolean): List<CallControlItem> {
+internal fun defaultControlList(callMediaState: CallMediaState, isScreenSharingActive: Boolean): List<CallControlItem> {
     return listOf(
         CallControlItem(
             icon = if (callMediaState.isSpeakerphoneEnabled) {

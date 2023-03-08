@@ -17,7 +17,7 @@
 package io.getstream.video.android.xml.widget.transformer
 
 import io.getstream.video.android.xml.widget.avatar.AvatarStyle
-import io.getstream.video.android.xml.widget.callcontent.CallContentStyle
+import io.getstream.video.android.xml.widget.call.CallViewStyle
 import io.getstream.video.android.xml.widget.calldetails.CallDetailsStyle
 import io.getstream.video.android.xml.widget.control.CallControlsStyle
 import io.getstream.video.android.xml.widget.control.ControlButtonStyle
@@ -43,7 +43,7 @@ public object TransformStyle {
     @JvmStatic
     public var callParticipantStyleTransformer: StyleTransformer<CallParticipantStyle> = noopTransformer()
     @JvmStatic
-    public var callContentStyleTransformer: StyleTransformer<CallContentStyle> = noopTransformer()
+    public var callViewStyleTransformer: StyleTransformer<CallViewStyle> = noopTransformer()
     @JvmStatic
     public var pictureInPictureStyleTransformer: StyleTransformer<PictureInPictureStyle> = noopTransformer()
     @JvmStatic

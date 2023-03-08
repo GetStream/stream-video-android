@@ -61,9 +61,9 @@ public class AvatarView : ShapeableImageView {
     }
 
     /**
-     * Sets the user data we want to show the avatar for.
+     * Loads the data for the avatar, from the user.
      *
-     * @param user The [User] for which we want to show the avatar for.
+     * @param user The [User] for which we want to show the avatar.
      */
     public fun setData(user: User) {
         load(
@@ -77,7 +77,7 @@ public class AvatarView : ShapeableImageView {
     }
 
     /**
-     * Sets the user data we want to show the avatar for.
+     * Loads the data for the avatar, from the user.
      *
      * @param user The [CallUser] for which we want to show the avatar for.
      */
@@ -93,7 +93,7 @@ public class AvatarView : ShapeableImageView {
     }
 
     /**
-     * Sets the user data we want to show the avatar for.
+     * Sets the text we want to show inside the avatar.
      *
      * @param text The text we wish to show inside the view.
      */

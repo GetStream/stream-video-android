@@ -31,8 +31,8 @@ public abstract class AbstractXmlCallActivity : AbstractCallActivity() {
         callContent.bindView(
             viewModel = callViewModel,
             lifecycleOwner = this,
-            handleCallAction = { handleCallAction(it) },
-            handleBackPressed = { handleBackPressed() },
+            onCallAction = { handleCallAction(it) },
+            onBackPressed = { handleBackPressed() },
             onIdle = { finish() }
         )
         callContent.setupToolbar(this)

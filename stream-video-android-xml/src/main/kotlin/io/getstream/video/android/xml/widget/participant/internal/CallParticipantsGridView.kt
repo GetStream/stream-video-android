@@ -33,10 +33,16 @@ import io.getstream.video.android.xml.utils.extensions.setConstraints
 import io.getstream.video.android.xml.widget.participant.CallParticipantView
 import io.getstream.video.android.xml.widget.participant.RendererInitializer
 import io.getstream.video.android.xml.widget.renderer.VideoRenderer
+import io.getstream.video.android.xml.widget.view.JobHolder
+import kotlinx.coroutines.Job
 
-internal class CallParticipantsGridView : ConstraintLayout, VideoRenderer {
+internal class CallParticipantsGridView : ConstraintLayout, VideoRenderer, JobHolder {
 
     private val childList: MutableList<CallParticipantView> = mutableListOf()
+
+    override val runningJobs: MutableList<Job> = mutableListOf()
+
+    private var rendererInitializer: RendererInitializer? = null
 
     /**
      * Sets the [RendererInitializer] handler.
@@ -44,6 +50,7 @@ internal class CallParticipantsGridView : ConstraintLayout, VideoRenderer {
      * @param rendererInitializer Handler for initializing the renderer.
      */
     override fun setRendererInitializer(rendererInitializer: RendererInitializer) {
+        this.rendererInitializer = rendererInitializer
         childList.forEach { it.setRendererInitializer(rendererInitializer) }
     }
 
@@ -83,7 +90,9 @@ internal class CallParticipantsGridView : ConstraintLayout, VideoRenderer {
             childList.size < participants.size -> {
                 val diff = participants.size - childList.size
                 for (index in 0 until diff) {
-                    val view = buildParticipantView()
+                    val view = buildParticipantView().apply {
+                        rendererInitializer?.let { setRendererInitializer(it) }
+                    }
                     childList.add(view)
                     addView(view)
                 }
@@ -186,5 +195,10 @@ internal class CallParticipantsGridView : ConstraintLayout, VideoRenderer {
      */
     internal fun updatePrimarySpeaker(participant: CallParticipantState?) {
         childList.forEach { it.setActive(it.tag == participant?.id) }
+    }
+
+    override fun onDetachedFromWindow() {
+        stopAllJobs()
+        super.onDetachedFromWindow()
     }
 }

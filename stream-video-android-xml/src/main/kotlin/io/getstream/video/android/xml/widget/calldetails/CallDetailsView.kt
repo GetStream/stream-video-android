@@ -95,18 +95,18 @@ public class CallDetailsView : ConstraintLayout {
                 addAvatarSpacer()
             }
 
-            addAvatar(participant, "", isSingleParticipant)
+            addAvatar(participant, isSingleParticipant)
         }
 
         if (participants.size == 3) {
             val participant = participants[2]
             addAvatarSpacer()
-            addAvatar(participant, "", isSingleParticipant)
+            addAvatar(participant, isSingleParticipant)
         }
 
         if (participants.size > 3) {
             addAvatarSpacer()
-            addAvatar(null, "+${participants.size - 2}", isSingleParticipant)
+            addAvatar(null, isSingleParticipant, "+${participants.size - 2}")
         }
     }
 
@@ -129,10 +129,11 @@ public class CallDetailsView : ConstraintLayout {
     /**
      * Ease of use method to create and add a new avatar.
      *
-     * @param imageUrl The avatar url of the participant.
+     * @param user [CallUser] for which we want to show the avatar.
      * @param isSingleAvatar Whether there is one participant (direct call) or multiple participants (group call).
+     * @param text Text which we want to show inside the avatar if the [user] is null.
      */
-    private fun addAvatar(user: CallUser?, text: String, isSingleAvatar: Boolean) {
+    private fun addAvatar(user: CallUser?, isSingleAvatar: Boolean, text: String = "") {
         val avatarSize = if (isSingleAvatar) style.singleAvatarSize else style.callAvatarSize
         val avatar = AvatarView(context).apply {
             layoutParams = LayoutParams(avatarSize, avatarSize)

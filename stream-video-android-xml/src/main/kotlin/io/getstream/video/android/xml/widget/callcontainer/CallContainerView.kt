@@ -29,20 +29,20 @@ import io.getstream.video.android.core.utils.formatAsTitle
 import io.getstream.video.android.xml.databinding.ViewCallContentBinding
 import io.getstream.video.android.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.xml.utils.extensions.streamThemeInflater
-import io.getstream.video.android.xml.widget.callcontent.CallContentView
+import io.getstream.video.android.xml.widget.call.CallView
 import io.getstream.video.android.xml.widget.incoming.IncomingCallView
 import io.getstream.video.android.xml.widget.outgoing.OutgoingCallView
 import io.getstream.video.android.xml.widget.participant.PictureInPictureView
 
 /**
  * View that is the highest in the hierarchy that handles switching of [IncomingCallView], [OutgoingCallView],
- * [CallContentView] and [PictureInPictureView] based on the call state.
+ * [CallView] and [PictureInPictureView] based on the call state.
  */
 public class CallContainerView : ConstraintLayout {
 
     private val binding = ViewCallContentBinding.inflate(streamThemeInflater, this)
 
-    public var handleBackPressed: () -> Unit = { }
+    public var onBackPressed: () -> Unit = { }
 
     public constructor(context: Context) : this(context, null, 0)
     public constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
@@ -86,49 +86,66 @@ public class CallContainerView : ConstraintLayout {
             it.setDisplayShowHomeEnabled(true)
             it.setDisplayHomeAsUpEnabled(true)
         }
-        binding.callToolbar.setNavigationOnClickListener { handleBackPressed() }
+        binding.callToolbar.setNavigationOnClickListener { onBackPressed() }
     }
 
     /**
      * Shows the outgoing call screen and initialises the state observers required to populate the screen.
+     *
+     * @param onViewInitialized Notifies when a [OutgoingCallView] has been initialised so that it can be bound to the
+     * view model.
      */
-    internal fun showOutgoingScreen(): OutgoingCallView? {
-        if (isViewInsideContainer<OutgoingCallView>()) return null
+    internal fun showOutgoingScreen(onViewInitialized: (OutgoingCallView) -> Unit) {
+        if (isViewInsideContainer<OutgoingCallView>()) return
         val outgoingCallView = OutgoingCallView(context)
         setContentView(outgoingCallView)
-        return outgoingCallView
+        onViewInitialized(outgoingCallView)
     }
 
     /**
      * Shows the incoming call screen and initialises the state observers required to populate the screen.
+     *
+     * @param onViewInitialized Notifies when a [IncomingCallView] has been initialised so that it can be bound to the
+     * view model.
      */
-    internal fun showIncomingScreen(): IncomingCallView? {
-        if (isViewInsideContainer<IncomingCallView>()) return null
+    internal fun showIncomingScreen(onViewInitialized: (IncomingCallView) -> Unit) {
+        if (isViewInsideContainer<IncomingCallView>()) return
         val incomingCallView = IncomingCallView(context)
         setContentView(incomingCallView)
-        return incomingCallView
+        onViewInitialized(incomingCallView)
     }
 
     /**
      * Shows the active call screen and initialises the state observers required to populate the screen.
+     *
+     * @param onViewInitialized Notifies when a [CallView] has been initialised so that it can be bound to the
+     * view model.
      */
-    internal fun showCallContentScreen(): CallContentView? {
-        if (isViewInsideContainer<CallContentView>()) return null
-        val callContentView = CallContentView(context)
-        setContentView(callContentView)
-        return callContentView
+    internal fun showCallContentScreen(onViewInitialized: (CallView) -> Unit) {
+        if (isViewInsideContainer<CallView>()) return
+        val callView = CallView(context)
+        setContentView(callView)
+        onViewInitialized(callView)
     }
 
     /**
      * Shows the picture in picture layout which consists of the primary call participants feed.
+     *
+     * @param onViewInitialized Notifies when a [PictureInPictureView] has been initialised so that it can be bound to
+     * the view model.
      */
-    internal fun showPipLayout(): PictureInPictureView? {
-        if (isViewInsideContainer<PictureInPictureView>()) return null
+    internal fun showPipLayout(onViewInitialized: (PictureInPictureView) -> Unit) {
+        if (isViewInsideContainer<PictureInPictureView>()) return
         val pictureInPicture = PictureInPictureView(context)
         setContentView(pictureInPicture)
-        return pictureInPicture
+        onViewInitialized(pictureInPicture)
     }
 
+    /**
+     * Sets the passed view as the primary content.
+     *
+     * @param view The view we wish to display as primary content.
+     */
     private fun setContentView(view: View) {
         view.layoutParams = FrameLayout.LayoutParams(
             FrameLayout.LayoutParams.MATCH_PARENT,

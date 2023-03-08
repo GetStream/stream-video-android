@@ -20,7 +20,6 @@ import android.content.Context
 import android.graphics.drawable.GradientDrawable
 import android.util.AttributeSet
 import android.view.View
-import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.isVisible
@@ -37,13 +36,14 @@ import io.getstream.video.android.xml.utils.extensions.getDrawableCompat
 import io.getstream.video.android.xml.utils.extensions.streamThemeInflater
 import io.getstream.video.android.xml.utils.extensions.updateConstraints
 import io.getstream.video.android.xml.widget.renderer.VideoRenderer
+import io.getstream.video.android.xml.widget.view.CallCardView
 import stream.video.sfu.models.TrackType
 import io.getstream.video.android.ui.common.R as RCommon
 
 /**
  * Represents a single participant in a call.
  */
-public class CallParticipantView : CardView, VideoRenderer {
+public class CallParticipantView : CallCardView, VideoRenderer {
 
     private val binding = ViewCallParticipantBinding.inflate(streamThemeInflater, this)
 
@@ -201,6 +201,11 @@ public class CallParticipantView : CardView, VideoRenderer {
         }
     }
 
+    /**
+     * Shows the avatar if there is no video track for the participant, hides it otherwise.
+     *
+     * @param participant The [CallParticipantState] for the current participant.
+     */
     private fun setAvatarVisibility(participant: CallParticipantState) {
         val track = participant.videoTrack
         val isVideoEnabled = try {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.xml.widget.callcontent
+package io.getstream.video.android.xml.widget.call
 
 import android.content.Context
 import android.graphics.Typeface
@@ -35,8 +35,8 @@ import io.getstream.video.android.xml.widget.transformer.TransformStyle
 import io.getstream.video.android.ui.common.R as RCommon
 
 /**
- * Style for [CallContentView].
- * Use this class together with [TransformStyle.callContentStyleTransformer] to change [CallContentView]
+ * Style for [CallView].
+ * Use this class together with [TransformStyle.callViewStyleTransformer] to change [CallView]
  * styles programmatically.
  *
  * @param gridCallParticipantStyle The id of the custom style for [CallParticipantView] to be applied for each call
@@ -46,7 +46,7 @@ import io.getstream.video.android.ui.common.R as RCommon
  * @param localParticipantHeight The height of the [FloatingParticipantView] used fot the local user.
  * @param localParticipantWidth The width of the [FloatingParticipantView] used fot the local user.
  * @param localParticipantPadding The padding between the [FloatingParticipantView] used fot the local user and the
- * borders of [CallContentView].
+ * borders of [CallView].
  * @param localParticipantRadius The corner radius of the [FloatingParticipantView] used fot the local user.
  * @param participantListHeight The height of the participants list when there is a screen share session active.
  * @param participantListPadding The padding applied to the participants list.
@@ -58,7 +58,7 @@ import io.getstream.video.android.ui.common.R as RCommon
  * @param presenterTextPadding Padding around the presenter text.
  * @param presenterTextMargin Margin between presenter text and screen share content.
  */
-public data class CallContentStyle(
+public data class CallViewStyle(
     public val gridCallParticipantStyle: Int,
     public val listCallParticipantStyle: Int,
     @Px public val localParticipantHeight: Float,
@@ -78,7 +78,7 @@ public data class CallContentStyle(
 ) {
 
     internal companion object {
-        operator fun invoke(context: Context, attrs: AttributeSet?): CallContentStyle {
+        operator fun invoke(context: Context, attrs: AttributeSet?): CallViewStyle {
             context.obtainStyledAttributes(
                 attrs,
                 R.styleable.CallContentView,
@@ -179,7 +179,7 @@ public data class CallContentStyle(
                     context.getDimension(RCommon.dimen.callControlsSheetHeight).toFloat()
                 ).toInt()
 
-                return CallContentStyle(
+                return CallViewStyle(
                     gridCallParticipantStyle = gridCallParticipantStyle,
                     listCallParticipantStyle = listCallParticipantStyle,
                     localParticipantHeight = localParticipantHeight,
@@ -196,7 +196,7 @@ public data class CallContentStyle(
                     presenterTextPadding = presenterTextPadding,
                     preConnectionImage = preConnectionImage,
                     callControlsHeight = callControlsHeight
-                ).let(TransformStyle.callContentStyleTransformer::transform)
+                ).let(TransformStyle.callViewStyleTransformer::transform)
             }
         }
     }

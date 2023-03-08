@@ -19,8 +19,6 @@ package io.getstream.video.android.xml.widget.participant
 import android.content.Context
 import android.util.AttributeSet
 import androidx.core.view.children
-import io.getstream.video.android.core.model.CallParticipantState
-import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.xml.R
 import io.getstream.video.android.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.xml.utils.extensions.getFirstViewInstance
@@ -70,42 +68,35 @@ public class PictureInPictureView : CallCardView, VideoRenderer {
     /**
      * Populates the PiP ui with the [CallParticipantView] to preview the primary speaker.
      */
-    public fun showCallParticipantView(participant: CallParticipantState) {
-        var callParticipantView = getFirstViewInstance<CallParticipantView>()
+    public fun setCallParticipantView(onViewInitialized: (CallParticipantView) -> Unit) {
+        if (getFirstViewInstance<CallParticipantView>() != null) return
 
-        if (callParticipantView == null) {
-            removeAllViews()
-            callParticipantView = CallParticipantView(
-                context = context,
-                attrs = null,
-                defStyleAttr = R.attr.streamPictureInPictureCallParticipantViewStyle,
-                defStyleRes = style.callParticipantStyle
-            ).apply {
-                layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
-                rendererInitializer?.let { setRendererInitializer(it) }
-                this@PictureInPictureView.addView(this)
-            }
+        removeAllViews()
+        CallParticipantView(
+            context = context,
+            attrs = null,
+            defStyleAttr = R.attr.streamPictureInPictureCallParticipantViewStyle,
+            defStyleRes = style.callParticipantStyle
+        ).apply {
+            layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
+            rendererInitializer?.let { setRendererInitializer(it) }
+            this@PictureInPictureView.addView(this)
+            onViewInitialized(this)
         }
-
-        callParticipantView.setParticipant(participant)
     }
 
     /**
      * Populates the PiP ui with the [ScreenShareView] to preview the primary speaker.
      */
-    public fun showScreenShare(screenSharingSession: ScreenSharingSession) {
-        var screenShareView = getFirstViewInstance<ScreenShareView>()
+    public fun setScreenShareView(onViewInitialized: (ScreenShareView) -> Unit) {
+        if (getFirstViewInstance<ScreenShareView>() != null) return
 
-        if (screenShareView == null) {
-            removeAllViews()
-            screenShareView = getFirstViewInstance() ?: ScreenShareView(context).apply {
-                layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
-                rendererInitializer?.let { setRendererInitializer(it) }
-                this@PictureInPictureView.addView(this)
-            }
+        ScreenShareView(context).apply {
+            layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
+            rendererInitializer?.let { setRendererInitializer(it) }
+            this@PictureInPictureView.addView(this)
+            onViewInitialized(this)
         }
-
-        screenShareView.setScreenSharingSession(screenSharingSession)
     }
 
     /**

@@ -19,19 +19,24 @@ package io.getstream.video.android.xml.binding
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.core.call.state.CallAction
+import io.getstream.video.android.core.call.state.CallMediaState
 import io.getstream.video.android.core.model.state.StreamCallState
 import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.xml.widget.callcontainer.CallContainerView
+import io.getstream.video.android.xml.widget.control.CallControlItem
 import kotlinx.coroutines.flow.combine
 
 public fun CallContainerView.bindView(
     viewModel: CallViewModel,
     lifecycleOwner: LifecycleOwner,
-    handleCallAction: (CallAction) -> Unit = { viewModel.onCallAction(it) },
-    handleBackPressed: () -> Unit = { },
+    updateCallMediaState: (CallMediaState, Boolean) -> List<CallControlItem> = { mediaState, isScreenSharingActive ->
+        defaultControlList(mediaState, isScreenSharingActive)
+    },
+    onCallAction: (CallAction) -> Unit = { viewModel.onCallAction(it) },
+    onBackPressed: () -> Unit = { },
     onIdle: () -> Unit = { },
 ) {
-    this.handleBackPressed = { handleBackPressed() }
+    this.onBackPressed = { onBackPressed() }
 
     lifecycleOwner.lifecycleScope.launchWhenCreated {
         viewModel.streamCallState.combine(viewModel.isInPictureInPicture) { state, isPictureInPicture ->
@@ -40,21 +45,22 @@ public fun CallContainerView.bindView(
             updateToolbar(state, isPictureInPicture)
             when {
                 state is StreamCallState.Incoming && !state.acceptedByMe ->
-                    showIncomingScreen()?.apply { bindView(viewModel, lifecycleOwner) }
+                    showIncomingScreen { it.bindView(viewModel, lifecycleOwner) }
 
                 state is StreamCallState.Outgoing && !state.acceptedByCallee ->
-                    showOutgoingScreen()?.apply { bindView(viewModel, lifecycleOwner) }
+                    showOutgoingScreen { it.bindView(viewModel, lifecycleOwner) }
 
                 state is StreamCallState.Connected && isPictureInPicture ->
-                    showPipLayout()?.apply { bindView(viewModel, lifecycleOwner) }
+                    showPipLayout { it.bindView(viewModel, lifecycleOwner) }
 
                 state is StreamCallState.Idle -> onIdle()
 
-                else -> showCallContentScreen()?.apply {
-                    bindView(
+                else -> showCallContentScreen {
+                    it.bindView(
                         viewModel = viewModel,
                         lifecycleOwner = lifecycleOwner,
-                        onCallAction = handleCallAction
+                        updateCallMediaState = updateCallMediaState,
+                        onCallAction = onCallAction,
                     )
                 }
             }
