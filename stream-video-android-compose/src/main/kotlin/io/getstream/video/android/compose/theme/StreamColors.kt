@@ -60,7 +60,8 @@ public data class StreamColors(
     public val avatarInitials: Color,
     public val soundLevels: Color,
     public val connectionQualityBackground: Color,
-    public val connectionQualityBar: Color
+    public val connectionQualityBar: Color,
+    public val infoMenuOverlayColor: Color
 ) {
 
     public companion object {
@@ -89,7 +90,8 @@ public data class StreamColors(
             screenSharingBackground = colorResource(R.color.stream_app_background),
             soundLevels = colorResource(id = R.color.stream_primary_accent),
             connectionQualityBackground = colorResource(id = R.color.stream_app_background),
-            connectionQualityBar = colorResource(id = R.color.stream_primary_accent)
+            connectionQualityBar = colorResource(id = R.color.stream_primary_accent),
+            infoMenuOverlayColor = Color.LightGray.copy(alpha = 0.7f)
         )
 
         /**
@@ -117,7 +119,8 @@ public data class StreamColors(
             avatarInitials = colorResource(id = R.color.stream_text_avatar_initials),
             soundLevels = colorResource(id = R.color.stream_primary_accent),
             connectionQualityBackground = colorResource(id = R.color.stream_app_background_dark),
-            connectionQualityBar = colorResource(id = R.color.stream_primary_accent)
+            connectionQualityBar = colorResource(id = R.color.stream_primary_accent),
+            infoMenuOverlayColor = Color.LightGray.copy(alpha = 0.7f)
         )
     }
 }
