@@ -28,9 +28,32 @@ import io.getstream.video.android.xml.utils.extensions.getColorCompat
 import io.getstream.video.android.xml.utils.extensions.getDimension
 import io.getstream.video.android.xml.utils.extensions.getDrawableCompat
 import io.getstream.video.android.xml.utils.extensions.use
+import io.getstream.video.android.xml.widget.control.CallControlsStyle
 import io.getstream.video.android.xml.widget.transformer.TransformStyle
+import io.getstream.video.android.xml.widget.appbar.internal.DefaultCallAppBarLeadingContent
+import io.getstream.video.android.xml.widget.appbar.internal.DefaultCallAppBarCenterContent
+import io.getstream.video.android.xml.widget.appbar.internal.DefaultCallAppBarTrailingContent
 import io.getstream.video.android.ui.common.R as RCommon
 
+/**
+ * Style for [CallControlsStyle].
+ * Use this class together with [TransformStyle.callAppBarStyleTransformer] to change [CallAppBarStyle] styles
+ * programmatically.
+ *
+ * @param backgroundColour The background color of the app bar.
+ * @param appBarPadding The padding around the app bar content.
+ * @param leadingContentIcon The icon shown in the [DefaultCallAppBarLeadingContent].
+ * @param leadingContentIconTint The icon color in the [DefaultCallAppBarLeadingContent].
+ * @param leadingContentMarginStart The margin between leading content and the start of the toolbar.
+ * @param leadingContentMarginEnd The margin between leading and center content.
+ * @param centerContentTextStyle The text style of the [DefaultCallAppBarCenterContent]
+ * @param centerContentMarginStart The margin between center and leading content.
+ * @param centerContentMarginEnd The margin between center and trailing content.
+ * @param trailingContentIcon The icon shown in the [DefaultCallAppBarTrailingContent].
+ * @param trailingContentIconTint The icon color in the [DefaultCallAppBarTrailingContent].
+ * @param trailingContentMarginStart The margin between trailing and center content.
+ * @param trailingContentMarginEnd The margin between leading trailing content and the end of the toolbar.
+ */
 public data class CallAppBarStyle(
     @ColorInt public val backgroundColour: Int,
     @Px public val appBarPadding: Int,
