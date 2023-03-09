@@ -17,6 +17,7 @@
 package io.getstream.video.android.xml.widget.appbar.internal
 
 import android.content.Context
+import android.text.TextUtils
 import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatTextView
 import io.getstream.video.android.core.model.state.StreamCallState
@@ -32,7 +33,14 @@ internal class DefaultCallAppBarCenterContent : AppCompatTextView, CallAppBarCon
         context.createStreamThemeWrapper(),
         attrs,
         defStyleAttr
-    )
+    ) {
+        init()
+    }
+
+    private fun init() {
+        maxLines = 1
+        ellipsize = TextUtils.TruncateAt.END
+    }
 
     override fun renderState(callState: StreamCallState) {
         val callId = when (callState) {
