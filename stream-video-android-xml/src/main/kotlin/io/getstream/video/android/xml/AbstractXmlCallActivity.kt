@@ -27,6 +27,7 @@ import io.getstream.video.android.ui.common.R as RCommon
 public abstract class AbstractXmlCallActivity : AbstractCallActivity() {
 
     override fun setupUi() {
+        setupBackHandler()
         val callContent = CallContainerView(this)
         callContent.bindView(
             viewModel = callViewModel,
@@ -35,9 +36,7 @@ public abstract class AbstractXmlCallActivity : AbstractCallActivity() {
             onBackPressed = { handleBackPressed() },
             onIdle = { finish() }
         )
-        callContent.setupToolbar(this)
         setContentView(callContent)
-        setupBackHandler()
     }
 
     /**

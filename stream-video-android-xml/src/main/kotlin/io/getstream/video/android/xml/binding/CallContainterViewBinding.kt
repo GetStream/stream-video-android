@@ -33,16 +33,22 @@ public fun CallContainerView.bindView(
         defaultControlList(mediaState, isScreenSharingActive)
     },
     onCallAction: (CallAction) -> Unit = { viewModel.onCallAction(it) },
+    onParticipantsPressed: () -> Unit = { },
     onBackPressed: () -> Unit = { },
     onIdle: () -> Unit = { },
 ) {
-    this.onBackPressed = { onBackPressed() }
+
+    binding.callToolbar.bindView(
+        viewModel = viewModel,
+        lifecycleOwner = lifecycleOwner,
+        onBackPressed = onBackPressed,
+        onParticipantsPressed = onParticipantsPressed
+    )
 
     lifecycleOwner.lifecycleScope.launchWhenCreated {
         viewModel.streamCallState.combine(viewModel.isInPictureInPicture) { state, isPictureInPicture ->
             state to isPictureInPicture
         }.collect { (state, isPictureInPicture) ->
-            updateToolbar(state, isPictureInPicture)
             when {
                 state is StreamCallState.Incoming && !state.acceptedByMe ->
                     showIncomingScreen { it.bindView(viewModel, lifecycleOwner) }

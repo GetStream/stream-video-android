@@ -10,6 +10,7 @@
         <item name="streamOutgoingViewStyle">@style/Stream.OutgoingCall</item>
         <item name="streamPictureInPictureViewStyle">@style/Stream.PictureInPicture</item>
         <item name="streamScreenShareStyle">@style/Stream.ScreenShare</item>
+        <item name="streamCallAppBarStyle">@style/Stream.CallAppBar</item>
     </style>
 
     <style name="Stream">
@@ -108,6 +109,9 @@
     </style>
 
     <style name="Stream.ScreenShare" parent="Stream">
+    </style>
+
+    <style name="Stream.CallAppBar" parent="Stream">
     </style>
 
 

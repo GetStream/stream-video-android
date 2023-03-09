@@ -1,0 +1,154 @@
+/*
+ * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package io.getstream.video.android.xml.widget.appbar
+
+import android.content.Context
+import android.graphics.Typeface
+import android.graphics.drawable.Drawable
+import android.util.AttributeSet
+import androidx.annotation.ColorInt
+import androidx.annotation.Px
+import io.getstream.video.android.xml.R
+import io.getstream.video.android.xml.font.TextStyle
+import io.getstream.video.android.xml.utils.extensions.getColorCompat
+import io.getstream.video.android.xml.utils.extensions.getDimension
+import io.getstream.video.android.xml.utils.extensions.getDrawableCompat
+import io.getstream.video.android.xml.utils.extensions.use
+import io.getstream.video.android.xml.widget.transformer.TransformStyle
+import io.getstream.video.android.ui.common.R as RCommon
+
+public data class CallAppBarStyle(
+    @ColorInt public val backgroundColour: Int,
+    @Px public val appBarPadding: Int,
+    public val leadingContentIcon: Drawable,
+    @ColorInt public val leadingContentIconTint: Int,
+    @Px public val leadingContentMarginStart: Int,
+    @Px public val leadingContentMarginEnd: Int,
+    public val centerContentTextStyle: TextStyle,
+    @Px public val centerContentMarginStart: Int,
+    @Px public val centerContentMarginEnd: Int,
+    public val trailingContentIcon: Drawable,
+    @ColorInt public val trailingContentIconTint: Int,
+    @Px public val trailingContentMarginStart: Int,
+    @Px public val trailingContentMarginEnd: Int,
+) {
+
+    internal companion object {
+        operator fun invoke(context: Context, attrs: AttributeSet?): CallAppBarStyle {
+            context.obtainStyledAttributes(
+                attrs,
+                R.styleable.CallAppBar,
+                R.attr.streamCallAppBarStyle,
+                R.style.Stream_CallAppBar
+            ).use {
+
+                val backgroundColour = it.getColor(
+                    R.styleable.CallAppBar_streamCallAppBarBackgroundColour,
+                    context.getColorCompat(RCommon.color.stream_bars_background)
+                )
+
+                val appBarPadding = it.getDimension(
+                    R.styleable.CallAppBar_streamCallAppBarPadding,
+                    context.getDimension(RCommon.dimen.callAppBarPadding).toFloat()
+                ).toInt()
+
+                val leadingContentIcon = it.getDrawable(
+                    R.styleable.CallAppBar_streamCallAppBarLeadingContentIcon
+                ) ?: context.getDrawableCompat(RCommon.drawable.ic_arrow_back)!!
+
+                val leadingContentIconTint = it.getColor(
+                    R.styleable.CallAppBar_streamCallAppBarLeadingContentIconTint,
+                    context.getColorCompat(RCommon.color.stream_text_high_emphasis)
+                )
+
+                val leadingContentMarginStart = it.getDimension(
+                    R.styleable.CallAppBar_streamCallAppBarLeadingContentMarginStart,
+                    context.getDimension(RCommon.dimen.callAppBarLeadingContentSpacingStart).toFloat()
+                ).toInt()
+
+                val leadingContentMarginEnd = it.getDimension(
+                    R.styleable.CallAppBar_streamCallAppBarLeadingContentMarginEnd,
+                    context.getDimension(RCommon.dimen.callAppBarLeadingContentSpacingEnd).toFloat()
+                ).toInt()
+
+                val centerContentTextStyle = TextStyle.Builder(it)
+                    .size(
+                        R.styleable.CallAppBar_streamCallAppBarCenterContentTextSize,
+                        context.getDimension(RCommon.dimen.topAppbarTextSize)
+                    )
+                    .color(
+                        R.styleable.CallAppBar_streamCallAppBarCenterContentTextColor,
+                        context.getColorCompat(RCommon.color.stream_text_high_emphasis)
+                    )
+                    .font(
+                        R.styleable.CallAppBar_streamCallAppBarCenterContentFontAsset,
+                        R.styleable.CallAppBar_streamCallAppBarCenterContentFont
+                    )
+                    .style(
+                        R.styleable.CallAppBar_streamCallAppBarCenterContentTextStyle,
+                        Typeface.NORMAL
+                    )
+                    .build()
+
+                val centerContentMarginStart = it.getDimension(
+                    R.styleable.CallAppBar_streamCallAppBarCenterContentMarginStart,
+                    context.getDimension(RCommon.dimen.callAppBarCenterContentSpacingStart).toFloat()
+                ).toInt()
+
+                val centerContentMarginEnd = it.getDimension(
+                    R.styleable.CallAppBar_streamCallAppBarCenterContentMarginEnd,
+                    context.getDimension(RCommon.dimen.callAppBarCenterContentSpacingEnd).toFloat()
+                ).toInt()
+
+                val trailingContentIcon = it.getDrawable(
+                    R.styleable.CallAppBar_streamCallAppBarTrailingContentIcon
+                ) ?: context.getDrawableCompat(RCommon.drawable.ic_participants)!!
+
+                val trailingContentIconTint = it.getColor(
+                    R.styleable.CallAppBar_streamCallAppBarTrailingContentIconTint,
+                    context.getColorCompat(RCommon.color.stream_text_high_emphasis)
+                )
+
+                val trailingContentMarginStart = it.getDimension(
+                    R.styleable.CallAppBar_streamCallAppBarTrailingContentMarginStart,
+                    context.getDimension(RCommon.dimen.callAppBarTrailingContentSpacingStart).toFloat()
+                ).toInt()
+
+                val trailingContentMarginEnd = it.getDimension(
+                    R.styleable.CallAppBar_streamCallAppBarTrailingContentMarginEnd,
+                    context.getDimension(RCommon.dimen.callAppBarTrailingContentSpacingEnd).toFloat()
+                ).toInt()
+
+                return CallAppBarStyle(
+                    backgroundColour = backgroundColour,
+                    appBarPadding = appBarPadding,
+                    leadingContentIcon = leadingContentIcon,
+                    leadingContentIconTint = leadingContentIconTint,
+                    leadingContentMarginStart = leadingContentMarginStart,
+                    leadingContentMarginEnd = leadingContentMarginEnd,
+                    centerContentTextStyle = centerContentTextStyle,
+                    centerContentMarginStart = centerContentMarginStart,
+                    centerContentMarginEnd = centerContentMarginEnd,
+                    trailingContentIcon = trailingContentIcon,
+                    trailingContentIconTint = trailingContentIconTint,
+                    trailingContentMarginStart = trailingContentMarginStart,
+                    trailingContentMarginEnd = trailingContentMarginEnd
+                ).let(TransformStyle.callAppBarStyleTransformer::transform)
+            }
+        }
+    }
+}
