@@ -20,7 +20,8 @@ public final class io/getstream/video/android/xml/VideoUI {
 }
 
 public final class io/getstream/video/android/xml/binding/CallAppBarBindingKt {
-	public static final fun bindView (Lio/getstream/video/android/xml/widget/appbar/CallAppBar;Lio/getstream/video/android/core/viewmodel/CallViewModel;Landroidx/lifecycle/LifecycleOwner;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;)V
+	public static final fun bindView (Lio/getstream/video/android/xml/widget/appbar/CallAppBarView;Lio/getstream/video/android/core/viewmodel/CallViewModel;Landroidx/lifecycle/LifecycleOwner;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;)V
+	public static synthetic fun bindView$default (Lio/getstream/video/android/xml/widget/appbar/CallAppBarView;Lio/getstream/video/android/core/viewmodel/CallViewModel;Landroidx/lifecycle/LifecycleOwner;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)V
 }
 
 public final class io/getstream/video/android/xml/binding/CallContainterViewBindingKt {
@@ -74,7 +75,7 @@ public final class io/getstream/video/android/xml/databinding/ViewCallAppBarBind
 }
 
 public final class io/getstream/video/android/xml/databinding/ViewCallContainerBinding : androidx/viewbinding/ViewBinding {
-	public final field callToolbar Lio/getstream/video/android/xml/widget/appbar/CallAppBar;
+	public final field callToolbar Lio/getstream/video/android/xml/widget/appbar/CallAppBarView;
 	public final field contentHolder Landroid/widget/FrameLayout;
 	public static fun bind (Landroid/view/View;)Lio/getstream/video/android/xml/databinding/ViewCallContainerBinding;
 	public fun getRoot ()Landroid/view/View;
@@ -252,23 +253,6 @@ public abstract interface class io/getstream/video/android/xml/utils/Disposable 
 	public abstract fun isDisposed ()Z
 }
 
-public final class io/getstream/video/android/xml/widget/appbar/CallAppBar : androidx/constraintlayout/widget/ConstraintLayout {
-	public fun <init> (Landroid/content/Context;)V
-	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
-	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;I)V
-	public final fun getOnBackPressed ()Lkotlin/jvm/functions/Function0;
-	public final fun getOnParticipantsPressed ()Lkotlin/jvm/functions/Function0;
-	public final fun renderState (Lio/getstream/video/android/core/model/state/StreamCallState;)V
-	public final fun setCenterContent (Landroid/view/View;Landroid/widget/FrameLayout$LayoutParams;)V
-	public static synthetic fun setCenterContent$default (Lio/getstream/video/android/xml/widget/appbar/CallAppBar;Landroid/view/View;Landroid/widget/FrameLayout$LayoutParams;ILjava/lang/Object;)V
-	public final fun setLeadingContent (Landroid/view/View;Landroid/widget/FrameLayout$LayoutParams;)V
-	public static synthetic fun setLeadingContent$default (Lio/getstream/video/android/xml/widget/appbar/CallAppBar;Landroid/view/View;Landroid/widget/FrameLayout$LayoutParams;ILjava/lang/Object;)V
-	public final fun setOnBackPressed (Lkotlin/jvm/functions/Function0;)V
-	public final fun setOnParticipantsPressed (Lkotlin/jvm/functions/Function0;)V
-	public final fun setTrailingContent (Landroid/view/View;Landroid/widget/FrameLayout$LayoutParams;)V
-	public static synthetic fun setTrailingContent$default (Lio/getstream/video/android/xml/widget/appbar/CallAppBar;Landroid/view/View;Landroid/widget/FrameLayout$LayoutParams;ILjava/lang/Object;)V
-}
-
 public abstract interface class io/getstream/video/android/xml/widget/appbar/CallAppBarContent {
 	public abstract fun renderState (Lio/getstream/video/android/core/model/state/StreamCallState;)V
 }
@@ -306,6 +290,23 @@ public final class io/getstream/video/android/xml/widget/appbar/CallAppBarStyle 
 	public final fun getTrailingContentMarginStart ()I
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/xml/widget/appbar/CallAppBarView : androidx/constraintlayout/widget/ConstraintLayout {
+	public fun <init> (Landroid/content/Context;)V
+	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
+	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;I)V
+	public final fun getOnBackPressed ()Lkotlin/jvm/functions/Function0;
+	public final fun getOnParticipantsPressed ()Lkotlin/jvm/functions/Function0;
+	public final fun renderState (Lio/getstream/video/android/core/model/state/StreamCallState;)V
+	public final fun setCenterContent (Landroid/view/View;Landroid/widget/FrameLayout$LayoutParams;)V
+	public static synthetic fun setCenterContent$default (Lio/getstream/video/android/xml/widget/appbar/CallAppBarView;Landroid/view/View;Landroid/widget/FrameLayout$LayoutParams;ILjava/lang/Object;)V
+	public final fun setLeadingContent (Landroid/view/View;Landroid/widget/FrameLayout$LayoutParams;)V
+	public static synthetic fun setLeadingContent$default (Lio/getstream/video/android/xml/widget/appbar/CallAppBarView;Landroid/view/View;Landroid/widget/FrameLayout$LayoutParams;ILjava/lang/Object;)V
+	public final fun setOnBackPressed (Lkotlin/jvm/functions/Function0;)V
+	public final fun setOnParticipantsPressed (Lkotlin/jvm/functions/Function0;)V
+	public final fun setTrailingContent (Landroid/view/View;Landroid/widget/FrameLayout$LayoutParams;)V
+	public static synthetic fun setTrailingContent$default (Lio/getstream/video/android/xml/widget/appbar/CallAppBarView;Landroid/view/View;Landroid/widget/FrameLayout$LayoutParams;ILjava/lang/Object;)V
 }
 
 public final class io/getstream/video/android/xml/widget/avatar/AvatarShape : java/lang/Enum {

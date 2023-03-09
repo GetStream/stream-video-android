@@ -25,8 +25,8 @@ import kotlinx.coroutines.flow.collectLatest
 public fun CallAppBarView.bindView(
     viewModel: CallViewModel,
     lifecycleOwner: LifecycleOwner,
-    onBackPressed: () -> Unit,
-    onParticipantsPressed: () -> Unit
+    onBackPressed: () -> Unit = { },
+    onParticipantsPressed: () -> Unit = { }
 ) {
     this.onBackPressed = onBackPressed
     this.onParticipantsPressed = onParticipantsPressed
