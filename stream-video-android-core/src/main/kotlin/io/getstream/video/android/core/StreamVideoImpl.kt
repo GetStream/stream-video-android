@@ -32,15 +32,22 @@ import io.getstream.video.android.core.lifecycle.LifecycleHandler
 import io.getstream.video.android.core.lifecycle.internal.StreamLifecycleObserver
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.CallEventType
+import io.getstream.video.android.core.model.CallInfo
 import io.getstream.video.android.core.model.CallMetadata
+import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.core.model.Device
 import io.getstream.video.android.core.model.IceServer
 import io.getstream.video.android.core.model.JoinedCall
+import io.getstream.video.android.core.model.MuteUsersData
+import io.getstream.video.android.core.model.QueriedCalls
+import io.getstream.video.android.core.model.QueryCallsData
+import io.getstream.video.android.core.model.QueryMembersData
 import io.getstream.video.android.core.model.SfuToken
 import io.getstream.video.android.core.model.StartedCall
 import io.getstream.video.android.core.model.StreamCallCid
 import io.getstream.video.android.core.model.StreamCallGuid
 import io.getstream.video.android.core.model.StreamCallKind
+import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.mapper.toMetadata
 import io.getstream.video.android.core.model.mapper.toTypeAndId
@@ -48,6 +55,7 @@ import io.getstream.video.android.core.model.state.DropReason
 import io.getstream.video.android.core.model.state.StreamCallState
 import io.getstream.video.android.core.model.toIceServer
 import io.getstream.video.android.core.model.toInfo
+import io.getstream.video.android.core.model.toRequest
 import io.getstream.video.android.core.socket.SocketListener
 import io.getstream.video.android.core.socket.SocketStateService
 import io.getstream.video.android.core.socket.VideoSocket
@@ -73,12 +81,15 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.openapitools.client.models.BlockUserRequest
 import org.openapitools.client.models.CallRequest
 import org.openapitools.client.models.GetCallEdgeServerRequest
 import org.openapitools.client.models.GetCallEdgeServerResponse
 import org.openapitools.client.models.GetOrCreateCallRequest
 import org.openapitools.client.models.MemberRequest
+import org.openapitools.client.models.RequestPermissionRequest
 import org.openapitools.client.models.SendEventRequest
+import org.openapitools.client.models.UnblockUserRequest
 import stream.video.coordinator.client_v1_rpc.CreateDeviceRequest
 import stream.video.coordinator.client_v1_rpc.DeleteDeviceRequest
 import stream.video.coordinator.push_v1.DeviceInput
@@ -439,6 +450,201 @@ internal class StreamVideoImpl(
             type = type,
             sendEventRequest = SendEventRequest(custom = dataJson, type = eventType)
         ).also { logger.v { "[sendCustomEvent] result: $it" } }
+    }
+
+    override suspend fun queryMembers(
+        callCid: StreamCallCid,
+        queryMembersData: QueryMembersData
+    ): Result<List<CallUser>> {
+        logger.d { "[queryMembers] callCid: $callCid, queryMembersData: $queryMembersData" }
+
+        val (type, id) = callCid.toTypeAndId()
+
+        return callCoordinatorClient.queryMembers(
+            queryMembersData.toRequest(id, type)
+        ).also {
+            logger.v { "[queryMembers] result: $it" }
+        }
+    }
+
+    override suspend fun blockUser(callCid: StreamCallCid, userId: String): Result<Unit> {
+        logger.d { "[blockUser] callCid: $callCid, userId: $userId" }
+
+        val (type, id) = callCid.toTypeAndId()
+
+        return callCoordinatorClient.blockUser(
+            id = id,
+            type = type,
+            blockUserRequest = BlockUserRequest(userId)
+        ).also {
+            logger.v { "[blockUser] result: $it" }
+        }
+    }
+
+    override suspend fun unblockUser(callCid: StreamCallCid, userId: String): Result<Unit> {
+        logger.d { "[unblockUser] callCid: $callCid, userId: $userId" }
+
+        val (type, id) = callCid.toTypeAndId()
+
+        return callCoordinatorClient.unblockUser(
+            id = id,
+            type = type,
+            unblockUserRequest = UnblockUserRequest(userId)
+        ).also {
+            logger.v { "[unblockUser] result: $it" }
+        }
+    }
+
+    override suspend fun endCall(callCid: StreamCallCid): Result<Unit> {
+        logger.d { "[endCall] callCid: $callCid" }
+
+        val (type, id) = callCid.toTypeAndId()
+
+        return callCoordinatorClient.endCall(
+            id = id,
+            type = type
+        ).also {
+            logger.v { "[endCall] result: $it" }
+        }
+    }
+
+    override suspend fun goLive(callCid: StreamCallCid): Result<CallInfo> {
+        logger.d { "[goLive] callCid: $callCid" }
+
+        val (type, id) = callCid.toTypeAndId()
+
+        return callCoordinatorClient.goLive(
+            id = id,
+            type = type
+        ).also {
+            logger.v { "[goLive] result: $it" }
+        }
+    }
+
+    override suspend fun stopLive(callCid: StreamCallCid): Result<CallInfo> {
+        logger.d { "[stopLive] callCid: $callCid" }
+
+        val (type, id) = callCid.toTypeAndId()
+
+        return callCoordinatorClient.stopLive(
+            id = id,
+            type = type
+        ).also {
+            logger.v { "[stopLive] result: $it" }
+        }
+    }
+
+    override suspend fun muteUsers(
+        callCid: StreamCallCid,
+        muteUsersData: MuteUsersData
+    ): Result<Unit> {
+        logger.d { "[muteUsers] callCid: $callCid" }
+
+        val (type, id) = callCid.toTypeAndId()
+
+        return callCoordinatorClient.muteUsers(
+            id = id,
+            type = type,
+            muteUsersRequest = muteUsersData.toRequest()
+        ).also {
+            logger.v { "[muteUsers] result: $it" }
+        }
+    }
+
+    override suspend fun queryCalls(queryCallsData: QueryCallsData): Result<QueriedCalls> {
+        logger.d { "[queryCalls] queryCallsData: $queryCallsData" }
+
+        return callCoordinatorClient.queryCalls(
+            queryCallsRequest = queryCallsData.toRequest()
+        ).also {
+            logger.v { "[queryCalls] result: $it" }
+        }
+    }
+
+    override suspend fun requestPermissions(
+        callCid: StreamCallCid,
+        permissions: List<String>
+    ): Result<Unit> {
+        logger.d { "[requestPermissions] callCid: $callCid, permissions: $permissions" }
+
+        val (type, id) = callCid.toTypeAndId()
+
+        return callCoordinatorClient.requestPermission(
+            id = id,
+            type = type,
+            requestPermissionRequest = RequestPermissionRequest(permissions)
+        ).also {
+            logger.v { "[requestPermissions] result: $it" }
+        }
+    }
+
+    override suspend fun startBroadcasting(callCid: StreamCallCid): Result<Unit> {
+        logger.d { "[startBroadcasting] callCid: $callCid" }
+
+        val (type, id) = callCid.toTypeAndId()
+
+        return callCoordinatorClient.startBroadcasting(
+            id = id,
+            type = type
+        ).also {
+            logger.v { "[startBroadcasting] result: $it" }
+        }
+    }
+
+    override suspend fun stopBroadcasting(callCid: StreamCallCid): Result<Unit> {
+        logger.d { "[stopBroadcasting] callCid: $callCid" }
+
+        val (type, id) = callCid.toTypeAndId()
+
+        return callCoordinatorClient.stopBroadcasting(
+            id = id,
+            type = type
+        ).also {
+            logger.v { "[stopBroadcasting] result: $it" }
+        }
+    }
+
+    override suspend fun startRecording(callCid: StreamCallCid): Result<Unit> {
+        logger.d { "[startRecording] callCid: $callCid" }
+
+        val (type, id) = callCid.toTypeAndId()
+
+        return callCoordinatorClient.startRecording(
+            id = id,
+            type = type
+        ).also {
+            logger.v { "[startRecording] result: $it" }
+        }
+    }
+
+    override suspend fun stopRecording(callCid: StreamCallCid): Result<Unit> {
+        logger.d { "[stopRecording] callCid: $callCid" }
+
+        val (type, id) = callCid.toTypeAndId()
+
+        return callCoordinatorClient.stopRecording(
+            id = id,
+            type = type
+        ).also {
+            logger.v { "[stopRecording] result: $it" }
+        }
+    }
+
+    override suspend fun updateUserPermissions(
+        callCid: StreamCallCid,
+        updateUserPermissionsData: UpdateUserPermissionsData
+    ): Result<Unit> {
+        logger.d { "[updateUserPermissions] callCid: $callCid" }
+
+        val (type, id) = callCid.toTypeAndId()
+
+        return callCoordinatorClient.updateUserPermissions(
+            id = id,
+            type = type,
+            updateUserPermissionsRequest = updateUserPermissionsData.toRequest()
+        ).also {
+            logger.v { "[updateUserPermissions] result: $it" }
+        }
     }
 
     override fun clearCallState() {
