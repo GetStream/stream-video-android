@@ -19,10 +19,10 @@ package io.getstream.video.android.xml.binding
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.core.viewmodel.CallViewModel
-import io.getstream.video.android.xml.widget.appbar.CallAppBar
+import io.getstream.video.android.xml.widget.appbar.CallAppBarView
 import kotlinx.coroutines.flow.collectLatest
 
-public fun CallAppBar.bindView(
+public fun CallAppBarView.bindView(
     viewModel: CallViewModel,
     lifecycleOwner: LifecycleOwner,
     onBackPressed: () -> Unit,

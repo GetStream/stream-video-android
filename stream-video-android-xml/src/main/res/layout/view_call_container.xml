@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     >
 
-    <io.getstream.video.android.xml.widget.appbar.CallAppBar
+    <io.getstream.video.android.xml.widget.appbar.CallAppBarView
         android:id="@+id/callToolbar"
         android:layout_width="match_parent"
         android:layout_height="@dimen/topAppbarHeight"

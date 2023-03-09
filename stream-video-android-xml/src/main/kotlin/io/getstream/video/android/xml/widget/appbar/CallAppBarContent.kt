@@ -19,7 +19,7 @@ package io.getstream.video.android.xml.widget.appbar
 import io.getstream.video.android.core.model.state.StreamCallState
 
 /**
- * An interface that must be implemented by the content views of [CallAppBar].
+ * An interface that must be implemented by the content views of [CallAppBarView].
  */
 interface CallAppBarContent {
 

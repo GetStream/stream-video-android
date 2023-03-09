@@ -28,7 +28,6 @@ import io.getstream.video.android.xml.utils.extensions.getColorCompat
 import io.getstream.video.android.xml.utils.extensions.getDimension
 import io.getstream.video.android.xml.utils.extensions.getDrawableCompat
 import io.getstream.video.android.xml.utils.extensions.use
-import io.getstream.video.android.xml.widget.control.CallControlsStyle
 import io.getstream.video.android.xml.widget.transformer.TransformStyle
 import io.getstream.video.android.xml.widget.appbar.internal.DefaultCallAppBarLeadingContent
 import io.getstream.video.android.xml.widget.appbar.internal.DefaultCallAppBarCenterContent
@@ -36,7 +35,7 @@ import io.getstream.video.android.xml.widget.appbar.internal.DefaultCallAppBarTr
 import io.getstream.video.android.ui.common.R as RCommon
 
 /**
- * Style for [CallControlsStyle].
+ * Style for [CallAppBarView].
  * Use this class together with [TransformStyle.callAppBarStyleTransformer] to change [CallAppBarStyle] styles
  * programmatically.
  *

@@ -38,7 +38,7 @@ import io.getstream.video.android.xml.widget.appbar.internal.DefaultCallAppBarTr
  * UI component designed to show a app bar. By default will contain a back button, title and a participants button
  * to view all participants and invite new ones.
  */
-public class CallAppBar : ConstraintLayout {
+public class CallAppBarView : ConstraintLayout {
 
     private val binding: ViewCallAppBarBinding = ViewCallAppBarBinding.inflate(streamThemeInflater, this)
 
@@ -147,7 +147,7 @@ public class CallAppBar : ConstraintLayout {
 
     /**
      * Sets custom center content view. It must implement [CallAppBarContent] interface.
-     * The current mode is propagated to the [contentView] in the [CallAppBar.renderState] function.
+     * The current mode is propagated to the [contentView] in the [CallAppBarView.renderState] function.
      *
      * @param contentView The [View] showing the leading content.
      * @param layoutParams The layout parameters to set on the content view.
@@ -167,7 +167,7 @@ public class CallAppBar : ConstraintLayout {
 
     /**
      * Sets custom center content view. It must implement [CallAppBarContent] interface.
-     * The current mode is propagated to the [contentView] in the [CallAppBar.renderState] function.
+     * The current mode is propagated to the [contentView] in the [CallAppBarView.renderState] function.
      *
      * @param contentView The [View] showing the center content.
      * @param layoutParams The layout parameters to set on the content view.
@@ -187,7 +187,7 @@ public class CallAppBar : ConstraintLayout {
 
     /**
      * Sets custom center content view. It must implement [CallAppBarContent] interface.
-     * The current mode is propagated to the [contentView] in the [CallAppBar.renderState] function.
+     * The current mode is propagated to the [contentView] in the [CallAppBarView.renderState] function.
      *
      * @param contentView The [View] showing the trailing content.
      * @param layoutParams The layout parameters to set on the content view.
