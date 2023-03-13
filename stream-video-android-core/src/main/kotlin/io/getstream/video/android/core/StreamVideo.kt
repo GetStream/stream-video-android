@@ -315,7 +315,7 @@ public interface StreamVideo {
     public fun clearCallState()
 
     /**
-     * Clears the internal user state.
+     * Clears the internal user state, removes push notification devices and clears the call state.
      */
     public fun logOut()
 
