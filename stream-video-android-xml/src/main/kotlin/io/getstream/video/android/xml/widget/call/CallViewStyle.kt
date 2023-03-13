@@ -28,6 +28,8 @@ import io.getstream.video.android.xml.utils.extensions.getDimension
 import io.getstream.video.android.xml.utils.extensions.getDrawableCompat
 import io.getstream.video.android.xml.utils.extensions.getResourceId
 import io.getstream.video.android.xml.utils.extensions.use
+import io.getstream.video.android.xml.widget.participant.CallParticipantView
+import io.getstream.video.android.xml.widget.participant.FloatingParticipantView
 import io.getstream.video.android.xml.widget.participant.internal.CallParticipantsGridView
 import io.getstream.video.android.xml.widget.participant.internal.CallParticipantsListView
 import io.getstream.video.android.xml.widget.screenshare.ScreenShareView
@@ -74,7 +76,6 @@ public data class CallViewStyle(
     @Px public val presenterTextPadding: Int,
     @Px public val presenterTextMargin: Int,
     public val preConnectionImage: Drawable,
-    @Px public val callControlsHeight: Int,
 ) {
 
     internal companion object {
@@ -174,11 +175,6 @@ public data class CallViewStyle(
                     R.styleable.CallContentView_streamCallContentPreConnectionImage
                 ) ?: context.getDrawableCompat(RCommon.drawable.ic_call)!!
 
-                val callControlsHeight = it.getDimension(
-                    R.styleable.CallContentView_streamCallContentCallControlsHeight,
-                    context.getDimension(RCommon.dimen.callControlsSheetHeight).toFloat()
-                ).toInt()
-
                 return CallViewStyle(
                     gridCallParticipantStyle = gridCallParticipantStyle,
                     listCallParticipantStyle = listCallParticipantStyle,
@@ -195,7 +191,6 @@ public data class CallViewStyle(
                     presenterTextMargin = presenterTextMargin,
                     presenterTextPadding = presenterTextPadding,
                     preConnectionImage = preConnectionImage,
-                    callControlsHeight = callControlsHeight
                 ).let(TransformStyle.callViewStyleTransformer::transform)
             }
         }

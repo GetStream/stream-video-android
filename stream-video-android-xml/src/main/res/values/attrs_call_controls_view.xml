@@ -3,6 +3,8 @@
     <declare-styleable name="CallControlsView">
         <!-- Size of the call control buttons -->
         <attr name="streamCallControlsButtonSize" format="dimension|reference" />
+        <attr name="streamCallControlsBackground" format="reference" />
+        <attr name="streamCallControlsBackgroundLandscape" format="reference" />
         <!-- Background color of the call controls view -->
         <attr name="streamCallControlsBackgroundColor" format="color|reference" />
     </declare-styleable>

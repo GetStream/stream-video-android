@@ -18,7 +18,6 @@ package io.getstream.video.android.xml.widget.participant.internal
 
 import android.content.Context
 import android.util.AttributeSet
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.transition.TransitionManager
 import io.getstream.video.android.core.model.CallParticipantState
@@ -33,14 +32,11 @@ import io.getstream.video.android.xml.utils.extensions.setConstraints
 import io.getstream.video.android.xml.widget.participant.CallParticipantView
 import io.getstream.video.android.xml.widget.participant.RendererInitializer
 import io.getstream.video.android.xml.widget.renderer.VideoRenderer
-import io.getstream.video.android.xml.widget.view.JobHolder
-import kotlinx.coroutines.Job
+import io.getstream.video.android.xml.widget.view.CallConstraintLayout
 
-internal class CallParticipantsGridView : ConstraintLayout, VideoRenderer, JobHolder {
+internal class CallParticipantsGridView : CallConstraintLayout, VideoRenderer {
 
     private val childList: MutableList<CallParticipantView> = mutableListOf()
-
-    override val runningJobs: MutableList<Job> = mutableListOf()
 
     private var rendererInitializer: RendererInitializer? = null
 
@@ -195,10 +191,5 @@ internal class CallParticipantsGridView : ConstraintLayout, VideoRenderer, JobHo
      */
     internal fun updatePrimarySpeaker(participant: CallParticipantState?) {
         childList.forEach { it.setActive(it.tag == participant?.id) }
-    }
-
-    override fun onDetachedFromWindow() {
-        stopAllJobs()
-        super.onDetachedFromWindow()
     }
 }

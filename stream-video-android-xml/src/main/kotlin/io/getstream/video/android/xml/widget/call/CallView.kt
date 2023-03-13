@@ -25,9 +25,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
-import androidx.core.view.children
 import androidx.core.view.setPadding
 import io.getstream.video.android.core.model.CallParticipantState
 import io.getstream.video.android.xml.R
@@ -45,18 +43,15 @@ import io.getstream.video.android.xml.widget.participant.FloatingParticipantView
 import io.getstream.video.android.xml.widget.participant.internal.CallParticipantsGridView
 import io.getstream.video.android.xml.widget.participant.internal.CallParticipantsListView
 import io.getstream.video.android.xml.widget.screenshare.ScreenShareView
-import io.getstream.video.android.xml.widget.view.JobHolder
-import kotlinx.coroutines.Job
+import io.getstream.video.android.xml.widget.view.CallConstraintLayout
 import java.util.UUID
 
 /**
  * Renders the call participants depending on the number of the participants and the call state.
  */
-public class CallView : ConstraintLayout, JobHolder {
+public class CallView : CallConstraintLayout {
 
     private lateinit var style: CallViewStyle
-
-    override val runningJobs: MutableList<Job> = mutableListOf()
 
     public constructor(context: Context) : this(context, null)
     public constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
@@ -70,7 +65,6 @@ public class CallView : ConstraintLayout, JobHolder {
         style = CallViewStyle(context, attrs)
 
         showPreConnectedHolder()
-        addCallControlsView()
     }
 
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
@@ -100,23 +94,6 @@ public class CallView : ConstraintLayout, JobHolder {
     }
 
     /**
-     * Adds a [CallControlsView] view to the view hierarchy.
-     */
-    private fun addCallControlsView() {
-        if (getFirstViewInstance<CallControlsView>() != null) return
-
-        val callControlsView = CallControlsView(context).apply {
-            id = ViewGroup.generateViewId()
-            this@CallView.addView(this)
-            layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, style.callControlsHeight)
-        }
-
-        updateConstraints {
-            constrainViewToParentBySide(callControlsView, ConstraintSet.BOTTOM)
-        }
-    }
-
-    /**
      * Populates the view with the screen share content. Will remove all views that are used when there is no screen
      * share content and add [ScreenShareView] and [CallParticipantsListView].
      *
@@ -126,11 +103,7 @@ public class CallView : ConstraintLayout, JobHolder {
     public fun setScreenSharingContent(onViewInitialized: (View) -> Unit) {
         if (getFirstViewInstance<ScreenShareView>() != null) return
 
-        children.forEach {
-            if (it !is CallControlsView) {
-                removeView(it)
-            }
-        }
+        removeAllViews()
 
         val presenterText = TextView(context).apply {
             id = ViewGroup.generateViewId()
@@ -191,11 +164,7 @@ public class CallView : ConstraintLayout, JobHolder {
     internal fun setNormalContent(onViewInitialized: (CallParticipantsGridView) -> Unit) {
         if (getFirstViewInstance<CallParticipantsGridView>() != null) return
 
-        children.forEach {
-            if (it !is CallControlsView) {
-                removeView(it)
-            }
-        }
+        removeAllViews()
 
         CallParticipantsGridView(context).apply {
             id = ViewGroup.generateViewId()
@@ -302,8 +271,13 @@ public class CallView : ConstraintLayout, JobHolder {
         return height - style.localParticipantHeight - style.localParticipantPadding - getCallControlsHeight()
     }
 
+    /**
+     * Returns the [CallControlsView] height.
+     *
+     * @return The height of the [CallControlsView].
+     */
     private fun getCallControlsHeight(): Int {
-        return style.callControlsHeight
+        return (parent as ViewGroup).getFirstViewInstance<CallControlsView>()?.height ?: 0
     }
 
     /**
@@ -342,12 +316,6 @@ public class CallView : ConstraintLayout, JobHolder {
     override fun onViewAdded(view: View?) {
         super.onViewAdded(view)
         getFirstViewInstance<FloatingParticipantView>()?.bringToFront()
-        getFirstViewInstance<CallControlsView>()?.bringToFront()
-    }
-
-    override fun onDetachedFromWindow() {
-        super.onDetachedFromWindow()
-        stopAllJobs()
     }
 
     companion object {

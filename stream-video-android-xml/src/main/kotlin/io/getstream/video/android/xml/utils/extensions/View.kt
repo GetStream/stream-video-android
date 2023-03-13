@@ -18,6 +18,10 @@ package io.getstream.video.android.xml.utils.extensions
 
 import android.util.TypedValue
 import android.view.View
+import android.view.ViewGroup
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.children
+import io.getstream.log.StreamLog
 
 /**
  * Sets the ripple effect to background for clickable views.
@@ -26,4 +30,28 @@ internal fun View.setBackgroundRipple() {
     val outValue = TypedValue()
     context.theme.resolveAttribute(android.R.attr.selectableItemBackgroundBorderless, outValue, true)
     setBackgroundResource(outValue.resourceId)
+}
+
+internal val View.isLandscape: Boolean
+    get() = context.isLandscape
+
+fun ViewGroup.orientationChanged(isLandscape: Boolean) {
+    if (this is OrientationChangeListener) this.onOrientationChanged(isLandscape)
+    children.forEach {
+        if (it is ViewGroup) it.orientationChanged(isLandscape)
+        if (it !is ViewGroup && it is OrientationChangeListener) it.onOrientationChanged(isLandscape)
+    }
+}
+
+interface OrientationChangeListener {
+    fun onOrientationChanged(isLandscape: Boolean) {}
+}
+
+internal fun View.updateLayoutParams(updateParams: ConstraintLayout.LayoutParams.() -> Unit) {
+    if (layoutParams !is ConstraintLayout.LayoutParams) {
+        StreamLog.w("View::updateLayoutParams") {
+            "Layout params are ${layoutParams::class.java.simpleName}. ConstraintLayout.LayoutParams required."
+        }
+    }
+    layoutParams = (layoutParams as ConstraintLayout.LayoutParams).apply { updateParams() }
 }

@@ -24,6 +24,5 @@
             <flag name="italic" value="2" />
         </attr>
         <attr name="streamCallContentPreConnectionImage" format="reference" />
-        <attr name="streamCallContentCallControlsHeight" format="dimension|reference" />
     </declare-styleable>
 </resources>

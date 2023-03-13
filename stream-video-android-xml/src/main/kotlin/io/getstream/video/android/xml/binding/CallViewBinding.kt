@@ -17,33 +17,16 @@
 package io.getstream.video.android.xml.binding
 
 import androidx.lifecycle.LifecycleOwner
-import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.call.state.CallMediaState
 import io.getstream.video.android.core.viewmodel.CallViewModel
-import io.getstream.video.android.xml.utils.extensions.getFirstViewInstance
 import io.getstream.video.android.xml.widget.call.CallView
-import io.getstream.video.android.xml.widget.control.CallControlItem
-import io.getstream.video.android.xml.widget.control.CallControlsView
 import io.getstream.video.android.xml.widget.participant.internal.CallParticipantsListView
 import io.getstream.video.android.xml.widget.screenshare.ScreenShareView
 import kotlinx.coroutines.flow.combine
 
 public fun CallView.bindView(
     viewModel: CallViewModel,
-    lifecycleOwner: LifecycleOwner,
-    updateCallMediaState: (CallMediaState, Boolean) -> List<CallControlItem> = { mediaState, isScreenSharingActive ->
-        defaultControlList(mediaState, isScreenSharingActive)
-    },
-    onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
+    lifecycleOwner: LifecycleOwner
 ) {
-
-    getFirstViewInstance<CallControlsView>()?.bindView(
-        viewModel = viewModel,
-        lifecycleOwner = lifecycleOwner,
-        updateCallMediaState = updateCallMediaState,
-        onCallAction = onCallAction
-    )
-
     startJob(lifecycleOwner) {
         viewModel.participantList.combine(viewModel.screenSharingSessions) { participants, screenSharingSessions ->
             participants to screenSharingSessions.firstOrNull()

@@ -16,19 +16,30 @@
 
 package io.getstream.video.android.xml
 
+import android.content.res.Configuration
 import android.view.Menu
+import android.view.View
+import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
 import io.getstream.video.android.common.AbstractCallActivity
 import io.getstream.video.android.xml.binding.bindView
+import io.getstream.video.android.xml.utils.extensions.orientationChanged
 import io.getstream.video.android.xml.widget.callcontainer.CallContainerView
 import io.getstream.video.android.ui.common.R as RCommon
 
 public abstract class AbstractXmlCallActivity : AbstractCallActivity() {
 
+    private var isLandscape: Boolean = false
+
     override fun setupUi() {
         setupBackHandler()
-        val callContent = CallContainerView(this)
+        val callContent = CallContainerView(this).apply {
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+        }
         callContent.bindView(
             viewModel = callViewModel,
             lifecycleOwner = this,
@@ -59,5 +70,15 @@ public abstract class AbstractXmlCallActivity : AbstractCallActivity() {
             it.icon?.setTint(ContextCompat.getColor(this, RCommon.color.stream_text_high_emphasis))
         }
         return true
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        val root = this.findViewById<View>(android.R.id.content)
+        val newIsLandscape = newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE
+        if (root is ViewGroup && isLandscape != newIsLandscape) {
+            isLandscape = newIsLandscape
+            root.orientationChanged(isLandscape)
+        }
     }
 }

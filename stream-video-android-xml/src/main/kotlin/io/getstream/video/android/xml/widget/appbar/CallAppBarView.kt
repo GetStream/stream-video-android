@@ -22,7 +22,6 @@ import android.util.AttributeSet
 import android.view.Gravity
 import android.view.View
 import android.widget.FrameLayout
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.children
 import androidx.core.view.setPadding
 import io.getstream.video.android.core.model.state.StreamCallState
@@ -33,12 +32,13 @@ import io.getstream.video.android.xml.utils.extensions.streamThemeInflater
 import io.getstream.video.android.xml.widget.appbar.internal.DefaultCallAppBarCenterContent
 import io.getstream.video.android.xml.widget.appbar.internal.DefaultCallAppBarLeadingContent
 import io.getstream.video.android.xml.widget.appbar.internal.DefaultCallAppBarTrailingContent
+import io.getstream.video.android.xml.widget.view.CallConstraintLayout
 
 /**
  * UI component designed to show a app bar. By default will contain a back button, title and a participants button
  * to view all participants and invite new ones.
  */
-public class CallAppBarView : ConstraintLayout {
+public class CallAppBarView : CallConstraintLayout {
 
     private val binding: ViewCallAppBarBinding = ViewCallAppBarBinding.inflate(streamThemeInflater, this)
 

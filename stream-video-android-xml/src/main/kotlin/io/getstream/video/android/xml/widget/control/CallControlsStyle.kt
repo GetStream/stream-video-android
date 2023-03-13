@@ -17,12 +17,14 @@
 package io.getstream.video.android.xml.widget.control
 
 import android.content.Context
+import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import androidx.annotation.ColorInt
 import androidx.annotation.Px
 import io.getstream.video.android.xml.R
 import io.getstream.video.android.xml.utils.extensions.getColorCompat
 import io.getstream.video.android.xml.utils.extensions.getDimension
+import io.getstream.video.android.xml.utils.extensions.getDrawableCompat
 import io.getstream.video.android.xml.utils.extensions.use
 import io.getstream.video.android.xml.widget.transformer.TransformStyle
 import io.getstream.video.android.ui.common.R as RCommon
@@ -37,7 +39,9 @@ import io.getstream.video.android.ui.common.R as RCommon
  */
 public data class CallControlsStyle(
     @Px public val callControlButtonSize: Int,
-    @ColorInt public val callControlsBackgroundColor: Int
+    public val callControlsBackground: Drawable,
+    public val callControlsBackgroundLandscape: Drawable,
+    @ColorInt public val callControlsBackgroundColor: Int,
 ) {
 
     internal companion object {
@@ -54,6 +58,14 @@ public data class CallControlsStyle(
                     context.getDimension(RCommon.dimen.callControlButtonSize)
                 )
 
+                val callControlsBackground = it.getDrawable(
+                    R.styleable.CallControlsView_streamCallControlsBackground
+                ) ?: context.getDrawableCompat(R.drawable.rect_controls)!!
+
+                val callControlsBackgroundLandscape = it.getDrawable(
+                    R.styleable.CallControlsView_streamCallControlsBackgroundLandscape
+                ) ?: context.getDrawableCompat(R.drawable.rect_controls_landscape)!!
+
                 val callControlsBackgroundColor = it.getColor(
                     R.styleable.CallControlsView_streamCallControlsBackgroundColor,
                     context.getColorCompat(R.color.stream_white)
@@ -61,6 +73,8 @@ public data class CallControlsStyle(
 
                 return CallControlsStyle(
                     callControlButtonSize = callControlButtonSize,
+                    callControlsBackground = callControlsBackground,
+                    callControlsBackgroundLandscape = callControlsBackgroundLandscape,
                     callControlsBackgroundColor = callControlsBackgroundColor
                 ).let(TransformStyle.callControlsStyleTransformer::transform)
             }

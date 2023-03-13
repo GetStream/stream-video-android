@@ -31,6 +31,7 @@ import io.getstream.video.android.core.model.toUser
 import io.getstream.video.android.xml.databinding.ViewCallParticipantBinding
 import io.getstream.video.android.xml.font.setTextStyle
 import io.getstream.video.android.xml.utils.extensions.clearConstraints
+import io.getstream.video.android.xml.utils.extensions.constrainViewToParentBySide
 import io.getstream.video.android.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.xml.utils.extensions.getDrawableCompat
 import io.getstream.video.android.xml.utils.extensions.streamThemeInflater
@@ -234,27 +235,26 @@ public class CallParticipantView : CallCardView, VideoRenderer {
      * @param labelAlignment [CallParticipantLabelAlignment] to be applied to the name label.
      */
     private fun setLabelAlignment(labelAlignment: CallParticipantLabelAlignment) {
-        val holderId = binding.labelHolder.id
-        val parentId = ConstraintLayout.LayoutParams.PARENT_ID
+        val holder = binding.labelHolder
 
         binding.contentHolder.updateConstraints {
-            clearConstraints(holderId)
+            clearConstraints(holder)
             when (labelAlignment) {
                 CallParticipantLabelAlignment.TOP_LEFT -> {
-                    connect(holderId, ConstraintSet.TOP, parentId, ConstraintSet.TOP, style.labelMargin)
-                    connect(holderId, ConstraintSet.LEFT, parentId, ConstraintSet.LEFT, style.labelMargin)
+                    constrainViewToParentBySide(holder, ConstraintSet.TOP)
+                    constrainViewToParentBySide(holder, ConstraintSet.START)
                 }
                 CallParticipantLabelAlignment.TOP_RIGHT -> {
-                    connect(holderId, ConstraintSet.TOP, parentId, ConstraintSet.TOP, style.labelMargin)
-                    connect(holderId, ConstraintSet.RIGHT, parentId, ConstraintSet.RIGHT, style.labelMargin)
+                    constrainViewToParentBySide(holder, ConstraintSet.TOP)
+                    constrainViewToParentBySide(holder, ConstraintSet.END)
                 }
                 CallParticipantLabelAlignment.BOTTOM_LEFT -> {
-                    connect(holderId, ConstraintSet.BOTTOM, parentId, ConstraintSet.BOTTOM, style.labelMargin)
-                    connect(holderId, ConstraintSet.LEFT, parentId, ConstraintSet.LEFT, style.labelMargin)
+                    constrainViewToParentBySide(holder, ConstraintSet.BOTTOM)
+                    constrainViewToParentBySide(holder, ConstraintSet.START)
                 }
                 CallParticipantLabelAlignment.BOTTOM_RIGHT -> {
-                    connect(holderId, ConstraintSet.BOTTOM, parentId, ConstraintSet.BOTTOM, style.labelMargin)
-                    connect(holderId, ConstraintSet.RIGHT, parentId, ConstraintSet.RIGHT, style.labelMargin)
+                    constrainViewToParentBySide(holder, ConstraintSet.BOTTOM)
+                    constrainViewToParentBySide(holder, ConstraintSet.END)
                 }
             }
         }

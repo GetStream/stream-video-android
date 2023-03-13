@@ -11,6 +11,7 @@
         <item name="streamPictureInPictureViewStyle">@style/Stream.PictureInPicture</item>
         <item name="streamScreenShareStyle">@style/Stream.ScreenShare</item>
         <item name="streamCallAppBarStyle">@style/Stream.CallAppBar</item>
+        <item name="streamCallContainerStyle">@style/Stream.CallContainer</item>
     </style>
 
     <style name="Stream">
@@ -112,6 +113,9 @@
     </style>
 
     <style name="Stream.CallAppBar" parent="Stream">
+    </style>
+
+    <style name="Stream.CallContainer" parent="Stream">
     </style>
 
 
