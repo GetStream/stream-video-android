@@ -222,7 +222,7 @@ private fun createMeeting(callId: String, participants: List<String>) {
             type = "default",
             id = callId,
             participantIds = participants,
-            ringing = false
+            ring = false
         )
 
         loadingState.value = false
@@ -376,7 +376,7 @@ private fun dialUsers(callId: String, participants: List<String>) { // 1
             type = "default",
             id = callId,
             participantIds = participants,
-            ringing = true
+            ring = true
         ).onError {
             Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show() // 3
         }
@@ -550,7 +550,7 @@ private fun AudioOnlyCallControls() { // Custom CallControls
 Also, make sure to add the following import for the Android resources, within the import section, at the top of the file:
 
 ```kotlin
-import io.getstream.video.android.compose.R
+import io.getstream.video.android.ui.common.R
 ```
 
 There is quite a bit of code here, but it's very simple in what it does:
