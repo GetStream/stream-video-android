@@ -20,8 +20,22 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.xml.widget.appbar.CallAppBarView
+import io.getstream.video.android.xml.widget.call.CallView
 import kotlinx.coroutines.flow.collectLatest
 
+/**
+ * Binds [CallView] with [CallViewModel], updating the view's state based on data provided by the ViewModel,
+ * and propagating view events to the ViewModel as needed.
+ *
+ * This function sets listeners on the view and ViewModel. Call this method
+ * before setting any additional listeners on these objects yourself.
+ *
+ * @param viewModel [CallViewModel] for observing data and running actions.
+ * @param lifecycleOwner The lifecycle owner, root component containing [CallView]. Usually an Activity or
+ * Fragment.
+ * @param onBackPressed Handler that notifies when the back button has been pressed.
+ * @param onParticipantsPressed Notifies when the participants button has been pressed.
+ */
 public fun CallAppBarView.bindView(
     viewModel: CallViewModel,
     lifecycleOwner: LifecycleOwner,
