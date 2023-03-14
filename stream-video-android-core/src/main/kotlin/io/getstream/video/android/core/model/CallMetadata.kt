@@ -29,7 +29,7 @@ public data class CallMetadata(
     val updatedAt: Long,
     val recordingEnabled: Boolean,
     val broadcastingEnabled: Boolean,
-    val callEgress: CallEgress,
+//    val callEgress: CallEgress,
     val callDetails: CallDetails,
     val users: Map<String, CallUser>,
     val custom: Map<String, Any>,
@@ -44,6 +44,6 @@ public fun CallMetadata.toInfo(): CallInfo = CallInfo(
     recordingEnabled = recordingEnabled,
     createdAt = Date(createdAt),
     updatedAt = Date(updatedAt),
-    callEgress = callEgress,
+//    callEgress = callEgress,
     custom = custom
 )
