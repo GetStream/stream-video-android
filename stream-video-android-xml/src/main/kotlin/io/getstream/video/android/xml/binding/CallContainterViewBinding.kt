@@ -31,10 +31,26 @@ import io.getstream.video.android.xml.widget.incoming.IncomingCallView
 import io.getstream.video.android.xml.widget.outgoing.OutgoingCallView
 import kotlinx.coroutines.flow.combine
 
+/**
+ * Binds [CallContainerView] with [CallViewModel], updating the view's state based on data provided by the ViewModel,
+ * and propagating view events to the ViewModel as needed.
+ *
+ * This function sets listeners on the view and ViewModel. Call this method
+ * before setting any additional listeners on these objects yourself.
+ *
+ * @param viewModel [CallViewModel] for observing data and running actions.
+ * @param lifecycleOwner The lifecycle owner, root component containing [CallContainerView]. Usually an Activity or
+ * Fragment.
+ * @param fetchCallMediaState Handler used to fetch the new state of the call controls buttons when the media state
+ * changes.
+ * @param onCallAction Handler that listens to interactions with call media controls.
+ * @param onBackPressed Handler that notifies when the back button has been pressed.
+ * @param onIdle Handler that notifies when the call has entered the idle state, notifies about end of the call.
+ */
 public fun CallContainerView.bindView(
     viewModel: CallViewModel,
     lifecycleOwner: LifecycleOwner,
-    updateCallMediaState: (CallMediaState, Boolean) -> List<CallControlItem> = { mediaState, isScreenSharingActive ->
+    fetchCallMediaState: (CallMediaState, Boolean) -> List<CallControlItem> = { mediaState, isScreenSharingActive ->
         defaultControlList(mediaState, isScreenSharingActive)
     },
     onCallAction: (CallAction) -> Unit = { viewModel.onCallAction(it) },
@@ -92,7 +108,7 @@ public fun CallContainerView.bindView(
                         is CallControlsView -> it.bindView(
                             viewModel = viewModel,
                             lifecycleOwner = lifecycleOwner,
-                            updateCallMediaState = updateCallMediaState,
+                            fetchCallMediaState = fetchCallMediaState,
                             onCallAction = onCallAction,
                         )
                         is CallAppBarView -> it.bindView(

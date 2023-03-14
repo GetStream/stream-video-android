@@ -41,7 +41,7 @@ import io.getstream.video.android.compose.theme.VideoTheme
  */
 @Composable
 public fun ActiveSoundLevels(modifier: Modifier) {
-    val color = VideoTheme.colors.primaryAccent
+    val color = VideoTheme.colors.soundLevels
 
     val firstLevel = remember { Animatable(0.5f) }
     val secondLevel = remember { Animatable(1f) }

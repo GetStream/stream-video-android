@@ -24,7 +24,18 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.onStart
 
-public fun CallParticipantView.bindPipView(
+/**
+ * Binds [CallParticipantView] with [CallViewModel], updating the view's state based on data provided by the ViewModel,
+ * and propagating view events to the ViewModel as needed.
+ *
+ * This function sets listeners on the view and ViewModel. Call this method
+ * before setting any additional listeners on these objects yourself.
+ *
+ * @param viewModel [CallViewModel] for observing data and running actions.
+ * @param lifecycleOwner The lifecycle owner, root component containing [CallParticipantView]. Usually an Activity or
+ * Fragment.
+ */
+public fun CallParticipantView.bindPictureInPictureView(
     viewModel: CallViewModel,
     lifecycleOwner: LifecycleOwner,
 ) {

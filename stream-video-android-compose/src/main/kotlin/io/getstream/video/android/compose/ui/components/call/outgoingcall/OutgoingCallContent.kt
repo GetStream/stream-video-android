@@ -56,7 +56,7 @@ public fun OutgoingCallContent(
     val participants: List<CallUser> by viewModel.participants.collectAsState()
     val callMediaState: CallMediaState by viewModel.callMediaState.collectAsState()
 
-    OutgoingCall(
+    OutgoingCallContent(
         callType = callType,
         participants = participants,
         callMediaState = callMediaState,
@@ -78,7 +78,7 @@ public fun OutgoingCallContent(
  * @param onCallAction Handler when the user clicks on some of the call controls.
  */
 @Composable
-public fun OutgoingCall(
+public fun OutgoingCallContent(
     callType: CallType,
     participants: List<CallUser>,
     callMediaState: CallMediaState,
@@ -139,7 +139,7 @@ public fun OutgoingCall(
 @Composable
 private fun OutgoingCallPreview() {
     VideoTheme {
-        OutgoingCall(
+        OutgoingCallContent(
             callType = CallType.VIDEO,
             participants = listOf(
                 mockParticipant.let {

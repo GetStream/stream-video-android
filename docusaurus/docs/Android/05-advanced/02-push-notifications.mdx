@@ -40,7 +40,7 @@ Now that you have the device generator, you need to add an `Activity` to your ap
 
 We provide an `AbstractNotificationActivity` that implements most of the logic for you. You only need to provide it with an instance of `StreamVideo` and a way to initialize the SDK in your app, if it hasn't been initialized.
 
-> **Note**: It's important to note that this guide assumes you're using our [call launchers](../01-basics/04-call-launchers.mdx), as well as the `AbstractComposeCallActivity` and its corresponding `Service`
+> **Note**: It's important to note that this guide assumes you're using our [call launchers](../01-basics/05-default-call-launchers.mdx), as well as the `AbstractComposeCallActivity` and its corresponding `Service`
 >
 > It's the fastest way to integrate our SDK seamlessly. If you're using a custom `CallActivity`, we recommend observing the `StreamCallState` within the `NotificationActivity` and starting your custom UI and logic based on the state.
 

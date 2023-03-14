@@ -23,6 +23,20 @@ import io.getstream.video.android.xml.widget.participant.internal.CallParticipan
 import io.getstream.video.android.xml.widget.screenshare.ScreenShareView
 import kotlinx.coroutines.flow.combine
 
+/**
+ * Binds [CallView] with [CallViewModel], updating the view's state based on data provided by the ViewModel,
+ * and propagating view events to the ViewModel as needed.
+ *
+ * This function sets listeners on the view and ViewModel. Call this method
+ * before setting any additional listeners on these objects yourself.
+ *
+ * @param viewModel [CallViewModel] for observing data and running actions.
+ * @param lifecycleOwner The lifecycle owner, root component containing [CallView]. Usually an Activity or
+ * Fragment.
+ * @param fetchCallMediaState Handler used to fetch the new state of the call controls buttons when the media state
+ * changes.
+ * @param onCallAction Handler that listens to interactions with call media controls.
+ */
 public fun CallView.bindView(
     viewModel: CallViewModel,
     lifecycleOwner: LifecycleOwner
@@ -41,7 +55,7 @@ public fun CallView.bindView(
                 updatePresenterText(screenSharingSession.participant.name.ifEmpty { screenSharingSession.participant.id })
                 setFloatingParticipant(null)
             } else {
-                setNormalContent { it.bindView(viewModel, lifecycleOwner) }
+                setRegularContent { it.bindView(viewModel, lifecycleOwner) }
                 val localParticipant = if (participants.size == 1 || participants.size == 4) {
                     null
                 } else {

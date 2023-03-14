@@ -113,7 +113,7 @@ public val localParticipant: Flow<CallParticipant>
 ```
 
 * `callState`: Represents an instance of `Call`, which holds all the call participants, their extra data, tracks, volume levels and similar. It can also be used as a convenience to enable or disable the local participant tracks.
-* `streamCallState`: Our **call engine** state wrapper, which exposes more information about the state of the call we're in. It can give you information if you're receiving a call, starting a call yourself, if the call dropped and for which reason and similar. Read more about it in our [call engine state guide](../04-guides/02-call-engine-state.mdx).
+* `streamCallState`: Our **call engine** state wrapper, which exposes more information about the state of the call we're in. It can give you information if you're receiving a call, starting a call yourself, if the call dropped and for which reason and similar. Read more about it in our [call engine state guide](../02-guides/03-call-engine.mdx).
 * `participantList`: Currently active participants in the call, with their full information and video tracks.
 * `activeSpeakers`: Participants whose audio levels are not at zero (0).
 * `localParticipant`: Ease-of-use accessor that lets you distinguish the local participant from remote ones. 

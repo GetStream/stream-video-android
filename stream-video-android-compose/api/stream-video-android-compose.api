@@ -96,7 +96,7 @@ public abstract class io/getstream/video/android/compose/state/ui/participants/P
 public final class io/getstream/video/android/compose/theme/StreamColors {
 	public static final field $stable I
 	public static final field Companion Lio/getstream/video/android/compose/theme/StreamColors$Companion;
-	public synthetic fun <init> (JJJJJJJJJJJJJJJJLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (JJJJJJJJJJJJJJJJJLkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1-0d7_KjU ()J
 	public final fun component10-0d7_KjU ()J
 	public final fun component11-0d7_KjU ()J
@@ -105,6 +105,7 @@ public final class io/getstream/video/android/compose/theme/StreamColors {
 	public final fun component14-0d7_KjU ()J
 	public final fun component15-0d7_KjU ()J
 	public final fun component16-0d7_KjU ()J
+	public final fun component17-0d7_KjU ()J
 	public final fun component2-0d7_KjU ()J
 	public final fun component3-0d7_KjU ()J
 	public final fun component4-0d7_KjU ()J
@@ -113,8 +114,8 @@ public final class io/getstream/video/android/compose/theme/StreamColors {
 	public final fun component7-0d7_KjU ()J
 	public final fun component8-0d7_KjU ()J
 	public final fun component9-0d7_KjU ()J
-	public final fun copy-Q_H9qLU (JJJJJJJJJJJJJJJJ)Lio/getstream/video/android/compose/theme/StreamColors;
-	public static synthetic fun copy-Q_H9qLU$default (Lio/getstream/video/android/compose/theme/StreamColors;JJJJJJJJJJJJJJJJILjava/lang/Object;)Lio/getstream/video/android/compose/theme/StreamColors;
+	public final fun copy-OG5zQOY (JJJJJJJJJJJJJJJJJ)Lio/getstream/video/android/compose/theme/StreamColors;
+	public static synthetic fun copy-OG5zQOY$default (Lio/getstream/video/android/compose/theme/StreamColors;JJJJJJJJJJJJJJJJJILjava/lang/Object;)Lio/getstream/video/android/compose/theme/StreamColors;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAppBackground-0d7_KjU ()J
 	public final fun getAvatarInitials-0d7_KjU ()J
@@ -130,6 +131,7 @@ public final class io/getstream/video/android/compose/theme/StreamColors {
 	public final fun getOverlayDark-0d7_KjU ()J
 	public final fun getPrimaryAccent-0d7_KjU ()J
 	public final fun getScreenSharingBackground-0d7_KjU ()J
+	public final fun getSoundLevels-0d7_KjU ()J
 	public final fun getTextHighEmphasis-0d7_KjU ()J
 	public final fun getTextLowEmphasis-0d7_KjU ()J
 	public fun hashCode ()I
@@ -370,7 +372,7 @@ public abstract class io/getstream/video/android/compose/ui/AbstractComposeCallA
 }
 
 public final class io/getstream/video/android/compose/ui/components/audio/SoundIndicatorKt {
-	public static final fun SoundIndicator (ZZLandroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+	public static final fun SoundIndicator (Lio/getstream/video/android/common/model/SoundState;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/audio/SoundLevelsKt {
@@ -379,6 +381,14 @@ public final class io/getstream/video/android/compose/ui/components/audio/SoundL
 
 public final class io/getstream/video/android/compose/ui/components/avatar/AvatarKt {
 	public static final fun Avatar-MQwOVTQ (Ljava/lang/String;Ljava/lang/String;Landroidx/compose/ui/Modifier;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/layout/ContentScale;Landroidx/compose/ui/graphics/painter/Painter;Ljava/lang/String;JLkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;II)V
+	public static final fun AvatarPreview (Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class io/getstream/video/android/compose/ui/components/avatar/ComposableSingletons$AvatarKt {
+	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/avatar/ComposableSingletons$AvatarKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class io/getstream/video/android/compose/ui/components/avatar/ImageAvatarKt {
@@ -426,14 +436,17 @@ public final class io/getstream/video/android/compose/ui/components/call/Composa
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/activecall/CallContentKt {
+	public static final fun CallContent (Lio/getstream/video/android/core/model/Call;Lio/getstream/video/android/core/model/state/StreamCallState;Lio/getstream/video/android/core/call/state/CallMediaState;Landroidx/compose/ui/Modifier;ZZZLio/getstream/video/android/core/model/ScreenSharingSession;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;III)V
 	public static final fun CallContent (Lio/getstream/video/android/core/viewmodel/CallViewModel;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/activecall/ComposableSingletons$CallContentKt {
 	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/call/activecall/ComposableSingletons$CallContentKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function3;
+	public static field lambda-2 Lkotlin/jvm/functions/Function3;
 	public fun <init> ()V
 	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda-2$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function3;
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/activecall/internal/ComposableSingletons$InviteUsersDialogKt {
@@ -465,7 +478,7 @@ public final class io/getstream/video/android/compose/ui/components/call/incomin
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/incomingcall/IncomingCallContentKt {
-	public static final fun IncomingCall (Ljava/util/List;Lio/getstream/video/android/core/model/CallType;ZLandroidx/compose/ui/Modifier;ZLkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+	public static final fun IncomingCallContent (Lio/getstream/video/android/core/model/CallType;Ljava/util/List;ZLandroidx/compose/ui/Modifier;ZLkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 	public static final fun IncomingCallContent (Lio/getstream/video/android/core/viewmodel/CallViewModel;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 
@@ -495,7 +508,7 @@ public final class io/getstream/video/android/compose/ui/components/call/outgoin
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/outgoingcall/OutgoingCallContentKt {
-	public static final fun OutgoingCall (Lio/getstream/video/android/core/model/CallType;Ljava/util/List;Lio/getstream/video/android/core/call/state/CallMediaState;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+	public static final fun OutgoingCallContent (Lio/getstream/video/android/core/model/CallType;Ljava/util/List;Lio/getstream/video/android/core/call/state/CallMediaState;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 	public static final fun OutgoingCallContent (Lio/getstream/video/android/core/viewmodel/CallViewModel;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 

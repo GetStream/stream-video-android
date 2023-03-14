@@ -21,6 +21,7 @@ import org.openapitools.client.models.BlockUserResponse
 import org.openapitools.client.models.EndCallResponse
 import org.openapitools.client.models.GetCallEdgeServerRequest
 import org.openapitools.client.models.GetCallEdgeServerResponse
+import org.openapitools.client.models.GetEdgesResponse
 import org.openapitools.client.models.GetOrCreateCallRequest
 import org.openapitools.client.models.GetOrCreateCallResponse
 import org.openapitools.client.models.GoLiveResponse
@@ -35,6 +36,7 @@ import org.openapitools.client.models.UnblockUserResponse
 import org.openapitools.client.models.UpdateCallRequest
 import org.openapitools.client.models.UpdateCallResponse
 import retrofit2.http.Body
+import retrofit2.http.GET
 import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Path
@@ -99,6 +101,19 @@ internal interface VideoCallsApi {
         @Path("id") id: String,
         @Body getCallEdgeServerRequest: GetCallEdgeServerRequest
     ): GetCallEdgeServerResponse
+
+    /**
+     * Get Edges
+     *
+     * Responses:
+     *  - 200: Successful response
+     *  - 400: Bad request
+     *  - 429: Too many requests
+     *
+     * @return [GetEdgesResponse]
+     */
+    @GET("/video/edges")
+    suspend fun getEdges(): GetEdgesResponse
 
     /**
      * Get or create a call

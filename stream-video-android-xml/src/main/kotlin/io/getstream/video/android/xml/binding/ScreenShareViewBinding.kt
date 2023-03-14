@@ -21,8 +21,19 @@ import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.xml.widget.screenshare.ScreenShareView
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.mapNotNull
 
+/**
+ * Binds [ScreenShareView] with [CallViewModel], updating the view's state based on data provided by the ViewModel,
+ * and propagating view events to the ViewModel as needed.
+ *
+ * This function sets listeners on the view and ViewModel. Call this method
+ * before setting any additional listeners on these objects yourself.
+ *
+ * @param viewModel [CallViewModel] for observing data and running actions.
+ * @param lifecycleOwner The lifecycle owner, root component containing [ScreenShareView]. Usually an Activity or
+ * Fragment.
+ */
 public fun ScreenShareView.bindView(
     viewModel: CallViewModel,
     lifecycleOwner: LifecycleOwner,
@@ -37,8 +48,7 @@ public fun ScreenShareView.bindView(
 
     startJob(lifecycleOwner) {
         viewModel.screenSharingSessions
-            .mapLatest { it.firstOrNull() }
-            .filterNotNull()
+            .mapNotNull { it.firstOrNull() }
             .collectLatest { screenSharingSession ->
                 setScreenSharingSession(screenSharingSession)
             }

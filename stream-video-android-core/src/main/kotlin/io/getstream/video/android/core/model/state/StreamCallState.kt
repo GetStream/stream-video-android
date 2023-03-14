@@ -19,7 +19,6 @@ package io.getstream.video.android.core.model.state
 import io.getstream.video.android.core.engine.StreamCallEngine
 import io.getstream.video.android.core.errors.VideoError
 import io.getstream.video.android.core.model.CallDetails
-import io.getstream.video.android.core.model.CallEgress
 import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.core.model.IceServer
 import io.getstream.video.android.core.model.SfuToken
@@ -28,7 +27,7 @@ import io.getstream.video.android.core.model.StreamCallKind
 import io.getstream.video.android.core.model.StreamSfuSessionId
 import io.getstream.video.android.core.model.User
 import java.io.Serializable
-import java.util.*
+import java.util.Date
 
 /**
  * Represents possible state of [StreamCallEngine].
@@ -63,7 +62,7 @@ public sealed interface StreamCallState : Serializable {
         public abstract val updatedAt: StreamDate
         public abstract val users: Map<String, CallUser>
         public abstract val callDetails: CallDetails
-        public abstract val callEgress: CallEgress
+//        public abstract val callEgress: CallEgress
         public abstract val custom: Map<String, Any>
     }
 
@@ -80,7 +79,7 @@ public sealed interface StreamCallState : Serializable {
         override val updatedAt: StreamDate,
         override val users: Map<String, CallUser>,
         override val callDetails: CallDetails,
-        override val callEgress: CallEgress,
+//        override val callEgress: CallEgress,
         override val custom: Map<String, Any>,
         val rejections: List<User>,
         val acceptedByCallee: Boolean
@@ -99,7 +98,7 @@ public sealed interface StreamCallState : Serializable {
         override val updatedAt: StreamDate,
         override val users: Map<String, CallUser>,
         override val callDetails: CallDetails,
-        override val callEgress: CallEgress,
+//        override val callEgress: CallEgress,
         override val custom: Map<String, Any>,
         val acceptedByMe: Boolean,
     ) : Started(), Joinable
@@ -114,7 +113,7 @@ public sealed interface StreamCallState : Serializable {
         override val updatedAt: StreamDate,
         override val users: Map<String, CallUser>,
         override val callDetails: CallDetails,
-        override val callEgress: CallEgress,
+//        override val callEgress: CallEgress,
         override val custom: Map<String, Any>
     ) : Started()
 
@@ -126,7 +125,7 @@ public sealed interface StreamCallState : Serializable {
 
     /**
      * Set when joined to Coordinator.
-     * @see [io.getstream.video.android.engine.StreamCallEngine.onCallJoined]
+     * @see [io.getstream.video.android.core.engine.StreamCallEngine.onCallJoined]
      */
     public data class Joined(
         override val callGuid: StreamCallGuid,
@@ -141,14 +140,14 @@ public sealed interface StreamCallState : Serializable {
         override val sfuToken: SfuToken,
         override val iceServers: List<IceServer>,
         override val callDetails: CallDetails,
-        override val callEgress: CallEgress,
+//        override val callEgress: CallEgress,
         override val custom: Map<String, Any>
     ) : InCall()
 
     /**
      * Set when SFU join request is sent.
      * @see [stream.video.sfu.event.JoinRequest]
-     * @see [io.getstream.video.android.engine.StreamCallEngine.onSfuJoinSent]
+     * @see [io.getstream.video.android.core.engine.StreamCallEngine.onSfuJoinSent]
      */
     public data class Connecting(
         val sfuSessionId: StreamSfuSessionId,
@@ -164,14 +163,14 @@ public sealed interface StreamCallState : Serializable {
         override val sfuToken: SfuToken,
         override val iceServers: List<IceServer>,
         override val callDetails: CallDetails,
-        override val callEgress: CallEgress,
+//        override val callEgress: CallEgress,
         override val custom: Map<String, Any>
     ) : InCall()
 
     /**
      * Set when SFU join response is received.
-     * @see [io.getstream.video.android.events.JoinCallResponseEvent]
-     * @see [io.getstream.video.android.engine.StreamCallEngine.onSfuEvent]
+     * @see [io.getstream.video.android.core.events.JoinCallResponseEvent]
+     * @see [io.getstream.video.android.core.engine.StreamCallEngine.onSfuEvent]
      */
     public data class Connected(
         val sfuSessionId: StreamSfuSessionId,
@@ -187,7 +186,7 @@ public sealed interface StreamCallState : Serializable {
         override val sfuToken: SfuToken,
         override val iceServers: List<IceServer>,
         override val callDetails: CallDetails,
-        override val callEgress: CallEgress,
+//        override val callEgress: CallEgress,
         override val custom: Map<String, Any>
     ) : InCall()
 

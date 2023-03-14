@@ -55,7 +55,7 @@ public fun IncomingCallContent(
     val participants: List<CallUser> by viewModel.participants.collectAsState()
     val callMediaState: CallMediaState by viewModel.callMediaState.collectAsState()
 
-    IncomingCall(
+    IncomingCallContent(
         participants = participants,
         callType = callType,
         isVideoEnabled = callMediaState.isCameraEnabled,
@@ -69,8 +69,8 @@ public fun IncomingCallContent(
  * Stateless variant of the Incoming call UI, which you can use to build your own custom logic that
  * powers the state and handlers.
  *
- * @param participants People participating in the call.
  * @param callType The type of call, Audio or Video.
+ * @param participants People participating in the call.
  * @param isVideoEnabled Whether the video should be enabled when entering the call or not.
  * @param modifier Modifier for styling.
  * @param showHeader If the app bar header is shown or not.
@@ -78,9 +78,9 @@ public fun IncomingCallContent(
  * @param onCallAction Handler used when the user interacts with Call UI.
  */
 @Composable
-public fun IncomingCall(
-    participants: List<CallUser>,
+public fun IncomingCallContent(
     callType: CallType,
+    participants: List<CallUser>,
     isVideoEnabled: Boolean,
     modifier: Modifier = Modifier,
     showHeader: Boolean = true,
@@ -131,7 +131,7 @@ public fun IncomingCall(
 @Composable
 private fun IncomingCallPreview() {
     VideoTheme {
-        IncomingCall(
+        IncomingCallContent(
             participants = mockParticipantList.map {
                 CallUser(
                     id = it.id,

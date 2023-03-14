@@ -41,6 +41,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import io.getstream.video.android.common.model.getSoundIndicatorState
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.audio.SoundIndicator
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
@@ -161,8 +162,10 @@ private fun BoxScope.ParticipantLabel(
         verticalAlignment = CenterVertically,
     ) {
         SoundIndicator(
-            hasSound = participant.hasAudio,
-            isSpeaking = participant.isSpeaking,
+            state = getSoundIndicatorState(
+                hasAudio = participant.hasAudio,
+                isSpeaking = participant.isSpeaking
+            ),
             modifier = Modifier
                 .align(CenterVertically)
                 .padding(start = VideoTheme.dimens.callParticipantSoundIndicatorPaddingStart)

@@ -16,17 +16,42 @@
 
 package org.openapitools.client.apis
 
+import org.openapitools.client.models.ListRecordingsResponse
 import org.openapitools.client.models.QueryCallsRequest
 import org.openapitools.client.models.QueryCallsResponse
 import org.openapitools.client.models.RequestPermissionRequest
 import org.openapitools.client.models.RequestPermissionResponse
+import org.openapitools.client.models.SendReactionRequest
+import org.openapitools.client.models.SendReactionResponse
 import org.openapitools.client.models.UpdateUserPermissionsRequest
 import org.openapitools.client.models.UpdateUserPermissionsResponse
 import retrofit2.http.Body
+import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
 
 internal interface DefaultApi {
+
+    /**
+     * List recordings
+     * Lists recordings
+     * Responses:
+     *  - 200: Successful response
+     *  - 400: Bad request
+     *  - 429: Too many requests
+     *
+     * @param type
+     * @param id
+     * @param session
+     * @return [ListRecordingsResponse]
+     */
+    @GET("video/call/{type}/{id}/{session}/recordings")
+    suspend fun listRecordings(
+        @Path("type") type: String,
+        @Path("id") id: String,
+        @Path("session") session: String
+    ): ListRecordingsResponse
+
     /**
      * Query call
      * Query calls with filter query
@@ -60,6 +85,26 @@ internal interface DefaultApi {
         @Path("id") id: String,
         @Body requestPermissionRequest: RequestPermissionRequest
     ): RequestPermissionResponse
+
+    /**
+     * Send reaction to the call
+     * Sends reaction to the call
+     * Responses:
+     *  - 201: Successful response
+     *  - 400: Bad request
+     *  - 429: Too many requests
+     *
+     * @param type
+     * @param id
+     * @param sendReactionRequest
+     * @return [SendReactionResponse]
+     */
+    @POST("/video/call/{type}/{id}/reaction")
+    suspend fun sendVideoReaction(
+        @Path("type") type: String,
+        @Path("id") id: String,
+        @Body sendReactionRequest: SendReactionRequest
+    ): SendReactionResponse
 
     /**
      * Start broadcasting

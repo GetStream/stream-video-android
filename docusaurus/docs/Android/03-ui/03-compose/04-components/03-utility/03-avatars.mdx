@@ -1,0 +1,112 @@
+# Avatar Components
+
+In our Video SDK, we provide a few different avatar based components. The `Avatar` component is a Jetpack Compose utility component that renders an image or initials based on the user state. If the user has an image URL defined in their profile, the component renders the `ImageAvatar` component. Otherwise, it uses the `InitialsAvatar` component to show the user's initials, based on the user `name` or `id`.
+
+Let's see how to use the component.
+
+## Usage
+
+To add the Avatar component to your layout, you can use the `Avatar` composable function like this:
+
+```kotlin
+import io.getstream.video.android.compose.ui.components.avatar.Avatar
+
+@Composable
+fun MyCustomAvatar(user: User) {
+    Avatar(
+        modifier = Modifier.size(56.dp),
+        imageUrl = user.imageUrl ?: "",
+        initials = user.name.initials(),
+    )
+    // ... rest of your code
+}
+```
+
+As mentioned, if the `imageUrl` is not empty, the component will try to render the image. Otherwise it will just show the user initials, like so:
+
+![User Initials](https://user-images.githubusercontent.com/17215808/222449548-c28ee995-9724-4194-a358-7c447a377463.png)
+
+This component is very simple, but it allows different types of customization. Let's explore them.
+
+## Handling Actions
+
+The `Avatar` component exposes the following behavior customization:
+
+```kotlin
+public fun Avatar(
+    imageUrl: String,
+    initials: String,
+    onClick: (() -> Unit)? = null,
+)
+```
+
+* `imageUrl`: While a part of the state, if the image exists, it'll be rendered. Otherwise, the behavior of the component changes to render the `initials`.
+* `initials`: Used as a fallback for the `imageUrl` being empty or failing to load.
+* `onClick`: Handler when the user clicks on the avatar.
+
+You can simply pass these parameters when calling the `Avatar` component, to customize what date it renders and how it behaves when the user clicks on the item.
+
+Customizing UI is much more complex and deep for the `Avatar`. Let's explore it.
+
+## Customization
+
+The `Avatar` allows the following customization options for its UI:
+
+```kotlin
+public fun Avatar(
+    ..., // state
+    modifier: Modifier = Modifier,
+    shape: Shape = VideoTheme.shapes.avatar,
+    textStyle: TextStyle = VideoTheme.typography.title3Bold,
+    contentScale: ContentScale = ContentScale.Crop,
+    placeholderPainter: Painter? = null,
+    contentDescription: String? = null,
+    initialsAvatarOffset: DpOffset = DpOffset(0.dp, 0.dp),
+)
+```
+
+* `modifier`: Used for styling the base component. Helpful for defining the `size` of the component and adding extra decoration.
+* `shape`: How the component is clipped. You can easily customize this component on a global SDK level, by changing the `VideoTheme.shapes.avatar` property of `StreamShapes`. Alternatively, you can pass in a custom shape for each instance of the `Avatar` component you call.
+* `textStyle`: Defines the style of text used for the `InitialsAvatar`.
+* `contentScale`: Used to define the scale type for the `ImageAvatar`.
+* `placeholderPainter`: Renders a placeholder image while the `image` is loading.
+* `contentDescription`: Helps define accessibility attributes for easier navigation.
+* `initialsAvatarOffset`: Padding offset for the `InitialsAvatar`.
+
+Using these parameters you can completely overhaul how the `Avatar` component looks and behaves. You can change the shape to be a square, squircle or a custom drawn shape, you can change its size, scale type and add placeholders.
+
+On top of that, if you want to customize the `ImageAvatar` or `InitialsAvatar` components, you can use their respective composable functions, like so:
+
+```kotlin
+import io.getstream.video.android.compose.ui.components.avatar.Avatar
+import io.getstream.video.android.compose.ui.components.avatar.ImageAvatar
+import io.getstream.video.android.compose.ui.components.avatar.InitialsAvatar
+
+@Composable
+fun MyCustomAvatar(user: User) {
+    // If you want us to determine which avatar to render
+    Avatar(
+        modifier = Modifier.size(56.dp),
+        imageUrl = user.imageUrl ?: "",
+        initials = user.name.initials(),
+    )
+    
+    // If your state and logic require an image avatar
+    ImageAvatar(
+        imageUrl = imageUrl,
+        modifier = Modifier.size(56.dp),
+    )
+  
+    // If your users don't have images and you want to render their initials
+    InitialsAvatar(
+        initials = initials,
+        modifier = Modifier.size(56.dp),
+        textStyle = ... // custom text style
+    )
+}
+```
+
+Note that all of these components have several properties exposed in our `VideoTheme`, such as the initials text style, the color, shape and more.
+
+Make sure to explore our [VideoTheme guide](../../03-general-customization/01-video-theme.mdx) to learn more.
+

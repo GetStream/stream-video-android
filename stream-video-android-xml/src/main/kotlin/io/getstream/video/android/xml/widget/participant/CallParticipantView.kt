@@ -53,7 +53,7 @@ public class CallParticipantView : CallCardView, VideoRenderer {
     /**
      * Flag that notifies if we initialised the renderer for this view or not.
      */
-    private var wasRendererInitialised: Boolean = false
+    private var isRendererInitialised: Boolean = false
 
     /**
      * Handler to initialise the renderer.
@@ -188,7 +188,7 @@ public class CallParticipantView : CallCardView, VideoRenderer {
      * Initialises the renderer for this view if it was not initialised.
      */
     private fun initRenderer() {
-        if (!wasRendererInitialised) {
+        if (!isRendererInitialised) {
             track?.let { videoTrack ->
                 rendererInitializer?.let { rendererInitializer ->
                     rendererInitializer.initRenderer(
@@ -196,7 +196,7 @@ public class CallParticipantView : CallCardView, VideoRenderer {
                         videoTrack.streamId,
                         TrackType.TRACK_TYPE_VIDEO
                     ) { onRender(it) }
-                    wasRendererInitialised = true
+                    isRendererInitialised = true
                 }
             }
         }

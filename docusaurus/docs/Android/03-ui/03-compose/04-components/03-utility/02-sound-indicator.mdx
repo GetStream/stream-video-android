@@ -1,0 +1,39 @@
+# SoundIndicator
+
+If you're looking to build a way for users to know if a person is muted, unmuted or speaking, you can use our `SoundIndicator` component.
+
+It's very simple and represents a few states:
+
+* **Muted**: shows a muted microphone icon to indicate that the user has turned off their audio.
+* **Unmuted**: shows a regular microphone icon to indicate that the user has turned their microphone on, but isn't speaking at the moment.
+* **Speaking**: shows a speaking indicator that moves as the user talks. In case the user stops talking, it transitions to the **unmuted** state, or **muted** if they disable their microphone.
+
+## Usage
+
+To add the SoundIndicator component to your layout, you can use the `SoundIndicator` composable function like this:
+
+```kotlin
+import io.getstream.video.android.compose.ui.components.audio.SoundIndicator
+
+@Composable
+fun CustomParticipantUi(participant: CallParticipantState) {
+    // ... The rest of your code
+    SoundIndicator(
+        modifier = ..., // provide UI customization
+        state = getSoundIndicatorState( // build the SoundState for the indicator
+            hasAudio = participant.hasAudio,
+            isSpeaking = participant.isSpeaking
+        )
+    )
+}
+```
+
+In the code above, the `state` parameter is the current state of the sound. You can easily build the state using `getSoundIndicatorState`. For now, the state is quite simple, but you can also deconstruct the `SoundIndicator` component and build something more custom and complex yourself. The `modifier` parameter is used to specify the size of the component.
+
+>  **Note**: Make sure to check the internals of `SoundIndicator`, since we have properties exposed in `VideoTheme` that let you customize it, such as its size.
+
+## Customization
+
+Since the `SoundIndicator` is a simple component, it doesn't expose much customization. Mainly, you can customize it using its `modifier` parameter.
+
+On top of that you can apply a different color to the waveform animation when a person is speaking, by overriding `VideoTheme.colors.soundLevels` property of `StreamColors`.

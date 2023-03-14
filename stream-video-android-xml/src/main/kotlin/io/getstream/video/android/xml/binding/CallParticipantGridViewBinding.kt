@@ -23,6 +23,17 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 
+/**
+ * Binds [CallParticipantsGridView] with [CallViewModel], updating the view's state based on data provided by the
+ * ViewModel, and propagating view events to the ViewModel as needed.
+ *
+ * This function sets listeners on the view and ViewModel. Call this method
+ * before setting any additional listeners on these objects yourself.
+ *
+ * @param viewModel [CallViewModel] for observing data and running actions.
+ * @param lifecycleOwner The lifecycle owner, root component containing [CallParticipantsGridView]. Usually an Activity
+ * or Fragment.
+ */
 internal fun CallParticipantsGridView.bindView(
     viewModel: CallViewModel,
     lifecycleOwner: LifecycleOwner,
