@@ -37,7 +37,7 @@ internal fun StreamCallState.Outgoing.toMetadata(): CallMetadata =
         broadcastingEnabled = broadcastingEnabled,
         recordingEnabled = recordingEnabled,
         custom = custom,
-        callEgress = callEgress,
+//        callEgress = callEgress,
         callDetails = callDetails
     )
 
@@ -60,7 +60,7 @@ internal fun StreamCallState.Joined.toConnecting(sfuSessionId: StreamSfuSessionI
         sfuToken = sfuToken,
         custom = custom,
         callDetails = callDetails,
-        callEgress = callEgress
+//        callEgress = callEgress
     )
 
 /**
@@ -81,5 +81,5 @@ internal fun StreamCallState.Connecting.toConnected() = StreamCallState.Connecte
     sfuToken = sfuToken,
     custom = custom,
     callDetails = callDetails,
-    callEgress = callEgress
+//    callEgress = callEgress
 )

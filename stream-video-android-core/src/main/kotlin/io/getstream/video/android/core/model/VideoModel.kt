@@ -17,11 +17,11 @@
 package io.getstream.video.android.core.model
 
 import io.getstream.video.android.core.utils.toCallUser
+import java.io.Serializable
+import java.util.Date
 import org.openapitools.client.models.CallCreatedEvent
 import org.openapitools.client.models.CallResponse
 import org.openapitools.client.models.MemberResponse
-import java.io.Serializable
-import java.util.Date
 
 public data class CallUser(
     val id: String,
@@ -58,7 +58,7 @@ public data class CallInfo(
     val recordingEnabled: Boolean,
     val createdAt: Date?,
     val updatedAt: Date?,
-    val callEgress: CallEgress,
+//    val callEgress: CallEgress,
     val custom: Map<String, Any>
 ) : Serializable
 
@@ -86,10 +86,10 @@ internal fun CallResponse.toCallInfo(): CallInfo {
         recordingEnabled = settings.recording.audioOnly, // TODO - how do we know if it's enabled or not
         createdAt = Date(createdAt.toEpochSecond() * 1000L),
         updatedAt = Date(updatedAt.toEpochSecond() * 1000L),
-        callEgress = CallEgress(
-            broadcastEgress = broadcastEgress,
-            recordEgress = recordEgress
-        ),
+//        callEgress = CallEgress(
+//            broadcastEgress = broadcastEgress,
+//            recordEgress = recordEgress
+//        ),
         custom = custom
     )
 }

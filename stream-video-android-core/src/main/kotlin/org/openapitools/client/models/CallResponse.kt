@@ -28,12 +28,12 @@ import com.squareup.moshi.Json
 /**
  * Represents a call
  *
- * @param backstage * @param blockedUserIds * @param broadcastEgress * @param cid The unique identifier for a call (<type>:<id>)
+ * @param backstage * @param blockedUserIds * @param broadcasting * @param cid The unique identifier for a call (<type>:<id>)
  * @param createdAt Date/time of creation
  * @param createdBy * @param custom Custom data for this object
  * @param id Call ID
  * @param ownCapabilities The capabilities of the current user
- * @param recordEgress * @param settings * @param team * @param type The type of call
+ * @param recording * @param settings * @param team * @param transcribing * @param type The type of call
  * @param updatedAt Date/time of the last update
  * @param endedAt Date/time when the call ended
  * @param startsAt Date/time when the call will start
@@ -47,8 +47,8 @@ data class CallResponse(
     @Json(name = "blocked_user_ids")
     val blockedUserIds: kotlin.collections.List<kotlin.String>,
 
-    @Json(name = "broadcast_egress")
-    val broadcastEgress: kotlin.String,
+    @Json(name = "broadcasting")
+    val broadcasting: kotlin.Boolean,
 
     /* The unique identifier for a call (<type>:<id>) */
     @Json(name = "cid")
@@ -73,14 +73,17 @@ data class CallResponse(
     @Json(name = "own_capabilities")
     val ownCapabilities: kotlin.collections.List<kotlin.String>,
 
-    @Json(name = "record_egress")
-    val recordEgress: kotlin.String,
+    @Json(name = "recording")
+    val recording: kotlin.Boolean,
 
     @Json(name = "settings")
     val settings: CallSettingsResponse,
 
     @Json(name = "team")
     val team: kotlin.String,
+
+    @Json(name = "transcribing")
+    val transcribing: kotlin.Boolean,
 
     /* The type of call */
     @Json(name = "type")
