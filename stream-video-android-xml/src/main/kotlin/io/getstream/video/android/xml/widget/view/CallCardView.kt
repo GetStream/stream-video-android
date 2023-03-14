@@ -19,7 +19,7 @@ package io.getstream.video.android.xml.widget.view
 import android.content.Context
 import android.util.AttributeSet
 import androidx.cardview.widget.CardView
-import io.getstream.video.android.xml.utils.extensions.OrientationChangeListener
+import io.getstream.video.android.xml.utils.OrientationChangeListener
 import kotlinx.coroutines.Job
 
 /**

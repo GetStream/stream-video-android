@@ -128,6 +128,9 @@ public class CallControlsView : CallConstraintLayout {
         setBackground()
     }
 
+    /**
+     * Updates the background of the [CallControlsView].
+     */
     private fun setBackground() {
         background = if (isLandscape) style.callControlsBackgroundLandscape else style.callControlsBackground
         background.setTint(style.callControlsBackgroundColor)

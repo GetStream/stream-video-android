@@ -246,15 +246,15 @@ public abstract interface class io/getstream/video/android/xml/utils/Disposable 
 	public abstract fun isDisposed ()Z
 }
 
-public abstract interface class io/getstream/video/android/xml/utils/extensions/OrientationChangeListener {
+public abstract interface class io/getstream/video/android/xml/utils/OrientationChangeListener {
 	public abstract fun onOrientationChanged (Z)V
 }
 
-public final class io/getstream/video/android/xml/utils/extensions/OrientationChangeListener$DefaultImpls {
-	public static fun onOrientationChanged (Lio/getstream/video/android/xml/utils/extensions/OrientationChangeListener;Z)V
+public final class io/getstream/video/android/xml/utils/OrientationChangeListener$DefaultImpls {
+	public static fun onOrientationChanged (Lio/getstream/video/android/xml/utils/OrientationChangeListener;Z)V
 }
 
-public final class io/getstream/video/android/xml/utils/extensions/ViewKt {
+public final class io/getstream/video/android/xml/utils/extensions/ViewGroupKt {
 	public static final fun orientationChanged (Landroid/view/ViewGroup;Z)V
 }
 
@@ -783,7 +783,7 @@ public final class io/getstream/video/android/xml/widget/transformer/TransformSt
 	public static final fun setScreenShareStyleTransformer (Lio/getstream/video/android/xml/widget/transformer/StyleTransformer;)V
 }
 
-public abstract class io/getstream/video/android/xml/widget/view/CallCardView : androidx/cardview/widget/CardView, io/getstream/video/android/xml/utils/extensions/OrientationChangeListener, io/getstream/video/android/xml/widget/view/JobHolder {
+public abstract class io/getstream/video/android/xml/widget/view/CallCardView : androidx/cardview/widget/CardView, io/getstream/video/android/xml/utils/OrientationChangeListener, io/getstream/video/android/xml/widget/view/JobHolder {
 	public fun <init> (Landroid/content/Context;)V
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;I)V
@@ -794,7 +794,7 @@ public abstract class io/getstream/video/android/xml/widget/view/CallCardView : 
 	public fun stopAllJobs ()V
 }
 
-public abstract class io/getstream/video/android/xml/widget/view/CallConstraintLayout : androidx/constraintlayout/widget/ConstraintLayout, io/getstream/video/android/xml/utils/extensions/OrientationChangeListener, io/getstream/video/android/xml/widget/view/JobHolder {
+public abstract class io/getstream/video/android/xml/widget/view/CallConstraintLayout : androidx/constraintlayout/widget/ConstraintLayout, io/getstream/video/android/xml/utils/OrientationChangeListener, io/getstream/video/android/xml/widget/view/JobHolder {
 	public fun <init> (Landroid/content/Context;)V
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;I)V

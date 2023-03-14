@@ -33,7 +33,9 @@ internal inline fun ConstraintLayout.updateConstraints(
 ) {
     val set = ConstraintSet()
     set.clone(this)
-    if (clearAllConstraints) { children.forEach { set.clearConstraints(it) } }
+    if (clearAllConstraints) {
+        children.forEach { set.clearConstraints(it) }
+    }
     set.actions()
     set.applyTo(this)
 }

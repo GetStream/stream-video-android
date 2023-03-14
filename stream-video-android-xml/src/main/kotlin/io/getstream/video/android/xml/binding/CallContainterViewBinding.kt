@@ -52,7 +52,7 @@ public fun CallContainerView.bindView(
     fetchCallMediaState: (CallMediaState, Boolean) -> List<CallControlItem> = { mediaState, isScreenSharingActive ->
         defaultControlList(mediaState, isScreenSharingActive)
     },
-    onCallAction: (CallAction) -> Unit = { viewModel.onCallAction(it) },
+    onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
     onParticipantsPressed: () -> Unit = { },
     onBackPressed: () -> Unit = { },
     onIdle: () -> Unit = { },

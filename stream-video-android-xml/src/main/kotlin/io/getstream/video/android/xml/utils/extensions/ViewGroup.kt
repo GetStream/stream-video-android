@@ -20,6 +20,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.children
+import io.getstream.video.android.xml.utils.OrientationChangeListener
 
 internal inline val ViewGroup.inflater: LayoutInflater
     get() = LayoutInflater.from(context)
@@ -27,6 +28,25 @@ internal inline val ViewGroup.inflater: LayoutInflater
 internal val ViewGroup.streamThemeInflater: LayoutInflater
     get() = LayoutInflater.from(context.createStreamThemeWrapper())
 
+/**
+ * Returns the first view that conforms to the predicate.
+ *
+ * @param predicate Optional parameter to find the first view that conforms to the predicate.
+ */
 internal inline fun <reified T : View> ViewGroup.getFirstViewInstance(predicate: (T) -> Boolean = { true }): T? {
     return children.firstOrNull { it is T && predicate(it) } as? T
+}
+
+/**
+ * Notifies the whole view tree that the orientation has changed. Views that implement [OrientationChangeListener] will
+ * get notified of this change.
+ *
+ * @param isLandscape Whether the orientation is landscape or not.
+ */
+fun ViewGroup.orientationChanged(isLandscape: Boolean) {
+    if (this is OrientationChangeListener) this.onOrientationChanged(isLandscape)
+    children.forEach {
+        if (it is ViewGroup) it.orientationChanged(isLandscape)
+        if (it !is ViewGroup && it is OrientationChangeListener) it.onOrientationChanged(isLandscape)
+    }
 }

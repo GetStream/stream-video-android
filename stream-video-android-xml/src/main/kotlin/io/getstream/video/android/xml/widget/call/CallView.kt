@@ -112,6 +112,9 @@ public class CallView : CallConstraintLayout {
         updateCallControlsConstraints()
     }
 
+    /**
+     * Updates the constraints of the [CallControlsView].
+     */
     private fun updateCallControlsConstraints() {
         val callControlsView = getFirstViewInstance<CallControlsView>() ?: return
 

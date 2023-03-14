@@ -48,7 +48,7 @@ public fun CallView.bindView(
     fetchCallMediaState: (CallMediaState, Boolean) -> List<CallControlItem> = { mediaState, isScreenSharingActive ->
         defaultControlList(mediaState, isScreenSharingActive)
     },
-    onCallAction: (CallAction) -> Unit = { viewModel.onCallAction(it) },
+    onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
 ) {
     getFirstViewInstance<CallControlsView>()?.bindView(
         viewModel = viewModel,
