@@ -1,0 +1,116 @@
+# CallContainer
+
+The easiest way to setup a screen that shows incoming, outgoing and active call screens which contain the current participants video feeds and the call controls is to use the `CallContainer`.
+
+`CallContainer` sets up the following functionality by connecting multiple components:
+
+* [**`OutgoingCall`**](../outgoing-call): When the user is calling other people. Shows other participants avatars and controls for switching audio/video and canceling the call.
+* [**`IncomingCall`**](../incoming-call): When the user is being called by another person. Shows the incoming
+
+In this section we will cover component at the highest top of the hierarchy which enable you to quickly implement a Video Call app.
+These components abstract the logic needed to write a functioning video call experience, which makes them less open to customisation.
+
+## Usage
+
+`CallContainer` is at the top of the hierarchy. It is a bound component that automatically handles Incoming/Outgoing and Active call components and states. All you have to do is pass it the `CallViewModel`:
+
+```kotlin
+override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    setContent {
+        VideoTheme {
+            CallContainer(viewModel = callViewModel)
+        }
+    }
+}
+```
+
+We require of you to provide a ViewModel, because of the underlying `StreamVideo` instance, which isn't a singleton. Using this UI component and our ViewModel, will show the following UI based on the Call state.kotlin
+
+![Call Activity](https://user-images.githubusercontent.com/17215808/216000813-86ebd384-f5d1-4e53-9b23-ce1f14b6de4e.png)
+
+If you want to customize the behavior for your use case, you can override the action handlers.
+
+## Handling Actions
+
+When it comes to actions the `CallContainer` exposes, you're able to override the following:
+
+* **onBackPressed**: Back pressed actions to go back when accessing different Call menus or trigger Picture-In-Picture mode.
+* **onCallAction**: Handler that notifies that user performed some kind of a `CallAction`, to trigger enable or disable video and audio states, leaving the call and more.
+
+These actions are defined by default, but you can override them by simply passing a custom handler when calling the component:
+
+```kotlin
+override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    setContent {
+        VideoTheme {
+            CallContainer(
+                viewModel = callViewModel,
+                onCallAction = {
+                    // TODO - handle call actions
+                }
+            )
+        }
+    }
+}
+```
+
+You can also pass the actions to the `ViewModel` to handle the default actions we define in our UI, but you can handle any custom actions here, if you've built some custom UI.
+
+When it comes to custom UI, the `CallContainer` exposes some Slot APIs for you to consume.
+
+## Customization
+
+`CallContainer` is our main **Screen component** and as such offers limited customization through itself. While you can customize all the `VideoTheme` properties, to style the UI, change colors, sizes, paddings, text styles and more, you can still override some Slot APIs to customize specific UI within this component.
+
+More specifically, the `CallContainer` exposes the following Slots:
+
+```kotlin
+@Composable
+public fun CallContainer(
+    ...
+    callControlsContent: @Composable () -> Unit = { // 1
+        DefaultCallControlsContent(
+            viewModel,
+            onCallAction
+        )
+    },
+    pictureInPictureContent: @Composable (Call) -> Unit = { DefaultPictureInPictureContent(it) }, // 2
+    incomingCallContent: @Composable () -> Unit = { // 3
+        IncomingCallContent(
+            modifier = modifier,
+            viewModel = viewModel,
+            onBackPressed = onBackPressed,
+            onCallAction = onCallAction
+        )
+    },
+    callContent: @Composable () -> Unit = { // 4
+        DefaultCallContent(
+            viewModel = viewModel,
+            modifier = modifier,
+            onBackPressed = onBackPressed,
+            onCallAction = onCallAction,
+            callControlsContent = callControlsContent,
+            pictureInPictureContent = pictureInPictureContent
+        )
+    },
+    outgoingCallContent: @Composable () -> Unit = { // 5
+        OutgoingCallContent(
+            modifier = modifier,
+            viewModel = viewModel,
+            onBackPressed = onBackPressed,
+            onCallAction = onCallAction
+        )
+    }
+)
+```
+
+
+* **callControlsContent**: Represents the content that features various controls and actions in a call, such as audio and video handles and leaving a call.
+* **pictureInPictureContent**: Represents the content that will be shown in Picture-In-Picture mode.
+* **incomingCallContent**: Represents the content shown when the active user is being ringed or called by other users, in the Incoming call state.
+* **outgoingCallContent**: Represents the content shown when the active user is calling or ringing other users, in the Outgoing call state.
+* **callContent**: Represents the active call content, when the user fully joins and connects to a call.
+
+Using any of these slots, you can fully replace the content that's shown in different states and you can build these components to be rendered differently, as the state updates.

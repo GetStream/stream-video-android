@@ -85,6 +85,14 @@ public fun CallContainer(
             onCallAction = onCallAction
         )
     },
+    outgoingCallContent: @Composable () -> Unit = {
+        OutgoingCallContent(
+            modifier = modifier,
+            viewModel = viewModel,
+            onBackPressed = onBackPressed,
+            onCallAction = onCallAction
+        )
+    },
     callContent: @Composable () -> Unit = {
         DefaultCallContent(
             viewModel = viewModel,
@@ -93,14 +101,6 @@ public fun CallContainer(
             onCallAction = onCallAction,
             callControlsContent = callControlsContent,
             pictureInPictureContent = pictureInPictureContent
-        )
-    },
-    outgoingCallContent: @Composable () -> Unit = {
-        OutgoingCallContent(
-            modifier = modifier,
-            viewModel = viewModel,
-            onBackPressed = onBackPressed,
-            onCallAction = onCallAction
         )
     }
 ) {

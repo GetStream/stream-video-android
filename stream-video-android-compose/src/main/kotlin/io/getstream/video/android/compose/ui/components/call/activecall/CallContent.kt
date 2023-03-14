@@ -48,6 +48,7 @@ import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CallMediaState
 import io.getstream.video.android.core.call.state.LeaveCall
 import io.getstream.video.android.core.model.Call
+import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.core.model.state.StreamCallState
 import io.getstream.video.android.core.viewmodel.CallViewModel
 import stream.video.sfu.models.TrackType
@@ -79,20 +80,19 @@ public fun CallContent(
     pictureInPictureContent: @Composable (Call) -> Unit = { DefaultPictureInPictureContent(it) }
 ) {
     val call by callViewModel.callState.collectAsState(initial = null)
-    val isShowingParticipantsInfo by callViewModel.isShowingCallInfo.collectAsState(false)
+    val isShowingCallInfo by callViewModel.isShowingCallInfo.collectAsState(false)
 
     val callMediaState by callViewModel.callMediaState.collectAsState(initial = CallMediaState())
 
     val isInPiPMode by callViewModel.isInPictureInPicture.collectAsState()
     val isFullscreen by callViewModel.isFullscreen.collectAsState()
-    val orientation = LocalConfiguration.current.orientation
     val callState by callViewModel.streamCallState.collectAsState(StreamCallState.Idle)
 
     val screenSharingSessions by callViewModel.screenSharingSessions.collectAsState(initial = emptyList())
     val screenSharing = screenSharingSessions.firstOrNull()
 
     val backAction = {
-        if (isShowingParticipantsInfo) {
+        if (isShowingCallInfo) {
             callViewModel.dismissOptions()
         } else {
             onBackPressed()
@@ -101,16 +101,72 @@ public fun CallContent(
 
     BackHandler { backAction() }
 
-    val currentCall = call
+    CallContent(
+        modifier = modifier,
+        call = call,
+        callState = callState,
+        callMediaState = callMediaState,
+        isShowingCallInfo = isShowingCallInfo,
+        isInPictureInPicture = isInPiPMode,
+        isFullscreen = isFullscreen,
+        screenSharing = screenSharing,
+        onBackPressed = onBackPressed,
+        onCallAction = onCallAction,
+        callControlsContent = callControlsContent,
+        pictureInPictureContent = pictureInPictureContent
+    )
+}
 
-    if (!isInPiPMode) {
+/**
+ * Represents the UI in an Active call that shows participants and their video, as well as some
+ * extra UI features to control the call settings, browse participants and more.
+ *
+ * @param call The state of the call with its participants.
+ * @param callState StreamCallEngine state representing in which state of the call the user is.
+ * @param callMediaState Media state of the call, for audio and video.
+ * @param modifier Modifier for styling.
+ * @param isShowingCallInfo If the call info menu is being shown.
+ * @param isInPictureInPicture If the user has engaged in Picture-In-Picture mode.
+ * @param isFullscreen If the user is in fullscreen.
+ * @param screenSharing The active screen sharing session, if it exists.
+ * @param onBackPressed Handler when the user taps on the back button.
+ * @param onCallAction Handler when the user triggers a Call Control Action.
+ * @param callControlsContent Content shown that allows users to trigger different actions.
+ * @param pictureInPictureContent Content shown when the user enters Picture in Picture mode, if
+ * it's been enabled in the app.
+ */
+@Composable
+public fun CallContent(
+    call: Call?,
+    callState: StreamCallState,
+    callMediaState: CallMediaState,
+    modifier: Modifier = Modifier,
+    isShowingCallInfo: Boolean = false,
+    isInPictureInPicture: Boolean = false,
+    isFullscreen: Boolean = false,
+    screenSharing: ScreenSharingSession? = null,
+    onBackPressed: () -> Unit = { },
+    onCallAction: (CallAction) -> Unit = { },
+    callControlsContent: @Composable () -> Unit = {
+        DefaultCallControlsContent(
+            call,
+            callMediaState,
+            onCallAction
+        )
+    },
+    pictureInPictureContent: @Composable (Call) -> Unit = { DefaultPictureInPictureContent(it) }
+) {
+    val orientation = LocalConfiguration.current.orientation
+
+    if (!isInPictureInPicture) {
         Scaffold(
             modifier = modifier,
             topBar = {
                 if (!isFullscreen && orientation != ORIENTATION_LANDSCAPE) {
                     ActiveCallAppBar(
-                        callViewModel = callViewModel,
-                        onBackPressed = backAction,
+                        callState = callState,
+                        isShowingCallInfo = isShowingCallInfo,
+                        onBackPressed = onBackPressed,
                         onCallAction = onCallAction
                     )
                 }
@@ -121,7 +177,7 @@ public fun CallContent(
                 }
             },
             content = {
-                if (currentCall == null) {
+                if (call == null) {
                     Box(
                         modifier = Modifier
                             .height(250.dp)
@@ -142,7 +198,7 @@ public fun CallContent(
                                 start = it.calculateStartPadding(layoutDirection = LocalLayoutDirection.current),
                                 end = it.calculateEndPadding(layoutDirection = LocalLayoutDirection.current),
                             ),
-                        call = currentCall,
+                        call = call,
                         paddingValues = it,
                         isFullscreen = isFullscreen,
                         callMediaState = callMediaState,
@@ -156,8 +212,8 @@ public fun CallContent(
             }
         )
     } else {
-        if (currentCall != null) {
-            pictureInPictureContent(currentCall)
+        if (call != null) {
+            pictureInPictureContent(call)
         }
     }
 }

@@ -50,8 +50,8 @@ import io.getstream.video.android.ui.common.R as RCommon
  * @param session The screen sharing session to show.
  * @param isFullscreen If the UI is currently in full screen mode.
  * @param modifier Modifier for styling.
- * @param onCallAction Handler for various call actions.
  * @param onRender Handler when the video content renders.
+ * @param onCallAction Handler for various call actions.
  */
 @Composable
 public fun ScreenShareContent(
@@ -59,8 +59,8 @@ public fun ScreenShareContent(
     session: ScreenSharingSession,
     isFullscreen: Boolean,
     modifier: Modifier = Modifier,
-    onCallAction: (CallAction) -> Unit,
-    onRender: (View) -> Unit
+    onRender: (View) -> Unit = {},
+    onCallAction: (CallAction) -> Unit
 ) {
     Box(modifier = modifier) {
         VideoRenderer(

@@ -16,8 +16,7 @@ Let's see how to integrate the component.
 
 ## Usage
 
-<!-- TODO link tutorial -->
-To use the `AbstractComposeCallActivity`, you just need to create an activity extending it and overriding `getStreamVideo`, found inside `StreamVideoProvider` interface, to provide the `StreamVideo` instance, which we crated inside [tutorial](../../01-basics/01-tutorial).
+To use the `AbstractComposeCallActivity`, you just need to create an activity extending it and overriding `getStreamVideo`, found inside `StreamVideoProvider` interface, to provide the `StreamVideo` instance, which we crated inside [tutorial](../../01-basics/01-tutorial.mdx).
 
 ```kotlin
 class CallActivity : AbstractComposeCallActivity() {
@@ -26,15 +25,37 @@ class CallActivity : AbstractComposeCallActivity() {
 }
 ```
 
-<!-- TODO PiP manifest setup -->
+Once you have that ready, you need to define the `Activity` in the `AndroidManifest`, like so:
+
+```xml
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="io.getstream.video.android.app"
+    >
+
+    <application>
+        <!-- The rest of the setup above... -->
+        <activity
+            android:name=".ui.call.CallActivity"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:supportsPictureInPicture="true"
+            />
+    </application>
+
+</manifest>
+```
 
 This small snippet wil produce a fully-working solution, as shown in the images below.
 
-<!-- TODO add some images -->
+![Compose Call Activity](https://user-images.githubusercontent.com/17215808/220632174-a21974c8-97cb-4ddc-9fa4-1e5f5363120f.png)
+
+Also note how the `configChanges` and `supportsPictureInPicture` properties are declared. These are used to enable Picture-In-Picture mode and support that comes out of the box with the Activity.
+
+Now that you've learned how to use the `Activity`, let's see how to customize the ViewModel and the UI.
 
 ## Providing custom `CallViewModelFactory`
 
-The `AbstractComposeCallActivity` itself implements `CallViewModelFactoryProvider` interface which also allows you to override the `getCallViewModelFactory` that allows you to write custom logic on how to provide the factory. This way you can provide custom user providers, in our case it helps us provide test users:
+The `AbstractComposeCallActivity` itself implements `CallViewModelFactoryProvider` interface which lets you to override the `getCallViewModelFactory` to write custom logic for the factory. This way you can provide custom user providers, in our case it helps us provide test users:
 
 ```
 override fun getCallViewModelFactory(): CallViewModelFactory {
@@ -46,8 +67,84 @@ override fun getCallViewModelFactory(): CallViewModelFactory {
 }
 ```
 
-<!-- TODO update after https://github.com/GetStream/stream-video-android/pull/110 has been sorted out -->
+Using this feature, you can build real user providers that fetch users from different sources, like our Chat SDK or your own backend service.
+
 ## Customising permission manager
 
-<!-- TODO update after https://github.com/GetStream/stream-video-android/pull/115 has been sorted out -->
-## Customising Picture in Picture mode
+By default, we provide permission handling for the call you join. In case you might need different handling, we allow overriding the `permissionManager`.
+
+You can do that the following way:
+
+```kotlin
+class CallActivity : AbstractComposeCallActivity() {
+
+    /**
+     * Provides the StreamVideo instance through the videoApp.
+     */
+    override fun getStreamVideo(context: Context): StreamVideo = context.videoApp.streamVideo
+
+    override fun getPermissionManager(): PermissionManager { // TODO - custom manager
+        return object : PermissionManager {
+            override val hasRecordAudioPermission: StateFlow<Boolean>
+                get() = TODO("Not yet implemented")
+            override val hasCameraPermission: StateFlow<Boolean>
+                get() = TODO("Not yet implemented")
+
+            override fun checkPermission(permission: String): Boolean {
+                // TODO - custom logic for permission checks
+            }
+
+            override fun requestPermission(permission: String): Boolean {
+                // TODO - custom logic for permission checks
+            }
+
+        }
+    }
+}
+```
+
+Of course, instead of providing an anonymous implementation, you can build a custom instance that holds state, allows different layers of permission checks or even requires other permissions other than audio and video.
+
+It exposes an extra layer of customization if your custom use requires it.
+
+## Customising Picture-In-Picture mode
+
+As you've already seen, we provide out of the box Picture-In-Picture support. The logic is integrated in our abstract `Activity` classes and doesn't require much input the integrator side, only the manifest declaration.
+
+However, in case you want to customize the UI of the PiP container, you can do so by overriding the default content. Simply open up your implementation of `AbstractComposeCallActivity` and override the content like so:
+
+```kotlin
+class CallActivity : AbstractComposeCallActivity() {
+
+    /**
+     * Provides the StreamVideo instance through the videoApp.
+     */
+    override fun getStreamVideo(context: Context): StreamVideo = context.videoApp.streamVideo
+
+    @Composable
+    override fun PictureInPictureContent(call: Call) { // here
+        val callState by callViewModel.callState.collectAsState()
+        val current = callState ?: return
+
+        val participants by current.callParticipants.collectAsState()
+
+        CallParticipant(
+            call = current,
+            participant = participants.first { it.isLocal }
+        )
+    }
+}
+```
+
+In this small snippet, instead of showing the the video from the person who's actively speaking, which is the default behavior, you're showing the local participant's video. That way the user who's participating in a call and it working on something in the background, can always see what kind of feed they're sending to other users, in case they're trying to explain something, or they're screen sharing from a different device, like a laptop.
+
+We also allow you to provide `PictureInPictureParams`, in case you want to change the default logic for the PiP container aspect ratio. You can override it using the following approach:
+
+```kotlin
+@RequiresApi(Build.VERSION_CODES.O)
+override fun getPictureInPictureParams(): PictureInPictureParams {
+    return super.getPictureInPictureParams()
+}
+```
+
+In this small function, you can apply complex logic to calculate the aspect ratio you want to use for the PiP container. You can also apply some smaller customization in the behavior, based on the [official PiP API](https://developer.android.com/develop/ui/views/picture-in-picture#setautoenterenabled).

@@ -646,7 +646,6 @@ public abstract interface class io/getstream/video/android/core/StreamVideo {
 	public abstract fun awaitCallClient (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun cancelCall (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun clearCallState ()V
-	public abstract fun createCallClient (Lio/getstream/video/android/core/model/StreamCallGuid;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lio/getstream/video/android/core/call/CallClient;
 	public abstract fun createDevice (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun deleteDevice (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun getActiveCallClient ()Lio/getstream/video/android/core/call/CallClient;
@@ -680,7 +679,6 @@ public final class io/getstream/video/android/core/StreamVideoBuilder {
 public abstract interface class io/getstream/video/android/core/StreamVideoConfig {
 	public abstract fun getAutoPublish ()Z
 	public abstract fun getCancelOnTimeout ()Z
-	public abstract fun getCreateCallClientInternally ()Z
 	public abstract fun getDefaultAudioOn ()Z
 	public abstract fun getDefaultSpeakerPhoneOn ()Z
 	public abstract fun getDefaultVideoOn ()Z
@@ -692,7 +690,6 @@ public final class io/getstream/video/android/core/StreamVideoConfigDefault : io
 	public static final field INSTANCE Lio/getstream/video/android/core/StreamVideoConfigDefault;
 	public fun getAutoPublish ()Z
 	public fun getCancelOnTimeout ()Z
-	public fun getCreateCallClientInternally ()Z
 	public fun getDefaultAudioOn ()Z
 	public fun getDefaultSpeakerPhoneOn ()Z
 	public fun getDefaultVideoOn ()Z
@@ -1954,7 +1951,6 @@ public final class io/getstream/video/android/core/model/Call {
 	public final fun getLocalParticipantId ()Ljava/lang/String;
 	public final fun getLocalParticipantIdPrefix ()Ljava/lang/String;
 	public final fun getOnStreamAdded ()Lkotlin/jvm/functions/Function1;
-	public final fun getOnStreamRemoved ()Lkotlin/jvm/functions/Function1;
 	public final fun getPrimarySpeaker ()Lkotlinx/coroutines/flow/Flow;
 	public final fun getScreenSharingSessions ()Lkotlinx/coroutines/flow/Flow;
 	public final fun initRenderer (Lio/getstream/video/android/core/ui/TextureViewRenderer;Ljava/lang/String;Lstream/video/sfu/models/TrackType;Lkotlin/jvm/functions/Function1;)V
@@ -1963,7 +1959,6 @@ public final class io/getstream/video/android/core/model/Call {
 	public final fun setCameraEnabled (Z)V
 	public final fun setMicrophoneEnabled (Z)V
 	public final fun setOnStreamAdded (Lkotlin/jvm/functions/Function1;)V
-	public final fun setOnStreamRemoved (Lkotlin/jvm/functions/Function1;)V
 	public final fun updateParticipantTrackSize (Ljava/lang/String;II)V
 }
 

@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.compose.ui.components.avatar
 
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
@@ -24,6 +25,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImagePainter
@@ -112,6 +114,18 @@ public fun Avatar(
             contentScale = contentScale,
             contentDescription = contentDescription,
             onClick = onClick
+        )
+    }
+}
+
+@Preview
+@Composable
+public fun AvatarPreview() {
+    VideoTheme {
+        Avatar(
+            modifier = Modifier.size(56.dp),
+            imageUrl = "",
+            initials = "CC"
         )
     }
 }

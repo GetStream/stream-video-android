@@ -1,0 +1,78 @@
+# CallParticipant
+
+The `CallParticipant` component is used to render a participant in a call. It renders the participant video if their track is not `null` and is correctly published, or a user avatar if there is no video to be shown.
+
+The component also renders the user label, which includes the user's name and call status, such as mute state. Additionally, if the user is focused, the component renders a border to indicate that the participant is the primary speaker.
+
+Let's see how to use it.
+
+## Usage
+
+To use the `CallParticipant` component, embed it anywhere in your custom UI and pass in the necessary parameters:
+
+```kotlin
+@Composable
+fun CustomCallScreen(call: Call) {
+    val participants by call.callParticipants.collectAsState(initial = emptyList())
+    val primarySpeaker by call.primarySpeaker.collectAsState(initial = null)
+
+    Column {
+        participants.forEach { participant ->
+            CallParticipant(
+                call = call,
+                participant = participant,
+                modifier = Modifier.padding(16.dp),
+                labelPosition = Alignment.BottomStart,
+                isFocused = participant.id == primarySpeaker?.id
+                onRender = { view -> /* do something with the rendered view */ }
+            )
+        }
+    }
+}
+```
+
+You can fetch the state of all particiopants using the `Call` and you can enrich it by exploring the `primarySpeaker`. Using the `callParticipants`, you can render any UI group of elements based on your use case - in this snippet a `Column` of items.
+
+To render the participant, you need the following state:
+
+* `call`: Used to determine the rest of the information we represent in the UI, based on the call state.
+* `participant`: The state of the call participant you want to render.
+* `isFocused`: If the user is focused or the primary speaker.
+
+Each of the `CallParticipant` items should look something like this:
+
+![CallParticipants Grid](https://user-images.githubusercontent.com/17215808/223418304-d21a2018-f0d2-4d37-afd0-87ef071e49b6.png)
+
+The users should have their video visible, or an avatar if there are no tracks available. On top of that, there is a label that has the name or ID laid out, as well as the current mute or speaking state, with the connection quality being on the side.
+
+Let's see how to customize the actions or the UI of the component.
+
+## Handling Actions
+
+The `CallParticipantState` allows you to react and handle the following:
+
+* `onRender(View)`: Allows you to react to UI rendering of the Video, if available.
+
+You can use that to update the state of each participant if required by your app. It's easily overrideable by passing in a simple lambda when calling the component.
+
+## Customization
+
+When it comes to customization, the `CallParticipant` items allow the following:
+
+```kotlin
+@Composable
+public fun CallParticipant(
+    modifier: Modifier = Modifier,
+    paddingValues: PaddingValues = PaddingValues(0.dp),
+    labelPosition: Alignment = BottomStart,
+    ... // the rest of parameters
+)
+```
+
+- `modifier`: Used to apply styling to the component, such as extra borders, background, elevation, size or shape and more.
+- `paddingValues`: Specifies the padding to be applied to the component. Useful for things like adjusting to the `Scaffold` padding or just applying padding overall.
+- `labelPosition`: `Alignment` that affects the user label position in the component. Use this to adjust where the label information is shown, based on your app use case.
+
+Use this to further customize the look and feel of participant video items in your UI.
+
+The `CallParticipant` is a crucial component in our SDK, used by many of our larger-scale components, such as the `CallParticipants`, which you'll explore next. `CallParticipants` is just a group version that shows more than one participant and adjusts its UI accordingly.
