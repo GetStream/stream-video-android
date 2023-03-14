@@ -52,6 +52,8 @@ import io.getstream.video.android.core.model.CallParticipantState
  * @param localParticipant The participant to render.
  * @param parentBounds Bounds of the parent, used to constrain the component to the parent bounds,
  * when dragging the floating UI around the screen.
+ * @param paddingValues The padding to be added to the component. Useful when the parent defines
+ * its bounds normally, but expects padding to be applied, similar to what a Scaffold does.
  * @param modifier Modifier for styling.
  */
 @Composable

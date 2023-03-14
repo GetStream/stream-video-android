@@ -138,7 +138,7 @@ internal class StreamVideoImpl(
                         cancelCall(state.callGuid.cid)
                     }
                     is StreamCallState.Idle -> clearCallState()
-                    is StreamCallState.Joined -> if (config.createCallClientInternally) {
+                    is StreamCallState.Joined -> {
                         logger.i { "[observeState] caller joins a call: $state" }
                         createCallClient(
                             callGuid = state.callGuid,
@@ -504,7 +504,7 @@ internal class StreamVideoImpl(
      * @return An instance of [CallClient] ready to connect to a call. Make sure to call
      * [CallClient.connectToCall] when you're ready to fully join a call.
      */
-    override fun createCallClient(
+    private fun createCallClient(
         callGuid: StreamCallGuid,
         signalUrl: String,
         sfuToken: SfuToken,

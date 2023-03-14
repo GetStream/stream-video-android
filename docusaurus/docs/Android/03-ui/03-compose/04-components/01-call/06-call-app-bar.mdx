@@ -1,0 +1,117 @@
+# CallAppBar
+
+The `CallAppBar` represents the header component that gives the user more information when in a call, while adding a few actions they can trigger while the call is active. The header is useful for showing the call name or title, as well as the state, such as if the user is fully connected to the call or not.
+
+Let's see how to use the component.
+
+## Usage
+
+To use the component, simply embed it within the rest of your custom UI:
+
+```kotlin
+@Composable
+fun MyCustomUi() {
+    Column(modifier = Modifier.fillMaxSize()) {
+        CallAppBar(onBackPressed = { handleBack() })
+        // ... The rest of your UI
+    }
+}
+```
+
+The component doesn't have any mandatory parameters, since its behavior and UI is fairly simple. However, we recommend overriding the `onBackPressed` handler for the back button.
+
+Using the component like this, without any further customization, will provide the following UI:
+
+![Default CallAppBar](https://user-images.githubusercontent.com/17215808/223149204-d1920c61-4440-4ea0-abe5-a6566954c592.png)
+
+It shows a small back button, a title and an icon that lets you explore participants. While this UI is rendered by default, the action handling needs to be provided by you, since we cannot handle that state out of the box.
+
+Let's see how to do so.
+
+## Handling Actions
+
+The `CallAppBar` component exposes the following actions:
+
+```kotlin
+@Composable
+public fun CallAppBar(
+    ..., // UI and state
+    onBackPressed: () -> Unit = {},
+    onCallAction: (CallAction) -> Unit = {},
+)
+```
+
+* `onBackPressed`: Handler when the user taps on the back arrow, useful for finishing the call or triggering the Picture-In-Picture mode.
+* `onCallAction`: Handler when the user triggers the "View Participants" action at the trailing part of the component. Use it to show custom UI or update the  `CallViewModel` state.
+
+You can override these parameters by passing in a custom lambda function that describes the behavior.
+
+Behavior customization is only one part, let's see how to customize the UI.
+
+## Customization
+
+Within UI customization, the component provides the following:
+```kotlin
+@Composable
+public fun CallAppBar(
+    modifier: Modifier = Modifier,
+    title: String = stringResource(id = R.string.default_app_bar_title),
+    leadingContent: @Composable () -> Unit = {
+        DefaultCallAppBarLeadingContent(isShowingOverlays, onBackPressed)
+    },
+    centerContent: @Composable (RowScope.() -> Unit) = {
+        DefaultCallAppBarCenterContent(title)
+    },
+    trailingContent: @Composable () -> Unit = {
+        DefaultCallAppBarTrailingContent(
+            onCallAction
+        )
+    }
+)
+```
+
+* `modifier`: Useful for additional styling, like applying borders or adding extra gesture handling.
+* `title`: The text shown in the component. Can be anything custom, that describes the state of the call.
+* `leadingContent`: Represents the default leading content, which is the back button. You can override this to remove the back button or add a different action.
+* `centerContent`: Represents the default center content, which is the call title. You can override this to add more details, like a subtitle, number of participants and much more.
+* `trailingContent`: Represents the default trailing content, which is the "Call Info" menu button. You can override this slot to remove the default button or to provide custom actions.
+
+Here's an example of a custom `CallAppBar`:
+
+```kotlin
+@Composable
+private fun CustomCallAppBar() {
+    VideoTheme {
+        CallAppBar(
+            centerContent = {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Call", // Call name
+                        style = VideoTheme.typography.title3Bold,
+                        fontSize = 16.sp
+                    )
+
+                    Text(
+                        text = "6 participants", // fetch from the state
+                        style = VideoTheme.typography.body
+                    )
+                }
+            },
+            trailingContent = {}, // remove trailing icon
+        )
+    }
+}
+```
+
+You can provide custom UI for the `centerContent` that overrides the basic title, to add a subtitle and remove the `trailingContent` by passing in an empty lambda.
+
+> **Note**: For simplicity, we hardcoded the title and subtitle, but this UI can be anything you want.
+
+Using this approach you'd get the following UI:
+
+![Custom CallAppBar](https://user-images.githubusercontent.com/17215808/223152556-5f9ebf34-dbee-4a45-9242-c9f9b55e062d.png)
+
+It was very simple to customize, while still having the same behavior.

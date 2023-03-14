@@ -57,7 +57,11 @@ public data class StreamColors(
     public val infoAccent: Color,
     public val highlight: Color,
     public val screenSharingBackground: Color,
-    public val avatarInitials: Color
+    public val avatarInitials: Color,
+    public val soundLevels: Color,
+    public val connectionQualityBackground: Color,
+    public val connectionQualityBar: Color,
+    public val infoMenuOverlayColor: Color
 ) {
 
     public companion object {
@@ -83,7 +87,11 @@ public data class StreamColors(
             infoAccent = colorResource(R.color.stream_info_accent),
             highlight = colorResource(R.color.stream_highlight),
             avatarInitials = colorResource(id = R.color.stream_text_avatar_initials),
-            screenSharingBackground = colorResource(R.color.stream_app_background)
+            screenSharingBackground = colorResource(R.color.stream_app_background),
+            soundLevels = colorResource(id = R.color.stream_primary_accent),
+            connectionQualityBackground = colorResource(id = R.color.stream_app_background),
+            connectionQualityBar = colorResource(id = R.color.stream_primary_accent),
+            infoMenuOverlayColor = Color.LightGray.copy(alpha = 0.7f)
         )
 
         /**
@@ -108,7 +116,11 @@ public data class StreamColors(
             infoAccent = colorResource(R.color.stream_info_accent_dark),
             highlight = colorResource(R.color.stream_highlight_dark),
             screenSharingBackground = colorResource(R.color.stream_app_background_dark),
-            avatarInitials = colorResource(id = R.color.stream_text_avatar_initials)
+            avatarInitials = colorResource(id = R.color.stream_text_avatar_initials),
+            soundLevels = colorResource(id = R.color.stream_primary_accent),
+            connectionQualityBackground = colorResource(id = R.color.stream_app_background_dark),
+            connectionQualityBar = colorResource(id = R.color.stream_primary_accent),
+            infoMenuOverlayColor = Color.LightGray.copy(alpha = 0.7f)
         )
     }
 }

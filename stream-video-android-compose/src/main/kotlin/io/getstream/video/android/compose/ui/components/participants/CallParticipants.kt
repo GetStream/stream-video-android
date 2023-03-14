@@ -24,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.ui.components.call.controls.internal.DefaultCallControlsContent
+import io.getstream.video.android.compose.ui.components.participants.internal.RegularCallParticipantsContent
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CallMediaState
 import io.getstream.video.android.core.model.Call

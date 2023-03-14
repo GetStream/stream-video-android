@@ -27,7 +27,7 @@ import io.getstream.video.android.core.model.StreamCallKind
 import io.getstream.video.android.core.model.StreamSfuSessionId
 import io.getstream.video.android.core.model.User
 import java.io.Serializable
-import java.util.*
+import java.util.Date
 
 /**
  * Represents possible state of [StreamCallEngine].
@@ -125,7 +125,7 @@ public sealed interface StreamCallState : Serializable {
 
     /**
      * Set when joined to Coordinator.
-     * @see [io.getstream.video.android.engine.StreamCallEngine.onCallJoined]
+     * @see [io.getstream.video.android.core.engine.StreamCallEngine.onCallJoined]
      */
     public data class Joined(
         override val callGuid: StreamCallGuid,
@@ -147,7 +147,7 @@ public sealed interface StreamCallState : Serializable {
     /**
      * Set when SFU join request is sent.
      * @see [stream.video.sfu.event.JoinRequest]
-     * @see [io.getstream.video.android.engine.StreamCallEngine.onSfuJoinSent]
+     * @see [io.getstream.video.android.core.engine.StreamCallEngine.onSfuJoinSent]
      */
     public data class Connecting(
         val sfuSessionId: StreamSfuSessionId,
@@ -169,8 +169,8 @@ public sealed interface StreamCallState : Serializable {
 
     /**
      * Set when SFU join response is received.
-     * @see [io.getstream.video.android.events.JoinCallResponseEvent]
-     * @see [io.getstream.video.android.engine.StreamCallEngine.onSfuEvent]
+     * @see [io.getstream.video.android.core.events.JoinCallResponseEvent]
+     * @see [io.getstream.video.android.core.engine.StreamCallEngine.onSfuEvent]
      */
     public data class Connected(
         val sfuSessionId: StreamSfuSessionId,

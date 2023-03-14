@@ -1,0 +1,78 @@
+# LocalVideoContent
+
+The `LocalVideoContent` displays the video content of the local participant in a video call in a floating way. This means that the component can be moved around within its parent component bounds. The component can be used with any participant, but in our default components, it handles only the local participant.
+
+Let's see how to use the component.
+
+## Usage
+
+To use the component, we recommend placing it in a `Box`, `Scaffold`, or some similar component that allows overlaid elements. Here's an example:
+
+```kotlin
+@Composable
+fun MyVideoScreen(
+    call: Call,
+    participantState: CallParticipantState,
+) {
+    val parentSize = ... // calculate parent size
+  
+    Scaffold(...) {
+        Box(modifier = Modifier.fillMaxSize().padding(it)) {
+            // ... Rest of your UI
+            LocalVideoContent(
+                call = call,
+                localParticipant = participantState,
+                parentBounds = parentSize,
+                paddingValues = it,
+                modifier = modifier
+            )
+        }
+    }
+}
+```
+
+In this example, you're using a `Scaffold` which lets you define the top bar, internal content and bottom bar. The rest of your UI can be whatever your use case requires, the main part is that the `LocalVideoContent` is overlaid on top of other UI elements.
+
+The state the `LocalVideoContent` requires is the following:
+
+* `call`: Used to determine the rest of the information we represent in the UI, based on the call state.
+* `localParticipant`: The state of the call participant you want to render.
+
+Once you have that provided, you'll see something similar to the following:
+
+![Default LocalVideoContent](https://user-images.githubusercontent.com/17215808/223443776-abd2aefa-ade7-4c97-9150-a59b6f3ae2c5.png)
+
+Notice the floating item at the top right corner. The `LocalVideoContent` represents that container. Given that the container is fairly simple and very specific, it doesn't allow any action handling customization.
+
+However, you can still customize the look and feel. Let's see how.
+
+## Customization
+
+When it comes to UI customization, the component exposes the following:
+
+```kotlin
+@Composable
+public fun LocalVideoContent(
+    parentBounds: IntSize,
+    paddingValues: PaddingValues,
+    modifier: Modifier = Modifier
+) 
+```
+
+* `parentBounds`: Defines the start and end area of the parent component. This parameter is used to ensure that the LocalVideoContent component is placed correctly within its parent when using the drag and drop gestures.
+* `paddingValues`: Specifies the padding values of the parent that are used to calculate bounds when using drag & drop.
+* `modifier`: Used for styling the component with more UI customization, such as adding a border, elevation and similar.
+
+On top of that, there are a few properties exposed in the `VideoTheme` that you can use to change the look of `LocalVideoContent`:
+
+* `StreamDimens.floatingVideoPadding`: Padding that's applied to the component container.
+* `StreamDimens.floatingVideoHeight`: The height of the container.
+* `StreamDimens.floatingVideoWidth`: The width of the container.
+* `StreamShapes.floatingParticipant`: The shape of the container.
+
+Using these properties, you can apply customization to the component without having to build your own UI component that deals with all the gesture and rendering logic.
+
+
+
+
+

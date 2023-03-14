@@ -21,11 +21,8 @@ import io.getstream.video.android.core.model.Call
 import io.getstream.video.android.core.model.CallEventType
 import io.getstream.video.android.core.model.CallMetadata
 import io.getstream.video.android.core.model.Device
-import io.getstream.video.android.core.model.IceServer
 import io.getstream.video.android.core.model.JoinedCall
-import io.getstream.video.android.core.model.SfuToken
 import io.getstream.video.android.core.model.StreamCallCid
-import io.getstream.video.android.core.model.StreamCallGuid
 import io.getstream.video.android.core.model.StreamCallId
 import io.getstream.video.android.core.model.StreamCallType
 import io.getstream.video.android.core.model.User
@@ -188,27 +185,6 @@ public interface StreamVideo {
      * @param socketListener The listener to remove.
      */
     public fun removeSocketListener(socketListener: SocketListener)
-
-    /**
-     * Creates an instance of the [CallClient] for the given call input, which is persisted and
-     * used to communicate with the BE.
-     *
-     * Use it to control the track state, mute/unmute devices and listen to call events.
-     *
-     * @param callGuid The GUID of the Call, containing the ID and the type.
-     * @param signalUrl The URL of the server in which the call is being hosted.
-     * @param sfuToken User's ticket to enter the call.
-     * @param iceServers Servers required to appropriately connect to the call and receive tracks.
-     *
-     * @return An instance of [CallClient] ready to connect to a call. Make sure to call
-     * [CallClient.connectToCall] when you're ready to fully join a call.
-     */
-    public fun createCallClient(
-        callGuid: StreamCallGuid,
-        signalUrl: String,
-        sfuToken: SfuToken,
-        iceServers: List<IceServer>
-    ): CallClient
 
     /**
      * Returns current [CallClient] instance.

@@ -1,0 +1,47 @@
+# CallBackground
+
+The `CallBackground` component is a versatile component designed to wrap the content of an incoming or outgoing call and its participants. Based on the state it receives and the call type, different types of information is shown. But it's still an easy way to wrap custom content into a BG that reflects the call state.
+
+Let's see how to use the component.
+
+## Usage
+
+To use the `CallBackground`, you can simply embed it somewhere in your custom UI, like so:
+
+```kotlin
+CallBackground(
+    participants = callParticipants
+    callType = CallType.VIDEO, // VIDEO or AUDIO
+    isIncoming = true,
+    modifier = Modifier.padding(16.dp)
+) {
+    // Content to be displayed in the call background
+    Avatar(
+        modifier = Modifier.size(56.dp),
+        imageUrl = "",
+        initials = "CC"
+    )
+}
+```
+
+Using this small snippet of code, you can represent something like the following:
+
+![Default Call Background](https://user-images.githubusercontent.com/17215808/223135903-017700bb-14e3-406c-9545-82d64db374e5.png)
+
+In this simple example, the component shows a static image for the call, since there are more participants in the call. For simplicity, we wrapped an `Avatar` in the `CallBackground`, but you can embed more complex UI if necessary.
+
+Alternatively, if there were only one participant in the call, the person who's calling you, or the person you're calling, their respective profile image would be rendered instead of the static image.
+
+Since this is a purely visual component that doesn't have any actions or behavior, there are no action handler customization options, but you can still customize the UI.
+
+## Customization
+
+This component has the following parameters that can be used to customize its behavior and appearance:
+
+- `participants`: A list of `CallUser` objects that represent the participants of the call. This parameter is mandatory, and it allows you to specify the users that are involved in the call, based on various events or your custom logic. Each `CallUser` object contains information about the user's name, profile picture and other relevant details.
+- `callType`: A `CallType` enum case that represents the type of the call. Can be either `CallType.VIDEO` or `CallType.AUDIO`.
+- `isIncoming`: A flag that specifies whether the call is Incoming or Outgoing. It allows you to customize the appearance of the component based on the call's direction. Incoming and Outgoing calls behave differently, visually, based on the `CallType` and number of participants.
+- `modifier`: A `Modifier` for styling. Optional parameter, but can be used for additional styling.
+- `content`: A composable Slot API that allows you to specify the content that should be wrapped by the component. This parameter is mandatory, since you need to define what content you're wrapping with the background.
+
+All of this should be more than enough to customize any Incoming or Outgoing calls. You can create immersive and engaging calling experiences that are tailored to your app's needs.
