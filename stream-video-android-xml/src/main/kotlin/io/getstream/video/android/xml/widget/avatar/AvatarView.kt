@@ -24,6 +24,8 @@ import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.shape.AbsoluteCornerSize
 import com.google.android.material.shape.RelativeCornerSize
 import com.google.android.material.shape.ShapeAppearanceModel
+import io.getstream.video.android.core.model.CallUser
+import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.utils.initials
 import io.getstream.video.android.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.xml.utils.extensions.load
@@ -49,9 +51,7 @@ public class AvatarView : ShapeableImageView {
     }
 
     public constructor(context: Context) : this(context, null)
-
     public constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
-
     public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
         context.createStreamThemeWrapper(),
         attrs,
@@ -60,23 +60,48 @@ public class AvatarView : ShapeableImageView {
         init(context, attrs)
     }
 
-    public constructor(context: Context, avatarStyle: AvatarStyle) : super(
-        context.createStreamThemeWrapper()
-    ) {
-        setAvatarStyle(avatarStyle)
-        scaleType = ScaleType.CENTER_CROP
+    /**
+     * Loads the data for the avatar, from the user.
+     *
+     * @param user The [User] for which we want to show the avatar.
+     */
+    public fun setData(user: User) {
+        load(
+            data = user.imageUrl,
+            placeholderDrawable = AvatarPlaceholderDrawable(
+                context = context,
+                initials = user.name.ifEmpty { user.id }.initials(),
+                initialsTextStyle = avatarStyle.avatarInitialsTextStyle
+            )
+        )
     }
 
     /**
-     * Sets the user data we want to show the avatar for.
+     * Loads the data for the avatar, from the user.
      *
-     * @param imageUrl The image url to display the avatar for.
-     * @param name The name to display as a fallback.
+     * @param user The [CallUser] for which we want to show the avatar for.
      */
-    public fun setData(imageUrl: String, name: String) {
+    public fun setData(user: CallUser) {
         load(
-            data = imageUrl,
-            placeholderDrawable = AvatarPlaceholderDrawable(context, name.initials(), avatarStyle.avatarInitialsTextStyle)
+            data = user.imageUrl,
+            placeholderDrawable = AvatarPlaceholderDrawable(
+                context = context,
+                initials = user.name.ifEmpty { user.id }.initials(),
+                initialsTextStyle = avatarStyle.avatarInitialsTextStyle
+            )
+        )
+    }
+
+    /**
+     * Sets the text we want to show inside the avatar.
+     *
+     * @param text The text we wish to show inside the view.
+     */
+    public fun setData(text: String) {
+        background = AvatarPlaceholderDrawable(
+            context = context,
+            initials = text,
+            initialsTextStyle = avatarStyle.avatarInitialsTextStyle
         )
     }
 

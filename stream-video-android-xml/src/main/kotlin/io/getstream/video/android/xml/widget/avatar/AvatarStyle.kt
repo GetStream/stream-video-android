@@ -37,7 +37,6 @@ public data class AvatarStyle(
     @Px public val avatarBorderWidth: Int,
     @ColorInt public val avatarBorderColor: Int,
     public val avatarInitialsTextStyle: TextStyle,
-    public val groupAvatarInitialsTextStyle: TextStyle,
     public val avatarShape: AvatarShape,
     @Px public val borderRadius: Float,
 ) {
@@ -79,25 +78,6 @@ public data class AvatarStyle(
                     )
                     .build()
 
-                val groupAvatarInitialsTextStyle = TextStyle.Builder(this)
-                    .size(
-                        R.styleable.AvatarView_streamGroupAvatarTextSize,
-                        context.getDimension(RCommon.dimen.title3TextSize)
-                    )
-                    .color(
-                        R.styleable.AvatarView_streamGroupAvatarTextColor,
-                        context.getColorCompat(R.color.stream_white)
-                    )
-                    .font(
-                        R.styleable.AvatarView_streamGroupAvatarTextFontAssets,
-                        R.styleable.AvatarView_streamGroupAvatarTextFont
-                    )
-                    .style(
-                        R.styleable.AvatarView_streamGroupAvatarTextStyle,
-                        Typeface.BOLD
-                    )
-                    .build()
-
                 val avatarShape =
                     getEnum(R.styleable.AvatarView_streamAvatarShape, AvatarShape.CIRCLE)
 
@@ -113,7 +93,6 @@ public data class AvatarStyle(
                     avatarBorderWidth = avatarBorderWidth,
                     avatarBorderColor = avatarBorderColor,
                     avatarInitialsTextStyle = avatarInitialsTextStyle,
-                    groupAvatarInitialsTextStyle = groupAvatarInitialsTextStyle,
                     avatarShape = avatarShape,
                     borderRadius = borderRadius,
                 ).let(TransformStyle.avatarStyleTransformer::transform)

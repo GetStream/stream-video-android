@@ -27,8 +27,8 @@ import kotlinx.coroutines.flow.collectLatest
  * Binds [OutgoingCallView] with [CallViewModel], updating the view's state based on data provided by the ViewModel,
  * and propagating view events to the ViewModel as needed.
  *
- * This function sets listeners on the view and ViewModel. Call this method before setting any additional listeners on
- * these objects yourself.
+ * This function sets listeners on the view and ViewModel. Call this method
+ * before setting any additional listeners on these objects yourself.
  *
  * @param viewModel [CallViewModel] for observing data and running actions.
  * @param lifecycleOwner The lifecycle owner, root component containing [OutgoingCallView]. Usually an Activity or

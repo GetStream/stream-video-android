@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2022 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -26,70 +26,45 @@ import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.call.state.ToggleSpeakerphone
 import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.xml.R
-import io.getstream.video.android.xml.widget.active.ActiveCallView
 import io.getstream.video.android.xml.widget.control.CallControlItem
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.collectLatest
+import io.getstream.video.android.xml.widget.control.CallControlsView
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filterNotNull
 import io.getstream.video.android.ui.common.R as RCommon
 
 /**
- * Binds [ActiveCallView] with [CallViewModel], updating the view's state based on data provided by the ViewModel,
+ * Binds [CallControlsView] with [CallViewModel], updating the view's state based on data provided by the ViewModel,
  * and propagating view events to the ViewModel as needed.
  *
  * This function sets listeners on the view and ViewModel. Call this method
  * before setting any additional listeners on these objects yourself.
  *
  * @param viewModel [CallViewModel] for observing data and running actions.
- * @param lifecycleOwner The lifecycle owner, root component containing [ActiveCallView]. Usually an Activity or
+ * @param lifecycleOwner The lifecycle owner, root component containing [CallControlsView]. Usually an Activity or
  * Fragment.
- * @param updateCallMediaState Called every time [CallMediaState] changes to update the UI.
+ * @param fetchCallMediaState Handler used to fetch the new state of the call controls buttons when the media state
+ * changes.
  * @param onCallAction Handler that listens to interactions with call media controls.
  */
-public fun ActiveCallView.bindView(
+public fun CallControlsView.bindView(
     viewModel: CallViewModel,
     lifecycleOwner: LifecycleOwner,
-    updateCallMediaState: (CallMediaState, Boolean) -> List<CallControlItem> = { mediaState, isScreenSharingActive ->
+    fetchCallMediaState: (CallMediaState, Boolean) -> List<CallControlItem> = { mediaState, isScreenSharingActive ->
         defaultControlList(mediaState, isScreenSharingActive)
     },
     onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
 ) {
-
-    this.callActionListener = onCallAction
-
-    startJob(lifecycleOwner) {
-        viewModel.callState.filterNotNull().collectLatest { call ->
-            setParticipantsRendererInitializer { videoRenderer, trackId, trackType, onRender ->
-                call.initRenderer(videoRenderer, trackId, trackType, onRender)
-            }
-        }
-    }
-
-    startJob(lifecycleOwner) {
-        viewModel.participantList.combine(viewModel.screenSharingSessions) { participants, screenSharingSessions ->
-            participants to screenSharingSessions.firstOrNull()
-        }.collect { (participants, screenSharingSession) ->
-            updateContent(participants, screenSharingSession)
-        }
-    }
-
-    startJob(lifecycleOwner) {
-        viewModel.primarySpeaker.collectLatest {
-            updatePrimarySpeaker(it)
-        }
-    }
+    this.onCallAction = onCallAction
 
     startJob(lifecycleOwner) {
         viewModel.callMediaState.combine(viewModel.screenSharingSessions) { mediaState, screenSharingSessions ->
             mediaState to screenSharingSessions.firstOrNull()
         }.collect { (mediaState, screenSharingSession) ->
-            setControlItems(updateCallMediaState(mediaState, screenSharingSession != null))
+            setItems(fetchCallMediaState(mediaState, screenSharingSession != null))
         }
     }
 }
 
-private fun defaultControlList(callMediaState: CallMediaState, isScreenSharingActive: Boolean): List<CallControlItem> {
+internal fun defaultControlList(callMediaState: CallMediaState, isScreenSharingActive: Boolean): List<CallControlItem> {
     return listOf(
         CallControlItem(
             icon = if (callMediaState.isSpeakerphoneEnabled) {

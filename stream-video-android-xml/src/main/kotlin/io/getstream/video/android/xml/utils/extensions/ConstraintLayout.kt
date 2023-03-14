@@ -19,6 +19,7 @@ package io.getstream.video.android.xml.utils.extensions
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.core.view.children
 
 internal inline fun ConstraintLayout.setConstraints(actions: ConstraintSet.() -> Unit) {
     val set = ConstraintSet()
@@ -26,9 +27,15 @@ internal inline fun ConstraintLayout.setConstraints(actions: ConstraintSet.() ->
     set.applyTo(this)
 }
 
-internal inline fun ConstraintLayout.updateConstraints(actions: ConstraintSet.() -> Unit) {
+internal inline fun ConstraintLayout.updateConstraints(
+    clearAllConstraints: Boolean = false,
+    actions: ConstraintSet.() -> Unit,
+) {
     val set = ConstraintSet()
     set.clone(this)
+    if (clearAllConstraints) {
+        children.forEach { set.clearConstraints(it.id) }
+    }
     set.actions()
     set.applyTo(this)
 }

@@ -165,11 +165,13 @@ public class CallViewModel(
     public val activeSpeakers: Flow<List<CallParticipantState>> =
         callState.filterNotNull().flatMapLatest { it.activeSpeakers }
 
-    public val localParticipant: Flow<CallParticipantState> =
+    public val localParticipant: StateFlow<CallParticipantState?> =
         callState.filterNotNull().flatMapLatest { it.localParticipant }
+            .stateIn(scope = viewModelScope, started = SharingStarted.Eagerly, initialValue = null)
 
-    public val primarySpeaker: Flow<CallParticipantState?> =
+    public val primarySpeaker: StateFlow<CallParticipantState?> =
         callState.filterNotNull().flatMapLatest { it.primarySpeaker }
+            .stateIn(scope = viewModelScope, started = SharingStarted.Eagerly, initialValue = null)
 
     private val _isShowingCallInfo = MutableStateFlow(false)
     public val isShowingCallInfo: StateFlow<Boolean> = _isShowingCallInfo
@@ -185,8 +187,9 @@ public class CallViewModel(
     private val _participants: MutableStateFlow<List<CallUser>> = MutableStateFlow(emptyList())
     public val participants: StateFlow<List<CallUser>> = _participants
 
-    public val screenSharingSessions: Flow<List<ScreenSharingSession>> =
+    public val screenSharingSessions: StateFlow<List<ScreenSharingSession>> =
         callState.flatMapLatest { it?.screenSharingSessions ?: emptyFlow() }
+            .stateIn(scope = viewModelScope, started = SharingStarted.Eagerly, initialValue = emptyList())
 
     private var prevState: State = State.Idle
 

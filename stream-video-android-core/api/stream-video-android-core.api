@@ -3185,11 +3185,11 @@ public final class io/getstream/video/android/core/viewmodel/CallViewModel : and
 	public final fun getCallMediaState ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getCallState ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getCallType ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun getLocalParticipant ()Lkotlinx/coroutines/flow/Flow;
+	public final fun getLocalParticipant ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getParticipantList ()Lkotlinx/coroutines/flow/Flow;
 	public final fun getParticipants ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun getPrimarySpeaker ()Lkotlinx/coroutines/flow/Flow;
-	public final fun getScreenSharingSessions ()Lkotlinx/coroutines/flow/Flow;
+	public final fun getPrimarySpeaker ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getScreenSharingSessions ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getStreamCallState ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getUsers ()Ljava/util/List;
 	public final fun getUsersState ()Lkotlinx/coroutines/flow/StateFlow;

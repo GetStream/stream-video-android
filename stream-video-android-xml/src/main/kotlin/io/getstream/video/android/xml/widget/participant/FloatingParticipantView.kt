@@ -23,11 +23,15 @@ import io.getstream.video.android.core.model.CallParticipantState
 import io.getstream.video.android.xml.databinding.ViewFloatingParticipantBinding
 import io.getstream.video.android.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.xml.utils.extensions.streamThemeInflater
+import io.getstream.video.android.xml.widget.view.JobHolder
+import kotlinx.coroutines.Job
 
 /**
  * Renders the call participant overlaid above the rest od the participants.
  */
-public class FloatingParticipantView : CardView {
+public class FloatingParticipantView : CardView, JobHolder {
+
+    override val runningJobs: MutableList<Job> = mutableListOf()
 
     private val binding = ViewFloatingParticipantBinding.inflate(streamThemeInflater, this)
 
@@ -55,5 +59,10 @@ public class FloatingParticipantView : CardView {
      */
     public fun setParticipant(participant: CallParticipantState) {
         binding.localParticipant.setParticipant(participant)
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        stopAllJobs()
     }
 }

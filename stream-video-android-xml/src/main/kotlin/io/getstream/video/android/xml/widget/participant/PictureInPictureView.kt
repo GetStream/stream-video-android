@@ -18,20 +18,18 @@ package io.getstream.video.android.xml.widget.participant
 
 import android.content.Context
 import android.util.AttributeSet
-import androidx.cardview.widget.CardView
 import androidx.core.view.children
-import io.getstream.video.android.core.model.CallParticipantState
-import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.xml.R
 import io.getstream.video.android.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.xml.utils.extensions.getFirstViewInstance
 import io.getstream.video.android.xml.widget.renderer.VideoRenderer
 import io.getstream.video.android.xml.widget.screenshare.ScreenShareView
+import io.getstream.video.android.xml.widget.view.CallCardView
 
 /**
  * View to ve shown when inside a call and the app enter picture in picture mode. Will show the primary speaker.
  */
-public class PictureInPictureView : CardView {
+public class PictureInPictureView : CallCardView, VideoRenderer {
 
     private lateinit var style: PictureInPictureStyle
 
@@ -39,11 +37,7 @@ public class PictureInPictureView : CardView {
      * Handler to initialise the renderer. If the participant view was created before the renderer has been initialised
      * will take care of init.
      */
-    public var rendererInitializer: RendererInitializer? = null
-        set(value) {
-            field = value
-            field?.let { getVideoRenderer()?.setRendererInitializer(it) }
-        }
+    private var rendererInitializer: RendererInitializer? = null
 
     public constructor(context: Context) : this(context, null)
     public constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
@@ -60,44 +54,49 @@ public class PictureInPictureView : CardView {
     }
 
     /**
+     * Used to set the [RendererInitializer] for the [CallParticipantView].
+     *
+     * @param rendererInitializer The [RendererInitializer] used to initialize the renderer.
+     */
+    override fun setRendererInitializer(rendererInitializer: RendererInitializer) {
+        this.rendererInitializer = rendererInitializer
+        getVideoRenderer()?.let {
+            it.setRendererInitializer(rendererInitializer)
+        }
+    }
+
+    /**
      * Populates the PiP ui with the [CallParticipantView] to preview the primary speaker.
      */
-    public fun showCallParticipantView(participant: CallParticipantState) {
-        var callParticipantView = getFirstViewInstance<CallParticipantView>()
+    public fun setCallParticipantView(onViewInitialized: (CallParticipantView) -> Unit) {
+        if (getFirstViewInstance<CallParticipantView>() != null) return
 
-        if (callParticipantView == null) {
-            removeAllViews()
-            callParticipantView = CallParticipantView(
-                context = context,
-                attrs = null,
-                defStyleAttr = R.attr.streamPictureInPictureCallParticipantViewStyle,
-                defStyleRes = style.callParticipantStyle
-            ).apply {
-                layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
-                rendererInitializer?.let { setRendererInitializer(it) }
-                this@PictureInPictureView.addView(this)
-            }
+        removeAllViews()
+        CallParticipantView(
+            context = context,
+            attrs = null,
+            defStyleAttr = R.attr.streamPictureInPictureCallParticipantViewStyle,
+            defStyleRes = style.callParticipantStyle
+        ).apply {
+            layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
+            rendererInitializer?.let { setRendererInitializer(it) }
+            this@PictureInPictureView.addView(this)
+            onViewInitialized(this)
         }
-
-        callParticipantView.setParticipant(participant)
     }
 
     /**
      * Populates the PiP ui with the [ScreenShareView] to preview the primary speaker.
      */
-    public fun showScreenShare(screenSharingSession: ScreenSharingSession) {
-        var screenShareView = getFirstViewInstance<ScreenShareView>()
+    public fun setScreenShareView(onViewInitialized: (ScreenShareView) -> Unit) {
+        if (getFirstViewInstance<ScreenShareView>() != null) return
 
-        if (screenShareView == null) {
-            removeAllViews()
-            screenShareView = getFirstViewInstance() ?: ScreenShareView(context).apply {
-                layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
-                rendererInitializer?.let { setRendererInitializer(it) }
-                this@PictureInPictureView.addView(this)
-            }
+        ScreenShareView(context).apply {
+            layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
+            rendererInitializer?.let { setRendererInitializer(it) }
+            this@PictureInPictureView.addView(this)
+            onViewInitialized(this)
         }
-
-        screenShareView.setScreenSharingSession(screenSharingSession)
     }
 
     /**

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.xml.widget.call
+package io.getstream.video.android.xml.widget.calldetails
 
 import android.content.Context
 import android.util.AttributeSet
@@ -95,18 +95,18 @@ public class CallDetailsView : ConstraintLayout {
                 addAvatarSpacer()
             }
 
-            addAvatar(participant.imageUrl, participant.name, isSingleParticipant)
+            addAvatar(participant, isSingleParticipant)
         }
 
         if (participants.size == 3) {
             val participant = participants[2]
             addAvatarSpacer()
-            addAvatar(participant.imageUrl, participant.name, isSingleParticipant)
+            addAvatar(participant, isSingleParticipant)
         }
 
         if (participants.size > 3) {
             addAvatarSpacer()
-            addAvatar("", "+${participants.size - 2}", isSingleParticipant)
+            addAvatar(null, isSingleParticipant, "+${participants.size - 2}")
         }
     }
 
@@ -129,16 +129,21 @@ public class CallDetailsView : ConstraintLayout {
     /**
      * Ease of use method to create and add a new avatar.
      *
-     * @param imageUrl The avatar url of the participant.
+     * @param user [CallUser] for which we want to show the avatar.
      * @param isSingleAvatar Whether there is one participant (direct call) or multiple participants (group call).
+     * @param text Text which we want to show inside the avatar if the [user] is null.
      */
-    private fun addAvatar(imageUrl: String?, name: String, isSingleAvatar: Boolean) {
+    private fun addAvatar(user: CallUser?, isSingleAvatar: Boolean, text: String = "") {
         val avatarSize = if (isSingleAvatar) style.singleAvatarSize else style.callAvatarSize
         val avatar = AvatarView(context).apply {
             layoutParams = LayoutParams(avatarSize, avatarSize)
             scaleType = ImageView.ScaleType.CENTER_CROP
         }
-        avatar.setData(imageUrl ?: "", name)
+        if (user != null) {
+            avatar.setData(user)
+        } else {
+            avatar.setData(text)
+        }
         binding.avatarsHolder.addView(avatar)
     }
 

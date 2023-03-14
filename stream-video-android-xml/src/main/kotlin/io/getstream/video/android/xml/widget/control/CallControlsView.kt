@@ -28,13 +28,18 @@ import io.getstream.video.android.xml.utils.extensions.constrainViewStartToEndOf
 import io.getstream.video.android.xml.utils.extensions.constrainViewToParentBySide
 import io.getstream.video.android.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.xml.utils.extensions.getColorCompat
+import io.getstream.video.android.xml.utils.extensions.getDrawableCompat
 import io.getstream.video.android.xml.utils.extensions.updateConstraints
+import io.getstream.video.android.xml.widget.view.JobHolder
+import kotlinx.coroutines.Job
 
 /**
  * Represents the set of controls the user can use to change their audio and video device state, or
  * browse other types of settings, leave the call, or implement something custom.
  */
-public class CallControlsView : ConstraintLayout {
+public class CallControlsView : ConstraintLayout, JobHolder {
+
+    override val runningJobs: MutableList<Job> = mutableListOf()
 
     /**
      * Style of the view.
@@ -49,7 +54,7 @@ public class CallControlsView : ConstraintLayout {
     /**
      * Handler for call controls click actions.
      */
-    public var callControlItemClickListener: (CallAction) -> Unit = { }
+    public var onCallAction: (CallAction) -> Unit = { }
 
     public constructor(context: Context) : this(context, null, 0)
     public constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
@@ -63,7 +68,7 @@ public class CallControlsView : ConstraintLayout {
 
     private fun init(context: Context, attrs: AttributeSet?) {
         style = CallControlsStyle(context, attrs)
-
+        background = context.getDrawableCompat(R.drawable.rect_controls)
         background.setTint(style.callControlsBackgroundColor)
     }
 
@@ -88,7 +93,7 @@ public class CallControlsView : ConstraintLayout {
             callControlView.background.setTint(context.getColorCompat(callControlItem.backgroundTint))
             callControlView.setOnClickListener {
                 if (callControlItem.enabled) {
-                    callControlItemClickListener(callControlItem.action)
+                    onCallAction(callControlItem.action)
                 }
             }
             views.add(callControlView)
@@ -145,5 +150,10 @@ public class CallControlsView : ConstraintLayout {
                 }
             }
         }
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        stopAllJobs()
     }
 }
