@@ -18,7 +18,6 @@ package io.getstream.video.android.core.utils
 
 import io.getstream.video.android.core.model.CallData
 import io.getstream.video.android.core.model.CallDetails
-import io.getstream.video.android.core.model.CallEgress
 import io.getstream.video.android.core.model.CallMetadata
 import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.core.model.CallUserState
@@ -49,10 +48,10 @@ internal fun GetOrCreateCallResponse.toCall(kind: StreamCallKind): CallMetadata 
             recordingEnabled = settings.recording.audioOnly, // TODO
             broadcastingEnabled = settings.broadcasting.enabled,
             users = members.toCallUsers(),
-            callEgress = CallEgress(
-                broadcastEgress = broadcastEgress,
-                recordEgress = recordEgress
-            ),
+//            callEgress = CallEgress(
+//                broadcastEgress = broadcastEgress,
+//                recordEgress = recordEgress
+//            ),
             callDetails = CallDetails(
                 members = members.map { it.toCallUser() }.associateBy { it.id },
                 memberUserIds = members.map { it.userId },

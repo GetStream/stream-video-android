@@ -19,7 +19,6 @@ package io.getstream.video.android.core.model.state
 import io.getstream.video.android.core.engine.StreamCallEngine
 import io.getstream.video.android.core.errors.VideoError
 import io.getstream.video.android.core.model.CallDetails
-import io.getstream.video.android.core.model.CallEgress
 import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.core.model.IceServer
 import io.getstream.video.android.core.model.SfuToken
@@ -63,7 +62,7 @@ public sealed interface StreamCallState : Serializable {
         public abstract val updatedAt: StreamDate
         public abstract val users: Map<String, CallUser>
         public abstract val callDetails: CallDetails
-        public abstract val callEgress: CallEgress
+//        public abstract val callEgress: CallEgress
         public abstract val custom: Map<String, Any>
     }
 
@@ -80,7 +79,7 @@ public sealed interface StreamCallState : Serializable {
         override val updatedAt: StreamDate,
         override val users: Map<String, CallUser>,
         override val callDetails: CallDetails,
-        override val callEgress: CallEgress,
+//        override val callEgress: CallEgress,
         override val custom: Map<String, Any>,
         val rejections: List<User>,
         val acceptedByCallee: Boolean
@@ -99,7 +98,7 @@ public sealed interface StreamCallState : Serializable {
         override val updatedAt: StreamDate,
         override val users: Map<String, CallUser>,
         override val callDetails: CallDetails,
-        override val callEgress: CallEgress,
+//        override val callEgress: CallEgress,
         override val custom: Map<String, Any>,
         val acceptedByMe: Boolean,
     ) : Started(), Joinable
@@ -114,7 +113,7 @@ public sealed interface StreamCallState : Serializable {
         override val updatedAt: StreamDate,
         override val users: Map<String, CallUser>,
         override val callDetails: CallDetails,
-        override val callEgress: CallEgress,
+//        override val callEgress: CallEgress,
         override val custom: Map<String, Any>
     ) : Started()
 
@@ -141,7 +140,7 @@ public sealed interface StreamCallState : Serializable {
         override val sfuToken: SfuToken,
         override val iceServers: List<IceServer>,
         override val callDetails: CallDetails,
-        override val callEgress: CallEgress,
+//        override val callEgress: CallEgress,
         override val custom: Map<String, Any>
     ) : InCall()
 
@@ -164,7 +163,7 @@ public sealed interface StreamCallState : Serializable {
         override val sfuToken: SfuToken,
         override val iceServers: List<IceServer>,
         override val callDetails: CallDetails,
-        override val callEgress: CallEgress,
+//        override val callEgress: CallEgress,
         override val custom: Map<String, Any>
     ) : InCall()
 
@@ -187,7 +186,7 @@ public sealed interface StreamCallState : Serializable {
         override val sfuToken: SfuToken,
         override val iceServers: List<IceServer>,
         override val callDetails: CallDetails,
-        override val callEgress: CallEgress,
+//        override val callEgress: CallEgress,
         override val custom: Map<String, Any>
     ) : InCall()
 
