@@ -26,7 +26,6 @@ import io.getstream.video.android.xml.widget.appbar.CallAppBarView
 import io.getstream.video.android.xml.widget.call.CallView
 import io.getstream.video.android.xml.widget.callcontainer.CallContainerView
 import io.getstream.video.android.xml.widget.control.CallControlItem
-import io.getstream.video.android.xml.widget.control.CallControlsView
 import io.getstream.video.android.xml.widget.incoming.IncomingCallView
 import io.getstream.video.android.xml.widget.outgoing.OutgoingCallView
 import kotlinx.coroutines.flow.combine
@@ -104,12 +103,11 @@ public fun CallContainerView.bindView(
 
                 else -> showCallContent {
                     when (it) {
-                        is CallView -> it.bindView(viewModel, lifecycleOwner)
-                        is CallControlsView -> it.bindView(
+                        is CallView -> it.bindView(
                             viewModel = viewModel,
                             lifecycleOwner = lifecycleOwner,
                             fetchCallMediaState = fetchCallMediaState,
-                            onCallAction = onCallAction,
+                            onCallAction = onCallAction
                         )
                         is CallAppBarView -> it.bindView(
                             viewModel = viewModel,

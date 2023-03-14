@@ -26,15 +26,19 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.core.view.children
 import androidx.core.view.setPadding
+import androidx.core.view.updateLayoutParams
 import io.getstream.video.android.core.model.CallParticipantState
 import io.getstream.video.android.xml.R
 import io.getstream.video.android.xml.font.setTextStyle
+import io.getstream.video.android.xml.utils.extensions.clearConstraints
 import io.getstream.video.android.xml.utils.extensions.constrainViewBottomToTopOfView
 import io.getstream.video.android.xml.utils.extensions.constrainViewToParent
 import io.getstream.video.android.xml.utils.extensions.constrainViewToParentBySide
 import io.getstream.video.android.xml.utils.extensions.constrainViewTopToBottomOfView
 import io.getstream.video.android.xml.utils.extensions.getFirstViewInstance
+import io.getstream.video.android.xml.utils.extensions.isLandscape
 import io.getstream.video.android.xml.utils.extensions.setConstraints
 import io.getstream.video.android.xml.utils.extensions.updateConstraints
 import io.getstream.video.android.xml.widget.control.CallControlsView
@@ -65,6 +69,7 @@ public class CallView : CallConstraintLayout {
         style = CallViewStyle(context, attrs)
 
         showPreConnectedHolder()
+        addCallControlsView()
     }
 
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
@@ -94,6 +99,47 @@ public class CallView : CallConstraintLayout {
     }
 
     /**
+     * Adds a [CallControlsView] view to the view hierarchy.
+     */
+    private fun addCallControlsView() {
+        if (getFirstViewInstance<CallControlsView>() != null) return
+
+        CallControlsView(context).apply {
+            id = ViewGroup.generateViewId()
+            this@CallView.addView(this)
+        }
+
+        updateCallControlsConstraints()
+    }
+
+    private fun updateCallControlsConstraints() {
+        val callControlsView = getFirstViewInstance<CallControlsView>() ?: return
+
+        val appBarWidth: Int
+        val appBarHeight: Int
+        val constraintSide: Int
+
+        if (isLandscape) {
+            appBarWidth = style.callControlsWidthLandscape
+            appBarHeight = LayoutParams.MATCH_PARENT
+            constraintSide = ConstraintSet.END
+        } else {
+            appBarWidth = LayoutParams.MATCH_PARENT
+            appBarHeight = style.callControlsHeight
+            constraintSide = ConstraintSet.BOTTOM
+        }
+
+        updateConstraints {
+            clearConstraints(callControlsView)
+            constrainViewToParentBySide(callControlsView, constraintSide)
+        }
+        callControlsView.updateLayoutParams {
+            width = appBarWidth
+            height = appBarHeight
+        }
+    }
+
+    /**
      * Populates the view with the screen share content. Will remove all views that are used when there is no screen
      * share content and add [ScreenShareView] and [CallParticipantsListView].
      *
@@ -103,7 +149,9 @@ public class CallView : CallConstraintLayout {
     public fun setScreenSharingContent(onViewInitialized: (View) -> Unit) {
         if (getFirstViewInstance<ScreenShareView>() != null) return
 
-        removeAllViews()
+        children.forEach {
+            if (it !is CallControlsView) removeView(it)
+        }
 
         val presenterText = TextView(context).apply {
             id = ViewGroup.generateViewId()
@@ -134,6 +182,8 @@ public class CallView : CallConstraintLayout {
             onViewInitialized(this)
         }
 
+        val callControlsView = getFirstViewInstance<CallControlsView>() ?: return
+
         updateConstraints {
             constrainViewToParentBySide(presenterText, ConstraintSet.START)
             constrainViewToParentBySide(presenterText, ConstraintSet.END)
@@ -144,7 +194,7 @@ public class CallView : CallConstraintLayout {
             constrainViewToParentBySide(screenShareView, ConstraintSet.END)
             constrainViewBottomToTopOfView(screenShareView, listView, style.screenShareMargin)
 
-            constrainViewToParentBySide(listView, ConstraintSet.BOTTOM, getCallControlsHeight())
+            constrainViewBottomToTopOfView(listView, callControlsView)
             constrainViewToParentBySide(listView, ConstraintSet.START)
             constrainViewToParentBySide(listView, ConstraintSet.END)
         }
@@ -164,12 +214,13 @@ public class CallView : CallConstraintLayout {
     internal fun setRegularContent(onViewInitialized: (CallParticipantsGridView) -> Unit) {
         if (getFirstViewInstance<CallParticipantsGridView>() != null) return
 
-        removeAllViews()
-
+        children.forEach {
+            if (it !is CallControlsView) removeView(it)
+        }
         CallParticipantsGridView(context).apply {
             id = ViewGroup.generateViewId()
             buildParticipantView = { this@CallView.buildParticipantView(false) }
-            getBottomLabelOffset = { this@CallView.getCallControlsHeight() }
+            getBottomLabelOffset = { this@CallView.getCallControlsSize() }
             this@CallView.addView(this)
             layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
             onViewInitialized(this)
@@ -266,16 +317,20 @@ public class CallView : CallConstraintLayout {
      * @return The max Y offset that can be applied to the overlaid [FloatingParticipantView].
      */
     private fun calculateFloatingParticipantMaxYOffset(): Float {
-        return height - style.localParticipantHeight - style.localParticipantPadding - getCallControlsHeight()
+        return height - style.localParticipantHeight - style.localParticipantPadding - getCallControlsSize()
     }
 
     /**
-     * Returns the [CallControlsView] height.
+     * Returns the [CallControlsView] width if landscape and height if in portrait mode.
      *
-     * @return The height of the [CallControlsView].
+     * @return The size of the [CallControlsView] depending on orientation.
      */
-    private fun getCallControlsHeight(): Int {
-        return (parent as ViewGroup).getFirstViewInstance<CallControlsView>()?.height ?: 0
+    public fun getCallControlsSize(): Int {
+        return if (isLandscape) style.callControlsWidthLandscape else style.callControlsHeight
+    }
+
+    override fun onOrientationChanged(isLandscape: Boolean) {
+        updateCallControlsConstraints()
     }
 
     /**
@@ -288,9 +343,9 @@ public class CallView : CallConstraintLayout {
      */
     private fun buildParticipantView(isListView: Boolean): CallParticipantView {
         val defStyleAttr = if (isListView) {
-            R.attr.streamCallContentListParticipantStyle
+            R.attr.streamCallViewListParticipantStyle
         } else {
-            R.attr.streamCallContentGridParticipantStyle
+            R.attr.streamCallViewGridParticipantStyle
         }
 
         val defStyleRes = if (isListView) style.listCallParticipantStyle else style.gridCallParticipantStyle
@@ -318,5 +373,6 @@ public class CallView : CallConstraintLayout {
     override fun onViewAdded(view: View?) {
         super.onViewAdded(view)
         getFirstViewInstance<FloatingParticipantView>()?.bringToFront()
+        getFirstViewInstance<CallControlsView>()?.bringToFront()
     }
 }

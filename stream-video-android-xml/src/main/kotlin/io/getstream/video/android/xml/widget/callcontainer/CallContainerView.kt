@@ -22,7 +22,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.children
-import io.getstream.video.android.xml.utils.extensions.constrainViewEndToStartOfView
+import io.getstream.video.android.xml.utils.extensions.clearConstraints
 import io.getstream.video.android.xml.utils.extensions.constrainViewToParentBySide
 import io.getstream.video.android.xml.utils.extensions.constrainViewTopToBottomOfView
 import io.getstream.video.android.xml.utils.extensions.createStreamThemeWrapper
@@ -32,7 +32,6 @@ import io.getstream.video.android.xml.utils.extensions.updateConstraints
 import io.getstream.video.android.xml.utils.extensions.updateLayoutParams
 import io.getstream.video.android.xml.widget.appbar.CallAppBarView
 import io.getstream.video.android.xml.widget.call.CallView
-import io.getstream.video.android.xml.widget.control.CallControlsView
 import io.getstream.video.android.xml.widget.incoming.IncomingCallView
 import io.getstream.video.android.xml.widget.outgoing.OutgoingCallView
 import io.getstream.video.android.xml.widget.participant.PictureInPictureView
@@ -123,24 +122,17 @@ public class CallContainerView : CallConstraintLayout {
         addToolbar(onViewInitialized)
 
         children.forEach {
-            if (it !is CallAppBarView && it !is CallView && it !is CallControlsView) removeView(it)
+            if (it !is CallAppBarView && it !is CallView) removeView(it)
         }
 
         if (getFirstViewInstance<CallView>() == null) {
             CallView(context).apply {
                 id = ViewGroup.generateViewId()
-                onViewInitialized(this)
                 this@CallContainerView.addView(this)
+                onViewInitialized(this)
             }
         }
 
-        if (getFirstViewInstance<CallControlsView>() == null) {
-            CallControlsView(context).apply {
-                id = ViewGroup.generateViewId()
-                onViewInitialized(this)
-                this@CallContainerView.addView(this)
-            }
-        }
         updateCallContentConstraints()
     }
 
@@ -154,49 +146,32 @@ public class CallContainerView : CallConstraintLayout {
     private fun updateCallContentConstraints() {
         val appBar = getFirstViewInstance<CallAppBarView>() ?: return
         val callView = getFirstViewInstance<CallView>() ?: return
-        val callControlsView = getFirstViewInstance<CallControlsView>() ?: return
 
         if (isLandscape) {
-            updateConstraints {
+            updateConstraints(true) {
                 constrainViewToParentBySide(appBar, ConstraintSet.TOP)
                 constrainViewToParentBySide(appBar, ConstraintSet.START)
-                constrainViewEndToStartOfView(appBar, callControlsView)
-
-                constrainViewToParentBySide(callControlsView, ConstraintSet.END)
-
-                constrainViewToParentBySide(callView, ConstraintSet.START)
-                constrainViewToParentBySide(callView, ConstraintSet.BOTTOM)
-                constrainViewTopToBottomOfView(callView, appBar)
-                constrainViewEndToStartOfView(callView, callControlsView)
+                constrainViewToParentBySide(appBar, ConstraintSet.END, callView.getCallControlsSize())
             }
             appBar.updateLayoutParams {
                 width = LayoutParams.MATCH_CONSTRAINT
                 height = style.landscapeAppBarHeight
             }
-            callControlsView.updateLayoutParams {
-                width = style.callControlsLandscapeWidth
-                height = LayoutParams.MATCH_PARENT
-            }
             callView.updateLayoutParams {
-                width = LayoutParams.MATCH_CONSTRAINT
-                height = LayoutParams.MATCH_CONSTRAINT
+                width = LayoutParams.MATCH_PARENT
+                height = LayoutParams.MATCH_PARENT
             }
         } else {
             updateConstraints {
+                clearConstraints(appBar)
                 constrainViewToParentBySide(appBar, ConstraintSet.TOP)
 
-                constrainViewToParentBySide(callControlsView, ConstraintSet.BOTTOM)
-
-                constrainViewTopToBottomOfView(callView, appBar)
                 constrainViewToParentBySide(callView, ConstraintSet.BOTTOM)
+                constrainViewTopToBottomOfView(callView, appBar)
             }
             appBar.updateLayoutParams {
                 width = LayoutParams.MATCH_PARENT
                 height = style.appBarHeight
-            }
-            callControlsView.updateLayoutParams {
-                width = LayoutParams.MATCH_PARENT
-                height = style.callControlsHeight
             }
             callView.updateLayoutParams {
                 width = LayoutParams.MATCH_PARENT
@@ -253,6 +228,5 @@ public class CallContainerView : CallConstraintLayout {
     override fun addView(child: View?, index: Int, params: ViewGroup.LayoutParams?) {
         super.addView(child, index, params)
         getFirstViewInstance<CallAppBarView>()?.bringToFront()
-        getFirstViewInstance<CallControlsView>()?.bringToFront()
     }
 }

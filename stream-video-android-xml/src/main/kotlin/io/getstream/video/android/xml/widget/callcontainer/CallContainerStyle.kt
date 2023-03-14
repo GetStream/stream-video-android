@@ -27,8 +27,6 @@ import io.getstream.video.android.ui.common.R as RCommon
 public data class CallContainerStyle(
     @Px public val appBarHeight: Int,
     @Px public val landscapeAppBarHeight: Int,
-    @Px public val callControlsHeight: Int,
-    @Px public val callControlsLandscapeWidth: Int,
 ) {
     internal companion object {
         operator fun invoke(context: Context, attrs: AttributeSet?): CallContainerStyle {
@@ -49,21 +47,9 @@ public data class CallContainerStyle(
                     context.getDimension(RCommon.dimen.landscapeTopAppBarHeight).toFloat()
                 ).toInt()
 
-                val callControlsHeight = it.getDimension(
-                    R.styleable.CallContainerView_streamCallContainerCallControlsHeight,
-                    context.getDimension(RCommon.dimen.callControlsSheetHeight).toFloat()
-                ).toInt()
-
-                val callControlsLandscapeWidth = it.getDimension(
-                    R.styleable.CallContainerView_streamCallContainerCallControlsLandscapeWidth,
-                    context.getDimension(RCommon.dimen.landscapeCallControlsSheetWidth).toFloat()
-                ).toInt()
-
                 return CallContainerStyle(
                     appBarHeight = appBarHeight,
                     landscapeAppBarHeight = landscapeAppBarHeight,
-                    callControlsHeight = callControlsHeight,
-                    callControlsLandscapeWidth = callControlsLandscapeWidth
                 )
             }
         }

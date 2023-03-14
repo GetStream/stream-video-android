@@ -39,6 +39,7 @@ import io.getstream.video.android.ui.common.R as RCommon
  */
 public data class CallControlsStyle(
     @Px public val callControlButtonSize: Int,
+    @Px public val callControlButtonSizeLandscape: Int,
     public val callControlsBackground: Drawable,
     public val callControlsBackgroundLandscape: Drawable,
     @ColorInt public val callControlsBackgroundColor: Int,
@@ -58,6 +59,11 @@ public data class CallControlsStyle(
                     context.getDimension(RCommon.dimen.callControlButtonSize)
                 )
 
+                val callControlButtonSizeLandscape = it.getDimensionPixelSize(
+                    R.styleable.CallControlsView_streamCallControlsButtonSizeLandscape,
+                    context.getDimension(RCommon.dimen.landscapeCallControlButtonSize)
+                )
+
                 val callControlsBackground = it.getDrawable(
                     R.styleable.CallControlsView_streamCallControlsBackground
                 ) ?: context.getDrawableCompat(R.drawable.rect_controls)!!
@@ -73,6 +79,7 @@ public data class CallControlsStyle(
 
                 return CallControlsStyle(
                     callControlButtonSize = callControlButtonSize,
+                    callControlButtonSizeLandscape = callControlButtonSizeLandscape,
                     callControlsBackground = callControlsBackground,
                     callControlsBackgroundLandscape = callControlsBackgroundLandscape,
                     callControlsBackgroundColor = callControlsBackgroundColor

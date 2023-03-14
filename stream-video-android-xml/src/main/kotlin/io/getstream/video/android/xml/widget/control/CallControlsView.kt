@@ -31,6 +31,7 @@ import io.getstream.video.android.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.xml.utils.extensions.getColorCompat
 import io.getstream.video.android.xml.utils.extensions.isLandscape
 import io.getstream.video.android.xml.utils.extensions.updateConstraints
+import io.getstream.video.android.xml.utils.extensions.updateLayoutParams
 import io.getstream.video.android.xml.widget.view.CallConstraintLayout
 
 /**
@@ -116,7 +117,6 @@ public class CallControlsView : CallConstraintLayout {
         val callControlButton = ControlButtonView(context).apply {
             id = View.generateViewId()
             tag = callControlItem
-            layoutParams = LayoutParams(style.callControlButtonSize, style.callControlButtonSize)
             setBackgroundResource(R.drawable.bg_call_control_option)
         }
         addView(callControlButton)
@@ -176,6 +176,14 @@ public class CallControlsView : CallConstraintLayout {
                         constrainViewEndToStartOfView(view, nextBinding)
                     }
                 }
+            }
+        }
+
+        val size = if (isLandscape) style.callControlButtonSizeLandscape else style.callControlButtonSize
+        controlList.forEach {
+            it.updateLayoutParams {
+                width = size
+                height = size
             }
         }
     }

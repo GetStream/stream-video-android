@@ -40,7 +40,8 @@ public final class io/getstream/video/android/xml/binding/CallParticipantViewBin
 }
 
 public final class io/getstream/video/android/xml/binding/CallViewBindingKt {
-	public static final fun bindView (Lio/getstream/video/android/xml/widget/call/CallView;Lio/getstream/video/android/core/viewmodel/CallViewModel;Landroidx/lifecycle/LifecycleOwner;)V
+	public static final fun bindView (Lio/getstream/video/android/xml/widget/call/CallView;Lio/getstream/video/android/core/viewmodel/CallViewModel;Landroidx/lifecycle/LifecycleOwner;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun bindView$default (Lio/getstream/video/android/xml/widget/call/CallView;Lio/getstream/video/android/core/viewmodel/CallViewModel;Landroidx/lifecycle/LifecycleOwner;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 }
 
 public final class io/getstream/video/android/xml/binding/FloatingParticipantViewBindingKt {
@@ -353,6 +354,8 @@ public final class io/getstream/video/android/xml/widget/call/CallView : io/gets
 	public fun <init> (Landroid/content/Context;)V
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;I)V
+	public final fun getCallControlsSize ()I
+	public fun onOrientationChanged (Z)V
 	public fun onViewAdded (Landroid/view/View;)V
 	public final fun setFloatingParticipant (Lio/getstream/video/android/core/model/CallParticipantState;Lkotlin/jvm/functions/Function1;)V
 	public static synthetic fun setFloatingParticipant$default (Lio/getstream/video/android/xml/widget/call/CallView;Lio/getstream/video/android/core/model/CallParticipantState;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
@@ -361,7 +364,7 @@ public final class io/getstream/video/android/xml/widget/call/CallView : io/gets
 }
 
 public final class io/getstream/video/android/xml/widget/call/CallViewStyle {
-	public fun <init> (IIFFFFIIIIILio/getstream/video/android/xml/font/TextStyle;IILandroid/graphics/drawable/Drawable;)V
+	public fun <init> (IIFFFFIIIIILio/getstream/video/android/xml/font/TextStyle;IILandroid/graphics/drawable/Drawable;II)V
 	public final fun component1 ()I
 	public final fun component10 ()I
 	public final fun component11 ()I
@@ -369,6 +372,8 @@ public final class io/getstream/video/android/xml/widget/call/CallViewStyle {
 	public final fun component13 ()I
 	public final fun component14 ()I
 	public final fun component15 ()Landroid/graphics/drawable/Drawable;
+	public final fun component16 ()I
+	public final fun component17 ()I
 	public final fun component2 ()I
 	public final fun component3 ()F
 	public final fun component4 ()F
@@ -377,9 +382,11 @@ public final class io/getstream/video/android/xml/widget/call/CallViewStyle {
 	public final fun component7 ()I
 	public final fun component8 ()I
 	public final fun component9 ()I
-	public final fun copy (IIFFFFIIIIILio/getstream/video/android/xml/font/TextStyle;IILandroid/graphics/drawable/Drawable;)Lio/getstream/video/android/xml/widget/call/CallViewStyle;
-	public static synthetic fun copy$default (Lio/getstream/video/android/xml/widget/call/CallViewStyle;IIFFFFIIIIILio/getstream/video/android/xml/font/TextStyle;IILandroid/graphics/drawable/Drawable;ILjava/lang/Object;)Lio/getstream/video/android/xml/widget/call/CallViewStyle;
+	public final fun copy (IIFFFFIIIIILio/getstream/video/android/xml/font/TextStyle;IILandroid/graphics/drawable/Drawable;II)Lio/getstream/video/android/xml/widget/call/CallViewStyle;
+	public static synthetic fun copy$default (Lio/getstream/video/android/xml/widget/call/CallViewStyle;IIFFFFIIIIILio/getstream/video/android/xml/font/TextStyle;IILandroid/graphics/drawable/Drawable;IIILjava/lang/Object;)Lio/getstream/video/android/xml/widget/call/CallViewStyle;
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCallControlsHeight ()I
+	public final fun getCallControlsWidthLandscape ()I
 	public final fun getGridCallParticipantStyle ()I
 	public final fun getListCallParticipantStyle ()I
 	public final fun getLocalParticipantHeight ()F
@@ -400,17 +407,13 @@ public final class io/getstream/video/android/xml/widget/call/CallViewStyle {
 }
 
 public final class io/getstream/video/android/xml/widget/callcontainer/CallContainerStyle {
-	public fun <init> (IIII)V
+	public fun <init> (II)V
 	public final fun component1 ()I
 	public final fun component2 ()I
-	public final fun component3 ()I
-	public final fun component4 ()I
-	public final fun copy (IIII)Lio/getstream/video/android/xml/widget/callcontainer/CallContainerStyle;
-	public static synthetic fun copy$default (Lio/getstream/video/android/xml/widget/callcontainer/CallContainerStyle;IIIIILjava/lang/Object;)Lio/getstream/video/android/xml/widget/callcontainer/CallContainerStyle;
+	public final fun copy (II)Lio/getstream/video/android/xml/widget/callcontainer/CallContainerStyle;
+	public static synthetic fun copy$default (Lio/getstream/video/android/xml/widget/callcontainer/CallContainerStyle;IIILjava/lang/Object;)Lio/getstream/video/android/xml/widget/callcontainer/CallContainerStyle;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAppBarHeight ()I
-	public final fun getCallControlsHeight ()I
-	public final fun getCallControlsLandscapeWidth ()I
 	public final fun getLandscapeAppBarHeight ()I
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
@@ -484,15 +487,17 @@ public final class io/getstream/video/android/xml/widget/control/CallControlItem
 }
 
 public final class io/getstream/video/android/xml/widget/control/CallControlsStyle {
-	public fun <init> (ILandroid/graphics/drawable/Drawable;Landroid/graphics/drawable/Drawable;I)V
+	public fun <init> (IILandroid/graphics/drawable/Drawable;Landroid/graphics/drawable/Drawable;I)V
 	public final fun component1 ()I
-	public final fun component2 ()Landroid/graphics/drawable/Drawable;
+	public final fun component2 ()I
 	public final fun component3 ()Landroid/graphics/drawable/Drawable;
-	public final fun component4 ()I
-	public final fun copy (ILandroid/graphics/drawable/Drawable;Landroid/graphics/drawable/Drawable;I)Lio/getstream/video/android/xml/widget/control/CallControlsStyle;
-	public static synthetic fun copy$default (Lio/getstream/video/android/xml/widget/control/CallControlsStyle;ILandroid/graphics/drawable/Drawable;Landroid/graphics/drawable/Drawable;IILjava/lang/Object;)Lio/getstream/video/android/xml/widget/control/CallControlsStyle;
+	public final fun component4 ()Landroid/graphics/drawable/Drawable;
+	public final fun component5 ()I
+	public final fun copy (IILandroid/graphics/drawable/Drawable;Landroid/graphics/drawable/Drawable;I)Lio/getstream/video/android/xml/widget/control/CallControlsStyle;
+	public static synthetic fun copy$default (Lio/getstream/video/android/xml/widget/control/CallControlsStyle;IILandroid/graphics/drawable/Drawable;Landroid/graphics/drawable/Drawable;IILjava/lang/Object;)Lio/getstream/video/android/xml/widget/control/CallControlsStyle;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCallControlButtonSize ()I
+	public final fun getCallControlButtonSizeLandscape ()I
 	public final fun getCallControlsBackground ()Landroid/graphics/drawable/Drawable;
 	public final fun getCallControlsBackgroundColor ()I
 	public final fun getCallControlsBackgroundLandscape ()Landroid/graphics/drawable/Drawable;
