@@ -34,14 +34,18 @@ import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.CallEventType
 import io.getstream.video.android.core.model.CallInfo
 import io.getstream.video.android.core.model.CallMetadata
+import io.getstream.video.android.core.model.CallRecordingData
 import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.core.model.Device
+import io.getstream.video.android.core.model.EdgeData
 import io.getstream.video.android.core.model.IceServer
 import io.getstream.video.android.core.model.JoinedCall
 import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.QueriedCalls
 import io.getstream.video.android.core.model.QueryCallsData
 import io.getstream.video.android.core.model.QueryMembersData
+import io.getstream.video.android.core.model.ReactionData
+import io.getstream.video.android.core.model.SendReactionData
 import io.getstream.video.android.core.model.SfuToken
 import io.getstream.video.android.core.model.StartedCall
 import io.getstream.video.android.core.model.StreamCallCid
@@ -693,6 +697,57 @@ internal class StreamVideoImpl(
             updateUserPermissionsRequest = updateUserPermissionsData.toRequest()
         ).also {
             logger.v { "[updateUserPermissions] result: $it" }
+        }
+    }
+
+    /**
+     * @see StreamVideo.listRecordings
+     */
+    override suspend fun listRecordings(
+        callCid: StreamCallCid,
+        sessionId: String
+    ): Result<List<CallRecordingData>> {
+        logger.d { "[listRecordings] callCid: $callCid, sessionId: $sessionId" }
+
+        val (type, id) = callCid.toTypeAndId()
+
+        return callCoordinatorClient.listRecordings(
+            id = id,
+            type = type,
+            sessionId = sessionId
+        ).also {
+            logger.v { "[listRecordings] result: $it" }
+        }
+    }
+
+    /**
+     * @see StreamVideo.sendVideoReaction
+     */
+    override suspend fun sendVideoReaction(
+        callCid: StreamCallCid,
+        sendReactionData: SendReactionData
+    ): Result<ReactionData> {
+        logger.d { "[sendVideoReaction] callCid: $callCid, sendReactionData: $sendReactionData" }
+
+        val (type, id) = callCid.toTypeAndId()
+
+        return callCoordinatorClient.sendVideoReaction(
+            id = id,
+            type = type,
+            request = sendReactionData.toRequest()
+        ).also {
+            logger.v { "[sendVideoReaction] result: $it" }
+        }
+    }
+
+    /**
+     * @see StreamVideo.getEdges
+     */
+    override suspend fun getEdges(): Result<List<EdgeData>> {
+        logger.d { "[getEdges] no params" }
+
+        return callCoordinatorClient.getEdges().also {
+            logger.v { "[getEdges] result: $it" }
         }
     }
 

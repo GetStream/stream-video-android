@@ -21,13 +21,17 @@ import io.getstream.video.android.core.model.Call
 import io.getstream.video.android.core.model.CallEventType
 import io.getstream.video.android.core.model.CallInfo
 import io.getstream.video.android.core.model.CallMetadata
+import io.getstream.video.android.core.model.CallRecordingData
 import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.core.model.Device
+import io.getstream.video.android.core.model.EdgeData
 import io.getstream.video.android.core.model.JoinedCall
 import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.QueriedCalls
 import io.getstream.video.android.core.model.QueryCallsData
 import io.getstream.video.android.core.model.QueryMembersData
+import io.getstream.video.android.core.model.ReactionData
+import io.getstream.video.android.core.model.SendReactionData
 import io.getstream.video.android.core.model.StreamCallCid
 import io.getstream.video.android.core.model.StreamCallId
 import io.getstream.video.android.core.model.StreamCallType
@@ -308,6 +312,35 @@ public interface StreamVideo {
         callCid: StreamCallCid,
         updateUserPermissionsData: UpdateUserPermissionsData
     ): Result<Unit>
+
+    /**
+     * Loads all recordings of a call for a given session.
+     *
+     * @param callCid The CID of the call.
+     * @param sessionId The ID of the session.
+     */
+    suspend fun listRecordings(
+        callCid: StreamCallCid,
+        sessionId: String
+    ): Result<List<CallRecordingData>>
+
+    /**
+     * Attempts to send a reaction to a video call.
+     *
+     * @param callCid The CID of the call.
+     * @param sendReactionData The reaction to be sent.
+     *
+     * @return [Result] containing info about the successfully sent [ReactionData].
+     */
+    suspend fun sendVideoReaction(
+        callCid: StreamCallCid,
+        sendReactionData: SendReactionData
+    ): Result<ReactionData>
+
+    /**
+     * Returns a list of all the edges available on the network.
+     */
+    suspend fun getEdges(): Result<List<EdgeData>>
 
     /**
      * Leaves the currently active call and clears up all connections to it.
