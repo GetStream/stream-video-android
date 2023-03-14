@@ -87,7 +87,7 @@ public class CallView : ConstraintLayout, JobHolder {
      * Shows a placeholder before any participant view has been added.
      */
     private fun showPreConnectedHolder() {
-        if (getFirstViewInstance<ImageView> { it.tag == PRECONNECTION_IMAGE_TAG } != null) return
+        if (getFirstViewInstance<ImageView>() != null) return
         val preConnectionImage = ImageView(context).apply {
             id = ViewGroup.generateViewId()
             setImageDrawable(style.preConnectionImage)
@@ -188,7 +188,7 @@ public class CallView : ConstraintLayout, JobHolder {
      * @param onViewInitialized Notifies when a new [CallParticipantsGridView] has been initialized so that it cen be
      * bound to the view model.
      */
-    internal fun setNormalContent(onViewInitialized: (CallParticipantsGridView) -> Unit) {
+    internal fun setRegularContent(onViewInitialized: (CallParticipantsGridView) -> Unit) {
         if (getFirstViewInstance<CallParticipantsGridView>() != null) return
 
         children.forEach {
@@ -218,31 +218,29 @@ public class CallView : ConstraintLayout, JobHolder {
         participant: CallParticipantState?,
         onViewInitialized: (FloatingParticipantView) -> Unit = {},
     ) {
-        when {
-            participant == null -> removeView(getFirstViewInstance<FloatingParticipantView>())
-            getFirstViewInstance<FloatingParticipantView>() == null -> onViewInitialized(addFloatingView())
-            else -> getFirstViewInstance<FloatingParticipantView>()?.setParticipant(participant)
+        if (participant == null) {
+            removeView(getFirstViewInstance<FloatingParticipantView>())
+            return
         }
-    }
 
-    /**
-     * Builds a [FloatingParticipantView] to be used for the local participant.
-     *
-     * @return [FloatingParticipantView]
-     */
-    private fun addFloatingView(): FloatingParticipantView {
-        return FloatingParticipantView(context).apply {
-            id = UUID.randomUUID().hashCode()
-            layoutParams = LayoutParams(
-                style.localParticipantWidth.toInt(),
-                style.localParticipantHeight.toInt()
-            )
-            radius = style.localParticipantRadius
-            translationX = calculateFloatingParticipantMaxXOffset()
-            translationY = style.localParticipantPadding
-            setLocalParticipantDragInteraction(this)
-            this@CallView.addView(this)
+        var floatingParticipant = getFirstViewInstance<FloatingParticipantView>()
+        if (floatingParticipant == null) {
+            floatingParticipant = FloatingParticipantView(context).apply {
+                id = UUID.randomUUID().hashCode()
+                layoutParams = LayoutParams(
+                    style.localParticipantWidth.toInt(),
+                    style.localParticipantHeight.toInt()
+                )
+                radius = style.localParticipantRadius
+                translationX = calculateFloatingParticipantMaxXOffset()
+                translationY = style.localParticipantPadding
+                setLocalParticipantDragInteraction(this)
+                this@CallView.addView(this)
+                onViewInitialized(this)
+            }
         }
+
+        floatingParticipant.setParticipant(participant)
     }
 
     /**
@@ -339,6 +337,10 @@ public class CallView : ConstraintLayout, JobHolder {
         }
     }
 
+    /**
+     * Overridden function from the [ViewGroup] class that notifies when a view has been added to the group. We use it
+     * to bring the content we need on top, in our case the [FloatingParticipantView] and [CallControlsView].
+     */
     override fun onViewAdded(view: View?) {
         super.onViewAdded(view)
         getFirstViewInstance<FloatingParticipantView>()?.bringToFront()
@@ -348,9 +350,5 @@ public class CallView : ConstraintLayout, JobHolder {
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
         stopAllJobs()
-    }
-
-    companion object {
-        private const val PRECONNECTION_IMAGE_TAG = "preconeection_image"
     }
 }
