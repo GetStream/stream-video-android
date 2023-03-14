@@ -29,13 +29,26 @@ import io.getstream.video.android.xml.R
 import io.getstream.video.android.xml.widget.control.CallControlItem
 import io.getstream.video.android.xml.widget.control.CallControlsView
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.onStart
 import io.getstream.video.android.ui.common.R as RCommon
 
+/**
+ * Binds [CallControlsView] with [CallViewModel], updating the view's state based on data provided by the ViewModel,
+ * and propagating view events to the ViewModel as needed.
+ *
+ * This function sets listeners on the view and ViewModel. Call this method
+ * before setting any additional listeners on these objects yourself.
+ *
+ * @param viewModel [CallViewModel] for observing data and running actions.
+ * @param lifecycleOwner The lifecycle owner, root component containing [CallControlsView]. Usually an Activity or
+ * Fragment.
+ * @param fetchCallMediaState Handler used to fetch the new state of the call controls buttons when the media state
+ * changes.
+ * @param onCallAction Handler that listens to interactions with call media controls.
+ */
 public fun CallControlsView.bindView(
     viewModel: CallViewModel,
     lifecycleOwner: LifecycleOwner,
-    updateCallMediaState: (CallMediaState, Boolean) -> List<CallControlItem> = { mediaState, isScreenSharingActive ->
+    fetchCallMediaState: (CallMediaState, Boolean) -> List<CallControlItem> = { mediaState, isScreenSharingActive ->
         defaultControlList(mediaState, isScreenSharingActive)
     },
     onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
@@ -45,10 +58,8 @@ public fun CallControlsView.bindView(
     startJob(lifecycleOwner) {
         viewModel.callMediaState.combine(viewModel.screenSharingSessions) { mediaState, screenSharingSessions ->
             mediaState to screenSharingSessions.firstOrNull()
-        }.onStart {
-            emit(viewModel.callMediaState.value to null)
         }.collect { (mediaState, screenSharingSession) ->
-            setItems(updateCallMediaState(mediaState, screenSharingSession != null))
+            setItems(fetchCallMediaState(mediaState, screenSharingSession != null))
         }
     }
 }
