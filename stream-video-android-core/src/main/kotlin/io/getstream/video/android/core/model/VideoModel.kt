@@ -17,11 +17,11 @@
 package io.getstream.video.android.core.model
 
 import io.getstream.video.android.core.utils.toCallUser
-import java.io.Serializable
-import java.util.Date
 import org.openapitools.client.models.CallCreatedEvent
 import org.openapitools.client.models.CallResponse
 import org.openapitools.client.models.MemberResponse
+import java.io.Serializable
+import java.util.Date
 
 public data class CallUser(
     val id: String,

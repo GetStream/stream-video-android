@@ -28,10 +28,10 @@ import io.getstream.video.android.xml.utils.extensions.getColorCompat
 import io.getstream.video.android.xml.utils.extensions.getDimension
 import io.getstream.video.android.xml.utils.extensions.getDrawableCompat
 import io.getstream.video.android.xml.utils.extensions.use
-import io.getstream.video.android.xml.widget.transformer.TransformStyle
-import io.getstream.video.android.xml.widget.appbar.internal.DefaultCallAppBarLeadingContent
 import io.getstream.video.android.xml.widget.appbar.internal.DefaultCallAppBarCenterContent
+import io.getstream.video.android.xml.widget.appbar.internal.DefaultCallAppBarLeadingContent
 import io.getstream.video.android.xml.widget.appbar.internal.DefaultCallAppBarTrailingContent
+import io.getstream.video.android.xml.widget.transformer.TransformStyle
 import io.getstream.video.android.ui.common.R as RCommon
 
 /**
