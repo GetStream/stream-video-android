@@ -63,8 +63,8 @@ import io.getstream.video.android.ui.common.R as RCommon
  * @param preConnectionImage Placeholder image while the user is connecting to a call.
  * @param callControlsHeight The height of the [CallControlsView] in portrait mode.
  * @param callControlsWidthLandscape The width of the [CallControlsView] in landscape mode.
- * @param shouldShowGridUsersAnListLandscape True when we want [CallParticipantsGridView] to show the user in the list,
- * or false when we want them arranged in a grid. [false] by default.
+ * @param shouldShowGridUsersAsListLandscape True when we want [CallParticipantsGridView] to show the user in the list,
+ * or false when we want them arranged in a grid. [true] by default.
  */
 public data class CallViewStyle(
     public val gridCallParticipantStyle: Int,
@@ -84,7 +84,7 @@ public data class CallViewStyle(
     public val preConnectionImage: Drawable,
     @Px public val callControlsHeight: Int,
     @Px public val callControlsWidthLandscape: Int,
-    public val shouldShowGridUsersAnListLandscape: Boolean
+    public val shouldShowGridUsersAsListLandscape: Boolean
 ) {
 
     internal companion object {
@@ -194,9 +194,9 @@ public data class CallViewStyle(
                     context.getDimension(RCommon.dimen.landscapeCallControlsSheetWidth).toFloat()
                 ).toInt()
 
-                val shouldShowGridUsersAnListLandscape = it.getBoolean(
-                    R.styleable.CallView_streamCallViewShouldShowGridUsersInListLandscape,
-                    false
+                val shouldShowGridUsersAsListLandscape = it.getBoolean(
+                    R.styleable.CallView_streamCallViewShouldShowGridUsersAsListLandscape,
+                    true
                 )
 
                 return CallViewStyle(
@@ -217,7 +217,7 @@ public data class CallViewStyle(
                     preConnectionImage = preConnectionImage,
                     callControlsHeight = callControlsHeight,
                     callControlsWidthLandscape = callControlsWidthLandscape,
-                    shouldShowGridUsersAnListLandscape = shouldShowGridUsersAnListLandscape
+                    shouldShowGridUsersAsListLandscape = shouldShowGridUsersAsListLandscape
                 ).let(TransformStyle.callViewStyleTransformer::transform)
             }
         }

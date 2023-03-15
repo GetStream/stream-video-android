@@ -45,7 +45,7 @@ internal class CallParticipantsGridView : CallConstraintLayout, VideoRenderer {
     /**
      * Whether to populate the users in a list or a grid while in landscape mode.
      */
-    internal var isLandscapeListLayout: Boolean = false
+    internal var isLandscapeListLayout: Boolean = true
 
     /**
      * Sets the [RendererInitializer] handler.

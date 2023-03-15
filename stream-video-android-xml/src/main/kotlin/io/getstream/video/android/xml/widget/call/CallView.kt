@@ -225,6 +225,7 @@ public class CallView : CallConstraintLayout {
         }
         CallParticipantsGridView(context).apply {
             id = ViewGroup.generateViewId()
+            isLandscapeListLayout = style.shouldShowGridUsersAsListLandscape
             buildParticipantView = { this@CallView.buildParticipantView(false) }
             getBottomLabelOffset = { this@CallView.getCallControlsSize() }
             this@CallView.addView(this)
