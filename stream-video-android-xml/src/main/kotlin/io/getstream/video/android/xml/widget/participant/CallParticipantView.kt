@@ -20,7 +20,6 @@ import android.content.Context
 import android.graphics.drawable.GradientDrawable
 import android.util.AttributeSet
 import android.view.View
-import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.isVisible
@@ -34,17 +33,17 @@ import io.getstream.video.android.xml.font.setTextStyle
 import io.getstream.video.android.xml.utils.extensions.clearConstraints
 import io.getstream.video.android.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.xml.utils.extensions.getDrawableCompat
-import io.getstream.video.android.xml.utils.extensions.load
 import io.getstream.video.android.xml.utils.extensions.streamThemeInflater
 import io.getstream.video.android.xml.utils.extensions.updateConstraints
 import io.getstream.video.android.xml.widget.renderer.VideoRenderer
+import io.getstream.video.android.xml.widget.view.CallCardView
 import stream.video.sfu.models.TrackType
 import io.getstream.video.android.ui.common.R as RCommon
 
 /**
  * Represents a single participant in a call.
  */
-public class CallParticipantView : CardView, VideoRenderer {
+public class CallParticipantView : CallCardView, VideoRenderer {
 
     private val binding = ViewCallParticipantBinding.inflate(streamThemeInflater, this)
 
@@ -53,7 +52,7 @@ public class CallParticipantView : CardView, VideoRenderer {
     /**
      * Flag that notifies if we initialised the renderer for this view or not.
      */
-    private var wasRendererInitialised: Boolean = false
+    private var isRendererInitialised: Boolean = false
 
     /**
      * Handler to initialise the renderer.
@@ -138,7 +137,8 @@ public class CallParticipantView : CardView, VideoRenderer {
     public fun setParticipant(participant: CallParticipantState) {
         binding.labelHolder.isVisible = !participant.isLocal
         setUserData(participant.toUser())
-        setTrack(participant.videoTrack, participant.hasVideo)
+        setTrack(participant.videoTrack)
+        setAvatarVisibility(participant)
         setHasAudio(participant.hasAudio)
     }
 
@@ -162,7 +162,7 @@ public class CallParticipantView : CardView, VideoRenderer {
      * @param user The [User] whose video we are viewing.
      */
     private fun setUserData(user: User) {
-        binding.participantAvatar.load(user.imageUrl)
+        binding.participantAvatar.setData(user)
         binding.participantLabel.text = user.name.ifBlank { user.id }
     }
 
@@ -170,11 +170,8 @@ public class CallParticipantView : CardView, VideoRenderer {
      * Updates the current track which contains the current participants video.
      *
      * @param track The [VideoTrack] of the participant.
-     * @param hasVideo Whether the participants video is being sent or not.
      */
-    private fun setTrack(track: VideoTrack?, hasVideo: Boolean) {
-        binding.participantAvatar.isVisible = !hasVideo
-
+    private fun setTrack(track: VideoTrack?) {
         if (this.track == track) return
 
         this.track?.video?.removeSink(binding.participantVideoRenderer)
@@ -190,16 +187,36 @@ public class CallParticipantView : CardView, VideoRenderer {
      * Initialises the renderer for this view if it was not initialised.
      */
     private fun initRenderer() {
-        if (!wasRendererInitialised) {
-            track?.let {
-                rendererInitializer?.initRenderer(
-                    binding.participantVideoRenderer,
-                    it.streamId,
-                    TrackType.TRACK_TYPE_VIDEO
-                ) { onRender(it) }
-                wasRendererInitialised = true
+        if (!isRendererInitialised) {
+            track?.let { videoTrack ->
+                rendererInitializer?.let { rendererInitializer ->
+                    rendererInitializer.initRenderer(
+                        binding.participantVideoRenderer,
+                        videoTrack.streamId,
+                        TrackType.TRACK_TYPE_VIDEO
+                    ) { onRender(it) }
+                    isRendererInitialised = true
+                }
             }
         }
+    }
+
+    /**
+     * Shows the avatar if there is no video track for the participant, hides it otherwise.
+     *
+     * @param participant The [CallParticipantState] for the current participant.
+     */
+    private fun setAvatarVisibility(participant: CallParticipantState) {
+        val track = participant.videoTrack
+        val isVideoEnabled = try {
+            track?.video?.enabled() == true
+        } catch (error: Throwable) {
+            false
+        }
+        val shouldShowAvatar =
+            track == null || !isVideoEnabled || TrackType.TRACK_TYPE_VIDEO !in participant.publishedTracks
+
+        binding.participantAvatar.isVisible = shouldShowAvatar
     }
 
     /**

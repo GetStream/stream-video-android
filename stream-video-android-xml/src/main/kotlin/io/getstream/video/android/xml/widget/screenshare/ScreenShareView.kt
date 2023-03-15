@@ -27,9 +27,13 @@ import io.getstream.video.android.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.xml.utils.extensions.streamThemeInflater
 import io.getstream.video.android.xml.widget.participant.RendererInitializer
 import io.getstream.video.android.xml.widget.renderer.VideoRenderer
+import io.getstream.video.android.xml.widget.view.JobHolder
+import kotlinx.coroutines.Job
 import stream.video.sfu.models.TrackType
 
-public class ScreenShareView : ConstraintLayout, VideoRenderer {
+public class ScreenShareView : ConstraintLayout, VideoRenderer, JobHolder {
+
+    override val runningJobs: MutableList<Job> = mutableListOf()
 
     private lateinit var style: ScreenShareStyle
 
@@ -131,6 +135,7 @@ public class ScreenShareView : ConstraintLayout, VideoRenderer {
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
+        stopAllJobs()
         binding.screenShare.apply {
             track?.video?.removeSink(this)
         }

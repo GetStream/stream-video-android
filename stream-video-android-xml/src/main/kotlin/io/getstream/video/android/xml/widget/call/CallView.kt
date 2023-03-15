@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.xml.widget.participant
+package io.getstream.video.android.xml.widget.call
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -22,6 +22,7 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -29,35 +30,33 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.children
 import androidx.core.view.setPadding
 import io.getstream.video.android.core.model.CallParticipantState
-import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.xml.R
 import io.getstream.video.android.xml.font.setTextStyle
 import io.getstream.video.android.xml.utils.extensions.constrainViewBottomToTopOfView
+import io.getstream.video.android.xml.utils.extensions.constrainViewToParent
 import io.getstream.video.android.xml.utils.extensions.constrainViewToParentBySide
 import io.getstream.video.android.xml.utils.extensions.constrainViewTopToBottomOfView
 import io.getstream.video.android.xml.utils.extensions.getFirstViewInstance
 import io.getstream.video.android.xml.utils.extensions.setConstraints
+import io.getstream.video.android.xml.utils.extensions.updateConstraints
 import io.getstream.video.android.xml.widget.control.CallControlsView
+import io.getstream.video.android.xml.widget.participant.CallParticipantView
+import io.getstream.video.android.xml.widget.participant.FloatingParticipantView
 import io.getstream.video.android.xml.widget.participant.internal.CallParticipantsGridView
 import io.getstream.video.android.xml.widget.participant.internal.CallParticipantsListView
-import io.getstream.video.android.xml.widget.renderer.VideoRenderer
 import io.getstream.video.android.xml.widget.screenshare.ScreenShareView
+import io.getstream.video.android.xml.widget.view.JobHolder
+import kotlinx.coroutines.Job
 import java.util.UUID
-import io.getstream.video.android.ui.common.R as RCommon
 
 /**
  * Renders the call participants depending on the number of the participants and the call state.
  */
-public class CallParticipantsView : ConstraintLayout {
+public class CallView : ConstraintLayout, JobHolder {
 
-    private lateinit var style: CallParticipantsStyle
+    private lateinit var style: CallViewStyle
 
-    /**
-     * Handler to initialise the renderer.
-     */
-    private lateinit var rendererInitializer: RendererInitializer
-
-    private var isScreenSharingActive: Boolean = false
+    override val runningJobs: MutableList<Job> = mutableListOf()
 
     public constructor(context: Context) : this(context, null)
     public constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
@@ -68,96 +67,101 @@ public class CallParticipantsView : ConstraintLayout {
     }
 
     private fun init(context: Context, attrs: AttributeSet?) {
-        style = CallParticipantsStyle(context, attrs)
+        style = CallViewStyle(context, attrs)
+
+        showPreConnectedHolder()
+        addCallControlsView()
     }
 
-    /**
-     * Sets the [RendererInitializer] handler.
-     *
-     * @param rendererInitializer Handler for initializing the renderer.
-     */
-    public fun setRendererInitializer(rendererInitializer: RendererInitializer) {
-        this.rendererInitializer = rendererInitializer
-        children.filterIsInstance<VideoRenderer>().forEach { it.setRendererInitializer(rendererInitializer) }
-    }
-
-    /**
-     * Updates participants and screen share previews on screen.
-     *
-     * In case there is no screen share up to 4 participants will be rendered in a grid. The current user will be in the
-     * grid if he is the only participant in the call or if there are at least 4 participant, otherwise he is shown in a
-     * draggable floating view.
-     *
-     * When there ia an active screen share session all users are shown in a scrollable list under the preview which
-     * is the main focus.
-     *
-     * @param participants The list of the participants in the current call.
-     * @param screenSharingSession The currently active screen sharing session if there or null if there is none.
-     */
-    public fun updateContent(participants: List<CallParticipantState>, screenSharingSession: ScreenSharingSession?) {
-        isScreenSharingActive = screenSharingSession != null
-
-        if (isScreenSharingActive) {
-            enterScreenSharing()
-            screenSharingSession?.let {
-                val sharingParticipant = it.participant
-                getFirstViewInstance<ScreenShareView>()?.setScreenSharingSession(it)
-                getFirstViewInstance<TextView>()?.text =
-                    context.getString(
-                        RCommon.string.stream_screen_sharing_title,
-                        sharingParticipant.name.ifEmpty { sharingParticipant.id }
-                    )
+    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
+        super.onLayout(changed, left, top, right, bottom)
+        if (changed) {
+            getFirstViewInstance<FloatingParticipantView>()?.apply {
+                radius = style.localParticipantRadius
+                translationX = calculateFloatingParticipantMaxXOffset()
             }
-            getFirstViewInstance<CallParticipantsListView>()?.updateParticipants(participants)
-            updateFloatingParticipant(null)
-        } else {
-            exitScreenSharing()
+        }
+    }
 
-            val floatingParticipant =
-                if (participants.size == 1 || participants.size == 4) null else participants.firstOrNull { it.isLocal }
-            val gridParticipants =
-                if (participants.size == 1 || participants.size == 4) participants else participants.filter { !it.isLocal }
+    /**
+     * Shows a placeholder before any participant view has been added.
+     */
+    private fun showPreConnectedHolder() {
+        if (getFirstViewInstance<ImageView>() != null) return
+        val preConnectionImage = ImageView(context).apply {
+            id = ViewGroup.generateViewId()
+            setImageDrawable(style.preConnectionImage)
+            scaleType = ImageView.ScaleType.CENTER
+        }
+        addView(preConnectionImage)
+        setConstraints {
+            constrainViewToParent(preConnectionImage)
+        }
+    }
 
-            updateFloatingParticipant(floatingParticipant)
-            getFirstViewInstance<CallParticipantsGridView>()?.updateParticipants(gridParticipants)
+    /**
+     * Adds a [CallControlsView] view to the view hierarchy.
+     */
+    private fun addCallControlsView() {
+        if (getFirstViewInstance<CallControlsView>() != null) return
+
+        val callControlsView = CallControlsView(context).apply {
+            id = ViewGroup.generateViewId()
+            this@CallView.addView(this)
+            layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, style.callControlsHeight)
+        }
+
+        updateConstraints {
+            constrainViewToParentBySide(callControlsView, ConstraintSet.BOTTOM)
         }
     }
 
     /**
      * Populates the view with the screen share content. Will remove all views that are used when there is no screen
      * share content and add [ScreenShareView] and [CallParticipantsListView].
+     *
+     * @param onViewInitialized Notifies when a new [ScreenShareView] or [CallParticipantsListView] has been initialized
+     * so that they can be bound to the view model.
      */
-    private fun enterScreenSharing() {
+    public fun setScreenSharingContent(onViewInitialized: (View) -> Unit) {
         if (getFirstViewInstance<ScreenShareView>() != null) return
 
-        removeAllViews()
+        children.forEach {
+            if (it !is CallControlsView) {
+                removeView(it)
+            }
+        }
 
         val presenterText = TextView(context).apply {
             id = ViewGroup.generateViewId()
             maxLines = 1
             setTextStyle(style.presenterTextStyle)
             setPadding(style.presenterTextPadding)
-            this@CallParticipantsView.addView(this)
+            this@CallView.addView(this)
         }
 
         val screenShareView = ScreenShareView(context).apply {
             id = ViewGroup.generateViewId()
-            if (::rendererInitializer.isInitialized) setRendererInitializer(rendererInitializer)
-            this@CallParticipantsView.addView(this)
+            this@CallView.addView(this)
+            onViewInitialized(this)
         }
 
         val listView = CallParticipantsListView(context).apply {
             id = ViewGroup.generateViewId()
-            if (::rendererInitializer.isInitialized) setRendererInitializer(rendererInitializer)
-            buildParticipantView = { this@CallParticipantsView.buildParticipantView(true) }
-            this@CallParticipantsView.addView(this)
+            buildParticipantView = { this@CallView.buildParticipantView(true) }
+            this@CallView.addView(this)
+            layoutParams = LayoutParams(
+                LayoutParams.MATCH_PARENT,
+                style.participantListHeight
+            )
             setPadding(style.participantListPadding)
             setItemMargin(style.participantListItemMargin)
             clipToPadding = false
             clipChildren = false
+            onViewInitialized(this)
         }
 
-        setConstraints {
+        updateConstraints {
             constrainViewToParentBySide(presenterText, ConstraintSet.START)
             constrainViewToParentBySide(presenterText, ConstraintSet.END)
             constrainViewToParentBySide(presenterText, ConstraintSet.TOP)
@@ -171,75 +175,72 @@ public class CallParticipantsView : ConstraintLayout {
             constrainViewToParentBySide(listView, ConstraintSet.START)
             constrainViewToParentBySide(listView, ConstraintSet.END)
         }
+    }
 
-        val listViewParams = listView.layoutParams as LayoutParams
-        listViewParams.height = style.participantListHeight
-        listView.layoutParams = listViewParams
-
-        val presenterTextViewParams = presenterText.layoutParams as LayoutParams
-        presenterTextViewParams.height = LayoutParams.WRAP_CONTENT
-        presenterText.layoutParams = presenterTextViewParams
+    public fun updatePresenterText(text: String) {
+        getFirstViewInstance<TextView>()?.text = text
     }
 
     /**
      * Populates the view with the regular screen content. Will remove all views that are used when a screen share
      * session is active and will add a [CallParticipantsGridView].
+     *
+     * @param onViewInitialized Notifies when a new [CallParticipantsGridView] has been initialized so that it cen be
+     * bound to the view model.
      */
-    private fun exitScreenSharing() {
+    internal fun setRegularContent(onViewInitialized: (CallParticipantsGridView) -> Unit) {
         if (getFirstViewInstance<CallParticipantsGridView>() != null) return
 
-        removeAllViews()
-
-        val gridView = CallParticipantsGridView(context).apply {
-            id = ViewGroup.generateViewId()
-            layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
-            if (::rendererInitializer.isInitialized) setRendererInitializer(rendererInitializer)
-            buildParticipantView = { this@CallParticipantsView.buildParticipantView(false) }
-            getBottomLabelOffset = { this@CallParticipantsView.getCallControlsHeight() }
+        children.forEach {
+            if (it !is CallControlsView) {
+                removeView(it)
+            }
         }
-        addView(gridView)
+
+        CallParticipantsGridView(context).apply {
+            id = ViewGroup.generateViewId()
+            buildParticipantView = { this@CallView.buildParticipantView(false) }
+            getBottomLabelOffset = { this@CallView.getCallControlsHeight() }
+            this@CallView.addView(this)
+            layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
+            onViewInitialized(this)
+        }
     }
 
     /**
      * Creates and updates the local participant floating view. If null is passed will remove the view.
      *
      * @param participant The local participant to be shown in a [FloatingParticipantView].
+     * @param onViewInitialized Notifies when a new [FloatingParticipantView] has been initialized so that it can be
+     * bound to the view model.
      */
-    private fun updateFloatingParticipant(participant: CallParticipantState?) {
-        var localParticipant = getFirstViewInstance<FloatingParticipantView>()
-
-        if (participant != null) {
-            if (localParticipant == null) {
-                localParticipant = buildFloatingView()
-                addView(localParticipant)
-            }
-            localParticipant.setParticipant(participant)
-        } else if (localParticipant != null) {
-            removeView(localParticipant)
+    public fun setFloatingParticipant(
+        participant: CallParticipantState?,
+        onViewInitialized: (FloatingParticipantView) -> Unit = {},
+    ) {
+        if (participant == null) {
+            removeView(getFirstViewInstance<FloatingParticipantView>())
+            return
         }
-        localParticipant?.bringToFront()
-    }
 
-    /**
-     * Builds a [FloatingParticipantView] to be used for the local participant.
-     *
-     * @return [FloatingParticipantView]
-     */
-    private fun buildFloatingView(): FloatingParticipantView {
-        return FloatingParticipantView(context).apply {
-            if (::rendererInitializer.isInitialized) {
-                setRendererInitializer(rendererInitializer)
+        var floatingParticipant = getFirstViewInstance<FloatingParticipantView>()
+        if (floatingParticipant == null) {
+            floatingParticipant = FloatingParticipantView(context).apply {
+                id = UUID.randomUUID().hashCode()
+                layoutParams = LayoutParams(
+                    style.localParticipantWidth.toInt(),
+                    style.localParticipantHeight.toInt()
+                )
+                radius = style.localParticipantRadius
+                translationX = calculateFloatingParticipantMaxXOffset()
+                translationY = style.localParticipantPadding
+                setLocalParticipantDragInteraction(this)
+                this@CallView.addView(this)
+                onViewInitialized(this)
             }
-            id = UUID.randomUUID().hashCode()
-            layoutParams = LayoutParams(
-                style.localParticipantWidth.toInt(),
-                style.localParticipantHeight.toInt()
-            )
-            radius = style.localParticipantRadius
-            translationX = calculateFloatingParticipantMaxXOffset()
-            translationY = style.localParticipantPadding
-            setLocalParticipantDragInteraction(this)
         }
+
+        floatingParticipant.setParticipant(participant)
     }
 
     /**
@@ -247,12 +248,12 @@ public class CallParticipantsView : ConstraintLayout {
      */
     @SuppressLint("ClickableViewAccessibility")
     private fun setLocalParticipantDragInteraction(localParticipant: FloatingParticipantView) {
-        val maxDx = calculateFloatingParticipantMaxXOffset()
-        val maxDy = calculateFloatingParticipantMaxYOffset()
-
         var dx = 0f
         var dy = 0f
         localParticipant.setOnTouchListener { view, event ->
+            val maxDx = calculateFloatingParticipantMaxXOffset()
+            val maxDy = calculateFloatingParticipantMaxYOffset()
+
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     dx = view.x - event.rawX
@@ -263,6 +264,12 @@ public class CallParticipantsView : ConstraintLayout {
                 MotionEvent.ACTION_MOVE -> {
                     val newX = event.rawX + dx
                     val newY = event.rawY + dy
+
+                    if (maxDx < style.localParticipantPadding ||
+                        maxDy < style.localParticipantPadding
+                    ) {
+                        return@setOnTouchListener false
+                    }
 
                     view.animate().x(newX.coerceIn(style.localParticipantPadding, maxDx))
                         .y(newY.coerceIn(style.localParticipantPadding, maxDy)).setDuration(0).start()
@@ -280,7 +287,7 @@ public class CallParticipantsView : ConstraintLayout {
      * @return The max X offset that can be applied to the overlaid [FloatingParticipantView].
      */
     private fun calculateFloatingParticipantMaxXOffset(): Float {
-        return measuredWidth - style.localParticipantWidth - style.localParticipantPadding
+        return width - style.localParticipantWidth - style.localParticipantPadding
     }
 
     /**
@@ -290,44 +297,26 @@ public class CallParticipantsView : ConstraintLayout {
      * @return The max Y offset that can be applied to the overlaid [FloatingParticipantView].
      */
     private fun calculateFloatingParticipantMaxYOffset(): Float {
-        val controlsHeight = getCallControlsHeight()
-        return measuredHeight - style.localParticipantHeight - style.localParticipantPadding - controlsHeight
+        return height - style.localParticipantHeight - style.localParticipantPadding - getCallControlsHeight()
     }
 
-    /**
-     * Gets the [CallControlsView] height from the parent screen if there is any.
-     *
-     * @return The height of the [CallControlsView].
-     */
     private fun getCallControlsHeight(): Int {
-        return (parent as? ViewGroup)?.children?.firstOrNull { it is CallControlsView }?.measuredHeight ?: 0
-    }
-
-    /**
-     * Updates the current primary speaker and shows a border around the primary speaker.
-     *
-     * @param participant The call participant marked as a primary speaker.
-     */
-    public fun updatePrimarySpeaker(participant: CallParticipantState?) {
-        children.forEach {
-            when (it) {
-                is CallParticipantsGridView -> it.updatePrimarySpeaker(participant)
-                is CallParticipantsListView -> it.updatePrimarySpeaker(participant)
-            }
-        }
+        return style.callControlsHeight
     }
 
     /**
      * Used to instantiate a new [CallParticipantView] when participants join the call. Will apply different styles
      * whether the view is in the [CallParticipantsGridView] od [CallParticipantsListView].
      *
+     * @param isListView True if the view is created for [CallParticipantsListView], false otherwise.
+     *
      * @return [CallParticipantView] to be used to render participants.
      */
     private fun buildParticipantView(isListView: Boolean): CallParticipantView {
         val defStyleAttr = if (isListView) {
-            R.attr.streamCallParticipantsListParticipantStyle
+            R.attr.streamCallContentListParticipantStyle
         } else {
-            R.attr.streamCallParticipantsGridParticipantStyle
+            R.attr.streamCallContentGridParticipantStyle
         }
 
         val defStyleRes = if (isListView) style.listCallParticipantStyle else style.gridCallParticipantStyle
@@ -339,11 +328,27 @@ public class CallParticipantsView : ConstraintLayout {
             defStyleRes = defStyleRes
         ).apply {
             this.id = View.generateViewId()
-            if (::rendererInitializer.isInitialized) setRendererInitializer(rendererInitializer)
             if (isListView) {
-                layoutParams =
-                    LinearLayout.LayoutParams(style.participantListItemWidth, LinearLayout.LayoutParams.MATCH_PARENT)
+                layoutParams = LinearLayout.LayoutParams(
+                    style.participantListItemWidth,
+                    LinearLayout.LayoutParams.MATCH_PARENT
+                )
             }
         }
+    }
+
+    /**
+     * Overridden function from the [ViewGroup] class that notifies when a view has been added to the group. We use it
+     * to bring the content we need on top, in our case the [FloatingParticipantView] and [CallControlsView].
+     */
+    override fun onViewAdded(view: View?) {
+        super.onViewAdded(view)
+        getFirstViewInstance<FloatingParticipantView>()?.bringToFront()
+        getFirstViewInstance<CallControlsView>()?.bringToFront()
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        stopAllJobs()
     }
 }
