@@ -57,18 +57,17 @@ class DeeplinkingActivity : AppCompatActivity() {
             val createCallResult = controller.joinCall("default", callId)
 
             createCallResult.onSuccess {
-                navigateToCall()
+                /**
+                 * Since we're using launchers, we don't need to worry about starting the
+                 * CallActivity ourselves.
+                 */
+                Log.d("Joined", it.toString())
             }
             createCallResult.onError {
                 Log.d("Couldn't select server", it.message ?: "")
                 Toast.makeText(this@DeeplinkingActivity, it.message, Toast.LENGTH_SHORT).show()
             }
         }
-    }
-
-    private fun navigateToCall() {
-        startActivity(CallActivity.getIntent(this))
-        finish()
     }
 
     private fun logIn() {
