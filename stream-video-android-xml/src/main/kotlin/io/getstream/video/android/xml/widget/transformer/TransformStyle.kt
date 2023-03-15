@@ -19,6 +19,7 @@ package io.getstream.video.android.xml.widget.transformer
 import io.getstream.video.android.xml.widget.appbar.CallAppBarStyle
 import io.getstream.video.android.xml.widget.avatar.AvatarStyle
 import io.getstream.video.android.xml.widget.call.CallViewStyle
+import io.getstream.video.android.xml.widget.callcontainer.CallContainerStyle
 import io.getstream.video.android.xml.widget.calldetails.CallDetailsStyle
 import io.getstream.video.android.xml.widget.control.CallControlsStyle
 import io.getstream.video.android.xml.widget.control.ControlButtonStyle
@@ -51,6 +52,8 @@ public object TransformStyle {
     public var screenShareStyleTransformer: StyleTransformer<ScreenShareStyle> = noopTransformer()
     @JvmStatic
     public var callAppBarStyleTransformer: StyleTransformer<CallAppBarStyle> = noopTransformer()
+    @JvmStatic
+    public var callContainerStyleTransformer: StyleTransformer<CallContainerStyle> = noopTransformer()
 
     private fun <T> noopTransformer() = StyleTransformer<T> { it }
 }

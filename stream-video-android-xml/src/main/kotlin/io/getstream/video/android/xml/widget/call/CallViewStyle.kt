@@ -28,6 +28,7 @@ import io.getstream.video.android.xml.utils.extensions.getDimension
 import io.getstream.video.android.xml.utils.extensions.getDrawableCompat
 import io.getstream.video.android.xml.utils.extensions.getResourceId
 import io.getstream.video.android.xml.utils.extensions.use
+import io.getstream.video.android.xml.widget.control.CallControlsView
 import io.getstream.video.android.xml.widget.participant.CallParticipantView
 import io.getstream.video.android.xml.widget.participant.FloatingParticipantView
 import io.getstream.video.android.xml.widget.participant.internal.CallParticipantsGridView
@@ -59,6 +60,9 @@ import io.getstream.video.android.ui.common.R as RCommon
  * @param presenterTextStyle Active screen share presenter text style.
  * @param presenterTextPadding Padding around the presenter text.
  * @param presenterTextMargin Margin between presenter text and screen share content.
+ * @param preConnectionImage Placeholder image while the user is connecting to a call.
+ * @param callControlsHeight The height of the [CallControlsView] in portrait mode.
+ * @param callControlsWidthLandscape The width of the [CallControlsView] in landscape mode.
  */
 public data class CallViewStyle(
     public val gridCallParticipantStyle: Int,
