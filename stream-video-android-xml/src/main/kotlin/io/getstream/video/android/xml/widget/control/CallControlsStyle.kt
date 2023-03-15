@@ -28,7 +28,7 @@ import io.getstream.video.android.xml.widget.transformer.TransformStyle
 import io.getstream.video.android.ui.common.R as RCommon
 
 /**
- * Style for [CallControlsStyle].
+ * Style for [CallControlsView].
  * Use this class together with [TransformStyle.callControlsStyleTransformer] to change [CallControlsStyle] styles
  * programmatically.
  *

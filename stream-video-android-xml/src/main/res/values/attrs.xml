@@ -27,5 +27,6 @@
         <attr name="streamCallContentViewStyle" format="reference" />
         <attr name="streamPictureInPictureViewStyle" format="reference" />
         <attr name="streamScreenShareStyle" format="reference" />
+        <attr name="streamCallAppBarStyle" format="reference" />
     </declare-styleable>
 </resources>
