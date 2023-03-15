@@ -21,7 +21,7 @@ import io.getstream.video.android.core.model.state.StreamCallState
 /**
  * An interface that must be implemented by the content views of [CallAppBarView].
  */
-interface CallAppBarContent {
+public interface CallAppBarContent {
 
     /**
      * Invoked when the state has changed and the UI needs to be updated accordingly.
