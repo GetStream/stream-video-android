@@ -19,7 +19,11 @@ package io.getstream.video.android.core.model
 import org.openapitools.client.models.UpdateUserPermissionsRequest
 
 /**
- * Represents the data used to request
+ * Represents the data used to request user permission updates.
+ *
+ * @param userId The ID of the user to change permissions.
+ * @param grantedPermissions Permissions which the user should be granted.
+ * @param revokedPermissions Permissions which we should revoke for the user.
  */
 public data class UpdateUserPermissionsData(
     public val userId: String,

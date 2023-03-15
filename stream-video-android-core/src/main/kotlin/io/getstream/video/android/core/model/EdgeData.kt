@@ -16,7 +16,15 @@
 
 package io.getstream.video.android.core.model
 
-data class EdgeData(
+/**
+ * Represents the information about an Edge center in our network.
+ *
+ * @param id The ID of the center.
+ * @param latencyTestUrl URL of the result for latency measurements.
+ * @param latitude The latitude of the server location.
+ * @param longitude The longitude of the server location.
+ */
+public data class EdgeData(
     val id: String,
     val latencyTestUrl: String,
     val latitude: Float,

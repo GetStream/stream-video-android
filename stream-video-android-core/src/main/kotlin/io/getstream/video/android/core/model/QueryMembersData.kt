@@ -18,6 +18,16 @@ package io.getstream.video.android.core.model
 
 import org.openapitools.client.models.QueryMembersRequest
 
+/**
+ * Represents the data to query members.
+ *
+ * @param streamCallCid The CID of the call in which the users are members.
+ * @param filters A map of filter keys and values to use for querying.
+ * @param sort Sorting field and direction information.
+ * @param limit The number of items to fetch.
+ * @param next The value of the next item in pagination as described in [sort].
+ * @param previous The value of the previous item in pagination as described in [sort].
+ */
 public data class QueryMembersData(
     public val streamCallCid: StreamCallCid,
     public val filters: Map<String, Any>,
@@ -29,6 +39,9 @@ public data class QueryMembersData(
 
 /**
  * Maps the data to the request for the BE.
+ *
+ * @param id The ID of the call.
+ * @param type The type of the call.
  */
 public fun QueryMembersData.toRequest(
     id: String,

@@ -261,7 +261,7 @@ public interface StreamVideo {
      * @param callCid The CID of the call.
      * @param permissions List of permissions the user wants to request.
      */
-    suspend fun requestPermissions(
+    public suspend fun requestPermissions(
         callCid: StreamCallCid,
         permissions: List<String>
     ): Result<Unit>
@@ -308,7 +308,7 @@ public interface StreamVideo {
      * @param callCid The CID of the call.
      * @param updateUserPermissionsData Holds permissions to grant or revoke.
      */
-    suspend fun updateUserPermissions(
+    public suspend fun updateUserPermissions(
         callCid: StreamCallCid,
         updateUserPermissionsData: UpdateUserPermissionsData
     ): Result<Unit>
@@ -319,7 +319,7 @@ public interface StreamVideo {
      * @param callCid The CID of the call.
      * @param sessionId The ID of the session.
      */
-    suspend fun listRecordings(
+    public suspend fun listRecordings(
         callCid: StreamCallCid,
         sessionId: String
     ): Result<List<CallRecordingData>>
@@ -332,7 +332,7 @@ public interface StreamVideo {
      *
      * @return [Result] containing info about the successfully sent [ReactionData].
      */
-    suspend fun sendVideoReaction(
+    public suspend fun sendVideoReaction(
         callCid: StreamCallCid,
         sendReactionData: SendReactionData
     ): Result<ReactionData>
@@ -340,7 +340,7 @@ public interface StreamVideo {
     /**
      * Returns a list of all the edges available on the network.
      */
-    suspend fun getEdges(): Result<List<EdgeData>>
+    public suspend fun getEdges(): Result<List<EdgeData>>
 
     /**
      * Leaves the currently active call and clears up all connections to it.
