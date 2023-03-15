@@ -761,6 +761,7 @@ public final class io/getstream/video/android/xml/widget/transformer/TransformSt
 	public static final field INSTANCE Lio/getstream/video/android/xml/widget/transformer/TransformStyle;
 	public static final fun getAvatarStyleTransformer ()Lio/getstream/video/android/xml/widget/transformer/StyleTransformer;
 	public static final fun getCallAppBarStyleTransformer ()Lio/getstream/video/android/xml/widget/transformer/StyleTransformer;
+	public static final fun getCallContainerStyleTransformer ()Lio/getstream/video/android/xml/widget/transformer/StyleTransformer;
 	public static final fun getCallControlsStyleTransformer ()Lio/getstream/video/android/xml/widget/transformer/StyleTransformer;
 	public static final fun getCallDetailsStyleTransformer ()Lio/getstream/video/android/xml/widget/transformer/StyleTransformer;
 	public static final fun getCallParticipantStyleTransformer ()Lio/getstream/video/android/xml/widget/transformer/StyleTransformer;
@@ -772,6 +773,7 @@ public final class io/getstream/video/android/xml/widget/transformer/TransformSt
 	public static final fun getScreenShareStyleTransformer ()Lio/getstream/video/android/xml/widget/transformer/StyleTransformer;
 	public static final fun setAvatarStyleTransformer (Lio/getstream/video/android/xml/widget/transformer/StyleTransformer;)V
 	public static final fun setCallAppBarStyleTransformer (Lio/getstream/video/android/xml/widget/transformer/StyleTransformer;)V
+	public static final fun setCallContainerStyleTransformer (Lio/getstream/video/android/xml/widget/transformer/StyleTransformer;)V
 	public static final fun setCallControlsStyleTransformer (Lio/getstream/video/android/xml/widget/transformer/StyleTransformer;)V
 	public static final fun setCallDetailsStyleTransformer (Lio/getstream/video/android/xml/widget/transformer/StyleTransformer;)V
 	public static final fun setCallParticipantStyleTransformer (Lio/getstream/video/android/xml/widget/transformer/StyleTransformer;)V

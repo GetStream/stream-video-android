@@ -22,13 +22,24 @@ import androidx.annotation.Px
 import io.getstream.video.android.xml.R
 import io.getstream.video.android.xml.utils.extensions.getDimension
 import io.getstream.video.android.xml.utils.extensions.use
+import io.getstream.video.android.xml.widget.appbar.CallAppBarView
+import io.getstream.video.android.xml.widget.transformer.TransformStyle
 import io.getstream.video.android.ui.common.R as RCommon
 
+/**
+ * Style for [CallContainerView].
+ * Use this class together with [TransformStyle.callContainerStyleTransformer] to change [CallContainerView]
+ * styles programmatically.
+ *
+ * @param appBarHeight The height of the [CallAppBarView] in portrait mode.
+ * @param landscapeAppBarHeight The height of the [CallAppBarView] in landscape mode.
+ */
 public data class CallContainerStyle(
     @Px public val appBarHeight: Int,
     @Px public val landscapeAppBarHeight: Int,
 ) {
     internal companion object {
+
         operator fun invoke(context: Context, attrs: AttributeSet?): CallContainerStyle {
             context.obtainStyledAttributes(
                 attrs,
@@ -50,7 +61,7 @@ public data class CallContainerStyle(
                 return CallContainerStyle(
                     appBarHeight = appBarHeight,
                     landscapeAppBarHeight = landscapeAppBarHeight,
-                )
+                ).let(TransformStyle.callContainerStyleTransformer::transform)
             }
         }
     }
