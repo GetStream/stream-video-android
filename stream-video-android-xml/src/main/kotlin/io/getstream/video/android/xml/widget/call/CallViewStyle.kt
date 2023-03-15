@@ -64,7 +64,7 @@ import io.getstream.video.android.ui.common.R as RCommon
  * @param callControlsHeight The height of the [CallControlsView] in portrait mode.
  * @param callControlsWidthLandscape The width of the [CallControlsView] in landscape mode.
  * @param shouldShowGridUsersAnListLandscape True when we want [CallParticipantsGridView] to show the user in the list,
- * or false when we want them aranged in a grid. [false] by default.
+ * or false when we want them arranged in a grid. [false] by default.
  */
 public data class CallViewStyle(
     public val gridCallParticipantStyle: Int,
