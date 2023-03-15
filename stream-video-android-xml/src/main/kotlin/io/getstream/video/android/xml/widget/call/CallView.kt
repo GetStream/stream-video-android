@@ -343,7 +343,11 @@ public class CallView : CallConstraintLayout {
      * @return The max X offset that can be applied to the overlaid [FloatingParticipantView].
      */
     private fun calculateFloatingParticipantMaxXOffset(): Float {
-        return width - style.localParticipantWidth - style.localParticipantPadding
+        return if (isLandscape) {
+            width - style.localParticipantWidth - style.localParticipantPadding - getCallControlsSize()
+        } else {
+            width - style.localParticipantWidth - style.localParticipantPadding
+        }
     }
 
     /**
@@ -353,7 +357,11 @@ public class CallView : CallConstraintLayout {
      * @return The max Y offset that can be applied to the overlaid [FloatingParticipantView].
      */
     private fun calculateFloatingParticipantMaxYOffset(): Float {
-        return height - style.localParticipantHeight - style.localParticipantPadding - getCallControlsSize()
+        return if (isLandscape) {
+            height - style.localParticipantHeight - style.localParticipantPadding
+        } else {
+            height - style.localParticipantHeight - style.localParticipantPadding - getCallControlsSize()
+        }
     }
 
     /**
