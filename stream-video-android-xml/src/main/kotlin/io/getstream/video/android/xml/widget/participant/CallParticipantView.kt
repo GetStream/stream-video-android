@@ -23,7 +23,7 @@ import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.isVisible
-import androidx.core.view.setMargins
+import io.getstream.log.StreamLog
 import io.getstream.video.android.core.model.CallParticipantState
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.VideoTrack
@@ -45,6 +45,8 @@ import io.getstream.video.android.ui.common.R as RCommon
  * Represents a single participant in a call.
  */
 public class CallParticipantView : CallCardView, VideoRenderer {
+
+    private val logger = StreamLog.getLogger(this::class.java.simpleName)
 
     private val binding = ViewCallParticipantBinding.inflate(streamThemeInflater, this)
 
@@ -99,7 +101,6 @@ public class CallParticipantView : CallCardView, VideoRenderer {
 
     private fun initNameHolder() {
         binding.participantLabel.setTextStyle(style.labelTextStyle)
-        (binding.labelHolder.layoutParams as ConstraintLayout.LayoutParams).setMargins(style.labelMargin)
         binding.labelHolder.background.setTint(style.labelBackgroundColor)
         setLabelAlignment(style.labelAlignment)
     }
@@ -175,13 +176,23 @@ public class CallParticipantView : CallCardView, VideoRenderer {
     private fun setTrack(track: VideoTrack?) {
         if (this.track == track) return
 
-        this.track?.video?.removeSink(binding.participantVideoRenderer)
-        this.track = track
+        try {
+            this.track?.video?.removeSink(binding.participantVideoRenderer)
+            this.track = track
+        } catch (e: java.lang.Exception) {
+            logger.e { "[setTrack] Failed to remove sink." }
+            e.printStackTrace()
+        }
 
         if (track == null) return
 
-        this.track!!.video.addSink(binding.participantVideoRenderer)
-        initRenderer()
+        try {
+            this.track!!.video.addSink(binding.participantVideoRenderer)
+            initRenderer()
+        } catch (e: IllegalStateException) {
+            logger.e { "[setTrack] Failed to add sink." }
+            e.printStackTrace()
+        }
     }
 
     /**
@@ -241,20 +252,20 @@ public class CallParticipantView : CallCardView, VideoRenderer {
             clearConstraints(holder)
             when (labelAlignment) {
                 CallParticipantLabelAlignment.TOP_LEFT -> {
-                    constrainViewToParentBySide(holder, ConstraintSet.TOP)
-                    constrainViewToParentBySide(holder, ConstraintSet.START)
+                    constrainViewToParentBySide(holder, ConstraintSet.TOP, style.labelMargin)
+                    constrainViewToParentBySide(holder, ConstraintSet.START, style.labelMargin)
                 }
                 CallParticipantLabelAlignment.TOP_RIGHT -> {
-                    constrainViewToParentBySide(holder, ConstraintSet.TOP)
-                    constrainViewToParentBySide(holder, ConstraintSet.END)
+                    constrainViewToParentBySide(holder, ConstraintSet.TOP, style.labelMargin)
+                    constrainViewToParentBySide(holder, ConstraintSet.END, style.labelMargin)
                 }
                 CallParticipantLabelAlignment.BOTTOM_LEFT -> {
-                    constrainViewToParentBySide(holder, ConstraintSet.BOTTOM)
-                    constrainViewToParentBySide(holder, ConstraintSet.START)
+                    constrainViewToParentBySide(holder, ConstraintSet.BOTTOM, style.labelMargin)
+                    constrainViewToParentBySide(holder, ConstraintSet.START, style.labelMargin)
                 }
                 CallParticipantLabelAlignment.BOTTOM_RIGHT -> {
-                    constrainViewToParentBySide(holder, ConstraintSet.BOTTOM)
-                    constrainViewToParentBySide(holder, ConstraintSet.END)
+                    constrainViewToParentBySide(holder, ConstraintSet.BOTTOM, style.labelMargin)
+                    constrainViewToParentBySide(holder, ConstraintSet.END, style.labelMargin)
                 }
             }
         }

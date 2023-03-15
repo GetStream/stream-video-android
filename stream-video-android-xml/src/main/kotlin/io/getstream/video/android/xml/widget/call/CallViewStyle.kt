@@ -77,7 +77,8 @@ public data class CallViewStyle(
     @Px public val presenterTextMargin: Int,
     public val preConnectionImage: Drawable,
     @Px public val callControlsHeight: Int,
-    @Px public val callControlsWidthLandscape: Int
+    @Px public val callControlsWidthLandscape: Int,
+    public val shouldShowGridUsersAnListLandscape: Boolean
 ) {
 
     internal companion object {
@@ -187,6 +188,11 @@ public data class CallViewStyle(
                     context.getDimension(RCommon.dimen.landscapeCallControlsSheetWidth).toFloat()
                 ).toInt()
 
+                val shouldShowGridUsersAnListLandscape = it.getBoolean(
+                    R.styleable.CallView_streamCallViewShouldShowGridUsersInListLandscape,
+                    false
+                )
+
                 return CallViewStyle(
                     gridCallParticipantStyle = gridCallParticipantStyle,
                     listCallParticipantStyle = listCallParticipantStyle,
@@ -204,7 +210,8 @@ public data class CallViewStyle(
                     presenterTextPadding = presenterTextPadding,
                     preConnectionImage = preConnectionImage,
                     callControlsHeight = callControlsHeight,
-                    callControlsWidthLandscape = callControlsWidthLandscape
+                    callControlsWidthLandscape = callControlsWidthLandscape,
+                    shouldShowGridUsersAnListLandscape = shouldShowGridUsersAnListLandscape
                 ).let(TransformStyle.callViewStyleTransformer::transform)
             }
         }

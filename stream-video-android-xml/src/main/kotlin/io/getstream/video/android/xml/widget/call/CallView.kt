@@ -34,6 +34,7 @@ import io.getstream.video.android.xml.R
 import io.getstream.video.android.xml.font.setTextStyle
 import io.getstream.video.android.xml.utils.extensions.clearConstraints
 import io.getstream.video.android.xml.utils.extensions.constrainViewBottomToTopOfView
+import io.getstream.video.android.xml.utils.extensions.constrainViewEndToStartOfView
 import io.getstream.video.android.xml.utils.extensions.constrainViewToParent
 import io.getstream.video.android.xml.utils.extensions.constrainViewToParentBySide
 import io.getstream.video.android.xml.utils.extensions.constrainViewTopToBottomOfView
@@ -56,6 +57,8 @@ import java.util.UUID
 public class CallView : CallConstraintLayout {
 
     private lateinit var style: CallViewStyle
+
+    public var getTopLandscapeOffset: () -> Int = { 0 }
 
     public constructor(context: Context) : this(context, null)
     public constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
@@ -225,8 +228,41 @@ public class CallView : CallConstraintLayout {
             buildParticipantView = { this@CallView.buildParticipantView(false) }
             getBottomLabelOffset = { this@CallView.getCallControlsSize() }
             this@CallView.addView(this)
-            layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
             onViewInitialized(this)
+        }
+        updateRegularContentConstraints()
+    }
+
+    private fun updateRegularContentConstraints() {
+        val participantsView = getFirstViewInstance<CallParticipantsGridView>() ?: return
+        val callControlsView = getFirstViewInstance<CallControlsView>() ?: return
+
+        val participantsWidth: Int
+        val participantsHeight: Int
+
+        if(isLandscape) {
+            updateConstraints {
+                clearConstraints(participantsView)
+                constrainViewToParentBySide(participantsView, ConstraintSet.START)
+                constrainViewToParentBySide(participantsView, ConstraintSet.BOTTOM)
+                constrainViewToParentBySide(participantsView, ConstraintSet.TOP, getTopLandscapeOffset())
+                constrainViewEndToStartOfView(participantsView, callControlsView)
+
+            }
+
+            participantsWidth = LayoutParams.MATCH_CONSTRAINT
+            participantsHeight = LayoutParams.MATCH_CONSTRAINT
+        }else {
+            updateConstraints {
+                clearConstraints(participantsView)
+            }
+            participantsWidth = LayoutParams.MATCH_PARENT
+            participantsHeight = LayoutParams.MATCH_PARENT
+        }
+
+        participantsView.updateLayoutParams {
+            width = participantsWidth
+            height = participantsHeight
         }
     }
 
@@ -334,6 +370,7 @@ public class CallView : CallConstraintLayout {
 
     override fun onOrientationChanged(isLandscape: Boolean) {
         updateCallControlsConstraints()
+        updateRegularContentConstraints()
     }
 
     /**

@@ -28,6 +28,8 @@ import io.getstream.video.android.xml.utils.extensions.constrainViewToParent
 import io.getstream.video.android.xml.utils.extensions.constrainViewToParentBySide
 import io.getstream.video.android.xml.utils.extensions.constrainViewTopToBottomOfView
 import io.getstream.video.android.xml.utils.extensions.createStreamThemeWrapper
+import io.getstream.video.android.xml.utils.extensions.horizontalChainInParent
+import io.getstream.video.android.xml.utils.extensions.isLandscape
 import io.getstream.video.android.xml.utils.extensions.setConstraints
 import io.getstream.video.android.xml.widget.participant.CallParticipantView
 import io.getstream.video.android.xml.widget.participant.RendererInitializer
@@ -39,6 +41,11 @@ internal class CallParticipantsGridView : CallConstraintLayout, VideoRenderer {
     private val childList: MutableList<CallParticipantView> = mutableListOf()
 
     private var rendererInitializer: RendererInitializer? = null
+
+    /**
+     * Whether to populate the users in a list or a grid while in landscape mode.
+     */
+    internal var isLandscapeListLayout: Boolean = false
 
     /**
      * Sets the [RendererInitializer] handler.
@@ -104,67 +111,89 @@ internal class CallParticipantsGridView : CallConstraintLayout, VideoRenderer {
         updateConstraints()
     }
 
+    override fun onOrientationChanged(isLandscape: Boolean) {
+        updateConstraints()
+    }
+
     /**
      * Updates the constraints of the shown [CallParticipantView]s so they all fit in the viewport.
      */
     private fun updateConstraints() {
+        if (childList.size == 0) return
+
         TransitionManager.beginDelayedTransition(this)
         setConstraints {
-            childList.forEachIndexed { index, callParticipantView ->
-                callParticipantView.setLabelBottomOffset(if (isBottomChild(index)) getBottomLabelOffset() else 0)
+            childList.forEach {
+                it.setLabelBottomOffset(0)
             }
-
-            when (childList.size) {
-                1 -> {
-                    constrainViewToParent(childList[0])
+            if (isLandscape && isLandscapeListLayout) {
+                childList.forEach { callParticipantView ->
+                    if (childList.size == 1) {
+                        constrainViewToParent(callParticipantView)
+                    }else {
+                        constrainViewToParentBySide(callParticipantView, ConstraintSet.TOP)
+                        constrainViewToParentBySide(callParticipantView, ConstraintSet.BOTTOM)
+                    }
                 }
-                2 -> {
-                    constrainViewToParentBySide(childList[0], ConstraintSet.TOP)
-                    constrainViewToParentBySide(childList[0], ConstraintSet.START)
-                    constrainViewToParentBySide(childList[0], ConstraintSet.END)
-                    constrainViewBottomToTopOfView(childList[0], childList[1])
-
-                    constrainViewToParentBySide(childList[1], ConstraintSet.BOTTOM)
-                    constrainViewToParentBySide(childList[1], ConstraintSet.START)
-                    constrainViewToParentBySide(childList[1], ConstraintSet.END)
-                    constrainViewTopToBottomOfView(childList[1], childList[0])
+                horizontalChainInParent(childList)
+            } else {
+                val offset = getBottomLabelOffset()
+                childList.forEachIndexed { index, callParticipantView ->
+                    val childOffset = if (!isLandscape && isBottomChild(index)) offset else 0
+                    callParticipantView.setLabelBottomOffset(childOffset)
                 }
-                3 -> {
-                    constrainViewToParentBySide(childList[0], ConstraintSet.TOP)
-                    constrainViewToParentBySide(childList[0], ConstraintSet.START)
-                    constrainViewEndToStartOfView(childList[0], childList[1])
-                    constrainViewBottomToTopOfView(childList[0], childList[2])
+                when (childList.size) {
+                    1 -> {
+                        constrainViewToParent(childList[0])
+                    }
+                    2 -> {
+                        constrainViewToParentBySide(childList[0], ConstraintSet.TOP)
+                        constrainViewToParentBySide(childList[0], ConstraintSet.START)
+                        constrainViewToParentBySide(childList[0], ConstraintSet.END)
+                        constrainViewBottomToTopOfView(childList[0], childList[1])
 
-                    constrainViewToParentBySide(childList[1], ConstraintSet.TOP)
-                    constrainViewToParentBySide(childList[1], ConstraintSet.END)
-                    constrainViewStartToEndOfView(childList[1], childList[0])
-                    constrainViewBottomToTopOfView(childList[1], childList[2])
+                        constrainViewToParentBySide(childList[1], ConstraintSet.BOTTOM)
+                        constrainViewToParentBySide(childList[1], ConstraintSet.START)
+                        constrainViewToParentBySide(childList[1], ConstraintSet.END)
+                        constrainViewTopToBottomOfView(childList[1], childList[0])
+                    }
+                    3 -> {
+                        constrainViewToParentBySide(childList[0], ConstraintSet.TOP)
+                        constrainViewToParentBySide(childList[0], ConstraintSet.START)
+                        constrainViewEndToStartOfView(childList[0], childList[1])
+                        constrainViewBottomToTopOfView(childList[0], childList[2])
 
-                    constrainViewToParentBySide(childList[2], ConstraintSet.BOTTOM)
-                    constrainViewToParentBySide(childList[2], ConstraintSet.START)
-                    constrainViewToParentBySide(childList[2], ConstraintSet.END)
-                    constrainViewTopToBottomOfView(childList[2], childList[1])
-                }
-                4 -> {
-                    constrainViewToParentBySide(childList[0], ConstraintSet.TOP)
-                    constrainViewToParentBySide(childList[0], ConstraintSet.START)
-                    constrainViewEndToStartOfView(childList[0], childList[1])
-                    constrainViewBottomToTopOfView(childList[0], childList[2])
+                        constrainViewToParentBySide(childList[1], ConstraintSet.TOP)
+                        constrainViewToParentBySide(childList[1], ConstraintSet.END)
+                        constrainViewStartToEndOfView(childList[1], childList[0])
+                        constrainViewBottomToTopOfView(childList[1], childList[2])
 
-                    constrainViewToParentBySide(childList[1], ConstraintSet.TOP)
-                    constrainViewToParentBySide(childList[1], ConstraintSet.END)
-                    constrainViewStartToEndOfView(childList[1], childList[0])
-                    constrainViewBottomToTopOfView(childList[1], childList[3])
+                        constrainViewToParentBySide(childList[2], ConstraintSet.BOTTOM)
+                        constrainViewToParentBySide(childList[2], ConstraintSet.START)
+                        constrainViewToParentBySide(childList[2], ConstraintSet.END)
+                        constrainViewTopToBottomOfView(childList[2], childList[1])
+                    }
+                    4 -> {
+                        constrainViewToParentBySide(childList[0], ConstraintSet.TOP)
+                        constrainViewToParentBySide(childList[0], ConstraintSet.START)
+                        constrainViewEndToStartOfView(childList[0], childList[1])
+                        constrainViewBottomToTopOfView(childList[0], childList[2])
 
-                    constrainViewToParentBySide(childList[2], ConstraintSet.BOTTOM)
-                    constrainViewToParentBySide(childList[2], ConstraintSet.START)
-                    constrainViewTopToBottomOfView(childList[2], childList[0])
-                    constrainViewEndToStartOfView(childList[2], childList[3])
+                        constrainViewToParentBySide(childList[1], ConstraintSet.TOP)
+                        constrainViewToParentBySide(childList[1], ConstraintSet.END)
+                        constrainViewStartToEndOfView(childList[1], childList[0])
+                        constrainViewBottomToTopOfView(childList[1], childList[3])
 
-                    constrainViewToParentBySide(childList[3], ConstraintSet.BOTTOM)
-                    constrainViewToParentBySide(childList[3], ConstraintSet.END)
-                    constrainViewTopToBottomOfView(childList[3], childList[1])
-                    constrainViewStartToEndOfView(childList[3], childList[2])
+                        constrainViewToParentBySide(childList[2], ConstraintSet.BOTTOM)
+                        constrainViewToParentBySide(childList[2], ConstraintSet.START)
+                        constrainViewTopToBottomOfView(childList[2], childList[0])
+                        constrainViewEndToStartOfView(childList[2], childList[3])
+
+                        constrainViewToParentBySide(childList[3], ConstraintSet.BOTTOM)
+                        constrainViewToParentBySide(childList[3], ConstraintSet.END)
+                        constrainViewTopToBottomOfView(childList[3], childList[1])
+                        constrainViewStartToEndOfView(childList[3], childList[2])
+                    }
                 }
             }
         }

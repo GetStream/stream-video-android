@@ -26,5 +26,6 @@
         <attr name="streamCallViewPreConnectionImage" format="reference" />
         <attr name="streamCallViewCallControlsHeight" format="dimension|reference" />
         <attr name="streamCallViewCallControlsWidthLandscape" format="dimension|reference" />
+        <attr name="streamCallViewShouldShowGridUsersInListLandscape" format="boolean|reference" />
     </declare-styleable>
 </resources>

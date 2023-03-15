@@ -128,6 +128,7 @@ public class CallContainerView : CallConstraintLayout {
         if (getFirstViewInstance<CallView>() == null) {
             CallView(context).apply {
                 id = ViewGroup.generateViewId()
+                getTopLandscapeOffset = { style.landscapeAppBarHeight }
                 this@CallContainerView.addView(this)
                 onViewInitialized(this)
             }
