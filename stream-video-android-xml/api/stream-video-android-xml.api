@@ -19,9 +19,14 @@ public final class io/getstream/video/android/xml/VideoUI {
 	public static final fun setStyle (Lio/getstream/video/android/xml/font/VideoStyle;)V
 }
 
+public final class io/getstream/video/android/xml/binding/CallAppBarBindingKt {
+	public static final fun bindView (Lio/getstream/video/android/xml/widget/appbar/CallAppBarView;Lio/getstream/video/android/core/viewmodel/CallViewModel;Landroidx/lifecycle/LifecycleOwner;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;)V
+	public static synthetic fun bindView$default (Lio/getstream/video/android/xml/widget/appbar/CallAppBarView;Lio/getstream/video/android/core/viewmodel/CallViewModel;Landroidx/lifecycle/LifecycleOwner;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)V
+}
+
 public final class io/getstream/video/android/xml/binding/CallContainterViewBindingKt {
-	public static final fun bindView (Lio/getstream/video/android/xml/widget/callcontainer/CallContainerView;Lio/getstream/video/android/core/viewmodel/CallViewModel;Landroidx/lifecycle/LifecycleOwner;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;)V
-	public static synthetic fun bindView$default (Lio/getstream/video/android/xml/widget/callcontainer/CallContainerView;Lio/getstream/video/android/core/viewmodel/CallViewModel;Landroidx/lifecycle/LifecycleOwner;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)V
+	public static final fun bindView (Lio/getstream/video/android/xml/widget/callcontainer/CallContainerView;Lio/getstream/video/android/core/viewmodel/CallViewModel;Landroidx/lifecycle/LifecycleOwner;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;)V
+	public static synthetic fun bindView$default (Lio/getstream/video/android/xml/widget/callcontainer/CallContainerView;Lio/getstream/video/android/core/viewmodel/CallViewModel;Landroidx/lifecycle/LifecycleOwner;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)V
 }
 
 public final class io/getstream/video/android/xml/binding/CallControlsViewBindingKt {
@@ -60,12 +65,21 @@ public final class io/getstream/video/android/xml/binding/ScreenShareViewBinding
 	public static final fun bindView (Lio/getstream/video/android/xml/widget/screenshare/ScreenShareView;Lio/getstream/video/android/core/viewmodel/CallViewModel;Landroidx/lifecycle/LifecycleOwner;)V
 }
 
-public final class io/getstream/video/android/xml/databinding/ViewCallContentBinding : androidx/viewbinding/ViewBinding {
-	public final field callToolbar Landroidx/appcompat/widget/Toolbar;
-	public final field contentHolder Landroid/widget/FrameLayout;
-	public static fun bind (Landroid/view/View;)Lio/getstream/video/android/xml/databinding/ViewCallContentBinding;
+public final class io/getstream/video/android/xml/databinding/ViewCallAppBarBinding : androidx/viewbinding/ViewBinding {
+	public final field callAppBarCenterContent Landroid/widget/FrameLayout;
+	public final field callAppBarLeadingContent Landroid/widget/FrameLayout;
+	public final field callAppBarTrailingContent Landroid/widget/FrameLayout;
+	public static fun bind (Landroid/view/View;)Lio/getstream/video/android/xml/databinding/ViewCallAppBarBinding;
 	public fun getRoot ()Landroid/view/View;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;)Lio/getstream/video/android/xml/databinding/ViewCallContentBinding;
+	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;)Lio/getstream/video/android/xml/databinding/ViewCallAppBarBinding;
+}
+
+public final class io/getstream/video/android/xml/databinding/ViewCallContainerBinding : androidx/viewbinding/ViewBinding {
+	public final field callToolbar Lio/getstream/video/android/xml/widget/appbar/CallAppBarView;
+	public final field contentHolder Landroid/widget/FrameLayout;
+	public static fun bind (Landroid/view/View;)Lio/getstream/video/android/xml/databinding/ViewCallContainerBinding;
+	public fun getRoot ()Landroid/view/View;
+	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;)Lio/getstream/video/android/xml/databinding/ViewCallContainerBinding;
 }
 
 public final class io/getstream/video/android/xml/databinding/ViewCallDetailsBinding : androidx/viewbinding/ViewBinding {
@@ -239,6 +253,62 @@ public abstract interface class io/getstream/video/android/xml/utils/Disposable 
 	public abstract fun isDisposed ()Z
 }
 
+public abstract interface class io/getstream/video/android/xml/widget/appbar/CallAppBarContent {
+	public abstract fun renderState (Lio/getstream/video/android/core/model/state/StreamCallState;)V
+}
+
+public final class io/getstream/video/android/xml/widget/appbar/CallAppBarStyle {
+	public fun <init> (IILandroid/graphics/drawable/Drawable;IIILio/getstream/video/android/xml/font/TextStyle;IILandroid/graphics/drawable/Drawable;III)V
+	public final fun component1 ()I
+	public final fun component10 ()Landroid/graphics/drawable/Drawable;
+	public final fun component11 ()I
+	public final fun component12 ()I
+	public final fun component13 ()I
+	public final fun component2 ()I
+	public final fun component3 ()Landroid/graphics/drawable/Drawable;
+	public final fun component4 ()I
+	public final fun component5 ()I
+	public final fun component6 ()I
+	public final fun component7 ()Lio/getstream/video/android/xml/font/TextStyle;
+	public final fun component8 ()I
+	public final fun component9 ()I
+	public final fun copy (IILandroid/graphics/drawable/Drawable;IIILio/getstream/video/android/xml/font/TextStyle;IILandroid/graphics/drawable/Drawable;III)Lio/getstream/video/android/xml/widget/appbar/CallAppBarStyle;
+	public static synthetic fun copy$default (Lio/getstream/video/android/xml/widget/appbar/CallAppBarStyle;IILandroid/graphics/drawable/Drawable;IIILio/getstream/video/android/xml/font/TextStyle;IILandroid/graphics/drawable/Drawable;IIIILjava/lang/Object;)Lio/getstream/video/android/xml/widget/appbar/CallAppBarStyle;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAppBarPadding ()I
+	public final fun getBackgroundColour ()I
+	public final fun getCenterContentMarginEnd ()I
+	public final fun getCenterContentMarginStart ()I
+	public final fun getCenterContentTextStyle ()Lio/getstream/video/android/xml/font/TextStyle;
+	public final fun getLeadingContentIcon ()Landroid/graphics/drawable/Drawable;
+	public final fun getLeadingContentIconTint ()I
+	public final fun getLeadingContentMarginEnd ()I
+	public final fun getLeadingContentMarginStart ()I
+	public final fun getTrailingContentIcon ()Landroid/graphics/drawable/Drawable;
+	public final fun getTrailingContentIconTint ()I
+	public final fun getTrailingContentMarginEnd ()I
+	public final fun getTrailingContentMarginStart ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/xml/widget/appbar/CallAppBarView : androidx/constraintlayout/widget/ConstraintLayout {
+	public fun <init> (Landroid/content/Context;)V
+	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
+	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;I)V
+	public final fun getOnBackPressed ()Lkotlin/jvm/functions/Function0;
+	public final fun getOnParticipantsPressed ()Lkotlin/jvm/functions/Function0;
+	public final fun renderState (Lio/getstream/video/android/core/model/state/StreamCallState;)V
+	public final fun setCenterContent (Landroid/view/View;Landroid/widget/FrameLayout$LayoutParams;)V
+	public static synthetic fun setCenterContent$default (Lio/getstream/video/android/xml/widget/appbar/CallAppBarView;Landroid/view/View;Landroid/widget/FrameLayout$LayoutParams;ILjava/lang/Object;)V
+	public final fun setLeadingContent (Landroid/view/View;Landroid/widget/FrameLayout$LayoutParams;)V
+	public static synthetic fun setLeadingContent$default (Lio/getstream/video/android/xml/widget/appbar/CallAppBarView;Landroid/view/View;Landroid/widget/FrameLayout$LayoutParams;ILjava/lang/Object;)V
+	public final fun setOnBackPressed (Lkotlin/jvm/functions/Function0;)V
+	public final fun setOnParticipantsPressed (Lkotlin/jvm/functions/Function0;)V
+	public final fun setTrailingContent (Landroid/view/View;Landroid/widget/FrameLayout$LayoutParams;)V
+	public static synthetic fun setTrailingContent$default (Lio/getstream/video/android/xml/widget/appbar/CallAppBarView;Landroid/view/View;Landroid/widget/FrameLayout$LayoutParams;ILjava/lang/Object;)V
+}
+
 public final class io/getstream/video/android/xml/widget/avatar/AvatarShape : java/lang/Enum {
 	public static final field CIRCLE Lio/getstream/video/android/xml/widget/avatar/AvatarShape;
 	public static final field ROUND_RECT Lio/getstream/video/android/xml/widget/avatar/AvatarShape;
@@ -334,8 +404,6 @@ public final class io/getstream/video/android/xml/widget/callcontainer/CallConta
 	public fun <init> (Landroid/content/Context;)V
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;I)V
-	public final fun getOnBackPressed ()Lkotlin/jvm/functions/Function0;
-	public final fun setOnBackPressed (Lkotlin/jvm/functions/Function0;)V
 }
 
 public final class io/getstream/video/android/xml/widget/calldetails/CallBackgroundView : androidx/appcompat/widget/AppCompatImageView {
@@ -667,6 +735,7 @@ public abstract interface class io/getstream/video/android/xml/widget/transforme
 public final class io/getstream/video/android/xml/widget/transformer/TransformStyle {
 	public static final field INSTANCE Lio/getstream/video/android/xml/widget/transformer/TransformStyle;
 	public static final fun getAvatarStyleTransformer ()Lio/getstream/video/android/xml/widget/transformer/StyleTransformer;
+	public static final fun getCallAppBarStyleTransformer ()Lio/getstream/video/android/xml/widget/transformer/StyleTransformer;
 	public static final fun getCallControlsStyleTransformer ()Lio/getstream/video/android/xml/widget/transformer/StyleTransformer;
 	public static final fun getCallDetailsStyleTransformer ()Lio/getstream/video/android/xml/widget/transformer/StyleTransformer;
 	public static final fun getCallParticipantStyleTransformer ()Lio/getstream/video/android/xml/widget/transformer/StyleTransformer;
@@ -677,6 +746,7 @@ public final class io/getstream/video/android/xml/widget/transformer/TransformSt
 	public static final fun getPictureInPictureStyleTransformer ()Lio/getstream/video/android/xml/widget/transformer/StyleTransformer;
 	public static final fun getScreenShareStyleTransformer ()Lio/getstream/video/android/xml/widget/transformer/StyleTransformer;
 	public static final fun setAvatarStyleTransformer (Lio/getstream/video/android/xml/widget/transformer/StyleTransformer;)V
+	public static final fun setCallAppBarStyleTransformer (Lio/getstream/video/android/xml/widget/transformer/StyleTransformer;)V
 	public static final fun setCallControlsStyleTransformer (Lio/getstream/video/android/xml/widget/transformer/StyleTransformer;)V
 	public static final fun setCallDetailsStyleTransformer (Lio/getstream/video/android/xml/widget/transformer/StyleTransformer;)V
 	public static final fun setCallParticipantStyleTransformer (Lio/getstream/video/android/xml/widget/transformer/StyleTransformer;)V

@@ -20,13 +20,10 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.View
 import android.widget.FrameLayout
-import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.children
 import androidx.core.view.isVisible
-import io.getstream.video.android.core.model.state.StreamCallState
-import io.getstream.video.android.core.utils.formatAsTitle
-import io.getstream.video.android.xml.databinding.ViewCallContentBinding
+import io.getstream.video.android.xml.databinding.ViewCallContainerBinding
 import io.getstream.video.android.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.xml.utils.extensions.streamThemeInflater
 import io.getstream.video.android.xml.widget.call.CallView
@@ -40,9 +37,7 @@ import io.getstream.video.android.xml.widget.participant.PictureInPictureView
  */
 public class CallContainerView : ConstraintLayout {
 
-    private val binding = ViewCallContentBinding.inflate(streamThemeInflater, this)
-
-    public var onBackPressed: () -> Unit = { }
+    internal val binding = ViewCallContainerBinding.inflate(streamThemeInflater, this)
 
     public constructor(context: Context) : this(context, null, 0)
     public constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
@@ -51,43 +46,6 @@ public class CallContainerView : ConstraintLayout {
         attrs,
         defStyleAttr
     )
-
-    /**
-     * Updates the toolbar title depending on the call state.
-     *
-     * @param streamCallState The state of the call we are observing.
-     * @param isPictureInPicture Whether the app is in picture in picture mode. If true will hide the toolbar or hide it
-     * if it is false.
-     */
-    internal fun updateToolbar(streamCallState: StreamCallState, isPictureInPicture: Boolean) {
-        binding.callToolbar.isVisible = !isPictureInPicture
-        if (isPictureInPicture) return
-
-        val callId = when (streamCallState) {
-            is StreamCallState.Active -> streamCallState.callGuid.id
-            else -> ""
-        }
-        val status = streamCallState.formatAsTitle(context)
-
-        val title = when (callId.isBlank()) {
-            true -> status
-            else -> "$status: $callId"
-        }
-        binding.callToolbar.title = title
-    }
-
-    /**
-     * Sets up the toolbar.
-     */
-    internal fun setupToolbar(activity: AppCompatActivity) {
-        activity.setSupportActionBar(binding.callToolbar)
-        activity.supportActionBar?.let {
-            it.setDisplayShowTitleEnabled(false)
-            it.setDisplayShowHomeEnabled(true)
-            it.setDisplayHomeAsUpEnabled(true)
-        }
-        binding.callToolbar.setNavigationOnClickListener { onBackPressed() }
-    }
 
     /**
      * Shows the outgoing call screen and initialises the state observers required to populate the screen.
@@ -99,6 +57,7 @@ public class CallContainerView : ConstraintLayout {
         if (isViewInsideContainer<OutgoingCallView>()) return
         val outgoingCallView = OutgoingCallView(context)
         setContentView(outgoingCallView)
+        binding.callToolbar.isVisible = true
         onViewInitialized(outgoingCallView)
     }
 
@@ -112,6 +71,7 @@ public class CallContainerView : ConstraintLayout {
         if (isViewInsideContainer<IncomingCallView>()) return
         val incomingCallView = IncomingCallView(context)
         setContentView(incomingCallView)
+        binding.callToolbar.isVisible = true
         onViewInitialized(incomingCallView)
     }
 
@@ -125,6 +85,7 @@ public class CallContainerView : ConstraintLayout {
         if (isViewInsideContainer<CallView>()) return
         val callView = CallView(context)
         setContentView(callView)
+        binding.callToolbar.isVisible = true
         onViewInitialized(callView)
     }
 
@@ -138,6 +99,7 @@ public class CallContainerView : ConstraintLayout {
         if (isViewInsideContainer<PictureInPictureView>()) return
         val pictureInPicture = PictureInPictureView(context)
         setContentView(pictureInPicture)
+        binding.callToolbar.isVisible = false
         onViewInitialized(pictureInPicture)
     }
 

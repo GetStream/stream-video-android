@@ -5,12 +5,11 @@
     android:layout_height="match_parent"
     >
 
-    <androidx.appcompat.widget.Toolbar
+    <io.getstream.video.android.xml.widget.appbar.CallAppBarView
         android:id="@+id/callToolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/topAppbarHeight"
         app:layout_constraintTop_toTopOf="parent"
-        android:background="@color/stream_bars_background"
         />
 
     <FrameLayout
