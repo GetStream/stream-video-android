@@ -355,16 +355,18 @@ public final class io/getstream/video/android/xml/widget/call/CallView : io/gets
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;I)V
 	public final fun getCallControlsSize ()I
+	public final fun getGetTopLandscapeOffset ()Lkotlin/jvm/functions/Function0;
 	public fun onOrientationChanged (Z)V
 	public fun onViewAdded (Landroid/view/View;)V
 	public final fun setFloatingParticipant (Lio/getstream/video/android/core/model/CallParticipantState;Lkotlin/jvm/functions/Function1;)V
 	public static synthetic fun setFloatingParticipant$default (Lio/getstream/video/android/xml/widget/call/CallView;Lio/getstream/video/android/core/model/CallParticipantState;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+	public final fun setGetTopLandscapeOffset (Lkotlin/jvm/functions/Function0;)V
 	public final fun setScreenSharingContent (Lkotlin/jvm/functions/Function1;)V
 	public final fun updatePresenterText (Ljava/lang/String;)V
 }
 
 public final class io/getstream/video/android/xml/widget/call/CallViewStyle {
-	public fun <init> (IIFFFFIIIIILio/getstream/video/android/xml/font/TextStyle;IILandroid/graphics/drawable/Drawable;II)V
+	public fun <init> (IIFFFFIIIIILio/getstream/video/android/xml/font/TextStyle;IILandroid/graphics/drawable/Drawable;IIZ)V
 	public final fun component1 ()I
 	public final fun component10 ()I
 	public final fun component11 ()I
@@ -374,6 +376,7 @@ public final class io/getstream/video/android/xml/widget/call/CallViewStyle {
 	public final fun component15 ()Landroid/graphics/drawable/Drawable;
 	public final fun component16 ()I
 	public final fun component17 ()I
+	public final fun component18 ()Z
 	public final fun component2 ()I
 	public final fun component3 ()F
 	public final fun component4 ()F
@@ -382,8 +385,8 @@ public final class io/getstream/video/android/xml/widget/call/CallViewStyle {
 	public final fun component7 ()I
 	public final fun component8 ()I
 	public final fun component9 ()I
-	public final fun copy (IIFFFFIIIIILio/getstream/video/android/xml/font/TextStyle;IILandroid/graphics/drawable/Drawable;II)Lio/getstream/video/android/xml/widget/call/CallViewStyle;
-	public static synthetic fun copy$default (Lio/getstream/video/android/xml/widget/call/CallViewStyle;IIFFFFIIIIILio/getstream/video/android/xml/font/TextStyle;IILandroid/graphics/drawable/Drawable;IIILjava/lang/Object;)Lio/getstream/video/android/xml/widget/call/CallViewStyle;
+	public final fun copy (IIFFFFIIIIILio/getstream/video/android/xml/font/TextStyle;IILandroid/graphics/drawable/Drawable;IIZ)Lio/getstream/video/android/xml/widget/call/CallViewStyle;
+	public static synthetic fun copy$default (Lio/getstream/video/android/xml/widget/call/CallViewStyle;IIFFFFIIIIILio/getstream/video/android/xml/font/TextStyle;IILandroid/graphics/drawable/Drawable;IIZILjava/lang/Object;)Lio/getstream/video/android/xml/widget/call/CallViewStyle;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCallControlsHeight ()I
 	public final fun getCallControlsWidthLandscape ()I
@@ -402,6 +405,7 @@ public final class io/getstream/video/android/xml/widget/call/CallViewStyle {
 	public final fun getPresenterTextPadding ()I
 	public final fun getPresenterTextStyle ()Lio/getstream/video/android/xml/font/TextStyle;
 	public final fun getScreenShareMargin ()I
+	public final fun getShouldShowGridUsersAnListLandscape ()Z
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }

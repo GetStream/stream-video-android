@@ -130,7 +130,7 @@ internal class CallParticipantsGridView : CallConstraintLayout, VideoRenderer {
                 childList.forEach { callParticipantView ->
                     if (childList.size == 1) {
                         constrainViewToParent(callParticipantView)
-                    }else {
+                    } else {
                         constrainViewToParentBySide(callParticipantView, ConstraintSet.TOP)
                         constrainViewToParentBySide(callParticipantView, ConstraintSet.BOTTOM)
                     }

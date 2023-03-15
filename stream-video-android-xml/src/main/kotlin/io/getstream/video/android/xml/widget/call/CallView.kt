@@ -240,19 +240,18 @@ public class CallView : CallConstraintLayout {
         val participantsWidth: Int
         val participantsHeight: Int
 
-        if(isLandscape) {
+        if (isLandscape) {
             updateConstraints {
                 clearConstraints(participantsView)
                 constrainViewToParentBySide(participantsView, ConstraintSet.START)
                 constrainViewToParentBySide(participantsView, ConstraintSet.BOTTOM)
                 constrainViewToParentBySide(participantsView, ConstraintSet.TOP, getTopLandscapeOffset())
                 constrainViewEndToStartOfView(participantsView, callControlsView)
-
             }
 
             participantsWidth = LayoutParams.MATCH_CONSTRAINT
             participantsHeight = LayoutParams.MATCH_CONSTRAINT
-        }else {
+        } else {
             updateConstraints {
                 clearConstraints(participantsView)
             }
