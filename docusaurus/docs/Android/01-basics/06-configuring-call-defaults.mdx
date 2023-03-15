@@ -1,0 +1,71 @@
+##  Configuring Call Defaults
+
+While our SDK supports various different use cases, like:
+
+* Live streams
+* Audio Rooms
+* Messaging & Ringing Apps
+* Meetings
+
+You might want to customize the default behavior. We provide that through various properties within the `StreamVideoConfig`.
+
+If you look into the `StreamVideoConfig` definition, here are some of the properties that are exposed:
+
+```kotlin
+public interface StreamVideoConfig {
+
+    // Call Behavior
+    public val dropTimeout: Long
+    public val cancelOnTimeout: Boolean
+    public val joinOnAcceptedByCallee: Boolean
+
+    // Default call configuration
+    public val autoPublish: Boolean
+    public val defaultAudioOn: Boolean
+    public val defaultVideoOn: Boolean
+    public val defaultSpeakerPhoneOn: Boolean
+}
+```
+
+The first set of properties define the flow of the call that triggers different events and changes the internal state:
+
+* `dropTimeout`: This is used to define how long clients wait for the user to accept the call, or for other users to accept a ring. After this timeout, the call is either rejected or cancelled.
+* `cancelOnTimeout`: Used in pair with `dropTimeout`, you can use this flag to disable cancelling a call automatically, after a timeout.
+* `joinOnAcceptedByCallee`: When calling other people, used to define if you want the user to automatically join the call when the first person accepts.
+
+The second set of properties are used for the default configuration when in calls.
+
+* `autoPublish`: Configures if the user automatically publishes audio and video tracks when joining a call. Before publishing, we first check if the user has the required permissions to do so.
+* `defaultAudioOn`: If user's audio, or microphone, is automatically on.
+* `defaultVideoOn`: If user's video, or camera, is automatically on.
+* `defaultSpeakerPhoneOn` If user's speakerphone is automatically on.
+
+You can customize any of these properties by creating an implementation of the `StreamVideoConfig` interface and passing it to the `StreamVideoBuilder`, like so:
+
+```kotlin
+val streamVideo = StreamVideoBuilder(
+    context = this,
+    user = user,
+    apiKey = apiKey,
+    androidInputs = ...,
+    loggingLevel = loggingLevel,
+    config = MyCustomConfig()
+).build()
+
+// Configuration
+
+private object MyCustomConfig : StreamVideoConfig {
+    override val dropTimeout: Long = 600_000L
+    override val cancelOnTimeout: Boolean = false
+    override val joinOnAcceptedByCallee: Boolean = true
+
+    override val autoPublish: Boolean = false
+    override val defaultAudioOn: Boolean = false
+    override val defaultVideoOn: Boolean = false
+    override val defaultSpeakerPhoneOn: Boolean = true
+}
+```
+
+In this example you customized how long the timeout is and if the call should be cancelled by default. 
+
+Additionally, you turned off all default publishing for the user in the call and made sure the speakerphone is used by default.

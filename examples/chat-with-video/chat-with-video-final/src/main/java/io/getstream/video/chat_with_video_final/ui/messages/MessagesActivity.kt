@@ -45,11 +45,11 @@ import io.getstream.chat.android.compose.viewmodel.messages.MessageComposerViewM
 import io.getstream.chat.android.compose.viewmodel.messages.MessageListViewModel
 import io.getstream.chat.android.compose.viewmodel.messages.MessagesViewModelFactory
 import io.getstream.chat.android.uiutils.extension.getDisplayName
-import io.getstream.video.android.utils.Success
+import io.getstream.video.android.core.utils.Success
 import io.getstream.video.chat_with_video_final.R
 import io.getstream.video.chat_with_video_final.application.chatWithVideoApp
 import kotlinx.coroutines.launch
-import java.util.*
+import java.util.UUID
 
 class MessagesActivity : ComponentActivity() {
 
@@ -114,10 +114,10 @@ class MessagesActivity : ComponentActivity() {
         lifecycleScope.launch {
             val callId = UUID.randomUUID().toString()
 
-            val createCallResult = videoClient.createCall(
+            val createCallResult = videoClient.getOrCreateCall(
                 id = callId,
                 type = "default",
-                ringing = false,
+                ring = false,
                 participantIds = emptyList()
             )
 

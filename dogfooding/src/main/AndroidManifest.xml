@@ -30,6 +30,12 @@
             android:exported="false"
             android:supportsPictureInPicture="true" />
 
+        <activity
+            android:name=".XmlCallActivity"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:exported="false"
+            android:supportsPictureInPicture="true" />
+
         <service
             android:name=".CallService"
             android:enabled="true"

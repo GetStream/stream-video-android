@@ -27,16 +27,15 @@ import io.getstream.chat.android.state.plugin.config.StatePluginConfig
 import io.getstream.chat.android.state.plugin.factory.StreamStatePluginFactory
 import io.getstream.log.StreamLog
 import io.getstream.log.android.AndroidStreamLogger
-import io.getstream.video.android.BuildConfig
-import io.getstream.video.android.StreamVideo
-import io.getstream.video.android.StreamVideoBuilder
-import io.getstream.video.android.StreamVideoConfig
-import io.getstream.video.android.input.CallActivityInput
-import io.getstream.video.android.input.CallServiceInput
-import io.getstream.video.android.logging.LoggingLevel
-import io.getstream.video.android.token.CredentialsProvider
-import io.getstream.video.android.user.UserCredentialsManager
-import io.getstream.video.android.user.UsersProvider
+import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.StreamVideoBuilder
+import io.getstream.video.android.core.StreamVideoConfig
+import io.getstream.video.android.core.input.CallActivityInput
+import io.getstream.video.android.core.input.CallServiceInput
+import io.getstream.video.android.core.logging.LoggingLevel
+import io.getstream.video.android.core.model.ApiKey
+import io.getstream.video.android.core.user.UsersProvider
+import io.getstream.video.chat_with_video_final.BuildConfig
 import io.getstream.video.chat_with_video_final.ui.call.CallActivity
 import io.getstream.video.chat_with_video_final.ui.call.CallService
 import io.getstream.video.chat_with_video_final.ui.messages.attachment.CallAttachmentFactory
@@ -48,7 +47,6 @@ class ChatWithVideoApp : Application() {
         override val dropTimeout: Long = 30_000L
         override val cancelOnTimeout: Boolean = true
         override val joinOnAcceptedByCallee: Boolean = true
-        override val createCallClientInternally: Boolean = true
 
         override val autoPublish: Boolean = true
         override val defaultAudioOn: Boolean = false
@@ -71,7 +69,7 @@ class ChatWithVideoApp : Application() {
 
         val logLevel = if (BuildConfig.DEBUG) ChatLogLevel.ALL else ChatLogLevel.NOTHING
 
-        ChatClient.Builder("tp8sef43xcpc", this)
+        ChatClient.Builder(BuildConfig.SAMPLE_STREAM_CHAT_API_KEY, this)
             .withPlugins(offlinePlugin, statePluginFactory)
             .logLevel(logLevel)
             .uploadAttachmentsNetworkType(UploadAttachmentsNetworkType.NOT_ROAMING)
@@ -90,27 +88,20 @@ class ChatWithVideoApp : Application() {
         }
     }
 
-    lateinit var credentialsProvider: CredentialsProvider
-        private set
+    private var video: StreamVideo? = null
 
-    lateinit var streamVideo: StreamVideo
-        private set
+    val streamVideo: StreamVideo
+        get() = requireNotNull(video)
 
     fun initializeStreamVideo(
-        credentialsProvider: CredentialsProvider,
+        user: io.getstream.video.android.core.model.User,
+        apiKey: ApiKey,
         loggingLevel: LoggingLevel
     ): StreamVideo {
-        if (this::credentialsProvider.isInitialized) {
-            this.credentialsProvider.updateUser(
-                credentialsProvider.getUserCredentials()
-            )
-        } else {
-            this.credentialsProvider = credentialsProvider
-        }
-
         return StreamVideoBuilder(
             context = this,
-            credentialsProvider = this.credentialsProvider,
+            user = user,
+            apiKey = apiKey,
             androidInputs = setOf(
                 CallServiceInput.from(CallService::class),
                 CallActivityInput.from(CallActivity::class),
@@ -118,20 +109,17 @@ class ChatWithVideoApp : Application() {
             loggingLevel = loggingLevel,
             config = videoConfig
         ).build().also {
-            streamVideo = it
+            video = it
         }
     }
 
     fun logOut() {
-        val preferences = UserCredentialsManager.initialize(this)
-
         chatClient.disconnect(true).enqueue()
-        streamVideo.clearCallState()
-        streamVideo.removeDevices(preferences.getDevices())
-        preferences.clear()
+        streamVideo.logOut()
+        video = null
     }
 }
 
-internal const val API_KEY = "us83cfwuhy8n"
+internal const val API_KEY = BuildConfig.SAMPLE_STREAM_VIDEO_API_KEY
 
 internal val Context.chatWithVideoApp get() = applicationContext as ChatWithVideoApp

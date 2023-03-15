@@ -26,11 +26,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.participants.CallParticipant
-import io.getstream.video.android.model.Call
-import io.getstream.video.android.model.CallParticipantState
+import io.getstream.video.android.core.model.Call
+import io.getstream.video.android.core.model.CallParticipantState
 
 /**
  * Shows a column of call participants.
@@ -43,11 +42,11 @@ import io.getstream.video.android.model.CallParticipantState
 internal fun ParticipantsColumn(
     call: Call,
     participants: List<CallParticipantState>,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     LazyColumn(
-        modifier = modifier.padding(vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = modifier.padding(vertical = VideoTheme.dimens.screenShareParticipantsRowPadding),
+        verticalArrangement = Arrangement.spacedBy(VideoTheme.dimens.screenShareParticipantsListItemMargin),
         horizontalAlignment = Alignment.CenterHorizontally,
         content = {
             items(participants) { participant ->
@@ -66,12 +65,12 @@ internal fun ParticipantsColumn(
 @Composable
 private fun ParticipantListItem(
     call: Call,
-    participant: CallParticipantState
+    participant: CallParticipantState,
 ) {
     CallParticipant(
         modifier = Modifier
             .size(VideoTheme.dimens.screenShareParticipantItemSize)
-            .clip(RoundedCornerShape(16.dp)),
+            .clip(RoundedCornerShape(VideoTheme.dimens.screenShareParticipantsRadius)),
         call = call,
         participant = participant,
         labelPosition = Alignment.BottomStart

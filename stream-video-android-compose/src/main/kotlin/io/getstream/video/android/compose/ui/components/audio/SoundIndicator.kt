@@ -24,26 +24,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.R
+import io.getstream.video.android.common.model.SoundState
+import io.getstream.video.android.common.model.Speaking
+import io.getstream.video.android.common.model.Unmuted
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.ui.common.R
 
 /**
  * Used to indicate the sound state of a given participant. Either shows a mute icon or the sound
  * levels.
  *
- * @param hasSound If the participant has sound active.
- * @param isSpeaking If the participant is speaking.
+ * @param state The state of the user audio.
  * @param modifier Modifier for styling.
  */
 @Composable
 public fun SoundIndicator(
-    hasSound: Boolean,
-    isSpeaking: Boolean,
+    state: SoundState,
     modifier: Modifier = Modifier
 ) {
-    when {
-        hasSound && isSpeaking -> ActiveSoundLevels(modifier)
-        hasSound && !isSpeaking -> {
+    when (state) {
+        Speaking -> ActiveSoundLevels(modifier)
+        Unmuted -> {
             Icon(
                 modifier = modifier
                     .size(VideoTheme.dimens.audioStatusSize)

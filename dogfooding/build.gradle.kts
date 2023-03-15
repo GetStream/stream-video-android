@@ -21,6 +21,7 @@ android {
         versionCode = 1
         versionName = "1.0"
 
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
@@ -79,6 +80,19 @@ android {
         }
     }
 
+    val envProps: File = rootProject.file(".env.properties")
+    if (envProps.exists()) {
+        val properties = Properties()
+        properties.load(FileInputStream(envProps))
+        buildTypes.forEach { buildType ->
+            properties
+                .filterKeys { "$it".startsWith("DOGFOODING") }
+                .forEach {
+                buildType.buildConfigField("String", "${it.key}", "\"${it.value}\"")
+            }
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -109,6 +123,7 @@ dependencies {
     implementation("com.firebaseui:firebase-ui-auth:7.2.0")
 
     implementation(project(":stream-video-android-compose"))
+    implementation(project(":stream-video-android-xml"))
 
     implementation(Dependencies.streamPushFirebase)
     implementation(Dependencies.streamLog)

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CallParticipantView">
+        <!-- Alignment for the name label inside the view. -->
+        <attr name="streamCallParticipantLabelAlignment" format="enum">
+            <enum name="top_start" value="0" />
+            <enum name="top_end" value="1" />
+            <enum name="bottom_start" value="2" />
+            <enum name="bottom_end" value="3" />
+        </attr>
+        <!-- Padding between the borders of the name label and parent. -->
+        <attr name="streamCallParticipantLabelMargin" format="dimension|reference" />
+        <!-- Participant name label background color. -->
+        <attr name="streamCallParticipantLabelBackgroundColor" format="color|reference" />
+        <!-- Participant name label text style. -->
+        <attr name="streamCallParticipantLabelTextSize" format="dimension|reference" />
+        <attr name="streamCallParticipantLabelTextColor" format="color|reference" />
+        <attr name="streamCallParticipantLabelTextFont" format="reference" />
+        <attr name="streamCallParticipantLabelTextFontAssets" format="string" />
+        <attr name="streamCallParticipantLabelTextStyle">
+            <flag name="normal" value="0" />
+            <flag name="bold" value="1" />
+            <flag name="italic" value="2" />
+        </attr>
+
+        <!-- Color of the primary active speaker border. -->
+        <attr name="streamCallParticipantActiveSpeakerBorderColor" format="color|reference" />
+        <!-- Width of the primary active speaker border. -->
+        <attr name="streamCallParticipantActiveSpeakerBorderWidth" format="dimension|reference" />
+
+        <!-- Icon for the participant muted state. -->
+        <attr name="streamCallParticipantMicrophoneOffIcon" format="reference" />
+        <!-- Icon tint for the participant muted state. -->
+        <attr name="streamCallParticipantMicrophoneOffTint" format="color|reference" />
+        <!-- Icon tint for the participant mic active   state. -->
+        <attr name="streamCallParticipantAudioLevelTint" format="color|reference" />
+
+        <attr name="streamCallParticipantElevation" format="dimension|reference" />
+        <attr name="streamCallParticipantCornerRadius" format="dimension|reference" />
+
+    </declare-styleable>
+</resources>

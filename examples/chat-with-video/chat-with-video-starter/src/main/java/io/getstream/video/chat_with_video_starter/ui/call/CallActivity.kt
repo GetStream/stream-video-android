@@ -17,9 +17,9 @@
 package io.getstream.video.chat_with_video_starter.ui.call
 
 import android.content.Context
-import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.compose.ui.AbstractComposeCallActivity
-import io.getstream.video.android.viewmodel.CallViewModelFactory
+import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.viewmodel.CallViewModelFactory
 import io.getstream.video.chat_with_video_starter.application.chatWithVideoApp
 
 class CallActivity : AbstractComposeCallActivity() {

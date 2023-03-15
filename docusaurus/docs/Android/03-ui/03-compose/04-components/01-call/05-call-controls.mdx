@@ -1,0 +1,126 @@
+## CallControls
+
+The `CallControls` component lets you display any number of controls on the UI, that trigger different actions within a call. We provide default actions, such as changing the audio and video mute state or turning on the speakerphone and leaving the call.
+
+On top of these actions, you can provide a custom set of actions through the API. The component only has a stateless variant, given that it doesn't rely on a `ViewModel` to bind its UI.
+
+Let's see how to use it.
+
+## Usage
+
+To use `CallControls`, you can simply call it in combination with any custom UI or our other components:
+
+```kotlin
+@Composable
+private fun CustomUi() {
+    // 1 
+    val callState by callViewModel.callState.collectAsState()
+    val callMediaState by callViewModel.callMediaState.collectAsState()
+    val streamCallState by callViewModel.streamCallState.collectAsState()
+
+    val currentCall = callState
+
+    VideoTheme {
+        if (currentCall != null) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                // 2
+                CallAppBar(...)
+              
+                CallParticipants( 
+                    modifier = ...,
+                    call = currentCall,
+                    onCallAction = ::handleCallAction,
+                    callMediaState = callMediaState,
+                    callState = streamCallState
+                )
+
+                CallControls( // 3
+                    modifier = ...,
+                    callMediaState = callMediaState,
+                    isScreenSharing = false,
+                    onCallAction = ::handleCallAction
+                )
+            }
+        }
+    }
+}
+```
+
+In this example, you're doing the following:
+
+1. You observe the required state using the `callViewModel`. You can build the `ViewModel` yourself, or use any of our predefined `Activity` constructs.
+2. Once you have the state ready, you build the UI. We omitted modifiers here, as you can arrange the components in any way possible, such as the `CallAppBar` and `CallControls` taking up a fixed size space, while the `CallParticipants` fills the rest of the parent. `CallParticipants` will take the responsibility of representing the main part of the call.
+3. Finally, you add the `CallControls`. You can customize how these look and which options they represent, but we'll talk about that later.
+
+If you're using this approach and our default set of components, you can expect a UI that's similar to our default implementation:
+
+![Call Screen](https://user-images.githubusercontent.com/17215808/216000813-86ebd384-f5d1-4e53-9b23-ce1f14b6de4e.png)
+
+By default `CallControls` component covers both portrait and landscape orientation. This means that the actions you pass in will be rendered either in a `Row` of items, horizontally placed, when in portrait, or a `Column`, when in landscape.
+
+Now that you've seen how to integrate the component and hook it up with state, let's explore customizing the action handlers.
+
+## Handling Actions
+
+`CallControls` expose the following ways to customize action handling:
+
+```kotlin
+@Composable
+public fun CallControls(
+    ..., // State and UI
+    actions: List<CallControlAction> = buildDefaultCallControlActions(callMediaState = callMediaState),
+    onCallAction: (CallAction) -> Unit
+)
+```
+
+* `actions`: While technically a part of the **component state**, it's still good to think about actions as a part of action handling. These items represent the `CallControlAction`s which are rendered on the UI and can be processed using our handler. Customizing these actions lets you define which buttons are shown and what type of behavior you want to trigger when users tap on them.
+* `onCallAction`: Handler when the user taps on any of the rendered `actions`. Using this handler, you can build logic for custom actions, or for some of the default provided actions, to customize the behavior.
+
+If you want to customize the actions and how they're used, you can do something like this:
+
+```kotlin
+@Composable
+private fun CustomCallControls(
+  callControlsActions: List<CallControlAction> // 1
+) {
+    CallControls(
+        ..., // State and modifier
+        actions = callControlsActions,
+        onCallAction = { action -> // 2
+          when (action) { 
+            // 3
+            ...
+            else -> callViewModel.onCallAction(action)
+          }
+        }
+    )
+}
+```
+
+1. By creating a custom list of `CallControlAction` actions, you define which actions you want. You could do something like removing the video/camera controls and building an audio-only use case, replacing the flip camera action with a settings wheel for more user input or even adding a Chat icon to support custom Chat UI.
+2. Within `CallControls`, you can override the `onCallAction` parameter to provide a custom handler when the user taps on any of the rendered buttons.
+3. You can list out any logic here for any of your custom actions, as well as the default ones that we provide. Finally, if you don't want to handle _some_ of the actions, you can simply call `callViewModel.onCallAction(action)` and it'll provide the default behavior of our SDK, such as flipping a camera or muting audio or video.
+
+Now that you've seen how to customize the behavior of the controls, let's dive deeper into the UI.
+
+## Customization
+
+This is a very simple component so it doesn't have replacable slots, but it still offers ways to customize its appearance.
+
+```kotlin
+@Composable
+public fun CallControls(
+    modifier: Modifier = Modifier,
+    actions: List<CallControlAction> = buildDefaultCallControlActions(callMediaState = callMediaState),
+)
+```
+
+* `modifier`: Allows you to customize the size, position, elevation, background and much more of the component. Using this in pair with `VideoTheme` and our [theming guide](../../03-general-customization/01-video-theme.mdx), you're able to customize the shape of the call controls as well as colors padding and more.
+* `actions`: As previously mentioned, by changing the `actions`, you don't only change the possible behavior, but also the appearance. You can change the icon of each button, the icon colors, background colors and more. You can also remove specific actions and add new, custom ones.
+
+In our [Video Android Tutorial](../../../../01-basics/01-tutorial.mdx), we showcased how to build custom `CallControls` to remove camera and video controls and only feature audio buttons. The result ended up looking something like this:
+
+![Audio Only Call](https://user-images.githubusercontent.com/17215808/216340710-e96e311c-1fd1-4564-bbfe-2230ff213fa1.png)
+
+Where you only have the speakerphone and microphone controls, as well as the button to leave the call. This allows you to visually change the component, while only changing the actions that are rendered, which is quite useful.
+

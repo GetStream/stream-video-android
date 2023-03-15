@@ -21,9 +21,10 @@ import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
-import io.getstream.video.android.call.state.CallAction
-import io.getstream.video.android.call.state.CallMediaState
 import io.getstream.video.android.compose.state.ui.call.CallControlAction
+import io.getstream.video.android.compose.ui.components.call.controls.internal.RegularCallControls
+import io.getstream.video.android.core.call.state.CallAction
+import io.getstream.video.android.core.call.state.CallMediaState
 
 /**
  * Represents the set of controls the user can use to change their audio and video device state, or

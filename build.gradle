@@ -7,7 +7,6 @@ buildscript {
     repositories {
         google()
         mavenCentral()
-        maven { url 'https://jitpack.io' }
         maven { url "https://plugins.gradle.org/m2/" }
     }
     dependencies {
@@ -28,7 +27,7 @@ subprojects {
     if (it.name.startsWith("stream-video-android")) {
         tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
             kotlinOptions.freeCompilerArgs += [
-                    "-Xexplicit-api=strict",
+//                    "-Xexplicit-api=strict", // TODO - re-enable once coordinator is stable
                     "-Xjvm-default=enable",
                     "-opt-in=io.getstream.video.android.core.internal.InternalStreamVideoApi"
             ]

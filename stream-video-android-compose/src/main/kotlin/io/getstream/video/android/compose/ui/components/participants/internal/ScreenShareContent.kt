@@ -34,14 +34,14 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.call.state.CallAction
-import io.getstream.video.android.call.state.ToggleScreenConfiguration
-import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
-import io.getstream.video.android.model.Call
-import io.getstream.video.android.model.ScreenSharingSession
+import io.getstream.video.android.core.call.state.CallAction
+import io.getstream.video.android.core.call.state.ToggleScreenConfiguration
+import io.getstream.video.android.core.model.Call
+import io.getstream.video.android.core.model.ScreenSharingSession
 import stream.video.sfu.models.TrackType
+import io.getstream.video.android.ui.common.R as RCommon
 
 /**
  * Represents the content of a screen sharing session.
@@ -50,17 +50,17 @@ import stream.video.sfu.models.TrackType
  * @param session The screen sharing session to show.
  * @param isFullscreen If the UI is currently in full screen mode.
  * @param modifier Modifier for styling.
- * @param onCallAction Handler for various call actions.
  * @param onRender Handler when the video content renders.
+ * @param onCallAction Handler for various call actions.
  */
 @Composable
-internal fun ScreenShareContent(
+public fun ScreenShareContent(
     call: Call,
     session: ScreenSharingSession,
     isFullscreen: Boolean,
     modifier: Modifier = Modifier,
-    onCallAction: (CallAction) -> Unit,
-    onRender: (View) -> Unit
+    onRender: (View) -> Unit = {},
+    onCallAction: (CallAction) -> Unit
 ) {
     Box(modifier = modifier) {
         VideoRenderer(
@@ -91,9 +91,9 @@ internal fun ScreenShareContent(
                 },
                 content = {
                     val drawable = if (orientation == ORIENTATION_LANDSCAPE) {
-                        R.drawable.ic_portrait_mode
+                        RCommon.drawable.ic_portrait_mode
                     } else {
-                        R.drawable.ic_landscape_mode
+                        RCommon.drawable.ic_landscape_mode
                     }
 
                     Icon(
@@ -105,7 +105,7 @@ internal fun ScreenShareContent(
                             .padding(8.dp),
                         painter = painterResource(id = drawable),
                         contentDescription = stringResource(
-                            id = R.string.change_orientation
+                            id = RCommon.string.change_orientation
                         ),
                         tint = VideoTheme.colors.textHighEmphasis
                     )
@@ -127,9 +127,9 @@ internal fun ScreenShareContent(
                 },
                 content = {
                     val drawable = if (isFullscreen) {
-                        R.drawable.ic_fullscreen_exit
+                        RCommon.drawable.ic_fullscreen_exit
                     } else {
-                        R.drawable.ic_fullscreen
+                        RCommon.drawable.ic_fullscreen
                     }
 
                     Icon(
@@ -141,7 +141,7 @@ internal fun ScreenShareContent(
                             .padding(8.dp),
                         painter = painterResource(id = drawable),
                         contentDescription = stringResource(
-                            id = R.string.toggle_fullscreen
+                            id = RCommon.string.toggle_fullscreen
                         ),
                         tint = VideoTheme.colors.textHighEmphasis
                     )

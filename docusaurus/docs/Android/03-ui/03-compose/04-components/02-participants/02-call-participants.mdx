@@ -1,0 +1,139 @@
+# CallParticipants
+
+The `CallParticipants` component is one of our most versatile and complex UI components, designed to render a list of participants in a call. It handles different UI layouts based on the number of participants and different screen orientations. Additionally, it can also render screen sharing content when there is an active session.
+
+Before jumping into how to use the component and how to customize it, let's review what some of these features mean.
+
+### Flexible Layout
+
+The `CallParticipants` changes the UI layout based on the number of participants. In calls with fewer than four people, the local participant video is rendered in a floating item, using the `LocalVideoContent` that you can [read more about](04-local-video.mdx) in this section. In calls with four or more people, it's rendered with other participants in a grid.
+
+Additionally, the participants are rendered in the following way:
+
+* **One participant** (only local): Rendered as the only item in the "grid", taking up the full component space.
+* **Two participants** (1 remote + local): The remote participant is rendered within the full component space while the local participant is a floating item.
+* **Three participants** (2 remote + local): Remote participants are in a vertical split-screen, while the local participant is a floating item.
+* **Four or more participants**: (3 or more remote + local): Participants are rendered as a grid of four items, in a paginated way. Up to four participants per page, with the last participant being the local participant. You can flip between pages using on-screen navigation.
+
+### Orientation 
+
+The component handles both Landscape and Portrait orientations by rendering different UI. In Portrait mode, the video layout is optimized for standard mobile device rendering, while the landscape mode offers more screen real estate to render video by adding a transparent app bar and pushing the call controls to the side. This is helpful when you need to pay attention to details of the video content of other participants.
+
+Additionally, both of these orientations work for screen sharing and adjust the UI accordingly.
+
+### Screen Sharing
+
+The component can render screen sharing content if there's an active session. If a session exists, it will be non-null when fetching its state. The way the component renders screen sharing is by maximizing the screen real estate that it provides for the screen share video.
+
+Users can then focus on the shared content more or choose to enter the full screen mode, while the participants grid becomes a horizontal or vertical list, for portrait and landscape, respectively.
+
+Now that you've learned a lot about the `CallParticipants` internal works, let's see how to use the component to add it to your UI.
+
+## Usage
+
+To use the component in your UI, once you have the required state, you can render `CallParticipants` like so:
+
+```kotlin
+@Composable
+public fun MyCustomScreen() {
+    Scaffold(
+        topBar = { /* Custom top bar */ },
+    ) { padding ->
+        CallParticipants(
+            modifier = Modifier.fillMaxSize(),
+            call = activeCall,
+            callMediaState = myCallMediaState,
+            callState = callState,
+            screenSharing = activeSession,
+            paddingValues = padding,
+            onBackPressed = { /* handle back press */ },
+            onCallAction = { action -> /* handle call action */ },
+        )
+    }
+}
+```
+
+There are quite a few parameters here, but let's focuso on the state:
+
+* `call`: Contains all the participants in the call as well as more details about the call itself.
+* `callMediaState`: Represents the media state, such as if the speakerphone, camera or microphone are enabled or not.
+* `callState`: Data representing the state machine state of the current call. Contains extra information about who created the call, the call details containing user capabilities and more.
+* `screenSharing`: The active screen sharing session if it exists, or `null` if there is no sharing happening. Used to show the screen share video if present.
+
+Since there are many different states and layouts this component can render by default, here's a select few.
+
+| 1 Participant                                                | 2 Participants                                               | 3 Participants                                               | 4+ Participants                                              |
+| ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| ![1 Participant](https://user-images.githubusercontent.com/17215808/223739500-c20e7fe4-1561-43e6-9326-5a5c5abeaaa8.png) | ![2 Participants](https://user-images.githubusercontent.com/17215808/223739496-1317c766-3987-4b1a-9d9d-efc915c5ed21.png) | ![3 Participants](https://user-images.githubusercontent.com/17215808/223739493-d21fab5e-6f0d-49a9-b52e-cd94bf98f229.png) | ![4+ Participants](https://user-images.githubusercontent.com/17215808/223739479-3b8de50c-5995-4467-9dba-49600acd1525.png) |
+
+These states represent the standard UI, when there is no screen sharing happening. Similar state can be observed when using the application in landscape orientation.
+
+| Landscape alternatives                                       |
+| ------------------------------------------------------------ |
+| ![1 Participant](https://user-images.githubusercontent.com/17215808/223740410-fec33949-8279-49de-aa63-dc5c93ad534e.png) |
+| ![2 Participants](https://user-images.githubusercontent.com/17215808/223740423-d045c9b9-f0c4-4eb1-8bf5-aa864ad1ff3c.png) |
+| ![3 Participants](https://user-images.githubusercontent.com/17215808/223740421-be99100d-b6af-4789-adcd-77ca1218ee42.png) |
+| ![4+ Participants](https://user-images.githubusercontent.com/17215808/223740417-483385b5-c923-4a47-a242-5f297d793f69.png) |
+
+And finally, if there is any screen sharing, you can expect the following UI:
+
+![Portrait Screen Sharing](https://user-images.githubusercontent.com/17215808/223741344-3aa128c9-0059-4c5e-8c30-9cb25f59bd15.png)
+
+You can see the participants are rendered in a horizontal `Row` that's scrollable. Additionally, the screen sharing UI is taking up the maximum amount of space to make it as clear as possible.
+
+This UI also works for Landscape, especially if used in full screen mode:
+
+| Landscape alternatives                                       |
+| ------------------------------------------------------------ |
+| ![Landscape Screen Sharing](https://user-images.githubusercontent.com/17215808/223741340-84063daa-8f86-4307-b654-f2dddb0c6b74.png) |
+| ![Full Screen Screen Sharing](https://user-images.githubusercontent.com/17215808/223741331-c09d4973-61ef-4202-b4c0-08f5653bb3df.png) |
+
+This component is truly versatile and lets you cover almost every use case for video calls, supporting smaller, group based calls, 1:1 calls, large meetings, screen sharing and much more.
+
+Let's see how to handle the actions that are available within the component.
+
+## Handling Actions
+
+The component exposes the following action handlers that you can override:
+
+```kotlin
+@Composable
+public fun CallParticipants(
+    ..., // state and UI
+    onCallAction: (CallAction) -> Unit,
+    onRender: (View) -> Unit = {},
+    onBackPressed: () -> Unit = {}
+)
+```
+
+* `onCallAction`: Allows you to override action handling for call controls buttons as well as screen sharing UI.
+* `onRender`: Used to triggere custom events when each of the video containers renders for the first time or changes its size.
+* `onBackPressed`: Handler when the user triggers a back action. This is doable in landscape, because the transparent overlaid toolbar exposes a back button.
+
+You can easily override these parameters to provide custom behavior that caters to your app's use case. Let's see how to customize the UI.
+
+## Customization
+
+In terms of UI customization, the component provides the following:
+
+```kotlin
+@Composable
+public fun CallParticipants(
+    modifier: Modifier = Modifier,
+    paddingValues: PaddingValues = PaddingValues(0.dp),
+    callControlsContent: @Composable () -> Unit = {
+        DefaultCallControlsContent(
+            call = call,
+            callMediaState = callMediaState,
+            onCallAction = onCallAction
+        )
+    }
+)
+```
+
+* `modifier`: Used for styling and changing the component size, shape and similar.
+* `paddingValues`: Padding from the parent, used to constrain the floating participant item.
+* `callControlsContent`: Used to add custom call controls content to the component. The content added using this API is rendered below the participant list in portrait UI and to the side for landscape UI. You can use this to add or remove actions from the call UI.
+
+With these options, you have more than enough space to customize how the component looks and behaves.
+

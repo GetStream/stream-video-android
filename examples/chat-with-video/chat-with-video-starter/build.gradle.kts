@@ -1,6 +1,8 @@
 import io.getstream.video.android.Configuration
 import io.getstream.video.android.Dependencies
 import io.getstream.video.android.Versions
+import java.io.FileInputStream
+import java.util.*
 
 plugins {
     id("com.android.application")
@@ -33,6 +35,20 @@ android {
             )
         }
     }
+
+    val envProps: File = rootProject.file(".env.properties")
+    if (envProps.exists()) {
+        val properties = Properties()
+        properties.load(FileInputStream(envProps))
+        buildTypes.forEach { buildType ->
+            properties
+                .filterKeys { "$it".startsWith("SAMPLE") }
+                .forEach {
+                    buildType.buildConfigField("String", "${it.key}", "\"${it.value}\"")
+                }
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11

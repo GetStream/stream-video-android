@@ -48,8 +48,8 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
+import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -66,9 +66,10 @@ import io.getstream.video.android.app.videoApp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.Avatar
 import io.getstream.video.android.compose.ui.components.avatar.InitialsAvatar
-import io.getstream.video.android.utils.initials
-import io.getstream.video.android.utils.onError
-import io.getstream.video.android.utils.onSuccess
+import io.getstream.video.android.core.user.UserPreferencesManager
+import io.getstream.video.android.core.utils.initials
+import io.getstream.video.android.core.utils.onError
+import io.getstream.video.android.core.utils.onSuccess
 import kotlinx.coroutines.launch
 
 class HomeActivity : AppCompatActivity() {
@@ -96,7 +97,7 @@ class HomeActivity : AppCompatActivity() {
         )
     }
 
-    private val callIdState: MutableState<String> = mutableStateOf("call328")
+    private val callIdState: MutableState<String> = mutableStateOf("call42977")
 
     private val loadingState: MutableState<Boolean> = mutableStateOf(false)
 
@@ -182,7 +183,7 @@ class HomeActivity : AppCompatActivity() {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = CenterVertically
         ) {
             Text(text = "Call ringing")
 
@@ -233,7 +234,7 @@ class HomeActivity : AppCompatActivity() {
     private fun createCall(
         callId: String,
         participants: List<String> = emptyList(),
-        ringing: Boolean
+        ringing: Boolean,
     ) {
         // ringing with no participants doesn't make sense
         if (ringing && participants.isEmpty()) {
@@ -252,7 +253,7 @@ class HomeActivity : AppCompatActivity() {
             logger.d { "[createMeeting] callId: $callId, participants: $participants" }
 
             loadingState.value = true
-            val result = streamVideo.createAndJoinCall(
+            val result = streamVideo.joinCall(
                 "default",
                 callId,
                 participants,
@@ -280,7 +281,7 @@ class HomeActivity : AppCompatActivity() {
                 "default",
                 callId,
                 participants,
-                ringing = true
+                ring = true
             ).onSuccess {
                 logger.v { "[dialUsers] completed: $it" }
             }.onError {
@@ -295,11 +296,11 @@ class HomeActivity : AppCompatActivity() {
         lifecycleScope.launch {
             logger.d { "[joinCall] callId: $callId" }
             loadingState.value = true
-            streamVideo.createAndJoinCall(
+            streamVideo.joinCall(
                 "default",
                 id = callId,
                 participantIds = emptyList(),
-                ringing = false
+                ring = false
             ).onSuccess { data ->
                 logger.v { "[joinCall] succeed: $data" }
             }.onError {
@@ -378,7 +379,8 @@ class HomeActivity : AppCompatActivity() {
 
     @Composable
     fun UserIcon() {
-        val user = videoApp.credentialsProvider.getUserCredentials()
+        val user = UserPreferencesManager.initialize(this).getUserCredentials() ?: return
+
         if (user.imageUrl.isNullOrEmpty()) {
             val initials = if (user.name.isNotEmpty()) {
                 user.name.first()

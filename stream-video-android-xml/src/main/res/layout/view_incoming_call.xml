@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout"
+    >
+
+    <io.getstream.video.android.xml.widget.calldetails.CallBackgroundView
+        android:id="@+id/callBackground"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        />
+
+    <io.getstream.video.android.xml.widget.calldetails.CallDetailsView
+        android:id="@+id/participantsInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/singleAvatarAppbarPadding"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+
+    <io.getstream.video.android.xml.widget.control.ControlButtonView
+        android:id="@+id/declineCall"
+        android:layout_width="@dimen/largeButtonSize"
+        android:layout_height="@dimen/largeButtonSize"
+        android:layout_marginBottom="@dimen/incomingCallOptionsBottomPadding"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/cameraToggle"
+        app:layout_constraintStart_toStartOf="parent"
+        />
+
+    <io.getstream.video.android.xml.widget.control.ControlButtonView
+        android:id="@+id/cameraToggle"
+        android:layout_width="@dimen/mediumButtonSize"
+        android:layout_height="@dimen/mediumButtonSize"
+        app:layout_constraintBottom_toBottomOf="@id/declineCall"
+        app:layout_constraintEnd_toStartOf="@id/acceptCall"
+        app:layout_constraintStart_toEndOf="@id/declineCall"
+        app:layout_constraintTop_toTopOf="@id/declineCall"
+        />
+
+    <io.getstream.video.android.xml.widget.control.ControlButtonView
+        android:id="@+id/acceptCall"
+        android:layout_width="@dimen/largeButtonSize"
+        android:layout_height="@dimen/largeButtonSize"
+        android:layout_marginBottom="@dimen/incomingCallOptionsBottomPadding"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/cameraToggle"
+        />
+
+</merge>

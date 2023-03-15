@@ -1,0 +1,88 @@
+# CallParticipantsInfoMenu
+
+The `CallParticipantsInfoMenu` component represents a full screen dialog that lets the user see more information about a particular call and its participants. It allows you to see which participants are in the call, what their mute state is and attempt to trigger different actions based on your own capabilities.
+
+On top of that, the menu allows you to invite other people to the call.
+
+Let's see how to use the component.
+
+## Usage
+
+`CallParticipantsInfoMenu` is available within our abstract `*CallActivity` classes out of the box, as well as within the `CallContainer` and `CallContent`. However, if you want to show it yourself, you can embed it on top of other UI, like so:
+
+```kotlin
+@Composable
+public fun MyCustomScreen(usersProvider: UsersProvider) {
+    // 1 
+    val isShowingCallInfo by callViewModel.isShowingCallInfo.collectAsState(initial = false)
+    val participantsState by callViewModel.participantList.collectAsState(initial = emptyList())
+
+    // ... rest of your UI
+    if (isShowingCallInfo) { // 2
+        val usersToInvite: List<User> = usersProvider.provideUsers() // 3
+
+        CallParticipantsInfoMenu( // 4
+            modifier = Modifier.fillMaxSize(),
+            participantsState = participantsState,
+            users = usersToInvite,
+            onDismiss = {
+                // handle dialog dismissal
+            },
+            onInfoMenuAction = { action -> 
+                // handle menu actions
+            },
+        )
+    }
+}
+```
+
+There are a few things happening in this code snippet:
+
+1. You fetch the state of the info menu through `CallViewModel`. You can also store this state elsewhere, but if you're using our `ViewModel`, it's provided for you out of the box.
+2. In the case of the `isShowingCallInfo` being `true`, you can render the info menu component. This is a nice Compose way of building extensible and rich experience, while keeping the code readable and intuitive.
+3. Within the `if` clause, you fetch a list of `User`s that the person seeing the info menu can invite to the call. We provide a simple interface called `UsersProvider`, which you can implement and build yourself, based on the unique way your app fetches users. On top of that, you fetch the list of `CallParticipantState`s from the `CallViewModel`, which describe the participants already in the call.
+4. Using `CallParticipantsInfoMenu` and its parameters, you build the UI and provide the required state. You also provide a couple of action handlers that we'll discuss in a moment.
+
+Using the default variant of this component, without customizing it much, will yield UI similar to the following:
+
+| Call Participants                                            | Invite Participants                                          |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| ![Call Participants](https://user-images.githubusercontent.com/17215808/223712177-0d2fd208-8241-4b16-b362-4d4ed851e9f1.png) | ![Invite Participants](https://user-images.githubusercontent.com/17215808/223712181-87e08e4f-b370-41f1-a3be-17129173b7a5.png) |
+
+You can see the initial state of the `CallParticipantsInfoMenu` which lets you see all the users in the call in a list, with a few extra details, like if their video or audio is enabled or not. Using the three dots at the end you can attempt to trigger different actions based on the capabilities or permissions the currently logged in user has.
+
+This component is very specific to our default use case and as such it offers limited customization in both actions and the UI. Let's explore what actions it provides.
+
+## Handling Actions
+
+When it comes to customizing behavior, the `CallParticipantsInfoMenu` provides the following:
+
+
+```kotlin
+@Composable
+public fun CallParticipantsInfoMenu(
+    ..., // State
+    onDismiss: () -> Unit = {},
+    onInfoMenuAction: (ParticipantInfoAction) -> Unit = {},
+)
+```
+
+* `onDismiss`: Triggered when the user is browsing the list of Call participants and they trigger either the system back button or the action bar back arrow.
+*  `onInfoMenuAction`: Used to pass the triggered action back, whenever the user attempts to toggle their mute state or invite other people. Also used to handle actions that users with elevated permissions can make against other participants.
+
+To override these handlers, simply pass them to the component as you're rendering it in your custom UI, like in the snippet above.
+
+Now that you've explored the actions, let's see about UI customization.
+
+## Customization
+
+To customize the UI, you can always pass in a custom `Modifier` parameter that governs the default look and feel of the component, such as its size, shape, background color and more. But there are a few other options that you can use to change the appearance of the component:
+
+* `StreamColors.infoMenuOverlayColor`: Governs the base overlay color of the `Box` in which the menu content lives. You can use this to add a custom overlay if the UI doesn't fill the entire screen, or to remove the overlay by passing in a transparent color, if you don't need any background colors.
+* `StreamDimens.callParticipantInfoMenuAppBarHeight`: The height of the info menu app bar.
+* `StreamDimens.callParticipantsInfoAvatarSize`: The size of the user avatar in the list of participants.
+* `StreamDimens.callParticipantInfoMenuOptionsHeight`: The height of the bottom options on the main part of the menu, mainly invite users and toggle mute state buttons.
+* `StreamDimens.callParticipantsInfoMenuOptionsButtonHeight`: The height of each of the buttons mentioned previously.
+* `StreamShapes.participantsInfoMenuButton`: The shape of the info menu buttons.
+
+Using these properties, you can change the look and feel of the component directly in the `VideoTheme`, without having to pass it down to the component.

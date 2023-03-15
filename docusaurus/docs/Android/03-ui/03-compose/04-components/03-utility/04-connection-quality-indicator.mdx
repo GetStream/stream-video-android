@@ -1,0 +1,51 @@
+# ConnectionQualityIndicator
+
+The `ConnectionQualityIndicator`  allows you to display the connection quality of a call for a certain participant. It's fairly simple and takes in a `ConnectionQuality` value to define how good the connection is. This value depends on the data the user sends and receives from the call server.
+
+It's helpful for users to know if their connection quality is poor, because you can show custom UI and messages to the user in case they're not aware.
+
+Let's see how to use the component.
+
+## Usage
+
+To use the `ConnectionQualityIndicator`, you add it anywhere in your custom Composable functions, like so:
+
+```kotlin
+@Composable
+fun MyCustomUi(connectionQuality: ConnectionQuality) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        // ... The rest of your UI
+        ConnectionQualityIndicator(
+            connectionQuality = connectionQuality,
+            modifier = Modifier.size(56.dp)
+        )
+    }
+}
+```
+
+In this small example, you're using the `ConnectionQualityIndicator` within custom UI. You pass in the `ConnectionQuality` as well as `Modifier` for size.
+
+The `ConnectionQuality` enum has the following possible values:
+
+- `CONNECTION_QUALITY_EXCELLENT`: The connection quality is excellent, there are little to no issues in data transfer.
+- `CONNECTION_QUALITY_GOOD`: The connection quality is good. There might be smaller issues with data, but nothing that impacts performance.
+- `CONNECTION_QUALITY_POOR`: The connection quality is poor. You're probably experiencing quality issues and the performance isn't ideal.
+- `CONNECTION_QUALITY_UNSPECIFIED`: There is no connection to the call server or there are issues measuring the quality.
+
+By default, the snippet above will produce a UI similar to the following:
+
+![Default ConnectionQualityIndicator](https://user-images.githubusercontent.com/17215808/223086732-170f269f-ed18-493a-8fbc-d1c4ff618eea.png)
+
+The component is very simple and doesn't have any behavior. As such, it doesn't allow any customization for action handling, but it does allow small UI customization.
+
+## Customization
+
+Within the `VideoTheme`, there are a few ways you can customize the look and feel of the `ConnectionQualityIndictator`:
+
+* `StreamDimens.connectionIndicatorBarMaxHeight`: Allows you to customize the max height of the bars.
+* `StreamDimens.connectionIndicatorBarWidth`: Changes the width of each bar for the quality.
+* `StreamColors.connectionQualityBackground`: Changes the color of the background on which the bars are drawn.
+* `StreamColors.connectionQualityBar`: Affects the colors of the quality bars.
+* `StreamShapes.connectionQualityIndicator`: Provides the shape of the indicator background.
+
+Overriding and changing these properties within their respective classes allows you to change the look and feel of the component to match your design style.

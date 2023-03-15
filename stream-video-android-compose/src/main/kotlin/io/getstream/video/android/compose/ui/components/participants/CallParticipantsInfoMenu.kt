@@ -30,7 +30,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.state.ui.internal.CallParticipantInfoMode
 import io.getstream.video.android.compose.state.ui.internal.Invite
@@ -46,10 +45,10 @@ import io.getstream.video.android.compose.ui.components.participants.internal.Ca
 import io.getstream.video.android.compose.ui.components.participants.internal.CallParticipantsList
 import io.getstream.video.android.compose.ui.components.participants.internal.InviteUserList
 import io.getstream.video.android.compose.ui.components.participants.internal.SelectedCallParticipantOptions
-import io.getstream.video.android.model.CallParticipantState
-import io.getstream.video.android.model.User
-import io.getstream.video.android.utils.updateAll
-import io.getstream.video.android.utils.updateValue
+import io.getstream.video.android.core.model.CallParticipantState
+import io.getstream.video.android.core.model.User
+import io.getstream.video.android.core.utils.updateAll
+import io.getstream.video.android.core.utils.updateValue
 
 /**
  * Represents a menu that shows information on the current call participants, while allowing the user
@@ -94,7 +93,7 @@ public fun CallParticipantsInfoMenu(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = Color.LightGray.copy(alpha = 0.7f))
+            .background(color = VideoTheme.colors.infoMenuOverlayColor)
     ) {
         Column(modifier) {
             CallParticipantsInfoAppBar(

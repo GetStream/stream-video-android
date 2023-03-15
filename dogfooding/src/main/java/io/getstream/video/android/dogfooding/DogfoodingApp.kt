@@ -22,31 +22,21 @@ import com.google.firebase.auth.FirebaseAuth
 import io.getstream.android.push.firebase.FirebasePushDeviceGenerator
 import io.getstream.log.StreamLog
 import io.getstream.log.android.AndroidStreamLogger
-import io.getstream.video.android.BuildConfig
-import io.getstream.video.android.StreamVideo
-import io.getstream.video.android.StreamVideoBuilder
-import io.getstream.video.android.input.CallActivityInput
-import io.getstream.video.android.input.CallServiceInput
-import io.getstream.video.android.logging.LoggingLevel
-import io.getstream.video.android.token.AuthCredentialsProvider
-import io.getstream.video.android.token.CredentialsProvider
-import io.getstream.video.android.user.UserCredentialsManager
-import io.getstream.video.android.user.UserPreferences
+import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.StreamVideoBuilder
+import io.getstream.video.android.core.input.CallActivityInput
+import io.getstream.video.android.core.input.CallServiceInput
+import io.getstream.video.android.core.logging.LoggingLevel
+import io.getstream.video.android.core.model.ApiKey
+import io.getstream.video.android.core.model.User
+import io.getstream.video.android.core.user.UserPreferencesManager
 
 class DogfoodingApp : Application() {
 
-    private var credentials: CredentialsProvider? = null
     private var video: StreamVideo? = null
-
-    val credentialsProvider: CredentialsProvider
-        get() = requireNotNull(credentials)
 
     val streamVideo: StreamVideo
         get() = requireNotNull(video)
-
-    val userPreferences: UserPreferences by lazy {
-        UserCredentialsManager.getPreferences()
-    }
 
     fun isInitialized(): Boolean {
         return video != null
@@ -58,25 +48,26 @@ class DogfoodingApp : Application() {
             StreamLog.setValidator { _, _ -> true }
             StreamLog.install(AndroidStreamLogger())
         }
-        UserCredentialsManager.initialize(this)
+        UserPreferencesManager.initialize(this)
     }
 
     /**
      * Sets up and returns the [streamVideo] required to connect to the API.
      */
     fun initializeStreamVideo(
-        credentialsProvider: CredentialsProvider,
+        user: User,
+        apiKey: ApiKey,
         loggingLevel: LoggingLevel
     ): StreamVideo {
-        this.credentials = credentialsProvider
-
         return StreamVideoBuilder(
             context = this,
-            credentialsProvider = credentialsProvider,
+            user = user,
+            apiKey = apiKey,
             loggingLevel = loggingLevel,
             pushDeviceGenerators = listOf(FirebasePushDeviceGenerator()),
             androidInputs = setOf(
                 CallServiceInput.from(CallService::class),
+                // CallActivityInput.from(XmlCallActivity::class),
                 CallActivityInput.from(CallActivity::class),
             )
         ).build().also {
@@ -86,32 +77,28 @@ class DogfoodingApp : Application() {
 
     fun logOut() {
         FirebaseAuth.getInstance().signOut()
-        streamVideo.clearCallState()
-        streamVideo.removeDevices(userPreferences.getDevices())
-        userPreferences.clear()
+        streamVideo.logOut()
         video = null
     }
 
     fun initializeFromCredentials(): Boolean {
-        val credentials = UserCredentialsManager.initialize(this)
-        val user = credentials.getCachedCredentials()
-        val apiKey = credentials.getCachedApiKey()
+        val credentials = UserPreferencesManager.initialize(this)
+        val user = credentials.getUserCredentials()
+        val apiKey = credentials.getApiKey()
 
-        if (user == null || apiKey.isNullOrBlank()) {
+        if (user == null || apiKey.isBlank()) {
             return false
         }
 
         dogfoodingApp.initializeStreamVideo(
-            AuthCredentialsProvider(
-                apiKey = apiKey,
-                user = user
-            ),
+            apiKey = apiKey,
+            user = user,
             loggingLevel = LoggingLevel.NONE
         )
         return true
     }
 }
 
-internal const val API_KEY = "us83cfwuhy8n"
+internal const val API_KEY = BuildConfig.DOGFOODING_API_KEY
 
 val Context.dogfoodingApp get() = applicationContext as DogfoodingApp

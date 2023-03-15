@@ -18,8 +18,8 @@ package io.getstream.video.android.dogfooding
 
 import android.content.Context
 import android.content.Intent
-import io.getstream.video.android.StreamVideo
 import io.getstream.video.android.compose.ui.AbstractComposeCallActivity
+import io.getstream.video.android.core.StreamVideo
 
 class CallActivity : AbstractComposeCallActivity() {
 

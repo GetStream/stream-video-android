@@ -24,19 +24,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import io.getstream.video.android.call.state.CallAction
-import io.getstream.video.android.call.state.CallMediaState
+import io.getstream.video.android.common.util.mockParticipant
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.background.CallBackground
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.call.outgoingcall.internal.OutgoingCallDetails
 import io.getstream.video.android.compose.ui.components.call.outgoingcall.internal.OutgoingGroupCallOptions
 import io.getstream.video.android.compose.ui.components.call.outgoingcall.internal.OutgoingSingleCallOptions
-import io.getstream.video.android.compose.ui.components.mock.mockParticipant
-import io.getstream.video.android.model.CallType
-import io.getstream.video.android.model.CallUser
-import io.getstream.video.android.viewmodel.CallViewModel
+import io.getstream.video.android.core.call.state.CallAction
+import io.getstream.video.android.core.call.state.CallMediaState
+import io.getstream.video.android.core.model.CallType
+import io.getstream.video.android.core.model.CallUser
+import io.getstream.video.android.core.viewmodel.CallViewModel
 
 /**
  * Represents the Outgoing Call state and UI, when the user is calling other people.
@@ -57,7 +56,7 @@ public fun OutgoingCallContent(
     val participants: List<CallUser> by viewModel.participants.collectAsState()
     val callMediaState: CallMediaState by viewModel.callMediaState.collectAsState()
 
-    OutgoingCall(
+    OutgoingCallContent(
         callType = callType,
         participants = participants,
         callMediaState = callMediaState,
@@ -79,7 +78,7 @@ public fun OutgoingCallContent(
  * @param onCallAction Handler when the user clicks on some of the call controls.
  */
 @Composable
-public fun OutgoingCall(
+public fun OutgoingCallContent(
     callType: CallType,
     participants: List<CallUser>,
     callMediaState: CallMediaState,
@@ -120,7 +119,7 @@ public fun OutgoingCall(
             OutgoingSingleCallOptions(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(bottom = 44.dp),
+                    .padding(bottom = VideoTheme.dimens.outgoingCallOptionsBottomPadding),
                 callMediaState = callMediaState,
                 onCallAction = onCallAction
             )
@@ -128,7 +127,7 @@ public fun OutgoingCall(
             OutgoingGroupCallOptions(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(bottom = 44.dp),
+                    .padding(bottom = VideoTheme.dimens.outgoingCallOptionsBottomPadding),
                 callMediaState = callMediaState,
                 onCallAction = onCallAction
             )
@@ -140,7 +139,7 @@ public fun OutgoingCall(
 @Composable
 private fun OutgoingCallPreview() {
     VideoTheme {
-        OutgoingCall(
+        OutgoingCallContent(
             callType = CallType.VIDEO,
             participants = listOf(
                 mockParticipant.let {

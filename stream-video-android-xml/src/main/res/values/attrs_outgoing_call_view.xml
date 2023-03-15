@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="OutgoingCallView">
+        <!-- Background to be applied to the outgoing call screen. -->
+        <attr name="streamOutgoingCallScreenBackground" format="reference"/>
+        <!-- Cancel call icon, tint and background styling. -->
+        <attr name="streamOutgoingCallCancelCallIcon" format="reference" />
+        <attr name="streamOutgoingCallCancelCallIconTint" format="color|reference" />
+        <attr name="streamOutgoingCallCancelCallBackground" format="reference" />
+        <attr name="streamOutgoingCallCancelCallBackgroundTint" format="color|reference" />
+
+        <!-- Video control button icon and tint styling option. -->
+        <attr name="streamOutgoingCallVideoEnabledIcon" format="reference" />
+        <attr name="streamOutgoingCallVideoDisabledIcon" format="reference" />
+        <!-- Microphone control button icon and tint styling option. -->
+        <attr name="streamOutgoingCallMicrophoneEnabledIcon" format="reference" />
+        <attr name="streamOutgoingCallMicrophoneDisabledIcon" format="reference" />
+        <!-- Video/microphone background styling. -->
+        <attr name="streamOutgoingCallMediaControlIconTint" format="color|reference" />
+        <attr name="streamOutgoingCallMediaButtonBackground" format="reference" />
+        <attr name="streamOutgoingCallMediaButtonBackgroundTint" format="color|reference" />
+
+    </declare-styleable>
+</resources>

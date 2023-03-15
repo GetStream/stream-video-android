@@ -18,6 +18,7 @@ package io.getstream.video.android.compose.theme
 
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
@@ -41,7 +42,9 @@ public data class StreamShapes(
     public val callControlsButton: Shape,
     public val participantsInfoMenuButton: Shape,
     public val connectionIndicatorBar: Shape,
-    public val soundIndicatorBar: Shape
+    public val soundIndicatorBar: Shape,
+    public val floatingParticipant: Shape,
+    public val connectionQualityIndicator: Shape
 ) {
     public companion object {
         /**
@@ -49,6 +52,7 @@ public data class StreamShapes(
          *
          * @return A [StreamShapes] that holds our default shapes.
          */
+        @Composable
         public fun defaultShapes(): StreamShapes = StreamShapes(
             avatar = CircleShape,
             callButton = CircleShape,
@@ -57,7 +61,9 @@ public data class StreamShapes(
             participantsInfoMenuButton = RoundedCornerShape(32.dp),
             dialog = RoundedCornerShape(16.dp),
             connectionIndicatorBar = RoundedCornerShape(16.dp),
-            soundIndicatorBar = RoundedCornerShape(16.dp)
+            soundIndicatorBar = RoundedCornerShape(16.dp),
+            floatingParticipant = RoundedCornerShape(16.dp),
+            connectionQualityIndicator = RoundedCornerShape(8.dp)
         )
     }
 }

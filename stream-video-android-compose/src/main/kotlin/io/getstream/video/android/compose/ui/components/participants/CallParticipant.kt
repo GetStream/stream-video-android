@@ -41,15 +41,16 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import io.getstream.video.android.common.model.getSoundIndicatorState
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.audio.SoundIndicator
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.compose.ui.components.connection.ConnectionQualityIndicator
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
-import io.getstream.video.android.model.Call
-import io.getstream.video.android.model.CallParticipantState
-import io.getstream.video.android.model.VideoTrack
-import io.getstream.video.android.model.toUser
+import io.getstream.video.android.core.model.Call
+import io.getstream.video.android.core.model.CallParticipantState
+import io.getstream.video.android.core.model.VideoTrack
+import io.getstream.video.android.core.model.toUser
 import stream.video.sfu.models.TrackType
 
 /**
@@ -68,7 +69,7 @@ public fun CallParticipant(
     participant: CallParticipantState,
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues = PaddingValues(0.dp),
-    labelPosition: Alignment = Alignment.BottomStart,
+    labelPosition: Alignment = BottomStart,
     isFocused: Boolean = false,
     onRender: (View) -> Unit = {}
 ) {
@@ -77,7 +78,7 @@ public fun CallParticipant(
     val containerModifier =
         if (isFocused) modifier.border(
             BorderStroke(
-                3.dp,
+                VideoTheme.dimens.callParticipantFocusedBorderWidth,
                 VideoTheme.colors.infoAccent
             )
         ) else modifier
@@ -120,7 +121,7 @@ private fun ParticipantVideo(
         false
     }
 
-    if (track != null && isVideoEnabled) {
+    if (track != null && isVideoEnabled && TrackType.TRACK_TYPE_VIDEO in participant.publishedTracks) {
         VideoRenderer(
             call = call,
             videoTrack = track,
@@ -151,8 +152,8 @@ private fun BoxScope.ParticipantLabel(
     Row(
         modifier = Modifier
             .align(labelPosition)
-            .padding(8.dp)
-            .height(24.dp)
+            .padding(VideoTheme.dimens.callParticipantLabelPadding)
+            .height(VideoTheme.dimens.callParticipantLabelHeight)
             .wrapContentWidth()
             .background(
                 Color.DarkGray,
@@ -161,11 +162,13 @@ private fun BoxScope.ParticipantLabel(
         verticalAlignment = CenterVertically,
     ) {
         SoundIndicator(
-            hasSound = participant.hasAudio,
-            isSpeaking = participant.isSpeaking,
+            state = getSoundIndicatorState(
+                hasAudio = participant.hasAudio,
+                isSpeaking = participant.isSpeaking
+            ),
             modifier = Modifier
                 .align(CenterVertically)
-                .padding(start = 8.dp)
+                .padding(start = VideoTheme.dimens.callParticipantSoundIndicatorPaddingStart)
         )
 
         val name = participant.name.ifEmpty {
@@ -173,8 +176,8 @@ private fun BoxScope.ParticipantLabel(
         }
         Text(
             modifier = Modifier
-                .widthIn(max = 64.dp)
-                .padding(horizontal = 4.dp)
+                .widthIn(max = VideoTheme.dimens.callParticipantLabelTextMaxWidth)
+                .padding(horizontal = VideoTheme.dimens.callParticipantLabelTextPadding)
                 .align(CenterVertically),
             text = name,
             style = VideoTheme.typography.body,

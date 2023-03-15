@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="default_app_bar_title">Call</string>
+    <string name="back_button_content_description">Back</string>
+
+    <string name="call_participants_menu_content_description">Participants</string>
+
+    <string name="call_controls_toggle_speakerphone">Toggle Speakerphone</string>
+    <string name="call_controls_leave_call">Leave call</string>
+    <string name="call_controls_flip_camera">Flip camera</string>
+    <string name="call_controls_toggle_microphone">Toggle microphone</string>
+    <string name="call_controls_toggle_camera">Toggle camera</string>
+    <string name="call_participants_info_options_invite">Invite</string>
+    <string name="call_participants_info_options_unmute">Unmute Me</string>
+    <string name="call_participants_info_options_mute">Mute Me</string>
+    <string name="call_participants_info_add_participants">Add Participants</string>
+    <string name="call_participants_info_invite">Invite</string>
+    <string name="invite_users_title">Invite Participants</string>
+    <string name="invite_users_message">Are you sure you want to add %1$d new people to the conversation?</string>
+    <string name="invite_users_cancel">Cancel</string>
+    <string name="invite_users_accept">Invite</string>
+    <string name="change_orientation">Change orientation</string>
+    <string name="toggle_fullscreen">Toggle fullscreen mode</string>
+
+    <string name="call_status_incoming">Incoming call...</string>
+    <string name="call_status_outgoing">Calling...</string>
+
+    <string name="permissions_title">Permissions required to launch the app</string>
+    <string name="permissions_message">Open settings to allow camera and microphone permissions.</string>
+    <string name="permissions_settings">Launch settings</string>
+    <string name="permissions_cancel">Cancel</string>
+
+    <plurals name="call_participants_info_number_of_participants">
+        <item quantity="one">Participant (%d)</item>
+        <item quantity="other">Participants (%d)</item>
+    </plurals>
+
+    <string name="stream_call_notification_action_accept">Accept</string>
+    <string name="stream_call_notification_action_reject">Reject</string>
+    <string name="stream_call_notification_action_cancel">Cancel</string>
+    <string name="stream_screen_sharing_title">%1$s presenting</string>
+</resources>

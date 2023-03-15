@@ -34,10 +34,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import io.getstream.video.android.call.state.CallAction
-import io.getstream.video.android.call.state.ShowCallInfo
-import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.core.call.state.CallAction
+import io.getstream.video.android.core.call.state.ShowCallInfo
+import io.getstream.video.android.ui.common.R
 
 /**
  * Represents the default AppBar that's shown in calls. Exposes handlers for the two default slot

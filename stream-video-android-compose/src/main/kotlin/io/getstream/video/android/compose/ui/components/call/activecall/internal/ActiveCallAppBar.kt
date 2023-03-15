@@ -17,26 +17,21 @@
 package io.getstream.video.android.compose.ui.components.call.activecall.internal
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
-import io.getstream.video.android.call.state.CallAction
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
-import io.getstream.video.android.model.state.StreamCallState
-import io.getstream.video.android.utils.formatAsTitle
-import io.getstream.video.android.viewmodel.CallViewModel
+import io.getstream.video.android.core.call.state.CallAction
+import io.getstream.video.android.core.model.state.StreamCallState
+import io.getstream.video.android.core.utils.formatAsTitle
 
 @Composable
 internal fun ActiveCallAppBar(
-    callViewModel: CallViewModel,
+    callState: StreamCallState,
+    isShowingCallInfo: Boolean,
     onBackPressed: () -> Unit,
     onCallAction: (CallAction) -> Unit,
 ) {
-    val callState by callViewModel.streamCallState.collectAsState(initial = StreamCallState.Idle)
-    val isShowingCallInfo by callViewModel.isShowingCallInfo.collectAsState()
-
-    val callId = when (val state = callState) {
-        is StreamCallState.Active -> state.callGuid.id
+    val callId = when (callState) {
+        is StreamCallState.Active -> callState.callGuid.id
         else -> ""
     }
     val status = callState.formatAsTitle(LocalContext.current)

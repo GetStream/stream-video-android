@@ -24,17 +24,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import io.getstream.video.android.call.state.CallAction
-import io.getstream.video.android.call.state.CallMediaState
+import io.getstream.video.android.common.util.mockParticipantList
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.background.CallBackground
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.call.incomingcall.internal.IncomingCallDetails
 import io.getstream.video.android.compose.ui.components.call.incomingcall.internal.IncomingCallOptions
-import io.getstream.video.android.compose.ui.components.mock.mockParticipantList
-import io.getstream.video.android.model.CallType
-import io.getstream.video.android.model.CallUser
-import io.getstream.video.android.viewmodel.CallViewModel
+import io.getstream.video.android.core.call.state.CallAction
+import io.getstream.video.android.core.call.state.CallMediaState
+import io.getstream.video.android.core.model.CallType
+import io.getstream.video.android.core.model.CallUser
+import io.getstream.video.android.core.viewmodel.CallViewModel
 
 /**
  * Represents the Incoming Call state and UI, when the user receives a call from other people.
@@ -55,7 +55,7 @@ public fun IncomingCallContent(
     val participants: List<CallUser> by viewModel.participants.collectAsState()
     val callMediaState: CallMediaState by viewModel.callMediaState.collectAsState()
 
-    IncomingCall(
+    IncomingCallContent(
         participants = participants,
         callType = callType,
         isVideoEnabled = callMediaState.isCameraEnabled,
@@ -69,8 +69,8 @@ public fun IncomingCallContent(
  * Stateless variant of the Incoming call UI, which you can use to build your own custom logic that
  * powers the state and handlers.
  *
- * @param participants People participating in the call.
  * @param callType The type of call, Audio or Video.
+ * @param participants People participating in the call.
  * @param isVideoEnabled Whether the video should be enabled when entering the call or not.
  * @param modifier Modifier for styling.
  * @param showHeader If the app bar header is shown or not.
@@ -78,9 +78,9 @@ public fun IncomingCallContent(
  * @param onCallAction Handler used when the user interacts with Call UI.
  */
 @Composable
-public fun IncomingCall(
-    participants: List<CallUser>,
+public fun IncomingCallContent(
     callType: CallType,
+    participants: List<CallUser>,
     isVideoEnabled: Boolean,
     modifier: Modifier = Modifier,
     showHeader: Boolean = true,
@@ -131,7 +131,7 @@ public fun IncomingCall(
 @Composable
 private fun IncomingCallPreview() {
     VideoTheme {
-        IncomingCall(
+        IncomingCallContent(
             participants = mockParticipantList.map {
                 CallUser(
                     id = it.id,

@@ -32,6 +32,18 @@ android {
         }
     }
 
+    File envProps = rootProject.file(".env.properties")
+    if (envProps.exists()) {
+        Properties properties = new Properties()
+        properties.load(new FileInputStream(envProps))
+        buildTypes.each { buildType ->
+            properties.findAll { "${it.key}".startsWith("SAMPLE_")}
+                    .each {
+                        buildType.buildConfigField("String", "${it.key}", "\"${it.value}\"")
+                    }
+        }
+    }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
@@ -56,6 +68,7 @@ android {
 
 dependencies {
     implementation project(":stream-video-android-compose")
+    implementation project(":stream-video-android-xml")
 
     implementation Dependencies.androidxCore
     implementation Dependencies.androidxAppcompat

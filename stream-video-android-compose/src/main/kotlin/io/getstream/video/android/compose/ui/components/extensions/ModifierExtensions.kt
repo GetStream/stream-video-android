@@ -29,9 +29,9 @@ internal fun Modifier.toggleAlpha(isEnabled: Boolean): Modifier = composed(
     }
 ) {
     val alpha = if (isEnabled) {
-        VideoTheme.dimens.buttonToggleOffAlpha
-    } else {
         VideoTheme.dimens.buttonToggleOnAlpha
+    } else {
+        VideoTheme.dimens.buttonToggleOffAlpha
     }
     alpha(alpha)
 }

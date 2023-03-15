@@ -22,18 +22,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.participants.CallParticipant
-import io.getstream.video.android.compose.ui.components.participants.FloatingParticipantItem
-import io.getstream.video.android.model.Call
-import io.getstream.video.android.model.CallParticipantState
+import io.getstream.video.android.compose.ui.components.participants.LocalVideoContent
+import io.getstream.video.android.core.model.Call
+import io.getstream.video.android.core.model.CallParticipantState
 
 /**
  * Renders call participants based on the number of people in a call, in portrait mode.
@@ -157,7 +155,7 @@ internal fun BoxScope.PortraitParticipants(
     if (callParticipants.size in 2..3) {
         val currentLocal = callParticipants.first { it.isLocal }
 
-        FloatingParticipantItem(
+        LocalVideoContent(
             call = call,
             localParticipant = currentLocal,
             parentBounds = parentSize,
@@ -166,7 +164,7 @@ internal fun BoxScope.PortraitParticipants(
                     height = VideoTheme.dimens.floatingVideoHeight,
                     width = VideoTheme.dimens.floatingVideoWidth
                 )
-                .clip(RoundedCornerShape(16.dp))
+                .clip(VideoTheme.shapes.floatingParticipant)
                 .align(Alignment.TopEnd),
             paddingValues = paddingValues
         )

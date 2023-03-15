@@ -26,11 +26,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.participants.CallParticipant
-import io.getstream.video.android.model.Call
-import io.getstream.video.android.model.CallParticipantState
+import io.getstream.video.android.core.model.Call
+import io.getstream.video.android.core.model.CallParticipantState
 
 /**
  * Shows a row of call participants.
@@ -46,8 +45,8 @@ internal fun ParticipantsRow(
     modifier: Modifier = Modifier
 ) {
     LazyRow(
-        modifier = modifier.padding(horizontal = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = modifier.padding(horizontal = VideoTheme.dimens.screenShareParticipantsRowPadding),
+        horizontalArrangement = Arrangement.spacedBy(VideoTheme.dimens.screenShareParticipantsListItemMargin),
         verticalAlignment = Alignment.CenterVertically,
         content = {
             items(participants) { participant ->
@@ -71,7 +70,7 @@ private fun ParticipantListItem(
     CallParticipant(
         modifier = Modifier
             .size(VideoTheme.dimens.screenShareParticipantItemSize)
-            .clip(RoundedCornerShape(16.dp)),
+            .clip(RoundedCornerShape(VideoTheme.dimens.screenShareParticipantsRadius)),
         call = call,
         participant = participant,
         labelPosition = Alignment.BottomStart

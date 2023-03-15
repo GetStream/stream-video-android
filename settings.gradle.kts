@@ -11,7 +11,6 @@ dependencyResolutionManagement {
   repositories {
     google()
     mavenCentral()
-    maven(url = "https://jitpack.io")
     maven(url = "https://plugins.gradle.org/m2/")
   }
 }
@@ -23,10 +22,15 @@ include(":dogfooding")
 
 // SDK
 include(":benchmark")
-include(":stream-video-android")
 include(":stream-video-android-core")
+include(":stream-video-android-ui-common")
+include(":stream-video-android-xml")
 include(":stream-video-android-compose")
+include(":stream-video-android-bom")
 
 // Examples and guide projects
+include(":examples:tutorial:tutorial-starter")
+include(":examples:tutorial:tutorial-final")
+
 include(":examples:chat-with-video:chat-with-video-final")
 include(":examples:chat-with-video:chat-with-video-starter")

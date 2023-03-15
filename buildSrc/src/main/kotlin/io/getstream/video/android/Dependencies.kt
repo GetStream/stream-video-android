@@ -12,10 +12,12 @@ object Versions {
 
     internal const val MATERIAL = "1.6.1"
     internal const val ANDROIDX_APPCOMPAT = "1.4.2"
-    internal const val ANDROIDX_CORE = "1.8.0"
+    internal const val ANDROIDX_CORE = "1.9.0"
     internal const val ANDROIDX_ANNOTATIONS = "1.5.0"
     internal const val ANDROIDX_LIFECYCLE = "2.5.1"
-    internal const val ACTIVITY_COMPOSE = "1.5.0"
+    internal const val ANDROIDX_STARTUP = "1.1.1"
+    internal const val ANDROIDX_ACTIVITY = "1.5.1"
+    internal const val ACTIVITY_COMPOSE = "1.5.1"
 
     internal const val COMPOSE_BOM = "2022.12.00"
     const val COMPOSE_COMPILER = "1.4.0"
@@ -26,7 +28,7 @@ object Versions {
     internal const val OKHTTP = "4.10.0"
     internal const val MOSHI = "1.14.0"
 
-    internal const val WEBRTC = "104.5112.05"
+    internal const val STREAM_WEBRTC = "1.0.0"
     internal const val STREAM = "6.0.0-beta1"
     internal const val STREAM_LOG = "1.1.3"
     internal const val STREAM_PUSH = "1.0.2"
@@ -59,13 +61,16 @@ object Dependencies {
     const val material = "com.google.android.material:material:${Versions.MATERIAL}"
     const val androidxAppcompat = "androidx.appcompat:appcompat:${Versions.ANDROIDX_APPCOMPAT}"
     const val androidxCore = "androidx.core:core-ktx:${Versions.ANDROIDX_CORE}"
-    const val androidxAnnotations = "androidx.annotation:annotation:${Versions.ANDROIDX_ANNOTATIONS}"
+    const val androidxActivity = "androidx.activity:activity-ktx:${Versions.ANDROIDX_ACTIVITY}"
+    const val androidxAnnotations =
+        "androidx.annotation:annotation:${Versions.ANDROIDX_ANNOTATIONS}"
     const val androidxLifecycleViewModel =
         "androidx.lifecycle:lifecycle-viewmodel-ktx:${Versions.ANDROIDX_LIFECYCLE}"
     const val androidxLifecycleRuntime =
         "androidx.lifecycle:lifecycle-runtime-ktx:${Versions.ANDROIDX_LIFECYCLE}"
     const val androidxLifecycleProcess =
         "androidx.lifecycle:lifecycle-process:${Versions.ANDROIDX_LIFECYCLE}"
+    const val androidxStartup = "androidx.startup:startup-runtime:${Versions.ANDROIDX_STARTUP}"
 
     // Compose
     const val activityCompose = "androidx.activity:activity-compose:${Versions.ACTIVITY_COMPOSE}"
@@ -78,8 +83,12 @@ object Dependencies {
     const val composeIconsExtended = "androidx.compose.material:material-icons-extended"
     const val composeCoil = "io.coil-kt:coil-compose:${Versions.COIL}"
 
+    const val coil = "io.coil-kt:coil:${Versions.COIL}"
+
     const val wireRuntime = "com.squareup.wire:wire-runtime:${Versions.WIRE}"
     const val retrofit = "com.squareup.retrofit2:retrofit:${Versions.RETROFIT}"
+    const val retrofitMoshi = "com.squareup.retrofit2:converter-moshi:${Versions.RETROFIT}"
+    const val retrofitScalars = "com.squareup.retrofit2:converter-scalars:${Versions.RETROFIT}"
     const val retrofitWireConverter = "com.squareup.retrofit2:converter-wire:${Versions.RETROFIT}"
     const val okhttpLoggingInterceptor =
         "com.squareup.okhttp3:logging-interceptor:${Versions.OKHTTP}"
@@ -87,8 +96,7 @@ object Dependencies {
     const val moshiKotlin = "com.squareup.moshi:moshi-kotlin:${Versions.MOSHI}"
     const val moshiAdapters = "com.squareup.moshi:moshi-adapters:${Versions.MOSHI}"
 
-    const val webRTC = "com.github.webrtc-sdk:android:${Versions.WEBRTC}"
-
+    const val streamWebRTC = "io.getstream:stream-webrtc-android:${Versions.STREAM_WEBRTC}"
     const val streamLog = "io.getstream:stream-log:${Versions.STREAM_LOG}"
     const val streamLogAndroid = "io.getstream:stream-log-android:${Versions.STREAM_LOG}"
     const val streamPush = "io.getstream:stream-android-push:${Versions.STREAM_PUSH}"

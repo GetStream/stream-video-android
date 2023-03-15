@@ -44,9 +44,9 @@ import androidx.lifecycle.lifecycleScope
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.google.firebase.auth.FirebaseAuth
-import io.getstream.video.android.logging.LoggingLevel
-import io.getstream.video.android.model.User
-import io.getstream.video.android.token.AuthCredentialsProvider
+import io.getstream.video.android.core.logging.LoggingLevel
+import io.getstream.video.android.core.model.User
+import io.getstream.video.android.core.user.UserPreferencesManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.json.JSONArray
@@ -79,12 +79,10 @@ class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val user = dogfoodingApp.userPreferences.getCachedCredentials()
+        val user = UserPreferencesManager.initialize(this).getUserCredentials()
 
         if (user != null && user.isValid()) {
-            startHome(
-                user
-            )
+            startHome(user)
             finish()
         }
 
@@ -133,7 +131,7 @@ class LoginActivity : ComponentActivity() {
             },
             content = {
                 Surface(modifier = Modifier.width(300.dp)) {
-                    Column() {
+                    Column {
                         TextField(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -176,8 +174,9 @@ class LoginActivity : ComponentActivity() {
 
     private fun onSignInSuccess(email: String) {
         lifecycleScope.launch(Dispatchers.IO) {
-            val request =
-                URL("https://stream-calls-dogfood.vercel.app/api/auth/create-token?user_id=$email")
+            val request = URL(
+                "https://stream-calls-dogfood.vercel.app/api/auth/create-token?user_id=$email&api_key=$API_KEY"
+            )
             val connection = request.openConnection()
 
             connection.connect()
@@ -215,10 +214,8 @@ class LoginActivity : ComponentActivity() {
 
     private fun startHome(user: User) {
         dogfoodingApp.initializeStreamVideo(
-            AuthCredentialsProvider(
-                apiKey = API_KEY,
-                user = user
-            ),
+            apiKey = API_KEY,
+            user = user,
             loggingLevel = LoggingLevel.BODY
         )
         startActivity(HomeActivity.getIntent(this))

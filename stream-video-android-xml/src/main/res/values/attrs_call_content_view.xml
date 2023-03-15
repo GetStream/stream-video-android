@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CallContentView">
+        <attr name="streamCallContentGridParticipantStyle" format="reference" />
+        <attr name="streamCallContentListParticipantStyle" format="reference" />
+        <attr name="streamCallContentLocalParticipantHeight" format="dimension|reference" />
+        <attr name="streamCallContentLocalParticipantWidth" format="dimension|reference" />
+        <attr name="streamCallContentLocalParticipantPadding" format="dimension|reference" />
+        <attr name="streamCallContentLocalParticipantRadius" format="dimension|reference" />
+        <attr name="streamCallContentListHeight" format="dimension|reference" />
+        <attr name="streamCallContentListPadding" format="dimension|reference" />
+        <attr name="streamCallContentListItemMargin" format="dimension|reference" />
+        <attr name="streamCallContentListItemWidth" format="dimension|reference" />
+        <attr name="streamCallContentScreenShareListMargin" format="dimension|reference" />
+        <attr name="streamCallContentPresenterTextMargin" format="dimension|reference" />
+        <attr name="streamCallContentPresenterTextPadding" format="dimension|reference" />
+        <attr name="streamCallContentPresenterInfoTextSize" format="dimension|reference" />
+        <attr name="streamCallContentPresenterInfoTextColor" format="color|reference" />
+        <attr name="streamCallContentPresenterInfoFontAsset" format="reference" />
+        <attr name="streamCallContentPresenterInfoFont" format="reference" />
+        <attr name="streamCallContentPresenterInfoTextStyle">
+            <flag name="normal" value="0" />
+            <flag name="bold" value="1" />
+            <flag name="italic" value="2" />
+        </attr>
+        <attr name="streamCallContentPreConnectionImage" format="reference" />
+        <attr name="streamCallContentCallControlsHeight" format="dimension|reference" />
+    </declare-styleable>
+</resources>

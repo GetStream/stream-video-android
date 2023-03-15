@@ -35,11 +35,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
-import io.getstream.video.android.model.CallParticipantState
-import io.getstream.video.android.model.toUser
+import io.getstream.video.android.core.model.CallParticipantState
+import io.getstream.video.android.core.model.toUser
+import io.getstream.video.android.ui.common.R
 
 /**
  * Represents the list of active call participants.
