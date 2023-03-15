@@ -364,12 +364,10 @@ public final class io/getstream/video/android/xml/widget/call/CallView : io/gets
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;I)V
 	public final fun getCallControlsSize ()I
-	public final fun getGetTopLandscapeOffset ()Lkotlin/jvm/functions/Function0;
 	public fun onOrientationChanged (Z)V
 	public fun onViewAdded (Landroid/view/View;)V
 	public final fun setFloatingParticipant (Lio/getstream/video/android/core/model/CallParticipantState;Lkotlin/jvm/functions/Function1;)V
 	public static synthetic fun setFloatingParticipant$default (Lio/getstream/video/android/xml/widget/call/CallView;Lio/getstream/video/android/core/model/CallParticipantState;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
-	public final fun setGetTopLandscapeOffset (Lkotlin/jvm/functions/Function0;)V
 	public final fun setScreenSharingContent (Lkotlin/jvm/functions/Function1;)V
 	public final fun updatePresenterText (Ljava/lang/String;)V
 }
@@ -414,7 +412,7 @@ public final class io/getstream/video/android/xml/widget/call/CallViewStyle {
 	public final fun getPresenterTextPadding ()I
 	public final fun getPresenterTextStyle ()Lio/getstream/video/android/xml/font/TextStyle;
 	public final fun getScreenShareMargin ()I
-	public final fun getShouldShowGridUsersAnListLandscape ()Z
+	public final fun getShouldShowGridUsersAsListLandscape ()Z
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -691,7 +689,6 @@ public final class io/getstream/video/android/xml/widget/participant/CallPartici
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;II)V
 	public final fun getOnRender ()Lkotlin/jvm/functions/Function1;
 	public final fun setActive (Z)V
-	public final fun setLabelBottomOffset (I)V
 	public final fun setOnRender (Lkotlin/jvm/functions/Function1;)V
 	public final fun setParticipant (Lio/getstream/video/android/core/model/CallParticipantState;)V
 	public fun setRendererInitializer (Lio/getstream/video/android/xml/widget/participant/RendererInitializer;)V

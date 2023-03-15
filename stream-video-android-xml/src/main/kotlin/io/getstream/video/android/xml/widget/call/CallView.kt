@@ -58,8 +58,6 @@ public class CallView : CallConstraintLayout {
 
     private lateinit var style: CallViewStyle
 
-    public var getTopLandscapeOffset: () -> Int = { 0 }
-
     public constructor(context: Context) : this(context, null)
     public constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
     public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
@@ -227,7 +225,6 @@ public class CallView : CallConstraintLayout {
             id = ViewGroup.generateViewId()
             isLandscapeListLayout = style.shouldShowGridUsersAsListLandscape
             buildParticipantView = { this@CallView.buildParticipantView(false) }
-            getBottomLabelOffset = { this@CallView.getCallControlsSize() }
             this@CallView.addView(this)
             onViewInitialized(this)
         }
@@ -245,19 +242,19 @@ public class CallView : CallConstraintLayout {
             updateConstraints {
                 clearConstraints(participantsView)
                 constrainViewToParentBySide(participantsView, ConstraintSet.START)
-                constrainViewToParentBySide(participantsView, ConstraintSet.BOTTOM)
-                constrainViewToParentBySide(participantsView, ConstraintSet.TOP, getTopLandscapeOffset())
                 constrainViewEndToStartOfView(participantsView, callControlsView)
             }
 
             participantsWidth = LayoutParams.MATCH_CONSTRAINT
-            participantsHeight = LayoutParams.MATCH_CONSTRAINT
+            participantsHeight = LayoutParams.MATCH_PARENT
         } else {
             updateConstraints {
                 clearConstraints(participantsView)
+                constrainViewToParentBySide(participantsView, ConstraintSet.TOP)
+                constrainViewBottomToTopOfView(participantsView, callControlsView)
             }
             participantsWidth = LayoutParams.MATCH_PARENT
-            participantsHeight = LayoutParams.MATCH_PARENT
+            participantsHeight = LayoutParams.MATCH_CONSTRAINT
         }
 
         participantsView.updateLayoutParams {

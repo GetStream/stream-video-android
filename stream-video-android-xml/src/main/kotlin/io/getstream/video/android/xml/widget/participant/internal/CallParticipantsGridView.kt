@@ -64,11 +64,6 @@ internal class CallParticipantsGridView : CallConstraintLayout, VideoRenderer {
     )
 
     /**
-     * Handler to acquire the offset for the participant label.
-     */
-    internal lateinit var getBottomLabelOffset: () -> Int
-
-    /**
      * Handler that provides new [CallParticipantView].
      */
     internal lateinit var buildParticipantView: () -> CallParticipantView
@@ -123,9 +118,6 @@ internal class CallParticipantsGridView : CallConstraintLayout, VideoRenderer {
 
         TransitionManager.beginDelayedTransition(this)
         setConstraints {
-            childList.forEach {
-                it.setLabelBottomOffset(0)
-            }
             if (isLandscape && isLandscapeListLayout) {
                 childList.forEach { callParticipantView ->
                     if (childList.size == 1) {
@@ -133,15 +125,10 @@ internal class CallParticipantsGridView : CallConstraintLayout, VideoRenderer {
                     } else {
                         constrainViewToParentBySide(callParticipantView, ConstraintSet.TOP)
                         constrainViewToParentBySide(callParticipantView, ConstraintSet.BOTTOM)
+                        horizontalChainInParent(childList)
                     }
                 }
-                horizontalChainInParent(childList)
             } else {
-                val offset = getBottomLabelOffset()
-                childList.forEachIndexed { index, callParticipantView ->
-                    val childOffset = if (!isLandscape && isBottomChild(index)) offset else 0
-                    callParticipantView.setLabelBottomOffset(childOffset)
-                }
                 when (childList.size) {
                     1 -> {
                         constrainViewToParent(childList[0])
@@ -196,20 +183,6 @@ internal class CallParticipantsGridView : CallConstraintLayout, VideoRenderer {
                     }
                 }
             }
-        }
-    }
-
-    /**
-     * Determines if the view is on the bottom half.
-     *
-     * @param index The index of the [CallParticipantView] in the list.
-     */
-    private fun isBottomChild(index: Int): Boolean {
-        return when {
-            childList.size == 1 -> true
-            childList.size == 2 && index == 1 -> true
-            childList.size > 2 && index > 1 -> true
-            else -> false
         }
     }
 

@@ -20,7 +20,6 @@ import android.content.Context
 import android.graphics.drawable.GradientDrawable
 import android.util.AttributeSet
 import android.view.View
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.isVisible
 import io.getstream.log.StreamLog
@@ -229,15 +228,6 @@ public class CallParticipantView : CallCardView, VideoRenderer {
             track == null || !isVideoEnabled || TrackType.TRACK_TYPE_VIDEO !in participant.publishedTracks
 
         binding.participantAvatar.isVisible = shouldShowAvatar
-    }
-
-    /**
-     * Use to offset label when they are covered by call controls.
-     */
-    public fun setLabelBottomOffset(offset: Int) {
-        val layoutParams = (binding.labelHolder.layoutParams as ConstraintLayout.LayoutParams)
-        layoutParams.bottomMargin = offset + style.labelMargin
-        binding.labelHolder.layoutParams = layoutParams
     }
 
     /**
