@@ -19,8 +19,11 @@ package io.getstream.video.android.core.coordinator
 import io.getstream.video.android.core.api.ClientRPCService
 import io.getstream.video.android.core.errors.VideoError
 import io.getstream.video.android.core.model.CallInfo
+import io.getstream.video.android.core.model.CallRecordingData
 import io.getstream.video.android.core.model.CallUser
+import io.getstream.video.android.core.model.EdgeData
 import io.getstream.video.android.core.model.QueriedCalls
+import io.getstream.video.android.core.model.ReactionData
 import io.getstream.video.android.core.model.StreamCallCid
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.toCallInfo
@@ -28,7 +31,10 @@ import io.getstream.video.android.core.utils.Failure
 import io.getstream.video.android.core.utils.Result
 import io.getstream.video.android.core.utils.Success
 import io.getstream.video.android.core.utils.toCallUser
+import io.getstream.video.android.core.utils.toEdge
 import io.getstream.video.android.core.utils.toQueriedCalls
+import io.getstream.video.android.core.utils.toReaction
+import io.getstream.video.android.core.utils.toRecording
 import org.openapitools.client.apis.DefaultApi
 import org.openapitools.client.apis.EventsApi
 import org.openapitools.client.apis.VideoCallsApi
@@ -43,6 +49,7 @@ import org.openapitools.client.models.QueryCallsRequest
 import org.openapitools.client.models.QueryMembersRequest
 import org.openapitools.client.models.RequestPermissionRequest
 import org.openapitools.client.models.SendEventRequest
+import org.openapitools.client.models.SendReactionRequest
 import org.openapitools.client.models.UnblockUserRequest
 import org.openapitools.client.models.UpdateCallRequest
 import org.openapitools.client.models.UpdateUserPermissionsRequest
@@ -191,6 +198,9 @@ internal class CallCoordinatorClientImpl(
         Failure(VideoError(error.message, error))
     }
 
+    /**
+     * @see CallCoordinatorClient.blockUser
+     */
     override suspend fun blockUser(
         id: String,
         type: String,
@@ -352,6 +362,9 @@ internal class CallCoordinatorClientImpl(
         Failure(VideoError(error.message, error))
     }
 
+    /**
+     * @see CallCoordinatorClient.updateUserPermissions
+     */
     override suspend fun updateUserPermissions(
         id: String,
         type: String,
@@ -360,6 +373,47 @@ internal class CallCoordinatorClientImpl(
         defaultApi.updateUserPermissions(type, id, updateUserPermissionsRequest)
 
         Success(Unit)
+    } catch (error: Throwable) {
+        Failure(VideoError(error.message, error))
+    }
+
+    /**
+     * @see CallCoordinatorClient.listRecordings
+     */
+    override suspend fun listRecordings(
+        id: String,
+        type: String,
+        sessionId: String
+    ): Result<List<CallRecordingData>> = try {
+        val result = defaultApi.listRecordings(type, id, sessionId)
+
+        Success(result.recordings.map { it.toRecording() })
+    } catch (error: Throwable) {
+        Failure(VideoError(error.message, error))
+    }
+
+    /**
+     * @see CallCoordinatorClient.sendVideoReaction
+     */
+    override suspend fun sendVideoReaction(
+        id: String,
+        type: String,
+        request: SendReactionRequest
+    ): Result<ReactionData> = try {
+        val result = defaultApi.sendVideoReaction(type, id, request)
+
+        Success(result.reaction.toReaction())
+    } catch (error: Throwable) {
+        Failure(VideoError(error.message, error))
+    }
+
+    /**
+     * @see CallCoordinatorClient.getEdges
+     */
+    override suspend fun getEdges(): Result<List<EdgeData>> = try {
+        val result = videoCallApi.getEdges()
+
+        Success(result.edges.map { it.toEdge() })
     } catch (error: Throwable) {
         Failure(VideoError(error.message, error))
     }

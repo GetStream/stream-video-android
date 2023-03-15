@@ -19,12 +19,23 @@ package io.getstream.video.android.core
 import io.getstream.video.android.core.call.CallClient
 import io.getstream.video.android.core.model.Call
 import io.getstream.video.android.core.model.CallEventType
+import io.getstream.video.android.core.model.CallInfo
 import io.getstream.video.android.core.model.CallMetadata
+import io.getstream.video.android.core.model.CallRecordingData
+import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.core.model.Device
+import io.getstream.video.android.core.model.EdgeData
 import io.getstream.video.android.core.model.JoinedCall
+import io.getstream.video.android.core.model.MuteUsersData
+import io.getstream.video.android.core.model.QueriedCalls
+import io.getstream.video.android.core.model.QueryCallsData
+import io.getstream.video.android.core.model.QueryMembersData
+import io.getstream.video.android.core.model.ReactionData
+import io.getstream.video.android.core.model.SendReactionData
 import io.getstream.video.android.core.model.StreamCallCid
 import io.getstream.video.android.core.model.StreamCallId
 import io.getstream.video.android.core.model.StreamCallType
+import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.state.StreamCallState
 import io.getstream.video.android.core.socket.SocketListener
@@ -156,12 +167,188 @@ public interface StreamVideo {
     ): Result<Boolean>
 
     /**
+     * Queries the API for members of a call.
+     *
+     * @param callCid The CID of the call you're querying the members in.
+     * @param queryMembersData Use this structure to define the query parameters and
+     * sorting order.
+     *
+     * @return [List] of [CallUser]s that match the given query.
+     */
+    public suspend fun queryMembers(
+        callCid: StreamCallCid,
+        queryMembersData: QueryMembersData
+    ): Result<List<CallUser>>
+
+    /**
+     * Blocks the user from a call so they cannot join.
+     *
+     * @param callCid The CID of the call you're querying the members in.
+     * @param userId THe ID of the user to block from joining a call.
+     */
+    public suspend fun blockUser(
+        callCid: StreamCallCid,
+        userId: String
+    ): Result<Unit>
+
+    /**
+     * Unlocks the user from a call so they can join.
+     *
+     * @param callCid The CID of the call.
+     * @param userId THe ID of the user to unblock from joining a call.
+     */
+    public suspend fun unblockUser(
+        callCid: StreamCallCid,
+        userId: String
+    ): Result<Unit>
+
+    /**
+     * End the call.
+     *
+     * @param callCid The CID of the call.
+     */
+    public suspend fun endCall(
+        callCid: StreamCallCid
+    ): Result<Unit>
+
+    /**
+     * Marks the call as live.
+     *
+     * @param callCid The CID of the call.
+     *
+     * @return [Result] with the [CallInfo].
+     */
+    public suspend fun goLive(
+        callCid: StreamCallCid
+    ): Result<CallInfo>
+
+    /**
+     * Stops the call from being live.
+     *
+     * @param callCid The CID of the call.
+     *
+     * @return [Result] with the [CallInfo].
+     */
+    public suspend fun stopLive(
+        callCid: StreamCallCid
+    ): Result<CallInfo>
+
+    /**
+     * Attempts to mute users and their tracks in a call.
+     *
+     * @param callCid The CID of the call.
+     * @param muteUsersData Contains information about muting users and their tracks.
+     */
+    public suspend fun muteUsers(
+        callCid: StreamCallCid,
+        muteUsersData: MuteUsersData
+    ): Result<Unit>
+
+    /**
+     * Queries calls with a given filter predicate and pagination.
+     *
+     * @param queryCallsData Request with the data describing the calls. Contains the filters
+     * as well as pagination logic to be used when querying.
+     * @return [Result] containing the [QueriedCalls].
+     */
+    public suspend fun queryCalls(
+        queryCallsData: QueryCallsData
+    ): Result<QueriedCalls>
+
+    /**
+     * Requests permissions within a call for the current user.
+     *
+     * @param callCid The CID of the call.
+     * @param permissions List of permissions the user wants to request.
+     */
+    public suspend fun requestPermissions(
+        callCid: StreamCallCid,
+        permissions: List<String>
+    ): Result<Unit>
+
+    /**
+     * Starts broadcasting the call.
+     *
+     * @param callCid The CID of the call.
+     */
+    public suspend fun startBroadcasting(
+        callCid: StreamCallCid
+    ): Result<Unit>
+
+    /**
+     * Stops broadcasting the call.
+     *
+     * @param callCid The CID of the call.
+     */
+    public suspend fun stopBroadcasting(
+        callCid: StreamCallCid
+    ): Result<Unit>
+
+    /**
+     * Starts recording the call.
+     *
+     * @param callCid The CID of the call.
+     */
+    public suspend fun startRecording(
+        callCid: StreamCallCid
+    ): Result<Unit>
+
+    /**
+     * Stops recording the call.
+     *
+     * @param callCid The CID of the call.
+     */
+    public suspend fun stopRecording(
+        callCid: StreamCallCid
+    ): Result<Unit>
+
+    /**
+     * Grants or revokes a user's set of permissions, updating what they have access to feature-wise.
+     *
+     * @param callCid The CID of the call.
+     * @param updateUserPermissionsData Holds permissions to grant or revoke.
+     */
+    public suspend fun updateUserPermissions(
+        callCid: StreamCallCid,
+        updateUserPermissionsData: UpdateUserPermissionsData
+    ): Result<Unit>
+
+    /**
+     * Loads all recordings of a call for a given session.
+     *
+     * @param callCid The CID of the call.
+     * @param sessionId The ID of the session.
+     */
+    public suspend fun listRecordings(
+        callCid: StreamCallCid,
+        sessionId: String
+    ): Result<List<CallRecordingData>>
+
+    /**
+     * Attempts to send a reaction to a video call.
+     *
+     * @param callCid The CID of the call.
+     * @param sendReactionData The reaction to be sent.
+     *
+     * @return [Result] containing info about the successfully sent [ReactionData].
+     */
+    public suspend fun sendVideoReaction(
+        callCid: StreamCallCid,
+        sendReactionData: SendReactionData
+    ): Result<ReactionData>
+
+    /**
+     * Returns a list of all the edges available on the network.
+     */
+    public suspend fun getEdges(): Result<List<EdgeData>>
+
+    /**
      * Leaves the currently active call and clears up all connections to it.
      */
     public fun clearCallState()
 
     /**
-     * Clears the internal user state.
+     * Clears the internal user state, removes push notification devices and clears the call state.
      */
     public fun logOut()
 
