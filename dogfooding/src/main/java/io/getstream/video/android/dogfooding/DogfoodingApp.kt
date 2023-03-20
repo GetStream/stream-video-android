@@ -99,6 +99,6 @@ class DogfoodingApp : Application() {
     }
 }
 
-internal const val API_KEY = "w6yaq5388uym"
+internal const val API_KEY = BuildConfig.DOGFOODING_API_KEY
 
 val Context.dogfoodingApp get() = applicationContext as DogfoodingApp
