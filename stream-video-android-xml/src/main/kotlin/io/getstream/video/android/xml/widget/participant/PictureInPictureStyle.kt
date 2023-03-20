@@ -39,13 +39,16 @@ public data class PictureInPictureStyle(
             context.obtainStyledAttributes(
                 attrs,
                 R.styleable.PictureInPictureView,
-                R.attr.streamPictureInPictureCallParticipantViewStyle,
+                R.attr.streamVideoPictureInPictureCallParticipantViewStyle,
                 R.style.Stream_PictureInPicture
             ).use {
 
                 val callParticipantStyle = it.getResourceId(
-                    R.styleable.PictureInPictureView_streamPictureInPictureCallParticipantViewStyle,
-                    context.getResourceId(R.style.StreamVideoTheme, R.attr.streamCallParticipantViewStyle)
+                    R.styleable.PictureInPictureView_streamVideoPictureInPictureCallParticipantViewStyle,
+                    context.getResourceId(
+                        R.style.StreamVideoTheme,
+                        R.attr.streamVideoCallParticipantViewStyle
+                    )
                 )
 
                 return PictureInPictureStyle(

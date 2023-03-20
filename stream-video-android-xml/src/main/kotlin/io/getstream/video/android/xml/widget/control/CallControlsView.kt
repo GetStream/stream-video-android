@@ -117,7 +117,7 @@ public class CallControlsView : CallConstraintLayout {
         val callControlButton = ControlButtonView(context).apply {
             id = View.generateViewId()
             tag = callControlItem
-            setBackgroundResource(R.drawable.bg_call_control_option)
+            setBackgroundResource(R.drawable.stream_video_bg_call_control_option)
         }
         addView(callControlButton)
         return callControlButton

@@ -23,8 +23,8 @@
             android:id="@+id/participantAvatar"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:streamAvatarBorderRadius="0dp"
-            app:streamAvatarShape="round_rect"
+            app:streamVideoAvatarBorderRadius="0dp"
+            app:streamVideoAvatarShape="round_rect"
             />
 
         <ImageView
@@ -39,7 +39,7 @@
             android:layout_width="0dp"
             android:layout_height="@dimen/callParticipantLabelHeight"
             android:layout_margin="@dimen/callParticipantLabelPadding"
-            android:background="@drawable/bg_call_participant_name"
+            android:background="@drawable/stream_video_bg_call_participant_name"
             android:orientation="horizontal"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"

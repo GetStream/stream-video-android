@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CallContainerView">
+        <attr name="streamVideoCallContainerAppBarHeight" format="dimension|reference" />
+        <attr name="streamVideoCallContainerAppBarLandscapeHeight" format="dimension|reference" />
+    </declare-styleable>
+</resources>
