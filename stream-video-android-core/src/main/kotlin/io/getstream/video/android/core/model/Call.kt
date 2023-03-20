@@ -29,8 +29,8 @@ import io.getstream.video.android.core.audio.AudioSwitchHandler
 import io.getstream.video.android.core.call.utils.stringify
 import io.getstream.video.android.core.events.AudioLevelChangedEvent
 import io.getstream.video.android.core.events.ParticipantLeftEvent
-import io.getstream.video.android.core.ui.TextureViewRenderer
 import io.getstream.video.android.core.utils.updateValue
+import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -107,7 +107,7 @@ public class Call(
      * Public API.
      */
     public fun initRenderer(
-        videoRenderer: TextureViewRenderer,
+        videoRenderer: VideoTextureViewRenderer,
         sessionId: String,
         trackType: TrackType,
         onRender: (View) -> Unit = {}

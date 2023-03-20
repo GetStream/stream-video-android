@@ -202,7 +202,7 @@ public class CallContainerView : CallConstraintLayout {
      * @param view The view we wish to display as primary content.
      */
     private fun setContentView(view: View) {
-        children.filter { it !is CallAppBarView  }.forEach(::removeView)
+        children.filter { it !is CallAppBarView }.forEach(::removeView)
         addView(
             view,
             LayoutParams(
