@@ -132,7 +132,11 @@ public class CallControlsView : CallConstraintLayout {
      * Updates the background of the [CallControlsView].
      */
     private fun setBackground() {
-        background = if (isLandscape) style.callControlsBackgroundLandscape else style.callControlsBackground
+        background = if (isLandscape) {
+            style.callControlsBackgroundLandscape
+        } else {
+            style.callControlsBackground
+        }
         background.setTint(style.callControlsBackgroundColor)
     }
 
@@ -182,7 +186,11 @@ public class CallControlsView : CallConstraintLayout {
             }
         }
 
-        val size = if (isLandscape) style.callControlButtonSizeLandscape else style.callControlButtonSize
+        val size = if (isLandscape) {
+            style.callControlButtonSizeLandscape
+        } else {
+            style.callControlButtonSize
+        }
         controlList.forEach {
             it.updateLayoutParams {
                 width = size

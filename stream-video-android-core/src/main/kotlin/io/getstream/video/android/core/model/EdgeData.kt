@@ -14,16 +14,22 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.xml.utils
+package io.getstream.video.android.core.model
 
 /**
- * Used to notify the view that the orientation has been changed and layout updates are needed.
+ * Represents the information about an Edge center in our network.
+ *
+ * @param id The ID of the center.
+ * @param latencyTestUrl URL of the result for latency measurements.
+ * @param latitude The latitude of the server location.
+ * @param longitude The longitude of the server location.
  */
-public interface OrientationChangeListener {
-    /**
-     * Notifies that the orientation has changed.
-     *
-     * @param isLandscape Whether the device orientation is landscape or not.
-     */
-    fun onOrientationChanged(isLandscape: Boolean) {}
-}
+public data class EdgeData(
+    val id: String,
+    val latencyTestUrl: String,
+    val latitude: Float,
+    val longitude: Float,
+    val green: Int,
+    val yellow: Int,
+    val red: Int
+)

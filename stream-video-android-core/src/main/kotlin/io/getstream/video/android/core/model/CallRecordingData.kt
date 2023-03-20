@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.xml.utils
+package io.getstream.video.android.core.model
 
 /**
- * Used to notify the view that the orientation has been changed and layout updates are needed.
+ * Represents a single call recording with its metadata.
+ *
+ * @param fileName The name of the file.
+ * @param url The location of the recording file.
+ * @param start The start time in epoch.
+ * @param end The end time in epoch.
  */
-public interface OrientationChangeListener {
-    /**
-     * Notifies that the orientation has changed.
-     *
-     * @param isLandscape Whether the device orientation is landscape or not.
-     */
-    fun onOrientationChanged(isLandscape: Boolean) {}
-}
+data class CallRecordingData(
+    val fileName: String,
+    val url: String,
+    val start: Long,
+    val end: Long
+)
