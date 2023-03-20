@@ -21,6 +21,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.res.ColorStateList
+import android.content.res.Configuration
 import android.graphics.drawable.Drawable
 import android.util.TypedValue
 import android.view.LayoutInflater
@@ -85,7 +86,10 @@ internal fun Context.createStreamThemeWrapper(): Context {
     val typedValue = TypedValue()
     return when {
         theme.resolveAttribute(R.attr.streamVideoValidTheme, typedValue, true) -> this
-        theme.resolveAttribute(R.attr.streamVideoTheme, typedValue, true) -> ContextThemeWrapper(this, typedValue.resourceId)
+        theme.resolveAttribute(R.attr.streamVideoTheme, typedValue, true) -> ContextThemeWrapper(
+            this,
+            typedValue.resourceId
+        )
         else -> ContextThemeWrapper(this, R.style.StreamVideoTheme)
     }
 }
@@ -96,3 +100,6 @@ internal fun Context.getResourceId(style: Int, attr: Int): Int {
         intArrayOf(attr)
     ).getResourceId(0, 0)
 }
+
+internal val Context.isLandscape: Boolean
+    get() = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE

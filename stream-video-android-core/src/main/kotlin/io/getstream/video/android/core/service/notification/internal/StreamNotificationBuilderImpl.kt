@@ -154,7 +154,7 @@ internal class StreamNotificationBuilderImpl(
         return NotificationCompat.Builder(context, getNotificationChannelId())
             .setDefaults(NotificationCompat.DEFAULT_ALL)
             .setAutoCancel(false)
-            .setSmallIcon(R.drawable.baseline_call_stream_24dp)
+            .setSmallIcon(R.drawable.stream_video_ic_call)
             .setContentTitle(contentTitle)
             .setContentText(contentText)
             .setPriority(NotificationCompat.PRIORITY_HIGH)

@@ -19,27 +19,26 @@ package io.getstream.video.android.xml.widget.control
 import android.content.Context
 import android.util.AttributeSet
 import android.view.View
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.xml.R
+import io.getstream.video.android.xml.utils.extensions.constrainViewBottomToTopOfView
 import io.getstream.video.android.xml.utils.extensions.constrainViewEndToStartOfView
 import io.getstream.video.android.xml.utils.extensions.constrainViewStartToEndOfView
 import io.getstream.video.android.xml.utils.extensions.constrainViewToParentBySide
+import io.getstream.video.android.xml.utils.extensions.constrainViewTopToBottomOfView
 import io.getstream.video.android.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.xml.utils.extensions.getColorCompat
-import io.getstream.video.android.xml.utils.extensions.getDrawableCompat
+import io.getstream.video.android.xml.utils.extensions.isLandscape
 import io.getstream.video.android.xml.utils.extensions.updateConstraints
-import io.getstream.video.android.xml.widget.view.JobHolder
-import kotlinx.coroutines.Job
+import io.getstream.video.android.xml.utils.extensions.updateLayoutParams
+import io.getstream.video.android.xml.widget.view.CallConstraintLayout
 
 /**
  * Represents the set of controls the user can use to change their audio and video device state, or
  * browse other types of settings, leave the call, or implement something custom.
  */
-public class CallControlsView : ConstraintLayout, JobHolder {
-
-    override val runningJobs: MutableList<Job> = mutableListOf()
+public class CallControlsView : CallConstraintLayout {
 
     /**
      * Style of the view.
@@ -68,8 +67,8 @@ public class CallControlsView : ConstraintLayout, JobHolder {
 
     private fun init(context: Context, attrs: AttributeSet?) {
         style = CallControlsStyle(context, attrs)
-        background = context.getDrawableCompat(R.drawable.rect_controls)
-        background.setTint(style.callControlsBackgroundColor)
+
+        setBackground()
     }
 
     /**
@@ -118,11 +117,27 @@ public class CallControlsView : ConstraintLayout, JobHolder {
         val callControlButton = ControlButtonView(context).apply {
             id = View.generateViewId()
             tag = callControlItem
-            layoutParams = LayoutParams(style.callControlButtonSize, style.callControlButtonSize)
-            setBackgroundResource(R.drawable.bg_call_control_option)
+            setBackgroundResource(R.drawable.stream_video_bg_call_control_option)
         }
         addView(callControlButton)
         return callControlButton
+    }
+
+    override fun onOrientationChanged(isLandscape: Boolean) {
+        defineConstraints()
+        setBackground()
+    }
+
+    /**
+     * Updates the background of the [CallControlsView].
+     */
+    private fun setBackground() {
+        background = if (isLandscape) {
+            style.callControlsBackgroundLandscape
+        } else {
+            style.callControlsBackground
+        }
+        background.setTint(style.callControlsBackgroundColor)
     }
 
     /**
@@ -130,30 +145,57 @@ public class CallControlsView : ConstraintLayout, JobHolder {
      */
     private fun defineConstraints() {
         val controlList = callControls.values.toList()
-        updateConstraints {
+
+        updateConstraints(true) {
             controlList.forEachIndexed { index, view ->
-                constrainViewToParentBySide(view, ConstraintSet.TOP)
-                constrainViewToParentBySide(view, ConstraintSet.BOTTOM)
-                if (index == 0) {
+                if (isLandscape) {
                     constrainViewToParentBySide(view, ConstraintSet.START)
-                }
-                if (index == controlList.lastIndex) {
                     constrainViewToParentBySide(view, ConstraintSet.END)
-                }
-                if (index > 0) {
-                    val prevBinding = controlList[index - 1]
-                    constrainViewStartToEndOfView(view, prevBinding)
-                }
-                if (index < controlList.lastIndex) {
-                    val nextBinding = controlList[index + 1]
-                    constrainViewEndToStartOfView(view, nextBinding)
+                    if (index == 0) {
+                        constrainViewToParentBySide(view, ConstraintSet.TOP)
+                    }
+                    if (index == controlList.lastIndex) {
+                        constrainViewToParentBySide(view, ConstraintSet.BOTTOM)
+                    }
+                    if (index > 0) {
+                        val prevBinding = controlList[index - 1]
+                        constrainViewTopToBottomOfView(view, prevBinding)
+                    }
+                    if (index < controlList.lastIndex) {
+                        val nextBinding = controlList[index + 1]
+                        constrainViewBottomToTopOfView(view, nextBinding)
+                    }
+                } else {
+                    constrainViewToParentBySide(view, ConstraintSet.TOP)
+                    constrainViewToParentBySide(view, ConstraintSet.BOTTOM)
+                    if (index == 0) {
+                        constrainViewToParentBySide(view, ConstraintSet.START)
+                    }
+                    if (index == controlList.lastIndex) {
+                        constrainViewToParentBySide(view, ConstraintSet.END)
+                    }
+                    if (index > 0) {
+                        val prevBinding = controlList[index - 1]
+                        constrainViewStartToEndOfView(view, prevBinding)
+                    }
+                    if (index < controlList.lastIndex) {
+                        val nextBinding = controlList[index + 1]
+                        constrainViewEndToStartOfView(view, nextBinding)
+                    }
                 }
             }
         }
-    }
 
-    override fun onDetachedFromWindow() {
-        super.onDetachedFromWindow()
-        stopAllJobs()
+        val size = if (isLandscape) {
+            style.callControlButtonSizeLandscape
+        } else {
+            style.callControlButtonSize
+        }
+        controlList.forEach {
+            it.updateLayoutParams {
+                width = size
+                height = size
+            }
+        }
     }
 }

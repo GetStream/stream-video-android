@@ -19,14 +19,15 @@
     <!--Themes attributes-->
     <declare-styleable name="StreamVideoStyleable">
         <attr name="streamVideoTheme" format="reference" />
-        <attr name="streamIncomingViewStyle" format="reference" />
-        <attr name="streamOutgoingViewStyle" format="reference" />
-        <attr name="streamCallControlsViewStyle" format="reference" />
-        <attr name="streamCallDetailsViewStyle" format="reference" />
-        <attr name="streamCallParticipantViewStyle" format="reference" />
-        <attr name="streamCallContentViewStyle" format="reference" />
-        <attr name="streamPictureInPictureViewStyle" format="reference" />
-        <attr name="streamScreenShareStyle" format="reference" />
-        <attr name="streamCallAppBarStyle" format="reference" />
+        <attr name="streamVideoIncomingViewStyle" format="reference" />
+        <attr name="streamVideoOutgoingViewStyle" format="reference" />
+        <attr name="streamVideoCallControlsViewStyle" format="reference" />
+        <attr name="streamVideoCallDetailsViewStyle" format="reference" />
+        <attr name="streamVideoCallParticipantViewStyle" format="reference" />
+        <attr name="streamVideoCallViewStyle" format="reference" />
+        <attr name="streamVideoPictureInPictureViewStyle" format="reference" />
+        <attr name="streamVideoScreenShareStyle" format="reference" />
+        <attr name="streamVideoCallAppBarStyle" format="reference" />
+        <attr name="streamVideoCallContainerStyle" format="reference" />
     </declare-styleable>
 </resources>

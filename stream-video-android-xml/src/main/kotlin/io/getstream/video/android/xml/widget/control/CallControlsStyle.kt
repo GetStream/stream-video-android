@@ -17,12 +17,14 @@
 package io.getstream.video.android.xml.widget.control
 
 import android.content.Context
+import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import androidx.annotation.ColorInt
 import androidx.annotation.Px
 import io.getstream.video.android.xml.R
 import io.getstream.video.android.xml.utils.extensions.getColorCompat
 import io.getstream.video.android.xml.utils.extensions.getDimension
+import io.getstream.video.android.xml.utils.extensions.getDrawableCompat
 import io.getstream.video.android.xml.utils.extensions.use
 import io.getstream.video.android.xml.widget.transformer.TransformStyle
 import io.getstream.video.android.ui.common.R as RCommon
@@ -37,7 +39,10 @@ import io.getstream.video.android.ui.common.R as RCommon
  */
 public data class CallControlsStyle(
     @Px public val callControlButtonSize: Int,
-    @ColorInt public val callControlsBackgroundColor: Int
+    @Px public val callControlButtonSizeLandscape: Int,
+    public val callControlsBackground: Drawable,
+    public val callControlsBackgroundLandscape: Drawable,
+    @ColorInt public val callControlsBackgroundColor: Int,
 ) {
 
     internal companion object {
@@ -45,22 +50,38 @@ public data class CallControlsStyle(
             context.obtainStyledAttributes(
                 attrs,
                 R.styleable.CallControlsView,
-                R.attr.streamCallControlsViewStyle,
+                R.attr.streamVideoCallControlsViewStyle,
                 R.style.Stream_CallControls
             ).use {
 
                 val callControlButtonSize = it.getDimensionPixelSize(
-                    R.styleable.CallControlsView_streamCallControlsButtonSize,
+                    R.styleable.CallControlsView_streamVideoCallControlsButtonSize,
                     context.getDimension(RCommon.dimen.callControlButtonSize)
                 )
 
+                val callControlButtonSizeLandscape = it.getDimensionPixelSize(
+                    R.styleable.CallControlsView_streamVideoCallControlsButtonSizeLandscape,
+                    context.getDimension(RCommon.dimen.landscapeCallControlButtonSize)
+                )
+
+                val callControlsBackground = it.getDrawable(
+                    R.styleable.CallControlsView_streamVideoCallControlsBackground
+                ) ?: context.getDrawableCompat(R.drawable.stream_video_rect_controls)!!
+
+                val callControlsBackgroundLandscape = it.getDrawable(
+                    R.styleable.CallControlsView_streamVideoCallControlsBackgroundLandscape
+                ) ?: context.getDrawableCompat(R.drawable.stream_video_rect_controls_landscape)!!
+
                 val callControlsBackgroundColor = it.getColor(
-                    R.styleable.CallControlsView_streamCallControlsBackgroundColor,
-                    context.getColorCompat(R.color.stream_white)
+                    R.styleable.CallControlsView_streamVideoCallControlsBackgroundColor,
+                    context.getColorCompat(R.color.stream_video_white)
                 )
 
                 return CallControlsStyle(
                     callControlButtonSize = callControlButtonSize,
+                    callControlButtonSizeLandscape = callControlButtonSizeLandscape,
+                    callControlsBackground = callControlsBackground,
+                    callControlsBackgroundLandscape = callControlsBackgroundLandscape,
                     callControlsBackgroundColor = callControlsBackgroundColor
                 ).let(TransformStyle.callControlsStyleTransformer::transform)
             }

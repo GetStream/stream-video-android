@@ -5,6 +5,6 @@
 
     <corners android:radius="8dp" />
 
-    <solid android:color="@color/stream_dark_gray" />
+    <solid android:color="@color/stream_video_dark_gray" />
 
 </shape>

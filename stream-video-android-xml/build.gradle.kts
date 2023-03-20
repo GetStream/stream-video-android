@@ -29,6 +29,8 @@ android {
         targetCompatibility = JavaVersion.VERSION_1_8
     }
 
+    resourcePrefix = "stream_video_"
+
     kotlinOptions {
         jvmTarget = "1.8"
     }

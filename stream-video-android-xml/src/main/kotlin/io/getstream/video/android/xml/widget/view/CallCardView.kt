@@ -19,6 +19,7 @@ package io.getstream.video.android.xml.widget.view
 import android.content.Context
 import android.util.AttributeSet
 import androidx.cardview.widget.CardView
+import io.getstream.video.android.xml.utils.OrientationChangeListener
 import kotlinx.coroutines.Job
 
 /**
@@ -26,7 +27,7 @@ import kotlinx.coroutines.Job
  * screen if they are attached programmatically. If they are used with XML and you wish to stop observing to clean
  * up resources when hiding content call [stopAllJobs].
  */
-public abstract class CallCardView : CardView, JobHolder {
+public abstract class CallCardView : CardView, JobHolder, OrientationChangeListener {
 
     public constructor(context: Context) : this(context, null, 0)
     public constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
