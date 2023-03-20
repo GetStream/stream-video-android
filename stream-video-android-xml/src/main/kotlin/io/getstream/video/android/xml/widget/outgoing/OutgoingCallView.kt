@@ -25,7 +25,7 @@ import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.model.CallStatus
 import io.getstream.video.android.core.model.CallUser
-import io.getstream.video.android.xml.databinding.ViewOutgoingCallBinding
+import io.getstream.video.android.xml.databinding.StreamVideoViewOutgoingCallBinding
 import io.getstream.video.android.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.xml.utils.extensions.dpToPx
 import io.getstream.video.android.xml.utils.extensions.getDimension
@@ -38,7 +38,7 @@ import io.getstream.video.android.xml.widget.view.CallConstraintLayout
  */
 public class OutgoingCallView : CallConstraintLayout {
 
-    private val binding = ViewOutgoingCallBinding.inflate(streamThemeInflater, this)
+    private val binding = StreamVideoViewOutgoingCallBinding.inflate(streamThemeInflater, this)
 
     private lateinit var style: OutgoingCallStyle
 
@@ -163,16 +163,32 @@ public class OutgoingCallView : CallConstraintLayout {
             constraintSet.clear(micToggle.id, ConstraintSet.BOTTOM)
             constraintSet.clear(cameraToggle.id, ConstraintSet.BOTTOM)
 
-            constraintSet.connect(micToggle.id, ConstraintSet.BOTTOM, controlsHolder.id, ConstraintSet.BOTTOM)
-            constraintSet.connect(cameraToggle.id, ConstraintSet.BOTTOM, controlsHolder.id, ConstraintSet.BOTTOM)
+            constraintSet.connect(
+                micToggle.id,
+                ConstraintSet.BOTTOM,
+                controlsHolder.id,
+                ConstraintSet.BOTTOM
+            )
+            constraintSet.connect(
+                cameraToggle.id,
+                ConstraintSet.BOTTOM,
+                controlsHolder.id,
+                ConstraintSet.BOTTOM
+            )
 
-            constraintSet.connect(cancelCall.id, ConstraintSet.BOTTOM, micToggle.id, ConstraintSet.TOP)
+            constraintSet.connect(
+                cancelCall.id,
+                ConstraintSet.BOTTOM,
+                micToggle.id,
+                ConstraintSet.TOP
+            )
             constraintSet.setMargin(cancelCall.id, ConstraintSet.BOTTOM, 32.dpToPx())
 
             controlsHolder.setConstraintSet(constraintSet)
 
             (callDetails.layoutParams as LayoutParams).apply {
-                this.topMargin = context.getDimension(io.getstream.video.android.ui.common.R.dimen.avatarAppbarPadding)
+                this.topMargin =
+                    context.getDimension(io.getstream.video.android.ui.common.R.dimen.avatarAppbarPadding)
                 requestLayout()
             }
         }

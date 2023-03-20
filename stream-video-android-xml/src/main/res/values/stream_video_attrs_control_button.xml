@@ -12,8 +12,8 @@
         <!-- Sets the button background. -->
         <attr name="android:enabled" format="reference" />
         <!-- Sets the button background. -->
-        <attr name="streamControlButtonBackgroundEnabledAlpha" format="float|reference" />
+        <attr name="streamVideoControlButtonBackgroundEnabledAlpha" format="float|reference" />
         <!-- Sets the button background. -->
-        <attr name="streamControlButtonBackgroundDisabledAlpha" format="float|reference" />
+        <attr name="streamVideoControlButtonBackgroundDisabledAlpha" format="float|reference" />
     </declare-styleable>
 </resources>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CallParticipantView">
+        <!-- Alignment for the name label inside the view. -->
+        <attr name="streamVideoCallParticipantLabelAlignment" format="enum">
+            <enum name="top_start" value="0" />
+            <enum name="top_end" value="1" />
+            <enum name="bottom_start" value="2" />
+            <enum name="bottom_end" value="3" />
+        </attr>
+        <!-- Padding between the borders of the name label and parent. -->
+        <attr name="streamVideoCallParticipantLabelMargin" format="dimension|reference" />
+        <!-- Participant name label background color. -->
+        <attr name="streamVideoCallParticipantLabelBackgroundColor" format="color|reference" />
+        <!-- Participant name label text style. -->
+        <attr name="streamVideoCallParticipantLabelTextSize" format="dimension|reference" />
+        <attr name="streamVideoCallParticipantLabelTextColor" format="color|reference" />
+        <attr name="streamVideoCallParticipantLabelTextFont" format="reference" />
+        <attr name="streamVideoCallParticipantLabelTextFontAssets" format="string" />
+        <attr name="streamVideoCallParticipantLabelTextStyle">
+            <flag name="normal" value="0" />
+            <flag name="bold" value="1" />
+            <flag name="italic" value="2" />
+        </attr>
+
+        <!-- Color of the primary active speaker border. -->
+        <attr name="streamVideoCallParticipantActiveSpeakerBorderColor" format="color|reference" />
+        <!-- Width of the primary active speaker border. -->
+        <attr name="streamVideoCallParticipantActiveSpeakerBorderWidth" format="dimension|reference" />
+
+        <!-- Icon for the participant muted state. -->
+        <attr name="streamVideoCallParticipantMicrophoneOffIcon" format="reference" />
+        <!-- Icon tint for the participant muted state. -->
+        <attr name="streamVideoCallParticipantMicrophoneOffTint" format="color|reference" />
+        <!-- Icon tint for the participant mic active   state. -->
+        <attr name="streamVideoCallParticipantAudioLevelTint" format="color|reference" />
+
+        <attr name="streamVideoCallParticipantElevation" format="dimension|reference" />
+        <attr name="streamVideoCallParticipantCornerRadius" format="dimension|reference" />
+
+    </declare-styleable>
+</resources>

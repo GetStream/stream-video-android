@@ -33,7 +33,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.ShowCallInfo
@@ -50,7 +49,7 @@ internal fun OverlayAppBar(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(48.dp)
+            .height(VideoTheme.dimens.landscapeTopAppBarHeight)
             .background(color = VideoTheme.colors.overlay),
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically

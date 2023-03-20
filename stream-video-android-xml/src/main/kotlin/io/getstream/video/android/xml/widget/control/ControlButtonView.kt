@@ -22,7 +22,7 @@ import android.util.AttributeSet
 import androidx.annotation.ColorInt
 import androidx.annotation.DrawableRes
 import androidx.cardview.widget.CardView
-import io.getstream.video.android.xml.databinding.ViewControlButtonBinding
+import io.getstream.video.android.xml.databinding.StreamVideoViewControlButtonBinding
 import io.getstream.video.android.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.xml.utils.extensions.dpToPxPrecise
 import io.getstream.video.android.xml.utils.extensions.streamThemeInflater
@@ -32,7 +32,7 @@ import io.getstream.video.android.xml.utils.extensions.streamThemeInflater
  */
 internal class ControlButtonView : CardView {
 
-    private val binding = ViewControlButtonBinding.inflate(streamThemeInflater, this)
+    private val binding = StreamVideoViewControlButtonBinding.inflate(streamThemeInflater, this)
 
     private lateinit var style: ControlButtonStyle
 

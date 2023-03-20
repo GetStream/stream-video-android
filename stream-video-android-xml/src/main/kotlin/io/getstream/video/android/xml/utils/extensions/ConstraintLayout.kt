@@ -34,19 +34,19 @@ internal inline fun ConstraintLayout.updateConstraints(
     val set = ConstraintSet()
     set.clone(this)
     if (clearAllConstraints) {
-        children.forEach { set.clearConstraints(it.id) }
+        children.forEach { set.clearConstraints(it) }
     }
     set.actions()
     set.applyTo(this)
 }
 
-internal fun ConstraintSet.clearConstraints(viewId: Int) {
-    clear(viewId, ConstraintSet.START)
-    clear(viewId, ConstraintSet.END)
-    clear(viewId, ConstraintSet.TOP)
-    clear(viewId, ConstraintSet.BOTTOM)
-    clear(viewId, ConstraintSet.LEFT)
-    clear(viewId, ConstraintSet.RIGHT)
+internal fun ConstraintSet.clearConstraints(view: View) {
+    clear(view.id, ConstraintSet.START)
+    clear(view.id, ConstraintSet.END)
+    clear(view.id, ConstraintSet.TOP)
+    clear(view.id, ConstraintSet.BOTTOM)
+    clear(view.id, ConstraintSet.LEFT)
+    clear(view.id, ConstraintSet.RIGHT)
 }
 
 internal fun ConstraintSet.constrainViewToParentBySide(view: View, side: Int, margin: Int = 0) {

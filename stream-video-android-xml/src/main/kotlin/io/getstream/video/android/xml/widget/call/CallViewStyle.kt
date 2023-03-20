@@ -28,6 +28,9 @@ import io.getstream.video.android.xml.utils.extensions.getDimension
 import io.getstream.video.android.xml.utils.extensions.getDrawableCompat
 import io.getstream.video.android.xml.utils.extensions.getResourceId
 import io.getstream.video.android.xml.utils.extensions.use
+import io.getstream.video.android.xml.widget.control.CallControlsView
+import io.getstream.video.android.xml.widget.participant.CallParticipantView
+import io.getstream.video.android.xml.widget.participant.FloatingParticipantView
 import io.getstream.video.android.xml.widget.participant.internal.CallParticipantsGridView
 import io.getstream.video.android.xml.widget.participant.internal.CallParticipantsListView
 import io.getstream.video.android.xml.widget.screenshare.ScreenShareView
@@ -57,6 +60,11 @@ import io.getstream.video.android.ui.common.R as RCommon
  * @param presenterTextStyle Active screen share presenter text style.
  * @param presenterTextPadding Padding around the presenter text.
  * @param presenterTextMargin Margin between presenter text and screen share content.
+ * @param preConnectionImage Placeholder image while the user is connecting to a call.
+ * @param callControlsHeight The height of the [CallControlsView] in portrait mode.
+ * @param callControlsWidthLandscape The width of the [CallControlsView] in landscape mode.
+ * @param shouldShowGridUsersAsListLandscape True when we want [CallParticipantsGridView] to show the user in the list,
+ * or false when we want them arranged in a grid. [true] by default.
  */
 public data class CallViewStyle(
     public val gridCallParticipantStyle: Int,
@@ -75,109 +83,121 @@ public data class CallViewStyle(
     @Px public val presenterTextMargin: Int,
     public val preConnectionImage: Drawable,
     @Px public val callControlsHeight: Int,
+    @Px public val callControlsWidthLandscape: Int,
+    public val shouldShowGridUsersAsListLandscape: Boolean
 ) {
 
     internal companion object {
         operator fun invoke(context: Context, attrs: AttributeSet?): CallViewStyle {
             context.obtainStyledAttributes(
                 attrs,
-                R.styleable.CallContentView,
-                R.attr.streamCallContentViewStyle,
-                R.style.Stream_CallParticipants
+                R.styleable.CallView,
+                R.attr.streamVideoCallViewStyle,
+                R.style.Stream_CallView
             ).use {
 
                 val gridCallParticipantStyle = it.getResourceId(
-                    R.styleable.CallContentView_streamCallContentGridParticipantStyle,
-                    context.getResourceId(R.style.StreamVideoTheme, R.attr.streamCallParticipantViewStyle)
+                    R.styleable.CallView_streamVideoCallViewGridParticipantStyle,
+                    context.getResourceId(R.style.StreamVideoTheme, R.attr.streamVideoCallParticipantViewStyle)
                 )
 
                 val listCallParticipantStyle = it.getResourceId(
-                    R.styleable.CallContentView_streamCallContentListParticipantStyle,
-                    context.getResourceId(R.style.StreamVideoTheme, R.attr.streamCallParticipantViewStyle)
+                    R.styleable.CallView_streamVideoCallViewListParticipantStyle,
+                    context.getResourceId(R.style.StreamVideoTheme, R.attr.streamVideoCallParticipantViewStyle)
                 )
 
                 val localParticipantHeight = it.getDimension(
-                    R.styleable.CallContentView_streamCallContentLocalParticipantHeight,
+                    R.styleable.CallView_streamVideoCallViewLocalParticipantHeight,
                     context.getDimension(RCommon.dimen.floatingVideoHeight).toFloat()
                 )
 
                 val localParticipantWidth = it.getDimension(
-                    R.styleable.CallContentView_streamCallContentLocalParticipantWidth,
+                    R.styleable.CallView_streamVideoCallViewLocalParticipantWidth,
                     context.getDimension(RCommon.dimen.floatingVideoWidth).toFloat()
                 )
 
                 val localParticipantPadding = it.getDimension(
-                    R.styleable.CallContentView_streamCallContentLocalParticipantPadding,
+                    R.styleable.CallView_streamVideoCallViewLocalParticipantPadding,
                     context.getDimension(RCommon.dimen.floatingVideoPadding).toFloat()
                 )
 
                 val localParticipantRadius = it.getDimension(
-                    R.styleable.CallContentView_streamCallContentLocalParticipantRadius,
+                    R.styleable.CallView_streamVideoCallViewLocalParticipantRadius,
                     context.getDimension(RCommon.dimen.floatingVideoRadius).toFloat()
                 )
 
                 val participantListHeight = it.getDimension(
-                    R.styleable.CallContentView_streamCallContentListHeight,
+                    R.styleable.CallView_streamVideoCallViewListHeight,
                     context.getDimension(RCommon.dimen.screenShareParticipantsListHeight).toFloat()
                 ).toInt()
 
                 val participantListPadding = it.getDimension(
-                    R.styleable.CallContentView_streamCallContentListPadding,
+                    R.styleable.CallView_streamVideoCallViewListPadding,
                     context.getDimension(RCommon.dimen.screenShareParticipantsListPadding).toFloat()
                 ).toInt()
 
                 val participantListItemMargin = it.getDimension(
-                    R.styleable.CallContentView_streamCallContentListItemMargin,
+                    R.styleable.CallView_streamVideoCallViewListItemMargin,
                     context.getDimension(RCommon.dimen.screenShareParticipantsListItemMargin).toFloat()
                 ).toInt()
 
                 val participantListItemWidth = it.getDimension(
-                    R.styleable.CallContentView_streamCallContentListItemWidth,
+                    R.styleable.CallView_streamVideoCallViewListItemWidth,
                     context.getDimension(RCommon.dimen.screenShareParticipantItemSize).toFloat()
                 ).toInt()
 
                 val screenShareMargin = it.getDimension(
-                    R.styleable.CallContentView_streamCallContentScreenShareListMargin,
+                    R.styleable.CallView_streamVideoCallViewScreenShareListMargin,
                     context.getDimension(RCommon.dimen.screenShareParticipantsRadius).toFloat()
                 ).toInt()
 
                 val presenterTextStyle = TextStyle.Builder(it)
                     .size(
-                        R.styleable.CallContentView_streamCallContentPresenterInfoTextSize,
+                        R.styleable.CallView_streamVideoCallViewPresenterInfoTextSize,
                         context.getDimension(RCommon.dimen.title3TextSize)
                     )
                     .color(
-                        R.styleable.CallContentView_streamCallContentPresenterInfoTextColor,
+                        R.styleable.CallView_streamVideoCallViewPresenterInfoTextColor,
                         context.getColorCompat(RCommon.color.stream_text_high_emphasis)
                     )
                     .font(
-                        R.styleable.CallContentView_streamCallContentPresenterInfoFontAsset,
-                        R.styleable.CallContentView_streamCallContentPresenterInfoFont,
+                        R.styleable.CallView_streamVideoCallViewPresenterInfoFontAsset,
+                        R.styleable.CallView_streamVideoCallViewPresenterInfoFont,
                     )
                     .style(
-                        R.styleable.CallContentView_streamCallContentPresenterInfoTextStyle,
+                        R.styleable.CallView_streamVideoCallViewPresenterInfoTextStyle,
                         Typeface.BOLD
                     )
                     .build()
 
                 val presenterTextMargin = it.getDimension(
-                    R.styleable.CallContentView_streamCallContentPresenterTextMargin,
+                    R.styleable.CallView_streamVideoCallViewPresenterTextMargin,
                     context.getDimension(RCommon.dimen.screenSharePresenterTitleMargin).toFloat()
                 ).toInt()
 
                 val presenterTextPadding = it.getDimension(
-                    R.styleable.CallContentView_streamCallContentPresenterTextPadding,
+                    R.styleable.CallView_streamVideoCallViewPresenterTextPadding,
                     context.getDimension(RCommon.dimen.screenSharePresenterPadding).toFloat()
                 ).toInt()
 
                 val preConnectionImage = it.getDrawable(
-                    R.styleable.CallContentView_streamCallContentPreConnectionImage
+                    R.styleable.CallView_streamVideoCallViewPreConnectionImage
                 ) ?: context.getDrawableCompat(RCommon.drawable.ic_call)!!
 
                 val callControlsHeight = it.getDimension(
-                    R.styleable.CallContentView_streamCallContentCallControlsHeight,
+                    R.styleable.CallView_streamVideoCallViewCallControlsHeight,
                     context.getDimension(RCommon.dimen.callControlsSheetHeight).toFloat()
                 ).toInt()
+
+                val callControlsWidthLandscape = it.getDimension(
+                    R.styleable.CallView_streamVideoCallViewCallControlsWidthLandscape,
+                    context.getDimension(RCommon.dimen.landscapeCallControlsSheetWidth).toFloat()
+                ).toInt()
+
+                val shouldShowGridUsersAsListLandscape = it.getBoolean(
+                    R.styleable.CallView_streamVideoCallViewShouldShowGridUsersAsListLandscape,
+                    true
+                )
 
                 return CallViewStyle(
                     gridCallParticipantStyle = gridCallParticipantStyle,
@@ -195,7 +215,9 @@ public data class CallViewStyle(
                     presenterTextMargin = presenterTextMargin,
                     presenterTextPadding = presenterTextPadding,
                     preConnectionImage = preConnectionImage,
-                    callControlsHeight = callControlsHeight
+                    callControlsHeight = callControlsHeight,
+                    callControlsWidthLandscape = callControlsWidthLandscape,
+                    shouldShowGridUsersAsListLandscape = shouldShowGridUsersAsListLandscape
                 ).let(TransformStyle.callViewStyleTransformer::transform)
             }
         }

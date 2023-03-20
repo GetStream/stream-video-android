@@ -20,7 +20,7 @@ import android.content.Context
 import android.util.AttributeSet
 import androidx.cardview.widget.CardView
 import io.getstream.video.android.core.model.CallParticipantState
-import io.getstream.video.android.xml.databinding.ViewFloatingParticipantBinding
+import io.getstream.video.android.xml.databinding.StreamVideoViewFloatingParticipantBinding
 import io.getstream.video.android.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.xml.utils.extensions.streamThemeInflater
 import io.getstream.video.android.xml.widget.view.JobHolder
@@ -33,7 +33,7 @@ public class FloatingParticipantView : CardView, JobHolder {
 
     override val runningJobs: MutableList<Job> = mutableListOf()
 
-    private val binding = ViewFloatingParticipantBinding.inflate(streamThemeInflater, this)
+    private val binding = StreamVideoViewFloatingParticipantBinding.inflate(streamThemeInflater, this)
 
     public constructor(context: Context) : this(context, null)
     public constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)

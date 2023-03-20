@@ -55,6 +55,8 @@ android {
         }
     }
 
+    resourcePrefix = "stream_video_"
+
     sourceSets {
         main.java.srcDirs += "build/generated/source/services"
     }

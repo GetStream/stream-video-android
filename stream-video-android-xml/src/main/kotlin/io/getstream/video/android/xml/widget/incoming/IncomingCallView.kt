@@ -25,7 +25,7 @@ import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.model.CallStatus
 import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.ui.common.R
-import io.getstream.video.android.xml.databinding.ViewIncomingCallBinding
+import io.getstream.video.android.xml.databinding.StreamVideoViewIncomingCallBinding
 import io.getstream.video.android.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.xml.utils.extensions.getDimension
 import io.getstream.video.android.xml.utils.extensions.streamThemeInflater
@@ -38,7 +38,7 @@ public class IncomingCallView : CallConstraintLayout {
 
     private lateinit var style: IncomingCallStyle
 
-    private val binding = ViewIncomingCallBinding.inflate(streamThemeInflater, this)
+    private val binding = StreamVideoViewIncomingCallBinding.inflate(streamThemeInflater, this)
 
     public constructor(context: Context) : this(context, null, 0)
     public constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)

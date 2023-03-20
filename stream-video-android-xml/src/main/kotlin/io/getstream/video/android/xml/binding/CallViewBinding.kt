@@ -50,12 +50,11 @@ public fun CallView.bindView(
     },
     onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
 ) {
-
     getFirstViewInstance<CallControlsView>()?.bindView(
         viewModel = viewModel,
         lifecycleOwner = lifecycleOwner,
         fetchCallMediaState = fetchCallMediaState,
-        onCallAction = onCallAction
+        onCallAction = onCallAction,
     )
 
     startJob(lifecycleOwner) {
