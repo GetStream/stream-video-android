@@ -32,15 +32,26 @@ import io.getstream.video.android.core.lifecycle.LifecycleHandler
 import io.getstream.video.android.core.lifecycle.internal.StreamLifecycleObserver
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.CallEventType
+import io.getstream.video.android.core.model.CallInfo
 import io.getstream.video.android.core.model.CallMetadata
+import io.getstream.video.android.core.model.CallRecordingData
+import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.core.model.Device
+import io.getstream.video.android.core.model.EdgeData
 import io.getstream.video.android.core.model.IceServer
 import io.getstream.video.android.core.model.JoinedCall
+import io.getstream.video.android.core.model.MuteUsersData
+import io.getstream.video.android.core.model.QueriedCalls
+import io.getstream.video.android.core.model.QueryCallsData
+import io.getstream.video.android.core.model.QueryMembersData
+import io.getstream.video.android.core.model.ReactionData
+import io.getstream.video.android.core.model.SendReactionData
 import io.getstream.video.android.core.model.SfuToken
 import io.getstream.video.android.core.model.StartedCall
 import io.getstream.video.android.core.model.StreamCallCid
 import io.getstream.video.android.core.model.StreamCallGuid
 import io.getstream.video.android.core.model.StreamCallKind
+import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.mapper.toMetadata
 import io.getstream.video.android.core.model.mapper.toTypeAndId
@@ -48,6 +59,7 @@ import io.getstream.video.android.core.model.state.DropReason
 import io.getstream.video.android.core.model.state.StreamCallState
 import io.getstream.video.android.core.model.toIceServer
 import io.getstream.video.android.core.model.toInfo
+import io.getstream.video.android.core.model.toRequest
 import io.getstream.video.android.core.socket.SocketListener
 import io.getstream.video.android.core.socket.SocketStateService
 import io.getstream.video.android.core.socket.VideoSocket
@@ -73,12 +85,15 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.openapitools.client.models.BlockUserRequest
 import org.openapitools.client.models.CallRequest
 import org.openapitools.client.models.GetCallEdgeServerRequest
 import org.openapitools.client.models.GetCallEdgeServerResponse
 import org.openapitools.client.models.GetOrCreateCallRequest
 import org.openapitools.client.models.MemberRequest
+import org.openapitools.client.models.RequestPermissionRequest
 import org.openapitools.client.models.SendEventRequest
+import org.openapitools.client.models.UnblockUserRequest
 import stream.video.coordinator.client_v1_rpc.CreateDeviceRequest
 import stream.video.coordinator.client_v1_rpc.DeleteDeviceRequest
 import stream.video.coordinator.push_v1.DeviceInput
@@ -164,12 +179,7 @@ internal class StreamVideoImpl(
     override val callState: StateFlow<StreamCallState> = engine.callState
 
     /**
-     * Create a device that will be used to receive push notifications.
-     *
-     * @param token The Token obtained from the selected push provider.
-     * @param pushProvider The selected push provider.
-     *
-     * @return [Result] containing the [Device].
+     * @see StreamVideo.createDevice
      */
     override suspend fun createDevice(token: String, pushProvider: String): Result<Device> {
         logger.d { "[createDevice] token: $token, pushProvider: $pushProvider" }
@@ -201,10 +211,7 @@ internal class StreamVideoImpl(
     }
 
     /**
-     * Remove a device used to receive push notifications.
-     *
-     * @param id The ID of the device, previously provided by [createDevice].
-     * @return Result if the operation was successful or not.
+     * @see StreamVideo.deleteDevice
      */
     override suspend fun deleteDevice(id: String): Result<Unit> {
         logger.d { "[deleteDevice] id: $id" }
@@ -213,6 +220,9 @@ internal class StreamVideoImpl(
         ).also { logger.v { "[deleteDevice] result: $it" } }
     }
 
+    /**
+     * @see StreamVideo.removeDevices
+     */
     override fun removeDevices(devices: List<Device>) {
         scope.launch {
             val operations = devices.map {
@@ -226,7 +236,11 @@ internal class StreamVideoImpl(
     /**
      * Domain - Coordinator.
      */
+
     // caller: DIAL and wait answer
+    /**
+     * @see StreamVideo.getOrCreateCall
+     */
     override suspend fun getOrCreateCall(
         type: String,
         id: String,
@@ -259,6 +273,9 @@ internal class StreamVideoImpl(
     }
 
     // caller: JOIN after accepting incoming call by callee
+    /**
+     * @see StreamVideo.joinCall
+     */
     override suspend fun joinCall(call: CallMetadata): Result<JoinedCall> =
         withContext(scope.coroutineContext) {
             logger.d { "[joinCallOnly] call: $call" }
@@ -270,11 +287,7 @@ internal class StreamVideoImpl(
         }
 
     /**
-     * Used to invite new users/members to an existing call.
-     *
-     * @param users The users to invite.
-     * @param cid The channel ID.
-     * @return [Result] if the operation was successful or not.
+     * @see StreamVideo.inviteUsers
      */
     override suspend fun inviteUsers(users: List<User>, cid: StreamCallCid): Result<Unit> {
         logger.d { "[inviteUsers] users: $users" }
@@ -376,6 +389,9 @@ internal class StreamVideoImpl(
     }
 
     // caller/callee: CREATE/JOIN meeting or ACCEPT call with no participants or ringing
+    /**
+     * @see StreamVideo.joinCall
+     */
     override suspend fun joinCall(
         type: String,
         id: String,
@@ -409,6 +425,9 @@ internal class StreamVideoImpl(
     }
 
     // callee: SEND Accepted or Rejected
+    /**
+     * @see StreamVideo.sendEvent
+     */
     override suspend fun sendEvent(
         callCid: String,
         eventType: CallEventType
@@ -426,6 +445,9 @@ internal class StreamVideoImpl(
             .also { logger.v { "[sendEvent] result: $it" } }
     }
 
+    /**
+     * @see StreamVideo.sendCustomEvent
+     */
     override suspend fun sendCustomEvent(
         callCid: String,
         dataJson: Map<String, Any>,
@@ -441,6 +463,297 @@ internal class StreamVideoImpl(
         ).also { logger.v { "[sendCustomEvent] result: $it" } }
     }
 
+    /**
+     * @see StreamVideo.queryMembers
+     */
+    override suspend fun queryMembers(
+        callCid: StreamCallCid,
+        queryMembersData: QueryMembersData
+    ): Result<List<CallUser>> {
+        logger.d { "[queryMembers] callCid: $callCid, queryMembersData: $queryMembersData" }
+
+        val (type, id) = callCid.toTypeAndId()
+
+        return callCoordinatorClient.queryMembers(
+            queryMembersData.toRequest(id, type)
+        ).also {
+            logger.v { "[queryMembers] result: $it" }
+        }
+    }
+
+    /**
+     * @see StreamVideo.blockUser
+     */
+    override suspend fun blockUser(callCid: StreamCallCid, userId: String): Result<Unit> {
+        logger.d { "[blockUser] callCid: $callCid, userId: $userId" }
+
+        val (type, id) = callCid.toTypeAndId()
+
+        return callCoordinatorClient.blockUser(
+            id = id,
+            type = type,
+            blockUserRequest = BlockUserRequest(userId)
+        ).also {
+            logger.v { "[blockUser] result: $it" }
+        }
+    }
+
+    /**
+     * @see StreamVideo.unblockUser
+     */
+    override suspend fun unblockUser(callCid: StreamCallCid, userId: String): Result<Unit> {
+        logger.d { "[unblockUser] callCid: $callCid, userId: $userId" }
+
+        val (type, id) = callCid.toTypeAndId()
+
+        return callCoordinatorClient.unblockUser(
+            id = id,
+            type = type,
+            unblockUserRequest = UnblockUserRequest(userId)
+        ).also {
+            logger.v { "[unblockUser] result: $it" }
+        }
+    }
+
+    /**
+     * @see StreamVideo.endCall
+     */
+    override suspend fun endCall(callCid: StreamCallCid): Result<Unit> {
+        logger.d { "[endCall] callCid: $callCid" }
+
+        val (type, id) = callCid.toTypeAndId()
+
+        return callCoordinatorClient.endCall(
+            id = id,
+            type = type
+        ).also {
+            logger.v { "[endCall] result: $it" }
+        }
+    }
+
+    /**
+     * @see StreamVideo.goLive
+     */
+    override suspend fun goLive(callCid: StreamCallCid): Result<CallInfo> {
+        logger.d { "[goLive] callCid: $callCid" }
+
+        val (type, id) = callCid.toTypeAndId()
+
+        return callCoordinatorClient.goLive(
+            id = id,
+            type = type
+        ).also {
+            logger.v { "[goLive] result: $it" }
+        }
+    }
+
+    /**
+     * @see StreamVideo.stopLive
+     */
+    override suspend fun stopLive(callCid: StreamCallCid): Result<CallInfo> {
+        logger.d { "[stopLive] callCid: $callCid" }
+
+        val (type, id) = callCid.toTypeAndId()
+
+        return callCoordinatorClient.stopLive(
+            id = id,
+            type = type
+        ).also {
+            logger.v { "[stopLive] result: $it" }
+        }
+    }
+
+    /**
+     * @see StreamVideo.muteUsers
+     */
+    override suspend fun muteUsers(
+        callCid: StreamCallCid,
+        muteUsersData: MuteUsersData
+    ): Result<Unit> {
+        logger.d { "[muteUsers] callCid: $callCid" }
+
+        val (type, id) = callCid.toTypeAndId()
+
+        return callCoordinatorClient.muteUsers(
+            id = id,
+            type = type,
+            muteUsersRequest = muteUsersData.toRequest()
+        ).also {
+            logger.v { "[muteUsers] result: $it" }
+        }
+    }
+
+    /**
+     * @see StreamVideo.queryCalls
+     */
+    override suspend fun queryCalls(queryCallsData: QueryCallsData): Result<QueriedCalls> {
+        logger.d { "[queryCalls] queryCallsData: $queryCallsData" }
+
+        return callCoordinatorClient.queryCalls(
+            queryCallsRequest = queryCallsData.toRequest()
+        ).also {
+            logger.v { "[queryCalls] result: $it" }
+        }
+    }
+
+    /**
+     * @see StreamVideo.requestPermissions
+     */
+    override suspend fun requestPermissions(
+        callCid: StreamCallCid,
+        permissions: List<String>
+    ): Result<Unit> {
+        logger.d { "[requestPermissions] callCid: $callCid, permissions: $permissions" }
+
+        val (type, id) = callCid.toTypeAndId()
+
+        return callCoordinatorClient.requestPermission(
+            id = id,
+            type = type,
+            requestPermissionRequest = RequestPermissionRequest(permissions)
+        ).also {
+            logger.v { "[requestPermissions] result: $it" }
+        }
+    }
+
+    /**
+     * @see StreamVideo.startBroadcasting
+     */
+    override suspend fun startBroadcasting(callCid: StreamCallCid): Result<Unit> {
+        logger.d { "[startBroadcasting] callCid: $callCid" }
+
+        val (type, id) = callCid.toTypeAndId()
+
+        return callCoordinatorClient.startBroadcasting(
+            id = id,
+            type = type
+        ).also {
+            logger.v { "[startBroadcasting] result: $it" }
+        }
+    }
+
+    /**
+     * @see StreamVideo.stopBroadcasting
+     */
+    override suspend fun stopBroadcasting(callCid: StreamCallCid): Result<Unit> {
+        logger.d { "[stopBroadcasting] callCid: $callCid" }
+
+        val (type, id) = callCid.toTypeAndId()
+
+        return callCoordinatorClient.stopBroadcasting(
+            id = id,
+            type = type
+        ).also {
+            logger.v { "[stopBroadcasting] result: $it" }
+        }
+    }
+
+    /**
+     * @see StreamVideo.startRecording
+     */
+    override suspend fun startRecording(callCid: StreamCallCid): Result<Unit> {
+        logger.d { "[startRecording] callCid: $callCid" }
+
+        val (type, id) = callCid.toTypeAndId()
+
+        return callCoordinatorClient.startRecording(
+            id = id,
+            type = type
+        ).also {
+            logger.v { "[startRecording] result: $it" }
+        }
+    }
+
+    /**
+     * @see StreamVideo.stopRecording
+     */
+    override suspend fun stopRecording(callCid: StreamCallCid): Result<Unit> {
+        logger.d { "[stopRecording] callCid: $callCid" }
+
+        val (type, id) = callCid.toTypeAndId()
+
+        return callCoordinatorClient.stopRecording(
+            id = id,
+            type = type
+        ).also {
+            logger.v { "[stopRecording] result: $it" }
+        }
+    }
+
+    /**
+     * @see StreamVideo.updateUserPermissions
+     */
+    override suspend fun updateUserPermissions(
+        callCid: StreamCallCid,
+        updateUserPermissionsData: UpdateUserPermissionsData
+    ): Result<Unit> {
+        logger.d { "[updateUserPermissions] callCid: $callCid" }
+
+        val (type, id) = callCid.toTypeAndId()
+
+        return callCoordinatorClient.updateUserPermissions(
+            id = id,
+            type = type,
+            updateUserPermissionsRequest = updateUserPermissionsData.toRequest()
+        ).also {
+            logger.v { "[updateUserPermissions] result: $it" }
+        }
+    }
+
+    /**
+     * @see StreamVideo.listRecordings
+     */
+    override suspend fun listRecordings(
+        callCid: StreamCallCid,
+        sessionId: String
+    ): Result<List<CallRecordingData>> {
+        logger.d { "[listRecordings] callCid: $callCid, sessionId: $sessionId" }
+
+        val (type, id) = callCid.toTypeAndId()
+
+        return callCoordinatorClient.listRecordings(
+            id = id,
+            type = type,
+            sessionId = sessionId
+        ).also {
+            logger.v { "[listRecordings] result: $it" }
+        }
+    }
+
+    /**
+     * @see StreamVideo.sendVideoReaction
+     */
+    override suspend fun sendVideoReaction(
+        callCid: StreamCallCid,
+        sendReactionData: SendReactionData
+    ): Result<ReactionData> {
+        logger.d { "[sendVideoReaction] callCid: $callCid, sendReactionData: $sendReactionData" }
+
+        val (type, id) = callCid.toTypeAndId()
+
+        return callCoordinatorClient.sendVideoReaction(
+            id = id,
+            type = type,
+            request = sendReactionData.toRequest()
+        ).also {
+            logger.v { "[sendVideoReaction] result: $it" }
+        }
+    }
+
+    /**
+     * @see StreamVideo.getEdges
+     */
+    override suspend fun getEdges(): Result<List<EdgeData>> {
+        logger.d { "[getEdges] no params" }
+
+        return callCoordinatorClient.getEdges().also {
+            logger.v { "[getEdges] result: $it" }
+        }
+    }
+
+    /**
+     * @see StreamVideo.clearCallState
+     */
     override fun clearCallState() {
         logger.i { "[clearCallState] no args" }
         preferences.storeSfuToken(null)
@@ -450,8 +763,7 @@ internal class StreamVideoImpl(
     }
 
     /**
-     * Logs out the user by clearing the credentials preferences, unregistering any push devices
-     * and clearing the call state.
+     * @see StreamVideo.logOut
      */
     override fun logOut() {
         val preferences = UserPreferencesManager.getPreferences()
@@ -472,20 +784,19 @@ internal class StreamVideoImpl(
         }
     }
 
+    /**
+     * @see StreamVideo.getUser
+     */
     override fun getUser(): User = userState.user.value
 
     /**
-     * Adds a listener to the socket which allows you to build custom behavior based on each event.
-     *
-     * @param socketListener The listener instance to add to a pool of event handlers.
+     * @see StreamVideo.addSocketListener
      */
     override fun addSocketListener(socketListener: SocketListener): Unit =
         socket.addListener(socketListener)
 
     /**
-     * Removes a listener from the socket allowing you to clean up event handling.
-     *
-     * @param socketListener The listener instance tocon be removed.
+     * @see StreamVideo.removeSocketListener
      */
     override fun removeSocketListener(socketListener: SocketListener): Unit =
         socket.removeListener(socketListener)
@@ -529,21 +840,22 @@ internal class StreamVideoImpl(
     }
 
     /**
-     *
-     * @return An instance of the [CallClient] if it currently exists (the user is in a call).
+     * @see StreamVideo.getActiveCallClient
      */
     override fun getActiveCallClient(): CallClient? {
         return callClientHolder.value
     }
 
     /**
-     *
-     * @return An instance of the [CallClient] if it currently exists (the user is in a call).
+     * @see StreamVideo.awaitCallClient
      */
     override suspend fun awaitCallClient(): CallClient = withContext(scope.coroutineContext) {
         callClientHolder.first { it != null } ?: error("callClient must not be null")
     }
 
+    /**
+     * @see StreamVideo.acceptCall
+     */
     override suspend fun acceptCall(cid: StreamCallCid): Result<JoinedCall> =
         withContext(scope.coroutineContext) {
             try {
@@ -563,18 +875,27 @@ internal class StreamVideoImpl(
             }
         }
 
+    /**
+     * @see StreamVideo.rejectCall
+     */
     override suspend fun rejectCall(cid: StreamCallCid): Result<Boolean> =
         withContext(scope.coroutineContext) {
             logger.d { "[rejectCall] cid: $cid" }
             sendEvent(callCid = cid, CallEventType.REJECTED)
         }
 
+    /**
+     * @see StreamVideo.cancelCall
+     */
     override suspend fun cancelCall(cid: StreamCallCid): Result<Boolean> =
         withContext(scope.coroutineContext) {
             logger.d { "[cancelCall] cid: $cid" }
             sendEvent(callCid = cid, CallEventType.CANCELLED)
         }
 
+    /**
+     * @see StreamVideo.handlePushMessage
+     */
     override suspend fun handlePushMessage(payload: Map<String, Any>): Result<Unit> =
         withContext(scope.coroutineContext) {
             val callCid = payload[INTENT_EXTRA_CALL_CID] as? String

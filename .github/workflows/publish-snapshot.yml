@@ -19,7 +19,7 @@ jobs:
           java-version: 11
       - name: Release build
         # assembleRelease for all modules, excluding non-library modules: samples, docs
-        run: ./gradlew assembleRelease -x :app:assembleRelease
+        run: ./gradlew assembleRelease -x :app:assembleRelease -x :dogfooding:assembleRelease -x :examples:tutorial:tutorial-starter:assembleRelease -x :examples:tutorial:tutorial-final:assembleRelease -x :examples:chat-with-video:chat-with-video-final:assembleRelease -x :examples:chat-with-video:chat-with-video-starter:assembleRelease
       - name: Source jar and dokka
         run: ./gradlew androidSourcesJar javadocJar
       - name: Publish to MavenCentral
