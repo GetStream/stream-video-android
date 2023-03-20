@@ -18,6 +18,7 @@ package io.getstream.video.android.app
 
 import android.app.Application
 import android.content.Context
+import io.getstream.log.Priority
 import io.getstream.log.StreamLog
 import io.getstream.log.android.AndroidStreamLogger
 import io.getstream.video.android.app.ui.call.CallActivity
@@ -37,10 +38,7 @@ class VideoApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        if (BuildConfig.DEBUG) {
-            StreamLog.setValidator { _, _ -> true }
-            StreamLog.install(AndroidStreamLogger())
-        }
+        AndroidStreamLogger.installOnDebuggableApp(this, minPriority = Priority.DEBUG)
         StreamLog.i(TAG) { "[onCreate] no args" }
         UserPreferencesManager.initialize(this)
     }
