@@ -19,6 +19,11 @@ package io.getstream.video.android.xml.utils
 /**
  * Used to notify the view that the orientation has been changed and layout updates are needed.
  */
-interface OrientationChangeListener {
+public interface OrientationChangeListener {
+    /**
+     * Notifies that the orientation has changed.
+     *
+     * @param isLandscape Whether the device orientation is landscape or not.
+     */
     fun onOrientationChanged(isLandscape: Boolean) {}
 }
