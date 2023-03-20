@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="ScreenShareView">
+        <attr name="streamVideoScreenShareFullscreenIcon" format="reference" />
+        <attr name="streamVideoScreenShareFullscreenExitIcon" format="reference" />
+        <attr name="streamVideoScreenSharePortraitIcon" format="reference" />
+        <attr name="streamVideoScreenShareLandscapeIcon" format="reference" />
+        <attr name="streamVideoScreenShareControlsBackgroundTint" format="color|reference" />
+        <attr name="streamVideoScreenShareControlsIconTint" format="color|reference" />
+    </declare-styleable>
+</resources>

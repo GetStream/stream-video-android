@@ -44,17 +44,17 @@ public data class CallContainerStyle(
             context.obtainStyledAttributes(
                 attrs,
                 R.styleable.CallContainerView,
-                R.attr.streamCallContainerStyle,
+                R.attr.streamVideoCallContainerStyle,
                 R.style.Stream_CallContainer
             ).use {
 
                 val appBarHeight = it.getDimension(
-                    R.styleable.CallContainerView_streamCallContainerAppBarHeight,
+                    R.styleable.CallContainerView_streamVideoCallContainerAppBarHeight,
                     context.getDimension(RCommon.dimen.topAppbarHeight).toFloat()
                 ).toInt()
 
                 val landscapeAppBarHeight = it.getDimension(
-                    R.styleable.CallContainerView_streamCAllContainerAppBarLandscapeHeight,
+                    R.styleable.CallContainerView_streamVideoCallContainerAppBarLandscapeHeight,
                     context.getDimension(RCommon.dimen.landscapeTopAppBarHeight).toFloat()
                 ).toInt()
 

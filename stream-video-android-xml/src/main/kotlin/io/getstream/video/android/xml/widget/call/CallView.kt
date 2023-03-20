@@ -388,9 +388,9 @@ public class CallView : CallConstraintLayout {
      */
     private fun buildParticipantView(isListView: Boolean): CallParticipantView {
         val defStyleAttr = if (isListView) {
-            R.attr.streamCallViewListParticipantStyle
+            R.attr.streamVideoCallViewListParticipantStyle
         } else {
-            R.attr.streamCallViewGridParticipantStyle
+            R.attr.streamVideoCallViewGridParticipantStyle
         }
 
         val defStyleRes = if (isListView) style.listCallParticipantStyle else style.gridCallParticipantStyle

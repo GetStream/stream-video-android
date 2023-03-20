@@ -27,7 +27,7 @@ import io.getstream.video.android.core.model.CallParticipantState
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toUser
-import io.getstream.video.android.xml.databinding.ViewCallParticipantBinding
+import io.getstream.video.android.xml.databinding.StreamVideoViewCallParticipantBinding
 import io.getstream.video.android.xml.font.setTextStyle
 import io.getstream.video.android.xml.utils.extensions.clearConstraints
 import io.getstream.video.android.xml.utils.extensions.constrainViewToParentBySide
@@ -47,7 +47,7 @@ public class CallParticipantView : CallCardView, VideoRenderer {
 
     private val logger by taggedLogger()
 
-    private val binding = ViewCallParticipantBinding.inflate(streamThemeInflater, this)
+    private val binding = StreamVideoViewCallParticipantBinding.inflate(streamThemeInflater, this)
 
     private lateinit var style: CallParticipantStyle
 
@@ -80,7 +80,12 @@ public class CallParticipantView : CallCardView, VideoRenderer {
         0
     )
 
-    public constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(
+    public constructor(
+        context: Context,
+        attrs: AttributeSet?,
+        defStyleAttr: Int,
+        defStyleRes: Int
+    ) : super(
         context.createStreamThemeWrapper(),
         attrs,
         defStyleAttr
@@ -150,8 +155,10 @@ public class CallParticipantView : CallCardView, VideoRenderer {
      */
     // TODO build sound level view
     private fun setHasAudio(hasAudio: Boolean) {
-        val tint = if (hasAudio) style.participantAudioLevelTint else style.participantMicOffIconTint
-        val icon = if (hasAudio) context.getDrawableCompat(RCommon.drawable.ic_mic_on) else style.participantMicOffIcon
+        val tint =
+            if (hasAudio) style.participantAudioLevelTint else style.participantMicOffIconTint
+        val icon =
+            if (hasAudio) context.getDrawableCompat(RCommon.drawable.ic_mic_on) else style.participantMicOffIcon
 
         binding.soundIndicator.setImageDrawable(icon)
         binding.soundIndicator.setColorFilter(tint)

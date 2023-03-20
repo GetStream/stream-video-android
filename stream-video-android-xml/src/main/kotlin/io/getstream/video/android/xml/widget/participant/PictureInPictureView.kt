@@ -75,7 +75,7 @@ public class PictureInPictureView : CallCardView, VideoRenderer {
         CallParticipantView(
             context = context,
             attrs = null,
-            defStyleAttr = R.attr.streamPictureInPictureCallParticipantViewStyle,
+            defStyleAttr = R.attr.streamVideoPictureInPictureCallParticipantViewStyle,
             defStyleRes = style.callParticipantStyle
         ).apply {
             layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)

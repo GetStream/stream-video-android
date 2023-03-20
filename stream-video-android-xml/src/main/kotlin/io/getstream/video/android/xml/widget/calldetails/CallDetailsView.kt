@@ -25,7 +25,7 @@ import io.getstream.video.android.common.util.buildLargeCallText
 import io.getstream.video.android.common.util.buildSmallCallText
 import io.getstream.video.android.core.model.CallStatus
 import io.getstream.video.android.core.model.CallUser
-import io.getstream.video.android.xml.databinding.ViewCallDetailsBinding
+import io.getstream.video.android.xml.databinding.StreamVideoViewCallDetailsBinding
 import io.getstream.video.android.xml.font.setTextStyle
 import io.getstream.video.android.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.xml.utils.extensions.streamThemeInflater
@@ -39,7 +39,7 @@ public class CallDetailsView : ConstraintLayout {
 
     private lateinit var style: CallDetailsStyle
 
-    private val binding = ViewCallDetailsBinding.inflate(streamThemeInflater, this)
+    private val binding = StreamVideoViewCallDetailsBinding.inflate(streamThemeInflater, this)
 
     public constructor(context: Context) : this(context, null, 0)
     public constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
@@ -117,7 +117,8 @@ public class CallDetailsView : ConstraintLayout {
      * @param participants The list of the current call participants.
      */
     private fun setParticipantsText(participants: List<CallUser>) {
-        val textStyle = if (participants.size == 1) style.singleParticipantTextStyle else style.participantsTextStyle
+        val textStyle =
+            if (participants.size == 1) style.singleParticipantTextStyle else style.participantsTextStyle
         binding.participantsInfo.setTextStyle(textStyle)
         binding.participantsInfo.text = if (participants.size < 3) {
             buildSmallCallText(participants)

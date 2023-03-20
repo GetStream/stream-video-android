@@ -65,83 +65,83 @@ public data class CallDetailsStyle(
             context.obtainStyledAttributes(
                 attrs,
                 R.styleable.CallDetailsView,
-                R.attr.streamCallDetailsViewStyle,
+                R.attr.streamVideoCallDetailsViewStyle,
                 R.style.Stream_CallDetails
             ).use {
                 val callAvatarSize = it.getDimensionPixelSize(
-                    R.styleable.CallDetailsView_streamCallDetailsAvatarSize,
+                    R.styleable.CallDetailsView_streamVideoCallDetailsAvatarSize,
                     context.getDimension(RCommon.dimen.callAvatarSize)
                 )
 
                 val singleAvatarSize = it.getDimensionPixelSize(
-                    R.styleable.CallDetailsView_streamCallDetailsDirectCallAvatarSize,
+                    R.styleable.CallDetailsView_streamVideoCallDetailsDirectCallAvatarSize,
                     context.getDimension(RCommon.dimen.singleAvatarSize)
                 )
 
                 val avatarSpacing = it.getDimensionPixelSize(
-                    R.styleable.CallDetailsView_streamCallDetailsAvatarSpacing,
+                    R.styleable.CallDetailsView_streamVideoCallDetailsAvatarSpacing,
                     DEFAULT_AVATAR_SPACING
                 )
 
                 val participantsTextStyle = TextStyle.Builder(it)
                     .size(
-                        R.styleable.CallDetailsView_streamCallDetailsParticipantsInfoTextSize,
+                        R.styleable.CallDetailsView_streamVideoCallDetailsParticipantsInfoTextSize,
                         context.getDimension(GROUP_CALL_INFO_TEXT_SIZE)
                     )
                     .color(
-                        R.styleable.CallDetailsView_streamCallDetailsParticipantsInfoTextColor,
+                        R.styleable.CallDetailsView_streamVideoCallDetailsParticipantsInfoTextColor,
                         context.getColorCompat(DEFAULT_TEXT_COLOR)
                     )
                     .font(
-                        R.styleable.CallDetailsView_streamCallDetailsParticipantsInfoFontAsset,
-                        R.styleable.CallDetailsView_streamCallDetailsParticipantsInfoFont,
+                        R.styleable.CallDetailsView_streamVideoCallDetailsParticipantsInfoFontAsset,
+                        R.styleable.CallDetailsView_streamVideoCallDetailsParticipantsInfoFont,
                     )
                     .style(
-                        R.styleable.CallDetailsView_streamCallDetailsParticipantsInfoTextStyle,
+                        R.styleable.CallDetailsView_streamVideoCallDetailsParticipantsInfoTextStyle,
                         Typeface.NORMAL
                     )
                     .build()
 
                 val singleParticipantTextStyle = TextStyle.Builder(it)
                     .size(
-                        R.styleable.CallDetailsView_streamCallDetailsDirectCallParticipantInfoTextSize,
+                        R.styleable.CallDetailsView_streamVideoCallDetailsDirectCallParticipantInfoTextSize,
                         context.getDimension(DIRECT_CALL_INFO_TEXT_SIZE)
                     )
                     .color(
-                        R.styleable.CallDetailsView_streamCallDetailsParticipantsInfoTextColor,
+                        R.styleable.CallDetailsView_streamVideoCallDetailsParticipantsInfoTextColor,
                         context.getColorCompat(DEFAULT_TEXT_COLOR)
                     )
                     .font(
-                        R.styleable.CallDetailsView_streamCallDetailsParticipantsInfoFontAsset,
-                        R.styleable.CallDetailsView_streamCallDetailsParticipantsInfoFont,
+                        R.styleable.CallDetailsView_streamVideoCallDetailsParticipantsInfoFontAsset,
+                        R.styleable.CallDetailsView_streamVideoCallDetailsParticipantsInfoFont,
                     )
                     .style(
-                        R.styleable.CallDetailsView_streamCallDetailsParticipantsInfoTextStyle,
+                        R.styleable.CallDetailsView_streamVideoCallDetailsParticipantsInfoTextStyle,
                         Typeface.NORMAL
                     )
                     .build()
 
                 val callStateTextStyle = TextStyle.Builder(it)
                     .size(
-                        R.styleable.CallDetailsView_streamCallDetailsCallStateTextSize,
+                        R.styleable.CallDetailsView_streamVideoCallDetailsCallStateTextSize,
                         context.getDimension(GROUP_CALL_INFO_TEXT_SIZE)
                     )
                     .color(
-                        R.styleable.CallDetailsView_streamCallDetailsCallStateTextColor,
+                        R.styleable.CallDetailsView_streamVideoCallDetailsCallStateTextColor,
                         context.getColorCompat(DEFAULT_TEXT_COLOR)
                     )
                     .font(
-                        R.styleable.CallDetailsView_streamCallDetailsCallStateFontAsset,
-                        R.styleable.CallDetailsView_streamCallDetailsCallStateFont,
+                        R.styleable.CallDetailsView_streamVideoCallDetailsCallStateFontAsset,
+                        R.styleable.CallDetailsView_streamVideoCallDetailsCallStateFont,
                     )
                     .style(
-                        R.styleable.CallDetailsView_streamCallDetailsCallStateTextStyle,
+                        R.styleable.CallDetailsView_streamVideoCallDetailsCallStateTextStyle,
                         Typeface.BOLD
                     )
                     .build()
 
                 val callStateTextAlpha = it.getFloat(
-                    R.styleable.CallDetailsView_streamCallDetailsStateTextAlpha,
+                    R.styleable.CallDetailsView_streamVideoCallDetailsStateTextAlpha,
                     context.getFloatResource(io.getstream.video.android.ui.common.R.dimen.onCallStatusTextAlpha)
                 )
 

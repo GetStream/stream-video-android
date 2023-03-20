@@ -50,31 +50,31 @@ public data class CallControlsStyle(
             context.obtainStyledAttributes(
                 attrs,
                 R.styleable.CallControlsView,
-                R.attr.streamCallControlsViewStyle,
+                R.attr.streamVideoCallControlsViewStyle,
                 R.style.Stream_CallControls
             ).use {
 
                 val callControlButtonSize = it.getDimensionPixelSize(
-                    R.styleable.CallControlsView_streamCallControlsButtonSize,
+                    R.styleable.CallControlsView_streamVideoCallControlsButtonSize,
                     context.getDimension(RCommon.dimen.callControlButtonSize)
                 )
 
                 val callControlButtonSizeLandscape = it.getDimensionPixelSize(
-                    R.styleable.CallControlsView_streamCallControlsButtonSizeLandscape,
+                    R.styleable.CallControlsView_streamVideoCallControlsButtonSizeLandscape,
                     context.getDimension(RCommon.dimen.landscapeCallControlButtonSize)
                 )
 
                 val callControlsBackground = it.getDrawable(
-                    R.styleable.CallControlsView_streamCallControlsBackground
-                ) ?: context.getDrawableCompat(R.drawable.rect_controls)!!
+                    R.styleable.CallControlsView_streamVideoCallControlsBackground
+                ) ?: context.getDrawableCompat(R.drawable.stream_video_rect_controls)!!
 
                 val callControlsBackgroundLandscape = it.getDrawable(
-                    R.styleable.CallControlsView_streamCallControlsBackgroundLandscape
-                ) ?: context.getDrawableCompat(R.drawable.rect_controls_landscape)!!
+                    R.styleable.CallControlsView_streamVideoCallControlsBackgroundLandscape
+                ) ?: context.getDrawableCompat(R.drawable.stream_video_rect_controls_landscape)!!
 
                 val callControlsBackgroundColor = it.getColor(
-                    R.styleable.CallControlsView_streamCallControlsBackgroundColor,
-                    context.getColorCompat(R.color.stream_white)
+                    R.styleable.CallControlsView_streamVideoCallControlsBackgroundColor,
+                    context.getColorCompat(R.color.stream_video_white)
                 )
 
                 return CallControlsStyle(
