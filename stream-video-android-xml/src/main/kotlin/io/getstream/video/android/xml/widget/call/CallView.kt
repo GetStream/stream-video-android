@@ -34,6 +34,7 @@ import io.getstream.video.android.xml.R
 import io.getstream.video.android.xml.font.setTextStyle
 import io.getstream.video.android.xml.utils.extensions.clearConstraints
 import io.getstream.video.android.xml.utils.extensions.constrainViewBottomToTopOfView
+import io.getstream.video.android.xml.utils.extensions.constrainViewEndToStartOfView
 import io.getstream.video.android.xml.utils.extensions.constrainViewToParent
 import io.getstream.video.android.xml.utils.extensions.constrainViewToParentBySide
 import io.getstream.video.android.xml.utils.extensions.constrainViewTopToBottomOfView
@@ -222,11 +223,43 @@ public class CallView : CallConstraintLayout {
         }
         CallParticipantsGridView(context).apply {
             id = ViewGroup.generateViewId()
+            isLandscapeListLayout = style.shouldShowGridUsersAsListLandscape
             buildParticipantView = { this@CallView.buildParticipantView(false) }
-            getBottomLabelOffset = { this@CallView.getCallControlsSize() }
             this@CallView.addView(this)
-            layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
             onViewInitialized(this)
+        }
+        updateRegularContentConstraints()
+    }
+
+    private fun updateRegularContentConstraints() {
+        val participantsView = getFirstViewInstance<CallParticipantsGridView>() ?: return
+        val callControlsView = getFirstViewInstance<CallControlsView>() ?: return
+
+        val participantsWidth: Int
+        val participantsHeight: Int
+
+        if (isLandscape) {
+            updateConstraints {
+                clearConstraints(participantsView)
+                constrainViewToParentBySide(participantsView, ConstraintSet.START)
+                constrainViewEndToStartOfView(participantsView, callControlsView)
+            }
+
+            participantsWidth = LayoutParams.MATCH_CONSTRAINT
+            participantsHeight = LayoutParams.MATCH_PARENT
+        } else {
+            updateConstraints {
+                clearConstraints(participantsView)
+                constrainViewToParentBySide(participantsView, ConstraintSet.TOP)
+                constrainViewBottomToTopOfView(participantsView, callControlsView)
+            }
+            participantsWidth = LayoutParams.MATCH_PARENT
+            participantsHeight = LayoutParams.MATCH_CONSTRAINT
+        }
+
+        participantsView.updateLayoutParams {
+            width = participantsWidth
+            height = participantsHeight
         }
     }
 
@@ -310,7 +343,11 @@ public class CallView : CallConstraintLayout {
      * @return The max X offset that can be applied to the overlaid [FloatingParticipantView].
      */
     private fun calculateFloatingParticipantMaxXOffset(): Float {
-        return width - style.localParticipantWidth - style.localParticipantPadding
+        return if (isLandscape) {
+            width - style.localParticipantWidth - style.localParticipantPadding - getCallControlsSize()
+        } else {
+            width - style.localParticipantWidth - style.localParticipantPadding
+        }
     }
 
     /**
@@ -320,7 +357,11 @@ public class CallView : CallConstraintLayout {
      * @return The max Y offset that can be applied to the overlaid [FloatingParticipantView].
      */
     private fun calculateFloatingParticipantMaxYOffset(): Float {
-        return height - style.localParticipantHeight - style.localParticipantPadding - getCallControlsSize()
+        return if (isLandscape) {
+            height - style.localParticipantHeight - style.localParticipantPadding
+        } else {
+            height - style.localParticipantHeight - style.localParticipantPadding - getCallControlsSize()
+        }
     }
 
     /**
@@ -334,6 +375,7 @@ public class CallView : CallConstraintLayout {
 
     override fun onOrientationChanged(isLandscape: Boolean) {
         updateCallControlsConstraints()
+        updateRegularContentConstraints()
     }
 
     /**
@@ -346,9 +388,9 @@ public class CallView : CallConstraintLayout {
      */
     private fun buildParticipantView(isListView: Boolean): CallParticipantView {
         val defStyleAttr = if (isListView) {
-            R.attr.streamCallViewListParticipantStyle
+            R.attr.streamVideoCallViewListParticipantStyle
         } else {
-            R.attr.streamCallViewGridParticipantStyle
+            R.attr.streamVideoCallViewGridParticipantStyle
         }
 
         val defStyleRes = if (isListView) style.listCallParticipantStyle else style.gridCallParticipantStyle

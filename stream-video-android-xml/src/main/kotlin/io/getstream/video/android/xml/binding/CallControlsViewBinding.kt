@@ -72,8 +72,8 @@ internal fun defaultControlList(callMediaState: CallMediaState, isScreenSharingA
             } else {
                 RCommon.drawable.ic_speaker_off
             },
-            iconTint = R.color.stream_black,
-            backgroundTint = R.color.stream_white,
+            iconTint = R.color.stream_video_black,
+            backgroundTint = R.color.stream_video_white,
             action = ToggleSpeakerphone(!callMediaState.isSpeakerphoneEnabled)
         ),
         CallControlItem(
@@ -82,8 +82,8 @@ internal fun defaultControlList(callMediaState: CallMediaState, isScreenSharingA
             } else {
                 RCommon.drawable.ic_videocam_off
             },
-            iconTint = R.color.stream_black,
-            backgroundTint = R.color.stream_white,
+            iconTint = R.color.stream_video_black,
+            backgroundTint = R.color.stream_video_white,
             action = ToggleCamera(!callMediaState.isCameraEnabled)
         ),
         CallControlItem(
@@ -92,20 +92,20 @@ internal fun defaultControlList(callMediaState: CallMediaState, isScreenSharingA
             } else {
                 RCommon.drawable.ic_mic_off
             },
-            iconTint = R.color.stream_black,
-            backgroundTint = R.color.stream_white,
+            iconTint = R.color.stream_video_black,
+            backgroundTint = R.color.stream_video_white,
             action = ToggleMicrophone(!callMediaState.isMicrophoneEnabled)
         ),
         CallControlItem(
             icon = RCommon.drawable.ic_camera_flip,
-            iconTint = R.color.stream_black,
-            backgroundTint = if (!isScreenSharingActive) R.color.stream_white else RCommon.color.stream_disabled,
+            iconTint = R.color.stream_video_black,
+            backgroundTint = if (!isScreenSharingActive) R.color.stream_video_white else RCommon.color.stream_disabled,
             action = FlipCamera,
             enabled = !isScreenSharingActive
         ),
         CallControlItem(
             icon = RCommon.drawable.ic_call_end,
-            iconTint = R.color.stream_white,
+            iconTint = R.color.stream_video_white,
             backgroundTint = RCommon.color.stream_error_accent,
             action = LeaveCall
         ),

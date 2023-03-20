@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CallAppBar">
+        <attr name="streamVideoCallAppBarBackgroundColour" format="color|reference" />
+        <attr name="streamVideoCallAppBarBackgroundColourLandscape" format="color|reference" />
+        <attr name="streamVideoCallAppBarPadding" format="dimension|reference" />
+
+        <attr name="streamVideoCallAppBarLeadingContentIcon" format="reference" />
+        <attr name="streamVideoCallAppBarLeadingContentIconTint" format="color|reference" />
+        <attr name="streamVideoCallAppBarLeadingContentIconTintLandscape" format="color|reference" />
+        <attr name="streamVideoCallAppBarLeadingContentMarginStart" format="dimension|reference" />
+        <attr name="streamVideoCallAppBarLeadingContentMarginEnd" format="dimension|reference" />
+
+        <attr name="streamVideoCallAppBarCenterContentTextSize" format="dimension|reference" />
+        <attr name="streamVideoCallAppBarCenterContentTextColor" format="color|reference" />
+        <attr name="streamVideoCallAppBarCenterContentFontAsset" format="reference" />
+        <attr name="streamVideoCallAppBarCenterContentFont" format="reference" />
+        <attr name="streamVideoCallAppBarCenterContentTextStyle">
+            <flag name="normal" value="0" />
+            <flag name="bold" value="1" />
+            <flag name="italic" value="2" />
+        </attr>
+        <attr name="streamVideoCallAppBarCenterContentTextSizeLandscape" format="dimension|reference" />
+        <attr name="streamVideoCallAppBarCenterContentTextColorLandscape" format="color|reference" />
+        <attr name="streamVideoCallAppBarCenterContentFontAssetLandscape" format="reference" />
+        <attr name="streamVideoCallAppBarCenterContentFontLandscape" format="reference" />
+        <attr name="streamVideoCallAppBarCenterContentTextStyleLandscape">
+            <flag name="normal" value="0" />
+            <flag name="bold" value="1" />
+            <flag name="italic" value="2" />
+        </attr>
+        <attr name="streamVideoCallAppBarCenterContentMarginStart" format="dimension|reference" />
+        <attr name="streamVideoCallAppBarCenterContentMarginEnd" format="dimension|reference" />
+
+        <attr name="streamVideoCallAppBarTrailingContentIcon" format="reference" />
+        <attr name="streamVideoCallAppBarTrailingContentIconTint" format="color|reference" />
+        <attr name="streamVideoCallAppBarTrailingContentIconTintLandscape" format="color|reference" />
+        <attr name="streamVideoCallAppBarTrailingContentMarginStart" format="dimension|reference" />
+        <attr name="streamVideoCallAppBarTrailingContentMarginEnd" format="dimension|reference" />
+    </declare-styleable>
+</resources>

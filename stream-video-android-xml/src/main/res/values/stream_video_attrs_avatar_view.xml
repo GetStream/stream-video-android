@@ -17,53 +17,53 @@
 <resources>
     <declare-styleable name="AvatarView">
         <!-- AvatarView border color -->
-        <attr name="streamAvatarBorderColor" format="color|reference" />
+        <attr name="streamVideoAvatarBorderColor" format="color|reference" />
         <!-- Border width of AvatarView -->
-        <attr name="streamAvatarBorderWidth" format="dimension|reference" />
+        <attr name="streamVideoAvatarBorderWidth" format="dimension|reference" />
         <!-- Text size of the AvatarView's initials letters -->
-        <attr name="streamAvatarTextSize" format="dimension|reference" />
+        <attr name="streamVideoAvatarTextSize" format="dimension|reference" />
         <!-- A color of the AvatarView's initials letters -->
-        <attr name="streamAvatarTextColor" format="color|reference" />
+        <attr name="streamVideoAvatarTextColor" format="color|reference" />
         <!-- Font name of the AvatarView's initials letters -->
-        <attr name="streamAvatarTextFont" format="reference" />
+        <attr name="streamVideoAvatarTextFont" format="reference" />
         <!-- Font assets reference for the AvatarView's initials letters -->
-        <attr name="streamAvatarTextFontAssets" format="string" />
+        <attr name="streamVideoAvatarTextFontAssets" format="string" />
         <!-- Text style of the AvatarView's initials letters -->
-        <attr name="streamAvatarTextStyle">
+        <attr name="streamVideoAvatarTextStyle">
             <flag name="normal" value="0" />
             <flag name="bold" value="1" />
             <flag name="italic" value="2" />
         </attr>
         <!-- A color of the AvatarView's initials letters in group avatar -->
-        <attr name="streamGroupAvatarTextColor" format="color|reference" />
+        <attr name="streamVideoGroupAvatarTextColor" format="color|reference" />
         <!-- Font name of the AvatarView's initials letters in group avatar -->
-        <attr name="streamGroupAvatarTextFont" format="reference" />
+        <attr name="streamVideoGroupAvatarTextFont" format="reference" />
         <!-- Font assets reference for the AvatarView's initials letters in group avatar -->
-        <attr name="streamGroupAvatarTextFontAssets" format="string" />
+        <attr name="streamVideoGroupAvatarTextFontAssets" format="string" />
         <!-- Text style of the AvatarView's initials letters in group avatar -->
-        <attr name="streamGroupAvatarTextStyle">
+        <attr name="streamVideoGroupAvatarTextStyle">
             <flag name="normal" value="0" />
             <flag name="bold" value="1" />
             <flag name="italic" value="2" />
         </attr>
         <!-- Sets the visibility of the online indicator -->
-        <attr name="streamAvatarOnlineIndicatorEnabled" format="boolean" />
+        <attr name="streamVideoAvatarOnlineIndicatorEnabled" format="boolean" />
         <!-- Sets the position of the online indicator -->
-        <attr name="streamAvatarOnlineIndicatorPosition" format="enum">
+        <attr name="streamVideoAvatarOnlineIndicatorPosition" format="enum">
             <enum name="topLeft" value="0" />
             <enum name="topRight" value="1" />
             <enum name="bottomLeft" value="2" />
             <enum name="bottomRight" value="3" />
         </attr>
         <!-- Color of the online indicator -->
-        <attr name="streamAvatarOnlineIndicatorColor" format="color|reference" />
+        <attr name="streamVideoAvatarOnlineIndicatorColor" format="color|reference" />
         <!-- Border color of the online indicator -->
-        <attr name="streamAvatarOnlineIndicatorBorderColor" format="color|reference" />
+        <attr name="streamVideoAvatarOnlineIndicatorBorderColor" format="color|reference" />
         <!-- Avatar shapes -->
-        <attr name="streamAvatarShape" format="enum">
+        <attr name="streamVideoAvatarShape" format="enum">
             <enum name="circle" value="0"/>
             <enum name="round_rect" value="1"/>
         </attr>
-        <attr name="streamAvatarBorderRadius" format="dimension|reference"/>
+        <attr name="streamVideoAvatarBorderRadius" format="dimension|reference"/>
     </declare-styleable>
 </resources>
