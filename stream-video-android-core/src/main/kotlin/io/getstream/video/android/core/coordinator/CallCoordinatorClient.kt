@@ -17,8 +17,11 @@
 package io.getstream.video.android.core.coordinator
 
 import io.getstream.video.android.core.model.CallInfo
+import io.getstream.video.android.core.model.CallRecordingData
 import io.getstream.video.android.core.model.CallUser
+import io.getstream.video.android.core.model.EdgeData
 import io.getstream.video.android.core.model.QueriedCalls
+import io.getstream.video.android.core.model.ReactionData
 import io.getstream.video.android.core.model.StreamCallCid
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.utils.Result
@@ -33,6 +36,7 @@ import org.openapitools.client.models.QueryCallsRequest
 import org.openapitools.client.models.QueryMembersRequest
 import org.openapitools.client.models.RequestPermissionRequest
 import org.openapitools.client.models.SendEventRequest
+import org.openapitools.client.models.SendReactionRequest
 import org.openapitools.client.models.UnblockUserRequest
 import org.openapitools.client.models.UpdateCallRequest
 import org.openapitools.client.models.UpdateUserPermissionsRequest
@@ -316,4 +320,37 @@ internal interface CallCoordinatorClient {
         type: String,
         updateUserPermissionsRequest: UpdateUserPermissionsRequest
     ): Result<Unit>
+
+    /**
+     * Loads all recordings of a call for a given session.
+     *
+     * @param id Call ID.
+     * @param type Call Type.
+     * @param sessionId The ID of the session.
+     */
+    suspend fun listRecordings(
+        id: String,
+        type: String,
+        sessionId: String
+    ): Result<List<CallRecordingData>>
+
+    /**
+     * Attempts to send a reaction to a video call.
+     *
+     * @param id Call ID.
+     * @param type Call Type.
+     * @param request The reaction to be sent.
+     *
+     * @return [Result] containing info about the successfully sent [ReactionData].
+     */
+    suspend fun sendVideoReaction(
+        id: String,
+        type: String,
+        request: SendReactionRequest
+    ): Result<ReactionData>
+
+    /**
+     * Returns a list of all the edges available on the network.
+     */
+    suspend fun getEdges(): Result<List<EdgeData>>
 }

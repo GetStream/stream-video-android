@@ -241,7 +241,7 @@ internal interface VideoCallsApi {
      * @param unblockUserRequest
      * @return [UnblockUserResponse]
      */
-    @POST("call/{type}/{id}/unblock")
+    @POST("/video/call/{type}/{id}/unblock")
     suspend fun unblockUser(
         @Path("type") type: String,
         @Path("id") id: String,
