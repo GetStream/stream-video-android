@@ -1,6 +1,6 @@
 # VideoRenderer
 
-One of the main utility components we provide is the `VideoRenderer`. It's a simple component built in JetpackCompose, which utilizes `TextureViewRenderer` under the hood. It supports rendering of both a user camera track and screen sharing track.
+One of the main utility components we provide is the `VideoRenderer`. It's a simple component built in Jetpack Compose, which utilizes [VideoTextureViewRenderer](https://getstream.github.io/webrtc-android/stream-webrtc-android-ui/io.getstream.webrtc.android.ui/-video-texture-view-renderer/index.html) under the hood. It supports rendering of both a user camera track and screen sharing track.
 
 Let's see how to use the component in your UI.
 
@@ -36,7 +36,7 @@ There are a few steps going on here:
 
 1. Using the `participant`, you can get that participant's `videoTrack`. It also contains the `sessionId` of that participant, which is used to connect the tracks and rendering.
 2. When you have the track, it's not `null`, you're ready to show the UI using `VideoRenderer` and its parameters.
-3. Using the `modifier`, you can customize the size, shape, eleveation and similar properties of the component UI.
+3. Using the `modifier`, you can customize the size, shape, elevation and similar properties of the component UI.
 
 This snippet of code will generate a single video track based on what the user is currently using - a front, back or external camera.
 
@@ -55,4 +55,4 @@ To ensure that the `VideoRenderer` component works correctly, you need to handle
 
 Fortunately enough, we provide this for you, out of the box. While tracks are persisted within the `CallParticipantState`, the WebRTC subscription is managed under the hood.
 
-When the composable function is called within the UI, it's rendered and connected to the `TextureViewRenderer` under the hood. When the state changes and it's removed from the UI, the renderer is disposed of and the state is cleaned up.
+When the composable function is called within the UI, it's rendered and connected to the [VideoTextureViewRenderer](https://getstream.github.io/webrtc-android/stream-webrtc-android-ui/io.getstream.webrtc.android.ui/-video-texture-view-renderer/index.html) under the hood. When the state changes and it's removed from the UI, the renderer is disposed of and the state is cleaned up.

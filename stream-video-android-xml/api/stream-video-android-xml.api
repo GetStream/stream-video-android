@@ -97,7 +97,7 @@ public final class io/getstream/video/android/xml/databinding/ViewCallParticipan
 	public final field labelHolder Landroidx/constraintlayout/widget/ConstraintLayout;
 	public final field participantAvatar Lio/getstream/video/android/xml/widget/avatar/AvatarView;
 	public final field participantLabel Landroid/widget/TextView;
-	public final field participantVideoRenderer Lio/getstream/video/android/core/ui/TextureViewRenderer;
+	public final field participantVideoRenderer Lio/getstream/webrtc/android/ui/VideoTextureViewRenderer;
 	public final field soundIndicator Landroid/widget/ImageView;
 	public static fun bind (Landroid/view/View;)Lio/getstream/video/android/xml/databinding/ViewCallParticipantBinding;
 	public fun getRoot ()Landroid/view/View;
@@ -144,7 +144,7 @@ public final class io/getstream/video/android/xml/databinding/ViewOutgoingCallBi
 public final class io/getstream/video/android/xml/databinding/ViewScreenShareBinding : androidx/viewbinding/ViewBinding {
 	public final field changeOrientationButton Lio/getstream/video/android/xml/widget/control/ControlButtonView;
 	public final field fullscreenButton Lio/getstream/video/android/xml/widget/control/ControlButtonView;
-	public final field screenShare Lio/getstream/video/android/core/ui/TextureViewRenderer;
+	public final field screenShare Lio/getstream/webrtc/android/ui/VideoTextureViewRenderer;
 	public static fun bind (Landroid/view/View;)Lio/getstream/video/android/xml/databinding/ViewScreenShareBinding;
 	public fun getRoot ()Landroid/view/View;
 	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;)Lio/getstream/video/android/xml/databinding/ViewScreenShareBinding;
@@ -691,7 +691,7 @@ public final class io/getstream/video/android/xml/widget/participant/PictureInPi
 }
 
 public abstract interface class io/getstream/video/android/xml/widget/participant/RendererInitializer {
-	public abstract fun initRenderer (Lio/getstream/video/android/core/ui/TextureViewRenderer;Ljava/lang/String;Lstream/video/sfu/models/TrackType;Lkotlin/jvm/functions/Function1;)V
+	public abstract fun initRenderer (Lio/getstream/webrtc/android/ui/VideoTextureViewRenderer;Ljava/lang/String;Lstream/video/sfu/models/TrackType;Lkotlin/jvm/functions/Function1;)V
 }
 
 public final class io/getstream/video/android/xml/widget/screenshare/ScreenShareStyle {

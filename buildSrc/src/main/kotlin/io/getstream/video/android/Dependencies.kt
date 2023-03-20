@@ -97,6 +97,7 @@ object Dependencies {
     const val moshiAdapters = "com.squareup.moshi:moshi-adapters:${Versions.MOSHI}"
 
     const val streamWebRTC = "io.getstream:stream-webrtc-android:${Versions.STREAM_WEBRTC}"
+    const val streamWebRTCUI = "io.getstream:stream-webrtc-android-ui:${Versions.STREAM_WEBRTC}"
     const val streamLog = "io.getstream:stream-log:${Versions.STREAM_LOG}"
     const val streamLogAndroid = "io.getstream:stream-log-android:${Versions.STREAM_LOG}"
     const val streamPush = "io.getstream:stream-android-push:${Versions.STREAM_PUSH}"
