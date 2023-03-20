@@ -68,68 +68,68 @@ public data class IncomingCallStyle(
             context.obtainStyledAttributes(
                 attrs,
                 R.styleable.IncomingCallView,
-                R.attr.streamIncomingViewStyle,
+                R.attr.streamVideoIncomingViewStyle,
                 R.style.Stream_IncomingCall
             ).use {
                 val callBackground = it.getDrawable(
-                    R.styleable.IncomingCallView_streamIncomingCallScreenBackground
+                    R.styleable.IncomingCallView_streamVideoIncomingCallScreenBackground
                 ) ?: context.getDrawableCompat(RCommon.drawable.bg_call)!!
 
                 val acceptCallIcon = it.getDrawable(
-                    R.styleable.IncomingCallView_streamIncomingCallAcceptCallIcon
+                    R.styleable.IncomingCallView_streamVideoIncomingCallAcceptCallIcon
                 ) ?: context.getDrawableCompat(RCommon.drawable.ic_call)!!
 
                 val acceptCallIconTint = it.getColor(
-                    R.styleable.IncomingCallView_streamIncomingCallAcceptCallIconTint,
-                    context.getColorCompat(R.color.stream_white)
+                    R.styleable.IncomingCallView_streamVideoIncomingCallAcceptCallIconTint,
+                    context.getColorCompat(R.color.stream_video_white)
                 )
 
                 val acceptCallBackground = it.getDrawable(
-                    R.styleable.IncomingCallView_streamIncomingCallAcceptCallBackground
-                ) ?: context.getDrawableCompat(R.drawable.bg_call_option)!!
+                    R.styleable.IncomingCallView_streamVideoIncomingCallAcceptCallBackground
+                ) ?: context.getDrawableCompat(R.drawable.stream_video_bg_call_option)!!
 
                 val acceptCallBackgroundTint = it.getColor(
-                    R.styleable.IncomingCallView_streamIncomingCallAcceptCallBackgroundTint,
+                    R.styleable.IncomingCallView_streamVideoIncomingCallAcceptCallBackgroundTint,
                     context.getColorCompat(RCommon.color.stream_info_accent)
                 )
 
                 val declineCallIcon = it.getDrawable(
-                    R.styleable.IncomingCallView_streamIncomingCallDeclineCallIcon
+                    R.styleable.IncomingCallView_streamVideoIncomingCallDeclineCallIcon
                 ) ?: context.getDrawableCompat(RCommon.drawable.ic_call_end)!!
 
                 val declineCallIconTint = it.getColor(
-                    R.styleable.IncomingCallView_streamIncomingCallDeclineCallIconTint,
-                    context.getColorCompat(R.color.stream_white)
+                    R.styleable.IncomingCallView_streamVideoIncomingCallDeclineCallIconTint,
+                    context.getColorCompat(R.color.stream_video_white)
                 )
 
                 val declineCallBackground = it.getDrawable(
-                    R.styleable.IncomingCallView_streamIncomingCallDeclineCallBackground
-                ) ?: context.getDrawableCompat(R.drawable.bg_call_option)!!
+                    R.styleable.IncomingCallView_streamVideoIncomingCallDeclineCallBackground
+                ) ?: context.getDrawableCompat(R.drawable.stream_video_bg_call_option)!!
 
                 val declineCallBackgroundTint = it.getColor(
-                    R.styleable.IncomingCallView_streamIncomingCallDeclineCallBackgroundTint,
+                    R.styleable.IncomingCallView_streamVideoIncomingCallDeclineCallBackgroundTint,
                     context.getColorCompat(RCommon.color.stream_error_accent)
                 )
 
                 val videoEnabledIcon = it.getDrawable(
-                    R.styleable.IncomingCallView_streamIncomingCallVideoEnabledIcon
+                    R.styleable.IncomingCallView_streamVideoIncomingCallVideoEnabledIcon
                 ) ?: context.getDrawableCompat(RCommon.drawable.ic_videocam_on)!!
 
                 val videoDisabledIcon = it.getDrawable(
-                    R.styleable.IncomingCallView_streamIncomingCallVideoDisabledIcon
+                    R.styleable.IncomingCallView_streamVideoIncomingCallVideoDisabledIcon
                 ) ?: context.getDrawableCompat(RCommon.drawable.ic_videocam_off)!!
 
                 val mediaControlIconTint = it.getColor(
-                    R.styleable.IncomingCallView_streamIncomingCallVideoIconTint,
+                    R.styleable.IncomingCallView_streamVideoIncomingCallVideoIconTint,
                     context.getColorCompat(RCommon.color.stream_text_high_emphasis)
                 )
 
                 val mediaControlBackground = it.getDrawable(
-                    R.styleable.IncomingCallView_streamIncomingCallVideoBackground
-                ) ?: context.getDrawableCompat(R.drawable.bg_call_control_option)!!
+                    R.styleable.IncomingCallView_streamVideoIncomingCallVideoBackground
+                ) ?: context.getDrawableCompat(R.drawable.stream_video_bg_call_control_option)!!
 
                 val mediaControlBackgroundTint = it.getColor(
-                    R.styleable.IncomingCallView_streamIncomingCallVideoBackgroundTint,
+                    R.styleable.IncomingCallView_streamVideoIncomingCallVideoBackgroundTint,
                     context.getColorCompat(RCommon.color.stream_app_background)
                 )
 

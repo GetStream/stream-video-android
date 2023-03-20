@@ -22,7 +22,7 @@
         android:layout_height="@dimen/screenShareButtonSize"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
-        android:background="@drawable/bg_call_option"
+        android:background="@drawable/stream_video_bg_call_option"
         android:padding="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/fullscreenButton"
@@ -34,7 +34,7 @@
         android:layout_height="@dimen/screenShareButtonSize"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
-        android:background="@drawable/bg_call_option"
+        android:background="@drawable/stream_video_bg_call_option"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         />

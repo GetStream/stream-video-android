@@ -25,18 +25,21 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.children
 import androidx.core.view.setPadding
+import androidx.core.view.updateLayoutParams
 import io.getstream.video.android.core.model.CallParticipantState
 import io.getstream.video.android.xml.R
 import io.getstream.video.android.xml.font.setTextStyle
+import io.getstream.video.android.xml.utils.extensions.clearConstraints
 import io.getstream.video.android.xml.utils.extensions.constrainViewBottomToTopOfView
+import io.getstream.video.android.xml.utils.extensions.constrainViewEndToStartOfView
 import io.getstream.video.android.xml.utils.extensions.constrainViewToParent
 import io.getstream.video.android.xml.utils.extensions.constrainViewToParentBySide
 import io.getstream.video.android.xml.utils.extensions.constrainViewTopToBottomOfView
 import io.getstream.video.android.xml.utils.extensions.getFirstViewInstance
+import io.getstream.video.android.xml.utils.extensions.isLandscape
 import io.getstream.video.android.xml.utils.extensions.setConstraints
 import io.getstream.video.android.xml.utils.extensions.updateConstraints
 import io.getstream.video.android.xml.widget.control.CallControlsView
@@ -45,18 +48,15 @@ import io.getstream.video.android.xml.widget.participant.FloatingParticipantView
 import io.getstream.video.android.xml.widget.participant.internal.CallParticipantsGridView
 import io.getstream.video.android.xml.widget.participant.internal.CallParticipantsListView
 import io.getstream.video.android.xml.widget.screenshare.ScreenShareView
-import io.getstream.video.android.xml.widget.view.JobHolder
-import kotlinx.coroutines.Job
+import io.getstream.video.android.xml.widget.view.CallConstraintLayout
 import java.util.UUID
 
 /**
  * Renders the call participants depending on the number of the participants and the call state.
  */
-public class CallView : ConstraintLayout, JobHolder {
+public class CallView : CallConstraintLayout {
 
     private lateinit var style: CallViewStyle
-
-    override val runningJobs: MutableList<Job> = mutableListOf()
 
     public constructor(context: Context) : this(context, null)
     public constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
@@ -105,14 +105,41 @@ public class CallView : ConstraintLayout, JobHolder {
     private fun addCallControlsView() {
         if (getFirstViewInstance<CallControlsView>() != null) return
 
-        val callControlsView = CallControlsView(context).apply {
+        CallControlsView(context).apply {
             id = ViewGroup.generateViewId()
             this@CallView.addView(this)
-            layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, style.callControlsHeight)
+        }
+
+        updateCallControlsConstraints()
+    }
+
+    /**
+     * Updates the constraints of the [CallControlsView].
+     */
+    private fun updateCallControlsConstraints() {
+        val callControlsView = getFirstViewInstance<CallControlsView>() ?: return
+
+        val appBarWidth: Int
+        val appBarHeight: Int
+        val constraintSide: Int
+
+        if (isLandscape) {
+            appBarWidth = style.callControlsWidthLandscape
+            appBarHeight = LayoutParams.MATCH_PARENT
+            constraintSide = ConstraintSet.END
+        } else {
+            appBarWidth = LayoutParams.MATCH_PARENT
+            appBarHeight = style.callControlsHeight
+            constraintSide = ConstraintSet.BOTTOM
         }
 
         updateConstraints {
-            constrainViewToParentBySide(callControlsView, ConstraintSet.BOTTOM)
+            clearConstraints(callControlsView)
+            constrainViewToParentBySide(callControlsView, constraintSide)
+        }
+        callControlsView.updateLayoutParams {
+            width = appBarWidth
+            height = appBarHeight
         }
     }
 
@@ -127,9 +154,7 @@ public class CallView : ConstraintLayout, JobHolder {
         if (getFirstViewInstance<ScreenShareView>() != null) return
 
         children.forEach {
-            if (it !is CallControlsView) {
-                removeView(it)
-            }
+            if (it !is CallControlsView) removeView(it)
         }
 
         val presenterText = TextView(context).apply {
@@ -161,6 +186,8 @@ public class CallView : ConstraintLayout, JobHolder {
             onViewInitialized(this)
         }
 
+        val callControlsView = getFirstViewInstance<CallControlsView>() ?: return
+
         updateConstraints {
             constrainViewToParentBySide(presenterText, ConstraintSet.START)
             constrainViewToParentBySide(presenterText, ConstraintSet.END)
@@ -171,7 +198,7 @@ public class CallView : ConstraintLayout, JobHolder {
             constrainViewToParentBySide(screenShareView, ConstraintSet.END)
             constrainViewBottomToTopOfView(screenShareView, listView, style.screenShareMargin)
 
-            constrainViewToParentBySide(listView, ConstraintSet.BOTTOM, getCallControlsHeight())
+            constrainViewBottomToTopOfView(listView, callControlsView)
             constrainViewToParentBySide(listView, ConstraintSet.START)
             constrainViewToParentBySide(listView, ConstraintSet.END)
         }
@@ -192,18 +219,47 @@ public class CallView : ConstraintLayout, JobHolder {
         if (getFirstViewInstance<CallParticipantsGridView>() != null) return
 
         children.forEach {
-            if (it !is CallControlsView) {
-                removeView(it)
-            }
+            if (it !is CallControlsView) removeView(it)
         }
-
         CallParticipantsGridView(context).apply {
             id = ViewGroup.generateViewId()
+            isLandscapeListLayout = style.shouldShowGridUsersAsListLandscape
             buildParticipantView = { this@CallView.buildParticipantView(false) }
-            getBottomLabelOffset = { this@CallView.getCallControlsHeight() }
             this@CallView.addView(this)
-            layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
             onViewInitialized(this)
+        }
+        updateRegularContentConstraints()
+    }
+
+    private fun updateRegularContentConstraints() {
+        val participantsView = getFirstViewInstance<CallParticipantsGridView>() ?: return
+        val callControlsView = getFirstViewInstance<CallControlsView>() ?: return
+
+        val participantsWidth: Int
+        val participantsHeight: Int
+
+        if (isLandscape) {
+            updateConstraints {
+                clearConstraints(participantsView)
+                constrainViewToParentBySide(participantsView, ConstraintSet.START)
+                constrainViewEndToStartOfView(participantsView, callControlsView)
+            }
+
+            participantsWidth = LayoutParams.MATCH_CONSTRAINT
+            participantsHeight = LayoutParams.MATCH_PARENT
+        } else {
+            updateConstraints {
+                clearConstraints(participantsView)
+                constrainViewToParentBySide(participantsView, ConstraintSet.TOP)
+                constrainViewBottomToTopOfView(participantsView, callControlsView)
+            }
+            participantsWidth = LayoutParams.MATCH_PARENT
+            participantsHeight = LayoutParams.MATCH_CONSTRAINT
+        }
+
+        participantsView.updateLayoutParams {
+            width = participantsWidth
+            height = participantsHeight
         }
     }
 
@@ -287,7 +343,11 @@ public class CallView : ConstraintLayout, JobHolder {
      * @return The max X offset that can be applied to the overlaid [FloatingParticipantView].
      */
     private fun calculateFloatingParticipantMaxXOffset(): Float {
-        return width - style.localParticipantWidth - style.localParticipantPadding
+        return if (isLandscape) {
+            width - style.localParticipantWidth - style.localParticipantPadding - getCallControlsSize()
+        } else {
+            width - style.localParticipantWidth - style.localParticipantPadding
+        }
     }
 
     /**
@@ -297,11 +357,25 @@ public class CallView : ConstraintLayout, JobHolder {
      * @return The max Y offset that can be applied to the overlaid [FloatingParticipantView].
      */
     private fun calculateFloatingParticipantMaxYOffset(): Float {
-        return height - style.localParticipantHeight - style.localParticipantPadding - getCallControlsHeight()
+        return if (isLandscape) {
+            height - style.localParticipantHeight - style.localParticipantPadding
+        } else {
+            height - style.localParticipantHeight - style.localParticipantPadding - getCallControlsSize()
+        }
     }
 
-    private fun getCallControlsHeight(): Int {
-        return style.callControlsHeight
+    /**
+     * Returns the [CallControlsView] width if landscape and height if in portrait mode.
+     *
+     * @return The size of the [CallControlsView] depending on orientation.
+     */
+    public fun getCallControlsSize(): Int {
+        return if (isLandscape) style.callControlsWidthLandscape else style.callControlsHeight
+    }
+
+    override fun onOrientationChanged(isLandscape: Boolean) {
+        updateCallControlsConstraints()
+        updateRegularContentConstraints()
     }
 
     /**
@@ -314,9 +388,9 @@ public class CallView : ConstraintLayout, JobHolder {
      */
     private fun buildParticipantView(isListView: Boolean): CallParticipantView {
         val defStyleAttr = if (isListView) {
-            R.attr.streamCallContentListParticipantStyle
+            R.attr.streamVideoCallViewListParticipantStyle
         } else {
-            R.attr.streamCallContentGridParticipantStyle
+            R.attr.streamVideoCallViewGridParticipantStyle
         }
 
         val defStyleRes = if (isListView) style.listCallParticipantStyle else style.gridCallParticipantStyle
@@ -345,10 +419,5 @@ public class CallView : ConstraintLayout, JobHolder {
         super.onViewAdded(view)
         getFirstViewInstance<FloatingParticipantView>()?.bringToFront()
         getFirstViewInstance<CallControlsView>()?.bringToFront()
-    }
-
-    override fun onDetachedFromWindow() {
-        super.onDetachedFromWindow()
-        stopAllJobs()
     }
 }

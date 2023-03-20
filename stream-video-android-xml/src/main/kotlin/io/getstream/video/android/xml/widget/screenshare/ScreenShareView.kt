@@ -22,7 +22,7 @@ import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.core.model.VideoTrack
-import io.getstream.video.android.xml.databinding.ViewScreenShareBinding
+import io.getstream.video.android.xml.databinding.StreamVideoViewScreenShareBinding
 import io.getstream.video.android.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.xml.utils.extensions.streamThemeInflater
 import io.getstream.video.android.xml.widget.participant.RendererInitializer
@@ -37,7 +37,7 @@ public class ScreenShareView : ConstraintLayout, VideoRenderer, JobHolder {
 
     private lateinit var style: ScreenShareStyle
 
-    private val binding = ViewScreenShareBinding.inflate(streamThemeInflater, this)
+    private val binding = StreamVideoViewScreenShareBinding.inflate(streamThemeInflater, this)
 
     /**
      * Flag that notifies if we initialised the renderer for this view or not.

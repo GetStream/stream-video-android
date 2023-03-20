@@ -22,25 +22,28 @@ import android.util.AttributeSet
 import android.view.Gravity
 import android.view.View
 import android.widget.FrameLayout
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.children
 import androidx.core.view.setPadding
 import io.getstream.video.android.core.model.state.StreamCallState
-import io.getstream.video.android.xml.databinding.ViewCallAppBarBinding
+import io.getstream.video.android.xml.databinding.StreamVideoViewCallAppBarBinding
+import io.getstream.video.android.xml.font.TextStyle
 import io.getstream.video.android.xml.font.setTextStyle
 import io.getstream.video.android.xml.utils.extensions.createStreamThemeWrapper
+import io.getstream.video.android.xml.utils.extensions.getFirstViewInstance
+import io.getstream.video.android.xml.utils.extensions.isLandscape
 import io.getstream.video.android.xml.utils.extensions.streamThemeInflater
 import io.getstream.video.android.xml.widget.appbar.internal.DefaultCallAppBarCenterContent
 import io.getstream.video.android.xml.widget.appbar.internal.DefaultCallAppBarLeadingContent
 import io.getstream.video.android.xml.widget.appbar.internal.DefaultCallAppBarTrailingContent
+import io.getstream.video.android.xml.widget.view.CallConstraintLayout
 
 /**
  * UI component designed to show a app bar. By default will contain a back button, title and a participants button
  * to view all participants and invite new ones.
  */
-public class CallAppBarView : ConstraintLayout {
+public class CallAppBarView : CallConstraintLayout {
 
-    private val binding: ViewCallAppBarBinding = ViewCallAppBarBinding.inflate(streamThemeInflater, this)
+    private val binding = StreamVideoViewCallAppBarBinding.inflate(streamThemeInflater, this)
 
     private lateinit var style: CallAppBarStyle
 
@@ -211,8 +214,52 @@ public class CallAppBarView : ConstraintLayout {
      * @param callState The state that will be used to render the updated UI.
      */
     public fun renderState(callState: StreamCallState) {
-        (binding.callAppBarLeadingContent.children.firstOrNull() as? CallAppBarContent)?.renderState(callState)
-        (binding.callAppBarCenterContent.children.firstOrNull() as? CallAppBarContent)?.renderState(callState)
-        (binding.callAppBarTrailingContent.children.firstOrNull() as? CallAppBarContent)?.renderState(callState)
+        (binding.callAppBarLeadingContent.children.firstOrNull() as? CallAppBarContent)?.renderState(
+            callState
+        )
+        (binding.callAppBarCenterContent.children.firstOrNull() as? CallAppBarContent)?.renderState(
+            callState
+        )
+        (binding.callAppBarTrailingContent.children.firstOrNull() as? CallAppBarContent)?.renderState(
+            callState
+        )
+    }
+
+    override fun onOrientationChanged(isLandscape: Boolean) {
+        updateContentStyles()
+    }
+
+    /**
+     * Updates the colour and styles of the toolbar content on orientation change.
+     */
+    private fun updateContentStyles() {
+        val leadingIconTint: Int
+        val centerContentTextStyle: TextStyle
+        val trailingContentIconTint: Int
+        val backgroundColor: Int
+
+        if (isLandscape) {
+            leadingIconTint = style.leadingContentIconTintLandscape
+            centerContentTextStyle = style.centerContentTextStyleLandscape
+            trailingContentIconTint = style.trailingContentIconTintLandscape
+            backgroundColor = style.backgroundColourLandscape
+        } else {
+            leadingIconTint = style.leadingContentIconTint
+            centerContentTextStyle = style.centerContentTextStyle
+            trailingContentIconTint = style.trailingContentIconTint
+            backgroundColor = style.backgroundColour
+        }
+
+        binding.callAppBarLeadingContent
+            .getFirstViewInstance<DefaultCallAppBarLeadingContent>()
+            ?.setColorFilter(leadingIconTint)
+        binding.callAppBarCenterContent
+            .getFirstViewInstance<DefaultCallAppBarCenterContent>()
+            ?.setTextStyle(centerContentTextStyle)
+        binding.callAppBarTrailingContent
+            .getFirstViewInstance<DefaultCallAppBarTrailingContent>()
+            ?.setColorFilter(trailingContentIconTint)
+
+        setBackgroundColor(backgroundColor)
     }
 }

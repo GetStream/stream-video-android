@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="IncomingCallView">
+        <!-- Background to be applied to the incoming call screen. -->
+        <attr name="streamVideoIncomingCallScreenBackground" format="reference" />
+        <!-- Accept call icon, tint and background styling. -->
+        <attr name="streamVideoIncomingCallAcceptCallIcon" format="reference" />
+        <attr name="streamVideoIncomingCallAcceptCallIconTint" format="color|reference" />
+        <attr name="streamVideoIncomingCallAcceptCallBackground" format="reference" />
+        <attr name="streamVideoIncomingCallAcceptCallBackgroundTint" format="color|reference" />
+        <!-- Decline call icon, tint and background styling. -->
+        <attr name="streamVideoIncomingCallDeclineCallIcon" format="reference" />
+        <attr name="streamVideoIncomingCallDeclineCallIconTint" format="color|reference" />
+        <attr name="streamVideoIncomingCallDeclineCallBackground" format="reference" />
+        <attr name="streamVideoIncomingCallDeclineCallBackgroundTint" format="color|reference" />
+
+        <!-- Video control button icon, tint and background styling. -->
+        <attr name="streamVideoIncomingCallVideoEnabledIcon" format="reference" />
+        <attr name="streamVideoIncomingCallVideoDisabledIcon" format="reference" />
+        <attr name="streamVideoIncomingCallVideoIconTint" format="color|reference" />
+        <attr name="streamVideoIncomingCallVideoBackground" format="reference" />
+        <attr name="streamVideoIncomingCallVideoBackgroundTint" format="color|reference" />
+        <attr name="streamVideoIncomingCallVideoBackgroundAlphaEnabled" format="float|reference" />
+        <attr name="streamVideoIncomingCallVideoBackgroundAlphaDisabled" format="float|reference" />
+
+    </declare-styleable>
+</resources>

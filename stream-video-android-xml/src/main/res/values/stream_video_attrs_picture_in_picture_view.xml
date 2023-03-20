@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="PictureInPictureView">
-        <attr name="streamPictureInPictureCallParticipantViewStyle" format="reference" />
+        <attr name="streamVideoPictureInPictureCallParticipantViewStyle" format="reference" />
     </declare-styleable>
 </resources>

@@ -53,30 +53,34 @@ public data class ScreenShareStyle(
             context.obtainStyledAttributes(
                 attrs,
                 R.styleable.ScreenShareView,
-                R.attr.streamScreenShareStyle,
+                R.attr.streamVideoScreenShareStyle,
                 R.style.Stream_ScreenShare
             ).use {
 
-                val fullscreenIcon = it.getDrawable(R.styleable.ScreenShareView_streamScreenShareFullscreenIcon)
-                    ?: context.getDrawableCompat(RCommon.drawable.ic_fullscreen)!!
+                val fullscreenIcon =
+                    it.getDrawable(R.styleable.ScreenShareView_streamVideoScreenShareFullscreenIcon)
+                        ?: context.getDrawableCompat(RCommon.drawable.ic_fullscreen)!!
 
-                val fullscreenExitIcon = it.getDrawable(R.styleable.ScreenShareView_streamScreenShareFullscreenExitIcon)
-                    ?: context.getDrawableCompat(RCommon.drawable.ic_fullscreen_exit)!!
+                val fullscreenExitIcon =
+                    it.getDrawable(R.styleable.ScreenShareView_streamVideoScreenShareFullscreenExitIcon)
+                        ?: context.getDrawableCompat(RCommon.drawable.ic_fullscreen_exit)!!
 
-                val portraitIcon = it.getDrawable(R.styleable.ScreenShareView_streamScreenSharePortraitIcon)
-                    ?: context.getDrawableCompat(RCommon.drawable.ic_portrait_mode)!!
+                val portraitIcon =
+                    it.getDrawable(R.styleable.ScreenShareView_streamVideoScreenSharePortraitIcon)
+                        ?: context.getDrawableCompat(RCommon.drawable.ic_portrait_mode)!!
 
-                val landscapeIcon = it.getDrawable(R.styleable.ScreenShareView_streamScreenShareLandscapeIcon)
-                    ?: context.getDrawableCompat(RCommon.drawable.ic_landscape_mode)!!
+                val landscapeIcon =
+                    it.getDrawable(R.styleable.ScreenShareView_streamVideoScreenShareLandscapeIcon)
+                        ?: context.getDrawableCompat(RCommon.drawable.ic_landscape_mode)!!
 
                 val controlButtonBackgroundTint = it.getColor(
-                    R.styleable.ScreenShareView_streamScreenShareControlsBackgroundTint,
+                    R.styleable.ScreenShareView_streamVideoScreenShareControlsBackgroundTint,
                     context.getColorCompat(RCommon.color.stream_bars_background)
                 )
 
                 val controlButtonIconTint = it.getColor(
-                    R.styleable.ScreenShareView_streamScreenShareControlsIconTint,
-                    context.getColorCompat(R.color.stream_black)
+                    R.styleable.ScreenShareView_streamVideoScreenShareControlsIconTint,
+                    context.getColorCompat(R.color.stream_video_black)
                 )
 
                 return ScreenShareStyle(
