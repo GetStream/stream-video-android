@@ -22,7 +22,7 @@ import android.util.AttributeSet
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.isVisible
-import io.getstream.log.StreamLog
+import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.model.CallParticipantState
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.VideoTrack
@@ -45,7 +45,7 @@ import io.getstream.video.android.ui.common.R as RCommon
  */
 public class CallParticipantView : CallCardView, VideoRenderer {
 
-    private val logger = StreamLog.getLogger(this::class.java.simpleName)
+    private val logger by taggedLogger()
 
     private val binding = StreamVideoViewCallParticipantBinding.inflate(streamThemeInflater, this)
 

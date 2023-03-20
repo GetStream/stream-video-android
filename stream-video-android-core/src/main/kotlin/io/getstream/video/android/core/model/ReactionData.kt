@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.xml.utils
+package io.getstream.video.android.core.model
 
 /**
- * Used to notify the view that the orientation has been changed and layout updates are needed.
+ * Represents the information about a successfully sent reaction.
+ *
+ * @param type The type of reaction.
+ * @param user The User who sent the reaction.
+ * @param emoji Code of the emoji, if it exists.
+ * @param custom Custom extra data to enrich the reaction.
  */
-public interface OrientationChangeListener {
-    /**
-     * Notifies that the orientation has changed.
-     *
-     * @param isLandscape Whether the device orientation is landscape or not.
-     */
-    fun onOrientationChanged(isLandscape: Boolean) {}
-}
+public data class ReactionData(
+    public val type: String,
+    public val user: User,
+    public val emoji: String?,
+    public val custom: Map<String, Any>
+)

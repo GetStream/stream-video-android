@@ -102,6 +102,4 @@ internal fun Context.getResourceId(style: Int, attr: Int): Int {
 }
 
 internal val Context.isLandscape: Boolean
-    get() {
-        return resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-    }
+    get() = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
