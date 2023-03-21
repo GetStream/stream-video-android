@@ -20,6 +20,7 @@ import io.getstream.video.android.core.model.IceServer
 import org.webrtc.MediaConstraints
 import org.webrtc.PeerConnection
 
+@JvmSynthetic
 internal fun buildRemoteIceServers(iceServers: List<IceServer>): List<PeerConnection.IceServer> {
     return iceServers.map {
         PeerConnection.IceServer.builder(it.urls)
@@ -29,6 +30,7 @@ internal fun buildRemoteIceServers(iceServers: List<IceServer>): List<PeerConnec
     }
 }
 
+@JvmSynthetic
 internal fun buildConnectionConfiguration(
     iceServers: List<PeerConnection.IceServer>,
     sdpSemantics: PeerConnection.SdpSemantics = PeerConnection.SdpSemantics.UNIFIED_PLAN
@@ -39,6 +41,7 @@ internal fun buildConnectionConfiguration(
     }
 }
 
+@JvmSynthetic
 internal fun buildMediaConstraints(): MediaConstraints {
     return MediaConstraints().apply {
         mandatory.addAll(
@@ -50,6 +53,7 @@ internal fun buildMediaConstraints(): MediaConstraints {
     }
 }
 
+@JvmSynthetic
 internal fun buildAudioConstraints(): MediaConstraints {
     val mediaConstraints = MediaConstraints()
     val items = listOf(

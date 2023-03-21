@@ -22,21 +22,27 @@ import org.webrtc.SessionDescription
 import org.webrtc.audio.JavaAudioDeviceModule
 import stream.video.sfu.models.PeerType
 
-internal fun SessionDescription.stringify(): String = "SessionDescription(type=$type, description=$description)"
+@JvmSynthetic
+internal fun SessionDescription.stringify(): String =
+    "SessionDescription(type=$type, description=$description)"
 
+@JvmSynthetic
 internal fun MediaStreamTrack.stringify(): String {
     return "MediaStreamTrack(id=${id()}, kind=${kind()}, enabled: ${enabled()}, state=${state()})"
 }
 
+@JvmSynthetic
 internal fun IceCandidateErrorEvent.stringify(): String {
     return "IceCandidateErrorEvent(errorCode=$errorCode, $errorText, address=$address, port=$port, url=$url)"
 }
 
+@JvmSynthetic
 internal fun JavaAudioDeviceModule.AudioSamples.stringify(): String {
     return "AudioSamples(audioFormat=$audioFormat, channelCount=$channelCount" +
         ", sampleRate=$sampleRate, data.size=${data.size})"
 }
 
+@JvmSynthetic
 internal fun PeerType.stringify() = when (this) {
     PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED -> "publisher"
     PeerType.PEER_TYPE_SUBSCRIBER -> "subscriber"

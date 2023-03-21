@@ -61,6 +61,7 @@ import io.getstream.video.android.core.utils.initials
 import io.getstream.video.android.core.utils.onError
 import io.getstream.video.android.core.utils.onSuccess
 import kotlinx.coroutines.launch
+import kotlin.random.Random
 
 class HomeActivity : AppCompatActivity() {
 
@@ -80,7 +81,7 @@ class HomeActivity : AppCompatActivity() {
 
     private val logger by taggedLogger("Call:HomeView")
 
-    private val callIdState: MutableState<String> = mutableStateOf("call321")
+    private val callIdState: MutableState<String> = mutableStateOf("call" + Random.nextInt(1000))
 
     private val loadingState: MutableState<Boolean> = mutableStateOf(false)
 
