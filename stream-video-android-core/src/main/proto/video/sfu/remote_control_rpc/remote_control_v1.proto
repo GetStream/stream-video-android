@@ -31,8 +31,42 @@ service RemoteControlRPC {
   rpc GetCall(GetCallRequest) returns (GetCallResponse);
   // CreateCall creates a Call on SFU
   rpc CreateCall(CreateCallRequest) returns (CreateCallResponse);
-  // EndCall finilizes the call, disconnecting all remaining participants
+  // EndCall finalizes the call, disconnecting all remaining participants
   rpc EndCall(EndCallRequest) returns (EndCallResponse);
+  // UpdateCallPermissions replaces the permissions for a call with the provided ones
+  rpc UpdateCallPermissions(UpdateCallPermissionsRequest) returns (UpdateCallPermissionsResponse);
+  rpc SendUserPermissionOverride(SendUserPermissionOverrideRequest) returns (SendUserPermissionOverrideResponse);
+}
+
+message ActionOverride {
+  PermissionAction action = 1;
+  PermissionActionOverrideType type = 2;
+}
+
+message SendUserPermissionOverrideRequest {
+  // App PK
+  int64 app_pk = 1;
+  // Call ID
+  string id = 2;
+  // User ID
+  string user_id = 3;
+  repeated ActionOverride overrides = 4;
+}
+
+message SendUserPermissionOverrideResponse {
+}
+
+// A request message for UpdateCallPermissions endpoint
+message UpdateCallPermissionsRequest {
+  // App PK
+  int64 app_pk = 1;
+  // Call ID
+  string id = 2;
+  // The permissions for the call organized by their role
+  map<string, Permissions> permissions_by_role = 3;
+}
+
+message UpdateCallPermissionsResponse {
 }
 
 // A request message for KickUser endpoint
@@ -70,6 +104,10 @@ message UpdateParticipantsMuteStatusRequest {
   repeated models.TrackType tracks = 6;
   // Whether to set to muted or not
   bool muted = 7;
+  // Whether to mute all users (user_ids is ignored)
+  bool mute_all_users = 8;
+  // The user IDs to exclude from mute_all
+  repeated string mute_all_excluded_user_ids = 9;
 }
 
 // A response message for UpdateParticipantsMuteStatus endpoint.
@@ -138,6 +176,34 @@ message GetCallResponse {
   models.CallState state = 2;
 }
 
+// Permission action enum
+// Indicates the type of action a permission refers to
+enum PermissionAction {
+  PERMISSION_ACTION_UNSPECIFIED = 0;
+  PERMISSION_ACTION_PUBLISH_VIDEO = 1;
+  PERMISSION_ACTION_PUBLISH_AUDIO = 2;
+  PERMISSION_ACTION_SCREENSHARE = 3;
+}
+
+enum PermissionActionOverrideType {
+  PERMISSION_ACTION_OVERRIDE_TYPE_UNSPECIFIED = 0;
+  PERMISSION_ACTION_OVERRIDE_TYPE_ALLOW = 1;
+  PERMISSION_ACTION_OVERRIDE_TYPE_DENY = 2;
+}
+
+// A message that contains a permission
+message Permission {
+  // the action this permission refers to
+  PermissionAction action = 1;
+  // whether the permission is granted or not only to the call owner
+  bool owner = 2;
+}
+
+// A message that contains a list of permissions
+message Permissions {
+  repeated Permission permissions = 1;
+}
+
 // A request message for CreateCall endpoint
 message CreateCallRequest {
   // App PK
@@ -148,6 +214,11 @@ message CreateCallRequest {
   repeated string cascading_sfus_hostnames = 3;
   // The token the SFU can use to participate in the gossip protocol
   string gossip_rpc_auth_token = 4;
+  // The permissions for the call organized by their role
+  map<string, Permissions> permissions_by_role = 5;
+  // the shard_id (i.e us_east:v1) where this app is allocated
+  // used to publish session related events
+  string shard_id = 6;
 }
 
 // A response message for CreateCall endpoint

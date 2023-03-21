@@ -71,6 +71,7 @@ message JoinRequest {
   string session_id = 2;
   // dumb SDP that allow us to extract subscriber's decode codecs
   string subscriber_sdp = 3;
+  models.ClientDetails client_details = 4;
   // TODO: we should know if this is going to be
   // - publishing and subscribing, or just subscribing for future routing
 }

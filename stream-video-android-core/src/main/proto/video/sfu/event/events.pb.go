@@ -717,7 +717,8 @@ type JoinRequest struct {
 	Token     string `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
 	SessionId string `protobuf:"bytes,2,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
 	// dumb SDP that allow us to extract subscriber's decode codecs
-	SubscriberSdp string `protobuf:"bytes,3,opt,name=subscriber_sdp,json=subscriberSdp,proto3" json:"subscriber_sdp,omitempty"`
+	SubscriberSdp string                `protobuf:"bytes,3,opt,name=subscriber_sdp,json=subscriberSdp,proto3" json:"subscriber_sdp,omitempty"`
+	ClientDetails *models.ClientDetails `protobuf:"bytes,4,opt,name=client_details,json=clientDetails,proto3" json:"client_details,omitempty"`
 }
 
 func (x *JoinRequest) Reset() {
@@ -771,6 +772,13 @@ func (x *JoinRequest) GetSubscriberSdp() string {
 		return x.SubscriberSdp
 	}
 	return ""
+}
+
+func (x *JoinRequest) GetClientDetails() *models.ClientDetails {
+	if x != nil {
+		return x.ClientDetails
+	}
+	return nil
 }
 
 type JoinResponse struct {
@@ -1826,13 +1834,18 @@ var file_video_sfu_event_events_proto_rawDesc = []byte{
 	0x18, 0x03, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x22, 0x2e, 0x73, 0x74, 0x72, 0x65, 0x61, 0x6d, 0x2e,
 	0x76, 0x69, 0x64, 0x65, 0x6f, 0x2e, 0x73, 0x66, 0x75, 0x2e, 0x6d, 0x6f, 0x64, 0x65, 0x6c, 0x73,
 	0x2e, 0x54, 0x72, 0x61, 0x63, 0x6b, 0x54, 0x79, 0x70, 0x65, 0x52, 0x04, 0x74, 0x79, 0x70, 0x65,
-	0x22, 0x69, 0x0a, 0x0b, 0x4a, 0x6f, 0x69, 0x6e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12,
-	0x14, 0x0a, 0x05, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05,
-	0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x12, 0x1d, 0x0a, 0x0a, 0x73, 0x65, 0x73, 0x73, 0x69, 0x6f, 0x6e,
-	0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x73, 0x65, 0x73, 0x73, 0x69,
-	0x6f, 0x6e, 0x49, 0x64, 0x12, 0x25, 0x0a, 0x0e, 0x73, 0x75, 0x62, 0x73, 0x63, 0x72, 0x69, 0x62,
-	0x65, 0x72, 0x5f, 0x73, 0x64, 0x70, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0d, 0x73, 0x75,
-	0x62, 0x73, 0x63, 0x72, 0x69, 0x62, 0x65, 0x72, 0x53, 0x64, 0x70, 0x22, 0x51, 0x0a, 0x0c, 0x4a,
+	0x22, 0xb8, 0x01, 0x0a, 0x0b, 0x4a, 0x6f, 0x69, 0x6e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
+	0x12, 0x14, 0x0a, 0x05, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x05, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x12, 0x1d, 0x0a, 0x0a, 0x73, 0x65, 0x73, 0x73, 0x69, 0x6f,
+	0x6e, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x73, 0x65, 0x73, 0x73,
+	0x69, 0x6f, 0x6e, 0x49, 0x64, 0x12, 0x25, 0x0a, 0x0e, 0x73, 0x75, 0x62, 0x73, 0x63, 0x72, 0x69,
+	0x62, 0x65, 0x72, 0x5f, 0x73, 0x64, 0x70, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0d, 0x73,
+	0x75, 0x62, 0x73, 0x63, 0x72, 0x69, 0x62, 0x65, 0x72, 0x53, 0x64, 0x70, 0x12, 0x4d, 0x0a, 0x0e,
+	0x63, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x5f, 0x64, 0x65, 0x74, 0x61, 0x69, 0x6c, 0x73, 0x18, 0x04,
+	0x20, 0x01, 0x28, 0x0b, 0x32, 0x26, 0x2e, 0x73, 0x74, 0x72, 0x65, 0x61, 0x6d, 0x2e, 0x76, 0x69,
+	0x64, 0x65, 0x6f, 0x2e, 0x73, 0x66, 0x75, 0x2e, 0x6d, 0x6f, 0x64, 0x65, 0x6c, 0x73, 0x2e, 0x43,
+	0x6c, 0x69, 0x65, 0x6e, 0x74, 0x44, 0x65, 0x74, 0x61, 0x69, 0x6c, 0x73, 0x52, 0x0d, 0x63, 0x6c,
+	0x69, 0x65, 0x6e, 0x74, 0x44, 0x65, 0x74, 0x61, 0x69, 0x6c, 0x73, 0x22, 0x51, 0x0a, 0x0c, 0x4a,
 	0x6f, 0x69, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x41, 0x0a, 0x0a, 0x63,
 	0x61, 0x6c, 0x6c, 0x5f, 0x73, 0x74, 0x61, 0x74, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32,
 	0x22, 0x2e, 0x73, 0x74, 0x72, 0x65, 0x61, 0x6d, 0x2e, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x2e, 0x73,
@@ -2019,10 +2032,11 @@ var file_video_sfu_event_events_proto_goTypes = []interface{}{
 	(*models.Error)(nil),             // 27: stream.video.sfu.models.Error
 	(models.PeerType)(0),             // 28: stream.video.sfu.models.PeerType
 	(models.TrackType)(0),            // 29: stream.video.sfu.models.TrackType
-	(*models.CallState)(nil),         // 30: stream.video.sfu.models.CallState
-	(*models.Participant)(nil),       // 31: stream.video.sfu.models.Participant
-	(models.ConnectionQuality)(0),    // 32: stream.video.sfu.models.ConnectionQuality
-	(*models.Codec)(nil),             // 33: stream.video.sfu.models.Codec
+	(*models.ClientDetails)(nil),     // 30: stream.video.sfu.models.ClientDetails
+	(*models.CallState)(nil),         // 31: stream.video.sfu.models.CallState
+	(*models.Participant)(nil),       // 32: stream.video.sfu.models.Participant
+	(models.ConnectionQuality)(0),    // 33: stream.video.sfu.models.ConnectionQuality
+	(*models.Codec)(nil),             // 34: stream.video.sfu.models.Codec
 }
 var file_video_sfu_event_events_proto_depIdxs = []int32{
 	13, // 0: stream.video.sfu.event.SfuEvent.subscriber_offer:type_name -> stream.video.sfu.event.SubscriberOffer
@@ -2045,26 +2059,27 @@ var file_video_sfu_event_events_proto_depIdxs = []int32{
 	5,  // 17: stream.video.sfu.event.SfuRequest.health_check_request:type_name -> stream.video.sfu.event.HealthCheckRequest
 	29, // 18: stream.video.sfu.event.TrackPublished.type:type_name -> stream.video.sfu.models.TrackType
 	29, // 19: stream.video.sfu.event.TrackUnpublished.type:type_name -> stream.video.sfu.models.TrackType
-	30, // 20: stream.video.sfu.event.JoinResponse.call_state:type_name -> stream.video.sfu.models.CallState
-	31, // 21: stream.video.sfu.event.ParticipantJoined.participant:type_name -> stream.video.sfu.models.Participant
-	31, // 22: stream.video.sfu.event.ParticipantLeft.participant:type_name -> stream.video.sfu.models.Participant
-	16, // 23: stream.video.sfu.event.ConnectionQualityChanged.connection_quality_updates:type_name -> stream.video.sfu.event.ConnectionQualityInfo
-	32, // 24: stream.video.sfu.event.ConnectionQualityInfo.connection_quality:type_name -> stream.video.sfu.models.ConnectionQuality
-	18, // 25: stream.video.sfu.event.AudioLevelChanged.audio_levels:type_name -> stream.video.sfu.event.AudioLevel
-	20, // 26: stream.video.sfu.event.AudioSender.media_request:type_name -> stream.video.sfu.event.AudioMediaRequest
-	33, // 27: stream.video.sfu.event.AudioSender.codec:type_name -> stream.video.sfu.models.Codec
-	0,  // 28: stream.video.sfu.event.VideoLayerSetting.priority:type_name -> stream.video.sfu.event.VideoLayerSetting.Priority
-	33, // 29: stream.video.sfu.event.VideoLayerSetting.codec:type_name -> stream.video.sfu.models.Codec
-	22, // 30: stream.video.sfu.event.VideoSender.media_request:type_name -> stream.video.sfu.event.VideoMediaRequest
-	33, // 31: stream.video.sfu.event.VideoSender.codec:type_name -> stream.video.sfu.models.Codec
-	23, // 32: stream.video.sfu.event.VideoSender.layers:type_name -> stream.video.sfu.event.VideoLayerSetting
-	21, // 33: stream.video.sfu.event.ChangePublishQuality.audio_senders:type_name -> stream.video.sfu.event.AudioSender
-	24, // 34: stream.video.sfu.event.ChangePublishQuality.video_senders:type_name -> stream.video.sfu.event.VideoSender
-	35, // [35:35] is the sub-list for method output_type
-	35, // [35:35] is the sub-list for method input_type
-	35, // [35:35] is the sub-list for extension type_name
-	35, // [35:35] is the sub-list for extension extendee
-	0,  // [0:35] is the sub-list for field type_name
+	30, // 20: stream.video.sfu.event.JoinRequest.client_details:type_name -> stream.video.sfu.models.ClientDetails
+	31, // 21: stream.video.sfu.event.JoinResponse.call_state:type_name -> stream.video.sfu.models.CallState
+	32, // 22: stream.video.sfu.event.ParticipantJoined.participant:type_name -> stream.video.sfu.models.Participant
+	32, // 23: stream.video.sfu.event.ParticipantLeft.participant:type_name -> stream.video.sfu.models.Participant
+	16, // 24: stream.video.sfu.event.ConnectionQualityChanged.connection_quality_updates:type_name -> stream.video.sfu.event.ConnectionQualityInfo
+	33, // 25: stream.video.sfu.event.ConnectionQualityInfo.connection_quality:type_name -> stream.video.sfu.models.ConnectionQuality
+	18, // 26: stream.video.sfu.event.AudioLevelChanged.audio_levels:type_name -> stream.video.sfu.event.AudioLevel
+	20, // 27: stream.video.sfu.event.AudioSender.media_request:type_name -> stream.video.sfu.event.AudioMediaRequest
+	34, // 28: stream.video.sfu.event.AudioSender.codec:type_name -> stream.video.sfu.models.Codec
+	0,  // 29: stream.video.sfu.event.VideoLayerSetting.priority:type_name -> stream.video.sfu.event.VideoLayerSetting.Priority
+	34, // 30: stream.video.sfu.event.VideoLayerSetting.codec:type_name -> stream.video.sfu.models.Codec
+	22, // 31: stream.video.sfu.event.VideoSender.media_request:type_name -> stream.video.sfu.event.VideoMediaRequest
+	34, // 32: stream.video.sfu.event.VideoSender.codec:type_name -> stream.video.sfu.models.Codec
+	23, // 33: stream.video.sfu.event.VideoSender.layers:type_name -> stream.video.sfu.event.VideoLayerSetting
+	21, // 34: stream.video.sfu.event.ChangePublishQuality.audio_senders:type_name -> stream.video.sfu.event.AudioSender
+	24, // 35: stream.video.sfu.event.ChangePublishQuality.video_senders:type_name -> stream.video.sfu.event.VideoSender
+	36, // [36:36] is the sub-list for method output_type
+	36, // [36:36] is the sub-list for method input_type
+	36, // [36:36] is the sub-list for extension type_name
+	36, // [36:36] is the sub-list for extension extendee
+	0,  // [0:36] is the sub-list for field type_name
 }
 
 func init() { file_video_sfu_event_events_proto_init() }
