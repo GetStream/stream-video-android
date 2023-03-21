@@ -21,7 +21,6 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
@@ -144,4 +143,7 @@ dependencies {
     implementation(Dependencies.activityCompose)
     implementation(Dependencies.composeIconsExtended)
     implementation(Dependencies.composeCoil)
+
+    // memory detection
+    debugImplementation(Dependencies.leakCanary)
 }
