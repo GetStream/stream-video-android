@@ -2,6 +2,6 @@
 <resources>
 
     <style name="Theme.Streamvideoandroid" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="android:statusBarColor">@color/purple_700</item>
+        <item name="android:statusBarColor">@color/stream_primary_accent</item>
     </style>
 </resources>

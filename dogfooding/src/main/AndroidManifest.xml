@@ -22,18 +22,22 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".HomeActivity" />
+        <activity
+            android:name=".HomeActivity"
+            android:windowSoftInputMode="adjustResize" />
 
         <activity
             android:name=".CallActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
             android:exported="false"
+            android:hardwareAccelerated="true"
             android:supportsPictureInPicture="true" />
 
         <activity
             android:name=".XmlCallActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
             android:exported="false"
+            android:hardwareAccelerated="true"
             android:supportsPictureInPicture="true" />
 
         <service

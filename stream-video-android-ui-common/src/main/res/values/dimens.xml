@@ -42,12 +42,13 @@
     <dimen name="audioLevelIndicatorBarWidth">3dp</dimen>
     <dimen name="audioLevelIndicatorBarSeparatorWidth">3dp</dimen>
     <dimen name="audioStatusSize">15dp</dimen>
-    <dimen name="activeSpeakerBoarderWidth">3dp</dimen>
+    <dimen name="activeSpeakerBoarderWidth">4dp</dimen>
     <dimen name="callParticipantLabelHeight">24dp</dimen>
     <dimen name="callParticipantSoundIndicatorPaddingStart">8dp</dimen>
     <dimen name="callParticipantLabelPadding">8dp</dimen>
     <dimen name="callParticipantLabelTextMaxWidth">64dp</dimen>
     <dimen name="callParticipantLabelTextPadding">4dp</dimen>
+    <dimen name="callControllerBottomPadding">12dp</dimen>
     <dimen name="screenShareParticipantItemSize">110dp</dimen>
     <dimen name="screenShareParticipantsListHeight">125dp</dimen>
     <dimen name="screenShareParticipantsListPadding">8dp</dimen>

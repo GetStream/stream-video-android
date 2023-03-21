@@ -18,18 +18,16 @@ package io.getstream.video.android.compose.ui.components.call.activecall
 
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Scaffold
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Call
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -37,7 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.unit.dp
+import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.activecall.internal.ActiveCallAppBar
 import io.getstream.video.android.compose.ui.components.call.controls.internal.DefaultCallControlsContent
 import io.getstream.video.android.compose.ui.components.participants.CallParticipant
@@ -177,27 +175,29 @@ public fun CallContent(
                 }
             },
             content = {
+                val paddings = PaddingValues(
+                    top = it.calculateTopPadding(),
+                    start = it.calculateStartPadding(layoutDirection = LocalLayoutDirection.current),
+                    end = it.calculateEndPadding(layoutDirection = LocalLayoutDirection.current),
+                )
+
                 if (call == null) {
                     Box(
                         modifier = Modifier
-                            .height(250.dp)
-                            .fillMaxWidth()
+                            .fillMaxSize()
+                            .padding(paddings)
+                            .background(VideoTheme.colors.appBackground)
                     ) {
-                        Image(
+                        CircularProgressIndicator(
                             modifier = Modifier.align(Alignment.Center),
-                            imageVector = Icons.Default.Call,
-                            contentDescription = null
+                            color = VideoTheme.colors.primaryAccent
                         )
                     }
                 } else {
                     CallParticipants(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(
-                                top = it.calculateTopPadding(),
-                                start = it.calculateStartPadding(layoutDirection = LocalLayoutDirection.current),
-                                end = it.calculateEndPadding(layoutDirection = LocalLayoutDirection.current),
-                            ),
+                            .padding(paddings),
                         call = call,
                         paddingValues = it,
                         isFullscreen = isFullscreen,
