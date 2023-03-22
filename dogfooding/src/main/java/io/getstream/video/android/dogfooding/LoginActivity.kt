@@ -42,6 +42,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -114,7 +115,7 @@ class LoginActivity : ComponentActivity() {
                             content = {
                                 Text(
                                     text = "Authenticate",
-                                    color = VideoTheme.colors.textHighEmphasis
+                                    color = Color.White
                                 )
                             },
                             onClick = ::authenticate
@@ -128,7 +129,7 @@ class LoginActivity : ComponentActivity() {
                             content = {
                                 Text(
                                     text = "Login as Guest",
-                                    color = VideoTheme.colors.textHighEmphasis
+                                    color = Color.White
                                 )
                             },
                             colors = ButtonDefaults.buttonColors(

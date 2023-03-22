@@ -159,7 +159,7 @@ class HomeActivity : AppCompatActivity() {
                 joinCall(callId = callIdState.value)
             }
         ) {
-            Text(text = "Join call", color = VideoTheme.colors.textHighEmphasis)
+            Text(text = "Join call", color = Color.White)
         }
     }
 
