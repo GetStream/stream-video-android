@@ -133,6 +133,7 @@ dependencies {
     implementation(Dependencies.androidxAppcompat)
     implementation(Dependencies.androidxLifecycleRuntime)
     implementation(Dependencies.material)
+    implementation(Dependencies.retrofit)
 
     // Compose
     implementation(platform(Dependencies.composeBom))

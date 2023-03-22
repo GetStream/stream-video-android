@@ -28,7 +28,7 @@ object Versions {
     internal const val OKHTTP = "4.10.0"
     internal const val MOSHI = "1.14.0"
 
-    internal const val STREAM_WEBRTC = "1.0.1"
+    internal const val STREAM_WEBRTC = "1.0.2"
     internal const val STREAM = "6.0.0-beta1"
     internal const val STREAM_LOG = "1.1.3"
     internal const val STREAM_PUSH = "1.0.2"

@@ -35,6 +35,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.coerceAtLeast
+import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.activecall.internal.ActiveCallAppBar
 import io.getstream.video.android.compose.ui.components.call.controls.internal.DefaultCallControlsContent
@@ -159,6 +161,7 @@ public fun CallContent(
     if (!isInPictureInPicture) {
         Scaffold(
             modifier = modifier,
+            contentColor = VideoTheme.colors.appBackground,
             topBar = {
                 if (!isFullscreen && orientation != ORIENTATION_LANDSCAPE) {
                     ActiveCallAppBar(
@@ -179,6 +182,8 @@ public fun CallContent(
                     top = it.calculateTopPadding(),
                     start = it.calculateStartPadding(layoutDirection = LocalLayoutDirection.current),
                     end = it.calculateEndPadding(layoutDirection = LocalLayoutDirection.current),
+                    bottom = (it.calculateBottomPadding() - VideoTheme.dimens.callControllerBottomPadding)
+                        .coerceAtLeast(0.dp)
                 )
 
                 if (call == null) {
@@ -195,11 +200,9 @@ public fun CallContent(
                     }
                 } else {
                     CallParticipants(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(paddings),
+                        modifier = Modifier.fillMaxSize(),
                         call = call,
-                        paddingValues = it,
+                        paddingValues = paddings,
                         isFullscreen = isFullscreen,
                         callMediaState = callMediaState,
                         callState = callState,

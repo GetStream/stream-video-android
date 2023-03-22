@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
@@ -86,7 +85,6 @@ public fun CallParticipant(
 
     Box(modifier = containerModifier.padding(paddingValues)) {
         ParticipantVideo(
-            modifier = Modifier.fillMaxSize(),
             call = call,
             participant = participant,
             track = track,
@@ -112,7 +110,6 @@ public fun CallParticipant(
 
 @Composable
 private fun ParticipantVideo(
-    modifier: Modifier = Modifier,
     call: Call,
     participant: CallParticipantState,
     track: VideoTrack?,
