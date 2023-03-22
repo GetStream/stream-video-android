@@ -63,6 +63,7 @@ import io.getstream.video.android.core.utils.initials
 import io.getstream.video.android.core.utils.onError
 import io.getstream.video.android.core.utils.onSuccess
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
 import kotlin.random.Random
 
 class HomeActivity : AppCompatActivity() {
@@ -173,7 +174,18 @@ class HomeActivity : AppCompatActivity() {
             result.onSuccess { joinedCall -> logger.v { "[joinCall] succeed: $joinedCall" } }
             result.onError {
                 logger.e { "[joinCall] failed: $it" }
-                Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
+
+                val throwable = it.cause
+                if (throwable is HttpException && throwable.code() == 401) {
+                    Toast.makeText(
+                        this@HomeActivity,
+                        R.string.unauthorized_error,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    logOut()
+                } else {
+                    Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }

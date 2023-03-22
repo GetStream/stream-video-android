@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Dogfooding</string>
     <string name="filter_call_link">call_link</string>
+    <string name="unauthorized_error">Your login token is expired. Please re-login.</string>
 </resources>
