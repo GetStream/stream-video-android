@@ -37,6 +37,7 @@ object Versions {
     internal const val BASE_PROFILE = "1.2.0"
     internal const val MACRO_BENCHMARK = "1.1.0"
     internal const val ANDROIDX_UI_AUTOMATOR = "2.2.0"
+    internal const val LEAKCANARY = "2.10"
 }
 
 object Dependencies {
@@ -118,4 +119,5 @@ object Dependencies {
     const val uiAutomator =
         "androidx.test.uiautomator:uiautomator:${Versions.ANDROIDX_UI_AUTOMATOR}"
     const val testRunner = "androidx.test:runner:${Versions.ANDROIDX_TEST}"
+    const val leakCanary = "com.squareup.leakcanary:leakcanary-android:${Versions.LEAKCANARY}"
 }
