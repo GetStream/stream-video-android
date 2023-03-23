@@ -27,9 +27,17 @@ subprojects {
     if (it.name.startsWith("stream-video-android")) {
         tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
             kotlinOptions.freeCompilerArgs += [
-//                    "-Xexplicit-api=strict", // TODO - re-enable once coordinator is stable
                     "-Xjvm-default=enable",
                     "-opt-in=io.getstream.video.android.core.internal.InternalStreamVideoApi"
+            ]
+        }
+    }
+
+    // TODO - re-enable the core module once coordinator is stable
+    if (it.name.startsWith("stream-video-android") && !it.name.startsWith("stream-video-android-core")) {
+        tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+            kotlinOptions.freeCompilerArgs += [
+                    "-Xexplicit-api=strict"
             ]
         }
     }

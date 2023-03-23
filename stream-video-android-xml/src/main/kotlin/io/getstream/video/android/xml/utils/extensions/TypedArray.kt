@@ -38,6 +38,7 @@ import kotlin.contracts.contract
  * @param id The index of attribute to retrieve.
  * @return An object that can be used to draw this resource.
  */
+@JvmSynthetic
 internal fun TypedArray.getDrawableCompat(context: Context, @StyleableRes id: Int): Drawable? {
     val resource = getResourceId(id, 0)
     if (resource != 0) {
@@ -47,6 +48,7 @@ internal fun TypedArray.getDrawableCompat(context: Context, @StyleableRes id: In
 }
 
 @OptIn(ExperimentalContracts::class)
+@JvmSynthetic
 internal inline fun TypedArray.use(block: (TypedArray) -> Unit) {
     contract {
         callsInPlace(block, InvocationKind.EXACTLY_ONCE)
@@ -55,6 +57,7 @@ internal inline fun TypedArray.use(block: (TypedArray) -> Unit) {
     recycle()
 }
 
+@JvmSynthetic
 internal inline fun <reified T : Enum<T>> TypedArray.getEnum(index: Int, default: T): T {
     return getInt(index, -1).let {
         if (it >= 0) enumValues<T>()[it] else default
@@ -62,9 +65,11 @@ internal inline fun <reified T : Enum<T>> TypedArray.getEnum(index: Int, default
 }
 
 @ColorInt
+@JvmSynthetic
 internal fun TypedArray.getColorOrNull(@StyleableRes index: Int): Int? =
     runCatching { getColorOrThrow(index) }.getOrNull()
 
 @Px
+@JvmSynthetic
 internal fun TypedArray.getDimensionOrNull(@StyleableRes index: Int): Float? =
     runCatching { getDimensionOrThrow(index) }.getOrNull()

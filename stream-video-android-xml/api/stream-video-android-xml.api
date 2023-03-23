@@ -254,10 +254,6 @@ public final class io/getstream/video/android/xml/utils/OrientationChangeListene
 	public static fun onOrientationChanged (Lio/getstream/video/android/xml/utils/OrientationChangeListener;Z)V
 }
 
-public final class io/getstream/video/android/xml/utils/extensions/ViewGroupKt {
-	public static final fun orientationChanged (Landroid/view/ViewGroup;Z)V
-}
-
 public abstract interface class io/getstream/video/android/xml/widget/appbar/CallAppBarContent {
 	public abstract fun renderState (Lio/getstream/video/android/core/model/state/StreamCallState;)V
 }
