@@ -56,6 +56,7 @@ import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.user.UserPreferencesManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.BufferedReader
@@ -226,6 +227,10 @@ class LoginActivity : ComponentActivity() {
             inputStream.close()
 
             logIn(response)
+
+            withContext(Dispatchers.Main) {
+                Toast.makeText(this@LoginActivity, "login succeed!", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
