@@ -56,9 +56,9 @@ object Dependencies {
     const val kotlinBinaryValidator =
         "org.jetbrains.kotlinx:binary-compatibility-validator:${Versions.KOTLIN_BINARY_VALIDATOR}"
     const val wirePlugin = "com.squareup.wire:wire-gradle-plugin:${Versions.WIRE}"
+
     const val coroutines =
         "org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.KOTLIN_COROUTINE}"
-
     const val material = "com.google.android.material:material:${Versions.MATERIAL}"
     const val androidxAppcompat = "androidx.appcompat:appcompat:${Versions.ANDROIDX_APPCOMPAT}"
     const val androidxCore = "androidx.core:core-ktx:${Versions.ANDROIDX_CORE}"
