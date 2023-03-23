@@ -19,7 +19,7 @@ object Versions {
     internal const val ANDROIDX_ACTIVITY = "1.5.1"
     internal const val ACTIVITY_COMPOSE = "1.5.1"
 
-    internal const val COMPOSE_BOM = "2023.01.00"
+    internal const val COMPOSE_BOM = "2023.03.00"
     const val COMPOSE_COMPILER = "1.4.3"
     internal const val COIL = "2.2.2"
 
