@@ -247,6 +247,7 @@ class LoginActivity : ComponentActivity() {
             )
 
             startHome(user)
+            Toast.makeText(this, "login succeed!", Toast.LENGTH_SHORT).show()
         }
     }
 
