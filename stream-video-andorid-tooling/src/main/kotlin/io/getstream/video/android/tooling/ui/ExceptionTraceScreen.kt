@@ -50,8 +50,8 @@ import io.getstream.video.android.tooling.R
 import io.getstream.video.android.tooling.extensions.toast
 
 @Composable
-internal fun ExceptionDebugScreen(
-    restartPackageName: String,
+internal fun ExceptionTraceScreen(
+    packageName: String,
     message: String
 ) {
     val scrollState = rememberScrollState()
@@ -64,7 +64,7 @@ internal fun ExceptionDebugScreen(
         StreamPrimaryButton(
             text = R.string.stream_video_tooling_restart_app,
             onClick = {
-                val mainActivity = Class.forName(restartPackageName)
+                val mainActivity = Class.forName(packageName)
                 context.startActivity(Intent(context, mainActivity))
             },
         )
