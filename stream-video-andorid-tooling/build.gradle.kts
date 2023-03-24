@@ -35,9 +35,13 @@ android {
     defaultConfig {
         minSdk = Configuration.minSdk
     }
+
+    resourcePrefix = "stream_video_tooling"
 }
 
 dependencies {
+    implementation(project(":stream-video-android-compose"))
+
     // androidx
     implementation(libs.androidx.material)
     implementation(libs.stream.log.android)
