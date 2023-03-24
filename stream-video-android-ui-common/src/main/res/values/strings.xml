@@ -35,8 +35,8 @@
         <item quantity="other">Participants (%d)</item>
     </plurals>
 
-    <string name="stream_call_notification_action_accept">Accept</string>
-    <string name="stream_call_notification_action_reject">Reject</string>
-    <string name="stream_call_notification_action_cancel">Cancel</string>
-    <string name="stream_screen_sharing_title">%1$s presenting</string>
+    <string name="stream_video_call_notification_action_accept">Accept</string>
+    <string name="stream_video_call_notification_action_reject">Reject</string>
+    <string name="stream_video_call_notification_action_cancel">Cancel</string>
+    <string name="stream_video_screen_sharing_title">%1$s presenting</string>
 </resources>

@@ -69,7 +69,7 @@ internal fun OverlayScreenSharingAppBar(
         Text(
             modifier = Modifier.weight(1f),
             text = stringResource(
-                id = R.string.stream_screen_sharing_title,
+                id = R.string.stream_video_screen_sharing_title,
                 sharingParticipant.name.ifEmpty { sharingParticipant.id }
             ),
             color = Color.White,
