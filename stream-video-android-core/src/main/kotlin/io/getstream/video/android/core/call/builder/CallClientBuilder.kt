@@ -81,7 +81,7 @@ internal class CallClientBuilder(
      */
     fun build(): CallClient {
         val user = preferences.getUserCredentials()
-        if (preferences.getApiKey().isNullOrBlank() ||
+        if (preferences.getApiKey().isBlank() ||
             user?.id.isNullOrBlank() ||
             preferences.getSfuToken().isBlank()
         ) throw IllegalArgumentException("The API key, user ID and token cannot be empty!")

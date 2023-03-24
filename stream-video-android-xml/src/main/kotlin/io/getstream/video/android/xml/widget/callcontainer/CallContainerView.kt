@@ -19,25 +19,31 @@ package io.getstream.video.android.xml.widget.callcontainer
 import android.content.Context
 import android.util.AttributeSet
 import android.view.View
-import android.widget.FrameLayout
-import androidx.constraintlayout.widget.ConstraintLayout
+import android.view.ViewGroup
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.children
-import androidx.core.view.isVisible
-import io.getstream.video.android.xml.databinding.ViewCallContainerBinding
+import io.getstream.video.android.xml.utils.extensions.clearConstraints
+import io.getstream.video.android.xml.utils.extensions.constrainViewToParentBySide
+import io.getstream.video.android.xml.utils.extensions.constrainViewTopToBottomOfView
 import io.getstream.video.android.xml.utils.extensions.createStreamThemeWrapper
-import io.getstream.video.android.xml.utils.extensions.streamThemeInflater
+import io.getstream.video.android.xml.utils.extensions.getFirstViewInstance
+import io.getstream.video.android.xml.utils.extensions.isLandscape
+import io.getstream.video.android.xml.utils.extensions.updateConstraints
+import io.getstream.video.android.xml.utils.extensions.updateLayoutParams
+import io.getstream.video.android.xml.widget.appbar.CallAppBarView
 import io.getstream.video.android.xml.widget.call.CallView
 import io.getstream.video.android.xml.widget.incoming.IncomingCallView
 import io.getstream.video.android.xml.widget.outgoing.OutgoingCallView
 import io.getstream.video.android.xml.widget.participant.PictureInPictureView
+import io.getstream.video.android.xml.widget.view.CallConstraintLayout
 
 /**
  * View that is the highest in the hierarchy that handles switching of [IncomingCallView], [OutgoingCallView],
  * [CallView] and [PictureInPictureView] based on the call state.
  */
-public class CallContainerView : ConstraintLayout {
+public class CallContainerView : CallConstraintLayout {
 
-    internal val binding = ViewCallContainerBinding.inflate(streamThemeInflater, this)
+    private lateinit var style: CallContainerStyle
 
     public constructor(context: Context) : this(context, null, 0)
     public constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
@@ -45,7 +51,32 @@ public class CallContainerView : ConstraintLayout {
         context.createStreamThemeWrapper(),
         attrs,
         defStyleAttr
-    )
+    ) {
+        init(context, attrs)
+    }
+
+    private fun init(context: Context, attrs: AttributeSet?) {
+        style = CallContainerStyle(context, attrs)
+    }
+
+    private fun addToolbar(onViewInitialized: (CallAppBarView) -> Unit) {
+        if (getFirstViewInstance<CallAppBarView>() != null) return
+        val callAppBar = CallAppBarView(context).apply {
+            id = ViewGroup.generateViewId()
+            this@CallContainerView.addView(this)
+            onViewInitialized(this)
+            updateLayoutParams {
+                width = LayoutParams.MATCH_CONSTRAINT
+                height = style.appBarHeight
+            }
+        }
+
+        updateConstraints {
+            constrainViewToParentBySide(callAppBar, ConstraintSet.TOP)
+            constrainViewToParentBySide(callAppBar, ConstraintSet.START)
+            constrainViewToParentBySide(callAppBar, ConstraintSet.END)
+        }
+    }
 
     /**
      * Shows the outgoing call screen and initialises the state observers required to populate the screen.
@@ -53,12 +84,15 @@ public class CallContainerView : ConstraintLayout {
      * @param onViewInitialized Notifies when a [OutgoingCallView] has been initialised so that it can be bound to the
      * view model.
      */
-    internal fun showOutgoingScreen(onViewInitialized: (OutgoingCallView) -> Unit) {
-        if (isViewInsideContainer<OutgoingCallView>()) return
-        val outgoingCallView = OutgoingCallView(context)
-        setContentView(outgoingCallView)
-        binding.callToolbar.isVisible = true
-        onViewInitialized(outgoingCallView)
+    internal fun showOutgoingScreen(onViewInitialized: (View) -> Unit) {
+        addToolbar(onViewInitialized)
+
+        if (getFirstViewInstance<OutgoingCallView>() != null) return
+        OutgoingCallView(context).apply {
+            id = ViewGroup.generateViewId()
+            setContentView(this)
+            onViewInitialized(this)
+        }
     }
 
     /**
@@ -67,26 +101,83 @@ public class CallContainerView : ConstraintLayout {
      * @param onViewInitialized Notifies when a [IncomingCallView] has been initialised so that it can be bound to the
      * view model.
      */
-    internal fun showIncomingScreen(onViewInitialized: (IncomingCallView) -> Unit) {
-        if (isViewInsideContainer<IncomingCallView>()) return
-        val incomingCallView = IncomingCallView(context)
-        setContentView(incomingCallView)
-        binding.callToolbar.isVisible = true
-        onViewInitialized(incomingCallView)
+    internal fun showIncomingScreen(onViewInitialized: (View) -> Unit) {
+        addToolbar(onViewInitialized)
+
+        if (getFirstViewInstance<IncomingCallView>() != null) return
+        IncomingCallView(context).apply {
+            id = ViewGroup.generateViewId()
+            setContentView(this)
+            onViewInitialized(this)
+        }
     }
 
     /**
      * Shows the active call screen and initialises the state observers required to populate the screen.
      *
-     * @param onViewInitialized Notifies when a [CallView] has been initialised so that it can be bound to the
-     * view model.
+     * @param onViewInitialized Notifies when [CallView] or [CallControlsView] has been initialised so that it can be
+     * bound to the view model.
      */
-    internal fun showCallContentScreen(onViewInitialized: (CallView) -> Unit) {
-        if (isViewInsideContainer<CallView>()) return
-        val callView = CallView(context)
-        setContentView(callView)
-        binding.callToolbar.isVisible = true
-        onViewInitialized(callView)
+    internal fun showCallContent(onViewInitialized: (View) -> Unit) {
+        addToolbar(onViewInitialized)
+
+        children.forEach {
+            if (it !is CallAppBarView && it !is CallView) removeView(it)
+        }
+
+        if (getFirstViewInstance<CallView>() == null) {
+            CallView(context).apply {
+                id = ViewGroup.generateViewId()
+                this@CallContainerView.addView(this)
+                onViewInitialized(this)
+            }
+        }
+
+        updateCallContentConstraints()
+    }
+
+    override fun onOrientationChanged(isLandscape: Boolean) {
+        updateCallContentConstraints()
+    }
+
+    /**
+     * Updates constraints when the call is active.
+     */
+    private fun updateCallContentConstraints() {
+        val appBar = getFirstViewInstance<CallAppBarView>() ?: return
+        val callView = getFirstViewInstance<CallView>() ?: return
+
+        if (isLandscape) {
+            updateConstraints(true) {
+                constrainViewToParentBySide(appBar, ConstraintSet.TOP)
+                constrainViewToParentBySide(appBar, ConstraintSet.START)
+                constrainViewToParentBySide(appBar, ConstraintSet.END, callView.getCallControlsSize())
+            }
+            appBar.updateLayoutParams {
+                width = LayoutParams.MATCH_CONSTRAINT
+                height = style.landscapeAppBarHeight
+            }
+            callView.updateLayoutParams {
+                width = LayoutParams.MATCH_PARENT
+                height = LayoutParams.MATCH_PARENT
+            }
+        } else {
+            updateConstraints {
+                clearConstraints(appBar)
+                constrainViewToParentBySide(appBar, ConstraintSet.TOP)
+
+                constrainViewToParentBySide(callView, ConstraintSet.BOTTOM)
+                constrainViewTopToBottomOfView(callView, appBar)
+            }
+            appBar.updateLayoutParams {
+                width = LayoutParams.MATCH_PARENT
+                height = style.appBarHeight
+            }
+            callView.updateLayoutParams {
+                width = LayoutParams.MATCH_PARENT
+                height = LayoutParams.MATCH_CONSTRAINT
+            }
+        }
     }
 
     /**
@@ -96,11 +187,13 @@ public class CallContainerView : ConstraintLayout {
      * the view model.
      */
     internal fun showPipLayout(onViewInitialized: (PictureInPictureView) -> Unit) {
-        if (isViewInsideContainer<PictureInPictureView>()) return
-        val pictureInPicture = PictureInPictureView(context)
-        setContentView(pictureInPicture)
-        binding.callToolbar.isVisible = false
-        onViewInitialized(pictureInPicture)
+        if (getFirstViewInstance<PictureInPictureView>() != null) return
+        removeAllViews()
+        PictureInPictureView(context).apply {
+            id = ViewGroup.generateViewId()
+            setContentView(this)
+            onViewInitialized(this)
+        }
     }
 
     /**
@@ -109,29 +202,31 @@ public class CallContainerView : ConstraintLayout {
      * @param view The view we wish to display as primary content.
      */
     private fun setContentView(view: View) {
-        view.layoutParams = FrameLayout.LayoutParams(
-            FrameLayout.LayoutParams.MATCH_PARENT,
-            FrameLayout.LayoutParams.MATCH_PARENT
+        children.filter { it !is CallAppBarView }.forEach(::removeView)
+        addView(
+            view,
+            LayoutParams(
+                LayoutParams.MATCH_PARENT,
+                LayoutParams.MATCH_CONSTRAINT
+            )
         )
-        binding.contentHolder.removeAllViews()
-        binding.contentHolder.addView(view)
+        view.updateLayoutParams {
+            width = LayoutParams.MATCH_PARENT
+            height = LayoutParams.MATCH_CONSTRAINT
+        }
+        val appBarView = getFirstViewInstance<CallAppBarView>()
+        updateConstraints {
+            if (appBarView != null) {
+                constrainViewTopToBottomOfView(view, appBarView)
+            } else {
+                constrainViewToParentBySide(view, ConstraintSet.TOP)
+            }
+            constrainViewToParentBySide(view, ConstraintSet.BOTTOM)
+        }
     }
 
-    /**
-     * Returns the view of type [T] if it is inside the content holder.
-     *
-     * @return The instance of [T] if one is inside the content holder, otherwise null.
-     */
-    private inline fun <reified T : View> getChildInstanceOf(): T? {
-        return binding.contentHolder.children.firstOrNull { it is T } as? T
-    }
-
-    /**
-     * Checks if the view inside the content is of type [T].
-     *
-     * @return Whether the instance of [T] is inside the content holder.
-     */
-    private inline fun <reified T : View> isViewInsideContainer(): Boolean {
-        return getChildInstanceOf<T>() != null
+    override fun addView(child: View?, index: Int, params: ViewGroup.LayoutParams?) {
+        super.addView(child, index, params)
+        getFirstViewInstance<CallAppBarView>()?.bringToFront()
     }
 }

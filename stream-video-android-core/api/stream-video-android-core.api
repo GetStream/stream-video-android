@@ -1970,8 +1970,8 @@ public final class io/getstream/video/android/core/model/Call {
 	public final fun getOnStreamAdded ()Lkotlin/jvm/functions/Function1;
 	public final fun getPrimarySpeaker ()Lkotlinx/coroutines/flow/Flow;
 	public final fun getScreenSharingSessions ()Lkotlinx/coroutines/flow/Flow;
-	public final fun initRenderer (Lio/getstream/video/android/core/ui/TextureViewRenderer;Ljava/lang/String;Lstream/video/sfu/models/TrackType;Lkotlin/jvm/functions/Function1;)V
-	public static synthetic fun initRenderer$default (Lio/getstream/video/android/core/model/Call;Lio/getstream/video/android/core/ui/TextureViewRenderer;Ljava/lang/String;Lstream/video/sfu/models/TrackType;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+	public final fun initRenderer (Lio/getstream/webrtc/android/ui/VideoTextureViewRenderer;Ljava/lang/String;Lstream/video/sfu/models/TrackType;Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun initRenderer$default (Lio/getstream/video/android/core/model/Call;Lio/getstream/webrtc/android/ui/VideoTextureViewRenderer;Ljava/lang/String;Lstream/video/sfu/models/TrackType;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public final fun isScreenSharingActive ()Z
 	public final fun setCameraEnabled (Z)V
 	public final fun setMicrophoneEnabled (Z)V
@@ -3254,7 +3254,7 @@ public final class io/getstream/video/android/core/ui/ParticipantContentView : a
 	public final fun renderParticipants (Lio/getstream/video/android/core/model/Call;Ljava/util/List;)V
 }
 
-public final class io/getstream/video/android/core/ui/ParticipantItemView : io/getstream/video/android/core/ui/TextureViewRenderer {
+public final class io/getstream/video/android/core/ui/ParticipantItemView : io/getstream/webrtc/android/ui/VideoTextureViewRenderer {
 	public fun <init> (Landroid/content/Context;)V
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
 	public final fun bindTrack (Lorg/webrtc/VideoTrack;)V
@@ -3262,22 +3262,6 @@ public final class io/getstream/video/android/core/ui/ParticipantItemView : io/g
 	public final fun initialize (Lio/getstream/video/android/core/model/Call;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public static synthetic fun initialize$default (Lio/getstream/video/android/core/ui/ParticipantItemView;Lio/getstream/video/android/core/model/Call;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public final fun isInitialized ()Z
-}
-
-public class io/getstream/video/android/core/ui/TextureViewRenderer : android/view/TextureView, android/view/TextureView$SurfaceTextureListener, org/webrtc/VideoSink {
-	public fun <init> (Landroid/content/Context;)V
-	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
-	public synthetic fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun init (Lorg/webrtc/EglBase$Context;Lorg/webrtc/RendererCommon$RendererEvents;)V
-	protected fun onDetachedFromWindow ()V
-	public fun onFrame (Lorg/webrtc/VideoFrame;)V
-	protected fun onLayout (ZIIII)V
-	public fun onSurfaceTextureAvailable (Landroid/graphics/SurfaceTexture;II)V
-	public fun onSurfaceTextureDestroyed (Landroid/graphics/SurfaceTexture;)Z
-	public fun onSurfaceTextureSizeChanged (Landroid/graphics/SurfaceTexture;II)V
-	public fun onSurfaceTextureUpdated (Landroid/graphics/SurfaceTexture;)V
-	public final fun release ()V
-	public final fun setMirror (Z)V
 }
 
 public final class io/getstream/video/android/core/user/EmptyUsersProvider : io/getstream/video/android/core/user/UsersProvider {

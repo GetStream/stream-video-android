@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (c) 2023 Stream.io Inc. All rights reserved.
+
+     Licensed under the Stream License;
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<resources>
+    <declare-styleable name="CallView">
+        <attr name="streamVideoCallViewGridParticipantStyle" format="reference" />
+        <attr name="streamVideoCallViewListParticipantStyle" format="reference" />
+        <attr name="streamVideoCallViewLocalParticipantHeight" format="dimension|reference" />
+        <attr name="streamVideoCallViewLocalParticipantWidth" format="dimension|reference" />
+        <attr name="streamVideoCallViewLocalParticipantPadding" format="dimension|reference" />
+        <attr name="streamVideoCallViewLocalParticipantRadius" format="dimension|reference" />
+        <attr name="streamVideoCallViewListHeight" format="dimension|reference" />
+        <attr name="streamVideoCallViewListPadding" format="dimension|reference" />
+        <attr name="streamVideoCallViewListItemMargin" format="dimension|reference" />
+        <attr name="streamVideoCallViewListItemWidth" format="dimension|reference" />
+        <attr name="streamVideoCallViewScreenShareListMargin" format="dimension|reference" />
+        <attr name="streamVideoCallViewPresenterTextMargin" format="dimension|reference" />
+        <attr name="streamVideoCallViewPresenterTextPadding" format="dimension|reference" />
+        <attr name="streamVideoCallViewPresenterInfoTextSize" format="dimension|reference" />
+        <attr name="streamVideoCallViewPresenterInfoTextColor" format="color|reference" />
+        <attr name="streamVideoCallViewPresenterInfoFontAsset" format="reference" />
+        <attr name="streamVideoCallViewPresenterInfoFont" format="reference" />
+        <attr name="streamVideoCallViewPresenterInfoTextStyle">
+            <flag name="normal" value="0" />
+            <flag name="bold" value="1" />
+            <flag name="italic" value="2" />
+        </attr>
+        <attr name="streamVideoCallViewPreConnectionImage" format="reference" />
+        <attr name="streamVideoCallViewCallControlsHeight" format="dimension|reference" />
+        <attr name="streamVideoCallViewCallControlsWidthLandscape" format="dimension|reference" />
+        <attr name="streamVideoCallViewShouldShowGridUsersAsListLandscape" format="boolean|reference" />
+    </declare-styleable>
+</resources>

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (c) 2023 Stream.io Inc. All rights reserved.
+
+     Licensed under the Stream License;
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout"
+    >
+
+    <io.getstream.video.android.xml.widget.calldetails.CallBackgroundView
+        android:id="@+id/callBackground"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        />
+
+    <io.getstream.video.android.xml.widget.calldetails.CallDetailsView
+        android:id="@+id/callDetails"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/singleAvatarAppbarPadding"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/controlsHolder"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/outgoingCallOptionsBottomPadding"
+        app:layout_constraintBottom_toBottomOf="parent"
+        >
+
+        <io.getstream.video.android.xml.widget.control.ControlButtonView
+            android:id="@+id/micToggle"
+            android:layout_width="@dimen/mediumButtonSize"
+            android:layout_height="@dimen/mediumButtonSize"
+            android:layout_marginBottom="32dp"
+            app:layout_constraintBottom_toTopOf="@id/cancelCall"
+            app:layout_constraintEnd_toStartOf="@id/cameraToggle"
+            app:layout_constraintStart_toStartOf="parent"
+            />
+
+        <io.getstream.video.android.xml.widget.control.ControlButtonView
+            android:id="@+id/cameraToggle"
+            android:layout_width="@dimen/mediumButtonSize"
+            android:layout_height="@dimen/mediumButtonSize"
+            android:layout_marginBottom="32dp"
+            app:layout_constraintBottom_toTopOf="@id/cancelCall"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/micToggle"
+            />
+
+        <io.getstream.video.android.xml.widget.control.ControlButtonView
+            android:id="@+id/cancelCall"
+            android:layout_width="@dimen/largeButtonSize"
+            android:layout_height="@dimen/largeButtonSize"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</merge>

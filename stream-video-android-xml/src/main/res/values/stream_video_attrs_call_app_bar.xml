@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (c) 2023 Stream.io Inc. All rights reserved.
+
+     Licensed under the Stream License;
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<resources>
+    <declare-styleable name="CallAppBar">
+        <attr name="streamVideoCallAppBarBackgroundColour" format="color|reference" />
+        <attr name="streamVideoCallAppBarBackgroundColourLandscape" format="color|reference" />
+        <attr name="streamVideoCallAppBarPadding" format="dimension|reference" />
+
+        <attr name="streamVideoCallAppBarLeadingContentIcon" format="reference" />
+        <attr name="streamVideoCallAppBarLeadingContentIconTint" format="color|reference" />
+        <attr name="streamVideoCallAppBarLeadingContentIconTintLandscape" format="color|reference" />
+        <attr name="streamVideoCallAppBarLeadingContentMarginStart" format="dimension|reference" />
+        <attr name="streamVideoCallAppBarLeadingContentMarginEnd" format="dimension|reference" />
+
+        <attr name="streamVideoCallAppBarCenterContentTextSize" format="dimension|reference" />
+        <attr name="streamVideoCallAppBarCenterContentTextColor" format="color|reference" />
+        <attr name="streamVideoCallAppBarCenterContentFontAsset" format="reference" />
+        <attr name="streamVideoCallAppBarCenterContentFont" format="reference" />
+        <attr name="streamVideoCallAppBarCenterContentTextStyle">
+            <flag name="normal" value="0" />
+            <flag name="bold" value="1" />
+            <flag name="italic" value="2" />
+        </attr>
+        <attr name="streamVideoCallAppBarCenterContentTextSizeLandscape" format="dimension|reference" />
+        <attr name="streamVideoCallAppBarCenterContentTextColorLandscape" format="color|reference" />
+        <attr name="streamVideoCallAppBarCenterContentFontAssetLandscape" format="reference" />
+        <attr name="streamVideoCallAppBarCenterContentFontLandscape" format="reference" />
+        <attr name="streamVideoCallAppBarCenterContentTextStyleLandscape">
+            <flag name="normal" value="0" />
+            <flag name="bold" value="1" />
+            <flag name="italic" value="2" />
+        </attr>
+        <attr name="streamVideoCallAppBarCenterContentMarginStart" format="dimension|reference" />
+        <attr name="streamVideoCallAppBarCenterContentMarginEnd" format="dimension|reference" />
+
+        <attr name="streamVideoCallAppBarTrailingContentIcon" format="reference" />
+        <attr name="streamVideoCallAppBarTrailingContentIconTint" format="color|reference" />
+        <attr name="streamVideoCallAppBarTrailingContentIconTintLandscape" format="color|reference" />
+        <attr name="streamVideoCallAppBarTrailingContentMarginStart" format="dimension|reference" />
+        <attr name="streamVideoCallAppBarTrailingContentMarginEnd" format="dimension|reference" />
+    </declare-styleable>
+</resources>

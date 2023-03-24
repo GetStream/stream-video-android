@@ -20,7 +20,7 @@ import android.app.Application
 import android.content.Context
 import com.google.firebase.auth.FirebaseAuth
 import io.getstream.android.push.firebase.FirebasePushDeviceGenerator
-import io.getstream.log.StreamLog
+import io.getstream.log.Priority
 import io.getstream.log.android.AndroidStreamLogger
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
@@ -30,6 +30,7 @@ import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.ApiKey
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.user.UserPreferencesManager
+import io.getstream.video.android.tooling.handler.StreamGlobalExceptionHandler
 
 class DogfoodingApp : Application() {
 
@@ -44,10 +45,11 @@ class DogfoodingApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        if (BuildConfig.DEBUG) {
-            StreamLog.setValidator { _, _ -> true }
-            StreamLog.install(AndroidStreamLogger())
-        }
+        AndroidStreamLogger.installOnDebuggableApp(this, minPriority = Priority.DEBUG)
+        StreamGlobalExceptionHandler.install(
+            application = this,
+            packageName = LoginActivity::class.java.name
+        )
         UserPreferencesManager.initialize(this)
     }
 

@@ -56,7 +56,7 @@ public abstract class AbstractStreamCallService : Service(), StreamVideoProvider
 
     protected open fun createNotificationBuilder(context: Context): StreamNotificationBuilder =
         StreamNotificationBuilderImpl(context, streamVideo, scope) {
-            R.id.stream_call_notification
+            R.id.stream_video_call_notification
         }
 
     protected open fun createVibroManager(context: Context): StreamVibroManager =

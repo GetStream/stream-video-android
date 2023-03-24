@@ -21,12 +21,14 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.children
 
+@JvmSynthetic
 internal inline fun ConstraintLayout.setConstraints(actions: ConstraintSet.() -> Unit) {
     val set = ConstraintSet()
     set.actions()
     set.applyTo(this)
 }
 
+@JvmSynthetic
 internal inline fun ConstraintLayout.updateConstraints(
     clearAllConstraints: Boolean = false,
     actions: ConstraintSet.() -> Unit,
@@ -34,45 +36,53 @@ internal inline fun ConstraintLayout.updateConstraints(
     val set = ConstraintSet()
     set.clone(this)
     if (clearAllConstraints) {
-        children.forEach { set.clearConstraints(it.id) }
+        children.forEach { set.clearConstraints(it) }
     }
     set.actions()
     set.applyTo(this)
 }
 
-internal fun ConstraintSet.clearConstraints(viewId: Int) {
-    clear(viewId, ConstraintSet.START)
-    clear(viewId, ConstraintSet.END)
-    clear(viewId, ConstraintSet.TOP)
-    clear(viewId, ConstraintSet.BOTTOM)
-    clear(viewId, ConstraintSet.LEFT)
-    clear(viewId, ConstraintSet.RIGHT)
+@JvmSynthetic
+internal fun ConstraintSet.clearConstraints(view: View) {
+    clear(view.id, ConstraintSet.START)
+    clear(view.id, ConstraintSet.END)
+    clear(view.id, ConstraintSet.TOP)
+    clear(view.id, ConstraintSet.BOTTOM)
+    clear(view.id, ConstraintSet.LEFT)
+    clear(view.id, ConstraintSet.RIGHT)
 }
 
+@JvmSynthetic
 internal fun ConstraintSet.constrainViewToParentBySide(view: View, side: Int, margin: Int = 0) {
     connect(view.id, side, ConstraintSet.PARENT_ID, side, margin)
 }
 
+@JvmSynthetic
 internal fun ConstraintSet.constrainViewStartToEndOfView(startView: View, endView: View, margin: Int = 0) {
     connect(startView.id, ConstraintSet.START, endView.id, ConstraintSet.END, margin)
 }
 
+@JvmSynthetic
 internal fun ConstraintSet.constrainViewEndToEndOfView(startView: View, endView: View, margin: Int = 0) {
     connect(startView.id, ConstraintSet.END, endView.id, ConstraintSet.END, margin)
 }
 
+@JvmSynthetic
 internal fun ConstraintSet.constrainViewEndToStartOfView(startView: View, endView: View, margin: Int = 0) {
     connect(startView.id, ConstraintSet.END, endView.id, ConstraintSet.START, margin)
 }
 
+@JvmSynthetic
 internal fun ConstraintSet.constrainViewBottomToTopOfView(startView: View, endView: View, margin: Int = 0) {
     connect(startView.id, ConstraintSet.BOTTOM, endView.id, ConstraintSet.TOP, margin)
 }
 
+@JvmSynthetic
 internal fun ConstraintSet.constrainViewTopToBottomOfView(startView: View, endView: View, margin: Int = 0) {
     connect(startView.id, ConstraintSet.TOP, endView.id, ConstraintSet.BOTTOM, margin)
 }
 
+@JvmSynthetic
 internal fun ConstraintSet.constrainViewToParent(view: View) {
     connect(view.id, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START)
     connect(view.id, ConstraintSet.TOP, ConstraintSet.PARENT_ID, ConstraintSet.TOP)
@@ -80,6 +90,7 @@ internal fun ConstraintSet.constrainViewToParent(view: View) {
     connect(view.id, ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM)
 }
 
+@JvmSynthetic
 internal fun ConstraintSet.horizontalChainInParent(views: List<View>) {
     createHorizontalChain(
         ConstraintSet.PARENT_ID,
@@ -92,10 +103,12 @@ internal fun ConstraintSet.horizontalChainInParent(views: List<View>) {
     )
 }
 
+@JvmSynthetic
 internal fun ConstraintSet.horizontalChainInParent(vararg views: View) {
     horizontalChainInParent(views.toList())
 }
 
+@JvmSynthetic
 internal fun ConstraintSet.verticalChainInParent(vararg views: View) {
     createVerticalChain(
         ConstraintSet.PARENT_ID,

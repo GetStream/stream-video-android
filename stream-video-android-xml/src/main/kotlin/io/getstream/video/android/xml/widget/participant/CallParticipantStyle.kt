@@ -66,8 +66,14 @@ public data class CallParticipantStyle(
     internal companion object {
         private val DEFAULT_LABEL_MARGIN = 8.dpToPxPrecise()
 
-        operator fun invoke(context: Context, attrs: AttributeSet?, styleAttrs: Int, styleRes: Int): CallParticipantStyle {
-            val viewStyleAttr = if (styleAttrs == 0) R.attr.streamCallParticipantViewStyle else styleAttrs
+        operator fun invoke(
+            context: Context,
+            attrs: AttributeSet?,
+            styleAttrs: Int,
+            styleRes: Int
+        ): CallParticipantStyle {
+            val viewStyleAttr =
+                if (styleAttrs == 0) R.attr.streamVideoCallParticipantViewStyle else styleAttrs
             val viewStyleRes = if (styleRes == 0) R.style.Stream_CallParticipant else styleRes
 
             context.obtainStyledAttributes(
@@ -78,70 +84,70 @@ public data class CallParticipantStyle(
             ).use {
 
                 val labelAlignment = it.getEnum(
-                    R.styleable.CallParticipantView_streamCallParticipantLabelAlignment,
+                    R.styleable.CallParticipantView_streamVideoCallParticipantLabelAlignment,
                     CallParticipantLabelAlignment.BOTTOM_LEFT
                 )
 
                 val labelMargin = it.getDimension(
-                    R.styleable.CallParticipantView_streamCallParticipantLabelMargin,
+                    R.styleable.CallParticipantView_streamVideoCallParticipantLabelMargin,
                     DEFAULT_LABEL_MARGIN
                 )
 
                 val activeSpeakerBorderWidth = it.getDimension(
-                    R.styleable.CallParticipantView_streamCallParticipantActiveSpeakerBorderWidth,
+                    R.styleable.CallParticipantView_streamVideoCallParticipantActiveSpeakerBorderWidth,
                     context.getDimension(RCommon.dimen.activeSpeakerBoarderWidth).toFloat()
                 ).toInt()
 
                 val activeSpeakerBorderColor = it.getColor(
-                    R.styleable.CallParticipantView_streamCallParticipantActiveSpeakerBorderColor,
+                    R.styleable.CallParticipantView_streamVideoCallParticipantActiveSpeakerBorderColor,
                     context.getColorCompat(RCommon.color.stream_info_accent)
                 )
 
                 val labelTextStyle = TextStyle.Builder(it)
                     .size(
-                        R.styleable.CallParticipantView_streamCallParticipantLabelTextSize,
+                        R.styleable.CallParticipantView_streamVideoCallParticipantLabelTextSize,
                         context.getDimension(RCommon.dimen.bodyTextSize)
                     )
                     .color(
-                        R.styleable.CallParticipantView_streamCallParticipantLabelTextColor,
-                        context.getColorCompat(R.color.stream_white)
+                        R.styleable.CallParticipantView_streamVideoCallParticipantLabelTextColor,
+                        context.getColorCompat(R.color.stream_video_white)
                     )
                     .font(
-                        R.styleable.CallParticipantView_streamCallParticipantLabelTextFontAssets,
-                        R.styleable.CallParticipantView_streamCallParticipantLabelTextFont
+                        R.styleable.CallParticipantView_streamVideoCallParticipantLabelTextFontAssets,
+                        R.styleable.CallParticipantView_streamVideoCallParticipantLabelTextFont
                     )
                     .style(
-                        R.styleable.CallParticipantView_streamCallParticipantLabelTextStyle,
+                        R.styleable.CallParticipantView_streamVideoCallParticipantLabelTextStyle,
                         Typeface.NORMAL
                     )
                     .build()
 
                 val labelBackgroundColor = it.getColor(
-                    R.styleable.CallParticipantView_streamCallParticipantLabelBackgroundColor,
-                    context.getColorCompat(R.color.stream_dark_gray)
+                    R.styleable.CallParticipantView_streamVideoCallParticipantLabelBackgroundColor,
+                    context.getColorCompat(R.color.stream_video_dark_gray)
                 )
 
                 val participantMicOffIcon = it.getDrawable(
-                    R.styleable.CallParticipantView_streamCallParticipantMicrophoneOffIcon
+                    R.styleable.CallParticipantView_streamVideoCallParticipantMicrophoneOffIcon
                 ) ?: context.getDrawableCompat(RCommon.drawable.ic_mic_off)!!
 
                 val participantMicOffIconTint = it.getColor(
-                    R.styleable.CallParticipantView_streamCallParticipantMicrophoneOffTint,
+                    R.styleable.CallParticipantView_streamVideoCallParticipantMicrophoneOffTint,
                     context.getColorCompat(RCommon.color.stream_error_accent)
                 )
 
                 val participantAudioLevelTint = it.getColor(
-                    R.styleable.CallParticipantView_streamCallParticipantAudioLevelTint,
-                    context.getColorCompat(R.color.stream_white)
+                    R.styleable.CallParticipantView_streamVideoCallParticipantAudioLevelTint,
+                    context.getColorCompat(R.color.stream_video_white)
                 )
 
                 val elevation = it.getDimension(
-                    R.styleable.CallParticipantView_streamCallParticipantElevation,
+                    R.styleable.CallParticipantView_streamVideoCallParticipantElevation,
                     0.dpToPxPrecise()
                 )
 
                 val cornersRadius = it.getDimension(
-                    R.styleable.CallParticipantView_streamCallParticipantCornerRadius,
+                    R.styleable.CallParticipantView_streamVideoCallParticipantCornerRadius,
                     0.dpToPxPrecise()
                 )
 

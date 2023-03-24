@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android
+package io.getstream.video.android.app
 
 import org.junit.Assert.assertEquals
 import org.junit.Test

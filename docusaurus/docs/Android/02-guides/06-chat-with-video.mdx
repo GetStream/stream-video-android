@@ -32,20 +32,20 @@ dependencies {
     // ...
     
     // Stream Chat
-    implementation(Dependencies.streamChatCompose)
-    implementation(Dependencies.streamChatOffline)
-    implementation(Dependencies.streamChatState)
-    implementation(Dependencies.streamChatUiUtils)
+    implementation(libs.stream.chat.compose)
+    implementation(libs.stream.chat.offline)
+    implementation(libs.stream.chat.state)
+    implementation(libs.stream.chat.ui.utils)
 }
 ```
 
 You'll be integrating two SDKs - Video and Chat. There is only one Video dependency right now, `stream-video-android-compose`, used to gain access to Jetpack Compose components and the low level client of the Video project.
 
 For chat, you have a few dependencies:
-* `streamChatCompose`: Similar to Video, gives access to Jetpack Components for Chat.
-* `streamChatOffline`: Used to integrate offline support in Chat.
-* `streamChatState`: Used to gain access to various state and its plugins for Chat.
-* `streamChatUiUtils`: Helper functionality to render custom UI or format data.
+* `stream-chat-compose`: Similar to Video, gives access to Jetpack Components for Chat.
+* `stream-chat-offline`: Used to integrate offline support in Chat.
+* `stream-chat-state`: Used to gain access to various state and its plugins for Chat.
+* `stream-chat-ui-utils`: A collection of helper functionalities to render custom UI or format data.
 
 The project already has a few screens set up for you with TODO items that you'll fill in later. Run the project and you should see the Login screen, followed by a blank Home screen after you select a user.
 

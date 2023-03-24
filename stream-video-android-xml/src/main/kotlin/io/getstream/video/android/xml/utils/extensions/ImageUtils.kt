@@ -24,6 +24,7 @@ import io.getstream.video.android.xml.imageloading.StreamImageLoader
 import io.getstream.video.android.xml.imageloading.StreamImageLoader.ImageTransformation
 import io.getstream.video.android.xml.utils.Disposable
 
+@JvmSynthetic
 internal fun ImageView.load(
     data: Any?,
     @DrawableRes placeholderResId: Int? = null,
@@ -41,6 +42,7 @@ internal fun ImageView.load(
     )
 }
 
+@JvmSynthetic
 internal fun ImageView.load(
     data: Any?,
     placeholderDrawable: Drawable?,
@@ -69,6 +71,7 @@ internal fun ImageView.load(
  * @param onComplete The callback when the load has finished.
  */
 
+@JvmSynthetic
 internal suspend fun ImageView.loadAndResize(
     data: Any?,
     placeholderDrawable: Drawable?,
@@ -86,6 +89,7 @@ internal suspend fun ImageView.loadAndResize(
     )
 }
 
+@JvmSynthetic
 internal fun ImageView.loadVideoThumbnail(
     uri: Uri?,
     @DrawableRes placeholderResId: Int? = null,

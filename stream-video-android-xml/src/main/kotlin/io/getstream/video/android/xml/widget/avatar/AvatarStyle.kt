@@ -50,40 +50,40 @@ public data class AvatarStyle(
                 0,
             ).apply {
                 val avatarBorderWidth = getDimensionPixelSize(
-                    R.styleable.AvatarView_streamAvatarBorderWidth,
+                    R.styleable.AvatarView_streamVideoAvatarBorderWidth,
                     0
                 )
 
                 val avatarBorderColor = getColor(
-                    R.styleable.AvatarView_streamAvatarBorderColor,
-                    context.getColorCompat(R.color.stream_black)
+                    R.styleable.AvatarView_streamVideoAvatarBorderColor,
+                    context.getColorCompat(R.color.stream_video_black)
                 )
 
                 val avatarInitialsTextStyle = TextStyle.Builder(this)
                     .size(
-                        R.styleable.AvatarView_streamAvatarTextSize,
+                        R.styleable.AvatarView_streamVideoAvatarTextSize,
                         context.getDimension(RCommon.dimen.title3TextSize)
                     )
                     .color(
-                        R.styleable.AvatarView_streamAvatarTextColor,
+                        R.styleable.AvatarView_streamVideoAvatarTextColor,
                         context.getColorCompat(RCommon.color.stream_text_avatar_initials)
                     )
                     .font(
-                        R.styleable.AvatarView_streamAvatarTextFontAssets,
-                        R.styleable.AvatarView_streamAvatarTextFont
+                        R.styleable.AvatarView_streamVideoAvatarTextFontAssets,
+                        R.styleable.AvatarView_streamVideoAvatarTextFont
                     )
                     .style(
-                        R.styleable.AvatarView_streamAvatarTextStyle,
+                        R.styleable.AvatarView_streamVideoAvatarTextStyle,
                         Typeface.BOLD
                     )
                     .build()
 
                 val avatarShape =
-                    getEnum(R.styleable.AvatarView_streamAvatarShape, AvatarShape.CIRCLE)
+                    getEnum(R.styleable.AvatarView_streamVideoAvatarShape, AvatarShape.CIRCLE)
 
                 val borderRadius =
                     getDimensionPixelSize(
-                        R.styleable.AvatarView_streamAvatarBorderRadius,
+                        R.styleable.AvatarView_streamVideoAvatarBorderRadius,
                         4.dpToPx()
                     ).toFloat()
 

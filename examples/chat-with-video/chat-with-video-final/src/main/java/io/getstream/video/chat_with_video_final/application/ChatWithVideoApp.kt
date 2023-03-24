@@ -25,7 +25,7 @@ import io.getstream.chat.android.compose.ui.attachments.StreamAttachmentFactorie
 import io.getstream.chat.android.offline.plugin.factory.StreamOfflinePluginFactory
 import io.getstream.chat.android.state.plugin.config.StatePluginConfig
 import io.getstream.chat.android.state.plugin.factory.StreamStatePluginFactory
-import io.getstream.log.StreamLog
+import io.getstream.log.Priority
 import io.getstream.log.android.AndroidStreamLogger
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
@@ -82,10 +82,7 @@ class ChatWithVideoApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        if (BuildConfig.DEBUG) {
-            StreamLog.setValidator { _, _ -> true }
-            StreamLog.install(AndroidStreamLogger())
-        }
+        AndroidStreamLogger.installOnDebuggableApp(this, minPriority = Priority.DEBUG)
     }
 
     private var video: StreamVideo? = null

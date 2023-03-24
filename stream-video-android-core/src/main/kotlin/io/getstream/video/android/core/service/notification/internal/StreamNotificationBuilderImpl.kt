@@ -154,7 +154,7 @@ internal class StreamNotificationBuilderImpl(
         return NotificationCompat.Builder(context, getNotificationChannelId())
             .setDefaults(NotificationCompat.DEFAULT_ALL)
             .setAutoCancel(false)
-            .setSmallIcon(R.drawable.baseline_call_stream_24dp)
+            .setSmallIcon(R.drawable.stream_video_ic_call)
             .setContentTitle(contentTitle)
             .setContentText(contentText)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -175,8 +175,8 @@ internal class StreamNotificationBuilderImpl(
     private fun getDefaultNotificationChannel(context: Context): (() -> NotificationChannel) {
         return {
             NotificationChannel(
-                context.getString(R.string.stream_call_notification_channel_id),
-                context.getString(R.string.stream_call_notification_channel_name),
+                context.getString(R.string.stream_video_call_notification_channel_id),
+                context.getString(R.string.stream_video_call_notification_channel_name),
                 NotificationManager.IMPORTANCE_DEFAULT,
             )
         }

@@ -28,7 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import io.getstream.video.android.core.model.Call
 import io.getstream.video.android.core.model.VideoTrack
-import io.getstream.video.android.core.ui.TextureViewRenderer
+import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import stream.video.sfu.models.TrackType
 
 /**
@@ -49,7 +49,7 @@ public fun VideoRenderer(
     onRender: (View) -> Unit = {},
 ) {
     val trackState: MutableState<VideoTrack?> = remember { mutableStateOf(null) }
-    var view: TextureViewRenderer? by remember { mutableStateOf(null) }
+    var view: VideoTextureViewRenderer? by remember { mutableStateOf(null) }
 
     DisposableEffect(call, videoTrack) {
         onDispose {
@@ -59,7 +59,7 @@ public fun VideoRenderer(
 
     AndroidView(
         factory = { context ->
-            TextureViewRenderer(context).apply {
+            VideoTextureViewRenderer(context).apply {
                 call.initRenderer(
                     videoRenderer = this,
                     sessionId = sessionId,
@@ -77,7 +77,7 @@ public fun VideoRenderer(
 }
 
 private fun cleanTrack(
-    view: TextureViewRenderer?,
+    view: VideoTextureViewRenderer?,
     trackState: MutableState<VideoTrack?>,
 ) {
     view?.let { trackState.value?.video?.removeSink(it) }
@@ -87,7 +87,7 @@ private fun cleanTrack(
 private fun setupVideo(
     trackState: MutableState<VideoTrack?>,
     track: VideoTrack,
-    renderer: TextureViewRenderer,
+    renderer: VideoTextureViewRenderer,
 ) {
     if (trackState.value == track) {
         return

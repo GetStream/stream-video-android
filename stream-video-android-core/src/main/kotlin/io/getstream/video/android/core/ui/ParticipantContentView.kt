@@ -57,7 +57,7 @@ public class ParticipantContentView : LinearLayout {
     }
 
     public fun init(context: Context?) {
-        LayoutInflater.from(context).inflate(R.layout.content_participant, this, true)
+        LayoutInflater.from(context).inflate(R.layout.stream_video_content_participant, this, true)
     }
 
     public fun renderParticipants(call: Call, participants: List<CallParticipantState>) {

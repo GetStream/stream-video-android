@@ -63,7 +63,7 @@ public data class ControlButtonStyle(
 
                 val iconTint = it.getColor(
                     R.styleable.ControlButton_android_tint,
-                    context.getColorCompat(R.color.stream_black)
+                    context.getColorCompat(R.color.stream_video_black)
                 )
 
                 val background = it.getDrawable(R.styleable.ControlButton_android_background)
@@ -79,12 +79,12 @@ public data class ControlButtonStyle(
                 )
 
                 val backgroundEnabledAlpha = it.getFloat(
-                    R.styleable.ControlButton_streamControlButtonBackgroundEnabledAlpha,
+                    R.styleable.ControlButton_streamVideoControlButtonBackgroundEnabledAlpha,
                     context.getFloatResource(RCommon.dimen.buttonToggleOnAlpha)
                 )
 
                 val backgroundDisabledAlpha = it.getFloat(
-                    R.styleable.ControlButton_streamControlButtonBackgroundDisabledAlpha,
+                    R.styleable.ControlButton_streamVideoControlButtonBackgroundDisabledAlpha,
                     context.getFloatResource(RCommon.dimen.buttonToggleOffAlpha)
                 )
 
