@@ -22,6 +22,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -38,6 +39,7 @@ import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -61,6 +63,8 @@ import io.getstream.video.android.core.utils.initials
 import io.getstream.video.android.core.utils.onError
 import io.getstream.video.android.core.utils.onSuccess
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
+import kotlin.random.Random
 
 class HomeActivity : AppCompatActivity() {
 
@@ -80,7 +84,7 @@ class HomeActivity : AppCompatActivity() {
 
     private val logger by taggedLogger("Call:HomeView")
 
-    private val callIdState: MutableState<String> = mutableStateOf("call321")
+    private val callIdState: MutableState<String> = mutableStateOf("call" + Random.nextInt(1000))
 
     private val loadingState: MutableState<Boolean> = mutableStateOf(false)
 
@@ -90,7 +94,12 @@ class HomeActivity : AppCompatActivity() {
 
     @Composable
     private fun HomeScreen() {
-        Column(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(VideoTheme.colors.appBackground),
+            verticalArrangement = Arrangement.Center
+        ) {
             UserDetails()
 
             JoinCallContent()
@@ -106,7 +115,10 @@ class HomeActivity : AppCompatActivity() {
                     backgroundColor = VideoTheme.colors.errorAccent, contentColor = Color.White
                 )
             ) {
-                Text(text = "Log Out")
+                Text(
+                    text = "Log Out",
+                    color = Color.White
+                )
             }
 
             val isLoading by loadingState
@@ -114,7 +126,10 @@ class HomeActivity : AppCompatActivity() {
             if (isLoading) {
                 Spacer(modifier = Modifier.height(16.dp))
 
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    color = VideoTheme.colors.primaryAccent
+                )
             }
         }
     }
@@ -134,13 +149,17 @@ class HomeActivity : AppCompatActivity() {
         Button(
             modifier = Modifier
                 .fillMaxWidth()
+                .height(64.dp)
                 .padding(horizontal = 16.dp)
                 .align(Alignment.CenterHorizontally),
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = VideoTheme.colors.primaryAccent
+            ),
             enabled = isDataValid, onClick = {
                 joinCall(callId = callIdState.value)
             }
         ) {
-            Text(text = "Join call")
+            Text(text = "Join call", color = Color.White)
         }
     }
 
@@ -155,7 +174,18 @@ class HomeActivity : AppCompatActivity() {
             result.onSuccess { joinedCall -> logger.v { "[joinCall] succeed: $joinedCall" } }
             result.onError {
                 logger.e { "[joinCall] failed: $it" }
-                Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
+
+                val throwable = it.cause
+                if (throwable is HttpException && throwable.code() == 401) {
+                    Toast.makeText(
+                        this@HomeActivity,
+                        R.string.unauthorized_error,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    logOut()
+                } else {
+                    Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }
@@ -172,6 +202,13 @@ class HomeActivity : AppCompatActivity() {
             onValueChange = { input ->
                 callIdState.value = input
             },
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                textColor = VideoTheme.colors.textHighEmphasis,
+                focusedBorderColor = VideoTheme.colors.primaryAccent,
+                focusedLabelColor = VideoTheme.colors.primaryAccent,
+                unfocusedBorderColor = VideoTheme.colors.primaryAccent,
+                unfocusedLabelColor = VideoTheme.colors.primaryAccent,
+            ),
             label = {
                 Text(text = "Enter the call ID")
             }
@@ -184,7 +221,6 @@ class HomeActivity : AppCompatActivity() {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(40.dp),
-            verticalAlignment = CenterVertically,
             horizontalArrangement = Arrangement.Start
         ) {
             UserIcon()
@@ -199,6 +235,7 @@ class HomeActivity : AppCompatActivity() {
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
                     .align(CenterVertically),
+                color = VideoTheme.colors.textHighEmphasis,
                 text = name,
                 overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.Center

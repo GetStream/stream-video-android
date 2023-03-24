@@ -24,20 +24,26 @@ import io.getstream.log.StreamLog
 /**
  * Sets the ripple effect to background for clickable views.
  */
+@JvmSynthetic
 internal fun View.setBackgroundRipple() {
     val outValue = TypedValue()
-    context.theme.resolveAttribute(android.R.attr.selectableItemBackgroundBorderless, outValue, true)
+    context.theme.resolveAttribute(
+        android.R.attr.selectableItemBackgroundBorderless,
+        outValue,
+        true
+    )
     setBackgroundResource(outValue.resourceId)
 }
 
 internal val View.isLandscape: Boolean
-    get() = context.isLandscape
+    @JvmSynthetic get() = context.isLandscape
 
 /**
  * Used to update the layout params of views inside [ConstraintLayout].
  *
  * @param updateParams Lambda that exposes the [ConstraintLayout.LayoutParams] to be manipulated and applied.
  */
+@JvmSynthetic
 internal inline fun View.updateLayoutParams(updateParams: ConstraintLayout.LayoutParams.() -> Unit) {
     if (layoutParams !is ConstraintLayout.LayoutParams) {
         StreamLog.w("View::updateLayoutParams") {

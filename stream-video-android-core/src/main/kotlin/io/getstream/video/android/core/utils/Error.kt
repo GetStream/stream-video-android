@@ -18,6 +18,7 @@ package io.getstream.video.android.core.utils
 
 import io.getstream.video.android.core.errors.VideoError
 
+@JvmSynthetic
 internal inline fun <T : Any> fetchResult(call: () -> T): Result<T> = try {
     Success(call.invoke())
 } catch (error: Throwable) {

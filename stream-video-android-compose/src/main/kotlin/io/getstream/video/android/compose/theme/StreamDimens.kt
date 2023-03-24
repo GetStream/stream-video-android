@@ -76,6 +76,7 @@ public data class StreamDimens(
     public val callParticipantInfoMenuOptionsHeight: Dp,
     public val callParticipantsInfoMenuOptionsButtonHeight: Dp,
     public val callParticipantsInfoAvatarSize: Dp,
+    public val callControllerBottomPadding: Dp,
     public val floatingVideoPadding: Dp,
     public val floatingVideoHeight: Dp,
     public val floatingVideoWidth: Dp,
@@ -163,7 +164,8 @@ public data class StreamDimens(
             screenShareParticipantsScreenShareListMargin = dimensionResource(id = R.dimen.screenShareParticipantsMargin),
             screenShareParticipantsRadius = dimensionResource(id = R.dimen.screenShareParticipantsRadius),
             screenSharePresenterMargin = dimensionResource(id = R.dimen.screenSharePresenterTitleMargin),
-            screenSharePresenterPadding = dimensionResource(id = R.dimen.screenSharePresenterPadding)
+            screenSharePresenterPadding = dimensionResource(id = R.dimen.screenSharePresenterPadding),
+            callControllerBottomPadding = dimensionResource(id = R.dimen.callControllerBottomPadding),
         )
     }
 }

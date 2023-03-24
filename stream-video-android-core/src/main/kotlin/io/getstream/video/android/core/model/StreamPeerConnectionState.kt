@@ -30,6 +30,7 @@ public enum class StreamPeerConnectionState {
     CLOSED;
 }
 
+@JvmSynthetic
 internal fun PeerConnectionState.toDomainPeerConnectionState(): StreamPeerConnectionState = when (this) {
     PeerConnectionState.NEW -> StreamPeerConnectionState.NEW
     PeerConnectionState.CONNECTING -> StreamPeerConnectionState.CONNECTING

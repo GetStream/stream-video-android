@@ -42,30 +42,36 @@ import io.getstream.video.android.xml.R
  * Helper method to check is the system requests RTL direction.
  */
 internal val Context.isRtlLayout: Boolean
-    get() = resources.configuration.layoutDirection == View.LAYOUT_DIRECTION_RTL
+    @JvmSynthetic get() = resources.configuration.layoutDirection == View.LAYOUT_DIRECTION_RTL
 
 @Px
+@JvmSynthetic
 internal fun Context.getDimension(@DimenRes dimen: Int): Int {
     return resources.getDimensionPixelSize(dimen)
 }
 
+@JvmSynthetic
 internal fun Context.getIntArray(@ArrayRes id: Int): IntArray {
     return resources.getIntArray(id)
 }
 
 @ColorInt
+@JvmSynthetic
 internal fun Context.getColorCompat(@ColorRes color: Int): Int {
     return ContextCompat.getColor(this, color)
 }
 
+@JvmSynthetic
 internal fun Context.getColorStateListCompat(@ColorRes color: Int): ColorStateList? {
     return ContextCompat.getColorStateList(this, color)
 }
 
+@JvmSynthetic
 internal fun Context.getDrawableCompat(@DrawableRes id: Int): Drawable? {
     return ContextCompat.getDrawable(this, id)
 }
 
+@JvmSynthetic
 internal fun Context?.getFragmentManager(): FragmentManager? {
     return when (this) {
         is AppCompatActivity -> supportFragmentManager
@@ -74,14 +80,16 @@ internal fun Context?.getFragmentManager(): FragmentManager? {
     }
 }
 
+@JvmSynthetic
 internal fun Context.copyToClipboard(text: String) {
     val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
     clipboard.setPrimaryClip(ClipData.newPlainText(null, text))
 }
 
 internal val Context.streamThemeInflater: LayoutInflater
-    get() = LayoutInflater.from(this.createStreamThemeWrapper())
+    @JvmSynthetic get() = LayoutInflater.from(this.createStreamThemeWrapper())
 
+@JvmSynthetic
 internal fun Context.createStreamThemeWrapper(): Context {
     val typedValue = TypedValue()
     return when {
@@ -94,6 +102,7 @@ internal fun Context.createStreamThemeWrapper(): Context {
     }
 }
 
+@JvmSynthetic
 internal fun Context.getResourceId(style: Int, attr: Int): Int {
     return theme.obtainStyledAttributes(
         style,
@@ -102,4 +111,4 @@ internal fun Context.getResourceId(style: Int, attr: Int): Int {
 }
 
 internal val Context.isLandscape: Boolean
-    get() = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+    @JvmSynthetic get() = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
