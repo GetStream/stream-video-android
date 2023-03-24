@@ -1,8 +1,6 @@
 @file:Suppress("UnstableApiUsage")
 
 import io.getstream.video.android.Configuration
-import io.getstream.video.android.Dependencies
-import io.getstream.video.android.Versions
 import java.io.FileInputStream
 import java.util.*
 
@@ -57,28 +55,28 @@ dependencies {
     implementation(project(":stream-video-android-compose"))
     implementation(project(":stream-video-android-xml"))
 
-    implementation(Dependencies.androidxCore)
-    implementation(Dependencies.androidxAppcompat)
-    implementation(Dependencies.material)
-    implementation(Dependencies.androidxLifecycleRuntime)
+    // androidx
+    implementation(libs.androidx.material)
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.lifecycle.runtime)
+    implementation(libs.androidx.activity.compose)
 
-    // Compose
-    implementation(Dependencies.composeRuntime)
-    implementation(Dependencies.composeUi)
-    implementation(Dependencies.composeUiTooling)
-    implementation(Dependencies.composeFoundation)
-    implementation(Dependencies.composeMaterial)
-    implementation(Dependencies.activityCompose)
-    implementation(Dependencies.composeIconsExtended)
+    // compose
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.ui.tooling)
+    implementation(libs.androidx.compose.runtime)
+    implementation(libs.androidx.compose.foundation)
+    implementation(libs.androidx.compose.material)
+    implementation(libs.androidx.compose.material.iconsExtended)
 
-    // Stream Logger
-    implementation(Dependencies.streamLog)
-    implementation(Dependencies.streamLogAndroid)
+    // stream logger
+    implementation(libs.stream.log.android)
 
     // memory detection
-    debugImplementation(Dependencies.leakCanary)
+    debugImplementation(libs.leakCanary)
 
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.3")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.4.0")
+    // unit test
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.test.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
 }

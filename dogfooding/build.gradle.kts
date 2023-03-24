@@ -1,14 +1,14 @@
 @file:Suppress("UnstableApiUsage")
 
 import io.getstream.video.android.Configuration
-import io.getstream.video.android.Dependencies
 import java.io.FileInputStream
 import java.util.*
 
+@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     id("io.getstream.android.application.compose")
-    id("com.google.gms.google-services")
     id("io.getstream.spotless")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -104,26 +104,25 @@ dependencies {
     implementation(project(":stream-video-android-compose"))
     implementation(project(":stream-video-android-xml"))
 
-    implementation(Dependencies.streamPushFirebase)
-    implementation(Dependencies.streamLog)
-    implementation(Dependencies.streamLogAndroid)
+    implementation(libs.stream.push.firebase)
+    implementation(libs.stream.log.android)
 
-    implementation(Dependencies.androidxCore)
-    implementation(Dependencies.androidxAppcompat)
-    implementation(Dependencies.androidxLifecycleRuntime)
-    implementation(Dependencies.material)
-    implementation(Dependencies.retrofit)
+    implementation(libs.androidx.material)
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.lifecycle.runtime)
+
+    implementation(libs.retrofit)
 
     // Compose
-    implementation(Dependencies.composeRuntime)
-    implementation(Dependencies.composeUi)
-    implementation(Dependencies.composeUiTooling)
-    implementation(Dependencies.composeFoundation)
-    implementation(Dependencies.composeMaterial)
-    implementation(Dependencies.activityCompose)
-    implementation(Dependencies.composeIconsExtended)
-    implementation(Dependencies.composeCoil)
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.ui.tooling)
+    implementation(libs.androidx.compose.runtime)
+    implementation(libs.androidx.compose.foundation)
+    implementation(libs.androidx.compose.material)
+    implementation(libs.androidx.compose.material.iconsExtended)
+    implementation(libs.coil.compose)
 
     // memory detection
-    debugImplementation(Dependencies.leakCanary)
+    debugImplementation(libs.leakCanary)
 }

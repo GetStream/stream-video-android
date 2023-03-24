@@ -1,6 +1,6 @@
 import io.getstream.video.android.Configuration
-import io.getstream.video.android.Dependencies
 
+@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     id("io.getstream.android.library")
     id("io.getstream.spotless")
@@ -29,10 +29,11 @@ android {
 dependencies {
     api(project(":stream-video-android-core"))
 
-    implementation(Dependencies.material)
-    implementation(Dependencies.streamLog)
-    implementation(Dependencies.coil)
+    implementation(libs.androidx.material)
+    implementation(libs.androidx.activity)
+    implementation(libs.androidx.lifecycle.runtime)
 
-    implementation(Dependencies.androidxActivity)
-    implementation(Dependencies.androidxLifecycleRuntime)
+    implementation(libs.coil)
+
+    implementation(libs.stream.log)
 }

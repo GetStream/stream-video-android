@@ -1,6 +1,6 @@
 import io.getstream.video.android.Configuration
-import io.getstream.video.android.Dependencies
 
+@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     id("com.android.test")
     id("org.jetbrains.kotlin.android")
@@ -42,10 +42,10 @@ android {
 }
 
 dependencies {
-    implementation(Dependencies.testRunner)
-    implementation(Dependencies.baseProfile)
-    implementation(Dependencies.macroBenchmark)
-    implementation(Dependencies.uiAutomator)
+    implementation(libs.androidx.test.runner)
+    implementation(libs.androidx.test.uiautomator)
+    implementation(libs.androidx.profileinstaller)
+    implementation(libs.androidx.benchmark.macro)
 }
 
 androidComponents {

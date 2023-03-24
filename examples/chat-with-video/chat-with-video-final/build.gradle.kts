@@ -1,9 +1,8 @@
 import io.getstream.video.android.Configuration
-import io.getstream.video.android.Dependencies
-import io.getstream.video.android.Versions
 import java.io.FileInputStream
-import java.util.*
+import java.util.Properties
 
+@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     id("io.getstream.android.application.compose")
     id("io.getstream.spotless")
@@ -55,25 +54,24 @@ android {
 dependencies {
     implementation(project(":stream-video-android-compose"))
 
-    implementation(Dependencies.androidxCore)
-    implementation(Dependencies.androidxAppcompat)
-    implementation(Dependencies.material)
-    implementation(Dependencies.androidxLifecycleRuntime)
+    // androidx
+    implementation(libs.androidx.material)
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.lifecycle.runtime)
 
-    // Compose
-    implementation(Dependencies.composeRuntime)
-    implementation(Dependencies.composeUi)
-    implementation(Dependencies.composeUiTooling)
-    implementation(Dependencies.composeFoundation)
-    implementation(Dependencies.composeMaterial)
-    implementation(Dependencies.activityCompose)
-    implementation(Dependencies.composeIconsExtended)
-    implementation(Dependencies.composeCoil)
+    // compose
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.ui.tooling)
+    implementation(libs.androidx.compose.runtime)
+    implementation(libs.androidx.compose.foundation)
+    implementation(libs.androidx.compose.material)
+    implementation(libs.androidx.compose.material.iconsExtended)
+    implementation(libs.coil.compose)
 
     // Stream chat SDK & logger
-    implementation(Dependencies.streamLogAndroid)
-    implementation(Dependencies.streamChatCompose)
-    implementation(Dependencies.streamChatOffline)
-    implementation(Dependencies.streamChatState)
-    implementation(Dependencies.streamChatUiUtils)
+    implementation(libs.stream.log.android)
+    implementation(libs.stream.chat.compose)
+    implementation(libs.stream.chat.offline)
+    implementation(libs.stream.chat.state)
+    implementation(libs.stream.chat.ui.utils)
 }

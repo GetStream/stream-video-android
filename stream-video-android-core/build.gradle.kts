@@ -1,5 +1,4 @@
 import io.getstream.video.android.Configuration
-import io.getstream.video.android.Dependencies
 
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
@@ -65,41 +64,41 @@ android {
 }
 
 dependencies {
-    api(Dependencies.streamWebRTC)
-    api(Dependencies.streamWebRTCUI)
+    api(libs.stream.webrtc)
+    api(libs.stream.webrtc.ui)
 
-    implementation(Dependencies.androidxCore)
-    implementation(Dependencies.androidxAppcompat)
-    implementation(Dependencies.material)
+    implementation(libs.androidx.material)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.core.ktx)
 
     // lifecycle
-    implementation(Dependencies.androidxLifecycleRuntime)
-    implementation(Dependencies.androidxLifecycleProcess)
-    implementation(Dependencies.androidxLifecycleViewModel)
+    implementation(libs.androidx.lifecycle.runtime)
+    implementation(libs.androidx.lifecycle.process)
+    implementation(libs.androidx.lifecycle.viewmodel)
 
     // coroutines
-    implementation(Dependencies.coroutines)
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.serialization.json)
 
     // API & Protobuf
-    api(Dependencies.wireRuntime)
-    implementation(Dependencies.retrofit)
-    implementation(Dependencies.retrofitWireConverter)
-    implementation(Dependencies.okhttpLoggingInterceptor)
-    implementation(Dependencies.kotlinSerializationJson)
-    implementation(Dependencies.retrofitMoshi)
-    implementation(Dependencies.retrofitScalars)
+    api(libs.wire.runtime)
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.moshi)
+    implementation(libs.retrofit.scalars)
+    implementation(libs.retrofit.wire.converter)
+    implementation(libs.okhttp.logging)
 
-    implementation(Dependencies.moshi)
-    implementation(Dependencies.moshiKotlin)
-    implementation(Dependencies.moshiAdapters)
+    implementation(libs.moshi)
+    implementation(libs.moshi.kotlin)
+    implementation(libs.moshi.adapters)
 
     // Stream
-    implementation(Dependencies.streamLog)
-    implementation(Dependencies.streamPush)
-    implementation(Dependencies.streamPushDelegate)
+    implementation(libs.stream.log)
+    implementation(libs.stream.push)
+    implementation(libs.stream.push.delegate)
 
-    // Unit Tests
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.3")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.4.0")
+    // unit test
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.test.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
 }
