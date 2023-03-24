@@ -43,7 +43,7 @@ import io.getstream.video.android.core.utils.Result
 import kotlinx.coroutines.flow.StateFlow
 
 /**
- * The main interface to control the Video calls. [StreamVideoImpl] is implements this interface.
+ * The main interface to control the Video calls. [StreamVideoImpl] implements this interface.
  */
 public interface StreamVideo {
 
