@@ -1,0 +1,27 @@
+public final class io/getstream/video/android/tooling/BuildConfig {
+	public static final field BUILD_TYPE Ljava/lang/String;
+	public static final field DEBUG Z
+	public static final field LIBRARY_PACKAGE_NAME Ljava/lang/String;
+	public fun <init> ()V
+}
+
+public final class io/getstream/video/android/tooling/exception/StreamGlobalException {
+	public static final field $stable I
+	public static final field INSTANCE Lio/getstream/video/android/tooling/exception/StreamGlobalException;
+	public final fun getInternalExceptionHandler ()Lio/getstream/video/android/tooling/handler/StreamGlobalExceptionHandler;
+	public static final fun install (Lio/getstream/video/android/tooling/handler/StreamGlobalExceptionHandler;)V
+	public static final fun isInstalled ()Z
+}
+
+public final class io/getstream/video/android/tooling/handler/StreamGlobalExceptionHandler : java/lang/Thread$UncaughtExceptionHandler {
+	public static final field $stable I
+	public static final field Companion Lio/getstream/video/android/tooling/handler/StreamGlobalExceptionHandler$Companion;
+	public fun <init> (Landroid/app/Application;Ljava/lang/String;Ljava/lang/Thread$UncaughtExceptionHandler;)V
+	public fun uncaughtException (Ljava/lang/Thread;Ljava/lang/Throwable;)V
+}
+
+public final class io/getstream/video/android/tooling/handler/StreamGlobalExceptionHandler$Companion {
+	public final fun install (Landroid/app/Application;Ljava/lang/String;)V
+	public final fun installOnDebuggableApp (Landroid/app/Application;Ljava/lang/String;)V
+}
+
