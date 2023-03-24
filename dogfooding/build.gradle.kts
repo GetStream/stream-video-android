@@ -118,6 +118,7 @@ dependencies {
 
     implementation(project(":stream-video-android-compose"))
     implementation(project(":stream-video-android-xml"))
+    implementation(project(":stream-video-android-tooling"))
 
     implementation(libs.stream.push.firebase)
     implementation(libs.stream.log.android)
