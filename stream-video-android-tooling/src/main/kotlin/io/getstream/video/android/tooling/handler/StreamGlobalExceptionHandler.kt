@@ -18,15 +18,27 @@ package io.getstream.video.android.tooling.handler
 
 import android.app.Activity
 import android.app.Application
+import android.content.pm.ApplicationInfo
 import android.os.Bundle
 import android.os.Process
+import io.getstream.video.android.tooling.exception.StreamGlobalException
+import io.getstream.video.android.tooling.handler.StreamGlobalExceptionHandler.Companion.install
+import io.getstream.video.android.tooling.handler.StreamGlobalExceptionHandler.Companion.installOnDebuggableApp
 import io.getstream.video.android.tooling.ui.ExceptionTraceActivity
 import java.io.PrintWriter
 import java.io.StringWriter
 import kotlin.system.exitProcess
 
-internal class StreamGlobalExceptionHandler constructor(
+/**
+ * A global exception handler that snatches all exceptions in the application and forward to the
+ * exception tracing screen. The exception tracing screen helps you to debug the error messages,
+ * and users can restart the crashed application or share the log messages.
+ *
+ *  You can install the exception handler with the [install] or [installOnDebuggableApp] methods.
+ */
+public class StreamGlobalExceptionHandler constructor(
     application: Application,
+    private val packageName: String,
     private val defaultExceptionHandler: Thread.UncaughtExceptionHandler,
 ) : Thread.UncaughtExceptionHandler {
 
@@ -91,8 +103,61 @@ internal class StreamGlobalExceptionHandler constructor(
 
     private fun startExceptionActivity(activity: Activity, exception: String, message: String) =
         activity.run {
-            val intent = ExceptionTraceActivity.getIntent(this, exception, message)
+            val intent = ExceptionTraceActivity.getIntent(
+                context = this,
+                exception = exception,
+                message = message,
+                this@StreamGlobalExceptionHandler.packageName
+            )
             startActivity(intent)
             finish()
         }
+
+    public companion object {
+        private val Application.isDebuggableApp: Boolean
+            get() = (applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
+
+        /**
+         * Install a new [StreamGlobalExceptionHandler] if the application is debuggable.
+         *
+         * @param application Application.
+         * @param packageName The package name of the Activity that should be started when user
+         * restarts the application.
+         */
+        public fun installOnDebuggableApp(
+            application: Application,
+            packageName: String,
+        ) {
+            val defaultExceptionHandler = Thread.getDefaultUncaughtExceptionHandler() ?: return
+            if (!StreamGlobalException.isInstalled && application.isDebuggableApp) {
+                StreamGlobalException.install(
+                    StreamGlobalExceptionHandler(
+                        application = application,
+                        packageName = packageName,
+                        defaultExceptionHandler = defaultExceptionHandler
+                    )
+                )
+            }
+        }
+
+        /**
+         * Install a new [StreamGlobalExceptionHandler].
+         *
+         * @param application Application.
+         * @param packageName The package name of the Activity that should be started when user
+         */
+        public fun install(
+            application: Application,
+            packageName: String,
+        ) {
+            val defaultExceptionHandler = Thread.getDefaultUncaughtExceptionHandler() ?: return
+            StreamGlobalException.install(
+                StreamGlobalExceptionHandler(
+                    application = application,
+                    packageName = packageName,
+                    defaultExceptionHandler = defaultExceptionHandler
+                )
+            )
+        }
+    }
 }

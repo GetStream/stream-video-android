@@ -14,4 +14,8 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<manifest package="io.getstream.video.android.tooling" />
+<resources>
+    <string name="stream_video_tooling_restart_app">Restart App</string>
+    <string name="stream_video_tooling_exception_log">Error Log</string>
+    <string name="stream_video_tooling_copy_into_clipboard">Log messages copied to clipboard!</string>
+</resources>

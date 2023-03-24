@@ -14,8 +14,15 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<resources>
-    <string name="stream_video_tooling_restart_app">Accept</string>
-    <string name="stream_video_tooling_exception_log">Error Log</string>
-    <string name="stream_video_tooling_copy_into_clipboard">Copy to clipboard</string>
-</resources>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="io.getstream.video.android.tooling">
+
+    <application>
+
+        <activity
+            android:name=".ui.ExceptionTraceActivity"
+            android:exported="false" />
+
+    </application>
+
+</manifest>

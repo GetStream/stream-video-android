@@ -30,14 +30,15 @@ internal class ExceptionTraceActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         val throwable = intent.getStringExtra(EXTRA_EXCEPTION)
-        if (throwable == null) {
+        val packageName = intent.getStringExtra(EXTRA_PACKAGE_NAME)
+        if (throwable == null || packageName == null) {
             finish()
         }
 
         setContent {
             VideoTheme {
                 ExceptionTraceScreen(
-                    packageName = "",
+                    packageName = packageName!!,
                     message = throwable!!
                 )
             }
@@ -47,10 +48,17 @@ internal class ExceptionTraceActivity : ComponentActivity() {
     internal companion object {
         private const val EXTRA_EXCEPTION = "EXTRA_EXCEPTION"
         private const val EXTRA_MESSAGE = "EXTRA_MESSAGE"
+        private const val EXTRA_PACKAGE_NAME = "EXTRA_PACKAGE_NAME"
 
-        fun getIntent(context: Context, exception: String, message: String) =
+        fun getIntent(context: Context, exception: String, message: String, packageName: String) =
             Intent(context, ExceptionTraceActivity::class.java).apply {
-                putExtras(bundleOf(EXTRA_EXCEPTION to exception, EXTRA_MESSAGE to message))
+                putExtras(
+                    bundleOf(
+                        EXTRA_EXCEPTION to exception,
+                        EXTRA_MESSAGE to message,
+                        EXTRA_PACKAGE_NAME to packageName
+                    )
+                )
             }
     }
 }
