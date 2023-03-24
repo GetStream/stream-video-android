@@ -1,24 +1,25 @@
-import com.android.build.gradle.LibraryExtension
+import com.android.build.gradle.internal.dsl.BaseAppModuleExtension
 import io.getstream.video.configureKotlinAndroid
+import io.getstream.video.kotlinOptions
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.gradle.kotlin.dsl.configure
-import org.gradle.kotlin.dsl.dependencies
-import org.gradle.kotlin.dsl.getByType
 
 class AndroidLibraryConventionPlugin : Plugin<Project> {
-  override fun apply(target: Project) {
-    with(target) {
-      with(pluginManager) {
-        apply("com.android.library")
-        apply("org.jetbrains.kotlin.android")
-      }
+    override fun apply(target: Project) {
+        with(target) {
+            pluginManager.apply("com.android.application")
+            pluginManager.apply("org.jetbrains.kotlin.android")
+            pluginManager.apply("binary-compatibility-validator")
+            pluginManager.apply("org.jetbrains.dokka")
 
-      extensions.configure<LibraryExtension> {
-        configureKotlinAndroid(this)
-        defaultConfig.targetSdk = 33
-      }
+            extensions.configure<BaseAppModuleExtension> {
+                configureKotlinAndroid(this)
+
+//                kotlinOptions {
+//                    freeCompilerArgs = freeCompilerArgs + listOf("-Xexplicit-api=strict")
+//                }
+            }
+        }
     }
-  }
 }

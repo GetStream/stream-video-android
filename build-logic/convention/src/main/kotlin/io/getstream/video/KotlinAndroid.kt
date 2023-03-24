@@ -13,42 +13,37 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinJvmOptions
  * Configure base Kotlin with Android options
  */
 internal fun Project.configureKotlinAndroid(
-  commonExtension: CommonExtension<*, *, *, *>,
+    commonExtension: CommonExtension<*, *, *, *>,
 ) {
-  commonExtension.apply {
-    compileSdk = 33
+    val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
 
-    defaultConfig {
-      minSdk = 21
+    commonExtension.apply {
+
+        compileOptions {
+            sourceCompatibility = JavaVersion.VERSION_1_8
+            targetCompatibility = JavaVersion.VERSION_1_8
+        }
+
+        kotlinOptions {
+            // Treat all Kotlin warnings as errors (disabled by default)
+            allWarningsAsErrors = properties["warningsAsErrors"] as? Boolean ?: false
+
+            // Set JVM target to 1.8
+            jvmTarget = libs.findVersion("jvmTarget").get().toString()
+            freeCompilerArgs = freeCompilerArgs + listOf(
+                "-Xjvm-default=enable",
+                "-opt-in=kotlin.RequiresOptIn",
+                "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
+                "-opt-in=androidx.lifecycle.compose.ExperimentalLifecycleComposeApi",
+                "-opt-in=io.getstream.video.android.core.internal.InternalStreamVideoApi",
+            )
+        }
+
+
+        lint {
+            abortOnError = false
+        }
     }
-
-    compileOptions {
-      sourceCompatibility = JavaVersion.VERSION_1_8
-      targetCompatibility = JavaVersion.VERSION_1_8
-      isCoreLibraryDesugaringEnabled = true
-    }
-
-    lint {
-      abortOnError = false
-    }
-
-    kotlinOptions {
-      // Treat all Kotlin warnings as errors (disabled by default)
-      allWarningsAsErrors = properties["warningsAsErrors"] as? Boolean ?: false
-
-      freeCompilerArgs = freeCompilerArgs + listOf(
-        "-opt-in=kotlin.RequiresOptIn",
-        // Enable experimental coroutines APIs, including Flow
-        "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
-        // Enable experimental compose APIs
-        "-opt-in=com.google.accompanist.pager.ExperimentalPagerApi",
-        "-opt-in=androidx.lifecycle.compose.ExperimentalLifecycleComposeApi",
-      )
-
-      // Set JVM target to 1.8
-      jvmTarget = JavaVersion.VERSION_1_8.toString()
-    }
-  }
 
 //  val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
 //  dependencies {
@@ -57,5 +52,5 @@ internal fun Project.configureKotlinAndroid(
 }
 
 fun CommonExtension<*, *, *, *>.kotlinOptions(block: KotlinJvmOptions.() -> Unit) {
-  (this as ExtensionAware).extensions.configure("kotlinOptions", block)
+    (this as ExtensionAware).extensions.configure("kotlinOptions", block)
 }

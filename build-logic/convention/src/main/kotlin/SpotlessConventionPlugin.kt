@@ -4,19 +4,19 @@ import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
 
 class SpotlessConventionPlugin : Plugin<Project> {
-  override fun apply(target: Project) {
-    with(target) {
-      pluginManager.apply("com.diffplug.spotless")
+    override fun apply(target: Project) {
+        with(target) {
+            pluginManager.apply("com.diffplug.spotless")
 
-      extensions.configure<SpotlessExtension> {
-        kotlin {
-          target("**/*.kt")
-          targetExclude("**/build/**/*.kt")
-          ktlint()
-          trimTrailingWhitespace()
-          endWithNewline()
-          licenseHeaderFile(rootProject.file("$rootDir/spotless/copyright.kt"))
-        }
+            extensions.configure<SpotlessExtension> {
+                kotlin {
+                    target("**/*.kt")
+                    targetExclude("**/build/**/*.kt")
+                    ktlint()
+                    trimTrailingWhitespace()
+                    endWithNewline()
+                    licenseHeaderFile(rootProject.file("$rootDir/spotless/copyright.kt"))
+                }
 //        format("kts") {
 //          target("**/*.kts")
 //          targetExclude("**/build/**/*.kts")
@@ -29,7 +29,7 @@ class SpotlessConventionPlugin : Plugin<Project> {
 //          // Look for the first XML tag that isn't a comment (<!--) or the xml declaration (<?xml)
 //          licenseHeaderFile(rootProject.file("spotless/copyright.xml"), "(<[^!?])")
 //        }
-      }
+            }
+        }
     }
-  }
 }
