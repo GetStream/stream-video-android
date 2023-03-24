@@ -11,7 +11,6 @@ public final class io/getstream/video/android/tooling/exception/StreamGlobalExce
 	public final fun getInternalExceptionHandler ()Lio/getstream/video/android/tooling/handler/StreamGlobalExceptionHandler;
 	public static final fun install (Lio/getstream/video/android/tooling/handler/StreamGlobalExceptionHandler;)V
 	public static final fun isInstalled ()Z
-	public static final fun unInstall ()V
 }
 
 public final class io/getstream/video/android/tooling/handler/StreamGlobalExceptionHandler : java/lang/Thread$UncaughtExceptionHandler {

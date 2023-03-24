@@ -21,33 +21,33 @@ import io.getstream.log.StreamLog
 import io.getstream.video.android.tooling.handler.StreamGlobalExceptionHandler
 
 /**
- * An installer of the [StreamGlobalExceptionHandler].
+ * Installer for the [StreamGlobalExceptionHandler].
  */
 public object StreamGlobalException {
 
     /**
-     * Represent a [StreamGlobalExceptionHandler] is already installed or not.
-     * Let you know if the internal StreamGlobalExceptionHandler instance used for the handler
-     * has been initialized or it is using the default one.
+     * Represents if [StreamGlobalExceptionHandler] is already installed or not.
+     * Lets you know if the internal [StreamGlobalExceptionHandler] instance is being used as the
+     * uncaught exception handler when true or if it is using the default one if false.
      */
     @JvmStatic
     public var isInstalled: Boolean = false
         private set
 
     /**
-     * [StreamGlobalExceptionHandler] implementation to be used.
+     * [StreamGlobalExceptionHandler] instance to be used.
      */
     @SuppressLint("StaticFieldLeak")
     @Volatile
     @PublishedApi
     internal var internalExceptionHandler: StreamGlobalExceptionHandler? = null
         private set(value) {
-            isInstalled = true
+            isInstalled = value != null
             field = value
         }
 
     /**
-     * Installs a new [StreamGlobalExceptionHandler] implementation to be used.
+     * Installs a new [StreamGlobalExceptionHandler] instance to be used.
      */
     @JvmStatic
     public fun install(exceptionHandler: StreamGlobalExceptionHandler) {
@@ -60,18 +60,6 @@ public object StreamGlobalException {
             }
             Thread.setDefaultUncaughtExceptionHandler(exceptionHandler)
             internalExceptionHandler = exceptionHandler
-        }
-    }
-
-    /**
-     * Uninstall a previous [StreamGlobalExceptionHandler] implementation.
-     */
-    @JvmStatic
-    public fun unInstall() {
-        synchronized(this) {
-            Thread.setDefaultUncaughtExceptionHandler(null)
-            internalExceptionHandler = null
-            isInstalled = false
         }
     }
 }

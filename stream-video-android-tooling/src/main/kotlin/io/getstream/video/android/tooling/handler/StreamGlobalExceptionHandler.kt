@@ -118,7 +118,7 @@ public class StreamGlobalExceptionHandler constructor(
             get() = (applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
 
         /**
-         * Install a new [StreamGlobalExceptionHandler] if the application is debuggable.
+         * Installs a new [StreamGlobalExceptionHandler] if the application is debuggable.
          *
          * @param application Application.
          * @param packageName The package name of the Activity that should be started when user
@@ -145,6 +145,7 @@ public class StreamGlobalExceptionHandler constructor(
          *
          * @param application Application.
          * @param packageName The package name of the Activity that should be started when user
+         * restarts the application.
          */
         public fun install(
             application: Application,
