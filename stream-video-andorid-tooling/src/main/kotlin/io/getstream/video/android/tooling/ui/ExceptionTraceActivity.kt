@@ -48,10 +48,9 @@ internal class ExceptionTraceActivity : ComponentActivity() {
         private const val EXTRA_EXCEPTION = "EXTRA_EXCEPTION"
         private const val EXTRA_MESSAGE = "EXTRA_MESSAGE"
 
-        fun getIntent(context: Context, exception: String, message: String) {
+        fun getIntent(context: Context, exception: String, message: String) =
             Intent(context, ExceptionTraceActivity::class.java).apply {
                 putExtras(bundleOf(EXTRA_EXCEPTION to exception, EXTRA_MESSAGE to message))
             }
-        }
     }
 }
