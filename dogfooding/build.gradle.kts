@@ -1,12 +1,12 @@
+@file:Suppress("UnstableApiUsage")
+
 import io.getstream.video.android.Configuration
 import io.getstream.video.android.Dependencies
-import io.getstream.video.android.Versions
 import java.io.FileInputStream
 import java.util.*
 
 plugins {
-    id("com.android.application")
-    id("org.jetbrains.kotlin.android")
+    id("io.getstream.android.application.compose")
     id("com.google.gms.google-services")
     id("io.getstream.spotless")
 }
@@ -21,8 +21,6 @@ android {
         targetSdk = Configuration.targetSdk
         versionCode = 1
         versionName = "1.0"
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -93,25 +91,6 @@ android {
         }
     }
 
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
-    buildFeatures {
-        compose = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = Versions.COMPOSE_COMPILER
-    }
-    packagingOptions {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
-        }
-    }
-
     lint {
         baseline = file("lint-baseline.xml")
     }
@@ -136,7 +115,6 @@ dependencies {
     implementation(Dependencies.retrofit)
 
     // Compose
-    implementation(platform(Dependencies.composeBom))
     implementation(Dependencies.composeRuntime)
     implementation(Dependencies.composeUi)
     implementation(Dependencies.composeUiTooling)

@@ -5,8 +5,7 @@ import java.io.FileInputStream
 import java.util.*
 
 plugins {
-    id("com.android.application")
-    id("org.jetbrains.kotlin.android")
+    id("io.getstream.android.application.compose")
     id("io.getstream.spotless")
 }
 
@@ -34,7 +33,7 @@ android {
         }
     }
 
-    val envProps: java.io.File = rootProject.file(".env.properties")
+    val envProps: File = rootProject.file(".env.properties")
     if (envProps.exists()) {
         val properties = Properties()
         properties.load(FileInputStream(envProps))
@@ -45,23 +44,6 @@ android {
                     buildType.buildConfigField("String", "${it.key}", "\"${it.value}\"")
                 }
         }
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
-
-    buildFeatures {
-        compose = true
-    }
-
-    composeOptions {
-        kotlinCompilerExtensionVersion = Versions.COMPOSE_COMPILER
     }
 
     lint {
@@ -78,7 +60,6 @@ dependencies {
     implementation(Dependencies.androidxLifecycleRuntime)
 
     // Compose
-    implementation(platform(Dependencies.composeBom))
     implementation(Dependencies.composeRuntime)
     implementation(Dependencies.composeUi)
     implementation(Dependencies.composeUiTooling)
@@ -88,6 +69,5 @@ dependencies {
     implementation(Dependencies.composeIconsExtended)
 
     // Stream Logger
-    implementation(Dependencies.streamLog)
     implementation(Dependencies.streamLogAndroid)
 }

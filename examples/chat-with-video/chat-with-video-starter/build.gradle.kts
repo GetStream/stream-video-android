@@ -5,8 +5,7 @@ import java.io.FileInputStream
 import java.util.*
 
 plugins {
-    id("com.android.application")
-    id("org.jetbrains.kotlin.android")
+    id("io.getstream.android.application.compose")
     id("io.getstream.spotless")
 }
 
@@ -50,25 +49,6 @@ android {
         }
     }
 
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
-    buildFeatures {
-        compose = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = Versions.COMPOSE_COMPILER
-    }
-    packagingOptions {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
-        }
-    }
-
     lint {
         baseline = file("lint-baseline.xml")
     }
@@ -94,7 +74,6 @@ dependencies {
     implementation(Dependencies.composeCoil)
 
     // Stream Logger
-    implementation(Dependencies.streamLog)
     implementation(Dependencies.streamLogAndroid)
 
     // Stream Chat

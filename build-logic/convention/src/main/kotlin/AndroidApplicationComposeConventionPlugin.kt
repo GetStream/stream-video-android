@@ -14,6 +14,12 @@ class AndroidApplicationComposeConventionPlugin : Plugin<Project> {
             extensions.configure<BaseAppModuleExtension> {
                 configureKotlinAndroid(this)
                 configureAndroidCompose(this)
+
+                packagingOptions {
+                    resources {
+                        excludes += "/META-INF/{AL2.0,LGPL2.1}"
+                    }
+                }
             }
         }
     }
