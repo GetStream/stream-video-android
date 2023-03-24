@@ -26,6 +26,7 @@ import org.webrtc.PeerConnection
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
+@JvmSynthetic
 internal suspend fun PeerConnection.addRtcIceCandidate(iceCandidate: IceCandidate): Result<Unit> {
     return suspendCoroutine { cont ->
         addIceCandidate(

@@ -19,10 +19,11 @@ package io.getstream.video.android.compose.ui.components.participants.internal
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import android.view.View
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -77,7 +78,11 @@ internal fun RegularCallParticipantsContent(
     val orientation = LocalConfiguration.current.orientation
 
     Row(modifier = modifier.background(color = VideoTheme.colors.appBackground)) {
-        BoxWithConstraints(modifier = Modifier.weight(1f)) {
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .padding(paddingValues)
+        ) {
             val roomParticipants by call.callParticipants.collectAsState(emptyList())
 
             if (roomParticipants.isNotEmpty()) {
@@ -87,7 +92,6 @@ internal fun RegularCallParticipantsContent(
                         .onSizeChanged { parentSize = it },
                     call = call,
                     onRender = onRender,
-                    paddingValues = paddingValues,
                     parentSize = parentSize
                 )
 

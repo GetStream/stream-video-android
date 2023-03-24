@@ -18,10 +18,44 @@ package io.getstream.video.android.dogfooding
 
 import android.content.Context
 import android.content.Intent
+import android.media.MediaPlayer
+import android.os.Bundle
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import io.getstream.video.android.compose.ui.AbstractComposeCallActivity
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.model.state.StreamCallState
+import kotlinx.coroutines.launch
 
 class CallActivity : AbstractComposeCallActivity() {
+
+    private val mediaPlayer by lazy {
+        MediaPlayer.create(this, R.raw.ringing).apply { isLooping = true }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                getStreamVideo(this@CallActivity).callState.collect { call ->
+                    when (call) {
+                        is StreamCallState.Joining -> mediaPlayer.start()
+                        is StreamCallState.Connected -> mediaPlayer.stop()
+                        else -> Unit
+                    }
+                }
+            }
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+
+        mediaPlayer.stop()
+        mediaPlayer.release()
+    }
 
     /**
      * Provides the StreamVideo instance through the videoApp.

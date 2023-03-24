@@ -23,6 +23,7 @@ package io.getstream.video.android.core.internal
     AnnotationTarget.FUNCTION,
     AnnotationTarget.TYPEALIAS
 )
+@Retention(AnnotationRetention.BINARY)
 @RequiresOptIn(
     message = "This is internal API for the Stream Video libraries. Do not depend on this API in your own client code.",
     level = RequiresOptIn.Level.ERROR

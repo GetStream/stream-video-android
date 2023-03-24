@@ -16,5 +16,10 @@
 
 package io.getstream.video.android.core.utils
 
+import io.getstream.video.android.core.internal.InternalStreamVideoApi
+
+@InternalStreamVideoApi
 public const val INTENT_EXTRA_CALL_CID: String = "call_cid"
+
+@InternalStreamVideoApi
 public const val INTENT_EXTRA_NOTIFICATION_ID: String = "notification_id"

@@ -80,6 +80,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
@@ -571,12 +572,14 @@ internal class CallClientImpl(
 
         return try {
             withTimeout(TIMEOUT) {
-                isConnected.first { it }
+                val connected = isConnected.value
+                logger.d { "[executeJoinRequest] is connected: $connected" }
                 sfuSocket.sendJoinRequest(request)
+                logger.d { "[executeJoinRequest] sfu join request is sent" }
                 callEngine.onSfuJoinSent(request)
-                logger.v { "[executeJoinRequest] request is sent" }
-                val event = sfuEvents.first { it is JoinCallResponseEvent } as JoinCallResponseEvent
-                logger.v { "[executeJoinRequest] completed: $event" }
+                logger.d { "[executeJoinRequest] request is sent" }
+                val event = sfuEvents.filterIsInstance<JoinCallResponseEvent>().first()
+                logger.d { "[executeJoinRequest] completed: $event" }
                 Success(JoinResponse(event.callState))
             }
         } catch (e: Throwable) {

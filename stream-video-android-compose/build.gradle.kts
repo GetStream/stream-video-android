@@ -1,11 +1,24 @@
+/*
+ * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 import io.getstream.video.android.Configuration
-import io.getstream.video.android.Dependencies
-import io.getstream.video.android.Versions
 
+@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
-    id("com.android.library")
-    id("org.jetbrains.kotlin.android")
-    id("binary-compatibility-validator")
+    id("io.getstream.android.library.compose")
+    id("io.getstream.spotless")
 }
 
 rootProject.extra.apply {
@@ -14,62 +27,33 @@ rootProject.extra.apply {
     set("PUBLISH_VERSION", rootProject.extra.get("rootVersionName"))
 }
 
-apply(from ="${rootDir}/scripts/publish-module.gradle")
+apply(from = "${rootDir}/scripts/publish-module.gradle")
 
 android {
     compileSdk = Configuration.compileSdk
 
     defaultConfig {
         minSdk = Configuration.minSdk
-        targetSdk = Configuration.targetSdk
     }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
-
-    buildFeatures {
-        compose = true
-    }
-
-    composeOptions {
-        kotlinCompilerExtensionVersion = Versions.COMPOSE_COMPILER
-    }
-}
-
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().all {
-    kotlinOptions.freeCompilerArgs += listOf(
-        "-P",
-        "plugin:androidx.compose.compiler.plugins.kotlin:reportsDestination=" +
-            project.buildDir.absolutePath + "/compose_metrics"
-    )
-    kotlinOptions.freeCompilerArgs += listOf(
-        "-P",
-        "plugin:androidx.compose.compiler.plugins.kotlin:metricsDestination=" +
-            project.buildDir.absolutePath + "/compose_metrics"
-    )
 }
 
 dependencies {
     api(project(":stream-video-android-core"))
     api(project(":stream-video-android-ui-common"))
 
-    implementation(Dependencies.material)
-    implementation(Dependencies.streamLog)
+    // androidx
+    implementation(libs.androidx.material)
+    implementation(libs.stream.log.android)
 
-    // Compose
-    implementation(platform(Dependencies.composeBom))
-    implementation(Dependencies.composeRuntime)
-    implementation(Dependencies.composeUi)
-    implementation(Dependencies.composeUiTooling)
-    implementation(Dependencies.composeFoundation)
-    implementation(Dependencies.composeMaterial)
-    implementation(Dependencies.activityCompose)
-    implementation(Dependencies.composeIconsExtended)
-    implementation(Dependencies.composeCoil)
+    // compose
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.ui.tooling)
+    implementation(libs.androidx.compose.runtime)
+    implementation(libs.androidx.compose.foundation)
+    implementation(libs.androidx.compose.material)
+    implementation(libs.androidx.compose.material.iconsExtended)
+
+    // image loading
+    implementation(libs.coil.compose)
 }

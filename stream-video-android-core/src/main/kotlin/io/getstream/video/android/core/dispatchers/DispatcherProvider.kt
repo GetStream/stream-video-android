@@ -43,7 +43,7 @@ public object DispatcherProvider {
      */
     public val Immediate: CoroutineDispatcher
         get() {
-            val mainDispatcher = io.getstream.video.android.core.dispatchers.DispatcherProvider.Main
+            val mainDispatcher = Main
 
             return if (mainDispatcher is MainCoroutineDispatcher) {
                 mainDispatcher.immediate
@@ -65,15 +65,15 @@ public object DispatcherProvider {
      * Overrides the main (UI thread) and IO dispatcher. For testing purposes only.
      */
     public fun set(mainDispatcher: CoroutineDispatcher, ioDispatcher: CoroutineDispatcher) {
-        io.getstream.video.android.core.dispatchers.DispatcherProvider.Main = mainDispatcher
-        io.getstream.video.android.core.dispatchers.DispatcherProvider.IO = ioDispatcher
+        Main = mainDispatcher
+        IO = ioDispatcher
     }
 
     /**
      * Resets the dispatchers to their default values. For testing purposes only.
      */
     public fun reset() {
-        io.getstream.video.android.core.dispatchers.DispatcherProvider.Main = Dispatchers.Main
-        io.getstream.video.android.core.dispatchers.DispatcherProvider.IO = Dispatchers.IO
+        Main = Dispatchers.Main
+        IO = Dispatchers.IO
     }
 }

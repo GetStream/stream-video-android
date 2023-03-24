@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package io.getstream.video.android.core.viewmodel
 
 import android.hardware.camera2.CameraMetadata
@@ -51,6 +53,7 @@ import io.getstream.video.android.core.utils.Failure
 import io.getstream.video.android.core.utils.Success
 import io.getstream.video.android.core.utils.onError
 import io.getstream.video.android.core.utils.onSuccess
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -303,6 +306,7 @@ public class CallViewModel(
 
     override fun onCleared() {
         super.onCleared()
+        cancelCall()
         clearState()
     }
 
@@ -313,10 +317,9 @@ public class CallViewModel(
             is ToggleMicrophone -> onMicrophoneChanged(callAction.isEnabled)
             is SelectAudioDevice -> selectAudioDevice(callAction.audioDevice)
             FlipCamera -> flipCamera()
-            CancelCall -> cancelCall()
+            CancelCall, LeaveCall -> cancelCall()
             AcceptCall -> acceptCall()
             DeclineCall -> rejectCall()
-            LeaveCall -> cancelCall()
             is InviteUsersToCall -> inviteUsersToCall(callAction.users)
             is ToggleScreenConfiguration -> {
                 _isFullscreen.value = callAction.isFullscreen && callAction.isLandscape

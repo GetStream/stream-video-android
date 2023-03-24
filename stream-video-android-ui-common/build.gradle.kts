@@ -1,11 +1,24 @@
+/*
+ * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 import io.getstream.video.android.Configuration
-import io.getstream.video.android.Dependencies
-import io.getstream.video.android.Versions
 
+@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
-    id("com.android.library")
-    id("org.jetbrains.kotlin.android")
-    id("binary-compatibility-validator")
+    id("io.getstream.android.library")
+    id("io.getstream.spotless")
 }
 
 rootProject.extra.apply {
@@ -21,16 +34,6 @@ android {
 
     defaultConfig {
         minSdk = Configuration.minSdk
-        targetSdk = Configuration.targetSdk
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-
-    kotlinOptions {
-        jvmTarget = "1.8"
     }
 
     buildFeatures {
@@ -41,10 +44,11 @@ android {
 dependencies {
     api(project(":stream-video-android-core"))
 
-    implementation(Dependencies.material)
-    implementation(Dependencies.streamLog)
-    implementation(Dependencies.coil)
+    implementation(libs.androidx.material)
+    implementation(libs.androidx.activity)
+    implementation(libs.androidx.lifecycle.runtime)
 
-    implementation(Dependencies.androidxActivity)
-    implementation(Dependencies.androidxLifecycleRuntime)
+    implementation(libs.coil)
+
+    implementation(libs.stream.log)
 }
