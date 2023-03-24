@@ -66,7 +66,7 @@ internal fun PortraitScreenSharingContent(
         Text(
             modifier = Modifier.padding(VideoTheme.dimens.screenSharePresenterPadding),
             text = stringResource(
-                id = R.string.stream_screen_sharing_title,
+                id = R.string.stream_video_screen_sharing_title,
                 sharingParticipant.name.ifEmpty { sharingParticipant.id }
             ),
             color = VideoTheme.colors.textHighEmphasis,

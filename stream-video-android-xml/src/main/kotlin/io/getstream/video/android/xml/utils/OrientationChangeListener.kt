@@ -25,5 +25,5 @@ public interface OrientationChangeListener {
      *
      * @param isLandscape Whether the device orientation is landscape or not.
      */
-    fun onOrientationChanged(isLandscape: Boolean) {}
+    public fun onOrientationChanged(isLandscape: Boolean) {}
 }

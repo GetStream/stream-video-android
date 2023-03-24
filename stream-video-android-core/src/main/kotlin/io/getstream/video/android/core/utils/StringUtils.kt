@@ -25,6 +25,7 @@ public fun String.initials(): String {
         .joinToString(separator = "") { it.take(1).uppercase() }
 }
 
+@JvmSynthetic
 internal fun StreamPeerType.stringify() = when (this) {
     StreamPeerType.PUBLISHER -> "publisher"
     StreamPeerType.SUBSCRIBER -> "subscriber"

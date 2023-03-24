@@ -41,6 +41,7 @@ import stream.video.sfu.models.Participant
 import stream.video.sfu.models.TrackType
 import java.util.*
 
+@JvmSynthetic
 internal fun GetOrCreateCallResponse.toCall(kind: StreamCallKind): CallMetadata {
     return with(call) {
         CallMetadata(
@@ -68,6 +69,7 @@ internal fun GetOrCreateCallResponse.toCall(kind: StreamCallKind): CallMetadata 
     }
 }
 
+@JvmSynthetic
 internal fun MemberResponse.toCallUser(): CallUser {
     return CallUser(
         id = userId,
@@ -81,6 +83,7 @@ internal fun MemberResponse.toCallUser(): CallUser {
     )
 }
 
+@JvmSynthetic
 internal fun Participant.toPartialUser(): CallUser {
     return CallUser(
         id = user_id,
@@ -99,6 +102,7 @@ internal fun Participant.toPartialUser(): CallUser {
     )
 }
 
+@JvmSynthetic
 internal fun UserResponse.toUser(): User {
     return User(
         id = id,
@@ -111,6 +115,7 @@ internal fun UserResponse.toUser(): User {
     )
 }
 
+@JvmSynthetic
 internal fun QueryCallsResponse.toQueriedCalls(): QueriedCalls {
     return QueriedCalls(
         calls = calls.toCallData(),
@@ -119,10 +124,12 @@ internal fun QueryCallsResponse.toQueriedCalls(): QueriedCalls {
     )
 }
 
+@JvmSynthetic
 internal fun List<CallStateResponseFields>.toCallData(): List<CallData> {
     return map { it.toCallData() }
 }
 
+@JvmSynthetic
 internal fun CallStateResponseFields.toCallData(): CallData {
     return CallData(
         blockedUsers = blockedUsers.map { it.toUser() },
@@ -132,6 +139,7 @@ internal fun CallStateResponseFields.toCallData(): CallData {
     )
 }
 
+@JvmSynthetic
 internal fun CallRecording.toRecording(): CallRecordingData {
     return CallRecordingData(
         fileName = filename,
@@ -141,6 +149,7 @@ internal fun CallRecording.toRecording(): CallRecordingData {
     )
 }
 
+@JvmSynthetic
 internal fun ReactionResponse.toReaction(): ReactionData {
     return ReactionData(
         type = type,
@@ -150,6 +159,7 @@ internal fun ReactionResponse.toReaction(): ReactionData {
     )
 }
 
+@JvmSynthetic
 internal fun EdgeResponse.toEdge(): EdgeData {
     return EdgeData(
         id = id,

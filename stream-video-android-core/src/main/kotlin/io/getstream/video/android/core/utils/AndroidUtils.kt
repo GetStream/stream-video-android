@@ -34,6 +34,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.callbackFlow
 
+@JvmSynthetic
 internal suspend fun Context.registerReceiverAsFlow(vararg actions: String): Flow<Intent> {
     return callbackFlow {
         val receiver = object : BroadcastReceiver() {
@@ -57,14 +58,14 @@ internal suspend fun Context.registerReceiverAsFlow(vararg actions: String): Flo
 }
 
 internal val Context.notificationManager: NotificationManager
-    get() = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    @JvmSynthetic get() = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
 internal val Context.vibrator: Vibrator
-    get() = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+    @JvmSynthetic get() = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
 
 internal val Context.vibratorManager: VibratorManager
     @RequiresApi(Build.VERSION_CODES.S)
-    get() = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+    @JvmSynthetic get() = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
 
 public fun Activity.shouldShowRequestPermissionsRationale(permissions: Array<out String>): Boolean {
     return permissions.map {

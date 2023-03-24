@@ -24,6 +24,7 @@ import io.getstream.video.android.core.model.state.StreamDate
 /**
  * Converts [StreamCallState.Outgoing] into [CallMetadata].
  */
+@JvmSynthetic
 internal fun StreamCallState.Outgoing.toMetadata(): CallMetadata =
     CallMetadata(
         cid = callGuid.cid,
@@ -44,6 +45,7 @@ internal fun StreamCallState.Outgoing.toMetadata(): CallMetadata =
 /**
  * Converts [StreamCallState.InCall] into [StreamCallState.Connecting].
  */
+@JvmSynthetic
 internal fun StreamCallState.Joined.toConnecting(sfuSessionId: StreamSfuSessionId) =
     StreamCallState.Connecting(
         callGuid = callGuid,
@@ -66,6 +68,7 @@ internal fun StreamCallState.Joined.toConnecting(sfuSessionId: StreamSfuSessionI
 /**
  * Converts [StreamCallState.Connecting] into [StreamCallState.Connected].
  */
+@JvmSynthetic
 internal fun StreamCallState.Connecting.toConnected() = StreamCallState.Connected(
     callGuid = callGuid,
     callKind = callKind,

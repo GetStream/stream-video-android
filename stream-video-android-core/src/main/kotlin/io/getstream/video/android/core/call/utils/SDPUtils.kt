@@ -25,6 +25,7 @@ import org.webrtc.SessionDescription
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
+@JvmSynthetic
 internal suspend inline fun createValue(
     crossinline call: (SdpObserver) -> Unit
 ): Result<SessionDescription> = suspendCoroutine {
@@ -53,6 +54,7 @@ internal suspend inline fun createValue(
     call(observer)
 }
 
+@JvmSynthetic
 internal suspend inline fun setValue(
     crossinline call: (SdpObserver) -> Unit
 ): Result<Unit> = suspendCoroutine {

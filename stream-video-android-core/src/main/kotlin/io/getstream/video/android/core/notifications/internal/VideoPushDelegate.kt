@@ -114,13 +114,13 @@ internal class VideoPushDelegate(
             .addAction(
                 NotificationCompat.Action.Builder(
                     null,
-                    context.getString(R.string.stream_call_notification_action_accept),
+                    context.getString(R.string.stream_video_call_notification_action_accept),
                     acceptCallPendingIntent,
                 ).build()
             ).addAction(
                 NotificationCompat.Action.Builder(
                     null,
-                    context.getString(R.string.stream_call_notification_action_reject),
+                    context.getString(R.string.stream_video_call_notification_action_reject),
                     rejectCallPendingIntent
                 ).build()
             ).build()
