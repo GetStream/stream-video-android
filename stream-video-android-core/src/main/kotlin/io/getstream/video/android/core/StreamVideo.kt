@@ -101,7 +101,7 @@ public interface StreamVideo {
         type: StreamCallType,
         id: StreamCallId,
         participantIds: List<String> = emptyList(),
-        ring: Boolean
+        ring: Boolean = false,
     ): Result<CallMetadata>
 
     /**
