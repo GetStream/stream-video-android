@@ -9,6 +9,7 @@ java {
   targetCompatibility = JavaVersion.VERSION_11
 }
 
+@Suppress("DSL_SCOPE_VIOLATION")
 dependencies {
   compileOnly(libs.android.gradlePlugin)
   compileOnly(libs.kotlin.gradlePlugin)

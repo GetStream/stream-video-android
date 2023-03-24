@@ -1,11 +1,8 @@
 import io.getstream.video.android.Configuration
 import io.getstream.video.android.Dependencies
-import io.getstream.video.android.Versions
 
 plugins {
-    id("com.android.library")
-    id("org.jetbrains.kotlin.android")
-    id("binary-compatibility-validator")
+    id("io.getstream.android.library.compose")
     id("io.getstream.spotless")
 }
 
@@ -15,31 +12,13 @@ rootProject.extra.apply {
     set("PUBLISH_VERSION", rootProject.extra.get("rootVersionName"))
 }
 
-apply(from ="${rootDir}/scripts/publish-module.gradle")
+apply(from = "${rootDir}/scripts/publish-module.gradle")
 
 android {
     compileSdk = Configuration.compileSdk
 
     defaultConfig {
         minSdk = Configuration.minSdk
-        targetSdk = Configuration.targetSdk
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
-
-    buildFeatures {
-        compose = true
-    }
-
-    composeOptions {
-        kotlinCompilerExtensionVersion = Versions.COMPOSE_COMPILER
     }
 }
 
@@ -47,12 +26,12 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().all {
     kotlinOptions.freeCompilerArgs += listOf(
         "-P",
         "plugin:androidx.compose.compiler.plugins.kotlin:reportsDestination=" +
-            project.buildDir.absolutePath + "/compose_metrics"
+                project.buildDir.absolutePath + "/compose_metrics"
     )
     kotlinOptions.freeCompilerArgs += listOf(
         "-P",
         "plugin:androidx.compose.compiler.plugins.kotlin:metricsDestination=" +
-            project.buildDir.absolutePath + "/compose_metrics"
+                project.buildDir.absolutePath + "/compose_metrics"
     )
 }
 

@@ -1,11 +1,8 @@
 import io.getstream.video.android.Configuration
 import io.getstream.video.android.Dependencies
-import io.getstream.video.android.Versions
 
 plugins {
-    id("com.android.library")
-    id("org.jetbrains.kotlin.android")
-    id("binary-compatibility-validator")
+    id("io.getstream.android.library")
     id("io.getstream.spotless")
 }
 
@@ -22,19 +19,9 @@ android {
 
     defaultConfig {
         minSdk = Configuration.minSdk
-        targetSdk = Configuration.targetSdk
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
     }
 
     resourcePrefix = "stream_video_"
-
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
 
     buildFeatures {
         viewBinding = true

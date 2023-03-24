@@ -1,6 +1,7 @@
 import com.android.build.gradle.LibraryExtension
 import io.getstream.video.configureAndroidCompose
 import io.getstream.video.configureKotlinAndroid
+import io.getstream.video.kotlinOptions
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
