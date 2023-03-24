@@ -6,6 +6,7 @@ plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
     id("binary-compatibility-validator")
+    id("io.getstream.spotless")
 }
 
 rootProject.extra.apply {

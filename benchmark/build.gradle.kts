@@ -4,6 +4,7 @@ import io.getstream.video.android.Dependencies
 plugins {
     id("com.android.test")
     id("org.jetbrains.kotlin.android")
+    id("io.getstream.spotless")
 }
 
 android {

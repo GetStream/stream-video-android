@@ -8,6 +8,7 @@ plugins {
     id 'com.squareup.wire'
     id 'binary-compatibility-validator'
     id 'io.getstream.video.generateServices'
+    id 'io.getstream.spotless'
 }
 
 ext {

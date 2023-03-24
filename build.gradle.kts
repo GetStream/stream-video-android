@@ -23,7 +23,6 @@ plugins {
 }
 
 subprojects {
-    apply(from = "$rootDir/spotless/spotless.gradle")
     if (name.startsWith("stream-video-android")) {
         tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
             kotlinOptions.freeCompilerArgs += listOf(

@@ -1,3 +1,5 @@
+@file:Suppress("UnstableApiUsage")
+
 import io.getstream.video.android.Configuration
 import io.getstream.video.android.Dependencies
 import io.getstream.video.android.Versions
@@ -7,6 +9,7 @@ import java.util.*
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("io.getstream.spotless")
 }
 
 android {
@@ -33,7 +36,7 @@ android {
         }
     }
 
-    val envProps: java.io.File = rootProject.file(".env.properties")
+    val envProps: File = rootProject.file(".env.properties")
     if (envProps.exists()) {
         val properties = Properties()
         properties.load(FileInputStream(envProps))
