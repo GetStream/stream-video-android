@@ -19,7 +19,10 @@ package io.getstream.video.android.core
 import androidx.test.core.app.ApplicationProvider
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
+@RunWith(RobolectricTestRunner::class)
 class ClientAndAuthTest : IntegrationTestBase() {
     /**
      * So what do we need to test on the client..
