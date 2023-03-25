@@ -1,5 +1,6 @@
 @file:Suppress("UnstableApiUsage")
 pluginManagement {
+  includeBuild("build-logic")
   repositories {
     gradlePluginPortal()
     google()
@@ -26,6 +27,7 @@ include(":stream-video-android-core")
 include(":stream-video-android-ui-common")
 include(":stream-video-android-xml")
 include(":stream-video-android-compose")
+include(":stream-video-android-tooling")
 include(":stream-video-android-bom")
 
 // Examples and guide projects

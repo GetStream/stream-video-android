@@ -36,7 +36,6 @@ import io.getstream.video.android.core.user.UserPreferencesManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-
 public class StreamVideoBuilder(
     private val context: Context,
     private val user: User,
