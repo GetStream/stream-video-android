@@ -76,14 +76,16 @@ public class UpdateOrDeleteCallCrudTest: IntegrationTestBase() {
 
     @Test
     fun createACall() = runTest {
-
-        val result2 = helper.client.getOrCreateCall("default", "123")
-
-        System.out.println(result2.onError {
+        val client = helper.client
+        val result2 = client.getOrCreateCall("default", "abc")
+        // TODO: update call needs to expose more..
+        val result3 = client.updateCall("default", "abc", mutableMapOf("color" to "green"))
+        result2.onSuccess { it.kind }
+        System.out.println(result3.onError {
             System.out.println("abc")
             System.out.println(it.toString())
         })
-        System.out.println(result2.onSuccess {
+        System.out.println(result3.onSuccess {
             System.out.println("123")
             System.out.println(it)
         })

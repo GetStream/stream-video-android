@@ -86,6 +86,12 @@ public interface StreamVideo {
      */
     public fun removeDevices(devices: List<Device>)
 
+    public suspend fun updateCall(
+        type: StreamCallType,
+        id: StreamCallId,
+        custom: Map<String, Any>): Result<CallInfo>
+
+
     /**
      * Creates a call with given information. You can then use the [CallMetadata] and join it and get auth
      * information to fully connect.

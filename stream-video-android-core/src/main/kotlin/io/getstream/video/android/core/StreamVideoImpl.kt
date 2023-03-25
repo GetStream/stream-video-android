@@ -85,15 +85,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.openapitools.client.models.BlockUserRequest
-import org.openapitools.client.models.CallRequest
-import org.openapitools.client.models.GetCallEdgeServerRequest
-import org.openapitools.client.models.GetCallEdgeServerResponse
-import org.openapitools.client.models.GetOrCreateCallRequest
-import org.openapitools.client.models.MemberRequest
-import org.openapitools.client.models.RequestPermissionRequest
-import org.openapitools.client.models.SendEventRequest
-import org.openapitools.client.models.UnblockUserRequest
+import org.openapitools.client.models.*
 import stream.video.coordinator.client_v1_rpc.CreateDeviceRequest
 import stream.video.coordinator.client_v1_rpc.DeleteDeviceRequest
 import stream.video.coordinator.push_v1.DeviceInput
@@ -236,6 +228,30 @@ internal class StreamVideoImpl(
     /**
      * Domain - Coordinator.
      */
+
+
+    /**
+     * @see StreamVideo.updateCall
+     */
+    override suspend fun updateCall(
+        type: String,
+        id: String,
+        custom: Map<String,Any>,
+    ): Result<CallInfo> = withContext(scope.coroutineContext) {
+        logger.d { "[updateCall] type: $type, id: $id, participantIds: $custom" }
+        //engine.onCallStarting(type, id, participantIds, ring, forcedNewCall = false)
+        callCoordinatorClient.updateCall(
+            type = type,
+            id = id,
+            updateCallRequest = UpdateCallRequest(
+                custom = custom,
+                settingsOverride = CallSettingsRequest()
+            )
+        )
+            .also { logger.v { "[updateCall] Coordinator result: $it" } }
+            .onError { engine.onCallFailed(it) }
+            .also { logger.v { "[updateCall] Final result: $it" } }
+    }
 
     // caller: DIAL and wait answer
     /**

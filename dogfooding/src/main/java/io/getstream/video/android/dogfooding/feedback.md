@@ -24,3 +24,5 @@ Most apps need a version that changes based on screensharing, portrait, landscap
 9. CallParticipant name is a confusing name for rendering video...
 
 10. CompositionLocal. Android doesn't use the composition local approach to sharing the active call with the components. React uses contexts. Probably for performance. Its fine, either approach works. 
+
+11. Do we need the callEngine local events?
