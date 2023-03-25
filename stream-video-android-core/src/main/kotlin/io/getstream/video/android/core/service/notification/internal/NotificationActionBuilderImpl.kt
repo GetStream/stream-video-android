@@ -36,7 +36,7 @@ internal class NotificationActionBuilderImpl(
     ): NotificationCompat.Action {
         return NotificationCompat.Action.Builder(
             android.R.drawable.ic_menu_call,
-            context.getString(R.string.stream_call_notification_action_accept),
+            context.getString(R.string.stream_video_call_notification_action_accept),
             createAcceptPendingIntent(notificationId, guid),
         ).build()
     }
@@ -47,7 +47,7 @@ internal class NotificationActionBuilderImpl(
     ): NotificationCompat.Action {
         return NotificationCompat.Action.Builder(
             android.R.drawable.ic_delete,
-            context.getString(R.string.stream_call_notification_action_reject),
+            context.getString(R.string.stream_video_call_notification_action_reject),
             createRejectPendingIntent(notificationId, guid),
         ).build()
     }
@@ -58,7 +58,7 @@ internal class NotificationActionBuilderImpl(
     ): NotificationCompat.Action {
         return NotificationCompat.Action.Builder(
             android.R.drawable.ic_delete,
-            context.getString(R.string.stream_call_notification_action_cancel),
+            context.getString(R.string.stream_video_call_notification_action_cancel),
             createCancelPendingIntent(notificationId, guid),
         ).build()
     }

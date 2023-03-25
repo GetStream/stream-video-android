@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.core
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -5,7 +21,6 @@ import io.getstream.video.android.core.utils.onError
 import io.getstream.video.android.core.utils.onSuccess
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
-import org.junit.Assert.*
 import org.junit.runner.RunWith
 
 /**
@@ -21,10 +36,8 @@ import org.junit.runner.RunWith
  *
  */
 
-
-
 @RunWith(AndroidJUnit4::class)
-public class CreateCallCrudTest: IntegrationTestBase() {
+public class CreateCallCrudTest : IntegrationTestBase() {
     /**
      * Alright so what do we need to test here:
      *
@@ -55,13 +68,12 @@ public class CreateCallCrudTest: IntegrationTestBase() {
 
         val result = helper.client.getOrCreateCall("missing", "123")
         assert(result.isFailure)
-        result.onError { System.out.println(it) }
+        result.onError { println(it) }
     }
-
 }
 
 @RunWith(AndroidJUnit4::class)
-public class UpdateOrDeleteCallCrudTest: IntegrationTestBase() {
+public class UpdateOrDeleteCallCrudTest : IntegrationTestBase() {
     /**
      * Alright so what do we need to test here:
      *
@@ -79,14 +91,17 @@ public class UpdateOrDeleteCallCrudTest: IntegrationTestBase() {
 
         val result2 = helper.client.getOrCreateCall("default", "123")
 
-        System.out.println(result2.onError {
-            System.out.println("abc")
-            System.out.println(it.toString())
-        })
-        System.out.println(result2.onSuccess {
-            System.out.println("123")
-            System.out.println(it)
-        })
+        System.out.println(
+            result2.onError {
+                System.out.println("abc")
+                System.out.println(it.toString())
+            }
+        )
+        System.out.println(
+            result2.onSuccess {
+                System.out.println("123")
+                System.out.println(it)
+            }
+        )
     }
-
 }

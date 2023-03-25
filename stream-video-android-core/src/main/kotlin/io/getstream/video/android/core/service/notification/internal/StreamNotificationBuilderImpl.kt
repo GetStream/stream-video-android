@@ -175,8 +175,8 @@ internal class StreamNotificationBuilderImpl(
     private fun getDefaultNotificationChannel(context: Context): (() -> NotificationChannel) {
         return {
             NotificationChannel(
-                context.getString(R.string.stream_call_notification_channel_id),
-                context.getString(R.string.stream_call_notification_channel_name),
+                context.getString(R.string.stream_video_call_notification_channel_id),
+                context.getString(R.string.stream_video_call_notification_channel_name),
                 NotificationManager.IMPORTANCE_DEFAULT,
             )
         }
