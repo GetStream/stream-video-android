@@ -46,4 +46,5 @@ public class IntegrationTestHelper() {
 
 open class IntegrationTestBase() {
     val helper = IntegrationTestHelper()
+    val client = helper.client
 }

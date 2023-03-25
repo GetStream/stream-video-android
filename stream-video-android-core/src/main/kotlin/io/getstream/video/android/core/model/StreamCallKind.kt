@@ -23,6 +23,7 @@ import java.io.Serializable
 /**
  * The kind of call, either a [RINGING] or a [MEETING].
  */
+// TODO: Remove this
 public enum class StreamCallKind : Serializable {
     MEETING, RINGING;
 

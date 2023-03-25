@@ -16,7 +16,16 @@
 
 package io.getstream.video.android.core
 
-class AudioRoomTest {
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import io.getstream.video.android.core.utils.mapSuspend
+import io.getstream.video.android.core.utils.onSuccess
+import kotlinx.coroutines.test.runTest
+import org.junit.Test
+import org.junit.runner.RunWith
+
+
+@RunWith(AndroidJUnit4::class)
+class AudioRoomTest: IntegrationTestBase() {
     /**
      * The Swift tutorial is good inspiration
      * https://github.com/GetStream/stream-video-swift/blob/main/docusaurus/docs/iOS/guides/quickstart/audio-room.md
@@ -31,4 +40,35 @@ class AudioRoomTest {
      * - Trying to publish while not having permissions to do so should raise an error
      *
      */
+
+    @Test
+    fun createACall() = runTest {
+        val result = client.getOrCreateCall("default", "123")
+        assert(result.isSuccess)
+    }
+
+    @Test
+    fun goLive() = runTest {
+        val result = client.goLive("default:123")
+        assert(result.isSuccess)
+    }
+
+    @Test
+    fun joinCall() = runTest {
+        val result = client.getOrCreateCall("default", "123")
+        assert(result.isSuccess)
+
+        val result2 = result.mapSuspend { client.joinCall(it) }
+        assert(result.isSuccess)
+
+        result2.onSuccess {
+            // joined call
+            // where is the state?
+
+
+        }
+
+
+
+    }
 }

@@ -59,14 +59,13 @@ public class CreateCallCrudTest : IntegrationTestBase() {
 
     @Test
     fun createACall() = runTest {
-        val result = helper.client.getOrCreateCall("default", "123")
+        val result = client.getOrCreateCall("default", "123")
         assert(result.isSuccess)
     }
 
     @Test
     fun failToCreateACall() = runTest {
-
-        val result = helper.client.getOrCreateCall("missing", "123")
+        val result = client.getOrCreateCall("missing", "123")
         assert(result.isFailure)
         result.onError { println(it) }
     }
