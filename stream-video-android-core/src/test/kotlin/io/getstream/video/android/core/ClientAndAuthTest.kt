@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core
 
+import io.getstream.video.android.core.model.QueryCallsData
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.UserType
 import kotlinx.coroutines.test.runTest
@@ -26,25 +27,12 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class ClientAndAuthTest : IntegrationTestBase() {
     /**
-     * So what do we need to test on the client..
+     * Test coverage for Client and Authentication
      *
-     * StreamVideoConfig. I'm not sure any of this belongs here.
-     * This should be on the call type....
-     *
-     * Things I didn't expect on the client
-     * ** AndroidInputs (not sure what it does)
-     * ** InputLauncher (again unsure)
-     * ** PushDevice Generators, probably to support firebase alternatives, not sure
-     *
-     * Missing..
-     * * Geofencing policy (also a good moment to show our edge network)
-     * * Filters (video and audio, hooks so you can build your own filters)
-     * * Guest and anon users
-     * * Token expiration
-     * * Connection timeout settings
-     *
-     * Client setup errors
-     * ** Invalid API key
+     * TODO
+     * - Subscribing for events
+     * - Connection id / connect setup when should it run
+     * - Guest user creation, and anon user id setup
      *
      */
     @Test
@@ -70,12 +58,29 @@ class ClientAndAuthTest : IntegrationTestBase() {
 
     @Test
     fun guestUser() = runTest {
+        // we get the token from Stream's server in this case
+        // the ID is generated, client side...
+        // verify that we get the token
+        // API call is getGuestUser or something like that
+        // TODO: Implement
         StreamVideoBuilder2(
             context = context,
             apiKey = apiKey,
             geo = GEO.GlobalEdgeNetwork,
             user = User(id="guest", type=UserType.Guest)
         ).build()
+    }
+
+    @Test
+    fun subscribeToEvents() = runTest {
+
+        val client = StreamVideoBuilder2(
+            context = context,
+            apiKey = apiKey,
+            geo = GEO.GlobalEdgeNetwork,
+            user = User(id="guest", type=UserType.Guest)
+        ).build()
+        // TODO: subscribe to events
     }
 
     @Test
@@ -109,5 +114,29 @@ class ClientAndAuthTest : IntegrationTestBase() {
             testData.users["thierry"]!!,
             "invalidtoken",
         ).build()
+    }
+
+    @Test
+    fun testConnectionId() = runTest {
+        // all requests should have a connection id
+        // the connection id comes from the websocket
+        // TODO:
+        // - you shouldn't immediately connect to the WS
+        // - maybe a manual connect step is best
+        // - maybe it doesn't wait for WS
+        // - there is no .connect on android, when should it connect?
+
+        val client = StreamVideoBuilder2(
+            context = context,
+            apiKey = apiKey,
+            geo = GEO.GlobalEdgeNetwork,
+            testData.users["thierry"]!!,
+            "invalidtoken",
+        ).build()
+        // client.connect()
+        val filters = mutableMapOf("active" to true)
+        val result = client.queryCalls(QueryCallsData(filters))
+        assert(result.isSuccess)
+        // client.joinCall()
     }
 }

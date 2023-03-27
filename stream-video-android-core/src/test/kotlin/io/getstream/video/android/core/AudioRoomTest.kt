@@ -75,7 +75,7 @@ class AudioRoomTest: IntegrationTestBase() {
      */
 
     @Test
-    fun listRooms() = runTest {
+    fun queryCalls() = runTest {
         /**
          * To test:
          * - Filter on custom fields

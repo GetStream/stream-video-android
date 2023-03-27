@@ -64,6 +64,14 @@ public class CreateCallCrudTest : IntegrationTestBase() {
     }
 
     @Test
+    fun createACallWith2Members() = runTest {
+        val members = mutableListOf("thierry", "tommaso")
+        // TODO: Rename participants to members
+        val result = client.getOrCreateCall("default", "tommaso-thierry", members)
+        assert(result.isSuccess)
+    }
+
+    @Test
     fun failToCreateACall() = runTest {
         val result = client.getOrCreateCall("missing", "123")
         assert(result.isFailure)
