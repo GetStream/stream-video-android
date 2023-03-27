@@ -32,12 +32,11 @@ class ClientAndAuthTest : IntegrationTestBase() {
      * Test coverage for Client and Authentication
      *
      * TODO
+     * - Local URL
      * - Test logging
      * - Truth & Mocking
-     * - Local URL
-     * - Build vars
+     * - Build vars (and document the system)
      *
-     * - Subscribing for events
      * - Connection id / connect setup when should it run
      * - Guest user creation, and anon user id setup
      *
@@ -158,7 +157,7 @@ class ClientAndAuthTest : IntegrationTestBase() {
             apiKey = apiKey,
             geo = GEO.GlobalEdgeNetwork,
             testData.users["thierry"]!!,
-            "invalidtoken",
+            testData.tokens["thierry"]!!,
         ).build()
         // client.connect()
         val filters = mutableMapOf("active" to true)

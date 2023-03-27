@@ -5,8 +5,9 @@
 
 ** Basics **
 - [ ] Truth
+- [ ] Mockito
 - [ ] Build vars
-- [ ] Ability to run against local go codebase
+- [X] Ability to run against local go codebase
 
 ** Use cases **
 

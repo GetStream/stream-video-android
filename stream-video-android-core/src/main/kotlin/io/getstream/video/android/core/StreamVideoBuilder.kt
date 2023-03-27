@@ -54,6 +54,9 @@ public class StreamVideoBuilder(
     private val pushDeviceGenerators: List<PushDeviceGenerator> = emptyList(),
 ) {
 
+    val videoDomain: String = "video-edge-frankfurt-ce1.stream-io-api.com"
+
+
     public fun build(): StreamVideo {
         val lifecycle = ProcessLifecycleOwner.get().lifecycle
 
@@ -70,7 +73,8 @@ public class StreamVideoBuilder(
 
         val module = VideoModule(
             appContext = context,
-            preferences = preferences
+            preferences = preferences,
+            videoDomain = videoDomain
         )
 
         val socket = module.socket()
@@ -81,7 +85,8 @@ public class StreamVideoBuilder(
             preferences = preferences,
             appContext = context,
             lifecycle = lifecycle,
-            okHttpClient = httpModule.okHttpClient
+            okHttpClient = httpModule.okHttpClient,
+            videoDomain = videoDomain
         )
 
         val scope = CoroutineScope(DispatcherProvider.IO)
@@ -178,11 +183,12 @@ public class StreamVideoBuilder2(
     private val ringNotification: ((call: Call) -> Notification?)? = null,
     /** Support for different push providers */
     private val pushDeviceGenerators: List<PushDeviceGenerator> = emptyList(),
-    /** URL overwrite to allow for testing against a local instance of video */
-    private val URL: String = "https://video-edge-frankfurt-ce1.stream-io-api.com/",
 ) {
+    val videoDomain: String = "video-edge-frankfurt-ce1.stream-io-api.com"
 
     public fun build(): StreamVideo {
+        /** URL overwrite to allow for testing against a local instance of video */
+
         val androidInputs: Set<CallAndroidInput> = emptySet()
         val inputLauncher: CallAndroidInputLauncher = DefaultCallAndroidInputLauncher
         val lifecycle = ProcessLifecycleOwner.get().lifecycle
@@ -203,7 +209,8 @@ public class StreamVideoBuilder2(
 
         val module = VideoModule(
             appContext = context,
-            preferences = preferences
+            preferences = preferences,
+            videoDomain = videoDomain
         )
 
         val socket = module.socket()
@@ -214,7 +221,8 @@ public class StreamVideoBuilder2(
             preferences = preferences,
             appContext = context,
             lifecycle = lifecycle,
-            okHttpClient = httpModule.okHttpClient
+            okHttpClient = httpModule.okHttpClient,
+            videoDomain = videoDomain
         )
 
         val scope = CoroutineScope(DispatcherProvider.IO)

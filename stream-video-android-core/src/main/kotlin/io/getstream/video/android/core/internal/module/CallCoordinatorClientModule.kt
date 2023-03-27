@@ -49,23 +49,26 @@ internal class CallCoordinatorClientModule(
     private val preferences: UserPreferences,
     private val appContext: Context,
     private val lifecycle: Lifecycle,
-    private val okHttpClient: OkHttpClient
+    private val okHttpClient: OkHttpClient,
+    private val videoDomain: String,
 ) {
 
     /**
      * Cached instance of the Retrofit client that builds API services.
      */
     private val protoRetrofitClient: Retrofit by lazy {
+        val baseUrl = "https://$videoDomain"
         Retrofit.Builder()
             .client(okHttpClient)
             .addConverterFactory(WireConverterFactory.create())
-            .baseUrl(BASE_URL)
+            .baseUrl(baseUrl)
             .build()
     }
 
     private val retrofitClient: Retrofit by lazy {
+        val baseUrl = "https://$videoDomain"
         Retrofit.Builder()
-            .baseUrl(BASE_URL)
+            .baseUrl(baseUrl)
             .addConverterFactory(ScalarsConverterFactory.create())
             .addConverterFactory(MoshiConverterFactory.create(Serializer.moshi))
             .client(okHttpClient)
@@ -112,7 +115,4 @@ internal class CallCoordinatorClientModule(
         return callCoordinatorClient
     }
 
-    internal companion object {
-        private const val BASE_URL = "https://video-edge-frankfurt-ce1.stream-io-api.com/"
-    }
 }

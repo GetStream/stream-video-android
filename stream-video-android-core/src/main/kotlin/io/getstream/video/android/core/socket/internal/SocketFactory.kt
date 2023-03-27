@@ -47,7 +47,6 @@ internal class SocketFactory(
     fun createSocket(eventsParser: EventsParser, connectionConf: ConnectionConf): Socket {
         val url =
             "${connectionConf.endpoint}?api_key=${connectionConf.apiKey}&stream-auth-type=jwt&X-Stream-Client=stream-video-android"
-        // wss://video-edge-frankfurt-ce1.stream-io-api.com/video/connect?api_key=<api_key>&stream-auth-type=jwt&X-Stream-Client=stream-video-javascript-client-browser
 
         logger.d { "[createSocket] url: $url" }
 

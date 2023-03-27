@@ -29,7 +29,8 @@ import kotlinx.coroutines.CoroutineScope
 
 internal class VideoModule(
     private val appContext: Context,
-    private val preferences: UserPreferences
+    private val preferences: UserPreferences,
+    private val videoDomain: String
 ) {
     /**
      * The [CoroutineScope] used for all business logic related operations.
@@ -70,8 +71,10 @@ internal class VideoModule(
      * @return The WebSocket handler that is used to connect to different calls.
      */
     internal fun socket(): VideoSocket {
+        val wssURL = "wss://$videoDomain/video/connect"
+
         return VideoSocketImpl(
-            wssUrl = WS_BASE_URL,
+            wssUrl = wssURL,
             preferences = preferences,
             socketFactory = socketFactory,
             networkStateProvider = networkStateProvider,
@@ -91,9 +94,4 @@ internal class VideoModule(
 
     internal fun networkStateProvider(): NetworkStateProvider = networkStateProvider
 
-    internal companion object {
-
-        internal const val WS_BASE_URL =
-            "wss://video-edge-frankfurt-ce1.stream-io-api.com/video/connect"
-    }
 }
