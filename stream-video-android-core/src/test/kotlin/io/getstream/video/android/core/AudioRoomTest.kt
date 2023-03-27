@@ -17,14 +17,19 @@
 package io.getstream.video.android.core
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import io.getstream.video.android.core.dispatchers.DispatcherProvider
+import io.getstream.video.android.core.model.QueryCallsData
 import io.getstream.video.android.core.utils.mapSuspend
 import io.getstream.video.android.core.utils.onSuccess
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
 
-@RunWith(AndroidJUnit4::class)
+@RunWith(RobolectricTestRunner::class)
 class AudioRoomTest: IntegrationTestBase() {
     /**
      * The Swift tutorial is good inspiration
@@ -41,6 +46,41 @@ class AudioRoomTest: IntegrationTestBase() {
      *
      */
 
+    /**
+     * Possible developer experience
+     *
+     * Expose a call object, with data, stateflows and methods for easier developer experience:
+     *
+     * call = client.joinCall("default", 123) //returns a call state object
+     * call.custom (stateflow)
+     * call.participants (stateflow)
+     * call.requestPermissions()
+     * call.goLive()
+     * call.leave()
+     *
+     *
+     *     viewModel: CallViewModel = viewModel(
+            factory = CallViewModel.provideFactory(
+            call,
+            ...
+            )
+            )
+     *
+     *
+     * On the compose layer we currently hide too much. It would be better to show
+     * some components so you know where to start
+     *
+     * <Call><ParticipantGrid><CallButtons>Button12,23</CallButtons></Call> etc
+     *
+     */
+
+    @Test
+    fun listRooms() = runTest {
+        val filters = mutableMapOf("active" to true)
+        val result = client.queryCalls(QueryCallsData(filters))
+        assert(result.isSuccess)
+    }
+
     @Test
     fun createACall() = runTest {
         val result = client.getOrCreateCall("default", "123")
@@ -49,8 +89,17 @@ class AudioRoomTest: IntegrationTestBase() {
 
     @Test
     fun goLive() = runTest {
+
         val result = client.goLive("default:123")
         assert(result.isSuccess)
+
+    }
+
+    @Test
+    fun requestPermissions() = runTest {
+        val result = client.requestPermissions("default:123", mutableListOf("hellworld"))
+        assert(result.isSuccess)
+
     }
 
     @Test
@@ -63,7 +112,7 @@ class AudioRoomTest: IntegrationTestBase() {
 
         result2.onSuccess {
             // joined call
-            // where is the state?
+            // state is in the viewmodel
 
 
         }

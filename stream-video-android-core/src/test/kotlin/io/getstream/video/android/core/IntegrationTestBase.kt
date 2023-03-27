@@ -17,7 +17,29 @@
 package io.getstream.video.android.core
 
 import androidx.test.core.app.ApplicationProvider
+import io.getstream.video.android.core.dispatchers.DispatcherProvider
+import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.User
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.test.TestDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import okhttp3.Dispatcher
+import org.junit.Rule
+import org.junit.rules.TestWatcher
+import org.junit.runner.Description
+
+
+class DispatcherRule(
+    val testDispatcher: TestDispatcher = UnconfinedTestDispatcher(),
+) : TestWatcher() {
+    override fun starting(description: Description) {
+        DispatcherProvider.set(testDispatcher, testDispatcher)
+    }
+
+    override fun finished(description: Description) {
+        DispatcherProvider.reset()
+    }
+}
 
 public class IntegrationTestHelper() {
     val users = mutableMapOf<String, User>()
@@ -39,12 +61,17 @@ public class IntegrationTestHelper() {
             context = ApplicationProvider.getApplicationContext(),
             thierry,
             apiKey = "hd8szvscpxvd",
+            loggingLevel = LoggingLevel.BODY
         )
         client = builder.build()
     }
 }
 
 open class IntegrationTestBase() {
+    @get:Rule
+    val dispatcherRule = DispatcherRule()
+
+
     val helper = IntegrationTestHelper()
     val client = helper.client
 }

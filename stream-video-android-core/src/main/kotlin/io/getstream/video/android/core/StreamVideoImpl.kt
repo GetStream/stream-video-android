@@ -602,10 +602,10 @@ internal class StreamVideoImpl(
     /**
      * @see StreamVideo.queryCalls
      */
-    override suspend fun queryCalls(queryCallsData: QueryCallsData): Result<QueriedCalls> {
+    override suspend fun queryCalls(queryCallsData: QueryCallsData): Result<QueriedCalls> = withContext(scope.coroutineContext) {
         logger.d { "[queryCalls] queryCallsData: $queryCallsData" }
 
-        return callCoordinatorClient.queryCalls(
+        callCoordinatorClient.queryCalls(
             queryCallsRequest = queryCallsData.toRequest()
         ).also {
             logger.v { "[queryCalls] result: $it" }
