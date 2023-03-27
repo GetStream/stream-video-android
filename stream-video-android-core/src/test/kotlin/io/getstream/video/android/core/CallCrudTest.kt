@@ -17,8 +17,12 @@
 package io.getstream.video.android.core
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import io.getstream.video.android.core.model.*
+import io.getstream.video.android.core.utils.Result
 import io.getstream.video.android.core.utils.onError
 import io.getstream.video.android.core.utils.onSuccess
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -35,6 +39,87 @@ import org.junit.runner.RunWith
  * - Call CRUD
  *
  */
+
+public data class SFUConnection(internal val callUrl: String,
+                           internal val sfuToken: SfuToken,
+                           internal val iceServers: List<IceServer>) {
+
+}
+
+/**
+ * Related see
+ * - CallMetadata
+ * - JoinedCall
+ * - CallViewModel
+ * - Compose lib Call.kt object
+ *
+ * Sometimes you want the raw server response
+ * Usually you want state that updates though..
+ */
+public class CallState(
+    private val client: StreamVideo,
+    private val id: String,
+    private val type: String,
+    private val token: String="",
+
+) {
+    private val _participants: MutableStateFlow<List<CallParticipantState>> =
+        MutableStateFlow(emptyList())
+    public val participants: StateFlow<List<CallParticipantState>> = _participants
+    
+    private val _members: MutableStateFlow<List<CallParticipantState>> =
+        MutableStateFlow(emptyList())
+    public val members: StateFlow<List<CallParticipantState>> = _members
+
+
+    // should be a stateflow
+    private var sfuConnection: SFUConnection? = null
+
+    suspend fun join(): Result<JoinedCall> {
+        return client.joinCall(
+            type,
+            id,
+            emptyList(),
+            false
+        )
+    }
+
+    suspend fun goLive() {
+
+    }
+
+    fun leave() {
+
+    }
+
+    fun end() {
+
+    }
+
+    fun destroy() {
+
+    }
+
+    /** Basic crud operations */
+    suspend fun get(): Result<CallMetadata> {
+        return client.getOrCreateCall(id, type)
+    }
+    suspend fun create(): Result<CallMetadata> {
+        return client.getOrCreateCall(id, type)
+    }
+    suspend fun update(): Result<CallInfo> {
+        return client.updateCall(id, type)
+    }
+
+    /** Permissions */
+    suspend fun requestPermissions(permissions: List<String>): Result<Unit> {
+        return client.requestPermissions("$id:$type", permissions)
+    }
+
+    /** send custom and regular events */
+
+
+}
 
 @RunWith(AndroidJUnit4::class)
 public class CreateCallCrudTest : IntegrationTestBase() {
@@ -56,6 +141,18 @@ public class CreateCallCrudTest : IntegrationTestBase() {
      * * Validate pagination works on participants
      *
      */
+
+    @Test
+    fun newCallSyntax() = runTest {
+        val result = client.call("default", "123", "mytoken")
+Call
+        val result = call.get()
+        call.create()
+        call.update()
+        call.join()
+
+        assert(result.isSuccess)
+    }
 
     @Test
     fun createACall() = runTest {

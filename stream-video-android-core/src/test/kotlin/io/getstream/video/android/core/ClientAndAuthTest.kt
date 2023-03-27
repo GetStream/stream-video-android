@@ -32,11 +32,11 @@ class ClientAndAuthTest : IntegrationTestBase() {
      * Test coverage for Client and Authentication
      *
      * TODO
-     * - Local URL
      * - Test logging
-     * - Truth & Mocking
      * - Build vars (and document the system)
+     * - Truth & Mockito
      *
+     * - Ensure API calls run on DispatcherProvider.IO
      * - Connection id / connect setup when should it run
      * - Guest user creation, and anon user id setup
      *
@@ -161,8 +161,9 @@ class ClientAndAuthTest : IntegrationTestBase() {
         ).build()
         // client.connect()
         val filters = mutableMapOf("active" to true)
+        client.joinCall("default", "123")
+
         val result = client.queryCalls(QueryCallsData(filters))
         assert(result.isSuccess)
-        // client.joinCall()
     }
 }

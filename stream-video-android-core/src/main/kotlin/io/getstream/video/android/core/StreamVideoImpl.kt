@@ -453,6 +453,7 @@ internal class StreamVideoImpl(
     ): Result<JoinedCall> = withContext(scope.coroutineContext) {
         logger.d { "[getOrCreateAndJoinCall] type: $type, id: $id, participantIds: $participantIds" }
         engine.onCallStarting(type, id, participantIds, ring, forcedNewCall = false)
+        // TODO: remove this, join call automatically gets the call, no need to do it twice
         callCoordinatorClient.getOrCreateCall(
             type = type,
             id = id,
