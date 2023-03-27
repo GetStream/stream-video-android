@@ -16,7 +16,8 @@
 
 package io.getstream.video.android.core
 
-import androidx.test.core.app.ApplicationProvider
+import io.getstream.video.android.core.model.User
+import io.getstream.video.android.core.model.UserType
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -47,12 +48,66 @@ class ClientAndAuthTest : IntegrationTestBase() {
      *
      */
     @Test
-    fun clientBuilder() = runTest {
-        val builder = StreamVideoBuilder(
-            context = ApplicationProvider.getApplicationContext(),
-            helper.users["thierry"]!!,
-            apiKey = "hd8szvscpxvd",
-        )
-        val client = builder.build()
+    fun regularUser() = runTest {
+        StreamVideoBuilder2(
+            context = context,
+            apiKey = apiKey,
+            geo = GEO.GlobalEdgeNetwork,
+            testData.users["thierry"]!!,
+            testData.tokens["thierry"]!!,
+        ).build()
+    }
+
+    @Test
+    fun anonymousUser() = runTest {
+        StreamVideoBuilder2(
+            context = context,
+            apiKey = apiKey,
+            geo = GEO.GlobalEdgeNetwork,
+            user = User(id="anon", type=UserType.Anonymous)
+        ).build()
+    }
+
+    @Test
+    fun guestUser() = runTest {
+        StreamVideoBuilder2(
+            context = context,
+            apiKey = apiKey,
+            geo = GEO.GlobalEdgeNetwork,
+            user = User(id="guest", type=UserType.Guest)
+        ).build()
+    }
+
+    @Test
+    fun testInvalidAPIKey() = runTest {
+        StreamVideoBuilder2(
+            context = context,
+            apiKey = "notvalid",
+            geo = GEO.GlobalEdgeNetwork,
+            testData.users["thierry"]!!,
+            testData.tokens["thierry"]!!,
+        ).build()
+    }
+
+    @Test
+    fun testEmptyAPIKey() = runTest {
+        StreamVideoBuilder2(
+            context = context,
+            apiKey = "",
+            geo = GEO.GlobalEdgeNetwork,
+            testData.users["thierry"]!!,
+            testData.tokens["thierry"]!!,
+        ).build()
+    }
+
+    @Test
+    fun testInvalidToken() = runTest {
+        StreamVideoBuilder2(
+            context = context,
+            apiKey = apiKey,
+            geo = GEO.GlobalEdgeNetwork,
+            testData.users["thierry"]!!,
+            "invalidtoken",
+        ).build()
     }
 }

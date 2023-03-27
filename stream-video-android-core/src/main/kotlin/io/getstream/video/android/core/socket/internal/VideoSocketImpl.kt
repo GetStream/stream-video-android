@@ -216,10 +216,11 @@ internal class VideoSocketImpl(
     override fun authenticateUser() {
         val user = userState.user.value
         logger.d { "[authenticateUser] user: $user" }
+        val token = preferences.getUserToken()
 
         socket?.authenticate(
             VideoWSAuthMessageRequest( // TODO - double check and see about user device
-                token = user.token,
+                token = token,
                 userDetails = UserObjectRequest(
                     id = user.id,
                     role = user.role

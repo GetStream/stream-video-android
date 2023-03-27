@@ -65,7 +65,7 @@ class AudioRoomTest: IntegrationTestBase() {
             ...
             )
             )
-     *
+
      *
      * On the compose layer we currently hide too much. It would be better to show
      * some components so you know where to start
@@ -76,6 +76,12 @@ class AudioRoomTest: IntegrationTestBase() {
 
     @Test
     fun listRooms() = runTest {
+        /**
+         * To test:
+         * - Filter on custom fields
+         * - Filter on about to start in X hours
+         * - Filter on currently live
+         */
         val filters = mutableMapOf("active" to true)
         val result = client.queryCalls(QueryCallsData(filters))
         assert(result.isSuccess)

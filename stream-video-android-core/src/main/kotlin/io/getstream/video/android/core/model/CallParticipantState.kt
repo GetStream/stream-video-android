@@ -54,8 +54,7 @@ public fun CallParticipantState.toUser(): User {
         id = id,
         role = role,
         name = name,
-        token = "",
-        imageUrl = profileImageURL,
+        imageUrl = profileImageURL ?: "",
         teams = emptyList(),
         extraData = emptyMap()
     )

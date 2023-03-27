@@ -108,8 +108,7 @@ internal fun UserResponse.toUser(): User {
         id = id,
         role = role,
         name = name ?: "",
-        token = "",
-        imageUrl = image,
+        imageUrl = image ?: "",
         teams = teams ?: emptyList(),
         extraData = custom.mapValues { it.value.toString() }
     )

@@ -71,6 +71,15 @@ internal class UserPreferencesImpl(
         }
     }
 
+    override fun getUserToken(): String =
+        sharedPreferences.getString(KEY_USER_TOKEN, "") ?: ""
+
+    override fun storeUserToken(userToken: String) {
+        sharedPreferences.edit {
+            putString(KEY_USER_TOKEN, userToken)
+        }
+    }
+
     /**
      * Parses the User JSON from the local preferences if able or a null user if nothing is stored.
      *
@@ -126,5 +135,7 @@ internal class UserPreferencesImpl(
         private const val KEY_APIKEY = "apikey"
         private const val KEY_DEVICES = "devices"
         private const val KEY_SFU_TOKEN = "sfu_token"
+        private const val KEY_USER_TOKEN = "user_token"
+
     }
 }

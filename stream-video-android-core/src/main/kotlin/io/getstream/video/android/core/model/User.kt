@@ -19,16 +19,31 @@ package io.getstream.video.android.core.model
 import kotlinx.serialization.Serializable
 
 @Serializable
+sealed class UserType{
+    /** A user that's authenticated in your system */
+    @Serializable
+    object Authenticated : UserType()
+    /** A temporary guest user, that can have an image, name etc */
+    @Serializable
+    object Guest : UserType()
+    /** Not authentication, anonymous user. Commonly used for audio rooms and livestreams */
+    @Serializable
+    object Anonymous : UserType()
+}
+
+@Serializable
 public data class User(
+    /** ID is required, the rest is optional */
     val id: String,
-    val role: String,
-    val name: String,
-    val token: String,
-    val imageUrl: String?,
-    val teams: List<String>,
-    val extraData: Map<String, String>
+    val role: String="",
+    val type: UserType = UserType.Authenticated,
+    val name: String="",
+    val imageUrl: String="",
+    val teams: List<String> = emptyList(),
+    val extraData: Map<String, String> = emptyMap()
+
 ) {
     public fun isValid(): Boolean {
-        return id.isNotEmpty() && token.isNotEmpty()
+        return id.isNotEmpty()
     }
 }

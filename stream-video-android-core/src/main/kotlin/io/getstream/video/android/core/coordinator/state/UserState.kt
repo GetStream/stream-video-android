@@ -17,6 +17,7 @@
 package io.getstream.video.android.core.coordinator.state
 
 import io.getstream.video.android.core.model.User
+import io.getstream.video.android.core.model.UserType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -39,6 +40,6 @@ public class UserState {
     }
 
     public companion object {
-        private val EMPTY_USER = User("", "", "", "", "", emptyList(), emptyMap())
+        private val EMPTY_USER = User("", "", UserType.Authenticated,"", "", emptyList(), emptyMap())
     }
 }

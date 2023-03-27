@@ -16,14 +16,13 @@
 
 package io.getstream.video.android.core
 
+import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.User
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import okhttp3.Dispatcher
 import org.junit.Rule
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
@@ -43,8 +42,11 @@ class DispatcherRule(
 
 public class IntegrationTestHelper() {
     val users = mutableMapOf<String, User>()
+    val tokens = mutableMapOf<String, String>()
+
     val client: StreamVideo
-    val builder: StreamVideoBuilder
+    val builder: StreamVideoBuilder2
+    val context: Context
 
     init {
         // TODO: generate token from build vars
@@ -52,18 +54,21 @@ public class IntegrationTestHelper() {
             "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidGhpZXJyeSJ9._4aZL6BR0VGKfZsKYdscsBm8yKVgG-2LatYeHRJUq0g"
 
         val thierry = User(
-            id = "thierry", role = "admin", name = "Thierry",
-            token = token, imageUrl = "hello",
+            id = "thierry", role = "admin", name = "Thierry", imageUrl = "hello",
             teams = emptyList(), extraData = mapOf()
         )
         users["thierry"] = thierry
-        builder = StreamVideoBuilder(
+        tokens["thierry"] = token
+        builder = StreamVideoBuilder2(
             context = ApplicationProvider.getApplicationContext(),
-            thierry,
             apiKey = "hd8szvscpxvd",
+            geo = GEO.GlobalEdgeNetwork,
+            thierry,
+            token,
             loggingLevel = LoggingLevel.BODY
         )
         client = builder.build()
+        context = ApplicationProvider.getApplicationContext()
     }
 }
 
@@ -72,6 +77,9 @@ open class IntegrationTestBase() {
     val dispatcherRule = DispatcherRule()
 
 
-    val helper = IntegrationTestHelper()
-    val client = helper.client
+    val testData = IntegrationTestHelper()
+    val client = testData.client
+    val context = testData.context
+    val apiKey = "hd8szvscpxvd"
+
 }

@@ -81,8 +81,8 @@ internal class HttpModule(
         val token = if (original.url.toString().contains("sfu")) {
             preferences.getSfuToken()
         } else {
-            preferences.getUserCredentials()?.token
-        } ?: ""
+            preferences.getUserToken()
+        }
 
         val updatedUrl = if (original.url.toString().contains("video")) {
             original.url.newBuilder()
