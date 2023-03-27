@@ -40,7 +40,8 @@
 
 ### Features
 
-- [ ] Event subscriptions
+- [X] Event subscriptions (listening)
+- [ ] Event subscriptions (sending)
 - [ ] Audio filter example
 - [ ] Video filter example
 - 

@@ -16,6 +16,8 @@
 
 package io.getstream.video.android.core
 
+import io.getstream.video.android.core.events.ConnectedEvent
+import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.model.QueryCallsData
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.UserType
@@ -30,6 +32,11 @@ class ClientAndAuthTest : IntegrationTestBase() {
      * Test coverage for Client and Authentication
      *
      * TODO
+     * - Test logging
+     * - Truth & Mocking
+     * - Local URL
+     * - Build vars
+     *
      * - Subscribing for events
      * - Connection id / connect setup when should it run
      * - Guest user creation, and anon user id setup
@@ -72,7 +79,7 @@ class ClientAndAuthTest : IntegrationTestBase() {
     }
 
     @Test
-    fun subscribeToEvents() = runTest {
+    fun subscribeToAllEvents() = runTest {
 
         val client = StreamVideoBuilder2(
             context = context,
@@ -80,7 +87,27 @@ class ClientAndAuthTest : IntegrationTestBase() {
             geo = GEO.GlobalEdgeNetwork,
             user = User(id="guest", type=UserType.Guest)
         ).build()
+        val sub = client.subscribe { event: VideoEvent ->
+            System.out.println(event)
+        }
+        sub.dispose()
         // TODO: subscribe to events
+    }
+
+    @Test
+    fun subscribeToSpecificEvents() = runTest {
+
+        val client = StreamVideoBuilder2(
+            context = context,
+            apiKey = apiKey,
+            geo = GEO.GlobalEdgeNetwork,
+            user = User(id="guest", type=UserType.Guest)
+        ).build()
+        // Subscribe for new message events
+        val sub = client.subscribeFor<ConnectedEvent> { newMessageEvent ->
+            System.out.println(newMessageEvent)
+        }
+        sub.dispose()
     }
 
     @Test

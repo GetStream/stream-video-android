@@ -23,6 +23,7 @@ import io.getstream.android.push.PushDeviceGenerator
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.engine.StreamCallEngine
 import io.getstream.video.android.core.engine.StreamCallEngineImpl
+import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.input.CallAndroidInput
 import io.getstream.video.android.core.input.CallAndroidInputLauncher
 import io.getstream.video.android.core.input.internal.DefaultCallAndroidInputLauncher
@@ -39,6 +40,7 @@ import io.getstream.video.android.core.user.UserPreferencesManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
+import java.util.*
 
 public class StreamVideoBuilder(
     private val context: Context,
@@ -141,6 +143,15 @@ sealed class TokenType{
     object User : TokenType()
     /** A call specific token */
     object Call : TokenType()
+}
+
+public interface Disposable {
+    public val isDisposed: Boolean
+    public fun dispose()
+}
+
+public fun interface VideoEventListener<EventT : VideoEvent> {
+    public fun onEvent(event: EventT)
 }
 
 public class StreamVideoBuilder2(

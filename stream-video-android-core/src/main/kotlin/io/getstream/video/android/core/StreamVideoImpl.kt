@@ -27,6 +27,7 @@ import io.getstream.video.android.core.engine.StreamCallEngine
 import io.getstream.video.android.core.engine.adapter.CoordinatorSocketListenerAdapter
 import io.getstream.video.android.core.errors.VideoError
 import io.getstream.video.android.core.events.CallCreatedEvent
+import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.lifecycle.LifecycleHandler
 import io.getstream.video.android.core.lifecycle.internal.StreamLifecycleObserver
@@ -90,6 +91,20 @@ import stream.video.coordinator.client_v1_rpc.CreateDeviceRequest
 import stream.video.coordinator.client_v1_rpc.DeleteDeviceRequest
 import stream.video.coordinator.push_v1.DeviceInput
 
+
+class EventSubscription
+    (
+    private val listener: VideoEventListener<VideoEvent>,
+    private val filter: ((VideoEvent) -> Boolean)? = null,
+    )
+    {
+        var isDisposed: Boolean = false
+
+        fun dispose() {
+            isDisposed = true
+        }
+}
+
 /**
  * @param lifecycle The lifecycle used to observe changes in the process. // TODO - docs
  */
@@ -109,6 +124,28 @@ internal class StreamVideoImpl(
 ) : StreamVideo {
 
     private val logger by taggedLogger("Call:StreamVideo")
+    private var subscriptions = mutableSetOf<EventSubscription>()
+
+
+    public override fun subscribeFor(
+        vararg eventTypes: Class<out VideoEvent>,
+        listener: VideoEventListener<VideoEvent>,
+    ): EventSubscription {
+        val filter = { event: VideoEvent ->
+            eventTypes.any { type -> type.isInstance(event) }
+        }
+        val sub = EventSubscription(listener, filter)
+        subscriptions.add(sub)
+        return sub
+    }
+
+    public override fun subscribe(
+        listener: VideoEventListener<VideoEvent>
+    ): EventSubscription {
+        val sub = EventSubscription(listener)
+        subscriptions.add(sub)
+        return sub
+    }
 
     /**
      * Observes the app lifecycle and attempts to reconnect/release the socket connection.
@@ -937,4 +974,16 @@ internal class StreamVideoImpl(
                 is Failure -> result
             }
         }
+}
+
+/** Extension function that makes it easy to use on kotlin, but keeps Java usable as well */
+public inline fun <reified T : VideoEvent> StreamVideo.subscribeFor(
+    listener: VideoEventListener<T>
+): EventSubscription {
+    return this.subscribeFor(
+        T::class.java,
+        listener = { event ->
+            listener.onEvent(event as T)
+        }
+    )
 }

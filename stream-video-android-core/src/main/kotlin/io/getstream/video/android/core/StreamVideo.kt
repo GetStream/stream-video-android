@@ -17,6 +17,7 @@
 package io.getstream.video.android.core
 
 import io.getstream.video.android.core.call.CallClient
+import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.model.Call
 import io.getstream.video.android.core.model.CallEventType
 import io.getstream.video.android.core.model.CallInfo
@@ -57,6 +58,18 @@ public interface StreamVideo {
      * Represents the default call config when starting a call.
      */
     public val config: StreamVideoConfig
+
+
+    /** Subscribe for a specific list of events */
+    public fun subscribeFor(
+        vararg eventTypes: Class<out VideoEvent>,
+        listener: VideoEventListener<VideoEvent>,
+    ): EventSubscription
+
+    /** Subscribe to all events */
+    public fun subscribe(
+        listener: VideoEventListener<VideoEvent>
+    ): EventSubscription
 
     /**
      * Create a device that will be used to receive push notifications.
