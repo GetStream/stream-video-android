@@ -4,7 +4,7 @@ package stream.video.sfu.models;
 import "google/protobuf/struct.proto";
 import "google/protobuf/timestamp.proto";
 
-option go_package = "sfu_models";
+option go_package = "github.com/GetStream/protocol/protobuf/video/sfu/models";
 option java_multiple_files = true;
 option java_outer_classname = "SfuModelsV1";
 option csharp_namespace = "Stream.Video.v1.Sfu";
@@ -53,6 +53,10 @@ message Participant {
   bool is_speaking = 7;
   bool is_dominant_speaker = 8;
   float audio_level = 9;
+  string name = 10;
+  string image = 11;
+  google.protobuf.Struct custom = 12;
+  repeated string roles = 13;
 }
 
 message StreamQuality {
@@ -96,6 +100,10 @@ message TrackInfo {
   TrackType track_type = 2;
   repeated VideoLayer layers = 5;
   string mid = 6;
+  // for audio tracks
+  bool dtx = 7;
+  bool stereo = 8;
+  bool red = 9;
 }
 
 
@@ -127,10 +135,39 @@ enum ErrorCode {
 
   ERROR_CODE_CALL_NOT_FOUND = 300;
 
+  ERROR_CODE_REQUEST_VALIDATION_FAILED = 400;
+  ERROR_CODE_UNAUTHENTICATED = 401;
+  ERROR_CODE_PERMISSION_DENIED = 403;
+  ERROR_CODE_TOO_MANY_REQUESTS = 429;
+
   ERROR_CODE_INTERNAL_SERVER_ERROR = 500;
 }
 
 message Error {
   ErrorCode code = 1;
   string message = 2;
+  bool should_retry = 3;
+}
+
+message ClientDetails {
+  int32 version = 1;
+  string os = 2;
+  string browser = 3;
+}
+
+enum TrackUnpublishReason {
+  // Default value which is used when the specific reason
+  // for muting the track is not known.
+  TRACK_UNPUBLISH_REASON_UNSPECIFIED = 0;
+  // Represents user muting their tracks.
+  TRACK_UNPUBLISH_REASON_USER_MUTED = 1;
+  // Represents muting the track because the permission to
+  // publish the track has been revoked.
+  TRACK_UNPUBLISH_REASON_PERMISSION_REVOKED = 2;
+  // Represents muting the track due to moderation actions.
+  // This is different from permission revoked because the
+  // participant can unmute themselves here whereas in case
+  // of "permission revoke" it is not possible until the
+  // call permissions are updated.
+  TRACK_UNPUBLISH_REASON_MODERATION = 3;
 }

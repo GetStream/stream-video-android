@@ -90,6 +90,7 @@ import org.openapitools.client.models.CallRequest
 import org.openapitools.client.models.GetCallEdgeServerRequest
 import org.openapitools.client.models.GetCallEdgeServerResponse
 import org.openapitools.client.models.GetOrCreateCallRequest
+import org.openapitools.client.models.JoinCallRequest
 import org.openapitools.client.models.MemberRequest
 import org.openapitools.client.models.RequestPermissionRequest
 import org.openapitools.client.models.SendEventRequest
@@ -309,7 +310,7 @@ internal class StreamVideoImpl(
                 id = call.id,
                 type = call.type,
                 connectionId = socket.getConnectionId(),
-                request = GetOrCreateCallRequest()
+                request = JoinCallRequest()
             )
             if (joinResult !is Success) {
                 logger.e { "[joinCallInternal] failed joinResult: $joinResult" }

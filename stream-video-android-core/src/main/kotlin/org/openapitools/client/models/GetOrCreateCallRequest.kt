@@ -27,7 +27,8 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param `data` * @param members * @param ring */
+ * @param `data` * @param members * @param ring if provided it overrides the default ring setting for this call
+ */
 
 data class GetOrCreateCallRequest(
 
@@ -37,6 +38,7 @@ data class GetOrCreateCallRequest(
     @Json(name = "members")
     val members: PaginationParamsRequest? = null,
 
+    /* if provided it overrides the default ring setting for this call */
     @Json(name = "ring")
     val ring: kotlin.Boolean? = null
 
