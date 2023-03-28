@@ -235,6 +235,7 @@ public class StreamVideoBuilder2(
             getCurrentUserId = { preferences.getUserCredentials()?.id ?: "" }
         )
 
+
         return StreamVideoImpl(
             context = context,
             scope = scope,

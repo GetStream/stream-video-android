@@ -16,17 +16,17 @@
 
 package io.getstream.video.android.core
 
-import android.util.Log
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.google.common.truth.Truth.assertThat
+import io.getstream.video.android.core.events.CallCreatedEvent
+import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.model.*
-import io.getstream.video.android.core.utils.Result
 import io.getstream.video.android.core.utils.onError
 import io.getstream.video.android.core.utils.onSuccess
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.util.*
 
 /**
  * TODO: testing work
@@ -79,8 +79,19 @@ public class CreateCallCrudTest : IntegrationTestBase() {
 
     @Test
     fun createACall() = runTest {
-        val result = client.getOrCreateCall("default", "123")
+        val result = client.getOrCreateCall("default", UUID.randomUUID().toString())
         assert(result.isSuccess)
+        val events = mutableListOf<VideoEvent>()
+        val eventTypes = mutableListOf<String>()
+        client.subscribe {
+            println(it)
+            events.add(it)
+            eventTypes.add(it.javaClass.toString())
+        }
+        assertThat(events.size).isEqualTo(1)
+        assertThat(events).contains(CallCreatedEvent::class.java.toString())
+
+
     }
 
     @Test
