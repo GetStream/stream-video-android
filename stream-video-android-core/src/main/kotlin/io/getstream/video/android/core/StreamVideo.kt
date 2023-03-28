@@ -425,5 +425,5 @@ public interface StreamVideo {
      */
     public suspend fun handlePushMessage(payload: Map<String, Any>): Result<Unit>
 
-    public fun call(id: String, type: String, token: String=""): Call2
+    public fun call(type: String, id: String, token: String=""): Call2
 }

@@ -27,7 +27,7 @@ import stream.video.sfu.models.PeerType
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoQuality
 
-public sealed class SfuDataEvent
+public sealed class SfuDataEvent: VideoEvent()
 
 public data class ICETrickleEvent(
     val candidate: String,

@@ -20,41 +20,7 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.StreamVideoConfig
 import io.getstream.video.android.core.coordinator.CallCoordinatorClient
 import io.getstream.video.android.core.errors.VideoError
-import io.getstream.video.android.core.events.AudioLevelChangedEvent
-import io.getstream.video.android.core.events.BlockedUserEvent
-import io.getstream.video.android.core.events.CallAcceptedEvent
-import io.getstream.video.android.core.events.CallCancelledEvent
-import io.getstream.video.android.core.events.CallCreatedEvent
-import io.getstream.video.android.core.events.CallEndedEvent
-import io.getstream.video.android.core.events.CallMembersDeletedEvent
-import io.getstream.video.android.core.events.CallMembersUpdatedEvent
-import io.getstream.video.android.core.events.CallRejectedEvent
-import io.getstream.video.android.core.events.CallUpdatedEvent
-import io.getstream.video.android.core.events.ChangePublishQualityEvent
-import io.getstream.video.android.core.events.ConnectedEvent
-import io.getstream.video.android.core.events.ConnectionQualityChangeEvent
-import io.getstream.video.android.core.events.CustomEvent
-import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
-import io.getstream.video.android.core.events.ErrorEvent
-import io.getstream.video.android.core.events.HealthCheckEvent
-import io.getstream.video.android.core.events.HealthCheckResponseEvent
-import io.getstream.video.android.core.events.ICETrickleEvent
-import io.getstream.video.android.core.events.JoinCallResponseEvent
-import io.getstream.video.android.core.events.ParticipantJoinedEvent
-import io.getstream.video.android.core.events.ParticipantLeftEvent
-import io.getstream.video.android.core.events.PermissionRequestEvent
-import io.getstream.video.android.core.events.PublisherAnswerEvent
-import io.getstream.video.android.core.events.RecordingStartedEvent
-import io.getstream.video.android.core.events.RecordingStoppedEvent
-import io.getstream.video.android.core.events.SfuDataEvent
-import io.getstream.video.android.core.events.SubscriberOfferEvent
-import io.getstream.video.android.core.events.TrackPublishedEvent
-import io.getstream.video.android.core.events.TrackUnpublishedEvent
-import io.getstream.video.android.core.events.UnblockedUserEvent
-import io.getstream.video.android.core.events.UnknownEvent
-import io.getstream.video.android.core.events.UpdatedCallPermissionsEvent
-import io.getstream.video.android.core.events.VideoEvent
-import io.getstream.video.android.core.events.VideoQualityChangedEvent
+import io.getstream.video.android.core.events.*
 import io.getstream.video.android.core.filter.InFilterObject
 import io.getstream.video.android.core.filter.toMap
 import io.getstream.video.android.core.model.CallEventType
@@ -122,7 +88,7 @@ internal class StreamCallEngineImpl(
 
     override val callState: StateFlow<State> = _callState
 
-    override fun onCoordinatorEvent(event: VideoEvent) {
+    override fun onCoordinatorEvent(event: CoordinatorEvent) {
         if (event !is HealthCheckEvent) {
             logger.v { "[onCoordinatorEvent] event: $event" }
         }
