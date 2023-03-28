@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 import io.getstream.video.android.Configuration
+import java.io.FileInputStream
+import java.util.*
 
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
@@ -71,6 +73,19 @@ android {
             isMinifyEnabled = true
             proguardFiles("proguard-android-optimize.txt", "proguard-rules.pro")
             consumerProguardFiles("consumer-proguard-rules.pro")
+        }
+    }
+
+    val envProps: File = rootProject.file(".env.properties")
+    if (envProps.exists()) {
+        val properties = Properties()
+        properties.load(FileInputStream(envProps))
+        buildTypes.forEach { buildType ->
+            properties
+                .filterKeys { "$it".startsWith("CORE") }
+                .forEach {
+                    buildType.buildConfigField("String", "${it.key}", "\"${it.value}\"")
+                }
         }
     }
 

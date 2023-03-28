@@ -43,7 +43,7 @@
 ### Features
 
 - [X] Event subscriptions (listening)
-- [ ] Event subscriptions (sending)
+- [X] Event subscriptions (sending)
 - [ ] Audio filter example
 - [ ] Video filter example
 - [ ] Permissions: https://www.notion.so/stream-wiki/Call-Permissions-832f914ad4c545cf8f048012900ad21d

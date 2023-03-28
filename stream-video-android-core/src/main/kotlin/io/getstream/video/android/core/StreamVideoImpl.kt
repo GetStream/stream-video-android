@@ -27,6 +27,7 @@ import io.getstream.video.android.core.engine.StreamCallEngine
 import io.getstream.video.android.core.engine.adapter.CoordinatorSocketListenerAdapter
 import io.getstream.video.android.core.errors.VideoError
 import io.getstream.video.android.core.events.CallCreatedEvent
+import io.getstream.video.android.core.events.ConnectedEvent
 import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.lifecycle.LifecycleHandler
@@ -65,6 +66,7 @@ import io.getstream.video.android.core.socket.SocketListener
 import io.getstream.video.android.core.socket.SocketStateService
 import io.getstream.video.android.core.socket.VideoSocket
 import io.getstream.video.android.core.socket.internal.SocketState
+import io.getstream.video.android.core.socket.internal.VideoSocketImpl
 import io.getstream.video.android.core.user.UserPreferences
 import io.getstream.video.android.core.user.UserPreferencesManager
 import io.getstream.video.android.core.utils.Failure
@@ -77,19 +79,17 @@ import io.getstream.video.android.core.utils.map
 import io.getstream.video.android.core.utils.onError
 import io.getstream.video.android.core.utils.onSuccess
 import io.getstream.video.android.core.utils.toCall
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.openapitools.client.models.*
 import stream.video.coordinator.client_v1_rpc.CreateDeviceRequest
 import stream.video.coordinator.client_v1_rpc.DeleteDeviceRequest
 import stream.video.coordinator.push_v1.DeviceInput
+import java.net.SocketImpl
+import kotlin.coroutines.Continuation
+import kotlin.coroutines.suspendCoroutine
 
 
 class EventSubscription
@@ -172,7 +172,12 @@ internal class StreamVideoImpl(
             lifecycleObserver.observe()
         }
 
-        socket.connectSocket()
+        // TODO: remove this, but for now it helps avoid bugs
+        runBlocking(scope.coroutineContext) {
+            val socketImpl = socket as VideoSocketImpl
+            val result = socket.connect()
+            println("Runblocking socket connect, $result")
+        }
     }
 
     private fun observeState() {
@@ -1011,6 +1016,14 @@ internal class StreamVideoImpl(
     override fun call(type: String, id: String, token: String): Call2 {
         val cid = "$type:$id"
         return calls[cid] ?: Call2(this, type, id, token)
+    }
+
+    public lateinit var nextEventContinuation: Continuation<VideoEvent>
+    public var nextEventCompleted: Boolean = false
+
+    suspend fun waitForNextEvent(): VideoEvent = suspendCoroutine { continuation ->
+        nextEventContinuation = continuation
+        nextEventCompleted = false
     }
 }
 

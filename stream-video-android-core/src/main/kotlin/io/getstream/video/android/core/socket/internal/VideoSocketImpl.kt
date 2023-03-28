@@ -66,7 +66,7 @@ internal class VideoSocketImpl(
     private val userState: UserState,
     private val coroutineScope: CoroutineScope,
 ) : VideoSocket {
-
+    public var eventListener : ((event: VideoEvent) -> Unit)? = null
     private lateinit var connectContinuation: Continuation<Result<ConnectedEvent>>
     private val logger by taggedLogger("Call:CoordinatorSocket")
 
@@ -134,6 +134,7 @@ internal class VideoSocketImpl(
     internal var state: State by Delegates.observable(
         State.DisconnectedTemporarily(null) as State
     ) { _, oldState, newState ->
+
         logger.i { "[onStateChanged] $newState <= $oldState" }
         if (oldState != newState) {
             when (newState) {
@@ -142,6 +143,7 @@ internal class VideoSocketImpl(
                     callListeners { it.onConnecting() }
                 }
                 is State.Connected -> {
+                    println("State.Connected")
                     val success = Success(data=newState.event)
                     connectContinuation.resume(success)
                     healthMonitor.start()
@@ -184,6 +186,7 @@ internal class VideoSocketImpl(
     }
 
     private fun onNetworkError(error: VideoNetworkError) {
+        connectContinuation.resume(Failure(error=error))
         when (error.streamCode) {
             VideoErrorCode.PARSER_ERROR.code,
             VideoErrorCode.CANT_PARSE_CONNECTION_EVENT.code,
@@ -287,6 +290,10 @@ internal class VideoSocketImpl(
     }
 
     override fun onEvent(event: VideoEvent) {
+        println("OnEvent: $event")
+        eventListener?.let {
+            it.invoke(event)
+        }
         healthMonitor.ack()
         callListeners { listener -> listener.onEvent(event) }
     }

@@ -18,14 +18,19 @@ package io.getstream.video.android.core
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
+import com.google.common.truth.Truth
+import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
+import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.User
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import org.junit.Before
 import org.junit.Rule
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
+import java.util.*
 
 
 class DispatcherRule(
@@ -41,11 +46,9 @@ class DispatcherRule(
 }
 
 public class IntegrationTestHelper() {
+
     val users = mutableMapOf<String, User>()
     val tokens = mutableMapOf<String, String>()
-
-    val client: StreamVideo
-    val builder: StreamVideoBuilder2
     val context: Context
 
     init {
@@ -59,28 +62,73 @@ public class IntegrationTestHelper() {
         )
         users["thierry"] = thierry
         tokens["thierry"] = token
-        builder = StreamVideoBuilder2(
-            context = ApplicationProvider.getApplicationContext(),
-            apiKey = "hd8szvscpxvd",
-            geo = GEO.GlobalEdgeNetwork,
-            thierry,
-            token,
-            loggingLevel = LoggingLevel.BODY
-        )
-        client = builder.build()
         context = ApplicationProvider.getApplicationContext()
     }
+
+
 }
 
 open class IntegrationTestBase() {
     @get:Rule
     val dispatcherRule = DispatcherRule()
 
-
+    /** Convenient helper with test data */
     val testData = IntegrationTestHelper()
-    val client = testData.client
-    internal val clientImpl : StreamVideoImpl = testData.client as StreamVideoImpl
+    /** Android context */
     val context = testData.context
+    /** API Key */
     val apiKey = "hd8szvscpxvd"
+    /** Client */
+    val client: StreamVideo
+    /** Implementation of the client for more access to interals */
+    internal val clientImpl : StreamVideoImpl
+    /** Tracks all events received by the client during a test */
+    var events: MutableList<VideoEvent>
+    /** The builder used for creating the client */
+    val builder: StreamVideoBuilder2
+
+    init {
+        builder = StreamVideoBuilder2(
+            context = ApplicationProvider.getApplicationContext(),
+            apiKey = "hd8szvscpxvd",
+            geo = GEO.GlobalEdgeNetwork,
+            testData.users["thierry"]!!,
+            testData.tokens["thierry"]!!,
+            loggingLevel = LoggingLevel.BODY
+        )
+        if (BuildConfig.CORE_TEST_LOCAL == "1") {
+            builder.videoDomain = "localhost"
+        }
+        client = builder.build()
+        clientImpl = client as StreamVideoImpl
+
+
+        // monitor for events
+        events = mutableListOf<VideoEvent>()
+        client.subscribe {
+            println("sub received an event: $it")
+            events.add(it)
+            println("events in loop $events")
+        }
+    }
+
+    /**
+     * Assert that we received the event of this type, get the event as well for
+     * further checks
+     */
+    fun assertEventReceived(eventClass: Class<*>?): VideoEvent {
+        val eventTypes = events.map { it::class.java }
+        Truth.assertThat(eventTypes).contains(eventClass)
+        return events.filter { it::class.java == eventClass }[0]
+    }
+
+    fun randomUUID(): String {
+        return UUID.randomUUID().toString()
+    }
+
+    @Before
+    fun resetTestVars() {
+        events = mutableListOf()
+    }
 
 }

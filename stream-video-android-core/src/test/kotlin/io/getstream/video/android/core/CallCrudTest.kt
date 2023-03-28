@@ -19,7 +19,6 @@ package io.getstream.video.android.core
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import io.getstream.video.android.core.events.CallCreatedEvent
-import io.getstream.video.android.core.events.ConnectedEvent
 import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.model.*
 import io.getstream.video.android.core.utils.onError
@@ -29,6 +28,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.util.*
+import kotlin.reflect.KClass
 
 /**
  * TODO: testing work
@@ -67,39 +67,23 @@ public class CreateCallCrudTest : IntegrationTestBase() {
      */
 
     @Test
-    fun newCallSyntax() = runTest {
-        val call = client.call("default", "123", "mytoken")
-        // TODO: Get or create call removes some of the fields, this is not ideal
-        val result = call.get()
-
-        result.onSuccess {
-            println(it)
-        }
-
-        assert(result.isSuccess)
-    }
-
-    @Test
     fun `create a call and verify the event is fired`() = runTest {
-        val result = client.getOrCreateCall("default", UUID.randomUUID().toString())
-
-        // TODO: how to start listening for events using the websocket?
-
+        // create the call
+        val call = client.call("default", randomUUID())
+        val result = call.create()
         assert(result.isSuccess)
-        val events = mutableListOf<VideoEvent>()
-        val eventTypes = mutableListOf<String>()
-        client.subscribe {
-            println("sub received an event: $it")
-            events.add(it)
-            eventTypes.add(it::class.java.toString())
-        }
-        clientImpl.fireEvent(ConnectedEvent("test123"))
+        // Wait to receive the next event
+        clientImpl.waitForNextEvent()
 
+        // verify that we received the create call event
         assertThat(events.size).isEqualTo(1)
-        assertThat(events).contains(CallCreatedEvent::class.java.toString())
+        val event = assertEventReceived(CallCreatedEvent::class.java)
 
-
+        // TODO: The structure of the event we receive is weird,
+        //  seems out of sync with server, to investigate
     }
+
+
 
     @Test
     fun createACallWith2Members() = runTest {
@@ -133,11 +117,10 @@ public class UpdateOrDeleteCallCrudTest : IntegrationTestBase() {
 
     @Test
     fun createACall() = runTest {
-        val client = testData.client
         // TODO: update call needs to expose more..
         val result3 = client.updateCall("default", "abc", mutableMapOf("color" to "green"))
 
-        val result2 = testData.client.getOrCreateCall("default", "123")
+        val result2 = client.getOrCreateCall("default", "123")
 
         System.out.println(
             result2.onError {

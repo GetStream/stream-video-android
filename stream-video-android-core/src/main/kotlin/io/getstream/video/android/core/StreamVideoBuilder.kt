@@ -43,6 +43,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
 import java.util.*
+import kotlin.coroutines.resume
 
 public class StreamVideoBuilder(
     private val context: Context,
@@ -186,7 +187,7 @@ public class StreamVideoBuilder2(
     /** Support for different push providers */
     private val pushDeviceGenerators: List<PushDeviceGenerator> = emptyList(),
 ) {
-    val videoDomain: String = "video-edge-frankfurt-ce1.stream-io-api.com"
+    var videoDomain: String = "video-edge-frankfurt-ce1.stream-io-api.com"
 
     public fun build(): StreamVideo {
         /** URL overwrite to allow for testing against a local instance of video */
@@ -238,8 +239,7 @@ public class StreamVideoBuilder2(
             getCurrentUserId = { preferences.getUserCredentials()?.id ?: "" }
         )
 
-        // TODO: remove this, but for now it helps avoid bugs
-        runBlocking { socket.connect() }
+
 
         val client = StreamVideoImpl(
             context = context,
@@ -276,9 +276,15 @@ public class StreamVideoBuilder2(
         }
 
         // TODO: Bit of a hack, eventually we need to remove the engine probably
-        engine.eventListener = {
-            println("engine eventlistener received an event: $it")
-            client.fireEvent(it)
+        socket.eventListener = { event ->
+            println("engine eventlistener received an event: $event")
+            client.fireEvent(event)
+            client.nextEventContinuation?.let {
+                if (!client.nextEventCompleted) {
+                    it.resume(event)
+                }
+                client.nextEventCompleted = true
+            }
         }
 
         return client
