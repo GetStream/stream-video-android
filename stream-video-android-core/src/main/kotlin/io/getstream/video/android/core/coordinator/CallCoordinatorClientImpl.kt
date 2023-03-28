@@ -20,10 +20,10 @@ import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import io.getstream.video.android.core.api.ClientRPCService
+import io.getstream.video.android.core.errors.VideoBackendError
 import io.getstream.video.android.core.errors.VideoError
 import kotlinx.serialization.decodeFromString
 
-import io.getstream.video.android.core.errors.VideoError2
 import io.getstream.video.android.core.model.CallInfo
 import io.getstream.video.android.core.model.CallRecordingData
 import io.getstream.video.android.core.model.CallUser
@@ -302,7 +302,7 @@ internal class CallCoordinatorClientImpl(
         // TODO: this isn't right
         val code = error.code()
         val errorBytes = error.response()?.errorBody()?.bytes()
-        var error = VideoError2()
+        var error = VideoBackendError()
         errorBytes?.let {
             val errorBody = String(it, Charsets.UTF_8)
             val format = Json {
@@ -310,10 +310,10 @@ internal class CallCoordinatorClientImpl(
                 ignoreUnknownKeys = true
             }
             val moshi: Moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
-            val jsonAdapter: JsonAdapter<VideoError2> = moshi.adapter(VideoError2::class.java)
+            val jsonAdapter: JsonAdapter<VideoBackendError> = moshi.adapter(VideoBackendError::class.java)
             println(errorBody)
 
-            error = format.decodeFromString<VideoError2>(errorBody)
+            error = format.decodeFromString<VideoBackendError>(errorBody)
 
         }
         // TODO: return the VideoError2 requires refactoring...

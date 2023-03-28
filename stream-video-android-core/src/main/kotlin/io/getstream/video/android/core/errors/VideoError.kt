@@ -19,7 +19,7 @@ package io.getstream.video.android.core.errors
 import kotlinx.serialization.SerialName
 
 @kotlinx.serialization.Serializable
-public data class VideoError2(
+public data class VideoBackendError (
     val code: Int = 1,
     val message: String = "",
     @SerialName("StatusCode")
@@ -36,7 +36,7 @@ public data class VideoError2(
  * @property message The message that represents the error.
  * @property cause Cause of the error, either a BE exception or an SDK based one.
  */
-public open class VideoError(
+public open class VideoError (
     public val message: String? = null,
     public val cause: Throwable? = null
 ) {
