@@ -16,8 +16,14 @@
 
 package io.getstream.video.android.core.coordinator
 
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import io.getstream.video.android.core.api.ClientRPCService
 import io.getstream.video.android.core.errors.VideoError
+import kotlinx.serialization.decodeFromString
+
+import io.getstream.video.android.core.errors.VideoError2
 import io.getstream.video.android.core.model.CallInfo
 import io.getstream.video.android.core.model.CallRecordingData
 import io.getstream.video.android.core.model.CallUser
@@ -35,9 +41,11 @@ import io.getstream.video.android.core.utils.toEdge
 import io.getstream.video.android.core.utils.toQueriedCalls
 import io.getstream.video.android.core.utils.toReaction
 import io.getstream.video.android.core.utils.toRecording
+import kotlinx.serialization.json.Json
 import org.openapitools.client.apis.DefaultApi
 import org.openapitools.client.apis.EventsApi
 import org.openapitools.client.apis.VideoCallsApi
+import org.openapitools.client.infrastructure.Serializer
 import org.openapitools.client.models.BlockUserRequest
 import org.openapitools.client.models.GetCallEdgeServerRequest
 import org.openapitools.client.models.GetCallEdgeServerResponse
@@ -53,6 +61,7 @@ import org.openapitools.client.models.SendReactionRequest
 import org.openapitools.client.models.UnblockUserRequest
 import org.openapitools.client.models.UpdateCallRequest
 import org.openapitools.client.models.UpdateUserPermissionsRequest
+import retrofit2.HttpException
 import stream.video.coordinator.client_v1_rpc.CreateDeviceRequest
 import stream.video.coordinator.client_v1_rpc.CreateDeviceResponse
 import stream.video.coordinator.client_v1_rpc.DeleteDeviceRequest
@@ -108,6 +117,8 @@ internal class CallCoordinatorClientImpl(
 
             Success(response)
         } catch (error: Throwable) {
+            // TODO: This isn't right..
+
             Failure(VideoError(error.message, error))
         }
 
@@ -287,8 +298,26 @@ internal class CallCoordinatorClientImpl(
         val result = videoCallApi.updateCall(type, id, updateCallRequest)
 
         Success(result.call.toCallInfo())
-    } catch (error: Throwable) {
-        Failure(VideoError(error.message, error))
+    } catch (error: HttpException) {
+        // TODO: this isn't right
+        val code = error.code()
+        val errorBytes = error.response()?.errorBody()?.bytes()
+        var error = VideoError2()
+        errorBytes?.let {
+            val errorBody = String(it, Charsets.UTF_8)
+            val format = Json {
+                prettyPrint = true
+                ignoreUnknownKeys = true
+            }
+            val moshi: Moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
+            val jsonAdapter: JsonAdapter<VideoError2> = moshi.adapter(VideoError2::class.java)
+            println(errorBody)
+
+            error = format.decodeFromString<VideoError2>(errorBody)
+
+        }
+        // TODO: return the VideoError2 requires refactoring...
+        Failure(VideoError())
     }
 
     /**

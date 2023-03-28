@@ -16,10 +16,8 @@
 
 package io.getstream.video.android.core
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import io.getstream.video.android.core.events.CallCreatedEvent
-import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.model.*
 import io.getstream.video.android.core.utils.onError
 import io.getstream.video.android.core.utils.onSuccess
@@ -28,22 +26,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.util.*
-import kotlin.reflect.KClass
-
-/**
- * TODO: testing work
- *
- * - Livestream
- * - Audio room
- * - Video call
- *
- *
- * - Client initialization
- * - Call CRUD
- *
- */
-
-
 
 @RunWith(RobolectricTestRunner::class)
 public class CreateCallCrudTest : IntegrationTestBase() {
@@ -58,20 +40,18 @@ public class CreateCallCrudTest : IntegrationTestBase() {
      *
      * Errors
      * * Try to create a call of a type that doesn't exist
-     * * Not having permission to create a call
      *
      * Get Success
      * * Validate basic stats work
      * * Validate pagination works on participants
      *
      */
-
     @Test
     fun `create a call and verify the event is fired`() = runTest {
         // create the call
         val call = client.call("default", randomUUID())
         val result = call.create()
-        assert(result.isSuccess)
+        assertSuccess(result)
         // Wait to receive the next event
         clientImpl.waitForNextEvent()
 
@@ -83,10 +63,35 @@ public class CreateCallCrudTest : IntegrationTestBase() {
         //  seems out of sync with server, to investigate
     }
 
+    @Test
+    fun `update a call, verify it works and the event is fired`() = runTest {
+        // create the call
+        val callId = randomUUID()
+        val call = client.call("default", callId)
+        val createResult = call.create()
+        assertSuccess(createResult)
 
+        // set a custom field and update
+        call.custom = mutableMapOf("color" to "green")
+        val updateResult = call.update()
+        assertSuccess(updateResult)
+
+        // get the call object
+        val getResult = call.get()
+        assertSuccess(getResult)
+
+        // verify that we received the create call event
+        assertThat(events.size).isEqualTo(1)
+        val createEvent = assertEventReceived(CallCreatedEvent::class.java)
+        val updateEvent = assertEventReceived(CallCreatedEvent::class.java)
+
+        getResult.onSuccess {
+            assertThat(it.custom["color"]).isEqualTo("green")
+        }
+    }
 
     @Test
-    fun createACallWith2Members() = runTest {
+    fun `Create a call with members and custom data`() = runTest {
         val members = mutableListOf("thierry", "tommaso")
         // TODO: Rename participants to members
         val result = client.getOrCreateCall("default", "tommaso-thierry", members)
@@ -94,45 +99,28 @@ public class CreateCallCrudTest : IntegrationTestBase() {
     }
 
     @Test
-    fun failToCreateACall() = runTest {
-        val result = client.getOrCreateCall("missing", "123")
+    fun `Fail to update a call that doesn't exist`() = runTest {
+        val result = client.call("default", randomUUID()).update()
         assert(result.isFailure)
         result.onError { println(it) }
+        // TODO: error is hidden, we need to fix that
     }
-}
-
-@RunWith(AndroidJUnit4::class)
-public class UpdateOrDeleteCallCrudTest : IntegrationTestBase() {
-    /**
-     * Alright so what do we need to test here:
-     *
-     * Success scenarios
-     * * Call was successfully updated
-     * * Call was successfully deleted
-     *
-     * Errors
-     * * Call doesn't exist
-     * * Not having permission to update/delete a call
-     */
 
     @Test
-    fun createACall() = runTest {
-        // TODO: update call needs to expose more..
-        val result3 = client.updateCall("default", "abc", mutableMapOf("color" to "green"))
+    fun `Fail to create a call with a missing call type`() = runTest {
+        val result = client.call("missing", "123").create()
+        assert(result.isFailure)
+        result.onError { println(it) }
+        // TODO: error is hidden, we need to fix that
+    }
 
-        val result2 = client.getOrCreateCall("default", "123")
+    @Test
+    fun `Read call stats`() = runTest {
+        // TODO
+    }
 
-        System.out.println(
-            result2.onError {
-                System.out.println("abc")
-                System.out.println(it.toString())
-            }
-        )
-        System.out.println(
-            result2.onSuccess {
-                System.out.println("123")
-                System.out.println(it)
-            }
-        )
+    @Test
+    fun `Paginate members`() = runTest {
+        // TODO
     }
 }

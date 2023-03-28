@@ -29,7 +29,7 @@ public class Call2(
 
     ) {
     private val cid = "$type:$id"
-    public val custom : Map<String, Any>? = null
+    public var custom : Map<String, Any>? = null
 
     private val _participants: MutableStateFlow<List<CallParticipantState>> =
         MutableStateFlow(emptyList())

@@ -1018,7 +1018,7 @@ internal class StreamVideoImpl(
         return calls[cid] ?: Call2(this, type, id, token)
     }
 
-    public lateinit var nextEventContinuation: Continuation<VideoEvent>
+    public var nextEventContinuation: Continuation<VideoEvent>? = null
     public var nextEventCompleted: Boolean = false
 
     suspend fun waitForNextEvent(): VideoEvent = suspendCoroutine { continuation ->

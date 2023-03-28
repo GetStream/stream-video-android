@@ -6,7 +6,8 @@
 ** Basics **
 - [X] Truth
 - [X] Mockk
-- [ ] Build vars
+- [X] Build vars (run locally)
+- [ ] Build vars (valid token generation)
 - [X] Ability to run against local go codebase
 
 ** Use cases **
@@ -21,7 +22,7 @@
 - [ ] Responding to events
 - [ ] Join flow
 
-### Documentation Inline
+### Documentation (code level)
 
 - [ ] Client docs
 - [ ] Call docs
@@ -39,6 +40,7 @@
 - [ ] Call refactoring
 - [ ] Support query members
 - [ ] Ensure we always use DispatcherProvider.IO
+- [ ] Stop hiding backend errors
 
 ### Features
 

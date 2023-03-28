@@ -24,6 +24,8 @@ import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.User
+import io.getstream.video.android.core.utils.Result
+import io.getstream.video.android.core.utils.onError
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Before
@@ -120,6 +122,17 @@ open class IntegrationTestBase() {
         val eventTypes = events.map { it::class.java }
         Truth.assertThat(eventTypes).contains(eventClass)
         return events.filter { it::class.java == eventClass }[0]
+    }
+
+    /**
+     * Verify the Result is a success and raise a nice error if it isn't
+     */
+    fun assertSuccess(result: Result<Any>) {
+        assert(result.isSuccess) {
+            result.onError {
+                "result wasn't a success, got an error $it."
+            }
+        }
     }
 
     fun randomUUID(): String {

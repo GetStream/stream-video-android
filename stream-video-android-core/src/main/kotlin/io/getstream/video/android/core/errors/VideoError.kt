@@ -16,6 +16,20 @@
 
 package io.getstream.video.android.core.errors
 
+import kotlinx.serialization.SerialName
+
+@kotlinx.serialization.Serializable
+public data class VideoError2(
+    val code: Int = 1,
+    val message: String = "",
+    @SerialName("StatusCode")
+    val statusCode: Int = 500,
+    val duration: String = "",
+    @SerialName("more_info")
+    val moreInfo: String = "",
+    val details: List<String> = emptyList(),
+)
+
 /**
  * Represents an SDK error that contains a message and the cause.
  *
