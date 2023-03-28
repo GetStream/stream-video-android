@@ -34,7 +34,8 @@ class ClientAndAuthTest : IntegrationTestBase() {
      * TODO
      * - Test logging
      * - Build vars (and document the system)
-     * - Truth & Mockito
+     * - Truth & Mockk
+     * - Consider DataStore over SharedPreferences
      *
      * - Ensure API calls run on DispatcherProvider.IO
      * - Connection id / connect setup when should it run

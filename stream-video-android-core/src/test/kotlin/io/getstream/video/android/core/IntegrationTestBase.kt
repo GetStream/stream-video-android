@@ -79,6 +79,7 @@ open class IntegrationTestBase() {
 
     val testData = IntegrationTestHelper()
     val client = testData.client
+    internal val clientImpl : StreamVideoImpl = testData.client as StreamVideoImpl
     val context = testData.context
     val apiKey = "hd8szvscpxvd"
 

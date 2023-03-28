@@ -424,4 +424,6 @@ public interface StreamVideo {
      * Used to process push notification payloads.
      */
     public suspend fun handlePushMessage(payload: Map<String, Any>): Result<Unit>
+
+    public fun call(id: String, type: String, token: String=""): Call2
 }

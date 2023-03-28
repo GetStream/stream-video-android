@@ -94,8 +94,8 @@ import stream.video.coordinator.push_v1.DeviceInput
 
 class EventSubscription
     (
-    private val listener: VideoEventListener<VideoEvent>,
-    private val filter: ((VideoEvent) -> Boolean)? = null,
+    public val listener: VideoEventListener<VideoEvent>,
+    public val filter: ((VideoEvent) -> Boolean)? = null,
     )
     {
         var isDisposed: Boolean = false
@@ -123,9 +123,11 @@ internal class StreamVideoImpl(
     private val networkStateProvider: NetworkStateProvider,
 ) : StreamVideo {
 
+    // TODO: Client state
+
     private val logger by taggedLogger("Call:StreamVideo")
     private var subscriptions = mutableSetOf<EventSubscription>()
-
+    private var calls = mutableMapOf<String, Call2>()
 
     public override fun subscribeFor(
         vararg eventTypes: Class<out VideoEvent>,
@@ -289,6 +291,26 @@ internal class StreamVideoImpl(
             .onError { engine.onCallFailed(it) }
             .also { logger.v { "[updateCall] Final result: $it" } }
     }
+
+
+    internal fun fireEvent(event: VideoEvent) {
+
+        // update state for the client
+
+        // update state for the calls
+
+        // fire event handlers
+        subscriptions.forEach { sub ->
+            if (sub.isDisposed) return
+
+            if (sub.filter?.let { it(event) } ?: true) {
+                sub.listener.onEvent(event)
+            }
+
+        }
+
+    }
+
 
     // caller: DIAL and wait answer
     /**
@@ -975,6 +997,11 @@ internal class StreamVideoImpl(
                 is Failure -> result
             }
         }
+
+    override fun call(type: String, id: String, token: String): Call2 {
+        val cid = "$type:$id"
+        return calls[cid] ?: Call2(this, type, id, token)
+    }
 }
 
 /** Extension function that makes it easy to use on kotlin, but keeps Java usable as well */
