@@ -19,6 +19,7 @@ package io.getstream.video.android.core
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import io.getstream.video.android.core.events.CallCreatedEvent
+import io.getstream.video.android.core.events.ConnectedEvent
 import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.model.*
 import io.getstream.video.android.core.utils.onError
@@ -26,6 +27,7 @@ import io.getstream.video.android.core.utils.onSuccess
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import java.util.*
 
 /**
@@ -43,7 +45,7 @@ import java.util.*
 
 
 
-@RunWith(AndroidJUnit4::class)
+@RunWith(RobolectricTestRunner::class)
 public class CreateCallCrudTest : IntegrationTestBase() {
     /**
      * Alright so what do we need to test here:
@@ -78,16 +80,21 @@ public class CreateCallCrudTest : IntegrationTestBase() {
     }
 
     @Test
-    fun createACall() = runTest {
+    fun `create a call and verify the event is fired`() = runTest {
         val result = client.getOrCreateCall("default", UUID.randomUUID().toString())
+
+        // TODO: how to start listening for events using the websocket?
+
         assert(result.isSuccess)
         val events = mutableListOf<VideoEvent>()
         val eventTypes = mutableListOf<String>()
         client.subscribe {
-            println(it)
+            println("sub received an event: $it")
             events.add(it)
-            eventTypes.add(it.javaClass.toString())
+            eventTypes.add(it::class.java.toString())
         }
+        clientImpl.fireEvent(ConnectedEvent("test123"))
+
         assertThat(events.size).isEqualTo(1)
         assertThat(events).contains(CallCreatedEvent::class.java.toString())
 

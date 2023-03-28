@@ -36,9 +36,11 @@ import io.getstream.video.android.core.model.ApiKey
 import io.getstream.video.android.core.model.Call
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.UserType
+import io.getstream.video.android.core.socket.internal.VideoSocketImpl
 import io.getstream.video.android.core.user.UserPreferencesManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
 import java.util.*
 
@@ -213,7 +215,8 @@ public class StreamVideoBuilder2(
             videoDomain = videoDomain
         )
 
-        val socket = module.socket()
+        val socket: VideoSocketImpl = module.socket() as VideoSocketImpl
+
         val userState = module.userState()
 
         val callCoordinatorClientModule = CallCoordinatorClientModule(
@@ -228,15 +231,17 @@ public class StreamVideoBuilder2(
         val scope = CoroutineScope(DispatcherProvider.IO)
         val config = StreamVideoConfigDefault
 
-        val engine: StreamCallEngine = StreamCallEngineImpl(
+        val engine: StreamCallEngineImpl = StreamCallEngineImpl(
             parentScope = scope,
             coordinatorClient = callCoordinatorClientModule.callCoordinatorClient(),
             config = config,
             getCurrentUserId = { preferences.getUserCredentials()?.id ?: "" }
         )
 
+        // TODO: remove this, but for now it helps avoid bugs
+        runBlocking { socket.connect() }
 
-        return StreamVideoImpl(
+        val client = StreamVideoImpl(
             context = context,
             scope = scope,
             config = config,
@@ -251,6 +256,8 @@ public class StreamVideoBuilder2(
             networkStateProvider = module.networkStateProvider()
         ).also { streamVideo ->
             StreamVideoStateLauncher(context, streamVideo, androidInputs, inputLauncher).run(scope)
+
+            // TODO: device shouldn't always be created
             scope.launch {
                 pushDeviceGenerators
                     .firstOrNull { it.isValidForThisDevice(context) }
@@ -267,5 +274,13 @@ public class StreamVideoBuilder2(
                     }
             }
         }
+
+        // TODO: Bit of a hack, eventually we need to remove the engine probably
+        engine.eventListener = {
+            println("engine eventlistener received an event: $it")
+            client.fireEvent(it)
+        }
+
+        return client
     }
 }

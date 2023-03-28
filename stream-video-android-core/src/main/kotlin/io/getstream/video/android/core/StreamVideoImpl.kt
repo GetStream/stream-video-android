@@ -292,7 +292,10 @@ internal class StreamVideoImpl(
             .also { logger.v { "[updateCall] Final result: $it" } }
     }
 
-
+    /**
+     * Internal function that fires the event. It starts by updating client state and call state
+     * After that it loops over the subscriptions and calls their listener
+     */
     internal fun fireEvent(event: VideoEvent) {
 
         // update state for the client
@@ -303,10 +306,17 @@ internal class StreamVideoImpl(
         subscriptions.forEach { sub ->
             if (sub.isDisposed) return
 
-            if (sub.filter?.let { it(event) } ?: true) {
+            // subs without filters should always fire
+            if (sub.filter == null) {
                 sub.listener.onEvent(event)
             }
 
+            // if there is a filter, check it and fire if it matches
+            sub.filter?.let {
+                if (it.invoke(event)) {
+                    sub.listener.onEvent(event)
+                }
+            }
         }
 
     }

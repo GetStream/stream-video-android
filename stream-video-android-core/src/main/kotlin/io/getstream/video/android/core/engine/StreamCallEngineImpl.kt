@@ -80,6 +80,8 @@ internal class StreamCallEngineImpl(
 
     private val jobs = Jobs()
 
+    public var eventListener : ((event: VideoEvent) -> Unit)? = null
+
     private val mutex = Mutex()
 
     private val scope = parentScope + Job(parentScope.coroutineContext.job) + Dispatchers.Default
@@ -89,6 +91,8 @@ internal class StreamCallEngineImpl(
     override val callState: StateFlow<State> = _callState
 
     override fun onCoordinatorEvent(event: CoordinatorEvent) {
+        println("onCoordinatorEvent eventlistener received an event: $event")
+        eventListener?.let { it.invoke(event) }
         if (event !is HealthCheckEvent) {
             logger.v { "[onCoordinatorEvent] event: $event" }
         }

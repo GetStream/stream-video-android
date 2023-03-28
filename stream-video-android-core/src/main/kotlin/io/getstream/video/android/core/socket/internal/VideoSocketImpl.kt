@@ -32,6 +32,9 @@ import io.getstream.video.android.core.model.CallMetadata
 import io.getstream.video.android.core.socket.SocketListener
 import io.getstream.video.android.core.socket.VideoSocket
 import io.getstream.video.android.core.user.UserPreferences
+import io.getstream.video.android.core.utils.Failure
+import io.getstream.video.android.core.utils.Result
+import io.getstream.video.android.core.utils.Success
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -39,8 +42,12 @@ import kotlinx.coroutines.launch
 import org.openapitools.client.models.UserObjectRequest
 import org.openapitools.client.models.VideoWSAuthMessageRequest
 import stream.video.coordinator.client_v1_rpc.WebsocketHealthcheck
+import kotlin.coroutines.Continuation
+import kotlin.coroutines.resume
 import kotlin.math.pow
 import kotlin.properties.Delegates
+import kotlin.coroutines.suspendCoroutine
+
 
 /**
  * Socket implementation used to handle the lifecycle of a WebSocket and its related state.
@@ -60,6 +67,7 @@ internal class VideoSocketImpl(
     private val coroutineScope: CoroutineScope,
 ) : VideoSocket {
 
+    private lateinit var connectContinuation: Continuation<Result<ConnectedEvent>>
     private val logger by taggedLogger("Call:CoordinatorSocket")
 
     private var connectionConf: SocketFactory.ConnectionConf? = null
@@ -70,6 +78,11 @@ internal class VideoSocketImpl(
     private var socketConnectionJob: Job? = null
     private val listeners = mutableSetOf<SocketListener>()
     private val eventUiHandler = Handler(Looper.getMainLooper())
+
+    suspend fun connect(): Result<ConnectedEvent> = suspendCoroutine { continuation ->
+        this.connectSocket()
+        this.connectContinuation = continuation
+    }
 
     /**
      * Call related state.
@@ -129,6 +142,8 @@ internal class VideoSocketImpl(
                     callListeners { it.onConnecting() }
                 }
                 is State.Connected -> {
+                    val success = Success(data=newState.event)
+                    connectContinuation.resume(success)
                     healthMonitor.start()
                     callListeners { it.onConnected(newState.event) }
                 }
@@ -160,6 +175,7 @@ internal class VideoSocketImpl(
         private set
 
     override fun onSocketError(error: VideoError) {
+        connectContinuation.resume(Failure(error=error))
         logger.e { "[onSocketError] state: $state, error: $error" }
         if (state !is State.DisconnectedPermanently) {
             callListeners { it.onError(error) }
