@@ -53,6 +53,7 @@ public class CreateCallCrudTest : IntegrationTestBase() {
         val result = call.create()
         assertSuccess(result)
         // Wait to receive the next event
+        // TODO: We could make this nicer, maybe specify the type of the event and proceed if it's already there
         clientImpl.waitForNextEvent()
 
         // verify that we received the create call event

@@ -2,7 +2,7 @@
 ## For Go devs
 
 ```
-cp env.properties.sample env.properties
+cp env.properties.sample .env.properties
 ```
 
 Edit the file and set CORE_TEST_LOCAL = 1 to run against your local infra.
@@ -11,7 +11,7 @@ Edit the file and set CORE_TEST_LOCAL = 1 to run against your local infra.
 
 You can copy environment variables like this:
 ```
-cp env.properties.sample env.properties
+cp env.properties.sample .env.properties
 ```
 
 build.gradle.kts for each repo reads the .env.properties file and translated it into

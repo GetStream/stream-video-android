@@ -5,6 +5,7 @@ import io.getstream.video.android.core.utils.Result
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.openapitools.client.models.GoLiveResponse
+import org.openapitools.client.models.MemberResponse
 import org.openapitools.client.models.UpdateCallResponse
 
 public data class SFUConnection(internal val callUrl: String,
@@ -13,17 +14,14 @@ public data class SFUConnection(internal val callUrl: String,
 
 }
 
-/**
- * Related see
- * - CallMetadata
- * - JoinedCall
- * - CallViewModel
- * - Compose lib Call.kt object
- * - StreamVideoStateLauncher
- *
- * Sometimes you want the raw server response
- * Usually you want state that updates though..
- */
+public class Participant2() {
+
+}
+
+public class Member2() {
+
+}
+
 public class Call2(
     private val client: StreamVideo,
     private val type: String,

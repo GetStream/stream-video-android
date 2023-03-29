@@ -1,5 +1,6 @@
 package io.getstream.video.android.core
 
+import com.google.common.truth.Truth.assertThat
 import io.getstream.video.android.core.events.*
 import io.getstream.video.android.core.model.QueryCallsData
 import io.getstream.video.android.core.model.User
@@ -11,6 +12,48 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class EventTest : IntegrationTestBase() {
+    /**
+     * Every event should update state properly
+     * - Coordinator events
+     * - SFU events
+     *
+     * Also review:
+     * - CallMetadata
+     * - JoinedCall
+     * - CallViewModel
+     * - Compose lib Call.kt object
+     * - StreamVideoStateLauncher
+     *
+     * At the client level
+     * - Ringing call
+     * - Active call
+     *
+     * Call level
+     * - Call Data and settings
+     * - Participants
+     * - Various sorting/filtering on participants
+     * - Call duration
+     * - Own permissions
+     *
+     * Me & Other participants (members)
+     * - Video on/off
+     * - Speaking
+     * - Network
+     *
+     * Ringing calls
+     * - Normal
+     * - Incoming (CallCreatedEvent. Ring=true)
+     * - Outgoing, ring=true, and people didn't join yet (member, not a participant)
+     * - Rejected/Accept event
+     *
+     */
+    @Test
+    fun `test recording`() = runTest {
+
+        clientImpl.fireEvent(RecordingStartedEvent())
+        assertThat(client.recording)
+    }
+
     @Test
     fun `Blocking a user event`() = runTest {
 
