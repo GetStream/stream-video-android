@@ -361,7 +361,7 @@ public interface StreamVideo {
         type: String,
         id: String,
         sessionId: String
-    ): Result<List<CallRecordingData>>
+    ): Result<ListRecordingsResponse>
 
     /**
      * Attempts to send a reaction to a video call.
@@ -426,17 +426,17 @@ public interface StreamVideo {
     /**
      * Accepts incoming call.
      */
-    public suspend fun acceptCall(cid: StreamCallCid): Result<JoinedCall>
+    public suspend fun acceptCall(type: String, id: String): Result<JoinedCall>
 
     /**
      * Rejects incoming call.
      */
-    public suspend fun rejectCall(cid: StreamCallCid): Result<Boolean>
+    public suspend fun rejectCall(type: String, id: String): Result<SendEventResponse>
 
     /**
      * Cancels outgoing or active call.
      */
-    public suspend fun cancelCall(cid: StreamCallCid): Result<Boolean>
+    public suspend fun cancelCall(type: String, id: String): Result<SendEventResponse>
 
     /**
      * Used to process push notification payloads.

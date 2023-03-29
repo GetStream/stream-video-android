@@ -32,7 +32,6 @@ import io.getstream.video.android.core.call.signal.socket.SfuSocket
 import io.getstream.video.android.core.call.signal.socket.SfuSocketListener
 import io.getstream.video.android.core.call.state.ConnectionState
 import io.getstream.video.android.core.call.utils.stringify
-import io.getstream.video.android.core.coordinator.CallCoordinatorClient
 import io.getstream.video.android.core.engine.StreamCallEngine
 import io.getstream.video.android.core.engine.adapter.SfuSocketListenerAdapter
 import io.getstream.video.android.core.errors.DisconnectCause

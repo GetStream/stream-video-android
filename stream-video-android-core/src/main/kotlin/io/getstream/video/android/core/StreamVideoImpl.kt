@@ -22,7 +22,6 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.api.ClientRPCService
 import io.getstream.video.android.core.call.CallClient
 import io.getstream.video.android.core.call.builder.CallClientBuilder
-import io.getstream.video.android.core.coordinator.CallCoordinatorClient
 import io.getstream.video.android.core.coordinator.state.UserState
 import io.getstream.video.android.core.engine.StreamCallEngine
 import io.getstream.video.android.core.engine.adapter.CoordinatorSocketListenerAdapter
@@ -277,7 +276,7 @@ internal class StreamVideoImpl(
                 when (state) {
                     is StreamCallState.Drop -> if (config.cancelOnTimeout && state.reason is DropReason.Timeout) {
                         logger.i { "[observeState] call dropped by timeout" }
-                        cancelCall(state.callGuid.cid)
+                        cancelCall(state.callGuid.type, state.callGuid.id)
                     }
                     is StreamCallState.Idle -> clearCallState()
                     is StreamCallState.Joined -> {
@@ -322,11 +321,7 @@ internal class StreamVideoImpl(
         logger.d { "[deleteDevice] id: $id" }
 
         val request = DeleteDeviceRequest(id = id)
-        try {
-            Success(callCoordinatorService.deleteDevice(request)).also { logger.v { "[deleteDevice] result: $it" } }
-        } catch (e: HttpException) {
-            parseError(e)
-        }
+        return wrapAPICall { callCoordinatorService.deleteDevice(request) }
     }
 
     /**
@@ -557,10 +552,10 @@ internal class StreamVideoImpl(
         logger.d { "[getOrCreateAndJoinCall] type: $type, id: $id, participantIds: $participantIds" }
         engine.onCallStarting(type, id, participantIds, ring, forcedNewCall = false)
         // TODO: remove this, join call automatically gets the call, no need to do it twice
-        callCoordinatorClient.getOrCreateCall(
+        getOrCreateCall(
             type = type,
             id = id,
-            getOrCreateCallRequest = GetOrCreateCallRequest(
+            request = GetOrCreateCallRequest(
                 data = CallRequest(
                     members = participantIds.map {
                         MemberRequest(
@@ -586,10 +581,12 @@ internal class StreamVideoImpl(
      * @see StreamVideo.sendEvent
      */
     override suspend fun sendEvent(
-        callCid: String,
+        type: String,
+        id: String,
         eventType: CallEventType
     ): Result<SendEventResponse> {
-        logger.d { "[sendEvent] callCid: $callCid, eventType: $eventType" }
+        logger.d { "[sendEvent] callCid: $type:$id, eventType: $eventType" }
+        val callCid = "$type:$id"
         engine.onCallEventSending(callCid, eventType)
         val (type, id) = callCid.toTypeAndId()
 
@@ -604,10 +601,12 @@ internal class StreamVideoImpl(
      * @see StreamVideo.sendCustomEvent
      */
     override suspend fun sendCustomEvent(
-        callCid: String,
+        type: String,
+        id: String,
         dataJson: Map<String, Any>,
         eventType: String
     ): Result<SendEventResponse> {
+        val callCid = "$type:$id"
         logger.d { "[sendCustomEvent] callCid: $callCid, dataJson: $dataJson, eventType: $eventType" }
         val (type, id) = callCid.toTypeAndId()
 
@@ -753,12 +752,9 @@ internal class StreamVideoImpl(
         id: String,
         updateUserPermissionsData: UpdateUserPermissionsData
     ): Result<Unit> {
-
-        wrapAPICall {
+        return wrapAPICall {
             defaultApi.updateUserPermissions(type, id, updateUserPermissionsData.toRequest())
         }
-
-
     }
 
     /**
@@ -768,9 +764,9 @@ internal class StreamVideoImpl(
         type: String,
         id: String,
         sessionId: String
-    ): Result<List<CallRecordingData>> {
+    ): Result<ListRecordingsResponse> {
         // TODO: Result structure isn't flexible
-        wrapAPICall {
+        return wrapAPICall {
             val result = defaultApi.listRecordings(type, id, sessionId)
 
             result.recordings.map { it.toRecording() }
@@ -788,7 +784,6 @@ internal class StreamVideoImpl(
     ): Result<SendReactionResponse> {
         logger.d { "[sendVideoReaction] callCid: $type:$id, sendReactionData: $sendReactionData" }
 
-        val result =
         return wrapAPICall {
             defaultApi.sendVideoReaction(type, id, sendReactionData.toRequest())
         }
@@ -800,11 +795,10 @@ internal class StreamVideoImpl(
     override suspend fun getEdges(): Result<List<EdgeData>> {
         logger.d { "[getEdges] no params" }
 
-        wrapAPICall {
+        return wrapAPICall {
             val result = videoCallApi.getEdges()
 
             result.edges.map { it.toEdge() }
-            result
         }
     }
 
@@ -913,13 +907,12 @@ internal class StreamVideoImpl(
     /**
      * @see StreamVideo.acceptCall
      */
-    override suspend fun acceptCall(cid: StreamCallCid): Result<JoinedCall> =
+    override suspend fun acceptCall(type: String, id: String): Result<JoinedCall> =
         withContext(scope.coroutineContext) {
             try {
-                logger.d { "[acceptCall] cid: $cid" }
-                val (type, id) = cid.toTypeAndId()
+
                 sendEvent(
-                    callCid = cid,
+                    type, id,
                     eventType = CallEventType.ACCEPTED
                 ).flatMap {
                     joinCall(type, id)
@@ -935,20 +928,20 @@ internal class StreamVideoImpl(
     /**
      * @see StreamVideo.rejectCall
      */
-    override suspend fun rejectCall(cid: StreamCallCid): Result<Boolean> =
-        withContext(scope.coroutineContext) {
-            logger.d { "[rejectCall] cid: $cid" }
-            sendEvent(callCid = cid, CallEventType.REJECTED)
-        }
+    override suspend fun rejectCall(type: String, id: String): Result<SendEventResponse> {
+        logger.d { "[rejectCall] cid: $type:$id" }
+        return sendEvent(type, id, CallEventType.REJECTED)
+    }
+
 
     /**
      * @see StreamVideo.cancelCall
      */
-    override suspend fun cancelCall(cid: StreamCallCid): Result<Boolean> =
-        withContext(scope.coroutineContext) {
-            logger.d { "[cancelCall] cid: $cid" }
-            sendEvent(callCid = cid, CallEventType.CANCELLED)
-        }
+    override suspend fun cancelCall(type: String, id: String): Result<SendEventResponse> {
+        return sendEvent(type = type, id=id, CallEventType.CANCELLED)
+    }
+
+
 
     /**
      * @see StreamVideo.handlePushMessage

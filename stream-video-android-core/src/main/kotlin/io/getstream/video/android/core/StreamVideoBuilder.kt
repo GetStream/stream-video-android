@@ -49,98 +49,6 @@ import org.openapitools.client.apis.VideoCallsApi
 import java.util.*
 import kotlin.coroutines.resume
 
-public class StreamVideoBuilder(
-    private val context: Context,
-    private val user: User,
-    private val apiKey: ApiKey,
-    private val config: StreamVideoConfig = StreamVideoConfigDefault,
-    private val androidInputs: Set<CallAndroidInput> = emptySet(),
-    private val inputLauncher: CallAndroidInputLauncher = DefaultCallAndroidInputLauncher,
-    private val loggingLevel: LoggingLevel = LoggingLevel.NONE,
-    private inline val callEngineBuilder: ((CoroutineScope) -> StreamCallEngine)? = null,
-    private val pushDeviceGenerators: List<PushDeviceGenerator> = emptyList(),
-) {
-
-    val videoDomain: String = "video-edge-frankfurt-ce1.stream-io-api.com"
-
-
-    public fun build(): StreamVideo {
-        val lifecycle = ProcessLifecycleOwner.get().lifecycle
-
-        if (apiKey.isBlank() ||
-            user.id.isBlank()
-        ) throw IllegalArgumentException("The API key, user ID and token cannot be empty!")
-
-        val preferences = UserPreferencesManager.initialize(context).apply {
-            storeUserCredentials(user)
-            storeApiKey(apiKey)
-        }
-
-        val httpModule = HttpModule.getOrCreate(loggingLevel.httpLoggingLevel, preferences)
-
-
-
-        val module = VideoModule(
-            appContext = context,
-            preferences = preferences,
-            videoDomain = videoDomain
-        )
-
-        val socket = module.socket()
-        val userState = module.userState()
-
-        val callCoordinatorClientModule = CallCoordinatorClientModule(
-            user = user,
-            preferences = preferences,
-            appContext = context,
-            lifecycle = lifecycle,
-            okHttpClient = httpModule.okHttpClient,
-            videoDomain = videoDomain
-        )
-
-        val scope = CoroutineScope(DispatcherProvider.IO)
-
-        val engine: StreamCallEngine =
-            callEngineBuilder?.invoke(scope) ?: StreamCallEngineImpl(
-                parentScope = scope,
-                coordinatorClient = callCoordinatorClientModule.callCoordinatorClient(),
-                config = config,
-                getCurrentUserId = { preferences.getUserCredentials()?.id ?: "" }
-            )
-
-        return StreamVideoImpl(
-            context = context,
-            scope = scope,
-            config = config,
-            engine = engine,
-            loggingLevel = loggingLevel,
-            preferences = preferences,
-            lifecycle = lifecycle,
-            socket = socket,
-            socketStateService = module.socketStateService(),
-            userState = userState,
-            networkStateProvider = module.networkStateProvider()
-        ).also { streamVideo ->
-            StreamVideoStateLauncher(context, streamVideo, androidInputs, inputLauncher).run(scope)
-            scope.launch {
-                pushDeviceGenerators
-                    .firstOrNull { it.isValidForThisDevice(context) }
-                    ?.let {
-                        it.onPushDeviceGeneratorSelected()
-                        it.asyncGeneratePushDevice {
-                            scope.launch {
-                                streamVideo.createDevice(
-                                    token = it.token,
-                                    pushProvider = it.pushProvider.key
-                                )
-                            }
-                        }
-                    }
-            }
-        }
-    }
-}
-
 public interface AudioFilter {
 }
 public interface VideoFilter {
@@ -167,7 +75,7 @@ public fun interface VideoEventListener<EventT : VideoEvent> {
     public fun onEvent(event: EventT)
 }
 
-public class StreamVideoBuilder2(
+public class StreamVideoBuilder(
     private val context: Context,
     /** Your Stream API Key, you can find it in the dashboard */
     private val apiKey: ApiKey,
@@ -237,30 +145,29 @@ public class StreamVideoBuilder2(
         val scope = CoroutineScope(DispatcherProvider.IO)
         val config = StreamVideoConfigDefault
 
-        val engine: StreamCallEngineImpl = StreamCallEngineImpl(
-            parentScope = scope,
-            coordinatorClient = callCoordinatorClientModule.callCoordinatorClient(),
-            config = config,
-            getCurrentUserId = { preferences.getUserCredentials()?.id ?: "" }
-        )
-
-//        private val callCoordinatorService: ClientRPCService,
-//        private val videoCallApi: VideoCallsApi,
-//        private val eventsApi: EventsApi,
-//        private val defaultApi: DefaultApi
+//        val engine: StreamCallEngineImpl = StreamCallEngineImpl(
+//            parentScope = scope,
+//            coordinatorClient = callCoordinatorClientModule.callCoordinatorClient(),
+//            config = config,
+//            getCurrentUserId = { preferences.getUserCredentials()?.id ?: "" }
+//        )
 
         val client = StreamVideoImpl(
             context = context,
             scope = scope,
             config = config,
-            engine = engine,
+           // engine = engine,
             loggingLevel = loggingLevel,
             preferences = preferences,
             lifecycle = lifecycle,
             socket = socket,
             socketStateService = module.socketStateService(),
             userState = userState,
-            networkStateProvider = module.networkStateProvider()
+            networkStateProvider = module.networkStateProvider(),
+            callCoordinatorService = callCoordinatorClientModule.oldService,
+            videoCallApi = callCoordinatorClientModule.videoCallsApi,
+            eventsApi= callCoordinatorClientModule.eventsApi,
+            defaultApi =  callCoordinatorClientModule.defaultApi
         ).also { streamVideo ->
             StreamVideoStateLauncher(context, streamVideo, androidInputs, inputLauncher).run(scope)
 

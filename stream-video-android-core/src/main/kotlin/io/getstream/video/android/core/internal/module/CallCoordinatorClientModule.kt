@@ -19,8 +19,6 @@ package io.getstream.video.android.core.internal.module
 import android.content.Context
 import androidx.lifecycle.Lifecycle
 import io.getstream.video.android.core.api.ClientRPCService
-import io.getstream.video.android.core.coordinator.CallCoordinatorClient
-import io.getstream.video.android.core.coordinator.CallCoordinatorClientImpl
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.user.UserPreferences
@@ -80,22 +78,11 @@ internal class CallCoordinatorClientModule(
             .build()
     }
 
-    /**
-     * Cached instance of the CallCoordinator service client for API calls.
-     */
-    private val callCoordinatorClient: CallCoordinatorClient by lazy {
-        val oldService = protoRetrofitClient.create(ClientRPCService::class.java)
-        val videoCallsApi = retrofitClient.create(VideoCallsApi::class.java)
-        val eventsApi = retrofitClient.create(EventsApi::class.java)
-        val defaultApi = retrofitClient.create(DefaultApi::class.java)
+    val oldService = protoRetrofitClient.create(ClientRPCService::class.java)
+    val videoCallsApi = retrofitClient.create(VideoCallsApi::class.java)
+    val eventsApi = retrofitClient.create(EventsApi::class.java)
+    val defaultApi = retrofitClient.create(DefaultApi::class.java)
 
-        CallCoordinatorClientImpl(
-            callCoordinatorService = oldService,
-            videoCallApi = videoCallsApi,
-            eventsApi = eventsApi,
-            defaultApi = defaultApi
-        )
-    }
 
     /**
      * The [CoroutineScope] used for all business logic related operations.
@@ -113,11 +100,6 @@ internal class CallCoordinatorClientModule(
         return scope
     }
 
-    /**
-     * @return The [CallCoordinatorClient] used to communicate to the API.
-     */
-    internal fun callCoordinatorClient(): CallCoordinatorClient {
-        return callCoordinatorClient
-    }
+
 
 }

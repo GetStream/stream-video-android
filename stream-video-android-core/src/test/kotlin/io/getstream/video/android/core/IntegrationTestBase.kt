@@ -87,10 +87,10 @@ open class IntegrationTestBase() {
     /** Tracks all events received by the client during a test */
     var events: MutableList<VideoEvent>
     /** The builder used for creating the client */
-    val builder: StreamVideoBuilder2
+    val builder: StreamVideoBuilder
 
     init {
-        builder = StreamVideoBuilder2(
+        builder = StreamVideoBuilder(
             context = ApplicationProvider.getApplicationContext(),
             apiKey = "hd8szvscpxvd",
             geo = GEO.GlobalEdgeNetwork,

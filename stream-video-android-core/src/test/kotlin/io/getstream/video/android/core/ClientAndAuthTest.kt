@@ -44,7 +44,7 @@ class ClientAndAuthTest : IntegrationTestBase() {
      */
     @Test
     fun regularUser() = runTest {
-        StreamVideoBuilder2(
+        StreamVideoBuilder(
             context = context,
             apiKey = apiKey,
             geo = GEO.GlobalEdgeNetwork,
@@ -55,7 +55,7 @@ class ClientAndAuthTest : IntegrationTestBase() {
 
     @Test
     fun anonymousUser() = runTest {
-        StreamVideoBuilder2(
+        StreamVideoBuilder(
             context = context,
             apiKey = apiKey,
             geo = GEO.GlobalEdgeNetwork,
@@ -70,7 +70,7 @@ class ClientAndAuthTest : IntegrationTestBase() {
         // verify that we get the token
         // API call is getGuestUser or something like that
         // TODO: Implement
-        StreamVideoBuilder2(
+        StreamVideoBuilder(
             context = context,
             apiKey = apiKey,
             geo = GEO.GlobalEdgeNetwork,
@@ -81,7 +81,7 @@ class ClientAndAuthTest : IntegrationTestBase() {
     @Test
     fun subscribeToAllEvents() = runTest {
 
-        val client = StreamVideoBuilder2(
+        val client = StreamVideoBuilder(
             context = context,
             apiKey = apiKey,
             geo = GEO.GlobalEdgeNetwork,
@@ -97,7 +97,7 @@ class ClientAndAuthTest : IntegrationTestBase() {
     @Test
     fun subscribeToSpecificEvents() = runTest {
 
-        val client = StreamVideoBuilder2(
+        val client = StreamVideoBuilder(
             context = context,
             apiKey = apiKey,
             geo = GEO.GlobalEdgeNetwork,
@@ -112,7 +112,7 @@ class ClientAndAuthTest : IntegrationTestBase() {
 
     @Test
     fun testInvalidAPIKey() = runTest {
-        StreamVideoBuilder2(
+        StreamVideoBuilder(
             context = context,
             apiKey = "notvalid",
             geo = GEO.GlobalEdgeNetwork,
@@ -123,7 +123,7 @@ class ClientAndAuthTest : IntegrationTestBase() {
 
     @Test
     fun testEmptyAPIKey() = runTest {
-        StreamVideoBuilder2(
+        StreamVideoBuilder(
             context = context,
             apiKey = "",
             geo = GEO.GlobalEdgeNetwork,
@@ -134,7 +134,7 @@ class ClientAndAuthTest : IntegrationTestBase() {
 
     @Test
     fun testInvalidToken() = runTest {
-        StreamVideoBuilder2(
+        StreamVideoBuilder(
             context = context,
             apiKey = apiKey,
             geo = GEO.GlobalEdgeNetwork,
@@ -153,7 +153,7 @@ class ClientAndAuthTest : IntegrationTestBase() {
         // - maybe it doesn't wait for WS
         // - there is no .connect on android, when should it connect?
 
-        val client = StreamVideoBuilder2(
+        val client = StreamVideoBuilder(
             context = context,
             apiKey = apiKey,
             geo = GEO.GlobalEdgeNetwork,
