@@ -26,8 +26,8 @@ import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.utils.Result
 import io.getstream.video.android.core.utils.onError
-import kotlinx.coroutines.test.TestDispatcher
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.test.*
 import org.junit.Before
 import org.junit.Rule
 import org.junit.rules.TestWatcher
@@ -36,13 +36,15 @@ import java.util.*
 
 
 class DispatcherRule(
-    val testDispatcher: TestDispatcher = UnconfinedTestDispatcher(),
+    val testDispatcher: TestDispatcher = UnconfinedTestDispatcher(TestCoroutineScheduler()),
 ) : TestWatcher() {
     override fun starting(description: Description) {
+        Dispatchers.setMain(testDispatcher)
         DispatcherProvider.set(testDispatcher, testDispatcher)
     }
 
     override fun finished(description: Description) {
+        Dispatchers.resetMain()
         DispatcherProvider.reset()
     }
 }
