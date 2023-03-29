@@ -23,5 +23,9 @@ import io.getstream.result.StreamError
 internal inline fun <T : Any> fetchResult(call: () -> T): Result<T> = try {
     Result.Success(call.invoke())
 } catch (error: Throwable) {
-    Result.Failure(StreamError.ThrowableError(error.message, error))
+    Result.Failure(
+        StreamError.ThrowableError(
+            error.message ?: "Sfu fetch error", error
+        )
+    )
 }

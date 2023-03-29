@@ -43,7 +43,9 @@ internal suspend inline fun createValue(
         }
 
         override fun onCreateFailure(message: String?) = it.resume(
-            Failure(StreamError.GenericError(message))
+            Failure(
+                StreamError.GenericError(message ?: "Couldn't create a SDP message.")
+            )
         )
 
         /**
@@ -72,7 +74,9 @@ internal suspend inline fun setValue(
          */
         override fun onSetSuccess() = it.resume(Success(Unit))
         override fun onSetFailure(message: String?) = it.resume(
-            Failure(StreamError.GenericError(message))
+            Failure(
+                StreamError.GenericError(message ?: "Couldn't create a SDP message.")
+            )
         )
     }
 

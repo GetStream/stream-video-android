@@ -357,7 +357,11 @@ internal class StreamVideoImpl(
             }
         } catch (error: Throwable) {
             logger.e(error) { "[joinCallInternal] failed: $error" }
-            Failure(StreamError.ThrowableError(error.message, error))
+            Failure(
+                StreamError.ThrowableError(
+                    error.message ?: "Couldn't join a call internal", error
+                )
+            )
         }
     }
 
@@ -868,7 +872,9 @@ internal class StreamVideoImpl(
                 }
             } catch (e: Throwable) {
                 logger.e { "[acceptCall] failed: $e" }
-                Failure(StreamError.ThrowableError(e.message, e))
+                Failure(
+                    StreamError.ThrowableError(e.message ?: "Couldn't accept a call.", e)
+                )
             }
         }
 

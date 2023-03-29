@@ -585,7 +585,9 @@ internal class CallClientImpl(
             }
         } catch (e: Throwable) {
             logger.e { "[executeJoinRequest] failed: $e" }
-            Failure(StreamError.ThrowableError(e.message, e))
+            Failure(
+                StreamError.ThrowableError(e.message ?: "Couldn't execute a join request.", e)
+            )
         }
     }
 
