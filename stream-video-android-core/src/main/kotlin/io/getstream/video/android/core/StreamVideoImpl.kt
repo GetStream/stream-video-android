@@ -19,6 +19,7 @@ package io.getstream.video.android.core
 import android.content.Context
 import androidx.lifecycle.Lifecycle
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.api.ClientRPCService
 import io.getstream.video.android.core.call.CallClient
 import io.getstream.video.android.core.call.builder.CallClientBuilder
 import io.getstream.video.android.core.coordinator.CallCoordinatorClient
@@ -28,6 +29,7 @@ import io.getstream.video.android.core.engine.adapter.CoordinatorSocketListenerA
 import io.getstream.video.android.core.errors.VideoBackendError
 import io.getstream.video.android.core.errors.VideoError
 import io.getstream.video.android.core.events.CallCreatedEvent
+import io.getstream.video.android.core.events.ConnectedEvent
 import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.lifecycle.LifecycleHandler
@@ -85,6 +87,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import org.openapitools.client.apis.DefaultApi
+import org.openapitools.client.apis.EventsApi
+import org.openapitools.client.apis.VideoCallsApi
 import org.openapitools.client.models.*
 import retrofit2.HttpException
 import stream.video.coordinator.client_v1_rpc.CreateDeviceRequest
@@ -118,18 +123,22 @@ internal class StreamVideoImpl(
     private val engine: StreamCallEngine,
     private val lifecycle: Lifecycle,
     private val loggingLevel: LoggingLevel,
-    private val callCoordinatorClient: CallCoordinatorClient,
     private val preferences: UserPreferences,
     private val socket: VideoSocket,
     private val socketStateService: SocketStateService,
     private val userState: UserState,
     private val networkStateProvider: NetworkStateProvider,
+    private val callCoordinatorService: ClientRPCService,
+    private val videoCallApi: VideoCallsApi,
+    private val eventsApi: EventsApi,
+    private val defaultApi: DefaultApi
 ) : StreamVideo {
 
 
     private val logger by taggedLogger("Call:StreamVideo")
     private var subscriptions = mutableSetOf<EventSubscription>()
     private var calls = mutableMapOf<String, Call2>()
+
 
     // caller: JOIN after accepting incoming call by callee
     /**
@@ -146,17 +155,52 @@ internal class StreamVideoImpl(
         }
 
     /**
+     * @see StreamVideo.createDevice
+     */
+    override suspend fun createDevice(token: String, pushProvider: String): Result<Device> {
+        logger.d { "[createDevice] token: $token, pushProvider: $pushProvider" }
+        return wrapAPICall {
+            val deviceResponse = callCoordinatorService.createDevice(
+                CreateDeviceRequest(
+                    DeviceInput(
+                        id = token,
+                        push_provider_id = pushProvider
+                    )
+                )
+            )
+            val device = Device(
+                token = deviceResponse.device?.id ?: error("CreateDeviceResponse has no device object "),
+                pushProvider = deviceResponse.device?.push_provider_name ?: "missing"
+            )
+            storeDevice(device)
+            device
+        }
+    }
+
+    /**
+     * Ensure that every API call runs on the IO dispatcher and has correct error handling
+     */
+    internal suspend fun <T: Any> wrapAPICall(apiCall: suspend () -> T): Result<T> {
+        return withContext(scope.coroutineContext) {
+            try {
+                Success(apiCall())
+            } catch (e: HttpException) {
+                parseError(e)
+            }
+        }
+    }
+
+    /**
      * @see StreamVideo.updateCall
      */
     override suspend fun updateCall(
         type: String,
         id: String,
         custom: Map<String,Any>,
-    ): Result<CallInfo> = withContext(scope.coroutineContext) {
-
+    ): Result<UpdateCallResponse> {
         logger.d { "[updateCall] type: $type, id: $id, participantIds: $custom" }
-        try {
-            callCoordinatorClient.updateCall(
+        return wrapAPICall {
+            videoCallApi.updateCall(
                 type = type,
                 id = id,
                 updateCallRequest = UpdateCallRequest(
@@ -164,8 +208,6 @@ internal class StreamVideoImpl(
                     settingsOverride = CallSettingsRequest()
                 )
             )
-        } catch (e: HttpException) {
-            parseError(e)
         }
     }
 
@@ -269,36 +311,14 @@ internal class StreamVideoImpl(
      */
     override val callState: StateFlow<StreamCallState> = engine.callState
 
-    /**
-     * @see StreamVideo.createDevice
-     */
-    override suspend fun createDevice(token: String, pushProvider: String): Result<Device> {
-        logger.d { "[createDevice] token: $token, pushProvider: $pushProvider" }
-        return callCoordinatorClient.createDevice(
-            CreateDeviceRequest(
-                DeviceInput(
-                    id = token,
-                    push_provider_id = pushProvider
-                )
-            )
-        )
-            .also { logger.v { "[createDevice] result: $it" } }
-            .map {
-                Device(
-                    token = it.device?.id ?: error("CreateDeviceResponse has no device object "),
-                    pushProvider = it.device.push_provider_name
-                )
-            }.also { storeDevice(it) }
-    }
 
-    private fun storeDevice(result: Result<Device>) {
-        if (result is Success) {
-            logger.d { "[storeDevice] device: ${result.data}" }
-            val device = result.data
+
+    private fun storeDevice(device: Device) {
+            logger.d { "[storeDevice] device: device" }
             val preferences = UserPreferencesManager.initialize(context)
 
             preferences.storeDevice(device)
-        }
+
     }
 
     /**
@@ -306,9 +326,13 @@ internal class StreamVideoImpl(
      */
     override suspend fun deleteDevice(id: String): Result<Unit> {
         logger.d { "[deleteDevice] id: $id" }
-        return callCoordinatorClient.deleteDevice(
-            DeleteDeviceRequest(id = id)
-        ).also { logger.v { "[deleteDevice] result: $it" } }
+
+        val request = DeleteDeviceRequest(id = id)
+        try {
+            Success(callCoordinatorService.deleteDevice(request)).also { logger.v { "[deleteDevice] result: $it" } }
+        } catch (e: HttpException) {
+            parseError(e)
+        }
     }
 
     /**
@@ -361,6 +385,9 @@ internal class StreamVideoImpl(
     }
 
 
+
+
+
     // caller: DIAL and wait answer
     /**
      * @see StreamVideo.getOrCreateCall
@@ -373,27 +400,33 @@ internal class StreamVideoImpl(
     ): Result<CallMetadata> = withContext(scope.coroutineContext) {
         logger.d { "[getOrCreateCall] type: $type, id: $id, participantIds: $participantIds" }
         engine.onCallStarting(type, id, participantIds, ring, forcedNewCall = false)
-        callCoordinatorClient.getOrCreateCall(
-            type = type,
-            id = id,
-            getOrCreateCallRequest = GetOrCreateCallRequest(
-                data = CallRequest(
-                    members = participantIds.map {
-                        MemberRequest(
-                            userId = it,
-                            role = "admin"
-                        )
-                    },
-                ),
-                ring = ring
-            )
-        )
-            .also { logger.v { "[getOrCreateCall] Coordinator result: $it" } }
-            .map { response -> StartedCall(call = response.toCall(StreamCallKind.fromRinging(ring))) }
-            .onSuccess { engine.onCallStarted(it.call) }
-            .onError { engine.onCallFailed(it) }
-            .map { it.call }
-            .also { logger.v { "[getOrCreateCall] Final result: $it" } }
+
+        try {
+            Success(videoCallApi.getOrCreateCall(
+                type = type,
+                id = id,
+                getOrCreateCallRequest = GetOrCreateCallRequest(
+                    data = CallRequest(
+                        members = participantIds.map {
+                            MemberRequest(
+                                userId = it,
+                                role = "admin"
+                            )
+                        },
+                    ),
+                    ring = ring
+                )
+            ))
+                .also { logger.v { "[getOrCreateCall] Coordinator result: $it" } }
+                .map { response -> StartedCall(call = response.toCall(StreamCallKind.fromRinging(ring))) }
+                .onSuccess { engine.onCallStarted(it.call) }
+                .onError { engine.onCallFailed(it) }
+                .map { it.call }
+                .also { logger.v { "[getOrCreateCall] Final result: $it" } }
+        } catch (e: HttpException) {
+            parseError(e)
+        }
+
     }
 
 
@@ -497,7 +530,13 @@ internal class StreamVideoImpl(
         id: String,
         request: GetCallEdgeServerRequest
     ): Result<GetCallEdgeServerResponse> {
-        return callCoordinatorClient.selectEdgeServer(id, type, request)
+        return wrapAPICall {
+            videoCallApi.getCallEdgeServer(
+                type = type,
+                id = id,
+                getCallEdgeServerRequest = request
+            )
+        }
     }
 
     // caller/callee: CREATE/JOIN meeting or ACCEPT call with no participants or ringing
@@ -544,18 +583,16 @@ internal class StreamVideoImpl(
     override suspend fun sendEvent(
         callCid: String,
         eventType: CallEventType
-    ): Result<Boolean> {
+    ): Result<SendEventResponse> {
         logger.d { "[sendEvent] callCid: $callCid, eventType: $eventType" }
         engine.onCallEventSending(callCid, eventType)
         val (type, id) = callCid.toTypeAndId()
 
-        return callCoordinatorClient.sendUserEvent(
-            id = id,
-            type = type,
-            sendEventRequest = SendEventRequest(type = eventType.eventType)
-        )
-            .onSuccess { engine.onCallEventSent(callCid, eventType) }
-            .also { logger.v { "[sendEvent] result: $it" } }
+        return wrapAPICall {
+            eventsApi.sendEvent(type, id, SendEventRequest(type = eventType.eventType)).also {
+                engine.onCallEventSent(callCid, eventType)
+            }
+        }
     }
 
     /**
@@ -565,15 +602,13 @@ internal class StreamVideoImpl(
         callCid: String,
         dataJson: Map<String, Any>,
         eventType: String
-    ): Result<Boolean> {
+    ): Result<SendEventResponse> {
         logger.d { "[sendCustomEvent] callCid: $callCid, dataJson: $dataJson, eventType: $eventType" }
         val (type, id) = callCid.toTypeAndId()
 
-        return callCoordinatorClient.sendUserEvent(
-            id = id,
-            type = type,
-            sendEventRequest = SendEventRequest(custom = dataJson, type = eventType)
-        ).also { logger.v { "[sendCustomEvent] result: $it" } }
+        return wrapAPICall {
+            eventsApi.sendEvent(type, id, SendEventRequest(custom = dataJson, type = eventType))
+        }
     }
 
     /**

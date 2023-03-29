@@ -42,6 +42,8 @@ import io.getstream.video.android.core.model.state.StreamCallState
 import io.getstream.video.android.core.socket.SocketListener
 import io.getstream.video.android.core.utils.Result
 import kotlinx.coroutines.flow.StateFlow
+import org.openapitools.client.models.SendEventResponse
+import org.openapitools.client.models.UpdateCallResponse
 
 /**
  * The main interface to control the Video calls. [StreamVideoImpl] implements this interface.
@@ -102,7 +104,7 @@ public interface StreamVideo {
     public suspend fun updateCall(
         type: StreamCallType,
         id: StreamCallId,
-        custom: Map<String, Any>): Result<CallInfo>
+        custom: Map<String, Any>): Result<UpdateCallResponse>
 
 
     /**
@@ -171,7 +173,7 @@ public interface StreamVideo {
     public suspend fun sendEvent(
         callCid: StreamCallCid,
         eventType: CallEventType
-    ): Result<Boolean>
+    ): Result<SendEventResponse>
 
     /**
      * Sends a custom event related to an active [Call].
@@ -186,7 +188,7 @@ public interface StreamVideo {
         callCid: StreamCallCid,
         dataJson: Map<String, Any>,
         eventType: String
-    ): Result<Boolean>
+    ): Result<SendEventResponse>
 
     /**
      * Queries the API for members of a call.

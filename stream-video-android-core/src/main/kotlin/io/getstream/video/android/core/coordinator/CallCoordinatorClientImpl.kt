@@ -78,49 +78,7 @@ internal class CallCoordinatorClientImpl(
     private val defaultApi: DefaultApi
 ) : CallCoordinatorClient {
 
-    /**
-     * @see CallCoordinatorClient.createDevice
-     */
-    override suspend fun createDevice(
-        createDeviceRequest: CreateDeviceRequest
-    ): Result<CreateDeviceResponse> = try {
-        Success(callCoordinatorService.createDevice(createDeviceRequest))
-    } catch (error: Throwable) {
-        Failure(VideoError(error.message, error))
-    }
 
-    /**
-     * @see CallCoordinatorClient.deleteDevice
-     */
-    override suspend fun deleteDevice(deleteDeviceRequest: DeleteDeviceRequest): Result<Unit> =
-        try {
-            callCoordinatorService.deleteDevice(deleteDeviceRequest)
-            Success(Unit)
-        } catch (error: Throwable) {
-            Failure(VideoError(error.message, error))
-        }
-
-    /**
-     * @see CallCoordinatorClient.getOrCreateCall
-     */
-    override suspend fun getOrCreateCall(
-        id: String,
-        type: String,
-        getOrCreateCallRequest: GetOrCreateCallRequest
-    ): Result<GetOrCreateCallResponse> =
-        try {
-            val response = videoCallApi.getOrCreateCall(
-                type = type,
-                id = id,
-                getOrCreateCallRequest = getOrCreateCallRequest
-            )
-
-            Success(response)
-        } catch (error: Throwable) {
-            // TODO: This isn't right..
-
-            Failure(VideoError(error.message, error))
-        }
 
     /**
      * @see CallCoordinatorClient.joinCall
@@ -143,40 +101,6 @@ internal class CallCoordinatorClientImpl(
         Failure(VideoError(error.message, error))
     }
 
-    /**
-     * @see CallCoordinatorClient.selectEdgeServer
-     */
-    override suspend fun selectEdgeServer(
-        id: String,
-        type: String,
-        request: GetCallEdgeServerRequest
-    ): Result<GetCallEdgeServerResponse> =
-        try {
-            val response = videoCallApi.getCallEdgeServer(
-                type = type,
-                id = id,
-                getCallEdgeServerRequest = request
-            )
-
-            Success(response)
-        } catch (error: Throwable) {
-            Failure(VideoError(error.message, error))
-        }
-
-    /**
-     * @see CallCoordinatorClient.sendUserEvent
-     */
-    override suspend fun sendUserEvent(
-        id: String,
-        type: String,
-        sendEventRequest: SendEventRequest
-    ): Result<Boolean> = try {
-        eventsApi.sendEvent(type, id, sendEventRequest)
-
-        Success(true)
-    } catch (error: Throwable) {
-        Failure(VideoError(error.message, error))
-    }
 
     /**
      * @see CallCoordinatorClient.inviteUsers
@@ -287,18 +211,6 @@ internal class CallCoordinatorClientImpl(
         Failure(VideoError(error.message, error))
     }
 
-    /**
-     * @see CallCoordinatorClient.updateCall
-     */
-    override suspend fun updateCall(
-        id: String,
-        type: String,
-        updateCallRequest: UpdateCallRequest
-    ): Result<CallInfo> {
-        val result = videoCallApi.updateCall(type, id, updateCallRequest)
-
-        return Success(result.call.toCallInfo())
-    }
 
     /**
      * @see CallCoordinatorClient.queryCalls
