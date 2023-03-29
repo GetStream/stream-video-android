@@ -37,7 +37,8 @@
 ### Refactoring
 
 - [X] Client builder refactoring. see https://www.notion.so/stream-wiki/Android-Changes-Discussion-10c5a9f303134eb786bdebcea55cf92a
-- [ ] Stop hiding backend errors (in progress)
+- [X] Stop hiding backend errors (in progress)
+- [ ] Merge SFU Client and CallClientImpl into 1 concept
 - [ ] Call refactoring
 - [ ] Support query members
 - [ ] Ensure we always use DispatcherProvider.IO

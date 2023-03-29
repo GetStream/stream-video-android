@@ -26,15 +26,13 @@ import android.os.Build
 import androidx.core.content.getSystemService
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.StreamVideoImpl
+import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.call.connection.StreamPeerConnection
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
-import io.getstream.video.android.core.call.signal.SfuClient
 import io.getstream.video.android.core.call.signal.socket.SfuSocket
 import io.getstream.video.android.core.call.signal.socket.SfuSocketListener
 import io.getstream.video.android.core.call.state.ConnectionState
 import io.getstream.video.android.core.call.utils.stringify
-import io.getstream.video.android.core.engine.StreamCallEngine
-import io.getstream.video.android.core.engine.adapter.SfuSocketListenerAdapter
 import io.getstream.video.android.core.errors.DisconnectCause
 import io.getstream.video.android.core.errors.VideoError
 import io.getstream.video.android.core.events.AudioLevelChangedEvent
@@ -54,15 +52,12 @@ import io.getstream.video.android.core.filter.InFilterObject
 import io.getstream.video.android.core.filter.toMap
 import io.getstream.video.android.core.model.*
 import io.getstream.video.android.core.model.state.StreamCallState
-import io.getstream.video.android.core.utils.Failure
-import io.getstream.video.android.core.utils.Result
-import io.getstream.video.android.core.utils.Success
+import io.getstream.video.android.core.utils.*
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import io.getstream.video.android.core.utils.buildConnectionConfiguration
 import io.getstream.video.android.core.utils.buildMediaConstraints
 import io.getstream.video.android.core.utils.buildRemoteIceServers
-import io.getstream.video.android.core.utils.onError
-import io.getstream.video.android.core.utils.onSuccessSuspend
+import io.getstream.video.android.core.utils.fetchResult
 import io.getstream.video.android.core.utils.stringify
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -104,13 +99,7 @@ import stream.video.sfu.models.TrackInfo
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
 import stream.video.sfu.models.VideoLayer
-import stream.video.sfu.signal.SendAnswerRequest
-import stream.video.sfu.signal.SetPublisherRequest
-import stream.video.sfu.signal.TrackMuteState
-import stream.video.sfu.signal.TrackSubscriptionDetails
-import stream.video.sfu.signal.UpdateMuteStatesRequest
-import stream.video.sfu.signal.UpdateMuteStatesResponse
-import stream.video.sfu.signal.UpdateSubscriptionsRequest
+import stream.video.sfu.signal.*
 import kotlin.math.absoluteValue
 import kotlin.random.Random
 
@@ -120,7 +109,7 @@ internal class CallClientImpl(
     private val callGuid: StreamCallGuid,
     private inline val getCurrentUserId: () -> String,
     private inline val getSfuToken: () -> SfuToken,
-    private val sfuClient: SfuClient,
+    private val signalService: SignalServerService,
     private val sfuSocket: SfuSocket,
     private val remoteIceServers: List<IceServer>,
 ) : CallClient, SfuSocketListener {
@@ -130,6 +119,25 @@ internal class CallClientImpl(
     private var connectionState: ConnectionState = ConnectionState.DISCONNECTED
     private var sessionId: String = ""
     private var call: Call? = null
+
+    // TODO: Wrap this properly
+
+    suspend fun sendAnswer(request: SendAnswerRequest): Result<SendAnswerResponse> =
+        fetchResult { signalService.sendAnswer(request) }
+
+    suspend fun sendIceCandidate(request: ICETrickle): Result<ICETrickleResponse> =
+        fetchResult { signalService.iceTrickle(request) }
+
+    suspend fun setPublisher(request: SetPublisherRequest): Result<SetPublisherResponse> =
+        fetchResult { signalService.setPublisher(request) }
+
+    suspend fun updateSubscriptions(request: UpdateSubscriptionsRequest): Result<UpdateSubscriptionsResponse> =
+        fetchResult { signalService.updateSubscriptions(request) }
+
+    suspend fun updateMuteState(muteStateRequest: UpdateMuteStatesRequest): Result<UpdateMuteStatesResponse> =
+        fetchResult { signalService.updateMuteStates(muteStateRequest) }
+
+
 
     /**
      * State that indicates whether the camera is capturing and sending video or not.
@@ -331,9 +339,6 @@ internal class CallClientImpl(
         }
     }
 
-    private suspend fun updateMuteState(muteStateRequest: UpdateMuteStatesRequest): Result<UpdateMuteStatesResponse> {
-        return sfuClient.updateMuteState(muteStateRequest)
-    }
 
     override fun flipCamera() {
         logger.d { "[flipCamera] #sfu; no args" }
@@ -536,7 +541,7 @@ internal class CallClientImpl(
                 session_id = sessionId
             )
             logger.v { "[sendIceCandidate] #sfu; #${peerType.stringify()}; iceTrickle: $iceTrickle" }
-            val result = sfuClient.sendIceCandidate(iceTrickle)
+            val result = sendIceCandidate(iceTrickle)
             logger.v { "[sendIceCandidate] #sfu; #${peerType.stringify()}; completed: $result" }
         }
     }
@@ -791,7 +796,7 @@ internal class CallClientImpl(
                     tracks = trackInfos
                 )
 
-                sfuClient.setPublisher(request).onSuccessSuspend {
+                setPublisher(request).onSuccessSuspend {
                     logger.v { "[negotiate] #$id; #sfu; #${peerType.stringify()}; answerSdp: $it" }
 
                     val answerDescription = SessionDescription(
@@ -984,7 +989,7 @@ internal class CallClientImpl(
         val sendAnswerRequest = SendAnswerRequest(
             PeerType.PEER_TYPE_SUBSCRIBER, answerSdp.description, sessionId
         )
-        val sendAnswerResult = sfuClient.sendAnswer(sendAnswerRequest)
+        val sendAnswerResult = sendAnswer(sendAnswerRequest)
         logger.v { "[handleSubscriberOffer] #sfu; #subscriber; sendAnswerResult: $sendAnswerResult" }
     }
 
@@ -1035,7 +1040,7 @@ internal class CallClientImpl(
         logger.d { "[updateParticipantsSubscriptions] #sfu; request: $request" }
 
         coroutineScope.launch {
-            when (val result = sfuClient.updateSubscriptions(request)) {
+            when (val result = updateSubscriptions(request)) {
                 is Success -> {
                     logger.v { "[updateParticipantsSubscriptions] #sfu; succeed" }
                 }

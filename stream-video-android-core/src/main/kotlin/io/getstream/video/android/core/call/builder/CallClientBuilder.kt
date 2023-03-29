@@ -105,7 +105,7 @@ internal class CallClientBuilder(
             callGuid = callGuid,
             getCurrentUserId = { preferences.getUserCredentials()?.id ?: "" },
             getSfuToken = { preferences.getSfuToken() },
-            sfuClient = sfuClientModule.sfuClient,
+            signalService = sfuClientModule.signalService,
             remoteIceServers = iceServers,
             sfuSocket = SfuSocketImpl(
                 wssUrl = "$updatedSignalUrl/ws".replace("https", "wss"),

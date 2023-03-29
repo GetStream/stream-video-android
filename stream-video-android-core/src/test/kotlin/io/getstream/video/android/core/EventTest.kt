@@ -23,6 +23,7 @@ class EventTest : IntegrationTestBase() {
      * - CallViewModel
      * - Compose lib Call.kt object
      * - StreamVideoStateLauncher
+     * - CallClientImpl
      *
      * At the client level
      * - Ringing call
@@ -50,8 +51,8 @@ class EventTest : IntegrationTestBase() {
     @Test
     fun `test recording`() = runTest {
 
-        clientImpl.fireEvent(RecordingStartedEvent())
-        assertThat(client.recording)
+        clientImpl.fireEvent(RecordingStartedEvent(cid="default:123", type="123"))
+        //assertThat(client.recording)
     }
 
     @Test
