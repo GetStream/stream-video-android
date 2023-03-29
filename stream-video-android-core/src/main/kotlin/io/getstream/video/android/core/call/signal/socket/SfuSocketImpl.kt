@@ -20,9 +20,8 @@ import android.os.Handler
 import android.os.Looper
 import androidx.annotation.VisibleForTesting
 import io.getstream.log.taggedLogger
+import io.getstream.result.StreamError
 import io.getstream.video.android.core.errors.DisconnectCause
-import io.getstream.video.android.core.errors.VideoError
-import io.getstream.video.android.core.errors.VideoNetworkError
 import io.getstream.video.android.core.events.ConnectedEvent
 import io.getstream.video.android.core.events.HealthCheckResponseEvent
 import io.getstream.video.android.core.events.SfuDataEvent
@@ -214,7 +213,7 @@ internal class SfuSocketImpl(
         }
     }
 
-    override fun onSocketError(error: VideoError) {
+    override fun onSocketError(error: StreamError) {
         logger.e { "[onSocketError] state: $state, error: $error" }
         if (state !is State.DisconnectedPermanently) {
             callListeners { it.onError(error) }
@@ -254,8 +253,8 @@ internal class SfuSocketImpl(
             override fun toString(): String = "NetworkDisconnected"
         }
 
-        data class DisconnectedTemporarily(val error: VideoNetworkError?) : State()
-        data class DisconnectedPermanently(val error: VideoNetworkError?) : State()
+        data class DisconnectedTemporarily(val error: StreamError.NetworkError?) : State()
+        data class DisconnectedPermanently(val error: StreamError.NetworkError?) : State()
         object DisconnectedByRequest : State() {
             override fun toString(): String = "DisconnectedByRequest"
         }

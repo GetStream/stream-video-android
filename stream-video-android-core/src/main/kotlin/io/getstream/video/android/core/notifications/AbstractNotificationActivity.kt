@@ -20,12 +20,13 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.lifecycleScope
+import io.getstream.result.Result
+import io.getstream.result.Result.Failure
+import io.getstream.result.Result.Success
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoProvider
-import io.getstream.video.android.core.utils.Failure
 import io.getstream.video.android.core.utils.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.core.utils.INTENT_EXTRA_NOTIFICATION_ID
-import io.getstream.video.android.core.utils.Success
 import kotlinx.coroutines.launch
 
 /**
@@ -77,8 +78,8 @@ public abstract class AbstractNotificationActivity : AppCompatActivity(), Stream
      */
     private suspend fun loadCallData(callCid: String) {
         when (streamVideo.handlePushMessage(mapOf(INTENT_EXTRA_CALL_CID to callCid))) {
-            is Success -> Unit
-            is Failure -> finish()
+            is Result.Success -> Unit
+            is Result.Failure -> finish()
         }
         dismissIncomingCallNotifications()
     }

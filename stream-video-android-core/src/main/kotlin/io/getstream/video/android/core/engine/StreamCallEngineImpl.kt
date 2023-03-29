@@ -17,9 +17,10 @@
 package io.getstream.video.android.core.engine
 
 import io.getstream.log.taggedLogger
+import io.getstream.result.Result.Success
+import io.getstream.result.StreamError
 import io.getstream.video.android.core.StreamVideoConfig
 import io.getstream.video.android.core.coordinator.CallCoordinatorClient
-import io.getstream.video.android.core.errors.VideoError
 import io.getstream.video.android.core.events.AudioLevelChangedEvent
 import io.getstream.video.android.core.events.BlockedUserEvent
 import io.getstream.video.android.core.events.CallAcceptedEvent
@@ -73,7 +74,6 @@ import io.getstream.video.android.core.model.state.DropReason
 import io.getstream.video.android.core.model.state.StreamDate
 import io.getstream.video.android.core.model.state.copy
 import io.getstream.video.android.core.utils.Jobs
-import io.getstream.video.android.core.utils.Success
 import io.getstream.video.android.core.utils.toPartialUser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -205,7 +205,9 @@ internal class StreamCallEngineImpl(
                             State.Drop(
                                 state.callGuid, state.callKind,
                                 DropReason.Failure(
-                                    VideoError(message = "no SfuJoined event received")
+                                    StreamError.GenericError(
+                                        message = "no SfuJoined event received"
+                                    )
                                 )
                             )
                         )
@@ -247,7 +249,7 @@ internal class StreamCallEngineImpl(
         )
 
         if (queryUsersResult is Success) {
-            val eventUsers = queryUsersResult.data.associateBy { it.id }
+            val eventUsers = queryUsersResult.value.associateBy { it.id }
 
             val stateConfirmed = state.toConnected().copy(
                 users = state.users merge eventUsers
@@ -286,7 +288,7 @@ internal class StreamCallEngineImpl(
             )
 
             if (userQueryResult is Success) {
-                if (userQueryResult.data.isEmpty()) {
+                if (userQueryResult.value.isEmpty()) {
                     _callState.post(
                         state.copy(
                             users = state.users merge event.participant.toPartialUser()
@@ -295,7 +297,7 @@ internal class StreamCallEngineImpl(
                     return@launchWithLock
                 }
 
-                val user = userQueryResult.data.first()
+                val user = userQueryResult.value.first()
 
                 _callState.post(
                     state.copy(
@@ -600,7 +602,7 @@ internal class StreamCallEngineImpl(
         )
     }
 
-    override fun onCallFailed(error: VideoError) = scope.launchWithLock(mutex) {
+    override fun onCallFailed(error: StreamError) = scope.launchWithLock(mutex) {
         logger.e { "[onCallFailed] error: $error" }
         val state = _callState.value
         if (state !is State.Active) {

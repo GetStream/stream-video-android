@@ -16,8 +16,11 @@
 
 package io.getstream.video.android.core.coordinator
 
+import io.getstream.result.Result
+import io.getstream.result.Result.Failure
+import io.getstream.result.Result.Success
+import io.getstream.result.StreamError
 import io.getstream.video.android.core.api.ClientRPCService
-import io.getstream.video.android.core.errors.VideoError
 import io.getstream.video.android.core.model.CallInfo
 import io.getstream.video.android.core.model.CallRecordingData
 import io.getstream.video.android.core.model.CallUser
@@ -27,9 +30,6 @@ import io.getstream.video.android.core.model.ReactionData
 import io.getstream.video.android.core.model.StreamCallCid
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.toCallInfo
-import io.getstream.video.android.core.utils.Failure
-import io.getstream.video.android.core.utils.Result
-import io.getstream.video.android.core.utils.Success
 import io.getstream.video.android.core.utils.toCallUser
 import io.getstream.video.android.core.utils.toEdge
 import io.getstream.video.android.core.utils.toQueriedCalls
@@ -77,7 +77,7 @@ internal class CallCoordinatorClientImpl(
     ): Result<CreateDeviceResponse> = try {
         Success(callCoordinatorService.createDevice(createDeviceRequest))
     } catch (error: Throwable) {
-        Failure(VideoError(error.message, error))
+        Failure(StreamError.ThrowableError(error.message, error))
     }
 
     /**
@@ -88,7 +88,7 @@ internal class CallCoordinatorClientImpl(
             callCoordinatorService.deleteDevice(deleteDeviceRequest)
             Success(Unit)
         } catch (error: Throwable) {
-            Failure(VideoError(error.message, error))
+            Failure(StreamError.ThrowableError(error.message, error))
         }
 
     /**
@@ -108,7 +108,7 @@ internal class CallCoordinatorClientImpl(
 
             Success(response)
         } catch (error: Throwable) {
-            Failure(VideoError(error.message, error))
+            Failure(StreamError.ThrowableError(error.message, error))
         }
 
     /**
@@ -129,7 +129,7 @@ internal class CallCoordinatorClientImpl(
 
         Success(response)
     } catch (error: Throwable) {
-        Failure(VideoError(error.message, error))
+        Failure(StreamError.ThrowableError(error.message, error))
     }
 
     /**
@@ -149,7 +149,7 @@ internal class CallCoordinatorClientImpl(
 
             Success(response)
         } catch (error: Throwable) {
-            Failure(VideoError(error.message, error))
+            Failure(StreamError.ThrowableError(error.message, error))
         }
 
     /**
@@ -164,7 +164,7 @@ internal class CallCoordinatorClientImpl(
 
         Success(true)
     } catch (error: Throwable) {
-        Failure(VideoError(error.message, error))
+        Failure(StreamError.ThrowableError(error.message, error))
     }
 
     /**
@@ -184,7 +184,7 @@ internal class CallCoordinatorClientImpl(
 
         Success(Unit)
     } catch (error: Throwable) {
-        Failure(VideoError(error.message, error))
+        Failure(StreamError.ThrowableError(error.message, error))
     }
 
     /**
@@ -195,7 +195,7 @@ internal class CallCoordinatorClientImpl(
 
         Success(users.map { it.toCallUser() })
     } catch (error: Throwable) {
-        Failure(VideoError(error.message, error))
+        Failure(StreamError.ThrowableError(error.message, error))
     }
 
     /**
@@ -210,7 +210,7 @@ internal class CallCoordinatorClientImpl(
 
         Success(Unit)
     } catch (error: Throwable) {
-        Failure(VideoError(error.message, error))
+        Failure(StreamError.ThrowableError(error.message, error))
     }
 
     /**
@@ -225,7 +225,7 @@ internal class CallCoordinatorClientImpl(
 
         Success(Unit)
     } catch (error: Throwable) {
-        Failure(VideoError(error.message, error))
+        Failure(StreamError.ThrowableError(error.message, error))
     }
 
     /**
@@ -236,7 +236,7 @@ internal class CallCoordinatorClientImpl(
 
         Success(Unit)
     } catch (error: Throwable) {
-        Failure(VideoError(error.message, error))
+        Failure(StreamError.ThrowableError(error.message, error))
     }
 
     /**
@@ -247,7 +247,7 @@ internal class CallCoordinatorClientImpl(
 
         Success(result.call.toCallInfo())
     } catch (error: Throwable) {
-        Failure(VideoError(error.message, error))
+        Failure(StreamError.ThrowableError(error.message, error))
     }
 
     /**
@@ -258,7 +258,7 @@ internal class CallCoordinatorClientImpl(
 
         Success(result.call.toCallInfo())
     } catch (error: Throwable) {
-        Failure(VideoError(error.message, error))
+        Failure(StreamError.ThrowableError(error.message, error))
     }
 
     /**
@@ -273,7 +273,7 @@ internal class CallCoordinatorClientImpl(
 
         Success(Unit)
     } catch (error: Throwable) {
-        Failure(VideoError(error.message, error))
+        Failure(StreamError.ThrowableError(error.message, error))
     }
 
     /**
@@ -288,7 +288,7 @@ internal class CallCoordinatorClientImpl(
 
         Success(result.call.toCallInfo())
     } catch (error: Throwable) {
-        Failure(VideoError(error.message, error))
+        Failure(StreamError.ThrowableError(error.message, error))
     }
 
     /**
@@ -300,7 +300,7 @@ internal class CallCoordinatorClientImpl(
 
             Success(result.toQueriedCalls())
         } catch (error: Throwable) {
-            Failure(VideoError(error.message, error))
+            Failure(StreamError.ThrowableError(error.message, error))
         }
 
     /**
@@ -315,7 +315,7 @@ internal class CallCoordinatorClientImpl(
 
         Success(Unit)
     } catch (error: Throwable) {
-        Failure(VideoError(error.message, error))
+        Failure(StreamError.ThrowableError(error.message, error))
     }
 
     /**
@@ -326,7 +326,7 @@ internal class CallCoordinatorClientImpl(
 
         Success(Unit)
     } catch (error: Throwable) {
-        Failure(VideoError(error.message, error))
+        Failure(StreamError.ThrowableError(error.message, error))
     }
 
     /**
@@ -337,7 +337,7 @@ internal class CallCoordinatorClientImpl(
 
         Success(Unit)
     } catch (error: Throwable) {
-        Failure(VideoError(error.message, error))
+        Failure(StreamError.ThrowableError(error.message, error))
     }
 
     /**
@@ -348,7 +348,7 @@ internal class CallCoordinatorClientImpl(
 
         Success(Unit)
     } catch (error: Throwable) {
-        Failure(VideoError(error.message, error))
+        Failure(StreamError.ThrowableError(error.message, error))
     }
 
     /**
@@ -359,7 +359,7 @@ internal class CallCoordinatorClientImpl(
 
         Success(Unit)
     } catch (error: Throwable) {
-        Failure(VideoError(error.message, error))
+        Failure(StreamError.ThrowableError(error.message, error))
     }
 
     /**
@@ -374,7 +374,7 @@ internal class CallCoordinatorClientImpl(
 
         Success(Unit)
     } catch (error: Throwable) {
-        Failure(VideoError(error.message, error))
+        Failure(StreamError.ThrowableError(error.message, error))
     }
 
     /**
@@ -389,7 +389,7 @@ internal class CallCoordinatorClientImpl(
 
         Success(result.recordings.map { it.toRecording() })
     } catch (error: Throwable) {
-        Failure(VideoError(error.message, error))
+        Failure(StreamError.ThrowableError(error.message, error))
     }
 
     /**
@@ -404,7 +404,7 @@ internal class CallCoordinatorClientImpl(
 
         Success(result.reaction.toReaction())
     } catch (error: Throwable) {
-        Failure(VideoError(error.message, error))
+        Failure(StreamError.ThrowableError(error.message, error))
     }
 
     /**
@@ -415,6 +415,6 @@ internal class CallCoordinatorClientImpl(
 
         Success(result.edges.map { it.toEdge() })
     } catch (error: Throwable) {
-        Failure(VideoError(error.message, error))
+        Failure(StreamError.ThrowableError(error.message, error))
     }
 }

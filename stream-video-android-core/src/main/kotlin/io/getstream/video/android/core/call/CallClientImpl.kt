@@ -25,6 +25,11 @@ import android.media.AudioManager
 import android.os.Build
 import androidx.core.content.getSystemService
 import io.getstream.log.taggedLogger
+import io.getstream.result.Result
+import io.getstream.result.Result.Failure
+import io.getstream.result.Result.Success
+import io.getstream.result.StreamError
+import io.getstream.result.onSuccessSuspend
 import io.getstream.video.android.core.call.connection.StreamPeerConnection
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.getstream.video.android.core.call.signal.SfuClient
@@ -36,7 +41,6 @@ import io.getstream.video.android.core.coordinator.CallCoordinatorClient
 import io.getstream.video.android.core.engine.StreamCallEngine
 import io.getstream.video.android.core.engine.adapter.SfuSocketListenerAdapter
 import io.getstream.video.android.core.errors.DisconnectCause
-import io.getstream.video.android.core.errors.VideoError
 import io.getstream.video.android.core.events.AudioLevelChangedEvent
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.ConnectedEvent
@@ -63,15 +67,10 @@ import io.getstream.video.android.core.model.StreamCallId
 import io.getstream.video.android.core.model.StreamPeerType
 import io.getstream.video.android.core.model.state.StreamCallState
 import io.getstream.video.android.core.model.toPeerType
-import io.getstream.video.android.core.utils.Failure
-import io.getstream.video.android.core.utils.Result
-import io.getstream.video.android.core.utils.Success
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import io.getstream.video.android.core.utils.buildConnectionConfiguration
 import io.getstream.video.android.core.utils.buildMediaConstraints
 import io.getstream.video.android.core.utils.buildRemoteIceServers
-import io.getstream.video.android.core.utils.onError
-import io.getstream.video.android.core.utils.onSuccessSuspend
 import io.getstream.video.android.core.utils.stringify
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -383,7 +382,9 @@ internal class CallClientImpl(
         logger.d { "[connectToCall] #sfu; sessionId: $sessionId, autoPublish: $autoPublish" }
         if (connectionState != ConnectionState.DISCONNECTED) {
             return Failure(
-                VideoError("Already connected or connecting to a call with the session ID: $sessionId")
+                StreamError.GenericError(
+                    "Already connected or connecting to a call with the session ID: $sessionId"
+                )
             )
         }
 
@@ -459,7 +460,7 @@ internal class CallClientImpl(
             )
 
             if (userQueryResult is Success) {
-                call?.upsertParticipants(userQueryResult.data)
+                call?.upsertParticipants(userQueryResult.value)
             }
         }
     }
@@ -505,7 +506,7 @@ internal class CallClientImpl(
                 loadParticipantsData(
                     callId = callGuid.id,
                     callType = callGuid.type,
-                    callState = result.data.call_state,
+                    callState = result.value.call_state,
                     callSettings = callSettings
                 )
                 createUserTracks(callSettings)
@@ -584,7 +585,7 @@ internal class CallClientImpl(
             }
         } catch (e: Throwable) {
             logger.e { "[executeJoinRequest] failed: $e" }
-            Failure(VideoError(e.message, e))
+            Failure(StreamError.ThrowableError(e.message, e))
         }
     }
 
@@ -622,7 +623,7 @@ internal class CallClientImpl(
         }
 
         return if (offer is Success) {
-            offer.data.description
+            offer.value.description
         } else {
             ""
         }
@@ -662,7 +663,7 @@ internal class CallClientImpl(
         }
     }
 
-    override fun onError(error: VideoError) {
+    override fun onError(error: StreamError) {
         coroutineScope.launch {
             logger.e { "[onError] cause: $error" }
         }
@@ -704,12 +705,12 @@ internal class CallClientImpl(
         )
 
         if (userQueryResult is Success) {
-            if (userQueryResult.data.isEmpty()) {
+            if (userQueryResult.value.isEmpty()) {
                 addPartialParticipant(event.participant)
                 return
             }
 
-            val user = userQueryResult.data.first()
+            val user = userQueryResult.value.first()
             val isLocal = event.participant.session_id == sessionId
 
             call?.addParticipant(
@@ -983,7 +984,7 @@ internal class CallClientImpl(
             logger.w { "[handleSubscriberOffer] #sfu; #subscriber; rejected (createAnswer failed): $answerResult" }
             return
         }
-        val answerSdp = answerResult.data
+        val answerSdp = answerResult.value
         logger.v { "[handleSubscriberOffer] #sfu; #subscriber; answerSdp: ${answerSdp.description}" }
         val setAnswerResult = subscriber.setLocalDescription(answerSdp)
         if (setAnswerResult !is Success) {

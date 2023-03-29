@@ -16,8 +16,8 @@
 
 package io.getstream.video.android.core.socket
 
+import io.getstream.result.StreamError
 import io.getstream.video.android.core.errors.DisconnectCause
-import io.getstream.video.android.core.errors.VideoError
 import io.getstream.video.android.core.events.ConnectedEvent
 import io.getstream.video.android.core.events.VideoEvent
 
@@ -55,7 +55,7 @@ public interface SocketListener {
      *
      * @param error The issue that occurred with the socket.
      */
-    public fun onError(error: VideoError) {
+    public fun onError(error: StreamError) {
     }
 
     /**

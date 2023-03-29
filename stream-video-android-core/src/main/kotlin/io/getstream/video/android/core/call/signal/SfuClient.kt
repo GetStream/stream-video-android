@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.core.call.signal
 
-import io.getstream.video.android.core.utils.Result
+import io.getstream.result.Result
 import stream.video.sfu.models.ICETrickle
 import stream.video.sfu.signal.ICETrickleResponse
 import stream.video.sfu.signal.SendAnswerRequest
