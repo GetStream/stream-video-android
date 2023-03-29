@@ -216,6 +216,7 @@ internal object EventMapper {
 
             RecordingStoppedEvent(
                 event.callCid,
+                event.callCid,
                 event.type
             )
         }

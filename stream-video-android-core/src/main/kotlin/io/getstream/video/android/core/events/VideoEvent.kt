@@ -133,6 +133,7 @@ public data class RecordingStartedEvent(
 ) : CoordinatorEvent()
 
 public data class RecordingStoppedEvent(
+    override val callCid: String,
     val cid: StreamCallCid?,
     val type: String
 ) : CoordinatorEvent()

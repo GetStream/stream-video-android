@@ -5,6 +5,7 @@ import io.getstream.video.android.core.events.*
 import io.getstream.video.android.core.model.QueryCallsData
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.UserType
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.lastOrNull
@@ -56,10 +57,14 @@ class EventTest : IntegrationTestBase() {
     @Test
     fun `test start and stop recording`() = runTest {
         val call = client.call("default", randomUUID())
+        // start by sending the start recording event
         val event = RecordingStartedEvent(callCid=call.cid, cid=call.cid, type="123")
         clientImpl.fireEvent(event)
-        val result = call.state.recording.lastOrNull()
-        assertThat(result).isTrue()
+        assertThat(call.state.recording.value).isTrue()
+        // now stop recording
+        val stopRecordingEvent = RecordingStoppedEvent(callCid=call.cid, cid=call.cid, type="123")
+        clientImpl.fireEvent(stopRecordingEvent)
+        assertThat(call.state.recording.value).isFalse()
     }
 
     @Test
