@@ -113,7 +113,6 @@ internal class StreamVideoImpl(
     private val context: Context,
     private val scope: CoroutineScope,
     override val config: StreamVideoConfig,
-    private val engine: StreamCallEngine,
     private val lifecycle: Lifecycle,
     private val loggingLevel: LoggingLevel,
     private val preferences: UserPreferences,
@@ -140,10 +139,10 @@ internal class StreamVideoImpl(
     override suspend fun joinCall(call: CallMetadata): Result<JoinedCall> =
         withContext(scope.coroutineContext) {
             logger.d { "[joinCallOnly] call: $call" }
-            engine.onCallJoining(call)
+            // TODO: engine.onCallJoining(call)
             joinCallInternal(call)
-                .onSuccess { data -> engine.onCallJoined(data) }
-                .onError { engine.onCallFailed(it) }
+                //.onSuccess { data -> engine.onCallJoined(data) }
+                //.onError { engine.onCallFailed(it) }
                 .also { logger.v { "[joinCallOnly] result: $it" } }
         }
 
@@ -163,7 +162,7 @@ internal class StreamVideoImpl(
             )
             val device = Device(
                 token = deviceResponse.device?.id ?: error("CreateDeviceResponse has no device object "),
-                pushProvider = deviceResponse.device?.push_provider_name ?: "missing"
+                pushProvider = deviceResponse.device.push_provider_name
             )
             storeDevice(device)
             device
@@ -257,7 +256,7 @@ internal class StreamVideoImpl(
 
     init {
         observeState()
-        addSocketListener(CoordinatorSocketListenerAdapter(engine))
+        //addSocketListener(CoordinatorSocketListenerAdapter(engine))
         scope.launch(Dispatchers.Main.immediate) {
             lifecycleObserver.observe()
         }
@@ -272,38 +271,32 @@ internal class StreamVideoImpl(
 
     private fun observeState() {
         scope.launch {
-            engine.callState.collect { state ->
-                when (state) {
-                    is StreamCallState.Drop -> if (config.cancelOnTimeout && state.reason is DropReason.Timeout) {
-                        logger.i { "[observeState] call dropped by timeout" }
-                        cancelCall(state.callGuid.type, state.callGuid.id)
-                    }
-                    is StreamCallState.Idle -> clearCallState()
-                    is StreamCallState.Joined -> {
-                        logger.i { "[observeState] caller joins a call: $state" }
-                        createCallClient(
-                            callGuid = state.callGuid,
-                            signalUrl = state.callUrl,
-                            sfuToken = state.sfuToken,
-                            iceServers = state.iceServers,
-                        )
-                    }
-                    is StreamCallState.Outgoing -> if (config.joinOnAcceptedByCallee && state.acceptedByCallee) {
-                        logger.i { "[observeState] caller joins a call: $state" }
-                        joinCall(state.toMetadata())
-                    }
-                    else -> { /* no-op */
-                    }
-                }
-            }
+//            engine.callState.collect { state ->
+//                when (state) {
+//                    is StreamCallState.Drop -> if (config.cancelOnTimeout && state.reason is DropReason.Timeout) {
+//                        logger.i { "[observeState] call dropped by timeout" }
+//                        cancelCall(state.callGuid.type, state.callGuid.id)
+//                    }
+//                    is StreamCallState.Idle -> clearCallState()
+//                    is StreamCallState.Joined -> {
+//                        logger.i { "[observeState] caller joins a call: $state" }
+//                        createCallClient(
+//                            callGuid = state.callGuid,
+//                            signalUrl = state.callUrl,
+//                            sfuToken = state.sfuToken,
+//                            iceServers = state.iceServers,
+//                        )
+//                    }
+//                    is StreamCallState.Outgoing -> if (config.joinOnAcceptedByCallee && state.acceptedByCallee) {
+//                        logger.i { "[observeState] caller joins a call: $state" }
+//                        joinCall(state.toMetadata())
+//                    }
+//                    else -> { /* no-op */
+//                    }
+//                }
+//            }
         }
     }
-
-    /**
-     * Represents the state of the currently active call.
-     */
-    override val callState: StateFlow<StreamCallState> = engine.callState
-
 
 
     private fun storeDevice(device: Device) {
@@ -388,7 +381,7 @@ internal class StreamVideoImpl(
         ring: Boolean
     ): Result<CallMetadata> = withContext(scope.coroutineContext) {
         logger.d { "[getOrCreateCall] type: $type, id: $id, participantIds: $participantIds" }
-        engine.onCallStarting(type, id, participantIds, ring, forcedNewCall = false)
+        //engine.onCallStarting(type, id, participantIds, ring, forcedNewCall = false)
 
         try {
             Success(videoCallApi.getOrCreateCall(
@@ -408,8 +401,8 @@ internal class StreamVideoImpl(
             ))
                 .also { logger.v { "[getOrCreateCall] Coordinator result: $it" } }
                 .map { response -> StartedCall(call = response.toCall(StreamCallKind.fromRinging(ring))) }
-                .onSuccess { engine.onCallStarted(it.call) }
-                .onError { engine.onCallFailed(it) }
+//                .onSuccess { engine.onCallStarted(it.call) }
+//                .onError { engine.onCallFailed(it) }
                 .map { it.call }
                 .also { logger.v { "[getOrCreateCall] Final result: $it" } }
         } catch (e: HttpException) {
@@ -548,32 +541,38 @@ internal class StreamVideoImpl(
         id: String,
         participantIds: List<String>,
         ring: Boolean
-    ): Result<JoinedCall> = withContext(scope.coroutineContext) {
+    ): Result<JoinedCall> {
         logger.d { "[getOrCreateAndJoinCall] type: $type, id: $id, participantIds: $participantIds" }
-        engine.onCallStarting(type, id, participantIds, ring, forcedNewCall = false)
+
+        // TODO: engine.onCallStarting(type, id, participantIds, ring, forcedNewCall = false)
         // TODO: remove this, join call automatically gets the call, no need to do it twice
-        getOrCreateCall(
-            type = type,
-            id = id,
-            request = GetOrCreateCallRequest(
-                data = CallRequest(
-                    members = participantIds.map {
-                        MemberRequest(
-                            userId = it,
-                            role = "admin"
-                        )
-                    },
-                ),
-                ring = ring
-            )
-        )
-            .also { logger.v { "[getOrCreateCall] Coordinator result: $it" } }
-            .map { response -> StartedCall(call = response.toCall(StreamCallKind.fromRinging(ring))) }
-            .onSuccess { engine.onCallJoining(it.call) }
-            .flatMap { joinCallInternal(it.call) }
-            .onSuccess { engine.onCallJoined(it) }
-            .onError { engine.onCallFailed(it) }
-            .also { logger.v { "[getOrCreateAndJoinCall] result: $it" } }
+//        getOrCreateCall(
+//            type = type,
+//            id = id,
+//            request = GetOrCreateCallRequest(
+//                data = CallRequest(
+//                    members = participantIds.map {
+//                        MemberRequest(
+//                            userId = it,
+//                            role = "admin"
+//                        )
+//                    },
+//                ),
+//                ring = ring
+//            )
+//        )
+//            .also { logger.v { "[getOrCreateCall] Coordinator result: $it" } }
+//            .map { response -> StartedCall(call = response.toCall(StreamCallKind.fromRinging(ring))) }
+//            .onSuccess { engine.onCallJoining(it.call) }
+//            .flatMap { joinCallInternal(it.call) }
+//            .onSuccess { engine.onCallJoined(it) }
+//            .onError { engine.onCallFailed(it) }
+//            .also { logger.v { "[getOrCreateAndJoinCall] result: $it" } }
+        return wrapAPICall {
+            // TODO: FiXME
+            JoinedCall(CallMetadata.empty(), "", "", emptyList())
+        }
+
     }
 
     // callee: SEND Accepted or Rejected
@@ -587,12 +586,10 @@ internal class StreamVideoImpl(
     ): Result<SendEventResponse> {
         logger.d { "[sendEvent] callCid: $type:$id, eventType: $eventType" }
         val callCid = "$type:$id"
-        engine.onCallEventSending(callCid, eventType)
-        val (type, id) = callCid.toTypeAndId()
 
         return wrapAPICall {
             eventsApi.sendEvent(type, id, SendEventRequest(type = eventType.eventType)).also {
-                engine.onCallEventSent(callCid, eventType)
+                //engine.onCallEventSent(callCid, eventType)
             }
         }
     }
@@ -803,23 +800,11 @@ internal class StreamVideoImpl(
     }
 
     /**
-     * @see StreamVideo.clearCallState
-     */
-    override fun clearCallState() {
-        logger.i { "[clearCallState] no args" }
-        preferences.storeSfuToken(null)
-        socket.updateCallState(null)
-        callClientHolder.value?.clear()
-        callClientHolder.value = null
-    }
-
-    /**
      * @see StreamVideo.logOut
      */
     override fun logOut() {
         val preferences = UserPreferencesManager.getPreferences()
 
-        clearCallState()
         removeDevices(preferences.getDevices())
         preferences.clear()
     }
@@ -876,10 +861,9 @@ internal class StreamVideoImpl(
 
         return CallClientBuilder(
             context = context,
-            coordinatorClient = callCoordinatorClient,
+            client = this,
             preferences = preferences,
             networkStateProvider = networkStateProvider,
-            callEngine = engine,
             signalUrl = signalUrl,
             iceServers = iceServers,
             callGuid = callGuid
@@ -965,7 +949,7 @@ internal class StreamVideoImpl(
                         callDetails = callMetadata.callDetails
                     )
 
-                    engine.onCoordinatorEvent(event)
+                    //TODO engine.onCoordinatorEvent(event)
                     Success(Unit)
                 }
                 is Failure -> result

@@ -22,6 +22,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoProvider
+import io.getstream.video.android.core.model.StreamCallCid
 import io.getstream.video.android.core.utils.Failure
 import io.getstream.video.android.core.utils.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.core.utils.INTENT_EXTRA_NOTIFICATION_ID
@@ -53,15 +54,16 @@ public abstract class AbstractNotificationActivity : AppCompatActivity(), Stream
      */
     private fun processNotificationData() {
         val hasAcceptedCall = intent.action == ACTION_ACCEPT_CALL
-        val callCid = intent.getStringExtra(INTENT_EXTRA_CALL_CID)
+        val callCid = intent.getStringExtra(INTENT_EXTRA_CALL_CID) as StreamCallCid
 
         if (callCid.isNullOrBlank()) {
             return
         }
+        val (type, id) = callCid.split(":")
 
         lifecycleScope.launch {
             if (hasAcceptedCall) {
-                streamVideo.acceptCall(callCid)
+                streamVideo.acceptCall(type, id)
                 dismissIncomingCallNotifications()
             } else {
                 loadCallData(callCid)

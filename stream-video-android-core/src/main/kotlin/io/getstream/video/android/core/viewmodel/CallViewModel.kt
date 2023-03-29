@@ -47,6 +47,8 @@ import io.getstream.video.android.core.model.CallType
 import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.core.model.User
+import io.getstream.video.android.core.model.state.StreamCallState.Active
+import io.getstream.video.android.core.model.state.StreamCallState.Joinable
 import io.getstream.video.android.core.permission.PermissionManager
 import io.getstream.video.android.core.user.UsersProvider
 import io.getstream.video.android.core.utils.Failure
@@ -179,7 +181,10 @@ public class CallViewModel(
     private val _isShowingCallInfo = MutableStateFlow(false)
     public val isShowingCallInfo: StateFlow<Boolean> = _isShowingCallInfo
 
-    public val streamCallState: StateFlow<State> get() = streamVideo.callState
+
+    // TODO: Replace with real state
+    private val _streamCallState: MutableStateFlow<Call?> = MutableStateFlow(null)
+    public val streamCallState: StateFlow<Call?> = _streamCallState
 
     private val _callType: MutableStateFlow<CallType> = MutableStateFlow(CallType.VIDEO)
     public val callType: StateFlow<CallType> = _callType
@@ -196,6 +201,9 @@ public class CallViewModel(
 
     private var prevState: State = State.Idle
 
+
+    // TODO: This is fake, remove me
+    val clientCallState: StateFlow<State> = MutableStateFlow(State.Idle)
     private val _isInPictureInPicture: MutableStateFlow<Boolean> = MutableStateFlow(false)
     public val isInPictureInPicture: StateFlow<Boolean> = _isInPictureInPicture
 
@@ -204,7 +212,7 @@ public class CallViewModel(
 
     init {
         viewModelScope.launch {
-            streamVideo.callState.collect { state ->
+            clientCallState.collect { state ->
                 logger.i { "[observeState] state: $state" }
                 when (state) {
                     is State.Idle -> {
@@ -337,14 +345,14 @@ public class CallViewModel(
      * Drops the call by sending a cancel event, which informs other users.
      */
     private fun cancelCall() {
-        val state = streamVideo.callState.value
-        if (state !is State.Active) {
+        val state = clientCallState.value
+        if (state !is Active) {
             logger.w { "[cancelCall] rejected (state is not Active): $state" }
             return
         }
         viewModelScope.launch {
             logger.d { "[cancelCall] state: $state" }
-            streamVideo.cancelCall(state.callGuid.cid)
+            streamVideo.cancelCall(state.callGuid.type, state.callGuid.id)
         }
     }
 
@@ -384,14 +392,14 @@ public class CallViewModel(
     }
 
     private fun acceptCall() {
-        val state = streamVideo.callState.value
+        val state = clientCallState.value
         if (state !is State.Incoming || state.acceptedByMe) {
             logger.w { "[acceptCall] rejected (state is not unaccepted Incoming): $state" }
             return
         }
         logger.d { "[acceptCall] state: $state" }
         viewModelScope.launch {
-            streamVideo.acceptCall(state.callGuid.cid)
+            streamVideo.acceptCall(state.callGuid.type, state.callGuid.id)
                 .onSuccess {
                     logger.v { "[acceptCall] completed: $it" }
                 }
@@ -403,14 +411,14 @@ public class CallViewModel(
     }
 
     private fun rejectCall() {
-        val state = streamVideo.callState.value
+        val state = clientCallState.value
         if (state !is State.Incoming || state.acceptedByMe) {
             logger.w { "[declineCall] rejected (state is not unaccepted Incoming): $state" }
             return
         }
         logger.d { "[declineCall] state: $state" }
         viewModelScope.launch {
-            val result = streamVideo.rejectCall(state.callGuid.cid)
+            val result = streamVideo.rejectCall(state.callGuid.type, state.callGuid.id)
             logger.d { "[declineCall] result: $result" }
         }
     }
@@ -457,14 +465,14 @@ public class CallViewModel(
      */
     private fun inviteUsersToCall(users: List<User>) {
         logger.d { "[inviteUsersToCall] Inviting users to call, users: $users" }
-        val callState = streamCallState.value
+        val callState = clientCallState.value
 
         if (callState !is State.Connected) {
             logger.d { "[inviteUsersToCall] Invalid state, not in State.Connected!" }
             return
         }
         viewModelScope.launch {
-            streamVideo.inviteUsers(users, callState.callGuid.cid)
+            streamVideo.inviteUsers(callState.callGuid.type, callState.callGuid.id, users)
                 .onSuccess {
                     logger.d { "[inviteUsersToCall] Success!" }
                 }

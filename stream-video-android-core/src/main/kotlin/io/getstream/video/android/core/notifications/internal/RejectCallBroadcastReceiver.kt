@@ -21,6 +21,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationManagerCompat
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.GEO
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.notifications.internal.RejectCallBroadcastReceiver.Companion.ACTION_REJECT_CALL
 import io.getstream.video.android.core.user.UserPreferencesManager
@@ -57,6 +58,7 @@ internal class RejectCallBroadcastReceiver : BroadcastReceiver() {
             if (callCid.isNullOrBlank()) {
                 return
             }
+            val (type, id) = callCid.split(":")
             val preferences = UserPreferencesManager.initialize(context)
 
             val user = preferences.getUserCredentials()
@@ -65,12 +67,13 @@ internal class RejectCallBroadcastReceiver : BroadcastReceiver() {
             if (user != null && apiKey.isNotBlank()) {
                 val streamVideo = StreamVideoBuilder(
                     context,
+                    apiKey = apiKey,
                     user = user,
-                    apiKey = apiKey
+                    geo = GEO.GlobalEdgeNetwork
                 ).build()
 
                 CoroutineScope(Dispatchers.IO).launch {
-                    when (val rejectResult = streamVideo.rejectCall(callCid)) {
+                    when (val rejectResult = streamVideo.rejectCall(type, id)) {
                         is Success -> logger.d { "[onReceive] rejectCall, Success: $rejectResult" }
                         is Failure -> logger.d { "[onReceive] rejectCall, Failure: $rejectResult" }
                     }

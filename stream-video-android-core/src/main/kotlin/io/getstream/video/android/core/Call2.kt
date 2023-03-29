@@ -4,6 +4,8 @@ import io.getstream.video.android.core.model.*
 import io.getstream.video.android.core.utils.Result
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import org.openapitools.client.models.GoLiveResponse
+import org.openapitools.client.models.UpdateCallResponse
 
 public data class SFUConnection(internal val callUrl: String,
                                 internal val sfuToken: SfuToken,
@@ -17,6 +19,7 @@ public data class SFUConnection(internal val callUrl: String,
  * - JoinedCall
  * - CallViewModel
  * - Compose lib Call.kt object
+ * - StreamVideoStateLauncher
  *
  * Sometimes you want the raw server response
  * Usually you want state that updates though..
@@ -52,8 +55,8 @@ public class Call2(
         )
     }
 
-    suspend fun goLive(): Result<CallInfo> {
-        return client.goLive(cid)
+    suspend fun goLive(): Result<GoLiveResponse> {
+        return client.goLive(type, id)
     }
 
     fun leave() {
@@ -61,7 +64,7 @@ public class Call2(
     }
 
     suspend fun end(): Result<Unit> {
-        return client.endCall(cid)
+        return client.endCall(type, id)
     }
 
     /** Basic crud operations */
@@ -71,13 +74,13 @@ public class Call2(
     suspend fun create(): Result<CallMetadata> {
         return client.getOrCreateCall(type, id)
     }
-    suspend fun update(): Result<CallInfo> {
+    suspend fun update(): Result<UpdateCallResponse> {
         return client.updateCall(type, id, custom ?: emptyMap())
     }
 
     /** Permissions */
     suspend fun requestPermissions(permissions: List<String>): Result<Unit> {
-        return client.requestPermissions("$id:$type", permissions)
+        return client.requestPermissions(type, id, permissions)
     }
 }
 

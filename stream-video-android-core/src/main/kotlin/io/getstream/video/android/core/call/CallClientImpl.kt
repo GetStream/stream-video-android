@@ -25,6 +25,7 @@ import android.media.AudioManager
 import android.os.Build
 import androidx.core.content.getSystemService
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.StreamVideoImpl
 import io.getstream.video.android.core.call.connection.StreamPeerConnection
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.getstream.video.android.core.call.signal.SfuClient
@@ -51,17 +52,8 @@ import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
 import io.getstream.video.android.core.filter.InFilterObject
 import io.getstream.video.android.core.filter.toMap
-import io.getstream.video.android.core.model.Call
-import io.getstream.video.android.core.model.CallParticipantState
-import io.getstream.video.android.core.model.CallSettings
-import io.getstream.video.android.core.model.IceCandidate
-import io.getstream.video.android.core.model.IceServer
-import io.getstream.video.android.core.model.SfuToken
-import io.getstream.video.android.core.model.StreamCallGuid
-import io.getstream.video.android.core.model.StreamCallId
-import io.getstream.video.android.core.model.StreamPeerType
+import io.getstream.video.android.core.model.*
 import io.getstream.video.android.core.model.state.StreamCallState
-import io.getstream.video.android.core.model.toPeerType
 import io.getstream.video.android.core.utils.Failure
 import io.getstream.video.android.core.utils.Result
 import io.getstream.video.android.core.utils.Success
@@ -124,11 +116,10 @@ import kotlin.random.Random
 
 internal class CallClientImpl(
     private val context: Context,
-    private val coordinatorClient: CallCoordinatorClient,
+    private val client: StreamVideoImpl,
     private val callGuid: StreamCallGuid,
     private inline val getCurrentUserId: () -> String,
     private inline val getSfuToken: () -> SfuToken,
-    private val callEngine: StreamCallEngine,
     private val sfuClient: SfuClient,
     private val sfuSocket: SfuSocket,
     private val remoteIceServers: List<IceServer>,
@@ -214,7 +205,7 @@ internal class CallClientImpl(
 
     init {
         sfuSocket.addListener(this)
-        sfuSocket.addListener(SfuSocketListenerAdapter(callEngine))
+        //TODO sfuSocket.addListener(SfuSocketListenerAdapter(callEngine))
         sfuSocket.connectSocket()
     }
 
@@ -264,10 +255,11 @@ internal class CallClientImpl(
         coroutineScope.launch {
             // If we are not connected to the SFU we do not want to send requests or initialise any tracks not to waste
             // resources if the user declines a call.
-            if (callEngine.callState.value !is StreamCallState.Connected) {
-                _isVideoEnabled.value = isEnabled
-                return@launch
-            }
+            // TODO
+//            if (callEngine.callState.value !is StreamCallState.Connected) {
+//                _isVideoEnabled.value = isEnabled
+//                return@launch
+//            }
 
             setupVideoTrack()
 
@@ -297,10 +289,11 @@ internal class CallClientImpl(
         coroutineScope.launch {
             // If we are not connected to the SFU we do not want to send requests or initialise any tracks not to waste
             // resources if the user declines a call.
-            if (callEngine.callState.value !is StreamCallState.Connected) {
-                _isAudioEnabled.value = isEnabled
-                return@launch
-            }
+            // TODO
+//            if (callEngine.callState.value !is StreamCallState.Connected) {
+//                _isAudioEnabled.value = isEnabled
+//                return@launch
+//            }
 
             setupAudioTrack()
 
@@ -444,19 +437,15 @@ internal class CallClientImpl(
         if (callState != null) {
             setPartialParticipants(callState.participants)
 
-            val query = InFilterObject(
-                "id",
-                callState.participants.map { it.user_id }.toSet()
-            ).toMap()
-
-            val userQueryResult = coordinatorClient.queryMembers(
-                QueryMembersRequest(
-                    id = callId,
-                    type = callType,
-                    filterConditions = query
-                )
+            val cid = "$callType:$callId"
+            val query = QueryMembersData(
+                streamCallCid=cid,
+                filters=InFilterObject(
+                    "id",
+                    callState.participants.map { it.user_id }.toSet()
+                ).toMap()
             )
-
+            val userQueryResult = client.queryMembers(callType, callId, query)
             if (userQueryResult is Success) {
                 call?.upsertParticipants(userQueryResult.data)
             }
@@ -575,7 +564,7 @@ internal class CallClientImpl(
                 logger.d { "[executeJoinRequest] is connected: $connected" }
                 sfuSocket.sendJoinRequest(request)
                 logger.d { "[executeJoinRequest] sfu join request is sent" }
-                callEngine.onSfuJoinSent(request)
+                // TODO: callEngine.onSfuJoinSent(request)
                 logger.d { "[executeJoinRequest] request is sent" }
                 val event = sfuEvents.filterIsInstance<JoinCallResponseEvent>().first()
                 logger.d { "[executeJoinRequest] completed: $event" }
@@ -694,11 +683,13 @@ internal class CallClientImpl(
     private suspend fun addParticipant(event: ParticipantJoinedEvent) {
         val query = InFilterObject("id", setOf(event.participant.user_id)).toMap()
 
-        val userQueryResult = coordinatorClient.queryMembers(
-            QueryMembersRequest(
-                id = callGuid.id,
-                type = callGuid.type,
-                filterConditions = query
+        val cid = "$callGuid.id:$callGuid.type"
+        val userQueryResult = client.queryMembers(
+            callGuid.id,
+            callGuid.type,
+            QueryMembersData(
+                streamCallCid = cid,
+                filters = query
             )
         )
 

@@ -64,19 +64,20 @@ public abstract class AbstractStreamCallService : Service(), StreamVideoProvider
 
     override fun onCreate() {
         super.onCreate()
-        val state = streamVideo.callState.value
-        if (state !is State.Active) {
-            logger.w { "[onCreate] rejected (state is not Active): $state" }
-            destroySelf()
-            return
-        }
-        logger.i { "[onCreate] state: $state" }
-        startForeground(state)
-        scope.launch {
-            streamVideo.callState.collect {
-                handleState(it)
-            }
-        }
+        // TODO: FIXME
+//        val state = streamVideo.callState.value
+//        if (state !is State.Active) {
+//            logger.w { "[onCreate] rejected (state is not Active): $state" }
+//            destroySelf()
+//            return
+//        }
+//        logger.i { "[onCreate] state: $state" }
+//        startForeground(state)
+//        scope.launch {
+//            streamVideo.callState.collect {
+//                handleState(it)
+//            }
+//        }
     }
 
     override fun onDestroy() {

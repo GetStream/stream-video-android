@@ -96,14 +96,14 @@ class AudioRoomTest: IntegrationTestBase() {
     @Test
     fun goLive() = runTest {
 
-        val result = client.goLive("default:123")
+        val result = client.goLive("default", "123")
         assert(result.isSuccess)
 
     }
 
     @Test
     fun requestPermissions() = runTest {
-        val result = client.requestPermissions("default:123", mutableListOf("hellworld"))
+        val result = client.requestPermissions("default", "123", mutableListOf("hellworld"))
         assert(result.isSuccess)
 
     }

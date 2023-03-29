@@ -22,8 +22,6 @@ import androidx.lifecycle.ProcessLifecycleOwner
 import io.getstream.android.push.PushDeviceGenerator
 import io.getstream.video.android.core.api.ClientRPCService
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
-import io.getstream.video.android.core.engine.StreamCallEngine
-import io.getstream.video.android.core.engine.StreamCallEngineImpl
 import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.input.CallAndroidInput
 import io.getstream.video.android.core.input.CallAndroidInputLauncher
@@ -80,7 +78,7 @@ public class StreamVideoBuilder(
     /** Your Stream API Key, you can find it in the dashboard */
     private val apiKey: ApiKey,
     /** Your GEO routing policy, supports geofencing for privacy concerns */
-    private val geo: GEO,
+    private val geo: GEO = GEO.GlobalEdgeNetwork,
     /** The user object, can be a regular user, guest user or anonymous */
     private val user: User,
     /** The token for this user generated using your API secret on your server */
@@ -145,18 +143,10 @@ public class StreamVideoBuilder(
         val scope = CoroutineScope(DispatcherProvider.IO)
         val config = StreamVideoConfigDefault
 
-//        val engine: StreamCallEngineImpl = StreamCallEngineImpl(
-//            parentScope = scope,
-//            coordinatorClient = callCoordinatorClientModule.callCoordinatorClient(),
-//            config = config,
-//            getCurrentUserId = { preferences.getUserCredentials()?.id ?: "" }
-//        )
-
         val client = StreamVideoImpl(
             context = context,
             scope = scope,
             config = config,
-           // engine = engine,
             loggingLevel = loggingLevel,
             preferences = preferences,
             lifecycle = lifecycle,

@@ -50,12 +50,6 @@ import org.openapitools.client.models.*
 public interface StreamVideo {
 
     /**
-     * Represents the state of the current call, if active. If there is no call fully joined, we'll
-     * keep intermediate states, such as [StreamCallState.Idle].
-     */
-    public val callState: StateFlow<StreamCallState>
-
-    /**
      * Represents the default call config when starting a call.
      */
     public val config: StreamVideoConfig
@@ -382,10 +376,6 @@ public interface StreamVideo {
      */
     public suspend fun getEdges(): Result<List<EdgeData>>
 
-    /**
-     * Leaves the currently active call and clears up all connections to it.
-     */
-    public fun clearCallState()
 
     /**
      * Clears the internal user state, removes push notification devices and clears the call state.

@@ -15,7 +15,7 @@
  */
 
 package io.getstream.video.android.core.engine
-
+/*
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.StreamVideoConfig
 import io.getstream.video.android.core.coordinator.CallCoordinatorClient
@@ -68,6 +68,10 @@ private const val TIMEOUT_SFU_JOINED = 10_000L
 /**
  * Should be written in pure kotlin.
  * No android imports are allowed here.
+ *
+ * This thing handles events... both SFU & Coordinator
+ * And updates state
+ *
  */
 internal class StreamCallEngineImpl(
     parentScope: CoroutineScope,
@@ -690,4 +694,4 @@ private fun CoroutineScope.launchWithLock(
             action()
         }
     }
-}
+}*/

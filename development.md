@@ -40,3 +40,8 @@ The base for integration testing is the `IntegrationTestBase` class.
 It offers convenient helpers for test data, client and clientImpl access, and testing events.
 
 * We use Truth and Mockk for testing
+
+## Architecture
+
+* StreamVideoImpl makes the API calls to the coordinator
+* Call object maintains state and is updated based on events

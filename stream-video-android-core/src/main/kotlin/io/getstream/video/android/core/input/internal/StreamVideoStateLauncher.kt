@@ -38,34 +38,35 @@ internal class StreamVideoStateLauncher(
     private var lastState: StreamCallState = StreamCallState.Idle
 
     fun run(scope: CoroutineScope) {
-        scope.launch(io.getstream.video.android.core.dispatchers.DispatcherProvider.Main) {
-            streamVideo.callState.collect { state ->
-                logger.v { "[run] $state <= $lastState" }
-                when {
-                    lastState is StreamCallState.Idle &&
-                        state is StreamCallState.Joining -> {
-                        androidInputs.forEach {
-                            inputLauncher.launch(context, it)
-                        }
-                    }
-                    lastState is StreamCallState.Idle &&
-                        state is StreamCallState.Outgoing &&
-                        !state.acceptedByCallee -> {
-                        androidInputs.forEach {
-                            inputLauncher.launch(context, it)
-                        }
-                    }
-                    lastState is StreamCallState.Idle &&
-                        state is StreamCallState.Incoming &&
-                        !state.acceptedByMe -> {
-                        androidInputs.forEach {
-                            inputLauncher.launch(context, it)
-                        }
-                    }
-                    else -> {}
-                }
-                lastState = state
-            }
-        }
+        // TODO: Move to call
+//        scope.launch(io.getstream.video.android.core.dispatchers.DispatcherProvider.Main) {
+//            streamVideo.callState.collect { state ->
+//                logger.v { "[run] $state <= $lastState" }
+//                when {
+//                    lastState is StreamCallState.Idle &&
+//                        state is StreamCallState.Joining -> {
+//                        androidInputs.forEach {
+//                            inputLauncher.launch(context, it)
+//                        }
+//                    }
+//                    lastState is StreamCallState.Idle &&
+//                        state is StreamCallState.Outgoing &&
+//                        !state.acceptedByCallee -> {
+//                        androidInputs.forEach {
+//                            inputLauncher.launch(context, it)
+//                        }
+//                    }
+//                    lastState is StreamCallState.Idle &&
+//                        state is StreamCallState.Incoming &&
+//                        !state.acceptedByMe -> {
+//                        androidInputs.forEach {
+//                            inputLauncher.launch(context, it)
+//                        }
+//                    }
+//                    else -> {}
+//                }
+//                lastState = state
+//            }
+//        }
     }
 }

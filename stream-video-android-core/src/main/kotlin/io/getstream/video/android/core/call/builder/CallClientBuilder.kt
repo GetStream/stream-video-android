@@ -17,12 +17,11 @@
 package io.getstream.video.android.core.call.builder
 
 import android.content.Context
+import io.getstream.video.android.core.StreamVideoImpl
 import io.getstream.video.android.core.call.CallClient
 import io.getstream.video.android.core.call.CallClientImpl
 import io.getstream.video.android.core.call.signal.socket.SfuSocketFactory
 import io.getstream.video.android.core.call.signal.socket.SfuSocketImpl
-import io.getstream.video.android.core.coordinator.CallCoordinatorClient
-import io.getstream.video.android.core.engine.StreamCallEngine
 import io.getstream.video.android.core.internal.module.HttpModule
 import io.getstream.video.android.core.internal.module.SfuClientModule
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
@@ -47,10 +46,9 @@ import okhttp3.logging.HttpLoggingInterceptor
  */
 internal class CallClientBuilder(
     private val context: Context,
-    private val coordinatorClient: CallCoordinatorClient,
+    private val client: StreamVideoImpl,
     private val preferences: UserPreferences,
     private val networkStateProvider: NetworkStateProvider,
-    private val callEngine: StreamCallEngine,
     private val signalUrl: String,
     private val iceServers: List<IceServer>,
     private val callGuid: StreamCallGuid,
@@ -103,11 +101,10 @@ internal class CallClientBuilder(
 
         return CallClientImpl(
             context = context,
-            coordinatorClient = coordinatorClient,
+            client = client,
             callGuid = callGuid,
             getCurrentUserId = { preferences.getUserCredentials()?.id ?: "" },
             getSfuToken = { preferences.getSfuToken() },
-            callEngine = callEngine,
             sfuClient = sfuClientModule.sfuClient,
             remoteIceServers = iceServers,
             sfuSocket = SfuSocketImpl(
