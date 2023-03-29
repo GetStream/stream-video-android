@@ -27,25 +27,23 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param callCid * @param createdAt * @param ownCapabilities The capabilities of the current user
- * @param type * @param user */
+ * @param blockedUsers * @param call * @param duration * @param members * @param membership */
 
-data class UpdatedCallPermissionsEvent(
+data class GetCallResponse(
 
-    @Json(name = "call_cid")
-    val callCid: kotlin.String,
+    @Json(name = "blocked_users")
+    val blockedUsers: kotlin.collections.List<UserResponse>,
 
-    @Json(name = "created_at")
-    val createdAt: java.time.OffsetDateTime,
+    @Json(name = "call")
+    val call: CallResponse,
 
-    /* The capabilities of the current user */
-    @Json(name = "own_capabilities")
-    val ownCapabilities: kotlin.collections.List<OwnCapability>,
+    @Json(name = "duration")
+    val duration: kotlin.String,
 
-    @Json(name = "type")
-    val type: kotlin.String,
+    @Json(name = "members")
+    val members: kotlin.collections.List<MemberResponse>,
 
-    @Json(name = "user")
-    val user: UserResponse
+    @Json(name = "membership")
+    val membership: MemberResponse? = null
 
 )
