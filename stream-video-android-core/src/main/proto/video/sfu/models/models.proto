@@ -4,7 +4,7 @@ package stream.video.sfu.models;
 import "google/protobuf/struct.proto";
 import "google/protobuf/timestamp.proto";
 
-option go_package = "sfu_models";
+option go_package = "github.com/GetStream/protocol/protobuf/video/sfu/models";
 option java_multiple_files = true;
 option java_outer_classname = "SfuModelsV1";
 option csharp_namespace = "Stream.Video.v1.Sfu";
@@ -56,6 +56,7 @@ message Participant {
   string name = 10;
   string image = 11;
   google.protobuf.Struct custom = 12;
+  repeated string roles = 13;
 }
 
 message StreamQuality {
@@ -149,7 +150,24 @@ message Error {
 }
 
 message ClientDetails {
-  int32 version  = 1;
-  string os =  2;
+  int32 version = 1;
+  string os = 2;
   string browser = 3;
+}
+
+enum TrackUnpublishReason {
+  // Default value which is used when the specific reason
+  // for muting the track is not known.
+  TRACK_UNPUBLISH_REASON_UNSPECIFIED = 0;
+  // Represents user muting their tracks.
+  TRACK_UNPUBLISH_REASON_USER_MUTED = 1;
+  // Represents muting the track because the permission to
+  // publish the track has been revoked.
+  TRACK_UNPUBLISH_REASON_PERMISSION_REVOKED = 2;
+  // Represents muting the track due to moderation actions.
+  // This is different from permission revoked because the
+  // participant can unmute themselves here whereas in case
+  // of "permission revoke" it is not possible until the
+  // call permissions are updated.
+  TRACK_UNPUBLISH_REASON_MODERATION = 3;
 }

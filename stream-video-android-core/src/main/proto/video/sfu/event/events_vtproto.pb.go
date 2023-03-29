@@ -2,12 +2,12 @@
 // protoc-gen-go-vtproto version: v0.3.0
 // source: video/sfu/event/events.proto
 
-package sfu_events
+package event
 
 import (
 	binary "encoding/binary"
 	fmt "fmt"
-	models "github.com/GetStream/video-proto/protobuf/video/sfu/models"
+	models "github.com/GetStream/protocol/protobuf/video/sfu/models"
 	proto "google.golang.org/protobuf/proto"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	io "io"
@@ -681,6 +681,11 @@ func (m *TrackUnpublished) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 	if m.unknownFields != nil {
 		i -= len(m.unknownFields)
 		copy(dAtA[i:], m.unknownFields)
+	}
+	if m.Cause != 0 {
+		i = encodeVarint(dAtA, i, uint64(m.Cause))
+		i--
+		dAtA[i] = 0x20
 	}
 	if m.Type != 0 {
 		i = encodeVarint(dAtA, i, uint64(m.Type))
@@ -2017,6 +2022,9 @@ func (m *TrackUnpublished) SizeVT() (n int) {
 	}
 	if m.Type != 0 {
 		n += 1 + sov(uint64(m.Type))
+	}
+	if m.Cause != 0 {
+		n += 1 + sov(uint64(m.Cause))
 	}
 	if m.unknownFields != nil {
 		n += len(m.unknownFields)
@@ -3749,6 +3757,25 @@ func (m *TrackUnpublished) UnmarshalVT(dAtA []byte) error {
 				b := dAtA[iNdEx]
 				iNdEx++
 				m.Type |= models.TrackType(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Cause", wireType)
+			}
+			m.Cause = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflow
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Cause |= models.TrackUnpublishReason(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}

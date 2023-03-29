@@ -4,7 +4,7 @@ package stream.video.sfu.event;
 
 import "video/sfu/models/models.proto";
 
-option go_package = "sfu_events";
+option go_package = "github.com/GetStream/protocol/protobuf/video/sfu/event";
 option java_multiple_files = true;
 option java_outer_classname = "SfuEventsV1";
 option csharp_namespace = "Stream.Video.v1.Sfu";
@@ -64,6 +64,7 @@ message TrackUnpublished {
   string user_id = 1;
   string session_id = 2;
   models.TrackType type = 3;
+  models.TrackUnpublishReason cause = 4;
 }
 
 message JoinRequest {
