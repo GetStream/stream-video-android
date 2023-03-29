@@ -42,8 +42,7 @@ import io.getstream.video.android.core.model.state.StreamCallState
 import io.getstream.video.android.core.socket.SocketListener
 import io.getstream.video.android.core.utils.Result
 import kotlinx.coroutines.flow.StateFlow
-import org.openapitools.client.models.SendEventResponse
-import org.openapitools.client.models.UpdateCallResponse
+import org.openapitools.client.models.*
 
 /**
  * The main interface to control the Video calls. [StreamVideoImpl] implements this interface.
@@ -162,7 +161,7 @@ public interface StreamVideo {
      * @param cid The call ID.
      * @return [Result] if the operation is successful or not.
      */
-    public suspend fun inviteUsers(users: List<User>, cid: StreamCallCid): Result<Unit>
+    public suspend fun inviteUsers(type: String, id: String, users: List<User>): Result<Unit>
 
     /**
      * Sends a specific event related to an active [Call].
@@ -171,7 +170,8 @@ public interface StreamVideo {
      * @return [Result] which contains if the event was successfully sent.
      */
     public suspend fun sendEvent(
-        callCid: StreamCallCid,
+        type: String,
+        id: String,
         eventType: CallEventType
     ): Result<SendEventResponse>
 
@@ -185,7 +185,8 @@ public interface StreamVideo {
      * @return [Result] which contains if the event was successfully sent.
      */
     public suspend fun sendCustomEvent(
-        callCid: StreamCallCid,
+        type: String,
+        id: String,
         dataJson: Map<String, Any>,
         eventType: String
     ): Result<SendEventResponse>
@@ -200,7 +201,8 @@ public interface StreamVideo {
      * @return [List] of [CallUser]s that match the given query.
      */
     public suspend fun queryMembers(
-        callCid: StreamCallCid,
+        type: String,
+        id: String,
         queryMembersData: QueryMembersData
     ): Result<List<CallUser>>
 
@@ -211,7 +213,8 @@ public interface StreamVideo {
      * @param userId THe ID of the user to block from joining a call.
      */
     public suspend fun blockUser(
-        callCid: StreamCallCid,
+        type: String,
+        id: String,
         userId: String
     ): Result<Unit>
 
@@ -222,7 +225,8 @@ public interface StreamVideo {
      * @param userId THe ID of the user to unblock from joining a call.
      */
     public suspend fun unblockUser(
-        callCid: StreamCallCid,
+        type: String,
+        id: String,
         userId: String
     ): Result<Unit>
 
@@ -232,7 +236,8 @@ public interface StreamVideo {
      * @param callCid The CID of the call.
      */
     public suspend fun endCall(
-        callCid: StreamCallCid
+        type: String,
+        id: String,
     ): Result<Unit>
 
     /**
@@ -243,8 +248,9 @@ public interface StreamVideo {
      * @return [Result] with the [CallInfo].
      */
     public suspend fun goLive(
-        callCid: StreamCallCid
-    ): Result<CallInfo>
+        type: String,
+        id: String,
+    ): Result<GoLiveResponse>
 
     /**
      * Stops the call from being live.
@@ -254,8 +260,9 @@ public interface StreamVideo {
      * @return [Result] with the [CallInfo].
      */
     public suspend fun stopLive(
-        callCid: StreamCallCid
-    ): Result<CallInfo>
+        type: String,
+        id: String
+    ): Result<StopLiveResponse>
 
     /**
      * Attempts to mute users and their tracks in a call.
@@ -264,7 +271,8 @@ public interface StreamVideo {
      * @param muteUsersData Contains information about muting users and their tracks.
      */
     public suspend fun muteUsers(
-        callCid: StreamCallCid,
+        type: String,
+        id: String,
         muteUsersData: MuteUsersData
     ): Result<Unit>
 
@@ -286,7 +294,8 @@ public interface StreamVideo {
      * @param permissions List of permissions the user wants to request.
      */
     public suspend fun requestPermissions(
-        callCid: StreamCallCid,
+        type: String,
+        id: String,
         permissions: List<String>
     ): Result<Unit>
 
@@ -296,7 +305,8 @@ public interface StreamVideo {
      * @param callCid The CID of the call.
      */
     public suspend fun startBroadcasting(
-        callCid: StreamCallCid
+        type: String,
+        id: String
     ): Result<Unit>
 
     /**
@@ -305,7 +315,8 @@ public interface StreamVideo {
      * @param callCid The CID of the call.
      */
     public suspend fun stopBroadcasting(
-        callCid: StreamCallCid
+        type: String,
+        id: String
     ): Result<Unit>
 
     /**
@@ -314,7 +325,8 @@ public interface StreamVideo {
      * @param callCid The CID of the call.
      */
     public suspend fun startRecording(
-        callCid: StreamCallCid
+        type: String,
+        id: String
     ): Result<Unit>
 
     /**
@@ -323,7 +335,8 @@ public interface StreamVideo {
      * @param callCid The CID of the call.
      */
     public suspend fun stopRecording(
-        callCid: StreamCallCid
+        type: String,
+        id: String
     ): Result<Unit>
 
     /**
@@ -333,7 +346,8 @@ public interface StreamVideo {
      * @param updateUserPermissionsData Holds permissions to grant or revoke.
      */
     public suspend fun updateUserPermissions(
-        callCid: StreamCallCid,
+        type: String,
+        id: String,
         updateUserPermissionsData: UpdateUserPermissionsData
     ): Result<Unit>
 
@@ -344,7 +358,8 @@ public interface StreamVideo {
      * @param sessionId The ID of the session.
      */
     public suspend fun listRecordings(
-        callCid: StreamCallCid,
+        type: String,
+        id: String,
         sessionId: String
     ): Result<List<CallRecordingData>>
 
@@ -357,9 +372,10 @@ public interface StreamVideo {
      * @return [Result] containing info about the successfully sent [ReactionData].
      */
     public suspend fun sendVideoReaction(
-        callCid: StreamCallCid,
+        type: String,
+        id: String,
         sendReactionData: SendReactionData
-    ): Result<ReactionData>
+    ): Result<SendReactionResponse>
 
     /**
      * Returns a list of all the edges available on the network.

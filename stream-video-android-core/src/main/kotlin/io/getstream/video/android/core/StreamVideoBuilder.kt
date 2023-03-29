@@ -20,6 +20,7 @@ import android.app.Notification
 import android.content.Context
 import androidx.lifecycle.ProcessLifecycleOwner
 import io.getstream.android.push.PushDeviceGenerator
+import io.getstream.video.android.core.api.ClientRPCService
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.engine.StreamCallEngine
 import io.getstream.video.android.core.engine.StreamCallEngineImpl
@@ -42,6 +43,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
+import org.openapitools.client.apis.DefaultApi
+import org.openapitools.client.apis.EventsApi
+import org.openapitools.client.apis.VideoCallsApi
 import java.util.*
 import kotlin.coroutines.resume
 
@@ -110,7 +114,6 @@ public class StreamVideoBuilder(
             config = config,
             engine = engine,
             loggingLevel = loggingLevel,
-            callCoordinatorClient = callCoordinatorClientModule.callCoordinatorClient(),
             preferences = preferences,
             lifecycle = lifecycle,
             socket = socket,
@@ -241,7 +244,10 @@ public class StreamVideoBuilder2(
             getCurrentUserId = { preferences.getUserCredentials()?.id ?: "" }
         )
 
-
+//        private val callCoordinatorService: ClientRPCService,
+//        private val videoCallApi: VideoCallsApi,
+//        private val eventsApi: EventsApi,
+//        private val defaultApi: DefaultApi
 
         val client = StreamVideoImpl(
             context = context,
@@ -249,7 +255,6 @@ public class StreamVideoBuilder2(
             config = config,
             engine = engine,
             loggingLevel = loggingLevel,
-            callCoordinatorClient = callCoordinatorClientModule.callCoordinatorClient(),
             preferences = preferences,
             lifecycle = lifecycle,
             socket = socket,

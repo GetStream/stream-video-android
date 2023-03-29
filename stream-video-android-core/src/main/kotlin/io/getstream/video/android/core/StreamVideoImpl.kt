@@ -71,15 +71,7 @@ import io.getstream.video.android.core.socket.internal.SocketState
 import io.getstream.video.android.core.socket.internal.VideoSocketImpl
 import io.getstream.video.android.core.user.UserPreferences
 import io.getstream.video.android.core.user.UserPreferencesManager
-import io.getstream.video.android.core.utils.Failure
-import io.getstream.video.android.core.utils.INTENT_EXTRA_CALL_CID
-import io.getstream.video.android.core.utils.Result
-import io.getstream.video.android.core.utils.Success
-import io.getstream.video.android.core.utils.flatMap
-import io.getstream.video.android.core.utils.getLatencyMeasurements
-import io.getstream.video.android.core.utils.map
-import io.getstream.video.android.core.utils.onError
-import io.getstream.video.android.core.utils.onSuccess
+import io.getstream.video.android.core.utils.*
 import io.getstream.video.android.core.utils.toCall
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -94,6 +86,8 @@ import org.openapitools.client.models.*
 import retrofit2.HttpException
 import stream.video.coordinator.client_v1_rpc.CreateDeviceRequest
 import stream.video.coordinator.client_v1_rpc.DeleteDeviceRequest
+import stream.video.coordinator.client_v1_rpc.MemberInput
+import stream.video.coordinator.client_v1_rpc.UpsertCallMembersRequest
 import stream.video.coordinator.push_v1.DeviceInput
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.suspendCoroutine
@@ -434,10 +428,20 @@ internal class StreamVideoImpl(
     /**
      * @see StreamVideo.inviteUsers
      */
-    override suspend fun inviteUsers(users: List<User>, cid: StreamCallCid): Result<Unit> {
+    override suspend fun inviteUsers(type: String, id: String, users: List<User>): Result<Unit> {
         logger.d { "[inviteUsers] users: $users" }
 
-        return callCoordinatorClient.inviteUsers(users, cid)
+        return wrapAPICall { callCoordinatorService.upsertCallMembers(
+            UpsertCallMembersRequest(
+                    call_cid = "$type:$id",
+                    members = users.map { user ->
+                        MemberInput(
+                            user_id = user.id, role = user.role
+                        )
+                    }
+                )
+            )
+        }
     }
 
     /**
@@ -450,12 +454,13 @@ internal class StreamVideoImpl(
     private suspend fun joinCallInternal(call: CallMetadata): Result<JoinedCall> {
         return try {
             logger.d { "[joinCallInternal] call: $call" }
-            val joinResult = callCoordinatorClient.joinCall(
+
+            val joinResult = wrapAPICall { videoCallApi.joinCall(
                 id = call.id,
                 type = call.type,
                 connectionId = socket.getConnectionId(),
-                request = GetOrCreateCallRequest()
-            )
+                getOrCreateCallRequest = GetOrCreateCallRequest()
+            ) }
             if (joinResult !is Success) {
                 logger.e { "[joinCallInternal] failed joinResult: $joinResult" }
                 return joinResult as Failure
@@ -615,256 +620,161 @@ internal class StreamVideoImpl(
      * @see StreamVideo.queryMembers
      */
     override suspend fun queryMembers(
-        callCid: StreamCallCid,
+        type: String, id: String,
         queryMembersData: QueryMembersData
     ): Result<List<CallUser>> {
-        logger.d { "[queryMembers] callCid: $callCid, queryMembersData: $queryMembersData" }
+        logger.d { "[queryMembers] callCid: $type:$id, queryMembersData: $queryMembersData" }
 
-        val (type, id) = callCid.toTypeAndId()
+        return wrapAPICall { videoCallApi.queryMembers(queryMembersData.toRequest(id, type)).members.map { it.toCallUser() }}
 
-        return callCoordinatorClient.queryMembers(
-            queryMembersData.toRequest(id, type)
-        ).also {
-            logger.v { "[queryMembers] result: $it" }
-        }
     }
 
     /**
      * @see StreamVideo.blockUser
      */
-    override suspend fun blockUser(callCid: StreamCallCid, userId: String): Result<Unit> {
-        logger.d { "[blockUser] callCid: $callCid, userId: $userId" }
+    override suspend fun blockUser(type: String, id: String, userId: String): Result<Unit> {
+        logger.d { "[blockUser] callCid: $type:$id, userId: $userId" }
 
-        val (type, id) = callCid.toTypeAndId()
+        return wrapAPICall { videoCallApi.blockUser(type, id, BlockUserRequest(userId)) }
 
-        return callCoordinatorClient.blockUser(
-            id = id,
-            type = type,
-            blockUserRequest = BlockUserRequest(userId)
-        ).also {
-            logger.v { "[blockUser] result: $it" }
-        }
     }
 
     /**
      * @see StreamVideo.unblockUser
      */
-    override suspend fun unblockUser(callCid: StreamCallCid, userId: String): Result<Unit> {
-        logger.d { "[unblockUser] callCid: $callCid, userId: $userId" }
+    override suspend fun unblockUser(type: String, id:String, userId: String): Result<Unit> {
+        logger.d { "[unblockUser] callCid: $type:$id, userId: $userId" }
 
-        val (type, id) = callCid.toTypeAndId()
+        return wrapAPICall { videoCallApi.unblockUser(type, id, UnblockUserRequest(userId)) }
 
-        return callCoordinatorClient.unblockUser(
-            id = id,
-            type = type,
-            unblockUserRequest = UnblockUserRequest(userId)
-        ).also {
-            logger.v { "[unblockUser] result: $it" }
-        }
     }
 
     /**
      * @see StreamVideo.endCall
      */
-    override suspend fun endCall(callCid: StreamCallCid): Result<Unit> {
-        logger.d { "[endCall] callCid: $callCid" }
-
-        val (type, id) = callCid.toTypeAndId()
-
-        return callCoordinatorClient.endCall(
-            id = id,
-            type = type
-        ).also {
-            logger.v { "[endCall] result: $it" }
-        }
+    override suspend fun endCall(type: String, id: String): Result<Unit> {
+        return wrapAPICall { videoCallApi.endCall(type, id) }
     }
 
     /**
      * @see StreamVideo.goLive
      */
-    override suspend fun goLive(callCid: StreamCallCid): Result<CallInfo> {
-        logger.d { "[goLive] callCid: $callCid" }
+    override suspend fun goLive(type: String, id:String): Result<GoLiveResponse> {
+        logger.d { "[goLive] callCid: $type:$id" }
 
-        val (type, id) = callCid.toTypeAndId()
-
-        return callCoordinatorClient.goLive(
-            id = id,
-            type = type
-        ).also {
-            logger.v { "[goLive] result: $it" }
-        }
+        return wrapAPICall { videoCallApi.goLive(type, id) }
     }
 
     /**
      * @see StreamVideo.stopLive
      */
-    override suspend fun stopLive(callCid: StreamCallCid): Result<CallInfo> {
-        logger.d { "[stopLive] callCid: $callCid" }
+    override suspend fun stopLive(type: String, id: String): Result<StopLiveResponse> {
 
-        val (type, id) = callCid.toTypeAndId()
-
-        return callCoordinatorClient.stopLive(
-            id = id,
-            type = type
-        ).also {
-            logger.v { "[stopLive] result: $it" }
-        }
+        return wrapAPICall { videoCallApi.stopLive(type, id) }
     }
 
     /**
      * @see StreamVideo.muteUsers
      */
     override suspend fun muteUsers(
-        callCid: StreamCallCid,
+        type: String, id: String,
         muteUsersData: MuteUsersData
     ): Result<Unit> {
-        logger.d { "[muteUsers] callCid: $callCid" }
 
-        val (type, id) = callCid.toTypeAndId()
-
-        return callCoordinatorClient.muteUsers(
-            id = id,
-            type = type,
-            muteUsersRequest = muteUsersData.toRequest()
-        ).also {
-            logger.v { "[muteUsers] result: $it" }
+        val request = muteUsersData.toRequest()
+        return wrapAPICall {
+            videoCallApi.muteUsers(type, id, request)
         }
+
     }
 
     /**
      * @see StreamVideo.queryCalls
      */
-    override suspend fun queryCalls(queryCallsData: QueryCallsData): Result<QueriedCalls> = withContext(scope.coroutineContext) {
+    override suspend fun queryCalls(queryCallsData: QueryCallsData): Result<QueriedCalls> {
         logger.d { "[queryCalls] queryCallsData: $queryCallsData" }
-
-        callCoordinatorClient.queryCalls(
-            queryCallsRequest = queryCallsData.toRequest()
-        ).also {
-            logger.v { "[queryCalls] result: $it" }
-        }
+        val request = queryCallsData.toRequest()
+        return wrapAPICall { defaultApi.queryCalls(request).toQueriedCalls() }
     }
 
     /**
      * @see StreamVideo.requestPermissions
      */
     override suspend fun requestPermissions(
-        callCid: StreamCallCid,
+        type: String, id: String,
         permissions: List<String>
     ): Result<Unit> {
-        logger.d { "[requestPermissions] callCid: $callCid, permissions: $permissions" }
+        logger.d { "[requestPermissions] callCid: $type:$id, permissions: $permissions" }
 
-        val (type, id) = callCid.toTypeAndId()
-
-        return callCoordinatorClient.requestPermission(
-            id = id,
-            type = type,
-            requestPermissionRequest = RequestPermissionRequest(permissions)
-        ).also {
-            logger.v { "[requestPermissions] result: $it" }
-        }
+        return wrapAPICall { defaultApi.requestPermission(type, id, RequestPermissionRequest(permissions)) }
     }
 
     /**
      * @see StreamVideo.startBroadcasting
      */
-    override suspend fun startBroadcasting(callCid: StreamCallCid): Result<Unit> {
-        logger.d { "[startBroadcasting] callCid: $callCid" }
+    override suspend fun startBroadcasting(type: String, id: String): Result<Unit> {
+        logger.d { "[startBroadcasting] callCid: $type $id" }
 
-        val (type, id) = callCid.toTypeAndId()
-
-        return callCoordinatorClient.startBroadcasting(
-            id = id,
-            type = type
-        ).also {
-            logger.v { "[startBroadcasting] result: $it" }
-        }
+        return wrapAPICall { defaultApi.startBroadcasting(type, id) }
     }
 
     /**
      * @see StreamVideo.stopBroadcasting
      */
-    override suspend fun stopBroadcasting(callCid: StreamCallCid): Result<Unit> {
-        logger.d { "[stopBroadcasting] callCid: $callCid" }
+    override suspend fun stopBroadcasting(type: String, id: String): Result<Unit> {
 
-        val (type, id) = callCid.toTypeAndId()
-
-        return callCoordinatorClient.stopBroadcasting(
-            id = id,
-            type = type
-        ).also {
-            logger.v { "[stopBroadcasting] result: $it" }
-        }
+        return wrapAPICall { defaultApi.stopBroadcasting(type, id) }
     }
 
     /**
      * @see StreamVideo.startRecording
      */
-    override suspend fun startRecording(callCid: StreamCallCid): Result<Unit> {
-        logger.d { "[startRecording] callCid: $callCid" }
+    override suspend fun startRecording(type: String, id: String): Result<Unit> {
 
-        val (type, id) = callCid.toTypeAndId()
-
-        return callCoordinatorClient.startRecording(
-            id = id,
-            type = type
-        ).also {
-            logger.v { "[startRecording] result: $it" }
-        }
+        return wrapAPICall { defaultApi.startRecording(type, id) }
     }
 
     /**
      * @see StreamVideo.stopRecording
      */
-    override suspend fun stopRecording(callCid: StreamCallCid): Result<Unit> {
-        logger.d { "[stopRecording] callCid: $callCid" }
+    override suspend fun stopRecording(type: String, id: String): Result<Unit> {
 
-        val (type, id) = callCid.toTypeAndId()
-
-        return callCoordinatorClient.stopRecording(
-            id = id,
-            type = type
-        ).also {
-            logger.v { "[stopRecording] result: $it" }
+        return wrapAPICall {
+            defaultApi.stopRecording(type, id)
         }
+
     }
 
     /**
      * @see StreamVideo.updateUserPermissions
      */
     override suspend fun updateUserPermissions(
-        callCid: StreamCallCid,
+        type: String,
+        id: String,
         updateUserPermissionsData: UpdateUserPermissionsData
     ): Result<Unit> {
-        logger.d { "[updateUserPermissions] callCid: $callCid" }
 
-        val (type, id) = callCid.toTypeAndId()
-
-        return callCoordinatorClient.updateUserPermissions(
-            id = id,
-            type = type,
-            updateUserPermissionsRequest = updateUserPermissionsData.toRequest()
-        ).also {
-            logger.v { "[updateUserPermissions] result: $it" }
+        wrapAPICall {
+            defaultApi.updateUserPermissions(type, id, updateUserPermissionsData.toRequest())
         }
+
+
     }
 
     /**
      * @see StreamVideo.listRecordings
      */
     override suspend fun listRecordings(
-        callCid: StreamCallCid,
+        type: String,
+        id: String,
         sessionId: String
     ): Result<List<CallRecordingData>> {
-        logger.d { "[listRecordings] callCid: $callCid, sessionId: $sessionId" }
+        // TODO: Result structure isn't flexible
+        wrapAPICall {
+            val result = defaultApi.listRecordings(type, id, sessionId)
 
-        val (type, id) = callCid.toTypeAndId()
-
-        return callCoordinatorClient.listRecordings(
-            id = id,
-            type = type,
-            sessionId = sessionId
-        ).also {
-            logger.v { "[listRecordings] result: $it" }
+            result.recordings.map { it.toRecording() }
+            result
         }
     }
 
@@ -872,19 +782,15 @@ internal class StreamVideoImpl(
      * @see StreamVideo.sendVideoReaction
      */
     override suspend fun sendVideoReaction(
-        callCid: StreamCallCid,
+        type: String,
+        id: String,
         sendReactionData: SendReactionData
-    ): Result<ReactionData> {
-        logger.d { "[sendVideoReaction] callCid: $callCid, sendReactionData: $sendReactionData" }
+    ): Result<SendReactionResponse> {
+        logger.d { "[sendVideoReaction] callCid: $type:$id, sendReactionData: $sendReactionData" }
 
-        val (type, id) = callCid.toTypeAndId()
-
-        return callCoordinatorClient.sendVideoReaction(
-            id = id,
-            type = type,
-            request = sendReactionData.toRequest()
-        ).also {
-            logger.v { "[sendVideoReaction] result: $it" }
+        val result =
+        return wrapAPICall {
+            defaultApi.sendVideoReaction(type, id, sendReactionData.toRequest())
         }
     }
 
@@ -894,8 +800,11 @@ internal class StreamVideoImpl(
     override suspend fun getEdges(): Result<List<EdgeData>> {
         logger.d { "[getEdges] no params" }
 
-        return callCoordinatorClient.getEdges().also {
-            logger.v { "[getEdges] result: $it" }
+        wrapAPICall {
+            val result = videoCallApi.getEdges()
+
+            result.edges.map { it.toEdge() }
+            result
         }
     }
 
