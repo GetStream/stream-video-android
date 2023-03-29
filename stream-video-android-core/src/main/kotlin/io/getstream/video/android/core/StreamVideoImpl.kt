@@ -346,6 +346,8 @@ internal class StreamVideoImpl(
         // update state for the client
         state.handleEvent(event)
 
+        println("fireEvent call state yolo ${event.callCid} in ${calls.keys}")
+
         // update state for the calls. calls handle updating participants and members
         if (event.callCid.isNotEmpty()) {
             calls[event.callCid]?.let {
@@ -355,17 +357,17 @@ internal class StreamVideoImpl(
 
         // fire event handlers
         subscriptions.forEach { sub ->
-            if (sub.isDisposed) return
-
-            // subs without filters should always fire
-            if (sub.filter == null) {
-                sub.listener.onEvent(event)
-            }
-
-            // if there is a filter, check it and fire if it matches
-            sub.filter?.let {
-                if (it.invoke(event)) {
+            if (!sub.isDisposed) {
+                // subs without filters should always fire
+                if (sub.filter == null) {
                     sub.listener.onEvent(event)
+                }
+
+                // if there is a filter, check it and fire if it matches
+                sub.filter?.let {
+                    if (it.invoke(event)) {
+                        sub.listener.onEvent(event)
+                    }
                 }
             }
         }
@@ -964,7 +966,13 @@ internal class StreamVideoImpl(
 
     override fun call(type: String, id: String, token: String): Call2 {
         val cid = "$type:$id"
-        return calls[cid] ?: Call2(this, type, id, token, user)
+        return if(calls.contains(cid)) {
+            calls[cid]!!
+        } else {
+            val call = Call2(this, type, id, token, user)
+            calls[cid]=call
+            call
+        }
     }
 
     public var nextEventContinuation: Continuation<VideoEvent>? = null

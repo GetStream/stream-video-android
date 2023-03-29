@@ -205,6 +205,7 @@ internal object EventMapper {
 
             RecordingStartedEvent(
                 event.callCid,
+                event.callCid,
                 event.type
             )
         }

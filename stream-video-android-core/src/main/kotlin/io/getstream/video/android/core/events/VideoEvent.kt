@@ -126,6 +126,8 @@ public data class UnblockedUserEvent(
 ) : CoordinatorEvent()
 
 public data class RecordingStartedEvent(
+    // TODO: Tommaso decide whats what plz
+    override val callCid: String,
     val cid: StreamCallCid?,
     val type: String
 ) : CoordinatorEvent()

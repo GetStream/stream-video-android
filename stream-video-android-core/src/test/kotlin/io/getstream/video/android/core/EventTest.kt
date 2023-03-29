@@ -7,7 +7,10 @@ import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.UserType
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.lastOrNull
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -51,13 +54,13 @@ class EventTest : IntegrationTestBase() {
      *
      */
     @Test
-    fun `test recording`() = runTest {
-
+    fun `test start and stop recording`() = runTest {
         val call = client.call("default", randomUUID())
-
-        val event = RecordingStartedEvent(cid=call.cid, type="123")
+        val event = RecordingStartedEvent(callCid=call.cid, cid=call.cid, type="123")
         clientImpl.fireEvent(event)
-        call.state.recording.collectLatest { assertThat(it).isTrue()  }
+        val result = call.state.recording.lastOrNull()
+        assertThat(result).isTrue()
+
     }
 
     @Test

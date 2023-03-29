@@ -60,6 +60,7 @@ public class CallState(user: User) {
     val recording: StateFlow<Boolean> = _recording
 
     fun handleEvent(event: VideoEvent) {
+        println("updating call state yolo")
         when (event) {
             is BlockedUserEvent -> TODO()
             is CallAcceptedEvent -> TODO()

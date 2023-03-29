@@ -181,6 +181,7 @@ public class StreamVideoBuilder(
         }
 
         // TODO: Bit of a hack, eventually we need to remove the engine probably
+
         socket.eventListener = { event ->
             println("engine eventlistener received an event: $event")
             client.fireEvent(event)
