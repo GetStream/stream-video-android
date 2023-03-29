@@ -74,6 +74,8 @@ public class StreamVideoBuilder(
 
         val httpModule = HttpModule.getOrCreate(loggingLevel.httpLoggingLevel, preferences)
 
+
+
         val module = VideoModule(
             appContext = context,
             preferences = preferences,

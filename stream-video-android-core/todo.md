@@ -37,10 +37,10 @@
 ### Refactoring
 
 - [X] Client builder refactoring. see https://www.notion.so/stream-wiki/Android-Changes-Discussion-10c5a9f303134eb786bdebcea55cf92a
+- [ ] Stop hiding backend errors (in progress)
 - [ ] Call refactoring
 - [ ] Support query members
 - [ ] Ensure we always use DispatcherProvider.IO
-- [ ] Stop hiding backend errors
 
 ### Features
 

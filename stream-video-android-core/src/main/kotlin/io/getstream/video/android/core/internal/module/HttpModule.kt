@@ -16,11 +16,20 @@
 
 package io.getstream.video.android.core.internal.module
 
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import io.getstream.video.android.core.errors.VideoBackendError
 import io.getstream.video.android.core.user.UserPreferences
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import okhttp3.HttpUrl
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import okhttp3.Response
 import okhttp3.logging.HttpLoggingInterceptor
+import java.util.concurrent.TimeUnit
+
 
 /**
  * @property loggingLevel Log level used for all HTTP requests towards the API.
@@ -51,6 +60,7 @@ internal class HttpModule(
      * @return [OkHttpClient] that allows us API calls.
      */
     private fun buildOkHttpClient(preferences: UserPreferences): OkHttpClient {
+        // TODO: Timeouts don't seem to be set here
         return OkHttpClient.Builder()
             .addInterceptor(
                 buildCredentialsInterceptor(
@@ -63,6 +73,10 @@ internal class HttpModule(
                 }
             )
             .addInterceptor(buildHostSelectionInterceptor())
+            .connectTimeout(5, TimeUnit.SECONDS)
+            .writeTimeout(5, TimeUnit.SECONDS)
+            .readTimeout(5, TimeUnit.SECONDS)
+            .callTimeout(10, TimeUnit.SECONDS)
             .build()
     }
 

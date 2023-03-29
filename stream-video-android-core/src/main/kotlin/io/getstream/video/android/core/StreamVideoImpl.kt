@@ -25,9 +25,9 @@ import io.getstream.video.android.core.coordinator.CallCoordinatorClient
 import io.getstream.video.android.core.coordinator.state.UserState
 import io.getstream.video.android.core.engine.StreamCallEngine
 import io.getstream.video.android.core.engine.adapter.CoordinatorSocketListenerAdapter
+import io.getstream.video.android.core.errors.VideoBackendError
 import io.getstream.video.android.core.errors.VideoError
 import io.getstream.video.android.core.events.CallCreatedEvent
-import io.getstream.video.android.core.events.ConnectedEvent
 import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.lifecycle.LifecycleHandler
@@ -83,11 +83,13 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import org.openapitools.client.models.*
+import retrofit2.HttpException
 import stream.video.coordinator.client_v1_rpc.CreateDeviceRequest
 import stream.video.coordinator.client_v1_rpc.DeleteDeviceRequest
 import stream.video.coordinator.push_v1.DeviceInput
-import java.net.SocketImpl
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.suspendCoroutine
 
@@ -104,6 +106,7 @@ class EventSubscription
             isDisposed = true
         }
 }
+
 
 /**
  * @param lifecycle The lifecycle used to observe changes in the process. // TODO - docs
@@ -123,11 +126,63 @@ internal class StreamVideoImpl(
     private val networkStateProvider: NetworkStateProvider,
 ) : StreamVideo {
 
-    // TODO: Client state
 
     private val logger by taggedLogger("Call:StreamVideo")
     private var subscriptions = mutableSetOf<EventSubscription>()
     private var calls = mutableMapOf<String, Call2>()
+
+    // caller: JOIN after accepting incoming call by callee
+    /**
+     * @see StreamVideo.joinCall
+     */
+    override suspend fun joinCall(call: CallMetadata): Result<JoinedCall> =
+        withContext(scope.coroutineContext) {
+            logger.d { "[joinCallOnly] call: $call" }
+            engine.onCallJoining(call)
+            joinCallInternal(call)
+                .onSuccess { data -> engine.onCallJoined(data) }
+                .onError { engine.onCallFailed(it) }
+                .also { logger.v { "[joinCallOnly] result: $it" } }
+        }
+
+    /**
+     * @see StreamVideo.updateCall
+     */
+    override suspend fun updateCall(
+        type: String,
+        id: String,
+        custom: Map<String,Any>,
+    ): Result<CallInfo> = withContext(scope.coroutineContext) {
+
+        logger.d { "[updateCall] type: $type, id: $id, participantIds: $custom" }
+        try {
+            callCoordinatorClient.updateCall(
+                type = type,
+                id = id,
+                updateCallRequest = UpdateCallRequest(
+                    custom = custom,
+                    settingsOverride = CallSettingsRequest()
+                )
+            )
+        } catch (e: HttpException) {
+            parseError(e)
+        }
+    }
+
+    internal fun parseError(e: HttpException): Failure {
+        val errorBytes = e.response()?.errorBody()?.bytes()
+        val error = errorBytes?.let {
+            val errorBody = String(it, Charsets.UTF_8)
+            val format = Json {
+                prettyPrint = true
+                ignoreUnknownKeys = true
+            }
+            format.decodeFromString<VideoBackendError>(errorBody)
+        }
+        return Failure(VideoError())
+    }
+
+
 
     public override fun subscribeFor(
         vararg eventTypes: Class<out VideoEvent>,
@@ -274,28 +329,7 @@ internal class StreamVideoImpl(
      */
 
 
-    /**
-     * @see StreamVideo.updateCall
-     */
-    override suspend fun updateCall(
-        type: String,
-        id: String,
-        custom: Map<String,Any>,
-    ): Result<CallInfo> = withContext(scope.coroutineContext) {
-        logger.d { "[updateCall] type: $type, id: $id, participantIds: $custom" }
-        //engine.onCallStarting(type, id, participantIds, ring, forcedNewCall = false)
-        callCoordinatorClient.updateCall(
-            type = type,
-            id = id,
-            updateCallRequest = UpdateCallRequest(
-                custom = custom,
-                settingsOverride = CallSettingsRequest()
-            )
-        )
-            .also { logger.v { "[updateCall] Coordinator result: $it" } }
-            .onError { engine.onCallFailed(it) }
-            .also { logger.v { "[updateCall] Final result: $it" } }
-    }
+
 
     /**
      * Internal function that fires the event. It starts by updating client state and call state
@@ -362,19 +396,7 @@ internal class StreamVideoImpl(
             .also { logger.v { "[getOrCreateCall] Final result: $it" } }
     }
 
-    // caller: JOIN after accepting incoming call by callee
-    /**
-     * @see StreamVideo.joinCall
-     */
-    override suspend fun joinCall(call: CallMetadata): Result<JoinedCall> =
-        withContext(scope.coroutineContext) {
-            logger.d { "[joinCallOnly] call: $call" }
-            engine.onCallJoining(call)
-            joinCallInternal(call)
-                .onSuccess { data -> engine.onCallJoined(data) }
-                .onError { engine.onCallFailed(it) }
-                .also { logger.v { "[joinCallOnly] result: $it" } }
-        }
+
 
     /**
      * @see StreamVideo.inviteUsers

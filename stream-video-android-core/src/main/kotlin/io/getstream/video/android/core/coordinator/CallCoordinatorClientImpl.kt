@@ -294,30 +294,10 @@ internal class CallCoordinatorClientImpl(
         id: String,
         type: String,
         updateCallRequest: UpdateCallRequest
-    ): Result<CallInfo> = try {
+    ): Result<CallInfo> {
         val result = videoCallApi.updateCall(type, id, updateCallRequest)
 
-        Success(result.call.toCallInfo())
-    } catch (error: HttpException) {
-        // TODO: this isn't right
-        val code = error.code()
-        val errorBytes = error.response()?.errorBody()?.bytes()
-        var error = VideoBackendError()
-        errorBytes?.let {
-            val errorBody = String(it, Charsets.UTF_8)
-            val format = Json {
-                prettyPrint = true
-                ignoreUnknownKeys = true
-            }
-            val moshi: Moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
-            val jsonAdapter: JsonAdapter<VideoBackendError> = moshi.adapter(VideoBackendError::class.java)
-            println(errorBody)
-
-            error = format.decodeFromString<VideoBackendError>(errorBody)
-
-        }
-        // TODO: return the VideoError2 requires refactoring...
-        Failure(VideoError())
+        return Success(result.call.toCallInfo())
     }
 
     /**

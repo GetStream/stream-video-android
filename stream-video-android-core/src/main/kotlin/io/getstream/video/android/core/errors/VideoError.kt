@@ -21,14 +21,14 @@ import kotlinx.serialization.SerialName
 @kotlinx.serialization.Serializable
 public data class VideoBackendError (
     val code: Int = 1,
-    val message: String = "",
+    override val message: String = "",
     @SerialName("StatusCode")
     val statusCode: Int = 500,
     val duration: String = "",
     @SerialName("more_info")
     val moreInfo: String = "",
     val details: List<String> = emptyList(),
-)
+): Throwable()
 
 /**
  * Represents an SDK error that contains a message and the cause.

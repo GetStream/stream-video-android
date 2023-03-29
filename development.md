@@ -23,7 +23,9 @@ BuildConfig.CORE_TEST_LOCAL
 
 ## Style guidelines
 
+* Keep it simple. Keep it simple. Keep it simple.
 * Interfaces can help make your code easier to test. That doesn't mean you should create an interface for everything though.
+* Factories are nice, but many times a constructor works just as well
 * Only create an interface if you need it for testing, start without it. Note that android studio allows you to extract an interface.
 * Integration testing and unit testing are important. It's often more productive to write tests than to try to validate things work by opening up the API
 * Our customers should be able to build any type of video/audio experience. Keep that in mind when working on the APIs. They need to be flexible and easy to use
