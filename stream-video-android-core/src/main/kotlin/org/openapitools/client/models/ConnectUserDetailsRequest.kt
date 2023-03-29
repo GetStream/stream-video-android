@@ -27,7 +27,11 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param id * @param custom * @param image * @param name */
+ * @param id
+ * @param custom
+ * @param image
+ * @param name
+ */
 
 data class ConnectUserDetailsRequest(
 
