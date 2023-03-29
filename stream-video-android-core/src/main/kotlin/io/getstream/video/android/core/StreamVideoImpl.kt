@@ -9,7 +9,7 @@
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, eitherVideoEvent express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
@@ -35,9 +35,7 @@ import io.getstream.video.android.core.lifecycle.LifecycleHandler
 import io.getstream.video.android.core.lifecycle.internal.StreamLifecycleObserver
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.CallEventType
-import io.getstream.video.android.core.model.CallInfo
 import io.getstream.video.android.core.model.CallMetadata
-import io.getstream.video.android.core.model.CallRecordingData
 import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.core.model.Device
 import io.getstream.video.android.core.model.EdgeData
@@ -113,11 +111,13 @@ internal class StreamVideoImpl(
     private val context: Context,
     private val scope: CoroutineScope,
     override val config: StreamVideoConfig,
+    private val user: User,
     private val lifecycle: Lifecycle,
     private val loggingLevel: LoggingLevel,
     private val preferences: UserPreferences,
     private val socket: VideoSocket,
     private val socketStateService: SocketStateService,
+    // TODO: Change the user state
     private val userState: UserState,
     private val networkStateProvider: NetworkStateProvider,
     private val callCoordinatorService: ClientRPCService,
@@ -126,7 +126,7 @@ internal class StreamVideoImpl(
     private val defaultApi: DefaultApi
 ) : StreamVideo {
 
-
+    override val state = ClientState()
     private val logger by taggedLogger("Call:StreamVideo")
     private var subscriptions = mutableSetOf<EventSubscription>()
     private var calls = mutableMapOf<String, Call2>()
@@ -344,8 +344,14 @@ internal class StreamVideoImpl(
     internal fun fireEvent(event: VideoEvent) {
 
         // update state for the client
+        state.handleEvent(event)
 
-        // update state for the calls
+        // update state for the calls. calls handle updating participants and members
+        if (event.callCid.isNotEmpty()) {
+            calls[event.callCid]?.let {
+                it.state.handleEvent(event)
+            }
+        }
 
         // fire event handlers
         subscriptions.forEach { sub ->
@@ -958,7 +964,7 @@ internal class StreamVideoImpl(
 
     override fun call(type: String, id: String, token: String): Call2 {
         val cid = "$type:$id"
-        return calls[cid] ?: Call2(this, type, id, token)
+        return calls[cid] ?: Call2(this, type, id, token, user)
     }
 
     public var nextEventContinuation: Continuation<VideoEvent>? = null

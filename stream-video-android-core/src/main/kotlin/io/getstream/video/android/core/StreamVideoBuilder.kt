@@ -147,6 +147,7 @@ public class StreamVideoBuilder(
             context = context,
             scope = scope,
             config = config,
+            user = user,
             loggingLevel = loggingLevel,
             preferences = preferences,
             lifecycle = lifecycle,

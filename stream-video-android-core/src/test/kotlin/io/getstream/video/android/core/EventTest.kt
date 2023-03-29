@@ -5,6 +5,8 @@ import io.getstream.video.android.core.events.*
 import io.getstream.video.android.core.model.QueryCallsData
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.UserType
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -51,8 +53,11 @@ class EventTest : IntegrationTestBase() {
     @Test
     fun `test recording`() = runTest {
 
-        clientImpl.fireEvent(RecordingStartedEvent(cid="default:123", type="123"))
-        //assertThat(client.recording)
+        val call = client.call("default", randomUUID())
+
+        val event = RecordingStartedEvent(cid=call.cid, type="123")
+        clientImpl.fireEvent(event)
+        call.state.recording.collectLatest { assertThat(it).isTrue()  }
     }
 
     @Test

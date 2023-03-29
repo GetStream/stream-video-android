@@ -71,13 +71,14 @@ public data class VideoQualityChangedEvent(
 ) : SfuDataEvent()
 
 public data class ParticipantJoinedEvent(
+
     val participant: Participant,
-    val callCid: StreamCallCid,
+    override val callCid: String,
 ) : SfuDataEvent()
 
 public data class ParticipantLeftEvent(
     val participant: Participant,
-    val callCid: StreamCallCid
+    override val callCid: String,
 ) : SfuDataEvent()
 
 public data class DominantSpeakerChangedEvent(

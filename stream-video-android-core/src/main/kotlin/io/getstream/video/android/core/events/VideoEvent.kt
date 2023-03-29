@@ -26,9 +26,9 @@ import java.util.Date
 /**
  * Represents the events coming in from the socket.
  */
-public sealed class VideoEvent : java.io.Serializable
+public sealed class VideoEvent(open val callCid: String="") : java.io.Serializable
 
-public sealed class CoordinatorEvent: VideoEvent()
+public sealed class CoordinatorEvent(): VideoEvent()
 
 /**
  * Triggered when a user gets connected to the WS.
@@ -48,7 +48,7 @@ public data class HealthCheckEvent(
  * Sent when someone creates a call and invites another person to participate.
  */
 public data class CallCreatedEvent(
-    val callCid: String,
+    override val callCid: String,
     val ringing: Boolean,
     val users: Map<String, CallUser>,
     val callInfo: CallInfo,
@@ -59,7 +59,7 @@ public data class CallCreatedEvent(
  * Sent when a call gets updated.
  */
 public data class CallUpdatedEvent(
-    val callCid: String,
+    override val callCid: String,
     val capabilitiesByRole: Map<String, List<String>>,
     val info: CallInfo,
     val ownCapabilities: List<String>
@@ -69,7 +69,7 @@ public data class CallUpdatedEvent(
  * Sent when a calls gets ended.
  */
 public data class CallEndedEvent(
-    val callCid: String,
+    override val callCid: String,
     val endedByUser: User?
 ) : CoordinatorEvent()
 
@@ -77,7 +77,6 @@ public data class CallEndedEvent(
  * Sent when call members get updated.
  */
 public data class CallMembersUpdatedEvent(
-    val callCid: String,
     val users: Map<String, CallUser>,
     val info: CallInfo,
     val details: CallDetails
@@ -87,25 +86,24 @@ public data class CallMembersUpdatedEvent(
  * Sent when call members get updated.
  */
 public data class CallMembersDeletedEvent(
-    val callCid: String,
     val users: Map<String, CallUser>,
     val info: CallInfo,
     val details: CallDetails
 ) : CoordinatorEvent()
 
 public data class CallAcceptedEvent(
-    val callCid: String,
+    override val callCid: String,
     val sentByUserId: String,
 ) : CoordinatorEvent()
 
 public data class CallRejectedEvent(
-    val callCid: String,
+    override val callCid: String,
     val user: User,
     val updatedAt: Date
 ) : CoordinatorEvent()
 
 public data class CallCancelledEvent(
-    val callCid: String,
+    override val callCid: String,
     val sentByUserId: String,
 ) : CoordinatorEvent()
 

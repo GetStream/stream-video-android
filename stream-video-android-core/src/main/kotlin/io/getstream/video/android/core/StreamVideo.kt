@@ -16,6 +16,8 @@
 
 package io.getstream.video.android.core
 
+
+
 import io.getstream.video.android.core.call.CallClient
 import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.model.Call
@@ -44,6 +46,10 @@ import io.getstream.video.android.core.utils.Result
 import kotlinx.coroutines.flow.StateFlow
 import org.openapitools.client.models.*
 
+
+
+
+
 /**
  * The main interface to control the Video calls. [StreamVideoImpl] implements this interface.
  */
@@ -54,6 +60,7 @@ public interface StreamVideo {
      */
     public val config: StreamVideoConfig
 
+    val state: ClientState
 
     /** Subscribe for a specific list of events */
     public fun subscribeFor(
