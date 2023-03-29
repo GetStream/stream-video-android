@@ -60,7 +60,6 @@ class EventTest : IntegrationTestBase() {
         clientImpl.fireEvent(event)
         val result = call.state.recording.lastOrNull()
         assertThat(result).isTrue()
-
     }
 
     @Test

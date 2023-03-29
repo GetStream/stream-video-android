@@ -76,6 +76,7 @@ public class CallState(user: User) {
             is HealthCheckEvent -> TODO()
             is PermissionRequestEvent -> TODO()
             is RecordingStartedEvent -> {
+                println("RecordingStartedEvent")
                 _recording.value = true
             }
             is RecordingStoppedEvent -> {
