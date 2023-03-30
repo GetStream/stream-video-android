@@ -66,4 +66,9 @@ for FILE in $APIS_ROOT/*.kt; do
 
 done
 
+echo Copying models and services
+
 cp -r "$CLIENT_ROOT/" "$PROJECT_ROOT/stream-video-android-core/src/main/kotlin/org/openapitools/client"
+cp -r "$PROTOCOL_ROOT/protobuf/." "$PROJECT_ROOT/stream-video-android-core/src/main/proto"
+
+echo Done!
