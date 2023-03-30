@@ -41,7 +41,7 @@ public data class ConnectedEvent(
 /**
  * Sent periodically by the server to keep the connection alive.
  */
-public data class HealthCheckEvent(
+public data class CoordinatorHealthCheckEvent(
     val clientId: String,
 ) : CoordinatorEvent()
 

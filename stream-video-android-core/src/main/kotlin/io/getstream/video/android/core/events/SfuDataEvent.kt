@@ -84,7 +84,7 @@ public data class DominantSpeakerChangedEvent(
     val userId: String
 ) : SfuDataEvent()
 
-public object HealthCheckResponseEvent : SfuDataEvent()
+public object SFUHealthCheckEvent : SfuDataEvent()
 
 public data class JoinCallResponseEvent(
     val callState: CallState

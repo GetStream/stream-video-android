@@ -20,6 +20,7 @@ import io.getstream.video.android.core.events.AudioLevelChangedEvent
 import io.getstream.video.android.core.events.BlockedUserEvent
 import io.getstream.video.android.core.events.CallAcceptedEvent
 import io.getstream.video.android.core.events.CallCancelledEvent
+import stream.video.sfu.models.Participant as ParticipantData
 import io.getstream.video.android.core.events.CallCreatedEvent
 import io.getstream.video.android.core.events.CallEndedEvent
 import io.getstream.video.android.core.events.CallMembersDeletedEvent
@@ -32,8 +33,8 @@ import io.getstream.video.android.core.events.ConnectionQualityChangeEvent
 import io.getstream.video.android.core.events.CustomEvent
 import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
 import io.getstream.video.android.core.events.ErrorEvent
-import io.getstream.video.android.core.events.HealthCheckEvent
-import io.getstream.video.android.core.events.HealthCheckResponseEvent
+import io.getstream.video.android.core.events.CoordinatorHealthCheckEvent
+import io.getstream.video.android.core.events.SFUHealthCheckEvent
 import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.ParticipantJoinedEvent
@@ -50,17 +51,16 @@ import io.getstream.video.android.core.events.UnknownEvent
 import io.getstream.video.android.core.events.UpdatedCallPermissionsEvent
 import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.events.VideoQualityChangedEvent
-import io.getstream.video.android.core.model.CallMetadata
-import io.getstream.video.android.core.model.CallParticipantState
-import io.getstream.video.android.core.model.IceServer
-import io.getstream.video.android.core.model.JoinedCall
-import io.getstream.video.android.core.model.SfuToken
-import io.getstream.video.android.core.model.User
-import io.getstream.video.android.core.utils.Result
+import io.getstream.video.android.core.model.*
+import io.getstream.video.android.core.utils.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import org.openapitools.client.models.GetCallEdgeServerRequest
 import org.openapitools.client.models.GoLiveResponse
+import org.openapitools.client.models.OwnCapability
 import org.openapitools.client.models.UpdateCallResponse
+import stream.video.sfu.models.ConnectionQuality
+import java.util.*
 
 public data class SFUConnection(
     internal val callUrl: String,
@@ -68,18 +68,39 @@ public data class SFUConnection(
     internal val iceServers: List<IceServer>
 )
 
+public open class ActiveSFUSession(
+    client: StreamVideo,
+    call2: Call2,
+    url: String,
+    token: String,
+    iceServers: List<IceServer>,
+    latencyResults: Map<String, List<Float>>
+) {
+
+}
+
+
 public open class ParticipantState(user: User) {
 
     /**
      * The user
      */
-    private val _user: MutableStateFlow<User> = MutableStateFlow(user)
+    internal val _user: MutableStateFlow<User> = MutableStateFlow(user)
     val user: StateFlow<User> = _user
+
+    internal val _acceptedAt: MutableStateFlow<Date?> = MutableStateFlow(null)
+    val acceptedAt: StateFlow<Date?> = _acceptedAt
+
+    internal val _rejectedAt: MutableStateFlow<Date?> = MutableStateFlow(null)
+    val rejectedAt: StateFlow<Date?> = _rejectedAt
+
+    internal val _joinedAt: MutableStateFlow<Date?> = MutableStateFlow(null)
+    val joinedAt: StateFlow<Date?> = _joinedAt
 
     /**
      * State that indicates whether the camera is capturing and sending video or not.
      */
-    private val _videoEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    internal val _videoEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val videoEnabled: StateFlow<Boolean> = _videoEnabled
 
     internal val _speaking: MutableStateFlow<Boolean> = MutableStateFlow(false)
@@ -87,20 +108,28 @@ public open class ParticipantState(user: User) {
 
     internal val _audioLevel: MutableStateFlow<Float> = MutableStateFlow(0F)
     val audioLevel: StateFlow<Float> = _audioLevel
+
+    internal val _connectionQuality: MutableStateFlow<ConnectionQuality> = MutableStateFlow(ConnectionQuality.CONNECTION_QUALITY_UNSPECIFIED)
+    val connectionQuality: StateFlow<ConnectionQuality> = _connectionQuality
     /**
      * State that indicates whether the mic is capturing and sending the audio or not.
      */
-    private val _isAudioEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    internal val _isAudioEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val audioEnabled: StateFlow<Boolean> = _isAudioEnabled
 
     /**
      * State that indicates whether the speakerphone is on or not.
      */
-    private val _isSpeakerPhoneEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    internal val _isSpeakerPhoneEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val speakerPhoneEnabled: StateFlow<Boolean> = _isSpeakerPhoneEnabled
 }
 
-public open class LocalParticipantState(user: User) : ParticipantState(user)
+public open class LocalParticipantState(user: User) : ParticipantState(user) {
+    internal val _ownCapabilities: MutableStateFlow<List<OwnCapability>> = MutableStateFlow(
+        emptyList()
+    )
+    val ownCapabilities: StateFlow<List<OwnCapability>> = _ownCapabilities
+}
 
 public class MemberState(user: User) {
     /**
@@ -114,26 +143,59 @@ public class MemberState(user: User) {
  *
  */
 public class CallState(user: User) {
+    private val memberMap: MutableMap<String, MemberState> = mutableMapOf()
     private val _recording: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val recording: StateFlow<Boolean> = _recording
 
-    val participantMap = mutableMapOf<String, ParticipantState>()
+    private val _endedAt: MutableStateFlow<Date?> = MutableStateFlow(null)
+    val endedAt: StateFlow<Date?> = _endedAt
+    private val _endedByUser: MutableStateFlow<User?> = MutableStateFlow(null)
+    val endedByUser: StateFlow<User?> = _endedByUser
+
+    private val participantMap = mutableMapOf<String, ParticipantState>()
+
+    private val _capabilitiesByRole: MutableStateFlow<Map<String, List<String>>> = MutableStateFlow(emptyMap())
+    val capabilitiesByRole: StateFlow<Map<String, List<String>>> = _capabilitiesByRole
 
     fun handleEvent(event: VideoEvent) {
         println("updating call state yolo")
         when (event) {
             is BlockedUserEvent -> TODO()
-            is CallAcceptedEvent -> TODO()
+            is CallAcceptedEvent -> {
+                val participant = getOrCreateParticipant(event.sentByUserId)
+                participant._acceptedAt.value = Date()
+            }
+            is CallRejectedEvent -> {
+                val participant = getOrCreateParticipant(event.user)
+                participant._rejectedAt.value = Date()
+            }
             is CallCancelledEvent -> TODO()
             is CallCreatedEvent -> TODO()
-            is CallEndedEvent -> TODO()
+            is CallEndedEvent -> {
+                _endedAt.value = Date()
+                _endedByUser.value = event.endedByUser
+            }
+            is CallMembersUpdatedEvent -> {
+                event.details.members.forEach { entry ->
+                    getOrCreateMember(entry.value)
+                }
+            }
             is CallMembersDeletedEvent -> TODO()
-            is CallMembersUpdatedEvent -> TODO()
-            is CallRejectedEvent -> TODO()
-            is CallUpdatedEvent -> TODO()
+
+
+            is CallUpdatedEvent -> {
+                // update the own capabilities
+                me._ownCapabilities.value=event.ownCapabilities
+                // update the capabilities by role
+                _capabilitiesByRole.value = event.capabilitiesByRole
+                // update call info fields
+            }
+            is UpdatedCallPermissionsEvent -> {
+                me._ownCapabilities.value=event.ownCapabilities
+            }
             is ConnectedEvent -> TODO()
             is CustomEvent -> TODO()
-            is HealthCheckEvent -> TODO()
+            is CoordinatorHealthCheckEvent -> TODO()
             is PermissionRequestEvent -> TODO()
             is RecordingStartedEvent -> {
                 println("RecordingStartedEvent")
@@ -144,7 +206,7 @@ public class CallState(user: User) {
             }
             is UnblockedUserEvent -> TODO()
             UnknownEvent -> TODO()
-            is UpdatedCallPermissionsEvent -> TODO()
+
             is AudioLevelChangedEvent -> {
                 event.levels.forEach { entry ->
                     val participant = getOrCreateParticipant(entry.key)
@@ -152,15 +214,26 @@ public class CallState(user: User) {
                     participant._audioLevel.value = entry.value.audioLevel
                 }
             }
+            is DominantSpeakerChangedEvent -> {
+                _dominantSpeaker.value = getOrCreateParticipant(event.userId)
+            }
+            is ConnectionQualityChangeEvent -> {
+                event.updates.forEach { entry ->
+                    val participant = getOrCreateParticipant(entry.user_id)
+                    participant._connectionQuality.value = entry.connection_quality
+                }
+            }
             is ChangePublishQualityEvent -> TODO()
-            is ConnectionQualityChangeEvent -> TODO()
-            is DominantSpeakerChangedEvent -> TODO()
             is ErrorEvent -> TODO()
-            HealthCheckResponseEvent -> TODO()
+            SFUHealthCheckEvent -> TODO()
             is ICETrickleEvent -> TODO()
             is JoinCallResponseEvent -> TODO()
-            is ParticipantJoinedEvent -> TODO()
-            is ParticipantLeftEvent -> TODO()
+            is ParticipantJoinedEvent -> {
+                getOrCreateParticipant(event.participant)
+            }
+            is ParticipantLeftEvent -> {
+                removeParticipant(event.participant.user_id)
+            }
             is PublisherAnswerEvent -> TODO()
             is SubscriberOfferEvent -> TODO()
             is TrackPublishedEvent -> TODO()
@@ -169,14 +242,51 @@ public class CallState(user: User) {
         }
     }
 
-    private fun getOrCreateParticipant(key: String): ParticipantState {
-        return if (participantMap.contains(key)) {
-            participantMap[key]!!
+    private fun removeParticipant(userId: String) {
+        participantMap.remove(userId)
+        // TODO: connect map and participant list nicely
+    }
+
+    private fun getOrCreateParticipant(participant: ParticipantData): ParticipantState {
+        // TODO: update some fields
+        val participantState = getOrCreateParticipant(participant.user_id)
+
+        participantState._speaking.value = participant.is_speaking
+        return participantState
+    }
+
+    private fun getOrCreateParticipant(user: User): ParticipantState {
+        // TODO: maybe update some fields
+        return getOrCreateParticipant(user.id)
+    }
+
+    private fun getOrCreateParticipant(userId: String): ParticipantState {
+        return if (participantMap.contains(userId)) {
+            participantMap[userId]!!
         } else {
-            val participant = ParticipantState(User(id=key))
-            participantMap[key] = participant
+            val participant = ParticipantState(User(id=userId))
+            participantMap[userId] = participant
             participant
         }
+    }
+    private fun getOrCreateMember(callUser: CallUser): MemberState {
+        // TODO: update fields :)
+        return getOrCreateMember(callUser.id)
+    }
+
+
+    private fun getOrCreateMember(userId: String): MemberState {
+        return if (memberMap.contains(userId)) {
+            memberMap[userId]!!
+        } else {
+            val member = MemberState(User(id=userId))
+            memberMap[userId] = member
+            member
+        }
+    }
+
+    fun getParticipant(userId: String): ParticipantState? {
+        return participantMap[userId]
     }
 
     // TODO: SFU Connection
@@ -184,6 +294,11 @@ public class CallState(user: User) {
     private val _participants: MutableStateFlow<List<CallParticipantState>> =
         MutableStateFlow(emptyList())
     public val participants: StateFlow<List<CallParticipantState>> = _participants
+
+    private val _dominantSpeaker: MutableStateFlow<ParticipantState?> =
+        MutableStateFlow(null)
+    public val dominantSpeaker: StateFlow<ParticipantState?> = _dominantSpeaker
+
 
     /**
      * TODO:
@@ -202,11 +317,12 @@ public class CallState(user: User) {
 
 public class Call2(
     private val client: StreamVideo,
-    private val type: String,
-    private val id: String,
+    val type: String,
+    val id: String,
     private val token: String = "",
-    private val user: User,
+    val user: User,
 ) {
+    private var activeSession: ActiveSFUSession? = null
     val cid = "$type:$id"
     val state = CallState(user)
 
@@ -215,13 +331,54 @@ public class Call2(
     // should be a stateflow
     private var sfuConnection: SFUConnection? = null
 
-    suspend fun join(): Result<JoinedCall> {
-        return client.joinCall(
-            type,
-            id,
-            emptyList(),
-            false
+    suspend fun join(): Result<ActiveSFUSession> {
+
+        /**
+         * Alright, how to make this solid
+         *
+         * - There are 2 methods.
+         * -- Client.JoinCall which makes the API call and gets a response
+         * -- The whole join process. Which measures latency, uploads it etc
+         *
+         * Latency measurement needs to be changed
+         *
+         */
+
+        // step 1. call the join endpoint to get a list of SFUs
+        val result = client.joinCall(type, id)
+        if (result !is Success) {
+            return result as Failure
+        }
+
+        // step 2. measure latency
+        // TODO: this should run in parallel and be configurable
+        val latencyResults = result.data.edges.associate {
+            it.name to getLatencyMeasurements(it.latencyUrl)
+        }
+        // upload our latency measurements to the server
+        val selectEdgeServerResult = client.selectEdgeServer(
+            type = type,
+            id = id,
+            request = GetCallEdgeServerRequest(
+                latencyMeasurements = latencyResults
+            )
         )
+        if (selectEdgeServerResult !is Success) {
+            return result as Failure
+        }
+
+        val credentials = selectEdgeServerResult.data.credentials
+        val url = credentials.server.url
+        val iceServers =
+            selectEdgeServerResult
+                .data
+                .credentials
+                .iceServers
+                .map { it.toIceServer() }
+
+        activeSession = ActiveSFUSession(client, this, url, credentials.token, iceServers, latencyResults)
+        return Success<ActiveSFUSession>(data= activeSession!!)
+
     }
 
     suspend fun goLive(): Result<GoLiveResponse> {

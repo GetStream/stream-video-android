@@ -20,8 +20,10 @@ import io.getstream.video.android.core.call.signal.socket.SfuSocketListener
 import io.getstream.video.android.core.model.Call
 import io.getstream.video.android.core.model.CallSettings
 import io.getstream.video.android.core.utils.Result
+import io.getstream.video.android.core.utils.Success
 import kotlinx.coroutines.flow.StateFlow
 import org.webrtc.RTCStatsReport
+import retrofit2.HttpException
 
 public interface CallClient {
 

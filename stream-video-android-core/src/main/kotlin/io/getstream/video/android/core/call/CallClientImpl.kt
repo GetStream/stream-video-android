@@ -25,6 +25,7 @@ import android.media.AudioManager
 import android.os.Build
 import androidx.core.content.getSystemService
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.Call2
 import io.getstream.video.android.core.StreamVideoImpl
 import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.call.connection.StreamPeerConnection
@@ -68,21 +69,16 @@ import io.getstream.video.android.core.utils.buildAudioConstraints
 import io.getstream.video.android.core.utils.buildConnectionConfiguration
 import io.getstream.video.android.core.utils.buildMediaConstraints
 import io.getstream.video.android.core.utils.buildRemoteIceServers
-import io.getstream.video.android.core.utils.fetchResult
 import io.getstream.video.android.core.utils.onError
 import io.getstream.video.android.core.utils.onSuccessSuspend
 import io.getstream.video.android.core.utils.stringify
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -101,6 +97,7 @@ import org.webrtc.SessionDescription
 import org.webrtc.SurfaceTextureHelper
 import org.webrtc.VideoCapturer
 import org.webrtc.VideoTrack
+import retrofit2.HttpException
 import stream.video.sfu.event.JoinRequest
 import stream.video.sfu.event.JoinResponse
 import stream.video.sfu.models.CallState
@@ -125,10 +122,23 @@ import stream.video.sfu.signal.UpdateSubscriptionsResponse
 import kotlin.math.absoluteValue
 import kotlin.random.Random
 
+/**
+ * Alright, what does this do?
+ *
+ * - Holds the subscriber and publisher peer connection
+ * - Connects to the SFU
+ *
+ * - Makes API calls to the SFU
+ * - Camera & Rendering helpers
+ *
+ *
+ */
 internal class CallClientImpl(
     private val context: Context,
     private val client: StreamVideoImpl,
+    private val scope: CoroutineScope,
     private val callGuid: StreamCallGuid,
+    private val call2: Call2,
     private inline val getCurrentUserId: () -> String,
     private inline val getSfuToken: () -> SfuToken,
     private val signalService: SignalServerService,
@@ -140,24 +150,38 @@ internal class CallClientImpl(
 
     private var connectionState: ConnectionState = ConnectionState.DISCONNECTED
     private var sessionId: String = ""
+
+    // ensure we parse errors and run on the right coroutineContext
+    internal suspend fun <T : Any> wrapAPICall(apiCall: suspend () -> T): Result<T> {
+        return withContext(scope.coroutineContext) {
+            try {
+                Success(apiCall())
+            } catch (e: HttpException) {
+                parseError(e)
+            }
+        }
+    }
     private var call: Call? = null
 
-    // TODO: Wrap this properly
+    suspend fun parseError(e: Throwable): Failure {
+        return Failure(VideoError("CallClientImpl error needs to be handled"))
+    }
 
     suspend fun sendAnswer(request: SendAnswerRequest): Result<SendAnswerResponse> =
-        fetchResult { signalService.sendAnswer(request) }
+        wrapAPICall { signalService.sendAnswer(request)
+    }
 
     suspend fun sendIceCandidate(request: ICETrickle): Result<ICETrickleResponse> =
-        fetchResult { signalService.iceTrickle(request) }
+        wrapAPICall { signalService.iceTrickle(request) }
 
     suspend fun setPublisher(request: SetPublisherRequest): Result<SetPublisherResponse> =
-        fetchResult { signalService.setPublisher(request) }
+        wrapAPICall { signalService.setPublisher(request) }
 
     suspend fun updateSubscriptions(request: UpdateSubscriptionsRequest): Result<UpdateSubscriptionsResponse> =
-        fetchResult { signalService.updateSubscriptions(request) }
+        wrapAPICall { signalService.updateSubscriptions(request) }
 
     suspend fun updateMuteState(muteStateRequest: UpdateMuteStatesRequest): Result<UpdateMuteStatesResponse> =
-        fetchResult { signalService.updateMuteStates(muteStateRequest) }
+        wrapAPICall { signalService.updateMuteStates(muteStateRequest) }
 
     /**
      * State that indicates whether the camera is capturing and sending video or not.
@@ -178,8 +202,7 @@ internal class CallClientImpl(
     override val isSpeakerPhoneEnabled: StateFlow<Boolean> = _isSpeakerPhoneEnabled
 
     private val supervisorJob = SupervisorJob()
-    private val coroutineScope =
-        CoroutineScope(io.getstream.video.android.core.dispatchers.DispatcherProvider.IO + supervisorJob)
+    private val coroutineScope = CoroutineScope(scope.coroutineContext + supervisorJob)
 
     /**
      * Connection and WebRTC.

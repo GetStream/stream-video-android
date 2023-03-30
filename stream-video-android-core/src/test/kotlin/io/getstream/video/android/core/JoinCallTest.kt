@@ -16,4 +16,31 @@
 
 package io.getstream.video.android.core
 
-class JoinCallTest
+import com.google.common.truth.Truth.assertThat
+import io.getstream.video.android.core.events.*
+import io.getstream.video.android.core.model.*
+import kotlinx.coroutines.test.runTest
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.openapitools.client.models.OwnCapability
+import org.robolectric.RobolectricTestRunner
+import stream.video.sfu.event.ConnectionQualityInfo
+import stream.video.sfu.models.ConnectionQuality
+import stream.video.sfu.models.Participant
+import java.util.*
+
+@RunWith(RobolectricTestRunner::class)
+class JoinCallTest : IntegrationTestBase() {
+
+    /**
+     *
+     */
+    @Test
+    fun `test joining a call`() = runTest {
+        val call = client.call("default", randomUUID())
+
+        call.join()
+
+    }
+
+}

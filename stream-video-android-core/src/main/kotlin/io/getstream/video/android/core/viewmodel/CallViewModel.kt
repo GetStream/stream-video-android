@@ -396,14 +396,14 @@ public class CallViewModel(
         }
         logger.d { "[acceptCall] state: $state" }
         viewModelScope.launch {
-            streamVideo.acceptCall(state.callGuid.type, state.callGuid.id)
-                .onSuccess {
-                    logger.v { "[acceptCall] completed: $it" }
-                }
-                .onError {
-                    logger.e { "[acceptCall] failed: $it" }
-                    rejectCall()
-                }
+//            streamVideo.acceptCall(state.callGuid.type, state.callGuid.id)
+//                .onSuccess {
+//                    logger.v { "[acceptCall] completed: $it" }
+//                }
+//                .onError {
+//                    logger.e { "[acceptCall] failed: $it" }
+//                    rejectCall()
+//                }
         }
     }
 

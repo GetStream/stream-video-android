@@ -21,7 +21,7 @@ import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.ConnectionQualityChangeEvent
 import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
 import io.getstream.video.android.core.events.ErrorEvent
-import io.getstream.video.android.core.events.HealthCheckResponseEvent
+import io.getstream.video.android.core.events.SFUHealthCheckEvent
 import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.ParticipantJoinedEvent
@@ -79,7 +79,7 @@ public object RTCEventMapper {
                 ParticipantLeftEvent(participant!!, call_cid)
             }
             event.dominant_speaker_changed != null -> DominantSpeakerChangedEvent(event.dominant_speaker_changed.user_id)
-            event.health_check_response != null -> HealthCheckResponseEvent
+            event.health_check_response != null -> SFUHealthCheckEvent
             event.join_response != null -> with(event.join_response) {
                 JoinCallResponseEvent(call_state!!)
             }

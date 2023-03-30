@@ -24,7 +24,7 @@ import io.getstream.video.android.core.events.CallEndedEvent
 import io.getstream.video.android.core.events.CallRejectedEvent
 import io.getstream.video.android.core.events.CallUpdatedEvent
 import io.getstream.video.android.core.events.CustomEvent
-import io.getstream.video.android.core.events.HealthCheckEvent
+import io.getstream.video.android.core.events.CoordinatorHealthCheckEvent
 import io.getstream.video.android.core.events.PermissionRequestEvent
 import io.getstream.video.android.core.events.RecordingStartedEvent
 import io.getstream.video.android.core.events.RecordingStoppedEvent
@@ -82,7 +82,7 @@ internal object EventMapper {
             val data = Json.decodeFromString<JsonObject>(text)
             val connectionId = data["connection_id"]?.jsonPrimitive?.content ?: ""
 
-            HealthCheckEvent(clientId = connectionId)
+            CoordinatorHealthCheckEvent(clientId = connectionId)
         }
 
         CALL_CREATED -> {

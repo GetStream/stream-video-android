@@ -24,7 +24,7 @@ import io.getstream.video.android.core.errors.DisconnectCause
 import io.getstream.video.android.core.errors.VideoError
 import io.getstream.video.android.core.errors.VideoNetworkError
 import io.getstream.video.android.core.events.ConnectedEvent
-import io.getstream.video.android.core.events.HealthCheckResponseEvent
+import io.getstream.video.android.core.events.SFUHealthCheckEvent
 import io.getstream.video.android.core.events.SfuDataEvent
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.socket.internal.EventsParser
@@ -185,7 +185,7 @@ internal class SfuSocketImpl(
     override fun onEvent(event: SfuDataEvent) {
         healthMonitor.ack()
         callListeners { listener ->
-            if (event !is HealthCheckResponseEvent) {
+            if (event !is SFUHealthCheckEvent) {
                 logger.d { "[onEvent] Sfu Event: $event" }
                 listener.onEvent(event)
             }

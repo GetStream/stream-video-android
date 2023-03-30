@@ -86,24 +86,7 @@ import kotlinx.serialization.json.Json
 import org.openapitools.client.apis.DefaultApi
 import org.openapitools.client.apis.EventsApi
 import org.openapitools.client.apis.VideoCallsApi
-import org.openapitools.client.models.BlockUserRequest
-import org.openapitools.client.models.CallRequest
-import org.openapitools.client.models.CallSettingsRequest
-import org.openapitools.client.models.GetCallEdgeServerRequest
-import org.openapitools.client.models.GetCallEdgeServerResponse
-import org.openapitools.client.models.GetOrCreateCallRequest
-import org.openapitools.client.models.GoLiveResponse
-import org.openapitools.client.models.JoinCallRequest
-import org.openapitools.client.models.ListRecordingsResponse
-import org.openapitools.client.models.MemberRequest
-import org.openapitools.client.models.RequestPermissionRequest
-import org.openapitools.client.models.SendEventRequest
-import org.openapitools.client.models.SendEventResponse
-import org.openapitools.client.models.SendReactionResponse
-import org.openapitools.client.models.StopLiveResponse
-import org.openapitools.client.models.UnblockUserRequest
-import org.openapitools.client.models.UpdateCallRequest
-import org.openapitools.client.models.UpdateCallResponse
+import org.openapitools.client.models.*
 import retrofit2.HttpException
 import stream.video.coordinator.client_v1_rpc.CreateDeviceRequest
 import stream.video.coordinator.client_v1_rpc.DeleteDeviceRequest
@@ -358,8 +341,6 @@ internal class StreamVideoImpl(
         // update state for the client
         state.handleEvent(event)
 
-        println("fireEvent call state yolo ${event.callCid} in ${calls.keys}")
-
         // update state for the calls. calls handle updating participants and members
         val selectedCid = cid.ifEmpty { event.callCid }
         if (selectedCid.isNotEmpty()) {
@@ -536,7 +517,7 @@ internal class StreamVideoImpl(
     /**
      * @see CallCoordinatorClient.selectEdgeServer for details.
      */
-    private suspend fun selectEdgeServer(
+    public override suspend fun selectEdgeServer(
         type: String,
         id: String,
         request: GetCallEdgeServerRequest
@@ -549,12 +530,12 @@ internal class StreamVideoImpl(
             )
         }
     }
+    override suspend fun joinCall(type: String, id: String): Result<JoinCallResponse> {
+        val joinCallRequest = JoinCallRequest()
+        return wrapAPICall { videoCallApi.joinCallTypeId0(type, id, joinCallRequest, socket.getConnectionId()) }
+    }
 
-    // caller/callee: CREATE/JOIN meeting or ACCEPT call with no participants or ringing
-    /**
-     * @see StreamVideo.joinCall
-     */
-    override suspend fun joinCall(
+    suspend fun joinCallOld(
         type: String,
         id: String,
         participantIds: List<String>,
@@ -870,6 +851,7 @@ internal class StreamVideoImpl(
         callGuid: StreamCallGuid,
         signalUrl: String,
         sfuToken: SfuToken,
+        call2: Call2,
         iceServers: List<IceServer>
     ): CallClient {
         logger.i { "[createCallClient] signalUrl: $signalUrl, sfuToken: $sfuToken, iceServers: $iceServers" }
@@ -880,6 +862,7 @@ internal class StreamVideoImpl(
             preferences = preferences,
             networkStateProvider = networkStateProvider,
             signalUrl = signalUrl,
+            call=call2,
             iceServers = iceServers,
             callGuid = callGuid
         ).apply {
@@ -903,26 +886,31 @@ internal class StreamVideoImpl(
         callClientHolder.first { it != null } ?: error("callClient must not be null")
     }
 
+    override suspend fun acceptCall(type: String, id: String) {
+        TODO("Not yet implemented")
+    }
+
     /**
      * @see StreamVideo.acceptCall
      */
-    override suspend fun acceptCall(type: String, id: String): Result<JoinedCall> =
-        withContext(scope.coroutineContext) {
-            try {
-
-                sendEvent(
-                    type, id,
-                    eventType = CallEventType.ACCEPTED
-                ).flatMap {
-                    joinCall(type, id)
-                }.also {
-                    logger.v { "[acceptCall] result: $it" }
-                }
-            } catch (e: Throwable) {
-                logger.e { "[acceptCall] failed: $e" }
-                Failure(VideoError(e.message, e))
-            }
-        }
+//    override suspend fun acceptCall(type: String, id: String): Result<JoinedCall> =
+//        withContext(scope.coroutineContext) {
+//            Result<JoinedCall>(JoinedCall())
+////            try {
+////
+////                sendEvent(
+////                    type, id,
+////                    eventType = CallEventType.ACCEPTED
+////                ).flatMap {
+////                    joinCall(type, id)
+////                }.also {
+////                    logger.v { "[acceptCall] result: $it" }
+////                }
+////            } catch (e: Throwable) {
+////                logger.e { "[acceptCall] failed: $e" }
+////                Failure(VideoError(e.message, e))
+////            }
+//        }
 
     /**
      * @see StreamVideo.rejectCall

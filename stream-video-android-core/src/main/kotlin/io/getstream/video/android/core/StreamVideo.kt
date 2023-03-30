@@ -38,12 +38,7 @@ import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.socket.SocketListener
 import io.getstream.video.android.core.utils.Result
-import org.openapitools.client.models.GoLiveResponse
-import org.openapitools.client.models.ListRecordingsResponse
-import org.openapitools.client.models.SendEventResponse
-import org.openapitools.client.models.SendReactionResponse
-import org.openapitools.client.models.StopLiveResponse
-import org.openapitools.client.models.UpdateCallResponse
+import org.openapitools.client.models.*
 
 /**
  * The main interface to control the Video calls. [StreamVideoImpl] implements this interface.
@@ -135,10 +130,8 @@ public interface StreamVideo {
      */
     public suspend fun joinCall(
         type: StreamCallType,
-        id: StreamCallId,
-        participantIds: List<String> = emptyList(),
-        ring: Boolean = false
-    ): Result<JoinedCall>
+        id: StreamCallId
+    ): Result<JoinCallResponse>
 
     /**
      * Authenticates the user to join a given Call using the [CallMetadata].
@@ -149,6 +142,12 @@ public interface StreamVideo {
      * connect.
      */
     public suspend fun joinCall(call: CallMetadata): Result<JoinedCall>
+
+    public suspend fun selectEdgeServer(
+        type: String,
+        id: String,
+        request: GetCallEdgeServerRequest
+    ): Result<GetCallEdgeServerResponse>
 
     /**
      * Sends invite to people for an existing call.
@@ -417,7 +416,7 @@ public interface StreamVideo {
     /**
      * Accepts incoming call.
      */
-    public suspend fun acceptCall(type: String, id: String): Result<JoinedCall>
+    public suspend fun acceptCall(type: String, id: String)
 
     /**
      * Rejects incoming call.
