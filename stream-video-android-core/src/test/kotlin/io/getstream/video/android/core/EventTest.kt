@@ -68,28 +68,53 @@ class EventTest : IntegrationTestBase() {
     }
 
     @Test
+    fun `Accepting & rejecting a call`() = runTest {
+        val call = client.call("default", randomUUID())
+        val event = CallAcceptedEvent(callCid=call.cid, sentByUserId="123")
+        clientImpl.fireEvent(event)
+
+        val event = CallRejectedEvent(callCid=call.cid, sentByUserId="123")
+        clientImpl.fireEvent(event)
+
+        // call.state -> Member and Participant should have the accepted field updated
+    }
+
+
+
+
+    @Test
     fun `Blocking a user event`() = runTest {
 
     }
 
-    @Test
-    fun `Accepting a call`() = runTest {
 
-    }
 
     @Test
-    fun `Cancelling a call`() = runTest {
+    fun `Call updates`() = runTest {
+        val call = client.call("default", randomUUID())
+        val event = CallUpdatedEvent(callCid=call.cid)
+        clientImpl.fireEvent(event)
 
+        // ensure we update call data and capabilities
     }
 
     @Test
     fun `Creating a call`() = runTest {
+        val call = client.call("default", randomUUID())
+        val event = CallCreatedEvent(callCid=call.cid, true, users= emptyMap())
+        clientImpl.fireEvent(event)
 
+        // if the call is ringing it should be added to the client.state.ringingCalls
     }
-
     @Test
-    fun `Call ended`() = runTest {
+    fun `Call Ended`() = runTest {
+        val call = client.call("default", randomUUID())
+        val event = CallEndedEvent(callCid=call.cid, endedByUser=testData.users["thierry"])
+        clientImpl.fireEvent(event)
 
+        // TODO: server. you want to know when the call ended and by who.
+        // call.state -> endedAt should be set
+        // call.state.status -> ended
     }
 
     @Test
@@ -98,13 +123,10 @@ class EventTest : IntegrationTestBase() {
         clientImpl.fireEvent(myEvent)
 //        when(e) {
 //            is BlockedUserEvent -> TODO()
-//            is CallAcceptedEvent -> TODO()
 //            is CallCancelledEvent -> TODO()
-//            is CallCreatedEvent -> TODO()
 //            is CallEndedEvent -> TODO()
 //            is CallMembersDeletedEvent -> TODO()
 //            is CallMembersUpdatedEvent -> TODO()
-//            is CallRejectedEvent -> TODO()
 //            is CallUpdatedEvent -> TODO()
 //            is ConnectedEvent -> TODO()
 //            is CustomEvent -> TODO()

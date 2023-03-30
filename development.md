@@ -33,6 +33,8 @@ BuildConfig.CORE_TEST_LOCAL
 
 ## OpenAPI build
 
+* Protocol is visible here: https://getstream.github.io/protocol/
+* 
 
 ## Writing integration tests
 
