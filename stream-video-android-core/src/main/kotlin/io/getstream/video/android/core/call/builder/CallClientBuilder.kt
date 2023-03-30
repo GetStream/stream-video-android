@@ -20,7 +20,7 @@ import android.content.Context
 import io.getstream.video.android.core.Call2
 import io.getstream.video.android.core.StreamVideoImpl
 import io.getstream.video.android.core.call.CallClient
-import io.getstream.video.android.core.call.CallClientImpl
+import io.getstream.video.android.core.call.ActiveSFUSession
 import io.getstream.video.android.core.call.signal.socket.SfuSocketFactory
 import io.getstream.video.android.core.call.signal.socket.SfuSocketImpl
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
@@ -102,7 +102,7 @@ internal class CallClientBuilder(
 
         val socketFactory = SfuSocketFactory(httpModule.okHttpClient)
 
-        return CallClientImpl(
+        return ActiveSFUSession(
             context = context,
             client = client,
             scope=CoroutineScope(DispatcherProvider.IO),

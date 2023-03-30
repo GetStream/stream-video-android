@@ -16,6 +16,19 @@
 
 package io.getstream.video.android.core
 
+import android.content.Context
+import android.hardware.camera2.CameraManager
+import androidx.core.content.getSystemService
+import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.api.SignalServerService
+import io.getstream.video.android.core.call.ActiveSFUSession
+import io.getstream.video.android.core.call.connection.StreamPeerConnection
+import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
+import io.getstream.video.android.core.call.signal.socket.SfuSocket
+import io.getstream.video.android.core.call.signal.socket.SfuSocketListener
+import io.getstream.video.android.core.call.state.ConnectionState
+import io.getstream.video.android.core.dispatchers.DispatcherProvider
+import io.getstream.video.android.core.errors.VideoError
 import io.getstream.video.android.core.events.AudioLevelChangedEvent
 import io.getstream.video.android.core.events.BlockedUserEvent
 import io.getstream.video.android.core.events.CallAcceptedEvent
@@ -53,14 +66,24 @@ import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.events.VideoQualityChangedEvent
 import io.getstream.video.android.core.model.*
 import io.getstream.video.android.core.utils.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.withContext
 import org.openapitools.client.models.GetCallEdgeServerRequest
 import org.openapitools.client.models.GoLiveResponse
 import org.openapitools.client.models.OwnCapability
 import org.openapitools.client.models.UpdateCallResponse
+import org.webrtc.*
+import org.webrtc.VideoTrack
+import retrofit2.HttpException
 import stream.video.sfu.models.ConnectionQuality
+import stream.video.sfu.models.ICETrickle
+import stream.video.sfu.signal.*
 import java.util.*
+import kotlin.coroutines.CoroutineContext
 
 public data class SFUConnection(
     internal val callUrl: String,
@@ -68,16 +91,10 @@ public data class SFUConnection(
     internal val iceServers: List<IceServer>
 )
 
-public open class ActiveSFUSession(
-    client: StreamVideo,
-    call2: Call2,
-    url: String,
-    token: String,
-    iceServers: List<IceServer>,
-    latencyResults: Map<String, List<Float>>
-) {
+/**
+ * TODO: Line 297. Where do we get the call settings from?
+ */
 
-}
 
 
 public open class ParticipantState(user: User) {
@@ -125,6 +142,10 @@ public open class ParticipantState(user: User) {
 }
 
 public open class LocalParticipantState(user: User) : ParticipantState(user) {
+
+    private var localVideoTrack: VideoTrack? = null
+    private var localAudioTrack: AudioTrack? = null
+
     internal val _ownCapabilities: MutableStateFlow<List<OwnCapability>> = MutableStateFlow(
         emptyList()
     )
@@ -351,6 +372,8 @@ public class Call2(
         }
 
         // step 2. measure latency
+        // TODO: setup the initial call state based on this
+        println(result.data.call.settings)
         // TODO: this should run in parallel and be configurable
         val latencyResults = result.data.edges.associate {
             it.name to getLatencyMeasurements(it.latencyUrl)

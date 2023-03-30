@@ -133,7 +133,7 @@ import kotlin.random.Random
  *
  *
  */
-internal class CallClientImpl(
+internal class ActiveSFUSession(
     private val context: Context,
     private val client: StreamVideoImpl,
     private val scope: CoroutineScope,

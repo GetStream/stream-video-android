@@ -21,7 +21,7 @@ import io.getstream.video.android.core.events.ConnectedEvent
 import io.getstream.video.android.core.events.SfuDataEvent
 import stream.video.sfu.event.JoinRequest
 
-internal interface SfuSocket {
+public interface SfuSocket {
 
     /**
      * Initializes the socket connection.
