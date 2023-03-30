@@ -45,5 +45,20 @@ It offers convenient helpers for test data, client and clientImpl access, and te
 
 ## Architecture
 
-* StreamVideoImpl makes the API calls to the coordinator
-* Call object maintains state and is updated based on events
+### API calls
+
+* StreamVideoImpl makes the API calls to the coordinator. Internally there are 4 retrofit APIs it calls
+* CallClient makes the API calls to the SFU on the edge
+
+### State management
+
+* All events are routed via the StreamVideoImpl.subcribe method. Both the SFU & Coordinator events
+* Based on these events the following state is updated: client.state, call.state, member and participant state
+* client.fireEvent is used for firing local events and testing
+* client.handleEvent updates client state, call state and after that calls any listeners
+
+### WebRTC layer
+
+
+### Compose
+
