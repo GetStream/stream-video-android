@@ -55,13 +55,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import io.getstream.log.taggedLogger
+import io.getstream.result.extractCause
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.Avatar
 import io.getstream.video.android.compose.ui.components.avatar.InitialsAvatar
 import io.getstream.video.android.core.user.UserPreferencesManager
 import io.getstream.video.android.core.utils.initials
-import io.getstream.video.android.core.utils.onError
-import io.getstream.video.android.core.utils.onSuccess
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import kotlin.random.Random
@@ -175,7 +174,7 @@ class HomeActivity : AppCompatActivity() {
             result.onError {
                 logger.e { "[joinCall] failed: $it" }
 
-                val throwable = it.cause
+                val throwable = it.extractCause()
                 if (throwable is HttpException && throwable.code() == 401) {
                     Toast.makeText(
                         this@HomeActivity,

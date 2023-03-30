@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core
 
+import io.getstream.result.Result
 import io.getstream.video.android.core.call.CallClient
 import io.getstream.video.android.core.model.Call
 import io.getstream.video.android.core.model.CallEventType
@@ -39,7 +40,6 @@ import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.state.StreamCallState
 import io.getstream.video.android.core.socket.SocketListener
-import io.getstream.video.android.core.utils.Result
 import kotlinx.coroutines.flow.StateFlow
 
 /**

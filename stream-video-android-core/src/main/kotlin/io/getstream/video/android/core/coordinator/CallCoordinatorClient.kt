@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.coordinator
 
+import io.getstream.result.Result
 import io.getstream.video.android.core.model.CallInfo
 import io.getstream.video.android.core.model.CallRecordingData
 import io.getstream.video.android.core.model.CallUser
@@ -24,7 +25,6 @@ import io.getstream.video.android.core.model.QueriedCalls
 import io.getstream.video.android.core.model.ReactionData
 import io.getstream.video.android.core.model.StreamCallCid
 import io.getstream.video.android.core.model.User
-import io.getstream.video.android.core.utils.Result
 import org.openapitools.client.models.BlockUserRequest
 import org.openapitools.client.models.GetCallEdgeServerRequest
 import org.openapitools.client.models.GetCallEdgeServerResponse

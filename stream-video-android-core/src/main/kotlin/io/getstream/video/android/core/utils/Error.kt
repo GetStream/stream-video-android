@@ -16,11 +16,16 @@
 
 package io.getstream.video.android.core.utils
 
-import io.getstream.video.android.core.errors.VideoError
+import io.getstream.result.Result
+import io.getstream.result.StreamError
 
 @JvmSynthetic
 internal inline fun <T : Any> fetchResult(call: () -> T): Result<T> = try {
-    Success(call.invoke())
+    Result.Success(call.invoke())
 } catch (error: Throwable) {
-    Failure(VideoError(error.message, error))
+    Result.Failure(
+        StreamError.ThrowableError(
+            error.message ?: "Sfu fetch error", error
+        )
+    )
 }

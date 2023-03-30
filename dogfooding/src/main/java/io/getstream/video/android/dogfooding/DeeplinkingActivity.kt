@@ -25,8 +25,6 @@ import androidx.lifecycle.lifecycleScope
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.user.UserPreferencesManager
-import io.getstream.video.android.core.utils.onError
-import io.getstream.video.android.core.utils.onSuccess
 import kotlinx.coroutines.launch
 
 class DeeplinkingActivity : AppCompatActivity() {

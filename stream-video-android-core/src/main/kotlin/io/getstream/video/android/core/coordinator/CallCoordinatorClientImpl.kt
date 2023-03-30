@@ -16,8 +16,11 @@
 
 package io.getstream.video.android.core.coordinator
 
+import io.getstream.result.Result
+import io.getstream.result.Result.Failure
+import io.getstream.result.Result.Success
+import io.getstream.result.StreamError
 import io.getstream.video.android.core.api.ClientRPCService
-import io.getstream.video.android.core.errors.VideoError
 import io.getstream.video.android.core.model.CallInfo
 import io.getstream.video.android.core.model.CallRecordingData
 import io.getstream.video.android.core.model.CallUser
@@ -27,9 +30,6 @@ import io.getstream.video.android.core.model.ReactionData
 import io.getstream.video.android.core.model.StreamCallCid
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.toCallInfo
-import io.getstream.video.android.core.utils.Failure
-import io.getstream.video.android.core.utils.Result
-import io.getstream.video.android.core.utils.Success
 import io.getstream.video.android.core.utils.toCallUser
 import io.getstream.video.android.core.utils.toEdge
 import io.getstream.video.android.core.utils.toQueriedCalls
@@ -78,7 +78,11 @@ internal class CallCoordinatorClientImpl(
     ): Result<CreateDeviceResponse> = try {
         Success(callCoordinatorService.createDevice(createDeviceRequest))
     } catch (error: Throwable) {
-        Failure(VideoError(error.message, error))
+        Failure(
+            StreamError.ThrowableError(
+                error.message ?: "Could not create a device.", error
+            )
+        )
     }
 
     /**
@@ -89,7 +93,11 @@ internal class CallCoordinatorClientImpl(
             callCoordinatorService.deleteDevice(deleteDeviceRequest)
             Success(Unit)
         } catch (error: Throwable) {
-            Failure(VideoError(error.message, error))
+            Failure(
+                StreamError.ThrowableError(
+                    error.message ?: "Could not delete a device.", error
+                )
+            )
         }
 
     /**
@@ -109,7 +117,11 @@ internal class CallCoordinatorClientImpl(
 
             Success(response)
         } catch (error: Throwable) {
-            Failure(VideoError(error.message, error))
+            Failure(
+                StreamError.ThrowableError(
+                    error.message ?: "Could not create a video call.", error
+                )
+            )
         }
 
     /**
@@ -130,7 +142,11 @@ internal class CallCoordinatorClientImpl(
 
         Success(response)
     } catch (error: Throwable) {
-        Failure(VideoError(error.message, error))
+        Failure(
+            StreamError.ThrowableError(
+                error.message ?: "Could not join a call.", error
+            )
+        )
     }
 
     /**
@@ -150,7 +166,11 @@ internal class CallCoordinatorClientImpl(
 
             Success(response)
         } catch (error: Throwable) {
-            Failure(VideoError(error.message, error))
+            Failure(
+                StreamError.ThrowableError(
+                    error.message ?: "Could not select am edge server.", error
+                )
+            )
         }
 
     /**
@@ -165,7 +185,11 @@ internal class CallCoordinatorClientImpl(
 
         Success(true)
     } catch (error: Throwable) {
-        Failure(VideoError(error.message, error))
+        Failure(
+            StreamError.ThrowableError(
+                error.message ?: "Could not send an user event.", error
+            )
+        )
     }
 
     /**
@@ -185,7 +209,11 @@ internal class CallCoordinatorClientImpl(
 
         Success(Unit)
     } catch (error: Throwable) {
-        Failure(VideoError(error.message, error))
+        Failure(
+            StreamError.ThrowableError(
+                error.message ?: "Could not invite users.", error
+            )
+        )
     }
 
     /**
@@ -196,7 +224,11 @@ internal class CallCoordinatorClientImpl(
 
         Success(users.map { it.toCallUser() })
     } catch (error: Throwable) {
-        Failure(VideoError(error.message, error))
+        Failure(
+            StreamError.ThrowableError(
+                error.message ?: "Could not query members.", error
+            )
+        )
     }
 
     /**
@@ -211,7 +243,11 @@ internal class CallCoordinatorClientImpl(
 
         Success(Unit)
     } catch (error: Throwable) {
-        Failure(VideoError(error.message, error))
+        Failure(
+            StreamError.ThrowableError(
+                error.message ?: "Could not block a user.", error
+            )
+        )
     }
 
     /**
@@ -226,7 +262,11 @@ internal class CallCoordinatorClientImpl(
 
         Success(Unit)
     } catch (error: Throwable) {
-        Failure(VideoError(error.message, error))
+        Failure(
+            StreamError.ThrowableError(
+                error.message ?: "Could not unblock a user.", error
+            )
+        )
     }
 
     /**
@@ -237,7 +277,11 @@ internal class CallCoordinatorClientImpl(
 
         Success(Unit)
     } catch (error: Throwable) {
-        Failure(VideoError(error.message, error))
+        Failure(
+            StreamError.ThrowableError(
+                error.message ?: "Could not end up a call.", error
+            )
+        )
     }
 
     /**
@@ -248,7 +292,11 @@ internal class CallCoordinatorClientImpl(
 
         Success(result.call.toCallInfo())
     } catch (error: Throwable) {
-        Failure(VideoError(error.message, error))
+        Failure(
+            StreamError.ThrowableError(
+                error.message ?: "Could not go into a live.", error
+            )
+        )
     }
 
     /**
@@ -259,7 +307,11 @@ internal class CallCoordinatorClientImpl(
 
         Success(result.call.toCallInfo())
     } catch (error: Throwable) {
-        Failure(VideoError(error.message, error))
+        Failure(
+            StreamError.ThrowableError(
+                error.message ?: "Could not stop a live.", error
+            )
+        )
     }
 
     /**
@@ -274,7 +326,11 @@ internal class CallCoordinatorClientImpl(
 
         Success(Unit)
     } catch (error: Throwable) {
-        Failure(VideoError(error.message, error))
+        Failure(
+            StreamError.ThrowableError(
+                error.message ?: "Could not mute users.", error
+            )
+        )
     }
 
     /**
@@ -289,7 +345,11 @@ internal class CallCoordinatorClientImpl(
 
         Success(result.call.toCallInfo())
     } catch (error: Throwable) {
-        Failure(VideoError(error.message, error))
+        Failure(
+            StreamError.ThrowableError(
+                error.message ?: "Could not update a call.", error
+            )
+        )
     }
 
     /**
@@ -301,7 +361,11 @@ internal class CallCoordinatorClientImpl(
 
             Success(result.toQueriedCalls())
         } catch (error: Throwable) {
-            Failure(VideoError(error.message, error))
+            Failure(
+                StreamError.ThrowableError(
+                    error.message ?: "Could not query calls.", error
+                )
+            )
         }
 
     /**
@@ -316,7 +380,11 @@ internal class CallCoordinatorClientImpl(
 
         Success(Unit)
     } catch (error: Throwable) {
-        Failure(VideoError(error.message, error))
+        Failure(
+            StreamError.ThrowableError(
+                error.message ?: "Could not request a permission.", error
+            )
+        )
     }
 
     /**
@@ -327,7 +395,11 @@ internal class CallCoordinatorClientImpl(
 
         Success(Unit)
     } catch (error: Throwable) {
-        Failure(VideoError(error.message, error))
+        Failure(
+            StreamError.ThrowableError(
+                error.message ?: "Could not start a broadcasting.", error
+            )
+        )
     }
 
     /**
@@ -338,7 +410,11 @@ internal class CallCoordinatorClientImpl(
 
         Success(Unit)
     } catch (error: Throwable) {
-        Failure(VideoError(error.message, error))
+        Failure(
+            StreamError.ThrowableError(
+                error.message ?: "Could not stop a broadcasting.", error
+            )
+        )
     }
 
     /**
@@ -349,7 +425,11 @@ internal class CallCoordinatorClientImpl(
 
         Success(Unit)
     } catch (error: Throwable) {
-        Failure(VideoError(error.message, error))
+        Failure(
+            StreamError.ThrowableError(
+                error.message ?: "Could not start a recording.", error
+            )
+        )
     }
 
     /**
@@ -360,7 +440,11 @@ internal class CallCoordinatorClientImpl(
 
         Success(Unit)
     } catch (error: Throwable) {
-        Failure(VideoError(error.message, error))
+        Failure(
+            StreamError.ThrowableError(
+                error.message ?: "Could not stop a recording.", error
+            )
+        )
     }
 
     /**
@@ -375,7 +459,11 @@ internal class CallCoordinatorClientImpl(
 
         Success(Unit)
     } catch (error: Throwable) {
-        Failure(VideoError(error.message, error))
+        Failure(
+            StreamError.ThrowableError(
+                error.message ?: "Could not update a user permission.", error
+            )
+        )
     }
 
     /**
@@ -390,7 +478,11 @@ internal class CallCoordinatorClientImpl(
 
         Success(result.recordings.map { it.toRecording() })
     } catch (error: Throwable) {
-        Failure(VideoError(error.message, error))
+        Failure(
+            StreamError.ThrowableError(
+                error.message ?: "Could not list recordings.", error
+            )
+        )
     }
 
     /**
@@ -405,7 +497,11 @@ internal class CallCoordinatorClientImpl(
 
         Success(result.reaction.toReaction())
     } catch (error: Throwable) {
-        Failure(VideoError(error.message, error))
+        Failure(
+            StreamError.ThrowableError(
+                error.message ?: "Could not send a video reaction.", error
+            )
+        )
     }
 
     /**
@@ -416,6 +512,10 @@ internal class CallCoordinatorClientImpl(
 
         Success(result.edges.map { it.toEdge() })
     } catch (error: Throwable) {
-        Failure(VideoError(error.message, error))
+        Failure(
+            StreamError.ThrowableError(
+                error.message ?: "Could not get edges.", error
+            )
+        )
     }
 }

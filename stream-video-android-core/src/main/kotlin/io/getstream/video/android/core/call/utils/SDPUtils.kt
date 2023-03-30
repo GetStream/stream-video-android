@@ -16,10 +16,10 @@
 
 package io.getstream.video.android.core.call.utils
 
-import io.getstream.video.android.core.errors.VideoError
-import io.getstream.video.android.core.utils.Failure
-import io.getstream.video.android.core.utils.Result
-import io.getstream.video.android.core.utils.Success
+import io.getstream.result.Result
+import io.getstream.result.Result.Failure
+import io.getstream.result.Result.Success
+import io.getstream.result.StreamError
 import org.webrtc.SdpObserver
 import org.webrtc.SessionDescription
 import kotlin.coroutines.resume
@@ -38,11 +38,15 @@ internal suspend inline fun createValue(
             if (description != null) {
                 it.resume(Success(description))
             } else {
-                Failure(VideoError("SessionDescription is null!"))
+                Failure(StreamError.GenericError("SessionDescription is null!"))
             }
         }
 
-        override fun onCreateFailure(message: String?) = it.resume(Failure(VideoError(message)))
+        override fun onCreateFailure(message: String?) = it.resume(
+            Failure(
+                StreamError.GenericError(message ?: "Couldn't create a SDP message.")
+            )
+        )
 
         /**
          * We ignore set results.
@@ -69,7 +73,11 @@ internal suspend inline fun setValue(
          * Handling of set values.
          */
         override fun onSetSuccess() = it.resume(Success(Unit))
-        override fun onSetFailure(message: String?) = it.resume(Failure(VideoError(message)))
+        override fun onSetFailure(message: String?) = it.resume(
+            Failure(
+                StreamError.GenericError(message ?: "Couldn't create a SDP message.")
+            )
+        )
     }
 
     call(observer)
