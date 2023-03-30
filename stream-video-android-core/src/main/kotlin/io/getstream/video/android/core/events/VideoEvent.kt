@@ -21,6 +21,7 @@ import io.getstream.video.android.core.model.CallInfo
 import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.core.model.StreamCallCid
 import io.getstream.video.android.core.model.User
+import org.openapitools.client.models.OwnCapability
 import java.util.Date
 
 /**
@@ -62,7 +63,7 @@ public data class CallUpdatedEvent(
     override val callCid: String,
     val capabilitiesByRole: Map<String, List<String>>,
     val info: CallInfo,
-    val ownCapabilities: List<String>
+    val ownCapabilities: List<OwnCapability>
 ) : CoordinatorEvent()
 
 /**
@@ -148,7 +149,7 @@ public data class PermissionRequestEvent(
 public data class UpdatedCallPermissionsEvent(
     val cid: StreamCallCid?,
     val type: String,
-    val ownCapabilities: List<String>,
+    val ownCapabilities: List<OwnCapability>,
     val user: User
 ) : CoordinatorEvent()
 

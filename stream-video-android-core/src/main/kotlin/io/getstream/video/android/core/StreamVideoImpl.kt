@@ -93,6 +93,7 @@ import org.openapitools.client.models.GetCallEdgeServerRequest
 import org.openapitools.client.models.GetCallEdgeServerResponse
 import org.openapitools.client.models.GetOrCreateCallRequest
 import org.openapitools.client.models.GoLiveResponse
+import org.openapitools.client.models.JoinCallRequest
 import org.openapitools.client.models.ListRecordingsResponse
 import org.openapitools.client.models.MemberRequest
 import org.openapitools.client.models.RequestPermissionRequest
@@ -458,11 +459,11 @@ internal class StreamVideoImpl(
             logger.d { "[joinCallInternal] call: $call" }
 
             val joinResult = wrapAPICall {
-                videoCallApi.joinCall(
+                videoCallApi.joinCallTypeId0(
                     id = call.id,
                     type = call.type,
                     connectionId = socket.getConnectionId(),
-                    getOrCreateCallRequest = GetOrCreateCallRequest()
+                    joinCallRequest = JoinCallRequest()
                 )
             }
             if (joinResult !is Success) {
