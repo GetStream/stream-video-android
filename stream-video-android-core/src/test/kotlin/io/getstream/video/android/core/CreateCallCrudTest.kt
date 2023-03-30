@@ -18,14 +18,12 @@ package io.getstream.video.android.core
 
 import com.google.common.truth.Truth.assertThat
 import io.getstream.video.android.core.events.CallCreatedEvent
-import io.getstream.video.android.core.model.*
 import io.getstream.video.android.core.utils.onError
 import io.getstream.video.android.core.utils.onSuccess
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import java.util.*
 
 @RunWith(RobolectricTestRunner::class)
 public class CreateCallCrudTest : IntegrationTestBase() {

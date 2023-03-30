@@ -19,7 +19,7 @@ package io.getstream.video.android.core.model
 import kotlinx.serialization.Serializable
 
 @Serializable
-sealed class UserType{
+sealed class UserType {
     /** A user that's authenticated in your system */
     @Serializable
     object Authenticated : UserType()
@@ -36,10 +36,10 @@ public data class User(
     /** ID is required, the rest is optional */
     // TODO: TBD, do we generate the ID client side or not... TBD
     val id: String,
-    val role: String="",
+    val role: String = "",
     val type: UserType = UserType.Authenticated,
-    val name: String="",
-    val imageUrl: String="",
+    val name: String = "",
+    val imageUrl: String = "",
     val teams: List<String> = emptyList(),
     val extraData: Map<String, String> = emptyMap()
 

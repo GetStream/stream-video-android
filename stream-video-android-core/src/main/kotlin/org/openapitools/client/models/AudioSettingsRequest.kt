@@ -27,25 +27,20 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param callCid * @param createdAt * @param ownCapabilities The capabilities of the current user
- * @param type * @param user */
+ * @param accessRequestEnabled
+ * @param opusDtxEnabled
+ * @param redundantCodingEnabled
+ * */
 
-data class UpdatedCallPermissionsEvent(
+data class AudioSettingsRequest(
 
-    @Json(name = "call_cid")
-    val callCid: kotlin.String,
+    @Json(name = "access_request_enabled")
+    val accessRequestEnabled: kotlin.Boolean? = null,
 
-    @Json(name = "created_at")
-    val createdAt: java.time.OffsetDateTime,
+    @Json(name = "opus_dtx_enabled")
+    val opusDtxEnabled: kotlin.Boolean? = null,
 
-    /* The capabilities of the current user */
-    @Json(name = "own_capabilities")
-    val ownCapabilities: kotlin.collections.List<OwnCapability>,
-
-    @Json(name = "type")
-    val type: kotlin.String,
-
-    @Json(name = "user")
-    val user: UserResponse
+    @Json(name = "redundant_coding_enabled")
+    val redundantCodingEnabled: kotlin.Boolean? = null
 
 )

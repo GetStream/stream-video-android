@@ -66,8 +66,6 @@ public interface UserPreferences {
     public fun storeUserToken(userToken: String)
     public fun getUserToken(): String
 
-
-
     public fun storeDevice(device: Device)
 
     public fun getDevices(): List<Device>

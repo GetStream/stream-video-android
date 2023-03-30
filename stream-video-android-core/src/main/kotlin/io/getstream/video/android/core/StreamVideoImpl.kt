@@ -9,7 +9,7 @@
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, eitherVideoEvent express or implied.
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
@@ -23,12 +23,9 @@ import io.getstream.video.android.core.api.ClientRPCService
 import io.getstream.video.android.core.call.CallClient
 import io.getstream.video.android.core.call.builder.CallClientBuilder
 import io.getstream.video.android.core.coordinator.state.UserState
-import io.getstream.video.android.core.engine.StreamCallEngine
-import io.getstream.video.android.core.engine.adapter.CoordinatorSocketListenerAdapter
 import io.getstream.video.android.core.errors.VideoBackendError
 import io.getstream.video.android.core.errors.VideoError
 import io.getstream.video.android.core.events.CallCreatedEvent
-import io.getstream.video.android.core.events.ConnectedEvent
 import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.lifecycle.LifecycleHandler
@@ -45,19 +42,14 @@ import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.QueriedCalls
 import io.getstream.video.android.core.model.QueryCallsData
 import io.getstream.video.android.core.model.QueryMembersData
-import io.getstream.video.android.core.model.ReactionData
 import io.getstream.video.android.core.model.SendReactionData
 import io.getstream.video.android.core.model.SfuToken
 import io.getstream.video.android.core.model.StartedCall
-import io.getstream.video.android.core.model.StreamCallCid
 import io.getstream.video.android.core.model.StreamCallGuid
 import io.getstream.video.android.core.model.StreamCallKind
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.User
-import io.getstream.video.android.core.model.mapper.toMetadata
 import io.getstream.video.android.core.model.mapper.toTypeAndId
-import io.getstream.video.android.core.model.state.DropReason
-import io.getstream.video.android.core.model.state.StreamCallState
 import io.getstream.video.android.core.model.toIceServer
 import io.getstream.video.android.core.model.toInfo
 import io.getstream.video.android.core.model.toRequest
@@ -68,18 +60,50 @@ import io.getstream.video.android.core.socket.internal.SocketState
 import io.getstream.video.android.core.socket.internal.VideoSocketImpl
 import io.getstream.video.android.core.user.UserPreferences
 import io.getstream.video.android.core.user.UserPreferencesManager
-import io.getstream.video.android.core.utils.*
+import io.getstream.video.android.core.utils.Failure
+import io.getstream.video.android.core.utils.INTENT_EXTRA_CALL_CID
+import io.getstream.video.android.core.utils.Result
+import io.getstream.video.android.core.utils.Success
+import io.getstream.video.android.core.utils.flatMap
+import io.getstream.video.android.core.utils.getLatencyMeasurements
+import io.getstream.video.android.core.utils.map
 import io.getstream.video.android.core.utils.toCall
-import kotlinx.coroutines.*
+import io.getstream.video.android.core.utils.toCallUser
+import io.getstream.video.android.core.utils.toEdge
+import io.getstream.video.android.core.utils.toQueriedCalls
+import io.getstream.video.android.core.utils.toRecording
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.openapitools.client.apis.DefaultApi
 import org.openapitools.client.apis.EventsApi
 import org.openapitools.client.apis.VideoCallsApi
-import org.openapitools.client.models.*
+import org.openapitools.client.models.BlockUserRequest
+import org.openapitools.client.models.CallRequest
+import org.openapitools.client.models.CallSettingsRequest
+import org.openapitools.client.models.GetCallEdgeServerRequest
+import org.openapitools.client.models.GetCallEdgeServerResponse
+import org.openapitools.client.models.GetOrCreateCallRequest
+import org.openapitools.client.models.GoLiveResponse
+import org.openapitools.client.models.JoinCallRequest
+import org.openapitools.client.models.ListRecordingsResponse
+import org.openapitools.client.models.MemberRequest
+import org.openapitools.client.models.RequestPermissionRequest
+import org.openapitools.client.models.SendEventRequest
+import org.openapitools.client.models.SendEventResponse
+import org.openapitools.client.models.SendReactionResponse
+import org.openapitools.client.models.StopLiveResponse
+import org.openapitools.client.models.UnblockUserRequest
+import org.openapitools.client.models.UpdateCallRequest
+import org.openapitools.client.models.UpdateCallResponse
 import retrofit2.HttpException
 import stream.video.coordinator.client_v1_rpc.CreateDeviceRequest
 import stream.video.coordinator.client_v1_rpc.DeleteDeviceRequest
@@ -89,20 +113,16 @@ import stream.video.coordinator.push_v1.DeviceInput
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.suspendCoroutine
 
-
-class EventSubscription
-    (
+class EventSubscription(
     public val listener: VideoEventListener<VideoEvent>,
     public val filter: ((VideoEvent) -> Boolean)? = null,
-    )
-    {
-        var isDisposed: Boolean = false
+) {
+    var isDisposed: Boolean = false
 
-        fun dispose() {
-            isDisposed = true
-        }
+    fun dispose() {
+        isDisposed = true
+    }
 }
-
 
 /**
  * @param lifecycle The lifecycle used to observe changes in the process. // TODO - docs
@@ -131,7 +151,6 @@ internal class StreamVideoImpl(
     private var subscriptions = mutableSetOf<EventSubscription>()
     private var calls = mutableMapOf<String, Call2>()
 
-
     // caller: JOIN after accepting incoming call by callee
     /**
      * @see StreamVideo.joinCall
@@ -141,8 +160,8 @@ internal class StreamVideoImpl(
             logger.d { "[joinCallOnly] call: $call" }
             // TODO: engine.onCallJoining(call)
             joinCallInternal(call)
-                //.onSuccess { data -> engine.onCallJoined(data) }
-                //.onError { engine.onCallFailed(it) }
+                // .onSuccess { data -> engine.onCallJoined(data) }
+                // .onError { engine.onCallFailed(it) }
                 .also { logger.v { "[joinCallOnly] result: $it" } }
         }
 
@@ -172,7 +191,7 @@ internal class StreamVideoImpl(
     /**
      * Ensure that every API call runs on the IO dispatcher and has correct error handling
      */
-    internal suspend fun <T: Any> wrapAPICall(apiCall: suspend () -> T): Result<T> {
+    internal suspend fun <T : Any> wrapAPICall(apiCall: suspend () -> T): Result<T> {
         return withContext(scope.coroutineContext) {
             try {
                 Success(apiCall())
@@ -188,7 +207,7 @@ internal class StreamVideoImpl(
     override suspend fun updateCall(
         type: String,
         id: String,
-        custom: Map<String,Any>,
+        custom: Map<String, Any>,
     ): Result<UpdateCallResponse> {
         logger.d { "[updateCall] type: $type, id: $id, participantIds: $custom" }
         return wrapAPICall {
@@ -215,8 +234,6 @@ internal class StreamVideoImpl(
         }
         return Failure(VideoError())
     }
-
-
 
     public override fun subscribeFor(
         vararg eventTypes: Class<out VideoEvent>,
@@ -256,7 +273,7 @@ internal class StreamVideoImpl(
 
     init {
         observeState()
-        //addSocketListener(CoordinatorSocketListenerAdapter(engine))
+        // addSocketListener(CoordinatorSocketListenerAdapter(engine))
         scope.launch(Dispatchers.Main.immediate) {
             lifecycleObserver.observe()
         }
@@ -298,13 +315,11 @@ internal class StreamVideoImpl(
         }
     }
 
-
     private fun storeDevice(device: Device) {
-            logger.d { "[storeDevice] device: device" }
-            val preferences = UserPreferencesManager.initialize(context)
+        logger.d { "[storeDevice] device: device" }
+        val preferences = UserPreferencesManager.initialize(context)
 
-            preferences.storeDevice(device)
-
+        preferences.storeDevice(device)
     }
 
     /**
@@ -334,9 +349,6 @@ internal class StreamVideoImpl(
      * Domain - Coordinator.
      */
 
-
-
-
     /**
      * Internal function that fires the event. It starts by updating client state and call state
      * After that it loops over the subscriptions and calls their listener
@@ -352,7 +364,7 @@ internal class StreamVideoImpl(
         if (event.callCid.isNotEmpty()) {
             calls[event.callCid]?.let {
                 it.state.handleEvent(event)
-            }
+            }nT
         }
 
         // fire event handlers
@@ -371,12 +383,7 @@ internal class StreamVideoImpl(
                 }
             }
         }
-
     }
-
-
-
-
 
     // caller: DIAL and wait answer
     /**
@@ -389,24 +396,26 @@ internal class StreamVideoImpl(
         ring: Boolean
     ): Result<CallMetadata> = withContext(scope.coroutineContext) {
         logger.d { "[getOrCreateCall] type: $type, id: $id, participantIds: $participantIds" }
-        //engine.onCallStarting(type, id, participantIds, ring, forcedNewCall = false)
+        // engine.onCallStarting(type, id, participantIds, ring, forcedNewCall = false)
 
         try {
-            Success(videoCallApi.getOrCreateCall(
-                type = type,
-                id = id,
-                getOrCreateCallRequest = GetOrCreateCallRequest(
-                    data = CallRequest(
-                        members = participantIds.map {
-                            MemberRequest(
-                                userId = it,
-                                role = "admin"
-                            )
-                        },
-                    ),
-                    ring = ring
+            Success(
+                videoCallApi.getOrCreateCall(
+                    type = type,
+                    id = id,
+                    getOrCreateCallRequest = GetOrCreateCallRequest(
+                        data = CallRequest(
+                            members = participantIds.map {
+                                MemberRequest(
+                                    userId = it,
+                                    role = "admin"
+                                )
+                            },
+                        ),
+                        ring = ring
+                    )
                 )
-            ))
+            )
                 .also { logger.v { "[getOrCreateCall] Coordinator result: $it" } }
                 .map { response -> StartedCall(call = response.toCall(StreamCallKind.fromRinging(ring))) }
 //                .onSuccess { engine.onCallStarted(it.call) }
@@ -416,10 +425,7 @@ internal class StreamVideoImpl(
         } catch (e: HttpException) {
             parseError(e)
         }
-
     }
-
-
 
     /**
      * @see StreamVideo.inviteUsers
@@ -427,8 +433,9 @@ internal class StreamVideoImpl(
     override suspend fun inviteUsers(type: String, id: String, users: List<User>): Result<Unit> {
         logger.d { "[inviteUsers] users: $users" }
 
-        return wrapAPICall { callCoordinatorService.upsertCallMembers(
-            UpsertCallMembersRequest(
+        return wrapAPICall {
+            callCoordinatorService.upsertCallMembers(
+                UpsertCallMembersRequest(
                     call_cid = "$type:$id",
                     members = users.map { user ->
                         MemberInput(
@@ -451,12 +458,14 @@ internal class StreamVideoImpl(
         return try {
             logger.d { "[joinCallInternal] call: $call" }
 
-            val joinResult = wrapAPICall { videoCallApi.joinCall(
-                id = call.id,
-                type = call.type,
-                connectionId = socket.getConnectionId(),
-                getOrCreateCallRequest = GetOrCreateCallRequest()
-            ) }
+            val joinResult = wrapAPICall {
+                videoCallApi.joinCallTypeId0(
+                    id = call.id,
+                    type = call.type,
+                    connectionId = socket.getConnectionId(),
+                    joinCallRequest = JoinCallRequest()
+                )
+            }
             if (joinResult !is Success) {
                 logger.e { "[joinCallInternal] failed joinResult: $joinResult" }
                 return joinResult as Failure
@@ -580,7 +589,6 @@ internal class StreamVideoImpl(
             // TODO: FiXME
             JoinedCall(CallMetadata.empty(), "", "", emptyList())
         }
-
     }
 
     // callee: SEND Accepted or Rejected
@@ -597,7 +605,7 @@ internal class StreamVideoImpl(
 
         return wrapAPICall {
             eventsApi.sendEvent(type, id, SendEventRequest(type = eventType.eventType)).also {
-                //engine.onCallEventSent(callCid, eventType)
+                // engine.onCallEventSent(callCid, eventType)
             }
         }
     }
@@ -624,13 +632,13 @@ internal class StreamVideoImpl(
      * @see StreamVideo.queryMembers
      */
     override suspend fun queryMembers(
-        type: String, id: String,
+        type: String,
+        id: String,
         queryMembersData: QueryMembersData
     ): Result<List<CallUser>> {
         logger.d { "[queryMembers] callCid: $type:$id, queryMembersData: $queryMembersData" }
 
-        return wrapAPICall { videoCallApi.queryMembers(queryMembersData.toRequest(id, type)).members.map { it.toCallUser() }}
-
+        return wrapAPICall { videoCallApi.queryMembers(queryMembersData.toRequest(id, type)).members.map { it.toCallUser() } }
     }
 
     /**
@@ -640,17 +648,15 @@ internal class StreamVideoImpl(
         logger.d { "[blockUser] callCid: $type:$id, userId: $userId" }
 
         return wrapAPICall { videoCallApi.blockUser(type, id, BlockUserRequest(userId)) }
-
     }
 
     /**
      * @see StreamVideo.unblockUser
      */
-    override suspend fun unblockUser(type: String, id:String, userId: String): Result<Unit> {
+    override suspend fun unblockUser(type: String, id: String, userId: String): Result<Unit> {
         logger.d { "[unblockUser] callCid: $type:$id, userId: $userId" }
 
         return wrapAPICall { videoCallApi.unblockUser(type, id, UnblockUserRequest(userId)) }
-
     }
 
     /**
@@ -663,7 +669,7 @@ internal class StreamVideoImpl(
     /**
      * @see StreamVideo.goLive
      */
-    override suspend fun goLive(type: String, id:String): Result<GoLiveResponse> {
+    override suspend fun goLive(type: String, id: String): Result<GoLiveResponse> {
         logger.d { "[goLive] callCid: $type:$id" }
 
         return wrapAPICall { videoCallApi.goLive(type, id) }
@@ -681,7 +687,8 @@ internal class StreamVideoImpl(
      * @see StreamVideo.muteUsers
      */
     override suspend fun muteUsers(
-        type: String, id: String,
+        type: String,
+        id: String,
         muteUsersData: MuteUsersData
     ): Result<Unit> {
 
@@ -689,7 +696,6 @@ internal class StreamVideoImpl(
         return wrapAPICall {
             videoCallApi.muteUsers(type, id, request)
         }
-
     }
 
     /**
@@ -705,7 +711,8 @@ internal class StreamVideoImpl(
      * @see StreamVideo.requestPermissions
      */
     override suspend fun requestPermissions(
-        type: String, id: String,
+        type: String,
+        id: String,
         permissions: List<String>
     ): Result<Unit> {
         logger.d { "[requestPermissions] callCid: $type:$id, permissions: $permissions" }
@@ -746,7 +753,6 @@ internal class StreamVideoImpl(
         return wrapAPICall {
             defaultApi.stopRecording(type, id)
         }
-
     }
 
     /**
@@ -925,15 +931,12 @@ internal class StreamVideoImpl(
         return sendEvent(type, id, CallEventType.REJECTED)
     }
 
-
     /**
      * @see StreamVideo.cancelCall
      */
     override suspend fun cancelCall(type: String, id: String): Result<SendEventResponse> {
-        return sendEvent(type = type, id=id, CallEventType.CANCELLED)
+        return sendEvent(type = type, id = id, CallEventType.CANCELLED)
     }
-
-
 
     /**
      * @see StreamVideo.handlePushMessage
@@ -957,7 +960,7 @@ internal class StreamVideoImpl(
                         callDetails = callMetadata.callDetails
                     )
 
-                    //TODO engine.onCoordinatorEvent(event)
+                    // TODO engine.onCoordinatorEvent(event)
                     Success(Unit)
                 }
                 is Failure -> result
@@ -966,11 +969,11 @@ internal class StreamVideoImpl(
 
     override fun call(type: String, id: String, token: String): Call2 {
         val cid = "$type:$id"
-        return if(calls.contains(cid)) {
+        return if (calls.contains(cid)) {
             calls[cid]!!
         } else {
             val call = Call2(this, type, id, token, user)
-            calls[cid]=call
+            calls[cid] = call
             call
         }
     }

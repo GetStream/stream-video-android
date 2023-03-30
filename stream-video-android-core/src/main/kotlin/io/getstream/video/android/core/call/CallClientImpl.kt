@@ -50,14 +50,27 @@ import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
 import io.getstream.video.android.core.filter.InFilterObject
 import io.getstream.video.android.core.filter.toMap
-import io.getstream.video.android.core.model.*
-import io.getstream.video.android.core.model.state.StreamCallState
-import io.getstream.video.android.core.utils.*
+import io.getstream.video.android.core.model.Call
+import io.getstream.video.android.core.model.CallParticipantState
+import io.getstream.video.android.core.model.CallSettings
+import io.getstream.video.android.core.model.IceCandidate
+import io.getstream.video.android.core.model.IceServer
+import io.getstream.video.android.core.model.QueryMembersData
+import io.getstream.video.android.core.model.SfuToken
+import io.getstream.video.android.core.model.StreamCallGuid
+import io.getstream.video.android.core.model.StreamCallId
+import io.getstream.video.android.core.model.StreamPeerType
+import io.getstream.video.android.core.model.toPeerType
+import io.getstream.video.android.core.utils.Failure
+import io.getstream.video.android.core.utils.Result
+import io.getstream.video.android.core.utils.Success
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import io.getstream.video.android.core.utils.buildConnectionConfiguration
 import io.getstream.video.android.core.utils.buildMediaConstraints
 import io.getstream.video.android.core.utils.buildRemoteIceServers
 import io.getstream.video.android.core.utils.fetchResult
+import io.getstream.video.android.core.utils.onError
+import io.getstream.video.android.core.utils.onSuccessSuspend
 import io.getstream.video.android.core.utils.stringify
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -73,7 +86,6 @@ import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import org.openapitools.client.models.QueryMembersRequest
 import org.webrtc.AudioTrack
 import org.webrtc.Camera2Capturer
 import org.webrtc.Camera2Enumerator
@@ -99,7 +111,17 @@ import stream.video.sfu.models.TrackInfo
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
 import stream.video.sfu.models.VideoLayer
-import stream.video.sfu.signal.*
+import stream.video.sfu.signal.ICETrickleResponse
+import stream.video.sfu.signal.SendAnswerRequest
+import stream.video.sfu.signal.SendAnswerResponse
+import stream.video.sfu.signal.SetPublisherRequest
+import stream.video.sfu.signal.SetPublisherResponse
+import stream.video.sfu.signal.TrackMuteState
+import stream.video.sfu.signal.TrackSubscriptionDetails
+import stream.video.sfu.signal.UpdateMuteStatesRequest
+import stream.video.sfu.signal.UpdateMuteStatesResponse
+import stream.video.sfu.signal.UpdateSubscriptionsRequest
+import stream.video.sfu.signal.UpdateSubscriptionsResponse
 import kotlin.math.absoluteValue
 import kotlin.random.Random
 
@@ -136,8 +158,6 @@ internal class CallClientImpl(
 
     suspend fun updateMuteState(muteStateRequest: UpdateMuteStatesRequest): Result<UpdateMuteStatesResponse> =
         fetchResult { signalService.updateMuteStates(muteStateRequest) }
-
-
 
     /**
      * State that indicates whether the camera is capturing and sending video or not.
@@ -213,7 +233,7 @@ internal class CallClientImpl(
 
     init {
         sfuSocket.addListener(this)
-        //TODO sfuSocket.addListener(SfuSocketListenerAdapter(callEngine))
+        // TODO sfuSocket.addListener(SfuSocketListenerAdapter(callEngine))
         sfuSocket.connectSocket()
     }
 
@@ -339,7 +359,6 @@ internal class CallClientImpl(
         }
     }
 
-
     override fun flipCamera() {
         logger.d { "[flipCamera] #sfu; no args" }
         (videoCapturer as? Camera2Capturer)?.switchCamera(null)
@@ -444,8 +463,8 @@ internal class CallClientImpl(
 
             val cid = "$callType:$callId"
             val query = QueryMembersData(
-                streamCallCid=cid,
-                filters=InFilterObject(
+                streamCallCid = cid,
+                filters = InFilterObject(
                     "id",
                     callState.participants.map { it.user_id }.toSet()
                 ).toMap()

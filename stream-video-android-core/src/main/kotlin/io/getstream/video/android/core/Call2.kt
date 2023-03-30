@@ -1,18 +1,72 @@
+/*
+ * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.core
 
-import io.getstream.video.android.core.events.*
-import io.getstream.video.android.core.model.*
+import io.getstream.video.android.core.events.AudioLevelChangedEvent
+import io.getstream.video.android.core.events.BlockedUserEvent
+import io.getstream.video.android.core.events.CallAcceptedEvent
+import io.getstream.video.android.core.events.CallCancelledEvent
+import io.getstream.video.android.core.events.CallCreatedEvent
+import io.getstream.video.android.core.events.CallEndedEvent
+import io.getstream.video.android.core.events.CallMembersDeletedEvent
+import io.getstream.video.android.core.events.CallMembersUpdatedEvent
+import io.getstream.video.android.core.events.CallRejectedEvent
+import io.getstream.video.android.core.events.CallUpdatedEvent
+import io.getstream.video.android.core.events.ChangePublishQualityEvent
+import io.getstream.video.android.core.events.ConnectedEvent
+import io.getstream.video.android.core.events.ConnectionQualityChangeEvent
+import io.getstream.video.android.core.events.CustomEvent
+import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
+import io.getstream.video.android.core.events.ErrorEvent
+import io.getstream.video.android.core.events.HealthCheckEvent
+import io.getstream.video.android.core.events.HealthCheckResponseEvent
+import io.getstream.video.android.core.events.ICETrickleEvent
+import io.getstream.video.android.core.events.JoinCallResponseEvent
+import io.getstream.video.android.core.events.ParticipantJoinedEvent
+import io.getstream.video.android.core.events.ParticipantLeftEvent
+import io.getstream.video.android.core.events.PermissionRequestEvent
+import io.getstream.video.android.core.events.PublisherAnswerEvent
+import io.getstream.video.android.core.events.RecordingStartedEvent
+import io.getstream.video.android.core.events.RecordingStoppedEvent
+import io.getstream.video.android.core.events.SubscriberOfferEvent
+import io.getstream.video.android.core.events.TrackPublishedEvent
+import io.getstream.video.android.core.events.TrackUnpublishedEvent
+import io.getstream.video.android.core.events.UnblockedUserEvent
+import io.getstream.video.android.core.events.UnknownEvent
+import io.getstream.video.android.core.events.UpdatedCallPermissionsEvent
+import io.getstream.video.android.core.events.VideoEvent
+import io.getstream.video.android.core.events.VideoQualityChangedEvent
+import io.getstream.video.android.core.model.CallMetadata
+import io.getstream.video.android.core.model.CallParticipantState
+import io.getstream.video.android.core.model.IceServer
+import io.getstream.video.android.core.model.JoinedCall
+import io.getstream.video.android.core.model.SfuToken
+import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.utils.Result
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import org.openapitools.client.models.GoLiveResponse
-import org.openapitools.client.models.MemberResponse
 import org.openapitools.client.models.UpdateCallResponse
 
-public data class SFUConnection(internal val callUrl: String,
-                                internal val sfuToken: SfuToken,
-                                internal val iceServers: List<IceServer>) {
-
-}
+public data class SFUConnection(
+    internal val callUrl: String,
+    internal val sfuToken: SfuToken,
+    internal val iceServers: List<IceServer>
+)
 
 public open class ParticipantState(user: User) {
     /**
@@ -37,12 +91,9 @@ public open class ParticipantState(user: User) {
      */
     private val _isSpeakerPhoneEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val speakerPhoneEnabled: StateFlow<Boolean> = _isSpeakerPhoneEnabled
-
 }
 
-public open class LocalParticipantState(user: User): ParticipantState(user) {
-
-}
+public open class LocalParticipantState(user: User) : ParticipantState(user)
 
 public class MemberState(user: User) {
     /**
@@ -117,7 +168,6 @@ public class CallState(user: User) {
      * - screenSharingSessions
      */
 
-
     private val _members: MutableStateFlow<List<CallParticipantState>> =
         MutableStateFlow(emptyList())
     public val members: StateFlow<List<CallParticipantState>> = _members
@@ -129,13 +179,13 @@ public class Call2(
     private val client: StreamVideo,
     private val type: String,
     private val id: String,
-    private val token: String="",
+    private val token: String = "",
     private val user: User,
-    ) {
+) {
     val cid = "$type:$id"
     val state = CallState(user)
 
-    public var custom : Map<String, Any>? = null
+    public var custom: Map<String, Any>? = null
 
     // should be a stateflow
     private var sfuConnection: SFUConnection? = null
@@ -154,7 +204,6 @@ public class Call2(
     }
 
     fun leave() {
-
     }
 
     suspend fun end(): Result<Unit> {

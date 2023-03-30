@@ -20,7 +20,6 @@ import android.app.Notification
 import android.content.Context
 import androidx.lifecycle.ProcessLifecycleOwner
 import io.getstream.android.push.PushDeviceGenerator
-import io.getstream.video.android.core.api.ClientRPCService
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.input.CallAndroidInput
@@ -34,30 +33,22 @@ import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.ApiKey
 import io.getstream.video.android.core.model.Call
 import io.getstream.video.android.core.model.User
-import io.getstream.video.android.core.model.UserType
 import io.getstream.video.android.core.socket.internal.VideoSocketImpl
 import io.getstream.video.android.core.user.UserPreferencesManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.Serializable
-import org.openapitools.client.apis.DefaultApi
-import org.openapitools.client.apis.EventsApi
-import org.openapitools.client.apis.VideoCallsApi
 import java.util.*
 import kotlin.coroutines.resume
 
-public interface AudioFilter {
-}
-public interface VideoFilter {
-}
+public interface AudioFilter
+public interface VideoFilter
 
-sealed class GEO{
+sealed class GEO {
     /** Run calls over our global edge network, this is the default and right for most applications */
     object GlobalEdgeNetwork : GEO()
 }
 
-sealed class TokenType{
+sealed class TokenType {
     /** A user token */
     object User : TokenType()
     /** A call specific token */
@@ -110,7 +101,6 @@ public class StreamVideoBuilder(
         if (apiKey.isBlank()
         ) throw IllegalArgumentException("The API key can not be empty")
 
-
         val preferences = UserPreferencesManager.initialize(context).apply {
             storeUserCredentials(user)
             storeApiKey(apiKey)
@@ -157,8 +147,8 @@ public class StreamVideoBuilder(
             networkStateProvider = module.networkStateProvider(),
             callCoordinatorService = callCoordinatorClientModule.oldService,
             videoCallApi = callCoordinatorClientModule.videoCallsApi,
-            eventsApi= callCoordinatorClientModule.eventsApi,
-            defaultApi =  callCoordinatorClientModule.defaultApi
+            eventsApi = callCoordinatorClientModule.eventsApi,
+            defaultApi = callCoordinatorClientModule.defaultApi
         ).also { streamVideo ->
             StreamVideoStateLauncher(context, streamVideo, androidInputs, inputLauncher).run(scope)
 

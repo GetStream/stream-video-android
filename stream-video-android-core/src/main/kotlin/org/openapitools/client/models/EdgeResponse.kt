@@ -27,9 +27,15 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param green * @param id * @param latencyTestUrl * @param latitude * @param longitude * @param red * @param yellow */
+ * @param continentCode * @param countryIsoCode * @param green * @param id * @param latencyTestUrl * @param latitude * @param longitude * @param red * @param subdivisionIsoCode * @param yellow */
 
 data class EdgeResponse(
+
+    @Json(name = "continent_code")
+    val continentCode: kotlin.String,
+
+    @Json(name = "country_iso_code")
+    val countryIsoCode: kotlin.String,
 
     @Json(name = "green")
     val green: kotlin.Int,
@@ -48,6 +54,9 @@ data class EdgeResponse(
 
     @Json(name = "red")
     val red: kotlin.Int,
+
+    @Json(name = "subdivision_iso_code")
+    val subdivisionIsoCode: kotlin.String,
 
     @Json(name = "yellow")
     val yellow: kotlin.Int

@@ -16,15 +16,12 @@
 
 package io.getstream.video.android.core
 
-
-
 import io.getstream.video.android.core.call.CallClient
 import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.model.Call
 import io.getstream.video.android.core.model.CallEventType
 import io.getstream.video.android.core.model.CallInfo
 import io.getstream.video.android.core.model.CallMetadata
-import io.getstream.video.android.core.model.CallRecordingData
 import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.core.model.Device
 import io.getstream.video.android.core.model.EdgeData
@@ -35,20 +32,18 @@ import io.getstream.video.android.core.model.QueryCallsData
 import io.getstream.video.android.core.model.QueryMembersData
 import io.getstream.video.android.core.model.ReactionData
 import io.getstream.video.android.core.model.SendReactionData
-import io.getstream.video.android.core.model.StreamCallCid
 import io.getstream.video.android.core.model.StreamCallId
 import io.getstream.video.android.core.model.StreamCallType
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.User
-import io.getstream.video.android.core.model.state.StreamCallState
 import io.getstream.video.android.core.socket.SocketListener
 import io.getstream.video.android.core.utils.Result
-import kotlinx.coroutines.flow.StateFlow
-import org.openapitools.client.models.*
-
-
-
-
+import org.openapitools.client.models.GoLiveResponse
+import org.openapitools.client.models.ListRecordingsResponse
+import org.openapitools.client.models.SendEventResponse
+import org.openapitools.client.models.SendReactionResponse
+import org.openapitools.client.models.StopLiveResponse
+import org.openapitools.client.models.UpdateCallResponse
 
 /**
  * The main interface to control the Video calls. [StreamVideoImpl] implements this interface.
@@ -104,8 +99,8 @@ public interface StreamVideo {
     public suspend fun updateCall(
         type: StreamCallType,
         id: StreamCallId,
-        custom: Map<String, Any>): Result<UpdateCallResponse>
-
+        custom: Map<String, Any>
+    ): Result<UpdateCallResponse>
 
     /**
      * Creates a call with given information. You can then use the [CallMetadata] and join it and get auth
@@ -383,7 +378,6 @@ public interface StreamVideo {
      */
     public suspend fun getEdges(): Result<List<EdgeData>>
 
-
     /**
      * Clears the internal user state, removes push notification devices and clears the call state.
      */
@@ -440,5 +434,5 @@ public interface StreamVideo {
      */
     public suspend fun handlePushMessage(payload: Map<String, Any>): Result<Unit>
 
-    public fun call(type: String, id: String, token: String=""): Call2
+    public fun call(type: String, id: String, token: String = ""): Call2
 }

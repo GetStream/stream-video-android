@@ -36,7 +36,7 @@ internal class SfuClientModule(
 
     internal val signalService: SignalServerService by lazy {
         signalRetrofitClient.create(SignalServerService::class.java)
-        }
+    }
 
     companion object {
         /**

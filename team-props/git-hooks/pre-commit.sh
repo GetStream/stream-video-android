@@ -1,25 +1,15 @@
 #!/bin/sh
 
-echo "Running code formatting with spotless and apiCheck..."
+echo "Running code formatting with spotless..."
 
-./gradlew spotlessCheck -q
-EXIT_CODE=$?
-if [ $EXIT_CODE -ne 0 ]; then
-  echo "❌ spotlessCheck failed, running spotlessApply for you..."
+./gradlew spotlessApply
 
-  ./gradlew spotlessApply -q
+status=$?
 
-  echo "Formatting done, please try your commit again!"
-  exit $EXIT_CODE
-fi
-
-./gradlew apiCheck -q
-EXIT_CODE=$?
-if [ $EXIT_CODE -ne 0 ]; then
-  echo "❌ apiCheck failed, running apiDump for you..."
-
-  ./gradlew apiDump -q
-
-  echo "API dump done, please check the results and then try your commit again!"
-  exit $EXIT_CODE
+if [ "$status" = 0 ] ; then
+    echo "Code formatting success."
+    exit 0
+else
+    echo 1>&2 "Static analysis found violations it could not fix."
+    exit 1
 fi

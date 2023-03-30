@@ -27,25 +27,17 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param callCid * @param createdAt * @param ownCapabilities The capabilities of the current user
- * @param type * @param user */
+ * @param token * @param userDetails * @param device */
 
-data class UpdatedCallPermissionsEvent(
+data class WSAuthMessageRequest(
 
-    @Json(name = "call_cid")
-    val callCid: kotlin.String,
+    @Json(name = "token")
+    val token: kotlin.String,
 
-    @Json(name = "created_at")
-    val createdAt: java.time.OffsetDateTime,
+    @Json(name = "user_details")
+    val userDetails: ConnectUserDetailsRequest,
 
-    /* The capabilities of the current user */
-    @Json(name = "own_capabilities")
-    val ownCapabilities: kotlin.collections.List<OwnCapability>,
-
-    @Json(name = "type")
-    val type: kotlin.String,
-
-    @Json(name = "user")
-    val user: UserResponse
+    @Json(name = "device")
+    val device: DeviceFieldsRequest? = null
 
 )

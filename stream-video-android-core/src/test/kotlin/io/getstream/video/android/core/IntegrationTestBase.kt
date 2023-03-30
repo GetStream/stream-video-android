@@ -27,13 +27,16 @@ import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.utils.Result
 import io.getstream.video.android.core.utils.onError
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.test.*
+import kotlinx.coroutines.test.TestCoroutineScheduler
+import kotlinx.coroutines.test.TestDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.setMain
 import org.junit.Before
 import org.junit.Rule
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
-import java.util.*
-
+import java.util.UUID
 
 class DispatcherRule(
     val testDispatcher: TestDispatcher = UnconfinedTestDispatcher(TestCoroutineScheduler()),
@@ -49,7 +52,7 @@ class DispatcherRule(
     }
 }
 
-public class IntegrationTestHelper() {
+public class IntegrationTestHelper {
 
     val users = mutableMapOf<String, User>()
     val tokens = mutableMapOf<String, String>()
@@ -68,11 +71,9 @@ public class IntegrationTestHelper() {
         tokens["thierry"] = token
         context = ApplicationProvider.getApplicationContext()
     }
-
-
 }
 
-open class IntegrationTestBase() {
+open class IntegrationTestBase {
     @get:Rule
     val dispatcherRule = DispatcherRule()
 
@@ -85,7 +86,7 @@ open class IntegrationTestBase() {
     /** Client */
     val client: StreamVideo
     /** Implementation of the client for more access to interals */
-    internal val clientImpl : StreamVideoImpl
+    internal val clientImpl: StreamVideoImpl
     /** Tracks all events received by the client during a test */
     var events: MutableList<VideoEvent>
     /** The builder used for creating the client */
@@ -106,9 +107,8 @@ open class IntegrationTestBase() {
         client = builder.build()
         clientImpl = client as StreamVideoImpl
 
-
         // monitor for events
-        events = mutableListOf<VideoEvent>()
+        events = mutableListOf()
         client.subscribe {
             println("sub received an event: $it")
             events.add(it)
@@ -145,5 +145,4 @@ open class IntegrationTestBase() {
     fun resetTestVars() {
         events = mutableListOf()
     }
-
 }

@@ -93,5 +93,4 @@ internal class VideoModule(
     internal fun socketStateService(): SocketStateService = socketStateService
 
     internal fun networkStateProvider(): NetworkStateProvider = networkStateProvider
-
 }

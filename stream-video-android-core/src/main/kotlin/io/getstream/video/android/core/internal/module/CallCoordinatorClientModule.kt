@@ -23,9 +23,7 @@ import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.user.UserPreferences
 import kotlinx.coroutines.CoroutineScope
-import okhttp3.Interceptor
 import okhttp3.OkHttpClient
-import okhttp3.Response
 import org.openapitools.client.apis.DefaultApi
 import org.openapitools.client.apis.EventsApi
 import org.openapitools.client.apis.VideoCallsApi
@@ -34,9 +32,6 @@ import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
 import retrofit2.converter.wire.WireConverterFactory
-
-
-
 
 /**
  * Serves as an internal DI framework that allows us to cache heavy components reused across the
@@ -83,7 +78,6 @@ internal class CallCoordinatorClientModule(
     val eventsApi = retrofitClient.create(EventsApi::class.java)
     val defaultApi = retrofitClient.create(DefaultApi::class.java)
 
-
     /**
      * The [CoroutineScope] used for all business logic related operations.
      */
@@ -99,7 +93,4 @@ internal class CallCoordinatorClientModule(
     internal fun scope(): CoroutineScope {
         return scope
     }
-
-
-
 }

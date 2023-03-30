@@ -59,7 +59,7 @@ class ClientAndAuthTest : IntegrationTestBase() {
             context = context,
             apiKey = apiKey,
             geo = GEO.GlobalEdgeNetwork,
-            user = User(id="anon", type=UserType.Anonymous)
+            user = User(id = "anon", type = UserType.Anonymous)
         ).build()
     }
 
@@ -74,7 +74,7 @@ class ClientAndAuthTest : IntegrationTestBase() {
             context = context,
             apiKey = apiKey,
             geo = GEO.GlobalEdgeNetwork,
-            user = User(id="guest", type=UserType.Guest)
+            user = User(id = "guest", type = UserType.Guest)
         ).build()
     }
 
@@ -85,7 +85,7 @@ class ClientAndAuthTest : IntegrationTestBase() {
             context = context,
             apiKey = apiKey,
             geo = GEO.GlobalEdgeNetwork,
-            user = User(id="guest", type=UserType.Guest)
+            user = User(id = "guest", type = UserType.Guest)
         ).build()
         val sub = client.subscribe { event: VideoEvent ->
             System.out.println(event)
@@ -101,7 +101,7 @@ class ClientAndAuthTest : IntegrationTestBase() {
             context = context,
             apiKey = apiKey,
             geo = GEO.GlobalEdgeNetwork,
-            user = User(id="guest", type=UserType.Guest)
+            user = User(id = "guest", type = UserType.Guest)
         ).build()
         // Subscribe for new message events
         val sub = client.subscribeFor<ConnectedEvent> { newMessageEvent ->
