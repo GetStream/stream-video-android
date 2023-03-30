@@ -18,10 +18,13 @@ package io.getstream.video.android.core
 
 import com.google.common.truth.Truth.assertThat
 import io.getstream.video.android.core.events.*
+import io.getstream.video.android.core.model.UserAudioLevel
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import stream.video.sfu.event.AudioLevel
+import stream.video.sfu.models.Participant
 
 @RunWith(RobolectricTestRunner::class)
 class EventTest : IntegrationTestBase() {
@@ -90,7 +93,22 @@ class EventTest : IntegrationTestBase() {
 
 
     @Test
-    fun `Blocking a user event`() = runTest {
+    fun `Participant Joined`() = runTest {
+        // ensure the participant exists
+//        val joinEvent = ParticipantJoinedEvent(participant = Participant(user_id = "thierry"),callCid = call.cid)
+//        clientImpl.fireEvent(joinEvent, call.cid)
+    }
+
+    @Test
+    fun `Audio level changes`() = runTest {
+        val call = client.call("default", randomUUID())
+        val levels = mutableMapOf("thierry" to UserAudioLevel(true, 10F))
+        val event = AudioLevelChangedEvent(levels=levels)
+        clientImpl.fireEvent(event, call.cid)
+
+        // ensure we update call data and capabilities
+        // TODO: change the map structure
+        println(call.state.participantMap["thierry"]?.audioLevel?.value)
     }
 
 

@@ -34,7 +34,7 @@ BuildConfig.CORE_TEST_LOCAL
 ## OpenAPI build
 
 * Protocol is visible here: https://getstream.github.io/protocol/
-* 
+* https://www.notion.so/Getting-Started-to-Video-for-Android-Developers-be5ae7e2e9584f78b757163ecff1033b
 
 ## Writing integration tests
 

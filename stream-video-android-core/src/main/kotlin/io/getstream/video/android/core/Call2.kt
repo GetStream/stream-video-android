@@ -69,6 +69,7 @@ public data class SFUConnection(
 )
 
 public open class ParticipantState(user: User) {
+
     /**
      * The user
      */
@@ -80,6 +81,12 @@ public open class ParticipantState(user: User) {
      */
     private val _videoEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val videoEnabled: StateFlow<Boolean> = _videoEnabled
+
+    internal val _speaking: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val speaking: StateFlow<Boolean> = _speaking
+
+    internal val _audioLevel: MutableStateFlow<Float> = MutableStateFlow(0F)
+    val audioLevel: StateFlow<Float> = _audioLevel
     /**
      * State that indicates whether the mic is capturing and sending the audio or not.
      */
@@ -110,6 +117,8 @@ public class CallState(user: User) {
     private val _recording: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val recording: StateFlow<Boolean> = _recording
 
+    val participantMap = mutableMapOf<String, ParticipantState>()
+
     fun handleEvent(event: VideoEvent) {
         println("updating call state yolo")
         when (event) {
@@ -136,7 +145,13 @@ public class CallState(user: User) {
             is UnblockedUserEvent -> TODO()
             UnknownEvent -> TODO()
             is UpdatedCallPermissionsEvent -> TODO()
-            is AudioLevelChangedEvent -> TODO()
+            is AudioLevelChangedEvent -> {
+                event.levels.forEach { entry ->
+                    val participant = getOrCreateParticipant(entry.key)
+                    participant._speaking.value = entry.value.isSpeaking
+                    participant._audioLevel.value = entry.value.audioLevel
+                }
+            }
             is ChangePublishQualityEvent -> TODO()
             is ConnectionQualityChangeEvent -> TODO()
             is DominantSpeakerChangedEvent -> TODO()
@@ -151,6 +166,16 @@ public class CallState(user: User) {
             is TrackPublishedEvent -> TODO()
             is TrackUnpublishedEvent -> TODO()
             is VideoQualityChangedEvent -> TODO()
+        }
+    }
+
+    private fun getOrCreateParticipant(key: String): ParticipantState {
+        return if (participantMap.contains(key)) {
+            participantMap[key]!!
+        } else {
+            val participant = ParticipantState(User(id=key))
+            participantMap[key] = participant
+            participant
         }
     }
 

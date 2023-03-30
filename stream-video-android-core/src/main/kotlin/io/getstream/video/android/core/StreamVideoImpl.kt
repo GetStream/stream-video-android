@@ -353,7 +353,7 @@ internal class StreamVideoImpl(
      * Internal function that fires the event. It starts by updating client state and call state
      * After that it loops over the subscriptions and calls their listener
      */
-    internal fun fireEvent(event: VideoEvent) {
+    internal fun fireEvent(event: VideoEvent, cid: String="") {
 
         // update state for the client
         state.handleEvent(event)
@@ -361,10 +361,11 @@ internal class StreamVideoImpl(
         println("fireEvent call state yolo ${event.callCid} in ${calls.keys}")
 
         // update state for the calls. calls handle updating participants and members
-        if (event.callCid.isNotEmpty()) {
-            calls[event.callCid]?.let {
+        val selectedCid = cid.ifEmpty { event.callCid }
+        if (selectedCid.isNotEmpty()) {
+            calls[selectedCid]?.let {
                 it.state.handleEvent(event)
-            }nT
+            }
         }
 
         // fire event handlers
