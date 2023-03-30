@@ -16,6 +16,11 @@
 
 package org.openapitools.client.apis
 
+import org.openapitools.client.models.CreateCallTypeRequest
+import org.openapitools.client.models.CreateCallTypeResponse
+import org.openapitools.client.models.GetCallResponse
+import org.openapitools.client.models.GetCallTypeResponse
+import org.openapitools.client.models.ListCallTypeResponse
 import org.openapitools.client.models.ListRecordingsResponse
 import org.openapitools.client.models.QueryCallsRequest
 import org.openapitools.client.models.QueryCallsResponse
@@ -23,14 +28,87 @@ import org.openapitools.client.models.RequestPermissionRequest
 import org.openapitools.client.models.RequestPermissionResponse
 import org.openapitools.client.models.SendReactionRequest
 import org.openapitools.client.models.SendReactionResponse
+import org.openapitools.client.models.UpdateCallTypeRequest
+import org.openapitools.client.models.UpdateCallTypeResponse
 import org.openapitools.client.models.UpdateUserPermissionsRequest
 import org.openapitools.client.models.UpdateUserPermissionsResponse
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 internal interface DefaultApi {
+    /**
+     * Create Call Type
+     *
+     * Responses:
+     *  - 201: Successful response
+     *  - 400: Bad request
+     *  - 429: Too many requests
+     *
+     * @param createCallTypeRequest
+     * @return [CreateCallTypeResponse]
+     */
+    @POST("/video/calltypes")
+    suspend fun createCallType(@Body createCallTypeRequest: CreateCallTypeRequest): CreateCallTypeResponse
+
+    /**
+     * Delete Call Type
+     *
+     * Responses:
+     *  - 400: Bad request
+     *  - 429: Too many requests
+     *
+     * @param name
+     * @return [Unit]
+     */
+    @DELETE("/video/calltypes/{name}")
+    suspend fun deleteCallType(@Path("name") name: String): Unit
+
+    /**
+     * Get Call
+     *
+     * Responses:
+     *  - 200: Successful response
+     *  - 400: Bad request
+     *  - 429: Too many requests
+     *
+     * @param type
+     * @param id
+     * @return [GetCallResponse]
+     */
+    @GET("/video/call/{type}/{id}")
+    suspend fun getCall(@Path("type") type: String, @Path("id") id: String): GetCallResponse
+
+    /**
+     * Get Call Type
+     *
+     * Responses:
+     *  - 200: Successful response
+     *  - 400: Bad request
+     *  - 429: Too many requests
+     *
+     * @param name
+     * @return [GetCallTypeResponse]
+     */
+    @GET("/video/calltypes/{name}")
+    suspend fun getCallType(@Path("name") name: String): GetCallTypeResponse
+
+    /**
+     * List Call Type
+     *
+     * Responses:
+     *  - 200: Successful response
+     *  - 400: Bad request
+     *  - 429: Too many requests
+     *
+     * @return [ListCallTypeResponse]
+     */
+    @GET("/video/calltypes")
+    suspend fun listCallTypes(): ListCallTypeResponse
 
     /**
      * List recordings
@@ -45,11 +123,11 @@ internal interface DefaultApi {
      * @param session
      * @return [ListRecordingsResponse]
      */
-    @GET("video/call/{type}/{id}/{session}/recordings")
+    @GET("/video/call/{type}/{id}/{session}/recordings")
     suspend fun listRecordings(
         @Path("type") type: String,
         @Path("id") id: String,
-        @Path("session") session: String
+        @Path("session") session: String,
     ): ListRecordingsResponse
 
     /**
@@ -61,10 +139,14 @@ internal interface DefaultApi {
      *  - 429: Too many requests
      *
      * @param queryCallsRequest
+     * @param connectionId  (optional)
      * @return [QueryCallsResponse]
      */
     @POST("/video/calls")
-    suspend fun queryCalls(@Body queryCallsRequest: QueryCallsRequest): QueryCallsResponse
+    suspend fun queryCalls(
+        @Body queryCallsRequest: QueryCallsRequest,
+        @Query("connection_id") connectionId: String? = null,
+    ): QueryCallsResponse
 
     /**
      * Request permission
@@ -83,7 +165,7 @@ internal interface DefaultApi {
     suspend fun requestPermission(
         @Path("type") type: String,
         @Path("id") id: String,
-        @Body requestPermissionRequest: RequestPermissionRequest
+        @Body requestPermissionRequest: RequestPermissionRequest,
     ): RequestPermissionResponse
 
     /**
@@ -103,7 +185,7 @@ internal interface DefaultApi {
     suspend fun sendVideoReaction(
         @Path("type") type: String,
         @Path("id") id: String,
-        @Body sendReactionRequest: SendReactionRequest
+        @Body sendReactionRequest: SendReactionRequest,
     ): SendReactionResponse
 
     /**
@@ -163,6 +245,24 @@ internal interface DefaultApi {
     suspend fun stopRecording(@Path("type") type: String, @Path("id") id: String): Unit
 
     /**
+     * Update Call Type
+     *
+     * Responses:
+     *  - 201: Successful response
+     *  - 400: Bad request
+     *  - 429: Too many requests
+     *
+     * @param name
+     * @param updateCallTypeRequest
+     * @return [UpdateCallTypeResponse]
+     */
+    @PUT("/video/calltypes/{name}")
+    suspend fun updateCallType(
+        @Path("name") name: String,
+        @Body updateCallTypeRequest: UpdateCallTypeRequest,
+    ): UpdateCallTypeResponse
+
+    /**
      * Update user permissions
      * Updates user permissions
      * Responses:
@@ -179,6 +279,6 @@ internal interface DefaultApi {
     suspend fun updateUserPermissions(
         @Path("type") type: String,
         @Path("id") id: String,
-        @Body updateUserPermissionsRequest: UpdateUserPermissionsRequest
+        @Body updateUserPermissionsRequest: UpdateUserPermissionsRequest,
     ): UpdateUserPermissionsResponse
 }

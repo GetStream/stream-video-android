@@ -27,25 +27,25 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param callCid * @param createdAt * @param ownCapabilities The capabilities of the current user
- * @param type * @param user */
+ * @param closedCaptionMode * @param mode */
 
-data class UpdatedCallPermissionsEvent(
+data class TranscriptionSettings(
 
-    @Json(name = "call_cid")
-    val callCid: kotlin.String,
+    @Json(name = "closed_caption_mode")
+    val closedCaptionMode: kotlin.String,
 
-    @Json(name = "created_at")
-    val createdAt: java.time.OffsetDateTime,
+    @Json(name = "mode")
+    val mode: TranscriptionSettings.Mode
 
-    /* The capabilities of the current user */
-    @Json(name = "own_capabilities")
-    val ownCapabilities: kotlin.collections.List<OwnCapability>,
+) {
 
-    @Json(name = "type")
-    val type: kotlin.String,
-
-    @Json(name = "user")
-    val user: UserResponse
-
-)
+    /**
+     * *
+     * Values: available,disabled,autoMinusOn
+     */
+    enum class Mode(val value: kotlin.String) {
+        @Json(name = "available") available("available"),
+        @Json(name = "disabled") disabled("disabled"),
+        @Json(name = "auto-on") autoMinusOn("auto-on");
+    }
+}

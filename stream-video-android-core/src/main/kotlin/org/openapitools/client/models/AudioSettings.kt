@@ -27,11 +27,20 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param accessRequestEnabled */
+ * @param accessRequestEnabled
+ * @param opusDtxEnabled
+ * @param redundantCodingEnabled
+ */
 
 data class AudioSettings(
 
     @Json(name = "access_request_enabled")
-    val accessRequestEnabled: kotlin.Boolean
+    val accessRequestEnabled: kotlin.Boolean,
+
+    @Json(name = "opus_dtx_enabled")
+    val opusDtxEnabled: kotlin.Boolean,
+
+    @Json(name = "redundant_coding_enabled")
+    val redundantCodingEnabled: kotlin.Boolean
 
 )

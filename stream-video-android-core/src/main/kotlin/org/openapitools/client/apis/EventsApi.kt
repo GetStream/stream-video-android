@@ -40,6 +40,6 @@ internal interface EventsApi {
     suspend fun sendEvent(
         @Path("type") type: String,
         @Path("id") id: String,
-        @Body sendEventRequest: SendEventRequest
+        @Body sendEventRequest: SendEventRequest,
     ): SendEventResponse
 }

@@ -27,9 +27,15 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param geofencing * @param recording * @param screensharing * @param video */
+ * @param audio * @param backstage * @param geofencing * @param recording * @param ring * @param screensharing * @param transcription * @param video */
 
 data class CallSettingsRequest(
+
+    @Json(name = "audio")
+    val audio: AudioSettingsRequest? = null,
+
+    @Json(name = "backstage")
+    val backstage: BackstageSettingsRequest? = null,
 
     @Json(name = "geofencing")
     val geofencing: GeofenceSettingsRequest? = null,
@@ -37,8 +43,14 @@ data class CallSettingsRequest(
     @Json(name = "recording")
     val recording: RecordSettingsRequest? = null,
 
+    @Json(name = "ring")
+    val ring: RingSettingsRequest? = null,
+
     @Json(name = "screensharing")
     val screensharing: ScreensharingSettingsRequest? = null,
+
+    @Json(name = "transcription")
+    val transcription: TranscriptionSettingsRequest? = null,
 
     @Json(name = "video")
     val video: VideoSettingsRequest? = null

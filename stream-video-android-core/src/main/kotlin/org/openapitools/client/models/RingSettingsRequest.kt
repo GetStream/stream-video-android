@@ -27,25 +27,17 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param callCid * @param createdAt * @param ownCapabilities The capabilities of the current user
- * @param type * @param user */
+ * @param autoCancelTimeoutMs * @param autoRejectTimeoutMs * @param enabled */
 
-data class UpdatedCallPermissionsEvent(
+data class RingSettingsRequest(
 
-    @Json(name = "call_cid")
-    val callCid: kotlin.String,
+    @Json(name = "auto_cancel_timeout_ms")
+    val autoCancelTimeoutMs: kotlin.Int? = null,
 
-    @Json(name = "created_at")
-    val createdAt: java.time.OffsetDateTime,
+    @Json(name = "auto_reject_timeout_ms")
+    val autoRejectTimeoutMs: kotlin.Int? = null,
 
-    /* The capabilities of the current user */
-    @Json(name = "own_capabilities")
-    val ownCapabilities: kotlin.collections.List<OwnCapability>,
-
-    @Json(name = "type")
-    val type: kotlin.String,
-
-    @Json(name = "user")
-    val user: UserResponse
+    @Json(name = "enabled")
+    val enabled: kotlin.Boolean? = null
 
 )

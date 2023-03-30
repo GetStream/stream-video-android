@@ -25,6 +25,7 @@ import org.openapitools.client.models.GetEdgesResponse
 import org.openapitools.client.models.GetOrCreateCallRequest
 import org.openapitools.client.models.GetOrCreateCallResponse
 import org.openapitools.client.models.GoLiveResponse
+import org.openapitools.client.models.JoinCallRequest
 import org.openapitools.client.models.JoinCallResponse
 import org.openapitools.client.models.MuteUsersRequest
 import org.openapitools.client.models.MuteUsersResponse
@@ -43,7 +44,6 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 internal interface VideoCallsApi {
-
     /**
      * Block user on a call
      * Block a user, preventing them from joining the call until they are unblocked.
@@ -57,11 +57,11 @@ internal interface VideoCallsApi {
      * @param blockUserRequest
      * @return [BlockUserResponse]
      */
-    @POST("video/call/{type}/{id}/block")
+    @POST("/video/call/{type}/{id}/block")
     suspend fun blockUser(
         @Path("type") type: String,
         @Path("id") id: String,
-        @Body blockUserRequest: BlockUserRequest
+        @Body blockUserRequest: BlockUserRequest,
     ): BlockUserResponse
 
     /**
@@ -77,10 +77,7 @@ internal interface VideoCallsApi {
      * @return [EndCallResponse]
      */
     @POST("/video/call/{type}/{id}/mark_ended")
-    suspend fun endCall(
-        @Path("type") type: String,
-        @Path("id") id: String
-    ): EndCallResponse
+    suspend fun endCall(@Path("type") type: String, @Path("id") id: String): EndCallResponse
 
     /**
      * Get Call Edge Server
@@ -99,7 +96,7 @@ internal interface VideoCallsApi {
     suspend fun getCallEdgeServer(
         @Path("type") type: String,
         @Path("id") id: String,
-        @Body getCallEdgeServerRequest: GetCallEdgeServerRequest
+        @Body getCallEdgeServerRequest: GetCallEdgeServerRequest,
     ): GetCallEdgeServerResponse
 
     /**
@@ -132,7 +129,7 @@ internal interface VideoCallsApi {
     suspend fun getOrCreateCall(
         @Path("type") type: String,
         @Path("id") id: String,
-        @Body getOrCreateCallRequest: GetOrCreateCallRequest
+        @Body getOrCreateCallRequest: GetOrCreateCallRequest,
     ): GetOrCreateCallResponse
 
     /**
@@ -147,14 +144,11 @@ internal interface VideoCallsApi {
      * @param id
      * @return [GoLiveResponse]
      */
-    @POST("video/call/{type}/{id}/go_live")
-    suspend fun goLive(
-        @Path("type") type: String,
-        @Path("id") id: String
-    ): GoLiveResponse
+    @POST("/video/call/{type}/{id}/go_live")
+    suspend fun goLive(@Path("type") type: String, @Path("id") id: String): GoLiveResponse
 
     /**
-     * Join call
+     * Join call (type, id)
      * Request to join a call
      * Responses:
      *  - 201: Successful response
@@ -163,15 +157,38 @@ internal interface VideoCallsApi {
      *
      * @param type
      * @param id
-     * @param getOrCreateCallRequest
+     * @param joinCallRequest
+     * @param connectionId  (optional)
      * @return [JoinCallResponse]
      */
     @POST("/video/join_call/{type}/{id}")
-    suspend fun joinCall(
+    suspend fun joinCallTypeId0(
         @Path("type") type: String,
         @Path("id") id: String,
-        @Query("connection_id") connectionId: String,
-        @Body getOrCreateCallRequest: GetOrCreateCallRequest
+        @Body joinCallRequest: JoinCallRequest,
+        @Query("connection_id") connectionId: String? = null,
+    ): JoinCallResponse
+
+    /**
+     * Join call (type, id)
+     * Request to join a call
+     * Responses:
+     *  - 201: Successful response
+     *  - 400: Bad request
+     *  - 429: Too many requests
+     *
+     * @param type
+     * @param id
+     * @param joinCallRequest
+     * @param connectionId  (optional)
+     * @return [JoinCallResponse]
+     */
+    @POST("/video/call/{type}/{id}/join")
+    suspend fun joinCallTypeId1(
+        @Path("type") type: String,
+        @Path("id") id: String,
+        @Body joinCallRequest: JoinCallRequest,
+        @Query("connection_id") connectionId: String? = null,
     ): JoinCallResponse
 
     /**
@@ -191,7 +208,7 @@ internal interface VideoCallsApi {
     suspend fun muteUsers(
         @Path("type") type: String,
         @Path("id") id: String,
-        @Body muteUsersRequest: MuteUsersRequest
+        @Body muteUsersRequest: MuteUsersRequest,
     ): MuteUsersResponse
 
     /**
@@ -206,9 +223,7 @@ internal interface VideoCallsApi {
      * @return [QueryMembersResponse]
      */
     @POST("/video/call/members")
-    suspend fun queryMembers(
-        @Body queryMembersRequest: QueryMembersRequest,
-    ): QueryMembersResponse
+    suspend fun queryMembers(@Body queryMembersRequest: QueryMembersRequest): QueryMembersResponse
 
     /**
      * Set call as not live
@@ -222,11 +237,8 @@ internal interface VideoCallsApi {
      * @param id
      * @return [StopLiveResponse]
      */
-    @POST("video/call/{type}/{id}/stop_live")
-    suspend fun stopLive(
-        @Path("type") type: String,
-        @Path("id") id: String
-    ): StopLiveResponse
+    @POST("/video/call/{type}/{id}/stop_live")
+    suspend fun stopLive(@Path("type") type: String, @Path("id") id: String): StopLiveResponse
 
     /**
      * Unblocks user on a call
@@ -245,7 +257,7 @@ internal interface VideoCallsApi {
     suspend fun unblockUser(
         @Path("type") type: String,
         @Path("id") id: String,
-        @Body unblockUserRequest: UnblockUserRequest
+        @Body unblockUserRequest: UnblockUserRequest,
     ): UnblockUserResponse
 
     /**
@@ -265,6 +277,6 @@ internal interface VideoCallsApi {
     suspend fun updateCall(
         @Path("type") type: String,
         @Path("id") id: String,
-        @Body updateCallRequest: UpdateCallRequest
+        @Body updateCallRequest: UpdateCallRequest,
     ): UpdateCallResponse
 }

@@ -43,6 +43,7 @@ import org.openapitools.client.models.GetCallEdgeServerRequest
 import org.openapitools.client.models.GetCallEdgeServerResponse
 import org.openapitools.client.models.GetOrCreateCallRequest
 import org.openapitools.client.models.GetOrCreateCallResponse
+import org.openapitools.client.models.JoinCallRequest
 import org.openapitools.client.models.JoinCallResponse
 import org.openapitools.client.models.MuteUsersRequest
 import org.openapitools.client.models.QueryCallsRequest
@@ -130,13 +131,13 @@ internal class CallCoordinatorClientImpl(
         id: String,
         type: String,
         connectionId: String,
-        request: GetOrCreateCallRequest
+        request: JoinCallRequest
     ): Result<JoinCallResponse> = try {
-        val response = videoCallApi.joinCall(
+        val response = videoCallApi.joinCallTypeId0(
             type = type,
             id = id,
             connectionId = connectionId,
-            getOrCreateCallRequest = request
+            joinCallRequest = request
         )
 
         Success(response)
