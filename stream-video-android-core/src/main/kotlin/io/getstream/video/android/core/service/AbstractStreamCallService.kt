@@ -33,7 +33,6 @@ import io.getstream.video.android.core.service.vibro.StreamVibroManagerImpl
 import io.getstream.video.android.core.utils.notificationManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
 import io.getstream.video.android.core.model.state.StreamCallState as State
 
 public abstract class AbstractStreamCallService : Service(), StreamVideoProvider {

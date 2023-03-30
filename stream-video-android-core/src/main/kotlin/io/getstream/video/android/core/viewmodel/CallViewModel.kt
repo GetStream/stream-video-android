@@ -48,7 +48,6 @@ import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.state.StreamCallState.Active
-import io.getstream.video.android.core.model.state.StreamCallState.Joinable
 import io.getstream.video.android.core.permission.PermissionManager
 import io.getstream.video.android.core.user.UsersProvider
 import io.getstream.video.android.core.utils.Failure
@@ -181,7 +180,6 @@ public class CallViewModel(
     private val _isShowingCallInfo = MutableStateFlow(false)
     public val isShowingCallInfo: StateFlow<Boolean> = _isShowingCallInfo
 
-
     // TODO: Replace with real state
     private val _streamCallState: MutableStateFlow<Call?> = MutableStateFlow(null)
     public val streamCallState: StateFlow<Call?> = _streamCallState
@@ -200,7 +198,6 @@ public class CallViewModel(
             .stateIn(scope = viewModelScope, started = SharingStarted.Eagerly, initialValue = emptyList())
 
     private var prevState: State = State.Idle
-
 
     // TODO: This is fake, remove me
     val clientCallState: StateFlow<State> = MutableStateFlow(State.Idle)

@@ -1,17 +1,26 @@
+/*
+ * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.core
 
 import com.google.common.truth.Truth.assertThat
-import io.getstream.video.android.core.events.*
-import io.getstream.video.android.core.model.QueryCallsData
-import io.getstream.video.android.core.model.User
-import io.getstream.video.android.core.model.UserType
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.lastOrNull
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import io.getstream.video.android.core.events.ConnectedEvent
+import io.getstream.video.android.core.events.RecordingStartedEvent
+import io.getstream.video.android.core.events.RecordingStoppedEvent
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.withContext
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -58,38 +67,33 @@ class EventTest : IntegrationTestBase() {
     fun `test start and stop recording`() = runTest {
         val call = client.call("default", randomUUID())
         // start by sending the start recording event
-        val event = RecordingStartedEvent(callCid=call.cid, cid=call.cid, type="123")
+        val event = RecordingStartedEvent(callCid = call.cid, cid = call.cid, type = "123")
         clientImpl.fireEvent(event)
         assertThat(call.state.recording.value).isTrue()
         // now stop recording
-        val stopRecordingEvent = RecordingStoppedEvent(callCid=call.cid, cid=call.cid, type="123")
+        val stopRecordingEvent = RecordingStoppedEvent(callCid = call.cid, cid = call.cid, type = "123")
         clientImpl.fireEvent(stopRecordingEvent)
         assertThat(call.state.recording.value).isFalse()
     }
 
     @Test
     fun `Blocking a user event`() = runTest {
-
     }
 
     @Test
     fun `Accepting a call`() = runTest {
-
     }
 
     @Test
     fun `Cancelling a call`() = runTest {
-
     }
 
     @Test
     fun `Creating a call`() = runTest {
-
     }
 
     @Test
     fun `Call ended`() = runTest {
-
     }
 
     @Test
@@ -131,5 +135,4 @@ class EventTest : IntegrationTestBase() {
 //            is VideoQualityChangedEvent -> TODO()
 //        }
     }
-
 }

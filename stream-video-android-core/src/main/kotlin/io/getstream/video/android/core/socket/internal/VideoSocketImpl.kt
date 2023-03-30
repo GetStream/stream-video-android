@@ -44,10 +44,9 @@ import org.openapitools.client.models.VideoWSAuthMessageRequest
 import stream.video.coordinator.client_v1_rpc.WebsocketHealthcheck
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 import kotlin.math.pow
 import kotlin.properties.Delegates
-import kotlin.coroutines.suspendCoroutine
-
 
 /**
  * Socket implementation used to handle the lifecycle of a WebSocket and its related state.
@@ -66,7 +65,7 @@ internal class VideoSocketImpl(
     private val userState: UserState,
     private val coroutineScope: CoroutineScope,
 ) : VideoSocket {
-    public var eventListener : ((event: VideoEvent) -> Unit)? = null
+    public var eventListener: ((event: VideoEvent) -> Unit)? = null
     private lateinit var connectContinuation: Continuation<Result<ConnectedEvent>>
     private val logger by taggedLogger("Call:CoordinatorSocket")
 
@@ -144,7 +143,7 @@ internal class VideoSocketImpl(
                 }
                 is State.Connected -> {
                     println("State.Connected")
-                    val success = Success(data=newState.event)
+                    val success = Success(data = newState.event)
                     connectContinuation.resume(success)
                     healthMonitor.start()
                     callListeners { it.onConnected(newState.event) }
@@ -177,7 +176,7 @@ internal class VideoSocketImpl(
         private set
 
     override fun onSocketError(error: VideoError) {
-        connectContinuation.resume(Failure(error=error))
+        connectContinuation.resume(Failure(error = error))
         logger.e { "[onSocketError] state: $state, error: $error" }
         if (state !is State.DisconnectedPermanently) {
             callListeners { it.onError(error) }
@@ -186,7 +185,7 @@ internal class VideoSocketImpl(
     }
 
     private fun onNetworkError(error: VideoNetworkError) {
-        connectContinuation.resume(Failure(error=error))
+        connectContinuation.resume(Failure(error = error))
         when (error.streamCode) {
             VideoErrorCode.PARSER_ERROR.code,
             VideoErrorCode.CANT_PARSE_CONNECTION_EVENT.code,

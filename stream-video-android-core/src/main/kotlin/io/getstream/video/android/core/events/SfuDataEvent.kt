@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.core.events
 
-import io.getstream.video.android.core.model.StreamCallCid
 import io.getstream.video.android.core.model.UserAudioLevel
 import stream.video.sfu.event.ChangePublishQuality
 import stream.video.sfu.event.ConnectionQualityInfo
@@ -27,7 +26,7 @@ import stream.video.sfu.models.PeerType
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoQuality
 
-public sealed class SfuDataEvent: VideoEvent()
+public sealed class SfuDataEvent : VideoEvent()
 
 public data class ICETrickleEvent(
     val candidate: String,

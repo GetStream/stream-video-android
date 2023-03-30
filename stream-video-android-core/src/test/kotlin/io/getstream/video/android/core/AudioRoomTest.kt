@@ -16,21 +16,16 @@
 
 package io.getstream.video.android.core
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
-import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.model.QueryCallsData
 import io.getstream.video.android.core.utils.mapSuspend
 import io.getstream.video.android.core.utils.onSuccess
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
-
 @RunWith(RobolectricTestRunner::class)
-class AudioRoomTest: IntegrationTestBase() {
+class AudioRoomTest : IntegrationTestBase() {
     /**
      * The Swift tutorial is good inspiration
      * https://github.com/GetStream/stream-video-swift/blob/main/docusaurus/docs/iOS/guides/quickstart/audio-room.md
@@ -60,11 +55,11 @@ class AudioRoomTest: IntegrationTestBase() {
      *
      *
      *     viewModel: CallViewModel = viewModel(
-            factory = CallViewModel.provideFactory(
-            call,
-            ...
-            )
-            )
+     factory = CallViewModel.provideFactory(
+     call,
+     ...
+     )
+     )
 
      *
      * On the compose layer we currently hide too much. It would be better to show
@@ -98,14 +93,12 @@ class AudioRoomTest: IntegrationTestBase() {
 
         val result = client.goLive("default", "123")
         assert(result.isSuccess)
-
     }
 
     @Test
     fun requestPermissions() = runTest {
         val result = client.requestPermissions("default", "123", mutableListOf("hellworld"))
         assert(result.isSuccess)
-
     }
 
     @Test
@@ -119,11 +112,6 @@ class AudioRoomTest: IntegrationTestBase() {
         result2.onSuccess {
             // joined call
             // state is in the viewmodel
-
-
         }
-
-
-
     }
 }

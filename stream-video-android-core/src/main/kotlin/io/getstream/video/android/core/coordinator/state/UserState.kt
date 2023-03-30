@@ -40,6 +40,6 @@ public class UserState {
     }
 
     public companion object {
-        private val EMPTY_USER = User("", "", UserType.Authenticated,"", "", emptyList(), emptyMap())
+        private val EMPTY_USER = User("", "", UserType.Authenticated, "", "", emptyList(), emptyMap())
     }
 }

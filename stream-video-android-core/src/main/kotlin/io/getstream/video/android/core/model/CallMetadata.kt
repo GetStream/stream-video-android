@@ -37,7 +37,7 @@ public data class CallMetadata(
     companion object {
         fun empty(): CallMetadata {
             val details = CallDetails(emptyList(), emptyMap(), emptyList())
-            return CallMetadata("", "", "", StreamCallKind.MEETING, "123", 0, 0, false, false, details, emptyMap(), emptyMap() )
+            return CallMetadata("", "", "", StreamCallKind.MEETING, "123", 0, 0, false, false, details, emptyMap(), emptyMap())
         }
     }
 }

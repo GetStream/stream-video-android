@@ -26,9 +26,9 @@ import java.util.Date
 /**
  * Represents the events coming in from the socket.
  */
-public sealed class VideoEvent(open val callCid: String="") : java.io.Serializable
+public sealed class VideoEvent(open val callCid: String = "") : java.io.Serializable
 
-public sealed class CoordinatorEvent(): VideoEvent()
+public sealed class CoordinatorEvent() : VideoEvent()
 
 /**
  * Triggered when a user gets connected to the WS.

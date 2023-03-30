@@ -19,12 +19,10 @@ package io.getstream.video.android.core.input.internal
 import android.content.Context
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.StreamVideo
-import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.input.CallAndroidInput
 import io.getstream.video.android.core.input.CallAndroidInputLauncher
 import io.getstream.video.android.core.model.state.StreamCallState
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
 internal class StreamVideoStateLauncher(
     private val context: Context,

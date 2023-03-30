@@ -138,6 +138,5 @@ internal class UserPreferencesImpl(
         private const val KEY_DEVICES = "devices"
         private const val KEY_SFU_TOKEN = "sfu_token"
         private const val KEY_USER_TOKEN = "user_token"
-
     }
 }
