@@ -43,4 +43,10 @@ class JoinCallTest : IntegrationTestBase() {
 
     }
 
+    @Test
+    fun `test latency measurements`() = runTest {
+
+
+    }
+
 }
