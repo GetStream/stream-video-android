@@ -13,15 +13,16 @@
 
 ** Use cases **
 
-- [ ] Audio rooms
-- [ ] Livestreaming
-- [ ] Calling
+- [X] Audio rooms
+- [X] Livestreaming
+- [X] Calling
 
 ** Protocol **
 
 - [X] Responding to events
+- [X] Join flow
 - [ ] Reconnect flow (https://www.notion.so/Reconnection-Failure-handling-f6991fd2e5584380bb2d2cb5e8ac5303)
-- [ ] Join flow
+- [ ] Active Session
 
 ### Refactoring
 
@@ -32,15 +33,15 @@
 - [X] Ensure we always use DispatcherProvider.IO
 - [ ] Use the new state in the view model
 - [ ] Update to the latest events from the protocol
-- [ ] Support query members
+- [X] Support query call
 
 ### Features
 
 - [X] Event subscriptions (listening)
 - [X] Event subscriptions (sending)
+- [X] Permissions: https://www.notion.so/stream-wiki/Call-Permissions-832f914ad4c545cf8f048012900ad21d
 - [ ] Audio filter example
 - [ ] Video filter example
-- [ ] Permissions: https://www.notion.so/stream-wiki/Call-Permissions-832f914ad4c545cf8f048012900ad21d
 
 ### Documentation (code level)
 
