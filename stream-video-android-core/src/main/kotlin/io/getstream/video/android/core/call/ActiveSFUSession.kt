@@ -56,7 +56,8 @@ import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
 import io.getstream.video.android.core.filter.InFilterObject
 import io.getstream.video.android.core.filter.toMap
-import io.getstream.video.android.core.internal.module.HttpModule
+import io.getstream.video.android.core.internal.module.ConnectionModule
+import io.getstream.video.android.core.internal.module.SFUConnectionModule
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.model.Call
 import io.getstream.video.android.core.model.CallParticipantState
@@ -146,8 +147,9 @@ import kotlin.random.Random
  *
  *
  */
-public class ActiveSFUSession(
+public class ActiveSFUSession internal constructor(
     private val client: StreamVideo,
+    private val connectionModule: ConnectionModule,
     private val call2: Call2,
     private val SFUUrl: String,
     private val SFUToken: String,
@@ -161,55 +163,18 @@ public class ActiveSFUSession(
     private var sessionId: String = ""
     private val scope = CoroutineScope(DispatcherProvider.IO)
 
-    private val networkStateProvider: NetworkStateProvider by lazy {
-        NetworkStateProvider(
-            connectivityManager = client.context
-                .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        )
-    }
-
-    private lateinit var okHttpClient: OkHttpClient
-    private lateinit var sfuSocket: SfuSocketImpl
+    private lateinit var sfuConnectionModule: SFUConnectionModule
 
     init {
         val preferences = UserPreferencesManager.getPreferences()
         val user = preferences.getUserCredentials()
         if (preferences.getApiKey().isBlank() ||
-            user?.id.isNullOrBlank() ||
-            preferences.getSfuToken().isBlank()
+            user?.id.isNullOrBlank()
         ) throw IllegalArgumentException("The API key, user ID and token cannot be empty!")
 
-        val updatedSignalUrl = SFUUrl.removeSuffix(suffix = "/twirp")
-        val httpModule = HttpModule.getOrCreate(
-            loggingLevel = HttpLoggingInterceptor.Level.NONE,
-            credentialsProvider = preferences
-        ).apply {
-            this.baseUrl = updatedSignalUrl.toHttpUrl()
-        }
+        // TODO: setup the connection module properly
+        sfuConnectionModule = connectionModule.createSFUConnectionModule(SFUUrl, SFUToken)
 
-        val socketFactory = SfuSocketFactory(httpModule.okHttpClient)
-
-
-        sfuSocket = SfuSocketImpl(
-            wssUrl = "$updatedSignalUrl/ws".replace("https", "wss"),
-            networkStateProvider = networkStateProvider,
-            coroutineScope = CoroutineScope(Dispatchers.IO),
-            sfuSocketFactory = socketFactory
-        )
-        okHttpClient = httpModule.okHttpClient
-    }
-
-
-    private val signalRetrofitClient: Retrofit by lazy {
-        Retrofit.Builder()
-            .client(okHttpClient)
-            .addConverterFactory(WireConverterFactory.create())
-            .baseUrl(SFUUrl)
-            .build()
-    }
-
-    internal val signalService: SignalServerService by lazy {
-        signalRetrofitClient.create(SignalServerService::class.java)
     }
 
     // ensure we parse errors and run on the right coroutineContext
@@ -229,20 +194,20 @@ public class ActiveSFUSession(
     }
 
     suspend fun sendAnswer(request: SendAnswerRequest): Result<SendAnswerResponse> =
-        wrapAPICall { signalService.sendAnswer(request)
+        wrapAPICall { sfuConnectionModule.signalService.sendAnswer(request)
     }
 
     suspend fun sendIceCandidate(request: ICETrickle): Result<ICETrickleResponse> =
-        wrapAPICall { signalService.iceTrickle(request) }
+        wrapAPICall { sfuConnectionModule.signalService.iceTrickle(request) }
 
     suspend fun setPublisher(request: SetPublisherRequest): Result<SetPublisherResponse> =
-        wrapAPICall { signalService.setPublisher(request) }
+        wrapAPICall { sfuConnectionModule.signalService.setPublisher(request) }
 
     suspend fun updateSubscriptions(request: UpdateSubscriptionsRequest): Result<UpdateSubscriptionsResponse> =
-        wrapAPICall { signalService.updateSubscriptions(request) }
+        wrapAPICall { sfuConnectionModule.signalService.updateSubscriptions(request) }
 
     suspend fun updateMuteState(muteStateRequest: UpdateMuteStatesRequest): Result<UpdateMuteStatesResponse> =
-        wrapAPICall { signalService.updateMuteStates(muteStateRequest) }
+        wrapAPICall { sfuConnectionModule.signalService.updateMuteStates(muteStateRequest) }
 
     /**
      * State that indicates whether the camera is capturing and sending video or not.
@@ -316,9 +281,9 @@ public class ActiveSFUSession(
     private var captureResolution: CameraEnumerationAndroid.CaptureFormat? = null
 
     init {
-        sfuSocket.addListener(this)
+        sfuConnectionModule.sfuSocket.addListener(this)
         // TODO sfuSocket.addListener(SfuSocketListenerAdapter(callEngine))
-        sfuSocket.connectSocket()
+        sfuConnectionModule.sfuSocket.connectSocket()
     }
 
     override fun clear() {
@@ -336,7 +301,7 @@ public class ActiveSFUSession(
         subscriber = null
         publisher = null
 
-        sfuSocket.releaseConnection()
+        sfuConnectionModule.sfuSocket.releaseConnection()
 
         videoCapturer?.stopCapture()
         videoCapturer?.dispose()
@@ -348,11 +313,11 @@ public class ActiveSFUSession(
     }
 
     override fun addSocketListener(sfuSocketListener: SfuSocketListener) {
-        sfuSocket.addListener(sfuSocketListener)
+        sfuConnectionModule.sfuSocket.addListener(sfuSocketListener)
     }
 
     override fun removeSocketListener(sfuSocketListener: SfuSocketListener) {
-        sfuSocket.removeListener(sfuSocketListener)
+        sfuConnectionModule.sfuSocket.removeListener(sfuSocketListener)
     }
 
     override fun setInitialCallSettings(callSettings: CallSettings) {
@@ -670,7 +635,7 @@ public class ActiveSFUSession(
             withTimeout(TIMEOUT) {
                 val connected = isConnected.value
                 logger.d { "[executeJoinRequest] is connected: $connected" }
-                sfuSocket.sendJoinRequest(request)
+                sfuConnectionModule.sfuSocket.sendJoinRequest(request)
                 logger.d { "[executeJoinRequest] sfu join request is sent" }
                 // TODO: callEngine.onSfuJoinSent(request)
                 logger.d { "[executeJoinRequest] request is sent" }

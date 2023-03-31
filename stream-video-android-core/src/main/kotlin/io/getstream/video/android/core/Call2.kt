@@ -399,6 +399,7 @@ public class Call2(
         activeSession = ActiveSFUSession(
             client=client, call2=this,
             SFUUrl =url, SFUToken=credentials.token,
+            connectionModule = (client as StreamVideoImpl).connectionModule,
             remoteIceServers=iceServers, latencyResults=latencyResults
         )
         return Success<ActiveSFUSession>(data= activeSession!!)

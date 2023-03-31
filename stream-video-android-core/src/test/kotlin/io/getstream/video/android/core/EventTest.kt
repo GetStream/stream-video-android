@@ -87,6 +87,10 @@ class EventTest : IntegrationTestBase() {
         val stopRecordingEvent = RecordingStoppedEvent(callCid = call.cid, cid = call.cid, type = "123")
         clientImpl.fireEvent(stopRecordingEvent)
         assertThat(call.state.recording.value).isFalse()
+
+        val event2 : VideoEvent
+
+
     }
 
     @Test

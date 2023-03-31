@@ -1,6 +1,11 @@
 
 ## Launch prep for the low level client
 
+- SFU Token handling
+- Check how we see if a socket is connected
+- Event handling
+- Verify logging works well
+
 ### Testing
 
 ** Basics **
@@ -31,15 +36,19 @@
 - [X] Merge SFU Client and CallClientImpl into 1 concept
 - [X] Call refactoring
 - [X] Ensure we always use DispatcherProvider.IO
+- [X] Support query calls
+- [ ] Cleanup The Network connection module
+- [ ] Cleanup event handling
 - [ ] Use the new state in the view model
 - [ ] Update to the latest events from the protocol
-- [X] Support query call
 
 ### Features
 
 - [X] Event subscriptions (listening)
 - [X] Event subscriptions (sending)
 - [X] Permissions: https://www.notion.so/stream-wiki/Call-Permissions-832f914ad4c545cf8f048012900ad21d
+- [ ] Sending reactions
+- [ ] Verify all events are handled
 - [ ] Audio filter example
 - [ ] Video filter example
 
@@ -54,3 +63,8 @@
 - [ ] Custom compose example
 - [ ] Authentication example
 - [ ] Docs on client setup
+
+### Available tasks up for grabs
+
+- Currently we use UserPreferencesManager. Jaewoong mentioned we should perhaps explore https://developer.android.com/topic/libraries/architecture/datastore
+- 

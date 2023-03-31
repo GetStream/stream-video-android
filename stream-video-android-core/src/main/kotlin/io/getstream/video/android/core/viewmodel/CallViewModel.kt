@@ -23,6 +23,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.StreamVideoConfigDefault
 import io.getstream.video.android.core.audio.AudioDevice
 import io.getstream.video.android.core.call.CallClient
 import io.getstream.video.android.core.call.state.AcceptCall
@@ -80,6 +81,7 @@ public class CallViewModel(
 ) : ViewModel() {
 
     private val logger by taggedLogger("Call:ViewModel")
+    private val config = StreamVideoConfigDefault
 
     private val _callState: MutableStateFlow<Call?> = MutableStateFlow(null)
     public val callState: StateFlow<Call?> = _callState
@@ -95,7 +97,7 @@ public class CallViewModel(
      * Determines whether the video should be enabled/disabled before [Call] and [CallClient] get initialised.
      */
     private val isVideoEnabled: MutableStateFlow<Boolean> =
-        MutableStateFlow(streamVideo.config.defaultVideoOn && permissionManager.hasCameraPermission.value)
+        MutableStateFlow(config.defaultVideoOn && permissionManager.hasCameraPermission.value)
 
     /**
      * Determines whether the video should be on or not. If [CallClient] is not initialised reflects the UI state
@@ -106,14 +108,14 @@ public class CallViewModel(
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.Eagerly,
-                streamVideo.config.defaultVideoOn
+                config.defaultVideoOn
             )
 
     /**
      * Determines whether the audio should be enabled/disabled before [Call] and [CallClient] get initialised.
      */
     private val isAudioEnabled: MutableStateFlow<Boolean> =
-        MutableStateFlow(streamVideo.config.defaultAudioOn && permissionManager.hasRecordAudioPermission.value)
+        MutableStateFlow(config.defaultAudioOn && permissionManager.hasRecordAudioPermission.value)
 
     /**
      * Determines whether the audio should be on or not. If [CallClient] is not initialised reflects the UI state
@@ -130,7 +132,7 @@ public class CallViewModel(
      * Determines whether the speaker phone should be enabled/disabled before [Call] and [CallClient] get initialised.
      */
     private val isSpeakerPhoneEnabled: MutableStateFlow<Boolean> =
-        MutableStateFlow(streamVideo.config.defaultSpeakerPhoneOn)
+        MutableStateFlow(config.defaultSpeakerPhoneOn)
 
     /**
      * Determines whether the speaker phone should be on or not. If [CallClient] is not initialised reflects the UI
@@ -142,7 +144,7 @@ public class CallViewModel(
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Eagerly,
-            initialValue = streamVideo.config.defaultSpeakerPhoneOn
+            initialValue = config.defaultSpeakerPhoneOn
         )
 
     /**
@@ -247,14 +249,14 @@ public class CallViewModel(
                 clientState.value = streamVideo.awaitCallClient()
                 client?.setInitialCallSettings(
                     CallSettings(
-                        autoPublish = streamVideo.config.autoPublish,
+                        autoPublish = config.autoPublish,
                         microphoneOn = isAudioEnabled.value,
                         cameraOn = isVideoEnabled.value,
                         speakerOn = isSpeakerPhoneEnabled.value
                     )
                 )
                 _isVideoInitialized.value = true
-                initializeCall(streamVideo.config.autoPublish)
+                initializeCall(config.autoPublish)
             }
         }
     }

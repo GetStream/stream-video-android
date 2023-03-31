@@ -50,7 +50,6 @@ public interface StreamVideo {
      * Represents the default call config when starting a call.
      */
     public val context: Context
-    public val config: StreamVideoConfig
     public val user: User
 
     val state: ClientState
