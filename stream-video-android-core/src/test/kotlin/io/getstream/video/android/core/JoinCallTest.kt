@@ -65,10 +65,12 @@ class JoinCallTest : IntegrationTestBase() {
 
         // TODO: with timeout doesn't fully work on latency measurements
         // related to java threading and coroutine compatibility
+        println("test")
         withTimeout(10) {
             val results = clientImpl.measureLatency(urls)
             println(results)
         }
+        println("testb")
 
 
 

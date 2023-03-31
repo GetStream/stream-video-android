@@ -495,7 +495,7 @@ internal class StreamVideoImpl internal constructor(
 
     internal suspend fun measureLatency(edgeUrls: List<String>): List<LatencyResult> = withContext(scope.coroutineContext) {
         val jobs = edgeUrls.map { async {
-                getLatencyMeasurements(it)
+            getLatencyMeasurementsOKHttp(it)
         } }
         val results = jobs.awaitAll().sortedBy { it.average }
         results

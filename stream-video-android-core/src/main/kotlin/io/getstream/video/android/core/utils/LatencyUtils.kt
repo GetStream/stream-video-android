@@ -16,13 +16,14 @@
 
 package io.getstream.video.android.core.utils
 
-import io.getstream.log.StreamLog
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.withTimeout
+import okhttp3.Call
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.URL
+import java.util.concurrent.TimeUnit
 
 private const val TAG = "Call:LatencyUtils"
 
@@ -33,6 +34,40 @@ data class LatencyResult(
     val failed: Throwable? = null
 )
 
+public fun getLatencyMeasurementsOKHttp(latencyUrl: String): LatencyResult {
+    val measurements = mutableListOf<Float>()
+    val connectionTimeoutInMs: Long = 3000
+
+    val client: OkHttpClient = OkHttpClient.Builder()
+        .connectTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
+        .writeTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
+        .readTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
+        .callTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
+        .build()
+
+    try {
+        repeat(3) {
+            val start = System.currentTimeMillis()
+
+            val okHttpRequest: Request = Request.Builder()
+                .url(latencyUrl) // 2-second response time
+                .build()
+            val call: Call = client.newCall(okHttpRequest)
+            val response: Response = call.execute()
+
+            val end = System.currentTimeMillis()
+            val seconds = (end - start) / 1000f
+            if (it!=0) {
+                measurements.add(seconds)
+            }
+        }
+    } catch (e: Throwable) {
+        measurements.add(Float.MAX_VALUE)
+        return LatencyResult(latencyUrl, measurements, measurements.average(), e)
+    }
+    return LatencyResult(latencyUrl, measurements, measurements.average())
+}
+
 /**
  * Calculates the latency to ping the server multiple times.
  *
@@ -41,6 +76,7 @@ data class LatencyResult(
  */
 public fun getLatencyMeasurements(latencyUrl: String): LatencyResult {
     val measurements = mutableListOf<Float>()
+    val connectionTimeoutInMs: Long = 3000
 
     try {
         repeat(3) {
