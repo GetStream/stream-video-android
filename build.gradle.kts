@@ -22,6 +22,7 @@ plugins {
     alias(libs.plugins.google.gms) apply false
     alias(libs.plugins.dokka) apply false
     alias(libs.plugins.spotless) apply false
+    alias(libs.plugins.paparazzi) apply false
 }
 
 subprojects {
