@@ -31,7 +31,7 @@ import com.squareup.moshi.Json
  * @param pushProvider * @param pushProviderName Name of the push provider configuration
  */
 
-internal data class DeviceFieldsRequest(
+data class DeviceFieldsRequest(
 
     /* Device ID */
     @Json(name = "id")

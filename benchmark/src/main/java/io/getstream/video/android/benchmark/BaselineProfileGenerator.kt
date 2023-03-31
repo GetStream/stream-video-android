@@ -16,12 +16,12 @@
 
 package io.getstream.video.android.benchmark
 
-import androidx.benchmark.macro.ExperimentalBaselineProfilesApi
+import androidx.benchmark.macro.ExperimentalStableBaselineProfilesApi
 import androidx.benchmark.macro.junit4.BaselineProfileRule
 import org.junit.Rule
 import org.junit.Test
 
-@ExperimentalBaselineProfilesApi
+@ExperimentalStableBaselineProfilesApi
 internal class BaselineProfileGenerator {
     @get:Rule
     internal val baselineProfileRule = BaselineProfileRule()

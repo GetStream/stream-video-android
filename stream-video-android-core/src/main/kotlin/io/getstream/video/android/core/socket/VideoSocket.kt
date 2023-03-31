@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.core.socket
 
-import io.getstream.video.android.core.errors.VideoError
+import io.getstream.result.StreamError
 import io.getstream.video.android.core.events.ConnectedEvent
 import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.model.CallMetadata
@@ -57,7 +57,7 @@ public interface VideoSocket {
      *
      * @param error The issue that caused the socket to fail.
      */
-    public fun onSocketError(error: VideoError)
+    public fun onSocketError(error: StreamError.NetworkError)
 
     /**
      * Triggered when an event is received from the socket.

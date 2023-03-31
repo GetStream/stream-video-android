@@ -19,13 +19,17 @@ package io.getstream.video.android.core
 import android.content.Context
 import androidx.lifecycle.Lifecycle
 import io.getstream.log.taggedLogger
+import io.getstream.result.Result
+import io.getstream.result.Result.Failure
+import io.getstream.result.Result.Success
+import io.getstream.result.StreamError
+import io.getstream.result.flatMap
 import io.getstream.video.android.core.call.CallClient
 import io.getstream.video.android.core.call.builder.CallClientBuilder
 import io.getstream.video.android.core.coordinator.CallCoordinatorClient
 import io.getstream.video.android.core.coordinator.state.UserState
 import io.getstream.video.android.core.engine.StreamCallEngine
 import io.getstream.video.android.core.engine.adapter.CoordinatorSocketListenerAdapter
-import io.getstream.video.android.core.errors.VideoError
 import io.getstream.video.android.core.events.CallCreatedEvent
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.lifecycle.LifecycleHandler
@@ -66,15 +70,8 @@ import io.getstream.video.android.core.socket.VideoSocket
 import io.getstream.video.android.core.socket.internal.SocketState
 import io.getstream.video.android.core.user.UserPreferences
 import io.getstream.video.android.core.user.UserPreferencesManager
-import io.getstream.video.android.core.utils.Failure
 import io.getstream.video.android.core.utils.INTENT_EXTRA_CALL_CID
-import io.getstream.video.android.core.utils.Result
-import io.getstream.video.android.core.utils.Success
-import io.getstream.video.android.core.utils.flatMap
 import io.getstream.video.android.core.utils.getLatencyMeasurements
-import io.getstream.video.android.core.utils.map
-import io.getstream.video.android.core.utils.onError
-import io.getstream.video.android.core.utils.onSuccess
 import io.getstream.video.android.core.utils.toCall
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -90,6 +87,7 @@ import org.openapitools.client.models.CallRequest
 import org.openapitools.client.models.GetCallEdgeServerRequest
 import org.openapitools.client.models.GetCallEdgeServerResponse
 import org.openapitools.client.models.GetOrCreateCallRequest
+import org.openapitools.client.models.JoinCallRequest
 import org.openapitools.client.models.MemberRequest
 import org.openapitools.client.models.RequestPermissionRequest
 import org.openapitools.client.models.SendEventRequest
@@ -202,8 +200,8 @@ internal class StreamVideoImpl(
 
     private fun storeDevice(result: Result<Device>) {
         if (result is Success) {
-            logger.d { "[storeDevice] device: ${result.data}" }
-            val device = result.data
+            logger.d { "[storeDevice] device: ${result.value}" }
+            val device = result.value
             val preferences = UserPreferencesManager.initialize(context)
 
             preferences.storeDevice(device)
@@ -309,7 +307,7 @@ internal class StreamVideoImpl(
                 id = call.id,
                 type = call.type,
                 connectionId = socket.getConnectionId(),
-                request = GetOrCreateCallRequest()
+                request = JoinCallRequest()
             )
             if (joinResult !is Success) {
                 logger.e { "[joinCallInternal] failed joinResult: $joinResult" }
@@ -317,7 +315,7 @@ internal class StreamVideoImpl(
             }
             logger.v { "[joinCallInternal] joinResult: $joinResult" }
 
-            val validEdges = joinResult.data.edges.filter {
+            val validEdges = joinResult.value.edges.filter {
                 it.latencyUrl.isNotBlank() && it.name.isNotBlank()
             }
 
@@ -336,11 +334,11 @@ internal class StreamVideoImpl(
             when (selectEdgeServerResult) {
                 is Success -> {
                     socket.updateCallState(call)
-                    val credentials = selectEdgeServerResult.data.credentials
+                    val credentials = selectEdgeServerResult.value.credentials
                     val url = credentials.server.url
                     val iceServers =
                         selectEdgeServerResult
-                            .data
+                            .value
                             .credentials
                             .iceServers
                             .map { it.toIceServer() }
@@ -356,11 +354,15 @@ internal class StreamVideoImpl(
                         )
                     )
                 }
-                is Failure -> Failure(selectEdgeServerResult.error)
+                is Failure -> Failure(selectEdgeServerResult.value)
             }
         } catch (error: Throwable) {
             logger.e(error) { "[joinCallInternal] failed: $error" }
-            Failure(VideoError(error.message, error))
+            Failure(
+                StreamError.ThrowableError(
+                    error.message ?: "Couldn't join a call internal", error
+                )
+            )
         }
     }
 
@@ -871,7 +873,9 @@ internal class StreamVideoImpl(
                 }
             } catch (e: Throwable) {
                 logger.e { "[acceptCall] failed: $e" }
-                Failure(VideoError(e.message, e))
+                Failure(
+                    StreamError.ThrowableError(e.message ?: "Couldn't accept a call.", e)
+                )
             }
         }
 
@@ -899,13 +903,13 @@ internal class StreamVideoImpl(
     override suspend fun handlePushMessage(payload: Map<String, Any>): Result<Unit> =
         withContext(scope.coroutineContext) {
             val callCid = payload[INTENT_EXTRA_CALL_CID] as? String
-                ?: return@withContext Failure(VideoError("Missing Call CID!"))
+                ?: return@withContext Failure(StreamError.GenericError("Missing Call CID!"))
 
             val (type, id) = callCid.toTypeAndId()
 
             when (val result = getOrCreateCall(type, id, emptyList(), false)) {
                 is Success -> {
-                    val callMetadata = result.data
+                    val callMetadata = result.value
 
                     val event = CallCreatedEvent(
                         callCid = callMetadata.cid,

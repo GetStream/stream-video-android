@@ -81,6 +81,7 @@ android {
 dependencies {
     api(libs.stream.webrtc)
     api(libs.stream.webrtc.ui)
+    api(libs.stream.result)
 
     implementation(libs.androidx.material)
     implementation(libs.androidx.appcompat)

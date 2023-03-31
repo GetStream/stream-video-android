@@ -20,11 +20,10 @@ import android.os.Handler
 import android.os.Looper
 import androidx.annotation.VisibleForTesting
 import io.getstream.log.taggedLogger
+import io.getstream.result.StreamError
 import io.getstream.video.android.core.coordinator.state.UserState
 import io.getstream.video.android.core.errors.DisconnectCause
-import io.getstream.video.android.core.errors.VideoError
 import io.getstream.video.android.core.errors.VideoErrorCode
-import io.getstream.video.android.core.errors.VideoNetworkError
 import io.getstream.video.android.core.events.ConnectedEvent
 import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
@@ -159,15 +158,15 @@ internal class VideoSocketImpl(
     }
         private set
 
-    override fun onSocketError(error: VideoError) {
+    override fun onSocketError(error: StreamError.NetworkError) {
         logger.e { "[onSocketError] state: $state, error: $error" }
         if (state !is State.DisconnectedPermanently) {
             callListeners { it.onError(error) }
-            (error as? VideoNetworkError)?.let(::onNetworkError)
+            (error as? StreamError.NetworkError)?.let(::onNetworkError)
         }
     }
 
-    private fun onNetworkError(error: VideoNetworkError) {
+    private fun onNetworkError(error: StreamError.NetworkError) {
         when (error.streamCode) {
             VideoErrorCode.PARSER_ERROR.code,
             VideoErrorCode.CANT_PARSE_CONNECTION_EVENT.code,
@@ -338,8 +337,8 @@ internal class VideoSocketImpl(
             override fun toString(): String = "NetworkDisconnected"
         }
 
-        data class DisconnectedTemporarily(val error: VideoNetworkError?) : State()
-        data class DisconnectedPermanently(val error: VideoNetworkError?) : State()
+        data class DisconnectedTemporarily(val error: StreamError.NetworkError?) : State()
+        data class DisconnectedPermanently(val error: StreamError.NetworkError?) : State()
         object DisconnectedByRequest : State() {
             override fun toString(): String = "DisconnectedByRequest"
         }

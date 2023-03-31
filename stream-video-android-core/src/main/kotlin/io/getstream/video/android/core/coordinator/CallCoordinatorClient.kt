@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.coordinator
 
+import io.getstream.result.Result
 import io.getstream.video.android.core.model.CallInfo
 import io.getstream.video.android.core.model.CallRecordingData
 import io.getstream.video.android.core.model.CallUser
@@ -24,12 +25,12 @@ import io.getstream.video.android.core.model.QueriedCalls
 import io.getstream.video.android.core.model.ReactionData
 import io.getstream.video.android.core.model.StreamCallCid
 import io.getstream.video.android.core.model.User
-import io.getstream.video.android.core.utils.Result
 import org.openapitools.client.models.BlockUserRequest
 import org.openapitools.client.models.GetCallEdgeServerRequest
 import org.openapitools.client.models.GetCallEdgeServerResponse
 import org.openapitools.client.models.GetOrCreateCallRequest
 import org.openapitools.client.models.GetOrCreateCallResponse
+import org.openapitools.client.models.JoinCallRequest
 import org.openapitools.client.models.JoinCallResponse
 import org.openapitools.client.models.MuteUsersRequest
 import org.openapitools.client.models.QueryCallsRequest
@@ -95,7 +96,7 @@ internal interface CallCoordinatorClient {
         id: String,
         type: String,
         connectionId: String,
-        request: GetOrCreateCallRequest
+        request: JoinCallRequest
     ): Result<JoinCallResponse>
 
     /**

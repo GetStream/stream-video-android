@@ -20,6 +20,7 @@ import io.getstream.video.android.core.utils.toCallUser
 import org.openapitools.client.models.CallCreatedEvent
 import org.openapitools.client.models.CallResponse
 import org.openapitools.client.models.MemberResponse
+import org.openapitools.client.models.OwnCapability
 import java.io.Serializable
 import java.util.Date
 
@@ -65,7 +66,7 @@ public data class CallInfo(
 public data class CallDetails(
     val memberUserIds: List<String>,
     val members: Map<String, CallUser>,
-    val ownCapabilities: List<String>
+    val ownCapabilities: List<OwnCapability>
 ) : Serializable
 
 public data class CallEgress(

@@ -2,11 +2,11 @@
 // protoc-gen-go-vtproto version: v0.3.0
 // source: video/sfu/signal_rpc/signal.proto
 
-package sfu_signal_rpc
+package signal_rpc
 
 import (
 	fmt "fmt"
-	models "github.com/GetStream/video-proto/protobuf/video/sfu/models"
+	models "github.com/GetStream/protocol/protobuf/video/sfu/models"
 	proto "google.golang.org/protobuf/proto"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	io "io"
