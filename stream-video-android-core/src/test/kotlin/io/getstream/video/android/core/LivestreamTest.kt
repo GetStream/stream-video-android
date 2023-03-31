@@ -53,14 +53,14 @@ class LivestreamTest : IntegrationTestBase() {
         val result = call.startRecording()
         assertSuccess(result)
         val result2 = call.stopRecording()
-        assertSuccess(result)
+        assertSuccess(result2)
     }
 
     @Test
     fun `advanced recording`() = runTest {
-        // TODO:
-        // - select a template
-        // - quality
+        // TODO: server support
+        // simple layouts to start, roadmap for more options after 1.0
+        // see notion
     }
 
     @Test
@@ -71,6 +71,7 @@ class LivestreamTest : IntegrationTestBase() {
         assertSuccess(result)
         val result2 = call.stopBroadcasting()
         assertSuccess(result2)
+        // TODO: where is the HLS url?
     }
 
     @Test
@@ -78,6 +79,14 @@ class LivestreamTest : IntegrationTestBase() {
         val call = client.call("default", randomUUID())
         // TODO: not implemented on the server
         // Create a publishing token
+        // TODO: do we ask the coordinator for it? or generate it locally?
+
+    }
+
+    @Test
+    fun `join a call with a viewing only token, that's not authenticated`() = runTest {
+        // TODO: not implemented on the server
+        val call = client.call("default", randomUUID(), "mytoken")
 
     }
 
@@ -96,7 +105,8 @@ class LivestreamTest : IntegrationTestBase() {
     @Test
     fun `mute the audio of the call you are receiving`() = runTest {
         val call = client.call("default", randomUUID())
-        // TODO: not implemented on the server
+        // TODO: This we can implement client side, should be disabled by default
+        // TODO: Call type setting to mute incoming audio by default
     }
 
 }

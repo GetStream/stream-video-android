@@ -27,6 +27,13 @@ import io.getstream.video.android.core.socket.internal.VideoSocketImpl
 import io.getstream.video.android.core.user.UserPreferences
 import kotlinx.coroutines.CoroutineScope
 
+/**
+ * Internal API module
+ * - 5 different retrofit connections
+ * - preferences
+ * - auth and sensible timeouts
+ * - network connectivity
+ */
 internal class VideoModule(
     private val appContext: Context,
     private val preferences: UserPreferences,

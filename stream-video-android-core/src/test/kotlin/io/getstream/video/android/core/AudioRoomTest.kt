@@ -78,7 +78,7 @@ class AudioRoomTest : IntegrationTestBase() {
 
     @Test
     fun `sometimes listeners will join as an anonymous user`() = runTest {
-        // TODO
+        // TODO support and test this
     }
 
     @Test

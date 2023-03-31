@@ -89,10 +89,10 @@ public class StreamVideoBuilder(
     /** Support for different push providers */
     private val pushDeviceGenerators: List<PushDeviceGenerator> = emptyList(),
 ) {
+    /** URL overwrite to allow for testing against a local instance of video */
     var videoDomain: String = "video-edge-frankfurt-ce1.stream-io-api.com"
 
     public fun build(): StreamVideo {
-        /** URL overwrite to allow for testing against a local instance of video */
 
         val androidInputs: Set<CallAndroidInput> = emptySet()
         val inputLauncher: CallAndroidInputLauncher = DefaultCallAndroidInputLauncher
@@ -129,8 +129,6 @@ public class StreamVideoBuilder(
         )
 
         val httpModule = HttpModule.getOrCreate(loggingLevel.httpLoggingLevel, preferences)
-
-
 
         val socket: VideoSocketImpl = module.socket() as VideoSocketImpl
 
