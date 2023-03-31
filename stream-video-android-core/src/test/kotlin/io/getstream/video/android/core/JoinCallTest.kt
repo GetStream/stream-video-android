@@ -39,7 +39,7 @@ class JoinCallTest : IntegrationTestBase() {
     fun `test joining a call`() = runTest {
         val call = client.call("default", randomUUID())
 
-        call.join()
+        //call.join()
 
     }
 

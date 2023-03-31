@@ -22,18 +22,23 @@ import android.hardware.camera2.CameraManager
 import android.hardware.camera2.CameraMetadata
 import android.media.AudioAttributes.ALLOW_CAPTURE_BY_ALL
 import android.media.AudioManager
+import android.net.ConnectivityManager
 import android.os.Build
 import androidx.core.content.getSystemService
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.Call2
+import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoImpl
 import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.call.connection.StreamPeerConnection
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.getstream.video.android.core.call.signal.socket.SfuSocket
+import io.getstream.video.android.core.call.signal.socket.SfuSocketFactory
+import io.getstream.video.android.core.call.signal.socket.SfuSocketImpl
 import io.getstream.video.android.core.call.signal.socket.SfuSocketListener
 import io.getstream.video.android.core.call.state.ConnectionState
 import io.getstream.video.android.core.call.utils.stringify
+import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.errors.DisconnectCause
 import io.getstream.video.android.core.errors.VideoError
 import io.getstream.video.android.core.events.AudioLevelChangedEvent
@@ -51,6 +56,8 @@ import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
 import io.getstream.video.android.core.filter.InFilterObject
 import io.getstream.video.android.core.filter.toMap
+import io.getstream.video.android.core.internal.module.HttpModule
+import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.model.Call
 import io.getstream.video.android.core.model.CallParticipantState
 import io.getstream.video.android.core.model.CallSettings
@@ -62,6 +69,7 @@ import io.getstream.video.android.core.model.StreamCallGuid
 import io.getstream.video.android.core.model.StreamCallId
 import io.getstream.video.android.core.model.StreamPeerType
 import io.getstream.video.android.core.model.toPeerType
+import io.getstream.video.android.core.user.UserPreferencesManager
 import io.getstream.video.android.core.utils.Failure
 import io.getstream.video.android.core.utils.Result
 import io.getstream.video.android.core.utils.Success
@@ -82,6 +90,9 @@ import kotlinx.coroutines.flow.first
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import org.webrtc.AudioTrack
 import org.webrtc.Camera2Capturer
 import org.webrtc.Camera2Enumerator
@@ -98,6 +109,8 @@ import org.webrtc.SurfaceTextureHelper
 import org.webrtc.VideoCapturer
 import org.webrtc.VideoTrack
 import retrofit2.HttpException
+import retrofit2.Retrofit
+import retrofit2.converter.wire.WireConverterFactory
 import stream.video.sfu.event.JoinRequest
 import stream.video.sfu.event.JoinResponse
 import stream.video.sfu.models.CallState
@@ -133,23 +146,71 @@ import kotlin.random.Random
  *
  *
  */
-internal class ActiveSFUSession(
-    private val context: Context,
-    private val client: StreamVideoImpl,
-    private val scope: CoroutineScope,
-    private val callGuid: StreamCallGuid,
+public class ActiveSFUSession(
+    private val client: StreamVideo,
     private val call2: Call2,
-    private inline val getCurrentUserId: () -> String,
-    private inline val getSfuToken: () -> SfuToken,
-    private val signalService: SignalServerService,
-    private val sfuSocket: SfuSocket,
+    private val SFUUrl: String,
+    private val SFUToken: String,
+    private val latencyResults: Map<String, List<Float>>,
     private val remoteIceServers: List<IceServer>,
 ) : CallClient, SfuSocketListener {
-
+    private val context = client.context
     private val logger by taggedLogger("Call:WebRtcClient")
 
     private var connectionState: ConnectionState = ConnectionState.DISCONNECTED
     private var sessionId: String = ""
+    private val scope = CoroutineScope(DispatcherProvider.IO)
+
+    private val networkStateProvider: NetworkStateProvider by lazy {
+        NetworkStateProvider(
+            connectivityManager = client.context
+                .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        )
+    }
+
+    private lateinit var okHttpClient: OkHttpClient
+    private lateinit var sfuSocket: SfuSocketImpl
+
+    init {
+        val preferences = UserPreferencesManager.getPreferences()
+        val user = preferences.getUserCredentials()
+        if (preferences.getApiKey().isBlank() ||
+            user?.id.isNullOrBlank() ||
+            preferences.getSfuToken().isBlank()
+        ) throw IllegalArgumentException("The API key, user ID and token cannot be empty!")
+
+        val updatedSignalUrl = SFUUrl.removeSuffix(suffix = "/twirp")
+        val httpModule = HttpModule.getOrCreate(
+            loggingLevel = HttpLoggingInterceptor.Level.NONE,
+            credentialsProvider = preferences
+        ).apply {
+            this.baseUrl = updatedSignalUrl.toHttpUrl()
+        }
+
+        val socketFactory = SfuSocketFactory(httpModule.okHttpClient)
+
+
+        sfuSocket = SfuSocketImpl(
+            wssUrl = "$updatedSignalUrl/ws".replace("https", "wss"),
+            networkStateProvider = networkStateProvider,
+            coroutineScope = CoroutineScope(Dispatchers.IO),
+            sfuSocketFactory = socketFactory
+        )
+        okHttpClient = httpModule.okHttpClient
+    }
+
+
+    private val signalRetrofitClient: Retrofit by lazy {
+        Retrofit.Builder()
+            .client(okHttpClient)
+            .addConverterFactory(WireConverterFactory.create())
+            .baseUrl(SFUUrl)
+            .build()
+    }
+
+    internal val signalService: SignalServerService by lazy {
+        signalRetrofitClient.create(SignalServerService::class.java)
+    }
 
     // ensure we parse errors and run on the right coroutineContext
     internal suspend fun <T : Any> wrapAPICall(apiCall: suspend () -> T): Result<T> {
@@ -469,7 +530,7 @@ internal class ActiveSFUSession(
         logger.d { "[buildCall] #sfu; sessionId: $sessionId" }
         return Call(
             context = context,
-            getCurrentUserId = getCurrentUserId,
+            getCurrentUserId = {client.user.id},
             eglBase = peerConnectionFactory.eglBase,
         )
     }
@@ -538,8 +599,8 @@ internal class ActiveSFUSession(
             is Success -> {
                 createPeerConnections(autoPublish)
                 loadParticipantsData(
-                    callId = callGuid.id,
-                    callType = callGuid.type,
+                    callId = call2.id,
+                    callType = call2.type,
                     callState = result.data.call_state,
                     callSettings = callSettings
                 )
@@ -600,7 +661,7 @@ internal class ActiveSFUSession(
 
         val request = JoinRequest(
             session_id = sessionId,
-            token = getSfuToken(),
+            token = "TODO: TOKEN",
             subscriber_sdp = sdp
         )
         logger.d { "[executeJoinRequest] request: $request" }
@@ -730,12 +791,11 @@ internal class ActiveSFUSession(
     private suspend fun addParticipant(event: ParticipantJoinedEvent) {
         val query = InFilterObject("id", setOf(event.participant.user_id)).toMap()
 
-        val cid = "$callGuid.id:$callGuid.type"
         val userQueryResult = client.queryMembers(
-            callGuid.id,
-            callGuid.type,
+            call2.type,
+            call2.id,
             QueryMembersData(
-                streamCallCid = cid,
+                streamCallCid = call2.cid,
                 filters = query
             )
         )
@@ -1037,7 +1097,7 @@ internal class ActiveSFUSession(
 
     private fun updateParticipantsSubscriptions(participants: List<CallParticipantState>) {
         val subscriptions = mutableMapOf<CallParticipantState, VideoDimension>()
-        val userId = getCurrentUserId()
+        val userId = client.user.id
 
         for (user in participants) {
             if (user.id != userId) {

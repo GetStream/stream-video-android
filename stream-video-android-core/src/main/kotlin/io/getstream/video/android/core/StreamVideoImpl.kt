@@ -21,8 +21,6 @@ import androidx.lifecycle.Lifecycle
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.api.ClientRPCService
 import io.getstream.video.android.core.call.CallClient
-import io.getstream.video.android.core.call.builder.CallClientBuilder
-import io.getstream.video.android.core.coordinator.state.UserState
 import io.getstream.video.android.core.errors.VideoBackendError
 import io.getstream.video.android.core.errors.VideoError
 import io.getstream.video.android.core.events.CallCreatedEvent
@@ -111,17 +109,15 @@ class EventSubscription(
  * @param lifecycle The lifecycle used to observe changes in the process. // TODO - docs
  */
 internal class StreamVideoImpl(
-    private val context: Context,
+    override val context: Context,
     private val scope: CoroutineScope,
     override val config: StreamVideoConfig,
-    private val user: User,
+    override val user: User,
     private val lifecycle: Lifecycle,
     private val loggingLevel: LoggingLevel,
     private val preferences: UserPreferences,
     private val socket: VideoSocket,
     private val socketStateService: SocketStateService,
-    // TODO: Change the user state
-    private val userState: UserState,
     private val networkStateProvider: NetworkStateProvider,
     private val callCoordinatorService: ClientRPCService,
     private val videoCallApi: VideoCallsApi,
@@ -809,17 +805,11 @@ internal class StreamVideoImpl(
      * Attempts to reconnect the socket if it's in a disconnected state and the user is available.
      */
     private fun reconnectSocket() {
-        val user = userState.user.value
 
         if (socketStateService.state !is SocketState.Connected && user.id.isNotBlank()) {
             socket.reconnect()
         }
     }
-
-    /**
-     * @see StreamVideo.getUser
-     */
-    override fun getUser(): User = userState.user.value
 
     /**
      * @see StreamVideo.addSocketListener
@@ -847,30 +837,6 @@ internal class StreamVideoImpl(
      * @return An instance of [CallClient] ready to connect to a call. Make sure to call
      * [CallClient.connectToCall] when you're ready to fully join a call.
      */
-    private fun createCallClient(
-        callGuid: StreamCallGuid,
-        signalUrl: String,
-        sfuToken: SfuToken,
-        call2: Call2,
-        iceServers: List<IceServer>
-    ): CallClient {
-        logger.i { "[createCallClient] signalUrl: $signalUrl, sfuToken: $sfuToken, iceServers: $iceServers" }
-
-        return CallClientBuilder(
-            context = context,
-            client = this,
-            preferences = preferences,
-            networkStateProvider = networkStateProvider,
-            signalUrl = signalUrl,
-            call=call2,
-            iceServers = iceServers,
-            callGuid = callGuid
-        ).apply {
-            loggingLevel(loggingLevel)
-        }.build().also {
-            callClientHolder.value = it
-        }
-    }
 
     /**
      * @see StreamVideo.getActiveCallClient

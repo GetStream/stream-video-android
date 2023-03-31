@@ -18,8 +18,8 @@ package io.getstream.video.android.core.internal.module
 
 import android.content.Context
 import android.net.ConnectivityManager
-import io.getstream.video.android.core.coordinator.state.UserState
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
+import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.socket.SocketStateService
 import io.getstream.video.android.core.socket.VideoSocket
 import io.getstream.video.android.core.socket.internal.SocketFactory
@@ -30,7 +30,8 @@ import kotlinx.coroutines.CoroutineScope
 internal class VideoModule(
     private val appContext: Context,
     private val preferences: UserPreferences,
-    private val videoDomain: String
+    private val videoDomain: String,
+    private val user: User,
 ) {
     /**
      * The [CoroutineScope] used for all business logic related operations.
@@ -59,15 +60,6 @@ internal class VideoModule(
     }
 
     /**
-     * User state that provides the information about the current user.
-     */
-    private val userState: UserState by lazy {
-        UserState().apply {
-            setUser(preferences.getUserCredentials())
-        }
-    }
-
-    /**
      * @return The WebSocket handler that is used to connect to different calls.
      */
     internal fun socket(): VideoSocket {
@@ -76,19 +68,13 @@ internal class VideoModule(
         return VideoSocketImpl(
             wssUrl = wssURL,
             preferences = preferences,
+            user = user,
             socketFactory = socketFactory,
             networkStateProvider = networkStateProvider,
-            userState = userState,
             coroutineScope = scope
         )
     }
 
-    /**
-     * @return The [UserState] that serves us information about the currently logged in user.
-     */
-    internal fun userState(): UserState {
-        return userState
-    }
 
     internal fun socketStateService(): SocketStateService = socketStateService
 

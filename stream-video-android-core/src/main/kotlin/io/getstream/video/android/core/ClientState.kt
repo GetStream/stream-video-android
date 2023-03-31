@@ -19,6 +19,7 @@ package io.getstream.video.android.core
 import io.getstream.video.android.core.errors.VideoError
 import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.model.Call
+import io.getstream.video.android.core.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 
 sealed class ConnectionState {
@@ -33,20 +34,24 @@ class ClientState {
     fun handleEvent(event: VideoEvent) {
     }
 
+    // TODO: Hide mutability
+    public val currentUser: MutableStateFlow<User?> = MutableStateFlow(null)
+
+
     /**
      * connectionState shows if we've established a connection with the coordinator
      */
     // TODO: Hide mutability
-    private val connection: MutableStateFlow<ConnectionState> = MutableStateFlow(ConnectionState.PreConnect())
+    public val connection: MutableStateFlow<ConnectionState> = MutableStateFlow(ConnectionState.PreConnect())
 
     /**
      * Incoming call. True when we receive an event or notification with an incoming call
      */
     // TODO: Should be a call object or similar. Not sure what's easiest
-    private val incomingCall: MutableStateFlow<Call?> = MutableStateFlow(null)
+    public val incomingCall: MutableStateFlow<Call?> = MutableStateFlow(null)
 
     /**
      * Active call. The currently active call
      */
-    private val activeCall: MutableStateFlow<Call2?> = MutableStateFlow(null)
+    public val activeCall: MutableStateFlow<Call2?> = MutableStateFlow(null)
 }

@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core
 
+import android.content.Context
 import io.getstream.video.android.core.call.CallClient
 import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.model.Call
@@ -48,7 +49,9 @@ public interface StreamVideo {
     /**
      * Represents the default call config when starting a call.
      */
+    public val context: Context
     public val config: StreamVideoConfig
+    public val user: User
 
     val state: ClientState
 
@@ -381,13 +384,6 @@ public interface StreamVideo {
      * Clears the internal user state, removes push notification devices and clears the call state.
      */
     public fun logOut()
-
-    /**
-     * Gets the current user information.
-     *
-     * @return The currently logged in [User].
-     */
-    public fun getUser(): User
 
     /**
      * Adds a listener to the active socket connection, to observe various events.

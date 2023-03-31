@@ -20,7 +20,6 @@ import android.os.Handler
 import android.os.Looper
 import androidx.annotation.VisibleForTesting
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.core.coordinator.state.UserState
 import io.getstream.video.android.core.errors.DisconnectCause
 import io.getstream.video.android.core.errors.VideoError
 import io.getstream.video.android.core.errors.VideoErrorCode
@@ -29,6 +28,7 @@ import io.getstream.video.android.core.events.ConnectedEvent
 import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.model.CallMetadata
+import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.socket.SocketListener
 import io.getstream.video.android.core.socket.VideoSocket
 import io.getstream.video.android.core.user.UserPreferences
@@ -60,9 +60,9 @@ import kotlin.properties.Delegates
 internal class VideoSocketImpl(
     private val wssUrl: String,
     private val preferences: UserPreferences,
+    private val user: User,
     private val socketFactory: SocketFactory,
     private val networkStateProvider: NetworkStateProvider,
-    private val userState: UserState,
     private val coroutineScope: CoroutineScope,
 ) : VideoSocket {
     public var eventListener: ((event: VideoEvent) -> Unit)? = null
@@ -100,7 +100,7 @@ internal class VideoSocketImpl(
                 (state as? State.Connected)?.let {
                     sendPing(
                         WebsocketHealthcheck(
-                            user_id = userState.user.value.id,
+                            user_id = user.id,
                             client_id = clientId,
                             call_type = call?.type ?: "",
                             call_id = call?.id ?: "",
@@ -232,7 +232,6 @@ internal class VideoSocketImpl(
     }
 
     override fun authenticateUser() {
-        val user = userState.user.value
         logger.d { "[authenticateUser] user: $user" }
         val token = preferences.getUserToken()
 

@@ -101,6 +101,18 @@ public class StreamVideoBuilder(
         if (apiKey.isBlank()
         ) throw IllegalArgumentException("The API key can not be empty")
 
+
+        /**
+         * TODO, both the ActiveSFUSession and StreamVideoImpl need a few shared things
+         * - preferences
+         * - httpModule
+         * - networkStateProvider
+         * We should wrap this in a utility class that we pass to both the client and active SFU session builder
+         */
+
+
+
+        // TODO: Don't user userpreference manager
         val preferences = UserPreferencesManager.initialize(context).apply {
             storeUserCredentials(user)
             storeApiKey(apiKey)
@@ -109,17 +121,18 @@ public class StreamVideoBuilder(
             }
         }
 
-        val httpModule = HttpModule.getOrCreate(loggingLevel.httpLoggingLevel, preferences)
-
         val module = VideoModule(
             appContext = context,
             preferences = preferences,
-            videoDomain = videoDomain
+            videoDomain = videoDomain,
+            user = user,
         )
 
-        val socket: VideoSocketImpl = module.socket() as VideoSocketImpl
+        val httpModule = HttpModule.getOrCreate(loggingLevel.httpLoggingLevel, preferences)
 
-        val userState = module.userState()
+
+
+        val socket: VideoSocketImpl = module.socket() as VideoSocketImpl
 
         val callCoordinatorClientModule = CallCoordinatorClientModule(
             user = user,
@@ -143,7 +156,6 @@ public class StreamVideoBuilder(
             lifecycle = lifecycle,
             socket = socket,
             socketStateService = module.socketStateService(),
-            userState = userState,
             networkStateProvider = module.networkStateProvider(),
             callCoordinatorService = callCoordinatorClientModule.oldService,
             videoCallApi = callCoordinatorClientModule.videoCallsApi,

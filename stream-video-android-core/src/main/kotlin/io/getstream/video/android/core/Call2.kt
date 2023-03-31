@@ -399,7 +399,11 @@ public class Call2(
                 .iceServers
                 .map { it.toIceServer() }
 
-        activeSession = ActiveSFUSession(client, this, url, credentials.token, iceServers, latencyResults)
+        activeSession = ActiveSFUSession(
+            client=client, call2=this,
+            SFUUrl =url, SFUToken=credentials.token,
+            remoteIceServers=iceServers, latencyResults=latencyResults
+        )
         return Success<ActiveSFUSession>(data= activeSession!!)
 
     }
