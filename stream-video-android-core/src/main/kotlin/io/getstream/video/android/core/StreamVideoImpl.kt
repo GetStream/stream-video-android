@@ -51,26 +51,15 @@ import io.getstream.video.android.core.socket.SocketListener
 import io.getstream.video.android.core.socket.internal.SocketState
 import io.getstream.video.android.core.socket.internal.VideoSocketImpl
 import io.getstream.video.android.core.user.UserPreferencesManager
-import io.getstream.video.android.core.utils.Failure
-import io.getstream.video.android.core.utils.INTENT_EXTRA_CALL_CID
-import io.getstream.video.android.core.utils.Result
-import io.getstream.video.android.core.utils.Success
-import io.getstream.video.android.core.utils.getLatencyMeasurements
-import io.getstream.video.android.core.utils.map
+import io.getstream.video.android.core.utils.*
 import io.getstream.video.android.core.utils.toCall
 import io.getstream.video.android.core.utils.toCallUser
 import io.getstream.video.android.core.utils.toEdge
 import io.getstream.video.android.core.utils.toQueriedCalls
 import io.getstream.video.android.core.utils.toRecording
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.openapitools.client.models.*
@@ -81,6 +70,7 @@ import stream.video.coordinator.client_v1_rpc.MemberInput
 import stream.video.coordinator.client_v1_rpc.UpsertCallMembersRequest
 import stream.video.coordinator.push_v1.DeviceInput
 import kotlin.coroutines.Continuation
+import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 class EventSubscription(
@@ -99,12 +89,24 @@ class EventSubscription(
  */
 internal class StreamVideoImpl internal constructor(
     override val context: Context,
-    private val scope: CoroutineScope,
+    internal val scope: CoroutineScope,
     override val user: User,
     private val lifecycle: Lifecycle,
     private val loggingLevel: LoggingLevel,
     internal val connectionModule: ConnectionModule,
-) : StreamVideo {
+) : StreamVideo, SocketListener {
+
+    override fun onEvent(event: VideoEvent) {
+        // TODO: maybe merge fire event into this?
+        println("engine eventlistener received an event: $event")
+        fireEvent(event)
+        nextEventContinuation?.let { continuation ->
+            if (!nextEventCompleted) {
+                continuation.resume(value=event)
+            }
+            nextEventCompleted = true
+        }
+    }
 
     override val state = ClientState()
     private val logger by taggedLogger("Call:StreamVideo")
@@ -238,7 +240,13 @@ internal class StreamVideoImpl internal constructor(
             lifecycleObserver.observe()
         }
 
-        // TODO: remove this, but for now it helps avoid bugs
+        // listen to socket events
+        connectionModule.coordinatorSocket.addListener(this)
+
+        // TODO: Find the event listener
+
+
+        // TODO: Make this optional
         runBlocking(scope.coroutineContext) {
             val socketImpl = connectionModule.coordinatorSocket as VideoSocketImpl
             val result = socketImpl.connect()
@@ -435,15 +443,13 @@ internal class StreamVideoImpl internal constructor(
                 it.latencyUrl.isNotBlank() && it.name.isNotBlank()
             }
 
-            val latencyResults = validEdges.associate {
-                it.name to measureLatency(it.latencyUrl)
-            }
+            val latencyResults = measureLatency(validEdges.map { it.latencyUrl })
             logger.v { "[joinCallInternal] latencyResults: $latencyResults" }
             val selectEdgeServerResult = selectEdgeServer(
                 type = call.type,
                 id = call.id,
                 request = GetCallEdgeServerRequest(
-                    latencyMeasurements = latencyResults
+                    latencyMeasurements = latencyResults.associate { it.latencyUrl to it.measurements }
                 )
             )
             logger.v { "[joinCallInternal] selectEdgeServerResult: $selectEdgeServerResult" }
@@ -486,9 +492,13 @@ internal class StreamVideoImpl internal constructor(
      * @return [List] of [Float] values which represent measurements from ping connections.
      */
     // TODO - measure latencies in the following way:
-    // 5x links/servers in parallel, 3s timeout, 3x retries
-    private suspend fun measureLatency(edgeUrl: String): List<Float> = withContext(Dispatchers.IO) {
-        getLatencyMeasurements(edgeUrl)
+
+    internal suspend fun measureLatency(edgeUrls: List<String>): List<LatencyResult> = withContext(scope.coroutineContext) {
+        val jobs = edgeUrls.map { async {
+                getLatencyMeasurements(it)
+        } }
+        val results = jobs.awaitAll().sortedBy { it.average }
+        results
     }
 
     /**

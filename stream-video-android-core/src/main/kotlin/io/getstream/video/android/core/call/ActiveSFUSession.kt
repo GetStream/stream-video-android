@@ -175,6 +175,8 @@ public class ActiveSFUSession internal constructor(
         // TODO: setup the connection module properly
         sfuConnectionModule = connectionModule.createSFUConnectionModule(SFUUrl, SFUToken)
 
+        sfuConnectionModule.sfuSocket.addListener(this)
+        sfuConnectionModule.sfuSocket.connectSocket()
     }
 
     // ensure we parse errors and run on the right coroutineContext
@@ -280,11 +282,6 @@ public class ActiveSFUSession internal constructor(
     private var isCapturingVideo: Boolean = false
     private var captureResolution: CameraEnumerationAndroid.CaptureFormat? = null
 
-    init {
-        sfuConnectionModule.sfuSocket.addListener(this)
-        // TODO sfuSocket.addListener(SfuSocketListenerAdapter(callEngine))
-        sfuConnectionModule.sfuSocket.connectSocket()
-    }
 
     override fun clear() {
         logger.i { "[clear] #sfu; no args" }
@@ -730,6 +727,10 @@ public class ActiveSFUSession internal constructor(
     }
 
     override fun onEvent(event: SfuDataEvent) {
+        val clientImpl = client as StreamVideoImpl
+        // trigger an event in the client as well for SFU events. makes it easier to subscribe
+        clientImpl.fireEvent(event, call2.cid)
+
         coroutineScope.launch {
             logger.v { "[onRtcEvent] event: $event" }
             sfuEvents.emit(event)

@@ -1,15 +1,18 @@
 package io.getstream.video.android.core
 
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class SessionTest : IntegrationTestBase() {
+class ActiveSFUSessionTest : IntegrationTestBase() {
 
     @Test
-    fun camera() {
+    fun camera() = runTest {
         val call = client.call("default", randomUUID())
+        val session = call.join()
+
         // what's the best user experience for:
         // internal we would have call.state.activeSFUSession
         // with the helpers as listed below

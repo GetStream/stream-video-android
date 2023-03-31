@@ -19,6 +19,9 @@ package io.getstream.video.android.core
 import com.google.common.truth.Truth.assertThat
 import io.getstream.video.android.core.events.*
 import io.getstream.video.android.core.model.*
+import io.getstream.video.android.core.utils.LatencyResult
+import io.getstream.video.android.core.utils.getLatencyMeasurements
+import kotlinx.coroutines.*
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -27,6 +30,7 @@ import org.robolectric.RobolectricTestRunner
 import stream.video.sfu.event.ConnectionQualityInfo
 import stream.video.sfu.models.ConnectionQuality
 import stream.video.sfu.models.Participant
+import java.net.SocketTimeoutException
 import java.util.*
 
 @RunWith(RobolectricTestRunner::class)
@@ -39,12 +43,34 @@ class JoinCallTest : IntegrationTestBase() {
     fun `test joining a call`() = runTest {
         val call = client.call("default", randomUUID())
 
-        //call.join()
+        call.join()
 
     }
 
     @Test
     fun `test latency measurements`() = runTest {
+        // latency measurements for different urls
+        // for each urls we measure 3 times sequentially (so you cache the connection)
+        // average is calculated using the second and third measurement
+        // sorted by average
+        // timeout in place, ensure that if 1 of the urls is broken it still works
+        // TODO: ideally if it takes more than 3 seconds, just collect what we have and move on
+
+        val urls = mutableListOf(
+            "https://sfu-9c0dc03.ovh-lim1.stream-io-video.com/latency_test.png",
+            "https://sfu-a69b58a.blu-tal1.stream-io-video.com/latency_test.png",
+            "https://latency-test.aws-sin1.stream-io-video.com/latency_test.png",
+            "http://kibana.us-east.gtstrm.com/" // This url is blocked, and will hang
+        )
+
+        // TODO: with timeout doesn't fully work on latency measurements
+        // related to java threading and coroutine compatibility
+        withTimeout(10) {
+            val results = clientImpl.measureLatency(urls)
+            println(results)
+        }
+
+
 
 
     }

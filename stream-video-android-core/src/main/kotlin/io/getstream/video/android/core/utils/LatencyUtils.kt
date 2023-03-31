@@ -17,11 +17,21 @@
 package io.getstream.video.android.core.utils
 
 import io.getstream.log.StreamLog
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.withTimeout
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.URL
 
 private const val TAG = "Call:LatencyUtils"
+
+data class LatencyResult(
+    val latencyUrl: String,
+    val measurements: List<Float> = emptyList(),
+    val average: Double = 100.0,
+    val failed: Throwable? = null
+)
 
 /**
  * Calculates the latency to ping the server multiple times.
@@ -29,30 +39,32 @@ private const val TAG = "Call:LatencyUtils"
  * @param latencyUrl The URL of the server where we ping a connection.
  * @return A [List] of [Double] values representing the portion of a second it takes to connect.
  */
-public fun getLatencyMeasurements(latencyUrl: String): List<Float> {
+public fun getLatencyMeasurements(latencyUrl: String): LatencyResult {
     val measurements = mutableListOf<Float>()
 
-    repeat(3) {
-        try {
+    try {
+        repeat(3) {
             val request = URL(latencyUrl)
             val start = System.currentTimeMillis()
             val connection = request.openConnection()
-
+            // ensure we have a timeout
+            connection.connectTimeout = 3000;
+            connection.readTimeout = 3000;
             connection.connect()
 
             // Read and print the input
             val inputStream = BufferedReader(InputStreamReader(connection.getInputStream()))
-            println(inputStream.readLines().toString())
             inputStream.close()
 
             val end = System.currentTimeMillis()
-
             val seconds = (end - start) / 1000f
-            measurements.add(seconds)
-        } catch (e: Throwable) {
-            StreamLog.e(TAG, e) { "[getLatencyMeasurements] failed: $e" }
-            measurements.add(Float.MAX_VALUE)
+            if (it!=0) {
+                measurements.add(seconds)
+            }
         }
+    } catch (e: Throwable) {
+        measurements.add(Float.MAX_VALUE)
+        return LatencyResult(latencyUrl, measurements, measurements.average(), e)
     }
-    return measurements
+    return LatencyResult(latencyUrl, measurements, measurements.average())
 }

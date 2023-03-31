@@ -1,9 +1,8 @@
 
 ## Launch prep for the low level client
 
-- SFU Token handling
-- Check how we see if a socket is connected
-- Event handling
+- Faster latency measurements (run in parallel)
+- Check how we see if a socket is connected (test for coordinator and SFU)
 - Verify logging works well
 
 ### Testing
@@ -37,7 +36,7 @@
 - [X] Call refactoring
 - [X] Ensure we always use DispatcherProvider.IO
 - [X] Support query calls
-- [ ] Cleanup The Network connection module
+- [X] Cleanup The Network connection module
 - [ ] Cleanup event handling
 - [ ] Use the new state in the view model
 - [ ] Update to the latest events from the protocol
@@ -67,4 +66,4 @@
 ### Available tasks up for grabs
 
 - Currently we use UserPreferencesManager. Jaewoong mentioned we should perhaps explore https://developer.android.com/topic/libraries/architecture/datastore
-- 
+- Measure latency isn't 100% ok. You can't set a global timeout and collect the measurements that we have. This relates to threading vs coroutines and withTimeout not working

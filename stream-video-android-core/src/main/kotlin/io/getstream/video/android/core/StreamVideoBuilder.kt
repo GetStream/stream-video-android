@@ -110,17 +110,6 @@ public class StreamVideoBuilder(
 
         // TODO: Bit of a hack
 
-//        socket.eventListener = { event ->
-//            println("engine eventlistener received an event: $event")
-//            client.fireEvent(event)
-//            client.nextEventContinuation?.let {
-//                if (!client.nextEventCompleted) {
-//                    it.resume(event)
-//                }
-//                client.nextEventCompleted = true
-//            }
-//        }
-
         val client = StreamVideoImpl(
             context = context,
             scope = scope,
@@ -128,25 +117,25 @@ public class StreamVideoBuilder(
             loggingLevel = loggingLevel,
             lifecycle = lifecycle,
             connectionModule = module,
-        ).also { streamVideo ->
-
-            // addDevice for push
-            if (enablePush && user.type == UserType.Authenticated) {
-                scope.launch {
-                    pushDeviceGenerators
-                        .firstOrNull { it.isValidForThisDevice(context) }
-                        ?.let {
-                            it.onPushDeviceGeneratorSelected()
-                            it.asyncGeneratePushDevice {
-                                scope.launch {
-                                    streamVideo.createDevice(
-                                        token = it.token,
-                                        pushProvider = it.pushProvider.key
-                                    )
-                                }
+        )
+        // addDevice for push
+        // TODO: This is a bit hard to read, lets simplify
+        if (enablePush && user.type == UserType.Authenticated) {
+            scope.launch {
+                pushDeviceGenerators
+                    .firstOrNull { it.isValidForThisDevice(context) }
+                    ?.let {
+                        it.onPushDeviceGeneratorSelected()
+                        it.asyncGeneratePushDevice {
+                            scope.launch {
+                                client.createDevice(
+                                    token = it.token,
+                                    pushProvider = it.pushProvider.key
+                                )
                             }
                         }
-                }
+                    }
+
             }
         }
 

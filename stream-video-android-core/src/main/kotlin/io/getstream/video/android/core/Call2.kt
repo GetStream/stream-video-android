@@ -380,7 +380,7 @@ public class Call2(
             type = type,
             id = id,
             request = GetCallEdgeServerRequest(
-                latencyMeasurements = latencyResults
+                latencyMeasurements = latencyResults.entries.associate { it.key to it.value.measurements }
             )
         )
         if (selectEdgeServerResult !is Success) {
@@ -400,7 +400,7 @@ public class Call2(
             client=client, call2=this,
             SFUUrl =url, SFUToken=credentials.token,
             connectionModule = (client as StreamVideoImpl).connectionModule,
-            remoteIceServers=iceServers, latencyResults=latencyResults
+            remoteIceServers=iceServers, latencyResults=latencyResults.entries.associate { it.key to it.value.measurements }
         )
         return Success<ActiveSFUSession>(data= activeSession!!)
 
