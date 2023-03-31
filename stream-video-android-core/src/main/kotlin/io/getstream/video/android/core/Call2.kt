@@ -72,10 +72,7 @@ import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.withContext
-import org.openapitools.client.models.GetCallEdgeServerRequest
-import org.openapitools.client.models.GoLiveResponse
-import org.openapitools.client.models.OwnCapability
-import org.openapitools.client.models.UpdateCallResponse
+import org.openapitools.client.models.*
 import org.webrtc.*
 import org.webrtc.VideoTrack
 import retrofit2.HttpException
@@ -411,6 +408,9 @@ public class Call2(
     suspend fun goLive(): Result<GoLiveResponse> {
         return client.goLive(type, id)
     }
+    suspend fun stopLive(): Result<StopLiveResponse> {
+        return client.stopLive(type, id)
+    }
 
     fun leave() {
     }
@@ -433,5 +433,19 @@ public class Call2(
     /** Permissions */
     suspend fun requestPermissions(permissions: List<String>): Result<Unit> {
         return client.requestPermissions(type, id, permissions)
+    }
+
+    suspend fun startRecording(): Result<Any> {
+        return client.startRecording(type, id)
+    }
+    suspend fun stopRecording(): Result<Any> {
+        return client.stopRecording(type, id)
+    }
+
+    suspend fun startBroadcasting(): Result<Any> {
+        return client.startBroadcasting(type, id)
+    }
+    suspend fun stopBroadcasting(): Result<Any> {
+        return client.stopBroadcasting(type, id)
     }
 }

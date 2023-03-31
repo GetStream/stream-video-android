@@ -40,37 +40,8 @@ class AudioRoomTest : IntegrationTestBase() {
      * - Trying to publish while not having permissions to do so should raise an error
      *
      */
-
-    /**
-     * Possible developer experience
-     *
-     * Expose a call object, with data, stateflows and methods for easier developer experience:
-     *
-     * call = client.joinCall("default", 123) //returns a call state object
-     * call.custom (stateflow)
-     * call.participants (stateflow)
-     * call.requestPermissions()
-     * call.goLive()
-     * call.leave()
-     *
-     *
-     *     viewModel: CallViewModel = viewModel(
-     factory = CallViewModel.provideFactory(
-     call,
-     ...
-     )
-     )
-
-     *
-     * On the compose layer we currently hide too much. It would be better to show
-     * some components so you know where to start
-     *
-     * <Call><ParticipantGrid><CallButtons>Button12,23</CallButtons></Call> etc
-     *
-     */
-
     @Test
-    fun queryCalls() = runTest {
+    fun `query calls should succeed`() = runTest {
         /**
          * To test:
          * - Filter on custom fields
@@ -78,40 +49,52 @@ class AudioRoomTest : IntegrationTestBase() {
          * - Filter on currently live
          */
         val filters = mutableMapOf("active" to true)
-        val result = client.queryCalls(QueryCallsData(filters))
-        assert(result.isSuccess)
+        val result = client.queryCalls(QueryCallsData(filters, limit=1))
+        assertSuccess(result)
     }
 
     @Test
-    fun createACall() = runTest {
-        val result = client.getOrCreateCall("default", "123")
-        assert(result.isSuccess)
+    fun `creating a new call should work`() = runTest {
+        val result = client.call("default", randomUUID()).create()
+        assertSuccess(result)
     }
 
     @Test
-    fun goLive() = runTest {
-
-        val result = client.goLive("default", "123")
-        assert(result.isSuccess)
+    fun `next we want to go live in a call`() = runTest {
+        val call = client.call("default", randomUUID())
+        call.create()
+        val goLiveResult = call.goLive()
+        assertSuccess(goLiveResult)
+        val stopLiveResult = call.stopLive()
+        assertSuccess(stopLiveResult)
     }
 
     @Test
-    fun requestPermissions() = runTest {
-        val result = client.requestPermissions("default", "123", mutableListOf("hellworld"))
-        assert(result.isSuccess)
+    fun `for audio rooms it's common to request permissions`() = runTest {
+        val call = client.call("default", randomUUID())
+        val result = call.requestPermissions(mutableListOf("screenshare", "send-audio"))
+        assertSuccess(result)
     }
 
     @Test
-    fun joinCall() = runTest {
-        val result = client.getOrCreateCall("default", "123")
-        assert(result.isSuccess)
-
-        val result2 = result.mapSuspend { client.joinCall(it) }
-        assert(result.isSuccess)
-
-        result2.onSuccess {
-            // joined call
-            // state is in the viewmodel
-        }
+    fun `sometimes listeners will join as an anonymous user`() = runTest {
+        // TODO
     }
+
+    @Test
+    fun `sometimes listeners will join with a token`() = runTest {
+
+        // TODO: server support
+        val call = client.call("default", randomUUID(), "token")
+        val result = call.get()
+        assertSuccess(result)
+    }
+
+    @Test
+    fun `publishing audio or video as a listener should raise an error`() = runTest {
+        // TODO
+
+    }
+
+
 }

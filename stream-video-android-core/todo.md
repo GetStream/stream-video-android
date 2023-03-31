@@ -9,6 +9,7 @@
 - [X] Build vars (run locally)
 - [X] Ability to run against local go codebase
 - [ ] Build vars (valid token generation)
+- [ ] Make client API methods internal
 
 ** Use cases **
 

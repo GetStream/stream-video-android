@@ -682,7 +682,8 @@ internal class StreamVideoImpl(
     override suspend fun queryCalls(queryCallsData: QueryCallsData): Result<QueriedCalls> {
         logger.d { "[queryCalls] queryCallsData: $queryCallsData" }
         val request = queryCallsData.toRequest()
-        return wrapAPICall { defaultApi.queryCalls(request).toQueriedCalls() }
+        val connectionId = socket.getConnectionId()
+        return wrapAPICall { defaultApi.queryCalls(request, connectionId).toQueriedCalls() }
     }
 
     /**
