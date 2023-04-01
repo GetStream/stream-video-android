@@ -78,6 +78,7 @@ import org.webrtc.VideoTrack
 import retrofit2.HttpException
 import stream.video.sfu.models.ConnectionQuality
 import stream.video.sfu.models.ICETrickle
+import stream.video.sfu.models.TrackType
 import stream.video.sfu.signal.*
 import java.util.*
 import kotlin.coroutines.CoroutineContext
@@ -94,7 +95,22 @@ public data class SFUConnection(
 
 
 
-public open class ParticipantState(user: User) {
+public open class ParticipantState(open val call: Call2, user: User) {
+
+    open fun muteAudio() {
+        // how do i mute another user?
+    }
+
+    open fun muteVideo() {
+        // how do i mute another user?
+    }
+
+    open val videoTrack by lazy {
+        call.activeSession?.getParticipant(user.id)?.videoTrack
+    }
+    open val audioTrack by lazy {
+        call.activeSession?.getParticipant(user.id)?.publishedTracks?.filter { it == TrackType.TRACK_TYPE_AUDIO }
+    }
 
     /**
      * The user
@@ -138,15 +154,32 @@ public open class ParticipantState(user: User) {
     val speakerPhoneEnabled: StateFlow<Boolean> = _isSpeakerPhoneEnabled
 }
 
-public open class LocalParticipantState(user: User) : ParticipantState(user) {
+public class LocalParticipantState(override val call: Call2, user: User) : ParticipantState(call, user) {
+    override fun muteAudio() {
+        call.activeSession!!.setMicrophoneEnabled(false)
+    }
 
-    private var localVideoTrack: VideoTrack? = null
-    private var localAudioTrack: AudioTrack? = null
+    override fun muteVideo() {
+        // TODO: raise a nice error if the session ins't there yet
+        call.activeSession!!.setCameraEnabled(false)
+    }
+
+    fun flipCamera() {
+        // TODO front and back facing
+        call.activeSession!!.flipCamera()
+    }
 
     internal val _ownCapabilities: MutableStateFlow<List<OwnCapability>> = MutableStateFlow(
         emptyList()
     )
     val ownCapabilities: StateFlow<List<OwnCapability>> = _ownCapabilities
+
+    val localVideoTrack by lazy {
+        call.activeSession?.localVideoTrack
+    }
+    val localAudioTrack by lazy {
+        call.activeSession?.localAudioTrack
+    }
 }
 
 public class MemberState(user: User) {
@@ -160,10 +193,17 @@ public class MemberState(user: User) {
 /**
  *
  */
-public class CallState(user: User) {
+public class CallState(val call: Call2, user: User) {
     private val memberMap: MutableMap<String, MemberState> = mutableMapOf()
     private val _recording: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val recording: StateFlow<Boolean> = _recording
+
+    /**
+     * connectionState shows if we've established a connection with the coordinator
+     */
+    private val _connection: MutableStateFlow<io.getstream.video.android.core.ConnectionState> = MutableStateFlow(
+        io.getstream.video.android.core.ConnectionState.PreConnect())
+    public val connection: StateFlow<io.getstream.video.android.core.ConnectionState> = _connection
 
     private val _endedAt: MutableStateFlow<Date?> = MutableStateFlow(null)
     val endedAt: StateFlow<Date?> = _endedAt
@@ -282,7 +322,7 @@ public class CallState(user: User) {
         return if (participantMap.contains(userId)) {
             participantMap[userId]!!
         } else {
-            val participant = ParticipantState(User(id=userId))
+            val participant = ParticipantState(call, User(id=userId))
             participantMap[userId] = participant
             participant
         }
@@ -330,7 +370,7 @@ public class CallState(user: User) {
         MutableStateFlow(emptyList())
     public val members: StateFlow<List<CallParticipantState>> = _members
 
-    val me = LocalParticipantState(user)
+    val me = LocalParticipantState(call, user)
 }
 
 public class Call2(
@@ -340,9 +380,9 @@ public class Call2(
     private val token: String = "",
     val user: User,
 ) {
-    private var activeSession: ActiveSFUSession? = null
+    var activeSession: ActiveSFUSession? = null
     val cid = "$type:$id"
-    val state = CallState(user)
+    val state = CallState(this, user)
 
     public var custom: Map<String, Any>? = null
 

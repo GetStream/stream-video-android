@@ -21,12 +21,15 @@ import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.model.Call
 import io.getstream.video.android.core.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 sealed class ConnectionState {
+    // TODO:ConnectionState.Connected is nicer than ConnectionState.Connected()
     class PreConnect : ConnectionState()
     class Loading : ConnectionState()
     class Connected : ConnectionState()
     class Reconnecting : ConnectionState()
+    class Disconnected : ConnectionState()
     class Failed(error: VideoError) : ConnectionState()
 }
 
@@ -34,24 +37,27 @@ class ClientState {
     fun handleEvent(event: VideoEvent) {
     }
 
-    // TODO: Hide mutability
-    public val currentUser: MutableStateFlow<User?> = MutableStateFlow(null)
-
+    /**
+     * Current user object
+     */
+    private val _currentUser: MutableStateFlow<User?> = MutableStateFlow(null)
+    public val currentUser: StateFlow<User?> = _currentUser
 
     /**
      * connectionState shows if we've established a connection with the coordinator
      */
-    // TODO: Hide mutability
-    public val connection: MutableStateFlow<ConnectionState> = MutableStateFlow(ConnectionState.PreConnect())
+    private val _connection: MutableStateFlow<ConnectionState> = MutableStateFlow(ConnectionState.PreConnect())
+    public val connection: StateFlow<ConnectionState> = _connection
 
     /**
      * Incoming call. True when we receive an event or notification with an incoming call
      */
-    // TODO: Should be a call object or similar. Not sure what's easiest
-    public val incomingCall: MutableStateFlow<Call?> = MutableStateFlow(null)
+    private val _incomingCall: MutableStateFlow<Call2?> = MutableStateFlow(null)
+    public val incomingCall: StateFlow<Call2?> = _incomingCall
 
     /**
      * Active call. The currently active call
      */
-    public val activeCall: MutableStateFlow<Call2?> = MutableStateFlow(null)
+    private val _activeCall: MutableStateFlow<Call2?> = MutableStateFlow(null)
+    public val activeCall: StateFlow<Call2?> = _activeCall
 }

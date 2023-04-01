@@ -59,17 +59,7 @@ import io.getstream.video.android.core.filter.toMap
 import io.getstream.video.android.core.internal.module.ConnectionModule
 import io.getstream.video.android.core.internal.module.SFUConnectionModule
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
-import io.getstream.video.android.core.model.Call
-import io.getstream.video.android.core.model.CallParticipantState
-import io.getstream.video.android.core.model.CallSettings
-import io.getstream.video.android.core.model.IceCandidate
-import io.getstream.video.android.core.model.IceServer
-import io.getstream.video.android.core.model.QueryMembersData
-import io.getstream.video.android.core.model.SfuToken
-import io.getstream.video.android.core.model.StreamCallGuid
-import io.getstream.video.android.core.model.StreamCallId
-import io.getstream.video.android.core.model.StreamPeerType
-import io.getstream.video.android.core.model.toPeerType
+import io.getstream.video.android.core.model.*
 import io.getstream.video.android.core.user.UserPreferencesManager
 import io.getstream.video.android.core.utils.Failure
 import io.getstream.video.android.core.utils.Result
@@ -158,6 +148,8 @@ public class ActiveSFUSession internal constructor(
 ) : CallClient, SfuSocketListener {
     private val context = client.context
     private val logger by taggedLogger("Call:WebRtcClient")
+
+
 
     private var connectionState: ConnectionState = ConnectionState.DISCONNECTED
     private var sessionId: String = ""
@@ -253,14 +245,14 @@ public class ActiveSFUSession internal constructor(
     private var subscriber: StreamPeerConnection? = null
     private var publisher: StreamPeerConnection? = null
 
-    private var localVideoTrack: VideoTrack? = null
+    internal var localVideoTrack: VideoTrack? = null
         set(value) {
             field = value
             if (value != null) {
                 call?.updateLocalVideoTrack(value)
             }
         }
-    private var localAudioTrack: AudioTrack? = null
+    internal var localAudioTrack: AudioTrack? = null
 
     private val isConnected = MutableStateFlow(value = false)
     private val sfuEvents = MutableSharedFlow<SfuDataEvent>()
@@ -427,6 +419,12 @@ public class ActiveSFUSession internal constructor(
 
         handler.selectDevice(device)
     }
+
+    // TODO: call participants should be a map
+    fun getParticipant(userId: String): CallParticipantState? {
+        return call?.callParticipants?.value?.associate { it.toUser().id to it }?.get(userId)
+    }
+
 
     private fun listenToParticipants() {
         val call = call ?: throw IllegalStateException("Call is in an incorrect state, null!")
