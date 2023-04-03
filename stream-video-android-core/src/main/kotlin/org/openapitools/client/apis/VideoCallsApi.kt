@@ -26,6 +26,8 @@ import org.openapitools.client.models.SendReactionResponse
 import org.openapitools.client.models.StopLiveResponse
 import org.openapitools.client.models.UnblockUserRequest
 import org.openapitools.client.models.UnblockUserResponse
+import org.openapitools.client.models.UpdateCallMemberRequest
+import org.openapitools.client.models.UpdateCallMemberResponse
 import org.openapitools.client.models.UpdateCallRequest
 import org.openapitools.client.models.UpdateCallResponse
 
@@ -245,5 +247,21 @@ interface VideoCallsApi {
      */
     @PATCH("call/{type}/{id}")
     suspend fun updateCall(@Path("type") type: String, @Path("id") id: String, @Body updateCallRequest: UpdateCallRequest): UpdateCallResponse
+
+    /**
+     * Update Call Member
+     *   Required permissions: - RemoveCallMember - UpdateCallMember - UpdateCallMemberRole 
+     * Responses:
+     *  - 201: Successful response
+     *  - 400: Bad request
+     *  - 429: Too many requests
+     *
+     * @param type 
+     * @param id 
+     * @param updateCallMemberRequest 
+     * @return [UpdateCallMemberResponse]
+     */
+    @POST("/video/call/{type}/{id}/update_member")
+    suspend fun updateCallMember(@Path("type") type: String, @Path("id") id: String, @Body updateCallMemberRequest: UpdateCallMemberRequest): UpdateCallMemberResponse
 
 }

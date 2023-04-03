@@ -111,7 +111,7 @@ internal class StreamVideoImpl internal constructor(
         }
     }
 
-    override val state = ClientState()
+    override val state = ClientState(this)
     private val logger by taggedLogger("Call:StreamVideo")
     private var subscriptions = mutableSetOf<EventSubscription>()
     private var calls = mutableMapOf<String, Call2>()

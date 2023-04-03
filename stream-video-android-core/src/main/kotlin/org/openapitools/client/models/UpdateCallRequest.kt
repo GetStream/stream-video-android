@@ -22,14 +22,14 @@ import com.squareup.moshi.Json
 /**
  * 
  *
- * @param custom call custom data
+ * @param custom Custom data for this object
  * @param settingsOverride 
  */
 
 
 data class UpdateCallRequest (
 
-    /* call custom data */
+    /* Custom data for this object */
     @Json(name = "custom")
     val custom: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null,
 

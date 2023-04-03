@@ -19,6 +19,10 @@ import org.openapitools.client.models.BlockedUserEvent
 import org.openapitools.client.models.CallAcceptedEvent
 import org.openapitools.client.models.CallCreatedEvent
 import org.openapitools.client.models.CallEndedEvent
+import org.openapitools.client.models.CallMemberAddedEvent
+import org.openapitools.client.models.CallMemberRemovedEvent
+import org.openapitools.client.models.CallMemberUpdatedEvent
+import org.openapitools.client.models.CallMemberUpdatedPermissionEvent
 import org.openapitools.client.models.CallReactionEvent
 import org.openapitools.client.models.CallRecordingStartedEvent
 import org.openapitools.client.models.CallRecordingStoppedEvent
@@ -47,10 +51,10 @@ import com.squareup.moshi.Json
  * @param type The type of event: \"connection.ok\" in this case
  * @param user 
  * @param call 
- * @param members the members added to this call
+ * @param members The list of members that were updated
  * @param ringing true when the call was created with ring enabled
- * @param reaction 
  * @param capabilitiesByRole The capabilities by role for this call
+ * @param reaction 
  * @param custom Custom data for this object
  * @param connectionId The connection_id for this client
  * @param permissions The list of permissions requested by the user
@@ -73,17 +77,17 @@ interface WSEvent {
     val user: UserResponse
     @Json(name = "call")
     val call: CallResponse
-    /* the members added to this call */
+    /* The list of members that were updated */
     @Json(name = "members")
     val members: kotlin.collections.List<MemberResponse>
     /* true when the call was created with ring enabled */
     @Json(name = "ringing")
     val ringing: kotlin.Boolean
-    @Json(name = "reaction")
-    val reaction: ReactionResponse
     /* The capabilities by role for this call */
     @Json(name = "capabilities_by_role")
     val capabilitiesByRole: kotlin.collections.Map<kotlin.String, kotlin.collections.List<kotlin.String>>
+    @Json(name = "reaction")
+    val reaction: ReactionResponse
     /* Custom data for this object */
     @Json(name = "custom")
     val custom: kotlin.collections.Map<kotlin.String, kotlin.Any>
