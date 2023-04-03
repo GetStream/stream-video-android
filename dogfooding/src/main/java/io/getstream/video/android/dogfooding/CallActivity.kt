@@ -53,8 +53,11 @@ class CallActivity : AbstractComposeCallActivity() {
     override fun onPause() {
         super.onPause()
 
-        mediaPlayer.stop()
-        mediaPlayer.release()
+        try {
+            mediaPlayer.stop()
+            mediaPlayer.release()
+        } catch (e: Exception) {
+        }
     }
 
     /**
