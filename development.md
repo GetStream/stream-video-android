@@ -41,7 +41,10 @@ BuildConfig.CORE_TEST_LOCAL
 The base for integration testing is the `IntegrationTestBase` class.
 It offers convenient helpers for test data, client and clientImpl access, and testing events.
 
-* We use Truth and Mockk for testing
+For unit test the `TestBase` class is used. Running the TestBase class is faster and more reliable than running the IntegrationTestBase class.
+Typically a combination of integration testing and unit testing is best.
+
+We use Truth and Mockk for testing
 
 ## Architecture
 

@@ -73,14 +73,21 @@ public class IntegrationTestHelper {
     }
 }
 
-open class IntegrationTestBase {
+open class TestBase {
     @get:Rule
     val dispatcherRule = DispatcherRule()
-
     /** Convenient helper with test data */
     val testData = IntegrationTestHelper()
     /** Android context */
     val context = testData.context
+
+    fun randomUUID(): String {
+        return UUID.randomUUID().toString()
+    }
+}
+
+open class IntegrationTestBase: TestBase() {
+
     /** API Key */
     val apiKey = "hd8szvscpxvd"
     /** Client */
@@ -137,9 +144,7 @@ open class IntegrationTestBase {
         }
     }
 
-    fun randomUUID(): String {
-        return UUID.randomUUID().toString()
-    }
+
 
     @Before
     fun resetTestVars() {
