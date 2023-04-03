@@ -24,6 +24,7 @@ import io.getstream.video.android.core.call.CallClient
 import io.getstream.video.android.core.errors.VideoBackendError
 import io.getstream.video.android.core.errors.VideoError
 import io.getstream.video.android.core.events.CallCreatedEvent
+import io.getstream.video.android.core.events.ConnectedEvent
 import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.internal.module.ConnectionModule
@@ -99,9 +100,14 @@ internal class StreamVideoImpl internal constructor(
     internal val pushDeviceGenerators: List<PushDeviceGenerator>,
 ) : StreamVideo, SocketListener {
 
+    override fun onConnected(event: ConnectedEvent) {
+        println("Client onConnected")
+        onEvent(event)
+    }
+
     override fun onEvent(event: VideoEvent) {
         // TODO: maybe merge fire event into this?
-        println("engine eventlistener received an event: $event")
+        println("eventlistener received an event: $event")
         fireEvent(event)
         nextEventContinuation?.let { continuation ->
             if (!nextEventCompleted) {
@@ -252,12 +258,14 @@ internal class StreamVideoImpl internal constructor(
 
     }
 
-    fun connect() {
-        // TODO: Make this optional
-        runBlocking(scope.coroutineContext) {
+    fun connect(): Result<ConnectedEvent> {
+        // TODO: When should connect run??
+        return runBlocking(scope.coroutineContext) {
+            logger.i { "Starting video coordinator connection for user ${user.id}" }
             val socketImpl = connectionModule.coordinatorSocket as VideoSocketImpl
             val result = socketImpl.connect()
-            println("Runblocking socket connect, $result")
+
+            result
         }
     }
 
@@ -836,18 +844,6 @@ internal class StreamVideoImpl internal constructor(
             connectionModule.coordinatorSocket.reconnect()
         }
     }
-
-    /**
-     * @see StreamVideo.addSocketListener
-     */
-    override fun addSocketListener(socketListener: SocketListener): Unit =
-        connectionModule.coordinatorSocket.addListener(socketListener)
-
-    /**
-     * @see StreamVideo.removeSocketListener
-     */
-    override fun removeSocketListener(socketListener: SocketListener): Unit =
-        connectionModule.coordinatorSocket.removeListener(socketListener)
 
     /**
      * Creates an instance of the [CallClient] for the given call input, which is persisted and

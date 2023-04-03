@@ -176,6 +176,7 @@ internal class VideoSocketImpl(
         private set
 
     override fun onSocketError(error: VideoError) {
+        println("onSocketError: $error")
         connectContinuation.resume(Failure(error = error))
         logger.e { "[onSocketError] state: $state, error: $error" }
         if (state !is State.DisconnectedPermanently) {
@@ -185,6 +186,7 @@ internal class VideoSocketImpl(
     }
 
     private fun onNetworkError(error: VideoNetworkError) {
+        println("onNetworkError: $error")
         connectContinuation.resume(Failure(error = error))
         when (error.streamCode) {
             VideoErrorCode.PARSER_ERROR.code,
@@ -215,12 +217,14 @@ internal class VideoSocketImpl(
     }
 
     override fun removeListener(socketListener: SocketListener) {
+        println("removing listeners")
         synchronized(listeners) {
             listeners.remove(socketListener)
         }
     }
 
     override fun addListener(socketListener: SocketListener) {
+        println("adding listeners $socketListener")
         synchronized(listeners) {
             listeners.add(socketListener)
         }
@@ -234,6 +238,12 @@ internal class VideoSocketImpl(
     override fun authenticateUser() {
         logger.d { "[authenticateUser] user: $user" }
         val token = preferences.getUserToken()
+
+        // TODO: handle guest and anon users
+
+        if (token.isEmpty()) {
+            throw IllegalStateException("User token is empty")
+        }
 
         socket?.authenticate(
             VideoWSAuthMessageRequest( // TODO - double check and see about user device
@@ -258,6 +268,7 @@ internal class VideoSocketImpl(
     }
 
     internal fun connect(connectionConf: SocketFactory.ConnectionConf) {
+        println("connect")
         val isNetworkConnected = networkStateProvider.isConnected()
         logger.d { "[connect] conf: $connectionConf, isNetworkConnected: $isNetworkConnected" }
         this.connectionConf = connectionConf
@@ -282,9 +293,16 @@ internal class VideoSocketImpl(
     }
 
     override fun onConnectionResolved(event: ConnectedEvent) {
+        println("onConnectionResolved $eventListener")
+        eventListener?.let {
+            it.invoke(event)
+        }
         logger.i { "[onConnectionResolved] event: $event" }
         this.clientId = event.clientId
         state = State.Connected(event)
+        println("Calling Listeners $listeners")
+        callListeners { listener -> listener.onConnected(event) }
+
     }
 
     override fun onEvent(event: VideoEvent) {
@@ -305,6 +323,7 @@ internal class VideoSocketImpl(
     }
 
     private fun reconnect(connectionConf: SocketFactory.ConnectionConf?) {
+        println("reconnect")
         logger.d { "[reconnect] conf: $connectionConf" }
         shutdownSocketConnection()
         setupSocket(connectionConf?.asReconnectionConf())
@@ -339,7 +358,7 @@ internal class VideoSocketImpl(
     private fun callListeners(call: (SocketListener) -> Unit) {
         synchronized(listeners) {
             listeners.forEach { listener ->
-                eventUiHandler.post { call(listener) }
+                call(listener)
             }
         }
     }

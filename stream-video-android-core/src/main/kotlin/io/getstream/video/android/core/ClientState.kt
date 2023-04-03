@@ -25,13 +25,13 @@ import io.getstream.video.android.core.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-sealed class ConnectionState {
+sealed class ConnectionState() {
     // TODO:ConnectionState.Connected is nicer than ConnectionState.Connected()
-    class PreConnect : ConnectionState()
-    class Loading : ConnectionState()
-    class Connected : ConnectionState()
-    class Reconnecting : ConnectionState()
-    class Disconnected : ConnectionState()
+    object PreConnect : ConnectionState()
+    object Loading : ConnectionState()
+    object Connected : ConnectionState()
+    object Reconnecting : ConnectionState()
+    object Disconnected : ConnectionState()
     class Failed(error: VideoError) : ConnectionState()
 }
 
@@ -44,10 +44,12 @@ class ClientState(client: StreamVideo) {
      */
 
     fun handleEvent(event: VideoEvent) {
-
+        val isConnectedEvent = event is ConnectedEvent
+        println("handle event client state $event $isConnectedEvent")
         // mark connected
         if (event is ConnectedEvent) {
-            _connection.value = ConnectionState.Connected()
+            println("setting connection.value to connected")
+            _connection.value = ConnectionState.Connected
         } else if (event is CallCreatedEvent) {
             // what's the right thing to do here?
             // if it's ringing we add it
@@ -72,7 +74,7 @@ class ClientState(client: StreamVideo) {
     /**
      * connectionState shows if we've established a connection with the coordinator
      */
-    private val _connection: MutableStateFlow<ConnectionState> = MutableStateFlow(ConnectionState.PreConnect())
+    private val _connection: MutableStateFlow<ConnectionState> = MutableStateFlow(ConnectionState.PreConnect)
     public val connection: StateFlow<ConnectionState> = _connection
 
     /**

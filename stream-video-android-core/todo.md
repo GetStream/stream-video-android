@@ -1,10 +1,10 @@
 
 ## Upcoming
 
-- See if there is a way to verify that android implements all events
-- Verify all events are handled
 - Easily see if the coordinator is connected
 - Easily see if the SFU is connected
+- See if there is a way to verify that android implements all events
+- Verify all events are handled
 
 ### Review each file, fix TODOS and document
 
@@ -43,6 +43,11 @@
 - [ ] Reconnect flow (https://www.notion.so/Reconnection-Failure-handling-f6991fd2e5584380bb2d2cb5e8ac5303)
 - [ ] Active Session
 
+### Websockets
+
+- Review WS requirements for SFU socket connection
+- Test coverage for WS connection
+
 ### Refactoring
 
 - [X] Client builder refactoring. see https://www.notion.so/stream-wiki/Android-Changes-Discussion-10c5a9f303134eb786bdebcea55cf92a
@@ -54,6 +59,7 @@
 - [X] Cleanup The Network connection module
 - [X] Cleanup event handling
 - [X] Update to the latest events from the protocol
+- [ ] VideoSocket Impl shouldn't hide errors
 - [ ] Easily see if the coordinator is connected
 - [ ] Easily see if the SFU is connected
 - [ ] Verify all events are handled

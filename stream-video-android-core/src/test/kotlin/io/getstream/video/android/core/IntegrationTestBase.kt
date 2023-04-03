@@ -19,6 +19,9 @@ package io.getstream.video.android.core
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth
+import io.getstream.log.Priority
+import io.getstream.log.StreamLog
+import io.getstream.log.StreamLogger
 import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.events.VideoEvent
@@ -26,6 +29,7 @@ import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.utils.Result
 import io.getstream.video.android.core.utils.onError
+import io.mockk.internalSubstitute
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.TestDispatcher
@@ -73,6 +77,23 @@ public class IntegrationTestHelper {
     }
 }
 
+/**
+ * A logger that prints to stdout
+ */
+class StreamTestLogger: StreamLogger {
+    var logLevel = Priority.VERBOSE
+
+    override fun log(priority: Priority, tag: String, message: String, throwable: Throwable?) {
+        if (priority > logLevel) {
+            println("$priority $tag: $message")
+            if (throwable != null) {
+                println(throwable)
+            }
+        }
+    }
+
+}
+
 open class TestBase {
     @get:Rule
     val dispatcherRule = DispatcherRule()
@@ -80,16 +101,39 @@ open class TestBase {
     val testData = IntegrationTestHelper()
     /** Android context */
     val context = testData.context
+    /** API Key */
+    val apiKey = "hd8szvscpxvd"
+
+    private val testLogger = StreamTestLogger()
+
+    init {
+        StreamLog.install(logger = testLogger)
+        println("test logger installed")
+    }
+
+    fun setLogLevel(priority: Priority) {
+        testLogger.logLevel = priority
+    }
 
     fun randomUUID(): String {
         return UUID.randomUUID().toString()
+    }
+
+    /**
+     * Verify the Result is a success and raise a nice error if it isn't
+     */
+    fun assertSuccess(result: Result<Any>) {
+        assert(result.isSuccess) {
+            result.onError {
+                "result wasn't a success, got an error $it."
+            }
+        }
     }
 }
 
 open class IntegrationTestBase(connectCoordinatorWS: Boolean = true): TestBase() {
 
-    /** API Key */
-    val apiKey = "hd8szvscpxvd"
+
     /** Client */
     val client: StreamVideo
     /** Implementation of the client for more access to interals */
@@ -138,16 +182,7 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true): TestBase()
         return events.filter { it::class.java == eventClass }[0]
     }
 
-    /**
-     * Verify the Result is a success and raise a nice error if it isn't
-     */
-    fun assertSuccess(result: Result<Any>) {
-        assert(result.isSuccess) {
-            result.onError {
-                "result wasn't a success, got an error $it."
-            }
-        }
-    }
+
 
 
 

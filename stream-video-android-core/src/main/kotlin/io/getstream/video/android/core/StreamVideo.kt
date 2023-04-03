@@ -386,20 +386,6 @@ public interface StreamVideo {
     public fun logOut()
 
     /**
-     * Adds a listener to the active socket connection, to observe various events.
-     *
-     * @param socketListener The listener to add.
-     */
-    public fun addSocketListener(socketListener: SocketListener)
-
-    /**
-     * Removes a given listener from the socket observers.
-     *
-     * @param socketListener The listener to remove.
-     */
-    public fun removeSocketListener(socketListener: SocketListener)
-
-    /**
      * Returns current [CallClient] instance.
      */
     public fun getActiveCallClient(): CallClient?

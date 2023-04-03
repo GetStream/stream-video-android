@@ -67,7 +67,7 @@ public class StreamVideoBuilder(
     /** Connection timeout in seconds */
     private val connectionTimeoutInMs: Long = 10000,
     /** Logging level */
-    private val loggingLevel: LoggingLevel = LoggingLevel.NONE,
+    private val loggingLevel: LoggingLevel = LoggingLevel.BASIC,
     /** Overwrite the default notification logic for incoming calls */
     private val ringNotification: ((call: Call) -> Notification?)? = null,
     /** Support for different push providers */

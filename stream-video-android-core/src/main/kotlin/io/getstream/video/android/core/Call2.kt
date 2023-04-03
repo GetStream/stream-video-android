@@ -16,6 +16,8 @@
 
 package io.getstream.video.android.core
 
+import io.getstream.log.TaggedLogger
+import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.call.ActiveSFUSession
 import io.getstream.video.android.core.events.*
 import io.getstream.video.android.core.events.BlockedUserEvent
@@ -46,6 +48,8 @@ public data class SFUConnection(
  *
  */
 public class CallState(val call: Call2, user: User) {
+    private val logger by taggedLogger("CallState")
+
     private val memberMap: MutableMap<String, MemberState> = mutableMapOf()
     private val _recording: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val recording: StateFlow<Boolean> = _recording
@@ -54,7 +58,7 @@ public class CallState(val call: Call2, user: User) {
      * connectionState shows if we've established a connection with the coordinator
      */
     private val _connection: MutableStateFlow<io.getstream.video.android.core.ConnectionState> = MutableStateFlow(
-        io.getstream.video.android.core.ConnectionState.PreConnect())
+        io.getstream.video.android.core.ConnectionState.PreConnect)
     public val connection: StateFlow<io.getstream.video.android.core.ConnectionState> = _connection
 
     private val _endedAt: MutableStateFlow<Date?> = MutableStateFlow(null)
@@ -70,7 +74,7 @@ public class CallState(val call: Call2, user: User) {
 
 
     fun handleEvent(event: VideoEvent) {
-        println("updating call state yolo")
+        logger.d { "Updating call state with event $event" }
         when (event) {
             is BlockedUserEvent -> TODO()
             is CallAcceptedEvent -> {

@@ -16,6 +16,9 @@
 
 package io.getstream.video.android.core
 
+import com.google.common.truth.Truth.assertThat
+import io.getstream.log.StreamLog
+import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.events.ConnectedEvent
 import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.model.QueryCallsData
@@ -27,21 +30,10 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class ClientAndAuthTest : IntegrationTestBase() {
-    /**
-     * Test coverage for Client and Authentication
-     *
-     * TODO
-     * - Test logging
-     * - Build vars (and document the system)
-     * - Truth & Mockk
-     * - Consider DataStore over SharedPreferences
-     *
-     * - Ensure API calls run on DispatcherProvider.IO
-     * - Connection id / connect setup when should it run
-     * - Guest user creation, and anon user id setup
-     *
-     */
+class ClientAndAuthTest : TestBase() {
+
+    private val logger by taggedLogger("Test:ClientAndAuthTest")
+
     @Test
     fun regularUser() = runTest {
         StreamVideoBuilder(
@@ -91,7 +83,6 @@ class ClientAndAuthTest : IntegrationTestBase() {
             System.out.println(event)
         }
         sub.dispose()
-        // TODO: subscribe to events
     }
 
     @Test
@@ -108,6 +99,35 @@ class ClientAndAuthTest : IntegrationTestBase() {
             System.out.println(newMessageEvent)
         }
         sub.dispose()
+    }
+
+    @Test
+    fun testLogger() = runTest {
+        // see StreamTestLogger & IntegrationTestBase
+        logger.d { "testing hello world - debug" }
+        logger.i { "testing hello world - info" }
+        logger.w { "testing hello world - warn" }
+        logger.e { "testing hello world - error" }
+
+        StreamLog.i("Testing") {"testing hello world - info StreamLog"}
+    }
+
+    @Test
+    fun waitForWSConnection() = runTest {
+        val client = StreamVideoBuilder(
+            context = context,
+            apiKey = apiKey,
+            geo = GEO.GlobalEdgeNetwork,
+            testData.users["thierry"]!!,
+            testData.tokens["thierry"]!!,
+        ).build()
+        assertThat(client.state.connection.value).isEqualTo(ConnectionState.PreConnect)
+        val clientImpl = client as StreamVideoImpl
+        val connectResult = clientImpl.connect()
+        assertSuccess(connectResult)
+
+        assertThat(client.state.connection.value).isEqualTo(ConnectionState.Connected)
+
     }
 
     @Test
