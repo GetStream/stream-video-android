@@ -25,6 +25,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.viewinterop.AndroidView
 import io.getstream.video.android.core.model.Call
 import io.getstream.video.android.core.model.VideoTrack
@@ -72,7 +73,7 @@ public fun VideoRenderer(
             }
         },
         update = { v -> setupVideo(trackState, videoTrack, v) },
-        modifier = modifier,
+        modifier = modifier.testTag("video_renderer"),
     )
 }
 

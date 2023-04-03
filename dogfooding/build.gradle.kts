@@ -82,6 +82,7 @@ android {
             isMinifyEnabled = false
             isShrinkResources = false
             signingConfig = signingConfigs.getByName("debug")
+            buildConfigField("Boolean", "BENCHMARK", "false")
         }
         getByName("release") {
             isMinifyEnabled = false
@@ -90,11 +91,13 @@ android {
                 "proguard-rules.pro"
             )
             signingConfig = signingConfigs.getByName("release")
+            buildConfigField("Boolean", "BENCHMARK", "false")
         }
         create("benchmark") {
             signingConfig = signingConfigs.getByName("debug")
             matchingFallbacks += listOf("release")
             isDebuggable = false
+            buildConfigField("Boolean", "BENCHMARK", "true")
         }
     }
 
