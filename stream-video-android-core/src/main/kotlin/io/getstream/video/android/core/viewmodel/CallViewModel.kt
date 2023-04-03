@@ -22,6 +22,7 @@ import android.hardware.camera2.CameraMetadata
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoConfigDefault
 import io.getstream.video.android.core.audio.AudioDevice
@@ -42,7 +43,6 @@ import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.call.state.ToggleScreenConfiguration
 import io.getstream.video.android.core.call.state.ToggleSpeakerphone
 import io.getstream.video.android.core.model.Call
-import io.getstream.video.android.core.model.CallParticipantState
 import io.getstream.video.android.core.model.CallSettings
 import io.getstream.video.android.core.model.CallType
 import io.getstream.video.android.core.model.CallUser
@@ -165,17 +165,17 @@ public class CallViewModel(
             initialValue = CallMediaState()
         )
 
-    public val participantList: Flow<List<CallParticipantState>> =
+    public val participantList: Flow<List<ParticipantState>> =
         callState.filterNotNull().flatMapLatest { it.callParticipants }
 
-    public val activeSpeakers: Flow<List<CallParticipantState>> =
+    public val activeSpeakers: Flow<List<ParticipantState>> =
         callState.filterNotNull().flatMapLatest { it.activeSpeakers }
 
-    public val localParticipant: StateFlow<CallParticipantState?> =
+    public val localParticipant: StateFlow<ParticipantState?> =
         callState.filterNotNull().flatMapLatest { it.localParticipant }
             .stateIn(scope = viewModelScope, started = SharingStarted.Eagerly, initialValue = null)
 
-    public val primarySpeaker: StateFlow<CallParticipantState?> =
+    public val primarySpeaker: StateFlow<ParticipantState?> =
         callState.filterNotNull().flatMapLatest { it.primarySpeaker }
             .stateIn(scope = viewModelScope, started = SharingStarted.Eagerly, initialValue = null)
 

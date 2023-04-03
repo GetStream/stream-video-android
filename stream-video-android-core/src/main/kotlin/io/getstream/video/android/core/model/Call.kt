@@ -24,6 +24,7 @@ import android.os.Build
 import android.view.View
 import androidx.core.content.getSystemService
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.audio.AudioHandler
 import io.getstream.video.android.core.audio.AudioSwitchHandler
 import io.getstream.video.android.core.call.utils.stringify
@@ -56,30 +57,31 @@ public class Call(
         AudioSwitchHandler(context)
     }
 
-    private val _callParticipants: MutableStateFlow<List<CallParticipantState>> =
+    private val _callParticipants: MutableStateFlow<List<ParticipantState>> =
         MutableStateFlow(emptyList())
 
-    public val callParticipants: StateFlow<List<CallParticipantState>> = _callParticipants
+    // TODO: use a map for easier updates
+    public val callParticipants: StateFlow<List<ParticipantState>> = _callParticipants
 
-    private val _localParticipant: MutableStateFlow<CallParticipantState?> = MutableStateFlow(null)
+    private val _localParticipant: MutableStateFlow<ParticipantState?> = MutableStateFlow(null)
 
-    public val localParticipant: Flow<CallParticipantState> =
+    public val localParticipant: Flow<ParticipantState> =
         _localParticipant.filterNotNull()
 
-    public val activeSpeakers: Flow<List<CallParticipantState>> = callParticipants.map { list ->
-        list.filter { participant -> participant.hasAudio && participant.audioLevel > 0f }
+    public val activeSpeakers: Flow<List<ParticipantState>> = callParticipants.map { list ->
+        list.filter { participant -> participant.hasAudio && participant.audioLevel.value > 0f }
     }
 
-    private var lastPrimarySpeaker: CallParticipantState? = null
+    private var lastPrimarySpeaker: ParticipantState? = null
 
-    private val _primarySpeaker: Flow<CallParticipantState?> =
+    private val _primarySpeaker: Flow<ParticipantState?> =
         callParticipants.combine(activeSpeakers) { participants, speakers ->
             selectPrimaryParticipant(participants, speakers)
         }.onEach {
             lastPrimarySpeaker = it
         }
 
-    public val primarySpeaker: Flow<CallParticipantState?> = _primarySpeaker
+    public val primarySpeaker: Flow<ParticipantState?> = _primarySpeaker
 
     private val _screenSharingSessions: MutableStateFlow<List<ScreenSharingSession>> =
         MutableStateFlow(emptyList())
@@ -263,7 +265,7 @@ public class Call(
         logger.d { "[removeScreenShareSession] screenSharingSessions: $updated" }
     }
 
-    internal fun setParticipants(participants: List<CallParticipantState>) {
+    internal fun setParticipants(participants: List<ParticipantState>) {
         this._callParticipants.value = participants
         logger.d { "[setParticipants] #sfu; allParticipants: ${_callParticipants.value}" }
 
@@ -277,26 +279,6 @@ public class Call(
 
             logger.v { "[setParticipants] #sfu; Added all streams to participants $streamsToProcess" }
         }
-    }
-
-    /**
-     * Upserts the user data with personal information.
-     *
-     * @param data The list of user data items containing expanded information.
-     */
-    internal fun upsertParticipants(data: List<CallUser>) {
-        val current = this._callParticipants.value
-        val updated = current.map { participant ->
-            val user = data.firstOrNull { it.id == participant.id }
-
-            participant.copy(
-                role = user?.role ?: participant.role,
-                name = user?.name ?: participant.name,
-                profileImageURL = user?.imageUrl ?: participant.profileImageURL
-            )
-        }
-
-        this._callParticipants.value = updated
     }
 
     internal fun updateMuteState(
@@ -347,28 +329,16 @@ public class Call(
         }
     }
 
-    internal fun addParticipant(participant: CallParticipantState) {
-        logger.d { "[addParticipant] #sfu; participant: $participant" }
-        _callParticipants.value = _callParticipants.value + participant
-    }
-
-    internal fun removeParticipant(event: ParticipantLeftEvent) {
-        logger.d { "[removeParticipant] #sfu; event: $event" }
-        val userId = event.participant.user_id
-
-        _callParticipants.value = _callParticipants.value.filter { it.id != userId }
-    }
-
     private fun selectPrimaryParticipant(
-        participantsList: List<CallParticipantState>,
-        speakers: List<CallParticipantState>,
-    ): CallParticipantState? {
+        participantsList: List<ParticipantState>,
+        speakers: List<ParticipantState>,
+    ): ParticipantState? {
         var speaker = lastPrimarySpeaker
         val localParticipant = participantsList.firstOrNull { it.isLocal }
 
         if (speaker?.isLocal == true) {
             val remoteSpeaker =
-                participantsList.filter { !it.isLocal }.maxByOrNull { it.audioLevel }
+                participantsList.filter { !it.isLocal }.maxByOrNull { it.audioLevel.value }
 
             if (remoteSpeaker != null) {
                 speaker = remoteSpeaker
@@ -376,13 +346,13 @@ public class Call(
         }
 
         if (!participantsList.contains(speaker)) {
-            speaker = participantsList.filter { !it.isLocal }.maxByOrNull { it.audioLevel }
+            speaker = participantsList.filter { !it.isLocal }.maxByOrNull { it.audioLevel.value }
                 ?: localParticipant
         }
 
         if (speakers.isNotEmpty() && !speakers.contains(speaker)) {
             val remoteSpeaker =
-                participantsList.filter { !it.isLocal }.maxByOrNull { it.audioLevel }
+                participantsList.filter { !it.isLocal }.maxByOrNull { it.audioLevel.value }
 
             if (remoteSpeaker != null) {
                 speaker = remoteSpeaker
@@ -411,7 +381,7 @@ public class Call(
         )
 
         val updated = allParticipants.updateValue(
-            predicate = { it.id == getCurrentUserId() },
+            predicate = { it.user.value.id == getCurrentUserId() },
             transformer = {
                 it.copy(videoTrack = videoTrack)
             }
@@ -456,7 +426,7 @@ public class Call(
         }
     }
 
-    public fun getLocalParticipant(): CallParticipantState? {
+    public fun getLocalParticipant(): ParticipantState? {
         return _callParticipants.value.firstOrNull { it.isLocal }
     }
 
@@ -473,7 +443,7 @@ public class Call(
         _localParticipant.value = updatedLocal
 
         val updatedList = _callParticipants.value.updateValue(
-            predicate = { it.id == getCurrentUserId() },
+            predicate = { it.user.value.id == getCurrentUserId() },
             transformer = { it.copy(publishedTracks = newTracks) }
         )
 
@@ -491,54 +461,12 @@ public class Call(
         _localParticipant.value = updatedLocal
 
         val updatedList = _callParticipants.value.updateValue(
-            predicate = { it.id == getCurrentUserId() },
+            predicate = { it.user.value.id == getCurrentUserId() },
             transformer = { it.copy(publishedTracks = newTracks) }
         )
 
         _callParticipants.value = updatedList
     }
 
-    internal fun updateAudioLevel(event: AudioLevelChangedEvent) {
-        logger.d { "[updateAudioLevel] #sfu; isEnabled: $event" }
 
-        val current = _callParticipants.value.toMutableList()
-
-        event.levels.forEach { (userId, level) ->
-            val index = current.indexOfFirst { it.id == userId }
-
-            if (index != -1) {
-                val updatedUser = current[index].copy(
-                    audioLevel = level.audioLevel,
-                    isSpeaking = level.isSpeaking
-                )
-                current.removeAt(index)
-                current.add(index, updatedUser)
-            }
-        }
-
-        _callParticipants.value = current.sortedByDescending { it.audioLevel }
-    }
-
-    /**
-     * Updates the information on the connection quality for each participant.
-     *
-     * @param updates A [List] of [ConnectionQualityInfo] containing the quality of each
-     * participant's connection.
-     */
-    internal fun updateConnectionQuality(updates: List<ConnectionQualityInfo>) {
-        val qualityMap = updates.associateBy { it.session_id }
-
-        val current = _callParticipants.value
-        val updated = current.map { user ->
-            val qualityInfo = qualityMap[user.sessionId]
-
-            if (qualityInfo != null) {
-                user.copy(connectionQuality = qualityInfo.connection_quality)
-            } else {
-                user
-            }
-        }
-
-        _callParticipants.value = updated
-    }
 }

@@ -27,6 +27,7 @@ import android.os.Build
 import androidx.core.content.getSystemService
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.Call2
+import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoImpl
 import io.getstream.video.android.core.api.SignalServerService
@@ -421,8 +422,8 @@ public class ActiveSFUSession internal constructor(
     }
 
     // TODO: call participants should be a map
-    fun getParticipant(userId: String): CallParticipantState? {
-        return call?.callParticipants?.value?.associate { it.toUser().id to it }?.get(userId)
+    fun getParticipant(userId: String): ParticipantState? {
+        return call?.callParticipants?.value?.associate { it.user.value.id to it }?.get(userId)
     }
 
 
@@ -515,26 +516,26 @@ public class ActiveSFUSession internal constructor(
             )
             val userQueryResult = client.queryMembers(callType, callId, query)
             if (userQueryResult is Success) {
-                call?.upsertParticipants(userQueryResult.data)
+                //call?.upsertParticipants(userQueryResult.data)
             }
         }
     }
 
     private fun setPartialParticipants(participants: List<Participant>) {
-        call?.setParticipants(
-            participants.map {
-                CallParticipantState(
-                    id = it.user_id,
-                    sessionId = it.session_id,
-                    idPrefix = it.track_lookup_prefix,
-                    isLocal = it.session_id == sessionId,
-                    name = "",
-                    profileImageURL = "",
-                    role = "",
-                    publishedTracks = it.published_tracks.toSet()
-                )
-            }
-        )
+//        call?.setParticipants(
+//            participants.map {
+//                ParticipantState(
+//                    id = it.user_id,
+//                    sessionId = it.session_id,
+//                    idPrefix = it.track_lookup_prefix,
+//                    isLocal = it.session_id == sessionId,
+//                    name = "",
+//                    profileImageURL = "",
+//                    role = "",
+//                    publishedTracks = it.published_tracks.toSet()
+//                )
+//            }
+//        )
     }
 
     private suspend fun initializeCall(
@@ -736,11 +737,8 @@ public class ActiveSFUSession internal constructor(
                 is ICETrickleEvent -> handleTrickle(event)
                 is SubscriberOfferEvent -> handleSubscriberOffer(event)
                 is PublisherAnswerEvent -> Unit
-                is ParticipantJoinedEvent -> addParticipant(event)
-                is ParticipantLeftEvent -> call?.removeParticipant(event)
                 is ChangePublishQualityEvent -> Unit
-                is ConnectionQualityChangeEvent -> call?.updateConnectionQuality(event.updates)
-                is AudioLevelChangedEvent -> call?.updateAudioLevel(event)
+
                 is TrackPublishedEvent -> {
                     call?.updateMuteState(event.userId, event.sessionId, event.trackType, true)
                 }
@@ -773,33 +771,33 @@ public class ActiveSFUSession internal constructor(
             val user = userQueryResult.data.first()
             val isLocal = event.participant.session_id == sessionId
 
-            call?.addParticipant(
-                CallParticipantState(
-                    id = user.id,
-                    role = user.role,
-                    name = user.name,
-                    profileImageURL = user.imageUrl,
-                    sessionId = event.participant.session_id,
-                    idPrefix = event.participant.track_lookup_prefix,
-                    isLocal = isLocal,
-                )
-            )
+//            call?.addParticipant(
+//                ParticipantState(
+//                    id = user.id,
+//                    role = user.role,
+//                    name = user.name,
+//                    profileImageURL = user.imageUrl,
+//                    sessionId = event.participant.session_id,
+//                    idPrefix = event.participant.track_lookup_prefix,
+//                    isLocal = isLocal,
+//                )
+//            )
         } else {
             addPartialParticipant(event.participant)
         }
     }
 
     private fun addPartialParticipant(participant: Participant) {
-        call?.addParticipant(
-            CallParticipantState(
-                id = participant.user_id,
-                idPrefix = participant.track_lookup_prefix,
-                sessionId = participant.session_id,
-                name = "",
-                profileImageURL = "",
-                role = ""
-            )
-        )
+//        call?.addParticipant(
+//            ParticipantState(
+//                id = participant.user_id,
+//                idPrefix = participant.track_lookup_prefix,
+//                sessionId = participant.session_id,
+//                name = "",
+//                profileImageURL = "",
+//                role = ""
+//            )
+//        )
     }
 
     private suspend fun handleTrickle(event: ICETrickleEvent) {
@@ -1059,19 +1057,20 @@ public class ActiveSFUSession internal constructor(
         logger.v { "[handleSubscriberOffer] #sfu; #subscriber; sendAnswerResult: $sendAnswerResult" }
     }
 
-    private fun updateParticipantsSubscriptions(participants: List<CallParticipantState>) {
-        val subscriptions = mutableMapOf<CallParticipantState, VideoDimension>()
+    private fun updateParticipantsSubscriptions(participants: List<ParticipantState>) {
+        val subscriptions = mutableMapOf<ParticipantState, VideoDimension>()
         val userId = client.user.id
 
-        for (user in participants) {
+        for (participant in participants) {
+            val user = participant.user.value
             if (user.id != userId) {
                 logger.d { "[updateParticipantsSubscriptions] #sfu; user.id: ${user.id}" }
 
                 val dimension = VideoDimension(
-                    width = user.videoTrackSize.first, height = user.videoTrackSize.second
+                    width = participant.videoTrackSize.first, height = participant.videoTrackSize.second
                 )
                 logger.d { "[updateParticipantsSubscriptions] #sfu; user.id: ${user.id}, dimension: $dimension" }
-                subscriptions[user] = dimension
+                subscriptions[participant] = dimension
             }
         }
         if (subscriptions.isEmpty()) {
@@ -1080,25 +1079,26 @@ public class ActiveSFUSession internal constructor(
 
         val request = UpdateSubscriptionsRequest(
             session_id = sessionId,
-            tracks = subscriptions.flatMap { (user, videoDimensions) ->
+            tracks = subscriptions.flatMap { (participant, videoDimensions) ->
+                val user = participant.user.value
                 listOf(
                     TrackSubscriptionDetails(
                         user_id = user.id,
                         track_type = TrackType.TRACK_TYPE_VIDEO,
                         dimension = videoDimensions,
-                        session_id = user.sessionId
+                        session_id = participant.sessionId
                     ),
                     TrackSubscriptionDetails(
                         user_id = user.id,
                         track_type = TrackType.TRACK_TYPE_SCREEN_SHARE,
                         dimension = videoDimensions,
-                        session_id = user.sessionId
+                        session_id = participant.sessionId
                     ),
                     TrackSubscriptionDetails(
                         user_id = user.id,
                         track_type = TrackType.TRACK_TYPE_AUDIO,
                         dimension = null,
-                        session_id = user.sessionId
+                        session_id = participant.sessionId
                     )
                 )
             }

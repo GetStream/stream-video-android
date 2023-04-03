@@ -34,7 +34,11 @@ class ActiveSFUSessionTest : IntegrationTestBase() {
         call.state.me.flipCamera()
 
 
+
+
         call.state.getParticipant("tommaso")!!.videoTrack
+        // TODO: how do we check if you are sending video?
+        call.state.getParticipant("tommaso")!!.hasVideo
         // what's the best user experience for:
         // internal we would have call.state.activeSFUSession
         // with the helpers as listed below

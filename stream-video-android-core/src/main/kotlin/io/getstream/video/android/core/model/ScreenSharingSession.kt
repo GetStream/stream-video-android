@@ -16,6 +16,8 @@
 
 package io.getstream.video.android.core.model
 
+import io.getstream.video.android.core.ParticipantState
+
 /**
  * Contains a track with the screen sharing content and the participant that's sharing the screen.
  *
@@ -24,5 +26,5 @@ package io.getstream.video.android.core.model
  */
 public data class ScreenSharingSession(
     public val track: VideoTrack,
-    public val participant: CallParticipantState
+    public val participant: ParticipantState
 )

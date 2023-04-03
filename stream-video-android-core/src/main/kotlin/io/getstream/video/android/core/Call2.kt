@@ -226,9 +226,9 @@ public class CallState(val call: Call2, user: User) {
 
     // TODO: SFU Connection
 
-    private val _participants: MutableStateFlow<List<CallParticipantState>> =
+    private val _participants: MutableStateFlow<List<ParticipantState>> =
         MutableStateFlow(emptyList())
-    public val participants: StateFlow<List<CallParticipantState>> = _participants
+    public val participants: StateFlow<List<ParticipantState>> = _participants
 
     private val _dominantSpeaker: MutableStateFlow<ParticipantState?> =
         MutableStateFlow(null)
@@ -243,9 +243,9 @@ public class CallState(val call: Call2, user: User) {
      * - screenSharingSessions
      */
 
-    private val _members: MutableStateFlow<List<CallParticipantState>> =
+    private val _members: MutableStateFlow<List<ParticipantState>> =
         MutableStateFlow(emptyList())
-    public val members: StateFlow<List<CallParticipantState>> = _members
+    public val members: StateFlow<List<ParticipantState>> = _members
 
     val me = LocalParticipantState(call, user)
 }

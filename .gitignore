@@ -3,6 +3,7 @@
 buildSrc/build
 .gradle
 /local.properties
+.env.properties
 
 # Built application files
 *.apk

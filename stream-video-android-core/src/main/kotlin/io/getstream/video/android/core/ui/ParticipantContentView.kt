@@ -23,8 +23,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.LinearLayout
 import io.getstream.video.android.R
+import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.Call
-import io.getstream.video.android.core.model.CallParticipantState
 import io.getstream.video.android.core.model.VideoTrack
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -60,7 +60,7 @@ public class ParticipantContentView : LinearLayout {
         LayoutInflater.from(context).inflate(R.layout.stream_video_content_participant, this, true)
     }
 
-    public fun renderParticipants(call: Call, participants: List<CallParticipantState>) {
+    public fun renderParticipants(call: Call, participants: List<ParticipantState>) {
         val otherParticipants = participants.filter { !it.isLocal }
         Log.d("RoomState", otherParticipants.toString())
 
@@ -83,7 +83,7 @@ public class ParticipantContentView : LinearLayout {
         }
     }
 
-    private fun renderSingleParticipant(call: Call, callParticipant: CallParticipantState) {
+    private fun renderSingleParticipant(call: Call, callParticipant: ParticipantState) {
         Log.d("RoomState", "Rendering single, $callParticipant")
 
         cleanUpViews()
@@ -98,8 +98,8 @@ public class ParticipantContentView : LinearLayout {
 
     private fun renderTwoParticipants(
         call: Call,
-        first: CallParticipantState,
-        second: CallParticipantState
+        first: ParticipantState,
+        second: ParticipantState
     ) {
         Log.d("RoomState", "Rendering two, $first $second")
 
@@ -121,9 +121,9 @@ public class ParticipantContentView : LinearLayout {
 
     private fun renderThreeParticipants(
         call: Call,
-        first: CallParticipantState,
-        second: CallParticipantState,
-        third: CallParticipantState
+        first: ParticipantState,
+        second: ParticipantState,
+        third: ParticipantState
     ) {
         cleanUpViews()
         setSecondRowVisibility(View.VISIBLE)
@@ -149,10 +149,10 @@ public class ParticipantContentView : LinearLayout {
 
     private fun renderFourParticipants(
         call: Call,
-        first: CallParticipantState,
-        second: CallParticipantState,
-        third: CallParticipantState,
-        fourth: CallParticipantState
+        first: ParticipantState,
+        second: ParticipantState,
+        third: ParticipantState,
+        fourth: ParticipantState
     ) {
         cleanUpViews()
         setSecondRowVisibility(View.VISIBLE)

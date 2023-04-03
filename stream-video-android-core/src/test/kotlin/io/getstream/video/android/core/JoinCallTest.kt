@@ -51,7 +51,6 @@ class JoinCallTest : IntegrationTestBase() {
         // call.activeSession.connected
 
         // TODO: check if the connection is ready
-
     }
 
     @Test

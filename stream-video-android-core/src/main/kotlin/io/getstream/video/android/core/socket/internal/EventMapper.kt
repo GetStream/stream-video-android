@@ -85,6 +85,13 @@ internal object EventMapper {
             CoordinatorHealthCheckEvent(clientId = connectionId)
         }
 
+        EventType.CONNECTION_OK -> {
+            val data = Json.decodeFromString<JsonObject>(text)
+            val connectionId = data["connection_id"]?.jsonPrimitive?.content ?: ""
+            // TODO: implement the connection OK event
+            CoordinatorHealthCheckEvent(clientId = connectionId)
+        }
+
         CALL_CREATED -> {
             val event =
                 Serializer.moshi.adapter(

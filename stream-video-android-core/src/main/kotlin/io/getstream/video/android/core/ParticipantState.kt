@@ -1,6 +1,7 @@
 package io.getstream.video.android.core
 
 import io.getstream.video.android.core.model.User
+import io.getstream.video.android.core.model.VideoTrack
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import stream.video.sfu.models.ConnectionQuality
@@ -13,7 +14,61 @@ import java.util.*
 
 
 
-public open class ParticipantState(open val call: Call2, user: User) {
+public open class ParticipantState(
+    open val call: Call2,
+    val initialUser: User,
+   var sessionId: String = "",
+   val idPrefix: String = "",
+   val isLocal: Boolean = false,
+   var isOnline: Boolean = false,
+
+   var videoTrack: VideoTrack? = null,
+   var screenSharingTrack: VideoTrack? = null,
+   var publishedTracks: Set<TrackType> = emptySet(),
+   var videoTrackSize: Pair<Int, Int> = Pair(0, 0)
+) {
+
+    // old fields to evaluate if we need them
+
+    fun copy(
+        call: Call2 = this.call,
+        initialUser: User = this.initialUser,
+        sessionId: String = this.sessionId,
+        idPrefix: String = this.idPrefix,
+        isLocal: Boolean = this.isLocal,
+        isOnline: Boolean = this.isOnline,
+        videoTrack: VideoTrack? = this.videoTrack,
+        screenSharingTrack: VideoTrack? = this.screenSharingTrack,
+        publishedTracks: Set<TrackType> = this.publishedTracks,
+        videoTrackSize: Pair<Int, Int> = this.videoTrackSize
+    ): ParticipantState {
+        return ParticipantState(
+            call = call,
+            initialUser = initialUser,
+            sessionId = sessionId,
+            idPrefix = idPrefix,
+            isLocal = isLocal,
+            isOnline = isOnline,
+            videoTrack = videoTrack,
+            screenSharingTrack = screenSharingTrack,
+            publishedTracks = publishedTracks,
+            videoTrackSize = videoTrackSize
+        )
+    }
+
+
+    public val hasVideo: Boolean
+        get() = TrackType.TRACK_TYPE_VIDEO in publishedTracks
+
+    public val hasAudio: Boolean
+        get() = TrackType.TRACK_TYPE_AUDIO in publishedTracks
+
+    public val hasScreenShare: Boolean
+        get() = TrackType.TRACK_TYPE_SCREEN_SHARE in publishedTracks && screenSharingTrack != null
+
+    public val hasScreenShareAudio: Boolean
+        get() = TrackType.TRACK_TYPE_SCREEN_SHARE_AUDIO in publishedTracks
+
 
     open fun muteAudio() {
         // how do i mute another user?
@@ -23,17 +78,14 @@ public open class ParticipantState(open val call: Call2, user: User) {
         // how do i mute another user?
     }
 
-    open val videoTrack by lazy {
-        call.activeSession?.getParticipant(user.id)?.videoTrack
-    }
     open val audioTrack by lazy {
-        call.activeSession?.getParticipant(user.id)?.publishedTracks?.filter { it == TrackType.TRACK_TYPE_AUDIO }
+        publishedTracks?.filter { it == TrackType.TRACK_TYPE_AUDIO }
     }
 
     /**
      * The user
      */
-    internal val _user: MutableStateFlow<User> = MutableStateFlow(user)
+    internal val _user: MutableStateFlow<User> = MutableStateFlow(initialUser)
     val user: StateFlow<User> = _user
 
     internal val _acceptedAt: MutableStateFlow<Date?> = MutableStateFlow(null)

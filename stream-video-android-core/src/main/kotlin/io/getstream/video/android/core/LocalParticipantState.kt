@@ -5,7 +5,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.openapitools.client.models.OwnCapability
 
-public class LocalParticipantState(override val call: Call2, user: User) : ParticipantState(call, user) {
+public class LocalParticipantState(override val call: Call2, user: User) : ParticipantState(
+    call = call,
+    initialUser = user
+) {
     override fun muteAudio() {
         call.activeSession!!.setMicrophoneEnabled(false)
     }

@@ -1,6 +1,7 @@
 
-## Launch prep for the low level client
+## Current
 
+- Participant sorting
 
 ### Review each file, fix TODOS and document
 
@@ -63,6 +64,7 @@
 - [X] Permissions: https://www.notion.so/stream-wiki/Call-Permissions-832f914ad4c545cf8f048012900ad21d
 - [X] Faster latency measurements (run in parallel)
 - [X] Sending reactions
+- [ ] Participant sorting rules
 - [ ] Audio filter example
 - [ ] Video filter example
 
