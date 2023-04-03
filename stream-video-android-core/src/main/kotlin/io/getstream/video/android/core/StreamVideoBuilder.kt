@@ -108,8 +108,7 @@ public class StreamVideoBuilder(
             loggingLevel=loggingLevel,
         )
 
-        // TODO: Bit of a hack
-
+        // create the client
         val client = StreamVideoImpl(
             context = context,
             scope = scope,

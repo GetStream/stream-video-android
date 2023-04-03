@@ -16,19 +16,7 @@
 
 package io.getstream.video.android.core
 
-import android.content.Context
-import android.hardware.camera2.CameraManager
-import androidx.core.content.getSystemService
-import io.getstream.log.taggedLogger
-import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.call.ActiveSFUSession
-import io.getstream.video.android.core.call.connection.StreamPeerConnection
-import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
-import io.getstream.video.android.core.call.signal.socket.SfuSocket
-import io.getstream.video.android.core.call.signal.socket.SfuSocketListener
-import io.getstream.video.android.core.call.state.ConnectionState
-import io.getstream.video.android.core.dispatchers.DispatcherProvider
-import io.getstream.video.android.core.errors.VideoError
 import io.getstream.video.android.core.events.AudioLevelChangedEvent
 import io.getstream.video.android.core.events.BlockedUserEvent
 import io.getstream.video.android.core.events.CallAcceptedEvent
@@ -66,131 +54,16 @@ import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.events.VideoQualityChangedEvent
 import io.getstream.video.android.core.model.*
 import io.getstream.video.android.core.utils.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.withContext
 import org.openapitools.client.models.*
-import org.webrtc.*
-import org.webrtc.VideoTrack
-import retrofit2.HttpException
-import stream.video.sfu.models.ConnectionQuality
-import stream.video.sfu.models.ICETrickle
-import stream.video.sfu.models.TrackType
-import stream.video.sfu.signal.*
 import java.util.*
-import kotlin.coroutines.CoroutineContext
 
 public data class SFUConnection(
     internal val callUrl: String,
     internal val sfuToken: SfuToken,
     internal val iceServers: List<IceServer>
 )
-
-/**
- * TODO: Line 297. Where do we get the call settings from?
- */
-
-
-
-public open class ParticipantState(open val call: Call2, user: User) {
-
-    open fun muteAudio() {
-        // how do i mute another user?
-    }
-
-    open fun muteVideo() {
-        // how do i mute another user?
-    }
-
-    open val videoTrack by lazy {
-        call.activeSession?.getParticipant(user.id)?.videoTrack
-    }
-    open val audioTrack by lazy {
-        call.activeSession?.getParticipant(user.id)?.publishedTracks?.filter { it == TrackType.TRACK_TYPE_AUDIO }
-    }
-
-    /**
-     * The user
-     */
-    internal val _user: MutableStateFlow<User> = MutableStateFlow(user)
-    val user: StateFlow<User> = _user
-
-    internal val _acceptedAt: MutableStateFlow<Date?> = MutableStateFlow(null)
-    val acceptedAt: StateFlow<Date?> = _acceptedAt
-
-    internal val _rejectedAt: MutableStateFlow<Date?> = MutableStateFlow(null)
-    val rejectedAt: StateFlow<Date?> = _rejectedAt
-
-    internal val _joinedAt: MutableStateFlow<Date?> = MutableStateFlow(null)
-    val joinedAt: StateFlow<Date?> = _joinedAt
-
-    /**
-     * State that indicates whether the camera is capturing and sending video or not.
-     */
-    internal val _videoEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    val videoEnabled: StateFlow<Boolean> = _videoEnabled
-
-    internal val _speaking: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    val speaking: StateFlow<Boolean> = _speaking
-
-    internal val _audioLevel: MutableStateFlow<Float> = MutableStateFlow(0F)
-    val audioLevel: StateFlow<Float> = _audioLevel
-
-    internal val _connectionQuality: MutableStateFlow<ConnectionQuality> = MutableStateFlow(ConnectionQuality.CONNECTION_QUALITY_UNSPECIFIED)
-    val connectionQuality: StateFlow<ConnectionQuality> = _connectionQuality
-    /**
-     * State that indicates whether the mic is capturing and sending the audio or not.
-     */
-    internal val _isAudioEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    val audioEnabled: StateFlow<Boolean> = _isAudioEnabled
-
-    /**
-     * State that indicates whether the speakerphone is on or not.
-     */
-    internal val _isSpeakerPhoneEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    val speakerPhoneEnabled: StateFlow<Boolean> = _isSpeakerPhoneEnabled
-}
-
-public class LocalParticipantState(override val call: Call2, user: User) : ParticipantState(call, user) {
-    override fun muteAudio() {
-        call.activeSession!!.setMicrophoneEnabled(false)
-    }
-
-    override fun muteVideo() {
-        // TODO: raise a nice error if the session ins't there yet
-        call.activeSession!!.setCameraEnabled(false)
-    }
-
-    fun flipCamera() {
-        // TODO front and back facing
-        call.activeSession!!.flipCamera()
-    }
-
-    internal val _ownCapabilities: MutableStateFlow<List<OwnCapability>> = MutableStateFlow(
-        emptyList()
-    )
-    val ownCapabilities: StateFlow<List<OwnCapability>> = _ownCapabilities
-
-    val localVideoTrack by lazy {
-        call.activeSession?.localVideoTrack
-    }
-    val localAudioTrack by lazy {
-        call.activeSession?.localAudioTrack
-    }
-
-
-}
-
-public class MemberState(user: User) {
-    /**
-     * If you are a participant or not
-     */
-    private val _isParticipant: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    val videoEnabled: StateFlow<Boolean> = _isParticipant
-}
 
 /**
  *

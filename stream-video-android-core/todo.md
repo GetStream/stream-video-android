@@ -1,8 +1,20 @@
 
 ## Launch prep for the low level client
 
-- Check how we see if a socket is connected (test for coordinator and SFU)
-- Verify logging works well
+
+### Review each file, fix TODOS and document
+
+- [X] StreamVideoBuilder
+- [ ] StreamVideoImpl
+- [ ] ConnectionModule
+- [ ] Call2
+- [ ] CallState
+- [ ] ParticipantState
+
+
+### TODOs
+
+- Review the 200 todos
 
 ### Testing
 
@@ -12,7 +24,7 @@
 - [X] Build vars (run locally)
 - [X] Ability to run against local go codebase
 - [ ] Build vars (valid token generation)
-- [ ] Make client API methods internal
+- [ ] Make call level client API methods internal
 
 ** Use cases **
 
@@ -39,6 +51,7 @@
 - [X] Cleanup event handling
 - [ ] Easily see if the coordinator is connected
 - [ ] Easily see if the SFU is connected
+- [ ] Verify all events are handled
 - [ ] Use the new state in the view model
 - [ ] Update to the latest events from the protocol
 - [ ] Perhaps a media manager class to abstract all the local audio/video stuff. Also makes it easy to test the codebase if you can swap out the media & webrtc stuff.
@@ -49,8 +62,7 @@
 - [X] Event subscriptions (sending)
 - [X] Permissions: https://www.notion.so/stream-wiki/Call-Permissions-832f914ad4c545cf8f048012900ad21d
 - [X] Faster latency measurements (run in parallel)
-- [ ] Verify all events are handled
-- [ ] Sending reactions
+- [X] Sending reactions
 - [ ] Audio filter example
 - [ ] Video filter example
 
@@ -66,16 +78,10 @@
 - [ ] Authentication example
 - [ ] Docs on client setup
 
-### Review each file, fix TODOS and document
 
-- [ ] StreamVideoBuilder
-- [ ] StreamVideoImpl
-- [ ] ConnectionModule
-- [ ] Call2
-- [ ] CallState
-- [ ] ParticipantState
 
 ### Available tasks up for grabs
 
 - Currently we use UserPreferencesManager. Jaewoong mentioned we should perhaps explore https://developer.android.com/topic/libraries/architecture/datastore
 - Measure latency isn't 100% ok. You can't set a timeout using withTimeout and collect the measurements that we have. This relates to threading vs coroutines and withTimeout not working
+- Logging needs to be reworked to correctly pass down from client to retrofit, also logs should work in the test suite
