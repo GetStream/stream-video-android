@@ -1,7 +1,7 @@
 
 ## Upcoming
 
-- Update from latest openapi spec
+- See if there is a way to verify that android implements all events
 - Verify all events are handled
 - Easily see if the coordinator is connected
 - Easily see if the SFU is connected
@@ -53,11 +53,11 @@
 - [X] Support query calls
 - [X] Cleanup The Network connection module
 - [X] Cleanup event handling
+- [X] Update to the latest events from the protocol
 - [ ] Easily see if the coordinator is connected
 - [ ] Easily see if the SFU is connected
 - [ ] Verify all events are handled
 - [ ] Use the new state in the view model
-- [ ] Update to the latest events from the protocol
 - [ ] Media manager class to abstract all the local audio/video stuff. Also makes it easy to test the codebase if you can swap out the media & webrtc stuff.
 
 ### Features

@@ -17,6 +17,8 @@
 package io.getstream.video.android.core
 
 import io.getstream.video.android.core.errors.VideoError
+import io.getstream.video.android.core.events.CallCreatedEvent
+import io.getstream.video.android.core.events.ConnectedEvent
 import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.model.Call
 import io.getstream.video.android.core.model.User
@@ -33,8 +35,32 @@ sealed class ConnectionState {
     class Failed(error: VideoError) : ConnectionState()
 }
 
-class ClientState {
+class ClientState(client: StreamVideo) {
+    internal val clientImpl = client as StreamVideoImpl
+
+    /**
+     * Handles the events for the client state.
+     * Most event logic happens in the Call instead of the client
+     */
+
     fun handleEvent(event: VideoEvent) {
+
+        // mark connected
+        if (event is ConnectedEvent) {
+            _connection.value = ConnectionState.Connected()
+        } else if (event is CallCreatedEvent) {
+            // what's the right thing to do here?
+            // if it's ringing we add it
+
+            // get or create the call and update it
+            val (type, id) = event.callCid.split(":")
+            val call = clientImpl.call(type, id)
+            call.state.updateFromEvent(event)
+
+            if (event.ringing) {
+                _incomingCall.value = call
+            }
+        }
     }
 
     /**

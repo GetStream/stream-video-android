@@ -82,7 +82,6 @@ public class CallState(val call: Call2, user: User) {
                 participant._rejectedAt.value = Date()
             }
             is CallCancelledEvent -> TODO()
-            is CallCreatedEvent -> TODO()
             is CallEndedEvent -> {
                 _endedAt.value = Date()
                 _endedByUser.value = event.endedByUser
@@ -94,13 +93,11 @@ public class CallState(val call: Call2, user: User) {
             }
             is CallMembersDeletedEvent -> TODO()
 
-
+            is CallCreatedEvent -> {
+                // this is handled by the client
+            }
             is CallUpdatedEvent -> {
-                // update the own capabilities
-                me._ownCapabilities.value=event.ownCapabilities
-                // update the capabilities by role
-                _capabilitiesByRole.value = event.capabilitiesByRole
-                // update call info fields
+                updateFromEvent(event)
             }
             is UpdatedCallPermissionsEvent -> {
                 me._ownCapabilities.value=event.ownCapabilities
@@ -202,6 +199,25 @@ public class CallState(val call: Call2, user: User) {
 
     fun getParticipant(userId: String): ParticipantState? {
         return participantMap[userId]
+    }
+
+    fun updateFromEvent(event: VideoEvent) {
+
+        if (event is CallCreatedEvent) {
+            // TODO fix this
+            // update the own capabilities
+//            me._ownCapabilities.value=event.call.ownCapabilities
+//            // update the capabilities by role
+//            _capabilitiesByRole.value = event.capabilitiesByRole
+            // update call info fields
+        } else if (event is CallUpdatedEvent) {
+            // update the own capabilities
+            me._ownCapabilities.value=event.ownCapabilities
+            // update the capabilities by role
+            _capabilitiesByRole.value = event.capabilitiesByRole
+            // update call info fields
+        }
+
     }
 
     // TODO: SFU Connection

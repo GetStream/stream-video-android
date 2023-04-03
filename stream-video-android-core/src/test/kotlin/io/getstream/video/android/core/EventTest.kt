@@ -30,7 +30,7 @@ import stream.video.sfu.models.Participant
 import java.util.*
 
 @RunWith(RobolectricTestRunner::class)
-class EventTest : IntegrationTestBase() {
+class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
     // TODO: Change the class to not use an integration test, we don't need a full connect
     /**
      * Every event should update state properly
@@ -87,10 +87,6 @@ class EventTest : IntegrationTestBase() {
         val stopRecordingEvent = RecordingStoppedEvent(callCid = call.cid, cid = call.cid, type = "123")
         clientImpl.fireEvent(stopRecordingEvent)
         assertThat(call.state.recording.value).isFalse()
-
-        val event2 : VideoEvent
-
-
     }
 
     @Test
