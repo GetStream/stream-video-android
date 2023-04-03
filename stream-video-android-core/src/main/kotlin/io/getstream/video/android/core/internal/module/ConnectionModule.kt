@@ -39,6 +39,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.openapitools.client.apis.DefaultApi
 import org.openapitools.client.apis.EventsApi
+import org.openapitools.client.apis.ModerationApi
 import org.openapitools.client.apis.VideoCallsApi
 import org.openapitools.client.infrastructure.Serializer
 import retrofit2.Retrofit
@@ -108,6 +109,8 @@ internal class ConnectionModule(
     internal var okHttpClient: OkHttpClient
     internal var oldService: ClientRPCService
     internal var videoCallsApi: VideoCallsApi
+    internal var moderationApi: ModerationApi
+
     internal var eventsApi: EventsApi
     internal var defaultApi: DefaultApi
     internal var coordinatorSocket: VideoSocket
@@ -143,6 +146,7 @@ internal class ConnectionModule(
         videoCallsApi = retrofitClient.create(VideoCallsApi::class.java)
         eventsApi = retrofitClient.create(EventsApi::class.java)
         defaultApi = retrofitClient.create(DefaultApi::class.java)
+        moderationApi = retrofitClient.create(ModerationApi::class.java)
 
         // Note that it doesn't connect when you create the socket
         coordinatorSocket = createCoordinatorSocket()

@@ -650,7 +650,7 @@ internal class StreamVideoImpl internal constructor(
     override suspend fun blockUser(type: String, id: String, userId: String): Result<Unit> {
         logger.d { "[blockUser] callCid: $type:$id, userId: $userId" }
 
-        return wrapAPICall { connectionModule.videoCallsApi.blockUser(type, id, BlockUserRequest(userId)) }
+        return wrapAPICall { connectionModule.moderationApi.blockUser(type, id, BlockUserRequest(userId)) }
     }
 
     /**
@@ -697,7 +697,7 @@ internal class StreamVideoImpl internal constructor(
 
         val request = muteUsersData.toRequest()
         return wrapAPICall {
-            connectionModule.videoCallsApi.muteUsers(type, id, request)
+            connectionModule.moderationApi.muteUsers(type, id, request)
         }
     }
 

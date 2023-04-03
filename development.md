@@ -33,6 +33,27 @@ BuildConfig.CORE_TEST_LOCAL
 
 ## OpenAPI build
 
+Clone the protocl
+```bash
+```
+
+Run the generate openapi
+```bash
+./generate-openapi.sh
+```
+
+Note that now you have your generated files here:
+* ~/workspace/generated/
+
+The code for android is here
+* ~/workspace/stream-video-android/
+
+You can see the diff here
+
+```bash
+diff -rq ~/workspace/generated/src/main/kotlin/org/openapitools/client ~/workspace/stream-video-android/src/main/kotlin/org/openapitools/client
+```
+
 * Protocol is visible here: https://getstream.github.io/protocol/
 * https://www.notion.so/Getting-Started-to-Video-for-Android-Developers-be5ae7e2e9584f78b757163ecff1033b
 
