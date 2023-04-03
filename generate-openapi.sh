@@ -73,12 +73,9 @@ for FILE in "$APIS_ROOT"/*.kt; do
     sed -i '' "s/$cleanup_string//g" "$FILE"
   done
 
-#  "*"
-
   RETROFIT_IMPORTS=($(grep -iE -o "$RETROFIT_IMPORTS_REGEX" "$FILE" | sed 's/@//;s/[()]//g' | tr ' ' '\n' | sort -u))
   PREPARED_IMPORTS=""
   for retrofit_import in "${RETROFIT_IMPORTS[@]}"; do
-    echo $retrofit_import
     PREPARED_IMPORTS+="import retrofit2.http.$retrofit_import\n"
   done
 
