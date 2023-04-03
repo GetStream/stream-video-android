@@ -15,19 +15,21 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.OwnUserResponse
 
 import com.squareup.moshi.Json
 
 /**
- * 
+ * This event is sent when the WS connection is established and authenticated, this event contains the full user object as it is stored on the server
  *
  * @param connectionId The connection_id for this client
  * @param createdAt 
- * @param type The type of event: \"health.check\" in this case
+ * @param me 
+ * @param type The type of event: \"connection.ok\" in this case
  */
 
 
-data class HealthCheckEvent (
+data class WSConnectedEvent (
 
     /* The connection_id for this client */
     @Json(name = "connection_id")
@@ -36,7 +38,10 @@ data class HealthCheckEvent (
     @Json(name = "created_at")
     val createdAt: java.time.OffsetDateTime,
 
-    /* The type of event: \"health.check\" in this case */
+    @Json(name = "me")
+    val me: OwnUserResponse,
+
+    /* The type of event: \"connection.ok\" in this case */
     @Json(name = "type")
     val type: kotlin.String
 

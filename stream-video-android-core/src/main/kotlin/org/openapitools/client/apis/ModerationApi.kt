@@ -21,7 +21,7 @@ import org.openapitools.client.models.UpdateUserPermissionsResponse
 interface ModerationApi {
     /**
      * Block user on a call
-     * Block a user, preventing them from joining the call until they are unblocked.
+     * Block a user, preventing them from joining the call until they are unblocked.  Sends events: - call.blocked_user  Required permissions: - BlockUser 
      * Responses:
      *  - 201: Successful response
      *  - 400: Bad request
@@ -37,7 +37,7 @@ interface ModerationApi {
 
     /**
      * Mute users
-     * Mutes users in a call
+     * Mutes users in a call  Required permissions: - MuteUsers 
      * Responses:
      *  - 201: Successful response
      *  - 400: Bad request
@@ -53,7 +53,7 @@ interface ModerationApi {
 
     /**
      * Request permission
-     * Request permission to perform an action
+     * Request permission to perform an action  Sends events: - call.permission_request 
      * Responses:
      *  - 201: Successful response
      *  - 400: Bad request
@@ -69,7 +69,7 @@ interface ModerationApi {
 
     /**
      * Unblocks user on a call
-     * Removes the block for a user on a call. The user will be able to join the call again.
+     * Removes the block for a user on a call. The user will be able to join the call again.  Sends events: - call.unblocked_user  Required permissions: - BlockUser 
      * Responses:
      *  - 201: Successful response
      *  - 400: Bad request
@@ -85,7 +85,7 @@ interface ModerationApi {
 
     /**
      * Update user permissions
-     * Updates user permissions
+     * Updates user permissions  Sends events: - call.permissions_updated  Required permissions: - UpdateCallPermissions 
      * Responses:
      *  - 201: Successful response
      *  - 400: Bad request

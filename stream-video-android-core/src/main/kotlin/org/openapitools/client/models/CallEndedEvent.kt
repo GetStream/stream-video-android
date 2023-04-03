@@ -20,11 +20,11 @@ import org.openapitools.client.models.UserResponse
 import com.squareup.moshi.Json
 
 /**
- * sent when a call is mark as ended for all its participants
+ * This event is sent when a call is mark as ended for all its participants. Clients receiving this event should leave the call screen
  *
  * @param callCid 
  * @param createdAt 
- * @param type 
+ * @param type The type of event: \"call.ended\" in this case
  * @param user 
  */
 
@@ -37,6 +37,7 @@ data class CallEndedEvent (
     @Json(name = "created_at")
     val createdAt: java.time.OffsetDateTime,
 
+    /* The type of event: \"call.ended\" in this case */
     @Json(name = "type")
     val type: kotlin.String,
 

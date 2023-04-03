@@ -17,7 +17,7 @@ import org.openapitools.client.models.UpdateCallTypeResponse
 interface CallTypesApi {
     /**
      * Create Call Type
-     * 
+     *  
      * Responses:
      *  - 201: Successful response
      *  - 400: Bad request
@@ -31,7 +31,7 @@ interface CallTypesApi {
 
     /**
      * Delete Call Type
-     * 
+     *  
      * Responses:
      *  - 400: Bad request
      *  - 429: Too many requests
@@ -44,7 +44,7 @@ interface CallTypesApi {
 
     /**
      * Get Call Type
-     * 
+     *  
      * Responses:
      *  - 200: Successful response
      *  - 400: Bad request
@@ -58,7 +58,7 @@ interface CallTypesApi {
 
     /**
      * List Call Type
-     * 
+     *  
      * Responses:
      *  - 200: Successful response
      *  - 400: Bad request
@@ -71,7 +71,7 @@ interface CallTypesApi {
 
     /**
      * Update Call Type
-     * 
+     *  
      * Responses:
      *  - 201: Successful response
      *  - 400: Bad request

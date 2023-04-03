@@ -12,7 +12,7 @@ import org.openapitools.client.models.StopLiveResponse
 interface LivestreamingApi {
     /**
      * Start broadcasting
-     * Starts broadcasting
+     * Starts broadcasting 
      * Responses:
      *  - 400: Bad request
      *  - 429: Too many requests
@@ -26,7 +26,7 @@ interface LivestreamingApi {
 
     /**
      * Stop broadcasting
-     * Stops broadcasting
+     * Stops broadcasting 
      * Responses:
      *  - 400: Bad request
      *  - 429: Too many requests
@@ -40,7 +40,7 @@ interface LivestreamingApi {
 
     /**
      * Set call as not live
-     * 
+     *   Sends events: - call.updated  Required permissions: - UpdateCall 
      * Responses:
      *  - 201: Successful response
      *  - 400: Bad request
@@ -55,7 +55,7 @@ interface LivestreamingApi {
 
     /**
      * Stop recording
-     * Stops recording
+     * Stops recording  Sends events: - call.recording_stopped  Required permissions: - StopRecording 
      * Responses:
      *  - 400: Bad request
      *  - 429: Too many requests

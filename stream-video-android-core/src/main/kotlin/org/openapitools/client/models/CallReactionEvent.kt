@@ -20,12 +20,12 @@ import org.openapitools.client.models.ReactionResponse
 import com.squareup.moshi.Json
 
 /**
- * this event is sent when a reaction is sent to a call
+ * This event is sent when a reaction is sent in a call, clients should use this to show the reaction in the call screen
  *
  * @param callCid 
  * @param createdAt 
  * @param reaction 
- * @param type 
+ * @param type The type of event: \"call.reaction_new\" in this case
  */
 
 
@@ -40,6 +40,7 @@ data class CallReactionEvent (
     @Json(name = "reaction")
     val reaction: ReactionResponse,
 
+    /* The type of event: \"call.reaction_new\" in this case */
     @Json(name = "type")
     val type: kotlin.String
 

@@ -19,11 +19,11 @@ package org.openapitools.client.models
 import com.squareup.moshi.Json
 
 /**
- * sent when a recording for a call has started
+ * This event is sent when call recording has started
  *
  * @param callCid 
  * @param createdAt 
- * @param type 
+ * @param type The type of event: \"call.recording_started\" in this case
  */
 
 
@@ -35,6 +35,7 @@ data class CallRecordingStartedEvent (
     @Json(name = "created_at")
     val createdAt: java.time.OffsetDateTime,
 
+    /* The type of event: \"call.recording_started\" in this case */
     @Json(name = "type")
     val type: kotlin.String
 

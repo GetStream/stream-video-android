@@ -12,7 +12,7 @@ import org.openapitools.client.models.ListRecordingsResponse
 interface RecordingApi {
     /**
      * List recordings
-     * Lists recordings
+     * Lists recordings  Required permissions: - ListRecordings 
      * Responses:
      *  - 200: Successful response
      *  - 400: Bad request
@@ -28,7 +28,7 @@ interface RecordingApi {
 
     /**
      * Start recording
-     * Starts recording
+     * Starts recording  Sends events: - call.recording_started  Required permissions: - StopRecording 
      * Responses:
      *  - 400: Bad request
      *  - 429: Too many requests
@@ -42,7 +42,7 @@ interface RecordingApi {
 
     /**
      * Stop recording
-     * Stops recording
+     * Stops recording  Sends events: - call.recording_stopped  Required permissions: - StopRecording 
      * Responses:
      *  - 400: Bad request
      *  - 429: Too many requests

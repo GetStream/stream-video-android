@@ -21,12 +21,12 @@ import org.openapitools.client.models.UserResponse
 import com.squareup.moshi.Json
 
 /**
- * sent when a user gets new permissions on a call granted
+ * This event is sent to notify about permission changes for a user, clients receiving this event should update their UI accordingly
  *
  * @param callCid 
  * @param createdAt 
  * @param ownCapabilities The capabilities of the current user
- * @param type 
+ * @param type The type of event: \"call.permissions_updated\" in this case
  * @param user 
  */
 
@@ -43,6 +43,7 @@ data class UpdatedCallPermissionsEvent (
     @Json(name = "own_capabilities")
     val ownCapabilities: kotlin.collections.List<OwnCapability>,
 
+    /* The type of event: \"call.permissions_updated\" in this case */
     @Json(name = "type")
     val type: kotlin.String,
 

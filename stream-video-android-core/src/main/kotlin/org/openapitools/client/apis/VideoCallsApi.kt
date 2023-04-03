@@ -32,7 +32,7 @@ import org.openapitools.client.models.UpdateCallResponse
 interface VideoCallsApi {
     /**
      * End call
-     * 
+     *   Sends events: - call.ended  Required permissions: - EndCall 
      * Responses:
      *  - 201: Successful response
      *  - 400: Bad request
@@ -47,7 +47,7 @@ interface VideoCallsApi {
 
     /**
      * Get Call
-     * 
+     *   Required permissions: - ReadCall 
      * Responses:
      *  - 200: Successful response
      *  - 400: Bad request
@@ -62,7 +62,7 @@ interface VideoCallsApi {
 
     /**
      * Get Call Edge Server
-     * 
+     * Retrieve the edge server information and credentials for a call.  Required permissions: - JoinCall 
      * Responses:
      *  - 201: Successful response
      *  - 400: Bad request
@@ -78,7 +78,7 @@ interface VideoCallsApi {
 
     /**
      * Get Edges
-     * 
+     * Returns the list of all edges available for video calls. 
      * Responses:
      *  - 200: Successful response
      *  - 400: Bad request
@@ -91,7 +91,7 @@ interface VideoCallsApi {
 
     /**
      * Get or create a call
-     * Gets or creates a new call
+     * Gets or creates a new call  Sends events: - call.created  Required permissions: - CreateCall - ReadCall - UpdateCallSettings 
      * Responses:
      *  - 201: Successful response
      *  - 400: Bad request
@@ -107,7 +107,7 @@ interface VideoCallsApi {
 
     /**
      * Set call as live
-     * 
+     *   Sends events: - call.updated  Required permissions: - UpdateCall 
      * Responses:
      *  - 201: Successful response
      *  - 400: Bad request
@@ -122,7 +122,7 @@ interface VideoCallsApi {
 
     /**
      * Join call (type, id)
-     * Request to join a call
+     * Request to join a call  Required permissions: - CreateCall - JoinCall 
      * Responses:
      *  - 201: Successful response
      *  - 400: Bad request
@@ -139,7 +139,7 @@ interface VideoCallsApi {
 
     /**
      * Join call (type, id)
-     * Request to join a call
+     * Request to join a call  Required permissions: - CreateCall - JoinCall 
      * Responses:
      *  - 201: Successful response
      *  - 400: Bad request
@@ -156,7 +156,7 @@ interface VideoCallsApi {
 
     /**
      * Query call
-     * Query calls with filter query
+     * Query calls with filter query  Required permissions: - ReadCall 
      * Responses:
      *  - 201: Successful response
      *  - 400: Bad request
@@ -171,7 +171,7 @@ interface VideoCallsApi {
 
     /**
      * Query call members
-     * Query call members with filter query
+     * Query call members with filter query  Required permissions: - ReadCall 
      * Responses:
      *  - 201: Successful response
      *  - 400: Bad request
@@ -185,7 +185,7 @@ interface VideoCallsApi {
 
     /**
      * Send reaction to the call
-     * Sends reaction to the call
+     * Sends reaction to the call  Sends events: - call.reaction_new  Required permissions: - CreateCallReaction 
      * Responses:
      *  - 201: Successful response
      *  - 400: Bad request
@@ -201,7 +201,7 @@ interface VideoCallsApi {
 
     /**
      * Set call as not live
-     * 
+     *   Sends events: - call.updated  Required permissions: - UpdateCall 
      * Responses:
      *  - 201: Successful response
      *  - 400: Bad request
@@ -216,7 +216,7 @@ interface VideoCallsApi {
 
     /**
      * Unblocks user on a call
-     * Removes the block for a user on a call. The user will be able to join the call again.
+     * Removes the block for a user on a call. The user will be able to join the call again.  Sends events: - call.unblocked_user  Required permissions: - BlockUser 
      * Responses:
      *  - 201: Successful response
      *  - 400: Bad request
@@ -232,7 +232,7 @@ interface VideoCallsApi {
 
     /**
      * Update Call
-     * 
+     *   Sends events: - call.updated  Required permissions: - UpdateCall 
      * Responses:
      *  - 200: Call
      *  - 400: Bad request

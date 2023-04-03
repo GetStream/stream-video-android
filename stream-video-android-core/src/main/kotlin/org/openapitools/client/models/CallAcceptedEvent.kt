@@ -20,7 +20,7 @@ import org.openapitools.client.models.UserResponse
 import com.squareup.moshi.Json
 
 /**
- * sent when a user accepts a call
+ * This event is sent by a user accepting an incoming ringing call. Clients receiving this event should dismiss the call screen and move to the call.
  *
  * @param callCid 
  * @param createdAt 
