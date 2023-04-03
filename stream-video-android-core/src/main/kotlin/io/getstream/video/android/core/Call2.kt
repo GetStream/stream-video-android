@@ -90,6 +90,8 @@ public class CallState(val call: Call2, user: User) {
     private val _capabilitiesByRole: MutableStateFlow<Map<String, List<String>>> = MutableStateFlow(emptyMap())
     val capabilitiesByRole: StateFlow<Map<String, List<String>>> = _capabilitiesByRole
 
+
+
     fun handleEvent(event: VideoEvent) {
         println("updating call state yolo")
         when (event) {
@@ -369,5 +371,45 @@ public class Call2(
     }
     suspend fun stopBroadcasting(): Result<Any> {
         return client.stopBroadcasting(type, id)
+    }
+
+    private var subscriptions = mutableSetOf<EventSubscription>()
+
+    public fun subscribeFor(
+        vararg eventTypes: Class<out VideoEvent>,
+        listener: VideoEventListener<VideoEvent>,
+    ): EventSubscription {
+        val filter = { event: VideoEvent ->
+            eventTypes.any { type -> type.isInstance(event) }
+        }
+        val sub = EventSubscription(listener, filter)
+        subscriptions.add(sub)
+        return sub
+    }
+
+    public fun subscribe(
+        listener: VideoEventListener<VideoEvent>
+    ): EventSubscription {
+        val sub = EventSubscription(listener)
+        subscriptions.add(sub)
+        return sub
+    }
+
+    fun fireEvent(event: VideoEvent) {
+        subscriptions.forEach { sub ->
+            if (!sub.isDisposed) {
+                // subs without filters should always fire
+                if (sub.filter == null) {
+                    sub.listener.onEvent(event)
+                }
+
+                // if there is a filter, check it and fire if it matches
+                sub.filter?.let {
+                    if (it.invoke(event)) {
+                        sub.listener.onEvent(event)
+                    }
+                }
+            }
+        }
     }
 }

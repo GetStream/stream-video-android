@@ -64,7 +64,7 @@
 - [X] Permissions: https://www.notion.so/stream-wiki/Call-Permissions-832f914ad4c545cf8f048012900ad21d
 - [X] Faster latency measurements (run in parallel)
 - [X] Sending reactions
-- [ ] Support for listening to events at the call level
+- [X] Support for listening to events at the call level
 - [ ] Participant sorting rules
 - [ ] Audio filter example
 - [ ] Video filter example

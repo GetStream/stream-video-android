@@ -334,7 +334,7 @@ internal class StreamVideoImpl internal constructor(
             }
         }
 
-        // fire event handlers
+        // client level subscriptions
         subscriptions.forEach { sub ->
             if (!sub.isDisposed) {
                 // subs without filters should always fire
@@ -350,6 +350,13 @@ internal class StreamVideoImpl internal constructor(
                 }
             }
         }
+        // call level subscriptions
+        if (selectedCid.isNotEmpty()) {
+            calls[selectedCid]?.let {
+                it.fireEvent(event)
+            }
+        }
+
     }
 
     // caller: DIAL and wait answer
