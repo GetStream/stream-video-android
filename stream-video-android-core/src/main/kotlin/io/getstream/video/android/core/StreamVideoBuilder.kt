@@ -21,7 +21,8 @@ import android.content.Context
 import androidx.lifecycle.ProcessLifecycleOwner
 import io.getstream.android.push.PushDeviceGenerator
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
-import io.getstream.video.android.core.events.VideoEvent
+import io.getstream.video.android.core.filter.AudioFilter
+import io.getstream.video.android.core.filter.VideoFilter
 import io.getstream.video.android.core.internal.module.ConnectionModule
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.ApiKey
@@ -32,25 +33,21 @@ import io.getstream.video.android.core.user.UserPreferencesManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-public interface AudioFilter
-public interface VideoFilter
 
-sealed class GEO {
-    /** Run calls over our global edge network, this is the default and right for most applications */
-    object GlobalEdgeNetwork : GEO()
-}
-
-sealed class TokenType {
-    /** A user token */
-    object User : TokenType()
-    /** A call specific token */
-    object Call : TokenType()
-}
-
-public fun interface VideoEventListener<EventT : VideoEvent> {
-    public fun onEvent(event: EventT)
-}
-
+/**
+ * The StreamVideoBuilder is used to create a new instance of the StreamVideoClient.
+ *
+ * @sample
+ * val client = StreamVideoBuilder(
+ *      context = context,
+ *      apiKey = apiKey,
+ *      geo = GEO.GlobalEdgeNetwork,
+ *      user,
+ *      token,
+ *      loggingLevel = LoggingLevel.BODY
+ *  )
+ *
+ */
 public class StreamVideoBuilder(
     private val context: Context,
     /** Your Stream API Key, you can find it in the dashboard */
@@ -116,28 +113,27 @@ public class StreamVideoBuilder(
             loggingLevel = loggingLevel,
             lifecycle = lifecycle,
             connectionModule = module,
+            pushDeviceGenerators=pushDeviceGenerators
         )
         // addDevice for push
-        // TODO: This is a bit hard to read, lets simplify
         if (enablePush && user.type == UserType.Authenticated) {
             scope.launch {
-                pushDeviceGenerators
-                    .firstOrNull { it.isValidForThisDevice(context) }
-                    ?.let {
-                        it.onPushDeviceGeneratorSelected()
-                        it.asyncGeneratePushDevice {
-                            scope.launch {
-                                client.createDevice(
-                                    token = it.token,
-                                    pushProvider = it.pushProvider.key
-                                )
-                            }
-                        }
-                    }
-
+                client.registerPushDevice()
             }
         }
 
         return client
     }
+}
+
+sealed class GEO {
+    /** Run calls over our global edge network, this is the default and right for most applications */
+    object GlobalEdgeNetwork : GEO()
+}
+
+sealed class TokenType {
+    /** A user token */
+    object User : TokenType()
+    /** A call specific token */
+    object Call : TokenType()
 }

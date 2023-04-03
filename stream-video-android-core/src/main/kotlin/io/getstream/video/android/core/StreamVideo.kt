@@ -19,6 +19,7 @@ package io.getstream.video.android.core
 import android.content.Context
 import io.getstream.video.android.core.call.CallClient
 import io.getstream.video.android.core.events.VideoEvent
+import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.model.Call
 import io.getstream.video.android.core.model.CallEventType
 import io.getstream.video.android.core.model.CallInfo
@@ -429,4 +430,8 @@ public interface StreamVideo {
     public suspend fun handlePushMessage(payload: Map<String, Any>): Result<Unit>
 
     public fun call(type: String, id: String, token: String = ""): Call2
+
+
+    public suspend fun registerPushDevice()
+
 }

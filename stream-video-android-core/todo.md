@@ -1,7 +1,10 @@
 
-## Current
+## Finish LLC
 
-- Participant sorting
+- Update from latest openapi spec
+- Implement the tokenProvider exception handling. (basically we just need to catch the right error and repeat the API call)
+
+
 
 ### Review each file, fix TODOS and document
 

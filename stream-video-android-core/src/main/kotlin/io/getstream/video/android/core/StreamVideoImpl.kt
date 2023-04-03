@@ -18,12 +18,14 @@ package io.getstream.video.android.core
 
 import android.content.Context
 import androidx.lifecycle.Lifecycle
+import io.getstream.android.push.PushDeviceGenerator
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.call.CallClient
 import io.getstream.video.android.core.errors.VideoBackendError
 import io.getstream.video.android.core.errors.VideoError
 import io.getstream.video.android.core.events.CallCreatedEvent
 import io.getstream.video.android.core.events.VideoEvent
+import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.internal.module.ConnectionModule
 import io.getstream.video.android.core.lifecycle.LifecycleHandler
 import io.getstream.video.android.core.lifecycle.internal.StreamLifecycleObserver
@@ -94,6 +96,7 @@ internal class StreamVideoImpl internal constructor(
     private val lifecycle: Lifecycle,
     private val loggingLevel: LoggingLevel,
     internal val connectionModule: ConnectionModule,
+    internal val pushDeviceGenerators: List<PushDeviceGenerator>,
 ) : StreamVideo, SocketListener {
 
     override fun onEvent(event: VideoEvent) {
@@ -315,6 +318,26 @@ internal class StreamVideoImpl internal constructor(
 
             operations.awaitAll()
         }
+    }
+
+    override suspend fun registerPushDevice() {
+        // first get a push device generator that works for this device
+        val generator = pushDeviceGenerators.firstOrNull { it.isValidForThisDevice(context) }
+
+        // if we found one, register it at the server
+        if (generator != null) {
+            generator.onPushDeviceGeneratorSelected()
+
+            generator.asyncGeneratePushDevice {generatedDevice ->
+                scope.launch {
+                    createDevice(
+                        token = generatedDevice.token,
+                        pushProvider = generatedDevice.pushProvider.key
+                    )
+                }
+            }
+        }
+
     }
 
     /**
