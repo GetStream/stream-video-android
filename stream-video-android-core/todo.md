@@ -36,12 +36,12 @@
 - [X] Ensure we always use DispatcherProvider.IO
 - [X] Support query calls
 - [X] Cleanup The Network connection module
+- [X] Cleanup event handling
 - [ ] Easily see if the coordinator is connected
 - [ ] Easily see if the SFU is connected
-- [X] Cleanup event handling
 - [ ] Use the new state in the view model
 - [ ] Update to the latest events from the protocol
-- [ ] Perhaps a media manager class to abstract all the local audio/video stuff
+- [ ] Perhaps a media manager class to abstract all the local audio/video stuff. Also makes it easy to test the codebase if you can swap out the media & webrtc stuff.
 
 ### Features
 
@@ -49,8 +49,8 @@
 - [X] Event subscriptions (sending)
 - [X] Permissions: https://www.notion.so/stream-wiki/Call-Permissions-832f914ad4c545cf8f048012900ad21d
 - [X] Faster latency measurements (run in parallel)
-- [ ] Sending reactions
 - [ ] Verify all events are handled
+- [ ] Sending reactions
 - [ ] Audio filter example
 - [ ] Video filter example
 

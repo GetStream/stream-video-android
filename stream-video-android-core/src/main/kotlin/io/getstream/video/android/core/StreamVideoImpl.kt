@@ -756,9 +756,9 @@ internal class StreamVideoImpl internal constructor(
     }
 
     /**
-     * @see StreamVideo.sendVideoReaction
+     * @see StreamVideo.sendReaction
      */
-    override suspend fun sendVideoReaction(
+    override suspend fun sendReaction(
         type: String,
         id: String,
         sendReactionData: SendReactionData

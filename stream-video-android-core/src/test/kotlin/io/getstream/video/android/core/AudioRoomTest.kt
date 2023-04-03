@@ -17,6 +17,7 @@
 package io.getstream.video.android.core
 
 import io.getstream.video.android.core.model.QueryCallsData
+import io.getstream.video.android.core.model.SendReactionData
 import io.getstream.video.android.core.utils.mapSuspend
 import io.getstream.video.android.core.utils.onSuccess
 import kotlinx.coroutines.test.runTest
@@ -67,6 +68,14 @@ class AudioRoomTest : IntegrationTestBase() {
         assertSuccess(goLiveResult)
         val stopLiveResult = call.stopLive()
         assertSuccess(stopLiveResult)
+    }
+
+    @Test
+    fun `maybe send a reaction`() = runTest {
+        val call = client.call("default", randomUUID())
+        call.create()
+        val response = call.sendReaction(SendReactionData("raise-hand"))
+        assertSuccess(response)
     }
 
     @Test

@@ -368,7 +368,7 @@ public interface StreamVideo {
      *
      * @return [Result] containing info about the successfully sent [ReactionData].
      */
-    public suspend fun sendVideoReaction(
+    public suspend fun sendReaction(
         type: String,
         id: String,
         sendReactionData: SendReactionData

@@ -180,6 +180,8 @@ public class LocalParticipantState(override val call: Call2, user: User) : Parti
     val localAudioTrack by lazy {
         call.activeSession?.localAudioTrack
     }
+
+
 }
 
 public class MemberState(user: User) {
@@ -299,6 +301,8 @@ public class CallState(val call: Call2, user: User) {
             is VideoQualityChangedEvent -> TODO()
         }
     }
+
+
 
     private fun removeParticipant(userId: String) {
         participantMap.remove(userId)
@@ -444,6 +448,10 @@ public class Call2(
         )
         return Success<ActiveSFUSession>(data= activeSession!!)
 
+    }
+
+    suspend fun sendReaction(data: SendReactionData): Result<SendReactionResponse> {
+        return client.sendReaction(type, id, data)
     }
 
     suspend fun goLive(): Result<GoLiveResponse> {
