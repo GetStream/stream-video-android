@@ -26,9 +26,11 @@ package org.openapitools.client.models
 import com.squareup.moshi.Json
 
 /**
- * *
+ * A custom event, this event is used to send custom events to other participants in the call.
+ *
  * @param callCid * @param createdAt * @param custom Custom data for this object
- * @param type * @param user */
+ * @param type The type of event (custom value in this case)
+ * @param user */
 
 data class CustomVideoEvent(
 
@@ -42,6 +44,7 @@ data class CustomVideoEvent(
     @Json(name = "custom")
     val custom: kotlin.collections.Map<kotlin.String, kotlin.Any>,
 
+    /* The type of event (custom value in this case) */
     @Json(name = "type")
     val type: kotlin.String,
 

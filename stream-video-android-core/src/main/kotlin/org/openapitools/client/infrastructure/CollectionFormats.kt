@@ -16,7 +16,7 @@
 
 package org.openapitools.client.infrastructure
 
-internal class CollectionFormats {
+class CollectionFormats {
 
     open class CSVParams {
 

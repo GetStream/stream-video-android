@@ -27,15 +27,12 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param sort * @param connectionId * @param filterConditions * @param limit * @param next * @param prev * @param watch */
+ * @param sort * @param filterConditions * @param limit * @param next * @param prev * @param watch */
 
 data class QueryCallsRequest(
 
     @Json(name = "sort")
     val sort: kotlin.collections.List<SortParamRequest>,
-
-    @Json(name = "connection_id")
-    val connectionId: kotlin.String? = null,
 
     @Json(name = "filter_conditions")
     val filterConditions: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null,

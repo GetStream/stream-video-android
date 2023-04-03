@@ -88,7 +88,13 @@ enum class OwnCapability(val value: kotlin.String) {
     updateMinusCallMinusPermissions("update-call-permissions"),
 
     @Json(name = "update-call-settings")
-    updateMinusCallMinusSettings("update-call-settings");
+    updateMinusCallMinusSettings("update-call-settings"),
+
+    @Json(name = "start-transcription-call")
+    startTranscriptionCall("start-transcription-call"),
+
+    @Json(name = "stop-transcription-call")
+    stopTranscriptionCall("stop-transcription-call");
 
     /**
      * Override toString() to avoid using the enum variable name as the value, and instead use
