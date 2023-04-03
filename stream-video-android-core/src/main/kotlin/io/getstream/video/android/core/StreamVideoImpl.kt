@@ -246,6 +246,10 @@ internal class StreamVideoImpl internal constructor(
         // TODO: Find the event listener
 
 
+
+    }
+
+    fun connect() {
         // TODO: Make this optional
         runBlocking(scope.coroutineContext) {
             val socketImpl = connectionModule.coordinatorSocket as VideoSocketImpl

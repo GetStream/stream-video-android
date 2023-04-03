@@ -86,7 +86,7 @@ open class TestBase {
     }
 }
 
-open class IntegrationTestBase: TestBase() {
+open class IntegrationTestBase(connectCoordinatorWS: Boolean = true): TestBase() {
 
     /** API Key */
     val apiKey = "hd8szvscpxvd"
@@ -113,6 +113,11 @@ open class IntegrationTestBase: TestBase() {
         }
         client = builder.build()
         clientImpl = client as StreamVideoImpl
+
+        // Connect to the WS if needed
+        if (connectCoordinatorWS) {
+            clientImpl.connect()
+        }
 
         // monitor for events
         events = mutableListOf()

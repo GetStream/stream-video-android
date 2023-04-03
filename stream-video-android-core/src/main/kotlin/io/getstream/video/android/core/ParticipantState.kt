@@ -5,6 +5,7 @@ import io.getstream.video.android.core.model.VideoTrack
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import stream.video.sfu.models.ConnectionQuality
+import stream.video.sfu.models.Participant
 import stream.video.sfu.models.TrackType
 import java.util.*
 
@@ -18,7 +19,7 @@ public open class ParticipantState(
     open val call: Call2,
     val initialUser: User,
    var sessionId: String = "",
-   val idPrefix: String = "",
+   var idPrefix: String = "",
    val isLocal: Boolean = false,
    var isOnline: Boolean = false,
 
@@ -78,6 +79,18 @@ public open class ParticipantState(
         // how do i mute another user?
     }
 
+    fun updateFromData(participant: Participant) {
+        sessionId = participant.session_id
+        _joinedAt.value = participant.joined_at?.toEpochMilli()?.let { Date(it) } ?: Date() // convert instant to date
+        idPrefix = participant.track_lookup_prefix
+        _connectionQuality.value = participant.connection_quality
+        _speaking.value = participant.is_speaking
+        _dominantSpeaker.value = participant.is_dominant_speaker
+        _audioLevel.value = participant.audio_level
+        val currentUser = _user.value
+        _user.value = currentUser.copy(name = participant.name)
+    }
+
     open val audioTrack by lazy {
         publishedTracks?.filter { it == TrackType.TRACK_TYPE_AUDIO }
     }
@@ -102,6 +115,9 @@ public open class ParticipantState(
      */
     internal val _videoEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val videoEnabled: StateFlow<Boolean> = _videoEnabled
+
+    internal val _dominantSpeaker: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val dominantSpeaker: StateFlow<Boolean> = _dominantSpeaker
 
     internal val _speaking: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val speaking: StateFlow<Boolean> = _speaking

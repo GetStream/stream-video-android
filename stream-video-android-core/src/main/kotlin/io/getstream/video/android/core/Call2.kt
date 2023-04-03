@@ -187,6 +187,7 @@ public class CallState(val call: Call2, user: User) {
     private fun getOrCreateParticipant(participant: ParticipantData): ParticipantState {
         // TODO: update some fields
         val participantState = getOrCreateParticipant(participant.user_id)
+        participantState.updateFromData(participant)
 
         participantState._speaking.value = participant.is_speaking
         return participantState
