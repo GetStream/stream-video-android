@@ -33,7 +33,6 @@ import org.openapitools.client.models.CallRecording
 import org.openapitools.client.models.CallStateResponseFields
 import org.openapitools.client.models.EdgeResponse
 import org.openapitools.client.models.GetOrCreateCallResponse
-import org.openapitools.client.models.JoinCallResponse
 import org.openapitools.client.models.MemberResponse
 import org.openapitools.client.models.QueryCallsResponse
 import org.openapitools.client.models.ReactionResponse
@@ -68,28 +67,6 @@ internal fun GetOrCreateCallResponse.toCall(kind: StreamCallKind): CallMetadata 
             custom = custom
         )
     }
-}
-
-@JvmSynthetic
-internal fun JoinCallResponse.toCall(kind: StreamCallKind): CallMetadata {
-    return CallMetadata(
-        cid = call.cid,
-        id = call.id,
-        type = call.type,
-        kind = kind,
-        createdByUserId = this.call.createdBy.id,
-        createdAt = call.createdAt.toEpochSecond(),
-        updatedAt = call.updatedAt.toEpochSecond(),
-        recordingEnabled = call.settings.recording.audioOnly,
-        broadcastingEnabled = call.settings.broadcasting.enabled,
-        users = members.toCallUsers(),
-        callDetails = CallDetails(
-            members = members.map { it.toCallUser() }.associateBy { it.id },
-            memberUserIds = members.map { it.userId },
-            ownCapabilities = call.ownCapabilities
-        ),
-        custom = call.custom
-    )
 }
 
 @JvmSynthetic
