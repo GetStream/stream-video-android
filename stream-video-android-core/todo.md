@@ -1,10 +1,10 @@
 
-## Finish LLC
+## Upcoming
 
 - Update from latest openapi spec
-- Implement the tokenProvider exception handling. (basically we just need to catch the right error and repeat the API call)
-
-
+- Verify all events are handled
+- Easily see if the coordinator is connected
+- Easily see if the SFU is connected
 
 ### Review each file, fix TODOS and document
 
@@ -58,7 +58,7 @@
 - [ ] Verify all events are handled
 - [ ] Use the new state in the view model
 - [ ] Update to the latest events from the protocol
-- [ ] Perhaps a media manager class to abstract all the local audio/video stuff. Also makes it easy to test the codebase if you can swap out the media & webrtc stuff.
+- [ ] Media manager class to abstract all the local audio/video stuff. Also makes it easy to test the codebase if you can swap out the media & webrtc stuff.
 
 ### Features
 
