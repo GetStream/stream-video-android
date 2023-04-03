@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
      Copyright (c) 2023 Stream.io Inc. All rights reserved.
 
      Licensed under the Stream License;
@@ -17,6 +16,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <queries>
-        <package android:name="io.getstream.video.android.app" />
+        <package android:name="io.getstream.video.android.dogfooding" />
     </queries>
 </manifest>

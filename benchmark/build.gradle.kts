@@ -52,7 +52,7 @@ android {
         }
     }
 
-    targetProjectPath = ":app"
+    targetProjectPath = ":dogfooding"
     experimentalProperties["android.experimental.self-instrumenting"] = true
 }
 
