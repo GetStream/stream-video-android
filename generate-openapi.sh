@@ -34,7 +34,7 @@ echo Generating OpenAPI spec
 
 if [ -d "$PROTOCOL_ROOT" ]; then
   if [ "$PROTOCOL_PULL_LATEST" = "y" ]; then
-    git fetch "$PROTOCOL_ROOT"
+    git -C "$PROTOCOL_ROOT" pull
   fi
 
 else
