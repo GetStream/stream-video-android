@@ -23,7 +23,6 @@ import kotlinx.serialization.Serializable
 public open class VideoErrorBase(
 
 ) {
-    public open val message: String? = null
 }
 
 @Serializable
@@ -31,6 +30,7 @@ public data class VideoBackendError(
     val code: Int = 1,
     @SerialName("StatusCode")
     val statusCode: Int = 500,
+    val message: String? = null,
     val duration: String = "",
     @SerialName("more_info")
     val moreInfo: String = "",
@@ -44,7 +44,7 @@ public data class VideoBackendError(
  * @property cause Cause of the error, either a BE exception or an SDK based one.
  */
 public open class VideoError(
-    public override val message: String? = null,
+    public val message: String? = null,
     public val cause: Throwable? = null
 ): VideoErrorBase() {
     override fun equals(other: Any?): Boolean {

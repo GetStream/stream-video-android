@@ -476,7 +476,7 @@ public class CallViewModel(
                     logger.d { "[inviteUsersToCall] Success!" }
                 }
                 .onError {
-                    logger.d { "[inviteUsersToCall] Error, ${it.message}." }
+                    logger.d { "[inviteUsersToCall] Error, ${it}." }
                 }
         }
     }

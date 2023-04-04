@@ -210,6 +210,7 @@ public class ActiveSFUSession internal constructor(
     private val _isSpeakerPhoneEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
     override val isSpeakerPhoneEnabled: StateFlow<Boolean> = _isSpeakerPhoneEnabled
 
+    // run all calls on a supervisor job so we can easily cancel them
     private val supervisorJob = SupervisorJob()
     private val coroutineScope = CoroutineScope(scope.coroutineContext + supervisorJob)
 
@@ -1109,6 +1110,10 @@ public class ActiveSFUSession internal constructor(
                 }
             }
         }
+    }
+
+    fun handleEvent(event: SfuDataEvent) {
+
     }
 
     companion object {

@@ -106,8 +106,12 @@ public class CallState(val call: Call2, user: User) {
             is UpdatedCallPermissionsEvent -> {
                 me._ownCapabilities.value=event.ownCapabilities
             }
-            is ConnectedEvent -> TODO()
-            is CustomEvent -> TODO()
+            is ConnectedEvent -> {
+                // this is handled by the client
+            }
+            is CustomEvent -> {
+                // safe to ignore, app level custom event
+            }
             is CoordinatorHealthCheckEvent -> TODO()
             is PermissionRequestEvent -> TODO()
             is RecordingStartedEvent -> {
@@ -135,10 +139,16 @@ public class CallState(val call: Call2, user: User) {
                     participant._connectionQuality.value = entry.connection_quality
                 }
             }
-            is ChangePublishQualityEvent -> TODO()
+            is ChangePublishQualityEvent -> {
+                call.activeSession!!.handleEvent(event)
+            }
             is ErrorEvent -> TODO()
-            SFUHealthCheckEvent -> TODO()
-            is ICETrickleEvent -> TODO()
+            SFUHealthCheckEvent -> {
+                // we don't do anythign with this
+            }
+            is ICETrickleEvent -> {
+                call.activeSession!!.handleEvent(event)
+            }
             is JoinCallResponseEvent -> TODO()
             is ParticipantJoinedEvent -> {
                 getOrCreateParticipant(event.participant)
