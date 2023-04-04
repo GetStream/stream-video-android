@@ -184,7 +184,7 @@ internal object EventMapper {
             BlockedUserEvent(
                 cid = event.callCid,
                 type = event.type,
-                userId = event.userId
+                userId = event.user.id
             )
         }
         EventType.UNBLOCKED_USER -> {
@@ -195,7 +195,7 @@ internal object EventMapper {
             UnblockedUserEvent(
                 cid = event.callCid,
                 type = event.type,
-                userId = event.userId
+                userId = event.user.id
             )
         }
         EventType.RECORDING_STARTED -> {

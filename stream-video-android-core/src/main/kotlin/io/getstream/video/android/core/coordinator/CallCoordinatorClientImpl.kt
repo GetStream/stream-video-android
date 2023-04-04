@@ -37,6 +37,7 @@ import io.getstream.video.android.core.utils.toReaction
 import io.getstream.video.android.core.utils.toRecording
 import org.openapitools.client.apis.DefaultApi
 import org.openapitools.client.apis.EventsApi
+import org.openapitools.client.apis.ModerationApi
 import org.openapitools.client.apis.VideoCallsApi
 import org.openapitools.client.models.BlockUserRequest
 import org.openapitools.client.models.GetCallEdgeServerRequest
@@ -67,7 +68,8 @@ internal class CallCoordinatorClientImpl(
     private val callCoordinatorService: ClientRPCService,
     private val videoCallApi: VideoCallsApi,
     private val eventsApi: EventsApi,
-    private val defaultApi: DefaultApi
+    private val defaultApi: DefaultApi,
+    private val moderationApi: ModerationApi,
 ) : CallCoordinatorClient {
 
     /**
@@ -239,7 +241,7 @@ internal class CallCoordinatorClientImpl(
         type: String,
         blockUserRequest: BlockUserRequest
     ): Result<Unit> = try {
-        videoCallApi.blockUser(type, id, blockUserRequest)
+        moderationApi.blockUser(type, id, blockUserRequest)
 
         Success(Unit)
     } catch (error: Throwable) {
@@ -322,7 +324,7 @@ internal class CallCoordinatorClientImpl(
         type: String,
         muteUsersRequest: MuteUsersRequest
     ): Result<Unit> = try {
-        videoCallApi.muteUsers(type, id, muteUsersRequest)
+        moderationApi.muteUsers(type, id, muteUsersRequest)
 
         Success(Unit)
     } catch (error: Throwable) {
