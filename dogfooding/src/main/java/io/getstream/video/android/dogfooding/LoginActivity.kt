@@ -43,6 +43,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -89,7 +90,7 @@ class LoginActivity : ComponentActivity() {
 
         val user = UserPreferencesManager.initialize(this).getUserCredentials()
 
-        if (user != null && user.isValid()) {
+        if (user != null && user.isValid() && !BuildConfig.BENCHMARK) {
             startHome(user)
             finish()
         }
@@ -140,6 +141,28 @@ class LoginActivity : ComponentActivity() {
                                 isShowingGuestLogin.value = true
                             }
                         )
+
+                        if (BuildConfig.BENCHMARK) {
+                            Button(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(72.dp)
+                                    .padding(horizontal = 32.dp, vertical = 8.dp)
+                                    .testTag("authenticate"),
+                                content = {
+                                    Text(
+                                        text = "Login for Benchmark",
+                                        color = Color.White
+                                    )
+                                },
+                                colors = ButtonDefaults.buttonColors(
+                                    backgroundColor = VideoTheme.colors.primaryAccent
+                                ),
+                                onClick = {
+                                    onSignInSuccess("benchmark.test@getstream.io")
+                                }
+                            )
+                        }
                     }
 
                     val isShowingGuestLogin by isShowingGuestLogin
