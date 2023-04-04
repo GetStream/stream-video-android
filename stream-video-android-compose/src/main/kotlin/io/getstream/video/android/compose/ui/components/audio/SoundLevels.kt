@@ -31,6 +31,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 
@@ -40,7 +41,7 @@ import io.getstream.video.android.compose.theme.VideoTheme
  * @param modifier Modifier for styling.
  */
 @Composable
-public fun ActiveSoundLevels(modifier: Modifier) {
+public fun ActiveSoundLevels(modifier: Modifier = Modifier) {
     val color = VideoTheme.colors.soundLevels
 
     val firstLevel = remember { Animatable(0.5f) }
@@ -126,5 +127,13 @@ public fun ActiveSoundLevels(modifier: Modifier) {
                 .fillMaxHeight(fraction = thirdLevel.value)
                 .background(color = color, shape = RoundedCornerShape(16.dp))
         )
+    }
+}
+
+@Preview
+@Composable
+private fun ActiveSoundLevelsPreview() {
+    VideoTheme {
+        ActiveSoundLevels()
     }
 }
