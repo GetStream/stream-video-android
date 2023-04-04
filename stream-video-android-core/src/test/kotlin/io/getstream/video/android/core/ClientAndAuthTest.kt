@@ -82,7 +82,7 @@ class ClientAndAuthTest : TestBase() {
             user = User(id = "guest", type = UserType.Guest)
         ).build()
         val sub = client.subscribe { event: VideoEvent ->
-            System.out.println(event)
+            logger.d { event.toString() }
         }
         sub.dispose()
     }
@@ -98,7 +98,7 @@ class ClientAndAuthTest : TestBase() {
         ).build()
         // Subscribe for new message events
         val sub = client.subscribeFor<ConnectedEvent> { newMessageEvent ->
-            System.out.println(newMessageEvent)
+            logger.d { newMessageEvent.toString() }
         }
         sub.dispose()
     }
@@ -111,7 +111,7 @@ class ClientAndAuthTest : TestBase() {
         logger.w { "testing hello world - warn" }
         logger.e { "testing hello world - error" }
 
-        StreamLog.i("Testing") {"testing hello world - info StreamLog"}
+        StreamLog.i("Testing") { "testing hello world - info StreamLog" }
     }
 
     @Test
@@ -138,7 +138,7 @@ class ClientAndAuthTest : TestBase() {
             }
         }
 
-        println("stateflow from test $client.state.connection")
+        logger.d { "stateflow from test $client.state.connection" }
         assertThat(client.state.connection.value).isEqualTo(ConnectionState.Connected)
 
     }

@@ -17,24 +17,20 @@
 package io.getstream.video.android.core
 
 import com.google.common.truth.Truth.assertThat
+import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.events.*
 import io.getstream.video.android.core.model.*
-import io.getstream.video.android.core.utils.LatencyResult
-import io.getstream.video.android.core.utils.getLatencyMeasurements
+import java.util.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.openapitools.client.models.OwnCapability
 import org.robolectric.RobolectricTestRunner
-import stream.video.sfu.event.ConnectionQualityInfo
-import stream.video.sfu.models.ConnectionQuality
-import stream.video.sfu.models.Participant
-import java.net.SocketTimeoutException
-import java.util.*
 
 @RunWith(RobolectricTestRunner::class)
 class JoinCallTest : IntegrationTestBase() {
+
+    private val logger by taggedLogger("Test:JoinCallTest")
 
     /**
      *
@@ -71,16 +67,10 @@ class JoinCallTest : IntegrationTestBase() {
 
         // TODO: with timeout doesn't fully work on latency measurements
         // related to java threading and coroutine compatibility
-        println("test")
         withTimeout(10) {
             val results = clientImpl.measureLatency(urls)
-            println(results)
+            logger.d { results.toString() }
         }
-        println("testb")
-
-
-
-
     }
 
 }

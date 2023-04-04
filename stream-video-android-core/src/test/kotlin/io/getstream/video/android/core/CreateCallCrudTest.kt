@@ -17,6 +17,7 @@
 package io.getstream.video.android.core
 
 import com.google.common.truth.Truth.assertThat
+import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.events.CallCreatedEvent
 import io.getstream.video.android.core.utils.onError
 import io.getstream.video.android.core.utils.onSuccess
@@ -27,6 +28,9 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 public class CreateCallCrudTest : IntegrationTestBase() {
+
+    private val logger by taggedLogger("Test:CreateCallCrudTest")
+
     /**
      * Alright so what do we need to test here:
      *
@@ -100,7 +104,7 @@ public class CreateCallCrudTest : IntegrationTestBase() {
     fun `Fail to update a call that doesn't exist`() = runTest {
         val result = client.call("default", randomUUID()).update()
         assert(result.isFailure)
-        result.onError { println(it) }
+        result.onError { logger.e { it.toString() } }
         // TODO: error is hidden, we need to fix that
     }
 
@@ -108,7 +112,7 @@ public class CreateCallCrudTest : IntegrationTestBase() {
     fun `Fail to create a call with a missing call type`() = runTest {
         val result = client.call("missing", "123").create()
         assert(result.isFailure)
-        result.onError { println(it) }
+        result.onError { logger.e { it.toString() } }
         // TODO: error is hidden, we need to fix that
     }
 
