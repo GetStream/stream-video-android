@@ -18,15 +18,25 @@ package io.getstream.video.android.compose
 
 import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.call.controls.CallControls
 import io.getstream.video.android.core.call.state.CallMediaState
 import org.junit.Rule
 import org.junit.Test
 
-internal class CallControlsTest {
+internal class CallComponentsTest {
 
     @get:Rule
     val paparazzi = Paparazzi()
+
+    @Test
+    fun `snapshot CallAppBar composable`() {
+        paparazzi.snapshot {
+            VideoTheme {
+                CallAppBar()
+            }
+        }
+    }
 
     @Test
     fun `snapshot CallControls composable`() {
