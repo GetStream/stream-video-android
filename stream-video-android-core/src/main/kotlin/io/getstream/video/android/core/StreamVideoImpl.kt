@@ -19,10 +19,10 @@ package io.getstream.video.android.core
 import android.content.Context
 import androidx.lifecycle.Lifecycle
 import io.getstream.log.taggedLogger
+import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
-import io.getstream.result.StreamError
 import io.getstream.result.flatMap
 import io.getstream.video.android.core.call.CallClient
 import io.getstream.video.android.core.call.builder.CallClientBuilder
@@ -359,7 +359,7 @@ internal class StreamVideoImpl(
         } catch (error: Throwable) {
             logger.e(error) { "[joinCallInternal] failed: $error" }
             Failure(
-                StreamError.ThrowableError(
+                Error.ThrowableError(
                     error.message ?: "Couldn't join a call internal", error
                 )
             )
@@ -874,7 +874,7 @@ internal class StreamVideoImpl(
             } catch (e: Throwable) {
                 logger.e { "[acceptCall] failed: $e" }
                 Failure(
-                    StreamError.ThrowableError(e.message ?: "Couldn't accept a call.", e)
+                    Error.ThrowableError(e.message ?: "Couldn't accept a call.", e)
                 )
             }
         }
@@ -903,7 +903,7 @@ internal class StreamVideoImpl(
     override suspend fun handlePushMessage(payload: Map<String, Any>): Result<Unit> =
         withContext(scope.coroutineContext) {
             val callCid = payload[INTENT_EXTRA_CALL_CID] as? String
-                ?: return@withContext Failure(StreamError.GenericError("Missing Call CID!"))
+                ?: return@withContext Failure(Error.GenericError("Missing Call CID!"))
 
             val (type, id) = callCid.toTypeAndId()
 

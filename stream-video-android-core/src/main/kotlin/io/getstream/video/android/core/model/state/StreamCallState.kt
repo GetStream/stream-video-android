@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.core.model.state
 
-import io.getstream.result.StreamError
+import io.getstream.result.Error
 import io.getstream.video.android.core.engine.StreamCallEngine
 import io.getstream.video.android.core.model.CallDetails
 import io.getstream.video.android.core.model.CallUser
@@ -205,7 +205,7 @@ public sealed interface StreamCallState : Serializable {
  */
 public sealed class DropReason : Serializable {
     public data class Timeout(val waitMillis: Long) : DropReason()
-    public data class Failure(val error: StreamError) : DropReason()
+    public data class Failure(val error: Error) : DropReason()
     public data class Rejected(val byUserId: String) : DropReason()
     public data class Cancelled(val byUserId: String) : DropReason()
     public object Ended : DropReason() {

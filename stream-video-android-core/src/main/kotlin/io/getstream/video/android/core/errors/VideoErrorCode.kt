@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.core.errors
 
-import io.getstream.result.StreamError
+import io.getstream.result.Error
 
 private const val NETWORK_FAILED_ERROR_CODE = 1000
 private const val PARSER_ERROR_ERROR_CODE = 1001
@@ -75,23 +75,23 @@ public enum class VideoErrorCode(public val code: Int, public val description: S
     }
 }
 
-public fun StreamError.NetworkError.Companion.create(
+public fun Error.NetworkError.Companion.create(
     code: VideoErrorCode,
     cause: Throwable? = null,
     statusCode: Int = -1
-): StreamError.NetworkError {
-    return StreamError.NetworkError(
-        cause = cause, message = code.description, streamCode = code.code, statusCode = statusCode
+): Error.NetworkError {
+    return Error.NetworkError(
+        cause = cause, message = code.description, serverErrorCode = code.code, statusCode = statusCode
     )
 }
 
-public fun StreamError.NetworkError.Companion.create(
+public fun Error.NetworkError.Companion.create(
     streamCode: Int,
     description: String,
     statusCode: Int,
     cause: Throwable? = null
-): StreamError.NetworkError {
-    return StreamError.NetworkError(
-        cause = cause, message = description, streamCode = streamCode, statusCode = statusCode
+): Error.NetworkError {
+    return Error.NetworkError(
+        cause = cause, message = description, serverErrorCode = streamCode, statusCode = statusCode
     )
 }
