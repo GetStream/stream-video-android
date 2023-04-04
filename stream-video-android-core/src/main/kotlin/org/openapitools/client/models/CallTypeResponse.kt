@@ -27,12 +27,7 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param createdAt
- * @param grants
- * @param name
- * @param settings
- * @param updatedAt
- */
+ * @param createdAt * @param grants * @param name * @param settings * @param updatedAt */
 
 data class CallTypeResponse(
 

@@ -26,8 +26,10 @@ package org.openapitools.client.models
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param callCid * @param createdAt * @param type * @param user */
+ * This event is sent when a user rejects a ringing call. Clients receiving this event should dismiss  the call screen unless the call includes more users.
+ *
+ * @param callCid * @param createdAt * @param type The type of event: \"call.rejected\" in this case
+ * @param user */
 
 data class CallRejectedEvent(
 
@@ -37,6 +39,7 @@ data class CallRejectedEvent(
     @Json(name = "created_at")
     val createdAt: java.time.OffsetDateTime,
 
+    /* The type of event: \"call.rejected\" in this case */
     @Json(name = "type")
     val type: kotlin.String,
 

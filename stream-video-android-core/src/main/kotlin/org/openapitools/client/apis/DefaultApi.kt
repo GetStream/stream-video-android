@@ -53,7 +53,9 @@ internal interface DefaultApi {
      * @return [CreateCallTypeResponse]
      */
     @POST("/video/calltypes")
-    suspend fun createCallType(@Body createCallTypeRequest: CreateCallTypeRequest): CreateCallTypeResponse
+    suspend fun createCallType(
+        @Body createCallTypeRequest: CreateCallTypeRequest,
+    ): CreateCallTypeResponse
 
     /**
      * Delete Call Type
@@ -66,7 +68,9 @@ internal interface DefaultApi {
      * @return [Unit]
      */
     @DELETE("/video/calltypes/{name}")
-    suspend fun deleteCallType(@Path("name") name: String): Unit
+    suspend fun deleteCallType(
+        @Path("name") name: String,
+    ): Unit
 
     /**
      * Get Call
@@ -81,7 +85,10 @@ internal interface DefaultApi {
      * @return [GetCallResponse]
      */
     @GET("/video/call/{type}/{id}")
-    suspend fun getCall(@Path("type") type: String, @Path("id") id: String): GetCallResponse
+    suspend fun getCall(
+        @Path("type") type: String,
+        @Path("id") id: String,
+    ): GetCallResponse
 
     /**
      * Get Call Type
@@ -95,7 +102,9 @@ internal interface DefaultApi {
      * @return [GetCallTypeResponse]
      */
     @GET("/video/calltypes/{name}")
-    suspend fun getCallType(@Path("name") name: String): GetCallTypeResponse
+    suspend fun getCallType(
+        @Path("name") name: String,
+    ): GetCallTypeResponse
 
     /**
      * List Call Type
@@ -200,7 +209,10 @@ internal interface DefaultApi {
      * @return [Unit]
      */
     @POST("/video/call/{type}/{id}/start_broadcasting")
-    suspend fun startBroadcasting(@Path("type") type: String, @Path("id") id: String): Unit
+    suspend fun startBroadcasting(
+        @Path("type") type: String,
+        @Path("id") id: String,
+    ): Unit
 
     /**
      * Start recording
@@ -214,7 +226,10 @@ internal interface DefaultApi {
      * @return [Unit]
      */
     @POST("/video/call/{type}/{id}/start_recording")
-    suspend fun startRecording(@Path("type") type: String, @Path("id") id: String): Unit
+    suspend fun startRecording(
+        @Path("type") type: String,
+        @Path("id") id: String,
+    ): Unit
 
     /**
      * Stop broadcasting
@@ -228,7 +243,10 @@ internal interface DefaultApi {
      * @return [Unit]
      */
     @POST("/video/call/{type}/{id}/stop_broadcasting")
-    suspend fun stopBroadcasting(@Path("type") type: String, @Path("id") id: String): Unit
+    suspend fun stopBroadcasting(
+        @Path("type") type: String,
+        @Path("id") id: String,
+    ): Unit
 
     /**
      * Stop recording
@@ -242,7 +260,10 @@ internal interface DefaultApi {
      * @return [Unit]
      */
     @POST("/video/call/{type}/{id}/stop_recording")
-    suspend fun stopRecording(@Path("type") type: String, @Path("id") id: String): Unit
+    suspend fun stopRecording(
+        @Path("type") type: String,
+        @Path("id") id: String,
+    ): Unit
 
     /**
      * Update Call Type

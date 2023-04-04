@@ -34,7 +34,7 @@ echo Generating OpenAPI spec
 
 if [ -d "$PROTOCOL_ROOT" ]; then
   if [ "$PROTOCOL_PULL_LATEST" = "y" ]; then
-    git fetch "$PROTOCOL_ROOT"
+    git -C "$PROTOCOL_ROOT" pull
   fi
 
 else
@@ -52,10 +52,10 @@ rm "$INFRASTRUCTURE_ROOT/ApiClient.kt" "$INFRASTRUCTURE_ROOT/ResponseExt.kt"
 rm "$APIS_ROOT/UsersApi.kt"
 
 API_REQUEST_REGEX="@(?:POST|DELETE|GET|PUT)\(\"(.*?)\""
+RETROFIT_IMPORTS_REGEX="(Body)|^[[:space:]]*@([^()]*)\("
 
-for FILE in $APIS_ROOT/*.kt; do
-  echo Processing $FILE
-  sed -i '' 's/kotlin.//g; s/Response<//g; s/>//g' $FILE
+for FILE in "$APIS_ROOT"/*.kt; do
+  echo Processing "$FILE"
 
   grep -iE "$API_REQUEST_REGEX" "$FILE" | while read -r line; do
     UPDATED_REQUEST=$(sed 's/("/("\/video\//g' <<<$line)
@@ -63,6 +63,23 @@ for FILE in $APIS_ROOT/*.kt; do
     ESCAPED_REQUEST=$(printf '%s\n' "$UPDATED_REQUEST" | sed -e 's/[\/&]/\\&/g')
     sed -i '' "s/$ESCAPED_LINE/$ESCAPED_REQUEST/g" "$FILE"
   done
+
+  REPLACEMENT="\n        &"
+  sed -i '' "s/@Path/$REPLACEMENT/g; s/@Body/$REPLACEMENT/g; s/@Query/$REPLACEMENT/g" "$FILE"
+  sed -i '' 's/):/\n    &/g' "$FILE"
+
+  CLEANUP_STRINGS=("kotlin." "Response<" ">" "import org.openapitools.client.infrastructure.CollectionFormats.*"  "import retrofit2.Response" "import okhttp3.RequestBody" "import com.squareup.moshi.Json" "import org.openapitools.client.models.APIError")
+  for cleanup_string in "${CLEANUP_STRINGS[@]}"; do
+    sed -i '' "s/$cleanup_string//g" "$FILE"
+  done
+
+  RETROFIT_IMPORTS=($(grep -iE -o "$RETROFIT_IMPORTS_REGEX" "$FILE" | sed 's/@//;s/[()]//g' | tr ' ' '\n' | sort -u))
+  PREPARED_IMPORTS=""
+  for retrofit_import in "${RETROFIT_IMPORTS[@]}"; do
+    PREPARED_IMPORTS+="import retrofit2.http.$retrofit_import\n"
+  done
+
+  sed -i '' "s/import retrofit2\.http\.\*/$PREPARED_IMPORTS/g" "$FILE"
 
 done
 

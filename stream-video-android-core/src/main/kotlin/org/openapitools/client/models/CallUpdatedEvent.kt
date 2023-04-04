@@ -26,20 +26,28 @@ package org.openapitools.client.models
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param call * @param capabilitiesByRole * @param createdAt * @param type */
+ * This event is sent when a call is updated, clients should use this update the local state of the call.  This event also contains the capabilities by role for the call, clients should update the own_capability for the current.
+ *
+ * @param call * @param callCid * @param capabilitiesByRole The capabilities by role for this call
+ * @param createdAt * @param type The type of event: \"call.ended\" in this case
+ */
 
 data class CallUpdatedEvent(
 
     @Json(name = "call")
     val call: CallResponse,
 
+    @Json(name = "call_cid")
+    val callCid: kotlin.String,
+
+    /* The capabilities by role for this call */
     @Json(name = "capabilities_by_role")
     val capabilitiesByRole: kotlin.collections.Map<kotlin.String, kotlin.collections.List<kotlin.String>>,
 
     @Json(name = "created_at")
     val createdAt: java.time.OffsetDateTime,
 
+    /* The type of event: \"call.ended\" in this case */
     @Json(name = "type")
     val type: kotlin.String
 
