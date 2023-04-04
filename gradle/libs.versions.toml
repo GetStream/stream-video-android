@@ -43,6 +43,7 @@ robolectric = "4.9"
 junit = "4.13.2"
 truth = "1.1.3"
 mockk = "1.13.4"
+kotlinTestJunit = "1.8.20"
 
 leakCanary = "2.10"
 
@@ -98,6 +99,8 @@ stream-chat-compose = { group = "io.getstream", name = "stream-chat-android-comp
 stream-chat-offline = { group = "io.getstream", name = "stream-chat-android-offline", version.ref = "streamChat" }
 stream-chat-state = { group = "io.getstream", name = "stream-chat-android-state", version.ref = "streamChat" }
 stream-chat-ui-utils = { group = "io.getstream", name = "stream-chat-android-ui-utils", version.ref = "streamChat" }
+
+kotlin-test-junit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit",  version.ref = "kotlinTestJunit" }
 
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test",  version.ref = "kotlinxCoroutines" }
