@@ -62,7 +62,6 @@ import io.getstream.video.android.compose.ui.components.avatar.Avatar
 import io.getstream.video.android.compose.ui.components.avatar.InitialsAvatar
 import io.getstream.video.android.core.user.UserPreferencesManager
 import io.getstream.video.android.core.utils.initials
-import io.getstream.video.android.core.utils.onError
 import io.getstream.video.android.tutorial_starter.model.HomeScreenOption
 import io.getstream.video.android.tutorial_starter.ui.components.UserList
 import io.getstream.video.android.tutorial_starter.ui.login.LoginActivity
