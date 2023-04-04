@@ -33,6 +33,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.ShowCallInfo
@@ -103,5 +104,16 @@ internal fun OverlayAppBar(
                 tint = Color.White
             )
         }
+    }
+}
+
+@Preview
+@Composable
+private fun OverlayAppBarPreview() {
+    VideoTheme {
+        OverlayAppBar(
+            callState = StreamCallState.Idle,
+            onBackPressed = {}
+        ) {}
     }
 }

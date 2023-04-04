@@ -30,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.state.ui.internal.CallParticipantsInfoOption
 import io.getstream.video.android.compose.state.ui.internal.Invite
@@ -91,6 +92,17 @@ internal fun CallParticipantsInfoOptions(
                     color = VideoTheme.colors.textLowEmphasis
                 )
             }
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun CallParticipantsInfoOptionsPreview() {
+    VideoTheme {
+        CallParticipantsInfoOptions(
+            isCurrentUserMuted = false,
+            onOptionSelected = { }
         )
     }
 }
