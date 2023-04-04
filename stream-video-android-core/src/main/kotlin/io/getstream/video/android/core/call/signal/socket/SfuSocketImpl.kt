@@ -24,6 +24,7 @@ import io.getstream.video.android.core.errors.DisconnectCause
 import io.getstream.video.android.core.errors.VideoError
 import io.getstream.video.android.core.errors.VideoNetworkError
 import io.getstream.video.android.core.events.ConnectedEvent
+import io.getstream.video.android.core.events.SFUConnectedEvent
 import io.getstream.video.android.core.events.SFUHealthCheckEvent
 import io.getstream.video.android.core.events.SfuDataEvent
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
@@ -139,6 +140,7 @@ internal class SfuSocketImpl(
     }
 
     override fun addListener(sfuSocketListener: SfuSocketListener) {
+
         synchronized(listeners) {
             listeners.add(sfuSocketListener)
         }
@@ -177,9 +179,13 @@ internal class SfuSocketImpl(
         state = State.DisconnectedByRequest
     }
 
-    override fun onConnectionResolved(event: ConnectedEvent) {
+    override fun onConnectionResolved(event: SFUConnectedEvent) {
         logger.i { "[onConnectionResolved] event: $event" }
         state = State.Connected(event)
+        callListeners { listener ->
+            logger.d { "[onEvent] Sfu Event: $event" }
+            listener.onEvent(event)
+        }
     }
 
     override fun onEvent(event: SfuDataEvent) {
@@ -200,6 +206,7 @@ internal class SfuSocketImpl(
 
     private fun setupSocket(connectionConf: SfuSocketFactory.ConnectionConf?) {
         logger.d { "[setupSocket] conf: $connectionConf" }
+        val sfuSocket = this
         state = when (connectionConf) {
             null -> State.DisconnectedPermanently(null)
             else -> {
@@ -238,7 +245,7 @@ internal class SfuSocketImpl(
     private fun callListeners(call: (SfuSocketListener) -> Unit) {
         synchronized(listeners) {
             listeners.forEach { listener ->
-                eventUiHandler.post { call(listener) }
+                call(listener)
             }
         }
     }
@@ -249,7 +256,7 @@ internal class SfuSocketImpl(
             override fun toString(): String = "Connecting"
         }
 
-        data class Connected(val event: ConnectedEvent) : State()
+        data class Connected(val event: SFUConnectedEvent) : State()
         object NetworkDisconnected : State() {
             override fun toString(): String = "NetworkDisconnected"
         }

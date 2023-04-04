@@ -84,7 +84,8 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
         clientImpl.fireEvent(event)
         assertThat(call.state.recording.value).isTrue()
         // now stop recording
-        val stopRecordingEvent = RecordingStoppedEvent(callCid = call.cid, cid = call.cid, type = "123")
+        val stopRecordingEvent =
+            RecordingStoppedEvent(callCid = call.cid, cid = call.cid, type = "123")
         clientImpl.fireEvent(stopRecordingEvent)
         assertThat(call.state.recording.value).isFalse()
     }
@@ -92,19 +93,21 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
     @Test
     fun `Accepting & rejecting a call`() = runTest {
         val call = client.call("default", randomUUID())
-        val acceptedEvent = CallAcceptedEvent(callCid=call.cid, sentByUserId="123")
+        val acceptedEvent = CallAcceptedEvent(callCid = call.cid, sentByUserId = "123")
         clientImpl.fireEvent(acceptedEvent)
         assertThat(call.state.getParticipant("123")?.acceptedAt?.value).isNotNull()
 
-        val rejectedEvent = CallRejectedEvent(callCid=call.cid, user= User(id="123"), updatedAt= Date())
+        val rejectedEvent =
+            CallRejectedEvent(callCid = call.cid, user = User(id = "123"), updatedAt = Date())
         clientImpl.fireEvent(rejectedEvent)
         assertThat(call.state.getParticipant("123")?.rejectedAt?.value).isNotNull()
     }
+
     @Test
     fun `Audio level changes`() = runTest {
         val call = client.call("default", randomUUID())
         val levels = mutableMapOf("thierry" to UserAudioLevel(true, 10F))
-        val event = AudioLevelChangedEvent(levels=levels)
+        val event = AudioLevelChangedEvent(levels = levels)
         clientImpl.fireEvent(event, call.cid)
 
         // ensure we update call data and capabilities
@@ -127,11 +130,16 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
     fun `Network connection quality changes`() = runTest {
         val call = client.call("default", randomUUID())
         // TODO: this is a list, other events its a map, make up your mind
-        val quality = ConnectionQualityInfo(user_id = "thierry", connection_quality = ConnectionQuality.CONNECTION_QUALITY_EXCELLENT)
-        val event = ConnectionQualityChangeEvent(updates=mutableListOf(quality))
+        val quality = ConnectionQualityInfo(
+            user_id = "thierry",
+            connection_quality = ConnectionQuality.CONNECTION_QUALITY_EXCELLENT
+        )
+        val event = ConnectionQualityChangeEvent(updates = mutableListOf(quality))
         clientImpl.fireEvent(event, call.cid)
 
-        assertThat(call.state.getParticipant("thierry")?.connectionQuality?.value).isEqualTo(ConnectionQuality.CONNECTION_QUALITY_EXCELLENT)
+        assertThat(call.state.getParticipant("thierry")?.connectionQuality?.value).isEqualTo(
+            ConnectionQuality.CONNECTION_QUALITY_EXCELLENT
+        )
     }
 
     @Test
@@ -140,9 +148,29 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
         val capability = OwnCapability.decode("end-call")!!
         val ownCapabilities = mutableListOf<OwnCapability>(capability)
         val custom = mutableMapOf<String, Any>("fruit" to "apple")
-        val callInfo = CallInfo(call.cid, call.type, call.id, createdByUserId="thierry", false, false, null, Date(), custom )
-        val capabilitiesByRole = mutableMapOf<String, List<String>>("admin" to mutableListOf<String>("end-call", "create-call"))
-        val event = CallUpdatedEvent(callCid=call.cid, capabilitiesByRole, info= callInfo, ownCapabilities=ownCapabilities)
+        val callInfo = CallInfo(
+            call.cid,
+            call.type,
+            call.id,
+            createdByUserId = "thierry",
+            false,
+            false,
+            null,
+            Date(),
+            custom
+        )
+        val capabilitiesByRole = mutableMapOf<String, List<String>>(
+            "admin" to mutableListOf<String>(
+                "end-call",
+                "create-call"
+            )
+        )
+        val event = CallUpdatedEvent(
+            callCid = call.cid,
+            capabilitiesByRole,
+            info = callInfo,
+            ownCapabilities = ownCapabilities
+        )
         clientImpl.fireEvent(event)
         // ensure we update call data and capabilities
         assertThat(call.state.capabilitiesByRole.value).isEqualTo(capabilitiesByRole)
@@ -156,14 +184,20 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
         // TODO: CID & Type?
         val permissions = mutableListOf<String>("screenshare")
-        val requestEvent = PermissionRequestEvent(call.cid, "whatsthis", permissions, testData.users["thierry"]!!)
+        val requestEvent =
+            PermissionRequestEvent(call.cid, "whatsthis", permissions, testData.users["thierry"]!!)
         clientImpl.fireEvent(requestEvent)
         // TODO: How do we show this in the state?
         // TODO: How is this different than call updates?
         // TODO: user field isn't clear, what user?
         val capability = OwnCapability.decode("screenshare")!!
         val ownCapabilities = mutableListOf(capability)
-        val permissionsUpdated = UpdatedCallPermissionsEvent(call.cid, "what", ownCapabilities, testData.users["thierry"]!!)
+        val permissionsUpdated = UpdatedCallPermissionsEvent(
+            call.cid,
+            "what",
+            ownCapabilities,
+            testData.users["thierry"]!!
+        )
         clientImpl.fireEvent(permissionsUpdated, call.cid)
 
         assertThat(call.state.me.ownCapabilities.value).isEqualTo(ownCapabilities)
@@ -178,10 +212,11 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
         // if the call is ringing it should be added to the client.state.ringingCalls
     }
+
     @Test
     fun `Call Ended`() = runTest {
         val call = client.call("default", randomUUID())
-        val event = CallEndedEvent(callCid=call.cid, endedByUser=testData.users["thierry"])
+        val event = CallEndedEvent(callCid = call.cid, endedByUser = testData.users["thierry"])
         clientImpl.fireEvent(event)
 
         // TODO: server. you want to know when the call ended and by who.
@@ -193,8 +228,8 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
     @Test
     fun `Participants join and leave`() = runTest {
         val call = client.call("default", randomUUID())
-        val participant = Participant(user_id="thierry", is_speaking=true)
-        val joinEvent = ParticipantJoinedEvent(participant = participant, callCid=call.cid)
+        val participant = Participant(user_id = "thierry", is_speaking = true)
+        val joinEvent = ParticipantJoinedEvent(participant = participant, callCid = call.cid)
         clientImpl.fireEvent(joinEvent)
         assertThat(call.state.getParticipant("thierry")!!.speaking.value).isTrue()
         val leaveEvent = ParticipantLeftEvent(participant, callCid = call.cid)

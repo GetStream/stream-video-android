@@ -101,13 +101,11 @@ internal class StreamVideoImpl internal constructor(
 ) : StreamVideo, SocketListener {
 
     override fun onConnected(event: ConnectedEvent) {
-        println("Client onConnected")
         onEvent(event)
     }
 
     override fun onEvent(event: VideoEvent) {
         // TODO: maybe merge fire event into this?
-        println("eventlistener received an event: $event")
         fireEvent(event)
 
     }

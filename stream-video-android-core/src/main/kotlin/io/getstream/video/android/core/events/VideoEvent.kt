@@ -31,6 +31,8 @@ public sealed class VideoEvent(open val callCid: String = "") : java.io.Serializ
 
 public sealed class CoordinatorEvent() : VideoEvent()
 
+
+
 /**
  * Triggered when a user gets connected to the WS.
  */

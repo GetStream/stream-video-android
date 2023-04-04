@@ -21,6 +21,7 @@ import io.getstream.video.android.core.errors.VideoError
 import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.errors.VideoNetworkError
 import io.getstream.video.android.core.events.ConnectedEvent
+import io.getstream.video.android.core.events.SFUConnectedEvent
 import okhttp3.Response
 import okhttp3.WebSocket
 import okio.ByteString
@@ -40,7 +41,7 @@ internal class SignalEventsParser(
         connectionEventReceived = false
         closedByClient = false
 
-        sfuSocket.onConnectionResolved(ConnectedEvent(""))
+        sfuSocket.onConnectionResolved(SFUConnectedEvent(""))
     }
 
     override fun onMessage(webSocket: WebSocket, bytes: ByteString) {

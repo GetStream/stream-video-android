@@ -124,9 +124,6 @@ class MediaManagerImpl(val context: Context) {
             val characteristics = cameraManager.getCameraCharacteristics(id)
             val cameraLensFacing = characteristics.get(CameraCharacteristics.LENS_FACING)
 
-            println("characteristics $characteristics")
-            println("cameraLensFacing $cameraLensFacing")
-
             val supportedFormats = enumerator.getSupportedFormats(names.first())
         }
         return names

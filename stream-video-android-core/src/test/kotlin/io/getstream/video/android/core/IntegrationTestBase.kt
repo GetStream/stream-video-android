@@ -19,9 +19,12 @@ package io.getstream.video.android.core
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth
+import io.getstream.log.IsLoggableValidator
 import io.getstream.log.Priority
 import io.getstream.log.StreamLog
 import io.getstream.log.StreamLogger
+import io.getstream.log.kotlin.KotlinStreamLogger
+import io.getstream.log.streamLog
 import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.events.ConnectedEvent
@@ -85,39 +88,41 @@ public class IntegrationTestHelper {
 /**
  * A logger that prints to stdout
  */
-class StreamTestLogger: StreamLogger {
-    var logLevel = Priority.VERBOSE
+internal class StreamTestLogger : KotlinStreamLogger() {
 
     override fun log(priority: Priority, tag: String, message: String, throwable: Throwable?) {
-        if (priority > logLevel) {
-            println("$priority $tag: $message")
-            if (throwable != null) {
-                println(throwable)
-            }
+        println("$priority $tag: $message")
+        if (throwable != null) {
+            println(throwable)
         }
     }
-
 }
 
 open class TestBase {
     @get:Rule
     val dispatcherRule = DispatcherRule()
+
     /** Convenient helper with test data */
     val testData = IntegrationTestHelper()
+
     /** Android context */
     val context = testData.context
+
     /** API Key */
     val apiKey = "hd8szvscpxvd"
 
     private val testLogger = StreamTestLogger()
 
     init {
-        StreamLog.install(logger = testLogger)
-        println("test logger installed")
+        if (!StreamLog.isInstalled) {
+            StreamLog.setValidator { priority, _ -> priority > Priority.VERBOSE }
+            StreamLog.install(logger = testLogger)
+            testLogger.streamLog { "test logger installed" }
+        }
     }
 
-    fun setLogLevel(priority: Priority) {
-        testLogger.logLevel = priority
+    fun setLogLevel(newPriority: Priority) {
+        StreamLog.setValidator { priority, _ -> priority > newPriority }
     }
 
     fun randomUUID(): String {
@@ -136,13 +141,16 @@ open class TestBase {
     }
 }
 
-open class IntegrationTestBase(connectCoordinatorWS: Boolean = true): TestBase() {
+open class IntegrationTestBase(connectCoordinatorWS: Boolean = true) : TestBase() {
     /** Client */
     val client: StreamVideo
+
     /** Implementation of the client for more access to interals */
     internal val clientImpl: StreamVideoImpl
+
     /** Tracks all events received by the client during a test */
     var events: MutableList<VideoEvent>
+
     /** The builder used for creating the client */
     val builder: StreamVideoBuilder
 
@@ -178,7 +186,7 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true): TestBase()
 
             nextEventContinuation?.let { continuation ->
                 if (!nextEventCompleted) {
-                    continuation.resume(value=it)
+                    continuation.resume(value = it)
                 }
                 nextEventCompleted = true
             }
@@ -200,7 +208,8 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true): TestBase()
      * Otherwise wait for the next event of this type
      * TODO: add a timeout
      */
-    suspend inline fun <reified T : VideoEvent> waitForNextEvent(): VideoEvent = withTimeout(1000L) {
+    suspend inline fun <reified T : VideoEvent> waitForNextEvent(): VideoEvent =
+
         suspendCoroutine { continuation ->
             client.subscribe {
                 val matchingEvents = events.filter { it is T }
@@ -213,7 +222,8 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true): TestBase()
             }
 
         }
-    }
+
+
     @Before
     fun resetTestVars() {
         events = mutableListOf()

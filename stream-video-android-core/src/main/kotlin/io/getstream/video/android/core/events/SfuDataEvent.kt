@@ -28,6 +28,10 @@ import stream.video.sfu.models.VideoQuality
 
 public sealed class SfuDataEvent : VideoEvent()
 
+public data class SFUConnectedEvent(
+    val clientId: String,
+) : SfuDataEvent()
+
 public data class ICETrickleEvent(
     val candidate: String,
     val peerType: PeerType

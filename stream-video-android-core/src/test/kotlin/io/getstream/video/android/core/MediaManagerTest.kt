@@ -1,5 +1,6 @@
 package io.getstream.video.android.core
 
+import io.getstream.log.taggedLogger
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -8,11 +9,13 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class MediaManagerTest : TestBase() {
 
+    private val logger by taggedLogger("Test:MediaManagerTest")
+
     @Test
     fun `list devices`() = runTest {
         val mediaManager = MediaManagerImpl(context)
         val devices = mediaManager.camera.devices()
-        println(devices)
+        logger.d { devices.toString() }
     }
 
     @Test

@@ -17,7 +17,7 @@
 package io.getstream.video.android.core.call.signal.socket
 
 import io.getstream.video.android.core.errors.VideoError
-import io.getstream.video.android.core.events.ConnectedEvent
+import io.getstream.video.android.core.events.SFUConnectedEvent
 import io.getstream.video.android.core.events.SfuDataEvent
 import stream.video.sfu.event.JoinRequest
 
@@ -57,7 +57,7 @@ public interface SfuSocket {
      *
      * @param event The event that holds connection data.
      */
-    fun onConnectionResolved(event: ConnectedEvent)
+    fun onConnectionResolved(event: SFUConnectedEvent)
 
     /**
      * Releases the socket connection when required in the app lifecycle.

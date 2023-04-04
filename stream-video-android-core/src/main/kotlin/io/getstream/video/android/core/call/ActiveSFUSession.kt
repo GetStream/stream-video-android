@@ -42,19 +42,7 @@ import io.getstream.video.android.core.call.utils.stringify
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.errors.DisconnectCause
 import io.getstream.video.android.core.errors.VideoError
-import io.getstream.video.android.core.events.AudioLevelChangedEvent
-import io.getstream.video.android.core.events.ChangePublishQualityEvent
-import io.getstream.video.android.core.events.ConnectedEvent
-import io.getstream.video.android.core.events.ConnectionQualityChangeEvent
-import io.getstream.video.android.core.events.ICETrickleEvent
-import io.getstream.video.android.core.events.JoinCallResponseEvent
-import io.getstream.video.android.core.events.ParticipantJoinedEvent
-import io.getstream.video.android.core.events.ParticipantLeftEvent
-import io.getstream.video.android.core.events.PublisherAnswerEvent
-import io.getstream.video.android.core.events.SfuDataEvent
-import io.getstream.video.android.core.events.SubscriberOfferEvent
-import io.getstream.video.android.core.events.TrackPublishedEvent
-import io.getstream.video.android.core.events.TrackUnpublishedEvent
+import io.getstream.video.android.core.events.*
 import io.getstream.video.android.core.filter.InFilterObject
 import io.getstream.video.android.core.filter.toMap
 import io.getstream.video.android.core.internal.module.ConnectionModule
@@ -154,7 +142,7 @@ public class ActiveSFUSession internal constructor(
 
     private var connectionState: ConnectionState = ConnectionState.DISCONNECTED
     private var sessionId: String = ""
-    private val scope = CoroutineScope(DispatcherProvider.IO)
+    private val scope = clientImpl.scope
 
     private lateinit var sfuConnectionModule: SFUConnectionModule
 
@@ -699,13 +687,11 @@ public class ActiveSFUSession internal constructor(
     }
 
     override fun onConnecting() {
-        coroutineScope.launch {
-            logger.i { "[onConnecting] no args" }
-            isConnected.value = false
-        }
+        logger.i { "[onConnecting] no args" }
+        //isConnected.value = false
     }
 
-    override fun onConnected(event: ConnectedEvent) {
+    override fun onConnected(event: SFUConnectedEvent) {
         // trigger an event in the client as well for SFU events. makes it easier to subscribe
         println("SFU onconnected")
         clientImpl.fireEvent(event, call2.cid)

@@ -111,7 +111,6 @@ public class CallState(val call: Call2, user: User) {
             is CoordinatorHealthCheckEvent -> TODO()
             is PermissionRequestEvent -> TODO()
             is RecordingStartedEvent -> {
-                println("RecordingStartedEvent")
                 _recording.value = true
             }
             is RecordingStoppedEvent -> {
@@ -152,6 +151,9 @@ public class CallState(val call: Call2, user: User) {
             is TrackPublishedEvent -> TODO()
             is TrackUnpublishedEvent -> TODO()
             is VideoQualityChangedEvent -> TODO()
+            is SFUConnectedEvent -> {
+                _connection.value = ConnectionState.Connected
+            }
         }
     }
 
