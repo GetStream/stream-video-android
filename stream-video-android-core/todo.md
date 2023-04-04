@@ -1,7 +1,6 @@
 
 ## Upcoming
 
-- Easily see if the coordinator is connected
 - Easily see if the SFU is connected
 - See if there is a way to verify that android implements all events
 - Verify all events are handled
@@ -59,8 +58,8 @@
 - [X] Cleanup The Network connection module
 - [X] Cleanup event handling
 - [X] Update to the latest events from the protocol
+- [X] Easily see if the coordinator is connected
 - [ ] VideoSocket Impl shouldn't hide errors
-- [ ] Easily see if the coordinator is connected
 - [ ] Easily see if the SFU is connected
 - [ ] Verify all events are handled
 - [ ] Use the new state in the view model

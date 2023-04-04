@@ -67,6 +67,25 @@ Typically a combination of integration testing and unit testing is best.
 
 We use Truth and Mockk for testing
 
+Here's an example test
+
+```kotlin
+@RunWith(RobolectricTestRunner::class)
+public class MyTest : IntegrationTestBase() {
+    @Test
+    fun `create a call and verify the event is fired`() = runTest {
+        // create the call
+        val call = client.call("default", randomUUID())
+        val result = call.create()
+        assertSuccess(result)
+        // Wait to receive the next event
+        val event = waitForNextEvent<CallCreatedEvent>()
+    }
+}
+```
+
+Check the docs on TestBase, TestHelper and IntegrationTestBase for more utility functions for testing
+
 ## Architecture
 
 ### API calls
