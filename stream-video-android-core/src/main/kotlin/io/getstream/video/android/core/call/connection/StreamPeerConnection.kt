@@ -17,9 +17,9 @@
 package io.getstream.video.android.core.call.connection
 
 import io.getstream.log.taggedLogger
+import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
-import io.getstream.result.StreamError
 import io.getstream.video.android.core.call.utils.addRtcIceCandidate
 import io.getstream.video.android.core.call.utils.createValue
 import io.getstream.video.android.core.call.utils.setValue
@@ -205,7 +205,7 @@ public class StreamPeerConnection(
             pendingIceMutex.withLock {
                 pendingIceCandidates.add(iceCandidate)
             }
-            return Failure(StreamError.GenericError(message = "RemoteDescription is not set"))
+            return Failure(Error.GenericError(message = "RemoteDescription is not set"))
         }
         val rtcIceCandidate = iceCandidate.toRtcCandidate()
         logger.d { "[addIceCandidate] #sfu; #$typeTag; rtcIceCandidate: $rtcIceCandidate" }

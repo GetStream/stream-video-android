@@ -17,8 +17,8 @@
 package io.getstream.video.android.core.engine
 
 import io.getstream.log.taggedLogger
+import io.getstream.result.Error
 import io.getstream.result.Result.Success
-import io.getstream.result.StreamError
 import io.getstream.video.android.core.StreamVideoConfig
 import io.getstream.video.android.core.coordinator.CallCoordinatorClient
 import io.getstream.video.android.core.events.AudioLevelChangedEvent
@@ -205,7 +205,7 @@ internal class StreamCallEngineImpl(
                             State.Drop(
                                 state.callGuid, state.callKind,
                                 DropReason.Failure(
-                                    StreamError.GenericError(
+                                    Error.GenericError(
                                         message = "no SfuJoined event received"
                                     )
                                 )
@@ -602,7 +602,7 @@ internal class StreamCallEngineImpl(
         )
     }
 
-    override fun onCallFailed(error: StreamError) = scope.launchWithLock(mutex) {
+    override fun onCallFailed(error: Error) = scope.launchWithLock(mutex) {
         logger.e { "[onCallFailed] error: $error" }
         val state = _callState.value
         if (state !is State.Active) {

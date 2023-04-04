@@ -16,10 +16,10 @@
 
 package io.getstream.video.android.core.call.utils
 
+import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
-import io.getstream.result.StreamError
 import org.webrtc.AddIceObserver
 import org.webrtc.IceCandidate
 import org.webrtc.PeerConnection
@@ -37,7 +37,7 @@ internal suspend fun PeerConnection.addRtcIceCandidate(iceCandidate: IceCandidat
                 }
 
                 override fun onAddFailure(error: String?) {
-                    cont.resume(Failure(StreamError.GenericError(message = error ?: "")))
+                    cont.resume(Failure(Error.GenericError(message = error ?: "")))
                 }
             }
         )

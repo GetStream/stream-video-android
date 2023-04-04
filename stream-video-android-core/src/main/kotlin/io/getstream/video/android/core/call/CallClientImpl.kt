@@ -25,10 +25,10 @@ import android.media.AudioManager
 import android.os.Build
 import androidx.core.content.getSystemService
 import io.getstream.log.taggedLogger
+import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
-import io.getstream.result.StreamError
 import io.getstream.result.onSuccessSuspend
 import io.getstream.video.android.core.call.connection.StreamPeerConnection
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
@@ -382,7 +382,7 @@ internal class CallClientImpl(
         logger.d { "[connectToCall] #sfu; sessionId: $sessionId, autoPublish: $autoPublish" }
         if (connectionState != ConnectionState.DISCONNECTED) {
             return Failure(
-                StreamError.GenericError(
+                Error.GenericError(
                     "Already connected or connecting to a call with the session ID: $sessionId"
                 )
             )
@@ -586,7 +586,7 @@ internal class CallClientImpl(
         } catch (e: Throwable) {
             logger.e { "[executeJoinRequest] failed: $e" }
             Failure(
-                StreamError.ThrowableError(e.message ?: "Couldn't execute a join request.", e)
+                Error.ThrowableError(e.message ?: "Couldn't execute a join request.", e)
             )
         }
     }
@@ -665,7 +665,7 @@ internal class CallClientImpl(
         }
     }
 
-    override fun onError(error: StreamError) {
+    override fun onError(error: Error) {
         coroutineScope.launch {
             logger.e { "[onError] cause: $error" }
         }

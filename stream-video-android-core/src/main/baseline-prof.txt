@@ -466,7 +466,7 @@ PLio/getstream/video/android/core/call/signal/socket/SfuSocketImpl$State$Connect
 PLio/getstream/video/android/core/call/signal/socket/SfuSocketImpl$State$Connected;->getEvent()Lio/getstream/video/android/core/events/ConnectedEvent;
 PLio/getstream/video/android/core/call/signal/socket/SfuSocketImpl$State$Connecting;-><clinit>()V
 PLio/getstream/video/android/core/call/signal/socket/SfuSocketImpl$State$Connecting;-><init>()V
-PLio/getstream/video/android/core/call/signal/socket/SfuSocketImpl$State$DisconnectedTemporarily;-><init>(Lio/getstream/result/StreamError$NetworkError;)V
+PLio/getstream/video/android/core/call/signal/socket/SfuSocketImpl$State$DisconnectedTemporarily;-><init>(Lio/getstream/result/Error$NetworkError;)V
 PLio/getstream/video/android/core/call/signal/socket/SfuSocketImpl$State$DisconnectedTemporarily;->equals(Ljava/lang/Object;)Z
 PLio/getstream/video/android/core/call/signal/socket/SfuSocketImpl$healthMonitor$1;-><init>(Lio/getstream/video/android/core/call/signal/socket/SfuSocketImpl;)V
 HPLio/getstream/video/android/core/call/signal/socket/SfuSocketImpl$healthMonitor$1;->check()V
@@ -1271,7 +1271,7 @@ PLio/getstream/video/android/core/socket/internal/VideoSocketImpl$State$Connecte
 PLio/getstream/video/android/core/socket/internal/VideoSocketImpl$State$Connected;->getEvent()Lio/getstream/video/android/core/events/ConnectedEvent;
 PLio/getstream/video/android/core/socket/internal/VideoSocketImpl$State$Connecting;-><clinit>()V
 PLio/getstream/video/android/core/socket/internal/VideoSocketImpl$State$Connecting;-><init>()V
-PLio/getstream/video/android/core/socket/internal/VideoSocketImpl$State$DisconnectedTemporarily;-><init>(Lio/getstream/result/StreamError$NetworkError;)V
+PLio/getstream/video/android/core/socket/internal/VideoSocketImpl$State$DisconnectedTemporarily;-><init>(Lio/getstream/result/Error$NetworkError;)V
 PLio/getstream/video/android/core/socket/internal/VideoSocketImpl$State$DisconnectedTemporarily;->equals(Ljava/lang/Object;)Z
 PLio/getstream/video/android/core/socket/internal/VideoSocketImpl$healthMonitor$1;-><init>(Lio/getstream/video/android/core/socket/internal/VideoSocketImpl;)V
 PLio/getstream/video/android/core/socket/internal/VideoSocketImpl$healthMonitor$1;->check()V
