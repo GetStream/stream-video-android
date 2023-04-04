@@ -20,9 +20,13 @@ import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.call.controls.CallControls
+import io.getstream.video.android.compose.ui.components.call.controls.internal.LandscapeCallControls
+import io.getstream.video.android.compose.ui.components.call.controls.internal.RegularCallControls
+import io.getstream.video.android.compose.ui.components.connection.ConnectionQualityIndicator
 import io.getstream.video.android.core.call.state.CallMediaState
 import org.junit.Rule
 import org.junit.Test
+import stream.video.sfu.models.ConnectionQuality
 
 internal class CallComponentsTest {
 
@@ -39,6 +43,30 @@ internal class CallComponentsTest {
     }
 
     @Test
+    fun `snapshot RegularCallControls composable`() {
+        paparazzi.snapshot {
+            VideoTheme {
+                RegularCallControls(
+                    callMediaState = CallMediaState(),
+                    isScreenSharing = false
+                ) {}
+            }
+        }
+    }
+
+    @Test
+    fun `snapshot LandscapeCallControls composable`() {
+        paparazzi.snapshot {
+            VideoTheme {
+                LandscapeCallControls(
+                    callMediaState = CallMediaState(),
+                    isScreenSharing = false
+                ) {}
+            }
+        }
+    }
+
+    @Test
     fun `snapshot CallControls composable`() {
         paparazzi.snapshot {
             VideoTheme {
@@ -46,6 +74,17 @@ internal class CallComponentsTest {
                     callMediaState = CallMediaState(),
                     isScreenSharing = false
                 ) {}
+            }
+        }
+    }
+
+    @Test
+    fun `snapshot Connection ConnectionQualityIndicator composable`() {
+        paparazzi.snapshot {
+            VideoTheme {
+                ConnectionQualityIndicator(
+                    connectionQuality = ConnectionQuality.CONNECTION_QUALITY_GOOD
+                )
             }
         }
     }

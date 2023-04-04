@@ -28,6 +28,7 @@ import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.state.ui.call.CallControlAction
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -102,6 +103,18 @@ public fun RegularCallControlsActions(
                     contentDescription = action.description
                 )
             }
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun RegularCallControlsActionsPreview() {
+    VideoTheme {
+        RegularCallControls(
+            callMediaState = CallMediaState(),
+            isScreenSharing = true
+        ) {
         }
     }
 }

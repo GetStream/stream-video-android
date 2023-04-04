@@ -18,11 +18,17 @@ package io.getstream.video.android.compose
 
 import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.common.util.mockParticipantList
+import io.getstream.video.android.compose.state.ui.internal.InviteUserItemState
+import io.getstream.video.android.compose.state.ui.internal.ParticipantList
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.participants.internal.CallParticipantsInfoAppBar
+import io.getstream.video.android.compose.ui.components.participants.internal.CallParticipantsInfoOptions
+import io.getstream.video.android.compose.ui.components.participants.internal.InviteUserList
 import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantAvatars
 import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantInformation
 import io.getstream.video.android.core.model.CallStatus
 import io.getstream.video.android.core.model.CallUser
+import io.getstream.video.android.core.model.toUser
 import org.junit.Rule
 import org.junit.Test
 
@@ -59,6 +65,43 @@ internal class ParticipantsTest {
                         )
                     }
                 )
+            }
+        }
+    }
+
+    @Test
+    fun `snapshot InviteUserList composable`() {
+        paparazzi.snapshot {
+            VideoTheme {
+                InviteUserList(
+                    mockParticipantList.map { InviteUserItemState(it.toUser()) },
+                    onUserSelected = {}
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `snapshot CallParticipantsInfoOptions composable`() {
+        paparazzi.snapshot {
+            VideoTheme {
+                CallParticipantsInfoOptions(
+                    isCurrentUserMuted = false,
+                    onOptionSelected = { }
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `snapshot CallParticipantsInfoAppBar composable`() {
+        paparazzi.snapshot {
+            VideoTheme {
+                CallParticipantsInfoAppBar(
+                    numberOfParticipants = 10,
+                    infoStateMode = ParticipantList,
+                    onBackPressed = {}
+                ) {}
             }
         }
     }
