@@ -28,6 +28,8 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 @RunWith(RobolectricTestRunner::class)
 class ClientAndAuthTest : TestBase() {
@@ -124,8 +126,19 @@ class ClientAndAuthTest : TestBase() {
         assertThat(client.state.connection.value).isEqualTo(ConnectionState.PreConnect)
         val clientImpl = client as StreamVideoImpl
         val connectResult = clientImpl.connect()
+
         assertSuccess(connectResult)
 
+        // wait for the WS to connect
+        suspendCoroutine<VideoEvent> { continuation ->
+            client.subscribe {
+                if (it is ConnectedEvent) {
+                    continuation.resume(it)
+                }
+            }
+        }
+
+        println("stateflow from test $client.state.connection")
         assertThat(client.state.connection.value).isEqualTo(ConnectionState.Connected)
 
     }

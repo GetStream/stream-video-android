@@ -48,7 +48,9 @@ class ClientState(client: StreamVideo) {
         println("handle event client state $event $isConnectedEvent")
         // mark connected
         if (event is ConnectedEvent) {
-            println("setting connection.value to connected")
+            val new = ConnectionState.Connected
+
+            println("setting connection.value to connected $new $connection")
             _connection.value = ConnectionState.Connected
         } else if (event is CallCreatedEvent) {
             // what's the right thing to do here?

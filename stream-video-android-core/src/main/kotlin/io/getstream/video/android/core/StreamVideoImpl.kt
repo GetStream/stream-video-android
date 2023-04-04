@@ -109,12 +109,7 @@ internal class StreamVideoImpl internal constructor(
         // TODO: maybe merge fire event into this?
         println("eventlistener received an event: $event")
         fireEvent(event)
-        nextEventContinuation?.let { continuation ->
-            if (!nextEventCompleted) {
-                continuation.resume(value=event)
-            }
-            nextEventCompleted = true
-        }
+
     }
 
     override val state = ClientState(this)
@@ -955,13 +950,9 @@ internal class StreamVideoImpl internal constructor(
         }
     }
 
-    public var nextEventContinuation: Continuation<VideoEvent>? = null
-    public var nextEventCompleted: Boolean = false
 
-    suspend fun waitForNextEvent(): VideoEvent = suspendCoroutine { continuation ->
-        nextEventContinuation = continuation
-        nextEventCompleted = false
-    }
+
+
 }
 
 /** Extension function that makes it easy to use on kotlin, but keeps Java usable as well */

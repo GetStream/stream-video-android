@@ -24,6 +24,7 @@ import io.getstream.log.StreamLog
 import io.getstream.log.StreamLogger
 import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
+import io.getstream.video.android.core.events.ConnectedEvent
 import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.User
@@ -36,11 +37,15 @@ import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.withTimeout
 import org.junit.Before
 import org.junit.Rule
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 import java.util.UUID
+import kotlin.coroutines.Continuation
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 class DispatcherRule(
     val testDispatcher: TestDispatcher = UnconfinedTestDispatcher(TestCoroutineScheduler()),
@@ -132,8 +137,6 @@ open class TestBase {
 }
 
 open class IntegrationTestBase(connectCoordinatorWS: Boolean = true): TestBase() {
-
-
     /** Client */
     val client: StreamVideo
     /** Implementation of the client for more access to interals */
@@ -142,6 +145,9 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true): TestBase()
     var events: MutableList<VideoEvent>
     /** The builder used for creating the client */
     val builder: StreamVideoBuilder
+
+    public var nextEventContinuation: Continuation<VideoEvent>? = null
+    public var nextEventCompleted: Boolean = false
 
     init {
         builder = StreamVideoBuilder(
@@ -169,6 +175,13 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true): TestBase()
             println("sub received an event: $it")
             events.add(it)
             println("events in loop $events")
+
+            nextEventContinuation?.let { continuation ->
+                if (!nextEventCompleted) {
+                    continuation.resume(value=it)
+                }
+                nextEventCompleted = true
+            }
         }
     }
 
@@ -182,9 +195,23 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true): TestBase()
         return events.filter { it::class.java == eventClass }[0]
     }
 
+    /**
+     * If we have already received an event of this type return immediately
+     * Otherwise wait for the next event of this type
+     * TODO: add a timeout
+     */
+    suspend inline fun <reified T : VideoEvent> waitForNextEvent(): VideoEvent = suspendCoroutine { continuation ->
+        client.subscribe {
+            val matchingEvents = events.filter{it is T}
+            if (matchingEvents.isNotEmpty()) {
+                continuation.resume(matchingEvents[0])
+            }
+            if (it is T) {
+                continuation.resume(it)
+            }
+        }
 
-
-
+    }
 
     @Before
     fun resetTestVars() {
