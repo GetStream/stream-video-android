@@ -197,8 +197,8 @@ internal class StreamVideoImpl internal constructor(
                 ignoreUnknownKeys = true
             }
             format.decodeFromString<VideoBackendError>(errorBody)
-        }
-        return Failure(VideoError())
+        } ?: VideoError("failed to parse error response from server")
+        return Failure(error)
     }
 
     public override fun subscribeFor(

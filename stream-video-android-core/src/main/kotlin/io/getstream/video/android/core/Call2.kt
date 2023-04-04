@@ -257,6 +257,7 @@ public class Call2(
     private val token: String = "",
     val user: User,
 ) {
+    private val clientImpl = client as StreamVideoImpl
     var activeSession: ActiveSFUSession? = null
     val cid = "$type:$id"
     val state = CallState(this, user)
@@ -288,16 +289,17 @@ public class Call2(
         // step 2. measure latency
         // TODO: setup the initial call state based on this
         println(result.data.call.settings)
-        // TODO: this should run in parallel and be configurable
-        val latencyResults = result.data.edges.associate {
-            it.name to getLatencyMeasurements(it.latencyUrl)
-        }
+
+        val edgeUrls = result.data.edges.map { it.latencyUrl }
+        // measure latency in parallel
+        val measurements = clientImpl.measureLatency(edgeUrls)
+
         // upload our latency measurements to the server
         val selectEdgeServerResult = client.selectEdgeServer(
             type = type,
             id = id,
             request = GetCallEdgeServerRequest(
-                latencyMeasurements = latencyResults.entries.associate { it.key to it.value.measurements }
+                latencyMeasurements = measurements.associate { it.latencyUrl to it.measurements }
             )
         )
         if (selectEdgeServerResult !is Success) {
@@ -317,7 +319,7 @@ public class Call2(
             client=client, call2=this,
             SFUUrl =url, SFUToken=credentials.token,
             connectionModule = (client as StreamVideoImpl).connectionModule,
-            remoteIceServers=iceServers, latencyResults=latencyResults.entries.associate { it.key to it.value.measurements }
+            remoteIceServers=iceServers, latencyResults=measurements.associate { it.latencyUrl to it.measurements }
         )
         return Success<ActiveSFUSession>(data= activeSession!!)
 

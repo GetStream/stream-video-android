@@ -17,6 +17,7 @@
 package io.getstream.video.android.core.utils
 
 import io.getstream.video.android.core.errors.VideoError
+import io.getstream.video.android.core.errors.VideoErrorBase
 
 /**
  *  A class which encapsulates a successful outcome with a value of type [T] or a failure with [VideoError].
@@ -48,7 +49,7 @@ public data class Success<out T : Any>(val data: T) : Result<T>()
  *
  * @param error The [VideoError] associated with the result.
  */
-public data class Failure(val error: VideoError) : Result<Nothing>()
+public data class Failure(val error: VideoErrorBase) : Result<Nothing>()
 
 /**
  * Runs the [successSideEffect] lambda function if the [Result] contains a successful data payload.
@@ -91,7 +92,7 @@ public suspend inline fun <T : Any> Result<T>.onSuccessSuspend(
  */
 @JvmSynthetic
 public inline fun <T : Any> Result<T>.onError(
-    crossinline errorSideEffect: (VideoError) -> Unit,
+    crossinline errorSideEffect: (VideoErrorBase) -> Unit,
 ): Result<T> = apply {
     if (this is Failure) {
         errorSideEffect(error)
@@ -107,7 +108,7 @@ public inline fun <T : Any> Result<T>.onError(
  */
 @JvmSynthetic
 public suspend inline fun <T : Any> Result<T>.onErrorSuspend(
-    crossinline errorSideEffect: suspend (VideoError) -> Unit,
+    crossinline errorSideEffect: suspend (VideoErrorBase) -> Unit,
 ): Result<T> = apply {
     if (this is Failure) {
         errorSideEffect(error)

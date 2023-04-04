@@ -41,16 +41,16 @@ class JoinCallTest : IntegrationTestBase() {
      */
     @Test
     fun `test joining a call`() = runTest {
+        client.subscribe {
+            println("event: $it")
+        }
         val call = client.call("default", randomUUID())
-        assertThat(client.state.connection.value).isEqualTo(ConnectionState.PreConnect)
-        call.join()
-
-        assertThat(call.state.connection).isEqualTo(ConnectionState.Connected)
-
-
-        // call.activeSession.connected
-
-        // TODO: check if the connection is ready
+        val createResult = call.create()
+        assertSuccess(createResult)
+        val joinResult = call.join()
+        assertSuccess(joinResult)
+        waitForNextEvent<ConnectedEvent>()
+        assertThat(call.state.connection.value).isEqualTo(ConnectionState.Connected)
     }
 
     @Test

@@ -150,7 +150,7 @@ public class ActiveSFUSession internal constructor(
     private val context = client.context
     private val logger by taggedLogger("Call:WebRtcClient")
 
-
+    private val clientImpl = client as StreamVideoImpl
 
     private var connectionState: ConnectionState = ConnectionState.DISCONNECTED
     private var sessionId: String = ""
@@ -706,6 +706,9 @@ public class ActiveSFUSession internal constructor(
     }
 
     override fun onConnected(event: ConnectedEvent) {
+        // trigger an event in the client as well for SFU events. makes it easier to subscribe
+        println("SFU onconnected")
+        clientImpl.fireEvent(event, call2.cid)
         coroutineScope.launch {
             logger.i { "[onConnected] event: $event" }
             isConnected.value = true
@@ -713,20 +716,25 @@ public class ActiveSFUSession internal constructor(
     }
 
     override fun onDisconnected(cause: DisconnectCause) {
+        println("SFU onDisconnected")
+
         coroutineScope.launch {
             logger.i { "[onDisconnected] cause: $cause" }
             isConnected.value = false
+
         }
     }
 
     override fun onError(error: VideoError) {
+        println("SFU onError")
+
         coroutineScope.launch {
             logger.e { "[onError] cause: $error" }
         }
     }
 
     override fun onEvent(event: SfuDataEvent) {
-        val clientImpl = client as StreamVideoImpl
+
         // trigger an event in the client as well for SFU events. makes it easier to subscribe
         clientImpl.fireEvent(event, call2.cid)
 

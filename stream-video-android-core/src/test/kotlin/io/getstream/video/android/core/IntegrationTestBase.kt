@@ -200,19 +200,20 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true): TestBase()
      * Otherwise wait for the next event of this type
      * TODO: add a timeout
      */
-    suspend inline fun <reified T : VideoEvent> waitForNextEvent(): VideoEvent = suspendCoroutine { continuation ->
-        client.subscribe {
-            val matchingEvents = events.filter{it is T}
-            if (matchingEvents.isNotEmpty()) {
-                continuation.resume(matchingEvents[0])
+    suspend inline fun <reified T : VideoEvent> waitForNextEvent(): VideoEvent = withTimeout(1000L) {
+        suspendCoroutine { continuation ->
+            client.subscribe {
+                val matchingEvents = events.filter { it is T }
+                if (matchingEvents.isNotEmpty()) {
+                    continuation.resume(matchingEvents[0])
+                }
+                if (it is T) {
+                    continuation.resume(it)
+                }
             }
-            if (it is T) {
-                continuation.resume(it)
-            }
+
         }
-
     }
-
     @Before
     fun resetTestVars() {
         events = mutableListOf()

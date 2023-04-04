@@ -17,18 +17,25 @@
 package io.getstream.video.android.core.errors
 
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
-@kotlinx.serialization.Serializable
+@Serializable
+public open class VideoErrorBase(
+
+) {
+    public open val message: String? = null
+}
+
+@Serializable
 public data class VideoBackendError(
     val code: Int = 1,
-    override val message: String = "",
     @SerialName("StatusCode")
     val statusCode: Int = 500,
     val duration: String = "",
     @SerialName("more_info")
     val moreInfo: String = "",
     val details: List<String> = emptyList(),
-) : Throwable()
+) : VideoErrorBase()
 
 /**
  * Represents an SDK error that contains a message and the cause.
@@ -37,9 +44,9 @@ public data class VideoBackendError(
  * @property cause Cause of the error, either a BE exception or an SDK based one.
  */
 public open class VideoError(
-    public val message: String? = null,
+    public override val message: String? = null,
     public val cause: Throwable? = null
-) {
+): VideoErrorBase() {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
