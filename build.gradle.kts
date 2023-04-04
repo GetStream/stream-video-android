@@ -6,8 +6,6 @@ buildscript {
         google()
         mavenCentral()
         maven("https://plugins.gradle.org/m2/")
-        // we should remove this after releasing the stable version of Stream Result
-        maven(url = "https://oss.sonatype.org/content/repositories/snapshots/")
     }
 }
 
