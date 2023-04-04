@@ -114,9 +114,11 @@ open class TestBase {
     private val testLogger = StreamTestLogger()
 
     init {
-        StreamLog.setValidator { priority, _ -> priority > Priority.VERBOSE }
-        StreamLog.install(logger = testLogger)
-        testLogger.streamLog { "test logger installed" }
+        if (!StreamLog.isInstalled) {
+            StreamLog.setValidator { priority, _ -> priority > Priority.VERBOSE }
+            StreamLog.install(logger = testLogger)
+            testLogger.streamLog { "test logger installed" }
+        }
     }
 
     fun setLogLevel(newPriority: Priority) {
