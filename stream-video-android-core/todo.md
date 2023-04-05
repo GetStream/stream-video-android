@@ -1,9 +1,9 @@
 
 ## This week: LLC Stability. Basics, not refactoring the sockets yet
 
-- Cleanup the test suite
+- Cleanup the test suite and make it faster
 - Openapi/Event integration. Events being out of sync is a large issue
-- Merge the two concepts of Call. Call2 and model/Call.kt
+- 
 - Clean up the active SFU session
 
 ## Phase 2, find a way to make Call/SFUSession testable
@@ -51,8 +51,8 @@ This i'm still somewhat unsure about
 
 - [X] Responding to events
 - [X] Join flow
+- [X] Active Session
 - [ ] Reconnect flow (https://www.notion.so/Reconnection-Failure-handling-f6991fd2e5584380bb2d2cb5e8ac5303)
-- [ ] Active Session
 - [ ] Join flow performance
 
 ### Websockets
@@ -75,6 +75,7 @@ This i'm still somewhat unsure about
 - [X] Easily see if the coordinator is connected
 - [X] VideoSocket Impl shouldn't hide errors
 - [X] Easily see if the SFU is connected
+- [X] Merge the two concepts of Call. Call2 and model/Call.kt
 - [ ] Verify all events are handled
 - [ ] Local participants, maybe data class, something to get stateflow to play nice
 - [ ] Use the new state in the view model

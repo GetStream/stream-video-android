@@ -79,9 +79,12 @@ class CameraManager(val mediaManager: MediaManagerImpl) {
         mediaManager.flipCamera()
     }
 
-    fun devices(): List<String> {
-        return mediaManager.getCameraDevices()
-    }
+    val _devices = MutableStateFlow<List<String>>(emptyList())
+    val devices: StateFlow<List<String>> = _devices
+
+//    fun devices(): List<String> {
+//        return mediaManager.getCameraDevices()
+//    }
 
     fun select(deviceId: String) {
         mediaManager.selectCamera(deviceId)

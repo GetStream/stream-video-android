@@ -10,6 +10,17 @@ import org.robolectric.RobolectricTestRunner
 class ActiveSFUSessionTest : IntegrationTestBase() {
 
     @Test
+    fun `Camera operations`() = runTest {
+        val call = client.call("default", randomUUID())
+        call.camera.devices
+        call.camera.flip()
+        call.camera.disable()
+        call.camera.enable()
+        call.camera.status
+        //call.camera.select()
+    }
+
+    @Test
     fun camera() = runTest {
         val call = client.call("default", randomUUID())
         val session = call.join()
@@ -33,7 +44,9 @@ class ActiveSFUSessionTest : IntegrationTestBase() {
         //call.state.me.muteVideo()
         //call.state.me.flipCamera()
 
-
+//        call.microphone.devices()
+//        call.camera.devices()
+//        call.speaker.devices()
 
 
         call.state.getParticipant("tommaso")!!.videoTrack

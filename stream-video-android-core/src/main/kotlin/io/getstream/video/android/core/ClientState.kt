@@ -25,7 +25,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 sealed class ConnectionState() {
-    // TODO:ConnectionState.Connected is nicer than ConnectionState.Connected()
     object PreConnect : ConnectionState()
     object Loading : ConnectionState()
     object Connected : ConnectionState()
@@ -33,6 +32,15 @@ sealed class ConnectionState() {
     object Disconnected : ConnectionState()
     class Failed(error: VideoError) : ConnectionState()
 }
+
+sealed class RingingState() {
+    object Incoming : RingingState()
+    object Outgoing : RingingState()
+    object Active : RingingState()
+    object RejectedByAll : RingingState()
+    object TimeoutNoAnswer : RingingState()
+}
+
 
 class ClientState(client: StreamVideo) {
     internal val clientImpl = client as StreamVideoImpl

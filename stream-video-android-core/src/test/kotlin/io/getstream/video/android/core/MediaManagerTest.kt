@@ -14,15 +14,15 @@ class MediaManagerTest : TestBase() {
     @Test
     fun `list devices`() = runTest {
         val mediaManager = MediaManagerImpl(context)
-        val devices = mediaManager.camera.devices()
+        val devices = mediaManager.camera.devices
         logger.d { devices.toString() }
     }
 
     @Test
     fun `start capture`() = runTest {
         val mediaManager = MediaManagerImpl(context)
-        val devices = mediaManager.camera.devices()
-        val result = mediaManager.camera.select(devices.first())
+        val devices = mediaManager.camera.devices
+        val result = mediaManager.camera.select(devices.value.first())
     }
 
     @Test
