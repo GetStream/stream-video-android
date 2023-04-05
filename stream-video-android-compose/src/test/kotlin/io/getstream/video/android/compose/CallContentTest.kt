@@ -23,16 +23,75 @@ import io.getstream.video.android.common.util.mockParticipant
 import io.getstream.video.android.common.util.mockParticipantList
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.incomingcall.IncomingCallContent
+import io.getstream.video.android.compose.ui.components.call.incomingcall.internal.IncomingCallDetails
+import io.getstream.video.android.compose.ui.components.call.incomingcall.internal.IncomingCallOptions
 import io.getstream.video.android.compose.ui.components.call.outgoingcall.OutgoingCallContent
+import io.getstream.video.android.compose.ui.components.call.outgoingcall.internal.OutgoingCallDetails
+import io.getstream.video.android.compose.ui.components.call.outgoingcall.internal.OutgoingGroupCallOptions
+import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.call.state.CallMediaState
 import io.getstream.video.android.core.model.CallType
 import io.getstream.video.android.core.model.CallUser
 import org.junit.Rule
 import org.junit.Test
+import org.webrtc.VideoTrack
+import stream.video.sfu.models.TrackType
 
 internal class CallContentTest {
     @get:Rule
     val paparazzi = Paparazzi()
+
+    @Test
+    fun `snapshot VideoRenderer composable`() {
+        paparazzi.snapshot {
+            VideoTheme {
+                VideoRenderer(
+                    call = null,
+                    videoTrack = io.getstream.video.android.core.model.VideoTrack(
+                        "",
+                        VideoTrack(123)
+                    ),
+                    sessionId = "",
+                    trackType = TrackType.TRACK_TYPE_VIDEO
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `snapshot IncomingCallContentDetails composable`() {
+        paparazzi.snapshot {
+            VideoTheme {
+                IncomingCallDetails(
+                    participants = mockParticipantList.map {
+                        CallUser(
+                            id = it.id,
+                            name = it.name,
+                            role = it.role,
+                            state = null,
+                            imageUrl = it.profileImageURL ?: "",
+                            createdAt = null,
+                            updatedAt = null,
+                            teams = emptyList()
+                        )
+                    }
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `snapshot IncomingCallOptions composable`() {
+        paparazzi.snapshot {
+            VideoTheme {
+                IncomingCallOptions(
+                    isVideoCall = true,
+                    isVideoEnabled = true,
+                    onCallAction = { }
+                )
+            }
+        }
+    }
 
     @Test
     fun `snapshot IncomingCallContent Video type with one participant composable`() {
@@ -85,6 +144,41 @@ internal class CallContentTest {
                     modifier = Modifier.fillMaxSize(),
                     onBackPressed = {},
                     onCallAction = {}
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `snapshot OutgoingCallDetails composable`() {
+        paparazzi.snapshot {
+            VideoTheme {
+                OutgoingCallDetails(
+                    callType = CallType.VIDEO,
+                    participants = mockParticipantList.map {
+                        CallUser(
+                            id = it.id,
+                            name = it.name,
+                            role = it.role,
+                            state = null,
+                            imageUrl = it.profileImageURL ?: "",
+                            createdAt = null,
+                            updatedAt = null,
+                            teams = emptyList()
+                        )
+                    }
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `snapshot OutgoingCallOptions composable`() {
+        paparazzi.snapshot {
+            VideoTheme {
+                OutgoingGroupCallOptions(
+                    callMediaState = CallMediaState(),
+                    onCallAction = { }
                 )
             }
         }

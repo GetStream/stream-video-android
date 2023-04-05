@@ -122,7 +122,7 @@ class MessagesActivity : ComponentActivity() {
             )
 
             if (createCallResult is Success) {
-                val data = createCallResult.data
+                val data = createCallResult.value
 
                 val customAttachment = Attachment(
                     type = "custom",

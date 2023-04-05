@@ -26,7 +26,8 @@ package org.openapitools.client.models
 import com.squareup.moshi.Json
 
 /**
- * *
+ * sent when a user cancels a call
+ *
  * @param callCid * @param createdAt * @param type * @param user */
 
 data class CallCancelledEvent(

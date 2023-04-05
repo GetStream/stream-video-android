@@ -27,21 +27,20 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param cid The unique identifier for a call (<type>:<id>)
- * @param connectionId * @param createdAt * @param type * @param me */
+ * @param connectionId The connection_id for this client
+ * @param createdAt * @param type The type of event: \"health.check\" in this case
+ * @param me */
 
 data class HealthCheckEvent(
 
-    /* The unique identifier for a call (<type>:<id>) */
-    @Json(name = "cid")
-    val cid: kotlin.String,
-
+    /* The connection_id for this client */
     @Json(name = "connection_id")
     val connectionId: kotlin.String,
 
     @Json(name = "created_at")
     val createdAt: java.time.OffsetDateTime,
 
+    /* The type of event: \"health.check\" in this case */
     @Json(name = "type")
     val type: kotlin.String,
 

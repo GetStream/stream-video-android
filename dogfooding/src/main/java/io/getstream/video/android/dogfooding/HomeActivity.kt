@@ -50,6 +50,7 @@ import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -150,7 +151,8 @@ class HomeActivity : AppCompatActivity() {
                 .fillMaxWidth()
                 .height(64.dp)
                 .padding(horizontal = 16.dp)
-                .align(Alignment.CenterHorizontally),
+                .align(Alignment.CenterHorizontally)
+                .testTag("join_call"),
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = VideoTheme.colors.primaryAccent
             ),

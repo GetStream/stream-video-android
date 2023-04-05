@@ -17,19 +17,28 @@
 package io.getstream.video.android.compose.ui.components.participants.internal
 
 import android.view.View
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.tooling.preview.Devices
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.participants.CallParticipant
 import io.getstream.video.android.compose.ui.components.participants.LocalVideoContent
+import io.getstream.video.android.compose.ui.components.previews.ParticipantsProvider
 import io.getstream.video.android.core.model.Call
 import io.getstream.video.android.core.model.CallParticipantState
 
@@ -46,7 +55,7 @@ import io.getstream.video.android.core.model.CallParticipantState
  */
 @Composable
 internal fun BoxScope.LandscapeParticipants(
-    call: Call,
+    call: Call?,
     primarySpeaker: CallParticipantState?,
     callParticipants: List<CallParticipantState>,
     modifier: Modifier,
@@ -103,5 +112,105 @@ internal fun BoxScope.LandscapeParticipants(
                 .align(Alignment.TopEnd),
             paddingValues = paddingValues
         )
+    }
+}
+
+@Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1440, heightDp = 720)
+@Composable
+private fun LandscapeParticipantsPreview1(
+    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<CallParticipantState>
+) {
+    VideoTheme {
+        val configuration = LocalConfiguration.current
+        val screenWidth = configuration.screenWidthDp
+        val screenHeight = configuration.screenHeightDp
+
+        Box(
+            modifier = Modifier.background(color = VideoTheme.colors.appBackground)
+        ) {
+            LandscapeParticipants(
+                call = null,
+                primarySpeaker = callParticipants[0],
+                callParticipants = callParticipants.take(1),
+                modifier = Modifier.fillMaxSize(),
+                paddingValues = PaddingValues(0.dp),
+                parentSize = IntSize(screenWidth, screenHeight)
+            ) {}
+        }
+    }
+}
+
+@Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1440, heightDp = 720)
+@Composable
+private fun LandscapeParticipantsPreview2(
+    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<CallParticipantState>
+) {
+    VideoTheme {
+        val configuration = LocalConfiguration.current
+        val screenWidth = configuration.screenWidthDp
+        val screenHeight = configuration.screenHeightDp
+
+        Box(
+            modifier = Modifier.background(color = VideoTheme.colors.appBackground)
+        ) {
+            LandscapeParticipants(
+                call = null,
+                primarySpeaker = callParticipants[0],
+                callParticipants = callParticipants.take(2),
+                modifier = Modifier.fillMaxSize(),
+                paddingValues = PaddingValues(0.dp),
+                parentSize = IntSize(screenWidth, screenHeight)
+            ) {}
+        }
+    }
+}
+
+@Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1440, heightDp = 720)
+@Composable
+private fun LandscapeParticipantsPreview3(
+    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<CallParticipantState>
+) {
+    VideoTheme {
+        val configuration = LocalConfiguration.current
+        val screenWidth = configuration.screenWidthDp
+        val screenHeight = configuration.screenHeightDp
+
+        Box(
+            modifier = Modifier.background(color = VideoTheme.colors.appBackground)
+        ) {
+            LandscapeParticipants(
+                call = null,
+                primarySpeaker = callParticipants[0],
+                callParticipants = callParticipants.take(3),
+                modifier = Modifier.fillMaxSize(),
+                paddingValues = PaddingValues(0.dp),
+                parentSize = IntSize(screenWidth, screenHeight)
+            ) {}
+        }
+    }
+}
+
+@Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1440, heightDp = 720)
+@Composable
+private fun LandscapeParticipantsPreview4(
+    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<CallParticipantState>
+) {
+    VideoTheme {
+        val configuration = LocalConfiguration.current
+        val screenWidth = configuration.screenWidthDp
+        val screenHeight = configuration.screenHeightDp
+
+        Box(
+            modifier = Modifier.background(color = VideoTheme.colors.appBackground)
+        ) {
+            LandscapeParticipants(
+                call = null,
+                primarySpeaker = callParticipants[0],
+                callParticipants = callParticipants.take(4),
+                modifier = Modifier.fillMaxSize(),
+                paddingValues = PaddingValues(0.dp),
+                parentSize = IntSize(screenWidth, screenHeight)
+            ) {}
+        }
     }
 }

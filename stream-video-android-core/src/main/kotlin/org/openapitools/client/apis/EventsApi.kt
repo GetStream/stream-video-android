@@ -22,24 +22,20 @@ import retrofit2.http.Body
 import retrofit2.http.POST
 import retrofit2.http.Path
 
-internal interface EventsApi {
+interface EventsApi {
     /**
      * Send event
-     * Sends event to the call
-     * Responses:
+     * Sends event to the call  Sends events: - call.accepted - call.rejected - custom  Required permissions: - SendEvent * Responses:
      *  - 201: Successful response
      *  - 400: Bad request
      *  - 429: Too many requests
      *
-     * @param type
-     * @param id
-     * @param sendEventRequest
-     * @return [SendEventResponse]
+     * @param type * @param id * @param sendEventRequest * @return [SendEventResponse]
      */
     @POST("/video/call/{type}/{id}/event")
     suspend fun sendEvent(
         @Path("type") type: String,
         @Path("id") id: String,
-        @Body sendEventRequest: SendEventRequest,
+        @Body sendEventRequest: SendEventRequest
     ): SendEventResponse
 }

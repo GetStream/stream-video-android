@@ -21,6 +21,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -29,7 +30,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.unit.dp
+import io.getstream.video.android.common.util.mockVideoTrack
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.previews.ParticipantsProvider
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.model.Call
 import io.getstream.video.android.core.model.CallParticipantState
@@ -48,7 +54,7 @@ import io.getstream.video.android.ui.common.R
  */
 @Composable
 internal fun PortraitScreenSharingContent(
-    call: Call,
+    call: Call?,
     session: ScreenSharingSession,
     participants: List<CallParticipantState>,
     paddingValues: PaddingValues,
@@ -95,5 +101,25 @@ internal fun PortraitScreenSharingContent(
             call = call,
             participants = participants
         )
+    }
+}
+
+@Preview
+@Composable
+private fun PortraitScreenSharingContentPreview(
+    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<CallParticipantState>
+) {
+    VideoTheme {
+        PortraitScreenSharingContent(
+            call = null,
+            session = ScreenSharingSession(
+                track = callParticipants.first().videoTrack ?: mockVideoTrack,
+                participant = callParticipants.first()
+            ),
+            participants = callParticipants,
+            paddingValues = PaddingValues(0.dp),
+            modifier = Modifier.fillMaxSize(),
+            onRender = {}
+        ) {}
     }
 }

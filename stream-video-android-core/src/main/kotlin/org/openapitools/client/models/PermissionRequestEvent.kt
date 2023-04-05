@@ -26,9 +26,11 @@ package org.openapitools.client.models
 import com.squareup.moshi.Json
 
 /**
- * *
+ * This event is sent when a user requests access to a feature on a call, clients receiving this event should display a permission request to the user
+ *
  * @param callCid * @param createdAt * @param permissions The list of permissions requested by the user
- * @param type * @param user */
+ * @param type The type of event: \"call.permission_request\" in this case
+ * @param user */
 
 data class PermissionRequestEvent(
 
@@ -42,6 +44,7 @@ data class PermissionRequestEvent(
     @Json(name = "permissions")
     val permissions: kotlin.collections.List<kotlin.String>,
 
+    /* The type of event: \"call.permission_request\" in this case */
     @Json(name = "type")
     val type: kotlin.String,
 

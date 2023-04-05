@@ -26,8 +26,10 @@ package org.openapitools.client.models
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param callCid * @param createdAt * @param type * @param userId */
+ * This event is sent when a user is unblocked on a call,  this can be useful to notify the user that they can now join the call again
+ *
+ * @param callCid * @param createdAt * @param type The type of event: \"call.unblocked_user\" in this case
+ * @param user */
 
 data class UnblockedUserEvent(
 
@@ -37,10 +39,11 @@ data class UnblockedUserEvent(
     @Json(name = "created_at")
     val createdAt: java.time.OffsetDateTime,
 
+    /* The type of event: \"call.unblocked_user\" in this case */
     @Json(name = "type")
     val type: kotlin.String,
 
-    @Json(name = "user_id")
-    val userId: kotlin.String
+    @Json(name = "user")
+    val user: UserResponse
 
 )

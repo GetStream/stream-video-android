@@ -28,6 +28,7 @@ import kotlinx.coroutines.CoroutineScope
 import okhttp3.OkHttpClient
 import org.openapitools.client.apis.DefaultApi
 import org.openapitools.client.apis.EventsApi
+import org.openapitools.client.apis.ModerationApi
 import org.openapitools.client.apis.VideoCallsApi
 import org.openapitools.client.infrastructure.Serializer
 import retrofit2.Retrofit
@@ -80,12 +81,14 @@ internal class CallCoordinatorClientModule(
         val videoCallsApi = retrofitClient.create(VideoCallsApi::class.java)
         val eventsApi = retrofitClient.create(EventsApi::class.java)
         val defaultApi = retrofitClient.create(DefaultApi::class.java)
+        val moderationApi = retrofitClient.create(ModerationApi::class.java)
 
         CallCoordinatorClientImpl(
             callCoordinatorService = oldService,
             videoCallApi = videoCallsApi,
             eventsApi = eventsApi,
-            defaultApi = defaultApi
+            defaultApi = defaultApi,
+            moderationApi = moderationApi
         )
     }
 

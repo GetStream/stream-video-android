@@ -16,10 +16,10 @@
 
 package io.getstream.video.android.core.coordinator
 
+import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
-import io.getstream.result.StreamError
 import io.getstream.video.android.core.api.ClientRPCService
 import io.getstream.video.android.core.model.CallInfo
 import io.getstream.video.android.core.model.CallRecordingData
@@ -37,6 +37,7 @@ import io.getstream.video.android.core.utils.toReaction
 import io.getstream.video.android.core.utils.toRecording
 import org.openapitools.client.apis.DefaultApi
 import org.openapitools.client.apis.EventsApi
+import org.openapitools.client.apis.ModerationApi
 import org.openapitools.client.apis.VideoCallsApi
 import org.openapitools.client.models.BlockUserRequest
 import org.openapitools.client.models.GetCallEdgeServerRequest
@@ -67,7 +68,8 @@ internal class CallCoordinatorClientImpl(
     private val callCoordinatorService: ClientRPCService,
     private val videoCallApi: VideoCallsApi,
     private val eventsApi: EventsApi,
-    private val defaultApi: DefaultApi
+    private val defaultApi: DefaultApi,
+    private val moderationApi: ModerationApi,
 ) : CallCoordinatorClient {
 
     /**
@@ -79,7 +81,7 @@ internal class CallCoordinatorClientImpl(
         Success(callCoordinatorService.createDevice(createDeviceRequest))
     } catch (error: Throwable) {
         Failure(
-            StreamError.ThrowableError(
+            Error.ThrowableError(
                 error.message ?: "Could not create a device.", error
             )
         )
@@ -94,7 +96,7 @@ internal class CallCoordinatorClientImpl(
             Success(Unit)
         } catch (error: Throwable) {
             Failure(
-                StreamError.ThrowableError(
+                Error.ThrowableError(
                     error.message ?: "Could not delete a device.", error
                 )
             )
@@ -118,7 +120,7 @@ internal class CallCoordinatorClientImpl(
             Success(response)
         } catch (error: Throwable) {
             Failure(
-                StreamError.ThrowableError(
+                Error.ThrowableError(
                     error.message ?: "Could not create a video call.", error
                 )
             )
@@ -143,7 +145,7 @@ internal class CallCoordinatorClientImpl(
         Success(response)
     } catch (error: Throwable) {
         Failure(
-            StreamError.ThrowableError(
+            Error.ThrowableError(
                 error.message ?: "Could not join a call.", error
             )
         )
@@ -167,7 +169,7 @@ internal class CallCoordinatorClientImpl(
             Success(response)
         } catch (error: Throwable) {
             Failure(
-                StreamError.ThrowableError(
+                Error.ThrowableError(
                     error.message ?: "Could not select am edge server.", error
                 )
             )
@@ -186,7 +188,7 @@ internal class CallCoordinatorClientImpl(
         Success(true)
     } catch (error: Throwable) {
         Failure(
-            StreamError.ThrowableError(
+            Error.ThrowableError(
                 error.message ?: "Could not send an user event.", error
             )
         )
@@ -210,7 +212,7 @@ internal class CallCoordinatorClientImpl(
         Success(Unit)
     } catch (error: Throwable) {
         Failure(
-            StreamError.ThrowableError(
+            Error.ThrowableError(
                 error.message ?: "Could not invite users.", error
             )
         )
@@ -225,7 +227,7 @@ internal class CallCoordinatorClientImpl(
         Success(users.map { it.toCallUser() })
     } catch (error: Throwable) {
         Failure(
-            StreamError.ThrowableError(
+            Error.ThrowableError(
                 error.message ?: "Could not query members.", error
             )
         )
@@ -239,12 +241,12 @@ internal class CallCoordinatorClientImpl(
         type: String,
         blockUserRequest: BlockUserRequest
     ): Result<Unit> = try {
-        videoCallApi.blockUser(type, id, blockUserRequest)
+        moderationApi.blockUser(type, id, blockUserRequest)
 
         Success(Unit)
     } catch (error: Throwable) {
         Failure(
-            StreamError.ThrowableError(
+            Error.ThrowableError(
                 error.message ?: "Could not block a user.", error
             )
         )
@@ -263,7 +265,7 @@ internal class CallCoordinatorClientImpl(
         Success(Unit)
     } catch (error: Throwable) {
         Failure(
-            StreamError.ThrowableError(
+            Error.ThrowableError(
                 error.message ?: "Could not unblock a user.", error
             )
         )
@@ -278,7 +280,7 @@ internal class CallCoordinatorClientImpl(
         Success(Unit)
     } catch (error: Throwable) {
         Failure(
-            StreamError.ThrowableError(
+            Error.ThrowableError(
                 error.message ?: "Could not end up a call.", error
             )
         )
@@ -293,7 +295,7 @@ internal class CallCoordinatorClientImpl(
         Success(result.call.toCallInfo())
     } catch (error: Throwable) {
         Failure(
-            StreamError.ThrowableError(
+            Error.ThrowableError(
                 error.message ?: "Could not go into a live.", error
             )
         )
@@ -308,7 +310,7 @@ internal class CallCoordinatorClientImpl(
         Success(result.call.toCallInfo())
     } catch (error: Throwable) {
         Failure(
-            StreamError.ThrowableError(
+            Error.ThrowableError(
                 error.message ?: "Could not stop a live.", error
             )
         )
@@ -322,12 +324,12 @@ internal class CallCoordinatorClientImpl(
         type: String,
         muteUsersRequest: MuteUsersRequest
     ): Result<Unit> = try {
-        videoCallApi.muteUsers(type, id, muteUsersRequest)
+        moderationApi.muteUsers(type, id, muteUsersRequest)
 
         Success(Unit)
     } catch (error: Throwable) {
         Failure(
-            StreamError.ThrowableError(
+            Error.ThrowableError(
                 error.message ?: "Could not mute users.", error
             )
         )
@@ -346,7 +348,7 @@ internal class CallCoordinatorClientImpl(
         Success(result.call.toCallInfo())
     } catch (error: Throwable) {
         Failure(
-            StreamError.ThrowableError(
+            Error.ThrowableError(
                 error.message ?: "Could not update a call.", error
             )
         )
@@ -362,7 +364,7 @@ internal class CallCoordinatorClientImpl(
             Success(result.toQueriedCalls())
         } catch (error: Throwable) {
             Failure(
-                StreamError.ThrowableError(
+                Error.ThrowableError(
                     error.message ?: "Could not query calls.", error
                 )
             )
@@ -381,7 +383,7 @@ internal class CallCoordinatorClientImpl(
         Success(Unit)
     } catch (error: Throwable) {
         Failure(
-            StreamError.ThrowableError(
+            Error.ThrowableError(
                 error.message ?: "Could not request a permission.", error
             )
         )
@@ -396,7 +398,7 @@ internal class CallCoordinatorClientImpl(
         Success(Unit)
     } catch (error: Throwable) {
         Failure(
-            StreamError.ThrowableError(
+            Error.ThrowableError(
                 error.message ?: "Could not start a broadcasting.", error
             )
         )
@@ -411,7 +413,7 @@ internal class CallCoordinatorClientImpl(
         Success(Unit)
     } catch (error: Throwable) {
         Failure(
-            StreamError.ThrowableError(
+            Error.ThrowableError(
                 error.message ?: "Could not stop a broadcasting.", error
             )
         )
@@ -426,7 +428,7 @@ internal class CallCoordinatorClientImpl(
         Success(Unit)
     } catch (error: Throwable) {
         Failure(
-            StreamError.ThrowableError(
+            Error.ThrowableError(
                 error.message ?: "Could not start a recording.", error
             )
         )
@@ -441,7 +443,7 @@ internal class CallCoordinatorClientImpl(
         Success(Unit)
     } catch (error: Throwable) {
         Failure(
-            StreamError.ThrowableError(
+            Error.ThrowableError(
                 error.message ?: "Could not stop a recording.", error
             )
         )
@@ -460,7 +462,7 @@ internal class CallCoordinatorClientImpl(
         Success(Unit)
     } catch (error: Throwable) {
         Failure(
-            StreamError.ThrowableError(
+            Error.ThrowableError(
                 error.message ?: "Could not update a user permission.", error
             )
         )
@@ -479,7 +481,7 @@ internal class CallCoordinatorClientImpl(
         Success(result.recordings.map { it.toRecording() })
     } catch (error: Throwable) {
         Failure(
-            StreamError.ThrowableError(
+            Error.ThrowableError(
                 error.message ?: "Could not list recordings.", error
             )
         )
@@ -498,7 +500,7 @@ internal class CallCoordinatorClientImpl(
         Success(result.reaction.toReaction())
     } catch (error: Throwable) {
         Failure(
-            StreamError.ThrowableError(
+            Error.ThrowableError(
                 error.message ?: "Could not send a video reaction.", error
             )
         )
@@ -513,7 +515,7 @@ internal class CallCoordinatorClientImpl(
         Success(result.edges.map { it.toEdge() })
     } catch (error: Throwable) {
         Failure(
-            StreamError.ThrowableError(
+            Error.ThrowableError(
                 error.message ?: "Could not get edges.", error
             )
         )

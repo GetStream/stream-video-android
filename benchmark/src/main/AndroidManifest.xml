@@ -17,6 +17,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <queries>
-        <package android:name="io.getstream.video.android.app" />
+        <package android:name="io.getstream.video.android.dogfooding" />
     </queries>
 </manifest>

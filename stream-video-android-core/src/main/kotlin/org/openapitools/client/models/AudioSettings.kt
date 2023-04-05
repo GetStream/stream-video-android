@@ -27,10 +27,7 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param accessRequestEnabled
- * @param opusDtxEnabled
- * @param redundantCodingEnabled
- */
+ * @param accessRequestEnabled * @param opusDtxEnabled * @param redundantCodingEnabled */
 
 data class AudioSettings(
 

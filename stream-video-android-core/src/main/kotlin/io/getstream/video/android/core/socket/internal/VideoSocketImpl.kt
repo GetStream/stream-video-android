@@ -20,7 +20,7 @@ import android.os.Handler
 import android.os.Looper
 import androidx.annotation.VisibleForTesting
 import io.getstream.log.taggedLogger
-import io.getstream.result.StreamError
+import io.getstream.result.Error
 import io.getstream.video.android.core.coordinator.state.UserState
 import io.getstream.video.android.core.errors.DisconnectCause
 import io.getstream.video.android.core.errors.VideoErrorCode
@@ -158,16 +158,16 @@ internal class VideoSocketImpl(
     }
         private set
 
-    override fun onSocketError(error: StreamError.NetworkError) {
+    override fun onSocketError(error: Error.NetworkError) {
         logger.e { "[onSocketError] state: $state, error: $error" }
         if (state !is State.DisconnectedPermanently) {
             callListeners { it.onError(error) }
-            (error as? StreamError.NetworkError)?.let(::onNetworkError)
+            (error as? Error.NetworkError)?.let(::onNetworkError)
         }
     }
 
-    private fun onNetworkError(error: StreamError.NetworkError) {
-        when (error.streamCode) {
+    private fun onNetworkError(error: Error.NetworkError) {
+        when (error.serverErrorCode) {
             VideoErrorCode.PARSER_ERROR.code,
             VideoErrorCode.CANT_PARSE_CONNECTION_EVENT.code,
             VideoErrorCode.CANT_PARSE_EVENT.code,
@@ -337,8 +337,8 @@ internal class VideoSocketImpl(
             override fun toString(): String = "NetworkDisconnected"
         }
 
-        data class DisconnectedTemporarily(val error: StreamError.NetworkError?) : State()
-        data class DisconnectedPermanently(val error: StreamError.NetworkError?) : State()
+        data class DisconnectedTemporarily(val error: Error.NetworkError?) : State()
+        data class DisconnectedPermanently(val error: Error.NetworkError?) : State()
         object DisconnectedByRequest : State() {
             override fun toString(): String = "DisconnectedByRequest"
         }

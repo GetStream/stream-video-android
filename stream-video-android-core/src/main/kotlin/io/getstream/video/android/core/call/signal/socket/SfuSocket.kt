@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.core.call.signal.socket
 
-import io.getstream.result.StreamError
+import io.getstream.result.Error
 import io.getstream.video.android.core.events.ConnectedEvent
 import io.getstream.video.android.core.events.SfuDataEvent
 import stream.video.sfu.event.JoinRequest
@@ -43,7 +43,7 @@ internal interface SfuSocket {
      *
      * @param error The issue that caused the socket to fail.
      */
-    fun onSocketError(error: StreamError)
+    fun onSocketError(error: Error)
 
     /**
      * Triggered when an event is received from the socket.

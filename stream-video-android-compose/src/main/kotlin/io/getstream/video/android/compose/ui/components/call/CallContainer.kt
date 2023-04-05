@@ -25,6 +25,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import io.getstream.video.android.compose.state.ui.participants.ChangeMuteState
 import io.getstream.video.android.compose.state.ui.participants.InviteUsers
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -79,7 +80,7 @@ public fun CallContainer(
     pictureInPictureContent: @Composable (Call) -> Unit = { DefaultPictureInPictureContent(it) },
     incomingCallContent: @Composable () -> Unit = {
         IncomingCallContent(
-            modifier = modifier,
+            modifier = modifier.testTag("incoming_call_content"),
             viewModel = viewModel,
             onBackPressed = onBackPressed,
             onCallAction = onCallAction
@@ -87,7 +88,7 @@ public fun CallContainer(
     },
     outgoingCallContent: @Composable () -> Unit = {
         OutgoingCallContent(
-            modifier = modifier,
+            modifier = modifier.testTag("outgoing_call_content"),
             viewModel = viewModel,
             onBackPressed = onBackPressed,
             onCallAction = onCallAction
@@ -126,7 +127,7 @@ internal fun DefaultCallContent(
     pictureInPictureContent: @Composable (Call) -> Unit = { DefaultPictureInPictureContent(it) }
 ) {
     CallContent(
-        modifier = modifier,
+        modifier = modifier.testTag("call_content"),
         callViewModel = viewModel,
         onBackPressed = onBackPressed,
         onCallAction = onCallAction,
@@ -154,6 +155,7 @@ internal fun DefaultCallContent(
                         viewModel.dismissOptions()
                         usersToInvite = action.users
                     }
+
                     is ChangeMuteState -> onCallAction(ToggleMicrophone(action.isEnabled))
                 }
             }
