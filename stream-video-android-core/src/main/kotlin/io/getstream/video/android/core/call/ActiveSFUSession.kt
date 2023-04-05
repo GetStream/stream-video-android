@@ -117,7 +117,8 @@ public class ActiveSFUSession internal constructor(
     private val logger by taggedLogger("Call:ActiveSFUSession")
 
     private var subscriber: StreamPeerConnection? = null
-    private var publisher: StreamPeerConnection? = null
+    @VisibleForTesting
+    var publisher: StreamPeerConnection? = null
     private val mediaConstraints: MediaConstraints by lazy {
         buildMediaConstraints()
     }
@@ -773,7 +774,23 @@ public class ActiveSFUSession internal constructor(
         logger.v { "[handleTrickle] #sfu; #${event.peerType.stringify()}; result: $result" }
     }
 
-    private fun onNegotiationNeeded(
+
+    /**
+     * https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/negotiationneeded_event
+     *
+     * Is called whenever a negotiation is needed. Common examples include
+     * - Adding a new media stream
+     * - Adding an audio Stream
+     * - A screenshare track is started
+     *
+     * Creates a new SDP
+     * - And sets it on the localDescription
+     * - Enables video simulcast
+     * - calls setPublisher
+     * - sets setRemoteDescription
+     */
+    @VisibleForTesting
+    fun onNegotiationNeeded(
         peerConnection: StreamPeerConnection,
         peerType: StreamPeerType
     ) {

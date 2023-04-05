@@ -5,6 +5,7 @@ import io.getstream.video.android.core.call.connection.StreamPeerConnectionFacto
 import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.events.SFUConnectedEvent
 import io.getstream.video.android.core.events.SubscriberOfferEvent
+import io.getstream.video.android.core.model.StreamPeerType
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import io.getstream.video.android.core.utils.buildMediaConstraints
 import io.mockk.MockKAnnotations
@@ -91,7 +92,17 @@ class ActiveSFUSessionTest : IntegrationTestBase() {
 
     @Test
     fun `onNegotiationNeeded`() = runTest {
+        // Join the call
+        val joinResult = call.join()
+        assertSuccess(joinResult)
+        waitForNextEvent<SFUConnectedEvent>()
+        Truth.assertThat(call.state.connection.value).isEqualTo(ConnectionState.Connected)
+        val publisher = call.activeSession!!.createPublisher()!!
+        call.activeSession?.onNegotiationNeeded(publisher,
+            StreamPeerType.PUBLISHER
+        )
 
+        // TODO verify local and remote description were set
     }
 
     @Test

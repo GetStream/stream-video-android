@@ -96,8 +96,9 @@ This i'm still somewhat unsure about
 - [X] Faster latency measurements (run in parallel)
 - [X] Sending reactions
 - [X] Support for listening to events at the call level
+- [X] Opus RED
+- [X] Opus DTX
 - [ ] Muting other users
-- [ ] Participant sorting rules
 - [ ] Audio filter example
 - [ ] Video filter example
 
@@ -136,6 +137,7 @@ This i'm still somewhat unsure about
 
 ### Available tasks up for grabs
 
+- Participant sorting rules. See Call sortedParticipants
 - Currently we use UserPreferencesManager. Jaewoong mentioned we should perhaps explore https://developer.android.com/topic/libraries/architecture/datastore
 - Measure latency isn't 100% ok. You can't set a timeout using withTimeout and collect the measurements that we have. This relates to threading vs coroutines and withTimeout not working
 - Logging needs to be reworked to correctly pass down from client to retrofit, also logs should work in the test suite
