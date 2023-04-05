@@ -107,7 +107,7 @@ public fun CallParticipant(
 }
 
 @Composable
-private fun ParticipantVideo(
+internal fun ParticipantVideo(
     call: Call?,
     participant: CallParticipantState,
     onRender: (View) -> Unit
