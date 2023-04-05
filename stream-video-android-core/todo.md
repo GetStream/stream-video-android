@@ -1,7 +1,10 @@
 
-## Week 2: LLC Stability. Basics, not refactoring the sockets yet
+## Timeline
 
-- Coverage for the SFUSession
+### Week 1: Refactor LLC & State. Setup testing
+### Week 2: LLC Stability
+
+- ActiveSFUSessionTest
 - API for audio/video devices and integrate with webrtc. don't love the API yet
 - Allow waiting for the client to connect (in a different part of the code than were the client is created)
 - Decide on LocalParticipantState (alternatively move the methods on the call)
@@ -121,6 +124,15 @@ This i'm still somewhat unsure about
 ### Muting/unmuting & permissions
 
 - There is significant complexity around muting
+
+### Server wishlist
+
+- Events as a sealed class
+- Tokens for calls
+- RTMP
+- HLS
+- Events for updating users
+- 
 
 ### Available tasks up for grabs
 

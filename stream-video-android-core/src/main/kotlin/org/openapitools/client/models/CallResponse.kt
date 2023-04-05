@@ -76,7 +76,7 @@ data class CallResponse (
 
     /* The capabilities of the current user */
     @Json(name = "own_capabilities")
-    val ownCapabilities: kotlin.collections.List<OwnCapability>,
+    val ownCapabilities: kotlin.collections.List<String>,
 
     @Json(name = "recording")
     val recording: kotlin.Boolean,

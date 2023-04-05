@@ -75,7 +75,7 @@ public class StreamVideoBuilder(
     private val enablePush: Boolean = false,
 ) {
     /** URL overwrite to allow for testing against a local instance of video */
-    var videoDomain: String = "video-edge-frankfurt-ce1.stream-io-api.com"
+    var videoDomain: String = "video.stream-io-api.com"
 
     public fun build(): StreamVideo {
         val lifecycle = ProcessLifecycleOwner.get().lifecycle

@@ -46,12 +46,7 @@ import io.getstream.video.android.core.utils.buildMediaConstraints
 import io.getstream.video.android.core.utils.buildRemoteIceServers
 import io.getstream.video.android.core.utils.stringify
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.filterIsInstance
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.*
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -159,6 +154,38 @@ public class ActiveSFUSession internal constructor(
             } catch (e: HttpException) {
                 parseError(e)
             }
+        }
+    }
+
+
+    suspend fun publishVideo() {
+        // 1. get the current camera
+        val currentDevice = call.camera.selectedDevice.value
+
+        // 2. setup the video track
+        logger.i { "Setting up video track for device $currentDevice" }
+        if (localVideoTrack != null) return
+
+        // start capturing the video
+        mediaManager.startCapturingLocalVideo(CameraMetadata.LENS_FACING_FRONT)
+
+        val isScreenShare = false
+        val videoSource = peerConnectionFactory.makeVideoSource(isScreenShare)
+
+        val capturer = mediaManager.buildCameraCapturer()
+        capturer?.initialize(surfaceTextureHelper, context, videoSource.capturerObserver)
+
+        val videoTrack = peerConnectionFactory.makeVideoTrack(
+            source = videoSource, trackId = buildTrackId(TRACK_TYPE_VIDEO)
+        )
+        localVideoTrack = videoTrack
+        videoTrack.setEnabled(_isVideoEnabled.value)
+        logger.v { "[createUserTracks] #sfu; videoTrack: ${videoTrack.stringify()}" }
+        publisher?.addVideoTransceiver(localVideoTrack!!, listOf(sessionId))
+
+        // 3. listen for changes to the camera and update
+        call.camera.selectedDevice.collectLatest { device ->
+            logger.i { "Camera changed from $currentDevice to $device" }
         }
     }
 
@@ -301,7 +328,7 @@ public class ActiveSFUSession internal constructor(
 //                return@launch
 //            }
 
-            setupVideoTrack()
+            //setupVideoTrack()
 
             if (!isCapturingVideo && isEnabled) {
                 mediaManager.startCapturingLocalVideo(CameraMetadata.LENS_FACING_FRONT)
@@ -838,7 +865,7 @@ public class ActiveSFUSession internal constructor(
         }
 
         if (_isVideoEnabled.value) {
-            setupVideoTrack(autoPublish)
+            //setupVideoTrack(autoPublish)
         }
     }
 
@@ -855,18 +882,6 @@ public class ActiveSFUSession internal constructor(
         }
     }
 
-    private fun setupVideoTrack(autoPublish: Boolean = true) {
-        if (localVideoTrack != null) return
-
-        val videoTrack = makeVideoTrack()
-        localVideoTrack = videoTrack
-        videoTrack.setEnabled(_isVideoEnabled.value)
-        logger.v { "[createUserTracks] #sfu; videoTrack: ${videoTrack.stringify()}" }
-
-        if (autoPublish) {
-            publisher?.addVideoTransceiver(localVideoTrack!!, listOf(sessionId))
-        }
-    }
 
     private fun makeAudioTrack(): AudioTrack {
         val audioSource = peerConnectionFactory.makeAudioSource(audioConstraints)
