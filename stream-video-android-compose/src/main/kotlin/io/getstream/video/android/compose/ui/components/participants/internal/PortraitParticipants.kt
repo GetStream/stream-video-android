@@ -17,19 +17,27 @@
 package io.getstream.video.android.compose.ui.components.participants.internal
 
 import android.view.View
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.participants.CallParticipant
 import io.getstream.video.android.compose.ui.components.participants.LocalVideoContent
+import io.getstream.video.android.compose.ui.components.previews.ParticipantsProvider
 import io.getstream.video.android.core.model.Call
 import io.getstream.video.android.core.model.CallParticipantState
 
@@ -46,7 +54,7 @@ import io.getstream.video.android.core.model.CallParticipantState
  */
 @Composable
 internal fun BoxScope.PortraitParticipants(
-    call: Call,
+    call: Call?,
     primarySpeaker: CallParticipantState?,
     callParticipants: List<CallParticipantState>,
     modifier: Modifier,
@@ -54,7 +62,7 @@ internal fun BoxScope.PortraitParticipants(
     parentSize: IntSize,
     onRender: (View) -> Unit
 ) {
-    val nonLocal = callParticipants.filter { !it.isLocal }
+    val remoteParticipants = callParticipants.filter { !it.isLocal }
 
     when (callParticipants.size) {
         0 -> Unit
@@ -70,8 +78,9 @@ internal fun BoxScope.PortraitParticipants(
                 paddingValues = paddingValues
             )
         }
+
         2 -> {
-            val participant = nonLocal.first()
+            val participant = remoteParticipants.first()
 
             CallParticipant(
                 modifier = modifier,
@@ -82,9 +91,10 @@ internal fun BoxScope.PortraitParticipants(
                 paddingValues = paddingValues
             )
         }
+
         3 -> {
-            val firstParticipant = nonLocal[0]
-            val secondParticipant = nonLocal[1]
+            val firstParticipant = remoteParticipants[0]
+            val secondParticipant = remoteParticipants[1]
 
             Column(modifier) {
                 CallParticipant(
@@ -104,13 +114,14 @@ internal fun BoxScope.PortraitParticipants(
                 )
             }
         }
+
         else -> {
             /**
              * More than three participants, we only show the first four.
              */
-            val firstParticipant = nonLocal[0]
-            val secondParticipant = nonLocal[1]
-            val thirdParticipant = nonLocal[2]
+            val firstParticipant = remoteParticipants[0]
+            val secondParticipant = remoteParticipants[1]
+            val thirdParticipant = remoteParticipants[2]
             val fourthParticipant = callParticipants.first { it.isLocal }
 
             Column(modifier) {
@@ -168,5 +179,105 @@ internal fun BoxScope.PortraitParticipants(
                 .align(Alignment.TopEnd),
             paddingValues = paddingValues
         )
+    }
+}
+
+@Preview
+@Composable
+private fun PortraitParticipantsPreview1(
+    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<CallParticipantState>
+) {
+    VideoTheme {
+        val configuration = LocalConfiguration.current
+        val screenWidth = configuration.screenWidthDp
+        val screenHeight = configuration.screenHeightDp
+
+        Box(
+            modifier = Modifier.background(color = VideoTheme.colors.appBackground)
+        ) {
+            PortraitParticipants(
+                call = null,
+                primarySpeaker = callParticipants[0],
+                callParticipants = callParticipants.take(1),
+                modifier = Modifier.fillMaxSize(),
+                paddingValues = PaddingValues(0.dp),
+                parentSize = IntSize(screenWidth, screenHeight)
+            ) {}
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun PortraitParticipantsPreview2(
+    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<CallParticipantState>
+) {
+    VideoTheme {
+        val configuration = LocalConfiguration.current
+        val screenWidth = configuration.screenWidthDp
+        val screenHeight = configuration.screenHeightDp
+
+        Box(
+            modifier = Modifier.background(color = VideoTheme.colors.appBackground)
+        ) {
+            PortraitParticipants(
+                call = null,
+                primarySpeaker = callParticipants[0],
+                callParticipants = callParticipants.take(2),
+                modifier = Modifier.fillMaxSize(),
+                paddingValues = PaddingValues(0.dp),
+                parentSize = IntSize(screenWidth, screenHeight)
+            ) {}
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun PortraitParticipantsPreview3(
+    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<CallParticipantState>
+) {
+    VideoTheme {
+        val configuration = LocalConfiguration.current
+        val screenWidth = configuration.screenWidthDp
+        val screenHeight = configuration.screenHeightDp
+
+        Box(
+            modifier = Modifier.background(color = VideoTheme.colors.appBackground)
+        ) {
+            PortraitParticipants(
+                call = null,
+                primarySpeaker = callParticipants[0],
+                callParticipants = callParticipants.take(3),
+                modifier = Modifier.fillMaxSize(),
+                paddingValues = PaddingValues(0.dp),
+                parentSize = IntSize(screenWidth, screenHeight)
+            ) {}
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun PortraitParticipantsPreview4(
+    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<CallParticipantState>
+) {
+    VideoTheme {
+        val configuration = LocalConfiguration.current
+        val screenWidth = configuration.screenWidthDp
+        val screenHeight = configuration.screenHeightDp
+
+        Box(
+            modifier = Modifier.background(color = VideoTheme.colors.appBackground)
+        ) {
+            PortraitParticipants(
+                call = null,
+                primarySpeaker = callParticipants[0],
+                callParticipants = callParticipants,
+                modifier = Modifier.fillMaxSize(),
+                paddingValues = PaddingValues(0.dp),
+                parentSize = IntSize(screenWidth, screenHeight)
+            ) {}
+        }
     }
 }

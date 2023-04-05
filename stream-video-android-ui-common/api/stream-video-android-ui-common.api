@@ -42,6 +42,7 @@ public final class io/getstream/video/android/common/util/MockUtilsKt {
 	public static final fun getMockParticipant ()Lio/getstream/video/android/core/model/CallParticipantState;
 	public static final fun getMockParticipantList ()Ljava/util/List;
 	public static final fun getMockUsers ()Ljava/util/List;
+	public static final fun getMockVideoTrack ()Lio/getstream/video/android/core/model/VideoTrack;
 }
 
 public final class io/getstream/video/android/common/util/ParticipantsTextKt {

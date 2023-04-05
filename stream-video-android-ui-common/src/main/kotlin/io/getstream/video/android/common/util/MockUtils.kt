@@ -18,6 +18,16 @@ package io.getstream.video.android.common.util
 
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.model.CallParticipantState
+import org.webrtc.VideoTrack
+import stream.video.sfu.models.TrackType
+import java.util.UUID
+
+@InternalStreamVideoApi
+public val mockVideoTrack: io.getstream.video.android.core.model.VideoTrack
+    inline get() = io.getstream.video.android.core.model.VideoTrack(
+        UUID.randomUUID().toString(),
+        VideoTrack(123)
+    )
 
 @InternalStreamVideoApi
 public val mockParticipant: CallParticipantState
@@ -36,7 +46,11 @@ public val mockUsers: List<CallParticipantState>
             profileImageURL = "https://avatars.githubusercontent.com/u/17215808?v=4",
             idPrefix = "",
             role = "",
-            sessionId = ""
+            sessionId = "",
+            videoTrack = mockVideoTrack,
+            isLocal = true,
+            isSpeaking = true,
+            publishedTracks = setOf(TrackType.TRACK_TYPE_VIDEO)
         ),
         CallParticipantState(
             id = "jaewoong",
@@ -44,7 +58,11 @@ public val mockUsers: List<CallParticipantState>
             profileImageURL = "https://ca.slack-edge.com/T02RM6X6B-U02HU1XR9LM-626fb91c334e-128",
             idPrefix = "",
             role = "",
-            sessionId = ""
+            sessionId = "",
+            videoTrack = mockVideoTrack,
+            isLocal = false,
+            isSpeaking = false,
+            publishedTracks = setOf(TrackType.TRACK_TYPE_VIDEO)
         ),
         CallParticipantState(
             id = "toma_zdravkovic",
@@ -52,6 +70,22 @@ public val mockUsers: List<CallParticipantState>
             profileImageURL = "https://upload.wikimedia.org/wikipedia/commons/d/da/Toma_Zdravkovi%C4%87.jpg",
             idPrefix = "",
             role = "",
-            sessionId = ""
+            sessionId = "",
+            videoTrack = mockVideoTrack,
+            isLocal = false,
+            isSpeaking = false,
+            publishedTracks = setOf(TrackType.TRACK_TYPE_VIDEO)
+        ),
+        CallParticipantState(
+            id = "tyrone_bailey",
+            name = "Tyrone Bailey",
+            profileImageURL = "https://getstream.io/chat/docs/sdk/avatars/jpg/Tyrone%20Bailey.jpg",
+            idPrefix = "",
+            role = "",
+            sessionId = "",
+            videoTrack = mockVideoTrack,
+            isLocal = false,
+            isSpeaking = false,
+            publishedTracks = setOf(TrackType.TRACK_TYPE_VIDEO)
         )
     )

@@ -55,7 +55,7 @@ import io.getstream.video.android.ui.common.R as RCommon
  */
 @Composable
 public fun ScreenShareContent(
-    call: Call,
+    call: Call?,
     session: ScreenSharingSession,
     isFullscreen: Boolean,
     modifier: Modifier = Modifier,
