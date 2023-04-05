@@ -35,6 +35,7 @@ import io.getstream.video.android.core.utils.Result
 import io.getstream.video.android.core.utils.onError
 import io.mockk.internalSubstitute
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -64,7 +65,7 @@ class DispatcherRule(
     }
 }
 
-public class IntegrationTestHelper {
+class IntegrationTestHelper {
 
     val users = mutableMapOf<String, User>()
     val tokens = mutableMapOf<String, String>()
@@ -141,6 +142,11 @@ open class TestBase {
     }
 }
 
+object IntegrationTestState{
+    var client: StreamVideo? = null
+    var call: Call? = null
+}
+
 open class IntegrationTestBase(connectCoordinatorWS: Boolean = true) : TestBase() {
     /** Client */
     val client: StreamVideo
@@ -154,8 +160,10 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true) : TestBase(
     /** The builder used for creating the client */
     val builder: StreamVideoBuilder
 
-    public var nextEventContinuation: Continuation<VideoEvent>? = null
-    public var nextEventCompleted: Boolean = false
+    var nextEventContinuation: Continuation<VideoEvent>? = null
+    var nextEventCompleted: Boolean = false
+
+
 
     init {
         builder = StreamVideoBuilder(
@@ -169,12 +177,18 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true) : TestBase(
         if (BuildConfig.CORE_TEST_LOCAL == "1") {
             builder.videoDomain = "localhost"
         }
-        client = builder.build()
-        clientImpl = client as StreamVideoImpl
 
-        // Connect to the WS if needed
-        if (connectCoordinatorWS) {
-            clientImpl.connect()
+        if (IntegrationTestState.client == null) {
+            client = builder.build()
+            clientImpl = client as StreamVideoImpl
+            // Connect to the WS if needed
+            if (connectCoordinatorWS) {
+                clientImpl.connect()
+            }
+            IntegrationTestState.client = client
+        } else {
+            client = IntegrationTestState.client!!
+            clientImpl = client as StreamVideoImpl
         }
 
         // monitor for events
@@ -190,6 +204,20 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true) : TestBase(
                 }
                 nextEventCompleted = true
             }
+        }
+    }
+
+    val call: Call by lazy {
+        if (IntegrationTestState.call != null) {
+            IntegrationTestState.call!!
+        } else {
+            val call = client.call("default", randomUUID())
+            IntegrationTestState.call = call
+            runBlocking {
+                val result = call.create()
+                assertSuccess(result)
+            }
+            call
         }
     }
 

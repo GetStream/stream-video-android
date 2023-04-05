@@ -1,7 +1,9 @@
 package io.getstream.video.android.core
 
+import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.VideoTrack
+import io.getstream.video.android.core.utils.Result
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import stream.video.sfu.models.ConnectionQuality
@@ -71,12 +73,17 @@ public open class ParticipantState(
         get() = TrackType.TRACK_TYPE_SCREEN_SHARE_AUDIO in publishedTracks
 
 
-    open fun muteAudio() {
+    open suspend fun muteAudio(): Result<Unit> {
         // how do i mute another user?
+        return call.muteUsers(MuteUsersData(audio = true, users= listOf(user.value.id)))
     }
 
-    open fun muteVideo() {
-        // how do i mute another user?
+    open suspend fun muteVideo(): Result<Unit> {
+        return call.muteUsers(MuteUsersData(video = true, users= listOf(user.value.id)))
+    }
+
+    open suspend fun muteScreenshare(): Result<Unit> {
+        return call.muteUsers(MuteUsersData(screenShare = true, users= listOf(user.value.id)))
     }
 
     fun updateFromData(participant: Participant) {

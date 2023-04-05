@@ -1,10 +1,12 @@
 
-## This week: LLC Stability. Basics, not refactoring the sockets yet
+## Week 2: LLC Stability. Basics, not refactoring the sockets yet
 
+- API for mute/unmute
+- Decide on LocalParticipantState (alternatively move the methods on the call)
 - Cleanup the test suite and make it faster
 - Openapi/Event integration. Events being out of sync is a large issue
-- 
 - Clean up the active SFU session
+
 
 ## Phase 2, find a way to make Call/SFUSession testable
 
@@ -113,6 +115,10 @@ This i'm still somewhat unsure about
 - leave method shuts down the supervisorJob, remove local objects, cleans up any media tracks
 - client.disconnect() (leaves all calls, cleans up state)
 - call is connected to the call view model lifecycle methods. client to the application lifecycle
+
+### Muting/unmuting & permissions
+
+- There is significant complexity around muting
 
 ### Available tasks up for grabs
 

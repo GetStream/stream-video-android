@@ -29,6 +29,12 @@ class SpeakerManager(val mediaManager: MediaManagerImpl) {
     val _status = MutableStateFlow<DeviceStatus>(DeviceStatus.Disabled)
     val status: StateFlow<DeviceStatus> = _status
 
+    val _selectedDevice = MutableStateFlow<String?>(null)
+    val selectedDevice: StateFlow<String?> = _selectedDevice
+
+    val _devices = MutableStateFlow<List<String>>(emptyList())
+    val devices: StateFlow<List<String>> = _devices
+
     fun devices(): List<String> {
         return mediaManager.getCameraDevices()
     }
@@ -41,6 +47,14 @@ class SpeakerManager(val mediaManager: MediaManagerImpl) {
         mediaManager.setCameraEnabled(true)
     }
 
+    fun setVolume(volumeLevel: Long) {
+
+    }
+
+    fun setSpeakerPhone(speakerPhone: Boolean) {
+
+    }
+
     fun disable() {
         mediaManager.setCameraEnabled(false)
     }
@@ -50,6 +64,12 @@ class MicrophoneManager(val mediaManager: MediaManagerImpl) {
 
     val _status = MutableStateFlow<DeviceStatus>(DeviceStatus.Disabled)
     val status: StateFlow<DeviceStatus> = _status
+
+    val _selectedDevice = MutableStateFlow<String?>(null)
+    val selectedDevice: StateFlow<String?> = _selectedDevice
+
+    val _devices = MutableStateFlow<List<String>>(emptyList())
+    val devices: StateFlow<List<String>> = _devices
 
     fun devices(): List<String> {
         return mediaManager.getCameraDevices()
@@ -74,6 +94,9 @@ class CameraManager(val mediaManager: MediaManagerImpl) {
 
     val _status = MutableStateFlow<DeviceStatus>(DeviceStatus.Disabled)
     val status: StateFlow<DeviceStatus> = _status
+
+    val _selectedDevice = MutableStateFlow<String?>(null)
+    val selectedDevice: StateFlow<String?> = _selectedDevice
 
     fun flip() {
         mediaManager.flipCamera()
@@ -239,7 +262,8 @@ class MediaManagerImpl(val context: Context) {
     }
 
     fun setCameraEnabled(b: Boolean) {
-        TODO("Not yet implemented")
+        TODO()
+        //activeSession!!.setCameraEnabled(false)
     }
 
     fun selectCamera(cameraId: String) {

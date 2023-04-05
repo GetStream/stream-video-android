@@ -27,7 +27,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-public class CreateCallCrudTest : IntegrationTestBase() {
+public class CallCrudTest : IntegrationTestBase() {
 
     private val logger by taggedLogger("Test:CreateCallCrudTest")
 

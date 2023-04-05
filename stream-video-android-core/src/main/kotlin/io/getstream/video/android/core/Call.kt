@@ -42,10 +42,17 @@ public class Call(
     val mediaManager = MediaManagerImpl(client.context)
 
     val camera = mediaManager.camera
+    val microphone = mediaManager.microphone
+    val speaker = mediaManager.speaker
+
     public var custom: Map<String, Any>? = null
 
     // should be a stateflow
     private var sfuConnection: SFUConnection? = null
+
+    suspend fun muteAllUsers(): Result<Unit> {
+        return muteUsers(MuteUsersData(audio = true, muteAllUsers = true))
+    }
 
     suspend fun join(): Result<ActiveSFUSession> {
 
@@ -192,5 +199,9 @@ public class Call(
                 }
             }
         }
+    }
+
+    suspend fun muteUsers(muteUsersData: MuteUsersData): Result<Unit> {
+        return client.muteUsers(type, id, muteUsersData)
     }
 }

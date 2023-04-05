@@ -62,7 +62,7 @@ class AudioRoomTest : IntegrationTestBase() {
 
     @Test
     fun `next we want to go live in a call`() = runTest {
-        val call = client.call("audio-room", randomUUID())
+        val call = client.call("audio_room", randomUUID())
         val result = call.create()
         assertSuccess(result)
         val goLiveResult = call.goLive()
@@ -73,17 +73,12 @@ class AudioRoomTest : IntegrationTestBase() {
 
     @Test
     fun `maybe send a reaction`() = runTest {
-        val call = client.call("default", randomUUID())
-        call.create()
         val response = call.sendReaction(SendReactionData("raise-hand"))
         assertSuccess(response)
     }
 
     @Test
     fun `for audio rooms it's common to request permissions`() = runTest {
-        val call = client.call("default", randomUUID())
-        val createResult = call.create()
-        assertSuccess(createResult)
         val result = call.requestPermissions(mutableListOf("screenshare", "send-audio"))
         assertSuccess(result)
     }

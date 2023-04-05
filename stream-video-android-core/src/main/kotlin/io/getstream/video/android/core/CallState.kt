@@ -67,6 +67,9 @@ public class CallState(val call: Call, user: User) {
         MutableStateFlow(emptyList())
     public val members: StateFlow<List<ParticipantState>> = _members
 
+
+    // TODO: does this need to be a stateflow, or can it be a property?
+    // making it a property requires cleaning up the properties of a participant
     val _me = MutableStateFlow(LocalParticipantState(call, user))
     val me : StateFlow<LocalParticipantState> = _me
 

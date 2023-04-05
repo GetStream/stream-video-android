@@ -2,6 +2,7 @@ package io.getstream.video.android.core
 
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.VideoTrack
+import io.getstream.video.android.core.utils.Result
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.openapitools.client.models.OwnCapability
@@ -23,6 +24,7 @@ public class LocalParticipantState(
 ) {
 
     // TODO: we need to use data classes for this or comparisons won't work in stateflow
+    // perhaps drop the whole class, otherwise we need to keep a different copy of this in the local state
 
     fun copy2(
         call: Call=this.call,
@@ -50,14 +52,10 @@ public class LocalParticipantState(
         )
     }
 
-    override fun muteAudio() {
-        call.activeSession!!.setMicrophoneEnabled(false)
-    }
+    // call.activeSession!!.setMicrophoneEnabled(false)
 
-    override fun muteVideo() {
-        // TODO: raise a nice error if the session ins't there yet
-        call.activeSession!!.setCameraEnabled(false)
-    }
+
+    // call.activeSession!!.setCameraEnabled(false)
 
     fun flipCamera() {
         // TODO front and back facing
@@ -68,6 +66,10 @@ public class LocalParticipantState(
         emptyList()
     )
     val ownCapabilities: StateFlow<List<OwnCapability>> = _ownCapabilities
+    fun hasPermission(permission: String): Boolean {
+        return ownCapabilities.value.any { it.name == permission }
+    }
+
 
     val localVideoTrack by lazy {
         call.activeSession?.localVideoTrack
