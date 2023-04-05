@@ -35,6 +35,6 @@ jobs:
         uses: wzieba/Firebase-Distribution-Github-Action@v1
         with:
           appId: ${{secrets.FIREBASE_DOGFOODING_SAMPLE_APP_ID}}
-          token: ${{secrets.FIREBASE_TOKEN}}
+          serviceCredentialsFileContent: ${{ secrets.CREDENTIAL_FILE_CONTENT }}
           groups: stream-testers
           file: dogfooding/build/outputs/apk/release/dogfooding-release.apk
