@@ -31,7 +31,6 @@ import java.util.*
 
 @RunWith(RobolectricTestRunner::class)
 class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
-    // TODO: Change the class to not use an integration test, we don't need a full connect
     /**
      * Every event should update state properly
      * - Coordinator events
@@ -78,7 +77,6 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
      */
     @Test
     fun `test start and stop recording`() = runTest {
-        val call = client.call("default", randomUUID())
         // start by sending the start recording event
         val event = RecordingStartedEvent(callCid = call.cid, cid = call.cid, type = "123")
         clientImpl.fireEvent(event)
@@ -92,7 +90,6 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
     @Test
     fun `Accepting & rejecting a call`() = runTest {
-        val call = client.call("default", randomUUID())
         val acceptedEvent = CallAcceptedEvent(callCid = call.cid, sentByUserId = "123")
         clientImpl.fireEvent(acceptedEvent)
         assertThat(call.state.getParticipant("123")?.acceptedAt?.value).isNotNull()
@@ -105,7 +102,6 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
     @Test
     fun `Audio level changes`() = runTest {
-        val call = client.call("default", randomUUID())
         val levels = mutableMapOf("thierry" to UserAudioLevel(true, 10F))
         val event = AudioLevelChangedEvent(levels = levels)
         clientImpl.fireEvent(event, call.cid)
@@ -117,7 +113,6 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
     @Test
     fun `Dominant speaker change`() = runTest {
-        val call = client.call("default", randomUUID())
         val event = DominantSpeakerChangedEvent(userId = "jaewoong")
         clientImpl.fireEvent(event, call.cid)
 
@@ -128,7 +123,6 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
     @Test
     fun `Network connection quality changes`() = runTest {
-        val call = client.call("default", randomUUID())
         // TODO: this is a list, other events its a map, make up your mind
         val quality = ConnectionQualityInfo(
             user_id = "thierry",
@@ -144,7 +138,6 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
     @Test
     fun `Call updates`() = runTest {
-        val call = client.call("default", randomUUID())
         val capability = OwnCapability.decode("end-call")!!
         val ownCapabilities = mutableListOf<OwnCapability>(capability)
         val custom = mutableMapOf<String, Any>("fruit" to "apple")
@@ -180,7 +173,6 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
     @Test
     fun `Call permissions updated`() {
-        val call = client.call("default", randomUUID())
 
         // TODO: CID & Type?
         val permissions = mutableListOf<String>("screenshare")
@@ -202,15 +194,6 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
         assertThat(call.state.me.value.ownCapabilities.value).isEqualTo(ownCapabilities)
 
-    }
-
-    @Test
-    fun `Creating a call`() = runTest {
-        val call = client.call("default", randomUUID())
-//        val event = CallCreatedEvent(callCid=call.cid, true, users= emptyMap())
-//        clientImpl.fireEvent(event)
-
-        // if the call is ringing it should be added to the client.state.ringingCalls
     }
 
     @Test

@@ -20,19 +20,34 @@ class CallTest: IntegrationTestBase() {
      */
 
     @Test
-    fun `Muting yourself`() = runTest {
-        val call = client.call("default", randomUUID())
-        val me = call.state.me.value
-
+    fun `Camera API`() = runTest {
         call.camera.devices
-        call.camera.flip() // this needs to update the call state though..
+        val cameraId = call.camera.devices.value.first()
+        call.camera.flip()
         call.camera.disable()
         call.camera.enable()
         call.camera.status
+        call.camera.select(cameraId)
+        // TODO: how to connect the buildCameraCapturer?
+        // TODO: how to send a new track when the camera changes?
+    }
 
-        val tommaso = call.state.getParticipant("tommaso")
-        tommaso!!.muteAudio() // send a moderation request to mute this person
+    @Test
+    fun `Microphone API`() = runTest {
+        // TODO: Maybe audio in/out is better?
+        call.microphone.devices
+        call.microphone.disable()
+        call.microphone.enable()
+        call.microphone.status
+    }
 
-        //call.camera.select()
+    @Test
+    fun `Speaker API`() = runTest {
+        call.speaker.devices
+        call.speaker.disable()
+        call.speaker.enable()
+        call.speaker.setVolume(100L)
+        call.speaker.setSpeakerPhone(true)
+        call.speaker.status
     }
 }

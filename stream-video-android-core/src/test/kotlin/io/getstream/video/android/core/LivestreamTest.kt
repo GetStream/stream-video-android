@@ -48,8 +48,9 @@ class LivestreamTest : IntegrationTestBase() {
 
     @Test
     fun `start recording a call`() = runTest {
-        val call = client.call("default", randomUUID())
-        call.create()
+        val call = client.call("livestream", randomUUID())
+        val createResult = call.create()
+        assertSuccess(createResult)
         val result = call.startRecording()
         assertSuccess(result)
         val result2 = call.stopRecording()
