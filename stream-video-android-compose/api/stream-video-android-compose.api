@@ -658,8 +658,8 @@ public final class io/getstream/video/android/compose/ui/components/participants
 	public final fun getLambda-2$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
 }
 
-public final class io/getstream/video/android/compose/ui/components/participants/internal/ComposableSingletons$InviteUserListKt {
-	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/participants/internal/ComposableSingletons$InviteUserListKt;
+public final class io/getstream/video/android/compose/ui/components/participants/internal/ComposableSingletons$LandscapeScreenSharingContentKt {
+	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/participants/internal/ComposableSingletons$LandscapeScreenSharingContentKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;
 	public fun <init> ()V
 	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
@@ -681,6 +681,13 @@ public final class io/getstream/video/android/compose/ui/components/participants
 
 public final class io/getstream/video/android/compose/ui/components/participants/internal/ScreenShareContentKt {
 	public static final fun ScreenShareContent (Lio/getstream/video/android/core/model/Call;Lio/getstream/video/android/core/model/ScreenSharingSession;ZLandroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class io/getstream/video/android/compose/ui/components/video/ComposableSingletons$VideoRendererKt {
+	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/video/ComposableSingletons$VideoRendererKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class io/getstream/video/android/compose/ui/components/video/VideoRendererKt {
