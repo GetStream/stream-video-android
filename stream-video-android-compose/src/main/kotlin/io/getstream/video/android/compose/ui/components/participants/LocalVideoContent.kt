@@ -35,12 +35,16 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import io.getstream.video.android.common.util.mockParticipant
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.model.Call
 import io.getstream.video.android.core.model.CallParticipantState
@@ -58,7 +62,7 @@ import io.getstream.video.android.core.model.CallParticipantState
  */
 @Composable
 public fun LocalVideoContent(
-    call: Call,
+    call: Call?,
     localParticipant: CallParticipantState,
     parentBounds: IntSize,
     paddingValues: PaddingValues,
@@ -79,7 +83,7 @@ public fun LocalVideoContent(
 
     val track = localParticipant.videoTrack
 
-    if (track != null) {
+    if (LocalInspectionMode.current || track != null) {
         Card(
             elevation = 8.dp,
             modifier = Modifier
@@ -158,4 +162,22 @@ private fun calculateVerticalOffsetBounds(
         density.run { paddingValues.calculateBottomPadding().toPx() }
 
     return parentBounds.height - bottomPadding - floatingVideoSize.height - offset
+}
+
+@Preview
+@Composable
+private fun LocalVideoContentPreview() {
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp
+    val screenHeight = configuration.screenHeightDp
+
+    VideoTheme {
+        LocalVideoContent(
+            call = null,
+            modifier = Modifier.fillMaxSize(),
+            localParticipant = mockParticipant,
+            parentBounds = IntSize(screenWidth, screenHeight),
+            paddingValues = PaddingValues(0.dp)
+        )
+    }
 }
