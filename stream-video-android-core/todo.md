@@ -1,7 +1,9 @@
 
 ## Week 2: LLC Stability. Basics, not refactoring the sockets yet
 
+- Coverage for the SFUSession
 - API for audio/video devices and integrate with webrtc. don't love the API yet
+- Allow waiting for the client to connect (in a different part of the code than were the client is created)
 - Decide on LocalParticipantState (alternatively move the methods on the call)
 - Cleanup the test suite and make it faster
 - Openapi/Event integration. Events being out of sync is a large issue
