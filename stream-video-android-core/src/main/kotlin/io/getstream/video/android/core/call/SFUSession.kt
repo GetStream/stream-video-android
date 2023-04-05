@@ -36,8 +36,6 @@ public interface SFUSession {
      */
     public val isAudioEnabled: StateFlow<Boolean>
 
-    public val mediaManager: MediaManagerImpl
-
     /**
      * State that indicates whether the speakerphone is on or not.
      */

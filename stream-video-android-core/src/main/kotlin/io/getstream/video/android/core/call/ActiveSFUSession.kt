@@ -16,17 +16,16 @@
 
 package io.getstream.video.android.core.call
 
-import android.hardware.camera2.CameraManager
 import android.hardware.camera2.CameraMetadata
 import android.media.AudioAttributes.ALLOW_CAPTURE_BY_ALL
 import android.media.AudioManager
 import android.os.Build
+import androidx.annotation.VisibleForTesting
 import androidx.core.content.getSystemService
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.*
 import io.getstream.video.android.core.StreamVideoImpl
 import io.getstream.video.android.core.call.connection.StreamPeerConnection
-import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.getstream.video.android.core.call.signal.socket.SfuSocketListener
 import io.getstream.video.android.core.call.state.ConnectionState
 import io.getstream.video.android.core.call.utils.stringify
@@ -52,9 +51,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.webrtc.AudioTrack
 import org.webrtc.Camera2Capturer
-import org.webrtc.Camera2Enumerator
 import org.webrtc.CameraEnumerationAndroid
-import org.webrtc.CameraEnumerator
 import org.webrtc.MediaConstraints
 import org.webrtc.MediaStreamTrack
 import org.webrtc.PeerConnection
@@ -119,7 +116,15 @@ public class ActiveSFUSession internal constructor(
     private val context = client.context
     private val logger by taggedLogger("Call:ActiveSFUSession")
 
-    override val mediaManager = MediaManagerImpl(client.context)
+    private var subscriber: StreamPeerConnection? = null
+    private var publisher: StreamPeerConnection? = null
+    private val mediaConstraints: MediaConstraints by lazy {
+        buildMediaConstraints()
+    }
+
+    private val audioConstraints: MediaConstraints by lazy {
+        buildAudioConstraints()
+    }
 
     private val clientImpl = client as StreamVideoImpl
 
@@ -143,9 +148,6 @@ public class ActiveSFUSession internal constructor(
         sfuConnectionModule.sfuSocket.connectSocket()
     }
 
-
-
-
     // ensure we parse errors and run on the right coroutineContext
     internal suspend fun <T : Any> wrapAPICall(apiCall: suspend () -> T): Result<T> {
         return withContext(scope.coroutineContext) {
@@ -156,8 +158,11 @@ public class ActiveSFUSession internal constructor(
             }
         }
     }
+    private val mediaManager = call.mediaManager
 
-
+    /**
+     * New publish video method to understand the flow
+     */
     suspend fun publishVideo() {
         // 1. get the current camera
         val currentDevice = call.camera.selectedDevice.value
@@ -170,12 +175,12 @@ public class ActiveSFUSession internal constructor(
         mediaManager.startCapturingLocalVideo(CameraMetadata.LENS_FACING_FRONT)
 
         val isScreenShare = false
-        val videoSource = peerConnectionFactory.makeVideoSource(isScreenShare)
+        val videoSource = clientImpl.peerConnectionFactory.makeVideoSource(isScreenShare)
 
         val capturer = mediaManager.buildCameraCapturer()
         capturer?.initialize(surfaceTextureHelper, context, videoSource.capturerObserver)
 
-        val videoTrack = peerConnectionFactory.makeVideoTrack(
+        val videoTrack = clientImpl.peerConnectionFactory.makeVideoTrack(
             source = videoSource, trackId = buildTrackId(TRACK_TYPE_VIDEO)
         )
         localVideoTrack = videoTrack
@@ -234,23 +239,16 @@ public class ActiveSFUSession internal constructor(
     /**
      * Connection and WebRTC.
      */
-    public val peerConnectionFactory = StreamPeerConnectionFactory(context)
+
     private val iceServers by lazy { buildRemoteIceServers(remoteIceServers) }
 
     private val connectionConfiguration: PeerConnection.RTCConfiguration by lazy {
         buildConnectionConfiguration(iceServers)
     }
 
-    private val mediaConstraints: MediaConstraints by lazy {
-        buildMediaConstraints()
-    }
 
-    private val audioConstraints: MediaConstraints by lazy {
-        buildAudioConstraints()
-    }
 
-    private var subscriber: StreamPeerConnection? = null
-    private var publisher: StreamPeerConnection? = null
+
 
     internal var localVideoTrack: VideoTrack? = null
         set(value) {
@@ -270,7 +268,7 @@ public class ActiveSFUSession internal constructor(
 
     private val surfaceTextureHelper by lazy {
         SurfaceTextureHelper.create(
-            "CaptureThread", peerConnectionFactory.eglBase.eglBaseContext
+            "CaptureThread", clientImpl.peerConnectionFactory.eglBase.eglBaseContext
         )
     }
 
@@ -554,17 +552,19 @@ public class ActiveSFUSession internal constructor(
         }
     }
 
-    private fun createSubscriber() {
-        this.subscriber = peerConnectionFactory.makePeerConnection(
+
+    @VisibleForTesting
+    public fun createSubscriber(): StreamPeerConnection? {
+        subscriber = clientImpl.peerConnectionFactory.makePeerConnection(
             coroutineScope = coroutineScope,
             configuration = connectionConfiguration,
             type = StreamPeerType.SUBSCRIBER,
             mediaConstraints = mediaConstraints,
             onStreamAdded = { call?.state?.addStream(it) }, // addTrack
             onIceCandidateRequest = ::sendIceCandidate
-        ).also {
-            logger.i { "[createSubscriber] #sfu; subscriber: $it" }
-        }
+        )
+        logger.i { "[createSubscriber] #sfu; subscriber: $subscriber" }
+        return subscriber
     }
 
     private fun sendIceCandidate(candidate: IceCandidate, peerType: StreamPeerType) {
@@ -617,7 +617,7 @@ public class ActiveSFUSession internal constructor(
     }
 
     private suspend fun getGenericSdp(): String {
-        val streamPeerConnection = peerConnectionFactory.makePeerConnection(
+        val streamPeerConnection = clientImpl.peerConnectionFactory.makePeerConnection(
             coroutineScope = coroutineScope,
             configuration = connectionConfiguration,
             type = StreamPeerType.SUBSCRIBER,
@@ -656,17 +656,18 @@ public class ActiveSFUSession internal constructor(
         }
     }
 
-    private fun createPublisher() {
-        publisher = peerConnectionFactory.makePeerConnection(
+    @VisibleForTesting
+    fun createPublisher(): StreamPeerConnection? {
+        publisher = clientImpl.peerConnectionFactory.makePeerConnection(
             coroutineScope = coroutineScope,
             configuration = connectionConfiguration,
             type = StreamPeerType.PUBLISHER,
             mediaConstraints = MediaConstraints(),
             onNegotiationNeeded = ::onNegotiationNeeded,
             onIceCandidateRequest = ::sendIceCandidate,
-        ).also {
-            logger.i { "[createPublisher] #sfu; publisher: $it" }
-        }
+        )
+        logger.i { "[createPublisher] #sfu; publisher: $publisher" }
+        return publisher
     }
 
     override fun onConnecting() {
@@ -707,24 +708,7 @@ public class ActiveSFUSession internal constructor(
         // trigger an event in the client as well for SFU events. makes it easier to subscribe
         clientImpl.fireEvent(event, call.cid)
 
-        coroutineScope.launch {
-            logger.v { "[onRtcEvent] event: $event" }
-            sfuEvents.emit(event)
-            when (event) {
-                is ICETrickleEvent -> handleTrickle(event)
-                is SubscriberOfferEvent -> handleSubscriberOffer(event)
-                is PublisherAnswerEvent -> Unit
-                is ChangePublishQualityEvent -> Unit
 
-                is TrackPublishedEvent -> {
-                    call?.state?.updateMuteState(event.userId, event.sessionId, event.trackType, true)
-                }
-                is TrackUnpublishedEvent -> {
-                    call?.state?.updateMuteState(event.userId, event.sessionId, event.trackType, false)
-                }
-                else -> Unit
-            }
-        }
     }
 
     private suspend fun addParticipant(event: ParticipantJoinedEvent) {
@@ -777,7 +761,8 @@ public class ActiveSFUSession internal constructor(
 //        )
     }
 
-    private suspend fun handleTrickle(event: ICETrickleEvent) {
+    @VisibleForTesting
+    suspend fun handleTrickle(event: ICETrickleEvent) {
         logger.d { "[handleTrickle] #sfu; #${event.peerType.stringify()}; candidate: ${event.candidate}" }
         val iceCandidate: IceCandidate = Json.decodeFromString(event.candidate)
         val result = if (event.peerType == PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED) {
@@ -795,7 +780,8 @@ public class ActiveSFUSession internal constructor(
         val id = Random.nextInt().absoluteValue
         logger.d { "[negotiate] #$id; #sfu; #${peerType.stringify()}; peerConnection: $peerConnection" }
         coroutineScope.launch {
-            peerConnection.createOffer().onSuccessSuspend { data ->
+            peerConnection.createOffer().onSuccessSuspend { originalSDP ->
+                val data = mangleSDP(originalSDP, true, enableDtx = true)
                 logger.v { "[negotiate] #$id; #sfu; #${peerType.stringify()}; offerSdp: $data" }
 
                 peerConnection.setLocalDescription(data)
@@ -884,20 +870,20 @@ public class ActiveSFUSession internal constructor(
 
 
     private fun makeAudioTrack(): AudioTrack {
-        val audioSource = peerConnectionFactory.makeAudioSource(audioConstraints)
+        val audioSource = clientImpl.peerConnectionFactory.makeAudioSource(audioConstraints)
 
-        return peerConnectionFactory.makeAudioTrack(
+        return clientImpl.peerConnectionFactory.makeAudioTrack(
             source = audioSource, trackId = buildTrackId(TRACK_TYPE_AUDIO)
         )
     }
 
     private fun makeVideoTrack(isScreenShare: Boolean = false): VideoTrack {
-        val videoSource = peerConnectionFactory.makeVideoSource(isScreenShare)
+        val videoSource = clientImpl.peerConnectionFactory.makeVideoSource(isScreenShare)
 
         val capturer = mediaManager.buildCameraCapturer()
         capturer?.initialize(surfaceTextureHelper, context, videoSource.capturerObserver)
 
-        return peerConnectionFactory.makeVideoTrack(
+        return clientImpl.peerConnectionFactory.makeVideoTrack(
             source = videoSource, trackId = buildTrackId(TRACK_TYPE_VIDEO)
         )
     }
@@ -945,7 +931,8 @@ public class ActiveSFUSession internal constructor(
         }
     }
 
-    private suspend fun handleSubscriberOffer(offerEvent: SubscriberOfferEvent) {
+    @VisibleForTesting
+    suspend fun handleSubscriberOffer(offerEvent: SubscriberOfferEvent) {
         logger.d { "[handleSubscriberOffer] #sfu; #subscriber; event: $offerEvent" }
         val subscriber = subscriber ?: return
 
@@ -958,7 +945,8 @@ public class ActiveSFUSession internal constructor(
             logger.w { "[handleSubscriberOffer] #sfu; #subscriber; rejected (createAnswer failed): $answerResult" }
             return
         }
-        val answerSdp = answerResult.data
+        val answerSdp = mangleSDP(answerResult.data)
+        
         logger.v { "[handleSubscriberOffer] #sfu; #subscriber; answerSdp: ${answerSdp.description}" }
         val setAnswerResult = subscriber.setLocalDescription(answerSdp)
         if (setAnswerResult !is Success) {
@@ -971,6 +959,34 @@ public class ActiveSFUSession internal constructor(
         )
         val sendAnswerResult = sendAnswer(sendAnswerRequest)
         logger.v { "[handleSubscriberOffer] #sfu; #subscriber; sendAnswerResult: $sendAnswerResult" }
+    }
+
+    /**
+     * Enabling DTX or RED requires mangling the SDP a bit
+     */
+    private fun mangleSDP(
+        sdp: SessionDescription,
+        enableRed: Boolean = true,
+        enableDtx: Boolean = true
+    ): SessionDescription {
+        val lines = sdp.description.split("\r\n")
+        val modifiedLines = mutableListOf<String>()
+        var opusPayloadType: String? = null
+
+        for (line in lines) {
+            when {
+                enableRed && line.contains("opus/48000") -> {
+                    opusPayloadType = line.split(" ")[0].substringAfter("a=rtpmap:")
+                    modifiedLines.add("$line;red=1;useinbandfec=1") // Enable RED
+                }
+                enableDtx && line.startsWith("a=extmap") && line.contains("urn:ietf:params:rtp-hdrext:ssrc-audio-level") && opusPayloadType != null -> {
+                    modifiedLines.add("$line\r\na=fmtp:$opusPayloadType usedtx=1") // Enable DTX
+                }
+                else -> modifiedLines.add(line)
+            }
+        }
+
+        return SessionDescription(sdp.type, modifiedLines.joinToString("\r\n"))
     }
 
     private fun updateParticipantsSubscriptions(participants: List<ParticipantState>) {
@@ -1033,7 +1049,41 @@ public class ActiveSFUSession internal constructor(
         }
     }
 
-    fun handleEvent(event: SfuDataEvent) {
+    fun handleEvent(event: VideoEvent) {
+        if (event is SfuDataEvent) {
+            coroutineScope.launch {
+                logger.v { "[onRtcEvent] event: $event" }
+                when (event) {
+                    is ICETrickleEvent -> handleTrickle(event)
+                    is SubscriberOfferEvent -> handleSubscriberOffer(event)
+                    is PublisherAnswerEvent -> Unit
+                    is ChangePublishQualityEvent -> Unit
+
+                    is TrackPublishedEvent -> {
+                        call?.state?.updateMuteState(event.userId, event.sessionId, event.trackType, true)
+                    }
+                    is TrackUnpublishedEvent -> {
+                        call?.state?.updateMuteState(event.userId, event.sessionId, event.trackType, false)
+                    }
+                    is AudioLevelChangedEvent -> {
+                        // handled by call state
+                    }
+                    is ConnectionQualityChangeEvent -> {
+                        // handled by call state
+                    }
+                    is DominantSpeakerChangedEvent -> {
+                        // handled by call state
+                    }
+                    is ErrorEvent -> TODO()
+                    is JoinCallResponseEvent -> TODO()
+                    is ParticipantJoinedEvent -> TODO()
+                    is ParticipantLeftEvent -> TODO()
+                    is SFUConnectedEvent -> TODO()
+                    SFUHealthCheckEvent -> TODO()
+                    is VideoQualityChangedEvent -> TODO()
+                }
+            }
+        }
 
     }
 

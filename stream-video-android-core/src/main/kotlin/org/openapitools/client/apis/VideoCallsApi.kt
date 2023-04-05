@@ -26,8 +26,8 @@ import org.openapitools.client.models.SendReactionResponse
 import org.openapitools.client.models.StopLiveResponse
 import org.openapitools.client.models.UnblockUserRequest
 import org.openapitools.client.models.UnblockUserResponse
-import org.openapitools.client.models.UpdateCallMemberRequest
-import org.openapitools.client.models.UpdateCallMemberResponse
+import org.openapitools.client.models.UpdateCallMembersRequest
+import org.openapitools.client.models.UpdateCallMembersResponse
 import org.openapitools.client.models.UpdateCallRequest
 import org.openapitools.client.models.UpdateCallResponse
 
@@ -258,10 +258,10 @@ interface VideoCallsApi {
      *
      * @param type 
      * @param id 
-     * @param updateCallMemberRequest 
-     * @return [UpdateCallMemberResponse]
+     * @param updateCallMembersRequest 
+     * @return [UpdateCallMembersResponse]
      */
-    @POST("/video/call/{type}/{id}/update_member")
-    suspend fun updateCallMember(@Path("type") type: String, @Path("id") id: String, @Body updateCallMemberRequest: UpdateCallMemberRequest): UpdateCallMemberResponse
+    @POST("/video/call/{type}/{id}/members")
+    suspend fun updateCallMembers(@Path("type") type: String, @Path("id") id: String, @Body updateCallMembersRequest: UpdateCallMembersRequest): UpdateCallMembersResponse
 
 }

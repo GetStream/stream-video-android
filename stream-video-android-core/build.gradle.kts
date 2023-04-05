@@ -135,6 +135,7 @@ dependencies {
     implementation(libs.stream.push.delegate)
 
     // unit test
+    testImplementation(libs.stream.webrtc)
     testImplementation(libs.junit)
     testImplementation(libs.truth)
     testImplementation(libs.mockk)

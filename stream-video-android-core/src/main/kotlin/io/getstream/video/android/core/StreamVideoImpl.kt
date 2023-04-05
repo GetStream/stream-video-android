@@ -17,10 +17,12 @@
 package io.getstream.video.android.core
 
 import android.content.Context
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.Lifecycle
 import io.getstream.android.push.PushDeviceGenerator
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.call.SFUSession
+import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.getstream.video.android.core.errors.VideoBackendError
 import io.getstream.video.android.core.errors.VideoError
 import io.getstream.video.android.core.events.CallCreatedEvent
@@ -97,6 +99,8 @@ internal class StreamVideoImpl internal constructor(
     internal val pushDeviceGenerators: List<PushDeviceGenerator>,
 ) : StreamVideo, SocketListener {
 
+    @VisibleForTesting
+    public var peerConnectionFactory = StreamPeerConnectionFactory(context)
     public override val userId = user.id
 
     override fun onConnected(event: ConnectedEvent) {
@@ -358,6 +362,9 @@ internal class StreamVideoImpl internal constructor(
         if (selectedCid.isNotEmpty()) {
             calls[selectedCid]?.let {
                 it.state.handleEvent(event)
+                it.activeSession?. let {
+                    it.handleEvent(event)
+                }
             }
         }
 

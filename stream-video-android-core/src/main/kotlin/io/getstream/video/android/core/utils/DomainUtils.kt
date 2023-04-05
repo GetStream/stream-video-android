@@ -74,7 +74,7 @@ internal fun MemberResponse.toCallUser(): CallUser {
     return CallUser(
         id = userId,
         name = user.name ?: "",
-        role = role,
+        role = role ?: "",
         imageUrl = user.image ?: "",
         teams = user.teams ?: emptyList(),
         state = null,

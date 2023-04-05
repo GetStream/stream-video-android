@@ -71,6 +71,21 @@ class IntegrationTestHelper {
     val tokens = mutableMapOf<String, String>()
     val context: Context
 
+    val fakeSDP = """
+        v=0
+        o=Node 1 1 IN IP4 172.30.8.37
+        s=Stream1
+        t=0 0
+        m=audio 5004 RTP/AVP 96
+        c=IN IP4 239.30.22.1
+        a=rtpmap:96 L24/48000/2
+        a=recvonly
+        a=ptime:1
+        a=ts-refclk:ptp=IEEE1588-2008:01-23-45-67-89-AB-CD-EF:127
+        a=mediaclk:direct=0
+        a=sync-time:0
+    """.trimIndent()
+
     init {
         // TODO: generate token from build vars
         val token =

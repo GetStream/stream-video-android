@@ -21,7 +21,7 @@ import com.squareup.moshi.Json
 /**
  * All possibility of string to use
  *
- * Values: blockMinusUsers,createMinusCall,createMinusReaction,endMinusCall,joinMinusBackstage,joinMinusCall,joinMinusEndedMinusCall,muteMinusUsers,readMinusCall,removeMinusCallMinusMember,screenshare,sendMinusAudio,sendMinusVideo,startMinusBroadcastMinusCall,startMinusRecordMinusCall,stopMinusBroadcastMinusCall,stopMinusRecordMinusCall,updateMinusCall,updateMinusCallMinusMember,updateMinusCallMinusPermissions,updateMinusCallMinusSettings
+ * Values: blockMinusUsers,createMinusCall,createMinusReaction,endMinusCall,joinMinusBackstage,joinMinusCall,joinMinusEndedMinusCall,muteMinusUsers,readMinusCall,removeMinusCallMinusMember,screenshare,sendMinusAudio,sendMinusVideo,startMinusBroadcastMinusCall,startMinusRecordMinusCall,startMinusTranscriptionMinusCall,stopMinusBroadcastMinusCall,stopMinusRecordMinusCall,stopMinusTranscriptionMinusCall,updateMinusCall,updateMinusCallMinusMember,updateMinusCallMinusPermissions,updateMinusCallMinusSettings
  */
 
 enum class OwnCapability(val value: kotlin.String) {
@@ -71,11 +71,17 @@ enum class OwnCapability(val value: kotlin.String) {
     @Json(name = "start-record-call")
     startMinusRecordMinusCall("start-record-call"),
 
+    @Json(name = "start-transcription-call")
+    startMinusTranscriptionMinusCall("start-transcription-call"),
+
     @Json(name = "stop-broadcast-call")
     stopMinusBroadcastMinusCall("stop-broadcast-call"),
 
     @Json(name = "stop-record-call")
     stopMinusRecordMinusCall("stop-record-call"),
+
+    @Json(name = "stop-transcription-call")
+    stopMinusTranscriptionMinusCall("stop-transcription-call"),
 
     @Json(name = "update-call")
     updateMinusCall("update-call"),

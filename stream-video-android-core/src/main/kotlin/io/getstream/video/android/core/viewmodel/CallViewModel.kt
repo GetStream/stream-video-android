@@ -23,10 +23,8 @@ import android.view.View
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.ConnectionState
-import io.getstream.video.android.core.ParticipantState
-import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.*
+import io.getstream.video.android.core.StreamVideoImpl
 import io.getstream.video.android.core.audio.AudioDevice
 import io.getstream.video.android.core.call.SFUSession
 import io.getstream.video.android.core.call.state.AcceptCall
@@ -86,6 +84,8 @@ public class CallViewModel(
 
     // shortcut to the call settings
     private val settings = call.state.settings
+
+    private val clientImpl = client as StreamVideoImpl
 
     // call state needs to be improve
     // - started/ some people joined/ everyone joined
@@ -183,7 +183,7 @@ public class CallViewModel(
                 session.connectToCall(UUID.randomUUID().toString(), autoPublish)
 
             // TODO raise an error if it failed
-            session.mediaManager.startCapturingLocalVideo(CameraMetadata.LENS_FACING_FRONT)
+            call.mediaManager.startCapturingLocalVideo(CameraMetadata.LENS_FACING_FRONT)
         }
 
     }
@@ -193,7 +193,7 @@ public class CallViewModel(
      */
     private fun flipCamera() {
         // TODO: session is required
-        session.mediaManager?.camera?.flip()
+        call.mediaManager?.camera?.flip()
     }
 
 
@@ -330,7 +330,7 @@ public class CallViewModel(
 
         // Note this comes from peerConnectionFactory.eglBase
         videoRenderer.init(
-            session.peerConnectionFactory.eglBase.eglBaseContext,
+            clientImpl.peerConnectionFactory.eglBase.eglBaseContext,
             object : RendererCommon.RendererEvents {
                 override fun onFirstFrameRendered() {
                     logger.v { "[initRenderer.onFirstFrameRendered] #sfu; sessionId: $sessionId" }
