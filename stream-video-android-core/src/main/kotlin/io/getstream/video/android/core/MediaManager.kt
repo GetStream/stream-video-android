@@ -4,11 +4,18 @@ import android.content.Context
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraDevice
 import android.hardware.camera2.CameraManager
+import android.hardware.camera2.CameraMetadata
+import android.media.AudioDeviceInfo
+import android.media.AudioManager
+import android.os.Build
 import androidx.core.content.getSystemService
+import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.audio.AudioHandler
+import io.getstream.video.android.core.audio.AudioSwitchHandler
+import io.getstream.video.android.core.model.CallSettings
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import org.webrtc.Camera2Capturer
-import org.webrtc.Camera2Enumerator
+import org.webrtc.*
 
 
 sealed class DeviceStatus {
@@ -104,6 +111,16 @@ class CameraManager(val mediaManager: MediaManagerImpl) {
  */
 class MediaManagerImpl(val context: Context) {
 
+    private var audioManager = context.getSystemService<AudioManager>()
+    private var captureResolution: CameraEnumerationAndroid.CaptureFormat? = null
+    private var isCapturingVideo: Boolean = false
+    private var videoCapturer: Camera2Capturer? = null
+    private val logger by taggedLogger("Call:MediaManagerImpl")
+    private val cameraManager = context.getSystemService<CameraManager>()
+    private val cameraEnumerator: CameraEnumerator by lazy {
+        Camera2Enumerator(context)
+    }
+
     val camera = CameraManager(this)
 
     // TODO: maybe merge microphone and speaker, not sure many apps allow you to split the concepts
@@ -111,7 +128,7 @@ class MediaManagerImpl(val context: Context) {
     val speaker = SpeakerManager(this)
 
     val enumerator = Camera2Enumerator(context)
-    val cameraManager = context.getSystemService<CameraManager>()
+
 
 
 
@@ -119,14 +136,99 @@ class MediaManagerImpl(val context: Context) {
 
         val ids = cameraManager!!.cameraIdList
         val names = enumerator.deviceNames.toList()
+        val manager = cameraManager
 
         for (id in ids) {
-            val characteristics = cameraManager.getCameraCharacteristics(id)
+            val characteristics = manager.getCameraCharacteristics(id)
             val cameraLensFacing = characteristics.get(CameraCharacteristics.LENS_FACING)
 
             val supportedFormats = enumerator.getSupportedFormats(names.first())
         }
         return names
+    }
+
+    public fun getAudioHandler(): io.getstream.video.android.core.audio.AudioSwitchHandler? {
+        return audioHandler as? io.getstream.video.android.core.audio.AudioSwitchHandler
+    }
+
+    fun startCapturingLocalVideo(position: Int) {
+        val capturer = videoCapturer as? Camera2Capturer ?: return
+        val enumerator = cameraEnumerator as? Camera2Enumerator ?: return
+
+        val frontCamera = enumerator.deviceNames.first {
+            if (position == 0) {
+                enumerator.isFrontFacing(it)
+            } else {
+                enumerator.isBackFacing(it)
+            }
+        }
+
+        val supportedFormats = enumerator.getSupportedFormats(frontCamera) ?: emptyList()
+
+        val resolution = supportedFormats.firstOrNull {
+            (it.width == 720 || it.width == 480 || it.width == 360)
+        } ?: return
+
+        capturer.startCapture(resolution.width, resolution.height, 30)
+        isCapturingVideo = true
+        captureResolution = resolution
+    }
+
+    fun buildCameraCapturer(): VideoCapturer? {
+        val manager = cameraManager ?: return null
+
+        val ids = manager.cameraIdList
+        var foundCamera = false
+        var cameraId = ""
+
+        for (id in ids) {
+            val characteristics = manager.getCameraCharacteristics(id)
+            val cameraLensFacing = characteristics.get(CameraCharacteristics.LENS_FACING)
+
+            if (cameraLensFacing == CameraMetadata.LENS_FACING_FRONT) {
+                foundCamera = true
+                cameraId = id
+            }
+        }
+
+        if (!foundCamera && ids.isNotEmpty()) {
+            cameraId = ids.first()
+        }
+
+        val camera2Capturer = Camera2Capturer(context, cameraId, null)
+        videoCapturer = camera2Capturer
+        return camera2Capturer
+    }
+
+    fun getAudioDevices(): List<io.getstream.video.android.core.audio.AudioDevice> {
+        logger.d { "[getAudioDevices] #sfu; no args" }
+        val handler = getAudioHandler() ?: return emptyList()
+
+        return handler.availableAudioDevices
+    }
+
+    internal val audioHandler: AudioHandler by lazy {
+        AudioSwitchHandler(context)
+    }
+
+    internal fun setupAudio(callSettings: CallSettings) {
+        logger.d { "[setupAudio] #sfu; no args" }
+        audioHandler.start()
+        audioManager?.mode = AudioManager.MODE_IN_COMMUNICATION
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val devices = audioManager?.availableCommunicationDevices ?: return
+            val deviceType = if (callSettings.speakerOn) {
+                AudioDeviceInfo.TYPE_BUILTIN_SPEAKER
+            } else {
+                AudioDeviceInfo.TYPE_BUILTIN_EARPIECE
+            }
+
+            val device = devices.firstOrNull { it.type == deviceType } ?: return
+
+            val isCommunicationDeviceSet = audioManager?.setCommunicationDevice(device)
+            logger.d { "[setupAudio] #sfu; isCommunicationDeviceSet: $isCommunicationDeviceSet" }
+        }
     }
 
     fun flipCamera() {

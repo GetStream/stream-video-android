@@ -20,7 +20,7 @@ import android.content.Context
 import androidx.lifecycle.Lifecycle
 import io.getstream.android.push.PushDeviceGenerator
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.core.call.CallClient
+import io.getstream.video.android.core.call.SFUSession
 import io.getstream.video.android.core.errors.VideoBackendError
 import io.getstream.video.android.core.errors.VideoError
 import io.getstream.video.android.core.events.CallCreatedEvent
@@ -72,9 +72,6 @@ import stream.video.coordinator.client_v1_rpc.DeleteDeviceRequest
 import stream.video.coordinator.client_v1_rpc.MemberInput
 import stream.video.coordinator.client_v1_rpc.UpsertCallMembersRequest
 import stream.video.coordinator.push_v1.DeviceInput
-import kotlin.coroutines.Continuation
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 class EventSubscription(
     public val listener: VideoEventListener<VideoEvent>,
@@ -100,6 +97,8 @@ internal class StreamVideoImpl internal constructor(
     internal val pushDeviceGenerators: List<PushDeviceGenerator>,
 ) : StreamVideo, SocketListener {
 
+    public override val userId = user.id
+
     override fun onConnected(event: ConnectedEvent) {
         onEvent(event)
     }
@@ -113,7 +112,7 @@ internal class StreamVideoImpl internal constructor(
     override val state = ClientState(this)
     private val logger by taggedLogger("Call:StreamVideo")
     private var subscriptions = mutableSetOf<EventSubscription>()
-    private var calls = mutableMapOf<String, Call2>()
+    private var calls = mutableMapOf<String, Call>()
 
     // caller: JOIN after accepting incoming call by callee
     /**
@@ -233,7 +232,7 @@ internal class StreamVideoImpl internal constructor(
             }
         )
 
-    private val callClientHolder = MutableStateFlow<CallClient?>(null)
+    private val SFUSessionHolder = MutableStateFlow<SFUSession?>(null)
 
     init {
         observeState()
@@ -839,7 +838,7 @@ internal class StreamVideoImpl internal constructor(
     }
 
     /**
-     * Creates an instance of the [CallClient] for the given call input, which is persisted and
+     * Creates an instance of the [SFUSession] for the given call input, which is persisted and
      * used to communicate with the BE.
      *
      * Use it to control the track state, mute/unmute devices and listen to call events.
@@ -849,22 +848,22 @@ internal class StreamVideoImpl internal constructor(
      * @param sfuToken User's ticket to enter the call.
      * @param iceServers Servers required to appropriately connect to the call and receive tracks.
      *
-     * @return An instance of [CallClient] ready to connect to a call. Make sure to call
-     * [CallClient.connectToCall] when you're ready to fully join a call.
+     * @return An instance of [SFUSession] ready to connect to a call. Make sure to call
+     * [SFUSession.connectToCall] when you're ready to fully join a call.
      */
 
     /**
      * @see StreamVideo.getActiveCallClient
      */
-    override fun getActiveCallClient(): CallClient? {
-        return callClientHolder.value
+    override fun getActiveCallClient(): SFUSession? {
+        return SFUSessionHolder.value
     }
 
     /**
      * @see StreamVideo.awaitCallClient
      */
-    override suspend fun awaitCallClient(): CallClient = withContext(scope.coroutineContext) {
-        callClientHolder.first { it != null } ?: error("callClient must not be null")
+    override suspend fun awaitCallClient(): SFUSession = withContext(scope.coroutineContext) {
+        SFUSessionHolder.first { it != null } ?: error("callClient must not be null")
     }
 
     override suspend fun acceptCall(type: String, id: String) {
@@ -937,12 +936,12 @@ internal class StreamVideoImpl internal constructor(
             }
         }
 
-    override fun call(type: String, id: String, token: String): Call2 {
+    override fun call(type: String, id: String, token: String): Call {
         val cid = "$type:$id"
         return if (calls.contains(cid)) {
             calls[cid]!!
         } else {
-            val call = Call2(this, type, id, token, user)
+            val call = Call(this, type, id, token, user)
             calls[cid] = call
             call
         }

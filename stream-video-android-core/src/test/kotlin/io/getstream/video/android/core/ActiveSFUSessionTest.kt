@@ -25,13 +25,13 @@ class ActiveSFUSessionTest : IntegrationTestBase() {
 
         // TODO: how to check if audio is disabled/enabled/no-permission
         // call.state.me.audioState()
-        call.state.me.muteAudio()
+       // call.state.me.muteAudio()
         //  microphone.devices(), microphone.select(device), microphone.enable(), microphone.disable(), microphone.status() // disabled/enabled/no-permission
         //  speaker.devices(), speaker.select(device), speaker.enable(), speaker.disable(), speaker.status() // disabled/enabled/no-permission
         //  camera.flip(), camera.devices(), camera.select(device), camera.enable(), camera.disable(), camera.status() // disabled/enabled/no-permission
 
-        call.state.me.muteVideo()
-        call.state.me.flipCamera()
+        //call.state.me.muteVideo()
+        //call.state.me.flipCamera()
 
 
 

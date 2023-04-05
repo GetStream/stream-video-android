@@ -16,23 +16,23 @@ import java.util.*
 
 
 public open class ParticipantState(
-    open val call: Call2,
-    val initialUser: User,
-   var sessionId: String = "",
-   var idPrefix: String = "",
-   val isLocal: Boolean = false,
-   var isOnline: Boolean = false,
+    open val call: Call,
+    open val initialUser: User,
+    open var sessionId: String = "",
+    open var idPrefix: String = "",
+    open val isLocal: Boolean = false,
+    open var isOnline: Boolean = false,
 
-   var videoTrack: VideoTrack? = null,
-   var screenSharingTrack: VideoTrack? = null,
-   var publishedTracks: Set<TrackType> = emptySet(),
-   var videoTrackSize: Pair<Int, Int> = Pair(0, 0)
+    open var videoTrack: VideoTrack? = null,
+    open var screenSharingTrack: VideoTrack? = null,
+    open var publishedTracks: Set<TrackType> = emptySet(),
+    open var videoTrackSize: Pair<Int, Int> = Pair(0, 0)
 ) {
 
     // old fields to evaluate if we need them
 
-    fun copy(
-        call: Call2 = this.call,
+    open fun copy(
+        call: Call = this.call,
         initialUser: User = this.initialUser,
         sessionId: String = this.sessionId,
         idPrefix: String = this.idPrefix,
@@ -121,6 +121,12 @@ public open class ParticipantState(
 
     internal val _speaking: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val speaking: StateFlow<Boolean> = _speaking
+
+    internal val _lastSpeakingAt: MutableStateFlow<Date?> = MutableStateFlow(null)
+    val lastSpeakingAt: StateFlow<Date?> = _lastSpeakingAt
+
+    internal val _pinnedAt: MutableStateFlow<Date?> = MutableStateFlow(null)
+    val pinnedAt: StateFlow<Date?> = _pinnedAt
 
     internal val _audioLevel: MutableStateFlow<Float> = MutableStateFlow(0F)
     val audioLevel: StateFlow<Float> = _audioLevel

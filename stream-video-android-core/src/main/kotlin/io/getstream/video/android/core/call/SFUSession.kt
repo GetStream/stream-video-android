@@ -16,16 +16,15 @@
 
 package io.getstream.video.android.core.call
 
+import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.call.signal.socket.SfuSocketListener
-import io.getstream.video.android.core.model.Call
 import io.getstream.video.android.core.model.CallSettings
 import io.getstream.video.android.core.utils.Result
-import io.getstream.video.android.core.utils.Success
 import kotlinx.coroutines.flow.StateFlow
 import org.webrtc.RTCStatsReport
-import retrofit2.HttpException
 
-public interface CallClient {
+public interface SFUSession {
 
     /**
      * State that indicates whether the camera is capturing and sending video or not.
@@ -36,6 +35,8 @@ public interface CallClient {
      * State that indicates whether the mic is capturing and sending the audio or not.
      */
     public val isAudioEnabled: StateFlow<Boolean>
+
+    public val mediaManager: MediaManagerImpl
 
     /**
      * State that indicates whether the speakerphone is on or not.
@@ -65,13 +66,6 @@ public interface CallClient {
     public fun getSubscriberStats(): StateFlow<RTCStatsReport?>
 
     /**
-     * Start capturing video for current user from device (camera) specified by [position].
-     *
-     * @param position The camera with which to start recording.
-     */
-    public fun startCapturingLocalVideo(position: Int)
-
-    /**
      * Sets the initial state of media for the CallClient after it has been constructed so it is up to date with the
      * UI state.
      */
@@ -84,8 +78,6 @@ public interface CallClient {
     public fun setSpeakerphoneEnabled(isEnabled: Boolean)
 
     public fun flipCamera()
-
-    public fun getAudioDevices(): List<io.getstream.video.android.core.audio.AudioDevice>
 
     public fun selectAudioDevice(device: io.getstream.video.android.core.audio.AudioDevice)
 

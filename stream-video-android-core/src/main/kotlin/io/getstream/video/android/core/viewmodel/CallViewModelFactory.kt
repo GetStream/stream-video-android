@@ -18,6 +18,7 @@ package io.getstream.video.android.core.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.permission.PermissionManager
 import io.getstream.video.android.core.user.EmptyUsersProvider
@@ -25,6 +26,7 @@ import io.getstream.video.android.core.user.UsersProvider
 
 public class CallViewModelFactory(
     private val streamVideo: StreamVideo,
+    private val call: Call,
     private val permissionManager: PermissionManager,
     private val usersProvider: UsersProvider = EmptyUsersProvider
 ) : ViewModelProvider.Factory {
@@ -32,8 +34,9 @@ public class CallViewModelFactory(
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return CallViewModel(
-            streamVideo = streamVideo,
-            permissionManager = permissionManager,
+            client = streamVideo,
+            call = call,
+            permissions = permissionManager,
             usersProvider = usersProvider
         ) as T
     }

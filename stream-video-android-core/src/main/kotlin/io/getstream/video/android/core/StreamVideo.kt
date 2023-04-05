@@ -17,10 +17,9 @@
 package io.getstream.video.android.core
 
 import android.content.Context
-import io.getstream.video.android.core.call.CallClient
+import io.getstream.video.android.core.call.SFUSession
 import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.events.VideoEventListener
-import io.getstream.video.android.core.model.Call
 import io.getstream.video.android.core.model.CallEventType
 import io.getstream.video.android.core.model.CallInfo
 import io.getstream.video.android.core.model.CallMetadata
@@ -38,7 +37,6 @@ import io.getstream.video.android.core.model.StreamCallId
 import io.getstream.video.android.core.model.StreamCallType
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.User
-import io.getstream.video.android.core.socket.SocketListener
 import io.getstream.video.android.core.utils.Result
 import org.openapitools.client.models.*
 
@@ -52,6 +50,7 @@ public interface StreamVideo {
      */
     public val context: Context
     public val user: User
+    public val userId: String
 
     val state: ClientState
 
@@ -386,14 +385,14 @@ public interface StreamVideo {
     public fun logOut()
 
     /**
-     * Returns current [CallClient] instance.
+     * Returns current [SFUSession] instance.
      */
-    public fun getActiveCallClient(): CallClient?
+    public fun getActiveCallClient(): SFUSession?
 
     /**
-     * Awaits [CallClient] creation.
+     * Awaits [SFUSession] creation.
      */
-    public suspend fun awaitCallClient(): CallClient
+    public suspend fun awaitCallClient(): SFUSession
 
     /**
      * Accepts incoming call.
@@ -415,7 +414,7 @@ public interface StreamVideo {
      */
     public suspend fun handlePushMessage(payload: Map<String, Any>): Result<Unit>
 
-    public fun call(type: String, id: String, token: String = ""): Call2
+    public fun call(type: String, id: String, token: String = ""): Call
 
 
     public suspend fun registerPushDevice()

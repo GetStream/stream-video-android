@@ -23,8 +23,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.LinearLayout
 import io.getstream.video.android.R
+import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
-import io.getstream.video.android.core.model.Call
 import io.getstream.video.android.core.model.VideoTrack
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch

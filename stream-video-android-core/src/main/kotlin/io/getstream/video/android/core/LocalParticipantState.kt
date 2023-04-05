@@ -1,14 +1,55 @@
 package io.getstream.video.android.core
 
 import io.getstream.video.android.core.model.User
+import io.getstream.video.android.core.model.VideoTrack
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.openapitools.client.models.OwnCapability
+import stream.video.sfu.models.TrackType
 
-public class LocalParticipantState(override val call: Call2, user: User) : ParticipantState(
-    call = call,
-    initialUser = user
+public class LocalParticipantState(
+    override val call: Call,
+    override val initialUser: User,
+    override var sessionId: String = "",
+    override var idPrefix: String = "",
+    override val isLocal: Boolean = false,
+    override var isOnline: Boolean = false,
+
+    override var videoTrack: VideoTrack? = null,
+    override var screenSharingTrack: VideoTrack? = null,
+    override var publishedTracks: Set<TrackType> = emptySet(),
+    override var videoTrackSize: Pair<Int, Int> = Pair(0, 0)
+) : ParticipantState(call, initialUser, sessionId,idPrefix, isLocal, isOnline, videoTrack, screenSharingTrack, publishedTracks, videoTrackSize
 ) {
+
+    // TODO: we need to use data classes for this or comparisons won't work in stateflow
+
+    fun copy2(
+        call: Call=this.call,
+        initialUser: User = this.initialUser,
+        sessionId: String = this.sessionId,
+        idPrefix: String = this.idPrefix,
+        isLocal: Boolean = this.isLocal,
+        isOnline: Boolean = this.isOnline,
+        videoTrack: VideoTrack? = this.videoTrack,
+        screenSharingTrack: VideoTrack? = this.screenSharingTrack,
+        publishedTracks: Set<TrackType> = this.publishedTracks,
+        videoTrackSize: Pair<Int, Int> = this.videoTrackSize
+    ): LocalParticipantState {
+        return LocalParticipantState(
+            call = call,
+            initialUser = initialUser,
+            sessionId = sessionId,
+            idPrefix = idPrefix,
+            isLocal = isLocal,
+            isOnline = isOnline,
+            videoTrack = videoTrack,
+            screenSharingTrack = screenSharingTrack,
+            publishedTracks = publishedTracks,
+            videoTrackSize = videoTrackSize
+        )
+    }
+
     override fun muteAudio() {
         call.activeSession!!.setMicrophoneEnabled(false)
     }

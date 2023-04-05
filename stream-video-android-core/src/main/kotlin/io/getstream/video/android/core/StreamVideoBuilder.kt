@@ -26,7 +26,6 @@ import io.getstream.video.android.core.filter.VideoFilter
 import io.getstream.video.android.core.internal.module.ConnectionModule
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.ApiKey
-import io.getstream.video.android.core.model.Call
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.UserType
 import io.getstream.video.android.core.user.UserPreferencesManager

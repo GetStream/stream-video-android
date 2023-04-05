@@ -16,30 +16,20 @@
 
 package io.getstream.video.android.core.call
 
-import android.content.Context
-import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import android.hardware.camera2.CameraMetadata
 import android.media.AudioAttributes.ALLOW_CAPTURE_BY_ALL
 import android.media.AudioManager
-import android.net.ConnectivityManager
 import android.os.Build
 import androidx.core.content.getSystemService
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.core.Call2
-import io.getstream.video.android.core.ParticipantState
-import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.*
 import io.getstream.video.android.core.StreamVideoImpl
-import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.call.connection.StreamPeerConnection
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
-import io.getstream.video.android.core.call.signal.socket.SfuSocket
-import io.getstream.video.android.core.call.signal.socket.SfuSocketFactory
-import io.getstream.video.android.core.call.signal.socket.SfuSocketImpl
 import io.getstream.video.android.core.call.signal.socket.SfuSocketListener
 import io.getstream.video.android.core.call.state.ConnectionState
 import io.getstream.video.android.core.call.utils.stringify
-import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.errors.DisconnectCause
 import io.getstream.video.android.core.errors.VideoError
 import io.getstream.video.android.core.events.*
@@ -47,18 +37,13 @@ import io.getstream.video.android.core.filter.InFilterObject
 import io.getstream.video.android.core.filter.toMap
 import io.getstream.video.android.core.internal.module.ConnectionModule
 import io.getstream.video.android.core.internal.module.SFUConnectionModule
-import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.model.*
 import io.getstream.video.android.core.user.UserPreferencesManager
-import io.getstream.video.android.core.utils.Failure
-import io.getstream.video.android.core.utils.Result
-import io.getstream.video.android.core.utils.Success
+import io.getstream.video.android.core.utils.*
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import io.getstream.video.android.core.utils.buildConnectionConfiguration
 import io.getstream.video.android.core.utils.buildMediaConstraints
 import io.getstream.video.android.core.utils.buildRemoteIceServers
-import io.getstream.video.android.core.utils.onError
-import io.getstream.video.android.core.utils.onSuccessSuspend
 import io.getstream.video.android.core.utils.stringify
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -70,9 +55,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import okhttp3.HttpUrl.Companion.toHttpUrl
-import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import org.webrtc.AudioTrack
 import org.webrtc.Camera2Capturer
 import org.webrtc.Camera2Enumerator
@@ -89,8 +71,6 @@ import org.webrtc.SurfaceTextureHelper
 import org.webrtc.VideoCapturer
 import org.webrtc.VideoTrack
 import retrofit2.HttpException
-import retrofit2.Retrofit
-import retrofit2.converter.wire.WireConverterFactory
 import stream.video.sfu.event.JoinRequest
 import stream.video.sfu.event.JoinResponse
 import stream.video.sfu.models.CallState
@@ -125,18 +105,26 @@ import kotlin.random.Random
  * - Camera & Rendering helpers
  *
  *
+ * Video Tracks
+ *
+ *
+ * WebRTC behaviour
+ *
+ *
  */
 public class ActiveSFUSession internal constructor(
     private val client: StreamVideo,
     private val connectionModule: ConnectionModule,
-    private val call2: Call2,
+    private val call: Call,
     private val SFUUrl: String,
     private val SFUToken: String,
     private val latencyResults: Map<String, List<Float>>,
     private val remoteIceServers: List<IceServer>,
-) : CallClient, SfuSocketListener {
+) : SFUSession, SfuSocketListener {
     private val context = client.context
-    private val logger by taggedLogger("Call:WebRtcClient")
+    private val logger by taggedLogger("Call:ActiveSFUSession")
+
+    override val mediaManager = MediaManagerImpl(client.context)
 
     private val clientImpl = client as StreamVideoImpl
 
@@ -160,6 +148,9 @@ public class ActiveSFUSession internal constructor(
         sfuConnectionModule.sfuSocket.connectSocket()
     }
 
+
+
+
     // ensure we parse errors and run on the right coroutineContext
     internal suspend fun <T : Any> wrapAPICall(apiCall: suspend () -> T): Result<T> {
         return withContext(scope.coroutineContext) {
@@ -170,7 +161,6 @@ public class ActiveSFUSession internal constructor(
             }
         }
     }
-    private var call: Call? = null
 
     suspend fun parseError(e: Throwable): Failure {
         return Failure(VideoError("CallClientImpl error needs to be handled"))
@@ -217,7 +207,7 @@ public class ActiveSFUSession internal constructor(
     /**
      * Connection and WebRTC.
      */
-    private val peerConnectionFactory by lazy { StreamPeerConnectionFactory(context) }
+    public val peerConnectionFactory = StreamPeerConnectionFactory(context)
     private val iceServers by lazy { buildRemoteIceServers(remoteIceServers) }
 
     private val connectionConfiguration: PeerConnection.RTCConfiguration by lazy {
@@ -239,7 +229,7 @@ public class ActiveSFUSession internal constructor(
         set(value) {
             field = value
             if (value != null) {
-                call?.updateLocalVideoTrack(value)
+                call?.state?.updateLocalVideoTrack(value)
             }
         }
     internal var localAudioTrack: AudioTrack? = null
@@ -250,10 +240,7 @@ public class ActiveSFUSession internal constructor(
     /**
      * Video track helpers.
      */
-    private val cameraManager by lazy { context.getSystemService<CameraManager>() }
-    private val cameraEnumerator: CameraEnumerator by lazy {
-        Camera2Enumerator(context)
-    }
+
     private val surfaceTextureHelper by lazy {
         SurfaceTextureHelper.create(
             "CaptureThread", peerConnectionFactory.eglBase.eglBaseContext
@@ -271,9 +258,6 @@ public class ActiveSFUSession internal constructor(
 
         connectionState = ConnectionState.DISCONNECTED
         sessionId = ""
-
-        call?.disconnect()
-        call = null
 
         subscriber?.connection?.close()
         publisher?.connection?.close()
@@ -320,7 +304,7 @@ public class ActiveSFUSession internal constructor(
             setupVideoTrack()
 
             if (!isCapturingVideo && isEnabled) {
-                startCapturingLocalVideo(CameraMetadata.LENS_FACING_FRONT)
+                mediaManager.startCapturingLocalVideo(CameraMetadata.LENS_FACING_FRONT)
             }
             val request = UpdateMuteStatesRequest(
                 session_id = sessionId,
@@ -333,7 +317,7 @@ public class ActiveSFUSession internal constructor(
             )
 
             updateMuteState(request).onSuccessSuspend {
-                call?.setCameraEnabled(isEnabled)
+                setCameraEnabled(isEnabled)
                 localVideoTrack?.setEnabled(isEnabled)
                 _isVideoEnabled.value = isEnabled
             }
@@ -364,7 +348,7 @@ public class ActiveSFUSession internal constructor(
             )
 
             updateMuteState(request).onSuccessSuspend {
-                call?.setMicrophoneEnabled(isEnabled)
+                setMicrophoneEnabled(isEnabled)
                 localAudioTrack?.setEnabled(isEnabled)
                 _isAudioEnabled.value = isEnabled
             }
@@ -372,7 +356,7 @@ public class ActiveSFUSession internal constructor(
     }
 
     override fun setSpeakerphoneEnabled(isEnabled: Boolean) {
-        val devices = getAudioDevices()
+        val devices = mediaManager.getAudioDevices()
 
         val activeDevice = devices.firstOrNull {
             if (isEnabled) {
@@ -382,7 +366,8 @@ public class ActiveSFUSession internal constructor(
             }
         }
 
-        getAudioHandler()?.selectDevice(activeDevice)?.also {
+        // TODO: migrate this
+        mediaManager.getAudioHandler()?.selectDevice(activeDevice)?.also {
             _isSpeakerPhoneEnabled.value = isEnabled
         }
     }
@@ -392,35 +377,20 @@ public class ActiveSFUSession internal constructor(
         (videoCapturer as? Camera2Capturer)?.switchCamera(null)
     }
 
-    private fun getAudioHandler(): io.getstream.video.android.core.audio.AudioSwitchHandler? {
-        return call?.audioHandler as? io.getstream.video.android.core.audio.AudioSwitchHandler
-    }
 
-    override fun getAudioDevices(): List<io.getstream.video.android.core.audio.AudioDevice> {
-        logger.d { "[getAudioDevices] #sfu; no args" }
-        val handler = getAudioHandler() ?: return emptyList()
-
-        return handler.availableAudioDevices
-    }
 
     override fun selectAudioDevice(device: io.getstream.video.android.core.audio.AudioDevice) {
         logger.d { "[selectAudioDevice] #sfu; device: $device" }
-        val handler = getAudioHandler() ?: return
+        val handler = mediaManager.getAudioHandler() ?: return
 
         handler.selectDevice(device)
     }
-
-    // TODO: call participants should be a map
-    fun getParticipant(userId: String): ParticipantState? {
-        return call?.callParticipants?.value?.associate { it.user.value.id to it }?.get(userId)
-    }
-
 
     private fun listenToParticipants() {
         val call = call ?: throw IllegalStateException("Call is in an incorrect state, null!")
 
         coroutineScope.launch {
-            call.callParticipants.collectLatest { participants ->
+            call.state.participants.collectLatest { participants ->
                 updateParticipantsSubscriptions(participants)
             }
         }
@@ -469,22 +439,6 @@ public class ActiveSFUSession internal constructor(
         return subscriber?.getStats() ?: MutableStateFlow(null)
     }
 
-    private fun createCall(sessionId: String): Call {
-        logger.d { "[createCall] #sfu; sessionId: $sessionId" }
-        this.sessionId = sessionId
-
-        return buildCall()
-    }
-
-    private fun buildCall(): Call {
-        logger.d { "[buildCall] #sfu; sessionId: $sessionId" }
-        return Call(
-            context = context,
-            getCurrentUserId = {client.user.id},
-            eglBase = peerConnectionFactory.eglBase,
-        )
-    }
-
     private suspend fun loadParticipantsData(
         callId: StreamCallId,
         callState: CallState?,
@@ -530,14 +484,15 @@ public class ActiveSFUSession internal constructor(
     private suspend fun initializeCall(
         autoPublish: Boolean,
     ): Result<JoinResponse> {
+
+        // TODO: review this and see what we actually use
         logger.d { "[initializeCall] #sfu; autoPublish: $autoPublish" }
 
-        val call = createCall(sessionId)
-        this.call = call
         listenToParticipants()
 
         val result = connectToCall()
         logger.v { "[initializeCall] #sfu; result: $result" }
+        // TODO: remove these
         val callSettings = CallSettings(
             autoPublish = autoPublish,
             microphoneOn = _isAudioEnabled.value,
@@ -549,13 +504,13 @@ public class ActiveSFUSession internal constructor(
             is Success -> {
                 createPeerConnections(autoPublish)
                 loadParticipantsData(
-                    callId = call2.id,
-                    callType = call2.type,
+                    callId = this.call.id,
+                    callType = this.call.type,
                     callState = result.data.call_state,
                     callSettings = callSettings
                 )
                 createUserTracks(callSettings)
-                call.setupAudio(callSettings)
+                mediaManager.setupAudio(callSettings)
 
                 result
             }
@@ -578,7 +533,7 @@ public class ActiveSFUSession internal constructor(
             configuration = connectionConfiguration,
             type = StreamPeerType.SUBSCRIBER,
             mediaConstraints = mediaConstraints,
-            onStreamAdded = { call?.addStream(it) }, // addTrack
+            onStreamAdded = { call?.state?.addStream(it) }, // addTrack
             onIceCandidateRequest = ::sendIceCandidate
         ).also {
             logger.i { "[createSubscriber] #sfu; subscriber: $it" }
@@ -695,7 +650,7 @@ public class ActiveSFUSession internal constructor(
     override fun onConnected(event: SFUConnectedEvent) {
         // trigger an event in the client as well for SFU events. makes it easier to subscribe
         println("SFU onconnected")
-        clientImpl.fireEvent(event, call2.cid)
+        clientImpl.fireEvent(event, call.cid)
         coroutineScope.launch {
             logger.i { "[onConnected] event: $event" }
             isConnected.value = true
@@ -723,7 +678,7 @@ public class ActiveSFUSession internal constructor(
     override fun onEvent(event: SfuDataEvent) {
 
         // trigger an event in the client as well for SFU events. makes it easier to subscribe
-        clientImpl.fireEvent(event, call2.cid)
+        clientImpl.fireEvent(event, call.cid)
 
         coroutineScope.launch {
             logger.v { "[onRtcEvent] event: $event" }
@@ -735,10 +690,10 @@ public class ActiveSFUSession internal constructor(
                 is ChangePublishQualityEvent -> Unit
 
                 is TrackPublishedEvent -> {
-                    call?.updateMuteState(event.userId, event.sessionId, event.trackType, true)
+                    call?.state?.updateMuteState(event.userId, event.sessionId, event.trackType, true)
                 }
                 is TrackUnpublishedEvent -> {
-                    call?.updateMuteState(event.userId, event.sessionId, event.trackType, false)
+                    call?.state?.updateMuteState(event.userId, event.sessionId, event.trackType, false)
                 }
                 else -> Unit
             }
@@ -749,10 +704,10 @@ public class ActiveSFUSession internal constructor(
         val query = InFilterObject("id", setOf(event.participant.user_id)).toMap()
 
         val userQueryResult = client.queryMembers(
-            call2.type,
-            call2.id,
+            call.type,
+            call.id,
             QueryMembersData(
-                streamCallCid = call2.cid,
+                streamCallCid = call.cid,
                 filters = query
             )
         )
@@ -924,7 +879,7 @@ public class ActiveSFUSession internal constructor(
     private fun makeVideoTrack(isScreenShare: Boolean = false): VideoTrack {
         val videoSource = peerConnectionFactory.makeVideoSource(isScreenShare)
 
-        val capturer = buildCameraCapturer()
+        val capturer = mediaManager.buildCameraCapturer()
         capturer?.initialize(surfaceTextureHelper, context, videoSource.capturerObserver)
 
         return peerConnectionFactory.makeVideoTrack(
@@ -933,56 +888,7 @@ public class ActiveSFUSession internal constructor(
     }
 
     private fun buildTrackId(trackTypeVideo: String): String {
-        return "${call?.localParticipantIdPrefix}:$trackTypeVideo:${(Math.random() * 100).toInt()}"
-    }
-
-    override fun startCapturingLocalVideo(position: Int) {
-        val capturer = videoCapturer as? Camera2Capturer ?: return
-        val enumerator = cameraEnumerator as? Camera2Enumerator ?: return
-
-        val frontCamera = enumerator.deviceNames.first {
-            if (position == 0) {
-                enumerator.isFrontFacing(it)
-            } else {
-                enumerator.isBackFacing(it)
-            }
-        }
-
-        val supportedFormats = enumerator.getSupportedFormats(frontCamera) ?: emptyList()
-
-        val resolution = supportedFormats.firstOrNull {
-            (it.width == 720 || it.width == 480 || it.width == 360)
-        } ?: return
-
-        capturer.startCapture(resolution.width, resolution.height, 30)
-        isCapturingVideo = true
-        captureResolution = resolution
-    }
-
-    private fun buildCameraCapturer(): VideoCapturer? {
-        val manager = cameraManager ?: return null
-
-        val ids = manager.cameraIdList
-        var foundCamera = false
-        var cameraId = ""
-
-        for (id in ids) {
-            val characteristics = manager.getCameraCharacteristics(id)
-            val cameraLensFacing = characteristics.get(CameraCharacteristics.LENS_FACING)
-
-            if (cameraLensFacing == CameraMetadata.LENS_FACING_FRONT) {
-                foundCamera = true
-                cameraId = id
-            }
-        }
-
-        if (!foundCamera && ids.isNotEmpty()) {
-            cameraId = ids.first()
-        }
-
-        val camera2Capturer = Camera2Capturer(context, cameraId, null)
-        videoCapturer = camera2Capturer
-        return camera2Capturer
+        return "${call?.state?.me?.value?.idPrefix}:$trackTypeVideo:${(Math.random() * 100).toInt()}"
     }
 
     private fun updatePublishQuality(event: ChangePublishQualityEvent) {

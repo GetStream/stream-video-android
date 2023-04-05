@@ -174,7 +174,7 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
         clientImpl.fireEvent(event)
         // ensure we update call data and capabilities
         assertThat(call.state.capabilitiesByRole.value).isEqualTo(capabilitiesByRole)
-        assertThat(call.state.me.ownCapabilities.value).isEqualTo(ownCapabilities)
+        assertThat(call.state.me.value.ownCapabilities.value).isEqualTo(ownCapabilities)
         // TODO: think about custom data assertThat(call.custom).isEqualTo(custom)
     }
 
@@ -200,7 +200,7 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
         )
         clientImpl.fireEvent(permissionsUpdated, call.cid)
 
-        assertThat(call.state.me.ownCapabilities.value).isEqualTo(ownCapabilities)
+        assertThat(call.state.me.value.ownCapabilities.value).isEqualTo(ownCapabilities)
 
     }
 

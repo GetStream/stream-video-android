@@ -20,7 +20,6 @@ import io.getstream.video.android.core.errors.VideoError
 import io.getstream.video.android.core.events.CallCreatedEvent
 import io.getstream.video.android.core.events.ConnectedEvent
 import io.getstream.video.android.core.events.VideoEvent
-import io.getstream.video.android.core.model.Call
 import io.getstream.video.android.core.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -80,12 +79,12 @@ class ClientState(client: StreamVideo) {
     /**
      * Incoming call. True when we receive an event or notification with an incoming call
      */
-    private val _incomingCall: MutableStateFlow<Call2?> = MutableStateFlow(null)
-    public val incomingCall: StateFlow<Call2?> = _incomingCall
+    private val _incomingCall: MutableStateFlow<Call?> = MutableStateFlow(null)
+    public val incomingCall: StateFlow<Call?> = _incomingCall
 
     /**
      * Active call. The currently active call
      */
-    private val _activeCall: MutableStateFlow<Call2?> = MutableStateFlow(null)
-    public val activeCall: StateFlow<Call2?> = _activeCall
+    private val _activeCall: MutableStateFlow<Call?> = MutableStateFlow(null)
+    public val activeCall: StateFlow<Call?> = _activeCall
 }
