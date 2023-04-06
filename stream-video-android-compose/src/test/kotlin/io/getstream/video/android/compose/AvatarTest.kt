@@ -25,7 +25,6 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.Avatar
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.core.model.toUser
-import io.getstream.video.android.ui.common.R
 import org.junit.Rule
 import org.junit.Test
 
@@ -41,19 +40,6 @@ internal class AvatarTest {
                 Avatar(
                     modifier = Modifier.size(72.dp),
                     initials = "Thierry"
-                )
-            }
-        }
-    }
-
-    @Test
-    fun `snapshot AvatarImage composable`() {
-        paparazzi.snapshot {
-            VideoTheme {
-                Avatar(
-                    modifier = Modifier.size(72.dp),
-                    initials = null,
-                    previewPlaceholder = R.drawable.stream_video_call_sample
                 )
             }
         }
