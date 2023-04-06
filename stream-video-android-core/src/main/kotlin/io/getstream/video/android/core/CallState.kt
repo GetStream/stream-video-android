@@ -12,6 +12,7 @@ import io.getstream.video.android.core.utils.updateValue
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.openapitools.client.models.CallSettingsResponse
+import org.openapitools.client.models.OwnCapability
 import org.webrtc.MediaStream
 import stream.video.sfu.models.Participant
 import stream.video.sfu.models.TrackType
@@ -40,8 +41,10 @@ public class CallState(val call: Call, user: User) {
 
     public val isScreenSharing: StateFlow<Boolean> = _screenSharingSession.mapState{ it != null }
 
+    private val _screenSharingTrack: MutableStateFlow<VideoTrack?> = MutableStateFlow(null)
 
-
+    private val _ownCapabilities: MutableStateFlow<List<OwnCapability>> = MutableStateFlow(emptyList())
+    public val ownCapabilities: StateFlow<List<OwnCapability>> = _ownCapabilities
 
     /**
      * connectionState shows if we've established a connection with the coordinator
@@ -70,8 +73,8 @@ public class CallState(val call: Call, user: User) {
 
     // TODO: does this need to be a stateflow, or can it be a property?
     // making it a property requires cleaning up the properties of a participant
-    val _me = MutableStateFlow(LocalParticipantState(call, user))
-    val me : StateFlow<LocalParticipantState> = _me
+    val _me = MutableStateFlow(ParticipantState(call, user))
+    val me : StateFlow<ParticipantState> = _me
 
 
     private fun replaceTrackIfNeeded(mediaStream: MediaStream, streamId: String?): VideoTrack? {
@@ -209,7 +212,7 @@ public class CallState(val call: Call, user: User) {
                 updateFromEvent(event)
             }
             is UpdatedCallPermissionsEvent -> {
-                me.value._ownCapabilities.value=event.ownCapabilities
+                _ownCapabilities.value=event.ownCapabilities
             }
             is ConnectedEvent -> {
                 // this is handled by the client
@@ -282,7 +285,7 @@ public class CallState(val call: Call, user: User) {
     private fun getOrCreateParticipant(participant: Participant): ParticipantState {
         // TODO: update some fields
         val participantState = getOrCreateParticipant(participant.user_id)
-        participantState.updateFromData(participant)
+        participantState.updateFromParticipantInfo(participant)
 
         participantState._speaking.value = participant.is_speaking
         return participantState
@@ -333,7 +336,7 @@ public class CallState(val call: Call, user: User) {
             // update call info fields
         } else if (event is CallUpdatedEvent) {
             // update the own capabilities
-            me.value._ownCapabilities.value=event.ownCapabilities
+            _ownCapabilities.value=event.ownCapabilities
             // update the capabilities by role
             _capabilitiesByRole.value = event.capabilitiesByRole
             // update call info fields
@@ -396,7 +399,7 @@ public class CallState(val call: Call, user: User) {
 
         // start by updating the local participant state (specialized version of Participant State)
         val localParticipant = _me.value
-        val updatedParticipant = localParticipant.copy2(
+        val updatedParticipant = localParticipant.copy(
             videoTrack = videoTrack
         )
         _me.value = updatedParticipant
@@ -476,7 +479,7 @@ public class CallState(val call: Call, user: User) {
         val tracks = localParticipant.publishedTracks
 
         val newTracks = if (isEnabled) tracks + track else tracks - track
-        val updatedLocal = localParticipant.copy2(
+        val updatedLocal = localParticipant.copy(
             publishedTracks = newTracks
         )
         _me.value = updatedLocal
@@ -496,7 +499,7 @@ public class CallState(val call: Call, user: User) {
         val tracks = localParticipant.publishedTracks
 
         val newTracks = if (isEnabled) tracks + track else tracks - track
-        val updatedLocal = localParticipant.copy2(publishedTracks = newTracks)
+        val updatedLocal = localParticipant.copy(publishedTracks = newTracks)
         _me.value = updatedLocal
 
         val updatedList = _participants.value.updateValue(

@@ -12,53 +12,101 @@ import stream.video.sfu.models.TrackType
 import java.util.*
 
 /**
- * TODO: Line 297. Where do we get the call settings from?
+ * Represents the state of a participant in a call.
+ *
+ * * A list of participants is shared when you join a call
+ * * The SFU sens you the participant joined event
+ *
+ * @see ParticipantJoinedEvent which shares the basic participant info found in
+ * @see Participant
+ *
+ * TODO: we need equality functions here , data class will ignore the stateflows
  */
+public data class ParticipantState(
+    /** The call object */
+    val call: Call,
+    /** The current version of the user, this is the start for participant.user stateflow */
+    val initialUser: User,
+    /** The SFU returns a session id for each participant */
+    var sessionId: String = "",
+    /** TODO what does this do? */
+    var idPrefix: String = "",
 
+    /** If this participant is the you/ the local participant */
+    val isLocal: Boolean = false,
 
-
-public open class ParticipantState(
-    open val call: Call,
-    open val initialUser: User,
-    open var sessionId: String = "",
-    open var idPrefix: String = "",
-    open val isLocal: Boolean = false,
-    open var isOnline: Boolean = false,
-
-    open var videoTrack: VideoTrack? = null,
-    open var screenSharingTrack: VideoTrack? = null,
-    open var publishedTracks: Set<TrackType> = emptySet(),
-    open var videoTrackSize: Pair<Int, Int> = Pair(0, 0)
+    var videoTrack: VideoTrack? = null,
+    var screenSharingTrack: VideoTrack? = null,
+    var publishedTracks: Set<TrackType> = emptySet(),
+    var videoTrackSize: Pair<Int, Int> = Pair(0, 0)
 ) {
+    /**
+     * The user, automatically updates when we receive user events
+     */
+    internal val _user: MutableStateFlow<User> = MutableStateFlow(initialUser)
+    val user: StateFlow<User> = _user
 
-    // old fields to evaluate if we need them
+    /**
+     * When you joined the call
+     */
+    internal val _joinedAt: MutableStateFlow<Date?> = MutableStateFlow(null)
+    val joinedAt: StateFlow<Date?> = _joinedAt
 
-    open fun copy(
-        call: Call = this.call,
-        initialUser: User = this.initialUser,
-        sessionId: String = this.sessionId,
-        idPrefix: String = this.idPrefix,
-        isLocal: Boolean = this.isLocal,
-        isOnline: Boolean = this.isOnline,
-        videoTrack: VideoTrack? = this.videoTrack,
-        screenSharingTrack: VideoTrack? = this.screenSharingTrack,
-        publishedTracks: Set<TrackType> = this.publishedTracks,
-        videoTrackSize: Pair<Int, Int> = this.videoTrackSize
-    ): ParticipantState {
-        return ParticipantState(
-            call = call,
-            initialUser = initialUser,
-            sessionId = sessionId,
-            idPrefix = idPrefix,
-            isLocal = isLocal,
-            isOnline = isOnline,
-            videoTrack = videoTrack,
-            screenSharingTrack = screenSharingTrack,
-            publishedTracks = publishedTracks,
-            videoTrackSize = videoTrackSize
-        )
+    /**
+     * The audio level of the participant
+     */
+    internal val _audioLevel: MutableStateFlow<Float> = MutableStateFlow(0F)
+    val audioLevel: StateFlow<Float> = _audioLevel
+
+    /**
+     * The video quality of the participant
+     */
+    internal val _connectionQuality: MutableStateFlow<ConnectionQuality> =
+        MutableStateFlow(ConnectionQuality.CONNECTION_QUALITY_UNSPECIFIED)
+    val connectionQuality: StateFlow<ConnectionQuality> = _connectionQuality
+
+    /**
+     * For ringing calls we track when the participant accepted or rejected
+     */
+    internal val _acceptedAt: MutableStateFlow<Date?> = MutableStateFlow(null)
+    val acceptedAt: StateFlow<Date?> = _acceptedAt
+
+    internal val _rejectedAt: MutableStateFlow<Date?> = MutableStateFlow(null)
+    val rejectedAt: StateFlow<Date?> = _rejectedAt
+
+    /**
+     * State that indicates whether the camera is capturing and sending video or not.
+     */
+    internal val _videoEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val videoEnabled: StateFlow<Boolean> = _videoEnabled
+
+    /**
+     * State that indicates whether the mic is capturing and sending the audio or not.
+     */
+    internal val _audioEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val audioEnabled: StateFlow<Boolean> = _audioEnabled
+
+    /**
+     * State that indicates whether the speakerphone is on or not.
+     */
+    internal val _speakerPhoneEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val speakerPhoneEnabled: StateFlow<Boolean> = _speakerPhoneEnabled
+
+    internal val _dominantSpeaker: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val dominantSpeaker: StateFlow<Boolean> = _dominantSpeaker
+
+    internal val _speaking: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val speaking: StateFlow<Boolean> = _speaking
+
+    internal val _lastSpeakingAt: MutableStateFlow<Date?> = MutableStateFlow(null)
+    val lastSpeakingAt: StateFlow<Date?> = _lastSpeakingAt
+
+    internal val _pinnedAt: MutableStateFlow<Date?> = MutableStateFlow(null)
+    val pinnedAt: StateFlow<Date?> = _pinnedAt
+
+    open val audioTrack by lazy {
+        publishedTracks?.filter { it == TrackType.TRACK_TYPE_AUDIO }
     }
-
 
     public val hasVideo: Boolean
         get() = TrackType.TRACK_TYPE_VIDEO in publishedTracks
@@ -86,7 +134,7 @@ public open class ParticipantState(
         return call.muteUsers(MuteUsersData(screenShare = true, users= listOf(user.value.id)))
     }
 
-    fun updateFromData(participant: Participant) {
+    fun updateFromParticipantInfo(participant: Participant) {
         sessionId = participant.session_id
         _joinedAt.value = participant.joined_at?.toEpochMilli()?.let { Date(it) } ?: Date() // convert instant to date
         idPrefix = participant.track_lookup_prefix
@@ -98,58 +146,6 @@ public open class ParticipantState(
         _user.value = currentUser.copy(name = participant.name)
     }
 
-    open val audioTrack by lazy {
-        publishedTracks?.filter { it == TrackType.TRACK_TYPE_AUDIO }
-    }
 
-    /**
-     * The user
-     */
-    internal val _user: MutableStateFlow<User> = MutableStateFlow(initialUser)
-    val user: StateFlow<User> = _user
 
-    internal val _acceptedAt: MutableStateFlow<Date?> = MutableStateFlow(null)
-    val acceptedAt: StateFlow<Date?> = _acceptedAt
-
-    internal val _rejectedAt: MutableStateFlow<Date?> = MutableStateFlow(null)
-    val rejectedAt: StateFlow<Date?> = _rejectedAt
-
-    internal val _joinedAt: MutableStateFlow<Date?> = MutableStateFlow(null)
-    val joinedAt: StateFlow<Date?> = _joinedAt
-
-    /**
-     * State that indicates whether the camera is capturing and sending video or not.
-     */
-    internal val _videoEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    val videoEnabled: StateFlow<Boolean> = _videoEnabled
-
-    internal val _dominantSpeaker: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    val dominantSpeaker: StateFlow<Boolean> = _dominantSpeaker
-
-    internal val _speaking: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    val speaking: StateFlow<Boolean> = _speaking
-
-    internal val _lastSpeakingAt: MutableStateFlow<Date?> = MutableStateFlow(null)
-    val lastSpeakingAt: StateFlow<Date?> = _lastSpeakingAt
-
-    internal val _pinnedAt: MutableStateFlow<Date?> = MutableStateFlow(null)
-    val pinnedAt: StateFlow<Date?> = _pinnedAt
-
-    internal val _audioLevel: MutableStateFlow<Float> = MutableStateFlow(0F)
-    val audioLevel: StateFlow<Float> = _audioLevel
-
-    internal val _connectionQuality: MutableStateFlow<ConnectionQuality> =
-        MutableStateFlow(ConnectionQuality.CONNECTION_QUALITY_UNSPECIFIED)
-    val connectionQuality: StateFlow<ConnectionQuality> = _connectionQuality
-    /**
-     * State that indicates whether the mic is capturing and sending the audio or not.
-     */
-    internal val _isAudioEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    val audioEnabled: StateFlow<Boolean> = _isAudioEnabled
-
-    /**
-     * State that indicates whether the speakerphone is on or not.
-     */
-    internal val _isSpeakerPhoneEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    val speakerPhoneEnabled: StateFlow<Boolean> = _isSpeakerPhoneEnabled
 }

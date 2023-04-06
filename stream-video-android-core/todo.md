@@ -4,12 +4,11 @@
 ### Week 1: Refactor LLC & State. Setup testing
 ### Week 2: LLC Stability
 
-- ActiveSFUSessionTest
-- API for audio/video devices and integrate with webrtc. don't love the API yet
+- Openapi/Event integration. Events being out of sync is a large issue
+
 - Allow waiting for the client to connect (in a different part of the code than were the client is created)
 - Decide on LocalParticipantState (alternatively move the methods on the call)
 - Cleanup the test suite and make it faster
-- Openapi/Event integration. Events being out of sync is a large issue
 - Clean up the active SFU session
 
 
@@ -18,7 +17,6 @@
 This i'm still somewhat unsure about
 
 - MediaManager that has a dummy version of devices for test
-- Webrtc dummy version. Shares participants with dummy video tracks
 
 ## Phase 3, Test using the UI
 
@@ -138,6 +136,7 @@ This i'm still somewhat unsure about
 ### Available tasks up for grabs
 
 - Participant sorting rules. See Call sortedParticipants
+- Pinning of participants
 - Currently we use UserPreferencesManager. Jaewoong mentioned we should perhaps explore https://developer.android.com/topic/libraries/architecture/datastore
 - Measure latency isn't 100% ok. You can't set a timeout using withTimeout and collect the measurements that we have. This relates to threading vs coroutines and withTimeout not working
 - Logging needs to be reworked to correctly pass down from client to retrofit, also logs should work in the test suite
