@@ -198,7 +198,12 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true) : TestBase(
             clientImpl = client as StreamVideoImpl
             // Connect to the WS if needed
             if (connectCoordinatorWS) {
-                clientImpl.connect()
+                // wait for the connection/ avoids race conditions in tests
+                runBlocking {
+                    val connectResultDeferred = clientImpl.connectAsync()
+                    val connectResult = connectResultDeferred.await()
+                    assertSuccess(connectResult)
+                }
             }
             IntegrationTestState.client = client
         } else {

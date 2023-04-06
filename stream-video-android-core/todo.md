@@ -4,9 +4,7 @@
 ### Week 1: Refactor LLC & State. Setup testing
 ### Week 2: LLC Stability
 
-- Allow waiting for the client to connect (in a different part of the code than were the client is created)
 - Token refresh flow
-- Cleanup call state
 - Openapi/Event integration. Events being out of sync is a large issue
 - Cleanup the test suite
 - Clean up the active SFU session
@@ -24,11 +22,11 @@
 
 - [X] StreamVideoBuilder
 - [X] ParticipantState
-- [ ] StreamVideoImpl
+- [X] ClientState
 - [ ] ConnectionModule
+- [ ] StreamVideoImpl
 - [ ] Call
 - [ ] CallState
-- [ ] ClientState
 
 ### TODOs
 
@@ -55,8 +53,7 @@
 - [X] Responding to events
 - [X] Join flow
 - [X] Active Session
-- [ ] Reconnect flow (https://www.notion.so/Reconnection-Failure-handling-f6991fd2e5584380bb2d2cb5e8ac5303)
-- [ ] Join flow performance
+
 
 ### Websockets
 
@@ -93,9 +90,7 @@
 - [X] Support for listening to events at the call level
 - [X] Opus RED
 - [X] Opus DTX
-- [ ] Muting other users/ Moderation
-- [ ] Audio filter example
-- [ ] Video filter example
+- [X] Muting other users/ Moderation
 
 ### Documentation (code level)
 
@@ -108,6 +103,18 @@
 - [ ] Custom compose example
 - [ ] Authentication example
 - [ ] Docs on client setup
+
+
+### Client TODO
+
+- [ ] Join flow performance
+- [ ] Reconnect flow (https://www.notion.so/Reconnection-Failure-handling-f6991fd2e5584380bb2d2cb5e8ac5303)
+- [ ] Audio filter example
+- [ ] Video filter example
+
+### State TODO
+
+- [ ] Call settings need to be used everywhere
 
 ### Disconnect suggestion
 

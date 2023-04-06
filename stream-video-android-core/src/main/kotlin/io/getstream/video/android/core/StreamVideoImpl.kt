@@ -74,6 +74,8 @@ import stream.video.coordinator.client_v1_rpc.DeleteDeviceRequest
 import stream.video.coordinator.client_v1_rpc.MemberInput
 import stream.video.coordinator.client_v1_rpc.UpsertCallMembersRequest
 import stream.video.coordinator.push_v1.DeviceInput
+import kotlin.coroutines.Continuation
+import kotlin.coroutines.suspendCoroutine
 
 class EventSubscription(
     public val listener: VideoEventListener<VideoEvent>,
@@ -99,6 +101,8 @@ internal class StreamVideoImpl internal constructor(
     internal val pushDeviceGenerators: List<PushDeviceGenerator>,
 ) : StreamVideo, SocketListener {
 
+    private lateinit var connectContinuation: Continuation<Result<ConnectedEvent>>
+
     @VisibleForTesting
     public var peerConnectionFactory = StreamPeerConnectionFactory(context)
     public override val userId = user.id
@@ -117,6 +121,8 @@ internal class StreamVideoImpl internal constructor(
     private val logger by taggedLogger("Call:StreamVideo")
     private var subscriptions = mutableSetOf<EventSubscription>()
     private var calls = mutableMapOf<String, Call>()
+
+    val socketImpl = connectionModule.coordinatorSocket as VideoSocketImpl
 
     // caller: JOIN after accepting incoming call by callee
     /**
@@ -263,16 +269,16 @@ internal class StreamVideoImpl internal constructor(
 
     }
 
-    fun connect(): Result<ConnectedEvent> {
-        // TODO: When should connect run??
-        return runBlocking(scope.coroutineContext) {
-            logger.i { "Starting video coordinator connection for user ${user.id}" }
-            val socketImpl = connectionModule.coordinatorSocket as VideoSocketImpl
+    suspend fun connectAsync(): Deferred<Result<ConnectedEvent>> {
+        return scope.async {
             val result = socketImpl.connect()
-
+            if (result.isFailure) {
+                logger.e {"Failed to connect to coordinator, error $result.error"}
+            }
             result
         }
     }
+
 
     private fun observeState() {
         scope.launch {

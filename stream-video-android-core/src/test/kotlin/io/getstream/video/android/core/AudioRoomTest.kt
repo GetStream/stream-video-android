@@ -56,7 +56,7 @@ class AudioRoomTest : IntegrationTestBase() {
 
     @Test
     fun `creating a new call should work`() = runTest {
-        val result = client.call("default", randomUUID()).create()
+        val result = client.call("audio_room", randomUUID()).create()
         assertSuccess(result)
     }
 
@@ -79,7 +79,7 @@ class AudioRoomTest : IntegrationTestBase() {
 
     @Test
     fun `for audio rooms it's common to request permissions`() = runTest {
-        val result = call.requestPermissions(mutableListOf("screenshare", "send-audio"))
+        val result = call.requestPermissions("screenshare", "send-audio")
         assertSuccess(result)
     }
 
@@ -92,7 +92,7 @@ class AudioRoomTest : IntegrationTestBase() {
     fun `sometimes listeners will join with a token`() = runTest {
 
         // TODO: server support
-        val call = client.call("default", randomUUID(), "token")
+        val call = client.call("audio_room", randomUUID(), "token")
         val result = call.get()
         assertSuccess(result)
     }

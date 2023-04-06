@@ -24,6 +24,7 @@ import io.getstream.video.android.core.model.QueryCallsData
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.UserType
 import kotlinx.coroutines.test.runTest
+import okhttp3.internal.wait
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -113,7 +114,8 @@ class ClientAndAuthTest : TestBase() {
         ).build()
         assertThat(client.state.connection.value).isEqualTo(ConnectionState.PreConnect)
         val clientImpl = client as StreamVideoImpl
-        val connectResult = clientImpl.connect()
+        val connectResultDeferred = clientImpl.connectAsync()
+        val connectResult = connectResultDeferred.await()
 
         assertSuccess(connectResult)
 
@@ -154,6 +156,42 @@ class ClientAndAuthTest : TestBase() {
 //            ).build()
 //        }
 
+    }
+
+    @Test
+    fun testWaitingForConnection() = runTest {
+        // often you'll want to run the connection task in the background and not wait for it
+        val client = StreamVideoBuilder(
+            context = context,
+            apiKey = apiKey,
+            geo = GEO.GlobalEdgeNetwork,
+            testData.users["thierry"]!!,
+            testData.tokens["thierry"]!!,
+        ).build()
+        val clientImpl = client as StreamVideoImpl
+        client.subscribe {
+            println(it)
+        }
+        val deferred = clientImpl.connectAsync()
+        deferred.join()
+    }
+
+    @Test
+    fun `join a call without waiting for a connection`() = runTest {
+        // often you'll want to run the connection task in the background and not wait for it
+        val client = StreamVideoBuilder(
+            context = context,
+            apiKey = apiKey,
+            geo = GEO.GlobalEdgeNetwork,
+            testData.users["thierry"]!!,
+            testData.tokens["thierry"]!!,
+        ).build()
+        val clientImpl = client as StreamVideoImpl
+        val call = client.call("default", randomUUID())
+        val callCreateResult = call.create()
+        assertSuccess(callCreateResult)
+        // wonder if this will work, no coordinator connection
+        val callJoined = call.join()
     }
 
     @Test

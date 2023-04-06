@@ -74,7 +74,8 @@ public class CallCrudTest : IntegrationTestBase() {
         assertSuccess(createResult)
 
         // set a custom field and update
-        call.custom = mutableMapOf("color" to "green")
+        val secret = randomUUID()
+        call.custom = mutableMapOf("secret" to secret)
         val updateResult = call.update()
         assertSuccess(updateResult)
 
@@ -88,7 +89,7 @@ public class CallCrudTest : IntegrationTestBase() {
         val updateEvent = assertEventReceived(CallCreatedEvent::class.java)
 
         getResult.onSuccess {
-            assertThat(it.custom["color"]).isEqualTo("green")
+            assertThat(it.custom["color"]).isEqualTo(secret)
         }
     }
 

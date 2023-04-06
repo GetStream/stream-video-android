@@ -66,7 +66,7 @@ class LivestreamTest : IntegrationTestBase() {
 
     @Test
     fun `start and stop broadcasting to HLS`() = runTest {
-        val call = client.call("default", randomUUID())
+        val call = client.call("livestream", randomUUID())
         call.create()
         val result = call.startBroadcasting()
         assertSuccess(result)
@@ -77,7 +77,7 @@ class LivestreamTest : IntegrationTestBase() {
 
     @Test
     fun `calls should support RTMP in`() = runTest {
-        val call = client.call("default", randomUUID())
+        val call = client.call("livestream", randomUUID())
         // TODO: not implemented on the server
         // Create a publishing token
         // TODO: do we ask the coordinator for it? or generate it locally?
@@ -87,25 +87,25 @@ class LivestreamTest : IntegrationTestBase() {
     @Test
     fun `join a call with a viewing only token, that's not authenticated`() = runTest {
         // TODO: not implemented on the server
-        val call = client.call("default", randomUUID(), "mytoken")
+        val call = client.call("livestream", randomUUID(), "mytoken")
 
     }
 
     @Test
     fun `call should expose participant count, time running stats`() = runTest {
-        val call = client.call("default", randomUUID())
+        val call = client.call("livestream", randomUUID())
         // TODO: not implemented on the server
     }
 
     @Test
     fun `manually specify the video quality you want to receive`() = runTest {
-        val call = client.call("default", randomUUID())
+        val call = client.call("livestream", randomUUID())
         // TODO: not implemented on the server
     }
 
     @Test
     fun `mute the audio of the call you are receiving`() = runTest {
-        val call = client.call("default", randomUUID())
+        val call = client.call("livestream", randomUUID())
         // TODO: This we can implement client side, should be disabled by default
         // TODO: Call type setting to mute incoming audio by default
     }

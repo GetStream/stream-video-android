@@ -66,7 +66,7 @@ internal class VideoSocketImpl(
     private val coroutineScope: CoroutineScope,
 ) : VideoSocket {
     public var eventListener: ((event: VideoEvent) -> Unit)? = null
-    private lateinit var connectContinuation: Continuation<Result<ConnectedEvent>>
+    internal lateinit var connectContinuation: Continuation<Result<ConnectedEvent>>
     private val logger by taggedLogger("Call:CoordinatorSocket")
 
     private var connectionConf: SocketFactory.ConnectionConf? = null

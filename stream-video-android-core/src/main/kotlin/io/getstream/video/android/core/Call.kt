@@ -108,6 +108,9 @@ public class Call(
             connectionModule = (client as StreamVideoImpl).connectionModule,
             remoteIceServers=iceServers, latencyResults=measurements.associate { it.latencyUrl to it.measurements }
         )
+
+        client.state.setActiveCall(this)
+
         return Success<ActiveSFUSession>(data= activeSession!!)
 
     }
