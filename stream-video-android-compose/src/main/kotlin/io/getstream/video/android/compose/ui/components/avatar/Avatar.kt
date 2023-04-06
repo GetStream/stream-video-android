@@ -16,21 +16,30 @@
 
 package io.getstream.video.android.compose.ui.components.avatar
 
+import androidx.annotation.DrawableRes
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImagePainter
+import com.skydoves.landscapist.ImageOptions
+import com.skydoves.landscapist.animation.crossfade.CrossfadePlugin
+import com.skydoves.landscapist.coil.CoilImage
+import com.skydoves.landscapist.components.rememberImageComponent
+import com.skydoves.landscapist.placeholder.placeholder.PlaceholderPlugin
+import io.getstream.video.android.compose.imageloading.LocalStreamImageLoader
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.utils.rememberStreamImagePainter
 import io.getstream.video.android.ui.common.R
 
 /**
@@ -43,89 +52,95 @@ import io.getstream.video.android.ui.common.R
  * @param shape The shape of the avatar.
  * @param textStyle The text style of the [initials] text.
  * @param contentScale The scale option used for the content.
- * @param placeholderPainter The placeholder to render while loading is in progress.
  * @param contentDescription Description of the image.
  * @param initialsAvatarOffset The initials offset to apply to the avatar.
  * @param onClick OnClick action, that can be nullable.
  */
 @Composable
 public fun Avatar(
-    imageUrl: String,
-    initials: String,
     modifier: Modifier = Modifier,
+    imageUrl: String? = null,
+    initials: String? = null,
     shape: Shape = VideoTheme.shapes.avatar,
     textStyle: TextStyle = VideoTheme.typography.title3Bold,
     contentScale: ContentScale = ContentScale.Crop,
-    placeholderPainter: Painter? = null,
     contentDescription: String? = null,
+    requestSize: IntSize = IntSize(DEFAULT_IMAGE_SIZE, DEFAULT_IMAGE_SIZE),
+    @DrawableRes loadingPlaceholder: Int? = null,
+    @DrawableRes previewPlaceholder: Int = R.drawable.ic_preview_avatar,
     initialsAvatarOffset: DpOffset = DpOffset(0.dp, 0.dp),
     onClick: (() -> Unit)? = null,
 ) {
-    if (LocalInspectionMode.current && imageUrl.isNotBlank()) {
-        // Show hardcoded avatar from resources when rendering previews
-        ImageAvatar(
-            modifier = modifier,
-            shape = shape,
-            painter = painterResource(id = R.drawable.ic_preview_avatar),
-            contentDescription = contentDescription,
-            onClick = onClick
-        )
-        return
-    }
-    if (imageUrl.isBlank()) {
+    if (!initials.isNullOrBlank()) {
         InitialsAvatar(
             modifier = modifier,
             initials = initials,
             shape = shape,
             textStyle = textStyle,
-            onClick = onClick,
             avatarOffset = initialsAvatarOffset
         )
         return
     }
 
-    val painter = rememberStreamImagePainter(
-        data = imageUrl, placeholderPainter = painterResource(id = R.drawable.ic_preview_avatar)
-    )
-
-    if (painter.state is AsyncImagePainter.State.Error) {
-        InitialsAvatar(
-            modifier = modifier,
-            initials = initials,
-            shape = shape,
-            textStyle = textStyle,
+    val clickableModifier: Modifier = if (onClick != null) {
+        modifier.clickable(
             onClick = onClick,
-            avatarOffset = initialsAvatarOffset
-        )
-    } else if (painter.state is AsyncImagePainter.State.Loading && placeholderPainter != null) {
-        ImageAvatar(
-            modifier = modifier,
-            shape = shape,
-            painter = placeholderPainter,
-            contentScale = contentScale,
-            contentDescription = contentDescription,
-            onClick = onClick
+            indication = rememberRipple(bounded = false),
+            interactionSource = remember { MutableInteractionSource() }
         )
     } else {
-        ImageAvatar(
-            modifier = modifier,
-            shape = shape,
-            painter = painter,
-            contentScale = contentScale,
+        modifier
+    }
+
+    CoilImage(
+        modifier = clickableModifier.clip(shape),
+        imageModel = { imageUrl },
+        imageLoader = { LocalStreamImageLoader.current },
+        imageOptions = ImageOptions(
             contentDescription = contentDescription,
-            onClick = onClick
+            contentScale = contentScale,
+            requestSize = requestSize
+        ),
+        previewPlaceholder = previewPlaceholder,
+        component = rememberImageComponent {
+            +CrossfadePlugin()
+            loadingPlaceholder?.let {
+                +PlaceholderPlugin.Loading(painterResource(id = it))
+            }
+        },
+        failure = {
+            InitialsAvatar(
+                modifier = modifier,
+                initials = initials ?: "",
+                shape = shape,
+                textStyle = textStyle,
+                avatarOffset = initialsAvatarOffset
+            )
+        }
+    )
+}
+
+@Preview
+@Composable
+private fun AvatarInitialPreview() {
+    VideoTheme {
+        Avatar(
+            modifier = Modifier.size(72.dp),
+            initials = "Thierry"
         )
     }
 }
 
 @Preview
 @Composable
-public fun AvatarPreview() {
+internal fun AvatarImagePreview() {
     VideoTheme {
         Avatar(
-            modifier = Modifier.size(56.dp),
-            imageUrl = "",
-            initials = "CC"
+            modifier = Modifier.size(72.dp),
+            initials = null,
+            previewPlaceholder = R.drawable.stream_video_call_sample
         )
     }
 }
+
+private const val DEFAULT_IMAGE_SIZE = -1

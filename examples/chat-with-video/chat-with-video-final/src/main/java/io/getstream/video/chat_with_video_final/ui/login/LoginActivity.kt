@@ -42,8 +42,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.avatar.ImageAvatar
-import io.getstream.video.android.compose.utils.rememberStreamImagePainter
+import io.getstream.video.android.compose.ui.components.avatar.Avatar
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.User
 import io.getstream.video.chat_with_video_final.application.API_KEY
@@ -140,11 +139,11 @@ class LoginActivity : ComponentActivity() {
                         .clip(CircleShape)
                         .background(VideoTheme.colors.appBackground)
                 ) {
-                    ImageAvatar(
+                    Avatar(
                         modifier = Modifier
                             .size(40.dp)
                             .align(alignment = Alignment.Center),
-                        painter = rememberStreamImagePainter(data = credentials.imageUrl)
+                        imageUrl = credentials.imageUrl
                     )
                 }
 
