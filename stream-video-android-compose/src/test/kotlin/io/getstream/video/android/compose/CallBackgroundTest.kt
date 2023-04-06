@@ -29,6 +29,7 @@ import io.getstream.video.android.compose.ui.components.background.CallBackgroun
 import io.getstream.video.android.core.model.CallType
 import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.core.model.CallUserState
+import io.getstream.video.android.ui.common.R
 import org.junit.Rule
 import org.junit.Test
 
@@ -37,7 +38,7 @@ internal class CallBackgroundTest {
     val paparazzi = Paparazzi()
 
     @Test
-    fun `snapshot CallBackground composable with an Avatar`() {
+    fun `snapshot CallBackground composable with an image Avatar`() {
         paparazzi.snapshot {
             VideoTheme(isInDarkMode = false) {
                 CallBackground(
@@ -55,11 +56,13 @@ internal class CallBackgroundTest {
                             )
                         }
                     ),
-                    callType = CallType.VIDEO, isIncoming = true
+                    callType = CallType.VIDEO,
+                    isIncoming = true
                 ) {
                     Box(modifier = Modifier.align(Alignment.Center)) {
                         Avatar(
-                            modifier = Modifier.size(56.dp), imageUrl = "", initials = "CC"
+                            modifier = Modifier.size(82.dp),
+                            previewPlaceholder = R.drawable.stream_video_call_sample
                         )
                     }
                 }
@@ -68,7 +71,7 @@ internal class CallBackgroundTest {
     }
 
     @Test
-    fun `snapshot CallBackground composable with an Avatar dark theme`() {
+    fun `snapshot CallBackground composable with an initial Avatar`() {
         paparazzi.snapshot {
             VideoTheme(isInDarkMode = true) {
                 CallBackground(
@@ -90,7 +93,8 @@ internal class CallBackgroundTest {
                 ) {
                     Box(modifier = Modifier.align(Alignment.Center)) {
                         Avatar(
-                            modifier = Modifier.size(56.dp), imageUrl = "", initials = "CC"
+                            modifier = Modifier.size(56.dp),
+                            initials = "Thierry"
                         )
                     }
                 }
