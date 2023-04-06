@@ -90,19 +90,19 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
     @Test
     fun `Accepting & rejecting a call`() = runTest {
-        val acceptedEvent = CallAcceptedEvent(callCid = call.cid, sentByUserId = "123")
+        val acceptedEvent = CallAcceptedEvent(callCid = call.cid, sentByUserId = "123", sessionId="123")
         clientImpl.fireEvent(acceptedEvent)
         assertThat(call.state.getParticipant("123")?.acceptedAt?.value).isNotNull()
 
         val rejectedEvent =
-            CallRejectedEvent(callCid = call.cid, user = User(id = "123"), updatedAt = Date())
+            CallRejectedEvent(callCid = call.cid, user = User(id = "123"), updatedAt = Date(), sessionId="123")
         clientImpl.fireEvent(rejectedEvent)
         assertThat(call.state.getParticipant("123")?.rejectedAt?.value).isNotNull()
     }
 
     @Test
     fun `Audio level changes`() = runTest {
-        val levels = mutableMapOf("thierry" to UserAudioLevel(true, 10F))
+        val levels = mutableMapOf("thierry" to UserAudioLevel("thierry", true, 10F))
         val event = AudioLevelChangedEvent(levels = levels)
         clientImpl.fireEvent(event, call.cid)
 
@@ -113,7 +113,7 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
     @Test
     fun `Dominant speaker change`() = runTest {
-        val event = DominantSpeakerChangedEvent(userId = "jaewoong")
+        val event = DominantSpeakerChangedEvent(userId = "jaewoong", sessionId = "jaewoong")
         clientImpl.fireEvent(event, call.cid)
 
         // ensure we update call data and capabilities

@@ -42,7 +42,10 @@ data class CallRejectedEvent (
     val type: kotlin.String,
 
     @Json(name = "user")
-    val user: UserResponse
+    val user: UserResponse,
+
+    @Json(name = "session_id")
+    val sessionId: kotlin.String,
 
 )
 

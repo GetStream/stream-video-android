@@ -114,6 +114,7 @@ internal object EventMapper {
             CallAcceptedEvent(
                 callCid = event.callCid,
                 sentByUserId = event.user.id,
+                sessionId = event.sessionId,
             )
         }
         CALL_REJECTED -> {
@@ -124,6 +125,7 @@ internal object EventMapper {
             CallRejectedEvent(
                 callCid = event.callCid,
                 user = event.user.toUser(),
+                sessionId = event.sessionId,
                 updatedAt = Date(event.createdAt.toEpochSecond() * 1000)
             )
         }

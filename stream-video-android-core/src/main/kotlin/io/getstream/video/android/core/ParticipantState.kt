@@ -23,12 +23,12 @@ import java.util.*
  * TODO: we need equality functions here , data class will ignore the stateflows
  */
 public data class ParticipantState(
+    /** The SFU returns a session id for each participant. This session id is unique */
+    var sessionId: String = "",
     /** The call object */
     val call: Call,
     /** The current version of the user, this is the start for participant.user stateflow */
     val initialUser: User,
-    /** The SFU returns a session id for each participant */
-    var sessionId: String = "",
     /** If this participant is the you/ the local participant */
     val isLocal: Boolean = false,
     /** video track and size */
@@ -133,7 +133,14 @@ public data class ParticipantState(
         _dominantSpeaker.value = participant.is_dominant_speaker
         _audioLevel.value = participant.audio_level
         val currentUser = _user.value
-        _user.value = currentUser.copy(name = participant.name)
+        _user.value = currentUser.copy(
+            name = participant.name,
+            imageUrl=participant.image,
+            //custom = participant.custom,
+            role=participant.roles.first()
+        )
+
+        publishedTracks = participant.published_tracks.toSet()
     }
 
 

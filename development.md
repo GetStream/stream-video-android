@@ -95,13 +95,58 @@ Check the docs on TestBase, TestHelper and IntegrationTestBase for more utility 
 
 ### State management
 
-* All events are routed via the StreamVideoImpl.subcribe method. Both the SFU & Coordinator events
+* All events are routed via the StreamVideoImpl.subscribe method. Both the SFU & Coordinator events
 * Based on these events the following state is updated: client.state, call.state, member and participant state
 * client.fireEvent is used for firing local events and testing
 * client.handleEvent updates client state, call state and after that calls any listeners
 
-### WebRTC layer
+## WebRTC layer
 
+* Ideally you setup your camera tracks and audio tracks before you join a call
+* Otherwise you end up joining and immediately triggering onNegotiationNeeded after that
+
+### How it currently works
+
+Join logic
+
+* connectToCall with args (2 versions of this function that do something different)
+* initializeCall
+* connectToCall no args version
+* executeJoinRequest -> (get a generic sdp)
+* createPeerConnections -> StreamPeerConnectionFactory enables simulcast
+* loadParticipantsData
+* createUserTracks
+* After that onNegotiationNeeded is triggered. this creates a new offer and calls SetPublisherRequest
+  (it also seems to enable simulcast here, which is a weird place to do this. should be enabled from the start)
+
+### RTC offer/answer cycle
+
+* create the peer connections
+* capture audio and video (if we're not doing so already, in many apps it should already be on for the preview screen)
+* execute the join request
+* add the audio/video tracks which triggers onNegotiationNeeded
+* onNegotiationNeeded(which calls SetPublisherRequest)
+* JoinCallResponseEvent returns info on the call's state
+
+Camera/device changes -> listener in ActiveSFUSession -> updates the tracks.
+
+### RTC dynascale
+
+* We send what resolutions we want using UpdateSubscriptionsRequest. 
+  * It should be triggered as we paginate through participants
+  * Or when the UI layout changes
+* The SFU tells us what resolution to publish using the ChangePublishQualityEvent event
+
+### ParticipantState
+
+* Participants have a session id. the session id is unique
+* Each participant has a trackPrefix
+* New media streams have a streamID, which starts with the trackPrefix
+  val (trackPrefix, trackType) = mediaStream.id.split(':');
+
+### Questions
+
+* Why does JoinRequest not specify tracks, but SetPublisherRequest does?
 
 ### Compose
 

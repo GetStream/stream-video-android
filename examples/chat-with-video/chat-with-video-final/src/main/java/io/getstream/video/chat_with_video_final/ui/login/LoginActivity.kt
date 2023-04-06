@@ -86,7 +86,7 @@ class LoginActivity : ComponentActivity() {
 
         chatWithVideoApp.chatClient.connectUser(
             user = userLogin,
-            token = user.extraData["chatToken"] as String
+            token = user.custom["chatToken"] as String
         ).enqueue()
     }
 

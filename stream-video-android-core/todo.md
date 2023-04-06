@@ -5,6 +5,7 @@
 ### Week 2: LLC Stability
 
 - Token refresh flow
+- Sorted Map for participants
 - Openapi/Event integration. Events being out of sync is a large issue
 - Cleanup the test suite
 - Clean up the active SFU session
@@ -23,10 +24,10 @@
 - [X] StreamVideoBuilder
 - [X] ParticipantState
 - [X] ClientState
+- [ ] CallState
 - [ ] ConnectionModule
 - [ ] StreamVideoImpl
 - [ ] Call
-- [ ] CallState
 
 ### TODOs
 
@@ -77,6 +78,7 @@
 - [X] Easily see if the SFU is connected
 - [X] Merge the two concepts of Call. Call2 and model/Call.kt
 - [X] Use the new state in the view model
+- [X] User a map for sessionId -> ParticipantState. Fixes several bugs with userId vs sessionId
 - [ ] Verify all events are handled
 - [ ] Media manager class to abstract all the local audio/video stuff. Also makes it easy to test the codebase if you can swap out the media & webrtc stuff.
 
@@ -135,7 +137,9 @@
 - RTMP
 - HLS
 - Events for updating users
-- 
+- Participant count (for livestreams you cant rely on the list)
+- Participant.online field is weird. Aren't you always online as a participant?
+- ConnectionQualityInfo is a list, audio levels is a map. Lets standardize
 
 ### Available tasks up for grabs
 
