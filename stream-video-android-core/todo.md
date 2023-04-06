@@ -5,7 +5,6 @@
 ### Week 2: LLC Stability
 
 - Token refresh flow
-- Sorted Map for participants
 - Openapi/Event integration. Events being out of sync is a large issue
 - Cleanup the test suite
 - Clean up the active SFU session
@@ -107,8 +106,10 @@
 - [ ] Docs on client setup
 
 
-### Client TODO
+### LLC TODO
 
+- [ ] Directly use the events from openAPI to prevent things being out of sync
+- [ ] List of backend changes
 - [ ] Join flow performance
 - [ ] Reconnect flow (https://www.notion.so/Reconnection-Failure-handling-f6991fd2e5584380bb2d2cb5e8ac5303)
 - [ ] Audio filter example
@@ -116,7 +117,12 @@
 
 ### State TODO
 
-- [ ] Call settings need to be used everywhere
+- [ ] Call settings need to be used everywhere. There are still some hardcoded settings
+
+### RTC TODO
+
+- [ ] Media manager class to enable easy testing of all audio/video stuff
+- 
 
 ### Disconnect suggestion
 
@@ -134,7 +140,7 @@
 
 - Events as a sealed class
 - Tokens for calls
-- RTMP
+- RTMP. How will the API interactions work?
 - HLS
 - Events for updating users
 - Participant count (for livestreams you cant rely on the list)
