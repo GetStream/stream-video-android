@@ -10,7 +10,7 @@ on:
 jobs:
   lint:
     name: Spotless check
-    if: ${{ false }}  # disable for now
+
     runs-on: ubuntu-18.04
     steps:
       - name: Check out code
@@ -42,7 +42,6 @@ jobs:
 
   api_check:
     name: API check
-    if: ${{ false }}  # disable for now
     runs-on: ubuntu-18.04
     steps:
       - name: Check out code
@@ -56,7 +55,6 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
-    if: ${{ false }}  # disable for now
     steps:
       - uses: actions/checkout@v3
 
