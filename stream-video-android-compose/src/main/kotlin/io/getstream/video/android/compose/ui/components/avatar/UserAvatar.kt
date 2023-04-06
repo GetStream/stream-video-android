@@ -55,16 +55,10 @@ public fun UserAvatar(
     onClick: (() -> Unit)? = null,
 ) {
     Box(modifier = modifier) {
-        val initials = if (user.name.isNotBlank()) {
-            user.name.initials()
-        } else {
-            user.id.initials()
-        }
-
         Avatar(
             modifier = Modifier.fillMaxSize(),
-            imageUrl = user.imageUrl ?: "",
-            initials = initials,
+            imageUrl = user.imageUrl.orEmpty(),
+            initials = user.name.ifBlank { user.id },
             textStyle = textStyle,
             contentScale = contentScale,
             shape = shape,

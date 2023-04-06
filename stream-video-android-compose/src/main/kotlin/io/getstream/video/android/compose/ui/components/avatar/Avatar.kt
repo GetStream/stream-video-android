@@ -111,7 +111,7 @@ public fun Avatar(
         failure = {
             InitialsAvatar(
                 modifier = modifier,
-                initials = initials ?: "",
+                initials = initials.orEmpty(),
                 shape = shape,
                 textStyle = textStyle,
                 avatarOffset = initialsAvatarOffset

@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.utils.initialsGradient
+import io.getstream.video.android.core.utils.initials
 
 /**
  * Represents a special avatar case when we need to show the initials instead of an image. Usually happens when there
@@ -61,7 +62,7 @@ internal fun InitialsAvatar(
             modifier = Modifier
                 .align(Alignment.Center)
                 .offset(avatarOffset.x, avatarOffset.y),
-            text = initials,
+            text = initials.initials(),
             style = textStyle,
             color = VideoTheme.colors.avatarInitials
         )
@@ -74,7 +75,7 @@ private fun InitialsAvatarPreview() {
     VideoTheme {
         Avatar(
             modifier = Modifier.size(56.dp),
-            initials = "Thierry"
+            initials = "Jaewoong Eum"
         )
     }
 }
