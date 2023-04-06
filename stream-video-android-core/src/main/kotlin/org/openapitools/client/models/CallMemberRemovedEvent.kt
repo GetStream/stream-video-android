@@ -26,22 +26,29 @@ package org.openapitools.client.models
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param type Event Type
- * @param createdAt Date/time of creation
- * @param user */
+ * This event is sent when one or more members are removed from a call
+ *
+ * @param call * @param callCid * @param createdAt * @param members the list of member IDs removed from the call
+ * @param type The type of event: \"call.member_added\" in this case
+ */
 
-internal data class UserUpdated(
+data class CallMemberRemovedEvent(
 
-    /* Event Type */
-    @Json(name = "type")
-    val type: kotlin.String,
+    @Json(name = "call")
+    val call: CallResponse,
 
-    /* Date/time of creation */
+    @Json(name = "call_cid")
+    val callCid: kotlin.String,
+
     @Json(name = "created_at")
-    val createdAt: java.time.OffsetDateTime? = null,
+    val createdAt: java.time.OffsetDateTime,
 
-    @Json(name = "user")
-    val user: UserObject? = null
+    /* the list of member IDs removed from the call */
+    @Json(name = "members")
+    val members: kotlin.collections.List<kotlin.String>,
+
+    /* The type of event: \"call.member_added\" in this case */
+    @Json(name = "type")
+    val type: kotlin.String
 
 )

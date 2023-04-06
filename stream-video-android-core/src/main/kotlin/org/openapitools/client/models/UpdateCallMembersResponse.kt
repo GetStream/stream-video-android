@@ -27,26 +27,16 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param idGt * @param idGte * @param idLt * @param idLte * @param limit * @param offset */
+ * @param duration Duration of the request in human-readable format
+ * @param members */
 
-data class PaginationParamsRequest(
+data class UpdateCallMembersResponse(
 
-    @Json(name = "id_gt")
-    val idGt: kotlin.Int? = null,
+    /* Duration of the request in human-readable format */
+    @Json(name = "duration")
+    val duration: kotlin.String,
 
-    @Json(name = "id_gte")
-    val idGte: kotlin.Int? = null,
-
-    @Json(name = "id_lt")
-    val idLt: kotlin.Int? = null,
-
-    @Json(name = "id_lte")
-    val idLte: kotlin.Int? = null,
-
-    @Json(name = "limit")
-    val limit: kotlin.Int? = null,
-
-    @Json(name = "offset")
-    val offset: kotlin.Int? = null
+    @Json(name = "members")
+    val members: kotlin.collections.List<MemberResponse>
 
 )

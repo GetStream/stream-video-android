@@ -26,20 +26,26 @@ package org.openapitools.client.models
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param token Token string
- * @param userDetails * @param device */
+ * This event is sent when the WS connection is established and authenticated, this event contains the full user object as it is stored on the server
+ *
+ * @param connectionId The connection_id for this client
+ * @param createdAt * @param me * @param type The type of event: \"connection.ok\" in this case
+ */
 
-internal data class VideoWSAuthMessageRequest(
+data class WSConnectedEvent(
 
-    /* Token string */
-    @Json(name = "token")
-    val token: kotlin.String,
+    /* The connection_id for this client */
+    @Json(name = "connection_id")
+    val connectionId: kotlin.String,
 
-    @Json(name = "user_details")
-    val userDetails: UserObjectRequest,
+    @Json(name = "created_at")
+    val createdAt: java.time.OffsetDateTime,
 
-    @Json(name = "device")
-    val device: DeviceFieldsRequest? = null
+    @Json(name = "me")
+    val me: OwnUserResponse,
+
+    /* The type of event: \"connection.ok\" in this case */
+    @Json(name = "type")
+    val type: kotlin.String
 
 )

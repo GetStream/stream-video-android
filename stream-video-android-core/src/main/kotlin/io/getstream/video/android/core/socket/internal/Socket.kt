@@ -20,7 +20,7 @@ import com.squareup.moshi.JsonAdapter
 import com.squareup.wire.Message
 import okhttp3.WebSocket
 import org.openapitools.client.infrastructure.Serializer
-import org.openapitools.client.models.VideoWSAuthMessageRequest
+import org.openapitools.client.models.WSAuthMessageRequest
 import stream.video.coordinator.client_v1_rpc.WebsocketHealthcheck
 import stream.video.sfu.event.HealthCheckRequest
 import stream.video.sfu.event.JoinRequest
@@ -37,9 +37,9 @@ internal class Socket(private val socket: WebSocket) {
      * Sends the [authRequest] as a message to the socket, attempting to authenticate the
      * currently logged in user.
      */
-    fun authenticate(authRequest: VideoWSAuthMessageRequest) {
-        val adapter: JsonAdapter<VideoWSAuthMessageRequest> =
-            Serializer.moshi.adapter(VideoWSAuthMessageRequest::class.java)
+    fun authenticate(authRequest: WSAuthMessageRequest) {
+        val adapter: JsonAdapter<WSAuthMessageRequest> =
+            Serializer.moshi.adapter(WSAuthMessageRequest::class.java)
 
         val message = adapter.toJson(authRequest)
 

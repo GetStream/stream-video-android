@@ -33,11 +33,11 @@ import com.squareup.moshi.Json
  * @param createdBy * @param custom Custom data for this object
  * @param id Call ID
  * @param ownCapabilities The capabilities of the current user
- * @param recording * @param settings * @param team * @param transcribing * @param type The type of call
+ * @param recording * @param settings * @param transcribing * @param type The type of call
  * @param updatedAt Date/time of the last update
  * @param endedAt Date/time when the call ended
  * @param startsAt Date/time when the call will start
- */
+ * @param team */
 
 data class CallResponse(
 
@@ -79,9 +79,6 @@ data class CallResponse(
     @Json(name = "settings")
     val settings: CallSettingsResponse,
 
-    @Json(name = "team")
-    val team: kotlin.String,
-
     @Json(name = "transcribing")
     val transcribing: kotlin.Boolean,
 
@@ -99,6 +96,9 @@ data class CallResponse(
 
     /* Date/time when the call will start */
     @Json(name = "starts_at")
-    val startsAt: java.time.OffsetDateTime? = null
+    val startsAt: java.time.OffsetDateTime? = null,
+
+    @Json(name = "team")
+    val team: kotlin.String? = null
 
 )
