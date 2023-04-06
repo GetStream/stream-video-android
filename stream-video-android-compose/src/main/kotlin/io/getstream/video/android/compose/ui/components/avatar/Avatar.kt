@@ -143,4 +143,4 @@ internal fun AvatarImagePreview() {
     }
 }
 
-private const val DEFAULT_IMAGE_SIZE = -1
+internal const val DEFAULT_IMAGE_SIZE = -1
