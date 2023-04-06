@@ -29,17 +29,20 @@ public data class ParticipantState(
     val initialUser: User,
     /** The SFU returns a session id for each participant */
     var sessionId: String = "",
-    /** TODO what does this do? */
-    var idPrefix: String = "",
-
     /** If this participant is the you/ the local participant */
     val isLocal: Boolean = false,
-
+    /** video track and size */
     var videoTrack: VideoTrack? = null,
+    var videoTrackSize: Pair<Int, Int> = Pair(0, 0),
+    /** screen sharing track and size */
     var screenSharingTrack: VideoTrack? = null,
+    var screenSharingTrackSize: Pair<Int, Int> = Pair(0, 0),
+    /** all published tracks including audio */
     var publishedTracks: Set<TrackType> = emptySet(),
-    var videoTrackSize: Pair<Int, Int> = Pair(0, 0)
-) {
+    /** A prefix to identify tracks, internal */
+    internal var trackLookupPrefix: String = "",
+
+    ) {
     /**
      * The user, automatically updates when we receive user events
      */
@@ -108,19 +111,6 @@ public data class ParticipantState(
         publishedTracks?.filter { it == TrackType.TRACK_TYPE_AUDIO }
     }
 
-    public val hasVideo: Boolean
-        get() = TrackType.TRACK_TYPE_VIDEO in publishedTracks
-
-    public val hasAudio: Boolean
-        get() = TrackType.TRACK_TYPE_AUDIO in publishedTracks
-
-    public val hasScreenShare: Boolean
-        get() = TrackType.TRACK_TYPE_SCREEN_SHARE in publishedTracks && screenSharingTrack != null
-
-    public val hasScreenShareAudio: Boolean
-        get() = TrackType.TRACK_TYPE_SCREEN_SHARE_AUDIO in publishedTracks
-
-
     open suspend fun muteAudio(): Result<Unit> {
         // how do i mute another user?
         return call.muteUsers(MuteUsersData(audio = true, users= listOf(user.value.id)))
@@ -137,7 +127,7 @@ public data class ParticipantState(
     fun updateFromParticipantInfo(participant: Participant) {
         sessionId = participant.session_id
         _joinedAt.value = participant.joined_at?.toEpochMilli()?.let { Date(it) } ?: Date() // convert instant to date
-        idPrefix = participant.track_lookup_prefix
+        trackLookupPrefix = participant.track_lookup_prefix
         _connectionQuality.value = participant.connection_quality
         _speaking.value = participant.is_speaking
         _dominantSpeaker.value = participant.is_dominant_speaker

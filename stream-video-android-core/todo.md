@@ -4,17 +4,14 @@
 ### Week 1: Refactor LLC & State. Setup testing
 ### Week 2: LLC Stability
 
-- Openapi/Event integration. Events being out of sync is a large issue
-
 - Allow waiting for the client to connect (in a different part of the code than were the client is created)
-- Decide on LocalParticipantState (alternatively move the methods on the call)
-- Cleanup the test suite and make it faster
+- Token refresh flow
+- Cleanup call state
+- Openapi/Event integration. Events being out of sync is a large issue
+- Cleanup the test suite
 - Clean up the active SFU session
 
-
 ## Phase 2, find a way to make Call/SFUSession testable
-
-This i'm still somewhat unsure about
 
 - MediaManager that has a dummy version of devices for test
 
@@ -26,11 +23,12 @@ This i'm still somewhat unsure about
 ### Review each file, fix TODOS and document
 
 - [X] StreamVideoBuilder
+- [X] ParticipantState
 - [ ] StreamVideoImpl
 - [ ] ConnectionModule
 - [ ] Call
 - [ ] CallState
-- [ ] ParticipantState
+- [ ] ClientState
 
 ### TODOs
 
@@ -81,9 +79,8 @@ This i'm still somewhat unsure about
 - [X] VideoSocket Impl shouldn't hide errors
 - [X] Easily see if the SFU is connected
 - [X] Merge the two concepts of Call. Call2 and model/Call.kt
+- [X] Use the new state in the view model
 - [ ] Verify all events are handled
-- [ ] Local participants, maybe data class, something to get stateflow to play nice
-- [ ] Use the new state in the view model
 - [ ] Media manager class to abstract all the local audio/video stuff. Also makes it easy to test the codebase if you can swap out the media & webrtc stuff.
 
 ### Features
@@ -96,7 +93,7 @@ This i'm still somewhat unsure about
 - [X] Support for listening to events at the call level
 - [X] Opus RED
 - [X] Opus DTX
-- [ ] Muting other users
+- [ ] Muting other users/ Moderation
 - [ ] Audio filter example
 - [ ] Video filter example
 
@@ -139,5 +136,6 @@ This i'm still somewhat unsure about
 - Pinning of participants
 - Currently we use UserPreferencesManager. Jaewoong mentioned we should perhaps explore https://developer.android.com/topic/libraries/architecture/datastore
 - Measure latency isn't 100% ok. You can't set a timeout using withTimeout and collect the measurements that we have. This relates to threading vs coroutines and withTimeout not working
-- Logging needs to be reworked to correctly pass down from client to retrofit, also logs should work in the test suite
+- Logging setting needs to be passed to retrofit
 - Disconnect/ garbage collect flow needs a full round of review
+- Hash/copy/equality methods for participantstate (otherwise the participants stateflow will have bugs)

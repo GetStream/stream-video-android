@@ -157,14 +157,20 @@ class ClientAndAuthTest : TestBase() {
     }
 
     @Test
-    fun testInvalidToken() = runTest {
-        StreamVideoBuilder(
+    fun testInvalidTokenRecovery() = runTest {
+        val client = StreamVideoBuilder(
             context = context,
             apiKey = apiKey,
             geo = GEO.GlobalEdgeNetwork,
             testData.users["thierry"]!!,
             "invalidtoken",
+            // Maybe 1 param is better TODO
+            tokenProvider = { type, user, call ->
+                 testData.tokens["thierry"]!!
+            }
         ).build()
+        val result = client.call("default", randomUUID()).create()
+        assertSuccess(result)
     }
 
     @Test

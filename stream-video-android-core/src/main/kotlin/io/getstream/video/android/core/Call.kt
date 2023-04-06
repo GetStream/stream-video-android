@@ -143,8 +143,8 @@ public class Call(
     }
 
     /** Permissions */
-    suspend fun requestPermissions(permissions: List<String>): Result<Unit> {
-        return client.requestPermissions(type, id, permissions)
+    suspend fun requestPermissions(vararg permission: String): Result<Unit> {
+        return client.requestPermissions(type, id, permission.toList())
     }
 
     suspend fun startRecording(): Result<Any> {

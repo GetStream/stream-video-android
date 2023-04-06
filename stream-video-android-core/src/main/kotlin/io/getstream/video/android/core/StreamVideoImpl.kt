@@ -163,7 +163,16 @@ internal class StreamVideoImpl internal constructor(
             try {
                 Success(apiCall())
             } catch (e: HttpException) {
-                parseError(e)
+                val failure = parseError(e)
+                val parsedError = failure.error as VideoBackendError
+                if (parsedError.code == 5) {
+                    // invalid token
+                    // val newToken = tokenProvider.getToken()
+                    // set the token, repeat API call
+                    // keep track of retry count
+
+                }
+                failure
             }
         }
     }

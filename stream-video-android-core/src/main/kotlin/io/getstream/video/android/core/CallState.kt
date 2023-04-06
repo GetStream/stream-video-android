@@ -114,7 +114,7 @@ public class CallState(val call: Call, user: User) {
         var screenSharingSession: ScreenSharingSession? = null
 
         val updatedList = _participants.value.updateValue(
-            predicate = { it.idPrefix in mediaStream.id },
+            predicate = { it.trackLookupPrefix in mediaStream.id },
             transformer = {
                 val track = replaceTrackIfNeeded(mediaStream, it.videoTrack?.streamId)
 
@@ -296,7 +296,7 @@ public class CallState(val call: Call, user: User) {
         return getOrCreateParticipant(user.id)
     }
 
-    private fun getOrCreateParticipant(userId: String): ParticipantState {
+    fun getOrCreateParticipant(userId: String): ParticipantState {
         return if (participantMap.contains(userId)) {
             participantMap[userId]!!
         } else {
@@ -417,7 +417,7 @@ public class CallState(val call: Call, user: User) {
         logger.d { "[updateLocalVideoTrack] #sfu; localParticipant: $updatedParticipant, callParticipants: ${_participants.value}" }
     }
 
-
+    // TODO: move to active SFU session
     internal fun updateMuteState(
         userId: String,
         sessionId: String,
@@ -470,7 +470,7 @@ public class CallState(val call: Call, user: User) {
 
 
 
-
+    // TODO : move to media manager and listen for changes to update local state
 
     public fun setCameraEnabled(isEnabled: Boolean) {
         logger.d { "[setCameraEnabled] #sfu; isEnabled: $isEnabled" }

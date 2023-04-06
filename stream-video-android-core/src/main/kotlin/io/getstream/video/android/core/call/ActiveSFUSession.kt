@@ -906,7 +906,7 @@ public class ActiveSFUSession internal constructor(
     }
 
     private fun buildTrackId(trackTypeVideo: String): String {
-        return "${call?.state?.me?.value?.idPrefix}:$trackTypeVideo:${(Math.random() * 100).toInt()}"
+        return "${call?.state?.me?.value?.trackLookupPrefix}:$trackTypeVideo:${(Math.random() * 100).toInt()}"
     }
 
     private fun updatePublishQuality(event: ChangePublishQualityEvent) {
