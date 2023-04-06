@@ -24,7 +24,6 @@ import io.getstream.log.StreamLog
 import io.getstream.log.kotlin.KotlinStreamLogger
 import io.getstream.log.streamLog
 import io.getstream.result.Result
-import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.logging.LoggingLevel
@@ -181,9 +180,9 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true) : TestBase(
             testData.tokens["thierry"]!!,
             loggingLevel = LoggingLevel.BODY
         )
-        if (BuildConfig.CORE_TEST_LOCAL == "1") {
-            builder.videoDomain = "localhost"
-        }
+//        if (BuildConfig.CORE_TEST_LOCAL == "1") {
+//            builder.videoDomain = "localhost"
+//        }
 
         if (IntegrationTestState.client == null) {
             client = builder.build()
@@ -252,12 +251,13 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true) : TestBase(
 
         suspendCoroutine { continuation ->
             client.subscribe {
-                val matchingEvents = events.filter { it is T }
-                if (matchingEvents.isNotEmpty()) {
-                    continuation.resume(matchingEvents[0])
-                }
                 if (it is T) {
                     continuation.resume(it)
+                } else {
+                    val matchingEvents = events.filterIsInstance<T>()
+                    if (matchingEvents.isNotEmpty()) {
+                        continuation.resume(matchingEvents[0])
+                    }
                 }
             }
         }
