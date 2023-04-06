@@ -48,7 +48,8 @@ public object RTCEventMapper {
             }
             event.audio_level_changed != null -> AudioLevelChangedEvent(
                 event.audio_level_changed.audio_levels.associate {
-                    it.user_id to UserAudioLevel(
+                    it.session_id to UserAudioLevel(
+                        it.user_id,
                         it.is_speaking,
                         it.level
                     )
@@ -78,7 +79,7 @@ public object RTCEventMapper {
             event.participant_left != null -> with(event.participant_left) {
                 ParticipantLeftEvent(participant!!, call_cid)
             }
-            event.dominant_speaker_changed != null -> DominantSpeakerChangedEvent(event.dominant_speaker_changed.user_id)
+            event.dominant_speaker_changed != null -> DominantSpeakerChangedEvent(event.dominant_speaker_changed.user_id, event.dominant_speaker_changed.session_id)
             event.health_check_response != null -> SFUHealthCheckEvent
             event.join_response != null -> with(event.join_response) {
                 JoinCallResponseEvent(call_state!!)

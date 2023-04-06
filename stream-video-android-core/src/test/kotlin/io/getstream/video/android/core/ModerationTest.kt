@@ -27,7 +27,7 @@ class ModerationTest : IntegrationTestBase() {
     fun `Edtech style moderation`() = runTest {
 
         // a teacher mutes the audio for a student
-        val result = call.state.getOrCreateParticipant("tommaso").muteAudio()
+        val result = call.state.getOrCreateParticipant("tommaso", "tommaso").muteAudio()
         assertSuccess(result)
 
         // this needs to fire an event that update's Tommaso's permissions...

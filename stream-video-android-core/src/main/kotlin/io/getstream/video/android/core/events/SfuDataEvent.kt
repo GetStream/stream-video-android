@@ -69,10 +69,6 @@ public data class TrackUnpublishedEvent(
     val trackType: TrackType
 ) : SfuDataEvent()
 
-public data class VideoQualityChangedEvent(
-    val qualities: Map<String, VideoQuality>
-) : SfuDataEvent()
-
 public data class ParticipantJoinedEvent(
 
     val participant: Participant,
@@ -85,7 +81,8 @@ public data class ParticipantLeftEvent(
 ) : SfuDataEvent()
 
 public data class DominantSpeakerChangedEvent(
-    val userId: String
+    val userId: String,
+    val sessionId: String,
 ) : SfuDataEvent()
 
 public object SFUHealthCheckEvent : SfuDataEvent()

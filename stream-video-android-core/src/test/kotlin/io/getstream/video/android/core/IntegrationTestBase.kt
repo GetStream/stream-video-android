@@ -23,11 +23,11 @@ import io.getstream.log.Priority
 import io.getstream.log.StreamLog
 import io.getstream.log.kotlin.KotlinStreamLogger
 import io.getstream.log.streamLog
-import io.getstream.result.Result
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.User
+
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineScheduler
@@ -86,7 +86,7 @@ class IntegrationTestHelper {
 
         val thierry = User(
             id = "thierry", role = "admin", name = "Thierry", imageUrl = "hello",
-            teams = emptyList(), extraData = mapOf()
+            teams = emptyList(), custom = mapOf()
         )
         users["thierry"] = thierry
         tokens["thierry"] = token

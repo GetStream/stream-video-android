@@ -27,7 +27,7 @@ fun getUsers(): List<User> {
             token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tZ28tY2xpZW50LTAuMC4xIiwic3ViIjoidXNlci9maWxpcCIsImlhdCI6MTY3MDkyNDA4NSwidXNlcl9pZCI6ImZpbGlwIn0.XiDNEnkdljujjtRkElYmUIFkzf6ctxhEbDQB2DAPbGg",
             role = "admin",
             teams = emptyList(),
-            extraData = emptyMap()
+            custom = emptyMap()
         ),
         User(
             id = "thierry",
@@ -36,7 +36,7 @@ fun getUsers(): List<User> {
             token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tZ28tY2xpZW50LTAuMC4xIiwic3ViIjoidXNlci90aGllcnJ5IiwiaWF0IjoxNjcwOTI0MTAxLCJ1c2VyX2lkIjoidGhpZXJyeSJ9.4UgSogpG6vSqdaIxWu6p7N9pCweiwVkh-NzY3VL10yQ",
             role = "admin",
             teams = emptyList(),
-            extraData = emptyMap()
+            custom = emptyMap()
         ),
         User(
             id = "martin",
@@ -45,7 +45,7 @@ fun getUsers(): List<User> {
             token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tZ28tY2xpZW50LTAuMC4xIiwic3ViIjoidXNlci9tYXJ0aW4iLCJpYXQiOjE2NzA5MjQxMTQsInVzZXJfaWQiOiJtYXJ0aW4ifQ.fu7_35JefrLSraiXXS1oKSX8CX-mmxlkjEhhz45KU0k",
             role = "admin",
             teams = emptyList(),
-            extraData = emptyMap()
+            custom = emptyMap()
         ),
         User(
             id = "oliver",
@@ -54,7 +54,7 @@ fun getUsers(): List<User> {
             token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tZ28tY2xpZW50LTAuMC4xIiwic3ViIjoidXNlci9vbGl2ZXIiLCJpYXQiOjE2NzA5MjQyMDYsInVzZXJfaWQiOiJvbGl2ZXIifQ.QxMwqDoWEBO8jDmVc57pGdXE5w3YnKmHH2jV1DRIAxY",
             role = "admin",
             teams = emptyList(),
-            extraData = emptyMap()
+            custom = emptyMap()
         ),
         User(
             id = "tomislav",
@@ -63,7 +63,7 @@ fun getUsers(): List<User> {
             token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tZ28tY2xpZW50LTAuMC4xIiwic3ViIjoidXNlci90b21pc2xhdiIsImlhdCI6MTY3MDkyNDQzOSwidXNlcl9pZCI6InRvbWlzbGF2In0.uMxSQkztftF0YcAk1967aUcrvD7Mc9KteDdrRQh3ADM",
             role = "admin",
             teams = emptyList(),
-            extraData = emptyMap()
+            custom = emptyMap()
         )
     )
 }

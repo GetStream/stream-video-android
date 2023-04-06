@@ -28,7 +28,7 @@ fun getUsers(): List<User> {
             token = BuildConfig.SAMPLE_USER_00_VIDEO_TOKEN,
             role = BuildConfig.SAMPLE_USER_00_ROLE,
             teams = emptyList(),
-            extraData = emptyMap()
+            custom = emptyMap()
         ),
         User(
             id = BuildConfig.SAMPLE_USER_01_ID,
@@ -37,7 +37,7 @@ fun getUsers(): List<User> {
             token = BuildConfig.SAMPLE_USER_01_VIDEO_TOKEN,
             role = BuildConfig.SAMPLE_USER_01_ROLE,
             teams = emptyList(),
-            extraData = emptyMap()
+            custom = emptyMap()
         ),
         User(
             id = BuildConfig.SAMPLE_USER_02_ID,
@@ -46,7 +46,7 @@ fun getUsers(): List<User> {
             token = BuildConfig.SAMPLE_USER_02_VIDEO_TOKEN,
             role = BuildConfig.SAMPLE_USER_02_ROLE,
             teams = emptyList(),
-            extraData = emptyMap()
+            custom = emptyMap()
         ),
         User(
             id = BuildConfig.SAMPLE_USER_03_ID,
@@ -55,7 +55,7 @@ fun getUsers(): List<User> {
             token = BuildConfig.SAMPLE_USER_03_VIDEO_TOKEN,
             role = BuildConfig.SAMPLE_USER_03_ROLE,
             teams = emptyList(),
-            extraData = emptyMap()
+            custom = emptyMap()
         ),
         User(
             id = BuildConfig.SAMPLE_USER_04_ID,
@@ -64,7 +64,7 @@ fun getUsers(): List<User> {
             token = BuildConfig.SAMPLE_USER_04_VIDEO_TOKEN,
             role = BuildConfig.SAMPLE_USER_04_ROLE,
             teams = emptyList(),
-            extraData = emptyMap()
+            custom = emptyMap()
         ),
         User(
             id = BuildConfig.SAMPLE_USER_05_ID,
@@ -73,7 +73,7 @@ fun getUsers(): List<User> {
             token = BuildConfig.SAMPLE_USER_05_VIDEO_TOKEN,
             role = BuildConfig.SAMPLE_USER_05_ROLE,
             teams = emptyList(),
-            extraData = emptyMap()
+            custom = emptyMap()
         )
     )
 }

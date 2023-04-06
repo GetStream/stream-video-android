@@ -23,10 +23,10 @@
 - [X] StreamVideoBuilder
 - [X] ParticipantState
 - [X] ClientState
+- [ ] CallState
 - [ ] ConnectionModule
 - [ ] StreamVideoImpl
 - [ ] Call
-- [ ] CallState
 
 ### TODOs
 
@@ -77,6 +77,7 @@
 - [X] Easily see if the SFU is connected
 - [X] Merge the two concepts of Call. Call2 and model/Call.kt
 - [X] Use the new state in the view model
+- [X] User a map for sessionId -> ParticipantState. Fixes several bugs with userId vs sessionId
 - [ ] Verify all events are handled
 - [ ] Media manager class to abstract all the local audio/video stuff. Also makes it easy to test the codebase if you can swap out the media & webrtc stuff.
 
@@ -105,8 +106,10 @@
 - [ ] Docs on client setup
 
 
-### Client TODO
+### LLC TODO
 
+- [ ] Directly use the events from openAPI to prevent things being out of sync
+- [ ] List of backend changes
 - [ ] Join flow performance
 - [ ] Reconnect flow (https://www.notion.so/Reconnection-Failure-handling-f6991fd2e5584380bb2d2cb5e8ac5303)
 - [ ] Audio filter example
@@ -114,7 +117,12 @@
 
 ### State TODO
 
-- [ ] Call settings need to be used everywhere
+- [ ] Call settings need to be used everywhere. There are still some hardcoded settings
+
+### RTC TODO
+
+- [ ] Media manager class to enable easy testing of all audio/video stuff
+- 
 
 ### Disconnect suggestion
 
@@ -132,10 +140,12 @@
 
 - Events as a sealed class
 - Tokens for calls
-- RTMP
+- RTMP. How will the API interactions work?
 - HLS
 - Events for updating users
-- 
+- Participant count (for livestreams you cant rely on the list)
+- Participant.online field is weird. Aren't you always online as a participant?
+- ConnectionQualityInfo is a list, audio levels is a map. Lets standardize
 
 ### Available tasks up for grabs
 

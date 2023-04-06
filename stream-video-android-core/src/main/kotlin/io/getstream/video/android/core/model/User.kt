@@ -41,7 +41,7 @@ public data class User(
     val name: String = "",
     val imageUrl: String = "",
     val teams: List<String> = emptyList(),
-    val extraData: Map<String, String> = emptyMap()
+    val custom: Map<String, String> = emptyMap()
 
 ) {
     public fun isValid(): Boolean {

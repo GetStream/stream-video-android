@@ -54,7 +54,6 @@ import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
 import io.getstream.video.android.core.events.VideoEvent
-import io.getstream.video.android.core.events.VideoQualityChangedEvent
 import io.getstream.video.android.core.filter.InFilterObject
 import io.getstream.video.android.core.filter.toMap
 import io.getstream.video.android.core.internal.module.ConnectionModule
@@ -186,6 +185,45 @@ public class ActiveSFUSession internal constructor(
 
         sfuConnectionModule.sfuSocket.addListener(this)
         sfuConnectionModule.sfuSocket.connectSocket()
+    }
+
+    fun connectRTC() {
+        // step 1 setup the peer connections
+        createSubscriber()
+        // if we are allowed to publish, create a peer connection for it
+        // TODO: real settings check
+        if (true) {
+            createPublisher()
+        }
+
+        // step 2 ensure all tracks are setup correctly
+        // start capturing the video
+        mediaManager.startCapturingLocalVideo(CameraMetadata.LENS_FACING_FRONT)
+        val capturer = mediaManager.buildCameraCapturer()
+
+        val isScreenShare = false
+        val videoSource = clientImpl.peerConnectionFactory.makeVideoSource(isScreenShare)
+
+        // render it on the surface. but we need to start this before forwarding it to the publisher
+        capturer?.initialize(surfaceTextureHelper, context, videoSource.capturerObserver)
+        // TODO: understand how to start with only rendering on the surface view
+
+
+        val videoTrack = clientImpl.peerConnectionFactory.makeVideoTrack(
+            source = videoSource, trackId = buildTrackId(TRACK_TYPE_VIDEO)
+        )
+        localVideoTrack = videoTrack
+        videoTrack.setEnabled(_isVideoEnabled.value)
+        logger.v { "[createUserTracks] #sfu; videoTrack: ${videoTrack.stringify()}" }
+        publisher?.addVideoTransceiver(localVideoTrack!!, listOf(sessionId))
+
+        // TODO: why are tracks required on SetPublisherRequest
+
+        // 3. listen for changes to the camera and update
+//        call.camera.selectedDevice.collectLatest { device ->
+//            logger.i { "Camera changed from $currentDevice to $device" }
+//        }
+
     }
 
     // ensure we parse errors and run on the right coroutineContext
@@ -627,6 +665,7 @@ public class ActiveSFUSession internal constructor(
     }
 
     private suspend fun executeJoinRequest(): Result<JoinResponse> {
+
         val sdp = getGenericSdp()
 
         val request = JoinRequest(
@@ -1042,6 +1081,12 @@ public class ActiveSFUSession internal constructor(
         return SessionDescription(sdp.type, modifiedLines.joinToString("\r\n"))
     }
 
+    /**
+     * This is called when you are look at a different set of participants
+     * or at a different size
+     *
+     * It tells the SFU that we want to receive person a's video at 1080p, and person b at 360p
+     */
     private fun updateParticipantsSubscriptions(participants: List<ParticipantState>) {
         val subscriptions = mutableMapOf<ParticipantState, VideoDimension>()
         val userId = client.user.id
@@ -1111,25 +1156,21 @@ public class ActiveSFUSession internal constructor(
                 when (event) {
                     is ICETrickleEvent -> handleTrickle(event)
                     is SubscriberOfferEvent -> handleSubscriberOffer(event)
-                    is PublisherAnswerEvent -> Unit
-                    is ChangePublishQualityEvent -> Unit
+                    is PublisherAnswerEvent -> {
+                        // this event is deprecated
+                    }
+                    // this dynascale event tells the SDK to change the quality of the video it's uploading
+                    is ChangePublishQualityEvent -> updatePublishQuality(event)
 
                     is TrackPublishedEvent -> {
-                        call?.state?.updateMuteState(
-                            event.userId,
-                            event.sessionId,
-                            event.trackType,
-                            true
-                        )
+
+                        call?.state?.updatePublishState(event.userId, event.sessionId, event.trackType, true)
+
                     }
 
                     is TrackUnpublishedEvent -> {
-                        call?.state?.updateMuteState(
-                            event.userId,
-                            event.sessionId,
-                            event.trackType,
-                            false
-                        )
+
+                        call?.state?.updatePublishState(event.userId, event.sessionId, event.trackType, false)
                     }
 
                     is AudioLevelChangedEvent -> {
@@ -1145,12 +1186,18 @@ public class ActiveSFUSession internal constructor(
                     }
 
                     is ErrorEvent -> TODO()
-                    is JoinCallResponseEvent -> TODO()
-                    is ParticipantJoinedEvent -> TODO()
-                    is ParticipantLeftEvent -> TODO()
-                    is SFUConnectedEvent -> TODO()
-                    SFUHealthCheckEvent -> TODO()
-                    is VideoQualityChangedEvent -> TODO()
+                    is JoinCallResponseEvent -> {
+                        // handled by call state
+                    }
+                    is ParticipantJoinedEvent -> {
+                        // handle by call state
+                    }
+                    is ParticipantLeftEvent -> {
+                        // handled by call state
+                    }
+                    else -> {
+                        logger.d { "[onRtcEvent] skipped event: $event" }
+                    }
                 }
             }
         }

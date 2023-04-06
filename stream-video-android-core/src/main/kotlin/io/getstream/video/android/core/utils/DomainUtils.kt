@@ -110,7 +110,7 @@ internal fun UserResponse.toUser(): User {
         name = name ?: "",
         imageUrl = image ?: "",
         teams = teams ?: emptyList(),
-        extraData = custom.mapValues { it.value.toString() }
+        custom = custom.mapValues { it.value.toString() }
     )
 }
 
