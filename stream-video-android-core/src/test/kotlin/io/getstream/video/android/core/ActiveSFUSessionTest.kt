@@ -96,7 +96,8 @@ class ActiveSFUSessionTest : IntegrationTestBase() {
         assertSuccess(joinResult)
 
         // publisher trickle
-        val candidate = """{"sdpMid": "test", "sdpMLineIndex": 0, "candidate": "test", "usernameFragment": "test"}"""
+        val candidate =
+            """{"sdpMid": "test", "sdpMLineIndex": 0, "candidate": "test", "usernameFragment": "test"}"""
         val publisherTrickle = ICETrickleEvent(candidate, PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED)
         call.activeSession?.handleTrickle(publisherTrickle)
         // subscriber trickle

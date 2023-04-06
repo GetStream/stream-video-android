@@ -26,8 +26,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.participants.CallParticipant
+import io.getstream.video.android.compose.ui.components.previews.ParticipantsProvider
 import io.getstream.video.android.core.model.Call
 import io.getstream.video.android.core.model.CallParticipantState
 
@@ -40,7 +43,7 @@ import io.getstream.video.android.core.model.CallParticipantState
  */
 @Composable
 internal fun ParticipantsRow(
-    call: Call,
+    call: Call?,
     participants: List<CallParticipantState>,
     modifier: Modifier = Modifier
 ) {
@@ -64,7 +67,7 @@ internal fun ParticipantsRow(
  */
 @Composable
 private fun ParticipantListItem(
-    call: Call,
+    call: Call?,
     participant: CallParticipantState
 ) {
     CallParticipant(
@@ -75,4 +78,17 @@ private fun ParticipantListItem(
         participant = participant,
         labelPosition = Alignment.BottomStart
     )
+}
+
+@Preview
+@Composable
+private fun ParticipantsRowPreview(
+    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<CallParticipantState>
+) {
+    VideoTheme {
+        ParticipantsRow(
+            call = null,
+            participants = callParticipants
+        )
+    }
 }

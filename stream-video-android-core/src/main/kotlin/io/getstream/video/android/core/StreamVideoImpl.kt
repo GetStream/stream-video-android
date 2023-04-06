@@ -21,10 +21,12 @@ import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.Lifecycle
 import io.getstream.android.push.PushDeviceGenerator
 import io.getstream.log.taggedLogger
+import io.getstream.result.Error
+import io.getstream.result.Result
+import io.getstream.result.Result.Failure
+import io.getstream.result.Result.Success
 import io.getstream.video.android.core.call.SFUSession
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
-import io.getstream.video.android.core.errors.VideoBackendError
-import io.getstream.video.android.core.errors.VideoError
 import io.getstream.video.android.core.events.CallCreatedEvent
 import io.getstream.video.android.core.events.ConnectedEvent
 import io.getstream.video.android.core.events.VideoEvent
@@ -56,13 +58,9 @@ import io.getstream.video.android.core.socket.SocketListener
 import io.getstream.video.android.core.socket.internal.SocketState
 import io.getstream.video.android.core.socket.internal.VideoSocketImpl
 import io.getstream.video.android.core.user.UserPreferencesManager
-import io.getstream.video.android.core.utils.Failure
 import io.getstream.video.android.core.utils.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.core.utils.LatencyResult
-import io.getstream.video.android.core.utils.Result
-import io.getstream.video.android.core.utils.Success
 import io.getstream.video.android.core.utils.getLatencyMeasurementsOKHttp
-import io.getstream.video.android.core.utils.map
 import io.getstream.video.android.core.utils.toCall
 import io.getstream.video.android.core.utils.toCallUser
 import io.getstream.video.android.core.utils.toEdge
@@ -199,8 +197,8 @@ internal class StreamVideoImpl internal constructor(
                 Success(apiCall())
             } catch (e: HttpException) {
                 val failure = parseError(e)
-                val parsedError = failure.error as VideoBackendError
-                if (parsedError.code == 5) {
+                val parsedError = failure.value as Error.NetworkError
+                if (parsedError.serverErrorCode == 5) {
                     // invalid token
                     // val newToken = tokenProvider.getToken()
                     // set the token, repeat API call
@@ -232,7 +230,7 @@ internal class StreamVideoImpl internal constructor(
         }
     }
 
-    internal fun parseError(e: HttpException): Failure {
+    private fun parseError(e: HttpException): Failure {
         val errorBytes = e.response()?.errorBody()?.bytes()
         val error = errorBytes?.let {
             val errorBody = String(it, Charsets.UTF_8)
@@ -240,8 +238,8 @@ internal class StreamVideoImpl internal constructor(
                 prettyPrint = true
                 ignoreUnknownKeys = true
             }
-            format.decodeFromString<VideoBackendError>(errorBody)
-        } ?: VideoError("failed to parse error response from server")
+            format.decodeFromString<Error.NetworkError>(errorBody)
+        } ?: Error.NetworkError("failed to parse error response from server", e.code())
         return Failure(error)
     }
 
@@ -525,7 +523,7 @@ internal class StreamVideoImpl internal constructor(
             }
             logger.v { "[joinCallInternal] joinResult: $joinResult" }
 
-            val validEdges = joinResult.data.edges.filter {
+            val validEdges = joinResult.value.edges.filter {
                 it.latencyUrl.isNotBlank() && it.name.isNotBlank()
             }
 
@@ -542,11 +540,11 @@ internal class StreamVideoImpl internal constructor(
             when (selectEdgeServerResult) {
                 is Success -> {
                     connectionModule.coordinatorSocket.updateCallState(call)
-                    val credentials = selectEdgeServerResult.data.credentials
+                    val credentials = selectEdgeServerResult.value.credentials
                     val url = credentials.server.url
                     val iceServers =
                         selectEdgeServerResult
-                            .data
+                            .value
                             .credentials
                             .iceServers
                             .map { it.toIceServer() }
@@ -563,11 +561,15 @@ internal class StreamVideoImpl internal constructor(
                     )
                 }
 
-                is Failure -> Failure(selectEdgeServerResult.error)
+                is Failure -> Failure(selectEdgeServerResult.value)
             }
         } catch (error: Throwable) {
             logger.e(error) { "[joinCallInternal] failed: $error" }
-            Failure(VideoError(error.message, error))
+            Failure(
+                Error.ThrowableError(
+                    error.message ?: "Couldn't join a call internal", error
+                )
+            )
         }
     }
 
@@ -800,7 +802,7 @@ internal class StreamVideoImpl internal constructor(
         val request = queryCallsData.toRequest()
         val connectionId = connectionModule.coordinatorSocket.getConnectionId()
         return wrapAPICall {
-            connectionModule.defaultApi.queryCalls(request, connectionId).toQueriedCalls()
+            connectionModule.videoCallsApi.queryCalls(request, connectionId).toQueriedCalls()
         }
     }
 
@@ -815,7 +817,7 @@ internal class StreamVideoImpl internal constructor(
         logger.d { "[requestPermissions] callCid: $type:$id, permissions: $permissions" }
 
         return wrapAPICall {
-            connectionModule.defaultApi.requestPermission(
+            connectionModule.moderationApi.requestPermission(
                 type,
                 id,
                 RequestPermissionRequest(permissions)
@@ -829,7 +831,7 @@ internal class StreamVideoImpl internal constructor(
     override suspend fun startBroadcasting(type: String, id: String): Result<Unit> {
         logger.d { "[startBroadcasting] callCid: $type $id" }
 
-        return wrapAPICall { connectionModule.defaultApi.startBroadcasting(type, id) }
+        return wrapAPICall { connectionModule.livestreamingApi.startBroadcasting(type, id) }
     }
 
     /**
@@ -837,7 +839,7 @@ internal class StreamVideoImpl internal constructor(
      */
     override suspend fun stopBroadcasting(type: String, id: String): Result<Unit> {
 
-        return wrapAPICall { connectionModule.defaultApi.stopBroadcasting(type, id) }
+        return wrapAPICall { connectionModule.livestreamingApi.stopBroadcasting(type, id) }
     }
 
     /**
@@ -845,7 +847,7 @@ internal class StreamVideoImpl internal constructor(
      */
     override suspend fun startRecording(type: String, id: String): Result<Unit> {
 
-        return wrapAPICall { connectionModule.defaultApi.startRecording(type, id) }
+        return wrapAPICall { connectionModule.recordingApi.startRecording(type, id) }
     }
 
     /**
@@ -854,7 +856,7 @@ internal class StreamVideoImpl internal constructor(
     override suspend fun stopRecording(type: String, id: String): Result<Unit> {
 
         return wrapAPICall {
-            connectionModule.defaultApi.stopRecording(type, id)
+            connectionModule.recordingApi.stopRecording(type, id)
         }
     }
 
@@ -867,7 +869,7 @@ internal class StreamVideoImpl internal constructor(
         updateUserPermissionsData: UpdateUserPermissionsData
     ): Result<Unit> {
         return wrapAPICall {
-            connectionModule.defaultApi.updateUserPermissions(
+            connectionModule.moderationApi.updateUserPermissions(
                 type,
                 id,
                 updateUserPermissionsData.toRequest()
@@ -885,7 +887,7 @@ internal class StreamVideoImpl internal constructor(
     ): Result<ListRecordingsResponse> {
         // TODO: Result structure isn't flexible
         return wrapAPICall {
-            val result = connectionModule.defaultApi.listRecordings(type, id, sessionId)
+            val result = connectionModule.recordingApi.listRecordings(type, id, sessionId)
 
             result.recordings.map { it.toRecording() }
             result
@@ -903,7 +905,7 @@ internal class StreamVideoImpl internal constructor(
         logger.d { "[sendVideoReaction] callCid: $type:$id, sendReactionData: $sendReactionData" }
 
         return wrapAPICall {
-            connectionModule.defaultApi.sendVideoReaction(type, id, sendReactionData.toRequest())
+            connectionModule.videoCallsApi.sendVideoReaction(type, id, sendReactionData.toRequest())
         }
     }
 
@@ -1016,13 +1018,13 @@ internal class StreamVideoImpl internal constructor(
     override suspend fun handlePushMessage(payload: Map<String, Any>): Result<Unit> =
         withContext(scope.coroutineContext) {
             val callCid = payload[INTENT_EXTRA_CALL_CID] as? String
-                ?: return@withContext Failure(VideoError("Missing Call CID!"))
+                ?: return@withContext Failure(Error.GenericError("Missing Call CID!"))
 
             val (type, id) = callCid.toTypeAndId()
 
             when (val result = getOrCreateCall(type, id, emptyList(), false)) {
                 is Success -> {
-                    val callMetadata = result.data
+                    val callMetadata = result.value
 
                     val event = CallCreatedEvent(
                         callCid = callMetadata.cid,

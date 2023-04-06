@@ -17,6 +17,8 @@
 package io.getstream.video.android.compose.ui.components.video
 
 import android.view.View
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.MutableState
@@ -25,7 +27,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
+import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.model.Call
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
@@ -41,13 +49,23 @@ import stream.video.sfu.models.TrackType
  */
 @Composable
 public fun VideoRenderer(
-    call: Call,
+    call: Call?,
     videoTrack: VideoTrack,
     sessionId: String,
     trackType: TrackType,
     modifier: Modifier = Modifier,
     onRender: (View) -> Unit = {},
 ) {
+    if (LocalInspectionMode.current || call == null) {
+        Image(
+            modifier = modifier.fillMaxSize().testTag("video_renderer"),
+            painter = painterResource(id = io.getstream.video.android.ui.common.R.drawable.stream_video_call_sample),
+            contentScale = ContentScale.Crop,
+            contentDescription = null
+        )
+        return
+    }
+
     val trackState: MutableState<VideoTrack?> = remember { mutableStateOf(null) }
     var view: VideoTextureViewRenderer? by remember { mutableStateOf(null) }
 
@@ -72,7 +90,7 @@ public fun VideoRenderer(
             }
         },
         update = { v -> setupVideo(trackState, videoTrack, v) },
-        modifier = modifier,
+        modifier = modifier.testTag("video_renderer"),
     )
 }
 
@@ -97,4 +115,17 @@ private fun setupVideo(
 
     trackState.value = track
     track.video.addSink(renderer)
+}
+
+@Preview
+@Composable
+private fun VideoRendererPreview() {
+    VideoTheme {
+        VideoRenderer(
+            call = null,
+            videoTrack = VideoTrack("", org.webrtc.VideoTrack(123)),
+            sessionId = "",
+            trackType = TrackType.TRACK_TYPE_VIDEO
+        )
+    }
 }

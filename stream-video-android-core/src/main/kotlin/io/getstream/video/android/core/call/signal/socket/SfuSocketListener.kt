@@ -16,8 +16,8 @@
 
 package io.getstream.video.android.core.call.signal.socket
 
+import io.getstream.result.Error
 import io.getstream.video.android.core.errors.DisconnectCause
-import io.getstream.video.android.core.errors.VideoError
 import io.getstream.video.android.core.events.ConnectedEvent
 import io.getstream.video.android.core.events.SFUConnectedEvent
 import io.getstream.video.android.core.events.SfuDataEvent
@@ -56,7 +56,7 @@ public interface SfuSocketListener {
      *
      * @param error The issue that occurred with the socket.
      */
-    public fun onError(error: VideoError) {
+    public fun onError(error: Error) {
     }
 
     /**

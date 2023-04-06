@@ -16,10 +16,10 @@
 
 package io.getstream.video.android.core
 
+import io.getstream.result.Result
 import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.VideoTrack
-import io.getstream.video.android.core.utils.Result
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import stream.video.sfu.models.ConnectionQuality
@@ -142,7 +142,8 @@ public data class ParticipantState(
 
     fun updateFromParticipantInfo(participant: Participant) {
         sessionId = participant.session_id
-        _joinedAt.value = participant.joined_at?.toEpochMilli()?.let { Date(it) } ?: Date() // convert instant to date
+        _joinedAt.value = participant.joined_at?.toEpochMilli()?.let { Date(it) }
+            ?: Date() // convert instant to date
         trackLookupPrefix = participant.track_lookup_prefix
         _connectionQuality.value = participant.connection_quality
         _speaking.value = participant.is_speaking

@@ -23,13 +23,12 @@ import io.getstream.log.Priority
 import io.getstream.log.StreamLog
 import io.getstream.log.kotlin.KotlinStreamLogger
 import io.getstream.log.streamLog
+import io.getstream.result.Result
 import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.User
-import io.getstream.video.android.core.utils.Result
-import io.getstream.video.android.core.utils.onError
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineScheduler

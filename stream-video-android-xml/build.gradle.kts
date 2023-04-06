@@ -56,7 +56,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime)
     implementation(libs.androidx.startup)
 
-    implementation(libs.coil)
+    implementation(libs.landscapist.coil)
 
     implementation(libs.stream.log)
 

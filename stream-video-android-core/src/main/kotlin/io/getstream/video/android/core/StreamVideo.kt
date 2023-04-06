@@ -17,6 +17,7 @@
 package io.getstream.video.android.core
 
 import android.content.Context
+import io.getstream.result.Result
 import io.getstream.video.android.core.call.SFUSession
 import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.events.VideoEventListener
@@ -37,7 +38,6 @@ import io.getstream.video.android.core.model.StreamCallId
 import io.getstream.video.android.core.model.StreamCallType
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.User
-import io.getstream.video.android.core.utils.Result
 import org.openapitools.client.models.GetCallEdgeServerRequest
 import org.openapitools.client.models.GetCallEdgeServerResponse
 import org.openapitools.client.models.GoLiveResponse

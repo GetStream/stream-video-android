@@ -16,6 +16,8 @@
 
 package io.getstream.video.android.core.errors
 
+import io.getstream.result.Error
+
 private const val NETWORK_FAILED_ERROR_CODE = 1000
 private const val PARSER_ERROR_ERROR_CODE = 1001
 private const val SOCKET_CLOSED_ERROR_CODE = 1002
@@ -71,4 +73,25 @@ public enum class VideoErrorCode(public val code: Int, public val description: S
 
         public fun isAuthenticationError(code: Int): Boolean = authenticationErrors.contains(code)
     }
+}
+
+public fun Error.NetworkError.Companion.create(
+    code: VideoErrorCode,
+    cause: Throwable? = null,
+    statusCode: Int = -1
+): Error.NetworkError {
+    return Error.NetworkError(
+        cause = cause, message = code.description, serverErrorCode = code.code, statusCode = statusCode
+    )
+}
+
+public fun Error.NetworkError.Companion.create(
+    streamCode: Int,
+    description: String,
+    statusCode: Int,
+    cause: Throwable? = null
+): Error.NetworkError {
+    return Error.NetworkError(
+        cause = cause, message = description, serverErrorCode = streamCode, statusCode = statusCode
+    )
 }

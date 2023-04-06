@@ -17,7 +17,6 @@
 package io.getstream.video.android.dogfooding
 
 import android.content.Context
-import android.content.Intent
 import android.media.MediaPlayer
 import android.os.Bundle
 import androidx.lifecycle.Lifecycle
@@ -53,20 +52,15 @@ class CallActivity : AbstractComposeCallActivity() {
     override fun onPause() {
         super.onPause()
 
-        mediaPlayer.stop()
-        mediaPlayer.release()
+        try {
+            mediaPlayer.stop()
+            mediaPlayer.release()
+        } catch (e: Exception) {
+        }
     }
 
     /**
      * Provides the StreamVideo instance through the videoApp.
      */
     override fun getStreamVideo(context: Context): StreamVideo = context.dogfoodingApp.streamVideo
-
-    companion object {
-        internal fun getIntent(
-            context: Context,
-        ): Intent {
-            return Intent(context, CallActivity::class.java)
-        }
-    }
 }

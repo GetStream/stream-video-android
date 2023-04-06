@@ -13,6 +13,7 @@ class AndroidLibraryComposeConventionPlugin : Plugin<Project> {
             pluginManager.apply("org.jetbrains.kotlin.android")
             pluginManager.apply("binary-compatibility-validator")
             pluginManager.apply("org.jetbrains.dokka")
+            pluginManager.apply("app.cash.paparazzi")
 
             extensions.configure<LibraryExtension> {
                 configureKotlinAndroid(this)

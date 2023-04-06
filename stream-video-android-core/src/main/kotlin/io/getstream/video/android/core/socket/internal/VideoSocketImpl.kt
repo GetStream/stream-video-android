@@ -20,10 +20,12 @@ import android.os.Handler
 import android.os.Looper
 import androidx.annotation.VisibleForTesting
 import io.getstream.log.taggedLogger
+import io.getstream.result.Error
+import io.getstream.result.Result
+import io.getstream.result.Result.Failure
+import io.getstream.result.Result.Success
 import io.getstream.video.android.core.errors.DisconnectCause
-import io.getstream.video.android.core.errors.VideoError
 import io.getstream.video.android.core.errors.VideoErrorCode
-import io.getstream.video.android.core.errors.VideoNetworkError
 import io.getstream.video.android.core.events.ConnectedEvent
 import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
@@ -32,15 +34,12 @@ import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.socket.SocketListener
 import io.getstream.video.android.core.socket.VideoSocket
 import io.getstream.video.android.core.user.UserPreferences
-import io.getstream.video.android.core.utils.Failure
-import io.getstream.video.android.core.utils.Result
-import io.getstream.video.android.core.utils.Success
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.openapitools.client.models.UserObjectRequest
-import org.openapitools.client.models.VideoWSAuthMessageRequest
+import org.openapitools.client.models.ConnectUserDetailsRequest
+import org.openapitools.client.models.WSAuthMessageRequest
 import stream.video.coordinator.client_v1_rpc.WebsocketHealthcheck
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
@@ -142,7 +141,7 @@ internal class VideoSocketImpl(
 
                 is State.Connected -> {
                     logger.i { "State.Connected" }
-                    val success = Success(data = newState.event)
+                    val success = Success(value = newState.event)
                     connectContinuation.resume(success)
                     healthMonitor.start()
                     callListeners { it.onConnected(newState.event) }
@@ -178,20 +177,20 @@ internal class VideoSocketImpl(
     }
         private set
 
-    override fun onSocketError(error: VideoError) {
+    override fun onSocketError(error: Error.NetworkError) {
         logger.i { "onSocketError: $error" }
-        connectContinuation.resume(Failure(error = error))
+        connectContinuation.resume(Failure(value = error))
         logger.e { "[onSocketError] state: $state, error: $error" }
         if (state !is State.DisconnectedPermanently) {
             callListeners { it.onError(error) }
-            (error as? VideoNetworkError)?.let(::onNetworkError)
+            (error as? Error.NetworkError)?.let(::onNetworkError)
         }
     }
 
-    private fun onNetworkError(error: VideoNetworkError) {
+    private fun onNetworkError(error: Error.NetworkError) {
         logger.e { "onNetworkError: $error" }
-        connectContinuation.resume(Failure(error = error))
-        when (error.streamCode) {
+        connectContinuation.resume(Failure(value = error))
+        when (error.serverErrorCode) {
             VideoErrorCode.PARSER_ERROR.code,
             VideoErrorCode.CANT_PARSE_CONNECTION_EVENT.code,
             VideoErrorCode.CANT_PARSE_EVENT.code,
@@ -251,17 +250,13 @@ internal class VideoSocketImpl(
         }
 
         socket?.authenticate(
-            VideoWSAuthMessageRequest( // TODO - double check and see about user device
+            WSAuthMessageRequest(
                 token = token,
-                userDetails = UserObjectRequest(
-                    id = user.id, role = user.role
-                ).apply {
-                    /**
-                     * Should be exposed on the BE to store user's custom data like name and image.
-                     */
-                    this["name"] = user.name
-                    user.imageUrl?.let { this["image"] = it }
-                }
+                userDetails = ConnectUserDetailsRequest(
+                    id = user.id,
+                    name = user.name,
+                    image = user.imageUrl,
+                )
             )
         )
     }
@@ -382,8 +377,8 @@ internal class VideoSocketImpl(
             override fun toString(): String = "NetworkDisconnected"
         }
 
-        data class DisconnectedTemporarily(val error: VideoNetworkError?) : State()
-        data class DisconnectedPermanently(val error: VideoNetworkError?) : State()
+        data class DisconnectedTemporarily(val error: Error.NetworkError?) : State()
+        data class DisconnectedPermanently(val error: Error.NetworkError?) : State()
         object DisconnectedByRequest : State() {
             override fun toString(): String = "DisconnectedByRequest"
         }

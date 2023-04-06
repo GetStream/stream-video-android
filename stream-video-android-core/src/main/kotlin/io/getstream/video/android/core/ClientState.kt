@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.core
 
-import io.getstream.video.android.core.errors.VideoError
 import io.getstream.video.android.core.events.CallCreatedEvent
 import io.getstream.video.android.core.events.ConnectedEvent
 import io.getstream.video.android.core.events.VideoEvent
@@ -30,7 +29,7 @@ sealed class ConnectionState() {
     object Connected : ConnectionState()
     object Reconnecting : ConnectionState()
     object Disconnected : ConnectionState()
-    class Failed(error: VideoError) : ConnectionState()
+    class Failed(error: Error) : ConnectionState()
 }
 
 sealed class RingingState() {
@@ -51,7 +50,8 @@ class ClientState(client: StreamVideo) {
     /**
      * connectionState shows if we've established a connection with the coordinator
      */
-    private val _connection: MutableStateFlow<ConnectionState> = MutableStateFlow(ConnectionState.PreConnect)
+    private val _connection: MutableStateFlow<ConnectionState> =
+        MutableStateFlow(ConnectionState.PreConnect)
     public val connection: StateFlow<ConnectionState> = _connection
 
     /**

@@ -16,6 +16,9 @@
 
 package io.getstream.video.android.core
 
+import io.getstream.result.Result
+import io.getstream.result.Result.Failure
+import io.getstream.result.Result.Success
 import io.getstream.video.android.core.call.ActiveSFUSession
 import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.events.VideoEventListener
@@ -26,9 +29,6 @@ import io.getstream.video.android.core.model.SendReactionData
 import io.getstream.video.android.core.model.SfuToken
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.toIceServer
-import io.getstream.video.android.core.utils.Failure
-import io.getstream.video.android.core.utils.Result
-import io.getstream.video.android.core.utils.Success
 import org.openapitools.client.models.GetCallEdgeServerRequest
 import org.openapitools.client.models.GoLiveResponse
 import org.openapitools.client.models.SendReactionResponse
@@ -88,9 +88,9 @@ public class Call(
 
         // step 2. measure latency
         // TODO: setup the initial call state based on this
-        println(result.data.call.settings)
+        println(result.value.call.settings)
 
-        val edgeUrls = result.data.edges.map { it.latencyUrl }
+        val edgeUrls = result.value.edges.map { it.latencyUrl }
         // measure latency in parallel
         val measurements = clientImpl.measureLatency(edgeUrls)
 
@@ -106,11 +106,11 @@ public class Call(
             return result as Failure
         }
 
-        val credentials = selectEdgeServerResult.data.credentials
+        val credentials = selectEdgeServerResult.value.credentials
         val url = credentials.server.url
         val iceServers =
             selectEdgeServerResult
-                .data
+                .value
                 .credentials
                 .iceServers
                 .map { it.toIceServer() }
@@ -127,7 +127,7 @@ public class Call(
 
         client.state.setActiveCall(this)
 
-        return Success<ActiveSFUSession>(data = activeSession!!)
+        return Success(value = activeSession!!)
     }
 
     suspend fun sendReaction(data: SendReactionData): Result<SendReactionResponse> {

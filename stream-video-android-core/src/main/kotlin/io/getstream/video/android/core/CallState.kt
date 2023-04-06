@@ -93,7 +93,8 @@ public class CallState(val call: Call, user: User) {
 
     private val _screenSharingTrack: MutableStateFlow<VideoTrack?> = MutableStateFlow(null)
 
-    private val _ownCapabilities: MutableStateFlow<List<OwnCapability>> = MutableStateFlow(emptyList())
+    private val _ownCapabilities: MutableStateFlow<List<OwnCapability>> =
+        MutableStateFlow(emptyList())
     public val ownCapabilities: StateFlow<List<OwnCapability>> = _ownCapabilities
 
     /**
@@ -236,45 +237,56 @@ public class CallState(val call: Call, user: User) {
                 val participant = getOrCreateParticipant(event.sentByUserId)
                 participant._acceptedAt.value = Date()
             }
+
             is CallRejectedEvent -> {
                 val participant = getOrCreateParticipant(event.user)
                 participant._rejectedAt.value = Date()
             }
+
             is CallCancelledEvent -> TODO()
             is CallEndedEvent -> {
                 _endedAt.value = Date()
                 _endedByUser.value = event.endedByUser
             }
+
             is CallMembersUpdatedEvent -> {
                 event.details.members.forEach { entry ->
                     getOrCreateMember(entry.value)
                 }
             }
+
             is CallMembersDeletedEvent -> TODO()
 
             is CallCreatedEvent -> {
                 // this is handled by the client
             }
+
             is CallUpdatedEvent -> {
                 updateFromEvent(event)
             }
+
             is UpdatedCallPermissionsEvent -> {
                 _ownCapabilities.value = event.ownCapabilities
             }
+
             is ConnectedEvent -> {
                 // this is handled by the client
             }
+
             is CustomEvent -> {
                 // safe to ignore, app level custom event
             }
+
             is CoordinatorHealthCheckEvent -> TODO()
             is PermissionRequestEvent -> TODO()
             is RecordingStartedEvent -> {
                 _recording.value = true
             }
+
             is RecordingStoppedEvent -> {
                 _recording.value = false
             }
+
             is UnblockedUserEvent -> TODO()
             UnknownEvent -> TODO()
 
@@ -285,32 +297,40 @@ public class CallState(val call: Call, user: User) {
                     participant._audioLevel.value = entry.value.audioLevel
                 }
             }
+
             is DominantSpeakerChangedEvent -> {
                 _dominantSpeaker.value = getOrCreateParticipant(event.userId)
             }
+
             is ConnectionQualityChangeEvent -> {
                 event.updates.forEach { entry ->
                     val participant = getOrCreateParticipant(entry.user_id)
                     participant._connectionQuality.value = entry.connection_quality
                 }
             }
+
             is ChangePublishQualityEvent -> {
                 call.activeSession!!.handleEvent(event)
             }
+
             is ErrorEvent -> TODO()
             SFUHealthCheckEvent -> {
                 // we don't do anythign with this
             }
+
             is ICETrickleEvent -> {
                 call.activeSession!!.handleEvent(event)
             }
+
             is JoinCallResponseEvent -> TODO()
             is ParticipantJoinedEvent -> {
                 getOrCreateParticipant(event.participant)
             }
+
             is ParticipantLeftEvent -> {
                 removeParticipant(event.participant.user_id)
             }
+
             is PublisherAnswerEvent -> TODO()
             is SubscriberOfferEvent -> TODO()
             is TrackPublishedEvent -> TODO()
@@ -350,6 +370,7 @@ public class CallState(val call: Call, user: User) {
             participant
         }
     }
+
     private fun getOrCreateMember(callUser: CallUser): MemberState {
         // TODO: update fields :)
         return getOrCreateMember(callUser.id)
@@ -394,7 +415,8 @@ public class CallState(val call: Call, user: User) {
     public val participants: StateFlow<List<ParticipantState>> = _participants
 
     /** participants who are currently speaking */
-    public val activeSpeakers = _participants.mapState { it.filter { participant -> participant.speaking.value } }
+    public val activeSpeakers =
+        _participants.mapState { it.filter { participant -> participant.speaking.value } }
 
     private val _dominantSpeaker: MutableStateFlow<ParticipantState?> =
         MutableStateFlow(null)

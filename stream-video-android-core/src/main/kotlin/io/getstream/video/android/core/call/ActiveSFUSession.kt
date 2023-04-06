@@ -23,6 +23,11 @@ import android.os.Build
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.getSystemService
 import io.getstream.log.taggedLogger
+import io.getstream.result.Error
+import io.getstream.result.Result
+import io.getstream.result.Result.Failure
+import io.getstream.result.Result.Success
+import io.getstream.result.onSuccessSuspend
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.StreamVideo
@@ -32,7 +37,6 @@ import io.getstream.video.android.core.call.signal.socket.SfuSocketListener
 import io.getstream.video.android.core.call.state.ConnectionState
 import io.getstream.video.android.core.call.utils.stringify
 import io.getstream.video.android.core.errors.DisconnectCause
-import io.getstream.video.android.core.errors.VideoError
 import io.getstream.video.android.core.events.AudioLevelChangedEvent
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.ConnectionQualityChangeEvent
@@ -63,15 +67,10 @@ import io.getstream.video.android.core.model.StreamCallId
 import io.getstream.video.android.core.model.StreamPeerType
 import io.getstream.video.android.core.model.toPeerType
 import io.getstream.video.android.core.user.UserPreferencesManager
-import io.getstream.video.android.core.utils.Failure
-import io.getstream.video.android.core.utils.Result
-import io.getstream.video.android.core.utils.Success
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import io.getstream.video.android.core.utils.buildConnectionConfiguration
 import io.getstream.video.android.core.utils.buildMediaConstraints
 import io.getstream.video.android.core.utils.buildRemoteIceServers
-import io.getstream.video.android.core.utils.onError
-import io.getstream.video.android.core.utils.onSuccessSuspend
 import io.getstream.video.android.core.utils.stringify
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -237,7 +236,7 @@ public class ActiveSFUSession internal constructor(
     }
 
     suspend fun parseError(e: Throwable): Failure {
-        return Failure(VideoError("CallClientImpl error needs to be handled"))
+        return Failure(Error.ThrowableError("CallClientImpl error needs to be handled", e))
     }
 
     suspend fun sendAnswer(request: SendAnswerRequest): Result<SendAnswerResponse> =
@@ -293,7 +292,7 @@ public class ActiveSFUSession internal constructor(
         set(value) {
             field = value
             if (value != null) {
-                call?.state?.updateLocalVideoTrack(value)
+                call.state.updateLocalVideoTrack(value)
             }
         }
     internal var localAudioTrack: AudioTrack? = null
@@ -464,7 +463,9 @@ public class ActiveSFUSession internal constructor(
         logger.d { "[connectToCall] #sfu; sessionId: $sessionId, autoPublish: $autoPublish" }
         if (connectionState != ConnectionState.DISCONNECTED) {
             return Failure(
-                VideoError("Already connected or connecting to a call with the session ID: $sessionId")
+                Error.GenericError(
+                    "Already connected or connecting to a call with the session ID: $sessionId"
+                )
             )
         }
 
@@ -521,7 +522,7 @@ public class ActiveSFUSession internal constructor(
             )
             val userQueryResult = client.queryMembers(callType, callId, query)
             if (userQueryResult is Success) {
-                // call?.upsertParticipants(userQueryResult.data)
+                // call?.upsertParticipants(userQueryResult.value)
             }
         }
     }
@@ -568,7 +569,7 @@ public class ActiveSFUSession internal constructor(
                 loadParticipantsData(
                     callId = this.call.id,
                     callType = this.call.type,
-                    callState = result.data.call_state,
+                    callState = result.value.call_state,
                     callSettings = callSettings
                 )
                 createUserTracks(callSettings)
@@ -597,7 +598,7 @@ public class ActiveSFUSession internal constructor(
             configuration = connectionConfiguration,
             type = StreamPeerType.SUBSCRIBER,
             mediaConstraints = mediaConstraints,
-            onStreamAdded = { call?.state?.addStream(it) }, // addTrack
+            onStreamAdded = { call.state.addStream(it) }, // addTrack
             onIceCandidateRequest = ::sendIceCandidate
         )
         logger.i { "[createSubscriber] #sfu; subscriber: $subscriber" }
@@ -649,7 +650,9 @@ public class ActiveSFUSession internal constructor(
             }
         } catch (e: Throwable) {
             logger.e { "[executeJoinRequest] failed: $e" }
-            Failure(VideoError(e.message, e))
+            Failure(
+                Error.ThrowableError(e.message ?: "Couldn't execute a join request.", e)
+            )
         }
     }
 
@@ -687,7 +690,7 @@ public class ActiveSFUSession internal constructor(
         }
 
         return if (offer is Success) {
-            offer.data.description
+            offer.value.description
         } else {
             ""
         }
@@ -731,7 +734,7 @@ public class ActiveSFUSession internal constructor(
         }
     }
 
-    override fun onError(error: VideoError) {
+    override fun onError(error: Error) {
         println("SFU onError")
 
         coroutineScope.launch {
@@ -758,12 +761,12 @@ public class ActiveSFUSession internal constructor(
         )
 
         if (userQueryResult is Success) {
-            if (userQueryResult.data.isEmpty()) {
+            if (userQueryResult.value.isEmpty()) {
                 addPartialParticipant(event.participant)
                 return
             }
 
-            val user = userQueryResult.data.first()
+            val user = userQueryResult.value.first()
             val isLocal = event.participant.session_id == sessionId
 
 //            call?.addParticipant(
@@ -937,7 +940,7 @@ public class ActiveSFUSession internal constructor(
     }
 
     private fun buildTrackId(trackTypeVideo: String): String {
-        return "${call?.state?.me?.value?.trackLookupPrefix}:$trackTypeVideo:${(Math.random() * 100).toInt()}"
+        return "${call.state?.me?.value?.trackLookupPrefix}:$trackTypeVideo:${(Math.random() * 100).toInt()}"
     }
 
     private fun updatePublishQuality(event: ChangePublishQualityEvent) {
@@ -993,7 +996,7 @@ public class ActiveSFUSession internal constructor(
             logger.w { "[handleSubscriberOffer] #sfu; #subscriber; rejected (createAnswer failed): $answerResult" }
             return
         }
-        val answerSdp = mangleSDP(answerResult.data)
+        val answerSdp = mangleSDP(answerResult.value)
 
         logger.v { "[handleSubscriberOffer] #sfu; #subscriber; answerSdp: ${answerSdp.description}" }
         val setAnswerResult = subscriber.setLocalDescription(answerSdp)
@@ -1094,7 +1097,7 @@ public class ActiveSFUSession internal constructor(
                     logger.v { "[updateParticipantsSubscriptions] #sfu; succeed" }
                 }
 
-                is Failure -> {
+                is Result.Failure -> {
                     logger.e { "[updateParticipantsSubscriptions] #sfu; failed: $result" }
                 }
             }

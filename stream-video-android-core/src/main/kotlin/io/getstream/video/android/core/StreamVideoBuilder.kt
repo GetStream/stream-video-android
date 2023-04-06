@@ -132,6 +132,7 @@ sealed class GEO {
 sealed class TokenType {
     /** A user token */
     object User : TokenType()
+
     /** A call specific token */
     object Call : TokenType()
 }

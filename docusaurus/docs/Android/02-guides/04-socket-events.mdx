@@ -33,7 +33,7 @@ public interface SocketListener {
 
     public fun onDisconnected(cause: DisconnectCause) {}
 
-    public fun onError(error: VideoError) {}
+    public fun onError(error: Error) {}
 
     public fun onEvent(event: VideoEvent) {}
 }
@@ -86,7 +86,7 @@ public interface SfuSocketListener {
 
     public fun onDisconnected(cause: DisconnectCause) {}
 
-    public fun onError(error: VideoError) {}
+    public fun onError(error: Error) {}
 
     public fun onEvent(event: SfuDataEvent) {}
 }

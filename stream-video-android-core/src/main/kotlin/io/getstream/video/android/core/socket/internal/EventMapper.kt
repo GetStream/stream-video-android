@@ -106,6 +106,7 @@ internal object EventMapper {
                 callDetails = event.toCallDetails()
             )
         }
+
         CALL_ACCEPTED -> {
             val event = Serializer.moshi.adapter(
                 org.openapitools.client.models.CallAcceptedEvent::class.java
@@ -116,6 +117,7 @@ internal object EventMapper {
                 sentByUserId = event.user.id,
             )
         }
+
         CALL_REJECTED -> {
             val event = Serializer.moshi.adapter(
                 org.openapitools.client.models.CallRejectedEvent::class.java
@@ -127,16 +129,18 @@ internal object EventMapper {
                 updatedAt = Date(event.createdAt.toEpochSecond() * 1000)
             )
         }
+
         CALL_CANCELLED -> {
             val event = Serializer.moshi.adapter(
-                org.openapitools.client.models.CallCancelledEvent::class.java
+                CallEndedEvent::class.java
             ).fromJson(text)!!
 
             CallCancelledEvent(
                 callCid = event.callCid,
-                sentByUserId = event.user.id,
+                sentByUserId = event.endedByUser?.id.orEmpty(),
             )
         }
+
         CALL_UPDATED -> {
             val event = Serializer.moshi.adapter(
                 org.openapitools.client.models.CallUpdatedEvent::class.java
@@ -149,6 +153,7 @@ internal object EventMapper {
                 ownCapabilities = event.call.ownCapabilities
             )
         }
+
         CALL_ENDED -> {
             val event = Serializer.moshi.adapter(
                 org.openapitools.client.models.CallEndedEvent::class.java
@@ -159,6 +164,7 @@ internal object EventMapper {
                 endedByUser = event.user?.toUser()
             )
         }
+
         PERMISSION_REQUEST -> {
             val event =
                 Serializer.moshi.adapter(org.openapitools.client.models.PermissionRequestEvent::class.java)
@@ -171,6 +177,7 @@ internal object EventMapper {
                 user = event.user.toUser()
             )
         }
+
         UPDATED_CALL_PERMISSIONS -> {
             val event =
                 Serializer.moshi.adapter(org.openapitools.client.models.UpdatedCallPermissionsEvent::class.java)
@@ -183,6 +190,7 @@ internal object EventMapper {
                 user = event.user.toUser()
             )
         }
+
         BLOCKED_USER -> {
             val event = Serializer.moshi.adapter(
                 org.openapitools.client.models.BlockedUserEvent::class.java
@@ -194,6 +202,7 @@ internal object EventMapper {
                 userId = event.user.id
             )
         }
+
         EventType.UNBLOCKED_USER -> {
             val event = Serializer.moshi.adapter(
                 org.openapitools.client.models.UnblockedUserEvent::class.java
@@ -205,6 +214,7 @@ internal object EventMapper {
                 userId = event.user.id
             )
         }
+
         EventType.RECORDING_STARTED -> {
             val event = Serializer.moshi.adapter(
                 CallRecordingStartedEvent::class.java
@@ -216,6 +226,7 @@ internal object EventMapper {
                 event.type
             )
         }
+
         EventType.RECORDING_STOPPED -> {
             val event = Serializer.moshi.adapter(
                 CallRecordingStoppedEvent::class.java
@@ -227,6 +238,7 @@ internal object EventMapper {
                 event.type
             )
         }
+
         CUSTOM -> {
             val event = Serializer.moshi.adapter(CustomVideoEvent::class.java).fromJson(text)!!
 

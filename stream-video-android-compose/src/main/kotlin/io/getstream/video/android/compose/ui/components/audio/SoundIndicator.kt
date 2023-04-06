@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.common.model.SoundState
 import io.getstream.video.android.common.model.Speaking
@@ -54,6 +55,7 @@ public fun SoundIndicator(
                 contentDescription = null
             )
         }
+
         else -> {
             Icon(
                 modifier = modifier
@@ -64,5 +66,13 @@ public fun SoundIndicator(
                 contentDescription = null
             )
         }
+    }
+}
+
+@Preview
+@Composable
+private fun SoundIndicatorPreview() {
+    VideoTheme {
+        SoundIndicator(state = Speaking)
     }
 }

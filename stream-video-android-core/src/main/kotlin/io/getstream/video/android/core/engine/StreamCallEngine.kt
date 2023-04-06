@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.core.engine
 
-import io.getstream.video.android.core.errors.VideoError
+import io.getstream.result.Error
 import io.getstream.video.android.core.events.CoordinatorEvent
 import io.getstream.video.android.core.events.SfuDataEvent
 import io.getstream.video.android.core.events.VideoEvent
@@ -90,7 +90,7 @@ public interface StreamCallEngine {
     /**
      * Called when a Call has been failed.
      */
-    public fun onCallFailed(error: VideoError)
+    public fun onCallFailed(error: Error)
 
     /**
      * Called when [CallEventType] message is about to be sent to Coordinator.

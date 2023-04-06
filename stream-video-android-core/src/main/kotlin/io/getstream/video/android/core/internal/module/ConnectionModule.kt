@@ -37,9 +37,10 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
-import org.openapitools.client.apis.DefaultApi
 import org.openapitools.client.apis.EventsApi
+import org.openapitools.client.apis.LivestreamingApi
 import org.openapitools.client.apis.ModerationApi
+import org.openapitools.client.apis.RecordingApi
 import org.openapitools.client.apis.VideoCallsApi
 import org.openapitools.client.infrastructure.Serializer
 import retrofit2.Retrofit
@@ -109,16 +110,20 @@ internal class ConnectionModule(
     internal var oldService: ClientRPCService
     internal var videoCallsApi: VideoCallsApi
     internal var moderationApi: ModerationApi
+    internal var recordingApi: RecordingApi
+    internal var livestreamingApi: LivestreamingApi
 
     internal var eventsApi: EventsApi
-    internal var defaultApi: DefaultApi
     internal var coordinatorSocket: VideoSocket
     internal var networkStateProvider: NetworkStateProvider
 
     init {
         // setup the OKHttpClient
         val userToken = preferences.getUserToken()
-        okHttpClient = buildOkHttpClient(preferences, interceptorWrapper = InterceptorWrapper(null, token = userToken))
+        okHttpClient = buildOkHttpClient(
+            preferences,
+            interceptorWrapper = InterceptorWrapper(null, token = userToken)
+        )
 
         networkStateProvider = NetworkStateProvider(
             connectivityManager = context
@@ -144,8 +149,9 @@ internal class ConnectionModule(
         oldService = protoRetrofitClient.create(ClientRPCService::class.java)
         videoCallsApi = retrofitClient.create(VideoCallsApi::class.java)
         eventsApi = retrofitClient.create(EventsApi::class.java)
-        defaultApi = retrofitClient.create(DefaultApi::class.java)
         moderationApi = retrofitClient.create(ModerationApi::class.java)
+        recordingApi = retrofitClient.create(RecordingApi::class.java)
+        livestreamingApi = retrofitClient.create(LivestreamingApi::class.java)
 
         // Note that it doesn't connect when you create the socket
         coordinatorSocket = createCoordinatorSocket()
@@ -172,23 +178,25 @@ internal class ConnectionModule(
     private val API_KEY = "api_key"
     private val STREAM_AUTH_TYPE = "stream-auth-type"
 
-    private fun buildHostSelectionInterceptor(interceptorWrapper: InterceptorWrapper): Interceptor = Interceptor { chain ->
-        interceptorWrapper.baseUrl = interceptorWrapper.baseUrl ?: return@Interceptor chain.proceed(chain.request())
-        // TODO: Remove !!
-        val host = interceptorWrapper.baseUrl?.host!!
-        val original = chain.request()
-        if (original.url.host == REPLACEMENT_HOST) {
-            val updatedBaseUrl = original.url.newBuilder()
-                .host(host)
-                .build()
-            val updated = original.newBuilder()
-                .url(updatedBaseUrl)
-                .build()
-            chain.proceed(updated)
-        } else {
-            chain.proceed(chain.request())
+    private fun buildHostSelectionInterceptor(interceptorWrapper: InterceptorWrapper): Interceptor =
+        Interceptor { chain ->
+            interceptorWrapper.baseUrl =
+                interceptorWrapper.baseUrl ?: return@Interceptor chain.proceed(chain.request())
+            // TODO: Remove !!
+            val host = interceptorWrapper.baseUrl?.host!!
+            val original = chain.request()
+            if (original.url.host == REPLACEMENT_HOST) {
+                val updatedBaseUrl = original.url.newBuilder()
+                    .host(host)
+                    .build()
+                val updated = original.newBuilder()
+                    .url(updatedBaseUrl)
+                    .build()
+                chain.proceed(updated)
+            } else {
+                chain.proceed(chain.request())
+            }
         }
-    }
 
     private fun buildCredentialsInterceptor(
         interceptorWrapper: InterceptorWrapper
@@ -212,7 +220,10 @@ internal class ConnectionModule(
         it.proceed(updated)
     }
 
-    private fun buildOkHttpClient(preferences: UserPreferences, interceptorWrapper: InterceptorWrapper): OkHttpClient {
+    private fun buildOkHttpClient(
+        preferences: UserPreferences,
+        interceptorWrapper: InterceptorWrapper
+    ): OkHttpClient {
         // create a new OkHTTP client and set timeouts
         // TODO: map logging level
         return OkHttpClient.Builder()

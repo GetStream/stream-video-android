@@ -17,17 +17,17 @@
 package io.getstream.video.android.core.call.connection
 
 import io.getstream.log.taggedLogger
+import io.getstream.result.Error
+import io.getstream.result.Result
+import io.getstream.result.Result.Failure
 import io.getstream.video.android.core.call.utils.addRtcIceCandidate
 import io.getstream.video.android.core.call.utils.createValue
 import io.getstream.video.android.core.call.utils.setValue
 import io.getstream.video.android.core.call.utils.stringify
-import io.getstream.video.android.core.errors.VideoError
 import io.getstream.video.android.core.model.IceCandidate
 import io.getstream.video.android.core.model.StreamPeerType
 import io.getstream.video.android.core.model.toDomainCandidate
 import io.getstream.video.android.core.model.toRtcCandidate
-import io.getstream.video.android.core.utils.Failure
-import io.getstream.video.android.core.utils.Result
 import io.getstream.video.android.core.utils.stringify
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -205,7 +205,7 @@ public class StreamPeerConnection(
             pendingIceMutex.withLock {
                 pendingIceCandidates.add(iceCandidate)
             }
-            return Failure(VideoError(message = "RemoteDescription is not set"))
+            return Failure(Error.GenericError(message = "RemoteDescription is not set"))
         }
         val rtcIceCandidate = iceCandidate.toRtcCandidate()
         logger.d { "[addIceCandidate] #sfu; #$typeTag; rtcIceCandidate: $rtcIceCandidate" }

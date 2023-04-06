@@ -17,9 +17,9 @@
 package io.getstream.video.android.core.call.signal.socket
 
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.core.errors.VideoError
+import io.getstream.result.Error
 import io.getstream.video.android.core.errors.VideoErrorCode
-import io.getstream.video.android.core.errors.VideoNetworkError
+import io.getstream.video.android.core.errors.create
 import io.getstream.video.android.core.events.SFUConnectedEvent
 import okhttp3.Response
 import okhttp3.WebSocket
@@ -71,26 +71,26 @@ internal class SignalEventsParser(
             closedByClient = true
         } else {
             // Treat as failure and reconnect, socket shouldn't be closed by server
-            onFailure(VideoNetworkError.create(VideoErrorCode.SOCKET_CLOSED))
+            onFailure(Error.NetworkError.create(VideoErrorCode.SOCKET_CLOSED))
         }
     }
 
     override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
         logger.i { "[onFailure] failure: $t, response: $response" }
         // Called when socket is disconnected by client also (client.disconnect())
-        onSocketError(VideoNetworkError.create(VideoErrorCode.SOCKET_FAILURE, t))
+        onSocketError(Error.NetworkError.create(VideoErrorCode.SOCKET_FAILURE, t))
     }
 
-    private fun onFailure(videoError: VideoError) {
+    private fun onFailure(streamError: Error.NetworkError) {
         // Called when socket is disconnected by client also (client.disconnect())
-        onSocketError(VideoNetworkError.create(VideoErrorCode.SOCKET_FAILURE, videoError.cause))
+        onSocketError(Error.NetworkError.create(VideoErrorCode.SOCKET_FAILURE, streamError.cause))
     }
 
     internal fun closeByClient() {
         closedByClient = true
     }
 
-    private fun onSocketError(error: VideoError) {
+    private fun onSocketError(error: Error.NetworkError) {
         if (!closedByClient) {
             sfuSocket.onSocketError(error)
         }

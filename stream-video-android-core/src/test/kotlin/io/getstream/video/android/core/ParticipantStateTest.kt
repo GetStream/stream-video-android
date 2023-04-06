@@ -18,7 +18,6 @@ package io.getstream.video.android.core
 
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.events.ParticipantJoinedEvent
-import io.getstream.video.android.core.utils.onSuccess
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith

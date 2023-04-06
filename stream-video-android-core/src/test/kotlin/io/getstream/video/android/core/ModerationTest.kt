@@ -48,6 +48,7 @@ class ModerationTest : IntegrationTestBase() {
         // and the student can click unmute
         // same applies for audio, video and screen sharing
     }
+
     @Test
     fun `Zoom style moderation`() = runTest {
         // on a large call someone will keep background noise going

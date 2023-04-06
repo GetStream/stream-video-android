@@ -31,10 +31,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.state.ui.internal.InviteUserItemState
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
+import io.getstream.video.android.compose.ui.components.previews.ParticipantsProvider
+import io.getstream.video.android.core.model.CallParticipantState
+import io.getstream.video.android.core.model.toUser
 import io.getstream.video.android.ui.common.R
 
 /**
@@ -113,5 +118,20 @@ internal fun InviteUserItem(
         }
 
         Spacer(modifier = Modifier.width(16.dp))
+    }
+}
+
+@Preview
+@Composable
+private fun InviteUserListPreview(
+    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<CallParticipantState>
+) {
+    VideoTheme {
+        InviteUserList(
+            callParticipants.map {
+                InviteUserItemState(it.toUser())
+            },
+            onUserSelected = {}
+        )
     }
 }
