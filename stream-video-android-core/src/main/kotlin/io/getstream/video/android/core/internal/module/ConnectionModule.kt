@@ -48,7 +48,6 @@ import retrofit2.converter.scalars.ScalarsConverterFactory
 import retrofit2.converter.wire.WireConverterFactory
 import java.util.concurrent.TimeUnit
 
-
 internal class SFUConnectionModule(
     okHttpClient: OkHttpClient,
     SFUUrl: String,
@@ -83,7 +82,7 @@ internal class SFUConnectionModule(
 internal data class InterceptorWrapper(
     var baseUrl: HttpUrl?,
     val token: String
-    )
+)
 
 /**
  * ConnectionModule provides several helpful attributes
@@ -119,12 +118,12 @@ internal class ConnectionModule(
     init {
         // setup the OKHttpClient
         val userToken = preferences.getUserToken()
-        okHttpClient = buildOkHttpClient(preferences, interceptorWrapper = InterceptorWrapper(null, token=userToken))
+        okHttpClient = buildOkHttpClient(preferences, interceptorWrapper = InterceptorWrapper(null, token = userToken))
 
         networkStateProvider = NetworkStateProvider(
-                connectivityManager = context
-                    .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-            )
+            connectivityManager = context
+                .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        )
 
         // setup the retrofit clients
         val baseUrl = "https://$videoDomain"
@@ -172,7 +171,6 @@ internal class ConnectionModule(
      */
     private val API_KEY = "api_key"
     private val STREAM_AUTH_TYPE = "stream-auth-type"
-
 
     private fun buildHostSelectionInterceptor(interceptorWrapper: InterceptorWrapper): Interceptor = Interceptor { chain ->
         interceptorWrapper.baseUrl = interceptorWrapper.baseUrl ?: return@Interceptor chain.proceed(chain.request())
@@ -236,13 +234,9 @@ internal class ConnectionModule(
             .build()
     }
 
-
-
-
     /**
      * Provider that handles connectivity and listens to state changes, exposing them to listeners.
      */
-
 
     /**
      * @return The WebSocket handler that is used to connect to different calls.
@@ -270,11 +264,5 @@ internal class ConnectionModule(
         val okHttpClient = buildOkHttpClient(preferences, interceptorWrapper = wrapper)
 
         return SFUConnectionModule(okHttpClient, SFUUrl, networkStateProvider)
-
-
     }
-
-
-
-
 }

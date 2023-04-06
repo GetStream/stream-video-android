@@ -24,7 +24,6 @@ import io.getstream.video.android.core.model.QueryCallsData
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.UserType
 import kotlinx.coroutines.test.runTest
-import okhttp3.internal.wait
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -130,7 +129,6 @@ class ClientAndAuthTest : TestBase() {
 
         logger.d { "stateflow from test $client.state.connection" }
         assertThat(client.state.connection.value).isEqualTo(ConnectionState.Connected)
-
     }
 
     @Test
@@ -155,7 +153,6 @@ class ClientAndAuthTest : TestBase() {
 //                testData.tokens["thierry"]!!,
 //            ).build()
 //        }
-
     }
 
     @Test
@@ -204,7 +201,7 @@ class ClientAndAuthTest : TestBase() {
             "invalidtoken",
             // Maybe 1 param is better TODO
             tokenProvider = { type, user, call ->
-                 testData.tokens["thierry"]!!
+                testData.tokens["thierry"]!!
             }
         ).build()
         val result = client.call("default", randomUUID()).create()

@@ -23,9 +23,10 @@ import android.view.View
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.core.*
+import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.ConnectionState
+import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoImpl
-import io.getstream.video.android.core.audio.AudioDevice
 import io.getstream.video.android.core.call.SFUSession
 import io.getstream.video.android.core.call.state.AcceptCall
 import io.getstream.video.android.core.call.state.CallAction
@@ -42,34 +43,23 @@ import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.call.state.ToggleScreenConfiguration
 import io.getstream.video.android.core.call.state.ToggleSpeakerphone
-import io.getstream.video.android.core.model.CallSettings
-import io.getstream.video.android.core.model.CallType
-import io.getstream.video.android.core.model.CallUser
-import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.core.model.User
-import io.getstream.video.android.core.model.state.StreamCallState.Active
 import io.getstream.video.android.core.permission.PermissionManager
 import io.getstream.video.android.core.user.UsersProvider
-import io.getstream.video.android.core.utils.*
+import io.getstream.video.android.core.utils.mapState
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import org.webrtc.RendererCommon
 import stream.video.sfu.models.TrackType
-import java.util.*
-import io.getstream.video.android.core.model.state.StreamCallState as State
+import java.util.UUID
 
 private const val CONNECT_TIMEOUT = 30_000L
 
@@ -114,7 +104,8 @@ public class CallViewModel(
      * Determines whether the video should be on or not. If [SFUSession] is not initialised reflects the UI state
      * stored inside [isVideoEnabled], otherwise reflects the state of the [SFUSession.isVideoEnabled].
      */
-    private val isVideoOn = call.state.connection.mapState{ it == ConnectionState.Connected && isVideoEnabled.value}
+    private val isVideoOn =
+        call.state.connection.mapState { it == ConnectionState.Connected && isVideoEnabled.value }
 
     /**
      * Determines whether the audio should be enabled/disabled before [Call] and [SFUSession] get initialised.
@@ -126,20 +117,22 @@ public class CallViewModel(
      * Determines whether the audio should be on or not. If [SFUSession] is not initialised reflects the UI state
      * stored inside [isAudioEnabled], otherwise reflects the state of the [SFUSession.isAudioEnabled].
      */
-    private val isAudioOn = call.state.connection.mapState{ it == ConnectionState.Connected && isAudioEnabled.value}
+    private val isAudioOn =
+        call.state.connection.mapState { it == ConnectionState.Connected && isAudioEnabled.value }
 
     /**
      * Determines whether the speaker phone should be enabled/disabled before [Call] and [SFUSession] get initialised.
      */
     private val isSpeakerPhoneEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
-
     /**
      * Determines whether the speaker phone should be on or not. If [SFUSession] is not initialised reflects the UI
      * state stored inside [isSpeakerPhoneEnabled], otherwise reflects the state of the
      * [SFUSession.isSpeakerPhoneEnabled].
      */
-    private val isSpeakerPhoneOn= call.state.connection.mapState{ it == ConnectionState.Connected && isSpeakerPhoneEnabled.value}
+    private val isSpeakerPhoneOn =
+        call.state.connection.mapState { it == ConnectionState.Connected && isSpeakerPhoneEnabled.value }
+
     /**
      * The state of the call media. Combines [isAudioOn], [isVideoOn], [isSpeakerPhoneOn].
      */
@@ -158,18 +151,14 @@ public class CallViewModel(
             initialValue = CallMediaState()
         )
 
-
-
     // what does this do?
     private val _isShowingCallInfo = MutableStateFlow(false)
     public val isShowingCallInfo: StateFlow<Boolean> = _isShowingCallInfo
-
 
     public fun connectToCall() {
         viewModelScope.launch {
             withTimeout(CONNECT_TIMEOUT) {
                 // TODO connection is already running, how do we await it?
-
 
                 _isVideoInitialized.value = true
                 initializeCall(true)
@@ -185,7 +174,6 @@ public class CallViewModel(
             // TODO raise an error if it failed
             call.mediaManager.startCapturingLocalVideo(CameraMetadata.LENS_FACING_FRONT)
         }
-
     }
 
     /**
@@ -195,7 +183,6 @@ public class CallViewModel(
         // TODO: session is required
         call.mediaManager?.camera?.flip()
     }
-
 
     override fun onCleared() {
         super.onCleared()
@@ -216,16 +203,16 @@ public class CallViewModel(
             is ToggleScreenConfiguration -> {
                 _isFullscreen.value = callAction.isFullscreen && callAction.isLandscape
             }
+
             is ShowCallInfo -> {
                 this._isShowingCallInfo.value = true
             }
+
             is CustomAction -> {
                 // custom actions
             }
         }
     }
-
-
 
     private fun acceptCall() {
 //        val state = clientCallState.value
@@ -318,7 +305,7 @@ public class CallViewModel(
 //        }
     }
 
-    val session by lazy {call.activeSession ?: throw IllegalStateException("Session is null")}
+    val session by lazy { call.activeSession ?: throw IllegalStateException("Session is null") }
 
     public fun initRenderer(
         videoRenderer: VideoTextureViewRenderer,

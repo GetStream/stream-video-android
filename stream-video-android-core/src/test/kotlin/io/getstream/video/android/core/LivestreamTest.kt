@@ -81,14 +81,12 @@ class LivestreamTest : IntegrationTestBase() {
         // TODO: not implemented on the server
         // Create a publishing token
         // TODO: do we ask the coordinator for it? or generate it locally?
-
     }
 
     @Test
     fun `join a call with a viewing only token, that's not authenticated`() = runTest {
         // TODO: not implemented on the server
         val call = client.call("livestream", randomUUID(), "mytoken")
-
     }
 
     @Test
@@ -109,5 +107,4 @@ class LivestreamTest : IntegrationTestBase() {
         // TODO: This we can implement client side, should be disabled by default
         // TODO: Call type setting to mute incoming audio by default
     }
-
 }

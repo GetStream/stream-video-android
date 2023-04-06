@@ -1,8 +1,58 @@
+/*
+ * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.core
 
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.call.utils.stringify
-import io.getstream.video.android.core.events.*
+import io.getstream.video.android.core.events.AudioLevelChangedEvent
+import io.getstream.video.android.core.events.BlockedUserEvent
+import io.getstream.video.android.core.events.CallAcceptedEvent
+import io.getstream.video.android.core.events.CallCancelledEvent
+import io.getstream.video.android.core.events.CallCreatedEvent
+import io.getstream.video.android.core.events.CallEndedEvent
+import io.getstream.video.android.core.events.CallMembersDeletedEvent
+import io.getstream.video.android.core.events.CallMembersUpdatedEvent
+import io.getstream.video.android.core.events.CallRejectedEvent
+import io.getstream.video.android.core.events.CallUpdatedEvent
+import io.getstream.video.android.core.events.ChangePublishQualityEvent
+import io.getstream.video.android.core.events.ConnectedEvent
+import io.getstream.video.android.core.events.ConnectionQualityChangeEvent
+import io.getstream.video.android.core.events.CoordinatorHealthCheckEvent
+import io.getstream.video.android.core.events.CustomEvent
+import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
+import io.getstream.video.android.core.events.ErrorEvent
+import io.getstream.video.android.core.events.ICETrickleEvent
+import io.getstream.video.android.core.events.JoinCallResponseEvent
+import io.getstream.video.android.core.events.ParticipantJoinedEvent
+import io.getstream.video.android.core.events.ParticipantLeftEvent
+import io.getstream.video.android.core.events.PermissionRequestEvent
+import io.getstream.video.android.core.events.PublisherAnswerEvent
+import io.getstream.video.android.core.events.RecordingStartedEvent
+import io.getstream.video.android.core.events.RecordingStoppedEvent
+import io.getstream.video.android.core.events.SFUConnectedEvent
+import io.getstream.video.android.core.events.SFUHealthCheckEvent
+import io.getstream.video.android.core.events.SubscriberOfferEvent
+import io.getstream.video.android.core.events.TrackPublishedEvent
+import io.getstream.video.android.core.events.TrackUnpublishedEvent
+import io.getstream.video.android.core.events.UnblockedUserEvent
+import io.getstream.video.android.core.events.UnknownEvent
+import io.getstream.video.android.core.events.UpdatedCallPermissionsEvent
+import io.getstream.video.android.core.events.VideoEvent
+import io.getstream.video.android.core.events.VideoQualityChangedEvent
 import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.core.model.User
@@ -16,7 +66,7 @@ import org.openapitools.client.models.OwnCapability
 import org.webrtc.MediaStream
 import stream.video.sfu.models.Participant
 import stream.video.sfu.models.TrackType
-import java.util.*
+import java.util.Date
 
 /**
  *
@@ -39,7 +89,7 @@ public class CallState(val call: Call, user: User) {
 
     public val screenSharingSession: StateFlow<ScreenSharingSession?> = _screenSharingSession
 
-    public val isScreenSharing: StateFlow<Boolean> = _screenSharingSession.mapState{ it != null }
+    public val isScreenSharing: StateFlow<Boolean> = _screenSharingSession.mapState { it != null }
 
     private val _screenSharingTrack: MutableStateFlow<VideoTrack?> = MutableStateFlow(null)
 
@@ -65,17 +115,14 @@ public class CallState(val call: Call, user: User) {
         MutableStateFlow(emptyMap())
     val capabilitiesByRole: StateFlow<Map<String, List<String>>> = _capabilitiesByRole
 
-
     private val _members: MutableStateFlow<List<ParticipantState>> =
         MutableStateFlow(emptyList())
     public val members: StateFlow<List<ParticipantState>> = _members
 
-
     // TODO: does this need to be a stateflow, or can it be a property?
     // making it a property requires cleaning up the properties of a participant
     val _me = MutableStateFlow(ParticipantState(call, user))
-    val me : StateFlow<ParticipantState> = _me
-
+    val me: StateFlow<ParticipantState> = _me
 
     private fun replaceTrackIfNeeded(mediaStream: MediaStream, streamId: String?): VideoTrack? {
 
@@ -212,7 +259,7 @@ public class CallState(val call: Call, user: User) {
                 updateFromEvent(event)
             }
             is UpdatedCallPermissionsEvent -> {
-                _ownCapabilities.value=event.ownCapabilities
+                _ownCapabilities.value = event.ownCapabilities
             }
             is ConnectedEvent -> {
                 // this is handled by the client
@@ -275,8 +322,6 @@ public class CallState(val call: Call, user: User) {
         }
     }
 
-
-
     private fun removeParticipant(userId: String) {
         participantMap.remove(userId)
         // TODO: connect map and participant list nicely
@@ -310,7 +355,6 @@ public class CallState(val call: Call, user: User) {
         return getOrCreateMember(callUser.id)
     }
 
-
     private fun getOrCreateMember(userId: String): MemberState {
         return if (memberMap.contains(userId)) {
             memberMap[userId]!!
@@ -336,12 +380,11 @@ public class CallState(val call: Call, user: User) {
             // update call info fields
         } else if (event is CallUpdatedEvent) {
             // update the own capabilities
-            _ownCapabilities.value=event.ownCapabilities
+            _ownCapabilities.value = event.ownCapabilities
             // update the capabilities by role
             _capabilitiesByRole.value = event.capabilitiesByRole
             // update call info fields
         }
-
     }
 
     // TODO: SFU Connection
@@ -349,8 +392,6 @@ public class CallState(val call: Call, user: User) {
     private val _participants: MutableStateFlow<List<ParticipantState>> =
         MutableStateFlow(emptyList())
     public val participants: StateFlow<List<ParticipantState>> = _participants
-
-
 
     /** participants who are currently speaking */
     public val activeSpeakers = _participants.mapState { it.filter { participant -> participant.speaking.value } }
@@ -368,16 +409,17 @@ public class CallState(val call: Call, user: User) {
      * * audio only participants by when they joined
      *
      */
-    public val sortedParticipants = _participants.mapState { it.sortedBy{
-        // TODO: implement actual sorting
-        val score = 1
-        score
-    } }
-
+    public val sortedParticipants = _participants.mapState {
+        it.sortedBy {
+            // TODO: implement actual sorting
+            val score = 1
+            score
+        }
+    }
 
     internal fun disconnect() {
         logger.i { "[disconnect] #sfu; no args" }
-        //audioHandler.stop()
+        // audioHandler.stop()
         val participants = _participants.value
         _participants.value = emptyList()
 
@@ -425,7 +467,6 @@ public class CallState(val call: Call, user: User) {
         isEnabled: Boolean
     ) {
 
-
         logger.d { "[updateMuteState] #sfu; userId: $userId, sessionId: $sessionId, isEnabled: $isEnabled" }
         val currentParticipants = _participants.value
 
@@ -468,8 +509,6 @@ public class CallState(val call: Call, user: User) {
         }
     }
 
-
-
     // TODO : move to media manager and listen for changes to update local state
 
     public fun setCameraEnabled(isEnabled: Boolean) {
@@ -509,7 +548,4 @@ public class CallState(val call: Call, user: User) {
 
         _participants.value = updatedList
     }
-
-
-
 }

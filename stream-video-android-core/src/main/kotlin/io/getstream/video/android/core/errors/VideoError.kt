@@ -20,10 +20,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-public open class VideoErrorBase(
-
-) {
-}
+public open class VideoErrorBase()
 
 @Serializable
 public data class VideoBackendError(
@@ -46,7 +43,7 @@ public data class VideoBackendError(
 public open class VideoError(
     public val message: String? = null,
     public val cause: Throwable? = null
-): VideoErrorBase() {
+) : VideoErrorBase() {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

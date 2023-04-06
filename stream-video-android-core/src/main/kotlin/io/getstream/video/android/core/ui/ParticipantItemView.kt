@@ -22,7 +22,6 @@ import android.view.View
 import io.getstream.video.android.core.Call
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import org.webrtc.VideoTrack
-import stream.video.sfu.models.TrackType
 
 public class ParticipantItemView : VideoTextureViewRenderer {
 

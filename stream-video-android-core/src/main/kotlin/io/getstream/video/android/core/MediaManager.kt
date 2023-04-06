@@ -1,8 +1,23 @@
+/*
+ * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.core
 
 import android.content.Context
 import android.hardware.camera2.CameraCharacteristics
-import android.hardware.camera2.CameraDevice
 import android.hardware.camera2.CameraManager
 import android.hardware.camera2.CameraMetadata
 import android.media.AudioDeviceInfo
@@ -15,8 +30,11 @@ import io.getstream.video.android.core.audio.AudioSwitchHandler
 import io.getstream.video.android.core.model.CallSettings
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import org.webrtc.*
-
+import org.webrtc.Camera2Capturer
+import org.webrtc.Camera2Enumerator
+import org.webrtc.CameraEnumerationAndroid
+import org.webrtc.CameraEnumerator
+import org.webrtc.VideoCapturer
 
 sealed class DeviceStatus {
     object Disabled : DeviceStatus()
@@ -48,11 +66,9 @@ class SpeakerManager(val mediaManager: MediaManagerImpl) {
     }
 
     fun setVolume(volumeLevel: Long) {
-
     }
 
     fun setSpeakerPhone(speakerPhone: Boolean) {
-
     }
 
     fun disable() {
@@ -88,8 +104,6 @@ class MicrophoneManager(val mediaManager: MediaManagerImpl) {
     }
 }
 
-
-
 class CameraManager(val mediaManager: MediaManagerImpl) {
 
     val _status = MutableStateFlow<DeviceStatus>(DeviceStatus.Disabled)
@@ -122,7 +136,6 @@ class CameraManager(val mediaManager: MediaManagerImpl) {
     }
 }
 
-
 /**
  * Wrap all the audio/video interactions
  * This makes it easier to test our codebase
@@ -154,9 +167,6 @@ class MediaManagerImpl(val context: Context) {
     val speaker = SpeakerManager(this)
 
     val enumerator = Camera2Enumerator(context)
-
-
-
 
     fun getCameraDevices(): List<String> {
 
@@ -263,7 +273,7 @@ class MediaManagerImpl(val context: Context) {
 
     fun setCameraEnabled(b: Boolean) {
         TODO()
-        //activeSession!!.setCameraEnabled(false)
+        // activeSession!!.setCameraEnabled(false)
     }
 
     fun selectCamera(cameraId: String) {
@@ -278,5 +288,4 @@ class MediaManagerImpl(val context: Context) {
 
         capturer!!.startCapture(resolution!!.width, resolution.height, 30)
     }
-
 }

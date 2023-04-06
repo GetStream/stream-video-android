@@ -41,7 +41,6 @@ sealed class RingingState() {
     object TimeoutNoAnswer : RingingState()
 }
 
-
 class ClientState(client: StreamVideo) {
     /**
      * Current user object
@@ -101,6 +100,4 @@ class ClientState(client: StreamVideo) {
     fun removeActiveCall() {
         this._activeCall.value = null
     }
-
-
 }

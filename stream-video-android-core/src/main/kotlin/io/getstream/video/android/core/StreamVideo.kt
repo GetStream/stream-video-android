@@ -38,7 +38,15 @@ import io.getstream.video.android.core.model.StreamCallType
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.utils.Result
-import org.openapitools.client.models.*
+import org.openapitools.client.models.GetCallEdgeServerRequest
+import org.openapitools.client.models.GetCallEdgeServerResponse
+import org.openapitools.client.models.GoLiveResponse
+import org.openapitools.client.models.JoinCallResponse
+import org.openapitools.client.models.ListRecordingsResponse
+import org.openapitools.client.models.SendEventResponse
+import org.openapitools.client.models.SendReactionResponse
+import org.openapitools.client.models.StopLiveResponse
+import org.openapitools.client.models.UpdateCallResponse
 
 /**
  * The main interface to control the Video calls. [StreamVideoImpl] implements this interface.
@@ -416,7 +424,5 @@ public interface StreamVideo {
 
     public fun call(type: String, id: String, token: String = ""): Call
 
-
     public suspend fun registerPushDevice()
-
 }

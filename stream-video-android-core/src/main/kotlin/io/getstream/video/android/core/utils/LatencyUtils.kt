@@ -57,7 +57,7 @@ public fun getLatencyMeasurementsOKHttp(latencyUrl: String): LatencyResult {
 
             val end = System.currentTimeMillis()
             val seconds = (end - start) / 1000f
-            if (it!=0) {
+            if (it != 0) {
                 measurements.add(seconds)
             }
         }
@@ -84,8 +84,8 @@ public fun getLatencyMeasurements(latencyUrl: String): LatencyResult {
             val start = System.currentTimeMillis()
             val connection = request.openConnection()
             // ensure we have a timeout
-            connection.connectTimeout = 3000;
-            connection.readTimeout = 3000;
+            connection.connectTimeout = 3000
+            connection.readTimeout = 3000
             connection.connect()
 
             // Read and print the input
@@ -94,7 +94,7 @@ public fun getLatencyMeasurements(latencyUrl: String): LatencyResult {
 
             val end = System.currentTimeMillis()
             val seconds = (end - start) / 1000f
-            if (it!=0) {
+            if (it != 0) {
                 measurements.add(seconds)
             }
         }

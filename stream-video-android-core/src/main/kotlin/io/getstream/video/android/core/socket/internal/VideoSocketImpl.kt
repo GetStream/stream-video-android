@@ -35,11 +35,6 @@ import io.getstream.video.android.core.user.UserPreferences
 import io.getstream.video.android.core.utils.Failure
 import io.getstream.video.android.core.utils.Result
 import io.getstream.video.android.core.utils.Success
-import kotlin.coroutines.Continuation
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
-import kotlin.math.pow
-import kotlin.properties.Delegates
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -47,6 +42,11 @@ import kotlinx.coroutines.launch
 import org.openapitools.client.models.UserObjectRequest
 import org.openapitools.client.models.VideoWSAuthMessageRequest
 import stream.video.coordinator.client_v1_rpc.WebsocketHealthcheck
+import kotlin.coroutines.Continuation
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
+import kotlin.math.pow
+import kotlin.properties.Delegates
 
 /**
  * Socket implementation used to handle the lifecycle of a WebSocket and its related state.
@@ -250,16 +250,20 @@ internal class VideoSocketImpl(
             throw IllegalStateException("User token is empty")
         }
 
-        socket?.authenticate(VideoWSAuthMessageRequest( // TODO - double check and see about user device
-            token = token, userDetails = UserObjectRequest(
-                id = user.id, role = user.role
-            ).apply {
-                /**
-                 * Should be exposed on the BE to store user's custom data like name and image.
-                 */
-                this["name"] = user.name
-                user.imageUrl?.let { this["image"] = it }
-            }))
+        socket?.authenticate(
+            VideoWSAuthMessageRequest( // TODO - double check and see about user device
+                token = token,
+                userDetails = UserObjectRequest(
+                    id = user.id, role = user.role
+                ).apply {
+                    /**
+                     * Should be exposed on the BE to store user's custom data like name and image.
+                     */
+                    this["name"] = user.name
+                    user.imageUrl?.let { this["image"] = it }
+                }
+            )
+        )
     }
 
     override fun reconnect() {
@@ -302,7 +306,6 @@ internal class VideoSocketImpl(
         state = State.Connected(event)
         logger.d { "Calling Listeners $listeners" }
         callListeners { listener -> listener.onConnected(event) }
-
     }
 
     override fun onEvent(event: VideoEvent) {

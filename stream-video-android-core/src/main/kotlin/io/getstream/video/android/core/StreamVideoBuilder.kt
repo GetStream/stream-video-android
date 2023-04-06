@@ -32,7 +32,6 @@ import io.getstream.video.android.core.user.UserPreferencesManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-
 /**
  * The StreamVideoBuilder is used to create a new instance of the StreamVideoClient.
  *
@@ -101,7 +100,7 @@ public class StreamVideoBuilder(
             preferences = preferences,
             connectionTimeoutInMs = connectionTimeoutInMs,
             user = user,
-            loggingLevel=loggingLevel,
+            loggingLevel = loggingLevel,
         )
 
         // create the client
@@ -112,7 +111,7 @@ public class StreamVideoBuilder(
             loggingLevel = loggingLevel,
             lifecycle = lifecycle,
             connectionModule = module,
-            pushDeviceGenerators=pushDeviceGenerators
+            pushDeviceGenerators = pushDeviceGenerators
         )
         // addDevice for push
         if (enablePush && user.type == UserType.Authenticated) {

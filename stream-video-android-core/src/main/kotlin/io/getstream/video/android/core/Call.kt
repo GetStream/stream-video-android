@@ -17,10 +17,23 @@
 package io.getstream.video.android.core
 
 import io.getstream.video.android.core.call.ActiveSFUSession
-import io.getstream.video.android.core.events.*
-import io.getstream.video.android.core.model.*
-import io.getstream.video.android.core.utils.*
-import org.openapitools.client.models.*
+import io.getstream.video.android.core.events.VideoEvent
+import io.getstream.video.android.core.events.VideoEventListener
+import io.getstream.video.android.core.model.CallMetadata
+import io.getstream.video.android.core.model.IceServer
+import io.getstream.video.android.core.model.MuteUsersData
+import io.getstream.video.android.core.model.SendReactionData
+import io.getstream.video.android.core.model.SfuToken
+import io.getstream.video.android.core.model.User
+import io.getstream.video.android.core.model.toIceServer
+import io.getstream.video.android.core.utils.Failure
+import io.getstream.video.android.core.utils.Result
+import io.getstream.video.android.core.utils.Success
+import org.openapitools.client.models.GetCallEdgeServerRequest
+import org.openapitools.client.models.GoLiveResponse
+import org.openapitools.client.models.SendReactionResponse
+import org.openapitools.client.models.StopLiveResponse
+import org.openapitools.client.models.UpdateCallResponse
 
 public data class SFUConnection(
     internal val callUrl: String,
@@ -103,16 +116,18 @@ public class Call(
                 .map { it.toIceServer() }
 
         activeSession = ActiveSFUSession(
-            client=client, call=this,
-            SFUUrl =url, SFUToken=credentials.token,
+            client = client,
+            call = this,
+            SFUUrl = url,
+            SFUToken = credentials.token,
             connectionModule = (client as StreamVideoImpl).connectionModule,
-            remoteIceServers=iceServers, latencyResults=measurements.associate { it.latencyUrl to it.measurements }
+            remoteIceServers = iceServers,
+            latencyResults = measurements.associate { it.latencyUrl to it.measurements }
         )
 
         client.state.setActiveCall(this)
 
-        return Success<ActiveSFUSession>(data= activeSession!!)
-
+        return Success<ActiveSFUSession>(data = activeSession!!)
     }
 
     suspend fun sendReaction(data: SendReactionData): Result<SendReactionResponse> {
@@ -122,6 +137,7 @@ public class Call(
     suspend fun goLive(): Result<GoLiveResponse> {
         return client.goLive(type, id)
     }
+
     suspend fun stopLive(): Result<StopLiveResponse> {
         return client.stopLive(type, id)
     }
@@ -138,9 +154,11 @@ public class Call(
     suspend fun get(): Result<CallMetadata> {
         return client.getOrCreateCall(type, id)
     }
+
     suspend fun create(): Result<CallMetadata> {
         return client.getOrCreateCall(type, id)
     }
+
     suspend fun update(): Result<UpdateCallResponse> {
         return client.updateCall(type, id, custom ?: emptyMap())
     }
@@ -153,6 +171,7 @@ public class Call(
     suspend fun startRecording(): Result<Any> {
         return client.startRecording(type, id)
     }
+
     suspend fun stopRecording(): Result<Any> {
         return client.stopRecording(type, id)
     }
@@ -160,6 +179,7 @@ public class Call(
     suspend fun startBroadcasting(): Result<Any> {
         return client.startBroadcasting(type, id)
     }
+
     suspend fun stopBroadcasting(): Result<Any> {
         return client.stopBroadcasting(type, id)
     }

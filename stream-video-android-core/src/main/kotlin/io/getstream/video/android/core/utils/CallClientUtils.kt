@@ -19,8 +19,6 @@ package io.getstream.video.android.core.utils
 import io.getstream.video.android.core.model.IceServer
 import org.webrtc.MediaConstraints
 import org.webrtc.PeerConnection
-import org.webrtc.SessionDescription
-
 
 @JvmSynthetic
 internal fun buildRemoteIceServers(iceServers: List<IceServer>): List<PeerConnection.IceServer> {
@@ -88,4 +86,3 @@ internal fun buildAudioConstraints(): MediaConstraints {
         }
     }
 }
-

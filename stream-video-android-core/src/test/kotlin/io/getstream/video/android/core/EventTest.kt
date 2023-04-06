@@ -17,8 +17,23 @@
 package io.getstream.video.android.core
 
 import com.google.common.truth.Truth.assertThat
-import io.getstream.video.android.core.events.*
-import io.getstream.video.android.core.model.*
+import io.getstream.video.android.core.events.AudioLevelChangedEvent
+import io.getstream.video.android.core.events.CallAcceptedEvent
+import io.getstream.video.android.core.events.CallEndedEvent
+import io.getstream.video.android.core.events.CallRejectedEvent
+import io.getstream.video.android.core.events.CallUpdatedEvent
+import io.getstream.video.android.core.events.ConnectedEvent
+import io.getstream.video.android.core.events.ConnectionQualityChangeEvent
+import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
+import io.getstream.video.android.core.events.ParticipantJoinedEvent
+import io.getstream.video.android.core.events.ParticipantLeftEvent
+import io.getstream.video.android.core.events.PermissionRequestEvent
+import io.getstream.video.android.core.events.RecordingStartedEvent
+import io.getstream.video.android.core.events.RecordingStoppedEvent
+import io.getstream.video.android.core.events.UpdatedCallPermissionsEvent
+import io.getstream.video.android.core.model.CallInfo
+import io.getstream.video.android.core.model.User
+import io.getstream.video.android.core.model.UserAudioLevel
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -153,7 +168,7 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
             custom
         )
         val capabilitiesByRole = mutableMapOf<String, List<String>>(
-            "admin" to mutableListOf<String>(
+            "admin" to mutableListOf(
                 "end-call",
                 "create-call"
             )
@@ -193,7 +208,6 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
         clientImpl.fireEvent(permissionsUpdated, call.cid)
 
         assertThat(call.state.ownCapabilities.value).isEqualTo(ownCapabilities)
-
     }
 
     @Test

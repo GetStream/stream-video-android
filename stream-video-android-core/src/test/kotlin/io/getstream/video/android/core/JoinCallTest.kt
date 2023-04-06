@@ -18,10 +18,7 @@ package io.getstream.video.android.core
 
 import com.google.common.truth.Truth.assertThat
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.core.events.*
-import io.getstream.video.android.core.model.*
-import java.util.*
-import kotlinx.coroutines.*
+import io.getstream.video.android.core.events.SFUConnectedEvent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -69,10 +66,8 @@ class JoinCallTest : IntegrationTestBase() {
         logger.d { results.toString() }
     }
 
-
     @Test
     fun `test session id`() = runTest {
         TODO()
     }
-
 }

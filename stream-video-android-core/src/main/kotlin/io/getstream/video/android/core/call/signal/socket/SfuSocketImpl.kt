@@ -23,7 +23,6 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.errors.DisconnectCause
 import io.getstream.video.android.core.errors.VideoError
 import io.getstream.video.android.core.errors.VideoNetworkError
-import io.getstream.video.android.core.events.ConnectedEvent
 import io.getstream.video.android.core.events.SFUConnectedEvent
 import io.getstream.video.android.core.events.SFUHealthCheckEvent
 import io.getstream.video.android.core.events.SfuDataEvent

@@ -17,7 +17,6 @@
 package io.getstream.video.android.core.call
 
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.call.signal.socket.SfuSocketListener
 import io.getstream.video.android.core.model.CallSettings
 import io.getstream.video.android.core.utils.Result

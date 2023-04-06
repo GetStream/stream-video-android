@@ -23,8 +23,8 @@ import io.getstream.video.android.core.events.CallCreatedEvent
 import io.getstream.video.android.core.events.CallEndedEvent
 import io.getstream.video.android.core.events.CallRejectedEvent
 import io.getstream.video.android.core.events.CallUpdatedEvent
-import io.getstream.video.android.core.events.CustomEvent
 import io.getstream.video.android.core.events.CoordinatorHealthCheckEvent
+import io.getstream.video.android.core.events.CustomEvent
 import io.getstream.video.android.core.events.PermissionRequestEvent
 import io.getstream.video.android.core.events.RecordingStartedEvent
 import io.getstream.video.android.core.events.RecordingStoppedEvent

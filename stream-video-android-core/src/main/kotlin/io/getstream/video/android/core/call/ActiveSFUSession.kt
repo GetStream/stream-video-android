@@ -23,7 +23,9 @@ import android.os.Build
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.getSystemService
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.core.*
+import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoImpl
 import io.getstream.video.android.core.call.connection.StreamPeerConnection
 import io.getstream.video.android.core.call.signal.socket.SfuSocketListener
@@ -31,21 +33,58 @@ import io.getstream.video.android.core.call.state.ConnectionState
 import io.getstream.video.android.core.call.utils.stringify
 import io.getstream.video.android.core.errors.DisconnectCause
 import io.getstream.video.android.core.errors.VideoError
-import io.getstream.video.android.core.events.*
+import io.getstream.video.android.core.events.AudioLevelChangedEvent
+import io.getstream.video.android.core.events.ChangePublishQualityEvent
+import io.getstream.video.android.core.events.ConnectionQualityChangeEvent
+import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
+import io.getstream.video.android.core.events.ErrorEvent
+import io.getstream.video.android.core.events.ICETrickleEvent
+import io.getstream.video.android.core.events.JoinCallResponseEvent
+import io.getstream.video.android.core.events.ParticipantJoinedEvent
+import io.getstream.video.android.core.events.ParticipantLeftEvent
+import io.getstream.video.android.core.events.PublisherAnswerEvent
+import io.getstream.video.android.core.events.SFUConnectedEvent
+import io.getstream.video.android.core.events.SFUHealthCheckEvent
+import io.getstream.video.android.core.events.SfuDataEvent
+import io.getstream.video.android.core.events.SubscriberOfferEvent
+import io.getstream.video.android.core.events.TrackPublishedEvent
+import io.getstream.video.android.core.events.TrackUnpublishedEvent
+import io.getstream.video.android.core.events.VideoEvent
+import io.getstream.video.android.core.events.VideoQualityChangedEvent
 import io.getstream.video.android.core.filter.InFilterObject
 import io.getstream.video.android.core.filter.toMap
 import io.getstream.video.android.core.internal.module.ConnectionModule
 import io.getstream.video.android.core.internal.module.SFUConnectionModule
-import io.getstream.video.android.core.model.*
+import io.getstream.video.android.core.model.CallSettings
+import io.getstream.video.android.core.model.IceCandidate
+import io.getstream.video.android.core.model.IceServer
+import io.getstream.video.android.core.model.QueryMembersData
+import io.getstream.video.android.core.model.StreamCallId
+import io.getstream.video.android.core.model.StreamPeerType
+import io.getstream.video.android.core.model.toPeerType
 import io.getstream.video.android.core.user.UserPreferencesManager
-import io.getstream.video.android.core.utils.*
+import io.getstream.video.android.core.utils.Failure
+import io.getstream.video.android.core.utils.Result
+import io.getstream.video.android.core.utils.Success
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import io.getstream.video.android.core.utils.buildConnectionConfiguration
 import io.getstream.video.android.core.utils.buildMediaConstraints
 import io.getstream.video.android.core.utils.buildRemoteIceServers
+import io.getstream.video.android.core.utils.onError
+import io.getstream.video.android.core.utils.onSuccessSuspend
 import io.getstream.video.android.core.utils.stringify
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -117,6 +156,7 @@ public class ActiveSFUSession internal constructor(
     private val logger by taggedLogger("Call:ActiveSFUSession")
 
     private var subscriber: StreamPeerConnection? = null
+
     @VisibleForTesting
     var publisher: StreamPeerConnection? = null
     private val mediaConstraints: MediaConstraints by lazy {
@@ -159,6 +199,7 @@ public class ActiveSFUSession internal constructor(
             }
         }
     }
+
     private val mediaManager = call.mediaManager
 
     /**
@@ -200,8 +241,9 @@ public class ActiveSFUSession internal constructor(
     }
 
     suspend fun sendAnswer(request: SendAnswerRequest): Result<SendAnswerResponse> =
-        wrapAPICall { sfuConnectionModule.signalService.sendAnswer(request)
-    }
+        wrapAPICall {
+            sfuConnectionModule.signalService.sendAnswer(request)
+        }
 
     suspend fun sendIceCandidate(request: ICETrickle): Result<ICETrickleResponse> =
         wrapAPICall { sfuConnectionModule.signalService.iceTrickle(request) }
@@ -247,10 +289,6 @@ public class ActiveSFUSession internal constructor(
         buildConnectionConfiguration(iceServers)
     }
 
-
-
-
-
     internal var localVideoTrack: VideoTrack? = null
         set(value) {
             field = value
@@ -276,7 +314,6 @@ public class ActiveSFUSession internal constructor(
     private var videoCapturer: VideoCapturer? = null
     private var isCapturingVideo: Boolean = false
     private var captureResolution: CameraEnumerationAndroid.CaptureFormat? = null
-
 
     override fun clear() {
         logger.i { "[clear] #sfu; no args" }
@@ -327,7 +364,7 @@ public class ActiveSFUSession internal constructor(
 //                return@launch
 //            }
 
-            //setupVideoTrack()
+            // setupVideoTrack()
 
             if (!isCapturingVideo && isEnabled) {
                 mediaManager.startCapturingLocalVideo(CameraMetadata.LENS_FACING_FRONT)
@@ -403,8 +440,6 @@ public class ActiveSFUSession internal constructor(
         (videoCapturer as? Camera2Capturer)?.switchCamera(null)
     }
 
-
-
     override fun selectAudioDevice(device: io.getstream.video.android.core.audio.AudioDevice) {
         logger.d { "[selectAudioDevice] #sfu; device: $device" }
         val handler = mediaManager.getAudioHandler() ?: return
@@ -442,6 +477,7 @@ public class ActiveSFUSession internal constructor(
 
                 Success(call!!)
             }
+
             is Failure -> initializeResult
         }
     }
@@ -485,7 +521,7 @@ public class ActiveSFUSession internal constructor(
             )
             val userQueryResult = client.queryMembers(callType, callId, query)
             if (userQueryResult is Success) {
-                //call?.upsertParticipants(userQueryResult.data)
+                // call?.upsertParticipants(userQueryResult.data)
             }
         }
     }
@@ -540,6 +576,7 @@ public class ActiveSFUSession internal constructor(
 
                 result
             }
+
             is Failure -> result
         }
     }
@@ -552,7 +589,6 @@ public class ActiveSFUSession internal constructor(
             createPublisher()
         }
     }
-
 
     @VisibleForTesting
     public fun createSubscriber(): StreamPeerConnection? {
@@ -673,7 +709,7 @@ public class ActiveSFUSession internal constructor(
 
     override fun onConnecting() {
         logger.i { "[onConnecting] no args" }
-        //isConnected.value = false
+        // isConnected.value = false
     }
 
     override fun onConnected(event: SFUConnectedEvent) {
@@ -692,7 +728,6 @@ public class ActiveSFUSession internal constructor(
         coroutineScope.launch {
             logger.i { "[onDisconnected] cause: $cause" }
             isConnected.value = false
-
         }
     }
 
@@ -708,8 +743,6 @@ public class ActiveSFUSession internal constructor(
 
         // trigger an event in the client as well for SFU events. makes it easier to subscribe
         clientImpl.fireEvent(event, call.cid)
-
-
     }
 
     private suspend fun addParticipant(event: ParticipantJoinedEvent) {
@@ -773,7 +806,6 @@ public class ActiveSFUSession internal constructor(
         }
         logger.v { "[handleTrickle] #sfu; #${event.peerType.stringify()}; result: $result" }
     }
-
 
     /**
      * https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/negotiationneeded_event
@@ -868,7 +900,7 @@ public class ActiveSFUSession internal constructor(
         }
 
         if (_isVideoEnabled.value) {
-            //setupVideoTrack(autoPublish)
+            // setupVideoTrack(autoPublish)
         }
     }
 
@@ -884,7 +916,6 @@ public class ActiveSFUSession internal constructor(
             publisher?.addAudioTransceiver(localAudioTrack!!, listOf(sessionId))
         }
     }
-
 
     private fun makeAudioTrack(): AudioTrack {
         val audioSource = clientImpl.peerConnectionFactory.makeAudioSource(audioConstraints)
@@ -963,7 +994,7 @@ public class ActiveSFUSession internal constructor(
             return
         }
         val answerSdp = mangleSDP(answerResult.data)
-        
+
         logger.v { "[handleSubscriberOffer] #sfu; #subscriber; answerSdp: ${answerSdp.description}" }
         val setAnswerResult = subscriber.setLocalDescription(answerSdp)
         if (setAnswerResult !is Success) {
@@ -996,9 +1027,11 @@ public class ActiveSFUSession internal constructor(
                     opusPayloadType = line.split(" ")[0].substringAfter("a=rtpmap:")
                     modifiedLines.add("$line;red=1;useinbandfec=1") // Enable RED
                 }
+
                 enableDtx && line.startsWith("a=extmap") && line.contains("urn:ietf:params:rtp-hdrext:ssrc-audio-level") && opusPayloadType != null -> {
                     modifiedLines.add("$line\r\na=fmtp:$opusPayloadType usedtx=1") // Enable DTX
                 }
+
                 else -> modifiedLines.add(line)
             }
         }
@@ -1016,7 +1049,8 @@ public class ActiveSFUSession internal constructor(
                 logger.d { "[updateParticipantsSubscriptions] #sfu; user.id: ${user.id}" }
 
                 val dimension = VideoDimension(
-                    width = participant.videoTrackSize.first, height = participant.videoTrackSize.second
+                    width = participant.videoTrackSize.first,
+                    height = participant.videoTrackSize.second
                 )
                 logger.d { "[updateParticipantsSubscriptions] #sfu; user.id: ${user.id}, dimension: $dimension" }
                 subscriptions[participant] = dimension
@@ -1059,6 +1093,7 @@ public class ActiveSFUSession internal constructor(
                 is Success -> {
                     logger.v { "[updateParticipantsSubscriptions] #sfu; succeed" }
                 }
+
                 is Failure -> {
                     logger.e { "[updateParticipantsSubscriptions] #sfu; failed: $result" }
                 }
@@ -1077,20 +1112,35 @@ public class ActiveSFUSession internal constructor(
                     is ChangePublishQualityEvent -> Unit
 
                     is TrackPublishedEvent -> {
-                        call?.state?.updateMuteState(event.userId, event.sessionId, event.trackType, true)
+                        call?.state?.updateMuteState(
+                            event.userId,
+                            event.sessionId,
+                            event.trackType,
+                            true
+                        )
                     }
+
                     is TrackUnpublishedEvent -> {
-                        call?.state?.updateMuteState(event.userId, event.sessionId, event.trackType, false)
+                        call?.state?.updateMuteState(
+                            event.userId,
+                            event.sessionId,
+                            event.trackType,
+                            false
+                        )
                     }
+
                     is AudioLevelChangedEvent -> {
                         // handled by call state
                     }
+
                     is ConnectionQualityChangeEvent -> {
                         // handled by call state
                     }
+
                     is DominantSpeakerChangedEvent -> {
                         // handled by call state
                     }
+
                     is ErrorEvent -> TODO()
                     is JoinCallResponseEvent -> TODO()
                     is ParticipantJoinedEvent -> TODO()
@@ -1101,7 +1151,6 @@ public class ActiveSFUSession internal constructor(
                 }
             }
         }
-
     }
 
     companion object {

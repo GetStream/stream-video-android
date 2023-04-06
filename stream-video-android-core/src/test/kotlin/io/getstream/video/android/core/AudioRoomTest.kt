@@ -18,8 +18,6 @@ package io.getstream.video.android.core
 
 import io.getstream.video.android.core.model.QueryCallsData
 import io.getstream.video.android.core.model.SendReactionData
-import io.getstream.video.android.core.utils.mapSuspend
-import io.getstream.video.android.core.utils.onSuccess
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -50,7 +48,7 @@ class AudioRoomTest : IntegrationTestBase() {
          * - Filter on currently live
          */
         val filters = mutableMapOf("active" to true)
-        val result = client.queryCalls(QueryCallsData(filters, limit=1))
+        val result = client.queryCalls(QueryCallsData(filters, limit = 1))
         assertSuccess(result)
     }
 
@@ -100,8 +98,5 @@ class AudioRoomTest : IntegrationTestBase() {
     @Test
     fun `publishing audio or video as a listener should raise an error`() = runTest {
         // TODO
-
     }
-
-
 }

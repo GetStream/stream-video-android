@@ -19,21 +19,17 @@ package io.getstream.video.android.core
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth
-import io.getstream.log.IsLoggableValidator
 import io.getstream.log.Priority
 import io.getstream.log.StreamLog
-import io.getstream.log.StreamLogger
 import io.getstream.log.kotlin.KotlinStreamLogger
 import io.getstream.log.streamLog
 import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
-import io.getstream.video.android.core.events.ConnectedEvent
 import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.utils.Result
 import io.getstream.video.android.core.utils.onError
-import io.mockk.internalSubstitute
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineScheduler
@@ -41,7 +37,6 @@ import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
-import kotlinx.coroutines.withTimeout
 import org.junit.Before
 import org.junit.Rule
 import org.junit.rules.TestWatcher
@@ -157,7 +152,7 @@ open class TestBase {
     }
 }
 
-object IntegrationTestState{
+object IntegrationTestState {
     var client: StreamVideo? = null
     var call: Call? = null
 }
@@ -177,8 +172,6 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true) : TestBase(
 
     var nextEventContinuation: Continuation<VideoEvent>? = null
     var nextEventCompleted: Boolean = false
-
-
 
     init {
         builder = StreamVideoBuilder(
@@ -268,9 +261,7 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true) : TestBase(
                     continuation.resume(it)
                 }
             }
-
         }
-
 
     @Before
     fun resetTestVars() {

@@ -20,7 +20,6 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.errors.VideoError
 import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.errors.VideoNetworkError
-import io.getstream.video.android.core.events.ConnectedEvent
 import io.getstream.video.android.core.events.SFUConnectedEvent
 import okhttp3.Response
 import okhttp3.WebSocket
