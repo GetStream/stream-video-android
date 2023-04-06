@@ -29,7 +29,7 @@ import com.squareup.moshi.Json
  * *
  * @param connectionId The connection_id for this client
  * @param createdAt * @param type The type of event: \"health.check\" in this case
- * @param me */
+ */
 
 data class HealthCheckEvent(
 
@@ -42,9 +42,6 @@ data class HealthCheckEvent(
 
     /* The type of event: \"health.check\" in this case */
     @Json(name = "type")
-    val type: kotlin.String,
-
-    @Json(name = "me")
-    val me: OwnUserResponse? = null
+    val type: kotlin.String
 
 )

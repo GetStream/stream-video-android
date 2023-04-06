@@ -26,22 +26,34 @@ package org.openapitools.client.models
 import com.squareup.moshi.Json
 
 /**
- * sent when a user cancels a call
+ * This event is sent when one or more members get its role updated
  *
- * @param callCid * @param createdAt * @param type * @param user */
+ * @param call * @param callCid * @param capabilitiesByRole The capabilities by role for this call
+ * @param createdAt * @param members The list of members that were updated
+ * @param type The type of event: \"call.member_added\" in this case
+ */
 
-data class CallCancelledEvent(
+data class CallMemberUpdatedPermissionEvent(
+
+    @Json(name = "call")
+    val call: CallResponse,
 
     @Json(name = "call_cid")
     val callCid: kotlin.String,
 
+    /* The capabilities by role for this call */
+    @Json(name = "capabilities_by_role")
+    val capabilitiesByRole: kotlin.collections.Map<kotlin.String, kotlin.collections.List<kotlin.String>>,
+
     @Json(name = "created_at")
     val createdAt: java.time.OffsetDateTime,
 
-    @Json(name = "type")
-    val type: kotlin.String,
+    /* The list of members that were updated */
+    @Json(name = "members")
+    val members: kotlin.collections.List<MemberResponse>,
 
-    @Json(name = "user")
-    val user: UserResponse
+    /* The type of event: \"call.member_added\" in this case */
+    @Json(name = "type")
+    val type: kotlin.String
 
 )

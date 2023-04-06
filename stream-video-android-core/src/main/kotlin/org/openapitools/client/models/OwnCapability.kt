@@ -28,7 +28,7 @@ import com.squareup.moshi.Json
 /**
  * All possibility of string to use
  *
- * Values: blockMinusUsers,createMinusCall,createMinusReaction,endMinusCall,joinMinusBackstage,joinMinusCall,joinMinusEndedMinusCall,muteMinusUsers,readMinusCall,screenshare,sendMinusAudio,sendMinusVideo,startMinusBroadcastMinusCall,startMinusRecordMinusCall,stopMinusBroadcastMinusCall,stopMinusRecordMinusCall,updateMinusCall,updateMinusCallMinusPermissions,updateMinusCallMinusSettings
+ * Values: blockMinusUsers,createMinusCall,createMinusReaction,endMinusCall,joinMinusBackstage,joinMinusCall,joinMinusEndedMinusCall,muteMinusUsers,readMinusCall,removeMinusCallMinusMember,screenshare,sendMinusAudio,sendMinusVideo,startMinusBroadcastMinusCall,startMinusRecordMinusCall,startMinusTranscriptionMinusCall,stopMinusBroadcastMinusCall,stopMinusRecordMinusCall,stopMinusTranscriptionMinusCall,updateMinusCall,updateMinusCallMinusMember,updateMinusCallMinusPermissions,updateMinusCallMinusSettings
  */
 
 enum class OwnCapability(val value: kotlin.String) {
@@ -60,6 +60,9 @@ enum class OwnCapability(val value: kotlin.String) {
     @Json(name = "read-call")
     readMinusCall("read-call"),
 
+    @Json(name = "remove-call-member")
+    removeMinusCallMinusMember("remove-call-member"),
+
     @Json(name = "screenshare")
     screenshare("screenshare"),
 
@@ -75,26 +78,29 @@ enum class OwnCapability(val value: kotlin.String) {
     @Json(name = "start-record-call")
     startMinusRecordMinusCall("start-record-call"),
 
+    @Json(name = "start-transcription-call")
+    startMinusTranscriptionMinusCall("start-transcription-call"),
+
     @Json(name = "stop-broadcast-call")
     stopMinusBroadcastMinusCall("stop-broadcast-call"),
 
     @Json(name = "stop-record-call")
     stopMinusRecordMinusCall("stop-record-call"),
 
+    @Json(name = "stop-transcription-call")
+    stopMinusTranscriptionMinusCall("stop-transcription-call"),
+
     @Json(name = "update-call")
     updateMinusCall("update-call"),
+
+    @Json(name = "update-call-member")
+    updateMinusCallMinusMember("update-call-member"),
 
     @Json(name = "update-call-permissions")
     updateMinusCallMinusPermissions("update-call-permissions"),
 
     @Json(name = "update-call-settings")
-    updateMinusCallMinusSettings("update-call-settings"),
-
-    @Json(name = "start-transcription-call")
-    startTranscriptionCall("start-transcription-call"),
-
-    @Json(name = "stop-transcription-call")
-    stopTranscriptionCall("stop-transcription-call");
+    updateMinusCallMinusSettings("update-call-settings");
 
     /**
      * Override toString() to avoid using the enum variable name as the value, and instead use

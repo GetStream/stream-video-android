@@ -35,8 +35,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.openapitools.client.models.UserObjectRequest
-import org.openapitools.client.models.VideoWSAuthMessageRequest
+import org.openapitools.client.models.ConnectUserDetailsRequest
+import org.openapitools.client.models.WSAuthMessageRequest
 import stream.video.coordinator.client_v1_rpc.WebsocketHealthcheck
 import kotlin.math.pow
 import kotlin.properties.Delegates
@@ -127,25 +127,30 @@ internal class VideoSocketImpl(
                     healthMonitor.stop()
                     callListeners { it.onConnecting() }
                 }
+
                 is State.Connected -> {
                     healthMonitor.start()
                     callListeners { it.onConnected(newState.event) }
                 }
+
                 is State.NetworkDisconnected -> {
                     shutdownSocketConnection()
                     healthMonitor.stop()
                     callListeners { it.onDisconnected(DisconnectCause.NetworkNotAvailable) }
                 }
+
                 is State.DisconnectedByRequest -> {
                     shutdownSocketConnection()
                     healthMonitor.stop()
                     callListeners { it.onDisconnected(DisconnectCause.ConnectionReleased) }
                 }
+
                 is State.DisconnectedTemporarily -> {
                     shutdownSocketConnection()
                     healthMonitor.onDisconnected()
                     callListeners { it.onDisconnected(DisconnectCause.Error(newState.error)) }
                 }
+
                 is State.DisconnectedPermanently -> {
                     shutdownSocketConnection()
                     connectionConf = null
@@ -182,6 +187,7 @@ internal class VideoSocketImpl(
                     }
                 }
             }
+
             VideoErrorCode.UNDEFINED_TOKEN.code,
             VideoErrorCode.INVALID_TOKEN.code,
             VideoErrorCode.API_KEY_NOT_FOUND.code,
@@ -189,6 +195,7 @@ internal class VideoSocketImpl(
             -> {
                 state = State.DisconnectedPermanently(error)
             }
+
             else -> {
                 state = State.DisconnectedTemporarily(error)
             }
@@ -217,18 +224,13 @@ internal class VideoSocketImpl(
         logger.d { "[authenticateUser] user: $user" }
 
         socket?.authenticate(
-            VideoWSAuthMessageRequest( // TODO - double check and see about user device
+            WSAuthMessageRequest(
                 token = user.token,
-                userDetails = UserObjectRequest(
+                userDetails = ConnectUserDetailsRequest(
                     id = user.id,
-                    role = user.role
-                ).apply {
-                    /**
-                     * Should be exposed on the BE to store user's custom data like name and image.
-                     */
-                    this["name"] = user.name
-                    user.imageUrl?.let { this["image"] = it }
-                }
+                    name = user.name,
+                    image = user.imageUrl,
+                )
             )
         )
     }

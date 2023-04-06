@@ -26,9 +26,10 @@ import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.user.UserPreferences
 import kotlinx.coroutines.CoroutineScope
 import okhttp3.OkHttpClient
-import org.openapitools.client.apis.DefaultApi
 import org.openapitools.client.apis.EventsApi
+import org.openapitools.client.apis.LivestreamingApi
 import org.openapitools.client.apis.ModerationApi
+import org.openapitools.client.apis.RecordingApi
 import org.openapitools.client.apis.VideoCallsApi
 import org.openapitools.client.infrastructure.Serializer
 import retrofit2.Retrofit
@@ -79,15 +80,17 @@ internal class CallCoordinatorClientModule(
     private val callCoordinatorClient: CallCoordinatorClient by lazy {
         val oldService = protoRetrofitClient.create(ClientRPCService::class.java)
         val videoCallsApi = retrofitClient.create(VideoCallsApi::class.java)
+        val recordingApi = retrofitClient.create(RecordingApi::class.java)
+        val livestreamingApi = retrofitClient.create(LivestreamingApi::class.java)
         val eventsApi = retrofitClient.create(EventsApi::class.java)
-        val defaultApi = retrofitClient.create(DefaultApi::class.java)
         val moderationApi = retrofitClient.create(ModerationApi::class.java)
 
         CallCoordinatorClientImpl(
             callCoordinatorService = oldService,
             videoCallApi = videoCallsApi,
             eventsApi = eventsApi,
-            defaultApi = defaultApi,
+            recordingApi = recordingApi,
+            livestreamingApi = livestreamingApi,
             moderationApi = moderationApi
         )
     }
@@ -116,6 +119,6 @@ internal class CallCoordinatorClientModule(
     }
 
     internal companion object {
-        private const val BASE_URL = "https://video-edge-frankfurt-ce1.stream-io-api.com/"
+        private const val BASE_URL = "https://video.stream-io-api.com/"
     }
 }
