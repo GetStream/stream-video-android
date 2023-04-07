@@ -103,7 +103,7 @@ public fun ActiveSoundLevels(modifier: Modifier = Modifier) {
     Row(
         modifier = modifier
             .height(height = VideoTheme.dimens.audioLevelIndicatorBarMaxHeight)
-            .padding(4.dp),
+            .padding(horizontal = 4.dp),
         verticalAlignment = Alignment.Bottom
     ) {
         Spacer(

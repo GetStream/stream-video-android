@@ -19,7 +19,9 @@ package io.getstream.video.android.compose
 import androidx.compose.foundation.layout.Box
 import androidx.compose.ui.Alignment
 import app.cash.paparazzi.Paparazzi
+import io.getstream.video.android.common.model.Muted
 import io.getstream.video.android.common.model.Speaking
+import io.getstream.video.android.common.model.Unmuted
 import io.getstream.video.android.common.util.mockParticipantList
 import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.ui.components.audio.ActiveSoundLevels
@@ -39,8 +41,10 @@ internal class IndicatorsTest : BaseComposeTest() {
 
     @Test
     fun `snapshot SoundIndicator composable`() {
-        snapshotWithDarkMode {
+        snapshot {
             SoundIndicator(state = Speaking)
+            SoundIndicator(state = Unmuted)
+            SoundIndicator(state = Muted)
         }
     }
 
