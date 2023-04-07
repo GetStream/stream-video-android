@@ -24,5 +24,5 @@ internal open class BasePortraitComposeTest : BaseComposeTest() {
     @get:Rule
     val paparazzi = Paparazzi()
 
-    override fun getPaparazzi(): Paparazzi = paparazzi
+    override fun basePaparazzi(): Paparazzi = paparazzi
 }

@@ -34,7 +34,7 @@ import org.junit.Test
 internal class CallBackgroundTest : BasePortraitComposeTest() {
 
     @Test
-    fun `snapshot CallBackground composable with an image Avatar`() {
+    fun `snapshot CallBackground composable with an image Avatars`() {
         snapshot {
             CallBackground(
                 participants = listOf(
@@ -64,8 +64,8 @@ internal class CallBackgroundTest : BasePortraitComposeTest() {
     }
 
     @Test
-    fun `snapshot CallBackground composable with an initial Avatar`() {
-        snapshot(isInDarkMode = true) {
+    fun `snapshot CallBackground composable with an initial Avatars`() {
+        snapshot {
             CallBackground(
                 participants = listOf(
                     mockUsers.first().let {

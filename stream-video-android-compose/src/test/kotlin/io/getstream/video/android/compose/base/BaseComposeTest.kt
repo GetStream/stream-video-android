@@ -23,19 +23,19 @@ import io.getstream.video.android.compose.theme.VideoTheme
 
 internal abstract class BaseComposeTest {
 
-    abstract fun getPaparazzi(): Paparazzi
+    abstract fun basePaparazzi(): Paparazzi
 
     fun snapshot(
         isInDarkMode: Boolean = false,
         composable: @Composable () -> Unit
     ) {
-        getPaparazzi().snapshot {
+        basePaparazzi().snapshot {
             VideoTheme(isInDarkMode) { composable.invoke() }
         }
     }
 
     fun snapshotWithDarkMode(composable: @Composable () -> Unit) {
-        getPaparazzi().snapshot {
+        basePaparazzi().snapshot {
             Column {
                 VideoTheme(isInDarkMode = true) { composable.invoke() }
                 VideoTheme(isInDarkMode = false) { composable.invoke() }

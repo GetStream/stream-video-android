@@ -25,5 +25,5 @@ internal open class BaseLandscapeComposeTest : BaseComposeTest() {
     @get:Rule
     val paparazziLandscape = Paparazzi(deviceConfig = DeviceConfig.NEXUS_5_LAND)
 
-    override fun getPaparazzi(): Paparazzi = paparazziLandscape
+    override fun basePaparazzi(): Paparazzi = paparazziLandscape
 }
