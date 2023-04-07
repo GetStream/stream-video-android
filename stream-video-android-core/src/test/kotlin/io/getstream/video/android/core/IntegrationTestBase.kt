@@ -27,6 +27,7 @@ import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.User
+import io.getstream.result.Result
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking

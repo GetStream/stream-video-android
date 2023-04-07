@@ -153,10 +153,13 @@ public class ActiveSFUSession internal constructor(
     private val context = client.context
     private val logger by taggedLogger("Call:ActiveSFUSession")
 
+    /** subscriber peer connection is used for subs */
     private var subscriber: StreamPeerConnection? = null
-
+    /** publisher for publishing, using 2 peer connections prevents race conditions in the offer/answer cycle */
     @VisibleForTesting
     var publisher: StreamPeerConnection? = null
+
+
     private val mediaConstraints: MediaConstraints by lazy {
         buildMediaConstraints()
     }
@@ -1086,6 +1089,9 @@ public class ActiveSFUSession internal constructor(
      * or at a different size
      *
      * It tells the SFU that we want to receive person a's video at 1080p, and person b at 360p
+     *
+     * TODO: right now this is called by the SFU session, it should be called by the viewmodel
+     * Since the viewmodel knows what's actually displayed
      */
     private fun updateParticipantsSubscriptions(participants: List<ParticipantState>) {
         val subscriptions = mutableMapOf<ParticipantState, VideoDimension>()
@@ -1167,33 +1173,9 @@ public class ActiveSFUSession internal constructor(
                         call?.state?.updatePublishState(event.userId, event.sessionId, event.trackType, true)
 
                     }
-
                     is TrackUnpublishedEvent -> {
 
                         call?.state?.updatePublishState(event.userId, event.sessionId, event.trackType, false)
-                    }
-
-                    is AudioLevelChangedEvent -> {
-                        // handled by call state
-                    }
-
-                    is ConnectionQualityChangeEvent -> {
-                        // handled by call state
-                    }
-
-                    is DominantSpeakerChangedEvent -> {
-                        // handled by call state
-                    }
-
-                    is ErrorEvent -> TODO()
-                    is JoinCallResponseEvent -> {
-                        // handled by call state
-                    }
-                    is ParticipantJoinedEvent -> {
-                        // handle by call state
-                    }
-                    is ParticipantLeftEvent -> {
-                        // handled by call state
                     }
                     else -> {
                         logger.d { "[onRtcEvent] skipped event: $event" }

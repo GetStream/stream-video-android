@@ -154,7 +154,7 @@ public data class ParticipantState(
             name = participant.name,
             imageUrl=participant.image,
             //custom = participant.custom,
-            role=participant.roles.first()
+            role=participant.roles.firstOrNull() ?: ""
         )
 
         publishedTracks = participant.published_tracks.toSet()
