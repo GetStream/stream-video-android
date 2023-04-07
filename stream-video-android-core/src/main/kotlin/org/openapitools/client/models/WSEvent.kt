@@ -76,10 +76,9 @@ class WSEventAdapter : JsonAdapter<WSEvent>() {
         }
         reader.endObject()
 
-        peek.use { peekedReader ->
-            return when (eventType) {
-                "connection.ok" -> Serializer.moshi.adapter(WSConnectedEvent::class.java).fromJson(peekedReader)
-                else -> throw IllegalArgumentException("Unknown eventType type: $eventType")
+        return eventType?.let {
+            peek.use { peekedReader ->
+                Serializer.moshi.adapter(getSubclass(eventType)).fromJson(peekedReader)
             }
         }
     }
