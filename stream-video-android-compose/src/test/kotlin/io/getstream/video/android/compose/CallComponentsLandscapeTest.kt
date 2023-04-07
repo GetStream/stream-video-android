@@ -16,25 +16,19 @@
 
 package io.getstream.video.android.compose
 
-import io.getstream.video.android.common.model.Speaking
-import io.getstream.video.android.compose.base.BasePortraitComposeTest
-import io.getstream.video.android.compose.ui.components.audio.ActiveSoundLevels
-import io.getstream.video.android.compose.ui.components.audio.SoundIndicator
+import io.getstream.video.android.compose.base.BaseLandscapeComposeTest
+import io.getstream.video.android.compose.ui.components.call.controls.internal.LandscapeCallControls
+import io.getstream.video.android.core.call.state.CallMediaState
 import org.junit.Test
 
-internal class AudioTest : BasePortraitComposeTest() {
+internal class CallComponentsLandscapeTest : BaseLandscapeComposeTest() {
 
     @Test
-    fun `snapshot SoundIndicator composable`() {
+    fun `snapshot LandscapeCallControls composable`() {
         snapshotWithDarkMode {
-            SoundIndicator(state = Speaking)
-        }
-    }
-
-    @Test
-    fun `snapshot ActiveSoundLevels composable`() {
-        snapshotWithDarkMode {
-            ActiveSoundLevels()
+            LandscapeCallControls(
+                callMediaState = CallMediaState(), isScreenSharing = false
+            ) {}
         }
     }
 }

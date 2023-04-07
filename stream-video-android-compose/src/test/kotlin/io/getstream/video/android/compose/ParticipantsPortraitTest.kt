@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import io.getstream.video.android.common.util.mockParticipant
 import io.getstream.video.android.common.util.mockParticipantList
 import io.getstream.video.android.common.util.mockVideoTrack
+import io.getstream.video.android.compose.base.BasePortraitComposeTest
 import io.getstream.video.android.compose.state.ui.internal.InviteUserItemState
 import io.getstream.video.android.compose.state.ui.internal.ParticipantList
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -51,7 +52,7 @@ import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.core.model.toUser
 import org.junit.Test
 
-internal class ParticipantsPortraitTest : BaseComposeTest() {
+internal class ParticipantsPortraitTest : BasePortraitComposeTest() {
 
     @Test
     fun `snapshot ParticipantAvatars composable`() {
@@ -124,7 +125,7 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
 
     @Test
     fun `snapshot ParticipantVideo composable`() {
-        paparazzi.snapshot {
+        snapshot {
             ParticipantVideo(
                 call = null,
                 participant = mockParticipant
@@ -134,189 +135,169 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
 
     @Test
     fun `snapshot LocalVideoContent composable`() {
-        paparazzi.snapshot {
-            VideoTheme {
-                val configuration = LocalConfiguration.current
-                val screenWidth = configuration.screenWidthDp
-                val screenHeight = configuration.screenHeightDp
-                LocalVideoContent(
-                    call = null,
-                    modifier = Modifier.fillMaxSize(),
-                    localParticipant = mockParticipant,
-                    parentBounds = IntSize(screenWidth, screenHeight),
-                    paddingValues = PaddingValues(0.dp)
-                )
-            }
+        snapshot {
+            val configuration = LocalConfiguration.current
+            val screenWidth = configuration.screenWidthDp
+            val screenHeight = configuration.screenHeightDp
+            LocalVideoContent(
+                call = null,
+                modifier = Modifier.fillMaxSize(),
+                localParticipant = mockParticipant,
+                parentBounds = IntSize(screenWidth, screenHeight),
+                paddingValues = PaddingValues(0.dp)
+            )
         }
     }
 
     @Test
     fun `snapshot CallParticipantsList composable`() {
-        paparazzi.snapshot {
-            VideoTheme {
-                CallParticipantsList(
-                    participantsState = mockParticipantList,
-                    onUserOptionsSelected = {}
-                )
-            }
+        snapshotWithDarkMode {
+            CallParticipantsList(
+                participantsState = mockParticipantList,
+                onUserOptionsSelected = {}
+            )
         }
     }
 
     @Test
     fun `snapshot PortraitParticipants1 composable`() {
-        paparazzi.snapshot {
-            VideoTheme {
-                val configuration = LocalConfiguration.current
-                val screenWidth = configuration.screenWidthDp
-                val screenHeight = configuration.screenHeightDp
+        snapshot {
+            val configuration = LocalConfiguration.current
+            val screenWidth = configuration.screenWidthDp
+            val screenHeight = configuration.screenHeightDp
 
-                Box(
-                    modifier = Modifier.background(color = VideoTheme.colors.appBackground)
-                ) {
-                    PortraitParticipants(
-                        call = null,
-                        primarySpeaker = mockParticipantList[0],
-                        callParticipants = mockParticipantList.take(1),
-                        modifier = Modifier.fillMaxSize(),
-                        paddingValues = PaddingValues(0.dp),
-                        parentSize = IntSize(screenWidth, screenHeight)
-                    ) {}
-                }
-            }
-        }
-    }
-
-    @Test
-    fun `snapshot PortraitParticipants2 composable`() {
-        paparazzi.snapshot {
-            VideoTheme {
-                val configuration = LocalConfiguration.current
-                val screenWidth = configuration.screenWidthDp
-                val screenHeight = configuration.screenHeightDp
-
-                Box(
-                    modifier = Modifier.background(color = VideoTheme.colors.appBackground)
-                ) {
-                    PortraitParticipants(
-                        call = null,
-                        primarySpeaker = mockParticipantList[0],
-                        callParticipants = mockParticipantList.take(2),
-                        modifier = Modifier.fillMaxSize(),
-                        paddingValues = PaddingValues(0.dp),
-                        parentSize = IntSize(screenWidth, screenHeight)
-                    ) {}
-                }
-            }
-        }
-    }
-
-    @Test
-    fun `snapshot PortraitParticipants3 composable`() {
-        paparazzi.snapshot {
-            VideoTheme {
-                val configuration = LocalConfiguration.current
-                val screenWidth = configuration.screenWidthDp
-                val screenHeight = configuration.screenHeightDp
-
-                Box(
-                    modifier = Modifier.background(color = VideoTheme.colors.appBackground)
-                ) {
-                    PortraitParticipants(
-                        call = null,
-                        primarySpeaker = mockParticipantList[0],
-                        callParticipants = mockParticipantList.take(3),
-                        modifier = Modifier.fillMaxSize(),
-                        paddingValues = PaddingValues(0.dp),
-                        parentSize = IntSize(screenWidth, screenHeight)
-                    ) {}
-                }
-            }
-        }
-    }
-
-    @Test
-    fun `snapshot PortraitParticipants4 composable`() {
-        paparazzi.snapshot {
-            VideoTheme {
-                val configuration = LocalConfiguration.current
-                val screenWidth = configuration.screenWidthDp
-                val screenHeight = configuration.screenHeightDp
-
-                Box(
-                    modifier = Modifier.background(color = VideoTheme.colors.appBackground)
-                ) {
-                    PortraitParticipants(
-                        call = null,
-                        primarySpeaker = mockParticipantList[0],
-                        callParticipants = mockParticipantList.take(4),
-                        modifier = Modifier.fillMaxSize(),
-                        paddingValues = PaddingValues(0.dp),
-                        parentSize = IntSize(screenWidth, screenHeight)
-                    ) {}
-                }
-            }
-        }
-    }
-
-    @Test
-    fun `snapshot PortraitScreenSharingContent composable`() {
-        paparazzi.snapshot {
-            VideoTheme {
-                PortraitScreenSharingContent(
+            Box(
+                modifier = Modifier.background(color = VideoTheme.colors.appBackground)
+            ) {
+                PortraitParticipants(
                     call = null,
-                    session = ScreenSharingSession(
-                        track = mockParticipantList.first().videoTrack ?: mockVideoTrack,
-                        participant = mockParticipantList.first()
-                    ),
-                    participants = mockParticipantList,
-                    paddingValues = PaddingValues(0.dp),
+                    primarySpeaker = mockParticipantList[0],
+                    callParticipants = mockParticipantList.take(1),
                     modifier = Modifier.fillMaxSize(),
-                    onRender = {}
+                    paddingValues = PaddingValues(0.dp),
+                    parentSize = IntSize(screenWidth, screenHeight)
                 ) {}
             }
         }
     }
 
     @Test
-    fun `snapshot ScreenSharingCallParticipantsContent composable`() {
-        paparazzi.snapshot {
-            VideoTheme {
-                ScreenSharingCallParticipantsContent(
+    fun `snapshot PortraitParticipants2 composable`() {
+        snapshot {
+            val configuration = LocalConfiguration.current
+            val screenWidth = configuration.screenWidthDp
+            val screenHeight = configuration.screenHeightDp
+
+            Box(
+                modifier = Modifier.background(color = VideoTheme.colors.appBackground)
+            ) {
+                PortraitParticipants(
                     call = null,
-                    session = ScreenSharingSession(
-                        track = mockParticipantList.first().videoTrack ?: mockVideoTrack,
-                        participant = mockParticipantList.first()
-                    ),
-                    participants = mockParticipantList,
-                    onCallAction = {},
+                    primarySpeaker = mockParticipantList[0],
+                    callParticipants = mockParticipantList.take(2),
                     modifier = Modifier.fillMaxSize(),
-                    callMediaState = CallMediaState()
-                )
+                    paddingValues = PaddingValues(0.dp),
+                    parentSize = IntSize(screenWidth, screenHeight)
+                ) {}
             }
+        }
+    }
+
+    @Test
+    fun `snapshot PortraitParticipants3 composable`() {
+        snapshot {
+            val configuration = LocalConfiguration.current
+            val screenWidth = configuration.screenWidthDp
+            val screenHeight = configuration.screenHeightDp
+
+            Box(
+                modifier = Modifier.background(color = VideoTheme.colors.appBackground)
+            ) {
+                PortraitParticipants(
+                    call = null,
+                    primarySpeaker = mockParticipantList[0],
+                    callParticipants = mockParticipantList.take(3),
+                    modifier = Modifier.fillMaxSize(),
+                    paddingValues = PaddingValues(0.dp),
+                    parentSize = IntSize(screenWidth, screenHeight)
+                ) {}
+            }
+        }
+    }
+
+    @Test
+    fun `snapshot PortraitParticipants4 composable`() {
+        snapshot {
+            val configuration = LocalConfiguration.current
+            val screenWidth = configuration.screenWidthDp
+            val screenHeight = configuration.screenHeightDp
+
+            Box(
+                modifier = Modifier.background(color = VideoTheme.colors.appBackground)
+            ) {
+                PortraitParticipants(
+                    call = null,
+                    primarySpeaker = mockParticipantList[0],
+                    callParticipants = mockParticipantList.take(4),
+                    modifier = Modifier.fillMaxSize(),
+                    paddingValues = PaddingValues(0.dp),
+                    parentSize = IntSize(screenWidth, screenHeight)
+                ) {}
+            }
+        }
+    }
+
+    @Test
+    fun `snapshot PortraitScreenSharingContent composable`() {
+        snapshot {
+            PortraitScreenSharingContent(
+                call = null,
+                session = ScreenSharingSession(
+                    track = mockParticipantList.first().videoTrack ?: mockVideoTrack,
+                    participant = mockParticipantList.first()
+                ),
+                participants = mockParticipantList,
+                paddingValues = PaddingValues(0.dp),
+                modifier = Modifier.fillMaxSize(),
+                onRender = {}
+            ) {}
+        }
+    }
+
+    @Test
+    fun `snapshot ScreenSharingCallParticipantsContent composable`() {
+        snapshot {
+            ScreenSharingCallParticipantsContent(
+                call = null,
+                session = ScreenSharingSession(
+                    track = mockParticipantList.first().videoTrack ?: mockVideoTrack,
+                    participant = mockParticipantList.first()
+                ),
+                participants = mockParticipantList,
+                onCallAction = {},
+                modifier = Modifier.fillMaxSize(),
+                callMediaState = CallMediaState()
+            )
         }
     }
 
     @Test
     fun `snapshot ParticipantsRow composable`() {
-        paparazzi.snapshot {
-            VideoTheme {
-                ParticipantsRow(
-                    call = null,
-                    participants = mockParticipantList
-                )
-            }
+        snapshotWithDarkMode {
+            ParticipantsRow(
+                call = null,
+                participants = mockParticipantList
+            )
         }
     }
 
     @Test
     fun `snapshot ParticipantsColumn composable`() {
-        paparazzi.snapshot {
-            VideoTheme {
-                ParticipantsColumn(
-                    call = null,
-                    participants = mockParticipantList
-                )
-            }
+        snapshotWithDarkMode {
+            ParticipantsColumn(
+                call = null,
+                participants = mockParticipantList
+            )
         }
     }
 }

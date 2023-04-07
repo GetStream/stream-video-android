@@ -14,27 +14,28 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose
+package io.getstream.video.android.compose.base
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.compose.theme.VideoTheme
-import org.junit.Rule
 
-internal open class BaseComposeTest {
+internal abstract class BaseComposeTest {
 
-    @get:Rule
-    val paparazzi = Paparazzi()
+    abstract fun getPaparazzi(): Paparazzi
 
-    fun snapshot(composable: @Composable () -> Unit) {
-        paparazzi.snapshot {
-            VideoTheme { composable.invoke() }
+    fun snapshot(
+        isInDarkMode: Boolean = false,
+        composable: @Composable () -> Unit
+    ) {
+        getPaparazzi().snapshot {
+            VideoTheme(isInDarkMode) { composable.invoke() }
         }
     }
 
     fun snapshotWithDarkMode(composable: @Composable () -> Unit) {
-        paparazzi.snapshot {
+        getPaparazzi().snapshot {
             Column {
                 VideoTheme(isInDarkMode = true) { composable.invoke() }
                 VideoTheme(isInDarkMode = false) { composable.invoke() }
