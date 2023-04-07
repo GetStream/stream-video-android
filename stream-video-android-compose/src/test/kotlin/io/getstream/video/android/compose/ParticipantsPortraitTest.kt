@@ -125,7 +125,7 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
         snapshot {
             CallParticipant(
                 call = null,
-                participant = callParticipants[0],
+                participant = mockParticipantList[0],
                 isFocused = true
             )
         }
@@ -136,7 +136,7 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
         snapshot {
             CallParticipant(
                 call = null,
-                participant = callParticipants[1],
+                participant = mockParticipantList[1],
                 isFocused = true
             )
         }
