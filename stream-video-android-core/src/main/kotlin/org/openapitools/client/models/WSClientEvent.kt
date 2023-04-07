@@ -17,22 +17,6 @@ package org.openapitools.client.models
 
 
 
-
-
-import com.squareup.moshi.Json
-
-/**
- * 
- *
- * @param permissions 
- */
-
-
-data class RequestPermissionRequest (
-
-    @Json(name = "permissions")
-    val permissions: kotlin.collections.List<kotlin.String>
-
-)
+sealed interface WSClientEvent {}
 
 

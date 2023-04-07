@@ -26,6 +26,7 @@ message SfuEvent {
     TrackPublished track_published = 16;
     TrackUnpublished track_unpublished = 17;
     Error error = 18;
+    CallGrantsUpdated call_grants_updated = 19;
   }
 }
 
@@ -177,4 +178,25 @@ message VideoSender {
 message ChangePublishQuality {
   repeated AudioSender audio_senders = 1;
   repeated VideoSender video_senders = 2;
+}
+
+// CallGrants is sent to users when there is a change in the call permissions
+// to publish audio, video or share the screen for a user or a role. This is
+// idempotent and can be sent at any time. Only the current_grants in the latest
+// message should be considered. In other words, this is not dependent on any
+// other message (including previous call_grants_updated message)
+//
+// When this message is received, the client (say, React component) should mute
+// the tracks which are not allowed anymore. For example, if the message has
+// grants {audio:true, video:false} while the user is publishing video, then the
+// client component should mute the video track and gray out the video button.
+// This way, the user will not be able to publish video until the permissions
+// are granted again. Also, muting the track on the client side will prevent
+// the SFU from receiving the video track and will save bandwidth.
+//
+// In simple words, this is exactly the same as muting a track on the client.
+// Here, instead of the user instructing the client, SFU would be doing it.
+message CallGrantsUpdated {
+  models.CallGrants current_grants = 1;
+  string message = 2;
 }

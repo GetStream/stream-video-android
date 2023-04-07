@@ -150,9 +150,43 @@ message Error {
 }
 
 message ClientDetails {
-  int32 version = 1;
-  string os = 2;
-  string browser = 3;
+  Sdk sdk = 1;
+  OS os = 2;
+  Browser browser = 3;
+  Device device = 4;
+}
+
+enum SdkType {
+  SDK_TYPE_UNSPECIFIED = 0;
+  SDK_TYPE_REACT = 1;
+  SDK_TYPE_ANGULAR = 2;
+  SDK_TYPE_ANDROID = 3;
+  SDK_TYPE_IOS = 4;
+  SDK_TYPE_FLUTTER = 5;
+  SDK_TYPE_REACT_NATIVE = 6;
+}
+
+message Sdk {
+  SdkType type = 1;
+  string major = 2;
+  string minor = 3;
+  string patch = 4;
+}
+
+message OS {
+  string name = 1;
+  string version = 2;
+  string architecture = 3;
+}
+
+message Browser {
+  string name = 1;
+  string version = 2;
+}
+
+message Device {
+  string name = 1;
+  string version = 2;
 }
 
 enum TrackUnpublishReason {
@@ -170,4 +204,12 @@ enum TrackUnpublishReason {
   // of "permission revoke" it is not possible until the
   // call permissions are updated.
   TRACK_UNPUBLISH_REASON_MODERATION = 3;
+}
+
+// CallGrants represents the set of permissions given
+// to the user for the current call.
+message CallGrants {
+  bool can_publish_audio = 1;
+  bool can_publish_video = 2;
+  bool can_screenshare = 3;
 }

@@ -16,23 +16,9 @@
 package org.openapitools.client.models
 
 
+sealed interface WSCallEvent {
+    fun getCallCID(): String
+}
 
-
-
-import com.squareup.moshi.Json
-
-/**
- * 
- *
- * @param permissions 
- */
-
-
-data class RequestPermissionRequest (
-
-    @Json(name = "permissions")
-    val permissions: kotlin.collections.List<kotlin.String>
-
-)
 
 

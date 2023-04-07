@@ -95,13 +95,11 @@ public data class CallMembersDeletedEvent(
 public data class CallAcceptedEvent(
     override val callCid: String,
     val sentByUserId: String,
-    val sessionId: String
 ) : CoordinatorEvent()
 
 public data class CallRejectedEvent(
     override val callCid: String,
     val user: User,
-    val sessionId: String,
     val updatedAt: Date
 ) : CoordinatorEvent()
 

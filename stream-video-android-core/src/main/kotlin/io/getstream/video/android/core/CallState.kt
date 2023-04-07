@@ -243,13 +243,15 @@ public class CallState(val call: Call, user: User) {
         when (event) {
             is BlockedUserEvent -> TODO()
             is CallAcceptedEvent -> {
-                val participant = getOrCreateParticipant(event.sessionId, event.sentByUserId)
-                participant._acceptedAt.value = Date()
+//                val participant = getOrCreateParticipant(event.sessionId, event.sentByUserId)
+//                participant._acceptedAt.value = Date()
             }
 
             is CallRejectedEvent -> {
-                val participant = getOrCreateParticipant(event.sessionId, event.user.id, event.user)
-                participant._rejectedAt.value = Date()
+                // TODO: we don't have a RTC session yet. So how do we do this?
+                // TODO: these are not participants. Keep track on the member instead of participant
+//                val participant = getOrCreateParticipant(event.sessionId, event.user.id, event.user)
+//                participant._rejectedAt.value = Date()
             }
 
             is CallCancelledEvent -> TODO()

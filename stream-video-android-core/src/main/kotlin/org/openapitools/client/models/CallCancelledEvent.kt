@@ -15,34 +15,33 @@
 
 package org.openapitools.client.models
 
-
-
-
+import org.openapitools.client.models.UserResponse
 
 import com.squareup.moshi.Json
 
 /**
- * 
+ * sent when a user cancels a call
  *
- * @param connectionId The connection_id for this client
+ * @param callCid 
  * @param createdAt 
- * @param type The type of event: \"health.check\" in this case
+ * @param type 
+ * @param user 
  */
 
 
-data class HealthCheckEvent (
+data class CallCancelledEvent (
 
-    /* The connection_id for this client */
-    @Json(name = "connection_id")
-    val connectionId: kotlin.String,
+    @Json(name = "call_cid")
+    val callCid: kotlin.String,
 
     @Json(name = "created_at")
     val createdAt: java.time.OffsetDateTime,
 
-    /* The type of event: \"health.check\" in this case */
     @Json(name = "type")
-    val type: kotlin.String
+    val type: kotlin.String,
 
-) : WSEvent(), WSClientEvent
+    @Json(name = "user")
+    val user: UserResponse
 
+)
 

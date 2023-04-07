@@ -16,12 +16,15 @@
 
 package io.getstream.video.android.core.socket.internal
 
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.Moshi
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.errors.create
 import io.getstream.video.android.core.events.ConnectedEvent
 import io.getstream.video.android.core.events.CoordinatorHealthCheckEvent
+import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.socket.VideoSocket
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
@@ -29,6 +32,8 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import okhttp3.Response
 import okhttp3.WebSocket
+import org.openapitools.client.models.WSEvent
+import org.openapitools.client.models.WSEventAdapter
 
 @Suppress("TooManyFunctions")
 internal class EventsParser(
@@ -55,7 +60,10 @@ internal class EventsParser(
             logger.d { "[onMessage] $data" }
 
             val eventType = EventType.from(data["type"]?.jsonPrimitive?.content ?: return)
-            val processedEvent = EventMapper.mapEvent(eventType, text)
+
+            val moshi = Moshi.Builder().add(WSEventAdapter()).build()
+            val jsonAdapter = moshi.adapter(WSEvent::class.java)
+            val processedEvent = jsonAdapter.fromJson(text) as VideoEvent
 
             if (processedEvent !is CoordinatorHealthCheckEvent) logger.v { "[onMessage] processedEvent: $processedEvent" }
 
