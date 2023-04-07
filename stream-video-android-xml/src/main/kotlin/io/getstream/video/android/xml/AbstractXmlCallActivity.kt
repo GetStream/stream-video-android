@@ -67,7 +67,7 @@ public abstract class AbstractXmlCallActivity : AbstractCallActivity() {
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.stream_video_call_menu, menu)
         menu?.findItem(R.id.callParticipants)?.let {
-            it.icon?.setTint(ContextCompat.getColor(this, RCommon.color.stream_text_high_emphasis))
+            it.icon?.setTint(ContextCompat.getColor(this, RCommon.color.stream_video_text_high_emphasis))
         }
         return true
     }

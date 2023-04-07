@@ -76,7 +76,7 @@ private fun OutgoingCallDetailsPreview() {
                     name = it.name,
                     role = it.role,
                     state = null,
-                    imageUrl = it.profileImageURL ?: "",
+                    imageUrl = it.profileImageURL.orEmpty(),
                     createdAt = null,
                     updatedAt = null,
                     teams = emptyList()

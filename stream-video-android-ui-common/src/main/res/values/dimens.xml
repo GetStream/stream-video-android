@@ -16,82 +16,82 @@
 -->
 <resources>
 
-    <dimen name="callAvatarSize">80dp</dimen>
-    <dimen name="singleAvatarSize">160dp</dimen>
-    <dimen name="headerElevation">4dp</dimen>
-    <dimen name="largeButtonSize">80dp</dimen>
-    <dimen name="mediumButtonSize">64dp</dimen>
-    <dimen name="smallButtonSize">32dp</dimen>
-    <dimen name="topAppbarHeight">64dp</dimen>
-    <dimen name="landscapeTopAppBarHeight">48dp</dimen>
-    <dimen name="avatarAppbarPadding">100dp</dimen>
-    <dimen name="singleAvatarAppbarPadding">20dp</dimen>
-    <dimen name="participantsTextPadding">65dp</dimen>
-    <dimen name="incomingCallOptionsBottomPadding">44dp</dimen>
-    <dimen name="outgoingCallOptionsBottomPadding">44dp</dimen>
-    <dimen name="callAppBarPadding">12dp</dimen>
-    <dimen name="callAppBarLeadingContentSpacingStart">0dp</dimen>
-    <dimen name="callAppBarLeadingContentSpacingEnd">0dp</dimen>
-    <dimen name="callAppBarCenterContentSpacingStart">8dp</dimen>
-    <dimen name="callAppBarCenterContentSpacingEnd">0dp</dimen>
-    <dimen name="callAppBarTrailingContentSpacingStart">8dp</dimen>
-    <dimen name="callAppBarTrailingContentSpacingEnd">8dp</dimen>
-    <dimen name="callControlButtonSize">50dp</dimen>
-    <dimen name="landscapeCallControlButtonSize">45dp</dimen>
-    <dimen name="callControlsSheetHeight">96dp</dimen>
-    <dimen name="landscapeCallControlsSheetWidth">64dp</dimen>
-    <dimen name="callParticipantInfoMenuAppBarHeight">64dp</dimen>
-    <dimen name="callParticipantInfoMenuOptionsHeight">56dp</dimen>
-    <dimen name="callParticipantsInfoMenuOptionsButtonHeight">40dp</dimen>
-    <dimen name="callParticipantsInfoAvatarSize">56dp</dimen>
-    <dimen name="callStatusParticipantsMargin">16dp</dimen>
-    <dimen name="callParticipantsAvatarsMargin">32dp</dimen>
-    <dimen name="floatingVideoPadding">16dp</dimen>
-    <dimen name="floatingVideoHeight">150dp</dimen>
-    <dimen name="floatingVideoWidth">125dp</dimen>
-    <dimen name="floatingVideoRadius">16dp</dimen>
-    <dimen name="connectionIndicatorBarMaxHeight">14dp</dimen>
-    <dimen name="connectionIndicatorBarWidth">3dp</dimen>
-    <dimen name="connectionIndicatorBarSeparatorWidth">3dp</dimen>
-    <dimen name="audioLevelIndicatorBarMaxHeight">16dp</dimen>
-    <dimen name="audioLevelIndicatorBarWidth">3dp</dimen>
-    <dimen name="audioLevelIndicatorBarSeparatorWidth">3dp</dimen>
-    <dimen name="audioStatusSize">15dp</dimen>
-    <dimen name="activeSpeakerBoarderWidth">4dp</dimen>
-    <dimen name="callParticipantLabelHeight">24dp</dimen>
-    <dimen name="callParticipantSoundIndicatorPaddingStart">8dp</dimen>
-    <dimen name="callParticipantLabelPadding">8dp</dimen>
-    <dimen name="callParticipantLabelTextMaxWidth">64dp</dimen>
-    <dimen name="callParticipantLabelTextPadding">4dp</dimen>
-    <dimen name="callControllerBottomPadding">6dp</dimen>
-    <dimen name="screenShareParticipantItemSize">110dp</dimen>
-    <dimen name="screenShareParticipantsListHeight">125dp</dimen>
-    <dimen name="screenShareParticipantsListPadding">8dp</dimen>
-    <dimen name="screenShareParticipantsListItemMargin">8dp</dimen>
-    <dimen name="screenShareParticipantsMargin">16dp</dimen>
-    <dimen name="screenShareParticipantsRadius">16dp</dimen>
-    <dimen name="screenSharePresenterPadding">16dp</dimen>
-    <dimen name="screenSharePresenterTitleMargin">16dp</dimen>
-    <dimen name="screenShareButtonSize">40dp</dimen>
+    <dimen name="stream_video_callAvatarSize">80dp</dimen>
+    <dimen name="stream_video_singleAvatarSize">160dp</dimen>
+    <dimen name="stream_video_headerElevation">4dp</dimen>
+    <dimen name="stream_video_largeButtonSize">80dp</dimen>
+    <dimen name="stream_video_mediumButtonSize">64dp</dimen>
+    <dimen name="stream_video_smallButtonSize">32dp</dimen>
+    <dimen name="stream_video_topAppbarHeight">64dp</dimen>
+    <dimen name="stream_video_landscapeTopAppBarHeight">48dp</dimen>
+    <dimen name="stream_video_avatarAppbarPadding">100dp</dimen>
+    <dimen name="stream_video_singleAvatarAppbarPadding">20dp</dimen>
+    <dimen name="stream_video_participantsTextPadding">65dp</dimen>
+    <dimen name="stream_video_incomingCallOptionsBottomPadding">44dp</dimen>
+    <dimen name="stream_video_outgoingCallOptionsBottomPadding">44dp</dimen>
+    <dimen name="stream_video_callAppBarPadding">12dp</dimen>
+    <dimen name="stream_video_callAppBarLeadingContentSpacingStart">0dp</dimen>
+    <dimen name="stream_video_callAppBarLeadingContentSpacingEnd">0dp</dimen>
+    <dimen name="stream_video_callAppBarCenterContentSpacingStart">8dp</dimen>
+    <dimen name="stream_video_callAppBarCenterContentSpacingEnd">0dp</dimen>
+    <dimen name="stream_video_callAppBarTrailingContentSpacingStart">8dp</dimen>
+    <dimen name="stream_video_callAppBarTrailingContentSpacingEnd">8dp</dimen>
+    <dimen name="stream_video_callControlButtonSize">50dp</dimen>
+    <dimen name="stream_video_landscapeCallControlButtonSize">45dp</dimen>
+    <dimen name="stream_video_callControlsSheetHeight">96dp</dimen>
+    <dimen name="stream_video_landscapeCallControlsSheetWidth">64dp</dimen>
+    <dimen name="stream_video_callParticipantInfoMenuAppBarHeight">64dp</dimen>
+    <dimen name="stream_video_callParticipantInfoMenuOptionsHeight">56dp</dimen>
+    <dimen name="stream_video_callParticipantsInfoMenuOptionsButtonHeight">40dp</dimen>
+    <dimen name="stream_video_callParticipantsInfoAvatarSize">56dp</dimen>
+    <dimen name="stream_video_callStatusParticipantsMargin">16dp</dimen>
+    <dimen name="stream_video_callParticipantsAvatarsMargin">32dp</dimen>
+    <dimen name="stream_video_floatingVideoPadding">16dp</dimen>
+    <dimen name="stream_video_floatingVideoHeight">200dp</dimen>
+    <dimen name="stream_video_floatingVideoWidth">140dp</dimen>
+    <dimen name="stream_video_floatingVideoRadius">16dp</dimen>
+    <dimen name="stream_video_connectionIndicatorBarMaxHeight">14dp</dimen>
+    <dimen name="stream_video_connectionIndicatorBarWidth">3dp</dimen>
+    <dimen name="stream_video_connectionIndicatorBarSeparatorWidth">3dp</dimen>
+    <dimen name="stream_video_audioLevelIndicatorBarMaxHeight">16dp</dimen>
+    <dimen name="stream_video_audioLevelIndicatorBarWidth">3dp</dimen>
+    <dimen name="stream_video_audioLevelIndicatorBarSeparatorWidth">3dp</dimen>
+    <dimen name="stream_video_audioStatusSize">15dp</dimen>
+    <dimen name="stream_video_activeSpeakerBoarderWidth">6dp</dimen>
+    <dimen name="stream_video_callParticipantLabelHeight">24dp</dimen>
+    <dimen name="stream_video_callParticipantSoundIndicatorPaddingStart">8dp</dimen>
+    <dimen name="stream_video_callParticipantLabelPadding">8dp</dimen>
+    <dimen name="stream_video_callParticipantLabelTextMaxWidth">64dp</dimen>
+    <dimen name="stream_video_callParticipantLabelTextPadding">4dp</dimen>
+    <dimen name="stream_video_callControllerBottomPadding">6dp</dimen>
+    <dimen name="stream_video_screenShareParticipantItemSize">110dp</dimen>
+    <dimen name="stream_video_screenShareParticipantsListHeight">125dp</dimen>
+    <dimen name="stream_video_screenShareParticipantsListPadding">8dp</dimen>
+    <dimen name="stream_video_screenShareParticipantsListItemMargin">8dp</dimen>
+    <dimen name="stream_video_screenShareParticipantsMargin">16dp</dimen>
+    <dimen name="stream_video_screenShareParticipantsRadius">16dp</dimen>
+    <dimen name="stream_video_screenSharePresenterPadding">16dp</dimen>
+    <dimen name="stream_video_screenSharePresenterTitleMargin">16dp</dimen>
+    <dimen name="stream_video_screenShareButtonSize">40dp</dimen>
 
-    <dimen name="title1TextSize">24sp</dimen>
-    <dimen name="title1LineHeight">34sp</dimen>
-    <dimen name="title3TextSize">18sp</dimen>
-    <dimen name="title3LineHeight">23sp</dimen>
-    <dimen name="bodyTextSize">14sp</dimen>
-    <dimen name="footnoteTextSize">12sp</dimen>
-    <dimen name="footnoteLineHeight">20sp</dimen>
-    <dimen name="captionTextSize">10sp</dimen>
-    <dimen name="captionLineHeight">16sp</dimen>
-    <dimen name="tabBarTextSize">10sp</dimen>
-    <dimen name="topAppbarTextSize">17sp</dimen>
+    <dimen name="stream_video_title1TextSize">24sp</dimen>
+    <dimen name="stream_video_title1LineHeight">34sp</dimen>
+    <dimen name="stream_video_title3TextSize">18sp</dimen>
+    <dimen name="stream_video_title3LineHeight">23sp</dimen>
+    <dimen name="stream_video_bodyTextSize">14sp</dimen>
+    <dimen name="stream_video_footnoteTextSize">12sp</dimen>
+    <dimen name="stream_video_footnoteLineHeight">20sp</dimen>
+    <dimen name="stream_video_captionTextSize">10sp</dimen>
+    <dimen name="stream_video_captionLineHeight">16sp</dimen>
+    <dimen name="stream_video_tabBarTextSize">10sp</dimen>
+    <dimen name="stream_video_topAppbarTextSize">17sp</dimen>
 
-    <dimen name="directCallUserNameTextSize">34sp</dimen>
-    <dimen name="groupCallUserNameTextSize">24sp</dimen>
-    <dimen name="onCallStatusTextSize">20sp</dimen>
+    <dimen name="stream_video_directCallUserNameTextSize">34sp</dimen>
+    <dimen name="stream_video_groupCallUserNameTextSize">24sp</dimen>
+    <dimen name="stream_video_onCallStatusTextSize">20sp</dimen>
 
-    <item name="onCallStatusTextAlpha" type="dimen" format="float">0.6</item>
-    <item name="buttonToggleOnAlpha" type="dimen" format="float">1.0</item>
-    <item name="buttonToggleOffAlpha" type="dimen" format="float">0.6</item>
+    <item name="stream_video_onCallStatusTextAlpha" format="float" type="dimen">0.6</item>
+    <item name="stream_video_buttonToggleOnAlpha" format="float" type="dimen">1.0</item>
+    <item name="stream_video_buttonToggleOffAlpha" format="float" type="dimen">0.6</item>
 
 </resources>

@@ -73,10 +73,10 @@ internal fun GetOrCreateCallResponse.toCall(kind: StreamCallKind): CallMetadata 
 internal fun MemberResponse.toCallUser(): CallUser {
     return CallUser(
         id = userId,
-        name = user.name ?: "",
-        role = role,
-        imageUrl = user.image ?: "",
+        name = user.name.orEmpty(),
+        imageUrl = user.image.orEmpty(),
         teams = user.teams ?: emptyList(),
+        role = user.role,
         state = null,
         createdAt = Date.from(createdAt.toInstant()),
         updatedAt = Date.from(updatedAt.toInstant()),

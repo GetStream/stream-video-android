@@ -89,7 +89,8 @@ internal fun InviteUserItem(
 
         UserAvatar(
             modifier = Modifier.size(VideoTheme.dimens.callParticipantsInfoAvatarSize),
-            user = user
+            user = user,
+            showOnlineIndicator = true
         )
 
         Spacer(modifier = Modifier.width(8.dp))
@@ -112,7 +113,7 @@ internal fun InviteUserItem(
         if (state.isSelected) {
             Image(
                 modifier = Modifier.size(24.dp),
-                painter = painterResource(id = R.drawable.ic_selected),
+                painter = painterResource(id = R.drawable.stream_video_ic_selected),
                 contentDescription = null,
             )
         }

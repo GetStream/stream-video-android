@@ -84,7 +84,7 @@ dependencies {
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.compose.material)
     implementation(libs.androidx.compose.material.iconsExtended)
-    implementation(libs.coil.compose)
+    implementation(libs.landscapist.coil)
 
     // Stream chat SDK & logger
     implementation(libs.stream.log.android)

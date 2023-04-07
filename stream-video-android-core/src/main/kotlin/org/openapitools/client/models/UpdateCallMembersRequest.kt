@@ -27,14 +27,18 @@ import com.squareup.moshi.Json
 
 /**
  * *
- * @param disabled * @param disabledUntil */
+ * @param removeMembers List of userID to remove
+ * @param updateMembers List of members to update or insert
+ */
 
-internal data class PushNotificationSettingsRequest(
+data class UpdateCallMembersRequest(
 
-    @Json(name = "disabled")
-    val disabled: kotlin.Boolean? = null,
+    /* List of userID to remove */
+    @Json(name = "remove_members")
+    val removeMembers: kotlin.collections.List<kotlin.String>? = null,
 
-    @Json(name = "disabled_until")
-    val disabledUntil: java.time.OffsetDateTime? = null
+    /* List of members to update or insert */
+    @Json(name = "update_members")
+    val updateMembers: kotlin.collections.List<MemberRequest>? = null
 
 )

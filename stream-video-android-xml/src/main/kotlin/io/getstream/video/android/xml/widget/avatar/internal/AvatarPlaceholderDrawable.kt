@@ -115,7 +115,7 @@ internal class AvatarPlaceholderDrawable(
         @Px width: Int,
         @Px height: Int,
     ): Shader {
-        val gradientBaseColors = context.getIntArray(R.array.stream_avatar_gradient_colors)
+        val gradientBaseColors = context.getIntArray(R.array.stream_video_avatar_gradient_colors)
 
         val baseColorIndex = abs(initials.hashCode()) % gradientBaseColors.size
         val baseColor = gradientBaseColors[baseColorIndex]

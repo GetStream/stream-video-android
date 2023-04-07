@@ -28,10 +28,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
+import com.skydoves.landscapist.ImageOptions
+import com.skydoves.landscapist.animation.crossfade.CrossfadePlugin
+import com.skydoves.landscapist.coil.CoilImage
+import com.skydoves.landscapist.components.rememberImageComponent
 import io.getstream.video.android.common.util.mockUsers
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.avatar.AvatarPreview
+import io.getstream.video.android.compose.ui.components.avatar.AvatarImagePreview
 import io.getstream.video.android.core.model.CallType
 import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.core.model.CallUserState
@@ -99,11 +102,16 @@ private fun ParticipantImageBackground(
     val firstUser = participants.first()
 
     if (firstUser.imageUrl.isNotEmpty()) {
-        AsyncImage(
+        CoilImage(
             modifier = modifier.fillMaxSize(),
-            model = firstUser.imageUrl,
-            contentScale = ContentScale.Crop,
-            contentDescription = null
+            imageModel = { firstUser.imageUrl },
+            previewPlaceholder = R.drawable.stream_video_call_sample,
+            imageOptions = ImageOptions(
+                contentScale = ContentScale.Crop, contentDescription = null
+            ),
+            component = rememberImageComponent {
+                +CrossfadePlugin()
+            }
         )
     } else {
         DefaultCallBackground()
@@ -114,7 +122,7 @@ private fun ParticipantImageBackground(
 private fun DefaultCallBackground() {
     Image(
         modifier = Modifier.fillMaxSize(),
-        painter = painterResource(id = R.drawable.bg_call),
+        painter = painterResource(id = R.drawable.stream_video_bg_call),
         contentScale = ContentScale.FillBounds,
         contentDescription = null
     )
@@ -139,11 +147,10 @@ private fun CallBackgroundPreview() {
                     )
                 }
             ),
-            callType = CallType.VIDEO,
-            isIncoming = true
+            callType = CallType.VIDEO, isIncoming = true
         ) {
             Box(modifier = Modifier.align(Alignment.Center)) {
-                AvatarPreview()
+                AvatarImagePreview()
             }
         }
     }

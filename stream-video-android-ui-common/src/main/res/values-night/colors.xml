@@ -15,18 +15,18 @@
      limitations under the License.
 -->
 <resources>
-    <color name="stream_text_high_emphasis">@color/stream_text_high_emphasis_dark</color>
-    <color name="stream_text_low_emphasis">@color/stream_text_low_emphasis_dark</color>
-    <color name="stream_disabled">@color/stream_disabled_dark</color>
-    <color name="stream_borders">@color/stream_borders_dark</color>
-    <color name="stream_input_background">@color/stream_input_background_dark</color>
-    <color name="stream_app_background">@color/stream_app_background_dark</color>
-    <color name="stream_bars_background">@color/stream_bars_background_dark</color>
-    <color name="stream_link_background">@color/stream_link_background_dark</color>
-    <color name="stream_overlay_regular">@color/stream_overlay_regular_dark</color>
-    <color name="stream_overlay_dark">@color/stream_overlay_dark_dark</color>
-    <color name="stream_primary_accent">@color/stream_primary_accent_dark</color>
-    <color name="stream_error_accent">@color/stream_error_accent_dark</color>
-    <color name="stream_info_accent">@color/stream_info_accent_dark</color>
-    <color name="stream_highlight">@color/stream_highlight_dark</color>
+    <color name="stream_video_text_high_emphasis">@color/stream_video_text_high_emphasis_dark</color>
+    <color name="stream_video_text_low_emphasis">@color/stream_video_text_low_emphasis_dark</color>
+    <color name="stream_video_disabled">@color/stream_video_disabled_dark</color>
+    <color name="stream_video_borders">@color/stream_video_borders_dark</color>
+    <color name="stream_video_input_background">@color/stream_video_input_background_dark</color>
+    <color name="stream_video_app_background">@color/stream_video_app_background_dark</color>
+    <color name="stream_video_bars_background">@color/stream_video_bars_background_dark</color>
+    <color name="stream_video_link_background">@color/stream_video_link_background_dark</color>
+    <color name="stream_video_overlay_regular">@color/stream_video_overlay_regular_dark</color>
+    <color name="stream_video_overlay_dark">@color/stream_video_overlay_dark_dark</color>
+    <color name="stream_video_primary_accent">@color/stream_video_primary_accent_dark</color>
+    <color name="stream_video_error_accent">@color/stream_video_error_accent_dark</color>
+    <color name="stream_video_info_accent">@color/stream_video_info_accent_dark</color>
+    <color name="stream_video_highlight">@color/stream_video_highlight_dark</color>
 </resources>

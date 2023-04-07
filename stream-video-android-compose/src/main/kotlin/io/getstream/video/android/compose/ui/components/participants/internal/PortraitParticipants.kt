@@ -24,7 +24,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -115,17 +120,15 @@ internal fun BoxScope.PortraitParticipants(
             }
         }
 
-        else -> {
-            /**
-             * More than three participants, we only show the first four.
-             */
-            val firstParticipant = remoteParticipants[0]
-            val secondParticipant = remoteParticipants[1]
-            val thirdParticipant = remoteParticipants[2]
-            val fourthParticipant = callParticipants.first { it.isLocal }
+        5 -> {
+            val firstParticipant = callParticipants[0]
+            val secondParticipant = callParticipants[1]
+            val thirdParticipant = callParticipants[2]
+            val fourthParticipant = callParticipants[3]
+            val fiveParticipant = callParticipants[4]
 
-            Column(modifier) {
-                Row(modifier = Modifier.weight(1f)) {
+            Row(modifier) {
+                Column(modifier = Modifier.weight(1f)) {
                     CallParticipant(
                         modifier = Modifier.weight(1f),
                         call = call,
@@ -141,7 +144,7 @@ internal fun BoxScope.PortraitParticipants(
                     )
                 }
 
-                Row(modifier = Modifier.weight(1f)) {
+                Column(modifier = Modifier.weight(1f)) {
                     CallParticipant(
                         modifier = Modifier.weight(1f),
                         call = call,
@@ -157,6 +160,39 @@ internal fun BoxScope.PortraitParticipants(
                         onRender = onRender,
                         isFocused = primarySpeaker?.id == fourthParticipant.id,
                         paddingValues = paddingValues
+                    )
+
+                    CallParticipant(
+                        modifier = Modifier.weight(1f),
+                        call = call,
+                        participant = fiveParticipant,
+                        onRender = onRender,
+                        isFocused = primarySpeaker?.id == fiveParticipant.id,
+                        paddingValues = paddingValues
+                    )
+                }
+            }
+        }
+
+        else -> {
+            val columnCount = 2
+            val heightDivision = callParticipants.size / 2
+            val maxGridItemCount = 6
+            LazyVerticalGrid(
+                modifier = modifier,
+                columns = GridCells.Fixed(columnCount)
+            ) {
+                items(
+                    items = callParticipants.take(maxGridItemCount),
+                    key = { it.id }
+                ) { participant ->
+                    CallParticipant(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(parentSize.height.dp / heightDivision),
+                        call = call,
+                        participant = participant,
+                        isFocused = primarySpeaker?.id == participant.id
                     )
                 }
             }
@@ -273,7 +309,57 @@ private fun PortraitParticipantsPreview4(
             PortraitParticipants(
                 call = null,
                 primarySpeaker = callParticipants[0],
-                callParticipants = callParticipants,
+                callParticipants = callParticipants.take(4),
+                modifier = Modifier.fillMaxSize(),
+                paddingValues = PaddingValues(0.dp),
+                parentSize = IntSize(screenWidth, screenHeight)
+            ) {}
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun PortraitParticipantsPreview5(
+    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<CallParticipantState>
+) {
+    VideoTheme {
+        val configuration = LocalConfiguration.current
+        val screenWidth = configuration.screenWidthDp
+        val screenHeight = configuration.screenHeightDp
+
+        Box(
+            modifier = Modifier.background(color = VideoTheme.colors.appBackground)
+        ) {
+            PortraitParticipants(
+                call = null,
+                primarySpeaker = callParticipants[0],
+                callParticipants = callParticipants.take(5),
+                modifier = Modifier.fillMaxSize(),
+                paddingValues = PaddingValues(0.dp),
+                parentSize = IntSize(screenWidth, screenHeight)
+            ) {}
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun PortraitParticipantsPreview6(
+    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<CallParticipantState>
+) {
+    VideoTheme {
+        val configuration = LocalConfiguration.current
+        val screenWidth = configuration.screenWidthDp
+        val screenHeight = configuration.screenHeightDp
+
+        Box(
+            modifier = Modifier.background(color = VideoTheme.colors.appBackground)
+        ) {
+            PortraitParticipants(
+                call = null,
+                primarySpeaker = callParticipants[0],
+                callParticipants = callParticipants.take(6),
                 modifier = Modifier.fillMaxSize(),
                 paddingValues = PaddingValues(0.dp),
                 parentSize = IntSize(screenWidth, screenHeight)

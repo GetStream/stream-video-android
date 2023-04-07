@@ -35,9 +35,10 @@ import io.getstream.video.android.core.utils.toEdge
 import io.getstream.video.android.core.utils.toQueriedCalls
 import io.getstream.video.android.core.utils.toReaction
 import io.getstream.video.android.core.utils.toRecording
-import org.openapitools.client.apis.DefaultApi
 import org.openapitools.client.apis.EventsApi
+import org.openapitools.client.apis.LivestreamingApi
 import org.openapitools.client.apis.ModerationApi
+import org.openapitools.client.apis.RecordingApi
 import org.openapitools.client.apis.VideoCallsApi
 import org.openapitools.client.models.BlockUserRequest
 import org.openapitools.client.models.GetCallEdgeServerRequest
@@ -67,8 +68,9 @@ import stream.video.coordinator.client_v1_rpc.UpsertCallMembersRequest
 internal class CallCoordinatorClientImpl(
     private val callCoordinatorService: ClientRPCService,
     private val videoCallApi: VideoCallsApi,
+    private val recordingApi: RecordingApi,
+    private val livestreamingApi: LivestreamingApi,
     private val eventsApi: EventsApi,
-    private val defaultApi: DefaultApi,
     private val moderationApi: ModerationApi,
 ) : CallCoordinatorClient {
 
@@ -359,7 +361,7 @@ internal class CallCoordinatorClientImpl(
      */
     override suspend fun queryCalls(queryCallsRequest: QueryCallsRequest): Result<QueriedCalls> =
         try {
-            val result = defaultApi.queryCalls(queryCallsRequest)
+            val result = videoCallApi.queryCalls(queryCallsRequest)
 
             Success(result.toQueriedCalls())
         } catch (error: Throwable) {
@@ -378,7 +380,7 @@ internal class CallCoordinatorClientImpl(
         type: String,
         requestPermissionRequest: RequestPermissionRequest
     ): Result<Unit> = try {
-        defaultApi.requestPermission(type, id, requestPermissionRequest)
+        moderationApi.requestPermission(type, id, requestPermissionRequest)
 
         Success(Unit)
     } catch (error: Throwable) {
@@ -393,7 +395,7 @@ internal class CallCoordinatorClientImpl(
      * @see CallCoordinatorClient.startBroadcasting
      */
     override suspend fun startBroadcasting(id: String, type: String): Result<Unit> = try {
-        defaultApi.startBroadcasting(type, id)
+        livestreamingApi.startBroadcasting(type, id)
 
         Success(Unit)
     } catch (error: Throwable) {
@@ -408,7 +410,7 @@ internal class CallCoordinatorClientImpl(
      * @see CallCoordinatorClient.stopBroadcasting
      */
     override suspend fun stopBroadcasting(id: String, type: String): Result<Unit> = try {
-        defaultApi.stopBroadcasting(type, id)
+        livestreamingApi.stopBroadcasting(type, id)
 
         Success(Unit)
     } catch (error: Throwable) {
@@ -423,7 +425,7 @@ internal class CallCoordinatorClientImpl(
      * @see CallCoordinatorClient.startRecording
      */
     override suspend fun startRecording(id: String, type: String): Result<Unit> = try {
-        defaultApi.startRecording(type, id)
+        recordingApi.startRecording(type, id)
 
         Success(Unit)
     } catch (error: Throwable) {
@@ -438,7 +440,7 @@ internal class CallCoordinatorClientImpl(
      * @see CallCoordinatorClient.stopRecording
      */
     override suspend fun stopRecording(id: String, type: String): Result<Unit> = try {
-        defaultApi.stopRecording(type, id)
+        recordingApi.stopRecording(type, id)
 
         Success(Unit)
     } catch (error: Throwable) {
@@ -457,7 +459,7 @@ internal class CallCoordinatorClientImpl(
         type: String,
         updateUserPermissionsRequest: UpdateUserPermissionsRequest
     ): Result<Unit> = try {
-        defaultApi.updateUserPermissions(type, id, updateUserPermissionsRequest)
+        moderationApi.updateUserPermissions(type, id, updateUserPermissionsRequest)
 
         Success(Unit)
     } catch (error: Throwable) {
@@ -476,7 +478,7 @@ internal class CallCoordinatorClientImpl(
         type: String,
         sessionId: String
     ): Result<List<CallRecordingData>> = try {
-        val result = defaultApi.listRecordings(type, id, sessionId)
+        val result = recordingApi.listRecordings(type, id, sessionId)
 
         Success(result.recordings.map { it.toRecording() })
     } catch (error: Throwable) {
@@ -495,7 +497,7 @@ internal class CallCoordinatorClientImpl(
         type: String,
         request: SendReactionRequest
     ): Result<ReactionData> = try {
-        val result = defaultApi.sendVideoReaction(type, id, request)
+        val result = videoCallApi.sendVideoReaction(type, id, request)
 
         Success(result.reaction.toReaction())
     } catch (error: Throwable) {

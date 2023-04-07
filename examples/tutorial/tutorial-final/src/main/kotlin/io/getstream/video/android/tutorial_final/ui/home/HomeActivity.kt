@@ -34,7 +34,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
@@ -51,7 +50,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -59,7 +57,6 @@ import androidx.lifecycle.lifecycleScope
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.Avatar
-import io.getstream.video.android.compose.ui.components.avatar.InitialsAvatar
 import io.getstream.video.android.core.user.UserPreferencesManager
 import io.getstream.video.android.core.utils.initials
 import io.getstream.video.android.tutorial_final.model.HomeScreenOption
@@ -88,8 +85,7 @@ class HomeActivity : AppCompatActivity() {
                 it.id != streamVideo.getUser().id
             }.map { user ->
                 AppUser(
-                    user,
-                    false
+                    user, false
                 )
             }
         )
@@ -195,8 +191,7 @@ class HomeActivity : AppCompatActivity() {
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
                 .align(CenterHorizontally),
-            enabled = isDataValid,
-            onClick = {
+            enabled = isDataValid, onClick = {
                 createCall(
                     callId = callIdState.value,
                     participants = participantsOptions.value.filter { it.isSelected }
@@ -220,8 +215,7 @@ class HomeActivity : AppCompatActivity() {
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
                 .align(CenterHorizontally),
-            enabled = isDataValid,
-            onClick = {
+            enabled = isDataValid, onClick = {
                 joinCall(callId = callIdState.value)
             }
         ) {
@@ -252,10 +246,7 @@ class HomeActivity : AppCompatActivity() {
 
             loadingState.value = true
             val result = streamVideo.joinCall(
-                "default",
-                callId,
-                participants,
-                false
+                "default", callId, participants, false
             )
 
             result.onSuccess { data ->
@@ -276,10 +267,7 @@ class HomeActivity : AppCompatActivity() {
 
             loadingState.value = true
             streamVideo.getOrCreateCall(
-                "default",
-                callId,
-                participants,
-                ring = true
+                "default", callId, participants, ring = true
             ).onSuccess {
                 logger.v { "[dialUsers] completed: $it" }
             }.onError {
@@ -295,10 +283,7 @@ class HomeActivity : AppCompatActivity() {
             logger.d { "[joinCall] callId: $callId" }
             loadingState.value = true
             streamVideo.joinCall(
-                "default",
-                id = callId,
-                participantIds = emptyList(),
-                ring = false
+                "default", id = callId, participantIds = emptyList(), ring = false
             ).onSuccess { data ->
                 logger.v { "[joinCall] succeed: $data" }
             }.onError {
@@ -379,29 +364,17 @@ class HomeActivity : AppCompatActivity() {
     fun UserIcon() {
         val user = UserPreferencesManager.initialize(this).getUserCredentials() ?: return
 
-        if (user.imageUrl.isNullOrEmpty()) {
-            val initials = if (user.name.isNotEmpty()) {
-                user.name.first()
+        Avatar(
+            modifier = Modifier
+                .size(40.dp)
+                .padding(top = 8.dp, start = 8.dp),
+            imageUrl = user.imageUrl.orEmpty(),
+            initials = if (user.imageUrl == null) {
+                user.name.initials()
             } else {
-                user.id.first()
-            }
-            InitialsAvatar(
-                modifier = Modifier
-                    .size(40.dp)
-                    .padding(top = 8.dp, start = 8.dp)
-                    .clip(CircleShape),
-                initials = initials.toString()
-            )
-        } else {
-            Avatar(
-                modifier = Modifier
-                    .size(40.dp)
-                    .padding(top = 8.dp, start = 8.dp)
-                    .clip(CircleShape),
-                imageUrl = user.imageUrl.orEmpty(),
-                initials = user.name.initials(),
-            )
-        }
+                null
+            },
+        )
     }
 
     private fun toggleSelectState(wrapper: AppUser, users: List<AppUser>) {

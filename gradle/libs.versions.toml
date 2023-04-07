@@ -20,8 +20,9 @@ googleService = "4.3.14"
 androidxComposeBom = "2023.03.00"
 androidxComposeCompiler = "1.4.4"
 androidxComposeTracing = "1.0.0-alpha01"
+
 coil = "2.2.2"
-landscapist = "2.1.8"
+landscapist = "2.1.9"
 
 wire = "4.4.1"
 okhttp = "4.10.0"
@@ -73,7 +74,9 @@ androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "u
 androidx-compose-tracing = { group = "androidx.compose.runtime", name = "runtime-tracing", version.ref = "androidxComposeTracing" }
 
 coil = { group = "io.coil-kt", name = "coil", version.ref = "coil" }
-coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
+landscapist-coil = { group = "com.github.skydoves", name = "landscapist-coil", version.ref = "landscapist" }
+landscapist-animation = { group = "com.github.skydoves", name = "landscapist-animation", version.ref = "landscapist" }
+landscapist-placeholder = { group = "com.github.skydoves", name = "landscapist-placeholder", version.ref = "landscapist" }
 
 wire-runtime = { group = "com.squareup.wire", name = "wire-runtime", version.ref = "wire" }
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }

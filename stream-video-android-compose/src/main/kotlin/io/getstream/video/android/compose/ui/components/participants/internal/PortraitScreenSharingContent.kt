@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.compose.ui.components.participants.internal
 
+import android.content.res.Configuration
 import android.view.View
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -105,6 +106,7 @@ internal fun PortraitScreenSharingContent(
 }
 
 @Preview
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun PortraitScreenSharingContentPreview(
     @PreviewParameter(ParticipantsProvider::class) callParticipants: List<CallParticipantState>

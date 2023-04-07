@@ -26,15 +26,29 @@ package org.openapitools.client.models
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param disabled * @param disabledUntil */
+ * This event is sent when one or more members are updated
+ *
+ * @param call * @param callCid * @param createdAt * @param members The list of members that were updated
+ * @param type The type of event: \"call.member_added\" in this case
+ */
 
-internal data class PushNotificationSettings(
+data class CallMemberUpdatedEvent(
 
-    @Json(name = "disabled")
-    val disabled: kotlin.Boolean? = null,
+    @Json(name = "call")
+    val call: CallResponse,
 
-    @Json(name = "disabled_until")
-    val disabledUntil: java.time.OffsetDateTime? = null
+    @Json(name = "call_cid")
+    val callCid: kotlin.String,
+
+    @Json(name = "created_at")
+    val createdAt: java.time.OffsetDateTime,
+
+    /* The list of members that were updated */
+    @Json(name = "members")
+    val members: kotlin.collections.List<MemberResponse>,
+
+    /* The type of event: \"call.member_added\" in this case */
+    @Json(name = "type")
+    val type: kotlin.String
 
 )

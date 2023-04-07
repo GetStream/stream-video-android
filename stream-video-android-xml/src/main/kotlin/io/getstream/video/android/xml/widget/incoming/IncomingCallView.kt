@@ -126,7 +126,7 @@ public class IncomingCallView : CallConstraintLayout {
 
         if (participants.size > 1) {
             (binding.participantsInfo.layoutParams as LayoutParams).apply {
-                this.topMargin = context.getDimension(R.dimen.avatarAppbarPadding)
+                this.topMargin = context.getDimension(R.dimen.stream_video_avatarAppbarPadding)
                 requestLayout()
             }
         }

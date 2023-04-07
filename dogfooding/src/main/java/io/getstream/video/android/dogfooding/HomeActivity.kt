@@ -33,7 +33,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.CircularProgressIndicator
@@ -48,7 +47,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
@@ -59,7 +57,6 @@ import io.getstream.log.taggedLogger
 import io.getstream.result.extractCause
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.Avatar
-import io.getstream.video.android.compose.ui.components.avatar.InitialsAvatar
 import io.getstream.video.android.core.user.UserPreferencesManager
 import io.getstream.video.android.core.utils.initials
 import kotlinx.coroutines.launch
@@ -116,8 +113,7 @@ class HomeActivity : AppCompatActivity() {
                 )
             ) {
                 Text(
-                    text = "Log Out",
-                    color = Color.White
+                    text = "Log Out", color = Color.White
                 )
             }
 
@@ -156,7 +152,8 @@ class HomeActivity : AppCompatActivity() {
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = VideoTheme.colors.primaryAccent
             ),
-            enabled = isDataValid, onClick = {
+            enabled = isDataValid,
+            onClick = {
                 joinCall(callId = callIdState.value)
             }
         ) {
@@ -179,9 +176,7 @@ class HomeActivity : AppCompatActivity() {
                 val throwable = it.extractCause()
                 if (throwable is HttpException && throwable.code() == 401) {
                     Toast.makeText(
-                        this@HomeActivity,
-                        R.string.unauthorized_error,
-                        Toast.LENGTH_SHORT
+                        this@HomeActivity, R.string.unauthorized_error, Toast.LENGTH_SHORT
                     ).show()
                     logOut()
                 } else {
@@ -248,29 +243,17 @@ class HomeActivity : AppCompatActivity() {
     fun UserIcon() {
         val user = UserPreferencesManager.initialize(this).getUserCredentials() ?: return
 
-        if (user.imageUrl.isNullOrEmpty()) {
-            val initials = if (user.name.isNotEmpty()) {
-                user.name.first()
+        Avatar(
+            modifier = Modifier
+                .size(40.dp)
+                .padding(top = 8.dp, start = 8.dp),
+            imageUrl = user.imageUrl.orEmpty(),
+            initials = if (user.imageUrl == null) {
+                user.name.initials()
             } else {
-                user.id.first()
-            }
-            InitialsAvatar(
-                modifier = Modifier
-                    .size(40.dp)
-                    .padding(top = 8.dp, start = 8.dp)
-                    .clip(CircleShape),
-                initials = initials.toString()
-            )
-        } else {
-            Avatar(
-                modifier = Modifier
-                    .size(40.dp)
-                    .padding(top = 8.dp, start = 8.dp)
-                    .clip(CircleShape),
-                imageUrl = user.imageUrl.orEmpty(),
-                initials = user.name.initials(),
-            )
-        }
+                null
+            },
+        )
     }
 
     companion object {

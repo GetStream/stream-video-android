@@ -62,11 +62,11 @@ public data class AvatarStyle(
                 val avatarInitialsTextStyle = TextStyle.Builder(this)
                     .size(
                         R.styleable.AvatarView_streamVideoAvatarTextSize,
-                        context.getDimension(RCommon.dimen.title3TextSize)
+                        context.getDimension(RCommon.dimen.stream_video_title3TextSize)
                     )
                     .color(
                         R.styleable.AvatarView_streamVideoAvatarTextColor,
-                        context.getColorCompat(RCommon.color.stream_text_avatar_initials)
+                        context.getColorCompat(RCommon.color.stream_video_text_avatar_initials)
                     )
                     .font(
                         R.styleable.AvatarView_streamVideoAvatarTextFontAssets,

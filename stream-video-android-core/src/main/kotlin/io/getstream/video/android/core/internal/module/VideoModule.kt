@@ -94,6 +94,6 @@ internal class VideoModule(
     internal companion object {
 
         internal const val WS_BASE_URL =
-            "wss://video-edge-frankfurt-ce1.stream-io-api.com/video/connect"
+            "wss://video.stream-io-api.com/video/connect"
     }
 }

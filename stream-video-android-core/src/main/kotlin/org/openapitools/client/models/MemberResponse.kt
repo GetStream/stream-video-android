@@ -29,9 +29,9 @@ import com.squareup.moshi.Json
  * *
  * @param createdAt Date/time of creation
  * @param custom Custom member response data
- * @param duration * @param role * @param updatedAt Date/time of the last update
+ * @param updatedAt Date/time of the last update
  * @param user * @param userId * @param deletedAt Date/time of deletion
- */
+ * @param role */
 
 data class MemberResponse(
 
@@ -42,12 +42,6 @@ data class MemberResponse(
     /* Custom member response data */
     @Json(name = "custom")
     val custom: kotlin.collections.Map<kotlin.String, kotlin.Any>,
-
-    @Json(name = "duration")
-    val duration: kotlin.String,
-
-    @Json(name = "role")
-    val role: kotlin.String,
 
     /* Date/time of the last update */
     @Json(name = "updated_at")
@@ -61,6 +55,9 @@ data class MemberResponse(
 
     /* Date/time of deletion */
     @Json(name = "deleted_at")
-    val deletedAt: java.time.OffsetDateTime? = null
+    val deletedAt: java.time.OffsetDateTime? = null,
+
+    @Json(name = "role")
+    val role: kotlin.String? = null
 
 )

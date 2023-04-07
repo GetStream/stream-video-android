@@ -26,14 +26,28 @@ package org.openapitools.client.models
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param createdAt * @param type */
+ * This event is sent when one or more members are added to a call
+ *
+ * @param call * @param callCid * @param createdAt * @param members the members added to this call
+ * @param type The type of event: \"call.member_added\" in this case
+ */
 
-data class AnyEvent(
+data class CallMemberAddedEvent(
+
+    @Json(name = "call")
+    val call: CallResponse,
+
+    @Json(name = "call_cid")
+    val callCid: kotlin.String,
 
     @Json(name = "created_at")
     val createdAt: java.time.OffsetDateTime,
 
+    /* the members added to this call */
+    @Json(name = "members")
+    val members: kotlin.collections.List<MemberResponse>,
+
+    /* The type of event: \"call.member_added\" in this case */
     @Json(name = "type")
     val type: kotlin.String
 
