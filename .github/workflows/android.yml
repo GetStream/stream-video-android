@@ -73,7 +73,7 @@ jobs:
           echo "${{ secrets.ENV_PROPERTIES }}" > .env.properties
 
       - name: Cache Gradle and wrapper
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
             ~/.gradle/caches
@@ -81,6 +81,7 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
+
       - name: Make Gradle executable
         run: chmod +x ./gradlew
 
