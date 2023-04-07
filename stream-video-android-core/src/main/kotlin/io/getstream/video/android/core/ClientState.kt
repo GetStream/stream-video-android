@@ -16,12 +16,12 @@
 
 package io.getstream.video.android.core
 
-import io.getstream.video.android.core.events.CallCreatedEvent
-import io.getstream.video.android.core.events.ConnectedEvent
 import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import org.openapitools.client.models.CallCreatedEvent
+import org.openapitools.client.models.WSConnectedEvent
 
 sealed class ConnectionState() {
     object PreConnect : ConnectionState()
@@ -74,9 +74,9 @@ class ClientState(client: StreamVideo) {
      */
 
     fun handleEvent(event: VideoEvent) {
-        val isConnectedEvent = event is ConnectedEvent
+        val isConnectedEvent = event is WSConnectedEvent
         // mark connected
-        if (event is ConnectedEvent) {
+        if (event is WSConnectedEvent) {
             _connection.value = ConnectionState.Connected
         } else if (event is CallCreatedEvent) {
             // what's the right thing to do here?

@@ -19,48 +19,30 @@ package io.getstream.video.android.core
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.call.utils.stringify
 import io.getstream.video.android.core.events.AudioLevelChangedEvent
-import io.getstream.video.android.core.events.BlockedUserEvent
-import io.getstream.video.android.core.events.CallAcceptedEvent
-import io.getstream.video.android.core.events.CallCancelledEvent
-import io.getstream.video.android.core.events.CallCreatedEvent
-import io.getstream.video.android.core.events.CallEndedEvent
-import io.getstream.video.android.core.events.CallMembersDeletedEvent
-import io.getstream.video.android.core.events.CallMembersUpdatedEvent
-import io.getstream.video.android.core.events.CallRejectedEvent
-import io.getstream.video.android.core.events.CallUpdatedEvent
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
-import io.getstream.video.android.core.events.ConnectedEvent
 import io.getstream.video.android.core.events.ConnectionQualityChangeEvent
-import io.getstream.video.android.core.events.CoordinatorHealthCheckEvent
-import io.getstream.video.android.core.events.CustomEvent
 import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
 import io.getstream.video.android.core.events.ErrorEvent
 import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.ParticipantJoinedEvent
 import io.getstream.video.android.core.events.ParticipantLeftEvent
-import io.getstream.video.android.core.events.PermissionRequestEvent
 import io.getstream.video.android.core.events.PublisherAnswerEvent
-import io.getstream.video.android.core.events.RecordingStartedEvent
-import io.getstream.video.android.core.events.RecordingStoppedEvent
 import io.getstream.video.android.core.events.SFUConnectedEvent
 import io.getstream.video.android.core.events.SFUHealthCheckEvent
 import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
-import io.getstream.video.android.core.events.UnblockedUserEvent
-import io.getstream.video.android.core.events.UnknownEvent
-import io.getstream.video.android.core.events.UpdatedCallPermissionsEvent
 import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.utils.mapState
+import io.getstream.video.android.core.utils.toUser
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import org.openapitools.client.models.CallSettingsResponse
-import org.openapitools.client.models.OwnCapability
+import org.openapitools.client.models.*
 import org.webrtc.MediaStream
 import stream.video.sfu.models.Participant
 import stream.video.sfu.models.TrackType
@@ -254,19 +236,18 @@ public class CallState(val call: Call, user: User) {
 //                participant._rejectedAt.value = Date()
             }
 
-            is CallCancelledEvent -> TODO()
             is CallEndedEvent -> {
                 _endedAt.value = Date()
-                _endedByUser.value = event.endedByUser
+                _endedByUser.value = event.user.toUser()
             }
 
-            is CallMembersUpdatedEvent -> {
-                event.details.members.forEach { entry ->
-                    getOrCreateMember(entry.value)
+            is CallMemberUpdatedEvent -> {
+                event.members.forEach { entry ->
+                    getOrCreateMember(entry)
                 }
             }
 
-            is CallMembersDeletedEvent -> TODO()
+            is CallMemberRemovedEvent -> TODO()
 
             is CallCreatedEvent -> {
                 // this is handled by the client
@@ -280,26 +261,25 @@ public class CallState(val call: Call, user: User) {
                 _ownCapabilities.value = event.ownCapabilities
             }
 
-            is ConnectedEvent -> {
+            is WSConnectedEvent -> {
                 // this is handled by the client
             }
 
-            is CustomEvent -> {
+            is CustomVideoEvent -> {
                 // safe to ignore, app level custom event
             }
 
-            is CoordinatorHealthCheckEvent -> TODO()
+            is HealthCheckEvent -> TODO()
             is PermissionRequestEvent -> TODO()
-            is RecordingStartedEvent -> {
+            is CallRecordingStartedEvent -> {
                 _recording.value = true
             }
 
-            is RecordingStoppedEvent -> {
+            is CallRecordingStoppedEvent -> {
                 _recording.value = false
             }
 
             is UnblockedUserEvent -> TODO()
-            UnknownEvent -> TODO()
 
             is AudioLevelChangedEvent -> {
                 event.levels.forEach { entry ->
@@ -354,6 +334,10 @@ public class CallState(val call: Call, user: User) {
             is SFUConnectedEvent -> {
                 _connection.value = ConnectionState.Connected
             }
+            is CallMemberAddedEvent -> TODO()
+            is CallMemberUpdatedPermissionEvent -> TODO()
+            is CallReactionEvent -> TODO()
+            is WSConnectedEvent -> TODO()
         }
     }
 
@@ -435,7 +419,7 @@ public class CallState(val call: Call, user: User) {
             // update call info fields
         } else if (event is CallUpdatedEvent) {
             // update the own capabilities
-            _ownCapabilities.value = event.ownCapabilities
+            _ownCapabilities.value = event.call.ownCapabilities
             // update the capabilities by role
             _capabilitiesByRole.value = event.capabilitiesByRole
             // update call info fields

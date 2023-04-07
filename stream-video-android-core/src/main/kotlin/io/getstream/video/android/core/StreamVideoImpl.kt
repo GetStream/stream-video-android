@@ -27,8 +27,6 @@ import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
 import io.getstream.video.android.core.call.SFUSession
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
-import io.getstream.video.android.core.events.CallCreatedEvent
-import io.getstream.video.android.core.events.ConnectedEvent
 import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.internal.module.ConnectionModule
@@ -77,25 +75,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import org.openapitools.client.models.BlockUserRequest
-import org.openapitools.client.models.CallRequest
-import org.openapitools.client.models.CallSettingsRequest
-import org.openapitools.client.models.GetCallEdgeServerRequest
-import org.openapitools.client.models.GetCallEdgeServerResponse
-import org.openapitools.client.models.GetOrCreateCallRequest
-import org.openapitools.client.models.GoLiveResponse
-import org.openapitools.client.models.JoinCallRequest
-import org.openapitools.client.models.JoinCallResponse
-import org.openapitools.client.models.ListRecordingsResponse
-import org.openapitools.client.models.MemberRequest
-import org.openapitools.client.models.RequestPermissionRequest
-import org.openapitools.client.models.SendEventRequest
-import org.openapitools.client.models.SendEventResponse
-import org.openapitools.client.models.SendReactionResponse
-import org.openapitools.client.models.StopLiveResponse
-import org.openapitools.client.models.UnblockUserRequest
-import org.openapitools.client.models.UpdateCallRequest
-import org.openapitools.client.models.UpdateCallResponse
+import org.openapitools.client.models.*
 import retrofit2.HttpException
 import stream.video.coordinator.client_v1_rpc.CreateDeviceRequest
 import stream.video.coordinator.client_v1_rpc.DeleteDeviceRequest
@@ -128,13 +108,13 @@ internal class StreamVideoImpl internal constructor(
     internal val pushDeviceGenerators: List<PushDeviceGenerator>,
 ) : StreamVideo, SocketListener {
 
-    private lateinit var connectContinuation: Continuation<Result<ConnectedEvent>>
+    private lateinit var connectContinuation: Continuation<Result<WSConnectedEvent>>
 
     @VisibleForTesting
     public var peerConnectionFactory = StreamPeerConnectionFactory(context)
     public override val userId = user.id
 
-    override fun onConnected(event: ConnectedEvent) {
+    override fun onConnected(event: WSConnectedEvent) {
         onEvent(event)
     }
 
@@ -1029,9 +1009,6 @@ internal class StreamVideoImpl internal constructor(
                     val event = CallCreatedEvent(
                         callCid = callMetadata.cid,
                         ringing = true,
-                        users = callMetadata.users,
-                        callInfo = callMetadata.toInfo(),
-                        callDetails = callMetadata.callDetails
                     )
 
                     // TODO engine.onCoordinatorEvent(event)

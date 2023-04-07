@@ -22,8 +22,6 @@ import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.errors.create
-import io.getstream.video.android.core.events.ConnectedEvent
-import io.getstream.video.android.core.events.CoordinatorHealthCheckEvent
 import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.socket.VideoSocket
 import kotlinx.serialization.decodeFromString
@@ -33,6 +31,8 @@ import kotlinx.serialization.json.jsonPrimitive
 import okhttp3.Response
 import okhttp3.WebSocket
 import org.openapitools.client.infrastructure.Serializer
+import org.openapitools.client.models.HealthCheckEvent
+import org.openapitools.client.models.WSConnectedEvent
 import org.openapitools.client.models.WSEvent
 import org.openapitools.client.models.WSEventAdapter
 
@@ -62,17 +62,17 @@ internal class EventsParser(
 
             val eventType = EventType.from(data["type"]?.jsonPrimitive?.content ?: return)
 
-            val moshi = Serializer.moshi
-            //Moshi.Builder().add(WSEventAdapter()).build()
-            val jsonAdapter = moshi.adapter(WSEvent::class.java)
-            val processedEvent = jsonAdapter.fromJson(text) as VideoEvent
+            val jsonAdapter = Serializer.moshi.adapter(WSEvent::class.java)
+            val processedEvent = jsonAdapter.fromJson(text)
 
-            if (processedEvent !is CoordinatorHealthCheckEvent) logger.v { "[onMessage] processedEvent: $processedEvent" }
+            if (processedEvent !is HealthCheckEvent) logger.v { "[onMessage] processedEvent: $processedEvent" }
 
-            if (!connectionEventReceived && processedEvent is CoordinatorHealthCheckEvent) {
+            if (!connectionEventReceived && processedEvent is WSConnectedEvent) {
+                val event = processedEvent as WSConnectedEvent
                 connectionEventReceived = true
-                videoSocket.onConnectionResolved(ConnectedEvent(processedEvent.clientId))
+                videoSocket.onConnectionResolved(event)
             } else {
+                val event = processedEvent as VideoEvent
                 videoSocket.onEvent(processedEvent)
             }
         } catch (error: Throwable) {

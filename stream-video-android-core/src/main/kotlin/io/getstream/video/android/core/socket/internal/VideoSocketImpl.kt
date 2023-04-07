@@ -26,7 +26,6 @@ import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
 import io.getstream.video.android.core.errors.DisconnectCause
 import io.getstream.video.android.core.errors.VideoErrorCode
-import io.getstream.video.android.core.events.ConnectedEvent
 import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.model.CallMetadata
@@ -40,6 +39,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.openapitools.client.models.ConnectUserDetailsRequest
 import org.openapitools.client.models.WSAuthMessageRequest
+import org.openapitools.client.models.WSConnectedEvent
 import stream.video.coordinator.client_v1_rpc.WebsocketHealthcheck
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
@@ -71,7 +71,7 @@ internal class VideoSocketImpl(
     private var connectionConf: SocketFactory.ConnectionConf? = null
     private var socket: Socket? = null
     private var eventsParser: EventsParser? = null
-    private var clientId: String = ""
+    private var connectionId: String = ""
 
     private var socketConnectionJob: Job? = null
     private val listeners = mutableSetOf<SocketListener>()
@@ -99,7 +99,7 @@ internal class VideoSocketImpl(
                 sendPing(
                     WebsocketHealthcheck(
                         user_id = user.id,
-                        client_id = clientId,
+                        client_id = connectionId,
                         call_type = call?.type ?: "",
                         call_id = call?.id ?: "",
                     )
@@ -291,13 +291,13 @@ internal class VideoSocketImpl(
         state = State.DisconnectedByRequest
     }
 
-    override fun onConnectionResolved(event: ConnectedEvent) {
+    override fun onConnectionResolved(event: WSConnectedEvent) {
         logger.d { "onConnectionResolved $eventListener" }
         eventListener?.let {
             it.invoke(event)
         }
         logger.i { "[onConnectionResolved] event: $event" }
-        this.clientId = event.clientId
+        this.connectionId = event.connectionId
         state = State.Connected(event)
         logger.d { "Calling Listeners $listeners" }
         callListeners { listener -> listener.onConnected(event) }
@@ -313,7 +313,7 @@ internal class VideoSocketImpl(
     }
 
     override fun getConnectionId(): String {
-        return clientId
+        return connectionId
     }
 
     internal fun sendPing(state: WebsocketHealthcheck) {
@@ -372,7 +372,7 @@ internal class VideoSocketImpl(
             override fun toString(): String = "Connecting"
         }
 
-        data class Connected(val event: ConnectedEvent) : State()
+        data class Connected(val event: WSConnectedEvent) : State()
         object NetworkDisconnected : State() {
             override fun toString(): String = "NetworkDisconnected"
         }

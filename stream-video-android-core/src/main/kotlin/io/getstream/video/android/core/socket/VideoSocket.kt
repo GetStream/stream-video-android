@@ -17,9 +17,9 @@
 package io.getstream.video.android.core.socket
 
 import io.getstream.result.Error
-import io.getstream.video.android.core.events.ConnectedEvent
 import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.model.CallMetadata
+import org.openapitools.client.models.WSConnectedEvent
 
 public interface VideoSocket {
 
@@ -71,7 +71,7 @@ public interface VideoSocket {
      *
      * @param event The event that holds connection data.
      */
-    public fun onConnectionResolved(event: ConnectedEvent)
+    public fun onConnectionResolved(event: WSConnectedEvent)
 
     /**
      * Releases the socket connection when required in the app lifecycle.
