@@ -238,7 +238,7 @@ public class CallState(val call: Call, user: User) {
 
             is CallEndedEvent -> {
                 _endedAt.value = Date()
-                _endedByUser.value = event.user.toUser()
+                _endedByUser.value = event.user?.toUser()
             }
 
             is CallMemberUpdatedEvent -> {
@@ -342,6 +342,8 @@ public class CallState(val call: Call, user: User) {
     }
 
 
+
+
     private fun updateFromJoinResponse(event: JoinCallResponseEvent) {
         event.callState.participants.forEach {
             getOrCreateParticipant(it)
@@ -378,9 +380,10 @@ public class CallState(val call: Call, user: User) {
         }
     }
 
-    private fun getOrCreateMember(callUser: CallUser): MemberState {
-        // TODO: update fields :)
-        return getOrCreateMember(callUser.id)
+    private fun getOrCreateMember(entry: MemberResponse): MemberState {
+        val member = getOrCreateMember(entry.userId)
+        // TODO: update fields
+        return member
     }
 
     private fun getOrCreateMember(userId: String): MemberState {

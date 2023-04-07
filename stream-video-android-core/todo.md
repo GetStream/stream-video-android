@@ -117,6 +117,7 @@
 
 ### State TODO
 
+- [ ] Member state isn't implemented fully. Could be either a state or just a data class
 - [ ] Call settings need to be used everywhere. There are still some hardcoded settings
 
 ### RTC TODO

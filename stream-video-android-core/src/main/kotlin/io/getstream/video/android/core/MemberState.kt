@@ -25,5 +25,6 @@ public class MemberState(user: User) {
      * If you are a participant or not
      */
     private val _isParticipant: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    val videoEnabled: StateFlow<Boolean> = _isParticipant
+    val isParticipant: StateFlow<Boolean> = _isParticipant
+    // TODO: implement the memberstate
 }

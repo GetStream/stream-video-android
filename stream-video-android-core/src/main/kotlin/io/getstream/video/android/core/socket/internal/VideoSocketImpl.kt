@@ -65,7 +65,7 @@ internal class VideoSocketImpl(
     private val coroutineScope: CoroutineScope,
 ) : VideoSocket {
     public var eventListener: ((event: VideoEvent) -> Unit)? = null
-    internal lateinit var connectContinuation: Continuation<Result<ConnectedEvent>>
+    internal lateinit var connectContinuation: Continuation<Result<WSConnectedEvent>>
     private val logger by taggedLogger("Call:CoordinatorSocket")
 
     private var connectionConf: SocketFactory.ConnectionConf? = null
@@ -77,7 +77,7 @@ internal class VideoSocketImpl(
     private val listeners = mutableSetOf<SocketListener>()
     private val eventUiHandler = Handler(Looper.getMainLooper())
 
-    suspend fun connect(): Result<ConnectedEvent> = suspendCoroutine { continuation ->
+    suspend fun connect(): Result<WSConnectedEvent> = suspendCoroutine { continuation ->
         this.connectSocket()
         this.connectContinuation = continuation
     }

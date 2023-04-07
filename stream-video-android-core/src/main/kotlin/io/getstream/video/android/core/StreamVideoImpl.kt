@@ -272,7 +272,7 @@ internal class StreamVideoImpl internal constructor(
         // TODO: Find the event listener
     }
 
-    suspend fun connectAsync(): Deferred<Result<ConnectedEvent>> {
+    suspend fun connectAsync(): Deferred<Result<WSConnectedEvent>> {
         return scope.async {
             val result = socketImpl.connect()
             if (result.isFailure) {
@@ -374,7 +374,11 @@ internal class StreamVideoImpl internal constructor(
         state.handleEvent(event)
 
         // update state for the calls. calls handle updating participants and members
-        val selectedCid = cid.ifEmpty { event.callCid }
+        val selectedCid = cid.ifEmpty {
+            val callEvent = event as? WSCallEvent
+            callEvent?.getCallCID()
+        } ?: ""
+
         if (selectedCid.isNotEmpty()) {
             calls[selectedCid]?.let {
                 it.state.handleEvent(event)
@@ -1006,10 +1010,10 @@ internal class StreamVideoImpl internal constructor(
                 is Success -> {
                     val callMetadata = result.value
 
-                    val event = CallCreatedEvent(
-                        callCid = callMetadata.cid,
-                        ringing = true,
-                    )
+//                    val event = CallCreatedEvent(
+//                        callCid = callMetadata.cid,
+//                        ringing = true,
+//                    )
 
                     // TODO engine.onCoordinatorEvent(event)
                     Success(Unit)

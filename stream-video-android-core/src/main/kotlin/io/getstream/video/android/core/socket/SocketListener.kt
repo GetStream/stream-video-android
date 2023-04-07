@@ -18,8 +18,8 @@ package io.getstream.video.android.core.socket
 
 import io.getstream.result.Error
 import io.getstream.video.android.core.errors.DisconnectCause
-import io.getstream.video.android.core.events.ConnectedEvent
 import io.getstream.video.android.core.events.VideoEvent
+import org.openapitools.client.models.WSConnectedEvent
 
 /**
  * Used to listen to socket events on the Coordinator level, outside of an active call.
@@ -38,7 +38,7 @@ public interface SocketListener {
      *
      * @param event The [ConnectedEvent] that contains the ID of the client socket connection.
      */
-    public fun onConnected(event: ConnectedEvent) {
+    public fun onConnected(event: WSConnectedEvent) {
     }
 
     /**

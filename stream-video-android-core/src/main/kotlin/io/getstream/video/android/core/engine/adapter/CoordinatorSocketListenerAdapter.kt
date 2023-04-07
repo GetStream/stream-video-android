@@ -17,7 +17,6 @@
 package io.getstream.video.android.core.engine.adapter
 
 import io.getstream.video.android.core.engine.StreamCallEngine
-import io.getstream.video.android.core.events.CoordinatorEvent
 import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.socket.SocketListener
 
@@ -26,6 +25,6 @@ internal class CoordinatorSocketListenerAdapter(
 ) : SocketListener {
 
     override fun onEvent(event: VideoEvent) {
-        engine.onCoordinatorEvent(event as CoordinatorEvent)
+        engine.onCoordinatorEvent(event)
     }
 }
