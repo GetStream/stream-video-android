@@ -10,14 +10,14 @@ on:
 jobs:
   lint:
     name: Spotless check
-
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v3.1.0
       - name: Set up JDK
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v3.5.1
         with:
+          distribution: adopt
           java-version: 11
       - name: spotless
         run: ./gradlew spotlessCheck
@@ -43,13 +43,14 @@ jobs:
 
   api_check:
     name: API check
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v3.1.0
       - name: Set up JDK
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v3.5.1
         with:
+          distribution: adopt
           java-version: 11
       - name: API check
         run: ./gradlew apiCheck
