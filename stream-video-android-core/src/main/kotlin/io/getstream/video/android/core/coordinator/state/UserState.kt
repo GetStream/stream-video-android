@@ -39,6 +39,6 @@ public class UserState {
     }
 
     public companion object {
-        private val EMPTY_USER = User("", "", "", "", "", emptyList(), emptyMap())
+        private val EMPTY_USER = User("", "", "", "", "", emptyList(), false, emptyMap())
     }
 }

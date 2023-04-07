@@ -16,34 +16,27 @@
 
 package io.getstream.video.android.compose
 
+import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
-import io.getstream.video.android.common.model.Speaking
-import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.audio.ActiveSoundLevels
-import io.getstream.video.android.compose.ui.components.audio.SoundIndicator
+import io.getstream.video.android.compose.base.BaseComposeTest
+import io.getstream.video.android.compose.ui.components.call.controls.internal.LandscapeCallControls
+import io.getstream.video.android.core.call.state.CallMediaState
 import org.junit.Rule
 import org.junit.Test
 
-internal class AudioTest {
+internal class CallComponentsLandscapeTest : BaseComposeTest() {
 
     @get:Rule
-    val paparazzi = Paparazzi()
+    val paparazziLandscape = Paparazzi(deviceConfig = DeviceConfig.NEXUS_5_LAND)
+
+    override fun basePaparazzi(): Paparazzi = paparazziLandscape
 
     @Test
-    fun `snapshot SoundIndicator composable`() {
-        paparazzi.snapshot {
-            VideoTheme {
-                SoundIndicator(state = Speaking)
-            }
-        }
-    }
-
-    @Test
-    fun `snapshot ActiveSoundLevels composable`() {
-        paparazzi.snapshot {
-            VideoTheme {
-                ActiveSoundLevels()
-            }
+    fun `snapshot LandscapeCallControls composable`() {
+        snapshot {
+            LandscapeCallControls(
+                callMediaState = CallMediaState(), isScreenSharing = false
+            ) {}
         }
     }
 }

@@ -90,7 +90,8 @@ private fun CallParticipantInfoItem(
 
         UserAvatar(
             modifier = Modifier.size(VideoTheme.dimens.callParticipantsInfoAvatarSize),
-            user = participant.toUser()
+            user = participant.toUser(),
+            showOnlineIndicator = true
         )
 
         val userName = when {

@@ -19,6 +19,7 @@ package io.getstream.video.android.common.util
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.model.CallParticipantState
 import org.webrtc.VideoTrack
+import stream.video.sfu.models.ConnectionQuality
 import stream.video.sfu.models.TrackType
 import java.util.UUID
 
@@ -50,7 +51,9 @@ public val mockUsers: List<CallParticipantState>
             videoTrack = mockVideoTrack,
             isLocal = true,
             isSpeaking = true,
-            publishedTracks = setOf(TrackType.TRACK_TYPE_VIDEO)
+            isOnline = true,
+            connectionQuality = ConnectionQuality.CONNECTION_QUALITY_GOOD,
+            publishedTracks = setOf(TrackType.TRACK_TYPE_VIDEO, TrackType.TRACK_TYPE_AUDIO)
         ),
         CallParticipantState(
             id = "jaewoong",
@@ -61,8 +64,10 @@ public val mockUsers: List<CallParticipantState>
             sessionId = "",
             videoTrack = mockVideoTrack,
             isLocal = false,
-            isSpeaking = false,
-            publishedTracks = setOf(TrackType.TRACK_TYPE_VIDEO)
+            isSpeaking = true,
+            isOnline = true,
+            connectionQuality = ConnectionQuality.CONNECTION_QUALITY_GOOD,
+            publishedTracks = setOf(TrackType.TRACK_TYPE_VIDEO, TrackType.TRACK_TYPE_AUDIO)
         ),
         CallParticipantState(
             id = "toma_zdravkovic",
@@ -74,7 +79,9 @@ public val mockUsers: List<CallParticipantState>
             videoTrack = mockVideoTrack,
             isLocal = false,
             isSpeaking = false,
-            publishedTracks = setOf(TrackType.TRACK_TYPE_VIDEO)
+            isOnline = true,
+            connectionQuality = ConnectionQuality.CONNECTION_QUALITY_GOOD,
+            publishedTracks = setOf(TrackType.TRACK_TYPE_VIDEO, TrackType.TRACK_TYPE_AUDIO)
         ),
         CallParticipantState(
             id = "tyrone_bailey",
@@ -86,6 +93,36 @@ public val mockUsers: List<CallParticipantState>
             videoTrack = mockVideoTrack,
             isLocal = false,
             isSpeaking = false,
+            isOnline = true,
+            connectionQuality = ConnectionQuality.CONNECTION_QUALITY_GOOD,
+            publishedTracks = setOf(TrackType.TRACK_TYPE_VIDEO)
+        ),
+        CallParticipantState(
+            id = "willard",
+            name = "Willard Hessel",
+            profileImageURL = "https://getstream.io/chat/docs/sdk/avatars/jpg/Willard%20Hessel.jpg",
+            idPrefix = "",
+            role = "",
+            sessionId = "",
+            videoTrack = mockVideoTrack,
+            isLocal = false,
+            isSpeaking = false,
+            isOnline = true,
+            connectionQuality = ConnectionQuality.CONNECTION_QUALITY_GOOD,
+            publishedTracks = setOf(TrackType.TRACK_TYPE_VIDEO)
+        ),
+        CallParticipantState(
+            id = "blanche",
+            name = "Blanche Schoen",
+            profileImageURL = "https://getstream.io/chat/docs/sdk/avatars/jpg/Blanche%20Schoen.jpg",
+            idPrefix = "",
+            role = "",
+            sessionId = "",
+            videoTrack = mockVideoTrack,
+            isLocal = false,
+            isSpeaking = false,
+            isOnline = true,
+            connectionQuality = ConnectionQuality.CONNECTION_QUALITY_GOOD,
             publishedTracks = setOf(TrackType.TRACK_TYPE_VIDEO)
         )
     )
