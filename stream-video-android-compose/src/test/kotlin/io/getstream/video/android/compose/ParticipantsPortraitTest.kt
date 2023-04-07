@@ -121,11 +121,23 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
     }
 
     @Test
-    fun `snapshot CallParticipant composable`() {
+    fun `snapshot CallParticipant a local call composable`() {
         snapshot {
             CallParticipant(
                 call = null,
-                participant = mockParticipant
+                participant = callParticipants[0],
+                isFocused = true
+            )
+        }
+    }
+
+    @Test
+    fun `snapshot CallParticipant a remote call composable`() {
+        snapshot {
+            CallParticipant(
+                call = null,
+                participant = callParticipants[1],
+                isFocused = true
             )
         }
     }

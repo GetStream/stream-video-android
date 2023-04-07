@@ -80,7 +80,7 @@ public fun CallParticipant(
 ) {
     val containerModifier = if (isFocused) modifier.border(
         BorderStroke(
-            VideoTheme.dimens.callParticipantFocusedBorderWidth, VideoTheme.colors.infoAccent
+            VideoTheme.dimens.callParticipantFocusedBorderWidth, VideoTheme.colors.callFocusedBorder
         )
     ) else modifier
 
@@ -202,7 +202,8 @@ private fun CallParticipantPreview(
     VideoTheme {
         CallParticipant(
             call = null,
-            participant = callParticipants[0]
+            participant = callParticipants[1],
+            isFocused = true
         )
     }
 }
@@ -215,7 +216,7 @@ private fun ParticipantVideoPreview(
     VideoTheme {
         ParticipantVideo(
             call = null,
-            participant = callParticipants[0]
+            participant = callParticipants[1],
         ) {}
     }
 }
