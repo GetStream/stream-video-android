@@ -112,7 +112,7 @@ internal fun InviteUserItem(
         if (state.isSelected) {
             Image(
                 modifier = Modifier.size(24.dp),
-                painter = painterResource(id = R.drawable.ic_selected),
+                painter = painterResource(id = R.drawable.stream_video_ic_selected),
                 contentDescription = null,
             )
         }

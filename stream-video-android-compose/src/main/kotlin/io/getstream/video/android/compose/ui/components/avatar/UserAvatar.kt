@@ -35,7 +35,6 @@ import io.getstream.video.android.compose.ui.components.previews.ParticipantsPro
 import io.getstream.video.android.core.model.CallParticipantState
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.toUser
-import io.getstream.video.android.core.utils.initials
 import io.getstream.video.android.ui.common.R
 
 /**
@@ -62,7 +61,7 @@ public fun UserAvatar(
     contentDescription: String? = null,
     requestSize: IntSize = IntSize(DEFAULT_IMAGE_SIZE, DEFAULT_IMAGE_SIZE),
     @DrawableRes loadingPlaceholder: Int? = null,
-    @DrawableRes previewPlaceholder: Int = R.drawable.ic_preview_avatar,
+    @DrawableRes previewPlaceholder: Int = R.drawable.stream_video_ic_preview_avatar,
     initialsAvatarOffset: DpOffset = DpOffset(0.dp, 0.dp),
     onClick: (() -> Unit)? = null,
 ) {

@@ -95,18 +95,18 @@ public data class CallParticipantStyle(
 
                 val activeSpeakerBorderWidth = it.getDimension(
                     R.styleable.CallParticipantView_streamVideoCallParticipantActiveSpeakerBorderWidth,
-                    context.getDimension(RCommon.dimen.activeSpeakerBoarderWidth).toFloat()
+                    context.getDimension(RCommon.dimen.stream_video_activeSpeakerBoarderWidth).toFloat()
                 ).toInt()
 
                 val activeSpeakerBorderColor = it.getColor(
                     R.styleable.CallParticipantView_streamVideoCallParticipantActiveSpeakerBorderColor,
-                    context.getColorCompat(RCommon.color.stream_info_accent)
+                    context.getColorCompat(RCommon.color.stream_video_info_accent)
                 )
 
                 val labelTextStyle = TextStyle.Builder(it)
                     .size(
                         R.styleable.CallParticipantView_streamVideoCallParticipantLabelTextSize,
-                        context.getDimension(RCommon.dimen.bodyTextSize)
+                        context.getDimension(RCommon.dimen.stream_video_bodyTextSize)
                     )
                     .color(
                         R.styleable.CallParticipantView_streamVideoCallParticipantLabelTextColor,
@@ -129,11 +129,11 @@ public data class CallParticipantStyle(
 
                 val participantMicOffIcon = it.getDrawable(
                     R.styleable.CallParticipantView_streamVideoCallParticipantMicrophoneOffIcon
-                ) ?: context.getDrawableCompat(RCommon.drawable.ic_mic_off)!!
+                ) ?: context.getDrawableCompat(RCommon.drawable.stream_video_ic_mic_off)!!
 
                 val participantMicOffIconTint = it.getColor(
                     R.styleable.CallParticipantView_streamVideoCallParticipantMicrophoneOffTint,
-                    context.getColorCompat(RCommon.color.stream_error_accent)
+                    context.getColorCompat(RCommon.color.stream_video_error_accent)
                 )
 
                 val participantAudioLevelTint = it.getColor(

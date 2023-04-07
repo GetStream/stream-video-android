@@ -65,8 +65,8 @@ internal fun OverlayAppBar(
         ) {
             Icon(
                 modifier = Modifier,
-                painter = painterResource(id = R.drawable.ic_arrow_back),
-                contentDescription = stringResource(id = R.string.back_button_content_description),
+                painter = painterResource(id = R.drawable.stream_video_ic_arrow_back),
+                contentDescription = stringResource(id = R.string.stream_video_back_button_content_description),
                 tint = Color.White
             )
         }
@@ -99,8 +99,8 @@ internal fun OverlayAppBar(
             )
         ) {
             Icon(
-                painter = painterResource(id = R.drawable.ic_participants),
-                contentDescription = stringResource(id = R.string.call_participants_menu_content_description),
+                painter = painterResource(id = R.drawable.stream_video_ic_participants),
+                contentDescription = stringResource(id = R.string.stream_video_call_participants_menu_content_description),
                 tint = Color.White
             )
         }

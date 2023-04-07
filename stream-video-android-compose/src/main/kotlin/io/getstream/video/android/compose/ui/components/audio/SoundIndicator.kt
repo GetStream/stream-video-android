@@ -50,7 +50,7 @@ public fun SoundIndicator(
                 modifier = modifier
                     .size(VideoTheme.dimens.audioStatusSize)
                     .padding(end = 4.dp),
-                painter = painterResource(id = R.drawable.ic_mic_on),
+                painter = painterResource(id = R.drawable.stream_video_ic_mic_on),
                 tint = Color.White,
                 contentDescription = null
             )
@@ -61,7 +61,7 @@ public fun SoundIndicator(
                 modifier = modifier
                     .size(VideoTheme.dimens.audioStatusSize)
                     .padding(end = 4.dp),
-                painter = painterResource(id = R.drawable.ic_mic_off),
+                painter = painterResource(id = R.drawable.stream_video_ic_mic_off),
                 tint = VideoTheme.colors.errorAccent,
                 contentDescription = null
             )

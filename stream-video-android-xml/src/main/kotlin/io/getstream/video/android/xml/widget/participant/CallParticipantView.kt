@@ -158,7 +158,7 @@ public class CallParticipantView : CallCardView, VideoRenderer {
         val tint =
             if (hasAudio) style.participantAudioLevelTint else style.participantMicOffIconTint
         val icon =
-            if (hasAudio) context.getDrawableCompat(RCommon.drawable.ic_mic_on) else style.participantMicOffIcon
+            if (hasAudio) context.getDrawableCompat(RCommon.drawable.stream_video_ic_mic_on) else style.participantMicOffIcon
 
         binding.soundIndicator.setImageDrawable(icon)
         binding.soundIndicator.setColorFilter(tint)

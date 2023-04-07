@@ -91,9 +91,9 @@ public fun ScreenShareContent(
                 },
                 content = {
                     val drawable = if (orientation == ORIENTATION_LANDSCAPE) {
-                        RCommon.drawable.ic_portrait_mode
+                        RCommon.drawable.stream_video_ic_portrait_mode
                     } else {
-                        RCommon.drawable.ic_landscape_mode
+                        RCommon.drawable.stream_video_ic_landscape_mode
                     }
 
                     Icon(
@@ -105,7 +105,7 @@ public fun ScreenShareContent(
                             .padding(8.dp),
                         painter = painterResource(id = drawable),
                         contentDescription = stringResource(
-                            id = RCommon.string.change_orientation
+                            id = RCommon.string.stream_video_change_orientation
                         ),
                         tint = VideoTheme.colors.textHighEmphasis
                     )
@@ -127,9 +127,9 @@ public fun ScreenShareContent(
                 },
                 content = {
                     val drawable = if (isFullscreen) {
-                        RCommon.drawable.ic_fullscreen_exit
+                        RCommon.drawable.stream_video_ic_fullscreen_exit
                     } else {
-                        RCommon.drawable.ic_fullscreen
+                        RCommon.drawable.stream_video_ic_fullscreen
                     }
 
                     Icon(
@@ -141,7 +141,7 @@ public fun ScreenShareContent(
                             .padding(8.dp),
                         painter = painterResource(id = drawable),
                         contentDescription = stringResource(
-                            id = RCommon.string.toggle_fullscreen
+                            id = RCommon.string.stream_video_toggle_fullscreen
                         ),
                         tint = VideoTheme.colors.textHighEmphasis
                     )
