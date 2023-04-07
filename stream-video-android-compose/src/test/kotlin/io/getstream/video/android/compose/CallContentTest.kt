@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.compose
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import app.cash.paparazzi.Paparazzi
@@ -166,10 +167,20 @@ internal class CallContentTest : BaseComposeTest() {
     @Test
     fun `snapshot OutgoingCallOptions composable`() {
         snapshotWithDarkMode {
-            OutgoingGroupCallOptions(
-                callMediaState = CallMediaState(),
-                onCallAction = { }
-            )
+            Column {
+                OutgoingGroupCallOptions(
+                    callMediaState = CallMediaState(
+                        isMicrophoneEnabled = true,
+                        isSpeakerphoneEnabled = true,
+                        isCameraEnabled = true
+                    ),
+                    onCallAction = { }
+                )
+                OutgoingGroupCallOptions(
+                    callMediaState = CallMediaState(),
+                    onCallAction = { }
+                )
+            }
         }
     }
 

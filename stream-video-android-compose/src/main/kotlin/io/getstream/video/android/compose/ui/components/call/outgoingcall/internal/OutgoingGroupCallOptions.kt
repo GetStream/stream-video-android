@@ -81,6 +81,32 @@ internal fun OutgoingGroupCallOptions(
         ) {
             IconButton(
                 modifier = Modifier
+                    .toggleAlpha(isMicEnabled)
+                    .background(
+                        color = VideoTheme.colors.appBackground,
+                        shape = VideoTheme.shapes.callButton
+                    )
+                    .size(VideoTheme.dimens.mediumButtonSize),
+                onClick = { onCallAction(ToggleMicrophone(!callMediaState.isMicrophoneEnabled)) },
+                content = {
+                    val micIcon = painterResource(
+                        id = if (isMicEnabled) {
+                            R.drawable.stream_video_ic_mic_on
+                        } else {
+                            R.drawable.stream_video_ic_mic_off
+                        }
+                    )
+
+                    Icon(
+                        painter = micIcon,
+                        contentDescription = "Toggle Mic",
+                        tint = VideoTheme.colors.textHighEmphasis
+                    )
+                }
+            )
+
+            IconButton(
+                modifier = Modifier
                     .toggleAlpha(isVideoEnabled)
                     .background(
                         color = VideoTheme.colors.appBackground,
@@ -105,32 +131,6 @@ internal fun OutgoingGroupCallOptions(
                     )
                 }
             )
-
-            IconButton(
-                modifier = Modifier
-                    .toggleAlpha(isMicEnabled)
-                    .background(
-                        color = VideoTheme.colors.appBackground,
-                        shape = VideoTheme.shapes.callButton
-                    )
-                    .size(VideoTheme.dimens.mediumButtonSize),
-                onClick = { onCallAction(ToggleMicrophone(!callMediaState.isMicrophoneEnabled)) },
-                content = {
-                    val micIcon = painterResource(
-                        id = if (isMicEnabled) {
-                            R.drawable.stream_video_ic_mic_on
-                        } else {
-                            R.drawable.stream_video_ic_mic_off
-                        }
-                    )
-
-                    Icon(
-                        painter = micIcon,
-                        contentDescription = "Toggle Mic",
-                        tint = VideoTheme.colors.textHighEmphasis
-                    )
-                }
-            )
         }
     }
 }
@@ -139,9 +139,20 @@ internal fun OutgoingGroupCallOptions(
 @Composable
 private fun OutgoingCallGroupOptions() {
     VideoTheme {
-        OutgoingGroupCallOptions(
-            callMediaState = CallMediaState(),
-            onCallAction = { }
-        )
+        Column {
+            OutgoingGroupCallOptions(
+                callMediaState = CallMediaState(
+                    isMicrophoneEnabled = true,
+                    isSpeakerphoneEnabled = true,
+                    isCameraEnabled = true
+                ),
+                onCallAction = { }
+            )
+
+            OutgoingGroupCallOptions(
+                callMediaState = CallMediaState(),
+                onCallAction = { }
+            )
+        }
     }
 }

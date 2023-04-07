@@ -138,9 +138,20 @@ internal fun OutgoingSingleCallOptions(
 @Composable
 private fun OutgoingCallOptionsPreview() {
     VideoTheme {
-        OutgoingSingleCallOptions(
-            callMediaState = CallMediaState(),
-            onCallAction = { }
-        )
+        Column {
+            OutgoingSingleCallOptions(
+                callMediaState = CallMediaState(
+                    isMicrophoneEnabled = true,
+                    isSpeakerphoneEnabled = true,
+                    isCameraEnabled = true
+                ),
+                onCallAction = { }
+            )
+
+            OutgoingSingleCallOptions(
+                callMediaState = CallMediaState(),
+                onCallAction = { }
+            )
+        }
     }
 }

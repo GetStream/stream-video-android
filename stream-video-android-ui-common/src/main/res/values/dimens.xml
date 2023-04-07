@@ -47,8 +47,8 @@
     <dimen name="stream_video_callStatusParticipantsMargin">16dp</dimen>
     <dimen name="stream_video_callParticipantsAvatarsMargin">32dp</dimen>
     <dimen name="stream_video_floatingVideoPadding">16dp</dimen>
-    <dimen name="stream_video_floatingVideoHeight">150dp</dimen>
-    <dimen name="stream_video_floatingVideoWidth">125dp</dimen>
+    <dimen name="stream_video_floatingVideoHeight">200dp</dimen>
+    <dimen name="stream_video_floatingVideoWidth">140dp</dimen>
     <dimen name="stream_video_floatingVideoRadius">16dp</dimen>
     <dimen name="stream_video_connectionIndicatorBarMaxHeight">14dp</dimen>
     <dimen name="stream_video_connectionIndicatorBarWidth">3dp</dimen>
