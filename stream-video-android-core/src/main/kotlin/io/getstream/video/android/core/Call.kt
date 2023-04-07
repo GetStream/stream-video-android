@@ -19,7 +19,7 @@ package io.getstream.video.android.core
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
-import io.getstream.video.android.core.call.ActiveSFUSession
+import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.model.CallMetadata
@@ -49,7 +49,7 @@ public class Call(
     val user: User,
 ) {
     private val clientImpl = client as StreamVideoImpl
-    var activeSession: ActiveSFUSession? = null
+    var session: RtcSession? = null
     val cid = "$type:$id"
     val state = CallState(this, user)
     val mediaManager = MediaManagerImpl(client.context)
@@ -67,7 +67,7 @@ public class Call(
         return muteUsers(MuteUsersData(audio = true, muteAllUsers = true))
     }
 
-    suspend fun join(): Result<ActiveSFUSession> {
+    suspend fun join(): Result<RtcSession> {
 
         /**
          * Alright, how to make this solid
@@ -115,7 +115,7 @@ public class Call(
                 .iceServers
                 .map { it.toIceServer() }
 
-        activeSession = ActiveSFUSession(
+        session = RtcSession(
             client = client,
             call = this,
             SFUUrl = url,
@@ -127,7 +127,7 @@ public class Call(
 
         client.state.setActiveCall(this)
 
-        return Success(value = activeSession!!)
+        return Success(value = session!!)
     }
 
     suspend fun sendReaction(data: SendReactionData): Result<SendReactionResponse> {

@@ -105,22 +105,9 @@ Check the docs on TestBase, TestHelper and IntegrationTestBase for more utility 
 * Ideally you setup your camera tracks and audio tracks before you join a call
 * Otherwise you end up joining and immediately triggering onNegotiationNeeded after that
 
-### How it currently works
-
-Join logic
-
-* connectToCall with args (2 versions of this function that do something different)
-* initializeCall
-* connectToCall no args version
-* executeJoinRequest -> (get a generic sdp)
-* createPeerConnections -> StreamPeerConnectionFactory enables simulcast
-* loadParticipantsData
-* createUserTracks
-* After that onNegotiationNeeded is triggered. this creates a new offer and calls SetPublisherRequest
-  (it also seems to enable simulcast here, which is a weird place to do this. should be enabled from the start)
-
 ### RTC offer/answer cycle
 
+* sessionId is created locally as a random UUID
 * create the peer connections
 * capture audio and video (if we're not doing so already, in many apps it should already be on for the preview screen)
 * execute the join request
@@ -143,10 +130,7 @@ Camera/device changes -> listener in ActiveSFUSession -> updates the tracks.
 * Each participant has a trackPrefix
 * New media streams have a streamID, which starts with the trackPrefix
   val (trackPrefix, trackType) = mediaStream.id.split(':');
+* Note that members are unique per user, not per session
 
-### Questions
-
-* Why does JoinRequest not specify tracks, but SetPublisherRequest does?
-
-### Compose
+## Compose
 

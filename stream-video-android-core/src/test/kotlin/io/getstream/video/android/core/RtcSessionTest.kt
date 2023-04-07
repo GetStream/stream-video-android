@@ -35,7 +35,7 @@ import org.robolectric.RobolectricTestRunner
 import stream.video.sfu.models.PeerType
 
 @RunWith(RobolectricTestRunner::class)
-class ActiveSFUSessionTest : IntegrationTestBase() {
+class RtcSessionTest : IntegrationTestBase() {
     /**
      * Creating the publisher and subscriber peer connection
      * - If we are not allowed to publish, we don't need to establish that peer connection
@@ -67,7 +67,7 @@ class ActiveSFUSessionTest : IntegrationTestBase() {
     fun `Create a subscriber peer connection`() = runTest {
         val joinResult = call.join()
         assertSuccess(joinResult)
-        val subscriber = call.activeSession!!.createSubscriber()
+        val subscriber = call.session!!.createSubscriber()
         println(subscriber)
     }
 
@@ -75,7 +75,7 @@ class ActiveSFUSessionTest : IntegrationTestBase() {
     fun `Create a publisher peer connection`() = runTest {
         val joinResult = call.join()
         assertSuccess(joinResult)
-        val publisher = call.activeSession!!.createPublisher()
+        val publisher = call.session!!.createPublisher()
         println(publisher)
     }
 
@@ -86,7 +86,7 @@ class ActiveSFUSessionTest : IntegrationTestBase() {
         assertSuccess(joinResult)
 
         val offerEvent = SubscriberOfferEvent(sdp = testData.fakeSDP)
-        call.activeSession?.handleSubscriberOffer(offerEvent)
+        call.session?.handleSubscriberOffer(offerEvent)
     }
 
     @Test
@@ -99,10 +99,10 @@ class ActiveSFUSessionTest : IntegrationTestBase() {
         val candidate =
             """{"sdpMid": "test", "sdpMLineIndex": 0, "candidate": "test", "usernameFragment": "test"}"""
         val publisherTrickle = ICETrickleEvent(candidate, PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED)
-        call.activeSession?.handleTrickle(publisherTrickle)
+        call.session?.handleTrickle(publisherTrickle)
         // subscriber trickle
         val subscriberTrickle = ICETrickleEvent(candidate, PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED)
-        call.activeSession?.handleTrickle(subscriberTrickle)
+        call.session?.handleTrickle(subscriberTrickle)
     }
 
     @Test
@@ -112,8 +112,8 @@ class ActiveSFUSessionTest : IntegrationTestBase() {
         assertSuccess(joinResult)
         waitForNextEvent<SFUConnectedEvent>()
         Truth.assertThat(call.state.connection.value).isEqualTo(ConnectionState.Connected)
-        val publisher = call.activeSession!!.createPublisher()!!
-        call.activeSession?.onNegotiationNeeded(
+        val publisher = call.session!!.createPublisher()!!
+        call.session?.onNegotiationNeeded(
             publisher,
             StreamPeerType.PUBLISHER
         )
@@ -133,7 +133,7 @@ class ActiveSFUSessionTest : IntegrationTestBase() {
         assertSuccess(joinResult)
         waitForNextEvent<SFUConnectedEvent>()
         Truth.assertThat(call.state.connection.value).isEqualTo(ConnectionState.Connected)
-        call.activeSession?.publishVideo()
+        call.session?.publishVideo()
     }
 
     @Test

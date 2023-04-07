@@ -53,6 +53,9 @@ class SpeakerManager(val mediaManager: MediaManagerImpl) {
     val _devices = MutableStateFlow<List<String>>(emptyList())
     val devices: StateFlow<List<String>> = _devices
 
+    val _speakerPhoneEnabled = MutableStateFlow(false)
+    val speakerPhoneEnabled: StateFlow<Boolean> = _speakerPhoneEnabled
+
     fun devices(): List<String> {
         return mediaManager.getCameraDevices()
     }
@@ -69,6 +72,8 @@ class SpeakerManager(val mediaManager: MediaManagerImpl) {
     }
 
     fun setSpeakerPhone(speakerPhone: Boolean) {
+        mediaManager.setSpeakerphoneEnabled(speakerPhone)
+        _speakerPhoneEnabled.value = speakerPhone
     }
 
     fun disable() {
@@ -93,6 +98,10 @@ class MicrophoneManager(val mediaManager: MediaManagerImpl) {
 
     fun select(deviceId: String) {
         mediaManager.selectCamera(deviceId)
+    }
+
+    fun startCapture() {
+
     }
 
     fun enable() {
@@ -127,6 +136,11 @@ class CameraManager(val mediaManager: MediaManagerImpl) {
         mediaManager.selectCamera(deviceId)
     }
 
+    fun startCapture() {
+        mediaManager.startCapturingLocalVideo(CameraMetadata.LENS_FACING_FRONT)
+        val capturer = mediaManager.buildCameraCapturer()
+    }
+
     fun enable() {
         mediaManager.setCameraEnabled(true)
     }
@@ -140,13 +154,16 @@ class CameraManager(val mediaManager: MediaManagerImpl) {
  * Wrap all the audio/video interactions
  * This makes it easier to test our codebase
  *
- * TODO: refactor code from these things into 1 media manager module
- * TODO: create a version of this class that spits out fake camera, microphone and speakers for testing
+ * This class knows about audio/ video.
+ * It shouldn't be aware of webrtc tracks. Those are handled in the RtcSession
  *
- * - CallClientUtils (for constraints)
- * - AudioSwitchHandler
- * - AudioSwitch
- * - BluetoothHeadsetManager
+ * @see RtcSession
+ *
+ * Also see:
+ *
+ * @see AudioSwitchHandler
+ * @see AudioSwitch
+ * @see BluetoothHeadsetManager
  */
 class MediaManagerImpl(val context: Context) {
 
@@ -167,6 +184,27 @@ class MediaManagerImpl(val context: Context) {
     val speaker = SpeakerManager(this)
 
     val enumerator = Camera2Enumerator(context)
+
+    fun setSpeakerphoneEnabled(isEnabled: Boolean) {
+        val devices = getAudioDevices()
+
+        val activeDevice = devices.firstOrNull {
+            if (isEnabled) {
+                it.name.contains("speaker", true)
+            } else {
+                !it.name.contains("speaker", true)
+            }
+        }
+
+        getAudioHandler()?.selectDevice(activeDevice)
+    }
+
+    fun selectAudioDevice(device: io.getstream.video.android.core.audio.AudioDevice) {
+        logger.d { "[selectAudioDevice] #sfu; device: $device" }
+        val handler = getAudioHandler() ?: return
+
+        handler.selectDevice(device)
+    }
 
     fun getCameraDevices(): List<String> {
 
@@ -268,7 +306,7 @@ class MediaManagerImpl(val context: Context) {
     }
 
     fun flipCamera() {
-        TODO("Not yet implemented")
+        (videoCapturer as? Camera2Capturer)?.switchCamera(null)
     }
 
     fun setCameraEnabled(b: Boolean) {

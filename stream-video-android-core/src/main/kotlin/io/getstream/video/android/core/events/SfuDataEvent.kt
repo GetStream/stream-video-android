@@ -41,10 +41,6 @@ public data class SubscriberOfferEvent(
     val sdp: String
 ) : SfuDataEvent()
 
-public data class PublisherAnswerEvent(
-    val sdp: String
-) : SfuDataEvent()
-
 public data class ConnectionQualityChangeEvent(
     val updates: List<ConnectionQualityInfo>
 ) : SfuDataEvent()

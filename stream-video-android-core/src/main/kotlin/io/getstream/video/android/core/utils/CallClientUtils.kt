@@ -19,6 +19,38 @@ package io.getstream.video.android.core.utils
 import io.getstream.video.android.core.model.IceServer
 import org.webrtc.MediaConstraints
 import org.webrtc.PeerConnection
+import org.webrtc.SessionDescription
+
+
+/**
+ * Enabling DTX or RED requires mangling the SDP a bit
+ */
+fun mangleSDP(
+    sdp: SessionDescription,
+    enableRed: Boolean = true,
+    enableDtx: Boolean = true
+): SessionDescription {
+    val lines = sdp.description.split("\r\n")
+    val modifiedLines = mutableListOf<String>()
+    var opusPayloadType: String? = null
+
+    for (line in lines) {
+        when {
+            enableRed && line.contains("opus/48000") -> {
+                opusPayloadType = line.split(" ")[0].substringAfter("a=rtpmap:")
+                modifiedLines.add("$line;red=1;useinbandfec=1") // Enable RED
+            }
+
+            enableDtx && line.startsWith("a=extmap") && line.contains("urn:ietf:params:rtp-hdrext:ssrc-audio-level") && opusPayloadType != null -> {
+                modifiedLines.add("$line\r\na=fmtp:$opusPayloadType usedtx=1") // Enable DTX
+            }
+
+            else -> modifiedLines.add(line)
+        }
+    }
+
+    return SessionDescription(sdp.type, modifiedLines.joinToString("\r\n"))
+}
 
 @JvmSynthetic
 internal fun buildRemoteIceServers(iceServers: List<IceServer>): List<PeerConnection.IceServer> {

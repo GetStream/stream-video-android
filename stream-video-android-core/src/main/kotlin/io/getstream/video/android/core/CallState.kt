@@ -319,7 +319,7 @@ public class CallState(val call: Call, user: User) {
             }
 
             is ChangePublishQualityEvent -> {
-                call.activeSession!!.handleEvent(event)
+                call.session!!.handleEvent(event)
             }
 
             is ErrorEvent -> {
@@ -481,94 +481,5 @@ public class CallState(val call: Call, user: User) {
         }
     }
 
-    // local video track update...
-    internal fun updateLocalVideoTrack(localVideoTrack: org.webrtc.VideoTrack) {
 
-        logger.d { "[updateLocalVideoTrack] #sfu; localVideoTrack: $localVideoTrack, localParticipant: $me.value" }
-        val videoTrack = VideoTrack(
-            video = localVideoTrack,
-            streamId = "${call.client.userId}:${localVideoTrack.id()}"
-        )
-
-        // start by updating the local participant state (specialized version of Participant State)
-        val localParticipant = me.value ?: throw IllegalStateException("Local participant is null")
-
-        val updatedParticipant = localParticipant.copy(
-            videoTrack = videoTrack
-        )
-        updateParticipant(updatedParticipant)
-
-        logger.d { "[updateLocalVideoTrack] #sfu; localParticipant: $updatedParticipant, callParticipants: ${_participants.value}" }
-    }
-
-    // TODO: move to active SFU session
-    internal fun updatePublishState(
-        userId: String,
-        sessionId: String,
-        trackType: TrackType,
-        isEnabled: Boolean
-    ) {
-
-        logger.d { "[updateMuteState] #sfu; userId: $userId, sessionId: $sessionId, isEnabled: $isEnabled" }
-
-        val participant = requireParticipant(sessionId)
-
-        val videoTrackSize = if (trackType == TrackType.TRACK_TYPE_VIDEO) {
-            if (isEnabled) {
-                participant.videoTrackSize
-            } else {
-                0 to 0
-            }
-        } else {
-            participant.videoTrackSize
-        }
-
-        val screenShareTrack = if (trackType == TrackType.TRACK_TYPE_SCREEN_SHARE) {
-            if (isEnabled) {
-                participant.screenSharingTrack
-            } else {
-                null
-            }
-        } else {
-            participant.screenSharingTrack
-        }
-
-        val updated = participant.copy(
-            videoTrackSize = videoTrackSize,
-            screenSharingTrack = screenShareTrack,
-            publishedTracks = if (isEnabled) participant.publishedTracks + trackType else participant.publishedTracks - trackType
-        )
-
-        updateParticipant(updated)
-
-        if (trackType == TrackType.TRACK_TYPE_SCREEN_SHARE && !isEnabled) {
-            _screenSharingSession.value = null
-        }
-    }
-
-    // TODO : move to media manager and listen for changes to update local state
-
-    public fun setCameraEnabled(isEnabled: Boolean) {
-        logger.d { "[setCameraEnabled] #sfu; isEnabled: $isEnabled" }
-        val localParticipant = me.value ?: return
-        val track = TrackType.TRACK_TYPE_VIDEO
-        val tracks = localParticipant.publishedTracks
-
-        val newTracks = if (isEnabled) tracks + track else tracks - track
-        val updatedLocal = localParticipant.copy(
-            publishedTracks = newTracks
-        )
-        updateParticipant(updatedLocal)
-    }
-
-    public fun setMicrophoneEnabled(isEnabled: Boolean) {
-        logger.d { "[setMicrophoneEnabled] #sfu; isEnabled: $isEnabled" }
-        val localParticipant = me.value ?: return
-        val track = TrackType.TRACK_TYPE_AUDIO
-        val tracks = localParticipant.publishedTracks
-
-        val newTracks = if (isEnabled) tracks + track else tracks - track
-        val updatedLocal = localParticipant.copy(publishedTracks = newTracks)
-        updateParticipant(updatedLocal)
-    }
 }

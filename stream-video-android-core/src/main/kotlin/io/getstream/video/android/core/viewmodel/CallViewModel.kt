@@ -167,12 +167,9 @@ public class CallViewModel(
     }
 
     private suspend fun initializeCall(autoPublish: Boolean) {
-        call.activeSession?.let { session ->
-            val callResult =
-                session.connectToCall(UUID.randomUUID().toString(), autoPublish)
+        call.session?.let { session ->
 
-            // TODO raise an error if it failed
-            call.mediaManager.startCapturingLocalVideo(CameraMetadata.LENS_FACING_FRONT)
+        TODO()
         }
     }
 
@@ -194,7 +191,7 @@ public class CallViewModel(
             is ToggleSpeakerphone -> onSpeakerphoneChanged(callAction.isEnabled)
             is ToggleCamera -> onVideoChanged(callAction.isEnabled)
             is ToggleMicrophone -> onMicrophoneChanged(callAction.isEnabled)
-            is SelectAudioDevice -> call.activeSession?.selectAudioDevice(callAction.audioDevice)
+            is SelectAudioDevice -> call.session?.selectAudioDevice(callAction.audioDevice)
             FlipCamera -> flipCamera()
             CancelCall, LeaveCall -> call.leave()
             AcceptCall -> acceptCall()
@@ -251,7 +248,7 @@ public class CallViewModel(
         if (!permissions.hasRecordAudioPermission.value) {
             logger.w { "[onMicrophoneChanged] the [Manifest.permissions.RECORD_AUDIO] has to be granted for audio to be sent" }
         }
-        call.activeSession?.setMicrophoneEnabled(microphoneEnabled)
+        call.session?.setMicrophoneEnabled(microphoneEnabled)
         isAudioEnabled.value = microphoneEnabled
     }
 
@@ -260,13 +257,13 @@ public class CallViewModel(
         if (!permissions.hasCameraPermission.value) {
             logger.w { "[onVideoChanged] the [Manifest.permissions.CAMERA] has to be granted for video to be sent" }
         }
-        call.activeSession?.setCameraEnabled(videoEnabled)
+        call.session?.setCameraEnabled(videoEnabled)
         isVideoEnabled.value = videoEnabled
     }
 
     private fun onSpeakerphoneChanged(speakerPhoneEnabled: Boolean) {
         logger.d { "[onSpeakerphoneChanged] speakerPhoneEnabled: $speakerPhoneEnabled" }
-        call.activeSession?.setSpeakerphoneEnabled(speakerPhoneEnabled)
+        call.session?.setSpeakerphoneEnabled(speakerPhoneEnabled)
         isSpeakerPhoneEnabled.value = speakerPhoneEnabled
     }
 
@@ -305,7 +302,7 @@ public class CallViewModel(
 //        }
     }
 
-    val session by lazy { call.activeSession ?: throw IllegalStateException("Session is null") }
+    val session by lazy { call.session ?: throw IllegalStateException("Session is null") }
 
     public fun initRenderer(
         videoRenderer: VideoTextureViewRenderer,
