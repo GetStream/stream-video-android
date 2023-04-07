@@ -72,9 +72,9 @@ internal fun OutgoingSingleCallOptions(
                 content = {
                     val micIcon = painterResource(
                         id = if (isMicEnabled) {
-                            R.drawable.ic_mic_on
+                            R.drawable.stream_video_ic_mic_on
                         } else {
-                            R.drawable.ic_mic_off
+                            R.drawable.stream_video_ic_mic_off
                         }
                     )
 
@@ -98,9 +98,9 @@ internal fun OutgoingSingleCallOptions(
                 content = {
                     val cameraIcon = painterResource(
                         id = if (isVideoEnabled) {
-                            R.drawable.ic_videocam_on
+                            R.drawable.stream_video_ic_videocam_on
                         } else {
-                            R.drawable.ic_videocam_off
+                            R.drawable.stream_video_ic_videocam_off
                         }
                     )
 
@@ -125,7 +125,7 @@ internal fun OutgoingSingleCallOptions(
             onClick = { onCallAction(CancelCall) },
             content = {
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_call_end),
+                    painter = painterResource(id = R.drawable.stream_video_ic_call_end),
                     tint = Color.White,
                     contentDescription = "End call"
                 )

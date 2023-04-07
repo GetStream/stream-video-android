@@ -36,6 +36,8 @@ android {
         minSdk = Configuration.minSdk
     }
 
+    resourcePrefix = "stream_video_"
+
     buildFeatures {
         viewBinding = true
     }

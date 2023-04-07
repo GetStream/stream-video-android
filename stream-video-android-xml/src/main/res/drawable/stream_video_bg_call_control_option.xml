@@ -21,11 +21,11 @@
     <item>
         <shape android:shape="oval">
             <size
-                android:width="@dimen/largeButtonSize"
-                android:height="@dimen/largeButtonSize"
+                android:width="@dimen/stream_video_largeButtonSize"
+                android:height="@dimen/stream_video_largeButtonSize"
                 />
 
-            <solid android:color="@color/stream_app_background" />
+            <solid android:color="@color/stream_video_app_background" />
         </shape>
     </item>
 

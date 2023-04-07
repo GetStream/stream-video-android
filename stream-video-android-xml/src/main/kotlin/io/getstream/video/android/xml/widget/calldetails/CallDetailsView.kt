@@ -64,8 +64,8 @@ public class CallDetailsView : ConstraintLayout {
      */
     public fun setCallStatus(callStatus: CallStatus) {
         binding.callStatus.text = when (callStatus) {
-            CallStatus.Incoming -> context.getString(RCommon.string.call_status_incoming)
-            CallStatus.Outgoing -> context.getString(RCommon.string.call_status_outgoing)
+            CallStatus.Incoming -> context.getString(RCommon.string.stream_video_call_status_incoming)
+            CallStatus.Outgoing -> context.getString(RCommon.string.stream_video_call_status_outgoing)
             is CallStatus.Calling -> callStatus.duration
         }
     }

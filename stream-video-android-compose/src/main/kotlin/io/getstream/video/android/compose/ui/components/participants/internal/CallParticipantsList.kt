@@ -119,7 +119,7 @@ private fun CallParticipantInfoItem(
         Row(verticalAlignment = Alignment.CenterVertically) {
             if (!participant.hasAudio) {
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_mic_off),
+                    painter = painterResource(id = R.drawable.stream_video_ic_mic_off),
                     tint = VideoTheme.colors.errorAccent,
                     contentDescription = null
                 )
@@ -129,7 +129,7 @@ private fun CallParticipantInfoItem(
 
             if (!participant.hasVideo) {
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_videocam_off),
+                    painter = painterResource(id = R.drawable.stream_video_ic_videocam_off),
                     tint = VideoTheme.colors.errorAccent,
                     contentDescription = null
                 )
@@ -139,7 +139,7 @@ private fun CallParticipantInfoItem(
 
             Icon(
                 modifier = Modifier.clickable { onUserOptionsSelected(participant) },
-                painter = painterResource(id = R.drawable.ic_options),
+                painter = painterResource(id = R.drawable.stream_video_ic_options),
                 tint = VideoTheme.colors.textHighEmphasis,
                 contentDescription = null
             )

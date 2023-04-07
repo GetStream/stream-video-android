@@ -18,7 +18,7 @@
 
     <stroke
         android:width="3dp"
-        android:color="@color/stream_info_accent"
+        android:color="@color/stream_video_info_accent"
         />
 
 </shape>
