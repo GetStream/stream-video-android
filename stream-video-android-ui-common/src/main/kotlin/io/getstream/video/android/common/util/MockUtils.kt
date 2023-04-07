@@ -96,5 +96,33 @@ public val mockUsers: List<CallParticipantState>
             isOnline = true,
             connectionQuality = ConnectionQuality.CONNECTION_QUALITY_GOOD,
             publishedTracks = setOf(TrackType.TRACK_TYPE_VIDEO)
+        ),
+        CallParticipantState(
+            id = "willard",
+            name = "Willard Hessel",
+            profileImageURL = "https://getstream.io/chat/docs/sdk/avatars/jpg/Willard%20Hessel.jpg",
+            idPrefix = "",
+            role = "",
+            sessionId = "",
+            videoTrack = mockVideoTrack,
+            isLocal = false,
+            isSpeaking = false,
+            isOnline = true,
+            connectionQuality = ConnectionQuality.CONNECTION_QUALITY_GOOD,
+            publishedTracks = setOf(TrackType.TRACK_TYPE_VIDEO)
+        ),
+        CallParticipantState(
+            id = "blanche",
+            name = "Blanche Schoen",
+            profileImageURL = "https://getstream.io/chat/docs/sdk/avatars/jpg/Blanche%20Schoen.jpg",
+            idPrefix = "",
+            role = "",
+            sessionId = "",
+            videoTrack = mockVideoTrack,
+            isLocal = false,
+            isSpeaking = false,
+            isOnline = true,
+            connectionQuality = ConnectionQuality.CONNECTION_QUALITY_GOOD,
+            publishedTracks = setOf(TrackType.TRACK_TYPE_VIDEO)
         )
     )
