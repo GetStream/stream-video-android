@@ -267,6 +267,50 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
     }
 
     @Test
+    fun `snapshot PortraitParticipants5 composable`() {
+        snapshot {
+            val configuration = LocalConfiguration.current
+            val screenWidth = configuration.screenWidthDp
+            val screenHeight = configuration.screenHeightDp
+
+            Box(
+                modifier = Modifier.background(color = VideoTheme.colors.appBackground)
+            ) {
+                PortraitParticipants(
+                    call = null,
+                    primarySpeaker = mockParticipantList[0],
+                    callParticipants = mockParticipantList.take(5),
+                    modifier = Modifier.fillMaxSize(),
+                    paddingValues = PaddingValues(0.dp),
+                    parentSize = IntSize(screenWidth, screenHeight)
+                ) {}
+            }
+        }
+    }
+
+    @Test
+    fun `snapshot PortraitParticipants6 composable`() {
+        snapshot {
+            val configuration = LocalConfiguration.current
+            val screenWidth = configuration.screenWidthDp
+            val screenHeight = configuration.screenHeightDp
+
+            Box(
+                modifier = Modifier.background(color = VideoTheme.colors.appBackground)
+            ) {
+                PortraitParticipants(
+                    call = null,
+                    primarySpeaker = mockParticipantList[0],
+                    callParticipants = mockParticipantList.take(6),
+                    modifier = Modifier.fillMaxSize(),
+                    paddingValues = PaddingValues(0.dp),
+                    parentSize = IntSize(screenWidth, screenHeight)
+                ) {}
+            }
+        }
+    }
+
+    @Test
     fun `snapshot PortraitScreenSharingContent composable`() {
         snapshot {
             PortraitScreenSharingContent(
