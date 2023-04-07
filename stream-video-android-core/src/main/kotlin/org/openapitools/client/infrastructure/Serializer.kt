@@ -2,6 +2,7 @@ package org.openapitools.client.infrastructure
 
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import org.openapitools.client.models.WSEventAdapter
 
 object Serializer {
     @JvmStatic
@@ -14,6 +15,7 @@ object Serializer {
         .add(URIAdapter())
         .add(KotlinJsonAdapterFactory())
         .add(BigDecimalAdapter())
+        .add(WSEventAdapter())
         .add(BigIntegerAdapter())
 
     @JvmStatic

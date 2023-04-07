@@ -37,7 +37,6 @@ import com.squareup.moshi.Json
  * @param teams 
  */
 
-
 data class OwnUserResponse (
 
     @Json(name = "created_at")

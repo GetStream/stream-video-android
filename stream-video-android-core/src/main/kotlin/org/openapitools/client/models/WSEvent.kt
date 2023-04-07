@@ -46,6 +46,7 @@ import org.openapitools.client.models.WSConnectedEvent
 
 import com.squareup.moshi.*
 import org.json.JSONObject
+import org.openapitools.client.infrastructure.Serializer
 
 /**
  * The discriminator object for all websocket events, you should use this to map event payloads to their own type
@@ -57,28 +58,27 @@ public sealed class WSEvent {
 }
 
 class WSEventAdapter : JsonAdapter<WSEvent>() {
-    private val moshi = Moshi.Builder().build()
-
 
     @FromJson
     override fun fromJson(reader: JsonReader): WSEvent? {
-
+        val peek = reader.peekJson()
+        // find the type field
         var eventType: String? = null
-
+        // we start the object {
         reader.beginObject()
+        // and get the nextName. Type in this case
         while (reader.hasNext()) {
             if (reader.nextName() == "type") {
                 eventType = reader.nextString()
-                break
             } else {
                 reader.skipValue()
             }
         }
         reader.endObject()
 
-        reader.peekJson().use { peekedReader ->
+        peek.use { peekedReader ->
             return when (eventType) {
-                "connection.ok" -> moshi.adapter(WSConnectedEvent::class.java).fromJson(peekedReader)
+                "connection.ok" -> Serializer.moshi.adapter(WSConnectedEvent::class.java).fromJson(peekedReader)
                 else -> throw IllegalArgumentException("Unknown eventType type: $eventType")
             }
         }

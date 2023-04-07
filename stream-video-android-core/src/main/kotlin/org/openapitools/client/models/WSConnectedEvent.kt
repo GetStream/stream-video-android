@@ -31,7 +31,6 @@ import com.squareup.moshi.Json
  * @param type The type of event: \"connection.ok\" in this case
  */
 
-
 data class WSConnectedEvent (
 
     /* The connection_id for this client */

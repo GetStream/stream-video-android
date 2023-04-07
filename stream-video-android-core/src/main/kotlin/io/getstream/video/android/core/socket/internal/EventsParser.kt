@@ -32,6 +32,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import okhttp3.Response
 import okhttp3.WebSocket
+import org.openapitools.client.infrastructure.Serializer
 import org.openapitools.client.models.WSEvent
 import org.openapitools.client.models.WSEventAdapter
 
@@ -61,7 +62,8 @@ internal class EventsParser(
 
             val eventType = EventType.from(data["type"]?.jsonPrimitive?.content ?: return)
 
-            val moshi = Moshi.Builder().add(WSEventAdapter()).build()
+            val moshi = Serializer.moshi
+            //Moshi.Builder().add(WSEventAdapter()).build()
             val jsonAdapter = moshi.adapter(WSEvent::class.java)
             val processedEvent = jsonAdapter.fromJson(text) as VideoEvent
 
