@@ -24,7 +24,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.common.util.mockParticipant
 import io.getstream.video.android.common.util.mockParticipantList
 import io.getstream.video.android.common.util.mockVideoTrack
@@ -50,104 +49,86 @@ import io.getstream.video.android.core.model.CallStatus
 import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.core.model.toUser
-import org.junit.Rule
 import org.junit.Test
 
-internal class ParticipantsPortraitTest {
-
-    @get:Rule
-    val paparazzi = Paparazzi()
+internal class ParticipantsPortraitTest : BaseComposeTest() {
 
     @Test
     fun `snapshot ParticipantAvatars composable`() {
-        paparazzi.snapshot {
-            VideoTheme {
-                ParticipantAvatars(participants = mockParticipantList)
-            }
+        snapshotWithDarkMode {
+            ParticipantAvatars(participants = mockParticipantList)
         }
     }
 
     @Test
     fun `snapshot ParticipantInformation composable`() {
-        paparazzi.snapshot {
-            VideoTheme {
-                ParticipantInformation(
-                    callStatus = CallStatus.Incoming,
-                    participants = mockParticipantList.map {
-                        CallUser(
-                            id = it.id,
-                            name = it.name,
-                            role = it.role,
-                            state = null,
-                            imageUrl = it.profileImageURL ?: "",
-                            createdAt = null,
-                            updatedAt = null,
-                            teams = emptyList()
-                        )
-                    }
-                )
-            }
+        snapshotWithDarkMode {
+            ParticipantInformation(
+                callStatus = CallStatus.Incoming,
+                participants = mockParticipantList.map {
+                    CallUser(
+                        id = it.id,
+                        name = it.name,
+                        role = it.role,
+                        state = null,
+                        imageUrl = it.profileImageURL ?: "",
+                        createdAt = null,
+                        updatedAt = null,
+                        teams = emptyList()
+                    )
+                }
+            )
         }
     }
 
     @Test
     fun `snapshot InviteUserList composable`() {
-        paparazzi.snapshot {
-            VideoTheme {
-                InviteUserList(
-                    mockParticipantList.map { InviteUserItemState(it.toUser()) },
-                    onUserSelected = {}
-                )
-            }
+        snapshotWithDarkMode {
+            InviteUserList(
+                mockParticipantList.map { InviteUserItemState(it.toUser()) },
+                onUserSelected = {}
+            )
         }
     }
 
     @Test
     fun `snapshot CallParticipantsInfoOptions composable`() {
-        paparazzi.snapshot {
-            VideoTheme {
-                CallParticipantsInfoOptions(
-                    isCurrentUserMuted = false,
-                    onOptionSelected = { }
-                )
-            }
+        snapshotWithDarkMode {
+            CallParticipantsInfoOptions(
+                isCurrentUserMuted = false,
+                onOptionSelected = { }
+            )
         }
     }
 
     @Test
     fun `snapshot CallParticipantsInfoAppBar composable`() {
-        paparazzi.snapshot {
-            VideoTheme {
-                CallParticipantsInfoAppBar(
-                    numberOfParticipants = 10,
-                    infoStateMode = ParticipantList,
-                    onBackPressed = {}
-                ) {}
-            }
+        snapshotWithDarkMode {
+            CallParticipantsInfoAppBar(
+                numberOfParticipants = 10,
+                infoStateMode = ParticipantList,
+                onBackPressed = {}
+            ) {}
         }
     }
 
     @Test
     fun `snapshot CallParticipant composable`() {
-        paparazzi.snapshot {
-            VideoTheme {
-                CallParticipant(
-                    call = null,
-                    participant = mockParticipant
-                )
-            }
+        snapshot {
+            CallParticipant(
+                call = null,
+                participant = mockParticipant
+            )
         }
     }
 
     @Test
     fun `snapshot ParticipantVideo composable`() {
         paparazzi.snapshot {
-            VideoTheme {
-                ParticipantVideo(
-                    call = null,
-                    participant = mockParticipant
-                ) {}
-            }
+            ParticipantVideo(
+                call = null,
+                participant = mockParticipant
+            ) {}
         }
     }
 
