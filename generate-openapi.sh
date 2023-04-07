@@ -41,7 +41,14 @@ else
   git clone git@github.com:GetStream/protocol.git "$PROTOCOL_ROOT"
 fi
 
-openapi-generator generate -i "$PROTOCOL_ROOT/openapi/video-openapi.yaml" -g kotlin -o "$GENERATED_CODE_ROOT" --additional-properties=library=jvm-retrofit2,useCoroutines --skip-validate-spec
+echo $GENERATED_CODE_ROOT_TEMP
+#openapi-generator generate -i "$PROTOCOL_ROOT/openapi/video-openapi.yaml" -g kotlin -o "$GENERATED_CODE_ROOT" --additional-properties=library=jvm-retrofit2,useCoroutines --skip-validate-spec
+#docker pull ghcr.io/getstream/openapi-generator:master
+docker run --rm -v "${$PROTOCOL_ROOT}:/local" ghcr.io/getstream/openapi-generator:master generate \
+   -i https://raw.githubusercontent.com/GetStream/protocol/main/openapi/video-openapi.yaml \
+   --additional-properties=library=jvm-retrofit2,useCoroutines \
+   -g kotlin \
+   -o /local/src/gen/kt
 
 CLIENT_ROOT="$GENERATED_CODE_ROOT/src/main/kotlin/org/openapitools/client"
 APIS_ROOT="$CLIENT_ROOT/apis"

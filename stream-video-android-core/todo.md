@@ -146,6 +146,8 @@
 - Participant count (for livestreams you cant rely on the list)
 - Participant.online field is weird. Aren't you always online as a participant?
 - ConnectionQualityInfo is a list, audio levels is a map. Lets standardize
+- Push setup
+- Listening to events for a list of calls
 
 ### Available tasks up for grabs
 
