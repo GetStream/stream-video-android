@@ -62,6 +62,7 @@ public data class StreamColors(
     public val connectionQualityBackground: Color,
     public val connectionQualityBar: Color,
     public val connectionQualityBarFilled: Color,
+    public val participantLabelBackground: Color,
     public val infoMenuOverlayColor: Color,
     public val callFocusedBorder: Color,
 ) {
@@ -94,6 +95,7 @@ public data class StreamColors(
             connectionQualityBackground = colorResource(id = R.color.stream_video_connection_quality_background),
             connectionQualityBarFilled = colorResource(id = R.color.stream_video_primary_accent),
             connectionQualityBar = colorResource(id = R.color.stream_video_connection_quality_bar_background),
+            participantLabelBackground = colorResource(id = R.color.stream_video_participant_label_background),
             infoMenuOverlayColor = Color.LightGray.copy(alpha = 0.7f),
             callFocusedBorder = colorResource(id = R.color.stream_video_focused_border_color),
         )
@@ -125,6 +127,7 @@ public data class StreamColors(
             connectionQualityBackground = colorResource(id = R.color.stream_video_connection_quality_background),
             connectionQualityBarFilled = colorResource(id = R.color.stream_video_primary_accent),
             connectionQualityBar = colorResource(id = R.color.stream_video_connection_quality_bar_background),
+            participantLabelBackground = colorResource(id = R.color.stream_video_participant_label_background),
             infoMenuOverlayColor = Color.LightGray.copy(alpha = 0.7f),
             callFocusedBorder = colorResource(id = R.color.stream_video_focused_border_color),
         )

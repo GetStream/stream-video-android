@@ -37,16 +37,19 @@ import androidx.compose.ui.Alignment.Companion.BottomEnd
 import androidx.compose.ui.Alignment.Companion.BottomStart
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.common.model.getSoundIndicatorState
 import io.getstream.video.android.common.util.mockVideoTrack
+import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.audio.SoundIndicator
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
@@ -76,6 +79,7 @@ public fun CallParticipant(
     paddingValues: PaddingValues = PaddingValues(0.dp),
     labelPosition: Alignment = BottomStart,
     isFocused: Boolean = false,
+    isShowConnectionQualityIndicator: Boolean = true,
     onRender: (View) -> Unit = {}
 ) {
     val containerModifier = if (isFocused) modifier.border(
@@ -85,24 +89,16 @@ public fun CallParticipant(
     ) else modifier
 
     Box(modifier = containerModifier.padding(paddingValues)) {
-        ParticipantVideo(
-            call = call, participant = participant, onRender = onRender
-        )
+        ParticipantVideo(call = call, participant = participant, onRender = onRender)
 
-        if (!participant.isLocal) {
-            ParticipantLabel(participant, labelPosition)
+        ParticipantLabel(participant, labelPosition)
+
+        if (isShowConnectionQualityIndicator) {
+            ConnectionQualityIndicator(
+                connectionQuality = participant.connectionQuality,
+                modifier = Modifier.align(BottomEnd)
+            )
         }
-
-        val connectionIndicatorAlignment = if (participant.isLocal) {
-            BottomStart
-        } else {
-            BottomEnd
-        }
-
-        ConnectionQualityIndicator(
-            connectionQuality = participant.connectionQuality,
-            modifier = Modifier.align(connectionIndicatorAlignment)
-        )
     }
 }
 
@@ -153,43 +149,49 @@ internal fun ParticipantVideo(
 }
 
 @Composable
-private fun BoxScope.ParticipantLabel(
+internal fun BoxScope.ParticipantLabel(
     participant: CallParticipantState,
     labelPosition: Alignment
 ) {
+    val nameLabel = if (participant.isLocal) {
+        stringResource(id = io.getstream.video.android.ui.common.R.string.stream_video_myself)
+    } else {
+        participant.name.ifEmpty { participant.id }
+    }
+
     Row(
         modifier = Modifier
             .align(labelPosition)
             .padding(VideoTheme.dimens.callParticipantLabelPadding)
             .height(VideoTheme.dimens.callParticipantLabelHeight)
             .wrapContentWidth()
+            .clip(RoundedCornerShape(8.dp))
             .background(
-                Color.DarkGray, shape = RoundedCornerShape(8.dp)
+                VideoTheme.colors.participantLabelBackground,
+                shape = RoundedCornerShape(8.dp)
             ),
         verticalAlignment = CenterVertically,
     ) {
-        SoundIndicator(
-            state = getSoundIndicatorState(
-                hasAudio = participant.hasAudio, isSpeaking = participant.isSpeaking
-            ),
-            modifier = Modifier
-                .align(CenterVertically)
-                .padding(start = VideoTheme.dimens.callParticipantSoundIndicatorPaddingStart)
-        )
-
-        val name = participant.name.ifEmpty {
-            participant.id
-        }
         Text(
             modifier = Modifier
                 .widthIn(max = VideoTheme.dimens.callParticipantLabelTextMaxWidth)
-                .padding(horizontal = VideoTheme.dimens.callParticipantLabelTextPadding)
+                .padding(start = VideoTheme.dimens.callParticipantLabelTextPaddingStart)
                 .align(CenterVertically),
-            text = name,
+            text = nameLabel,
             style = VideoTheme.typography.body,
             color = Color.White,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
+        )
+
+        SoundIndicator(
+            state = getSoundIndicatorState(
+                hasAudio = participant.hasAudio,
+                isSpeaking = participant.isSpeaking
+            ),
+            modifier = Modifier
+                .align(CenterVertically)
+                .padding(horizontal = VideoTheme.dimens.callParticipantSoundIndicatorPadding)
         )
     }
 }
@@ -205,6 +207,21 @@ private fun CallParticipantPreview(
             participant = callParticipants[1],
             isFocused = true
         )
+    }
+}
+
+@Preview
+@Composable
+private fun ParticipantLabelPreview(
+    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<CallParticipantState>
+) {
+    VideoTheme {
+        Box {
+            ParticipantLabel(
+                participant = callParticipants[1],
+                BottomStart,
+            )
+        }
     }
 }
 

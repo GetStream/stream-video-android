@@ -19,6 +19,7 @@ package io.getstream.video.android.common.util
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.model.CallParticipantState
 import org.webrtc.VideoTrack
+import stream.video.sfu.models.ConnectionQuality
 import stream.video.sfu.models.TrackType
 import java.util.UUID
 
@@ -50,7 +51,8 @@ public val mockUsers: List<CallParticipantState>
             videoTrack = mockVideoTrack,
             isLocal = true,
             isSpeaking = true,
-            publishedTracks = setOf(TrackType.TRACK_TYPE_VIDEO)
+            connectionQuality = ConnectionQuality.CONNECTION_QUALITY_GOOD,
+            publishedTracks = setOf(TrackType.TRACK_TYPE_VIDEO, TrackType.TRACK_TYPE_AUDIO)
         ),
         CallParticipantState(
             id = "jaewoong",
@@ -61,8 +63,9 @@ public val mockUsers: List<CallParticipantState>
             sessionId = "",
             videoTrack = mockVideoTrack,
             isLocal = false,
-            isSpeaking = false,
-            publishedTracks = setOf(TrackType.TRACK_TYPE_VIDEO)
+            isSpeaking = true,
+            connectionQuality = ConnectionQuality.CONNECTION_QUALITY_GOOD,
+            publishedTracks = setOf(TrackType.TRACK_TYPE_VIDEO, TrackType.TRACK_TYPE_AUDIO)
         ),
         CallParticipantState(
             id = "toma_zdravkovic",
@@ -74,7 +77,8 @@ public val mockUsers: List<CallParticipantState>
             videoTrack = mockVideoTrack,
             isLocal = false,
             isSpeaking = false,
-            publishedTracks = setOf(TrackType.TRACK_TYPE_VIDEO)
+            connectionQuality = ConnectionQuality.CONNECTION_QUALITY_GOOD,
+            publishedTracks = setOf(TrackType.TRACK_TYPE_VIDEO, TrackType.TRACK_TYPE_AUDIO)
         ),
         CallParticipantState(
             id = "tyrone_bailey",
@@ -86,6 +90,7 @@ public val mockUsers: List<CallParticipantState>
             videoTrack = mockVideoTrack,
             isLocal = false,
             isSpeaking = false,
+            connectionQuality = ConnectionQuality.CONNECTION_QUALITY_GOOD,
             publishedTracks = setOf(TrackType.TRACK_TYPE_VIDEO)
         )
     )

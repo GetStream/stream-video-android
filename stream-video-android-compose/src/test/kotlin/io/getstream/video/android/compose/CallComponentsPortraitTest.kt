@@ -21,11 +21,9 @@ import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.call.controls.CallControls
 import io.getstream.video.android.compose.ui.components.call.controls.internal.RegularCallControls
-import io.getstream.video.android.compose.ui.components.connection.ConnectionQualityIndicator
 import io.getstream.video.android.core.call.state.CallMediaState
 import org.junit.Rule
 import org.junit.Test
-import stream.video.sfu.models.ConnectionQuality
 
 internal class CallComponentsPortraitTest : BaseComposeTest() {
 
@@ -56,15 +54,6 @@ internal class CallComponentsPortraitTest : BaseComposeTest() {
             CallControls(
                 callMediaState = CallMediaState(), isScreenSharing = false
             ) {}
-        }
-    }
-
-    @Test
-    fun `snapshot Connection ConnectionQualityIndicator composable`() {
-        snapshotWithDarkMode {
-            ConnectionQualityIndicator(
-                connectionQuality = ConnectionQuality.CONNECTION_QUALITY_GOOD
-            )
         }
     }
 }

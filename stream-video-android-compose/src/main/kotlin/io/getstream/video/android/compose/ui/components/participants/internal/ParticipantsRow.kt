@@ -52,7 +52,7 @@ internal fun ParticipantsRow(
         horizontalArrangement = Arrangement.spacedBy(VideoTheme.dimens.screenShareParticipantsListItemMargin),
         verticalAlignment = Alignment.CenterVertically,
         content = {
-            items(participants) { participant ->
+            items(items = participants, key = { it.id }) { participant ->
                 ParticipantListItem(call, participant)
             }
         }
@@ -76,7 +76,8 @@ private fun ParticipantListItem(
             .clip(RoundedCornerShape(VideoTheme.dimens.screenShareParticipantsRadius)),
         call = call,
         participant = participant,
-        labelPosition = Alignment.BottomStart
+        labelPosition = Alignment.BottomStart,
+        isShowConnectionQualityIndicator = false
     )
 }
 

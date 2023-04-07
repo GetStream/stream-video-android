@@ -16,15 +16,21 @@
 
 package io.getstream.video.android.compose
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.Alignment
 import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.common.model.Speaking
+import io.getstream.video.android.common.util.mockParticipantList
 import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.ui.components.audio.ActiveSoundLevels
 import io.getstream.video.android.compose.ui.components.audio.SoundIndicator
+import io.getstream.video.android.compose.ui.components.connection.ConnectionQualityIndicator
+import io.getstream.video.android.compose.ui.components.participants.ParticipantLabel
 import org.junit.Rule
 import org.junit.Test
+import stream.video.sfu.models.ConnectionQuality
 
-internal class AudioTest : BaseComposeTest() {
+internal class IndicatorsTest : BaseComposeTest() {
 
     @get:Rule
     val paparazzi = Paparazzi()
@@ -42,6 +48,27 @@ internal class AudioTest : BaseComposeTest() {
     fun `snapshot ActiveSoundLevels composable`() {
         snapshot {
             ActiveSoundLevels()
+        }
+    }
+
+    @Test
+    fun `snapshot Connection ConnectionQualityIndicator composable`() {
+        snapshotWithDarkMode {
+            ConnectionQualityIndicator(
+                connectionQuality = ConnectionQuality.CONNECTION_QUALITY_GOOD
+            )
+        }
+    }
+
+    @Test
+    fun `snapshot Connection ParticipantLabel composable`() {
+        snapshotWithDarkMode {
+            Box {
+                ParticipantLabel(
+                    participant = mockParticipantList[1],
+                    Alignment.BottomStart,
+                )
+            }
         }
     }
 }
