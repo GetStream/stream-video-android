@@ -271,6 +271,7 @@ class LoginActivity : ComponentActivity() {
                 token,
                 authUser?.photoUrl?.toString() ?: "",
                 emptyList(),
+                true,
                 emptyMap()
             )
 

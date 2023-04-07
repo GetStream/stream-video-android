@@ -429,8 +429,22 @@ public final class io/getstream/video/android/compose/ui/components/avatar/Compo
 	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
 }
 
+public final class io/getstream/video/android/compose/ui/components/avatar/OnlineIndicatorAlignment : java/lang/Enum {
+	public static final field BottomEnd Lio/getstream/video/android/compose/ui/components/avatar/OnlineIndicatorAlignment;
+	public static final field BottomStart Lio/getstream/video/android/compose/ui/components/avatar/OnlineIndicatorAlignment;
+	public static final field TopEnd Lio/getstream/video/android/compose/ui/components/avatar/OnlineIndicatorAlignment;
+	public static final field TopStart Lio/getstream/video/android/compose/ui/components/avatar/OnlineIndicatorAlignment;
+	public final fun getAlignment ()Landroidx/compose/ui/Alignment;
+	public static fun valueOf (Ljava/lang/String;)Lio/getstream/video/android/compose/ui/components/avatar/OnlineIndicatorAlignment;
+	public static fun values ()[Lio/getstream/video/android/compose/ui/components/avatar/OnlineIndicatorAlignment;
+}
+
+public final class io/getstream/video/android/compose/ui/components/avatar/OnlineIndicatorKt {
+	public static final fun OnlineIndicator (Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+}
+
 public final class io/getstream/video/android/compose/ui/components/avatar/UserAvatarKt {
-	public static final fun UserAvatar-ymGmgjM (Lio/getstream/video/android/core/model/User;Landroidx/compose/ui/Modifier;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/layout/ContentScale;Ljava/lang/String;JLjava/lang/Integer;IJLkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;III)V
+	public static final fun UserAvatar-VcqPlDs (Lio/getstream/video/android/core/model/User;Landroidx/compose/ui/Modifier;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/layout/ContentScale;Ljava/lang/String;JLjava/lang/Integer;IZLio/getstream/video/android/compose/ui/components/avatar/OnlineIndicatorAlignment;JLkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;III)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/background/CallBackgroundKt {

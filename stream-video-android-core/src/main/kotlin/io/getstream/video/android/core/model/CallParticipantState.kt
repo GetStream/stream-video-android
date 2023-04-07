@@ -57,6 +57,7 @@ public fun CallParticipantState.toUser(): User {
         token = "",
         imageUrl = profileImageURL,
         teams = emptyList(),
+        isOnline = isOnline,
         extraData = emptyMap()
     )
 }

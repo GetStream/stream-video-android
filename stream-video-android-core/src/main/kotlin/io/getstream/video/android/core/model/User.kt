@@ -26,6 +26,7 @@ public data class User(
     val token: String,
     val imageUrl: String?,
     val teams: List<String>,
+    val isOnline: Boolean = false,
     val extraData: Map<String, String>
 ) {
     public fun isValid(): Boolean {

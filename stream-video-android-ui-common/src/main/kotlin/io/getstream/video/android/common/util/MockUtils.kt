@@ -51,6 +51,7 @@ public val mockUsers: List<CallParticipantState>
             videoTrack = mockVideoTrack,
             isLocal = true,
             isSpeaking = true,
+            isOnline = true,
             connectionQuality = ConnectionQuality.CONNECTION_QUALITY_GOOD,
             publishedTracks = setOf(TrackType.TRACK_TYPE_VIDEO, TrackType.TRACK_TYPE_AUDIO)
         ),
@@ -64,6 +65,7 @@ public val mockUsers: List<CallParticipantState>
             videoTrack = mockVideoTrack,
             isLocal = false,
             isSpeaking = true,
+            isOnline = true,
             connectionQuality = ConnectionQuality.CONNECTION_QUALITY_GOOD,
             publishedTracks = setOf(TrackType.TRACK_TYPE_VIDEO, TrackType.TRACK_TYPE_AUDIO)
         ),
@@ -77,6 +79,7 @@ public val mockUsers: List<CallParticipantState>
             videoTrack = mockVideoTrack,
             isLocal = false,
             isSpeaking = false,
+            isOnline = true,
             connectionQuality = ConnectionQuality.CONNECTION_QUALITY_GOOD,
             publishedTracks = setOf(TrackType.TRACK_TYPE_VIDEO, TrackType.TRACK_TYPE_AUDIO)
         ),
@@ -90,6 +93,7 @@ public val mockUsers: List<CallParticipantState>
             videoTrack = mockVideoTrack,
             isLocal = false,
             isSpeaking = false,
+            isOnline = true,
             connectionQuality = ConnectionQuality.CONNECTION_QUALITY_GOOD,
             publishedTracks = setOf(TrackType.TRACK_TYPE_VIDEO)
         )
