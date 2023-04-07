@@ -17,6 +17,7 @@
 package io.getstream.video.android.compose.base
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.runtime.Composable
 import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -37,6 +38,15 @@ internal abstract class BaseComposeTest {
     fun snapshotWithDarkMode(composable: @Composable () -> Unit) {
         basePaparazzi().snapshot {
             Column {
+                VideoTheme(isInDarkMode = true) { composable.invoke() }
+                VideoTheme(isInDarkMode = false) { composable.invoke() }
+            }
+        }
+    }
+
+    fun snapshotWithDarkModeRow(composable: @Composable () -> Unit) {
+        basePaparazzi().snapshot {
+            Row {
                 VideoTheme(isInDarkMode = true) { composable.invoke() }
                 VideoTheme(isInDarkMode = false) { composable.invoke() }
             }

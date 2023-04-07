@@ -16,16 +16,23 @@
 
 package io.getstream.video.android.compose
 
-import io.getstream.video.android.compose.base.BasePortraitComposeTest
+import app.cash.paparazzi.Paparazzi
+import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.call.controls.CallControls
 import io.getstream.video.android.compose.ui.components.call.controls.internal.RegularCallControls
 import io.getstream.video.android.compose.ui.components.connection.ConnectionQualityIndicator
 import io.getstream.video.android.core.call.state.CallMediaState
+import org.junit.Rule
 import org.junit.Test
 import stream.video.sfu.models.ConnectionQuality
 
-internal class CallComponentsPortraitTest : BasePortraitComposeTest() {
+internal class CallComponentsPortraitTest : BaseComposeTest() {
+
+    @get:Rule
+    val paparazzi = Paparazzi()
+
+    override fun basePaparazzi(): Paparazzi = paparazzi
 
     @Test
     fun `snapshot CallAppBar composable`() {

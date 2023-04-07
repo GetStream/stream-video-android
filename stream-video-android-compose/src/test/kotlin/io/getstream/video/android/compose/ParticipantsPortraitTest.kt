@@ -24,10 +24,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.common.util.mockParticipant
 import io.getstream.video.android.common.util.mockParticipantList
 import io.getstream.video.android.common.util.mockVideoTrack
-import io.getstream.video.android.compose.base.BasePortraitComposeTest
+import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.state.ui.internal.InviteUserItemState
 import io.getstream.video.android.compose.state.ui.internal.ParticipantList
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -50,9 +51,15 @@ import io.getstream.video.android.core.model.CallStatus
 import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.core.model.toUser
+import org.junit.Rule
 import org.junit.Test
 
-internal class ParticipantsPortraitTest : BasePortraitComposeTest() {
+internal class ParticipantsPortraitTest : BaseComposeTest() {
+
+    @get:Rule
+    val paparazzi = Paparazzi()
+
+    override fun basePaparazzi(): Paparazzi = paparazzi
 
     @Test
     fun `snapshot ParticipantAvatars composable`() {
@@ -293,7 +300,7 @@ internal class ParticipantsPortraitTest : BasePortraitComposeTest() {
 
     @Test
     fun `snapshot ParticipantsColumn composable`() {
-        snapshotWithDarkMode {
+        snapshotWithDarkModeRow {
             ParticipantsColumn(
                 call = null,
                 participants = mockParticipantList

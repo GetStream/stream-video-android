@@ -19,14 +19,21 @@ package io.getstream.video.android.compose
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.common.util.mockParticipant
-import io.getstream.video.android.compose.base.BasePortraitComposeTest
+import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.ui.components.avatar.Avatar
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.core.model.toUser
+import org.junit.Rule
 import org.junit.Test
 
-internal class AvatarTest : BasePortraitComposeTest() {
+internal class AvatarTest : BaseComposeTest() {
+
+    @get:Rule
+    val paparazzi = Paparazzi()
+
+    override fun basePaparazzi(): Paparazzi = paparazzi
 
     @Test
     fun `snapshot AvatarInitial composable`() {

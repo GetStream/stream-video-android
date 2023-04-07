@@ -16,13 +16,20 @@
 
 package io.getstream.video.android.compose
 
+import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.common.model.Speaking
-import io.getstream.video.android.compose.base.BasePortraitComposeTest
+import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.ui.components.audio.ActiveSoundLevels
 import io.getstream.video.android.compose.ui.components.audio.SoundIndicator
+import org.junit.Rule
 import org.junit.Test
 
-internal class AudioTest : BasePortraitComposeTest() {
+internal class AudioTest : BaseComposeTest() {
+
+    @get:Rule
+    val paparazzi = Paparazzi()
+
+    override fun basePaparazzi(): Paparazzi = paparazzi
 
     @Test
     fun `snapshot SoundIndicator composable`() {
@@ -33,7 +40,7 @@ internal class AudioTest : BasePortraitComposeTest() {
 
     @Test
     fun `snapshot ActiveSoundLevels composable`() {
-        snapshotWithDarkMode {
+        snapshot {
             ActiveSoundLevels()
         }
     }

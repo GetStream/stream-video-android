@@ -16,16 +16,24 @@
 
 package io.getstream.video.android.compose
 
-import io.getstream.video.android.compose.base.BaseLandscapeComposeTest
+import app.cash.paparazzi.DeviceConfig
+import app.cash.paparazzi.Paparazzi
+import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.ui.components.call.controls.internal.LandscapeCallControls
 import io.getstream.video.android.core.call.state.CallMediaState
+import org.junit.Rule
 import org.junit.Test
 
-internal class CallComponentsLandscapeTest : BaseLandscapeComposeTest() {
+internal class CallComponentsLandscapeTest : BaseComposeTest() {
+
+    @get:Rule
+    val paparazziLandscape = Paparazzi(deviceConfig = DeviceConfig.NEXUS_5_LAND)
+
+    override fun basePaparazzi(): Paparazzi = paparazziLandscape
 
     @Test
     fun `snapshot LandscapeCallControls composable`() {
-        snapshotWithDarkMode {
+        snapshot {
             LandscapeCallControls(
                 callMediaState = CallMediaState(), isScreenSharing = false
             ) {}

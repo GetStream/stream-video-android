@@ -24,19 +24,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import app.cash.paparazzi.DeviceConfig
+import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.common.util.mockParticipant
 import io.getstream.video.android.common.util.mockParticipantList
 import io.getstream.video.android.common.util.mockVideoTrack
-import io.getstream.video.android.compose.base.BaseLandscapeComposeTest
+import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.controls.internal.DefaultCallControlsContent
 import io.getstream.video.android.compose.ui.components.participants.internal.LandscapeParticipants
 import io.getstream.video.android.compose.ui.components.participants.internal.LandscapeScreenSharingContent
 import io.getstream.video.android.core.call.state.CallMediaState
 import io.getstream.video.android.core.model.ScreenSharingSession
+import org.junit.Rule
 import org.junit.Test
 
-internal class ParticipantLandscapeTest : BaseLandscapeComposeTest() {
+internal class ParticipantLandscapeTest : BaseComposeTest() {
+
+    @get:Rule
+    val paparazziLandscape = Paparazzi(deviceConfig = DeviceConfig.NEXUS_5_LAND)
+
+    override fun basePaparazzi(): Paparazzi = paparazziLandscape
 
     @Test
     fun `snapshot LandscapeParticipants1 composable`() {

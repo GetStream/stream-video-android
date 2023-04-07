@@ -18,9 +18,10 @@ package io.getstream.video.android.compose
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
+import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.common.util.mockParticipant
 import io.getstream.video.android.common.util.mockParticipantList
-import io.getstream.video.android.compose.base.BasePortraitComposeTest
+import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.ui.components.call.incomingcall.IncomingCallContent
 import io.getstream.video.android.compose.ui.components.call.incomingcall.internal.IncomingCallDetails
 import io.getstream.video.android.compose.ui.components.call.incomingcall.internal.IncomingCallOptions
@@ -31,11 +32,17 @@ import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.call.state.CallMediaState
 import io.getstream.video.android.core.model.CallType
 import io.getstream.video.android.core.model.CallUser
+import org.junit.Rule
 import org.junit.Test
 import org.webrtc.VideoTrack
 import stream.video.sfu.models.TrackType
 
-internal class CallContentTest : BasePortraitComposeTest() {
+internal class CallContentTest : BaseComposeTest() {
+
+    @get:Rule
+    val paparazzi = Paparazzi()
+
+    override fun basePaparazzi(): Paparazzi = paparazzi
 
     @Test
     fun `snapshot VideoRenderer composable`() {
