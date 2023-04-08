@@ -49,6 +49,8 @@ truth = "1.1.3"
 mockk = "1.13.4"
 kotlinTestJunit = "1.8.20"
 
+desugar = "1.2.2"
+
 leakCanary = "2.10"
 
 [libraries]
@@ -79,6 +81,8 @@ androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "u
 androidx-compose-tracing = { group = "androidx.compose.runtime", name = "runtime-tracing", version.ref = "androidxComposeTracing" }
 
 coil = { group = "io.coil-kt", name = "coil", version.ref = "coil" }
+desugar = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "desugar" }
+
 landscapist-coil = { group = "com.github.skydoves", name = "landscapist-coil", version.ref = "landscapist" }
 landscapist-animation = { group = "com.github.skydoves", name = "landscapist-animation", version.ref = "landscapist" }
 landscapist-placeholder = { group = "com.github.skydoves", name = "landscapist-placeholder", version.ref = "landscapist" }
