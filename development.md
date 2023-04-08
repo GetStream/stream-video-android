@@ -102,8 +102,7 @@ Check the docs on TestBase, TestHelper and IntegrationTestBase for more utility 
 
 ## WebRTC layer
 
-* Ideally you setup your camera tracks and audio tracks before you join a call
-* Otherwise you end up joining and immediately triggering onNegotiationNeeded after that
+* RtcSession maintains all the tracks and the webrtc logic
 
 ### RTC offer/answer cycle
 

@@ -25,7 +25,6 @@ import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
-import io.getstream.video.android.core.call.SFUSession
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.getstream.video.android.core.events.CallCreatedEvent
 import io.getstream.video.android.core.events.ConnectedEvent
@@ -276,8 +275,6 @@ internal class StreamVideoImpl internal constructor(
                 }
             }
         )
-
-    private val SFUSessionHolder = MutableStateFlow<SFUSession?>(null)
 
     init {
         observeState()
@@ -956,20 +953,6 @@ internal class StreamVideoImpl internal constructor(
      * @return An instance of [SFUSession] ready to connect to a call. Make sure to call
      * [SFUSession.connectToCall] when you're ready to fully join a call.
      */
-
-    /**
-     * @see StreamVideo.getActiveCallClient
-     */
-    override fun getActiveCallClient(): SFUSession? {
-        return SFUSessionHolder.value
-    }
-
-    /**
-     * @see StreamVideo.awaitCallClient
-     */
-    override suspend fun awaitCallClient(): SFUSession = withContext(scope.coroutineContext) {
-        SFUSessionHolder.first { it != null } ?: error("callClient must not be null")
-    }
 
     override suspend fun acceptCall(type: String, id: String) {
         TODO("Not yet implemented")

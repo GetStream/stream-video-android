@@ -133,7 +133,7 @@ class RtcSessionTest : IntegrationTestBase() {
         assertSuccess(joinResult)
         waitForNextEvent<SFUConnectedEvent>()
         Truth.assertThat(call.state.connection.value).isEqualTo(ConnectionState.Connected)
-        call.session?.publishVideo()
+       // call.session?.publishVideo()
     }
 
     @Test

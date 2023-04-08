@@ -123,7 +123,7 @@ public class RtcSession internal constructor(
     private val SFUToken: String,
     private val latencyResults: Map<String, List<Float>>,
     private val remoteIceServers: List<IceServer>,
-) : SFUSession, SfuSocketListener {
+) {
     private val context = client.context
     private val logger by taggedLogger("Call:ActiveSFUSession")
     private val clientImpl = client as StreamVideoImpl
@@ -246,6 +246,9 @@ public class RtcSession internal constructor(
 
     /**
     * A single media stream contains multiple tracks. We receive it from the subcriber peer connection
+     *
+     * Loop over the audio and video tracks
+     * Update the local tracks
      */
     internal fun addStream(mediaStream: MediaStream) {
 
@@ -260,8 +263,6 @@ public class RtcSession internal constructor(
             val wrappedTrack = TrackWrapper(mediaStream.id, audio=track)
             setTrack(sessionId, trackType, wrappedTrack)
         }
-
-        var screenSharingSession: ScreenSharingSession? = null
 
         if (trackPrefixToSessionIdMap.value[trackPrefix].isNullOrEmpty()) {
             logger.w { "[addStream] skipping unrecognized trackPrefix ${trackPrefix}" }
@@ -362,7 +363,7 @@ public class RtcSession internal constructor(
     private var isCapturingVideo: Boolean = false
     private var captureResolution: CameraEnumerationAndroid.CaptureFormat? = null
 
-    override fun clear() {
+    fun clear() {
         logger.i { "[clear] #sfu; no args" }
         supervisorJob.cancelChildren()
 
@@ -386,12 +387,12 @@ public class RtcSession internal constructor(
 
 
     /**
-     * TODO:
+     * TODO: Probably partially move this
      * - set the camera track enabled
      * - updateMuteStateRequest
      *
      */
-    override fun setCameraEnabled(isEnabled: Boolean) {
+    fun setCameraEnabled(isEnabled: Boolean) {
         logger.d { "[setCameraEnabled] #sfu; isEnabled: $isEnabled" }
 
         coroutineScope.launch {
@@ -417,7 +418,7 @@ public class RtcSession internal constructor(
         }
     }
 
-    override fun setMicrophoneEnabled(isEnabled: Boolean) {
+    fun setMicrophoneEnabled(isEnabled: Boolean) {
         logger.d { "[setMicrophoneEnabled] #sfu; isEnabled: $isEnabled" }
         coroutineScope.launch {
             val request = UpdateMuteStatesRequest(
@@ -831,14 +832,14 @@ public class RtcSession internal constructor(
     /**
      * @return [StateFlow] that holds [RTCStatsReport] that the publisher exposes.
      */
-    override fun getPublisherStats(): StateFlow<RTCStatsReport?> {
+    fun getPublisherStats(): StateFlow<RTCStatsReport?> {
         return publisher?.getStats() ?: MutableStateFlow(null)
     }
 
     /**
      * @return [StateFlow] that holds [RTCStatsReport] that the subscriber exposes.
      */
-    override fun getSubscriberStats(): StateFlow<RTCStatsReport?> {
+    fun getSubscriberStats(): StateFlow<RTCStatsReport?> {
         return subscriber?.getStats() ?: MutableStateFlow(null)
     }
 

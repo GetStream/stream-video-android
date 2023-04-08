@@ -18,7 +18,6 @@ package io.getstream.video.android.core
 
 import android.content.Context
 import io.getstream.result.Result
-import io.getstream.video.android.core.call.SFUSession
 import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.model.CallEventType
@@ -391,16 +390,6 @@ public interface StreamVideo {
      * Clears the internal user state, removes push notification devices and clears the call state.
      */
     public fun logOut()
-
-    /**
-     * Returns current [SFUSession] instance.
-     */
-    public fun getActiveCallClient(): SFUSession?
-
-    /**
-     * Awaits [SFUSession] creation.
-     */
-    public suspend fun awaitCallClient(): SFUSession
 
     /**
      * Accepts incoming call.

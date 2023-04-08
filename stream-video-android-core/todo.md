@@ -12,12 +12,8 @@ We're going to start simple.
 - Step 2: Upload local video to the SFU
 - Step 3: Join a call and render participants
 
-## Phase 2, find a way to make Call/SFUSession testable
-
-
-- MediaManager that has a dummy version of devices for test
-
-## Phase 3, Test using the UI
+RTCSession cleanup
+- review and maybe move setCameraEnabled and setMicrophoneEnabled
 
 - Token refresh flow
 - Cleanup the test suite

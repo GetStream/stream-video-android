@@ -19,7 +19,6 @@ package io.getstream.video.android.core
 import io.getstream.result.Result
 import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.User
-import io.getstream.video.android.core.model.VideoTrackWrapper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import stream.video.sfu.models.ConnectionQuality
@@ -47,18 +46,34 @@ public data class ParticipantState(
     val initialUser: User,
     /** If this participant is the you/ the local participant */
     val isLocal: Boolean = false,
-    /** video track and size */
-    var videoTrackWrapper: VideoTrackWrapper? = null,
     var videoTrackSize: Pair<Int, Int> = Pair(0, 0),
-    /** screen sharing track and size */
-    var screenSharingTrack: VideoTrackWrapper? = null,
     var screenSharingTrackSize: Pair<Int, Int> = Pair(0, 0),
-    /** all published tracks including audio */
-    var publishedTracks: Set<TrackType> = emptySet(),
     /** A prefix to identify tracks, internal */
     internal var trackLookupPrefix: String = "",
 
     ) {
+
+    /** video track */
+    val videoTrack by lazy {
+        videoTrackWrapped?.video
+    }
+    val videoTrackWrapped by lazy {
+        call.session?.getTrack(sessionId, TrackType.TRACK_TYPE_VIDEO)
+    }
+    val audioTrack by lazy {
+        audioTrackWrapped?.audio
+    }
+    val audioTrackWrapped by lazy {
+        call.session?.getTrack(sessionId, TrackType.TRACK_TYPE_AUDIO)
+    }
+    val screenSharingTrack by lazy {
+        screenSharingTrackWrapped?.video
+    }
+    val screenSharingTrackWrapped by lazy {
+        call.session?.getTrack(sessionId, TrackType.TRACK_TYPE_SCREEN_SHARE)
+    }
+
+
     /**
      * The user, automatically updates when we receive user events
      */
@@ -123,9 +138,7 @@ public data class ParticipantState(
     internal val _pinnedAt: MutableStateFlow<Date?> = MutableStateFlow(null)
     val pinnedAt: StateFlow<Date?> = _pinnedAt
 
-    open val audioTrack by lazy {
-        publishedTracks?.filter { it == TrackType.TRACK_TYPE_AUDIO }
-    }
+
 
     open suspend fun muteAudio(): Result<Unit> {
         // how do i mute another user?
@@ -157,6 +170,5 @@ public data class ParticipantState(
             role=participant.roles.firstOrNull() ?: ""
         )
 
-        publishedTracks = participant.published_tracks.toSet()
     }
 }

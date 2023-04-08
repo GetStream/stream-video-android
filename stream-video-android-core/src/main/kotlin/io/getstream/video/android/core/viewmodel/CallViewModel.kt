@@ -27,7 +27,6 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ConnectionState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoImpl
-import io.getstream.video.android.core.call.SFUSession
 import io.getstream.video.android.core.call.state.AcceptCall
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CallMediaState
@@ -191,7 +190,7 @@ public class CallViewModel(
             is ToggleSpeakerphone -> onSpeakerphoneChanged(callAction.isEnabled)
             is ToggleCamera -> onVideoChanged(callAction.isEnabled)
             is ToggleMicrophone -> onMicrophoneChanged(callAction.isEnabled)
-            is SelectAudioDevice -> call.session?.selectAudioDevice(callAction.audioDevice)
+           // is SelectAudioDevice -> call.session?.selectAudioDevice(callAction.audioDevice)
             FlipCamera -> flipCamera()
             CancelCall, LeaveCall -> call.leave()
             AcceptCall -> acceptCall()
@@ -208,6 +207,7 @@ public class CallViewModel(
             is CustomAction -> {
                 // custom actions
             }
+            else -> {}
         }
     }
 
@@ -263,7 +263,7 @@ public class CallViewModel(
 
     private fun onSpeakerphoneChanged(speakerPhoneEnabled: Boolean) {
         logger.d { "[onSpeakerphoneChanged] speakerPhoneEnabled: $speakerPhoneEnabled" }
-        call.session?.setSpeakerphoneEnabled(speakerPhoneEnabled)
+        //call.session?.setSpeakerphoneEnabled(speakerPhoneEnabled)
         isSpeakerPhoneEnabled.value = speakerPhoneEnabled
     }
 

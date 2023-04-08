@@ -40,7 +40,6 @@ import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.ParticipantJoinedEvent
 import io.getstream.video.android.core.events.ParticipantLeftEvent
 import io.getstream.video.android.core.events.PermissionRequestEvent
-import io.getstream.video.android.core.events.PublisherAnswerEvent
 import io.getstream.video.android.core.events.RecordingStartedEvent
 import io.getstream.video.android.core.events.RecordingStoppedEvent
 import io.getstream.video.android.core.events.SFUConnectedEvent
@@ -377,11 +376,11 @@ public class CallState(val call: Call, user: User) {
         val participants = _participants.value
         _participants.value = emptyMap<String, ParticipantState>().toSortedMap()
 
-        participants.values.forEach {
-            val track = it.videoTrackWrapper
-            it.videoTrackWrapper = null
-            track?.video?.dispose()
-        }
+//        participants.values.forEach {
+//            val track = it.videoTrackWrapper
+//            it.videoTrackWrapper = null
+//            track?.video?.dispose()
+//        }
     }
 
 
