@@ -5,20 +5,19 @@
 ### Week 2: LLC & State Stability
 ### Week 3: Sample app
 
-We're going to start simple.
-
-- Jaewoong and Thierry to review the codebase
-- Step 1: Render local video using the new API and compose. Start a new sample app ideally
+- Tommaso to fix the event openapi thing, and we merge it
+- Jaewoong and Thierry to review the codebase. Monday evening
+- Step 1: Render local video using the new API and compose
 - Step 2: Upload local video to the SFU
 - Step 3: Join a call and render participants
 
 RTCSession cleanup
 - review and maybe move setCameraEnabled and setMicrophoneEnabled
 
+Other
+
 - Token refresh flow
 - Cleanup the test suite
--
-
 
 ### Review each file, fix TODOS and document
 
