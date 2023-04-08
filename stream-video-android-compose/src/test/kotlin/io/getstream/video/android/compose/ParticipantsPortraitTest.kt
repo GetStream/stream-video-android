@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.dp
 import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.common.util.mockParticipant
 import io.getstream.video.android.common.util.mockParticipantList
-import io.getstream.video.android.common.util.mockVideoTrack
+import io.getstream.video.android.common.util.mockVideoTrackWrapper
 import io.getstream.video.android.compose.state.ui.internal.InviteUserItemState
 import io.getstream.video.android.compose.state.ui.internal.ParticipantList
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -284,7 +284,7 @@ internal class ParticipantsPortraitTest {
                 PortraitScreenSharingContent(
                     call = null,
                     session = ScreenSharingSession(
-                        track = mockParticipantList.first().videoTrack ?: mockVideoTrack,
+                        track = mockParticipantList.first().videoTrack ?: mockVideoTrackWrapper,
                         participant = mockParticipantList.first()
                     ),
                     participants = mockParticipantList,
@@ -303,7 +303,7 @@ internal class ParticipantsPortraitTest {
                 ScreenSharingCallParticipantsContent(
                     call = null,
                     session = ScreenSharingSession(
-                        track = mockParticipantList.first().videoTrack ?: mockVideoTrack,
+                        track = mockParticipantList.first().videoTrack ?: mockVideoTrackWrapper,
                         participant = mockParticipantList.first()
                     ),
                     participants = mockParticipantList,

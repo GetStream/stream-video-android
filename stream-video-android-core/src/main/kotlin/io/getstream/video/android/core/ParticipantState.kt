@@ -19,7 +19,7 @@ package io.getstream.video.android.core
 import io.getstream.result.Result
 import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.User
-import io.getstream.video.android.core.model.VideoTrack
+import io.getstream.video.android.core.model.VideoTrackWrapper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import stream.video.sfu.models.ConnectionQuality
@@ -48,17 +48,17 @@ public data class ParticipantState(
     /** If this participant is the you/ the local participant */
     val isLocal: Boolean = false,
     /** video track and size */
-    var videoTrack: VideoTrack? = null,
+    var videoTrackWrapper: VideoTrackWrapper? = null,
     var videoTrackSize: Pair<Int, Int> = Pair(0, 0),
     /** screen sharing track and size */
-    var screenSharingTrack: VideoTrack? = null,
+    var screenSharingTrack: VideoTrackWrapper? = null,
     var screenSharingTrackSize: Pair<Int, Int> = Pair(0, 0),
     /** all published tracks including audio */
     var publishedTracks: Set<TrackType> = emptySet(),
     /** A prefix to identify tracks, internal */
     internal var trackLookupPrefix: String = "",
 
-) {
+    ) {
     /**
      * The user, automatically updates when we receive user events
      */

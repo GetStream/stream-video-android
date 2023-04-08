@@ -28,7 +28,7 @@ import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.common.util.mockParticipant
 import io.getstream.video.android.common.util.mockParticipantList
-import io.getstream.video.android.common.util.mockVideoTrack
+import io.getstream.video.android.common.util.mockVideoTrackWrapper
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.controls.internal.DefaultCallControlsContent
 import io.getstream.video.android.compose.ui.components.participants.internal.LandscapeParticipants
@@ -146,7 +146,7 @@ internal class ParticipantLandscapeTest {
                 LandscapeScreenSharingContent(
                     call = null,
                     session = ScreenSharingSession(
-                        track = mockParticipantList.first().videoTrack ?: mockVideoTrack,
+                        track = mockParticipantList.first().videoTrack ?: mockVideoTrackWrapper,
                         participant = mockParticipantList.first()
                     ),
                     participants = mockParticipantList,

@@ -238,7 +238,7 @@ internal fun DefaultPictureInPictureContent(call: Call) {
         VideoRenderer(
             modifier = Modifier.aspectRatio(ScreenShareAspectRatio, false),
             call = call,
-            videoTrack = session.track,
+            videoTrackWrapper = session.track,
             trackType = TrackType.TRACK_TYPE_SCREEN_SHARE,
             sessionId = session.participant.sessionId
         )

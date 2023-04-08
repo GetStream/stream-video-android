@@ -35,7 +35,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.model.Call
-import io.getstream.video.android.core.model.VideoTrack
+import io.getstream.video.android.core.model.VideoTrackWrapper
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import stream.video.sfu.models.TrackType
 
@@ -43,14 +43,14 @@ import stream.video.sfu.models.TrackType
  * Renders a single video track based on the call state.
  *
  * @param call The call state that contains all the tracks and participants.
- * @param videoTrack The track containing the video stream for a given participant.
+ * @param videoTrackWrapper The track containing the video stream for a given participant.
  * @param modifier Modifier for styling.
  * @param onRender Handler when the view is rendered.
  */
 @Composable
 public fun VideoRenderer(
     call: Call?,
-    videoTrack: VideoTrack,
+    videoTrackWrapper: VideoTrackWrapper,
     sessionId: String,
     trackType: TrackType,
     modifier: Modifier = Modifier,
@@ -66,10 +66,10 @@ public fun VideoRenderer(
         return
     }
 
-    val trackState: MutableState<VideoTrack?> = remember { mutableStateOf(null) }
+    val trackState: MutableState<VideoTrackWrapper?> = remember { mutableStateOf(null) }
     var view: VideoTextureViewRenderer? by remember { mutableStateOf(null) }
 
-    DisposableEffect(call, videoTrack) {
+    DisposableEffect(call, videoTrackWrapper) {
         onDispose {
             cleanTrack(view, trackState)
         }
@@ -84,27 +84,27 @@ public fun VideoRenderer(
                     trackType = trackType,
                     onRender = onRender
                 )
-                setupVideo(trackState, videoTrack, this)
+                setupVideo(trackState, videoTrackWrapper, this)
 
                 view = this
             }
         },
-        update = { v -> setupVideo(trackState, videoTrack, v) },
+        update = { v -> setupVideo(trackState, videoTrackWrapper, v) },
         modifier = modifier.testTag("video_renderer"),
     )
 }
 
 private fun cleanTrack(
     view: VideoTextureViewRenderer?,
-    trackState: MutableState<VideoTrack?>,
+    trackState: MutableState<VideoTrackWrapper?>,
 ) {
     view?.let { trackState.value?.video?.removeSink(it) }
     trackState.value = null
 }
 
 private fun setupVideo(
-    trackState: MutableState<VideoTrack?>,
-    track: VideoTrack,
+    trackState: MutableState<VideoTrackWrapper?>,
+    track: VideoTrackWrapper,
     renderer: VideoTextureViewRenderer,
 ) {
     if (trackState.value == track) {
@@ -123,7 +123,7 @@ private fun VideoRendererPreview() {
     VideoTheme {
         VideoRenderer(
             call = null,
-            videoTrack = VideoTrack("", org.webrtc.VideoTrack(123)),
+            videoTrackWrapper = VideoTrackWrapper("", org.webrtc.VideoTrack(123)),
             sessionId = "",
             trackType = TrackType.TRACK_TYPE_VIDEO
         )

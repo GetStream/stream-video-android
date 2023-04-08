@@ -16,24 +16,11 @@
 
 package io.getstream.video.android.core.model
 
+import org.webrtc.AudioTrack
 import org.webrtc.VideoTrack
 
-public data class VideoTrack(
+public data class TrackWrapper(
     public val streamId: String,
-    public val video: VideoTrack,
-) {
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as io.getstream.video.android.core.model.VideoTrack
-
-        if (streamId != other.streamId) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        return streamId.hashCode()
-    }
-}
+    public val video: VideoTrack? = null,
+    public val audio: AudioTrack? = null,
+)

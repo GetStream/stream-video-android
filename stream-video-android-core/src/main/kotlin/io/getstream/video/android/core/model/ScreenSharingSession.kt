@@ -25,6 +25,6 @@ import io.getstream.video.android.core.ParticipantState
  * @param participant The person that's sharing the screen.
  */
 public data class ScreenSharingSession(
-    public val track: VideoTrack,
+    public val track: VideoTrackWrapper,
     public val participant: ParticipantState
 )

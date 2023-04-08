@@ -25,7 +25,7 @@ import androidx.core.view.isVisible
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.model.CallParticipantState
 import io.getstream.video.android.core.model.User
-import io.getstream.video.android.core.model.VideoTrack
+import io.getstream.video.android.core.model.VideoTrackWrapper
 import io.getstream.video.android.core.model.toUser
 import io.getstream.video.android.xml.databinding.StreamVideoViewCallParticipantBinding
 import io.getstream.video.android.xml.font.setTextStyle
@@ -64,7 +64,7 @@ public class CallParticipantView : CallCardView, VideoRenderer {
     /**
      * The track of the current participant.
      */
-    private var track: VideoTrack? = null
+    private var track: VideoTrackWrapper? = null
 
     /**
      * Handler when the video renders.
@@ -177,9 +177,9 @@ public class CallParticipantView : CallCardView, VideoRenderer {
     /**
      * Updates the current track which contains the current participants video.
      *
-     * @param track The [VideoTrack] of the participant.
+     * @param track The [VideoTrackWrapper] of the participant.
      */
-    private fun setTrack(track: VideoTrack?) {
+    private fun setTrack(track: VideoTrackWrapper?) {
         if (this.track == track) return
 
         try {

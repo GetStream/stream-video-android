@@ -170,7 +170,7 @@ class MediaManagerImpl(val context: Context) {
     private var audioManager = context.getSystemService<AudioManager>()
     private var captureResolution: CameraEnumerationAndroid.CaptureFormat? = null
     private var isCapturingVideo: Boolean = false
-    private var videoCapturer: Camera2Capturer? = null
+    var videoCapturer: Camera2Capturer? = null
     private val logger by taggedLogger("Call:MediaManagerImpl")
     private val cameraManager = context.getSystemService<CameraManager>()
     private val cameraEnumerator: CameraEnumerator by lazy {
@@ -221,12 +221,12 @@ class MediaManagerImpl(val context: Context) {
         return names
     }
 
-    public fun getAudioHandler(): io.getstream.video.android.core.audio.AudioSwitchHandler? {
-        return audioHandler as? io.getstream.video.android.core.audio.AudioSwitchHandler
+    public fun getAudioHandler(): AudioSwitchHandler? {
+        return audioHandler as? AudioSwitchHandler
     }
 
     fun startCapturingLocalVideo(position: Int) {
-        val capturer = videoCapturer as? Camera2Capturer ?: return
+        val capturer = videoCapturer ?: return
         val enumerator = cameraEnumerator as? Camera2Enumerator ?: return
 
         val frontCamera = enumerator.deviceNames.first {

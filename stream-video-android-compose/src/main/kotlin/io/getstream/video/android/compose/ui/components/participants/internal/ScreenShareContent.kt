@@ -69,7 +69,7 @@ public fun ScreenShareContent(
                 .aspectRatio(ScreenShareAspectRatio, false)
                 .align(Alignment.Center),
             call = call,
-            videoTrack = session.track,
+            videoTrackWrapper = session.track,
             onRender = onRender,
             trackType = TrackType.TRACK_TYPE_SCREEN_SHARE,
             sessionId = session.participant.sessionId

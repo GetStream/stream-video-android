@@ -46,7 +46,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.common.model.getSoundIndicatorState
-import io.getstream.video.android.common.util.mockVideoTrack
+import io.getstream.video.android.common.util.mockVideoTrackWrapper
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.audio.SoundIndicator
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
@@ -124,7 +124,7 @@ internal fun ParticipantVideo(
         VideoRenderer(
             modifier = Modifier.fillMaxSize(),
             call = call,
-            videoTrack = track ?: mockVideoTrack,
+            videoTrackWrapper = track ?: mockVideoTrackWrapper,
             sessionId = participant.sessionId,
             onRender = onRender,
             trackType = TrackType.TRACK_TYPE_VIDEO
@@ -135,7 +135,7 @@ internal fun ParticipantVideo(
     if (track != null && isVideoEnabled && TrackType.TRACK_TYPE_VIDEO in participant.publishedTracks) {
         VideoRenderer(
             call = call,
-            videoTrack = track,
+            videoTrackWrapper = track,
             sessionId = participant.sessionId,
             onRender = onRender,
             trackType = TrackType.TRACK_TYPE_VIDEO

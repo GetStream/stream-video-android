@@ -23,8 +23,8 @@ import stream.video.sfu.models.TrackType
 import java.util.UUID
 
 @InternalStreamVideoApi
-public val mockVideoTrack: io.getstream.video.android.core.model.VideoTrack
-    inline get() = io.getstream.video.android.core.model.VideoTrack(
+public val mockVideoTrackWrapper: io.getstream.video.android.core.model.VideoTrackWrapper
+    inline get() = io.getstream.video.android.core.model.VideoTrackWrapper(
         UUID.randomUUID().toString(),
         VideoTrack(123)
     )
@@ -47,7 +47,7 @@ public val mockUsers: List<CallParticipantState>
             idPrefix = "",
             role = "",
             sessionId = "",
-            videoTrack = mockVideoTrack,
+            videoTrack = mockVideoTrackWrapper,
             isLocal = true,
             isSpeaking = true,
             publishedTracks = setOf(TrackType.TRACK_TYPE_VIDEO)
@@ -59,7 +59,7 @@ public val mockUsers: List<CallParticipantState>
             idPrefix = "",
             role = "",
             sessionId = "",
-            videoTrack = mockVideoTrack,
+            videoTrack = mockVideoTrackWrapper,
             isLocal = false,
             isSpeaking = false,
             publishedTracks = setOf(TrackType.TRACK_TYPE_VIDEO)
@@ -71,7 +71,7 @@ public val mockUsers: List<CallParticipantState>
             idPrefix = "",
             role = "",
             sessionId = "",
-            videoTrack = mockVideoTrack,
+            videoTrack = mockVideoTrackWrapper,
             isLocal = false,
             isSpeaking = false,
             publishedTracks = setOf(TrackType.TRACK_TYPE_VIDEO)
@@ -83,7 +83,7 @@ public val mockUsers: List<CallParticipantState>
             idPrefix = "",
             role = "",
             sessionId = "",
-            videoTrack = mockVideoTrack,
+            videoTrack = mockVideoTrackWrapper,
             isLocal = false,
             isSpeaking = false,
             publishedTracks = setOf(TrackType.TRACK_TYPE_VIDEO)

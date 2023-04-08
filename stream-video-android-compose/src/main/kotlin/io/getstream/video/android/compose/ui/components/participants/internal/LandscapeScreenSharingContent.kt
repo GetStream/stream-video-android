@@ -30,7 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.common.util.mockVideoTrack
+import io.getstream.video.android.common.util.mockVideoTrackWrapper
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.controls.internal.DefaultCallControlsContent
 import io.getstream.video.android.compose.ui.components.internal.OverlayScreenSharingAppBar
@@ -116,7 +116,7 @@ private fun LandscapeScreenSharingContentPreview(
         LandscapeScreenSharingContent(
             call = null,
             session = ScreenSharingSession(
-                track = callParticipants.first().videoTrack ?: mockVideoTrack,
+                track = callParticipants.first().videoTrack ?: mockVideoTrackWrapper,
                 participant = callParticipants.first()
             ),
             participants = callParticipants,

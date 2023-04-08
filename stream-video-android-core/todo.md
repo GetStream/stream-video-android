@@ -2,20 +2,26 @@
 ## Timeline
 
 ### Week 1: Refactor LLC & State. Setup testing
-### Week 2: LLC Stability
+### Week 2: LLC & State Stability
+### Week 3: Sample app
 
-- Token refresh flow
-- Openapi/Event integration. Events being out of sync is a large issue
-- Cleanup the test suite
-- Clean up the active SFU session
+We're going to start simple.
+
+- Jaewoong and Thierry to review the codebase
+- Step 1: Render local video using the new API and compose. Start a new sample app ideally
+- Step 2: Upload local video to the SFU
+- Step 3: Join a call and render participants
 
 ## Phase 2, find a way to make Call/SFUSession testable
+
 
 - MediaManager that has a dummy version of devices for test
 
 ## Phase 3, Test using the UI
 
-
+- Token refresh flow
+- Cleanup the test suite
+-
 
 
 ### Review each file, fix TODOS and document
@@ -54,7 +60,6 @@
 - [X] Join flow
 - [X] Active Session
 
-
 ### Websockets
 
 - Review WS requirements for SFU socket connection
@@ -78,8 +83,9 @@
 - [X] Merge the two concepts of Call. Call2 and model/Call.kt
 - [X] Use the new state in the view model
 - [X] User a map for sessionId -> ParticipantState. Fixes several bugs with userId vs sessionId
-- [ ] Verify all events are handled
-- [ ] Media manager class to abstract all the local audio/video stuff. Also makes it easy to test the codebase if you can swap out the media & webrtc stuff.
+- [X] Verify all events are handled
+- [X] Media manager class to abstract all the local audio/video stuff. Also makes it easy to test the codebase if you can swap out the media & webrtc stuff.
+- [X] Clean up the active SFU session]
 
 ### Features
 

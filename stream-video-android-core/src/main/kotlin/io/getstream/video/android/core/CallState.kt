@@ -52,10 +52,7 @@ import io.getstream.video.android.core.events.UnblockedUserEvent
 import io.getstream.video.android.core.events.UnknownEvent
 import io.getstream.video.android.core.events.UpdatedCallPermissionsEvent
 import io.getstream.video.android.core.events.VideoEvent
-import io.getstream.video.android.core.model.CallUser
-import io.getstream.video.android.core.model.ScreenSharingSession
-import io.getstream.video.android.core.model.User
-import io.getstream.video.android.core.model.VideoTrack
+import io.getstream.video.android.core.model.*
 import io.getstream.video.android.core.utils.mapState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -85,8 +82,7 @@ public class CallState(val call: Call, user: User) {
     private val _screenSharingSession: MutableStateFlow<ScreenSharingSession?> =
         MutableStateFlow(null)
 
-    // participants by session id -> participant state
-    private val trackPrefixToSessionIdMap = mutableMapOf<String, String>()
+
 
     private val _participants: MutableStateFlow<SortedMap<String, ParticipantState>> =
         MutableStateFlow(emptyMap<String, ParticipantState>().toSortedMap())
@@ -99,19 +95,20 @@ public class CallState(val call: Call, user: User) {
 
     public val isScreenSharing: StateFlow<Boolean> = _screenSharingSession.mapState { it != null }
 
-    private val _screenSharingTrack: MutableStateFlow<VideoTrack?> = MutableStateFlow(null)
+    private val _screenSharingTrack: MutableStateFlow<TrackWrapper?> = MutableStateFlow(null)
 
     private val _ownCapabilities: MutableStateFlow<List<OwnCapability>> =
         MutableStateFlow(emptyList())
     public val ownCapabilities: StateFlow<List<OwnCapability>> = _ownCapabilities
 
     /**
-     * connectionState shows if we've established a connection with the coordinator
+     * connection shows if we've established a connection with the SFU
      */
     private val _connection: MutableStateFlow<ConnectionState> = MutableStateFlow(
         ConnectionState.PreConnect
     )
     public val connection: StateFlow<ConnectionState> = _connection
+
 
     private val _endedAt: MutableStateFlow<Date?> = MutableStateFlow(null)
     val endedAt: StateFlow<Date?> = _endedAt
@@ -132,98 +129,6 @@ public class CallState(val call: Call, user: User) {
         MutableStateFlow(emptyList())
     public val errors: StateFlow<List<ErrorEvent>> = _errors
 
-
-
-    private fun replaceTrackIfNeeded(mediaStream: MediaStream, streamId: String?): VideoTrack? {
-
-        return if (streamId == null || streamId != mediaStream.id) {
-            mediaStream.videoTracks?.firstOrNull()?.let { track ->
-                VideoTrack(
-                    streamId = mediaStream.id,
-                    video = track
-                )
-            }
-        } else {
-            null
-        }
-    }
-
-    internal fun addStream(mediaStream: MediaStream) {
-        val streamsToProcess: MutableList<MediaStream> = mutableListOf()
-        val participants = _participants.value
-        if (participants.isEmpty()) {
-            streamsToProcess.add(mediaStream)
-            return
-        }
-
-        logger.i { "[] #sfu; mediaStream: $mediaStream" }
-        if (mediaStream.audioTracks.isNotEmpty()) {
-            mediaStream.audioTracks.forEach { track ->
-                logger.v { "[addStream] #sfu; audioTrack: ${track.stringify()}" }
-                track.setEnabled(true)
-            }
-        }
-
-        if (mediaStream.videoTracks.isEmpty()) {
-            return
-        }
-
-        var screenSharingSession: ScreenSharingSession? = null
-
-        val (trackPrefix, trackType) = mediaStream.id.split(':');
-        if (trackPrefixToSessionIdMap[trackPrefix].isNullOrEmpty()) {
-            logger.w { "[addStream] skipping unrecognized trackPrefix ${trackPrefix}" }
-            return
-        }
-
-        val sessionId = trackPrefixToSessionIdMap[trackPrefix]!!
-        val participant = getParticipant(sessionId=sessionId)!!
-
-        val track = replaceTrackIfNeeded(mediaStream, participant.videoTrack?.streamId)
-
-        if (track != null) {
-            logger.d { "[addStream] updating users with track $track" }
-            track.video.setEnabled(true)
-
-            val streamId = mediaStream.id
-            val videoTrack =
-                if (TrackType.TRACK_TYPE_VIDEO.name in streamId) track else participant.videoTrack
-            val screenShareTrack =
-                if (TrackType.TRACK_TYPE_SCREEN_SHARE.name in streamId) track else participant.screenSharingTrack
-
-            val tracks = participant.publishedTracks.toMutableSet()
-
-            if (videoTrack != null) {
-                tracks.add(TrackType.TRACK_TYPE_VIDEO)
-            }
-
-            if (screenShareTrack != null) {
-                tracks.add(TrackType.TRACK_TYPE_SCREEN_SHARE)
-            }
-
-            val updatedParticipant = participant.copy(
-                videoTrack = videoTrack,
-                screenSharingTrack = screenShareTrack,
-                publishedTracks = tracks
-            )
-
-            if (screenShareTrack != null) {
-                screenSharingSession =
-                    ScreenSharingSession(
-                        track = screenShareTrack,
-                        participant = updatedParticipant
-                    )
-            }
-
-            updatedParticipant
-            screenSharingSession?.let { _screenSharingSession.value = it }
-            val updatedParticipantMap = _participants.value.toSortedMap()
-            updatedParticipantMap[sessionId] = updatedParticipant
-            _participants.value = updatedParticipantMap
-
-        }
-
-    }
 
     public fun updateParticipantTrackSize(
         sessionId: String,
@@ -345,7 +250,6 @@ public class CallState(val call: Call, user: User) {
                 removeParticipant(event.participant.session_id)
             }
 
-            is PublisherAnswerEvent -> TODO()
             is SubscriberOfferEvent -> TODO()
             is TrackPublishedEvent -> TODO()
             is TrackUnpublishedEvent -> TODO()
@@ -374,7 +278,6 @@ public class CallState(val call: Call, user: User) {
         // get or create the participant and update them
 
         val participantState = getOrCreateParticipant(participant.session_id, participant.user_id)
-        trackPrefixToSessionIdMap[participant.track_lookup_prefix] = participant.session_id
         participantState.updateFromParticipantInfo(participant)
 
         participantState._speaking.value = participant.is_speaking
@@ -475,8 +378,8 @@ public class CallState(val call: Call, user: User) {
         _participants.value = emptyMap<String, ParticipantState>().toSortedMap()
 
         participants.values.forEach {
-            val track = it.videoTrack
-            it.videoTrack = null
+            val track = it.videoTrackWrapper
+            it.videoTrackWrapper = null
             track?.video?.dispose()
         }
     }

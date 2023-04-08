@@ -47,7 +47,7 @@ internal class CallContentTest {
             VideoTheme {
                 VideoRenderer(
                     call = null,
-                    videoTrack = io.getstream.video.android.core.model.VideoTrack(
+                    videoTrackWrapper = io.getstream.video.android.core.model.VideoTrackWrapper(
                         "",
                         VideoTrack(123)
                     ),
