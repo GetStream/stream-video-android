@@ -133,3 +133,36 @@ Camera/device changes -> listener in ActiveSFUSession -> updates the tracks.
 
 ## Compose
 
+Some of our customers will include the SDK and don't customize things.
+But the majority will either customize our UI components and partially or entirely build their own UI. 
+
+Because of this we need to make sure that our examples don't hide how the SDK works.
+
+For example this is bad:
+
+```
+CallComposable() 
+```
+
+A better approach is to show the underlying components, so people understand how to swap them out
+
+```
+Call {
+  ParticipantGrid(card= { ParticipantCard() })
+  CallControls {
+    ChatButton()
+    FlipVideoButton()
+    MuteAudioButton()
+    MuteVideoButton()
+  }
+}
+```
+
+The second approach is better since:
+
+* It clearly shows how to change the buttons if you want to
+* It shows how to change the participant card. Let's say you don't want to show names, or hide the network indicator etc.
+* Or if you want an entirely different layout of the participants
+* Or perhaps have the buttons in a bottom bar instead of an overlay
+
+With the second approach everything is easy to understand and customize.
