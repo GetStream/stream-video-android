@@ -27,6 +27,7 @@ import org.junit.Test
  *
  * * Video decoding: VP8, VP9, H264
  * * Audio decoding: Opus, Opus Red, Opus DTX
+ * * Video encoding
  * * Connection/join call flow
  */
 class JoinCallTest : IntegrationTestBase() {
