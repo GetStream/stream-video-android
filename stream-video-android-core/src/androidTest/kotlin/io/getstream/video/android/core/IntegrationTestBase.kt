@@ -36,6 +36,7 @@ import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.withTimeout
 import org.junit.Before
 import org.junit.Rule
 import org.junit.rules.TestWatcher
@@ -193,9 +194,11 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true) : TestBase(
             if (connectCoordinatorWS) {
                 // wait for the connection/ avoids race conditions in tests
                 runBlocking {
-                    val connectResultDeferred = clientImpl.connectAsync()
-                    val connectResult = connectResultDeferred.await()
-                    assertSuccess(connectResult)
+                    withTimeout(10000) {
+                        val connectResultDeferred = clientImpl.connectAsync()
+                        val connectResult = connectResultDeferred.await()
+                        assertSuccess(connectResult)
+                    }
                 }
             }
             IntegrationTestState.client = client
@@ -251,25 +254,27 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true) : TestBase(
      * TODO: add a timeout
      */
     suspend inline fun <reified T : VideoEvent> waitForNextEvent(): T =
+        withTimeout(10000) {
+            suspendCoroutine { continuation ->
+                var finished = false
+                client.subscribe {
 
-        suspendCoroutine { continuation ->
-            var finished = false
-            client.subscribe {
-
-                if (!finished ) {
-                    if (it is T) {
-                        continuation.resume(it)
-                        finished = true
-                    } else {
-                        val matchingEvents = events.filterIsInstance<T>()
-                        if (matchingEvents.isNotEmpty()) {
-                            continuation.resume(matchingEvents[0])
+                    if (!finished ) {
+                        if (it is T) {
+                            continuation.resume(it)
                             finished = true
+                        } else {
+                            val matchingEvents = events.filterIsInstance<T>()
+                            if (matchingEvents.isNotEmpty()) {
+                                continuation.resume(matchingEvents[0])
+                                finished = true
+                            }
                         }
                     }
                 }
             }
         }
+
 
     @Before
     fun resetTestVars() {
