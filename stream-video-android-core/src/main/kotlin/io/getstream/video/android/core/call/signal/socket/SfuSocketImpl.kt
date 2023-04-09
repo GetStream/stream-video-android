@@ -115,6 +115,7 @@ internal class SfuSocketImpl(
                     callListeners { it.onDisconnected(DisconnectCause.ConnectionReleased) }
                 }
                 is State.DisconnectedTemporarily -> {
+                    logger.e { "[onStateChanged] DisconnectedTemporarily: ${newState.error}" }
                     shutdownSocketConnection()
                     healthMonitor.onDisconnected()
                     callListeners { it.onDisconnected(DisconnectCause.Error(newState.error)) }
@@ -187,6 +188,7 @@ internal class SfuSocketImpl(
     }
 
     override fun onEvent(event: SfuDataEvent) {
+        logger.i {"received event $event"}
         healthMonitor.ack()
         callListeners { listener ->
             if (event !is SFUHealthCheckEvent) {

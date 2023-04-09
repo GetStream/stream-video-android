@@ -30,6 +30,7 @@ fun mangleSDP(
     enableRed: Boolean = true,
     enableDtx: Boolean = true
 ): SessionDescription {
+    return sdp
     val lines = sdp.description.split("\r\n")
     val modifiedLines = mutableListOf<String>()
     var opusPayloadType: String? = null

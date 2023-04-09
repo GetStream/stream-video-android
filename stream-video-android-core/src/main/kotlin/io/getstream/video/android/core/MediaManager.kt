@@ -101,7 +101,6 @@ class MicrophoneManager(val mediaManager: MediaManagerImpl) {
     }
 
     fun startCapture() {
-
     }
 
     fun enable() {

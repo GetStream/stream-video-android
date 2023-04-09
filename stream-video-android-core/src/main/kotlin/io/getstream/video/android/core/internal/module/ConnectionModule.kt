@@ -22,6 +22,7 @@ import io.getstream.video.android.core.api.ClientRPCService
 import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.call.signal.socket.SfuSocketFactory
 import io.getstream.video.android.core.call.signal.socket.SfuSocketImpl
+import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.User
@@ -61,7 +62,7 @@ internal class SFUConnectionModule(
         Retrofit.Builder()
             .client(okHttpClient)
             .addConverterFactory(WireConverterFactory.create())
-            .baseUrl(SFUUrl)
+            .baseUrl(updatedSignalUrl)
             .build()
     }
 
@@ -74,7 +75,7 @@ internal class SFUConnectionModule(
         sfuSocket = SfuSocketImpl(
             wssUrl = "$updatedSignalUrl/ws".replace("https", "wss"),
             networkStateProvider = networkStateProvider,
-            coroutineScope = CoroutineScope(Dispatchers.IO),
+            coroutineScope = CoroutineScope(DispatcherProvider.IO),
             sfuSocketFactory = socketFactory
         )
     }

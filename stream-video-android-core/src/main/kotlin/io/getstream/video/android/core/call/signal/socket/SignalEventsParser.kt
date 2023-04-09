@@ -82,6 +82,7 @@ internal class SignalEventsParser(
     }
 
     private fun onFailure(streamError: Error.NetworkError) {
+        logger.i { "[onFailure] failure: $streamError" }
         // Called when socket is disconnected by client also (client.disconnect())
         onSocketError(Error.NetworkError.create(VideoErrorCode.SOCKET_FAILURE, streamError.cause))
     }
@@ -91,6 +92,7 @@ internal class SignalEventsParser(
     }
 
     private fun onSocketError(error: Error.NetworkError) {
+        logger.i { "[onSocketError] failure: $error"}
         if (!closedByClient) {
             sfuSocket.onSocketError(error)
         }

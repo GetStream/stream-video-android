@@ -125,7 +125,7 @@ public class RtcSession internal constructor(
     private val remoteIceServers: List<IceServer>,
 ) {
     private val context = client.context
-    private val logger by taggedLogger("Call:ActiveSFUSession")
+    private val logger by taggedLogger("Call:RtcSession")
     private val clientImpl = client as StreamVideoImpl
     private val scope = clientImpl.scope
     /** session id is generated client side */
@@ -207,21 +207,25 @@ public class RtcSession internal constructor(
 
         sfuConnectionModule.sfuSocket.addListener(object: SfuSocketListener {
             public override fun onConnecting() {
-                // TODO
+                logger.i {"SFU connecting"}
             }
 
             public override fun onConnected(event: SFUConnectedEvent) {
                 clientImpl.fireEvent(event, call.cid)
+                logger.i {"SFU onConnected $event"}
             }
 
             public override fun onDisconnected(cause: DisconnectCause) {
+                logger.i {"SFU onDisconnected $cause"}
             }
 
             public override fun onError(error: io.getstream.result.Error) {
+                logger.e { "SFU connection failed with error $error" }
                 TODO()
             }
 
             public override fun onEvent(event: SfuDataEvent) {
+                logger.i {"SFU onEvent $event"}
                 clientImpl.fireEvent(event, call.cid)
             }
         })
@@ -467,7 +471,7 @@ public class RtcSession internal constructor(
         logger.d { "[executeJoinRequest] request: $request" }
 
         return try {
-            withTimeout(3000) {
+            withTimeout(10000) {
                 val connected = call.state.connection.value
                 logger.d { "[executeJoinRequest] is connected: $connected" }
                 sfuConnectionModule.sfuSocket.sendJoinRequest(request)
