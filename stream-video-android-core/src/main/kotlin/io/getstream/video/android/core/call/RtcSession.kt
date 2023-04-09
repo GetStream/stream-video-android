@@ -229,11 +229,17 @@ public class RtcSession internal constructor(
                 clientImpl.fireEvent(event, call.cid)
             }
         })
+
+
+    }
+
+    suspend fun connect() {
+        connectWs()
+        connectRtc()
+    }
+
+    suspend fun connectWs() {
         sfuConnectionModule.sfuSocket.connectSocket()
-        coroutineScope.launch {
-            connectRTC()
-            listenToMediaChanges()
-        }
     }
 
     suspend fun listenToMediaChanges() {
@@ -283,7 +289,7 @@ public class RtcSession internal constructor(
         }
     }
 
-    suspend fun connectRTC() {
+    suspend fun connectRtc() {
         // step 1 setup the peer connections
         createSubscriber()
         // if we are allowed to publish, create a peer connection for it
@@ -329,7 +335,7 @@ public class RtcSession internal constructor(
         val result = executeJoinRequest()
         // step 7 - onNegotiationNeeded will trigger and complete the setup using SetPublisherRequest
         // step 8 - We will receive the JoinCallResponseEvent event
-
+        listenToMediaChanges()
     }
 
     /**

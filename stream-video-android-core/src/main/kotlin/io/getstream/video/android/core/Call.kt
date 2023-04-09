@@ -29,6 +29,7 @@ import io.getstream.video.android.core.model.SendReactionData
 import io.getstream.video.android.core.model.SfuToken
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.toIceServer
+import kotlinx.coroutines.launch
 import org.openapitools.client.models.GetCallEdgeServerRequest
 import org.openapitools.client.models.GoLiveResponse
 import org.openapitools.client.models.SendReactionResponse
@@ -126,6 +127,8 @@ public class Call(
         )
 
         client.state.setActiveCall(this)
+
+        session?.let {it.connect()}
 
         return Success(value = session!!)
     }
