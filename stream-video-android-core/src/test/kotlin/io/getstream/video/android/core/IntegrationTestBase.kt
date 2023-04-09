@@ -248,16 +248,22 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true) : TestBase(
      * Otherwise wait for the next event of this type
      * TODO: add a timeout
      */
-    suspend inline fun <reified T : VideoEvent> waitForNextEvent(): VideoEvent =
+    suspend inline fun <reified T : VideoEvent> waitForNextEvent(): T =
 
         suspendCoroutine { continuation ->
+            var finished = false
             client.subscribe {
-                if (it is T) {
-                    continuation.resume(it)
-                } else {
-                    val matchingEvents = events.filterIsInstance<T>()
-                    if (matchingEvents.isNotEmpty()) {
-                        continuation.resume(matchingEvents[0])
+
+                if (!finished ) {
+                    if (it is T) {
+                        continuation.resume(it)
+                        finished = true
+                    } else {
+                        val matchingEvents = events.filterIsInstance<T>()
+                        if (matchingEvents.isNotEmpty()) {
+                            continuation.resume(matchingEvents[0])
+                            finished = true
+                        }
                     }
                 }
             }
