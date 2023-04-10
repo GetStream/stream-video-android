@@ -42,11 +42,8 @@ import io.getstream.video.android.compose.ui.components.participants.internal.In
 import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantAvatars
 import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantInformation
 import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantsColumn
-import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantsRow
 import io.getstream.video.android.compose.ui.components.participants.internal.PortraitParticipants
 import io.getstream.video.android.compose.ui.components.participants.internal.PortraitScreenSharingContent
-import io.getstream.video.android.compose.ui.components.participants.internal.ScreenSharingCallParticipantsContent
-import io.getstream.video.android.core.call.state.CallMediaState
 import io.getstream.video.android.core.model.CallStatus
 import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.core.model.ScreenSharingSession
