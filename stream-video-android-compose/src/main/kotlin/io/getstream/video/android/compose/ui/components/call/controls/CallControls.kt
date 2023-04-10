@@ -18,6 +18,7 @@ package io.getstream.video.android.compose.ui.components.call.controls
 
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import android.content.res.Configuration.ORIENTATION_PORTRAIT
+import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
@@ -71,10 +72,18 @@ public fun CallControls(
 @Preview
 @Composable
 private fun CallControlsPreview() {
-    VideoTheme {
-        CallControls(
-            callMediaState = CallMediaState(),
-            isScreenSharing = false
-        ) {}
+    Column {
+        VideoTheme {
+            CallControls(
+                callMediaState = CallMediaState(),
+                isScreenSharing = false
+            ) {}
+        }
+        VideoTheme(isInDarkMode = true) {
+            CallControls(
+                callMediaState = CallMediaState(),
+                isScreenSharing = false
+            ) {}
+        }
     }
 }
