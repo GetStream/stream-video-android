@@ -36,9 +36,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
+import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.ToggleScreenConfiguration
-import io.getstream.video.android.core.model.Call
 import io.getstream.video.android.core.model.ScreenSharingSession
 import stream.video.sfu.models.TrackType
 import io.getstream.video.android.ui.common.R as RCommon

@@ -32,6 +32,7 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.BottomEnd
 import androidx.compose.ui.Alignment.Companion.BottomStart
@@ -53,9 +54,8 @@ import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.compose.ui.components.connection.ConnectionQualityIndicator
 import io.getstream.video.android.compose.ui.components.previews.ParticipantsProvider
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
-import io.getstream.video.android.core.model.Call
-import io.getstream.video.android.core.model.CallParticipantState
-import io.getstream.video.android.core.model.toUser
+import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.ParticipantState
 import stream.video.sfu.models.TrackType
 
 /**
@@ -71,7 +71,7 @@ import stream.video.sfu.models.TrackType
 @Composable
 public fun CallParticipant(
     call: Call?,
-    participant: CallParticipantState,
+    participant: ParticipantState,
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues = PaddingValues(0.dp),
     labelPosition: Alignment = BottomStart,
@@ -100,7 +100,7 @@ public fun CallParticipant(
         }
 
         ConnectionQualityIndicator(
-            connectionQuality = participant.connectionQuality,
+            connectionQuality = participant.connectionQuality.collectAsState().value,
             modifier = Modifier.align(connectionIndicatorAlignment)
         )
     }
@@ -109,10 +109,10 @@ public fun CallParticipant(
 @Composable
 internal fun ParticipantVideo(
     call: Call?,
-    participant: CallParticipantState,
+    participant: ParticipantState,
     onRender: (View) -> Unit
 ) {
-    val track = participant.videoTrack
+    val track = participant.videoTrackWrapped
 
     val isVideoEnabled = try {
         track?.video?.enabled() == true
@@ -132,7 +132,7 @@ internal fun ParticipantVideo(
         return
     }
 
-    if (track != null && isVideoEnabled && TrackType.TRACK_TYPE_VIDEO in participant.publishedTracks) {
+    if (track != null) {
         VideoRenderer(
             call = call,
             videoTrackWrapper = track,
@@ -143,18 +143,19 @@ internal fun ParticipantVideo(
     } else {
         UserAvatar(
             modifier = Modifier.onSizeChanged {
-                call.updateParticipantTrackSize(
-                    participant.sessionId, it.width, it.height
-                )
+                // TODO:
+//                call.updateParticipantTrackSize(
+//                    participant.sessionId, it.width, it.height
+//                )
             },
-            shape = RectangleShape, user = participant.toUser()
+            shape = RectangleShape, user = participant.user.collectAsState().value
         )
     }
 }
 
 @Composable
 private fun BoxScope.ParticipantLabel(
-    participant: CallParticipantState,
+    participant: ParticipantState,
     labelPosition: Alignment
 ) {
     Row(
@@ -169,17 +170,16 @@ private fun BoxScope.ParticipantLabel(
         verticalAlignment = CenterVertically,
     ) {
         SoundIndicator(
+            // TODO
             state = getSoundIndicatorState(
-                hasAudio = participant.hasAudio, isSpeaking = participant.isSpeaking
+                hasAudio = false, isSpeaking = false
             ),
             modifier = Modifier
                 .align(CenterVertically)
                 .padding(start = VideoTheme.dimens.callParticipantSoundIndicatorPaddingStart)
         )
 
-        val name = participant.name.ifEmpty {
-            participant.id
-        }
+        val name = participant.userNameOrId.collectAsState().value
         Text(
             modifier = Modifier
                 .widthIn(max = VideoTheme.dimens.callParticipantLabelTextMaxWidth)
@@ -197,7 +197,7 @@ private fun BoxScope.ParticipantLabel(
 @Preview
 @Composable
 private fun CallParticipantPreview(
-    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<CallParticipantState>
+    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<ParticipantState>
 ) {
     VideoTheme {
         CallParticipant(
@@ -210,7 +210,7 @@ private fun CallParticipantPreview(
 @Preview
 @Composable
 private fun ParticipantVideoPreview(
-    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<CallParticipantState>
+    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<ParticipantState>
 ) {
     VideoTheme {
         ParticipantVideo(

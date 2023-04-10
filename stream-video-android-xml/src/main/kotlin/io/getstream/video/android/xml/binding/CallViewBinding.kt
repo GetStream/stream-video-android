@@ -48,37 +48,37 @@ public fun CallView.bindView(
     fetchCallMediaState: (CallMediaState, Boolean) -> List<CallControlItem> = { mediaState, isScreenSharingActive ->
         defaultControlList(mediaState, isScreenSharingActive)
     },
-    onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
+    //onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
 ) {
     getFirstViewInstance<CallControlsView>()?.bindView(
         viewModel = viewModel,
         lifecycleOwner = lifecycleOwner,
         fetchCallMediaState = fetchCallMediaState,
-        onCallAction = onCallAction,
+        //onCallAction = onCallAction,
     )
 
     startJob(lifecycleOwner) {
-        viewModel.participantList.combine(viewModel.screenSharingSessions) { participants, screenSharingSessions ->
-            participants to screenSharingSessions.firstOrNull()
-        }.collect { (participants, screenSharingSession) ->
-            if (screenSharingSession != null) {
-                setScreenSharingContent { view ->
-                    when (view) {
-                        is ScreenShareView -> view.bindView(viewModel, lifecycleOwner)
-                        is CallParticipantsListView -> view.bindView(viewModel, lifecycleOwner)
-                    }
-                }
-                updatePresenterText(screenSharingSession.participant.name.ifEmpty { screenSharingSession.participant.id })
-                setFloatingParticipant(null)
-            } else {
-                setRegularContent { it.bindView(viewModel, lifecycleOwner) }
-                val localParticipant = if (participants.size == 1 || participants.size == 4) {
-                    null
-                } else {
-                    participants.firstOrNull { it.isLocal }
-                }
-                setFloatingParticipant(localParticipant) { it.bindView(viewModel, lifecycleOwner) }
-            }
-        }
+//        viewModel.participantList.combine(viewModel.screenSharingSessions) { participants, screenSharingSessions ->
+//            participants to screenSharingSessions.firstOrNull()
+//        }.collect { (participants, screenSharingSession) ->
+//            if (screenSharingSession != null) {
+//                setScreenSharingContent { view ->
+//                    when (view) {
+//                        is ScreenShareView -> view.bindView(viewModel, lifecycleOwner)
+//                        is CallParticipantsListView -> view.bindView(viewModel, lifecycleOwner)
+//                    }
+//                }
+//                updatePresenterText(screenSharingSession.participant.name.ifEmpty { screenSharingSession.participant.id })
+//                setFloatingParticipant(null)
+//            } else {
+//                setRegularContent { it.bindView(viewModel, lifecycleOwner) }
+//                val localParticipant = if (participants.size == 1 || participants.size == 4) {
+//                    null
+//                } else {
+//                    participants.firstOrNull { it.isLocal }
+//                }
+//                setFloatingParticipant(localParticipant) { it.bindView(viewModel, lifecycleOwner) }
+//            }
+//        }
     }
 }

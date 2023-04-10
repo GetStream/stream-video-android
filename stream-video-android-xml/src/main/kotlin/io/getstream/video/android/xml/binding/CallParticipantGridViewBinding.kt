@@ -39,24 +39,24 @@ internal fun CallParticipantsGridView.bindView(
     lifecycleOwner: LifecycleOwner,
 ) {
     startJob(lifecycleOwner) {
-        viewModel.callState.filterNotNull().collectLatest { call ->
-            setRendererInitializer { videoRenderer, streamId, trackType, onRender ->
-                call.initRenderer(videoRenderer, streamId, trackType, onRender)
-            }
-        }
+//        viewModel.callState.filterNotNull().collectLatest { call ->
+//            setRendererInitializer { videoRenderer, streamId, trackType, onRender ->
+//                call.initRenderer(videoRenderer, streamId, trackType, onRender)
+//            }
+//        }
     }
 
     startJob(lifecycleOwner) {
-        viewModel.participantList.combine(viewModel.primarySpeaker) { participants, primarySpeaker ->
-            participants to (primarySpeaker ?: viewModel.localParticipant.value)
-        }.collectLatest { (participants, primarySpeaker) ->
-            val gridParticipants = if (participants.size == 1 || participants.size == 4) {
-                participants
-            } else {
-                participants.filter { !it.isLocal }
-            }
-            updateParticipants(gridParticipants)
-            updatePrimarySpeaker(primarySpeaker)
-        }
+//        viewModel.participantList.combine(viewModel.primarySpeaker) { participants, primarySpeaker ->
+//            participants to (primarySpeaker ?: viewModel.localParticipant.value)
+//        }.collectLatest { (participants, primarySpeaker) ->
+//            val gridParticipants = if (participants.size == 1 || participants.size == 4) {
+//                participants
+//            } else {
+//                participants.filter { !it.isLocal }
+//            }
+//            updateParticipants(gridParticipants)
+//            updatePrimarySpeaker(primarySpeaker)
+//        }
     }
 }

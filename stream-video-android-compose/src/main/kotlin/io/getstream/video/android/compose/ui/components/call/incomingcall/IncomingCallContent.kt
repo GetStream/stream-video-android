@@ -49,20 +49,19 @@ public fun IncomingCallContent(
     viewModel: CallViewModel,
     modifier: Modifier = Modifier,
     onBackPressed: () -> Unit,
-    onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
+   // onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
 ) {
-    val callType: CallType by viewModel.callType.collectAsState()
-    val participants: List<CallUser> by viewModel.participants.collectAsState()
-    val callMediaState: CallMediaState by viewModel.callMediaState.collectAsState()
-
-    IncomingCallContent(
-        participants = participants,
-        callType = callType,
-        isVideoEnabled = callMediaState.isCameraEnabled,
-        modifier = modifier,
-        onBackPressed = onBackPressed,
-        onCallAction = onCallAction
-    )
+//    val participants: List<CallUser> by viewModel.participants.collectAsState()
+//    val callMediaState: CallMediaState by viewModel.callMediaState.collectAsState()
+//
+//    IncomingCallContent(
+//        participants = participants,
+//        callType = callType,
+//        isVideoEnabled = callMediaState.isCameraEnabled,
+//        modifier = modifier,
+//        onBackPressed = onBackPressed,
+//        onCallAction = onCallAction
+//    )
 }
 
 /**
@@ -131,22 +130,22 @@ public fun IncomingCallContent(
 @Composable
 private fun IncomingCallPreview() {
     VideoTheme {
-        IncomingCallContent(
-            participants = mockParticipantList.map {
-                CallUser(
-                    id = it.id,
-                    name = it.name,
-                    role = it.role,
-                    state = null,
-                    createdAt = null,
-                    updatedAt = null,
-                    imageUrl = it.profileImageURL ?: "",
-                    teams = emptyList()
-                )
-            },
-            callType = CallType.VIDEO,
-            isVideoEnabled = false,
-            onBackPressed = {}
-        ) {}
+//        IncomingCallContent(
+////            participants = mockParticipantList.map {
+////                CallUser(
+////                    id = it.id,
+////                    name = it.name,
+////                    role = it.role,
+////                    state = null,
+////                    createdAt = null,
+////                    updatedAt = null,
+////                    imageUrl = it.profileImageURL ?: "",
+////                    teams = emptyList()
+////                )
+////            },
+//            callType = CallType.VIDEO,
+//            isVideoEnabled = false,
+//            onBackPressed = {}
+//        ) {}
     }
 }

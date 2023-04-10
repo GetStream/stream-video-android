@@ -51,16 +51,16 @@ public fun CallControlsView.bindView(
     fetchCallMediaState: (CallMediaState, Boolean) -> List<CallControlItem> = { mediaState, isScreenSharingActive ->
         defaultControlList(mediaState, isScreenSharingActive)
     },
-    onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
+    //onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
 ) {
     this.onCallAction = onCallAction
 
     startJob(lifecycleOwner) {
-        viewModel.callMediaState.combine(viewModel.screenSharingSessions) { mediaState, screenSharingSessions ->
-            mediaState to screenSharingSessions.firstOrNull()
-        }.collect { (mediaState, screenSharingSession) ->
-            setItems(fetchCallMediaState(mediaState, screenSharingSession != null))
-        }
+//        viewModel.callMediaState.combine(viewModel.screenSharingSessions) { mediaState, screenSharingSessions ->
+//            mediaState to screenSharingSessions.firstOrNull()
+//        }.collect { (mediaState, screenSharingSession) ->
+//            setItems(fetchCallMediaState(mediaState, screenSharingSession != null))
+//        }
     }
 }
 

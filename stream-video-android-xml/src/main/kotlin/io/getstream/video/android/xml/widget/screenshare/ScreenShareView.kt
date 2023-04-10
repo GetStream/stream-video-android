@@ -21,7 +21,7 @@ import android.util.AttributeSet
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import io.getstream.video.android.core.model.ScreenSharingSession
-import io.getstream.video.android.core.model.VideoTrackWrapper
+import io.getstream.video.android.core.model.TrackWrapper
 import io.getstream.video.android.xml.databinding.StreamVideoViewScreenShareBinding
 import io.getstream.video.android.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.xml.utils.extensions.streamThemeInflater
@@ -47,7 +47,7 @@ public class ScreenShareView : ConstraintLayout, VideoRenderer, JobHolder {
     /**
      * The track of the current screen share.
      */
-    private var track: VideoTrackWrapper? = null
+    private var track: TrackWrapper? = null
 
     /**
      * Handler when the video renders.
@@ -121,7 +121,7 @@ public class ScreenShareView : ConstraintLayout, VideoRenderer, JobHolder {
      *
      * @param track The [VideoTrackWrapper] of the participant.
      */
-    private fun setTrack(track: VideoTrackWrapper?) {
+    private fun setTrack(track: TrackWrapper?) {
         if (this.track == track) return
 
         this.track?.video?.removeSink(binding.screenShare)
@@ -129,7 +129,7 @@ public class ScreenShareView : ConstraintLayout, VideoRenderer, JobHolder {
 
         if (track == null) return
 
-        this.track!!.video.addSink(binding.screenShare)
+        this.track!!.video?.addSink(binding.screenShare)
         initRenderer()
     }
 

@@ -38,22 +38,22 @@ import kotlinx.coroutines.flow.collectLatest
 public fun OutgoingCallView.bindView(
     viewModel: CallViewModel,
     lifecycleOwner: LifecycleOwner,
-    onCallAction: (CallAction) -> Unit = viewModel::onCallAction
+    //onCallAction: (CallAction) -> Unit = viewModel::onCallAction
 ) {
     setCallStatus(CallStatus.Outgoing)
 
-    callActionListener = onCallAction
+    //callActionListener = onCallAction
 
     startJob(lifecycleOwner) {
-        viewModel.callMediaState.collectLatest {
-            setMicrophoneEnabled(it.isMicrophoneEnabled)
-            setCameraEnabled(it.isCameraEnabled)
-        }
+//        viewModel.callMediaState.collectLatest {
+//            setMicrophoneEnabled(it.isMicrophoneEnabled)
+//            setCameraEnabled(it.isCameraEnabled)
+//        }
     }
 
     startJob(lifecycleOwner) {
-        viewModel.participants.collectLatest {
-            setParticipants(it)
-        }
+//        viewModel.participants.collectLatest {
+//            setParticipants(it)
+//        }
     }
 }

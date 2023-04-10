@@ -46,8 +46,8 @@ public fun CallAppBarView.bindView(
     this.onParticipantsPressed = onParticipantsPressed
 
     lifecycleOwner.lifecycleScope.launchWhenResumed {
-        viewModel.streamCallState.collectLatest {
-            renderState(it)
-        }
+//        viewModel.streamCallState.collectLatest {
+//            renderState(it)
+//        }
     }
 }

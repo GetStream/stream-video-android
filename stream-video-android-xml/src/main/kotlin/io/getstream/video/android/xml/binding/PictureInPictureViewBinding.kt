@@ -39,20 +39,20 @@ public fun PictureInPictureView.bindView(
     lifecycleOwner: LifecycleOwner,
 ) {
     startJob(lifecycleOwner) {
-        viewModel.callState.filterNotNull().collectLatest { call ->
-            setRendererInitializer { videoRenderer, trackId, trackType, onRender ->
-                call.initRenderer(videoRenderer, trackId, trackType, onRender)
-            }
-        }
+//        viewModel.callState.filterNotNull().collectLatest { call ->
+//            setRendererInitializer { videoRenderer, trackId, trackType, onRender ->
+//                call.initRenderer(videoRenderer, trackId, trackType, onRender)
+//            }
+//        }
     }
 
     startJob(lifecycleOwner) {
-        viewModel.screenSharingSessions.map { it.firstOrNull() }.collectLatest {
-            if (it != null) {
-                setScreenShareView { it.bindView(viewModel, lifecycleOwner) }
-            } else {
-                setCallParticipantView { it.bindPictureInPictureView(viewModel, lifecycleOwner) }
-            }
-        }
+//        viewModel.screenSharingSessions.map { it.firstOrNull() }.collectLatest {
+//            if (it != null) {
+//                setScreenShareView { it.bindView(viewModel, lifecycleOwner) }
+//            } else {
+//                setCallParticipantView { it.bindPictureInPictureView(viewModel, lifecycleOwner) }
+//            }
+//        }
     }
 }

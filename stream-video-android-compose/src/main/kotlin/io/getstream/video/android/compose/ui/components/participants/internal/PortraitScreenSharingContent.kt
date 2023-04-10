@@ -36,9 +36,9 @@ import androidx.compose.ui.unit.dp
 import io.getstream.video.android.common.util.mockVideoTrackWrapper
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.previews.ParticipantsProvider
+import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.model.Call
-import io.getstream.video.android.core.model.CallParticipantState
 import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.ui.common.R
 
@@ -56,7 +56,7 @@ import io.getstream.video.android.ui.common.R
 internal fun PortraitScreenSharingContent(
     call: Call?,
     session: ScreenSharingSession,
-    participants: List<CallParticipantState>,
+    participants: List<ParticipantState>,
     paddingValues: PaddingValues,
     modifier: Modifier = Modifier,
     onRender: (View) -> Unit,
@@ -73,7 +73,7 @@ internal fun PortraitScreenSharingContent(
             modifier = Modifier.padding(VideoTheme.dimens.screenSharePresenterPadding),
             text = stringResource(
                 id = R.string.stream_video_screen_sharing_title,
-                sharingParticipant.name.ifEmpty { sharingParticipant.id }
+                sharingParticipant.userNameOrId
             ),
             color = VideoTheme.colors.textHighEmphasis,
             style = VideoTheme.typography.title3Bold,
@@ -107,13 +107,13 @@ internal fun PortraitScreenSharingContent(
 @Preview
 @Composable
 private fun PortraitScreenSharingContentPreview(
-    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<CallParticipantState>
+    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<ParticipantState>
 ) {
     VideoTheme {
         PortraitScreenSharingContent(
             call = null,
             session = ScreenSharingSession(
-                track = callParticipants.first().videoTrack ?: mockVideoTrackWrapper,
+                track = callParticipants.first().videoTrackWrapped ?: mockVideoTrackWrapper,
                 participant = callParticipants.first()
             ),
             participants = callParticipants,

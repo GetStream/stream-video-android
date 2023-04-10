@@ -26,9 +26,9 @@ import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.ui.components.call.controls.internal.DefaultCallControlsContent
 import io.getstream.video.android.compose.ui.components.participants.internal.RegularCallParticipantsContent
 import io.getstream.video.android.compose.ui.components.participants.internal.ScreenSharingCallParticipantsContent
+import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CallMediaState
-import io.getstream.video.android.core.model.Call
 import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.core.model.state.StreamCallState
 
@@ -81,7 +81,7 @@ public fun CallParticipants(
             callControlsContent = callControlsContent
         )
     } else {
-        val participants by call.callParticipants.collectAsState()
+        val participants by call.state.participants.collectAsState()
 
         ScreenSharingCallParticipantsContent(
             call = call,

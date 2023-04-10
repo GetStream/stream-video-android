@@ -28,9 +28,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.controls.CallControls
+import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CallMediaState
-import io.getstream.video.android.core.model.Call
 import io.getstream.video.android.core.viewmodel.CallViewModel
 import kotlinx.coroutines.flow.emptyFlow
 
@@ -45,14 +45,14 @@ internal fun DefaultCallControlsContent(
     viewModel: CallViewModel,
     onCallAction: (CallAction) -> Unit
 ) {
-    val call by viewModel.callState.collectAsState(initial = null)
-    val callMediaState by viewModel.callMediaState.collectAsState(initial = CallMediaState())
-
-    DefaultCallControlsContent(
-        call = call,
-        callMediaState = callMediaState,
-        onCallAction = onCallAction
-    )
+//    val call by viewModel.call.state.collectAsState(initial = null)
+//    val callMediaState by viewModel.callMediaState.collectAsState(initial = CallMediaState())
+//
+//    DefaultCallControlsContent(
+//        call = call,
+//        callMediaState = callMediaState,
+//        onCallAction = onCallAction
+//    )
 }
 
 /**
@@ -69,10 +69,10 @@ internal fun DefaultCallControlsContent(
     callMediaState: CallMediaState,
     onCallAction: (CallAction) -> Unit
 ) {
-    val screenShareSessionsState = call?.screenSharingSessions ?: emptyFlow()
-    val state by screenShareSessionsState.collectAsState(initial = emptyList())
+    //val screenShareSessionsState = call?.screenSharingSessions ?: emptyFlow()
+    //val state by screenShareSessionsState.collectAsState(initial = emptyList())
 
-    val isScreenSharing = state.isNotEmpty()
+    //val isScreenSharing = state.isNotEmpty()
 
     val orientation = LocalConfiguration.current.orientation
 
@@ -86,10 +86,10 @@ internal fun DefaultCallControlsContent(
             .height(VideoTheme.dimens.callControlsSheetHeight)
     }
 
-    CallControls(
-        modifier = modifier,
-        callMediaState = callMediaState,
-        isScreenSharing = isScreenSharing,
-        onCallAction = onCallAction
-    )
+//    CallControls(
+//        modifier = modifier,
+//        callMediaState = callMediaState,
+//       // isScreenSharing = isScreenSharing,
+//        onCallAction = onCallAction
+//    )
 }

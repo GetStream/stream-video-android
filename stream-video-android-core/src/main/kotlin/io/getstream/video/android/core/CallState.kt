@@ -87,6 +87,30 @@ public class CallState(val call: Call, user: User) {
         MutableStateFlow(emptyMap<String, ParticipantState>().toSortedMap())
     public val participants: StateFlow<List<ParticipantState>> = _participants.mapState { it.values.toList() }
 
+    /** participants who are currently speaking */
+    public val activeSpeakers = _participants.mapState { it.values.filter { participant -> participant.speaking.value } }
+
+
+    private val _dominantSpeaker: MutableStateFlow<ParticipantState?> =
+        MutableStateFlow(null)
+    public val dominantSpeaker: StateFlow<ParticipantState?> = _dominantSpeaker
+
+    /**
+     * Sorted participants gives you the list of participants sorted by
+     * * anyone who is pinned
+     * * dominant speaker
+     * * last speaking at
+     * * all other video participants by when they joined
+     * * audio only participants by when they joined
+     *
+     */
+
+    public val sortedParticipants = _participants.mapState { it.values.sortedBy{
+        // TODO: implement actual sorting
+        val score = 1
+        score
+    } }
+
     // making it a property requires cleaning up the properties of a participant
     val me : StateFlow<ParticipantState?> = _participants.mapState { it.get(user.id) }
 
@@ -369,33 +393,9 @@ public class CallState(val call: Call, user: User) {
         }
     }
 
-    // TODO: SFU Connection
 
 
 
-    /** participants who are currently speaking */
-    public val activeSpeakers = _participants.mapState { it.values.filter { participant -> participant.speaking.value } }
-
-
-    private val _dominantSpeaker: MutableStateFlow<ParticipantState?> =
-        MutableStateFlow(null)
-    public val dominantSpeaker: StateFlow<ParticipantState?> = _dominantSpeaker
-
-    /**
-     * Sorted participants gives you the list of participants sorted by
-     * * anyone who is pinned
-     * * dominant speaker
-     * * last speaking at
-     * * all other video participants by when they joined
-     * * audio only participants by when they joined
-     *
-     */
-
-    public val sortedParticipants = _participants.mapState { it.values.sortedBy{
-        // TODO: implement actual sorting
-        val score = 1
-        score
-    } }
 
     internal fun disconnect() {
         logger.i { "[disconnect] #sfu; no args" }

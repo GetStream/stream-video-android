@@ -45,8 +45,7 @@ import io.getstream.video.android.compose.ui.components.participants.internal.Ca
 import io.getstream.video.android.compose.ui.components.participants.internal.CallParticipantsList
 import io.getstream.video.android.compose.ui.components.participants.internal.InviteUserList
 import io.getstream.video.android.compose.ui.components.participants.internal.SelectedCallParticipantOptions
-import io.getstream.video.android.core.model.CallParticipantState
-import io.getstream.video.android.core.model.User
+import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.utils.updateAll
 import io.getstream.video.android.core.utils.updateValue
 
@@ -62,102 +61,101 @@ import io.getstream.video.android.core.utils.updateValue
  */
 @Composable
 public fun CallParticipantsInfoMenu(
-    participantsState: List<CallParticipantState>,
-    users: List<User>,
+    participantsState: List<Any>,
     modifier: Modifier = Modifier,
     onDismiss: () -> Unit = {},
     onInfoMenuAction: (ParticipantInfoAction) -> Unit = {},
 ) {
-    var infoStateMode by remember { mutableStateOf<CallParticipantInfoMode>(ParticipantList) }
-    val isCurrentUserMuted = !(participantsState.firstOrNull { it.isLocal }?.hasAudio ?: false)
-    var selectedUsers by remember {
-        mutableStateOf(
-            users.map { InviteUserItemState(it) }
-        )
-    }
-    var selectedUser by remember { mutableStateOf<CallParticipantState?>(null) }
-
-    BackHandler {
-        when {
-            infoStateMode is ParticipantList -> onDismiss()
-            selectedUser != null -> selectedUser = null
-            else -> {
-                infoStateMode = ParticipantList
-                val currentUsers = selectedUsers.updateAll { it.copy(isSelected = false) }
-
-                selectedUsers = currentUsers
-            }
-        }
-    }
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(color = VideoTheme.colors.infoMenuOverlayColor)
-    ) {
-        Column(modifier) {
-            CallParticipantsInfoAppBar(
-                numberOfParticipants = participantsState.size,
-                infoStateMode = infoStateMode,
-                onBackPressed = {
-                    when (infoStateMode) {
-                        is ParticipantList -> onDismiss()
-                        else -> infoStateMode = ParticipantList
-                    }
-                },
-                selectedParticipants = selectedUsers,
-                onInviteParticipants = onInfoMenuAction
-            )
-
-            val listModifier = Modifier
-                .weight(2f)
-                .fillMaxWidth()
-                .background(VideoTheme.colors.appBackground)
-
-            if (infoStateMode is ParticipantList) {
-                CallParticipantsList(
-                    modifier = listModifier,
-                    participantsState = participantsState,
-                    onUserOptionsSelected = { selectedUser = it }
-                )
-            } else {
-                InviteUserList(
-                    modifier = listModifier,
-                    users = selectedUsers,
-                    onUserSelected = { item ->
-                        val currentList = selectedUsers
-
-                        val updated = currentList.updateValue(
-                            predicate = { it.user.id == item.user.id },
-                            transformer = { it.copy(isSelected = !it.isSelected) }
-                        )
-
-                        selectedUsers = updated
-                    }
-                )
-            }
-
-            if (infoStateMode !is ParticipantInvites) {
-                CallParticipantsInfoOptions(
-                    isCurrentUserMuted = isCurrentUserMuted,
-                    modifier = Modifier
-                        .padding(12.dp)
-                        .fillMaxWidth()
-                        .background(color = VideoTheme.colors.appBackground)
-                        .height(VideoTheme.dimens.callParticipantInfoMenuOptionsHeight),
-                    onOptionSelected = { option ->
-                        when (option) {
-                            Invite -> infoStateMode = ParticipantInvites
-                            is ToggleMute -> onInfoMenuAction(ChangeMuteState(option.isMuted))
-                        }
-                    }
-                )
-            }
-
-            val currentlyUser = selectedUser
-            if (currentlyUser != null) {
-                SelectedCallParticipantOptions()
-            }
-        }
-    }
+//    var infoStateMode by remember { mutableStateOf<CallParticipantInfoMode>(ParticipantList) }
+//    val isCurrentUserMuted = !(participantsState.firstOrNull { it.isLocal }?.hasAudio ?: false)
+//    var selectedUsers by remember {
+//        mutableStateOf(
+//            users.map { InviteUserItemState(it) }
+//        )
+//    }
+//    var selectedUser by remember { mutableStateOf<ParticipantState?>(null) }
+//
+//    BackHandler {
+//        when {
+//            infoStateMode is ParticipantList -> onDismiss()
+//            selectedUser != null -> selectedUser = null
+//            else -> {
+//                infoStateMode = ParticipantList
+//                val currentUsers = selectedUsers.updateAll { it.copy(isSelected = false) }
+//
+//                selectedUsers = currentUsers
+//            }
+//        }
+//    }
+//
+//    Box(
+//        modifier = Modifier
+//            .fillMaxSize()
+//            .background(color = VideoTheme.colors.infoMenuOverlayColor)
+//    ) {
+//        Column(modifier) {
+//            CallParticipantsInfoAppBar(
+//                numberOfParticipants = participantsState.size,
+//                infoStateMode = infoStateMode,
+//                onBackPressed = {
+//                    when (infoStateMode) {
+//                        is ParticipantList -> onDismiss()
+//                        else -> infoStateMode = ParticipantList
+//                    }
+//                },
+//                selectedParticipants = selectedUsers,
+//                onInviteParticipants = onInfoMenuAction
+//            )
+//
+//            val listModifier = Modifier
+//                .weight(2f)
+//                .fillMaxWidth()
+//                .background(VideoTheme.colors.appBackground)
+//
+//            if (infoStateMode is ParticipantList) {
+//                CallParticipantsList(
+//                    modifier = listModifier,
+//                    participantsState = participantsState,
+//                    onUserOptionsSelected = { selectedUser = it }
+//                )
+//            } else {
+//                InviteUserList(
+//                    modifier = listModifier,
+//                    users = selectedUsers,
+//                    onUserSelected = { item ->
+//                        val currentList = selectedUsers
+//
+//                        val updated = currentList.updateValue(
+//                            predicate = { it.user.id == item.user.id },
+//                            transformer = { it.copy(isSelected = !it.isSelected) }
+//                        )
+//
+//                        selectedUsers = updated
+//                    }
+//                )
+//            }
+//
+//            if (infoStateMode !is ParticipantInvites) {
+//                CallParticipantsInfoOptions(
+//                    isCurrentUserMuted = isCurrentUserMuted,
+//                    modifier = Modifier
+//                        .padding(12.dp)
+//                        .fillMaxWidth()
+//                        .background(color = VideoTheme.colors.appBackground)
+//                        .height(VideoTheme.dimens.callParticipantInfoMenuOptionsHeight),
+//                    onOptionSelected = { option ->
+//                        when (option) {
+//                            Invite -> infoStateMode = ParticipantInvites
+//                            is ToggleMute -> onInfoMenuAction(ChangeMuteState(option.isMuted))
+//                        }
+//                    }
+//                )
+//            }
+//
+//            val currentlyUser = selectedUser
+//            if (currentlyUser != null) {
+//                SelectedCallParticipantOptions()
+//            }
+//        }
+//    }
 }

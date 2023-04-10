@@ -87,20 +87,20 @@ internal fun ParticipantInformation(
 @Composable
 private fun ParticipantInformationPreview() {
     VideoTheme {
-        ParticipantInformation(
-            callStatus = CallStatus.Incoming,
-            participants = mockParticipantList.map {
-                CallUser(
-                    id = it.id,
-                    name = it.name,
-                    role = it.role,
-                    state = null,
-                    imageUrl = it.profileImageURL ?: "",
-                    createdAt = null,
-                    updatedAt = null,
-                    teams = emptyList()
-                )
-            }
-        )
+//        ParticipantInformation(
+//            callStatus = CallStatus.Incoming,
+//            participants = mockParticipantList.map {
+//                CallUser(
+//                    id = it.id,
+//                    name = it.name,
+//                    role = it.role,
+//                    state = null,
+//                    imageUrl = it.profileImageURL ?: "",
+//                    createdAt = null,
+//                    updatedAt = null,
+//                    teams = emptyList()
+//                )
+//            }
+//        )
     }
 }

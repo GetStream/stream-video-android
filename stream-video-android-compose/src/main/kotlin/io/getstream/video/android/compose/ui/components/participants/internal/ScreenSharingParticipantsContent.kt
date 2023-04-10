@@ -30,10 +30,10 @@ import io.getstream.video.android.common.util.mockVideoTrackWrapper
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.controls.internal.DefaultCallControlsContent
 import io.getstream.video.android.compose.ui.components.previews.ParticipantsProvider
+import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CallMediaState
-import io.getstream.video.android.core.model.Call
-import io.getstream.video.android.core.model.CallParticipantState
 import io.getstream.video.android.core.model.ScreenSharingSession
 
 /**
@@ -56,7 +56,7 @@ import io.getstream.video.android.core.model.ScreenSharingSession
 internal fun ScreenSharingCallParticipantsContent(
     call: Call?,
     session: ScreenSharingSession,
-    participants: List<CallParticipantState>,
+    participants: List<ParticipantState>,
     callMediaState: CallMediaState,
     onCallAction: (CallAction) -> Unit,
     modifier: Modifier = Modifier,
@@ -104,13 +104,13 @@ internal fun ScreenSharingCallParticipantsContent(
 @Preview
 @Composable
 private fun ScreenSharingCallParticipantsContentPreview(
-    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<CallParticipantState>
+    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<ParticipantState>
 ) {
     VideoTheme {
         ScreenSharingCallParticipantsContent(
             call = null,
             session = ScreenSharingSession(
-                track = callParticipants.first().videoTrack ?: mockVideoTrackWrapper,
+                track = callParticipants.first().videoTrackWrapped ?: mockVideoTrackWrapper,
                 participant = callParticipants.first()
             ),
             participants = callParticipants,

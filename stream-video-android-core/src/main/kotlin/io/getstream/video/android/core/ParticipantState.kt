@@ -19,8 +19,10 @@ package io.getstream.video.android.core
 import io.getstream.result.Result
 import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.User
+import io.getstream.video.android.core.utils.mapState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import org.webrtc.VideoTrack
 import stream.video.sfu.models.ConnectionQuality
 import stream.video.sfu.models.Participant
 import stream.video.sfu.models.TrackType
@@ -73,12 +75,19 @@ public data class ParticipantState(
         call.session?.getTrack(sessionId, TrackType.TRACK_TYPE_SCREEN_SHARE)
     }
 
+    val hasVideo: Boolean
+        get() = videoTrack != null
+
+    val hasAudio: Boolean
+        get() = audioTrack != null
 
     /**
      * The user, automatically updates when we receive user events
      */
     internal val _user: MutableStateFlow<User> = MutableStateFlow(initialUser)
     val user: StateFlow<User> = _user
+
+    val userNameOrId: StateFlow<String> = _user.mapState { it.name.ifEmpty { it.id } }
 
     /**
      * When you joined the call

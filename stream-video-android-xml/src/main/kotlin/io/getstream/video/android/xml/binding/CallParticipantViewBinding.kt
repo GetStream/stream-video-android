@@ -40,20 +40,20 @@ public fun CallParticipantView.bindPictureInPictureView(
     lifecycleOwner: LifecycleOwner,
 ) {
     startJob(lifecycleOwner) {
-        viewModel.callState.filterNotNull().collectLatest { call ->
-            setRendererInitializer { videoRenderer, streamId, trackType, onRender ->
-                call.initRenderer(videoRenderer, streamId, trackType, onRender)
-            }
-        }
+//        viewModel.callState.filterNotNull().collectLatest { call ->
+//            setRendererInitializer { videoRenderer, streamId, trackType, onRender ->
+//                call.initRenderer(videoRenderer, streamId, trackType, onRender)
+//            }
+//        }
     }
 
     startJob(lifecycleOwner) {
-        viewModel.primarySpeaker.combine(viewModel.localParticipant) { primarySpeaker, localParticipant ->
-            primarySpeaker to localParticipant
-        }.onStart {
-            emit(viewModel.primarySpeaker.value to viewModel.localParticipant.value)
-        }.collectLatest { (primarySpeaker, localParticipant) ->
-            setParticipant(primarySpeaker ?: localParticipant ?: return@collectLatest)
-        }
+//        viewModel.primarySpeaker.combine(viewModel.localParticipant) { primarySpeaker, localParticipant ->
+//            primarySpeaker to localParticipant
+//        }.onStart {
+//            emit(viewModel.primarySpeaker.value to viewModel.localParticipant.value)
+//        }.collectLatest { (primarySpeaker, localParticipant) ->
+//            setParticipant(primarySpeaker ?: localParticipant ?: return@collectLatest)
+//        }
     }
 }

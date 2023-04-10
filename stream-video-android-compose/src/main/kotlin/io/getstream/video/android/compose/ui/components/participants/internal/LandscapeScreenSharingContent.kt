@@ -35,11 +35,12 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.controls.internal.DefaultCallControlsContent
 import io.getstream.video.android.compose.ui.components.internal.OverlayScreenSharingAppBar
 import io.getstream.video.android.compose.ui.components.previews.ParticipantsProvider
+import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CallMediaState
-import io.getstream.video.android.core.model.Call
-import io.getstream.video.android.core.model.CallParticipantState
 import io.getstream.video.android.core.model.ScreenSharingSession
+import org.webrtc.VideoTrack
 
 /**
  * Represents the landscape screen sharing content.
@@ -59,7 +60,7 @@ import io.getstream.video.android.core.model.ScreenSharingSession
 internal fun LandscapeScreenSharingContent(
     call: Call?,
     session: ScreenSharingSession,
-    participants: List<CallParticipantState>,
+    participants: List<ParticipantState>,
     paddingValues: PaddingValues,
     modifier: Modifier = Modifier,
     isFullscreen: Boolean,
@@ -110,13 +111,14 @@ internal fun LandscapeScreenSharingContent(
 @Preview
 @Composable
 private fun LandscapeScreenSharingContentPreview(
-    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<CallParticipantState>
+    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<ParticipantState>
 ) {
+    val videoTrack = callParticipants.first().videoTrackWrapped
     VideoTheme {
         LandscapeScreenSharingContent(
             call = null,
             session = ScreenSharingSession(
-                track = callParticipants.first().videoTrack ?: mockVideoTrackWrapper,
+                track = videoTrack ?: mockVideoTrackWrapper,
                 participant = callParticipants.first()
             ),
             participants = callParticipants,

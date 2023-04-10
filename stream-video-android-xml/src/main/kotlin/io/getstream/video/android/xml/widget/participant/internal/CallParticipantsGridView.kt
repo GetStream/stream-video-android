@@ -20,7 +20,7 @@ import android.content.Context
 import android.util.AttributeSet
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.transition.TransitionManager
-import io.getstream.video.android.core.model.CallParticipantState
+import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.xml.utils.extensions.constrainViewBottomToTopOfView
 import io.getstream.video.android.xml.utils.extensions.constrainViewEndToStartOfView
 import io.getstream.video.android.xml.utils.extensions.constrainViewStartToEndOfView
@@ -74,7 +74,7 @@ internal class CallParticipantsGridView : CallConstraintLayout, VideoRenderer {
      *
      * @param participants The list of participants to show on the screen.
      */
-    internal fun updateParticipants(participants: List<CallParticipantState>) {
+    internal fun updateParticipants(participants: List<ParticipantState>) {
         when {
             childList.size > participants.size -> {
                 val diff = childList.size - participants.size
@@ -100,7 +100,7 @@ internal class CallParticipantsGridView : CallConstraintLayout, VideoRenderer {
         participants.forEachIndexed { index, participant ->
             val view = childList[index]
             view.setParticipant(participant)
-            view.tag = participant.id
+            view.tag = participant.sessionId
         }
 
         updateConstraints()
@@ -191,7 +191,7 @@ internal class CallParticipantsGridView : CallConstraintLayout, VideoRenderer {
      *
      * @param participant The call participant marked as a primary speaker.
      */
-    internal fun updatePrimarySpeaker(participant: CallParticipantState?) {
-        childList.forEach { it.setActive(it.tag == participant?.id) }
+    internal fun updatePrimarySpeaker(participant: ParticipantState?) {
+        childList.forEach { it.setActive(it.tag == participant?.sessionId) }
     }
 }

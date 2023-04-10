@@ -38,8 +38,8 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.participants.CallParticipant
 import io.getstream.video.android.compose.ui.components.participants.LocalVideoContent
 import io.getstream.video.android.compose.ui.components.previews.ParticipantsProvider
-import io.getstream.video.android.core.model.Call
-import io.getstream.video.android.core.model.CallParticipantState
+import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.ParticipantState
 
 /**
  * Renders call participants based on the number of people in a call, in portrait mode.
@@ -55,8 +55,8 @@ import io.getstream.video.android.core.model.CallParticipantState
 @Composable
 internal fun BoxScope.PortraitParticipants(
     call: Call?,
-    primarySpeaker: CallParticipantState?,
-    callParticipants: List<CallParticipantState>,
+    primarySpeaker: ParticipantState?,
+    callParticipants: List<ParticipantState>,
     modifier: Modifier,
     paddingValues: PaddingValues,
     parentSize: IntSize,
@@ -74,7 +74,7 @@ internal fun BoxScope.PortraitParticipants(
                 call = call,
                 participant = participant,
                 onRender = onRender,
-                isFocused = primarySpeaker?.id == participant.id,
+                isFocused = primarySpeaker?.sessionId == participant.sessionId,
                 paddingValues = paddingValues
             )
         }
@@ -87,7 +87,7 @@ internal fun BoxScope.PortraitParticipants(
                 call = call,
                 participant = participant,
                 onRender = onRender,
-                isFocused = primarySpeaker?.id == participant.id,
+                isFocused = primarySpeaker?.sessionId == participant.sessionId,
                 paddingValues = paddingValues
             )
         }
@@ -101,7 +101,7 @@ internal fun BoxScope.PortraitParticipants(
                     modifier = Modifier.weight(1f),
                     call = call,
                     participant = firstParticipant,
-                    isFocused = primarySpeaker?.id == firstParticipant.id
+                    isFocused = primarySpeaker?.sessionId == firstParticipant.sessionId
                 )
 
                 CallParticipant(
@@ -109,7 +109,7 @@ internal fun BoxScope.PortraitParticipants(
                     call = call,
                     participant = secondParticipant,
                     onRender = onRender,
-                    isFocused = primarySpeaker?.id == secondParticipant.id,
+                    isFocused = primarySpeaker?.sessionId == secondParticipant.sessionId,
                     paddingValues = paddingValues
                 )
             }
@@ -130,14 +130,14 @@ internal fun BoxScope.PortraitParticipants(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = firstParticipant,
-                        isFocused = primarySpeaker?.id == firstParticipant.id
+                        isFocused = primarySpeaker?.sessionId == firstParticipant.sessionId
                     )
 
                     CallParticipant(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = secondParticipant,
-                        isFocused = primarySpeaker?.id == secondParticipant.id
+                        isFocused = primarySpeaker?.sessionId == secondParticipant.sessionId
                     )
                 }
 
@@ -146,7 +146,7 @@ internal fun BoxScope.PortraitParticipants(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = thirdParticipant,
-                        isFocused = primarySpeaker?.id == thirdParticipant.id,
+                        isFocused = primarySpeaker?.sessionId == thirdParticipant.sessionId,
                         paddingValues = paddingValues
                     )
 
@@ -155,7 +155,7 @@ internal fun BoxScope.PortraitParticipants(
                         call = call,
                         participant = fourthParticipant,
                         onRender = onRender,
-                        isFocused = primarySpeaker?.id == fourthParticipant.id,
+                        isFocused = primarySpeaker?.sessionId == fourthParticipant.sessionId,
                         paddingValues = paddingValues
                     )
                 }
@@ -185,7 +185,7 @@ internal fun BoxScope.PortraitParticipants(
 @Preview
 @Composable
 private fun PortraitParticipantsPreview1(
-    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<CallParticipantState>
+    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<ParticipantState>
 ) {
     VideoTheme {
         val configuration = LocalConfiguration.current
@@ -210,7 +210,7 @@ private fun PortraitParticipantsPreview1(
 @Preview
 @Composable
 private fun PortraitParticipantsPreview2(
-    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<CallParticipantState>
+    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<ParticipantState>
 ) {
     VideoTheme {
         val configuration = LocalConfiguration.current
@@ -235,7 +235,7 @@ private fun PortraitParticipantsPreview2(
 @Preview
 @Composable
 private fun PortraitParticipantsPreview3(
-    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<CallParticipantState>
+    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<ParticipantState>
 ) {
     VideoTheme {
         val configuration = LocalConfiguration.current
@@ -260,7 +260,7 @@ private fun PortraitParticipantsPreview3(
 @Preview
 @Composable
 private fun PortraitParticipantsPreview4(
-    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<CallParticipantState>
+    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<ParticipantState>
 ) {
     VideoTheme {
         val configuration = LocalConfiguration.current

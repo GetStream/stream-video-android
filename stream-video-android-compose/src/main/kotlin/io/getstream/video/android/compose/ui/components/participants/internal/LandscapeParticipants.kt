@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,8 +40,8 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.participants.CallParticipant
 import io.getstream.video.android.compose.ui.components.participants.LocalVideoContent
 import io.getstream.video.android.compose.ui.components.previews.ParticipantsProvider
-import io.getstream.video.android.core.model.Call
-import io.getstream.video.android.core.model.CallParticipantState
+import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.ParticipantState
 
 /**
  * Renders call participants based on the number of people in a call, in landscape mode.
@@ -56,8 +57,8 @@ import io.getstream.video.android.core.model.CallParticipantState
 @Composable
 internal fun BoxScope.LandscapeParticipants(
     call: Call?,
-    primarySpeaker: CallParticipantState?,
-    callParticipants: List<CallParticipantState>,
+    primarySpeaker: ParticipantState?,
+    callParticipants: List<ParticipantState>,
     modifier: Modifier,
     paddingValues: PaddingValues,
     parentSize: IntSize,
@@ -76,13 +77,14 @@ internal fun BoxScope.LandscapeParticipants(
                     .weight(rowItemWeight),
                 call = call,
                 participant = participant,
-                isFocused = primarySpeaker?.id == participant.id
+                isFocused = primarySpeaker?.user?.value?.id == participant.user.value.id
             )
         }
 
         if (callParticipants.size == 1 || callParticipants.size >= 4) {
             val local = callParticipants.firstOrNull { it.isLocal }
 
+            val primarySpeakerUser = primarySpeaker?.user?.collectAsState()
             if (local != null) {
                 CallParticipant(
                     modifier = Modifier
@@ -91,7 +93,7 @@ internal fun BoxScope.LandscapeParticipants(
                     call = call,
                     participant = local,
                     onRender = onRender,
-                    isFocused = primarySpeaker?.id == local.id,
+                    isFocused = primarySpeakerUser?.value?.id == local.user.collectAsState().value.id,
                     paddingValues = paddingValues
                 )
             }
@@ -118,7 +120,7 @@ internal fun BoxScope.LandscapeParticipants(
 @Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1440, heightDp = 720)
 @Composable
 private fun LandscapeParticipantsPreview1(
-    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<CallParticipantState>
+    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<ParticipantState>
 ) {
     VideoTheme {
         val configuration = LocalConfiguration.current
@@ -143,7 +145,7 @@ private fun LandscapeParticipantsPreview1(
 @Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1440, heightDp = 720)
 @Composable
 private fun LandscapeParticipantsPreview2(
-    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<CallParticipantState>
+    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<ParticipantState>
 ) {
     VideoTheme {
         val configuration = LocalConfiguration.current
@@ -168,7 +170,7 @@ private fun LandscapeParticipantsPreview2(
 @Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1440, heightDp = 720)
 @Composable
 private fun LandscapeParticipantsPreview3(
-    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<CallParticipantState>
+    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<ParticipantState>
 ) {
     VideoTheme {
         val configuration = LocalConfiguration.current
@@ -193,7 +195,7 @@ private fun LandscapeParticipantsPreview3(
 @Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1440, heightDp = 720)
 @Composable
 private fun LandscapeParticipantsPreview4(
-    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<CallParticipantState>
+    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<ParticipantState>
 ) {
     VideoTheme {
         val configuration = LocalConfiguration.current

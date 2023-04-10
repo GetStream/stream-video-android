@@ -31,8 +31,8 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.participants.CallParticipant
 import io.getstream.video.android.compose.ui.components.previews.ParticipantsProvider
-import io.getstream.video.android.core.model.Call
-import io.getstream.video.android.core.model.CallParticipantState
+import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.ParticipantState
 
 /**
  * Shows a row of call participants.
@@ -44,7 +44,7 @@ import io.getstream.video.android.core.model.CallParticipantState
 @Composable
 internal fun ParticipantsRow(
     call: Call?,
-    participants: List<CallParticipantState>,
+    participants: List<ParticipantState>,
     modifier: Modifier = Modifier
 ) {
     LazyRow(
@@ -68,7 +68,7 @@ internal fun ParticipantsRow(
 @Composable
 private fun ParticipantListItem(
     call: Call?,
-    participant: CallParticipantState
+    participant: ParticipantState
 ) {
     CallParticipant(
         modifier = Modifier
@@ -83,7 +83,7 @@ private fun ParticipantListItem(
 @Preview
 @Composable
 private fun ParticipantsRowPreview(
-    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<CallParticipantState>
+    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<ParticipantState>
 ) {
     VideoTheme {
         ParticipantsRow(

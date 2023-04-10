@@ -36,13 +36,9 @@ import io.getstream.video.android.compose.ui.components.call.controls.CallContro
 import io.getstream.video.android.compose.ui.components.call.incomingcall.IncomingCallContent
 import io.getstream.video.android.compose.ui.components.call.outgoingcall.OutgoingCallContent
 import io.getstream.video.android.compose.ui.components.participants.CallParticipantsInfoMenu
-import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.call.state.InviteUsersToCall
-import io.getstream.video.android.core.call.state.ToggleMicrophone
-import io.getstream.video.android.core.model.Call
+import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.viewmodel.CallViewModel
-import io.getstream.video.android.core.model.state.StreamCallState as State
 
 /**
  * Represents different call content based on the call state provided from the [viewModel].
@@ -104,16 +100,16 @@ public fun CallContainer(
         )
     }
 ) {
-    val stateHolder = viewModel.streamCallState.collectAsState(initial = State.Idle)
-    val state = stateHolder.value
-
-    if (state is State.Incoming && !state.acceptedByMe) {
-        incomingCallContent()
-    } else if (state is State.Outgoing && !state.acceptedByCallee) {
-        outgoingCallContent()
-    } else {
-        callContent()
-    }
+//    val stateHolder = viewModel.streamCallState.collectAsState(initial = State.Idle)
+//    val state = stateHolder.value
+//
+//    if (state is State.Incoming && !state.acceptedByMe) {
+//        incomingCallContent()
+//    } else if (state is State.Outgoing && !state.acceptedByCallee) {
+//        outgoingCallContent()
+//    } else {
+//        callContent()
+//    }
 }
 
 @Composable
@@ -122,15 +118,14 @@ internal fun DefaultCallContent(
     modifier: Modifier = Modifier,
     onBackPressed: () -> Unit = {},
     //onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
-    callControlsContent: @Composable () -> Unit,
     pictureInPictureContent: @Composable (Call) -> Unit = { DefaultPictureInPictureContent(it) }
 ) {
     CallContent(
         modifier = modifier.testTag("call_content"),
         callViewModel = viewModel,
-        onBackPressed = onBackPressed,
+        //onBackPressed = onBackPressed,
         //onCallAction = onCallAction,
-        callControlsContent = callControlsContent,
+        //callControlsContent = callControlsContent,
         pictureInPictureContent = pictureInPictureContent
     )
 
@@ -145,21 +140,21 @@ internal fun DefaultCallContent(
             modifier = Modifier
                 .fillMaxSize()
                 .background(VideoTheme.colors.appBackground),
-            participantsState = participantsState,
-            //users = users,
-            //onDismiss = { viewModel.dismissOptions() },
-            onInfoMenuAction = { action ->
-                when (action) {
-                    is InviteUsers -> {
-                        //viewModel.dismissOptions()
-                        usersToInvite = action.users
-                    }
-
-                    //is ChangeMuteState -> onCallAction(ToggleMicrophone(action.isEnabled))
-                    is ChangeMuteState -> TODO()
-                }
-            }
+            participantsState = participantsState
         )
+        //users = users,
+        //onDismiss = { viewModel.dismissOptions() },
+        { action ->
+            when (action) {
+                is InviteUsers -> {
+                    //viewModel.dismissOptions()
+                    usersToInvite = action.users
+                }
+
+                //is ChangeMuteState -> onCallAction(ToggleMicrophone(action.isEnabled))
+                is ChangeMuteState -> TODO()
+            }
+        }
     }
 
     if (usersToInvite.isNotEmpty()) {

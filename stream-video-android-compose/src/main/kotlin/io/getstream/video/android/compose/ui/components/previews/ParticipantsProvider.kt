@@ -18,10 +18,10 @@ package io.getstream.video.android.compose.ui.components.previews
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import io.getstream.video.android.common.util.mockParticipantList
-import io.getstream.video.android.core.model.CallParticipantState
+import io.getstream.video.android.core.ParticipantState
 
-internal class ParticipantsProvider : PreviewParameterProvider<List<CallParticipantState>> {
+internal class ParticipantsProvider : PreviewParameterProvider<List<ParticipantState>> {
 
-    override val values: Sequence<List<CallParticipantState>>
+    override val values: Sequence<List<ParticipantState>>
         get() = sequenceOf(mockParticipantList)
 }

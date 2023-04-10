@@ -24,7 +24,7 @@ import android.util.AttributeSet
 import android.widget.HorizontalScrollView
 import android.widget.LinearLayout
 import androidx.annotation.Px
-import io.getstream.video.android.core.model.CallParticipantState
+import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.xml.widget.participant.CallParticipantView
 import io.getstream.video.android.xml.widget.participant.RendererInitializer
@@ -91,7 +91,7 @@ internal class CallParticipantsListView : HorizontalScrollView, VideoRenderer, J
      *
      * @param participants The list of participants to show on the screen.
      */
-    internal fun updateParticipants(participants: List<CallParticipantState>) {
+    internal fun updateParticipants(participants: List<ParticipantState>) {
         when {
             childList.size > participants.size -> {
                 val diff = childList.size - participants.size
@@ -117,7 +117,7 @@ internal class CallParticipantsListView : HorizontalScrollView, VideoRenderer, J
         childList.forEachIndexed { index, view ->
             val participant = participants[index]
             view.setParticipant(participant)
-            view.tag = participant.id
+            view.tag = participant.sessionId
         }
     }
 
@@ -126,9 +126,9 @@ internal class CallParticipantsListView : HorizontalScrollView, VideoRenderer, J
      *
      * @param participant The call participant marked as a primary speaker.
      */
-    internal fun updatePrimarySpeaker(participant: CallParticipantState?) {
+    internal fun updatePrimarySpeaker(participant: ParticipantState?) {
         childList.forEach {
-            it.setActive(it.tag == participant?.id)
+            it.setActive(it.tag == participant?.sessionId)
         }
     }
 

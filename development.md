@@ -168,3 +168,54 @@ The second approach is better since:
 * Or perhaps have the buttons in a bottom bar instead of an overlay
 
 With the second approach everything is easy to understand and customize.
+
+### Ringing
+
+* Push notifications or the coordinator WS can trigger a callCreatedEvent with ring=true
+* The UI should show an incoming call interface
+* Clicking accept or reject fires triggers the accept/reject API endpoints
+* Call members have an accepted_at, rejected_at field
+
+Ringing state on a call has the following options
+
+```kotlin
+sealed class RingingState() {
+    object Incoming : RingingState()
+    object Outgoing : RingingState()
+    object Active : RingingState()
+    object RejectedByAll : RingingState()
+    object TimeoutNoAnswer : RingingState()
+}
+```
+
+### V0 to V1 migration tips
+
+Participant state now lives in ParticipantState
+```kotlin
+// old
+CallParticipantState(name="hello")
+// new
+ParticipantState(initialUser= User(name="hello"))
+```
+
+The participant state object exposes stateflow objects
+
+```kotlin
+// old
+participant.connectionQuality
+// new
+participant.connectionQuality.collectAsState().value
+```
+
+Call now has a state object
+
+```kotlin
+// old call.callParticipants
+// new call.state.participants
+```
+
+Ringing call state has been simplified
+
+```kotlin
+// call.state.ringingState
+```

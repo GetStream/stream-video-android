@@ -26,6 +26,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,14 +35,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.ShowCallInfo
-import io.getstream.video.android.core.model.CallParticipantState
 import io.getstream.video.android.ui.common.R
 
 @Composable
 internal fun OverlayScreenSharingAppBar(
-    sharingParticipant: CallParticipantState,
+    sharingParticipant: ParticipantState,
     onBackPressed: () -> Unit,
     onCallAction: (CallAction) -> Unit
 ) {
@@ -70,7 +71,7 @@ internal fun OverlayScreenSharingAppBar(
             modifier = Modifier.weight(1f),
             text = stringResource(
                 id = R.string.stream_video_screen_sharing_title,
-                sharingParticipant.name.ifEmpty { sharingParticipant.id }
+                sharingParticipant.user.collectAsState().value.name.ifEmpty { sharingParticipant.user }
             ),
             color = Color.White,
             style = VideoTheme.typography.title3Bold,

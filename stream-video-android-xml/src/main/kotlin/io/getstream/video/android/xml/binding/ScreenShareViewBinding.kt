@@ -39,18 +39,18 @@ public fun ScreenShareView.bindView(
     lifecycleOwner: LifecycleOwner,
 ) {
     startJob(lifecycleOwner) {
-        viewModel.callState.filterNotNull().collectLatest { call ->
-            setRendererInitializer { videoRenderer, streamId, trackType, onRender ->
-                call.initRenderer(videoRenderer, streamId, trackType, onRender)
-            }
-        }
+//        viewModel.callState.filterNotNull().collectLatest { call ->
+//            setRendererInitializer { videoRenderer, streamId, trackType, onRender ->
+//                call.initRenderer(videoRenderer, streamId, trackType, onRender)
+//            }
+//        }
     }
 
     startJob(lifecycleOwner) {
-        viewModel.screenSharingSessions
-            .mapNotNull { it.firstOrNull() }
-            .collectLatest { screenSharingSession ->
-                setScreenSharingSession(screenSharingSession)
-            }
+//        viewModel.screenSharingSessions
+//            .mapNotNull { it.firstOrNull() }
+//            .collectLatest { screenSharingSession ->
+//                setScreenSharingSession(screenSharingSession)
+//            }
     }
 }

@@ -50,20 +50,20 @@ public fun OutgoingCallContent(
     viewModel: CallViewModel,
     modifier: Modifier = Modifier,
     onBackPressed: () -> Unit,
-    onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
+    //onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
 ) {
-    val callType: CallType by viewModel.callType.collectAsState()
-    val participants: List<CallUser> by viewModel.participants.collectAsState()
-    val callMediaState: CallMediaState by viewModel.callMediaState.collectAsState()
+//    val callType: CallType by viewModel.callType.collectAsState()
+//    val participants: List<CallUser> by viewModel.participants.collectAsState()
+//    val callMediaState: CallMediaState by viewModel.callMediaState.collectAsState()
 
-    OutgoingCallContent(
-        callType = callType,
-        participants = participants,
-        callMediaState = callMediaState,
-        modifier = modifier,
-        onBackPressed = onBackPressed,
-        onCallAction = onCallAction
-    )
+//    OutgoingCallContent(
+//        callType = callType,
+//        participants = participants,
+//        callMediaState = callMediaState,
+//        modifier = modifier,
+//        onBackPressed = onBackPressed,
+//        onCallAction = onCallAction
+//    )
 }
 
 /**
@@ -139,24 +139,24 @@ public fun OutgoingCallContent(
 @Composable
 private fun OutgoingCallPreview() {
     VideoTheme {
-        OutgoingCallContent(
-            callType = CallType.VIDEO,
-            participants = listOf(
-                mockParticipant.let {
-                    CallUser(
-                        id = it.id,
-                        name = it.name,
-                        role = it.role,
-                        state = null,
-                        imageUrl = it.profileImageURL ?: "",
-                        createdAt = null,
-                        updatedAt = null,
-                        teams = emptyList()
-                    )
-                }
-            ),
-            callMediaState = CallMediaState(),
-            onBackPressed = {}
-        ) {}
+//        OutgoingCallContent(
+//            callType = CallType.VIDEO,
+//            participants = listOf(
+//                mockParticipant.let {
+//                    CallUser(
+//                        id = it.id,
+//                        name = it.name,
+//                        role = it.role,
+//                        state = null,
+//                        imageUrl = it.profileImageURL ?: "",
+//                        createdAt = null,
+//                        updatedAt = null,
+//                        teams = emptyList()
+//                    )
+//                }
+//            ),
+//            callMediaState = CallMediaState(),
+//            onBackPressed = {}
+//        ) {}
     }
 }

@@ -34,8 +34,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.core.model.Call
-import io.getstream.video.android.core.model.VideoTrackWrapper
+import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.model.TrackWrapper
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import stream.video.sfu.models.TrackType
 
@@ -50,7 +50,7 @@ import stream.video.sfu.models.TrackType
 @Composable
 public fun VideoRenderer(
     call: Call?,
-    videoTrackWrapper: VideoTrackWrapper,
+    videoTrackWrapper: TrackWrapper,
     sessionId: String,
     trackType: TrackType,
     modifier: Modifier = Modifier,
@@ -66,7 +66,7 @@ public fun VideoRenderer(
         return
     }
 
-    val trackState: MutableState<VideoTrackWrapper?> = remember { mutableStateOf(null) }
+    val trackState: MutableState<TrackWrapper?> = remember { mutableStateOf(null) }
     var view: VideoTextureViewRenderer? by remember { mutableStateOf(null) }
 
     DisposableEffect(call, videoTrackWrapper) {
@@ -96,15 +96,15 @@ public fun VideoRenderer(
 
 private fun cleanTrack(
     view: VideoTextureViewRenderer?,
-    trackState: MutableState<VideoTrackWrapper?>,
+    trackState: MutableState<TrackWrapper?>,
 ) {
     view?.let { trackState.value?.video?.removeSink(it) }
     trackState.value = null
 }
 
 private fun setupVideo(
-    trackState: MutableState<VideoTrackWrapper?>,
-    track: VideoTrackWrapper,
+    trackState: MutableState<TrackWrapper?>,
+    track: TrackWrapper,
     renderer: VideoTextureViewRenderer,
 ) {
     if (trackState.value == track) {
@@ -114,7 +114,7 @@ private fun setupVideo(
     cleanTrack(renderer, trackState)
 
     trackState.value = track
-    track.video.addSink(renderer)
+    track.video?.addSink(renderer)
 }
 
 @Preview
@@ -123,7 +123,7 @@ private fun VideoRendererPreview() {
     VideoTheme {
         VideoRenderer(
             call = null,
-            videoTrackWrapper = VideoTrackWrapper("", org.webrtc.VideoTrack(123)),
+            videoTrackWrapper = TrackWrapper("", org.webrtc.VideoTrack(123)),
             sessionId = "",
             trackType = TrackType.TRACK_TYPE_VIDEO
         )
