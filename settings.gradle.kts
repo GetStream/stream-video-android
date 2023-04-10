@@ -20,6 +20,7 @@ rootProject.name = "stream-video-android"
 // Sample apps
 include(":app")
 include(":dogfooding")
+include(":demo")
 
 // SDK
 include(":benchmark")
