@@ -134,18 +134,7 @@ private fun CallBackgroundPreview() {
     VideoTheme {
         CallBackground(
             participants = listOf(
-                mockUsers.first().let {
-                    CallUser(
-                        id = it.id,
-                        name = it.name,
-                        imageUrl = it.profileImageURL ?: "",
-                        role = it.role,
-                        teams = emptyList(),
-                        updatedAt = null,
-                        createdAt = null,
-                        state = CallUserState("", false, false, false)
-                    )
-                }
+
             ),
             callType = CallType.VIDEO, isIncoming = true
         ) {

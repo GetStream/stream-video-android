@@ -44,8 +44,8 @@ class ClientState(client: StreamVideo) {
     /**
      * Current user object
      */
-    private val _currentUser: MutableStateFlow<User?> = MutableStateFlow(null)
-    public val currentUser: StateFlow<User?> = _currentUser
+    private val _user: MutableStateFlow<User?> = MutableStateFlow(null)
+    public val user: StateFlow<User?> = _user
 
     /**
      * connectionState shows if we've established a connection with the coordinator

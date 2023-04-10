@@ -157,3 +157,6 @@ Other
 - Logging setting needs to be passed to retrofit
 - Token refresh flow
 - Disconnect/ garbage collect flow needs a full round of review
+- MediaManager needs a full review and cleanup
+- Socket connection system needs a full review, cleanup and test coverage
+- Ringing support isn't implemented yet

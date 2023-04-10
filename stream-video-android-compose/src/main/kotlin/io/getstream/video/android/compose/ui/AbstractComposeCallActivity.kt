@@ -37,7 +37,7 @@ public abstract class AbstractComposeCallActivity : AbstractCallActivity() {
             CallContainer(
                 modifier = Modifier.background(color = VideoTheme.colors.appBackground),
                 viewModel = callViewModel,
-                onCallAction = ::handleCallAction,
+                //onCallAction = ::handleCallAction,
                 onBackPressed = ::handleBackPressed,
                 pictureInPictureContent = { PictureInPictureContent(call = it) }
             )

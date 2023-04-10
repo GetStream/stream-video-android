@@ -90,6 +90,7 @@ public class CallState(val call: Call, user: User) {
     // making it a property requires cleaning up the properties of a participant
     val me : StateFlow<ParticipantState?> = _participants.mapState { it.get(user.id) }
 
+    // TODO: implement me properly
     public val screenSharingSession: StateFlow<ScreenSharingSession?> = _screenSharingSession
 
     public val isScreenSharing: StateFlow<Boolean> = _screenSharingSession.mapState { it != null }

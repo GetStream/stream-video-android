@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
@@ -32,9 +33,8 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.previews.ParticipantsProvider
-import io.getstream.video.android.core.model.CallParticipantState
+import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.User
-import io.getstream.video.android.core.model.toUser
 import io.getstream.video.android.core.utils.initials
 import io.getstream.video.android.ui.common.R
 
@@ -87,11 +87,11 @@ public fun UserAvatar(
 @Preview
 @Composable
 private fun UserAvatarPreview(
-    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<CallParticipantState>
+    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<ParticipantState>
 ) {
     VideoTheme {
         UserAvatar(
-            user = callParticipants[0].toUser(),
+            user = callParticipants[0].user.collectAsState().value,
             modifier = Modifier.size(82.dp)
         )
     }

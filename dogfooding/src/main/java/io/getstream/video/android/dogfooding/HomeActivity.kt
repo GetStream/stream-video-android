@@ -39,11 +39,7 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
@@ -221,9 +217,9 @@ class HomeActivity : AppCompatActivity() {
         ) {
             UserIcon()
 
-            val user = streamVideo.getUser()
+            val user = streamVideo.state.user.collectAsState().value
 
-            val name = user.name.ifEmpty {
+            val name = user?.name?.ifEmpty {
                 user.id
             }
 
@@ -232,7 +228,7 @@ class HomeActivity : AppCompatActivity() {
                     .padding(horizontal = 16.dp)
                     .align(CenterVertically),
                 color = VideoTheme.colors.textHighEmphasis,
-                text = name,
+                text = name ?: "Missing name",
                 overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.Center
             )
