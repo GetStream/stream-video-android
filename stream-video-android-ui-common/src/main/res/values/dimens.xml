@@ -69,11 +69,13 @@
     <dimen name="stream_video_screenShareParticipantsListHeight">125dp</dimen>
     <dimen name="stream_video_screenShareParticipantsListPadding">8dp</dimen>
     <dimen name="stream_video_screenShareParticipantsListItemMargin">8dp</dimen>
-    <dimen name="stream_video_screenShareIconTitlePadding">5dp</dimen>
     <dimen name="stream_video_screenShareParticipantsMargin">16dp</dimen>
     <dimen name="stream_video_screenShareParticipantsRadius">16dp</dimen>
     <dimen name="stream_video_screenSharePresenterPadding">16dp</dimen>
-    <dimen name="stream_video_screenSharePresenterTitleMargin">16dp</dimen>
+    <dimen name="stream_video_screenSharePresenterTooltipMargin">16dp</dimen>
+    <dimen name="stream_video_screenSharePresenterTooltipPadding">16dp</dimen>
+    <dimen name="stream_video_screenSharePresenterTooltipHeight">35dp</dimen>
+    <dimen name="stream_video_screenShareTooltipIconPadding">5dp</dimen>
     <dimen name="stream_video_screenShareButtonSize">40dp</dimen>
 
     <dimen name="stream_video_title1TextSize">24sp</dimen>

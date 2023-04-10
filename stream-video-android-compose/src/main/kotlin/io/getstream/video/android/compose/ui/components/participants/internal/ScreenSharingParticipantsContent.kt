@@ -81,7 +81,8 @@ internal fun ScreenSharingCallParticipantsContent(
             paddingValues = paddingValues,
             modifier = modifier,
             onRender = onRender,
-            onCallAction = onCallAction
+            onCallAction = onCallAction,
+            onBackPressed = onBackPressed,
         )
     } else {
         LandscapeScreenSharingContent(
@@ -92,10 +93,8 @@ internal fun ScreenSharingCallParticipantsContent(
             paddingValues = paddingValues,
             modifier = modifier,
             onRender = onRender,
-            isFullscreen = isFullscreen,
             onCallAction = onCallAction,
             onBackPressed = onBackPressed,
-            callControlsContent = callControlsContent
         )
     }
 }

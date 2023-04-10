@@ -320,8 +320,10 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
                 primarySpeaker = mockParticipant,
                 paddingValues = PaddingValues(0.dp),
                 modifier = Modifier.fillMaxSize(),
-                onRender = {}
-            ) {}
+                onRender = {},
+                onBackPressed = {},
+                onCallAction = {}
+            )
         }
     }
 

@@ -95,8 +95,10 @@ public data class StreamDimens(
     public val screenShareParticipantsScreenShareListMargin: Dp,
     public val screenShareParticipantsRadius: Dp,
     public val screenSharePresenterPadding: Dp,
-    public val screenSharePresenterMargin: Dp,
-    public val screenSharePresenterIconTitlePadding: Dp,
+    public val screenSharePresenterTooltipMargin: Dp,
+    public val screenSharePresenterTooltipPadding: Dp,
+    public val screenSharePresenterTooltipIconPadding: Dp,
+    public val screenSharePresenterTooltipHeight: Dp,
 ) {
     public companion object {
         /**
@@ -166,10 +168,12 @@ public data class StreamDimens(
             screenShareParticipantsListItemMargin = dimensionResource(id = R.dimen.stream_video_screenShareParticipantsListItemMargin),
             screenShareParticipantsScreenShareListMargin = dimensionResource(id = R.dimen.stream_video_screenShareParticipantsMargin),
             screenShareParticipantsRadius = dimensionResource(id = R.dimen.stream_video_screenShareParticipantsRadius),
-            screenSharePresenterMargin = dimensionResource(id = R.dimen.stream_video_screenSharePresenterTitleMargin),
+            screenSharePresenterTooltipMargin = dimensionResource(id = R.dimen.stream_video_screenSharePresenterTooltipMargin),
+            screenSharePresenterTooltipPadding = dimensionResource(id = R.dimen.stream_video_screenSharePresenterTooltipPadding),
             screenSharePresenterPadding = dimensionResource(id = R.dimen.stream_video_screenSharePresenterPadding),
             callControllerBottomPadding = dimensionResource(id = R.dimen.stream_video_callControllerBottomPadding),
-            screenSharePresenterIconTitlePadding = dimensionResource(id = R.dimen.stream_video_screenShareIconTitlePadding),
+            screenSharePresenterTooltipIconPadding = dimensionResource(id = R.dimen.stream_video_screenShareTooltipIconPadding),
+            screenSharePresenterTooltipHeight = dimensionResource(id = R.dimen.stream_video_screenSharePresenterTooltipHeight)
         )
     }
 }

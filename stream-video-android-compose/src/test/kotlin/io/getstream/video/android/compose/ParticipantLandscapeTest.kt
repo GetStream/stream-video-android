@@ -31,11 +31,9 @@ import io.getstream.video.android.common.util.mockParticipantList
 import io.getstream.video.android.common.util.mockVideoTrack
 import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.call.controls.internal.DefaultCallControlsContent
 import io.getstream.video.android.compose.ui.components.participants.internal.LandscapeParticipants
 import io.getstream.video.android.compose.ui.components.participants.internal.LandscapeScreenSharingContent
 import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantsRow
-import io.getstream.video.android.core.call.state.CallMediaState
 import io.getstream.video.android.core.model.ScreenSharingSession
 import org.junit.Rule
 import org.junit.Test
@@ -192,16 +190,10 @@ internal class ParticipantLandscapeTest : BaseComposeTest() {
                 primarySpeaker = mockParticipant,
                 paddingValues = PaddingValues(0.dp),
                 modifier = Modifier.fillMaxSize(),
-                isFullscreen = true,
                 onRender = {},
                 onCallAction = {},
                 onBackPressed = {}
-            ) {
-                DefaultCallControlsContent(
-                    call = null,
-                    callMediaState = CallMediaState(),
-                ) {}
-            }
+            )
         }
     }
 

@@ -172,7 +172,7 @@ public data class CallViewStyle(
 
                 val presenterTextMargin = it.getDimension(
                     R.styleable.CallView_streamVideoCallViewPresenterTextMargin,
-                    context.getDimension(RCommon.dimen.stream_video_screenSharePresenterTitleMargin).toFloat()
+                    context.getDimension(RCommon.dimen.stream_video_screenSharePresenterTooltipMargin).toFloat()
                 ).toInt()
 
                 val presenterTextPadding = it.getDimension(
