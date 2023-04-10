@@ -32,7 +32,7 @@ jobs:
           name: dogfooding-release
           path: dogfooding/build/outputs/apk/release/
       - name: Upload artifact to Firebase App Distribution
-        uses: wzieba/Firebase-Distribution-Github-Action@v1
+        uses: wzieba/Firebase-Distribution-Github-Action@v1.5.0
         with:
           appId: ${{secrets.FIREBASE_DOGFOODING_SAMPLE_APP_ID}}
           serviceCredentialsFileContent: ${{ secrets.CREDENTIAL_FILE_CONTENT }}
