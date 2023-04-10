@@ -19,6 +19,12 @@ class AndroidLibraryComposeConventionPlugin : Plugin<Project> {
                 configureKotlinAndroid(this)
                 configureAndroidCompose(this)
 
+                packagingOptions {
+                    resources {
+                        excludes += "/META-INF/{AL2.0,LGPL2.1}"
+                    }
+                }
+
                 kotlinOptions {
                     freeCompilerArgs = freeCompilerArgs + listOf("-Xexplicit-api=strict")
                 }
