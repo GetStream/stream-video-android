@@ -58,6 +58,7 @@
     <dimen name="stream_video_audioLevelIndicatorBarSeparatorWidth">3dp</dimen>
     <dimen name="stream_video_audioStatusSize">15dp</dimen>
     <dimen name="stream_video_activeSpeakerBoarderWidth">6dp</dimen>
+    <dimen name="stream_video_activeSpeakerScreenSharingBoarderWidth">4dp</dimen>
     <dimen name="stream_video_callParticipantLabelHeight">24dp</dimen>
     <dimen name="stream_video_callParticipantSoundIndicatorPaddingStart">8dp</dimen>
     <dimen name="stream_video_callParticipantLabelPadding">8dp</dimen>

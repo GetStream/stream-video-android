@@ -83,6 +83,7 @@ private fun ParticipantListItem(
         call = call,
         participant = participant,
         labelPosition = Alignment.BottomStart,
+        isScreenSharing = true,
         isFocused = participant.id == primarySpeaker?.id,
         isShowConnectionQualityIndicator = false
     )
