@@ -308,16 +308,36 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
     }
 
     @Test
-    fun `snapshot PortraitScreenSharingContent composable`() {
+    fun `snapshot PortraitScreenSharingContent for other participant composable`() {
         snapshot {
             PortraitScreenSharingContent(
                 call = null,
                 session = ScreenSharingSession(
-                    track = mockParticipantList.first().videoTrack ?: mockVideoTrack,
-                    participant = mockParticipantList.first()
+                    track = mockParticipantList[1].videoTrack ?: mockVideoTrack,
+                    participant = mockParticipantList[1]
                 ),
                 participants = mockParticipantList,
-                primarySpeaker = mockParticipant,
+                primarySpeaker = mockParticipantList[1],
+                paddingValues = PaddingValues(0.dp),
+                modifier = Modifier.fillMaxSize(),
+                onRender = {},
+                onBackPressed = {},
+                onCallAction = {}
+            )
+        }
+    }
+
+    @Test
+    fun `snapshot PortraitScreenSharingContent for myself composable`() {
+        snapshot {
+            PortraitScreenSharingContent(
+                call = null,
+                session = ScreenSharingSession(
+                    track = mockParticipantList[0].videoTrack ?: mockVideoTrack,
+                    participant = mockParticipantList[0]
+                ),
+                participants = mockParticipantList,
+                primarySpeaker = mockParticipantList[0],
                 paddingValues = PaddingValues(0.dp),
                 modifier = Modifier.fillMaxSize(),
                 onRender = {},

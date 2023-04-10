@@ -124,8 +124,37 @@ private fun LandscapeScreenSharingContentPreview(
         LandscapeScreenSharingContent(
             call = null,
             session = ScreenSharingSession(
-                track = callParticipants.first().videoTrack ?: mockVideoTrack,
-                participant = callParticipants.first()
+                track = callParticipants[1].videoTrack ?: mockVideoTrack,
+                participant = callParticipants[1]
+            ),
+            participants = callParticipants,
+            primarySpeaker = callParticipants[1],
+            paddingValues = PaddingValues(0.dp),
+            modifier = Modifier.fillMaxSize(),
+            onRender = {},
+            onCallAction = {},
+            onBackPressed = {}
+        )
+    }
+}
+
+@Preview(
+    device = Devices.AUTOMOTIVE_1024p, widthDp = 1440, heightDp = 720
+)
+@Preview(
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    device = Devices.AUTOMOTIVE_1024p, widthDp = 1440, heightDp = 720
+)
+@Composable
+private fun LandscapeScreenSharingMyContentPreview(
+    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<CallParticipantState>
+) {
+    VideoTheme {
+        LandscapeScreenSharingContent(
+            call = null,
+            session = ScreenSharingSession(
+                track = callParticipants[0].videoTrack ?: mockVideoTrack,
+                participant = callParticipants[0]
             ),
             participants = callParticipants,
             primarySpeaker = callParticipants[0],

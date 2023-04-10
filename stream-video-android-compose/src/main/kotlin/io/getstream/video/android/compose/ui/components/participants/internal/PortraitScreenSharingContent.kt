@@ -129,3 +129,27 @@ private fun PortraitScreenSharingContentPreview(
         )
     }
 }
+
+@Preview
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun PortraitScreenSharingMyContentPreview(
+    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<CallParticipantState>
+) {
+    VideoTheme {
+        PortraitScreenSharingContent(
+            call = null,
+            session = ScreenSharingSession(
+                track = callParticipants[0].videoTrack ?: mockVideoTrack,
+                participant = callParticipants[0]
+            ),
+            participants = callParticipants,
+            primarySpeaker = callParticipants[0],
+            paddingValues = PaddingValues(0.dp),
+            modifier = Modifier.fillMaxSize(),
+            onRender = {},
+            onBackPressed = {},
+            onCallAction = {}
+        )
+    }
+}

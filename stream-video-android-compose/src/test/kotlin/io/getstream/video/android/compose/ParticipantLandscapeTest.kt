@@ -178,13 +178,33 @@ internal class ParticipantLandscapeTest : BaseComposeTest() {
     }
 
     @Test
-    fun `snapshot LandscapeScreenSharingContent composable`() {
-        snapshot {
+    fun `snapshot LandscapeScreenSharingContent for other participant composable`() {
+        snapshot(isInDarkMode = true) {
             LandscapeScreenSharingContent(
                 call = null,
                 session = ScreenSharingSession(
-                    track = mockParticipantList.first().videoTrack ?: mockVideoTrack,
-                    participant = mockParticipantList.first()
+                    track = mockParticipantList[1].videoTrack ?: mockVideoTrack,
+                    participant = mockParticipantList[1]
+                ),
+                participants = mockParticipantList,
+                primarySpeaker = mockParticipant,
+                paddingValues = PaddingValues(0.dp),
+                modifier = Modifier.fillMaxSize(),
+                onRender = {},
+                onCallAction = {},
+                onBackPressed = {}
+            )
+        }
+    }
+
+    @Test
+    fun `snapshot LandscapeScreenSharingContent for myself composable`() {
+        snapshot(isInDarkMode = true) {
+            LandscapeScreenSharingContent(
+                call = null,
+                session = ScreenSharingSession(
+                    track = mockParticipantList[0].videoTrack ?: mockVideoTrack,
+                    participant = mockParticipantList[0]
                 ),
                 participants = mockParticipantList,
                 primarySpeaker = mockParticipant,
