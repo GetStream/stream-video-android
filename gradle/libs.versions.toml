@@ -22,7 +22,7 @@ androidxComposeCompiler = "1.4.4"
 androidxComposeTracing = "1.0.0-alpha01"
 
 coil = "2.2.2"
-landscapist = "2.1.9"
+landscapist = "2.1.10"
 
 wire = "4.4.1"
 okhttp = "4.10.0"
