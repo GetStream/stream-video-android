@@ -135,6 +135,50 @@ internal class ParticipantLandscapeTest : BaseComposeTest() {
     }
 
     @Test
+    fun `snapshot LandscapeParticipants5 composable`() {
+        snapshot {
+            val configuration = LocalConfiguration.current
+            val screenWidth = configuration.screenWidthDp
+            val screenHeight = configuration.screenHeightDp
+
+            Box(
+                modifier = Modifier.background(color = VideoTheme.colors.appBackground)
+            ) {
+                LandscapeParticipants(
+                    call = null,
+                    primarySpeaker = mockParticipant,
+                    callParticipants = mockParticipantList.take(5),
+                    modifier = Modifier.fillMaxSize(),
+                    paddingValues = PaddingValues(0.dp),
+                    parentSize = IntSize(screenWidth, screenHeight)
+                ) {}
+            }
+        }
+    }
+
+    @Test
+    fun `snapshot LandscapeParticipants6 composable`() {
+        snapshot {
+            val configuration = LocalConfiguration.current
+            val screenWidth = configuration.screenWidthDp
+            val screenHeight = configuration.screenHeightDp
+
+            Box(
+                modifier = Modifier.background(color = VideoTheme.colors.appBackground)
+            ) {
+                LandscapeParticipants(
+                    call = null,
+                    primarySpeaker = mockParticipant,
+                    callParticipants = mockParticipantList.take(6),
+                    modifier = Modifier.fillMaxSize(),
+                    paddingValues = PaddingValues(0.dp),
+                    parentSize = IntSize(screenWidth, screenHeight)
+                ) {}
+            }
+        }
+    }
+
+    @Test
     fun `snapshot LandscapeScreenSharingContent composable`() {
         snapshot {
             LandscapeScreenSharingContent(
