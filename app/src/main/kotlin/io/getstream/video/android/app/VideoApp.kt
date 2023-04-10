@@ -63,11 +63,11 @@ class VideoApp : Application() {
             context = this,
             user = user,
             apiKey = apiKey,
-            androidInputs = setOf(
-                CallServiceInput.from(CallService::class),
-                CallActivityInput.from(CallActivity::class),
-                // CallActivityInput.from(XmlCallActivity::class),
-            ),
+//            androidInputs = setOf(
+//                CallServiceInput.from(CallService::class),
+//                CallActivityInput.from(CallActivity::class),
+//                // CallActivityInput.from(XmlCallActivity::class),
+//            ),
             loggingLevel = loggingLevel
         ).build().also {
             streamVideo = it

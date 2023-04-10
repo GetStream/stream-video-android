@@ -79,7 +79,6 @@ public class CallViewModel(
     public val client: StreamVideo,
     public val call: Call,
     private val permissions: PermissionManager,
-    private val usersProvider: UsersProvider,
 ) : ViewModel() {
 
     private val logger by taggedLogger("Call:ViewModel")

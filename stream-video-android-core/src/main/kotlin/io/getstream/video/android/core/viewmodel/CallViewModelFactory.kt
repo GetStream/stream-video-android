@@ -27,8 +27,7 @@ import io.getstream.video.android.core.user.UsersProvider
 public class CallViewModelFactory(
     private val streamVideo: StreamVideo,
     private val call: Call,
-    private val permissionManager: PermissionManager,
-    private val usersProvider: UsersProvider = EmptyUsersProvider
+    private val permissionManager: PermissionManager
 ) : ViewModelProvider.Factory {
 
     @Suppress("UNCHECKED_CAST")
@@ -37,7 +36,6 @@ public class CallViewModelFactory(
             client = streamVideo,
             call = call,
             permissions = permissionManager,
-            usersProvider = usersProvider
         ) as T
     }
 }

@@ -188,6 +188,12 @@ sealed class RingingState() {
 }
 ```
 
+### Dogfooding vs Demo App
+
+* dogfooding has google authentication. demo app has no authentication
+* demo app allows you to type in the call id and join, or create a new
+* dogfooding joins via a url deeplink
+
 ### V0 to V1 migration tips
 
 Participant state now lives in ParticipantState

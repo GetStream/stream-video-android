@@ -17,6 +17,7 @@
 package io.getstream.video.android.app.ui.call
 
 import android.content.Context
+import androidx.compose.runtime.collectAsState
 import io.getstream.video.android.app.BuildConfig
 import io.getstream.video.android.app.user.FakeUsersProvider
 import io.getstream.video.android.app.videoApp
@@ -36,12 +37,12 @@ class CallActivity : AbstractComposeCallActivity() {
      * Provides a custom factory for the ViewModel, that provides fake users for invites.
      */
     override fun getCallViewModelFactory(): CallViewModelFactory {
-        val currentUserId = getStreamVideo(this).getUser().id
+        val currentUserId = getStreamVideo(this).state.user.value?.id
 
         return CallViewModelFactory(
             streamVideo = getStreamVideo(this),
             permissionManager = getPermissionManager(),
-            usersProvider = if (BuildConfig.DEBUG) FakeUsersProvider(currentUserId) else EmptyUsersProvider
+            call = getStreamVideo(this).call("default", "replaceme")
         )
     }
 }
