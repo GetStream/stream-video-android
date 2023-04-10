@@ -60,6 +60,7 @@ internal fun LandscapeScreenSharingContent(
     call: Call?,
     session: ScreenSharingSession,
     participants: List<CallParticipantState>,
+    primarySpeaker: CallParticipantState?,
     paddingValues: PaddingValues,
     modifier: Modifier = Modifier,
     isFullscreen: Boolean,
@@ -99,7 +100,8 @@ internal fun LandscapeScreenSharingContent(
                     .width(125.dp)
                     .fillMaxHeight(),
                 call = call,
-                participants = participants
+                participants = participants,
+                primarySpeaker = primarySpeaker
             )
 
             callControlsContent()
@@ -120,6 +122,7 @@ private fun LandscapeScreenSharingContentPreview(
                 participant = callParticipants.first()
             ),
             participants = callParticipants,
+            primarySpeaker = callParticipants[0],
             paddingValues = PaddingValues(0.dp),
             modifier = Modifier.fillMaxSize(),
             isFullscreen = true,

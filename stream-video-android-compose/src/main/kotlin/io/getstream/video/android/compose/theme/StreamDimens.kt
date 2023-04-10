@@ -95,6 +95,7 @@ public data class StreamDimens(
     public val screenShareParticipantsRadius: Dp,
     public val screenSharePresenterPadding: Dp,
     public val screenSharePresenterMargin: Dp,
+    public val screenSharePresenterIconTitlePadding: Dp,
 ) {
     public companion object {
         /**
@@ -166,6 +167,7 @@ public data class StreamDimens(
             screenSharePresenterMargin = dimensionResource(id = R.dimen.stream_video_screenSharePresenterTitleMargin),
             screenSharePresenterPadding = dimensionResource(id = R.dimen.stream_video_screenSharePresenterPadding),
             callControllerBottomPadding = dimensionResource(id = R.dimen.stream_video_callControllerBottomPadding),
+            screenSharePresenterIconTitlePadding = dimensionResource(id = R.dimen.stream_video_screenShareIconTitlePadding),
         )
     }
 }

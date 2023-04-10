@@ -21,14 +21,17 @@ import android.view.View
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -58,6 +61,7 @@ internal fun PortraitScreenSharingContent(
     call: Call?,
     session: ScreenSharingSession,
     participants: List<CallParticipantState>,
+    primarySpeaker: CallParticipantState?,
     paddingValues: PaddingValues,
     modifier: Modifier = Modifier,
     onRender: (View) -> Unit,
@@ -70,17 +74,25 @@ internal fun PortraitScreenSharingContent(
             .background(VideoTheme.colors.screenSharingBackground)
             .padding(paddingValues)
     ) {
-        Text(
-            modifier = Modifier.padding(VideoTheme.dimens.screenSharePresenterPadding),
-            text = stringResource(
-                id = R.string.stream_video_screen_sharing_title,
-                sharingParticipant.name.ifEmpty { sharingParticipant.id }
-            ),
-            color = VideoTheme.colors.textHighEmphasis,
-            style = VideoTheme.typography.title3Bold,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
+        Row(modifier = Modifier.padding(VideoTheme.dimens.screenSharePresenterPadding)) {
+            Icon(
+                modifier = Modifier.padding(end = VideoTheme.dimens.screenSharePresenterIconTitlePadding),
+                painter = painterResource(id = R.drawable.stream_video_ic_screensharing),
+                tint = VideoTheme.colors.textHighEmphasis,
+                contentDescription = "Presenting"
+            )
+
+            Text(
+                text = stringResource(
+                    id = R.string.stream_video_screen_sharing_title,
+                    sharingParticipant.name.ifEmpty { sharingParticipant.id }
+                ),
+                color = VideoTheme.colors.textHighEmphasis,
+                style = VideoTheme.typography.title3Bold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
 
         Spacer(modifier = Modifier.height(VideoTheme.dimens.screenSharePresenterMargin))
 
@@ -100,6 +112,7 @@ internal fun PortraitScreenSharingContent(
         ParticipantsRow(
             modifier = Modifier.height(VideoTheme.dimens.screenShareParticipantsRowHeight),
             call = call,
+            primarySpeaker = primarySpeaker,
             participants = participants
         )
     }
@@ -119,6 +132,7 @@ private fun PortraitScreenSharingContentPreview(
                 participant = callParticipants.first()
             ),
             participants = callParticipants,
+            primarySpeaker = callParticipants[0],
             paddingValues = PaddingValues(0.dp),
             modifier = Modifier.fillMaxSize(),
             onRender = {}

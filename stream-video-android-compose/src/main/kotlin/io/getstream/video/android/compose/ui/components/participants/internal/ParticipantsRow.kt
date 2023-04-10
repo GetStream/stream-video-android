@@ -45,6 +45,7 @@ import io.getstream.video.android.core.model.CallParticipantState
 internal fun ParticipantsRow(
     call: Call?,
     participants: List<CallParticipantState>,
+    primarySpeaker: CallParticipantState?,
     modifier: Modifier = Modifier
 ) {
     LazyRow(
@@ -53,7 +54,11 @@ internal fun ParticipantsRow(
         verticalAlignment = Alignment.CenterVertically,
         content = {
             items(items = participants, key = { it.id }) { participant ->
-                ParticipantListItem(call, participant)
+                ParticipantListItem(
+                    call = call,
+                    participant = participant,
+                    primarySpeaker = primarySpeaker
+                )
             }
         }
     )
@@ -68,7 +73,8 @@ internal fun ParticipantsRow(
 @Composable
 private fun ParticipantListItem(
     call: Call?,
-    participant: CallParticipantState
+    participant: CallParticipantState,
+    primarySpeaker: CallParticipantState?,
 ) {
     CallParticipant(
         modifier = Modifier
@@ -77,6 +83,7 @@ private fun ParticipantListItem(
         call = call,
         participant = participant,
         labelPosition = Alignment.BottomStart,
+        isFocused = participant.id == primarySpeaker?.id,
         isShowConnectionQualityIndicator = false
     )
 }
@@ -89,7 +96,8 @@ private fun ParticipantsRowPreview(
     VideoTheme {
         ParticipantsRow(
             call = null,
-            participants = callParticipants
+            participants = callParticipants,
+            primarySpeaker = callParticipants[0]
         )
     }
 }

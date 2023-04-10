@@ -68,6 +68,7 @@
     <dimen name="stream_video_screenShareParticipantsListHeight">125dp</dimen>
     <dimen name="stream_video_screenShareParticipantsListPadding">8dp</dimen>
     <dimen name="stream_video_screenShareParticipantsListItemMargin">8dp</dimen>
+    <dimen name="stream_video_screenShareIconTitlePadding">5dp</dimen>
     <dimen name="stream_video_screenShareParticipantsMargin">16dp</dimen>
     <dimen name="stream_video_screenShareParticipantsRadius">16dp</dimen>
     <dimen name="stream_video_screenSharePresenterPadding">16dp</dimen>

@@ -19,17 +19,13 @@ package io.getstream.video.android.compose.ui.components.participants.internal
 import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import android.view.View
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.common.util.mockVideoTrack
-import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.controls.internal.DefaultCallControlsContent
-import io.getstream.video.android.compose.ui.components.previews.ParticipantsProvider
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CallMediaState
 import io.getstream.video.android.core.model.Call
@@ -54,7 +50,7 @@ import io.getstream.video.android.core.model.ScreenSharingSession
  */
 @Composable
 internal fun ScreenSharingCallParticipantsContent(
-    call: Call?,
+    call: Call,
     session: ScreenSharingSession,
     participants: List<CallParticipantState>,
     callMediaState: CallMediaState,
@@ -74,12 +70,14 @@ internal fun ScreenSharingCallParticipantsContent(
 ) {
     val configuration = LocalConfiguration.current
     val orientation = configuration.orientation
+    val primarySpeaker by call.primarySpeaker.collectAsState(initial = null)
 
     if (orientation == ORIENTATION_PORTRAIT) {
         PortraitScreenSharingContent(
             call = call,
             session = session,
             participants = participants,
+            primarySpeaker = primarySpeaker,
             paddingValues = paddingValues,
             modifier = modifier,
             onRender = onRender,
@@ -90,6 +88,7 @@ internal fun ScreenSharingCallParticipantsContent(
             call = call,
             session = session,
             participants = participants,
+            primarySpeaker = primarySpeaker,
             paddingValues = paddingValues,
             modifier = modifier,
             onRender = onRender,
@@ -97,26 +96,6 @@ internal fun ScreenSharingCallParticipantsContent(
             onCallAction = onCallAction,
             onBackPressed = onBackPressed,
             callControlsContent = callControlsContent
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun ScreenSharingCallParticipantsContentPreview(
-    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<CallParticipantState>
-) {
-    VideoTheme {
-        ScreenSharingCallParticipantsContent(
-            call = null,
-            session = ScreenSharingSession(
-                track = callParticipants.first().videoTrack ?: mockVideoTrack,
-                participant = callParticipants.first()
-            ),
-            participants = callParticipants,
-            onCallAction = {},
-            modifier = Modifier.fillMaxSize(),
-            callMediaState = CallMediaState()
         )
     }
 }

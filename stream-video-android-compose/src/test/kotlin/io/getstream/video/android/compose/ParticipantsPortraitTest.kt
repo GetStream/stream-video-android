@@ -320,6 +320,7 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
                     participant = mockParticipantList.first()
                 ),
                 participants = mockParticipantList,
+                primarySpeaker = mockParticipant,
                 paddingValues = PaddingValues(0.dp),
                 modifier = Modifier.fillMaxSize(),
                 onRender = {}
@@ -328,38 +329,12 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
     }
 
     @Test
-    fun `snapshot ScreenSharingCallParticipantsContent composable`() {
-        snapshot {
-            ScreenSharingCallParticipantsContent(
-                call = null,
-                session = ScreenSharingSession(
-                    track = mockParticipantList.first().videoTrack ?: mockVideoTrack,
-                    participant = mockParticipantList.first()
-                ),
-                participants = mockParticipantList,
-                onCallAction = {},
-                modifier = Modifier.fillMaxSize(),
-                callMediaState = CallMediaState()
-            )
-        }
-    }
-
-    @Test
-    fun `snapshot ParticipantsRow composable`() {
-        snapshotWithDarkMode {
-            ParticipantsRow(
-                call = null,
-                participants = mockParticipantList
-            )
-        }
-    }
-
-    @Test
     fun `snapshot ParticipantsColumn composable`() {
         snapshotWithDarkModeRow {
             ParticipantsColumn(
                 call = null,
-                participants = mockParticipantList
+                participants = mockParticipantList,
+                primarySpeaker = mockParticipant,
             )
         }
     }

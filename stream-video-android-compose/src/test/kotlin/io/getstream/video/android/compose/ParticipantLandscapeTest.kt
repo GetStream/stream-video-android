@@ -34,6 +34,7 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.controls.internal.DefaultCallControlsContent
 import io.getstream.video.android.compose.ui.components.participants.internal.LandscapeParticipants
 import io.getstream.video.android.compose.ui.components.participants.internal.LandscapeScreenSharingContent
+import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantsRow
 import io.getstream.video.android.core.call.state.CallMediaState
 import io.getstream.video.android.core.model.ScreenSharingSession
 import org.junit.Rule
@@ -188,6 +189,7 @@ internal class ParticipantLandscapeTest : BaseComposeTest() {
                     participant = mockParticipantList.first()
                 ),
                 participants = mockParticipantList,
+                primarySpeaker = mockParticipant,
                 paddingValues = PaddingValues(0.dp),
                 modifier = Modifier.fillMaxSize(),
                 isFullscreen = true,
@@ -200,6 +202,17 @@ internal class ParticipantLandscapeTest : BaseComposeTest() {
                     callMediaState = CallMediaState(),
                 ) {}
             }
+        }
+    }
+
+    @Test
+    fun `snapshot ParticipantsRow composable`() {
+        snapshotWithDarkMode {
+            ParticipantsRow(
+                call = null,
+                participants = mockParticipantList,
+                primarySpeaker = mockParticipant,
+            )
         }
     }
 }
