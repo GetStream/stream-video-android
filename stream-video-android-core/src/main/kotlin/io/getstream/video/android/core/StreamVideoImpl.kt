@@ -129,6 +129,8 @@ internal class StreamVideoImpl internal constructor(
 
     private lateinit var connectContinuation: Continuation<Result<ConnectedEvent>>
 
+    var developmentMode = true // if true we fail fast on errors instead of logging them
+
     @VisibleForTesting
     public var peerConnectionFactory = StreamPeerConnectionFactory(context)
     public override val userId = user.id

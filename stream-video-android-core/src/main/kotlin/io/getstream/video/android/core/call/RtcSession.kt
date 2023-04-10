@@ -243,14 +243,16 @@ public class RtcSession internal constructor(
     }
 
     suspend fun listenToMediaChanges() {
-        // update the tracks when the camera or microphone status changes
-        call.mediaManager.camera.status.collectLatest {
-            val track = getTrack(sessionId, TrackType.TRACK_TYPE_VIDEO)
-            track?.video?.setEnabled(it == DeviceStatus.Enabled)
-        }
+        coroutineScope.launch {
+            // update the tracks when the camera or microphone status changes
+            call.mediaManager.camera.status.collectLatest {
+                val track = getTrack(sessionId, TrackType.TRACK_TYPE_VIDEO)
+                track?.video?.setEnabled(it == DeviceStatus.Enabled)
+            }
 
-        call.mediaManager.camera.selectedDevice.collectLatest {
-            // update the track with the new device
+            call.mediaManager.camera.selectedDevice.collectLatest {
+                // update the track with the new device
+            }
         }
     }
 
@@ -289,7 +291,7 @@ public class RtcSession internal constructor(
         }
     }
 
-    suspend fun connectRtc() {
+    suspend fun connectRtc(): Result<JoinResponse> {
         // step 1 setup the peer connections
         createSubscriber()
         // if we are allowed to publish, create a peer connection for it
@@ -335,7 +337,9 @@ public class RtcSession internal constructor(
         val result = executeJoinRequest()
         // step 7 - onNegotiationNeeded will trigger and complete the setup using SetPublisherRequest
         // step 8 - We will receive the JoinCallResponseEvent event
+
         listenToMediaChanges()
+        return result
     }
 
     /**
@@ -471,23 +475,25 @@ public class RtcSession internal constructor(
 
         val request = JoinRequest(
             session_id = sessionId,
-            token = "TODO: TOKEN",
+            token = SFUToken,
             subscriber_sdp = sdp.description
         )
         logger.d { "[executeJoinRequest] request: $request" }
 
         return try {
-            withTimeout(10000) {
-                val connected = call.state.connection.value
-                logger.d { "[executeJoinRequest] is connected: $connected" }
-                sfuConnectionModule.sfuSocket.sendJoinRequest(request)
-                logger.d { "[executeJoinRequest] sfu join request is sent" }
-                // TODO: callEngine.onSfuJoinSent(request)
-                logger.d { "[executeJoinRequest] request is sent" }
-                val event = joinEventResponse.filterNotNull().first()
-                logger.d { "[executeJoinRequest] completed: $event" }
-                Success(JoinResponse(event.callState))
-            }
+            val connected = call.state.connection.value
+            logger.d { "[executeJoinRequest] is connected: $connected" }
+            sfuConnectionModule.sfuSocket.sendJoinRequest(request)
+            logger.d { "[executeJoinRequest] sfu join request is sent" }
+            logger.d { "[executeJoinRequest] request is sent" }
+            // TODO: this doesn't work...
+            val currentValue = joinEventResponse.value
+            println(currentValue)
+            logger.d{ "[executeJoinRequest] currentValue: $currentValue"}
+            val event = joinEventResponse.filterNotNull().first()
+            logger.d { "[executeJoinRequest] completed: $event" }
+            Success(JoinResponse())
+
         } catch (e: Throwable) {
             logger.e { "[executeJoinRequest] failed: $e" }
             val msg = "failed to join the event"
@@ -661,7 +667,10 @@ public class RtcSession internal constructor(
     }
 
     fun handleEvent(event: VideoEvent) {
+        logger.i { "[rtc handleEvent] #sfu; event: $event" }
         if (event is JoinCallResponseEvent) {
+            logger.i { "[rtc handleEvent] joinEventResponse.value: $event" }
+
             joinEventResponse.value = event
         }
         if (event is SfuDataEvent) {

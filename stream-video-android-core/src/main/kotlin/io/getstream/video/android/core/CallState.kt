@@ -260,9 +260,12 @@ public class CallState(val call: Call, user: User) {
 
 
     private fun updateFromJoinResponse(event: JoinCallResponseEvent) {
-        event.callState.participants.forEach {
+        // creates the participants
+        val participantStates = event.callState.participants.map {
             getOrCreateParticipant(it)
         }
+        // TODO: update more fields
+        upsertParticipants(participantStates)
     }
 
 
@@ -273,25 +276,48 @@ public class CallState(val call: Call, user: User) {
 
     }
 
+    private fun upsertParticipants(participants: List<ParticipantState>) {
+        val new = _participants.value.toSortedMap()
+        participants.forEach {
+            new[it.sessionId] = it
+        }
+        _participants.value = new
+    }
+
+    private fun getOrCreateParticipants(participants: List<Participant>): List<ParticipantState> {
+        // get or create the participant and update them
+        val participantStates = participants.map {
+            val participantState = getOrCreateParticipant(it.session_id, it.user_id)
+            participantState.updateFromParticipantInfo(it)
+            participantState
+        }
+
+        upsertParticipants(participantStates)
+        return participantStates
+    }
+
     private fun getOrCreateParticipant(participant: Participant): ParticipantState {
         // get or create the participant and update them
 
         val participantState = getOrCreateParticipant(participant.session_id, participant.user_id)
         participantState.updateFromParticipantInfo(participant)
 
-        participantState._speaking.value = participant.is_speaking
+        upsertParticipants(listOf(participantState))
+
         return participantState
     }
 
-    fun getOrCreateParticipant(sessionId: String, userId: String, user: User? = null): ParticipantState {
-        val participantMap = _participants.value
-        return if (participantMap.contains(sessionId)) {
+    fun getOrCreateParticipant(sessionId: String, userId: String, user: User? = null, updateFlow: Boolean=false): ParticipantState {
+        val participantMap = _participants.value.toSortedMap()
+        val participantState =  if (participantMap.contains(sessionId)) {
             participantMap[sessionId]!!
         } else {
-            val participant = ParticipantState(sessionId=sessionId, call=call, initialUser=user ?: User(userId))
-            participantMap[sessionId] = participant
-            participant
+            ParticipantState(sessionId=sessionId, call=call, initialUser=user ?: User(userId))
         }
+        if (updateFlow) {
+            upsertParticipants(listOf(participantState))
+        }
+        return participantState
     }
 
     private fun getOrCreateMember(callUser: CallUser): MemberState {

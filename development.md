@@ -92,6 +92,8 @@ Check the docs on TestBase, TestHelper and IntegrationTestBase for more utility 
 
 * StreamVideoImpl makes the API calls to the coordinator. Internally there are 4 retrofit APIs it calls
 * CallClient makes the API calls to the SFU on the edge
+* StreamVideoImpl.developmentMode determines if we should log an error or fail fast. 
+Typically for development you want to fail fast and loud. For production you want to ignore most non-critical errors.
 
 ### State management
 

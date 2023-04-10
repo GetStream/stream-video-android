@@ -254,7 +254,6 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true) : TestBase(
      * TODO: add a timeout
      */
     suspend inline fun <reified T : VideoEvent> waitForNextEvent(): T =
-        withTimeout(10000) {
             suspendCoroutine { continuation ->
                 var finished = false
                 client.subscribe {
@@ -273,7 +272,7 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true) : TestBase(
                     }
                 }
             }
-        }
+
 
 
     @Before
