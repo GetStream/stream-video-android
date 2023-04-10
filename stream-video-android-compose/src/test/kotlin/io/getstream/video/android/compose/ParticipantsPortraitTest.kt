@@ -309,7 +309,7 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
 
     @Test
     fun `snapshot PortraitScreenSharingContent for other participant composable`() {
-        snapshot {
+        snapshot(isInDarkMode = true) {
             PortraitScreenSharingContent(
                 call = null,
                 session = ScreenSharingSession(
@@ -329,7 +329,7 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
 
     @Test
     fun `snapshot PortraitScreenSharingContent for myself composable`() {
-        snapshot {
+        snapshot(isInDarkMode = true) {
             PortraitScreenSharingContent(
                 call = null,
                 session = ScreenSharingSession(
