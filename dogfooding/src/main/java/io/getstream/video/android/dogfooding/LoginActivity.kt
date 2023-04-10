@@ -267,11 +267,6 @@ class LoginActivity : ComponentActivity() {
             val user = User(
                 authUser?.email ?: userJSON.getString("userId"),
                 "admin",
-                authUser?.displayName ?: "",
-                token,
-                authUser?.photoUrl?.toString() ?: "",
-                emptyList(),
-                emptyMap()
             )
 
             startHome(user)

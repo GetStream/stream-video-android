@@ -16,6 +16,8 @@
 
 package io.getstream.video.android.core
 
+import android.view.View
+import io.getstream.log.taggedLogger
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
@@ -29,12 +31,15 @@ import io.getstream.video.android.core.model.SendReactionData
 import io.getstream.video.android.core.model.SfuToken
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.toIceServer
+import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import kotlinx.coroutines.launch
 import org.openapitools.client.models.GetCallEdgeServerRequest
 import org.openapitools.client.models.GoLiveResponse
 import org.openapitools.client.models.SendReactionResponse
 import org.openapitools.client.models.StopLiveResponse
 import org.openapitools.client.models.UpdateCallResponse
+import org.webrtc.RendererCommon
+import stream.video.sfu.models.TrackType
 
 public data class SFUConnection(
     internal val callUrl: String,
@@ -135,6 +140,48 @@ public class Call(
 
     suspend fun sendReaction(data: SendReactionData): Result<SendReactionResponse> {
         return client.sendReaction(type, id, data)
+    }
+
+    private val logger by taggedLogger("Call")
+
+    // TODO: review this
+    public fun initRenderer(
+        videoRenderer: VideoTextureViewRenderer,
+        sessionId: String,
+        trackType: TrackType,
+        onRender: (View) -> Unit = {}
+    ) {
+        logger.d { "[initRenderer] #sfu; sessionId: $sessionId" }
+
+        // Note this comes from peerConnectionFactory.eglBase
+        videoRenderer.init(
+            clientImpl.peerConnectionFactory.eglBase.eglBaseContext,
+            object : RendererCommon.RendererEvents {
+                override fun onFirstFrameRendered() {
+                    logger.v { "[initRenderer.onFirstFrameRendered] #sfu; sessionId: $sessionId" }
+                    if (trackType != TrackType.TRACK_TYPE_SCREEN_SHARE) {
+                        state.updateParticipantTrackSize(
+                            sessionId,
+                            videoRenderer.measuredWidth,
+                            videoRenderer.measuredHeight
+                        )
+                    }
+                    onRender(videoRenderer)
+                }
+
+                override fun onFrameResolutionChanged(p0: Int, p1: Int, p2: Int) {
+                    logger.v { "[initRenderer.onFrameResolutionChanged] #sfu; sessionId: $sessionId" }
+
+                    if (trackType != TrackType.TRACK_TYPE_SCREEN_SHARE) {
+                        state.updateParticipantTrackSize(
+                            sessionId,
+                            videoRenderer.measuredWidth,
+                            videoRenderer.measuredHeight
+                        )
+                    }
+                }
+            }
+        )
     }
 
     suspend fun goLive(): Result<GoLiveResponse> {

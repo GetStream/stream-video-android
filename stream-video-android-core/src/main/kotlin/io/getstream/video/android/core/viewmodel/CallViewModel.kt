@@ -114,45 +114,6 @@ public class CallViewModel(
         // TODO: properly clean up
     }
 
-    public fun initRenderer(
-        videoRenderer: VideoTextureViewRenderer,
-        sessionId: String,
-        trackType: TrackType,
-        onRender: (View) -> Unit = {}
-    ) {
-        logger.d { "[initRenderer] #sfu; sessionId: $sessionId" }
-
-        // Note this comes from peerConnectionFactory.eglBase
-        videoRenderer.init(
-            clientImpl.peerConnectionFactory.eglBase.eglBaseContext,
-            object : RendererCommon.RendererEvents {
-                override fun onFirstFrameRendered() {
-                    logger.v { "[initRenderer.onFirstFrameRendered] #sfu; sessionId: $sessionId" }
-                    if (trackType != TrackType.TRACK_TYPE_SCREEN_SHARE) {
-                        call.state.updateParticipantTrackSize(
-                            sessionId,
-                            videoRenderer.measuredWidth,
-                            videoRenderer.measuredHeight
-                        )
-                    }
-                    onRender(videoRenderer)
-                }
-
-                override fun onFrameResolutionChanged(p0: Int, p1: Int, p2: Int) {
-                    logger.v { "[initRenderer.onFrameResolutionChanged] #sfu; sessionId: $sessionId" }
-
-                    if (trackType != TrackType.TRACK_TYPE_SCREEN_SHARE) {
-                        call.state.updateParticipantTrackSize(
-                            sessionId,
-                            videoRenderer.measuredWidth,
-                            videoRenderer.measuredHeight
-                        )
-                    }
-                }
-            }
-        )
-    }
-
     public fun onPictureInPictureModeChanged(inPictureInPictureMode: Boolean) {
         this._isInPictureInPicture.value = inPictureInPictureMode
     }
