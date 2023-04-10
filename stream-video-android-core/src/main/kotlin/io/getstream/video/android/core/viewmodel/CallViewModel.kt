@@ -62,6 +62,7 @@ import java.util.UUID
 
 private const val CONNECT_TIMEOUT = 30_000L
 
+
 public class CallViewModel(
     public val client: StreamVideo,
     public val call: Call,

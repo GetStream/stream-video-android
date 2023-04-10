@@ -486,7 +486,6 @@ public class RtcSession internal constructor(
             sfuConnectionModule.sfuSocket.sendJoinRequest(request)
             logger.d { "[executeJoinRequest] sfu join request is sent" }
             logger.d { "[executeJoinRequest] request is sent" }
-            // TODO: this doesn't work...
             val currentValue = joinEventResponse.value
             println(currentValue)
             logger.d{ "[executeJoinRequest] currentValue: $currentValue"}

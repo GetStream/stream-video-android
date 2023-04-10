@@ -5,18 +5,15 @@
 ### Week 2: LLC & State Stability
 ### Week 3: Sample app
 
+- Audio/video review
 - Tommaso to fix the event openapi thing, and we merge it
 - Jaewoong and Thierry to review the codebase. Monday evening
 - Step 1: Render local video using the new API and compose
 - Step 2: Upload local video to the SFU
 - Step 3: Join a call and render participants
 
-RTCSession cleanup
-- review and maybe move setCameraEnabled and setMicrophoneEnabled
-
 Other
 
-- Token refresh flow
 - Cleanup the test suite
 
 ### Review each file, fix TODOS and document
@@ -153,9 +150,10 @@ Other
 ### Available tasks up for grabs
 
 - Participant sorting rules. See Call sortedParticipants
-- Pinning of participants
+- Pinning of participants. You pin/unpin and it sets pinnedAt and sorting takes it into account
 - Currently we use UserPreferencesManager. Jaewoong mentioned we should perhaps explore https://developer.android.com/topic/libraries/architecture/datastore
+- Hash/copy/equality methods for participantstate (otherwise the participants stateflow will have bugs)
 - Measure latency isn't 100% ok. You can't set a timeout using withTimeout and collect the measurements that we have. This relates to threading vs coroutines and withTimeout not working
 - Logging setting needs to be passed to retrofit
+- Token refresh flow
 - Disconnect/ garbage collect flow needs a full round of review
-- Hash/copy/equality methods for participantstate (otherwise the participants stateflow will have bugs)

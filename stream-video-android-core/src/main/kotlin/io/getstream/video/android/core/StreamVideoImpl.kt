@@ -287,8 +287,6 @@ internal class StreamVideoImpl internal constructor(
 
         // listen to socket events
         connectionModule.coordinatorSocket.addListener(this)
-
-        // TODO: Find the event listener
     }
 
     suspend fun connectAsync(): Deferred<Result<ConnectedEvent>> {
@@ -618,44 +616,6 @@ internal class StreamVideoImpl internal constructor(
                 joinCallRequest,
                 connectionModule.coordinatorSocket.getConnectionId()
             )
-        }
-    }
-
-    suspend fun joinCallOld(
-        type: String,
-        id: String,
-        participantIds: List<String>,
-        ring: Boolean
-    ): Result<JoinedCall> {
-        logger.d { "[getOrCreateAndJoinCall] type: $type, id: $id, participantIds: $participantIds" }
-
-        // TODO: engine.onCallStarting(type, id, participantIds, ring, forcedNewCall = false)
-        // TODO: remove this, join call automatically gets the call, no need to do it twice
-//        getOrCreateCall(
-//            type = type,
-//            id = id,
-//            request = GetOrCreateCallRequest(
-//                data = CallRequest(
-//                    members = participantIds.map {
-//                        MemberRequest(
-//                            userId = it,
-//                            role = "admin"
-//                        )
-//                    },
-//                ),
-//                ring = ring
-//            )
-//        )
-//            .also { logger.v { "[getOrCreateCall] Coordinator result: $it" } }
-//            .map { response -> StartedCall(call = response.toCall(StreamCallKind.fromRinging(ring))) }
-//            .onSuccess { engine.onCallJoining(it.call) }
-//            .flatMap { joinCallInternal(it.call) }
-//            .onSuccess { engine.onCallJoined(it) }
-//            .onError { engine.onCallFailed(it) }
-//            .also { logger.v { "[getOrCreateAndJoinCall] result: $it" } }
-        return wrapAPICall {
-            // TODO: FiXME
-            JoinedCall(CallMetadata.empty(), "", "", emptyList())
         }
     }
 

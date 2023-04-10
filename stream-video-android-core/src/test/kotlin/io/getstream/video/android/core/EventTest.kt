@@ -247,33 +247,4 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
         // TODO clean this up val eventDeleted = CallMembersDeletedEvent(user_id="thierry", is_speaking=true)
     }
 
-    @Test
-    fun testEvent() = runTest {
-        val myEvent = ConnectedEvent(clientId = "test123")
-        clientImpl.fireEvent(myEvent)
-//        when(e) {
-        // TODO: how to treat blocking...
-//            is BlockedUserEvent -> TODO()
-        //            is UnblockedUserEvent -> TODO()
-        // TODO: What's call cancelled? This seems redundant
-//            is CallCancelledEvent -> TODO()
-        // TODO: decide on how to expose this...
-//            is ConnectedEvent -> TODO()
-//            is CoordinatorHealthCheckEvent -> TODO() // socket level health check
-//            SFUHealthCheckEvent -> TODO()
-
-        // TODO: what does this mean compared to the create and participant joined events?
-//            is JoinCallResponseEvent -> TODO()
-
-        // TODO: Webrtc stuff
-//            is ICETrickleEvent -> TODO()
-//            is PublisherAnswerEvent -> TODO()
-//            is SubscriberOfferEvent -> TODO()
-//            is TrackPublishedEvent -> TODO()
-//            is TrackUnpublishedEvent -> TODO()
-//            is ChangePublishQualityEvent -> TODO()
-//            is VideoQualityChangedEvent -> TODO()
-//            is ErrorEvent -> TODO() // Maybe just console log it for now?
-//        }
-    }
 }
