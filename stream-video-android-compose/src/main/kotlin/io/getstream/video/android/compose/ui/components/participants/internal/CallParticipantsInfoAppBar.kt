@@ -79,9 +79,9 @@ internal fun CallParticipantsInfoAppBar(
             onClick = onBackPressed,
             content = {
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_arrow_back),
+                    painter = painterResource(id = R.drawable.stream_video_ic_arrow_back),
                     contentDescription = stringResource(
-                        id = R.string.back_button_content_description
+                        id = R.string.stream_video_back_button_content_description
                     ),
                     tint = VideoTheme.colors.textHighEmphasis
                 )
@@ -89,10 +89,10 @@ internal fun CallParticipantsInfoAppBar(
         )
 
         val titleText = if (infoStateMode is ParticipantInvites) {
-            stringResource(R.string.call_participants_info_add_participants)
+            stringResource(R.string.stream_video_call_participants_info_add_participants)
         } else {
             resources.getQuantityString(
-                R.plurals.call_participants_info_number_of_participants,
+                R.plurals.stream_video_call_participants_info_number_of_participants,
                 numberOfParticipants,
                 numberOfParticipants
             )
@@ -113,7 +113,7 @@ internal fun CallParticipantsInfoAppBar(
         if (infoStateMode is ParticipantInvites) {
             TextButton(
                 onClick = { onInviteParticipants(InviteUsers(selectedParticipants.map { it.user })) },
-                content = { Text(text = stringResource(R.string.call_participants_info_invite)) },
+                content = { Text(text = stringResource(R.string.stream_video_call_participants_info_invite)) },
                 enabled = selectedParticipants.any { it.isSelected },
                 colors = ButtonDefaults.textButtonColors(
                     contentColor = VideoTheme.colors.primaryAccent,

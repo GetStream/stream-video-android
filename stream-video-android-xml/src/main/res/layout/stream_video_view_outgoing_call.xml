@@ -32,7 +32,7 @@
         android:id="@+id/callDetails"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/singleAvatarAppbarPadding"
+        android:layout_marginTop="@dimen/stream_video_singleAvatarAppbarPadding"
         app:layout_constraintTop_toTopOf="parent"
         />
 
@@ -40,14 +40,14 @@
         android:id="@+id/controlsHolder"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/outgoingCallOptionsBottomPadding"
+        android:layout_marginBottom="@dimen/stream_video_outgoingCallOptionsBottomPadding"
         app:layout_constraintBottom_toBottomOf="parent"
         >
 
         <io.getstream.video.android.xml.widget.control.ControlButtonView
             android:id="@+id/micToggle"
-            android:layout_width="@dimen/mediumButtonSize"
-            android:layout_height="@dimen/mediumButtonSize"
+            android:layout_width="@dimen/stream_video_mediumButtonSize"
+            android:layout_height="@dimen/stream_video_mediumButtonSize"
             android:layout_marginBottom="32dp"
             app:layout_constraintBottom_toTopOf="@id/cancelCall"
             app:layout_constraintEnd_toStartOf="@id/cameraToggle"
@@ -56,8 +56,8 @@
 
         <io.getstream.video.android.xml.widget.control.ControlButtonView
             android:id="@+id/cameraToggle"
-            android:layout_width="@dimen/mediumButtonSize"
-            android:layout_height="@dimen/mediumButtonSize"
+            android:layout_width="@dimen/stream_video_mediumButtonSize"
+            android:layout_height="@dimen/stream_video_mediumButtonSize"
             android:layout_marginBottom="32dp"
             app:layout_constraintBottom_toTopOf="@id/cancelCall"
             app:layout_constraintEnd_toEndOf="parent"
@@ -66,8 +66,8 @@
 
         <io.getstream.video.android.xml.widget.control.ControlButtonView
             android:id="@+id/cancelCall"
-            android:layout_width="@dimen/largeButtonSize"
-            android:layout_height="@dimen/largeButtonSize"
+            android:layout_width="@dimen/stream_video_largeButtonSize"
+            android:layout_height="@dimen/stream_video_largeButtonSize"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

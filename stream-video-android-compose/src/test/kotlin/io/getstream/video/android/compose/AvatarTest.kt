@@ -22,38 +22,37 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.common.util.mockParticipant
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.ui.components.avatar.Avatar
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import org.junit.Rule
 import org.junit.Test
 
-internal class AvatarTest {
+internal class AvatarTest : BaseComposeTest() {
 
     @get:Rule
     val paparazzi = Paparazzi()
 
+    override fun basePaparazzi(): Paparazzi = paparazzi
+
     @Test
     fun `snapshot AvatarInitial composable`() {
-        paparazzi.snapshot {
-            VideoTheme {
-                Avatar(
-                    modifier = Modifier.size(72.dp),
-                    initials = "Thierry"
-                )
-            }
+        snapshot {
+            Avatar(
+                modifier = Modifier.size(72.dp),
+                initials = "Thierry"
+            )
         }
     }
 
     @Test
     fun `snapshot UserAvatar composable`() {
-        paparazzi.snapshot {
-            VideoTheme {
-                UserAvatar(
-                    user = mockParticipant.user.collectAsState().value,
-                    modifier = Modifier.size(82.dp)
-                )
-            }
+        snapshot {
+            UserAvatar(
+                user = mockParticipant.user.collectAsState().value,
+                modifier = Modifier.size(82.dp),
+                showOnlineIndicator = true
+            )
         }
     }
 }

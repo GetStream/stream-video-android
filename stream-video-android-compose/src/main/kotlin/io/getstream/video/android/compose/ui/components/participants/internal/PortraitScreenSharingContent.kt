@@ -16,8 +16,10 @@
 
 package io.getstream.video.android.compose.ui.components.participants.internal
 
+import android.content.res.Configuration
 import android.view.View
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -25,22 +27,20 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.common.util.mockVideoTrackWrapper
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.internal.OverlayScreenSharingAppBar
 import io.getstream.video.android.compose.ui.components.previews.ParticipantsProvider
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.model.ScreenSharingSession
-import io.getstream.video.android.ui.common.R
 
 /**
  * Represents the portrait screen sharing content.
@@ -57,69 +57,94 @@ internal fun PortraitScreenSharingContent(
     call: Call?,
     session: ScreenSharingSession,
     participants: List<ParticipantState>,
+    primarySpeaker: ParticipantState?,
     paddingValues: PaddingValues,
     modifier: Modifier = Modifier,
     onRender: (View) -> Unit,
     onCallAction: (CallAction) -> Unit,
+    onBackPressed: () -> Unit,
 ) {
     val sharingParticipant = session.participant
+    val me = participants.firstOrNull { it.isLocal }
 
     Column(
         modifier = modifier
             .background(VideoTheme.colors.screenSharingBackground)
             .padding(paddingValues)
     ) {
-        Text(
-            modifier = Modifier.padding(VideoTheme.dimens.screenSharePresenterPadding),
-            text = stringResource(
-                id = R.string.stream_video_screen_sharing_title,
-                sharingParticipant.userNameOrId
-            ),
-            color = VideoTheme.colors.textHighEmphasis,
-            style = VideoTheme.typography.title3Bold,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-
-        Spacer(modifier = Modifier.height(VideoTheme.dimens.screenSharePresenterMargin))
-
-        ScreenShareContent(
-            call = call,
-            session = session,
-            onRender = onRender,
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f),
-            isFullscreen = false,
-            onCallAction = onCallAction
-        )
+                .weight(1f)
+        ) {
+            ScreenShareContent(
+                modifier = Modifier.fillMaxWidth(),
+                call = call,
+                session = session,
+                onRender = onRender,
+            )
+
+            if (me?.initialUser?.id == sharingParticipant.initialUser.id) {
+                OverlayScreenSharingAppBar(sharingParticipant, onBackPressed, onCallAction)
+            } else {
+                ScreenShareTooltip(
+                    modifier = Modifier.align(Alignment.TopStart),
+                    sharingParticipant = sharingParticipant
+                )
+            }
+        }
 
         Spacer(modifier = Modifier.height(VideoTheme.dimens.screenShareParticipantsScreenShareListMargin))
 
         ParticipantsRow(
             modifier = Modifier.height(VideoTheme.dimens.screenShareParticipantsRowHeight),
             call = call,
+            primarySpeaker = primarySpeaker,
             participants = participants
         )
     }
 }
 
 @Preview
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun PortraitScreenSharingContentPreview(
     @PreviewParameter(ParticipantsProvider::class) callParticipants: List<ParticipantState>
 ) {
     VideoTheme {
-        PortraitScreenSharingContent(
-            call = null,
+        PortraitScreenSharingContent(call = null,
             session = ScreenSharingSession(
-                track = callParticipants.first().videoTrackWrapped ?: mockVideoTrackWrapper,
-                participant = callParticipants.first()
+                track = callParticipants[1].videoTrackWrapped ?: mockVideoTrackWrapper,
+                participant = callParticipants[1]
             ),
             participants = callParticipants,
+            primarySpeaker = callParticipants[1],
             paddingValues = PaddingValues(0.dp),
             modifier = Modifier.fillMaxSize(),
-            onRender = {}
-        ) {}
+            onRender = {},
+            onBackPressed = {},
+            onCallAction = {})
+    }
+}
+
+@Preview
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun PortraitScreenSharingMyContentPreview(
+    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<ParticipantState>
+) {
+    VideoTheme {
+        PortraitScreenSharingContent(call = null,
+            session = ScreenSharingSession(
+                track = callParticipants[0].videoTrackWrapped ?: mockVideoTrackWrapper,
+                participant = callParticipants[0]
+            ),
+            participants = callParticipants,
+            primarySpeaker = callParticipants[0],
+            paddingValues = PaddingValues(0.dp),
+            modifier = Modifier.fillMaxSize(),
+            onRender = {},
+            onBackPressed = {},
+            onCallAction = {})
     }
 }

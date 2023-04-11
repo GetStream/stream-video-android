@@ -90,7 +90,6 @@ public fun CallParticipants(
             modifier = modifier,
             paddingValues = paddingValues,
             onRender = onRender,
-            isFullscreen = isFullscreen,
             onCallAction = onCallAction,
             callMediaState = callMediaState,
             onBackPressed = onBackPressed,

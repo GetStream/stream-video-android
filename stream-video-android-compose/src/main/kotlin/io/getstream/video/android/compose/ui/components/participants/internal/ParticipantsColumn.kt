@@ -45,6 +45,7 @@ import io.getstream.video.android.core.ParticipantState
 internal fun ParticipantsColumn(
     call: Call?,
     participants: List<ParticipantState>,
+    primarySpeaker: ParticipantState?,
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(
@@ -52,8 +53,12 @@ internal fun ParticipantsColumn(
         verticalArrangement = Arrangement.spacedBy(VideoTheme.dimens.screenShareParticipantsListItemMargin),
         horizontalAlignment = Alignment.CenterHorizontally,
         content = {
-            items(participants) { participant ->
-                ParticipantListItem(call, participant)
+            items(items = participants, key = { it.user.value.id }) { participant ->
+                ParticipantListItem(
+                    call = call,
+                    participant = participant,
+                    primarySpeaker = primarySpeaker
+                )
             }
         }
     )
@@ -69,6 +74,7 @@ internal fun ParticipantsColumn(
 private fun ParticipantListItem(
     call: Call?,
     participant: ParticipantState,
+    primarySpeaker: ParticipantState?,
 ) {
     CallParticipant(
         modifier = Modifier
@@ -76,7 +82,10 @@ private fun ParticipantListItem(
             .clip(RoundedCornerShape(VideoTheme.dimens.screenShareParticipantsRadius)),
         call = call,
         participant = participant,
-        labelPosition = Alignment.BottomStart
+        labelPosition = Alignment.BottomStart,
+        isScreenSharing = true,
+        isFocused = participant.initialUser.id == primarySpeaker?.initialUser?.id,
+        isShowConnectionQualityIndicator = false
     )
 }
 
@@ -88,7 +97,8 @@ private fun ParticipantsColumnPreview(
     VideoTheme {
         ParticipantsColumn(
             call = null,
-            participants = callParticipants
+            participants = callParticipants,
+            primarySpeaker = callParticipants[0]
         )
     }
 }

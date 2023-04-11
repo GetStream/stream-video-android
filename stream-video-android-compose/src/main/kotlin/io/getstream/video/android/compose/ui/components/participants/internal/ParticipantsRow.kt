@@ -45,18 +45,19 @@ import io.getstream.video.android.core.ParticipantState
 internal fun ParticipantsRow(
     call: Call?,
     participants: List<ParticipantState>,
+    primarySpeaker: ParticipantState?,
     modifier: Modifier = Modifier
 ) {
-    LazyRow(
-        modifier = modifier.padding(horizontal = VideoTheme.dimens.screenShareParticipantsRowPadding),
+    LazyRow(modifier = modifier.padding(horizontal = VideoTheme.dimens.screenShareParticipantsRowPadding),
         horizontalArrangement = Arrangement.spacedBy(VideoTheme.dimens.screenShareParticipantsListItemMargin),
         verticalAlignment = Alignment.CenterVertically,
         content = {
-            items(participants) { participant ->
-                ParticipantListItem(call, participant)
+            items(items = participants, key = { it.user.value.id }) { participant ->
+                ParticipantListItem(
+                    call = call, participant = participant, primarySpeaker = primarySpeaker
+                )
             }
-        }
-    )
+        })
 }
 
 /**
@@ -68,7 +69,8 @@ internal fun ParticipantsRow(
 @Composable
 private fun ParticipantListItem(
     call: Call?,
-    participant: ParticipantState
+    participant: ParticipantState,
+    primarySpeaker: ParticipantState?,
 ) {
     CallParticipant(
         modifier = Modifier
@@ -76,7 +78,10 @@ private fun ParticipantListItem(
             .clip(RoundedCornerShape(VideoTheme.dimens.screenShareParticipantsRadius)),
         call = call,
         participant = participant,
-        labelPosition = Alignment.BottomStart
+        labelPosition = Alignment.BottomStart,
+        isScreenSharing = true,
+        isFocused = participant.initialUser.id == primarySpeaker?.initialUser?.id,
+        isShowConnectionQualityIndicator = false
     )
 }
 
@@ -87,8 +92,7 @@ private fun ParticipantsRowPreview(
 ) {
     VideoTheme {
         ParticipantsRow(
-            call = null,
-            participants = callParticipants
+            call = null, participants = callParticipants, primarySpeaker = callParticipants[0]
         )
     }
 }

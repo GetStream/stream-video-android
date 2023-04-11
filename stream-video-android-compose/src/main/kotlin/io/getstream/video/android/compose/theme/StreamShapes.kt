@@ -63,7 +63,7 @@ public data class StreamShapes(
             connectionIndicatorBar = RoundedCornerShape(16.dp),
             soundIndicatorBar = RoundedCornerShape(16.dp),
             floatingParticipant = RoundedCornerShape(16.dp),
-            connectionQualityIndicator = RoundedCornerShape(8.dp)
+            connectionQualityIndicator = RoundedCornerShape(5.dp)
         )
     }
 }

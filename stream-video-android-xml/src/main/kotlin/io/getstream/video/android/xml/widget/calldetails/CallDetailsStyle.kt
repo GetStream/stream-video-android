@@ -56,10 +56,10 @@ public data class CallDetailsStyle(
     internal companion object {
         private val DEFAULT_AVATAR_SPACING = 20.dpToPx()
 
-        private val DIRECT_CALL_INFO_TEXT_SIZE = RCommon.dimen.directCallUserNameTextSize
-        private val GROUP_CALL_INFO_TEXT_SIZE = RCommon.dimen.groupCallUserNameTextSize
+        private val DIRECT_CALL_INFO_TEXT_SIZE = RCommon.dimen.stream_video_directCallUserNameTextSize
+        private val GROUP_CALL_INFO_TEXT_SIZE = RCommon.dimen.stream_video_groupCallUserNameTextSize
 
-        private val DEFAULT_TEXT_COLOR = RCommon.color.stream_text_high_emphasis
+        private val DEFAULT_TEXT_COLOR = RCommon.color.stream_video_text_high_emphasis
 
         operator fun invoke(context: Context, attrs: AttributeSet?): CallDetailsStyle {
             context.obtainStyledAttributes(
@@ -70,12 +70,12 @@ public data class CallDetailsStyle(
             ).use {
                 val callAvatarSize = it.getDimensionPixelSize(
                     R.styleable.CallDetailsView_streamVideoCallDetailsAvatarSize,
-                    context.getDimension(RCommon.dimen.callAvatarSize)
+                    context.getDimension(RCommon.dimen.stream_video_callAvatarSize)
                 )
 
                 val singleAvatarSize = it.getDimensionPixelSize(
                     R.styleable.CallDetailsView_streamVideoCallDetailsDirectCallAvatarSize,
-                    context.getDimension(RCommon.dimen.singleAvatarSize)
+                    context.getDimension(RCommon.dimen.stream_video_singleAvatarSize)
                 )
 
                 val avatarSpacing = it.getDimensionPixelSize(
@@ -142,7 +142,7 @@ public data class CallDetailsStyle(
 
                 val callStateTextAlpha = it.getFloat(
                     R.styleable.CallDetailsView_streamVideoCallDetailsStateTextAlpha,
-                    context.getFloatResource(io.getstream.video.android.ui.common.R.dimen.onCallStatusTextAlpha)
+                    context.getFloatResource(io.getstream.video.android.ui.common.R.dimen.stream_video_onCallStatusTextAlpha)
                 )
 
                 return CallDetailsStyle(

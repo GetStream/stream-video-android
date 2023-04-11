@@ -43,26 +43,26 @@ public fun buildDefaultCallControlActions(
     val speakerphoneIcon =
         painterResource(
             id = if (callMediaState.isSpeakerphoneEnabled) {
-                R.drawable.ic_speaker_on
+                R.drawable.stream_video_ic_speaker_on
             } else {
-                R.drawable.ic_speaker_off
+                R.drawable.stream_video_ic_speaker_off
             }
         )
 
     val microphoneIcon =
         painterResource(
             id = if (callMediaState.isMicrophoneEnabled) {
-                R.drawable.ic_mic_on
+                R.drawable.stream_video_ic_mic_on
             } else {
-                R.drawable.ic_mic_off
+                R.drawable.stream_video_ic_mic_off
             }
         )
 
     val cameraIcon = painterResource(
         id = if (callMediaState.isCameraEnabled) {
-            R.drawable.ic_videocam_on
+            R.drawable.stream_video_ic_videocam_on
         } else {
-            R.drawable.ic_videocam_off
+            R.drawable.stream_video_ic_videocam_off
         }
     )
 
@@ -72,35 +72,35 @@ public fun buildDefaultCallControlActions(
             icon = speakerphoneIcon,
             iconTint = Color.DarkGray,
             callAction = ToggleSpeakerphone(callMediaState.isSpeakerphoneEnabled.not()),
-            description = stringResource(R.string.call_controls_toggle_speakerphone)
+            description = stringResource(R.string.stream_video_call_controls_toggle_speakerphone)
         ),
         CallControlAction(
             actionBackgroundTint = Color.White,
             icon = cameraIcon,
             iconTint = Color.DarkGray,
             callAction = ToggleCamera(callMediaState.isCameraEnabled.not()),
-            description = stringResource(R.string.call_controls_toggle_camera)
+            description = stringResource(R.string.stream_video_call_controls_toggle_camera)
         ),
         CallControlAction(
             actionBackgroundTint = Color.White,
             icon = microphoneIcon,
             iconTint = Color.DarkGray,
             callAction = ToggleMicrophone(callMediaState.isMicrophoneEnabled.not()),
-            description = stringResource(R.string.call_controls_toggle_microphone)
+            description = stringResource(R.string.stream_video_call_controls_toggle_microphone)
         ),
         CallControlAction(
             actionBackgroundTint = Color.White,
-            icon = painterResource(id = R.drawable.ic_camera_flip),
+            icon = painterResource(id = R.drawable.stream_video_ic_camera_flip),
             iconTint = Color.DarkGray,
             callAction = FlipCamera,
-            description = stringResource(R.string.call_controls_flip_camera)
+            description = stringResource(R.string.stream_video_call_controls_flip_camera)
         ),
         CallControlAction(
             actionBackgroundTint = VideoTheme.colors.errorAccent,
-            icon = painterResource(id = R.drawable.ic_call_end),
+            icon = painterResource(id = R.drawable.stream_video_ic_call_end),
             iconTint = Color.White,
             callAction = LeaveCall,
-            description = stringResource(R.string.call_controls_leave_call)
+            description = stringResource(R.string.stream_video_call_controls_leave_call)
         ),
     )
 }

@@ -188,7 +188,7 @@ public class OutgoingCallView : CallConstraintLayout {
 
             (callDetails.layoutParams as LayoutParams).apply {
                 this.topMargin =
-                    context.getDimension(io.getstream.video.android.ui.common.R.dimen.avatarAppbarPadding)
+                    context.getDimension(io.getstream.video.android.ui.common.R.dimen.stream_video_avatarAppbarPadding)
                 requestLayout()
             }
         }

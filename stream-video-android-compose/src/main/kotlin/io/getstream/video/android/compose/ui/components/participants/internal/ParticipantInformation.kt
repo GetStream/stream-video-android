@@ -31,18 +31,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.common.util.buildLargeCallText
 import io.getstream.video.android.common.util.buildSmallCallText
+import io.getstream.video.android.common.util.mockParticipantList
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.model.CallStatus
 import io.getstream.video.android.core.model.CallUser
 
 @Composable
 internal fun ParticipantInformation(
-    callStatus: CallStatus,
-    participants: List<CallUser>
+    callStatus: CallStatus, participants: List<CallUser>
 ) {
     Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally
     ) {
         val text = if (participants.size < 3) {
             buildSmallCallText(participants)
@@ -86,20 +85,18 @@ internal fun ParticipantInformation(
 @Composable
 private fun ParticipantInformationPreview() {
     VideoTheme {
-//        ParticipantInformation(
-//            callStatus = CallStatus.Incoming,
-//            participants = mockParticipantList.map {
-//                CallUser(
-//                    id = it.id,
-//                    name = it.name,
-//                    role = it.role,
-//                    state = null,
-//                    imageUrl = it.profileImageURL ?: "",
-//                    createdAt = null,
-//                    updatedAt = null,
-//                    teams = emptyList()
-//                )
-//            }
-//        )
+        ParticipantInformation(callStatus = CallStatus.Incoming,
+            participants = mockParticipantList.map {
+                CallUser(
+                    id = it.initialUser.id,
+                    name = it.initialUser.name,
+                    role = it.initialUser.role,
+                    imageUrl = it.initialUser.imageUrl,
+                    state = null,
+                    createdAt = null,
+                    updatedAt = null,
+                    teams = emptyList()
+                )
+            })
     }
 }

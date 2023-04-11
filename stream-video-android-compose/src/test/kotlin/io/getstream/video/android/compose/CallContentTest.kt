@@ -16,12 +16,13 @@
 
 package io.getstream.video.android.compose
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.common.util.mockParticipant
 import io.getstream.video.android.common.util.mockParticipantList
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.ui.components.call.incomingcall.IncomingCallContent
 import io.getstream.video.android.compose.ui.components.call.incomingcall.internal.IncomingCallDetails
 import io.getstream.video.android.compose.ui.components.call.incomingcall.internal.IncomingCallOptions
@@ -37,125 +38,51 @@ import org.junit.Test
 import org.webrtc.VideoTrack
 import stream.video.sfu.models.TrackType
 
-internal class CallContentTest {
+internal class CallContentTest : BaseComposeTest() {
+
     @get:Rule
     val paparazzi = Paparazzi()
 
-    @Test
-    fun `snapshot VideoRenderer composable`() {
-        paparazzi.snapshot {
-            VideoTheme {
-                VideoRenderer(
-                    call = null,
-                    videoTrackWrapper = io.getstream.video.android.core.model.VideoTrackWrapper(
-                        "",
-                        VideoTrack(123)
-                    ),
-                    sessionId = "",
-                    trackType = TrackType.TRACK_TYPE_VIDEO
-                )
-            }
-        }
-    }
+    override fun basePaparazzi(): Paparazzi = paparazzi
 
     @Test
     fun `snapshot IncomingCallContentDetails composable`() {
-        paparazzi.snapshot {
-            VideoTheme {
-                IncomingCallDetails(
-                    participants = mockParticipantList.map {
-                        CallUser(
-                            id = it.id,
-                            name = it.name,
-                            role = it.role,
-                            state = null,
-                            imageUrl = it.profileImageURL ?: "",
-                            createdAt = null,
-                            updatedAt = null,
-                            teams = emptyList()
-                        )
-                    }
-                )
-            }
+        snapshot {
+            IncomingCallDetails(
+                participants = mockParticipantList.map {
+                    CallUser(
+                        id = it.id,
+                        name = it.name,
+                        role = it.role,
+                        state = null,
+                        imageUrl = it.profileImageURL ?: "",
+                        createdAt = null,
+                        updatedAt = null,
+                        teams = emptyList()
+                    )
+                }
+            )
         }
     }
 
     @Test
     fun `snapshot IncomingCallOptions composable`() {
-        paparazzi.snapshot {
-            VideoTheme {
-                IncomingCallOptions(
-                    isVideoCall = true,
-                    isVideoEnabled = true,
-                    onCallAction = { }
-                )
-            }
+        snapshotWithDarkMode {
+            IncomingCallOptions(
+                isVideoCall = true,
+                isVideoEnabled = true,
+                onCallAction = { }
+            )
         }
     }
 
     @Test
     fun `snapshot IncomingCallContent Video type with one participant composable`() {
-        paparazzi.snapshot {
-            VideoTheme {
-                IncomingCallContent(
-                    callType = CallType.VIDEO,
-                    participants = listOf(
-                        mockParticipant.let {
-                            CallUser(
-                                id = it.id,
-                                name = it.name,
-                                role = it.role,
-                                state = null,
-                                imageUrl = it.profileImageURL ?: "",
-                                createdAt = null,
-                                updatedAt = null,
-                                teams = emptyList()
-                            )
-                        }
-                    ),
-                    isVideoEnabled = false,
-                    modifier = Modifier.fillMaxSize(),
-                    onBackPressed = {},
-                    onCallAction = {}
-                )
-            }
-        }
-    }
-
-    @Test
-    fun `snapshot IncomingCallContent Video type with multiple participants composable`() {
-        paparazzi.snapshot {
-            VideoTheme {
-                IncomingCallContent(
-                    callType = CallType.VIDEO,
-                    participants = mockParticipantList.map {
-                        CallUser(
-                            id = it.id,
-                            name = it.name,
-                            role = it.role,
-                            state = null,
-                            imageUrl = it.profileImageURL ?: "",
-                            createdAt = null,
-                            updatedAt = null,
-                            teams = emptyList()
-                        )
-                    },
-                    isVideoEnabled = false,
-                    modifier = Modifier.fillMaxSize(),
-                    onBackPressed = {},
-                    onCallAction = {}
-                )
-            }
-        }
-    }
-
-    @Test
-    fun `snapshot OutgoingCallDetails composable`() {
-        paparazzi.snapshot {
-            VideoTheme {
-                OutgoingCallDetails(
-                    callType = CallType.VIDEO,
-                    participants = mockParticipantList.map {
+        snapshot {
+            IncomingCallContent(
+                callType = CallType.VIDEO,
+                participants = listOf(
+                    mockParticipant.let {
                         CallUser(
                             id = it.id,
                             name = it.name,
@@ -167,15 +94,73 @@ internal class CallContentTest {
                             teams = emptyList()
                         )
                     }
-                )
-            }
+                ),
+                isVideoEnabled = false,
+                modifier = Modifier.fillMaxSize(),
+                onBackPressed = {},
+                onCallAction = {}
+            )
+        }
+    }
+
+    @Test
+    fun `snapshot IncomingCallContent Video type with multiple participants composable`() {
+        snapshot {
+            IncomingCallContent(
+                callType = CallType.VIDEO,
+                participants = mockParticipantList.map {
+                    CallUser(
+                        id = it.id,
+                        name = it.name,
+                        role = it.role,
+                        state = null,
+                        imageUrl = it.profileImageURL ?: "",
+                        createdAt = null,
+                        updatedAt = null,
+                        teams = emptyList()
+                    )
+                },
+                isVideoEnabled = false,
+                modifier = Modifier.fillMaxSize(),
+                onBackPressed = {},
+                onCallAction = {}
+            )
+        }
+    }
+
+    @Test
+    fun `snapshot OutgoingCallDetails composable`() {
+        snapshot {
+            OutgoingCallDetails(
+                callType = CallType.VIDEO,
+                participants = mockParticipantList.map {
+                    CallUser(
+                        id = it.id,
+                        name = it.name,
+                        role = it.role,
+                        state = null,
+                        imageUrl = it.profileImageURL ?: "",
+                        createdAt = null,
+                        updatedAt = null,
+                        teams = emptyList()
+                    )
+                }
+            )
         }
     }
 
     @Test
     fun `snapshot OutgoingCallOptions composable`() {
-        paparazzi.snapshot {
-            VideoTheme {
+        snapshotWithDarkMode {
+            Column {
+                OutgoingGroupCallOptions(
+                    callMediaState = CallMediaState(
+                        isMicrophoneEnabled = true,
+                        isSpeakerphoneEnabled = true,
+                        isCameraEnabled = true
+                    ),
+                    onCallAction = { }
+                )
                 OutgoingGroupCallOptions(
                     callMediaState = CallMediaState(),
                     onCallAction = { }
@@ -186,41 +171,11 @@ internal class CallContentTest {
 
     @Test
     fun `snapshot OutgoingCallContent Video type with one participant composable`() {
-        paparazzi.snapshot {
-            VideoTheme {
-                OutgoingCallContent(
-                    callType = CallType.VIDEO,
-                    participants = listOf(
-                        mockParticipant.let {
-                            CallUser(
-                                id = it.id,
-                                name = it.name,
-                                role = it.role,
-                                state = null,
-                                imageUrl = it.profileImageURL ?: "",
-                                createdAt = null,
-                                updatedAt = null,
-                                teams = emptyList()
-                            )
-                        }
-                    ),
-                    callMediaState = CallMediaState(),
-                    modifier = Modifier.fillMaxSize(),
-                    onBackPressed = {},
-                    onCallAction = {}
-                )
-            }
-        }
-    }
-
-    @Test
-    fun `snapshot OutgoingCallContent Video type with multiple participants composable`() {
-        paparazzi.snapshot {
-            VideoTheme {
-                OutgoingCallContent(
-                    callType = CallType.VIDEO,
-                    participants =
-                    mockParticipantList.map {
+        snapshot {
+            OutgoingCallContent(
+                callType = CallType.VIDEO,
+                participants = listOf(
+                    mockParticipant.let {
                         CallUser(
                             id = it.id,
                             name = it.name,
@@ -231,13 +186,39 @@ internal class CallContentTest {
                             updatedAt = null,
                             teams = emptyList()
                         )
-                    },
-                    callMediaState = CallMediaState(),
-                    modifier = Modifier.fillMaxSize(),
-                    onBackPressed = {},
-                    onCallAction = {}
-                )
-            }
+                    }
+                ),
+                callMediaState = CallMediaState(),
+                modifier = Modifier.fillMaxSize(),
+                onBackPressed = {},
+                onCallAction = {}
+            )
+        }
+    }
+
+    @Test
+    fun `snapshot OutgoingCallContent Video type with multiple participants composable`() {
+        snapshot {
+            OutgoingCallContent(
+                callType = CallType.VIDEO,
+                participants =
+                mockParticipantList.map {
+                    CallUser(
+                        id = it.id,
+                        name = it.name,
+                        role = it.role,
+                        state = null,
+                        imageUrl = it.profileImageURL ?: "",
+                        createdAt = null,
+                        updatedAt = null,
+                        teams = emptyList()
+                    )
+                },
+                callMediaState = CallMediaState(),
+                modifier = Modifier.fillMaxSize(),
+                onBackPressed = {},
+                onCallAction = {}
+            )
         }
     }
 }

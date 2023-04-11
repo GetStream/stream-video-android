@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.compose.ui.components.audio
 
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Icon
@@ -25,6 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import io.getstream.video.android.common.model.Muted
 import io.getstream.video.android.common.model.SoundState
 import io.getstream.video.android.common.model.Speaking
 import io.getstream.video.android.common.model.Unmuted
@@ -50,7 +52,7 @@ public fun SoundIndicator(
                 modifier = modifier
                     .size(VideoTheme.dimens.audioStatusSize)
                     .padding(end = 4.dp),
-                painter = painterResource(id = R.drawable.ic_mic_on),
+                painter = painterResource(id = R.drawable.stream_video_ic_mic_on),
                 tint = Color.White,
                 contentDescription = null
             )
@@ -61,7 +63,7 @@ public fun SoundIndicator(
                 modifier = modifier
                     .size(VideoTheme.dimens.audioStatusSize)
                     .padding(end = 4.dp),
-                painter = painterResource(id = R.drawable.ic_mic_off),
+                painter = painterResource(id = R.drawable.stream_video_ic_mic_off),
                 tint = VideoTheme.colors.errorAccent,
                 contentDescription = null
             )
@@ -73,6 +75,10 @@ public fun SoundIndicator(
 @Composable
 private fun SoundIndicatorPreview() {
     VideoTheme {
-        SoundIndicator(state = Speaking)
+        Row {
+            SoundIndicator(state = Speaking)
+            SoundIndicator(state = Unmuted)
+            SoundIndicator(state = Muted)
+        }
     }
 }

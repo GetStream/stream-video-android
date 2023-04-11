@@ -43,13 +43,11 @@
             android:name="io.getstream.android.push.delegate.PushDelegateProvider"
             android:authorities="${applicationId}.io.getstream.android.push"
             android:exported="false"
-            tools:node="merge"
-            >
+            tools:node="merge">
 
             <meta-data
-                android:name="io.getstream.video.android.notifications.internal.VideoPushDelegate"
-                android:value="io.getstream.android.push.PushDelegate"
-                />
+                android:name="io.getstream.video.android.core.notifications.internal.VideoPushDelegate"
+                android:value="io.getstream.android.push.PushDelegate" />
         </provider>
 
         <receiver

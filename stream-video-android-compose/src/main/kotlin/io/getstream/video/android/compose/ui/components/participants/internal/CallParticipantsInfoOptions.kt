@@ -69,7 +69,7 @@ internal fun CallParticipantsInfoOptions(
             onClick = { onOptionSelected(Invite) },
             content = {
                 Text(
-                    text = stringResource(R.string.call_participants_info_options_invite),
+                    text = stringResource(R.string.stream_video_call_participants_info_options_invite),
                     style = VideoTheme.typography.bodyBold,
                     color = Color.White
                 )
@@ -87,7 +87,7 @@ internal fun CallParticipantsInfoOptions(
             shape = VideoTheme.shapes.participantsInfoMenuButton,
             content = {
                 Text(
-                    text = stringResource(if (isCurrentUserMuted) R.string.call_participants_info_options_unmute else R.string.call_participants_info_options_mute),
+                    text = stringResource(if (isCurrentUserMuted) R.string.stream_video_call_participants_info_options_unmute else R.string.stream_video_call_participants_info_options_mute),
                     style = VideoTheme.typography.bodyBold,
                     color = VideoTheme.colors.textLowEmphasis
                 )

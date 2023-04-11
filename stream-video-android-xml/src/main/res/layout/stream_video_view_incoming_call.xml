@@ -32,15 +32,15 @@
         android:id="@+id/participantsInfo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/singleAvatarAppbarPadding"
+        android:layout_marginTop="@dimen/stream_video_singleAvatarAppbarPadding"
         app:layout_constraintTop_toTopOf="parent"
         />
 
     <io.getstream.video.android.xml.widget.control.ControlButtonView
         android:id="@+id/declineCall"
-        android:layout_width="@dimen/largeButtonSize"
-        android:layout_height="@dimen/largeButtonSize"
-        android:layout_marginBottom="@dimen/incomingCallOptionsBottomPadding"
+        android:layout_width="@dimen/stream_video_largeButtonSize"
+        android:layout_height="@dimen/stream_video_largeButtonSize"
+        android:layout_marginBottom="@dimen/stream_video_incomingCallOptionsBottomPadding"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/cameraToggle"
         app:layout_constraintStart_toStartOf="parent"
@@ -48,8 +48,8 @@
 
     <io.getstream.video.android.xml.widget.control.ControlButtonView
         android:id="@+id/cameraToggle"
-        android:layout_width="@dimen/mediumButtonSize"
-        android:layout_height="@dimen/mediumButtonSize"
+        android:layout_width="@dimen/stream_video_mediumButtonSize"
+        android:layout_height="@dimen/stream_video_mediumButtonSize"
         app:layout_constraintBottom_toBottomOf="@id/declineCall"
         app:layout_constraintEnd_toStartOf="@id/acceptCall"
         app:layout_constraintStart_toEndOf="@id/declineCall"
@@ -58,9 +58,9 @@
 
     <io.getstream.video.android.xml.widget.control.ControlButtonView
         android:id="@+id/acceptCall"
-        android:layout_width="@dimen/largeButtonSize"
-        android:layout_height="@dimen/largeButtonSize"
-        android:layout_marginBottom="@dimen/incomingCallOptionsBottomPadding"
+        android:layout_width="@dimen/stream_video_largeButtonSize"
+        android:layout_height="@dimen/stream_video_largeButtonSize"
+        android:layout_marginBottom="@dimen/stream_video_incomingCallOptionsBottomPadding"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/cameraToggle"

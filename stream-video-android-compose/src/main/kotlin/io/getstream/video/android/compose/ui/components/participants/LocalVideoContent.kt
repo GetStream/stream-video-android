@@ -132,7 +132,8 @@ public fun LocalVideoContent(
                     .fillMaxSize()
                     .clip(RoundedCornerShape(16.dp)),
                 call = call,
-                participant = localParticipant
+                participant = localParticipant,
+                isShowConnectionQualityIndicator = false
             )
         }
     }

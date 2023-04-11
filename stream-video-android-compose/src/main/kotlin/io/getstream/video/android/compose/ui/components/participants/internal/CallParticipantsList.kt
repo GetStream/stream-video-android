@@ -31,6 +31,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -88,13 +89,14 @@ private fun CallParticipantInfoItem(
 
         Spacer(modifier = Modifier.width(8.dp))
 
+        val user by participant.user.collectAsState()
         UserAvatar(
             modifier = Modifier.size(VideoTheme.dimens.callParticipantsInfoAvatarSize),
-            user = participant.user.collectAsState().value
+            user = user,
+            showOnlineIndicator = true
         )
 
-        val userName = participant.userNameOrId.collectAsState().value
-
+        val userName by participant.userNameOrId.collectAsState()
         Text(
             modifier = Modifier
                 .padding(start = 8.dp)
@@ -109,7 +111,7 @@ private fun CallParticipantInfoItem(
         Row(verticalAlignment = Alignment.CenterVertically) {
             if (!participant.hasAudio) {
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_mic_off),
+                    painter = painterResource(id = R.drawable.stream_video_ic_mic_off),
                     tint = VideoTheme.colors.errorAccent,
                     contentDescription = null
                 )
@@ -119,7 +121,7 @@ private fun CallParticipantInfoItem(
 
             if (!participant.hasVideo) {
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_videocam_off),
+                    painter = painterResource(id = R.drawable.stream_video_ic_videocam_off),
                     tint = VideoTheme.colors.errorAccent,
                     contentDescription = null
                 )
@@ -129,7 +131,7 @@ private fun CallParticipantInfoItem(
 
             Icon(
                 modifier = Modifier.clickable { onUserOptionsSelected(participant) },
-                painter = painterResource(id = R.drawable.ic_options),
+                painter = painterResource(id = R.drawable.stream_video_ic_options),
                 tint = VideoTheme.colors.textHighEmphasis,
                 contentDescription = null
             )

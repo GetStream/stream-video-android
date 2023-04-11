@@ -265,7 +265,7 @@ class LoginActivity : ComponentActivity() {
         if (userJSON != null) {
             val token = userJSON.getString("token")
             val user = User(
-                authUser?.email ?: userJSON.getString("userId"),
+                id = authUser?.email ?: userJSON.getString("userId"),
                 name = authUser?.displayName ?: "",
                 imageUrl = authUser?.photoUrl?.toString() ?: "",
             )

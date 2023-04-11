@@ -65,66 +65,66 @@ public data class StreamTypography(
         @Composable
         public fun defaultTypography(fontFamily: FontFamily? = null): StreamTypography = StreamTypography(
             title1 = TextStyle(
-                fontSize = textSizeResource(id = R.dimen.title1TextSize),
-                lineHeight = textSizeResource(id = R.dimen.title1LineHeight),
+                fontSize = textSizeResource(id = R.dimen.stream_video_title1TextSize),
+                lineHeight = textSizeResource(id = R.dimen.stream_video_title1LineHeight),
                 fontWeight = FontWeight.W500,
                 fontFamily = fontFamily
             ),
             title3 = TextStyle(
-                fontSize = textSizeResource(id = R.dimen.title3TextSize),
-                lineHeight = textSizeResource(id = R.dimen.title3LineHeight),
+                fontSize = textSizeResource(id = R.dimen.stream_video_title3TextSize),
+                lineHeight = textSizeResource(id = R.dimen.stream_video_title3LineHeight),
                 fontWeight = FontWeight.W400,
                 fontFamily = fontFamily
             ),
             title3Bold = TextStyle(
-                fontSize = textSizeResource(id = R.dimen.title3TextSize),
-                lineHeight = textSizeResource(id = R.dimen.title3LineHeight),
+                fontSize = textSizeResource(id = R.dimen.stream_video_title3TextSize),
+                lineHeight = textSizeResource(id = R.dimen.stream_video_title3LineHeight),
                 fontWeight = FontWeight.W500,
                 fontFamily = fontFamily
             ),
             body = TextStyle(
-                fontSize = textSizeResource(id = R.dimen.bodyTextSize),
+                fontSize = textSizeResource(id = R.dimen.stream_video_bodyTextSize),
                 fontWeight = FontWeight.W400,
                 fontFamily = fontFamily
             ),
             bodyItalic = TextStyle(
-                fontSize = textSizeResource(id = R.dimen.bodyTextSize),
+                fontSize = textSizeResource(id = R.dimen.stream_video_bodyTextSize),
                 fontWeight = FontWeight.W400,
                 fontStyle = FontStyle.Italic,
                 fontFamily = fontFamily
             ),
             bodyBold = TextStyle(
-                fontSize = textSizeResource(id = R.dimen.bodyTextSize),
+                fontSize = textSizeResource(id = R.dimen.stream_video_bodyTextSize),
                 fontWeight = FontWeight.W500,
                 fontFamily = fontFamily
             ),
             footnote = TextStyle(
-                fontSize = textSizeResource(id = R.dimen.footnoteTextSize),
-                lineHeight = textSizeResource(id = R.dimen.footnoteLineHeight),
+                fontSize = textSizeResource(id = R.dimen.stream_video_footnoteTextSize),
+                lineHeight = textSizeResource(id = R.dimen.stream_video_footnoteLineHeight),
                 fontWeight = FontWeight.W400,
                 fontFamily = fontFamily
             ),
             footnoteItalic = TextStyle(
-                fontSize = textSizeResource(id = R.dimen.footnoteTextSize),
-                lineHeight = textSizeResource(id = R.dimen.footnoteLineHeight),
+                fontSize = textSizeResource(id = R.dimen.stream_video_footnoteTextSize),
+                lineHeight = textSizeResource(id = R.dimen.stream_video_footnoteLineHeight),
                 fontWeight = FontWeight.W400,
                 fontStyle = FontStyle.Italic,
                 fontFamily = fontFamily
             ),
             footnoteBold = TextStyle(
-                fontSize = textSizeResource(id = R.dimen.footnoteTextSize),
-                lineHeight = textSizeResource(id = R.dimen.footnoteLineHeight),
+                fontSize = textSizeResource(id = R.dimen.stream_video_footnoteTextSize),
+                lineHeight = textSizeResource(id = R.dimen.stream_video_footnoteLineHeight),
                 fontWeight = FontWeight.W500,
                 fontFamily = fontFamily
             ),
             captionBold = TextStyle(
-                fontSize = textSizeResource(id = R.dimen.captionTextSize),
-                lineHeight = textSizeResource(id = R.dimen.captionLineHeight),
+                fontSize = textSizeResource(id = R.dimen.stream_video_captionTextSize),
+                lineHeight = textSizeResource(id = R.dimen.stream_video_captionLineHeight),
                 fontWeight = FontWeight.W700,
                 fontFamily = fontFamily
             ),
             tabBar = TextStyle(
-                fontSize = textSizeResource(id = R.dimen.tabBarTextSize),
+                fontSize = textSizeResource(id = R.dimen.stream_video_tabBarTextSize),
                 fontWeight = FontWeight.W400,
                 fontFamily = fontFamily
             ),

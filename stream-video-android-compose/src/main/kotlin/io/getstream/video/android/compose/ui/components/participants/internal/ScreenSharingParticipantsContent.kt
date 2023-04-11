@@ -19,17 +19,13 @@ package io.getstream.video.android.compose.ui.components.participants.internal
 import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import android.view.View
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.common.util.mockVideoTrackWrapper
-import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.controls.internal.DefaultCallControlsContent
-import io.getstream.video.android.compose.ui.components.previews.ParticipantsProvider
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallAction
@@ -54,14 +50,13 @@ import io.getstream.video.android.core.model.ScreenSharingSession
  */
 @Composable
 internal fun ScreenSharingCallParticipantsContent(
-    call: Call?,
+    call: Call,
     session: ScreenSharingSession,
     participants: List<ParticipantState>,
     callMediaState: CallMediaState,
     onCallAction: (CallAction) -> Unit,
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues = PaddingValues(0.dp),
-    isFullscreen: Boolean = false,
     onRender: (View) -> Unit = {},
     onBackPressed: () -> Unit = {},
     callControlsContent: @Composable () -> Unit = {
@@ -74,49 +69,31 @@ internal fun ScreenSharingCallParticipantsContent(
 ) {
     val configuration = LocalConfiguration.current
     val orientation = configuration.orientation
+    val screenSharingSession by call.state.screenSharingSession.collectAsState(initial = null)
 
     if (orientation == ORIENTATION_PORTRAIT) {
         PortraitScreenSharingContent(
             call = call,
             session = session,
             participants = participants,
+            primarySpeaker = screenSharingSession?.participant,
             paddingValues = paddingValues,
             modifier = modifier,
             onRender = onRender,
-            onCallAction = onCallAction
+            onCallAction = onCallAction,
+            onBackPressed = onBackPressed,
         )
     } else {
         LandscapeScreenSharingContent(
             call = call,
             session = session,
             participants = participants,
+            primarySpeaker = screenSharingSession?.participant,
             paddingValues = paddingValues,
             modifier = modifier,
             onRender = onRender,
-            isFullscreen = isFullscreen,
             onCallAction = onCallAction,
             onBackPressed = onBackPressed,
-            callControlsContent = callControlsContent
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun ScreenSharingCallParticipantsContentPreview(
-    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<ParticipantState>
-) {
-    VideoTheme {
-        ScreenSharingCallParticipantsContent(
-            call = null,
-            session = ScreenSharingSession(
-                track = callParticipants.first().videoTrackWrapped ?: mockVideoTrackWrapper,
-                participant = callParticipants.first()
-            ),
-            participants = callParticipants,
-            onCallAction = {},
-            modifier = Modifier.fillMaxSize(),
-            callMediaState = CallMediaState()
         )
     }
 }

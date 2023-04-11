@@ -18,10 +18,10 @@ package io.getstream.video.android.compose.ui.components.avatar
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
@@ -35,7 +35,6 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.previews.ParticipantsProvider
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.User
-import io.getstream.video.android.core.utils.initials
 import io.getstream.video.android.ui.common.R
 
 /**
@@ -62,8 +61,13 @@ public fun UserAvatar(
     contentDescription: String? = null,
     requestSize: IntSize = IntSize(DEFAULT_IMAGE_SIZE, DEFAULT_IMAGE_SIZE),
     @DrawableRes loadingPlaceholder: Int? = null,
-    @DrawableRes previewPlaceholder: Int = R.drawable.ic_preview_avatar,
+    @DrawableRes previewPlaceholder: Int = R.drawable.stream_video_ic_preview_avatar,
+    showOnlineIndicator: Boolean = false,
+    onlineIndicatorAlignment: OnlineIndicatorAlignment = OnlineIndicatorAlignment.TopEnd,
     initialsAvatarOffset: DpOffset = DpOffset(0.dp, 0.dp),
+    onlineIndicator: @Composable BoxScope.() -> Unit = {
+        DefaultOnlineIndicator(onlineIndicatorAlignment)
+    },
     onClick: (() -> Unit)? = null,
 ) {
     Box(modifier = modifier) {
@@ -81,7 +85,19 @@ public fun UserAvatar(
             onClick = onClick,
             initialsAvatarOffset = initialsAvatarOffset
         )
+
+        if (showOnlineIndicator && user.isOnline) {
+            onlineIndicator()
+        }
     }
+}
+
+/**
+ * The default online indicator for channel members.
+ */
+@Composable
+internal fun BoxScope.DefaultOnlineIndicator(onlineIndicatorAlignment: OnlineIndicatorAlignment) {
+    OnlineIndicator(modifier = Modifier.align(onlineIndicatorAlignment.alignment))
 }
 
 @Preview
@@ -91,7 +107,7 @@ private fun UserAvatarPreview(
 ) {
     VideoTheme {
         UserAvatar(
-            user = callParticipants[0].user.collectAsState().value,
+            user = callParticipants[0].initialUser,
             modifier = Modifier.size(82.dp)
         )
     }

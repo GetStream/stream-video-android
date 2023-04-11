@@ -120,7 +120,7 @@ private fun ParticipantImageBackground(
 private fun DefaultCallBackground() {
     Image(
         modifier = Modifier.fillMaxSize(),
-        painter = painterResource(id = R.drawable.bg_call),
+        painter = painterResource(id = R.drawable.stream_video_bg_call),
         contentScale = ContentScale.FillBounds,
         contentDescription = null
     )
