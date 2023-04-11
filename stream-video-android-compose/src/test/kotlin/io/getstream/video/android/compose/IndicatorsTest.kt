@@ -17,6 +17,7 @@
 package io.getstream.video.android.compose
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.ui.Alignment
 import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.common.model.Muted
@@ -58,9 +59,17 @@ internal class IndicatorsTest : BaseComposeTest() {
     @Test
     fun `snapshot Connection ConnectionQualityIndicator composable`() {
         snapshotWithDarkMode {
-            ConnectionQualityIndicator(
-                connectionQuality = ConnectionQuality.CONNECTION_QUALITY_GOOD
-            )
+            Row {
+                ConnectionQualityIndicator(
+                    connectionQuality = ConnectionQuality.CONNECTION_QUALITY_POOR
+                )
+                ConnectionQualityIndicator(
+                    connectionQuality = ConnectionQuality.CONNECTION_QUALITY_GOOD
+                )
+                ConnectionQualityIndicator(
+                    connectionQuality = ConnectionQuality.CONNECTION_QUALITY_EXCELLENT
+                )
+            }
         }
     }
 

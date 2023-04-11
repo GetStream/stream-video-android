@@ -31,10 +31,9 @@ import io.getstream.video.android.common.util.mockParticipantList
 import io.getstream.video.android.common.util.mockVideoTrack
 import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.call.controls.internal.DefaultCallControlsContent
 import io.getstream.video.android.compose.ui.components.participants.internal.LandscapeParticipants
 import io.getstream.video.android.compose.ui.components.participants.internal.LandscapeScreenSharingContent
-import io.getstream.video.android.core.call.state.CallMediaState
+import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantsRow
 import io.getstream.video.android.core.model.ScreenSharingSession
 import org.junit.Rule
 import org.junit.Test
@@ -135,27 +134,97 @@ internal class ParticipantLandscapeTest : BaseComposeTest() {
     }
 
     @Test
-    fun `snapshot LandscapeScreenSharingContent composable`() {
+    fun `snapshot LandscapeParticipants5 composable`() {
         snapshot {
+            val configuration = LocalConfiguration.current
+            val screenWidth = configuration.screenWidthDp
+            val screenHeight = configuration.screenHeightDp
+
+            Box(
+                modifier = Modifier.background(color = VideoTheme.colors.appBackground)
+            ) {
+                LandscapeParticipants(
+                    call = null,
+                    primarySpeaker = mockParticipant,
+                    callParticipants = mockParticipantList.take(5),
+                    modifier = Modifier.fillMaxSize(),
+                    paddingValues = PaddingValues(0.dp),
+                    parentSize = IntSize(screenWidth, screenHeight)
+                ) {}
+            }
+        }
+    }
+
+    @Test
+    fun `snapshot LandscapeParticipants6 composable`() {
+        snapshot {
+            val configuration = LocalConfiguration.current
+            val screenWidth = configuration.screenWidthDp
+            val screenHeight = configuration.screenHeightDp
+
+            Box(
+                modifier = Modifier.background(color = VideoTheme.colors.appBackground)
+            ) {
+                LandscapeParticipants(
+                    call = null,
+                    primarySpeaker = mockParticipant,
+                    callParticipants = mockParticipantList.take(6),
+                    modifier = Modifier.fillMaxSize(),
+                    paddingValues = PaddingValues(0.dp),
+                    parentSize = IntSize(screenWidth, screenHeight)
+                ) {}
+            }
+        }
+    }
+
+    @Test
+    fun `snapshot LandscapeScreenSharingContent for other participant composable`() {
+        snapshot(isInDarkMode = true) {
             LandscapeScreenSharingContent(
                 call = null,
                 session = ScreenSharingSession(
-                    track = mockParticipantList.first().videoTrack ?: mockVideoTrack,
-                    participant = mockParticipantList.first()
+                    track = mockParticipantList[1].videoTrack ?: mockVideoTrack,
+                    participant = mockParticipantList[1]
                 ),
                 participants = mockParticipantList,
+                primarySpeaker = mockParticipant,
                 paddingValues = PaddingValues(0.dp),
                 modifier = Modifier.fillMaxSize(),
-                isFullscreen = true,
                 onRender = {},
                 onCallAction = {},
                 onBackPressed = {}
-            ) {
-                DefaultCallControlsContent(
-                    call = null,
-                    callMediaState = CallMediaState(),
-                ) {}
-            }
+            )
+        }
+    }
+
+    @Test
+    fun `snapshot LandscapeScreenSharingContent for myself composable`() {
+        snapshot(isInDarkMode = true) {
+            LandscapeScreenSharingContent(
+                call = null,
+                session = ScreenSharingSession(
+                    track = mockParticipantList[0].videoTrack ?: mockVideoTrack,
+                    participant = mockParticipantList[0]
+                ),
+                participants = mockParticipantList,
+                primarySpeaker = mockParticipant,
+                paddingValues = PaddingValues(0.dp),
+                modifier = Modifier.fillMaxSize(),
+                onRender = {},
+                onCallAction = {},
+                onBackPressed = {}
+            )
+        }
+    }
+
+    @Test
+    fun `snapshot ParticipantsRow composable`() {
+        snapshotWithDarkMode {
+            ParticipantsRow(
+                call = null,
+                participants = mockParticipantList,
+                primarySpeaker = mockParticipant,
+            )
         }
     }
 }

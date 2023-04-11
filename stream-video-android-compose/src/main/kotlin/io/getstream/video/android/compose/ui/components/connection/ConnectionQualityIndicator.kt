@@ -65,8 +65,10 @@ public fun ConnectionQualityIndicator(
                     .width(VideoTheme.dimens.connectionIndicatorBarWidth)
                     .fillMaxHeight(0.33f)
                     .background(
-                        color = if (quality >= 1) {
+                        color = if (quality > 1) {
                             VideoTheme.colors.connectionQualityBarFilled
+                        } else if (quality == 1) {
+                            VideoTheme.colors.errorAccent
                         } else {
                             VideoTheme.colors.connectionQualityBar
                         },
@@ -113,8 +115,16 @@ public fun ConnectionQualityIndicator(
 @Composable
 private fun ConnectionQualityIndicatorPreview() {
     VideoTheme {
-        ConnectionQualityIndicator(
-            connectionQuality = ConnectionQuality.CONNECTION_QUALITY_GOOD
-        )
+        Row {
+            ConnectionQualityIndicator(
+                connectionQuality = ConnectionQuality.CONNECTION_QUALITY_POOR
+            )
+            ConnectionQualityIndicator(
+                connectionQuality = ConnectionQuality.CONNECTION_QUALITY_GOOD
+            )
+            ConnectionQualityIndicator(
+                connectionQuality = ConnectionQuality.CONNECTION_QUALITY_EXCELLENT
+            )
+        }
     }
 }

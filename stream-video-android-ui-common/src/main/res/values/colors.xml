@@ -30,6 +30,8 @@
     <color name="stream_video_connection_quality_background">#D9303030</color>
     <color name="stream_video_participant_label_background">#D9303030</color>
     <color name="stream_video_connection_quality_bar_background">#FFFFFF</color>
+    <color name="stream_video_screen_sharing_tooltip_background">#D9000000</color>
+    <color name="stream_video_screen_sharing_tooltip_content">#FCFCFC</color>
     <color name="stream_video_error_accent">#FF3742</color>
     <color name="stream_video_info_accent">#20E070</color>
     <color name="stream_video_focused_border_color">#005FFF</color>

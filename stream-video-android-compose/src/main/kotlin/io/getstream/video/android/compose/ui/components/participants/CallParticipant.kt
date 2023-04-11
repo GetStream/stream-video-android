@@ -79,16 +79,36 @@ public fun CallParticipant(
     paddingValues: PaddingValues = PaddingValues(0.dp),
     labelPosition: Alignment = BottomStart,
     isFocused: Boolean = false,
+    isScreenSharing: Boolean = false,
     isShowConnectionQualityIndicator: Boolean = true,
     onRender: (View) -> Unit = {}
 ) {
     val containerModifier = if (isFocused) modifier.border(
-        BorderStroke(
-            VideoTheme.dimens.callParticipantFocusedBorderWidth, VideoTheme.colors.callFocusedBorder
-        )
+        border = if (isScreenSharing) {
+            BorderStroke(
+                VideoTheme.dimens.callParticipantScreenSharingFocusedBorderWidth,
+                VideoTheme.colors.callFocusedBorder
+            )
+        } else {
+            BorderStroke(
+                VideoTheme.dimens.callParticipantFocusedBorderWidth,
+                VideoTheme.colors.callFocusedBorder
+            )
+        },
+        shape = if (isScreenSharing) {
+            RoundedCornerShape(VideoTheme.dimens.screenShareParticipantsRadius)
+        } else {
+            RectangleShape
+        }
     ) else modifier
 
-    Box(modifier = containerModifier.padding(paddingValues)) {
+    Box(
+        modifier = containerModifier.padding(paddingValues).apply {
+            if (isScreenSharing) {
+                clip(RoundedCornerShape(VideoTheme.dimens.screenShareParticipantsRadius))
+            }
+        }
+    ) {
         ParticipantVideo(call = call, participant = participant, onRender = onRender)
 
         ParticipantLabel(participant, labelPosition)

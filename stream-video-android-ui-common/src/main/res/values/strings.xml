@@ -53,7 +53,7 @@
     <string name="stream_video_call_notification_action_accept">Accept</string>
     <string name="stream_video_call_notification_action_reject">Reject</string>
     <string name="stream_video_call_notification_action_cancel">Cancel</string>
-    <string name="stream_video_screen_sharing_title">%1$s presenting</string>
+    <string name="stream_video_screen_sharing_title">%1$s is Presenting</string>
 
     <string name="stream_video_myself">You</string>
 </resources>

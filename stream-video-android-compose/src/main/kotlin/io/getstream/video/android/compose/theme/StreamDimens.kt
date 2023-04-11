@@ -66,6 +66,7 @@ public data class StreamDimens(
     public val landscapeCallControlButtonSize: Dp,
     public val callControlsSheetHeight: Dp,
     public val callParticipantFocusedBorderWidth: Dp,
+    public val callParticipantScreenSharingFocusedBorderWidth: Dp,
     public val callParticipantLabelHeight: Dp,
     public val callParticipantLabelPadding: Dp,
     public val callParticipantLabelTextMaxWidth: Dp,
@@ -94,7 +95,10 @@ public data class StreamDimens(
     public val screenShareParticipantsScreenShareListMargin: Dp,
     public val screenShareParticipantsRadius: Dp,
     public val screenSharePresenterPadding: Dp,
-    public val screenSharePresenterMargin: Dp,
+    public val screenSharePresenterTooltipMargin: Dp,
+    public val screenSharePresenterTooltipPadding: Dp,
+    public val screenSharePresenterTooltipIconPadding: Dp,
+    public val screenSharePresenterTooltipHeight: Dp,
 ) {
     public companion object {
         /**
@@ -135,6 +139,7 @@ public data class StreamDimens(
             callAppBarTrailingContentSpacingEnd = dimensionResource(id = R.dimen.stream_video_callAppBarTrailingContentSpacingEnd),
             callControlButtonSize = dimensionResource(id = R.dimen.stream_video_callControlButtonSize),
             callParticipantFocusedBorderWidth = dimensionResource(id = R.dimen.stream_video_activeSpeakerBoarderWidth),
+            callParticipantScreenSharingFocusedBorderWidth = dimensionResource(id = R.dimen.stream_video_activeSpeakerScreenSharingBoarderWidth),
             callParticipantLabelHeight = dimensionResource(id = R.dimen.stream_video_callParticipantLabelHeight),
             callParticipantLabelPadding = dimensionResource(id = R.dimen.stream_video_callParticipantLabelPadding),
             callParticipantLabelTextMaxWidth = dimensionResource(id = R.dimen.stream_video_callParticipantLabelTextMaxWidth),
@@ -163,9 +168,12 @@ public data class StreamDimens(
             screenShareParticipantsListItemMargin = dimensionResource(id = R.dimen.stream_video_screenShareParticipantsListItemMargin),
             screenShareParticipantsScreenShareListMargin = dimensionResource(id = R.dimen.stream_video_screenShareParticipantsMargin),
             screenShareParticipantsRadius = dimensionResource(id = R.dimen.stream_video_screenShareParticipantsRadius),
-            screenSharePresenterMargin = dimensionResource(id = R.dimen.stream_video_screenSharePresenterTitleMargin),
+            screenSharePresenterTooltipMargin = dimensionResource(id = R.dimen.stream_video_screenSharePresenterTooltipMargin),
+            screenSharePresenterTooltipPadding = dimensionResource(id = R.dimen.stream_video_screenSharePresenterTooltipPadding),
             screenSharePresenterPadding = dimensionResource(id = R.dimen.stream_video_screenSharePresenterPadding),
             callControllerBottomPadding = dimensionResource(id = R.dimen.stream_video_callControllerBottomPadding),
+            screenSharePresenterTooltipIconPadding = dimensionResource(id = R.dimen.stream_video_screenShareTooltipIconPadding),
+            screenSharePresenterTooltipHeight = dimensionResource(id = R.dimen.stream_video_screenSharePresenterTooltipHeight)
         )
     }
 }

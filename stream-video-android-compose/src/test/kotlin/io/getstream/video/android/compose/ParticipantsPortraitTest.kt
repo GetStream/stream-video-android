@@ -42,11 +42,8 @@ import io.getstream.video.android.compose.ui.components.participants.internal.In
 import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantAvatars
 import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantInformation
 import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantsColumn
-import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantsRow
 import io.getstream.video.android.compose.ui.components.participants.internal.PortraitParticipants
 import io.getstream.video.android.compose.ui.components.participants.internal.PortraitScreenSharingContent
-import io.getstream.video.android.compose.ui.components.participants.internal.ScreenSharingCallParticipantsContent
-import io.getstream.video.android.core.call.state.CallMediaState
 import io.getstream.video.android.core.model.CallStatus
 import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.core.model.ScreenSharingSession
@@ -311,45 +308,41 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
     }
 
     @Test
-    fun `snapshot PortraitScreenSharingContent composable`() {
-        snapshot {
+    fun `snapshot PortraitScreenSharingContent for other participant composable`() {
+        snapshot(isInDarkMode = true) {
             PortraitScreenSharingContent(
                 call = null,
                 session = ScreenSharingSession(
-                    track = mockParticipantList.first().videoTrack ?: mockVideoTrack,
-                    participant = mockParticipantList.first()
+                    track = mockParticipantList[1].videoTrack ?: mockVideoTrack,
+                    participant = mockParticipantList[1]
                 ),
                 participants = mockParticipantList,
+                primarySpeaker = mockParticipantList[1],
                 paddingValues = PaddingValues(0.dp),
                 modifier = Modifier.fillMaxSize(),
-                onRender = {}
-            ) {}
-        }
-    }
-
-    @Test
-    fun `snapshot ScreenSharingCallParticipantsContent composable`() {
-        snapshot {
-            ScreenSharingCallParticipantsContent(
-                call = null,
-                session = ScreenSharingSession(
-                    track = mockParticipantList.first().videoTrack ?: mockVideoTrack,
-                    participant = mockParticipantList.first()
-                ),
-                participants = mockParticipantList,
-                onCallAction = {},
-                modifier = Modifier.fillMaxSize(),
-                callMediaState = CallMediaState()
+                onRender = {},
+                onBackPressed = {},
+                onCallAction = {}
             )
         }
     }
 
     @Test
-    fun `snapshot ParticipantsRow composable`() {
-        snapshotWithDarkMode {
-            ParticipantsRow(
+    fun `snapshot PortraitScreenSharingContent for myself composable`() {
+        snapshot(isInDarkMode = true) {
+            PortraitScreenSharingContent(
                 call = null,
-                participants = mockParticipantList
+                session = ScreenSharingSession(
+                    track = mockParticipantList[0].videoTrack ?: mockVideoTrack,
+                    participant = mockParticipantList[0]
+                ),
+                participants = mockParticipantList,
+                primarySpeaker = mockParticipantList[0],
+                paddingValues = PaddingValues(0.dp),
+                modifier = Modifier.fillMaxSize(),
+                onRender = {},
+                onBackPressed = {},
+                onCallAction = {}
             )
         }
     }
@@ -359,7 +352,8 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
         snapshotWithDarkModeRow {
             ParticipantsColumn(
                 call = null,
-                participants = mockParticipantList
+                participants = mockParticipantList,
+                primarySpeaker = mockParticipant,
             )
         }
     }
