@@ -55,12 +55,14 @@ class DogfoodingApp : Application() {
      */
     fun initializeStreamVideo(
         user: User,
+        token: String,
         apiKey: ApiKey,
         loggingLevel: LoggingLevel
     ): StreamVideo {
         return StreamVideoBuilder(
             context = this,
             user = user,
+            userToken=token,
             apiKey = apiKey,
             loggingLevel = loggingLevel,
             pushDeviceGenerators = listOf(FirebasePushDeviceGenerator()),
@@ -84,6 +86,7 @@ class DogfoodingApp : Application() {
         val credentials = UserPreferencesManager.initialize(this)
         val user = credentials.getUserCredentials()
         val apiKey = credentials.getApiKey()
+        val token = credentials.getUserToken()
 
         if (user == null || apiKey.isBlank()) {
             return false
@@ -92,7 +95,8 @@ class DogfoodingApp : Application() {
         dogfoodingApp.initializeStreamVideo(
             apiKey = apiKey,
             user = user,
-            loggingLevel = LoggingLevel.NONE
+            loggingLevel = LoggingLevel.NONE,
+            token=token
         )
         return true
     }

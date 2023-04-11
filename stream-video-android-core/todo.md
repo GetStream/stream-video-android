@@ -2,12 +2,13 @@
 ## Timeline
 
 ### Week 1: Refactor LLC & State. Setup testing
-### Week 2: LLC & State Stability
-### Week 3: Sample app
+### Week 2: LLC & State Stability. Compose testing & previews
+### Week 3: Sample app, update compose to LLC & State changes
 
 - Audio/video review
 - Tommaso to fix the event openapi thing, and we merge it
 - Jaewoong and Thierry to review the codebase. Monday evening
+- Make the UI work with the new LLC & State
 - Step 1: Render local video using the new API and compose
 - Step 2: Upload local video to the SFU
 - Step 3: Join a call and render participants

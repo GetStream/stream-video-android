@@ -88,10 +88,11 @@ class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val user = UserPreferencesManager.initialize(this).getUserCredentials()
+        val preferenceManager = UserPreferencesManager.initialize(this)
+        val user = preferenceManager.getUserCredentials()
 
         if (user != null && user.isValid() && !BuildConfig.BENCHMARK) {
-            startHome(user)
+            startHome(user, preferenceManager.getUserToken())
             finish()
         }
 
@@ -249,6 +250,10 @@ class LoginActivity : ComponentActivity() {
             println(response)
             inputStream.close()
 
+
+            val userPreferences = UserPreferencesManager.initialize(applicationContext)
+            userPreferences.storeUserToken(response)
+
             logIn(response)
 
             withContext(Dispatchers.Main) {
@@ -256,6 +261,8 @@ class LoginActivity : ComponentActivity() {
             }
         }
     }
+
+
 
     private fun logIn(response: String) {
         val jsonArray = JSONArray(response)
@@ -270,15 +277,16 @@ class LoginActivity : ComponentActivity() {
                 imageUrl = authUser?.photoUrl?.toString() ?: "",
             )
 
-            startHome(user)
+            startHome(user, token)
         }
     }
 
-    private fun startHome(user: User) {
+    private fun startHome(user: User, token: String) {
         dogfoodingApp.initializeStreamVideo(
             apiKey = API_KEY,
             user = user,
-            loggingLevel = LoggingLevel.BODY
+            loggingLevel = LoggingLevel.BODY,
+            token = token
         )
         startActivity(HomeActivity.getIntent(this))
     }

@@ -83,6 +83,8 @@ public class StreamVideoBuilder(
         if (apiKey.isBlank()
         ) throw IllegalArgumentException("The API key can not be empty")
 
+        if (userToken.isBlank() && tokenProvider == null && user.type == UserType.Authenticated) throw IllegalArgumentException("Either a user token or a token provider must be provided")
+
         // TODO: Don't user userpreference manager
         val preferences = UserPreferencesManager.initialize(context).apply {
             storeUserCredentials(user)
