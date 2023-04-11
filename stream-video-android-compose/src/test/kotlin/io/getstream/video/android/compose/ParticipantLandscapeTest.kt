@@ -28,6 +28,7 @@ import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.common.util.mockParticipant
 import io.getstream.video.android.common.util.mockParticipantList
+import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.common.util.mockVideoTrackWrapper
 import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -51,14 +52,15 @@ internal class ParticipantLandscapeTest : BaseComposeTest() {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
+            val participants = mockParticipants
 
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.appBackground)
             ) {
                 LandscapeParticipants(
                     call = null,
-                    primarySpeaker = mockParticipant,
-                    callParticipants = mockParticipantList.take(1),
+                    primarySpeaker = participants[0],
+                    callParticipants = participants.take(1),
                     modifier = Modifier.fillMaxSize(),
                     paddingValues = PaddingValues(0.dp),
                     parentSize = IntSize(screenWidth, screenHeight)
@@ -73,14 +75,15 @@ internal class ParticipantLandscapeTest : BaseComposeTest() {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
+            val participants = mockParticipants
 
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.appBackground)
             ) {
                 LandscapeParticipants(
                     call = null,
-                    primarySpeaker = mockParticipant,
-                    callParticipants = mockParticipantList.take(2),
+                    primarySpeaker = participants[0],
+                    callParticipants = participants.take(2),
                     modifier = Modifier.fillMaxSize(),
                     paddingValues = PaddingValues(0.dp),
                     parentSize = IntSize(screenWidth, screenHeight)
@@ -95,14 +98,15 @@ internal class ParticipantLandscapeTest : BaseComposeTest() {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
+            val participants = mockParticipants
 
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.appBackground)
             ) {
                 LandscapeParticipants(
                     call = null,
-                    primarySpeaker = mockParticipant,
-                    callParticipants = mockParticipantList.take(3),
+                    primarySpeaker = participants[0],
+                    callParticipants = participants.take(3),
                     modifier = Modifier.fillMaxSize(),
                     paddingValues = PaddingValues(0.dp),
                     parentSize = IntSize(screenWidth, screenHeight)
@@ -117,14 +121,15 @@ internal class ParticipantLandscapeTest : BaseComposeTest() {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
+            val participants = mockParticipants
 
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.appBackground)
             ) {
                 LandscapeParticipants(
                     call = null,
-                    primarySpeaker = mockParticipant,
-                    callParticipants = mockParticipantList.take(4),
+                    primarySpeaker = participants[0],
+                    callParticipants = participants.take(4),
                     modifier = Modifier.fillMaxSize(),
                     paddingValues = PaddingValues(0.dp),
                     parentSize = IntSize(screenWidth, screenHeight)
@@ -139,14 +144,15 @@ internal class ParticipantLandscapeTest : BaseComposeTest() {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
+            val participants = mockParticipants
 
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.appBackground)
             ) {
                 LandscapeParticipants(
                     call = null,
-                    primarySpeaker = mockParticipant,
-                    callParticipants = mockParticipantList.take(5),
+                    primarySpeaker = participants[0],
+                    callParticipants = participants.take(5),
                     modifier = Modifier.fillMaxSize(),
                     paddingValues = PaddingValues(0.dp),
                     parentSize = IntSize(screenWidth, screenHeight)
@@ -161,14 +167,15 @@ internal class ParticipantLandscapeTest : BaseComposeTest() {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
+            val participants = mockParticipants
 
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.appBackground)
             ) {
                 LandscapeParticipants(
                     call = null,
-                    primarySpeaker = mockParticipant,
-                    callParticipants = mockParticipantList.take(6),
+                    primarySpeaker = participants[0],
+                    callParticipants = participants.take(6),
                     modifier = Modifier.fillMaxSize(),
                     paddingValues = PaddingValues(0.dp),
                     parentSize = IntSize(screenWidth, screenHeight)

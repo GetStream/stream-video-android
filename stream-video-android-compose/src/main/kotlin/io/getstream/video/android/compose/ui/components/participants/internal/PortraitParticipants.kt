@@ -227,14 +227,15 @@ private fun PortraitParticipantsPreview1() {
         val configuration = LocalConfiguration.current
         val screenWidth = configuration.screenWidthDp
         val screenHeight = configuration.screenHeightDp
+        val participants = mockParticipants
 
         Box(
             modifier = Modifier.background(color = VideoTheme.colors.appBackground)
         ) {
             PortraitParticipants(
                 call = null,
-                primarySpeaker = mockParticipants[0],
-                callParticipants = mockParticipants.take(1),
+                primarySpeaker = participants[0],
+                callParticipants = participants.take(1),
                 modifier = Modifier.fillMaxSize(),
                 paddingValues = PaddingValues(0.dp),
                 parentSize = IntSize(screenWidth, screenHeight)
@@ -251,6 +252,7 @@ private fun PortraitParticipantsPreview2() {
         val configuration = LocalConfiguration.current
         val screenWidth = configuration.screenWidthDp
         val screenHeight = configuration.screenHeightDp
+        val participants = mockParticipants
 
         Box(
             modifier = Modifier.background(color = VideoTheme.colors.appBackground)
@@ -258,7 +260,7 @@ private fun PortraitParticipantsPreview2() {
             PortraitParticipants(
                 call = null,
                 primarySpeaker = mockParticipants[0],
-                callParticipants = mockParticipants.take(2),
+                callParticipants = participants.take(2),
                 modifier = Modifier.fillMaxSize(),
                 paddingValues = PaddingValues(0.dp),
                 parentSize = IntSize(screenWidth, screenHeight)
@@ -275,14 +277,15 @@ private fun PortraitParticipantsPreview3() {
         val configuration = LocalConfiguration.current
         val screenWidth = configuration.screenWidthDp
         val screenHeight = configuration.screenHeightDp
+        val participants = mockParticipants
 
         Box(
             modifier = Modifier.background(color = VideoTheme.colors.appBackground)
         ) {
             PortraitParticipants(
                 call = null,
-                primarySpeaker = mockParticipants[0],
-                callParticipants = mockParticipants.take(3),
+                primarySpeaker = participants[0],
+                callParticipants = participants.take(3),
                 modifier = Modifier.fillMaxSize(),
                 paddingValues = PaddingValues(0.dp),
                 parentSize = IntSize(screenWidth, screenHeight)
@@ -299,14 +302,15 @@ private fun PortraitParticipantsPreview4() {
         val configuration = LocalConfiguration.current
         val screenWidth = configuration.screenWidthDp
         val screenHeight = configuration.screenHeightDp
+        val participants = mockParticipants
 
         Box(
             modifier = Modifier.background(color = VideoTheme.colors.appBackground)
         ) {
             PortraitParticipants(
                 call = null,
-                primarySpeaker = mockParticipants[0],
-                callParticipants = mockParticipants.take(4),
+                primarySpeaker = participants[0],
+                callParticipants = participants.take(4),
                 modifier = Modifier.fillMaxSize(),
                 paddingValues = PaddingValues(0.dp),
                 parentSize = IntSize(screenWidth, screenHeight)
@@ -323,14 +327,15 @@ private fun PortraitParticipantsPreview5() {
         val configuration = LocalConfiguration.current
         val screenWidth = configuration.screenWidthDp
         val screenHeight = configuration.screenHeightDp
+        val participants = mockParticipants
 
         Box(
             modifier = Modifier.background(color = VideoTheme.colors.appBackground)
         ) {
             PortraitParticipants(
                 call = null,
-                primarySpeaker = mockParticipants[0],
-                callParticipants = mockParticipants.take(5),
+                primarySpeaker = participants[0],
+                callParticipants = participants.take(5),
                 modifier = Modifier.fillMaxSize(),
                 paddingValues = PaddingValues(0.dp),
                 parentSize = IntSize(screenWidth, screenHeight)
@@ -347,14 +352,15 @@ private fun PortraitParticipantsPreview6() {
         val configuration = LocalConfiguration.current
         val screenWidth = configuration.screenWidthDp
         val screenHeight = configuration.screenHeightDp
+        val participants = mockParticipants
 
         Box(
             modifier = Modifier.background(color = VideoTheme.colors.appBackground)
         ) {
             PortraitParticipants(
                 call = null,
-                primarySpeaker = mockParticipants[0],
-                callParticipants = mockParticipants.take(6),
+                primarySpeaker = participants[0],
+                callParticipants = participants.take(6),
                 modifier = Modifier.fillMaxSize(),
                 paddingValues = PaddingValues(0.dp),
                 parentSize = IntSize(screenWidth, screenHeight)
