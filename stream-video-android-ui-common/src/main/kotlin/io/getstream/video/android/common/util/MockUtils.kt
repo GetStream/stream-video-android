@@ -111,7 +111,7 @@ public val mockParticipants: List<ParticipantState>
             participants.add(
                 ParticipantState(
                     initialUser = it,
-                    sessionId = "",
+                    sessionId = UUID.randomUUID().toString(),
                     isLocal = it.id == mockUsers.first().id,
                     call = mockCall
                 )
