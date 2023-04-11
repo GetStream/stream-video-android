@@ -78,8 +78,8 @@ internal class VideoSocketImpl(
     private val eventUiHandler = Handler(Looper.getMainLooper())
 
     suspend fun connect(): Result<ConnectedEvent> = suspendCoroutine { continuation ->
-        this.connectSocket()
         this.connectContinuation = continuation
+        this.connectSocket()
     }
 
     /**
