@@ -38,7 +38,8 @@ import io.getstream.video.android.core.model.CallUser
 
 @Composable
 internal fun ParticipantInformation(
-    callStatus: CallStatus, participants: List<CallUser>
+    callStatus: CallStatus,
+    participants: List<CallUser>
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally
@@ -85,7 +86,8 @@ internal fun ParticipantInformation(
 @Composable
 private fun ParticipantInformationPreview() {
     VideoTheme {
-        ParticipantInformation(callStatus = CallStatus.Incoming,
+        ParticipantInformation(
+            callStatus = CallStatus.Incoming,
             participants = mockParticipantList.map {
                 CallUser(
                     id = it.initialUser.id,
@@ -97,6 +99,7 @@ private fun ParticipantInformationPreview() {
                     updatedAt = null,
                     teams = emptyList()
                 )
-            })
+            }
+        )
     }
 }

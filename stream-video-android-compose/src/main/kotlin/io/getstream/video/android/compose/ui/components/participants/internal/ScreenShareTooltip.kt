@@ -54,7 +54,8 @@ internal fun ScreenShareTooltip(
             .background(
                 color = VideoTheme.colors.screenSharingTooltipBackground,
                 shape = RoundedCornerShape(8.dp)
-            ), verticalAlignment = Alignment.CenterVertically
+            ),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
             modifier = Modifier.padding(

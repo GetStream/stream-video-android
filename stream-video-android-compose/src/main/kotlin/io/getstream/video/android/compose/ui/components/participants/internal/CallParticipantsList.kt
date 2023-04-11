@@ -34,14 +34,15 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.getstream.video.android.common.util.MockUtils
+import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
-import io.getstream.video.android.compose.ui.components.previews.ParticipantsProvider
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.ui.common.R
 
@@ -143,12 +144,11 @@ private fun CallParticipantInfoItem(
 
 @Preview
 @Composable
-private fun CallParticipantsListPreview(
-    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<ParticipantState>
-) {
+private fun CallParticipantsListPreview() {
+    MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         CallParticipantsList(
-            participantsState = callParticipants,
+            participantsState = mockParticipants,
             onUserOptionsSelected = {}
         )
     }

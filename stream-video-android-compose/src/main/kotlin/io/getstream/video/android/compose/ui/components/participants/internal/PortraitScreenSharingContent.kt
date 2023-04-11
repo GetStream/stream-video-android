@@ -30,13 +30,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import io.getstream.video.android.common.util.MockUtils
+import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.common.util.mockVideoTrackWrapper
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.internal.OverlayScreenSharingAppBar
-import io.getstream.video.android.compose.ui.components.previews.ParticipantsProvider
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallAction
@@ -108,43 +109,44 @@ internal fun PortraitScreenSharingContent(
 @Preview
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-private fun PortraitScreenSharingContentPreview(
-    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<ParticipantState>
-) {
+private fun PortraitScreenSharingContentPreview() {
+    MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        PortraitScreenSharingContent(call = null,
+        PortraitScreenSharingContent(
+            call = null,
             session = ScreenSharingSession(
-                track = callParticipants[1].videoTrackWrapped ?: mockVideoTrackWrapper,
-                participant = callParticipants[1]
+                track = mockParticipants[1].videoTrackWrapped ?: mockVideoTrackWrapper,
+                participant = mockParticipants[1]
             ),
-            participants = callParticipants,
-            primarySpeaker = callParticipants[1],
+            participants = mockParticipants,
+            primarySpeaker = mockParticipants[1],
             paddingValues = PaddingValues(0.dp),
             modifier = Modifier.fillMaxSize(),
             onRender = {},
             onBackPressed = {},
-            onCallAction = {})
+            onCallAction = {}
+        )
     }
 }
 
 @Preview
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-private fun PortraitScreenSharingMyContentPreview(
-    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<ParticipantState>
-) {
+private fun PortraitScreenSharingMyContentPreview() {
     VideoTheme {
-        PortraitScreenSharingContent(call = null,
+        PortraitScreenSharingContent(
+            call = null,
             session = ScreenSharingSession(
-                track = callParticipants[0].videoTrackWrapped ?: mockVideoTrackWrapper,
-                participant = callParticipants[0]
+                track = mockParticipants[0].videoTrackWrapped ?: mockVideoTrackWrapper,
+                participant = mockParticipants[0]
             ),
-            participants = callParticipants,
-            primarySpeaker = callParticipants[0],
+            participants = mockParticipants,
+            primarySpeaker = mockParticipants[0],
             paddingValues = PaddingValues(0.dp),
             modifier = Modifier.fillMaxSize(),
             onRender = {},
             onBackPressed = {},
-            onCallAction = {})
+            onCallAction = {}
+        )
     }
 }

@@ -82,8 +82,7 @@ public data class ParticipantState(
         get() = audioTrack != null
 
     //TODO
-    val isSpeaking: Boolean
-        get() = true
+    public var isSpeaking: Boolean = true
 
     /**
      * The user, automatically updates when we receive user events

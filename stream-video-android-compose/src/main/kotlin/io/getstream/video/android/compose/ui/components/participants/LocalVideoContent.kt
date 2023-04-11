@@ -36,6 +36,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.tooling.preview.Preview
@@ -44,6 +45,8 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import io.getstream.video.android.common.util.MockUtils
+import io.getstream.video.android.common.util.mockCall
 import io.getstream.video.android.common.util.mockParticipant
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.Call
@@ -168,13 +171,14 @@ private fun calculateVerticalOffsetBounds(
 @Preview
 @Composable
 private fun LocalVideoContentPreview() {
+    MockUtils.initializeStreamVideo(LocalContext.current)
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp
     val screenHeight = configuration.screenHeightDp
 
     VideoTheme {
         LocalVideoContent(
-            call = null,
+            call = mockCall,
             modifier = Modifier.fillMaxSize(),
             localParticipant = mockParticipant,
             parentBounds = IntSize(screenWidth, screenHeight),

@@ -26,11 +26,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
+import io.getstream.video.android.common.util.MockUtils
+import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.participants.CallParticipant
-import io.getstream.video.android.compose.ui.components.previews.ParticipantsProvider
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 
@@ -55,9 +56,7 @@ internal fun ParticipantsColumn(
         content = {
             items(items = participants, key = { it.user.value.id }) { participant ->
                 ParticipantListItem(
-                    call = call,
-                    participant = participant,
-                    primarySpeaker = primarySpeaker
+                    call = call, participant = participant, primarySpeaker = primarySpeaker
                 )
             }
         }
@@ -91,14 +90,11 @@ private fun ParticipantListItem(
 
 @Preview
 @Composable
-private fun ParticipantsColumnPreview(
-    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<ParticipantState>
-) {
+private fun ParticipantsColumnPreview() {
+    MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         ParticipantsColumn(
-            call = null,
-            participants = callParticipants,
-            primarySpeaker = callParticipants[0]
+            call = null, participants = mockParticipants, primarySpeaker = mockParticipants[0]
         )
     }
 }

@@ -35,14 +35,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import io.getstream.video.android.common.util.MockUtils
+import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.participants.CallParticipant
 import io.getstream.video.android.compose.ui.components.participants.LocalVideoContent
-import io.getstream.video.android.compose.ui.components.previews.ParticipantsProvider
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 
@@ -220,9 +221,8 @@ internal fun BoxScope.PortraitParticipants(
 
 @Preview
 @Composable
-private fun PortraitParticipantsPreview1(
-    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<ParticipantState>
-) {
+private fun PortraitParticipantsPreview1() {
+    MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         val configuration = LocalConfiguration.current
         val screenWidth = configuration.screenWidthDp
@@ -233,8 +233,8 @@ private fun PortraitParticipantsPreview1(
         ) {
             PortraitParticipants(
                 call = null,
-                primarySpeaker = callParticipants[0],
-                callParticipants = callParticipants.take(1),
+                primarySpeaker = mockParticipants[0],
+                callParticipants = mockParticipants.take(1),
                 modifier = Modifier.fillMaxSize(),
                 paddingValues = PaddingValues(0.dp),
                 parentSize = IntSize(screenWidth, screenHeight)
@@ -245,9 +245,8 @@ private fun PortraitParticipantsPreview1(
 
 @Preview
 @Composable
-private fun PortraitParticipantsPreview2(
-    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<ParticipantState>
-) {
+private fun PortraitParticipantsPreview2() {
+    MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         val configuration = LocalConfiguration.current
         val screenWidth = configuration.screenWidthDp
@@ -258,8 +257,8 @@ private fun PortraitParticipantsPreview2(
         ) {
             PortraitParticipants(
                 call = null,
-                primarySpeaker = callParticipants[0],
-                callParticipants = callParticipants.take(2),
+                primarySpeaker = mockParticipants[0],
+                callParticipants = mockParticipants.take(2),
                 modifier = Modifier.fillMaxSize(),
                 paddingValues = PaddingValues(0.dp),
                 parentSize = IntSize(screenWidth, screenHeight)
@@ -270,9 +269,8 @@ private fun PortraitParticipantsPreview2(
 
 @Preview
 @Composable
-private fun PortraitParticipantsPreview3(
-    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<ParticipantState>
-) {
+private fun PortraitParticipantsPreview3() {
+    MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         val configuration = LocalConfiguration.current
         val screenWidth = configuration.screenWidthDp
@@ -283,8 +281,8 @@ private fun PortraitParticipantsPreview3(
         ) {
             PortraitParticipants(
                 call = null,
-                primarySpeaker = callParticipants[0],
-                callParticipants = callParticipants.take(3),
+                primarySpeaker = mockParticipants[0],
+                callParticipants = mockParticipants.take(3),
                 modifier = Modifier.fillMaxSize(),
                 paddingValues = PaddingValues(0.dp),
                 parentSize = IntSize(screenWidth, screenHeight)
@@ -295,9 +293,8 @@ private fun PortraitParticipantsPreview3(
 
 @Preview
 @Composable
-private fun PortraitParticipantsPreview4(
-    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<ParticipantState>
-) {
+private fun PortraitParticipantsPreview4() {
+    MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         val configuration = LocalConfiguration.current
         val screenWidth = configuration.screenWidthDp
@@ -308,8 +305,8 @@ private fun PortraitParticipantsPreview4(
         ) {
             PortraitParticipants(
                 call = null,
-                primarySpeaker = callParticipants[0],
-                callParticipants = callParticipants.take(4),
+                primarySpeaker = mockParticipants[0],
+                callParticipants = mockParticipants.take(4),
                 modifier = Modifier.fillMaxSize(),
                 paddingValues = PaddingValues(0.dp),
                 parentSize = IntSize(screenWidth, screenHeight)
@@ -320,9 +317,8 @@ private fun PortraitParticipantsPreview4(
 
 @Preview
 @Composable
-private fun PortraitParticipantsPreview5(
-    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<ParticipantState>
-) {
+private fun PortraitParticipantsPreview5() {
+    MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         val configuration = LocalConfiguration.current
         val screenWidth = configuration.screenWidthDp
@@ -333,8 +329,8 @@ private fun PortraitParticipantsPreview5(
         ) {
             PortraitParticipants(
                 call = null,
-                primarySpeaker = callParticipants[0],
-                callParticipants = callParticipants.take(5),
+                primarySpeaker = mockParticipants[0],
+                callParticipants = mockParticipants.take(5),
                 modifier = Modifier.fillMaxSize(),
                 paddingValues = PaddingValues(0.dp),
                 parentSize = IntSize(screenWidth, screenHeight)
@@ -345,9 +341,8 @@ private fun PortraitParticipantsPreview5(
 
 @Preview
 @Composable
-private fun PortraitParticipantsPreview6(
-    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<ParticipantState>
-) {
+private fun PortraitParticipantsPreview6() {
+    MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         val configuration = LocalConfiguration.current
         val screenWidth = configuration.screenWidthDp
@@ -358,8 +353,8 @@ private fun PortraitParticipantsPreview6(
         ) {
             PortraitParticipants(
                 call = null,
-                primarySpeaker = callParticipants[0],
-                callParticipants = callParticipants.take(6),
+                primarySpeaker = mockParticipants[0],
+                callParticipants = mockParticipants.take(6),
                 modifier = Modifier.fillMaxSize(),
                 paddingValues = PaddingValues(0.dp),
                 parentSize = IntSize(screenWidth, screenHeight)

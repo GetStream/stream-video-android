@@ -29,14 +29,11 @@ import io.getstream.video.android.compose.ui.components.call.incomingcall.intern
 import io.getstream.video.android.compose.ui.components.call.outgoingcall.OutgoingCallContent
 import io.getstream.video.android.compose.ui.components.call.outgoingcall.internal.OutgoingCallDetails
 import io.getstream.video.android.compose.ui.components.call.outgoingcall.internal.OutgoingGroupCallOptions
-import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.call.state.CallMediaState
 import io.getstream.video.android.core.model.CallType
 import io.getstream.video.android.core.model.CallUser
 import org.junit.Rule
 import org.junit.Test
-import org.webrtc.VideoTrack
-import stream.video.sfu.models.TrackType
 
 internal class CallContentTest : BaseComposeTest() {
 

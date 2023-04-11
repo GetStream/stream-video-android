@@ -58,11 +58,11 @@ public class Call(
     var session: RtcSession? = null
     val cid = "$type:$id"
     val state = CallState(this, user)
-    val mediaManager = MediaManagerImpl(client.context)
 
-    val camera = mediaManager.camera
-    val microphone = mediaManager.microphone
-    val speaker = mediaManager.speaker
+    val mediaManager by lazy { MediaManagerImpl(client.context) }
+    val camera by lazy { mediaManager.camera }
+    val microphone by lazy { mediaManager.microphone }
+    val speaker by lazy { mediaManager.speaker }
 
     public var custom: Map<String, Any>? = null
 
@@ -133,7 +133,7 @@ public class Call(
 
         client.state.setActiveCall(this)
 
-        session?.let {it.connect()}
+        session?.let { it.connect() }
 
         return Success(value = session!!)
     }

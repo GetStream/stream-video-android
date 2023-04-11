@@ -43,19 +43,20 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.common.model.getSoundIndicatorState
+import io.getstream.video.android.common.util.MockUtils
+import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.common.util.mockVideoTrackWrapper
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.audio.SoundIndicator
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.compose.ui.components.connection.ConnectionQualityIndicator
-import io.getstream.video.android.compose.ui.components.previews.ParticipantsProvider
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
@@ -221,13 +222,12 @@ internal fun BoxScope.ParticipantLabel(
 
 @Preview
 @Composable
-private fun CallParticipantPreview(
-    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<ParticipantState>
-) {
+private fun CallParticipantPreview() {
+    MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         CallParticipant(
             call = null,
-            participant = callParticipants[1],
+            participant = mockParticipants[1],
             isFocused = true
         )
     }
@@ -235,13 +235,12 @@ private fun CallParticipantPreview(
 
 @Preview
 @Composable
-private fun ParticipantLabelPreview(
-    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<ParticipantState>
-) {
+private fun ParticipantLabelPreview() {
+    MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         Box {
             ParticipantLabel(
-                participant = callParticipants[1],
+                participant = mockParticipants[1],
                 BottomStart,
             )
         }
@@ -250,13 +249,12 @@ private fun ParticipantLabelPreview(
 
 @Preview
 @Composable
-private fun ParticipantVideoPreview(
-    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<ParticipantState>
-) {
+private fun ParticipantVideoPreview() {
+    MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         ParticipantVideo(
             call = null,
-            participant = callParticipants[1],
+            participant = mockParticipants[1],
         ) {}
     }
 }

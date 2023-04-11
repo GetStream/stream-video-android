@@ -22,7 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import app.cash.paparazzi.Paparazzi
-import io.getstream.video.android.common.util.mockUsers
+import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.ui.components.avatar.Avatar
 import io.getstream.video.android.compose.ui.components.background.CallBackground
@@ -44,7 +44,7 @@ internal class CallBackgroundTest : BaseComposeTest() {
         snapshot {
             CallBackground(
                 participants = listOf(
-                    mockUsers.first().let {
+                    mockParticipants.first().let {
                         CallUser(
                             id = it.initialUser.id,
                             name = it.initialUser.name,
