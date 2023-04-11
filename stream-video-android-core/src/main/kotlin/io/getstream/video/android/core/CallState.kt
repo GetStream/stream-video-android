@@ -51,7 +51,10 @@ import io.getstream.video.android.core.events.UnblockedUserEvent
 import io.getstream.video.android.core.events.UnknownEvent
 import io.getstream.video.android.core.events.UpdatedCallPermissionsEvent
 import io.getstream.video.android.core.events.VideoEvent
-import io.getstream.video.android.core.model.*
+import io.getstream.video.android.core.model.CallUser
+import io.getstream.video.android.core.model.ScreenSharingSession
+import io.getstream.video.android.core.model.TrackWrapper
+import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.utils.mapState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -82,13 +85,14 @@ public class CallState(val call: Call, user: User) {
         MutableStateFlow(null)
 
 
-
     private val _participants: MutableStateFlow<SortedMap<String, ParticipantState>> =
         MutableStateFlow(emptyMap<String, ParticipantState>().toSortedMap())
-    public val participants: StateFlow<List<ParticipantState>> = _participants.mapState { it.values.toList() }
+    public val participants: StateFlow<List<ParticipantState>> =
+        _participants.mapState { it.values.toList() }
 
     /** participants who are currently speaking */
-    public val activeSpeakers = _participants.mapState { it.values.filter { participant -> participant.speaking.value } }
+    public val activeSpeakers =
+        _participants.mapState { it.values.filter { participant -> participant.speaking.value } }
 
 
     private val _dominantSpeaker: MutableStateFlow<ParticipantState?> =
@@ -105,14 +109,16 @@ public class CallState(val call: Call, user: User) {
      *
      */
 
-    public val sortedParticipants = _participants.mapState { it.values.sortedBy{
-        // TODO: implement actual sorting
-        val score = 1
-        score
-    } }
+    public val sortedParticipants = _participants.mapState {
+        it.values.sortedBy {
+            // TODO: implement actual sorting
+            val score = 1
+            score
+        }
+    }
 
     // making it a property requires cleaning up the properties of a participant
-    val me : StateFlow<ParticipantState?> = _participants.mapState { it.get(user.id) }
+    val me: StateFlow<ParticipantState?> = _participants.mapState { it.get(user.id) }
 
     // TODO: implement me properly
     public val screenSharingSession: StateFlow<ScreenSharingSession?> = _screenSharingSession
@@ -146,7 +152,6 @@ public class CallState(val call: Call, user: User) {
     private val _members: MutableStateFlow<List<ParticipantState>> =
         MutableStateFlow(emptyList())
     public val members: StateFlow<List<ParticipantState>> = _members
-
 
 
     private val _errors: MutableStateFlow<List<ErrorEvent>> =
@@ -254,6 +259,7 @@ public class CallState(val call: Call, user: User) {
             is ErrorEvent -> {
                 _errors.value = errors.value + event
             }
+
             SFUHealthCheckEvent -> {
                 // we don't do anything with this
             }
@@ -261,6 +267,7 @@ public class CallState(val call: Call, user: User) {
             is ICETrickleEvent -> {
                 // handled by ActiveSFUSession
             }
+
             is JoinCallResponseEvent -> {
                 // time to update call state based on the join response
                 updateFromJoinResponse(event)
@@ -332,12 +339,17 @@ public class CallState(val call: Call, user: User) {
         return participantState
     }
 
-    fun getOrCreateParticipant(sessionId: String, userId: String, user: User? = null, updateFlow: Boolean=false): ParticipantState {
+    fun getOrCreateParticipant(
+        sessionId: String,
+        userId: String,
+        user: User? = null,
+        updateFlow: Boolean = false
+    ): ParticipantState {
         val participantMap = _participants.value.toSortedMap()
-        val participantState =  if (participantMap.contains(sessionId)) {
+        val participantState = if (participantMap.contains(sessionId)) {
             participantMap[sessionId]!!
         } else {
-            ParticipantState(sessionId=sessionId, call=call, initialUser=user ?: User(userId))
+            ParticipantState(sessionId = sessionId, call = call, initialUser = user ?: User(userId))
         }
         if (updateFlow) {
             upsertParticipants(listOf(participantState))
@@ -362,7 +374,8 @@ public class CallState(val call: Call, user: User) {
 
     fun requireParticipant(sessionId: String): ParticipantState {
         // TODO: after development lets just log instead throwing an error
-        return getParticipant(sessionId) ?: throw IllegalStateException("No participant with sessionId $sessionId")
+        return getParticipant(sessionId)
+            ?: throw IllegalStateException("No participant with sessionId $sessionId")
     }
 
     fun getParticipant(sessionId: String): ParticipantState? {
@@ -392,9 +405,6 @@ public class CallState(val call: Call, user: User) {
             // update call info fields
         }
     }
-
-
-
 
 
     internal fun disconnect() {

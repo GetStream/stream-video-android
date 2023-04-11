@@ -19,9 +19,6 @@ package io.getstream.video.android.xml.binding
 import androidx.lifecycle.LifecycleOwner
 import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.xml.widget.participant.internal.CallParticipantsGridView
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filterNotNull
 
 /**
  * Binds [CallParticipantsGridView] with [CallViewModel], updating the view's state based on data provided by the

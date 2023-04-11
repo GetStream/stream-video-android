@@ -23,14 +23,10 @@ import io.getstream.log.StreamLog
 import io.getstream.log.android.AndroidStreamLogger
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
-import io.getstream.video.android.core.input.CallActivityInput
-import io.getstream.video.android.core.input.CallServiceInput
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.ApiKey
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.user.UserPreferencesManager
-import io.getstream.video.android.tutorial_final.ui.call.CallActivity
-import io.getstream.video.android.tutorial_final.ui.call.CallService
 
 class VideoApp : Application() {
 
@@ -60,10 +56,10 @@ class VideoApp : Application() {
             context = this,
             user = user,
             apiKey = apiKey,
-            androidInputs = setOf(
-                CallServiceInput.from(CallService::class),
-                CallActivityInput.from(CallActivity::class),
-            ),
+//            androidInputs = setOf(
+//                CallServiceInput.from(CallService::class),
+//                CallActivityInput.from(CallActivity::class),
+//            ),
             loggingLevel = loggingLevel
         ).build().also {
             video = it

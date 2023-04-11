@@ -17,6 +17,7 @@
 package io.getstream.video.android.core
 
 import android.content.Context
+import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.Lifecycle
 import io.getstream.android.push.PushDeviceGenerator
@@ -26,6 +27,7 @@ import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
+import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.events.CallCreatedEvent
 import io.getstream.video.android.core.events.ConnectedEvent
 import io.getstream.video.android.core.events.VideoEvent
@@ -53,6 +55,7 @@ import io.getstream.video.android.core.model.mapper.toTypeAndId
 import io.getstream.video.android.core.model.toIceServer
 import io.getstream.video.android.core.model.toInfo
 import io.getstream.video.android.core.model.toRequest
+import io.getstream.video.android.core.socket.ErrorResponse
 import io.getstream.video.android.core.socket.SocketListener
 import io.getstream.video.android.core.socket.internal.SocketState
 import io.getstream.video.android.core.socket.internal.VideoSocketImpl
@@ -199,7 +202,7 @@ internal class StreamVideoImpl internal constructor(
             } catch (e: HttpException) {
                 val failure = parseError(e)
                 val parsedError = failure.value as Error.NetworkError
-                if (parsedError.serverErrorCode == 5) {
+                if (parsedError.serverErrorCode == VideoErrorCode.AUTHENTICATION_ERROR.code) {
                     // invalid token
                     // val newToken = tokenProvider.getToken()
                     // set the token, repeat API call
@@ -234,14 +237,32 @@ internal class StreamVideoImpl internal constructor(
     private fun parseError(e: HttpException): Failure {
         val errorBytes = e.response()?.errorBody()?.bytes()
         val error = errorBytes?.let {
-            val errorBody = String(it, Charsets.UTF_8)
-            val format = Json {
-                prettyPrint = true
-                ignoreUnknownKeys = true
+            try {
+                val errorBody = String(it, Charsets.UTF_8)
+                val format = Json {
+                    prettyPrint = true
+                    ignoreUnknownKeys = true
+                }
+                format.decodeFromString<ErrorResponse>(errorBody)
+            } catch (e: Exception) {
+                return Failure(
+                    Error.NetworkError(
+                        "failed to parse error response from server: ${e.message}",
+                        VideoErrorCode.PARSER_ERROR.code
+                    )
+                )
             }
-            format.decodeFromString<Error.NetworkError>(errorBody)
-        } ?: Error.NetworkError("failed to parse error response from server", e.code())
-        return Failure(error)
+        } ?: return Failure(
+            Error.NetworkError("failed to parse error response from server", e.code())
+        )
+        return Failure(
+            Error.NetworkError(
+                message = error.message,
+                serverErrorCode = error.code,
+                statusCode = error.statusCode,
+                cause = Throwable(error.moreInfo)
+            )
+        )
     }
 
     public override fun subscribeFor(

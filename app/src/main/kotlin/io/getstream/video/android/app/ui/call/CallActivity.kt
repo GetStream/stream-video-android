@@ -17,13 +17,9 @@
 package io.getstream.video.android.app.ui.call
 
 import android.content.Context
-import androidx.compose.runtime.collectAsState
-import io.getstream.video.android.app.BuildConfig
-import io.getstream.video.android.app.user.FakeUsersProvider
 import io.getstream.video.android.app.videoApp
 import io.getstream.video.android.compose.ui.AbstractComposeCallActivity
 import io.getstream.video.android.core.StreamVideo
-import io.getstream.video.android.core.user.EmptyUsersProvider
 import io.getstream.video.android.core.viewmodel.CallViewModelFactory
 
 class CallActivity : AbstractComposeCallActivity() {

@@ -65,7 +65,7 @@ public fun CallContainer(
     viewModel: CallViewModel,
     modifier: Modifier = Modifier,
     onBackPressed: () -> Unit = {},
-    //onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
+    // onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
 //    callControlsContent: @Composable () -> Unit = {
 //        DefaultCallControlsContent(
 //            viewModel
@@ -78,7 +78,7 @@ public fun CallContainer(
             modifier = modifier.testTag("incoming_call_content"),
             viewModel = viewModel,
             onBackPressed = onBackPressed,
-            //onCallAction = onCallAction
+            // onCallAction = onCallAction
         )
     },
     outgoingCallContent: @Composable () -> Unit = {
@@ -86,7 +86,7 @@ public fun CallContainer(
             modifier = modifier.testTag("outgoing_call_content"),
             viewModel = viewModel,
             onBackPressed = onBackPressed,
-            //onCallAction = onCallAction
+            // onCallAction = onCallAction
         )
     },
     callContent: @Composable () -> Unit = {
@@ -94,8 +94,8 @@ public fun CallContainer(
             viewModel = viewModel,
             modifier = modifier,
             onBackPressed = onBackPressed,
-            //onCallAction = onCallAction,
-            //callControlsContent = callControlsContent,
+            // onCallAction = onCallAction,
+            // callControlsContent = callControlsContent,
             pictureInPictureContent = pictureInPictureContent
         )
     }
@@ -117,15 +117,15 @@ internal fun DefaultCallContent(
     viewModel: CallViewModel,
     modifier: Modifier = Modifier,
     onBackPressed: () -> Unit = {},
-    //onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
+    // onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
     pictureInPictureContent: @Composable (Call) -> Unit = { DefaultPictureInPictureContent(it) }
 ) {
     CallContent(
         modifier = modifier.testTag("call_content"),
         callViewModel = viewModel,
-        //onBackPressed = onBackPressed,
-        //onCallAction = onCallAction,
-        //callControlsContent = callControlsContent,
+        // onBackPressed = onBackPressed,
+        // onCallAction = onCallAction,
+        // callControlsContent = callControlsContent,
         pictureInPictureContent = pictureInPictureContent
     )
 
@@ -142,16 +142,16 @@ internal fun DefaultCallContent(
                 .background(VideoTheme.colors.appBackground),
             participantsState = participantsState
         )
-        //users = users,
-        //onDismiss = { viewModel.dismissOptions() },
+        // users = users,
+        // onDismiss = { viewModel.dismissOptions() },
         { action ->
             when (action) {
                 is InviteUsers -> {
-                    //viewModel.dismissOptions()
+                    // viewModel.dismissOptions()
                     usersToInvite = action.users
                 }
 
-                //is ChangeMuteState -> onCallAction(ToggleMicrophone(action.isEnabled))
+                // is ChangeMuteState -> onCallAction(ToggleMicrophone(action.isEnabled))
                 is ChangeMuteState -> TODO()
             }
         }
@@ -163,7 +163,7 @@ internal fun DefaultCallContent(
             onDismiss = { usersToInvite = emptyList() },
             onInviteUsers = {
                 usersToInvite = emptyList()
-                //viewModel.onCallAction(InviteUsersToCall(it))
+                // viewModel.onCallAction(InviteUsersToCall(it))
             }
         )
     }

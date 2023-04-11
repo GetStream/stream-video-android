@@ -19,19 +19,16 @@ package io.getstream.video.android.compose.ui.components.call.incomingcall
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import io.getstream.video.android.common.util.mockParticipantList
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.background.CallBackground
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.call.incomingcall.internal.IncomingCallDetails
 import io.getstream.video.android.compose.ui.components.call.incomingcall.internal.IncomingCallOptions
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.call.state.CallMediaState
 import io.getstream.video.android.core.model.CallType
 import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.core.viewmodel.CallViewModel
@@ -49,7 +46,7 @@ public fun IncomingCallContent(
     viewModel: CallViewModel,
     modifier: Modifier = Modifier,
     onBackPressed: () -> Unit,
-   // onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
+    // onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
 ) {
 //    val participants: List<CallUser> by viewModel.participants.collectAsState()
 //    val callMediaState: CallMediaState by viewModel.callMediaState.collectAsState()
@@ -131,18 +128,18 @@ public fun IncomingCallContent(
 private fun IncomingCallPreview() {
     VideoTheme {
 //        IncomingCallContent(
-////            participants = mockParticipantList.map {
-////                CallUser(
-////                    id = it.id,
-////                    name = it.name,
-////                    role = it.role,
-////                    state = null,
-////                    createdAt = null,
-////                    updatedAt = null,
-////                    imageUrl = it.profileImageURL ?: "",
-////                    teams = emptyList()
-////                )
-////            },
+// //            participants = mockParticipantList.map {
+// //                CallUser(
+// //                    id = it.id,
+// //                    name = it.name,
+// //                    role = it.role,
+// //                    state = null,
+// //                    createdAt = null,
+// //                    updatedAt = null,
+// //                    imageUrl = it.profileImageURL ?: "",
+// //                    teams = emptyList()
+// //                )
+// //            },
 //            callType = CallType.VIDEO,
 //            isVideoEnabled = false,
 //            onBackPressed = {}

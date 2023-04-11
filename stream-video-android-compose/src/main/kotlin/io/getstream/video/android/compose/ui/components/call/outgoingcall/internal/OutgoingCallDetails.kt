@@ -24,9 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.common.util.mockParticipantList
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantAvatars
 import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantInformation
 import io.getstream.video.android.core.model.CallStatus
 import io.getstream.video.android.core.model.CallType
@@ -42,14 +40,14 @@ internal fun OutgoingCallDetails(
         if (callType == CallType.AUDIO) {
 //            ParticipantAvatars(
 //                participants = participants.map {
-////                    CallParticipantState(
-////                        id = it.id,
-////                        role = it.role,
-////                        name = it.name,
-////                        profileImageURL = it.imageUrl,
-////                        idPrefix = "",
-////                        sessionId = ""
-////                    )
+// //                    CallParticipantState(
+// //                        id = it.id,
+// //                        role = it.role,
+// //                        name = it.name,
+// //                        profileImageURL = it.imageUrl,
+// //                        idPrefix = "",
+// //                        sessionId = ""
+// //                    )
 //                }
 //            )
 

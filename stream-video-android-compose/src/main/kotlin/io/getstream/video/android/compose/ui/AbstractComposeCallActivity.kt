@@ -26,7 +26,6 @@ import io.getstream.video.android.compose.ui.components.call.CallContainer
 import io.getstream.video.android.compose.ui.components.call.activecall.DefaultPictureInPictureContent
 import io.getstream.video.android.core.Call
 
-
 public abstract class AbstractComposeCallActivity : AbstractCallActivity() {
 
     override fun setupUi() {
@@ -38,7 +37,7 @@ public abstract class AbstractComposeCallActivity : AbstractCallActivity() {
             CallContainer(
                 modifier = Modifier.background(color = VideoTheme.colors.appBackground),
                 viewModel = callViewModel,
-                //onCallAction = ::handleCallAction,
+                // onCallAction = ::handleCallAction,
                 onBackPressed = ::handleBackPressed,
                 pictureInPictureContent = { PictureInPictureContent(call = it) }
             )

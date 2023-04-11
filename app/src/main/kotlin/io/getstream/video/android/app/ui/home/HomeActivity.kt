@@ -246,7 +246,8 @@ class HomeActivity : AppCompatActivity() {
 
             loadingState.value = true
             val result = streamVideo.call(
-                "default", callId).join()
+                "default", callId
+            ).join()
 
             result.onSuccess { data ->
                 logger.v { "[createMeeting] successful: $data" }

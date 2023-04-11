@@ -24,13 +24,10 @@ import io.getstream.log.Priority
 import io.getstream.log.android.AndroidStreamLogger
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
-import io.getstream.video.android.core.input.CallActivityInput
-import io.getstream.video.android.core.input.CallServiceInput
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.ApiKey
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.user.UserPreferencesManager
-import io.getstream.video.android.tooling.handler.StreamGlobalExceptionHandler
 
 class DogfoodingApp : Application() {
 
@@ -46,10 +43,10 @@ class DogfoodingApp : Application() {
     override fun onCreate() {
         super.onCreate()
         AndroidStreamLogger.installOnDebuggableApp(this, minPriority = Priority.DEBUG)
-        StreamGlobalExceptionHandler.install(
-            application = this,
-            packageName = LoginActivity::class.java.name
-        )
+//        StreamGlobalExceptionHandler.install(
+//            application = this,
+//            packageName = LoginActivity::class.java.name
+//        )
         UserPreferencesManager.initialize(this)
     }
 

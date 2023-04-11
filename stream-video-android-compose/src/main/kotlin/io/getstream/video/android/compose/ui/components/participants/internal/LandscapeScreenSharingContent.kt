@@ -40,7 +40,6 @@ import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CallMediaState
 import io.getstream.video.android.core.model.ScreenSharingSession
-import org.webrtc.VideoTrack
 
 /**
  * Represents the landscape screen sharing content.

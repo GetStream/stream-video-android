@@ -21,7 +21,6 @@ import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.xml.widget.appbar.CallAppBarView
 import io.getstream.video.android.xml.widget.call.CallView
-import kotlinx.coroutines.flow.collectLatest
 
 /**
  * Binds [CallView] with [CallViewModel], updating the view's state based on data provided by the ViewModel,

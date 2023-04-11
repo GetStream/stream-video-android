@@ -126,7 +126,7 @@ class MessagesActivity : ComponentActivity() {
 
                 val customAttachment = Attachment(
                     type = "custom",
-                    authorName = videoClient.getUser().name,
+                    authorName = videoClient.user.name,
                     extraData = mutableMapOf(
                         "callCid" to data.cid,
                         "members" to data.users.map { it.value.name },

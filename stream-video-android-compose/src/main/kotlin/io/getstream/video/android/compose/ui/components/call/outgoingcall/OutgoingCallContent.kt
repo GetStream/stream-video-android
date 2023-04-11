@@ -19,12 +19,10 @@ package io.getstream.video.android.compose.ui.components.call.outgoingcall
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import io.getstream.video.android.common.util.mockParticipant
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.background.CallBackground
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
@@ -50,7 +48,7 @@ public fun OutgoingCallContent(
     viewModel: CallViewModel,
     modifier: Modifier = Modifier,
     onBackPressed: () -> Unit,
-    //onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
+    // onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
 ) {
 //    val callType: CallType by viewModel.callType.collectAsState()
 //    val participants: List<CallUser> by viewModel.participants.collectAsState()

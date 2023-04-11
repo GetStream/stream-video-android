@@ -17,11 +17,9 @@
 package io.getstream.video.android.xml.binding
 
 import androidx.lifecycle.LifecycleOwner
-import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.model.CallStatus
 import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.xml.widget.incoming.IncomingCallView
-import kotlinx.coroutines.flow.collectLatest
 
 /**
  * Binds [IncomingCallView] with [CallViewModel], updating the view's state based on data provided by the ViewModel,
@@ -38,11 +36,11 @@ import kotlinx.coroutines.flow.collectLatest
 public fun IncomingCallView.bindView(
     viewModel: CallViewModel,
     lifecycleOwner: LifecycleOwner,
-    //onCallAction: (CallAction) -> Unit = viewModel::onCallAction
+    // onCallAction: (CallAction) -> Unit = viewModel::onCallAction
 ) {
     setCallStatus(CallStatus.Outgoing)
 
-    //callActionListener = onCallAction
+    // callActionListener = onCallAction
 
     startJob(lifecycleOwner) {
 //        viewModel.callMediaState.collectLatest {

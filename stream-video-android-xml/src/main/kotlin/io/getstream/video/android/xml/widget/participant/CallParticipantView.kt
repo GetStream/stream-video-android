@@ -230,7 +230,7 @@ public class CallParticipantView : CallCardView, VideoRenderer {
         } catch (error: Throwable) {
             false
         }
-        //TODO
+        // TODO
         val shouldShowAvatar = false
         binding.participantAvatar.isVisible = shouldShowAvatar
     }

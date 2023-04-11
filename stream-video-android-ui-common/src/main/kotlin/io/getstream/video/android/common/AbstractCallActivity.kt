@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.common
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.app.PictureInPictureParams
 import android.content.Intent
@@ -35,22 +34,15 @@ import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoProvider
-import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.call.state.CancelCall
-import io.getstream.video.android.core.call.state.ToggleCamera
-import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.call.state.ToggleScreenConfiguration
-import io.getstream.video.android.core.model.state.StreamCallState
 import io.getstream.video.android.core.permission.PermissionManager
 import io.getstream.video.android.core.permission.PermissionManagerProvider
 import io.getstream.video.android.core.permission.StreamPermissionManagerImpl
 import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.core.viewmodel.CallViewModelFactory
 import io.getstream.video.android.core.viewmodel.CallViewModelFactoryProvider
-import kotlinx.coroutines.flow.collectLatest
 
 public abstract class AbstractCallActivity :
     AppCompatActivity(),
@@ -116,7 +108,6 @@ public abstract class AbstractCallActivity :
      * Override to setup ui.
      */
     public abstract fun setupUi()
-
 
     @SuppressLint("SourceLockedOrientationActivity")
     private fun toggleFullscreen(action: ToggleScreenConfiguration) {
@@ -237,7 +228,6 @@ public abstract class AbstractCallActivity :
 
             val currentOrientation = resources.configuration.orientation
             val screenSharing = callViewModel.call.state.screenSharingSession.value
-
 
             val aspect =
                 if (currentOrientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT && screenSharing == null) {

@@ -17,18 +17,10 @@
 package io.getstream.video.android.xml.binding
 
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.lifecycleScope
-import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CallMediaState
-import io.getstream.video.android.core.model.state.StreamCallState
 import io.getstream.video.android.core.viewmodel.CallViewModel
-import io.getstream.video.android.xml.widget.appbar.CallAppBarView
-import io.getstream.video.android.xml.widget.call.CallView
 import io.getstream.video.android.xml.widget.callcontainer.CallContainerView
 import io.getstream.video.android.xml.widget.control.CallControlItem
-import io.getstream.video.android.xml.widget.incoming.IncomingCallView
-import io.getstream.video.android.xml.widget.outgoing.OutgoingCallView
-import kotlinx.coroutines.flow.combine
 
 /**
  * Binds [CallContainerView] with [CallViewModel], updating the view's state based on data provided by the ViewModel,
@@ -52,7 +44,7 @@ public fun CallContainerView.bindView(
     fetchCallMediaState: (CallMediaState, Boolean) -> List<CallControlItem> = { mediaState, isScreenSharingActive ->
         defaultControlList(mediaState, isScreenSharingActive)
     },
-    //onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
+    // onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
     onParticipantsPressed: () -> Unit = { },
     onBackPressed: () -> Unit = { },
     onIdle: () -> Unit = { },

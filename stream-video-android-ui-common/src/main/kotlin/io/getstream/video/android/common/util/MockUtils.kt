@@ -18,9 +18,7 @@ package io.getstream.video.android.common.util
 
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
-import io.getstream.video.android.core.model.User
 import org.webrtc.VideoTrack
-import stream.video.sfu.models.TrackType
 import java.util.UUID
 
 @InternalStreamVideoApi
@@ -40,7 +38,4 @@ public val mockParticipantList: List<ParticipantState>
 
 @InternalStreamVideoApi
 public val mockUsers: List<ParticipantState>
-    inline get() = listOf<ParticipantState>(
-
-
-    )
+    inline get() = listOf<ParticipantState>()

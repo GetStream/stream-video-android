@@ -23,9 +23,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import io.getstream.video.android.compose.ui.AbstractComposeCallActivity
 import io.getstream.video.android.core.StreamVideo
-import io.getstream.video.android.core.model.state.StreamCallState
 import kotlinx.coroutines.launch
 
 class CallActivity : AppCompatActivity() {

@@ -44,7 +44,7 @@ class ClientState(client: StreamVideo) {
     /**
      * Current user object
      */
-    private val _user: MutableStateFlow<User?> = MutableStateFlow(null)
+    private val _user: MutableStateFlow<User?> = MutableStateFlow(client.user)
     public val user: StateFlow<User?> = _user
 
     /**

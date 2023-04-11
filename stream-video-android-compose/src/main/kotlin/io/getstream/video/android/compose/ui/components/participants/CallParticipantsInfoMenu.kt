@@ -16,38 +16,11 @@
 
 package io.getstream.video.android.compose.ui.components.participants
 
-import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.state.ui.internal.CallParticipantInfoMode
-import io.getstream.video.android.compose.state.ui.internal.Invite
-import io.getstream.video.android.compose.state.ui.internal.InviteUserItemState
-import io.getstream.video.android.compose.state.ui.internal.ParticipantInvites
-import io.getstream.video.android.compose.state.ui.internal.ParticipantList
-import io.getstream.video.android.compose.state.ui.internal.ToggleMute
-import io.getstream.video.android.compose.state.ui.participants.ChangeMuteState
 import io.getstream.video.android.compose.state.ui.participants.ParticipantInfoAction
-import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.participants.internal.CallParticipantsInfoAppBar
-import io.getstream.video.android.compose.ui.components.participants.internal.CallParticipantsInfoOptions
-import io.getstream.video.android.compose.ui.components.participants.internal.CallParticipantsList
-import io.getstream.video.android.compose.ui.components.participants.internal.InviteUserList
-import io.getstream.video.android.compose.ui.components.participants.internal.SelectedCallParticipantOptions
-import io.getstream.video.android.core.ParticipantState
-import io.getstream.video.android.core.utils.updateAll
-import io.getstream.video.android.core.utils.updateValue
 
 /**
  * Represents a menu that shows information on the current call participants, while allowing the user

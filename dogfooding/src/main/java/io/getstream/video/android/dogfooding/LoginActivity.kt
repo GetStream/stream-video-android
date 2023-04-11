@@ -266,7 +266,8 @@ class LoginActivity : ComponentActivity() {
             val token = userJSON.getString("token")
             val user = User(
                 authUser?.email ?: userJSON.getString("userId"),
-                "admin",
+                name = authUser?.displayName ?: "",
+                imageUrl = authUser?.photoUrl?.toString() ?: "",
             )
 
             startHome(user)

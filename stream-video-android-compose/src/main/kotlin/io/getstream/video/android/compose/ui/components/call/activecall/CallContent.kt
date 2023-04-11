@@ -21,7 +21,6 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
@@ -40,18 +39,13 @@ import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.activecall.internal.ActiveCallAppBar
 import io.getstream.video.android.compose.ui.components.call.controls.internal.DefaultCallControlsContent
-import io.getstream.video.android.compose.ui.components.participants.CallParticipant
 import io.getstream.video.android.compose.ui.components.participants.CallParticipants
-import io.getstream.video.android.compose.ui.components.participants.internal.ScreenShareAspectRatio
-import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CallMediaState
-import io.getstream.video.android.core.call.state.LeaveCall
 import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.core.model.state.StreamCallState
 import io.getstream.video.android.core.viewmodel.CallViewModel
-import stream.video.sfu.models.TrackType
 
 /**
  * Represents the UI in an Active call that shows participants and their video, as well as some
@@ -69,8 +63,8 @@ import stream.video.sfu.models.TrackType
 public fun CallContent(
     callViewModel: CallViewModel,
     modifier: Modifier = Modifier,
-    //onBackPressed: () -> Unit = { callViewModel.onCallAction(LeaveCall) },
-    //onCallAction: (CallAction) -> Unit = callViewModel::onCallAction,
+    // onBackPressed: () -> Unit = { callViewModel.onCallAction(LeaveCall) },
+    // onCallAction: (CallAction) -> Unit = callViewModel::onCallAction,
     callControlsContent: @Composable () -> Unit = {
 //        DefaultCallControlsContent(
 //            callViewModel,
@@ -79,23 +73,23 @@ public fun CallContent(
     },
     pictureInPictureContent: @Composable (Call) -> Unit = { DefaultPictureInPictureContent(it) }
 ) {
-    //val call by callViewModel.callState.collectAsState(initial = null)
+    // val call by callViewModel.callState.collectAsState(initial = null)
     val isShowingCallInfo by callViewModel.isShowingCallInfo.collectAsState(false)
 
-    //val callMediaState by callViewModel.callMediaState.collectAsState(initial = CallMediaState())
+    // val callMediaState by callViewModel.callMediaState.collectAsState(initial = CallMediaState())
 
     val isInPiPMode by callViewModel.isInPictureInPicture.collectAsState()
     val isFullscreen by callViewModel.isFullscreen.collectAsState()
-    //val callState by callViewModel.streamCallState.collectAsState(StreamCallState.Idle)
+    // val callState by callViewModel.streamCallState.collectAsState(StreamCallState.Idle)
 
     val screenSharingSessions = callViewModel.call.state.screenSharingSession.collectAsState()
     val screenSharing = screenSharingSessions.value
 
     val backAction = {
         if (isShowingCallInfo) {
-           // callViewModel.dismissOptions()
+            // callViewModel.dismissOptions()
         } else {
-           // onBackPressed()
+            // onBackPressed()
         }
     }
 

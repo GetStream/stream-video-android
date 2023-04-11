@@ -34,7 +34,6 @@ import io.getstream.video.android.compose.ui.components.avatar.InitialsAvatar
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.core.ParticipantState
 
-
 @Composable
 internal fun ParticipantAvatars(
     participants: List<ParticipantState>
