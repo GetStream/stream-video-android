@@ -46,10 +46,10 @@ internal class CallBackgroundTest : BaseComposeTest() {
                 participants = listOf(
                     mockUsers.first().let {
                         CallUser(
-                            id = it.id,
-                            name = it.name,
-                            imageUrl = it.profileImageURL ?: "",
-                            role = it.role,
+                            id = it.initialUser.id,
+                            name = it.initialUser.name,
+                            imageUrl = it.initialUser.imageUrl,
+                            role = it.initialUser.role,
                             teams = emptyList(),
                             updatedAt = null,
                             createdAt = null,

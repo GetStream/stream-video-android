@@ -51,11 +51,11 @@ internal class CallContentTest : BaseComposeTest() {
             IncomingCallDetails(
                 participants = mockParticipantList.map {
                     CallUser(
-                        id = it.id,
-                        name = it.name,
-                        role = it.role,
+                        id = it.initialUser.id,
+                        name = it.initialUser.name,
+                        role = it.initialUser.role,
+                        imageUrl = it.initialUser.imageUrl,
                         state = null,
-                        imageUrl = it.profileImageURL ?: "",
                         createdAt = null,
                         updatedAt = null,
                         teams = emptyList()
@@ -84,11 +84,11 @@ internal class CallContentTest : BaseComposeTest() {
                 participants = listOf(
                     mockParticipant.let {
                         CallUser(
-                            id = it.id,
-                            name = it.name,
-                            role = it.role,
+                            id = it.initialUser.id,
+                            name = it.initialUser.name,
+                            role = it.initialUser.role,
+                            imageUrl = it.initialUser.imageUrl,
                             state = null,
-                            imageUrl = it.profileImageURL ?: "",
                             createdAt = null,
                             updatedAt = null,
                             teams = emptyList()
@@ -110,11 +110,11 @@ internal class CallContentTest : BaseComposeTest() {
                 callType = CallType.VIDEO,
                 participants = mockParticipantList.map {
                     CallUser(
-                        id = it.id,
-                        name = it.name,
-                        role = it.role,
+                        id = it.initialUser.id,
+                        name = it.initialUser.name,
+                        role = it.initialUser.role,
+                        imageUrl = it.initialUser.imageUrl,
                         state = null,
-                        imageUrl = it.profileImageURL ?: "",
                         createdAt = null,
                         updatedAt = null,
                         teams = emptyList()
@@ -135,11 +135,11 @@ internal class CallContentTest : BaseComposeTest() {
                 callType = CallType.VIDEO,
                 participants = mockParticipantList.map {
                     CallUser(
-                        id = it.id,
-                        name = it.name,
-                        role = it.role,
+                        id = it.initialUser.id,
+                        name = it.initialUser.name,
+                        role = it.initialUser.role,
+                        imageUrl = it.initialUser.imageUrl,
                         state = null,
-                        imageUrl = it.profileImageURL ?: "",
                         createdAt = null,
                         updatedAt = null,
                         teams = emptyList()
@@ -177,11 +177,11 @@ internal class CallContentTest : BaseComposeTest() {
                 participants = listOf(
                     mockParticipant.let {
                         CallUser(
-                            id = it.id,
-                            name = it.name,
-                            role = it.role,
+                            id = it.initialUser.id,
+                            name = it.initialUser.name,
+                            role = it.initialUser.role,
+                            imageUrl = it.initialUser.imageUrl,
                             state = null,
-                            imageUrl = it.profileImageURL ?: "",
                             createdAt = null,
                             updatedAt = null,
                             teams = emptyList()
@@ -204,11 +204,11 @@ internal class CallContentTest : BaseComposeTest() {
                 participants =
                 mockParticipantList.map {
                     CallUser(
-                        id = it.id,
-                        name = it.name,
-                        role = it.role,
+                        id = it.initialUser.id,
+                        name = it.initialUser.name,
+                        role = it.initialUser.role,
+                        imageUrl = it.initialUser.imageUrl,
                         state = null,
-                        imageUrl = it.profileImageURL ?: "",
                         createdAt = null,
                         updatedAt = null,
                         teams = emptyList()
