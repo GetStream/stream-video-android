@@ -29,12 +29,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.animation.crossfade.CrossfadePlugin
 import com.skydoves.landscapist.coil.CoilImage
 import com.skydoves.landscapist.components.rememberImageComponent
+import io.getstream.video.android.common.util.MockUtils
+import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.AvatarImagePreview
 import io.getstream.video.android.core.ParticipantState
@@ -142,9 +145,10 @@ private fun DefaultCallBackground() {
 @Preview
 @Composable
 private fun CallBackgroundPreview() {
+    MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         CallBackground(
-            participants = listOf(),
+            participants = mockParticipants,
             callType = CallType.VIDEO,
             isIncoming = true
         ) {

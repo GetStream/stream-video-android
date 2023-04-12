@@ -72,19 +72,7 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
         snapshotWithDarkMode {
             ParticipantInformation(
                 callStatus = CallStatus.Incoming,
-                participants = mockParticipantList.map {
-                    val user by it.user.collectAsState()
-                    CallUser(
-                        id = user.id,
-                        name = user.name,
-                        role = user.role,
-                        state = null,
-                        imageUrl = user.imageUrl,
-                        createdAt = null,
-                        updatedAt = null,
-                        teams = emptyList()
-                    )
-                }
+                participants = mockParticipants
             )
         }
     }
