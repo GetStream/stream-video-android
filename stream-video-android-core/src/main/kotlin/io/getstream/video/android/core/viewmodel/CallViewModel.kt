@@ -49,7 +49,7 @@ private const val CONNECT_TIMEOUT = 30_000L
 public class CallViewModel(
     public val client: StreamVideo,
     public val call: Call,
-    private val permissions: PermissionManager,
+    private val permissions: PermissionManager?,
 ) : ViewModel() {
 
     private val logger by taggedLogger("Call:ViewModel")
