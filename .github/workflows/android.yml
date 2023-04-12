@@ -87,4 +87,13 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build with Gradle
-        run: ./gradlew build
+        run: |
+          ./gradlew --scan --stacktrace \
+              assemble
+
+      - name: Unit Tests
+        run: |
+          ./gradlew --scan --stacktrace \
+              :stream-video-android-compose:testDebugUnitTest  
+    
+              
