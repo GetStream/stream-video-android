@@ -32,7 +32,7 @@ import com.squareup.moshi.Json
 data class UpdateCallTypeResponse(
 
     @Json(name = "created_at")
-    val createdAt: java.time.OffsetDateTime,
+    val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "duration")
     val duration: kotlin.String,
@@ -47,6 +47,6 @@ data class UpdateCallTypeResponse(
     val settings: CallSettingsResponse,
 
     @Json(name = "updated_at")
-    val updatedAt: java.time.OffsetDateTime
+    val updatedAt: org.threeten.bp.OffsetDateTime
 
 )

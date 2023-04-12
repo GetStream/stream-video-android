@@ -56,7 +56,7 @@ data class CallResponse(
 
     /* Date/time of creation */
     @Json(name = "created_at")
-    val createdAt: java.time.OffsetDateTime,
+    val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "created_by")
     val createdBy: UserResponse,
@@ -88,15 +88,15 @@ data class CallResponse(
 
     /* Date/time of the last update */
     @Json(name = "updated_at")
-    val updatedAt: java.time.OffsetDateTime,
+    val updatedAt: org.threeten.bp.OffsetDateTime,
 
     /* Date/time when the call ended */
     @Json(name = "ended_at")
-    val endedAt: java.time.OffsetDateTime? = null,
+    val endedAt: org.threeten.bp.OffsetDateTime? = null,
 
     /* Date/time when the call will start */
     @Json(name = "starts_at")
-    val startsAt: java.time.OffsetDateTime? = null,
+    val startsAt: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "team")
     val team: kotlin.String? = null

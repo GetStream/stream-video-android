@@ -24,6 +24,7 @@
 package org.openapitools.client.models
 
 import com.squareup.moshi.Json
+import org.threeten.bp.OffsetDateTime
 
 /**
  * *
@@ -32,7 +33,7 @@ import com.squareup.moshi.Json
 data class OwnUserResponse(
 
     @Json(name = "created_at")
-    val createdAt: java.time.OffsetDateTime,
+    val createdAt: OffsetDateTime,
 
     @Json(name = "custom")
     val custom: kotlin.collections.Map<kotlin.String, kotlin.Any>,
@@ -47,10 +48,10 @@ data class OwnUserResponse(
     val role: kotlin.String,
 
     @Json(name = "updated_at")
-    val updatedAt: java.time.OffsetDateTime,
+    val updatedAt: OffsetDateTime,
 
     @Json(name = "deleted_at")
-    val deletedAt: java.time.OffsetDateTime? = null,
+    val deletedAt: OffsetDateTime? = null,
 
     @Json(name = "image")
     val image: kotlin.String? = null,

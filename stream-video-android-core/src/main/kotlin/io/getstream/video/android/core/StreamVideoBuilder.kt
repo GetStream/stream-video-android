@@ -19,6 +19,7 @@ package io.getstream.video.android.core
 import android.app.Notification
 import android.content.Context
 import androidx.lifecycle.ProcessLifecycleOwner
+import com.jakewharton.threetenabp.AndroidThreeTen
 import io.getstream.android.push.PushDeviceGenerator
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.filter.AudioFilter
@@ -83,7 +84,14 @@ public class StreamVideoBuilder(
         if (apiKey.isBlank()
         ) throw IllegalArgumentException("The API key can not be empty")
 
-        if (userToken.isBlank() && tokenProvider == null && user.type == UserType.Authenticated) throw IllegalArgumentException("Either a user token or a token provider must be provided")
+        if (userToken.isBlank() && tokenProvider == null && user.type == UserType.Authenticated) {
+            throw IllegalArgumentException(
+                "Either a user token or a token provider must be provided"
+            )
+        }
+
+        // initializes
+        AndroidThreeTen.init(context)
 
         // TODO: Don't user userpreference manager
         val preferences = UserPreferencesManager.initialize(context).apply {

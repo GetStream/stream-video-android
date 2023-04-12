@@ -37,7 +37,7 @@ data class CallRejectedEvent(
     val callCid: kotlin.String,
 
     @Json(name = "created_at")
-    val createdAt: java.time.OffsetDateTime,
+    val createdAt: org.threeten.bp.OffsetDateTime,
 
     /* The type of event: \"call.rejected\" in this case */
     @Json(name = "type")

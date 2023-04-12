@@ -24,6 +24,7 @@
 package org.openapitools.client.models
 
 import com.squareup.moshi.Json
+import org.threeten.bp.OffsetDateTime
 
 /**
  * This event is sent when a user is unblocked on a call,  this can be useful to notify the user that they can now join the call again
@@ -37,7 +38,7 @@ data class UnblockedUserEvent(
     val callCid: kotlin.String,
 
     @Json(name = "created_at")
-    val createdAt: java.time.OffsetDateTime,
+    val createdAt: OffsetDateTime,
 
     /* The type of event: \"call.unblocked_user\" in this case */
     @Json(name = "type")

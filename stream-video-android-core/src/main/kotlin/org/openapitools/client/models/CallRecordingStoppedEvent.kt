@@ -37,7 +37,7 @@ data class CallRecordingStoppedEvent(
     val callCid: kotlin.String,
 
     @Json(name = "created_at")
-    val createdAt: java.time.OffsetDateTime,
+    val createdAt: org.threeten.bp.OffsetDateTime,
 
     /* The type of event: \"call.recording_stopped\" in this case */
     @Json(name = "type")
