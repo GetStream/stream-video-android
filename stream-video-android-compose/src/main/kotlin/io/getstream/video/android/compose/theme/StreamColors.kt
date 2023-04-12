@@ -67,6 +67,9 @@ public data class StreamColors(
     public val participantLabelBackground: Color,
     public val infoMenuOverlayColor: Color,
     public val callFocusedBorder: Color,
+    public val callGradientStart: Color,
+    public val callGradientEnd: Color,
+    public val callDescription: Color,
 ) {
 
     public companion object {
@@ -102,6 +105,9 @@ public data class StreamColors(
             participantLabelBackground = colorResource(id = R.color.stream_video_participant_label_background),
             infoMenuOverlayColor = Color.LightGray.copy(alpha = 0.7f),
             callFocusedBorder = colorResource(id = R.color.stream_video_focused_border_color),
+            callGradientStart = colorResource(id = R.color.stream_video_call_gradient_start),
+            callGradientEnd = colorResource(id = R.color.stream_video_call_gradient_end),
+            callDescription = colorResource(id = R.color.stream_video_call_description),
         )
 
         /**
@@ -136,6 +142,9 @@ public data class StreamColors(
             participantLabelBackground = colorResource(id = R.color.stream_video_participant_label_background),
             infoMenuOverlayColor = Color.LightGray.copy(alpha = 0.7f),
             callFocusedBorder = colorResource(id = R.color.stream_video_focused_border_color),
+            callGradientStart = colorResource(id = R.color.stream_video_call_gradient_start),
+            callGradientEnd = colorResource(id = R.color.stream_video_call_gradient_end),
+            callDescription = colorResource(id = R.color.stream_video_call_description),
         )
     }
 }

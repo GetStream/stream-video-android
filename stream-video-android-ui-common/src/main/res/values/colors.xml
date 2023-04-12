@@ -37,6 +37,9 @@
     <color name="stream_video_focused_border_color">#005FFF</color>
     <color name="stream_video_highlight">#FBF4DD</color>
     <color name="stream_video_text_avatar_initials">#FFFFFF</color>
+    <color name="stream_video_call_gradient_start">#545A64</color>
+    <color name="stream_video_call_gradient_end">#272A30</color>
+    <color name="stream_video_call_description">#FFFFFF</color>
 
     <!-- Default Dark colors -->
     <color name="stream_video_text_high_emphasis_dark">#FFFFFF</color>

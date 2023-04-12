@@ -67,7 +67,7 @@ internal fun ParticipantInformation(
             modifier = Modifier.padding(horizontal = VideoTheme.dimens.participantsTextPadding),
             text = text,
             fontSize = fontSize,
-            color = VideoTheme.colors.textHighEmphasis,
+            color = VideoTheme.colors.callDescription,
             textAlign = TextAlign.Center,
         )
 
@@ -83,7 +83,7 @@ internal fun ParticipantInformation(
             style = VideoTheme.typography.body,
             fontSize = VideoTheme.dimens.onCallStatusTextSize,
             fontWeight = FontWeight.Bold,
-            color = VideoTheme.colors.textHighEmphasis,
+            color = VideoTheme.colors.callDescription,
             textAlign = TextAlign.Center,
         )
     }
