@@ -107,6 +107,7 @@ internal class VideoSocketImpl(
             }
         }
     })
+
     private val networkStateListener = object : NetworkStateProvider.NetworkStateListener {
         override fun onConnected() {
             logger.i { "[onNetworkConnected] state: $state" }
