@@ -27,127 +27,132 @@ import java.util.Date
 /**
  * Represents the events coming in from the socket.
  */
-public sealed class VideoEvent : java.io.Serializable
+public sealed class VideoEvent(open val callCid: String = "") : java.io.Serializable
+
+public sealed class CoordinatorEvent() : VideoEvent()
 
 /**
  * Triggered when a user gets connected to the WS.
  */
 public data class ConnectedEvent(
     val clientId: String,
-) : VideoEvent()
+) : CoordinatorEvent()
 
 /**
  * Sent periodically by the server to keep the connection alive.
  */
-public data class HealthCheckEvent(
+public data class CoordinatorHealthCheckEvent(
     val clientId: String,
-) : VideoEvent()
+) : CoordinatorEvent()
 
 /**
  * Sent when someone creates a call and invites another person to participate.
  */
 public data class CallCreatedEvent(
-    val callCid: String,
+    override val callCid: String,
     val ringing: Boolean,
     val users: Map<String, CallUser>,
     val callInfo: CallInfo,
     val callDetails: CallDetails,
-) : VideoEvent()
+) : CoordinatorEvent()
 
 /**
  * Sent when a call gets updated.
  */
 public data class CallUpdatedEvent(
-    val callCid: String,
+    override val callCid: String,
     val capabilitiesByRole: Map<String, List<String>>,
     val info: CallInfo,
     val ownCapabilities: List<OwnCapability>
-) : VideoEvent()
+) : CoordinatorEvent()
 
 /**
  * Sent when a calls gets ended.
  */
 public data class CallEndedEvent(
-    val callCid: String,
+    override val callCid: String,
     val endedByUser: User?
-) : VideoEvent()
+) : CoordinatorEvent()
 
 /**
  * Sent when call members get updated.
  */
 public data class CallMembersUpdatedEvent(
-    val callCid: String,
     val users: Map<String, CallUser>,
     val info: CallInfo,
     val details: CallDetails
-) : VideoEvent()
+) : CoordinatorEvent()
 
 /**
  * Sent when call members get updated.
  */
 public data class CallMembersDeletedEvent(
-    val callCid: String,
     val users: Map<String, CallUser>,
     val info: CallInfo,
     val details: CallDetails
-) : VideoEvent()
+) : CoordinatorEvent()
 
 public data class CallAcceptedEvent(
-    val callCid: String,
+    override val callCid: String,
     val sentByUserId: String,
-) : VideoEvent()
+    val sessionId: String
+) : CoordinatorEvent()
 
 public data class CallRejectedEvent(
-    val callCid: String,
+    override val callCid: String,
     val user: User,
+    val sessionId: String,
     val updatedAt: Date
-) : VideoEvent()
+) : CoordinatorEvent()
 
 public data class CallCancelledEvent(
-    val callCid: String,
+    override val callCid: String,
     val sentByUserId: String,
-) : VideoEvent()
+) : CoordinatorEvent()
 
 public data class CustomEvent(
     val cid: StreamCallCid?,
     val sentByUser: User?,
     val custom: Map<String, Any>?,
-) : VideoEvent()
+) : CoordinatorEvent()
 
 public data class BlockedUserEvent(
     val cid: StreamCallCid?,
     val type: String,
     val userId: String
-) : VideoEvent()
+) : CoordinatorEvent()
 
 public data class UnblockedUserEvent(
     val cid: StreamCallCid?,
     val type: String,
     val userId: String
-) : VideoEvent()
+) : CoordinatorEvent()
 
 public data class RecordingStartedEvent(
+    // TODO: Tommaso decide whats what plz
+    override val callCid: String,
     val cid: StreamCallCid?,
     val type: String
-) : VideoEvent()
+) : CoordinatorEvent()
 
 public data class RecordingStoppedEvent(
+    override val callCid: String,
     val cid: StreamCallCid?,
     val type: String
-) : VideoEvent()
+) : CoordinatorEvent()
 
 public data class PermissionRequestEvent(
     val cid: StreamCallCid?,
     val type: String,
     val permissions: List<String>,
     val user: User
-) : VideoEvent()
+) : CoordinatorEvent()
 
 public data class UpdatedCallPermissionsEvent(
     val cid: StreamCallCid?,
     val type: String,
     val ownCapabilities: List<OwnCapability>,
     val user: User
-) : VideoEvent()
+) : CoordinatorEvent()
 
-public object UnknownEvent : VideoEvent()
+public object UnknownEvent : CoordinatorEvent()

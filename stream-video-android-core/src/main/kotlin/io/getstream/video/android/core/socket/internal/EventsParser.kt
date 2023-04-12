@@ -21,7 +21,7 @@ import io.getstream.result.Error
 import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.errors.create
 import io.getstream.video.android.core.events.ConnectedEvent
-import io.getstream.video.android.core.events.HealthCheckEvent
+import io.getstream.video.android.core.events.CoordinatorHealthCheckEvent
 import io.getstream.video.android.core.socket.VideoSocket
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
@@ -57,9 +57,9 @@ internal class EventsParser(
             val eventType = EventType.from(data["type"]?.jsonPrimitive?.content ?: return)
             val processedEvent = EventMapper.mapEvent(eventType, text)
 
-            if (processedEvent !is HealthCheckEvent) logger.v { "[onMessage] processedEvent: $processedEvent" }
+            if (processedEvent !is CoordinatorHealthCheckEvent) logger.v { "[onMessage] processedEvent: $processedEvent" }
 
-            if (!connectionEventReceived && processedEvent is HealthCheckEvent) {
+            if (!connectionEventReceived && processedEvent is CoordinatorHealthCheckEvent) {
                 connectionEventReceived = true
                 videoSocket.onConnectionResolved(ConnectedEvent(processedEvent.clientId))
             } else {

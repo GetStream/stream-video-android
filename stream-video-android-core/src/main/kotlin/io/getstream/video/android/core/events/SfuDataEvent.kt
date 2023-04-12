@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.core.events
 
-import io.getstream.video.android.core.model.StreamCallCid
 import io.getstream.video.android.core.model.UserAudioLevel
 import stream.video.sfu.event.ChangePublishQuality
 import stream.video.sfu.event.ConnectionQualityInfo
@@ -25,9 +24,12 @@ import stream.video.sfu.models.Error
 import stream.video.sfu.models.Participant
 import stream.video.sfu.models.PeerType
 import stream.video.sfu.models.TrackType
-import stream.video.sfu.models.VideoQuality
 
-public sealed class SfuDataEvent
+public sealed class SfuDataEvent : VideoEvent()
+
+public data class SFUConnectedEvent(
+    val clientId: String,
+) : SfuDataEvent()
 
 public data class ICETrickleEvent(
     val candidate: String,
@@ -35,10 +37,6 @@ public data class ICETrickleEvent(
 ) : SfuDataEvent()
 
 public data class SubscriberOfferEvent(
-    val sdp: String
-) : SfuDataEvent()
-
-public data class PublisherAnswerEvent(
     val sdp: String
 ) : SfuDataEvent()
 
@@ -66,25 +64,23 @@ public data class TrackUnpublishedEvent(
     val trackType: TrackType
 ) : SfuDataEvent()
 
-public data class VideoQualityChangedEvent(
-    val qualities: Map<String, VideoQuality>
-) : SfuDataEvent()
-
 public data class ParticipantJoinedEvent(
+
     val participant: Participant,
-    val callCid: StreamCallCid,
+    override val callCid: String,
 ) : SfuDataEvent()
 
 public data class ParticipantLeftEvent(
     val participant: Participant,
-    val callCid: StreamCallCid
+    override val callCid: String,
 ) : SfuDataEvent()
 
 public data class DominantSpeakerChangedEvent(
-    val userId: String
+    val userId: String,
+    val sessionId: String,
 ) : SfuDataEvent()
 
-public object HealthCheckResponseEvent : SfuDataEvent()
+public object SFUHealthCheckEvent : SfuDataEvent()
 
 public data class JoinCallResponseEvent(
     val callState: CallState

@@ -35,16 +35,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import io.getstream.video.android.common.util.MockUtils
+import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.participants.CallParticipant
 import io.getstream.video.android.compose.ui.components.participants.LocalVideoContent
-import io.getstream.video.android.compose.ui.components.previews.ParticipantsProvider
-import io.getstream.video.android.core.model.Call
-import io.getstream.video.android.core.model.CallParticipantState
+import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.ParticipantState
 
 /**
  * Renders call participants based on the number of people in a call, in portrait mode.
@@ -60,8 +61,8 @@ import io.getstream.video.android.core.model.CallParticipantState
 @Composable
 internal fun BoxScope.PortraitParticipants(
     call: Call?,
-    primarySpeaker: CallParticipantState?,
-    callParticipants: List<CallParticipantState>,
+    primarySpeaker: ParticipantState?,
+    callParticipants: List<ParticipantState>,
     modifier: Modifier,
     paddingValues: PaddingValues,
     parentSize: IntSize,
@@ -79,7 +80,7 @@ internal fun BoxScope.PortraitParticipants(
                 call = call,
                 participant = participant,
                 onRender = onRender,
-                isFocused = primarySpeaker?.id == participant.id,
+                isFocused = primarySpeaker?.sessionId == participant.sessionId,
                 paddingValues = paddingValues
             )
         }
@@ -92,7 +93,7 @@ internal fun BoxScope.PortraitParticipants(
                 call = call,
                 participant = participant,
                 onRender = onRender,
-                isFocused = primarySpeaker?.id == participant.id,
+                isFocused = primarySpeaker?.sessionId == participant.sessionId,
                 paddingValues = paddingValues
             )
         }
@@ -106,7 +107,7 @@ internal fun BoxScope.PortraitParticipants(
                     modifier = Modifier.weight(1f),
                     call = call,
                     participant = firstParticipant,
-                    isFocused = primarySpeaker?.id == firstParticipant.id
+                    isFocused = primarySpeaker?.sessionId == firstParticipant.sessionId
                 )
 
                 CallParticipant(
@@ -114,7 +115,7 @@ internal fun BoxScope.PortraitParticipants(
                     call = call,
                     participant = secondParticipant,
                     onRender = onRender,
-                    isFocused = primarySpeaker?.id == secondParticipant.id,
+                    isFocused = primarySpeaker?.sessionId == secondParticipant.sessionId,
                     paddingValues = paddingValues
                 )
             }
@@ -133,14 +134,14 @@ internal fun BoxScope.PortraitParticipants(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = firstParticipant,
-                        isFocused = primarySpeaker?.id == firstParticipant.id
+                        isFocused = primarySpeaker?.sessionId == firstParticipant.sessionId
                     )
 
                     CallParticipant(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = secondParticipant,
-                        isFocused = primarySpeaker?.id == secondParticipant.id
+                        isFocused = primarySpeaker?.sessionId == secondParticipant.sessionId
                     )
                 }
 
@@ -149,7 +150,7 @@ internal fun BoxScope.PortraitParticipants(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = thirdParticipant,
-                        isFocused = primarySpeaker?.id == thirdParticipant.id,
+                        isFocused = primarySpeaker?.sessionId == thirdParticipant.sessionId,
                         paddingValues = paddingValues
                     )
 
@@ -158,7 +159,7 @@ internal fun BoxScope.PortraitParticipants(
                         call = call,
                         participant = fourthParticipant,
                         onRender = onRender,
-                        isFocused = primarySpeaker?.id == fourthParticipant.id,
+                        isFocused = primarySpeaker?.sessionId == fourthParticipant.sessionId,
                         paddingValues = paddingValues
                     )
 
@@ -167,7 +168,7 @@ internal fun BoxScope.PortraitParticipants(
                         call = call,
                         participant = fiveParticipant,
                         onRender = onRender,
-                        isFocused = primarySpeaker?.id == fiveParticipant.id,
+                        isFocused = primarySpeaker?.initialUser?.id == fiveParticipant.initialUser.id,
                         paddingValues = paddingValues
                     )
                 }
@@ -184,7 +185,7 @@ internal fun BoxScope.PortraitParticipants(
             ) {
                 items(
                     items = callParticipants.take(maxGridItemCount),
-                    key = { it.id }
+                    key = { it.initialUser.id }
                 ) { participant ->
                     CallParticipant(
                         modifier = Modifier
@@ -192,7 +193,7 @@ internal fun BoxScope.PortraitParticipants(
                             .height(parentSize.height.dp / heightDivision),
                         call = call,
                         participant = participant,
-                        isFocused = primarySpeaker?.id == participant.id
+                        isFocused = primarySpeaker?.initialUser?.id == participant.initialUser.id
                     )
                 }
             }
@@ -220,21 +221,21 @@ internal fun BoxScope.PortraitParticipants(
 
 @Preview
 @Composable
-private fun PortraitParticipantsPreview1(
-    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<CallParticipantState>
-) {
+private fun PortraitParticipantsPreview1() {
+    MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         val configuration = LocalConfiguration.current
         val screenWidth = configuration.screenWidthDp
         val screenHeight = configuration.screenHeightDp
+        val participants = mockParticipants
 
         Box(
             modifier = Modifier.background(color = VideoTheme.colors.appBackground)
         ) {
             PortraitParticipants(
                 call = null,
-                primarySpeaker = callParticipants[0],
-                callParticipants = callParticipants.take(1),
+                primarySpeaker = participants[0],
+                callParticipants = participants.take(1),
                 modifier = Modifier.fillMaxSize(),
                 paddingValues = PaddingValues(0.dp),
                 parentSize = IntSize(screenWidth, screenHeight)
@@ -245,21 +246,21 @@ private fun PortraitParticipantsPreview1(
 
 @Preview
 @Composable
-private fun PortraitParticipantsPreview2(
-    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<CallParticipantState>
-) {
+private fun PortraitParticipantsPreview2() {
+    MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         val configuration = LocalConfiguration.current
         val screenWidth = configuration.screenWidthDp
         val screenHeight = configuration.screenHeightDp
+        val participants = mockParticipants
 
         Box(
             modifier = Modifier.background(color = VideoTheme.colors.appBackground)
         ) {
             PortraitParticipants(
                 call = null,
-                primarySpeaker = callParticipants[0],
-                callParticipants = callParticipants.take(2),
+                primarySpeaker = mockParticipants[0],
+                callParticipants = participants.take(2),
                 modifier = Modifier.fillMaxSize(),
                 paddingValues = PaddingValues(0.dp),
                 parentSize = IntSize(screenWidth, screenHeight)
@@ -270,21 +271,21 @@ private fun PortraitParticipantsPreview2(
 
 @Preview
 @Composable
-private fun PortraitParticipantsPreview3(
-    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<CallParticipantState>
-) {
+private fun PortraitParticipantsPreview3() {
+    MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         val configuration = LocalConfiguration.current
         val screenWidth = configuration.screenWidthDp
         val screenHeight = configuration.screenHeightDp
+        val participants = mockParticipants
 
         Box(
             modifier = Modifier.background(color = VideoTheme.colors.appBackground)
         ) {
             PortraitParticipants(
                 call = null,
-                primarySpeaker = callParticipants[0],
-                callParticipants = callParticipants.take(3),
+                primarySpeaker = participants[0],
+                callParticipants = participants.take(3),
                 modifier = Modifier.fillMaxSize(),
                 paddingValues = PaddingValues(0.dp),
                 parentSize = IntSize(screenWidth, screenHeight)
@@ -295,21 +296,21 @@ private fun PortraitParticipantsPreview3(
 
 @Preview
 @Composable
-private fun PortraitParticipantsPreview4(
-    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<CallParticipantState>
-) {
+private fun PortraitParticipantsPreview4() {
+    MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         val configuration = LocalConfiguration.current
         val screenWidth = configuration.screenWidthDp
         val screenHeight = configuration.screenHeightDp
+        val participants = mockParticipants
 
         Box(
             modifier = Modifier.background(color = VideoTheme.colors.appBackground)
         ) {
             PortraitParticipants(
                 call = null,
-                primarySpeaker = callParticipants[0],
-                callParticipants = callParticipants.take(4),
+                primarySpeaker = participants[0],
+                callParticipants = participants.take(4),
                 modifier = Modifier.fillMaxSize(),
                 paddingValues = PaddingValues(0.dp),
                 parentSize = IntSize(screenWidth, screenHeight)
@@ -320,21 +321,21 @@ private fun PortraitParticipantsPreview4(
 
 @Preview
 @Composable
-private fun PortraitParticipantsPreview5(
-    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<CallParticipantState>
-) {
+private fun PortraitParticipantsPreview5() {
+    MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         val configuration = LocalConfiguration.current
         val screenWidth = configuration.screenWidthDp
         val screenHeight = configuration.screenHeightDp
+        val participants = mockParticipants
 
         Box(
             modifier = Modifier.background(color = VideoTheme.colors.appBackground)
         ) {
             PortraitParticipants(
                 call = null,
-                primarySpeaker = callParticipants[0],
-                callParticipants = callParticipants.take(5),
+                primarySpeaker = participants[0],
+                callParticipants = participants.take(5),
                 modifier = Modifier.fillMaxSize(),
                 paddingValues = PaddingValues(0.dp),
                 parentSize = IntSize(screenWidth, screenHeight)
@@ -345,21 +346,21 @@ private fun PortraitParticipantsPreview5(
 
 @Preview
 @Composable
-private fun PortraitParticipantsPreview6(
-    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<CallParticipantState>
-) {
+private fun PortraitParticipantsPreview6() {
+    MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         val configuration = LocalConfiguration.current
         val screenWidth = configuration.screenWidthDp
         val screenHeight = configuration.screenHeightDp
+        val participants = mockParticipants
 
         Box(
             modifier = Modifier.background(color = VideoTheme.colors.appBackground)
         ) {
             PortraitParticipants(
                 call = null,
-                primarySpeaker = callParticipants[0],
-                callParticipants = callParticipants.take(6),
+                primarySpeaker = participants[0],
+                callParticipants = participants.take(6),
                 modifier = Modifier.fillMaxSize(),
                 paddingValues = PaddingValues(0.dp),
                 parentSize = IntSize(screenWidth, screenHeight)

@@ -19,9 +19,6 @@ package io.getstream.video.android.xml.binding
 import androidx.lifecycle.LifecycleOwner
 import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.xml.widget.participant.internal.CallParticipantsListView
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filterNotNull
 
 /**
  * Binds [CallParticipantsListView] with [CallViewModel], updating the view's state based on data provided by the
@@ -39,19 +36,19 @@ internal fun CallParticipantsListView.bindView(
     lifecycleOwner: LifecycleOwner,
 ) {
     startJob(lifecycleOwner) {
-        viewModel.callState.filterNotNull().collectLatest { call ->
-            setRendererInitializer { videoRenderer, streamId, trackType, onRender ->
-                call.initRenderer(videoRenderer, streamId, trackType, onRender)
-            }
-        }
+//        viewModel.callState.filterNotNull().collectLatest { call ->
+//            setRendererInitializer { videoRenderer, streamId, trackType, onRender ->
+//                call.initRenderer(videoRenderer, streamId, trackType, onRender)
+//            }
+//        }
     }
 
     startJob(lifecycleOwner) {
-        viewModel.participantList.combine(viewModel.primarySpeaker) { participants, primarySpeaker ->
-            participants to (primarySpeaker ?: viewModel.localParticipant.value)
-        }.collectLatest { (participants, primarySpeaker) ->
-            updateParticipants(participants)
-            updatePrimarySpeaker(primarySpeaker)
-        }
+//        viewModel.participantList.combine(viewModel.primarySpeaker) { participants, primarySpeaker ->
+//            participants to (primarySpeaker ?: viewModel.localParticipant.value)
+//        }.collectLatest { (participants, primarySpeaker) ->
+//            updateParticipants(participants)
+//            updatePrimarySpeaker(primarySpeaker)
+//        }
     }
 }

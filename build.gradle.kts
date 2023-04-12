@@ -49,9 +49,9 @@ tasks.register("clean")
     }
 
 apply(from = "${rootDir}/scripts/publish-root.gradle")
-apply(from = teamPropsFile("git-hooks.gradle.kts"))
-
-fun teamPropsFile(propsFile: String): File {
-    val teamPropsDir = file("team-props")
-    return File(teamPropsDir, propsFile)
-}
+//apply(from = teamPropsFile("git-hooks.gradle.kts"))
+//
+//fun teamPropsFile(propsFile: String): File {
+//    val teamPropsDir = file("team-props")
+//    return File(teamPropsDir, propsFile)
+//}

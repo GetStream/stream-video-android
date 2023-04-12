@@ -33,9 +33,8 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.previews.ParticipantsProvider
-import io.getstream.video.android.core.model.CallParticipantState
+import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.User
-import io.getstream.video.android.core.model.toUser
 import io.getstream.video.android.ui.common.R
 
 /**
@@ -104,11 +103,11 @@ internal fun BoxScope.DefaultOnlineIndicator(onlineIndicatorAlignment: OnlineInd
 @Preview
 @Composable
 private fun UserAvatarPreview(
-    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<CallParticipantState>
+    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<ParticipantState>
 ) {
     VideoTheme {
         UserAvatar(
-            user = callParticipants[0].toUser(),
+            user = callParticipants[0].initialUser,
             modifier = Modifier.size(82.dp)
         )
     }

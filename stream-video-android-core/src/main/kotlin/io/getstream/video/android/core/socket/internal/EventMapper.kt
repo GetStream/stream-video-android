@@ -23,8 +23,8 @@ import io.getstream.video.android.core.events.CallCreatedEvent
 import io.getstream.video.android.core.events.CallEndedEvent
 import io.getstream.video.android.core.events.CallRejectedEvent
 import io.getstream.video.android.core.events.CallUpdatedEvent
+import io.getstream.video.android.core.events.CoordinatorHealthCheckEvent
 import io.getstream.video.android.core.events.CustomEvent
-import io.getstream.video.android.core.events.HealthCheckEvent
 import io.getstream.video.android.core.events.PermissionRequestEvent
 import io.getstream.video.android.core.events.RecordingStartedEvent
 import io.getstream.video.android.core.events.RecordingStoppedEvent
@@ -82,7 +82,14 @@ internal object EventMapper {
             val data = Json.decodeFromString<JsonObject>(text)
             val connectionId = data["connection_id"]?.jsonPrimitive?.content ?: ""
 
-            HealthCheckEvent(clientId = connectionId)
+            CoordinatorHealthCheckEvent(clientId = connectionId)
+        }
+
+        EventType.CONNECTION_OK -> {
+            val data = Json.decodeFromString<JsonObject>(text)
+            val connectionId = data["connection_id"]?.jsonPrimitive?.content ?: ""
+            // TODO: implement the connection OK event
+            CoordinatorHealthCheckEvent(clientId = connectionId)
         }
 
         CALL_CREATED -> {
@@ -108,6 +115,7 @@ internal object EventMapper {
             CallAcceptedEvent(
                 callCid = event.callCid,
                 sentByUserId = event.user.id,
+                sessionId = event.sessionId,
             )
         }
 
@@ -119,6 +127,7 @@ internal object EventMapper {
             CallRejectedEvent(
                 callCid = event.callCid,
                 user = event.user.toUser(),
+                sessionId = event.sessionId,
                 updatedAt = Date(event.createdAt.toEpochSecond() * 1000)
             )
         }
@@ -215,6 +224,7 @@ internal object EventMapper {
 
             RecordingStartedEvent(
                 event.callCid,
+                event.callCid,
                 event.type
             )
         }
@@ -225,6 +235,7 @@ internal object EventMapper {
             ).fromJson(text)!!
 
             RecordingStoppedEvent(
+                event.callCid,
                 event.callCid,
                 event.type
             )

@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# uncomment this if you run into problems
+#set -xe
+
 BASEDIR=$(dirname "$(pwd)")
 PROTOCOL_ROOT="$BASEDIR/protocol"
 PROJECT_ROOT=$(pwd)
@@ -41,7 +44,11 @@ else
   git clone git@github.com:GetStream/protocol.git "$PROTOCOL_ROOT"
 fi
 
-openapi-generator generate -i "$PROTOCOL_ROOT/openapi/video-openapi.yaml" -g kotlin -o "$GENERATED_CODE_ROOT" --additional-properties=library=jvm-retrofit2,useCoroutines --skip-validate-spec
+docker run --rm -v "${GENERATED_CODE_ROOT}:/local" ghcr.io/getstream/openapi-generator:master generate \
+   -i https://raw.githubusercontent.com/GetStream/protocol/main/openapi/video-openapi.yaml \
+   --additional-properties=library=jvm-retrofit2,useCoroutines \
+   -g kotlin \
+   -o /local
 
 CLIENT_ROOT="$GENERATED_CODE_ROOT/src/main/kotlin/org/openapitools/client"
 APIS_ROOT="$CLIENT_ROOT/apis"
@@ -53,6 +60,11 @@ rm "$APIS_ROOT/UsersApi.kt"
 
 API_REQUEST_REGEX="@(?:POST|DELETE|GET|PUT)\(\"(.*?)\""
 RETROFIT_IMPORTS_REGEX="(Body)|^[[:space:]]*@([^()]*)\("
+
+for FILE in $APIS_ROOT/*.kt; do
+  echo Processing $FILE
+  sed -i '' 's/kotlin.//g; s/Response<//g; s/>//g' $FILE
+done
 
 for FILE in "$APIS_ROOT"/*.kt; do
   echo Processing "$FILE"
@@ -80,12 +92,7 @@ for FILE in "$APIS_ROOT"/*.kt; do
   done
 
   sed -i '' "s/import retrofit2\.http\.\*/$PREPARED_IMPORTS/g" "$FILE"
-
 done
 
-echo Copying models and services
-
-cp -r "$CLIENT_ROOT/" "$PROJECT_ROOT/stream-video-android-core/src/main/kotlin/org/openapitools/client"
-cp -r "$PROTOCOL_ROOT/protobuf/." "$PROJECT_ROOT/stream-video-android-core/src/main/proto"
-
-echo Done!
+cp -r "${CLIENT_ROOT}/" "${PROJECT_ROOT}/stream-video-android-core/src/main/kotlin/org/openapitools/client"
+cp -r "${PROTOCOL_ROOT}/protobuf/." "${PROJECT_ROOT}/stream-video-android-core/src/main/proto"

@@ -29,14 +29,11 @@ import io.getstream.video.android.compose.ui.components.call.incomingcall.intern
 import io.getstream.video.android.compose.ui.components.call.outgoingcall.OutgoingCallContent
 import io.getstream.video.android.compose.ui.components.call.outgoingcall.internal.OutgoingCallDetails
 import io.getstream.video.android.compose.ui.components.call.outgoingcall.internal.OutgoingGroupCallOptions
-import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.call.state.CallMediaState
 import io.getstream.video.android.core.model.CallType
 import io.getstream.video.android.core.model.CallUser
 import org.junit.Rule
 import org.junit.Test
-import org.webrtc.VideoTrack
-import stream.video.sfu.models.TrackType
 
 internal class CallContentTest : BaseComposeTest() {
 
@@ -46,31 +43,16 @@ internal class CallContentTest : BaseComposeTest() {
     override fun basePaparazzi(): Paparazzi = paparazzi
 
     @Test
-    fun `snapshot VideoRenderer composable`() {
-        snapshot {
-            VideoRenderer(
-                call = null,
-                videoTrack = io.getstream.video.android.core.model.VideoTrack(
-                    "",
-                    VideoTrack(123)
-                ),
-                sessionId = "",
-                trackType = TrackType.TRACK_TYPE_VIDEO
-            )
-        }
-    }
-
-    @Test
     fun `snapshot IncomingCallContentDetails composable`() {
         snapshot {
             IncomingCallDetails(
                 participants = mockParticipantList.map {
                     CallUser(
-                        id = it.id,
-                        name = it.name,
-                        role = it.role,
+                        id = it.initialUser.id,
+                        name = it.initialUser.name,
+                        role = it.initialUser.role,
+                        imageUrl = it.initialUser.imageUrl,
                         state = null,
-                        imageUrl = it.profileImageURL ?: "",
                         createdAt = null,
                         updatedAt = null,
                         teams = emptyList()
@@ -99,11 +81,11 @@ internal class CallContentTest : BaseComposeTest() {
                 participants = listOf(
                     mockParticipant.let {
                         CallUser(
-                            id = it.id,
-                            name = it.name,
-                            role = it.role,
+                            id = it.initialUser.id,
+                            name = it.initialUser.name,
+                            role = it.initialUser.role,
+                            imageUrl = it.initialUser.imageUrl,
                             state = null,
-                            imageUrl = it.profileImageURL ?: "",
                             createdAt = null,
                             updatedAt = null,
                             teams = emptyList()
@@ -125,11 +107,11 @@ internal class CallContentTest : BaseComposeTest() {
                 callType = CallType.VIDEO,
                 participants = mockParticipantList.map {
                     CallUser(
-                        id = it.id,
-                        name = it.name,
-                        role = it.role,
+                        id = it.initialUser.id,
+                        name = it.initialUser.name,
+                        role = it.initialUser.role,
+                        imageUrl = it.initialUser.imageUrl,
                         state = null,
-                        imageUrl = it.profileImageURL ?: "",
                         createdAt = null,
                         updatedAt = null,
                         teams = emptyList()
@@ -150,11 +132,11 @@ internal class CallContentTest : BaseComposeTest() {
                 callType = CallType.VIDEO,
                 participants = mockParticipantList.map {
                     CallUser(
-                        id = it.id,
-                        name = it.name,
-                        role = it.role,
+                        id = it.initialUser.id,
+                        name = it.initialUser.name,
+                        role = it.initialUser.role,
+                        imageUrl = it.initialUser.imageUrl,
                         state = null,
-                        imageUrl = it.profileImageURL ?: "",
                         createdAt = null,
                         updatedAt = null,
                         teams = emptyList()
@@ -192,11 +174,11 @@ internal class CallContentTest : BaseComposeTest() {
                 participants = listOf(
                     mockParticipant.let {
                         CallUser(
-                            id = it.id,
-                            name = it.name,
-                            role = it.role,
+                            id = it.initialUser.id,
+                            name = it.initialUser.name,
+                            role = it.initialUser.role,
+                            imageUrl = it.initialUser.imageUrl,
                             state = null,
-                            imageUrl = it.profileImageURL ?: "",
                             createdAt = null,
                             updatedAt = null,
                             teams = emptyList()
@@ -219,11 +201,11 @@ internal class CallContentTest : BaseComposeTest() {
                 participants =
                 mockParticipantList.map {
                     CallUser(
-                        id = it.id,
-                        name = it.name,
-                        role = it.role,
+                        id = it.initialUser.id,
+                        name = it.initialUser.name,
+                        role = it.initialUser.role,
+                        imageUrl = it.initialUser.imageUrl,
                         state = null,
-                        imageUrl = it.profileImageURL ?: "",
                         createdAt = null,
                         updatedAt = null,
                         teams = emptyList()

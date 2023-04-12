@@ -18,6 +18,7 @@ package io.getstream.video.android.core.socket.internal
 
 internal enum class EventType(val type: String) {
     HEALTH_CHECK("health.check"),
+    CONNECTION_OK("connection.ok"),
     CALL_CREATED("call.created"),
     CALL_ACCEPTED("call.accepted"),
     CALL_REJECTED("call.rejected"),
@@ -43,6 +44,7 @@ internal enum class EventType(val type: String) {
                 CALL_CANCELLED.type -> CALL_CANCELLED
                 CALL_UPDATED.type -> CALL_UPDATED
                 CALL_ENDED.type -> CALL_ENDED
+                CONNECTION_OK.type -> CONNECTION_OK
                 PERMISSION_REQUEST.type -> PERMISSION_REQUEST
                 UPDATED_CALL_PERMISSIONS.type -> UPDATED_CALL_PERMISSIONS
                 CUSTOM.type -> CUSTOM

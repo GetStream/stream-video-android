@@ -36,8 +36,8 @@ class CallActivity : AbstractComposeCallActivity() {
     override fun getCallViewModelFactory(): CallViewModelFactory {
         return CallViewModelFactory(
             streamVideo = getStreamVideo(this),
+            call = getStreamVideo(this).call("default", "123"),
             permissionManager = getPermissionManager(),
-            usersProvider = chatWithVideoApp.usersLoginProvider
         )
     }
 }

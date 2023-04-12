@@ -30,18 +30,20 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.getstream.video.android.common.util.MockUtils
+import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
-import io.getstream.video.android.compose.ui.components.previews.ParticipantsProvider
-import io.getstream.video.android.core.model.CallParticipantState
-import io.getstream.video.android.core.model.toUser
+import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.ui.common.R
 
 /**
@@ -53,8 +55,8 @@ import io.getstream.video.android.ui.common.R
  */
 @Composable
 internal fun CallParticipantsList(
-    participantsState: List<CallParticipantState>,
-    onUserOptionsSelected: (CallParticipantState) -> Unit,
+    participantsState: List<ParticipantState>,
+    onUserOptionsSelected: (ParticipantState) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -77,8 +79,8 @@ internal fun CallParticipantsList(
  */
 @Composable
 private fun CallParticipantInfoItem(
-    participant: CallParticipantState,
-    onUserOptionsSelected: (CallParticipantState) -> Unit
+    participant: ParticipantState,
+    onUserOptionsSelected: (ParticipantState) -> Unit
 ) {
     Row(
         modifier = Modifier.wrapContentWidth(),
@@ -88,29 +90,19 @@ private fun CallParticipantInfoItem(
 
         Spacer(modifier = Modifier.width(8.dp))
 
+        val user by participant.user.collectAsState()
         UserAvatar(
             modifier = Modifier.size(VideoTheme.dimens.callParticipantsInfoAvatarSize),
-            user = participant.toUser(),
+            user = user,
             showOnlineIndicator = true
         )
 
-        val userName = when {
-            participant.name.isNotBlank() -> participant.name
-            participant.id.isNotBlank() -> participant.id
-            else -> "Unknown"
-        }
-
-        val userText = if (participant.isLocal) {
-            "$userName (You)"
-        } else {
-            userName
-        }
-
+        val userName by participant.userNameOrId.collectAsState()
         Text(
             modifier = Modifier
                 .padding(start = 8.dp)
                 .weight(1f),
-            text = userText,
+            text = userName,
             style = VideoTheme.typography.bodyBold,
             color = VideoTheme.colors.textHighEmphasis,
             fontSize = 16.sp,
@@ -152,12 +144,11 @@ private fun CallParticipantInfoItem(
 
 @Preview
 @Composable
-private fun CallParticipantsListPreview(
-    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<CallParticipantState>
-) {
+private fun CallParticipantsListPreview() {
+    MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         CallParticipantsList(
-            participantsState = callParticipants,
+            participantsState = mockParticipants,
             onUserOptionsSelected = {}
         )
     }

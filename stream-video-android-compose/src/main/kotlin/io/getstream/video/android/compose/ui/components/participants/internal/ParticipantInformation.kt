@@ -42,8 +42,7 @@ internal fun ParticipantInformation(
     participants: List<CallUser>
 ) {
     Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally
     ) {
         val text = if (participants.size < 3) {
             buildSmallCallText(participants)
@@ -91,11 +90,11 @@ private fun ParticipantInformationPreview() {
             callStatus = CallStatus.Incoming,
             participants = mockParticipantList.map {
                 CallUser(
-                    id = it.id,
-                    name = it.name,
-                    role = it.role,
+                    id = it.initialUser.id,
+                    name = it.initialUser.name,
+                    role = it.initialUser.role,
+                    imageUrl = it.initialUser.imageUrl,
                     state = null,
-                    imageUrl = it.profileImageURL.orEmpty(),
                     createdAt = null,
                     updatedAt = null,
                     teams = emptyList()

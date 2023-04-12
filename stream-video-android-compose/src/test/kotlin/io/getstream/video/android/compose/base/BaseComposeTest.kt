@@ -19,7 +19,9 @@ package io.getstream.video.android.compose.base
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import app.cash.paparazzi.Paparazzi
+import io.getstream.video.android.common.util.MockUtils
 import io.getstream.video.android.compose.theme.VideoTheme
 
 internal abstract class BaseComposeTest {
@@ -31,12 +33,14 @@ internal abstract class BaseComposeTest {
         composable: @Composable () -> Unit
     ) {
         basePaparazzi().snapshot {
+            MockUtils.initializeStreamVideo(LocalContext.current)
             VideoTheme(isInDarkMode) { composable.invoke() }
         }
     }
 
     fun snapshotWithDarkMode(composable: @Composable () -> Unit) {
         basePaparazzi().snapshot {
+            MockUtils.initializeStreamVideo(LocalContext.current)
             Column {
                 VideoTheme(isInDarkMode = true) { composable.invoke() }
                 VideoTheme(isInDarkMode = false) { composable.invoke() }

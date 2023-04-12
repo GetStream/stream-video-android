@@ -16,12 +16,57 @@
 
 package io.getstream.video.android.core.utils
 
-import io.getstream.log.StreamLog
+import okhttp3.Call
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.URL
+import java.util.concurrent.TimeUnit
 
 private const val TAG = "Call:LatencyUtils"
+
+data class LatencyResult(
+    val latencyUrl: String,
+    val measurements: List<Float> = emptyList(),
+    val average: Double = 100.0,
+    val failed: Throwable? = null
+)
+
+public fun getLatencyMeasurementsOKHttp(latencyUrl: String): LatencyResult {
+    val measurements = mutableListOf<Float>()
+    val connectionTimeoutInMs: Long = 3000
+
+    val client: OkHttpClient = OkHttpClient.Builder()
+        .connectTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
+        .writeTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
+        .readTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
+        .callTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
+        .build()
+
+    try {
+        repeat(3) {
+            val start = System.currentTimeMillis()
+
+            val okHttpRequest: Request = Request.Builder()
+                .url(latencyUrl) // 2-second response time
+                .build()
+            val call: Call = client.newCall(okHttpRequest)
+            val response: Response = call.execute()
+
+            val end = System.currentTimeMillis()
+            val seconds = (end - start) / 1000f
+            if (it != 0) {
+                measurements.add(seconds)
+            }
+        }
+    } catch (e: Throwable) {
+        measurements.add(Float.MAX_VALUE)
+        return LatencyResult(latencyUrl, measurements, measurements.average(), e)
+    }
+    return LatencyResult(latencyUrl, measurements, measurements.average())
+}
 
 /**
  * Calculates the latency to ping the server multiple times.
@@ -29,30 +74,33 @@ private const val TAG = "Call:LatencyUtils"
  * @param latencyUrl The URL of the server where we ping a connection.
  * @return A [List] of [Double] values representing the portion of a second it takes to connect.
  */
-public fun getLatencyMeasurements(latencyUrl: String): List<Float> {
+public fun getLatencyMeasurements(latencyUrl: String): LatencyResult {
     val measurements = mutableListOf<Float>()
+    val connectionTimeoutInMs: Long = 3000
 
-    repeat(3) {
-        try {
+    try {
+        repeat(3) {
             val request = URL(latencyUrl)
             val start = System.currentTimeMillis()
             val connection = request.openConnection()
-
+            // ensure we have a timeout
+            connection.connectTimeout = 3000
+            connection.readTimeout = 3000
             connection.connect()
 
             // Read and print the input
             val inputStream = BufferedReader(InputStreamReader(connection.getInputStream()))
-            println(inputStream.readLines().toString())
             inputStream.close()
 
             val end = System.currentTimeMillis()
-
             val seconds = (end - start) / 1000f
-            measurements.add(seconds)
-        } catch (e: Throwable) {
-            StreamLog.e(TAG, e) { "[getLatencyMeasurements] failed: $e" }
-            measurements.add(Float.MAX_VALUE)
+            if (it != 0) {
+                measurements.add(seconds)
+            }
         }
+    } catch (e: Throwable) {
+        measurements.add(Float.MAX_VALUE)
+        return LatencyResult(latencyUrl, measurements, measurements.average(), e)
     }
-    return measurements
+    return LatencyResult(latencyUrl, measurements, measurements.average())
 }

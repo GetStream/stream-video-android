@@ -23,20 +23,22 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import io.getstream.video.android.common.util.MockUtils
 import io.getstream.video.android.common.util.mockParticipantList
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.InitialsAvatar
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
-import io.getstream.video.android.core.model.CallParticipantState
-import io.getstream.video.android.core.model.toUser
+import io.getstream.video.android.core.ParticipantState
 
 @Composable
 internal fun ParticipantAvatars(
-    participants: List<CallParticipantState>
+    participants: List<ParticipantState>
 ) {
     Box(
         modifier = Modifier.fillMaxWidth(),
@@ -48,14 +50,14 @@ internal fun ParticipantAvatars(
 
                 UserAvatar(
                     modifier = Modifier.size(VideoTheme.dimens.singleAvatarSize),
-                    user = participant.toUser()
+                    user = participant.user.collectAsState().value
                 )
             } else {
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
                     items(participants.take(2)) { participant ->
                         UserAvatar(
                             modifier = Modifier.size(VideoTheme.dimens.callAvatarSize),
-                            user = participant.toUser()
+                            user = participant.user.collectAsState().value
                         )
                     }
 
@@ -63,7 +65,7 @@ internal fun ParticipantAvatars(
                         item {
                             UserAvatar(
                                 modifier = Modifier.size(VideoTheme.dimens.callAvatarSize),
-                                user = participants[2].toUser()
+                                user = participants[2].user.collectAsState().value
                             )
                         }
                     } else if (participants.size > 3) {
@@ -83,6 +85,7 @@ internal fun ParticipantAvatars(
 @Preview
 @Composable
 private fun ParticipantAvatarsPreview() {
+    MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         ParticipantAvatars(participants = mockParticipantList)
     }

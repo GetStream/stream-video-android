@@ -33,7 +33,14 @@ public data class CallMetadata(
     val callDetails: CallDetails,
     val users: Map<String, CallUser>,
     val custom: Map<String, Any>,
-) : Serializable
+) : Serializable {
+    companion object {
+        fun empty(): CallMetadata {
+            val details = CallDetails(emptyList(), emptyMap(), emptyList())
+            return CallMetadata("", "", "", StreamCallKind.MEETING, "123", 0, 0, false, false, details, emptyMap(), emptyMap())
+        }
+    }
+}
 
 public fun CallMetadata.toInfo(): CallInfo = CallInfo(
     cid = cid,

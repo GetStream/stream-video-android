@@ -62,12 +62,23 @@ internal class UserPreferencesImpl(
         }
     }
 
+    // TODO: SFU tokens aren't reusable, we should probably not store these
+
     override fun getSfuToken(): SfuToken =
         sharedPreferences.getString(KEY_SFU_TOKEN, "") ?: ""
 
     override fun storeSfuToken(sfuToken: SfuToken?) {
         sharedPreferences.edit {
             putString(KEY_SFU_TOKEN, sfuToken)
+        }
+    }
+
+    override fun getUserToken(): String =
+        sharedPreferences.getString(KEY_USER_TOKEN, "") ?: ""
+
+    override fun storeUserToken(userToken: String) {
+        sharedPreferences.edit {
+            putString(KEY_USER_TOKEN, userToken)
         }
     }
 
@@ -126,5 +137,6 @@ internal class UserPreferencesImpl(
         private const val KEY_APIKEY = "apikey"
         private const val KEY_DEVICES = "devices"
         private const val KEY_SFU_TOKEN = "sfu_token"
+        private const val KEY_USER_TOKEN = "user_token"
     }
 }

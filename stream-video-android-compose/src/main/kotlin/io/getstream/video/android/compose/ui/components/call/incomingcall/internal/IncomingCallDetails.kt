@@ -23,11 +23,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import io.getstream.video.android.common.util.mockParticipantList
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantAvatars
 import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantInformation
-import io.getstream.video.android.core.model.CallParticipantState
 import io.getstream.video.android.core.model.CallStatus
 import io.getstream.video.android.core.model.CallUser
 
@@ -38,18 +35,18 @@ internal fun IncomingCallDetails(
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
 
-        ParticipantAvatars(
-            participants = participants.map {
-                CallParticipantState(
-                    id = it.id,
-                    role = it.role,
-                    name = it.name,
-                    profileImageURL = it.imageUrl,
-                    idPrefix = "",
-                    sessionId = ""
-                )
-            }
-        )
+//        ParticipantAvatars(
+//            participants = participants.map {
+//                CallParticipantState(
+//                    id = it.id,
+//                    role = it.role,
+//                    name = it.name,
+//                    profileImageURL = it.imageUrl,
+//                    idPrefix = "",
+//                    sessionId = ""
+//                )
+//            }
+//        )
 
         Spacer(modifier = Modifier.height(VideoTheme.dimens.callParticipantsAvatarsMargin))
 
@@ -64,19 +61,19 @@ internal fun IncomingCallDetails(
 @Composable
 private fun IncomingCallDetailsPreview() {
     VideoTheme {
-        IncomingCallDetails(
-            participants = mockParticipantList.map {
-                CallUser(
-                    id = it.id,
-                    name = it.name,
-                    role = it.role,
-                    state = null,
-                    imageUrl = it.profileImageURL ?: "",
-                    createdAt = null,
-                    updatedAt = null,
-                    teams = emptyList()
-                )
-            }
-        )
+//        IncomingCallDetails(
+//            participants = mockParticipantList.map {
+//                CallUser(
+//                    id = it.id,
+//                    name = it.name,
+//                    role = it.role,
+//                    state = null,
+//                    imageUrl = it.profileImageURL ?: "",
+//                    createdAt = null,
+//                    updatedAt = null,
+//                    teams = emptyList()
+//                )
+//            }
+//        )
     }
 }

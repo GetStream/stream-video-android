@@ -27,7 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.core.model.Call
+import io.getstream.video.android.core.Call
 
 /**
  * Renders call participants based on the number of people in a call.
@@ -46,8 +46,8 @@ internal fun BoxScope.Participants(
     paddingValues: PaddingValues = PaddingValues(0.dp),
     parentSize: IntSize = IntSize(0, 0)
 ) {
-    val primarySpeaker by call.primarySpeaker.collectAsState(initial = null)
-    val roomParticipants by call.callParticipants.collectAsState(emptyList())
+    val primarySpeaker by call.state.dominantSpeaker.collectAsState(initial = null)
+    val roomParticipants by call.state.participants.collectAsState(emptyList())
 
     val orientation = LocalConfiguration.current.orientation
 

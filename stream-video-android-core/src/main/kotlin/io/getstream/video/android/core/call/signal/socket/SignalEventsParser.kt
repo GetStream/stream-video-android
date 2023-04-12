@@ -20,7 +20,7 @@ import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.errors.create
-import io.getstream.video.android.core.events.ConnectedEvent
+import io.getstream.video.android.core.events.SFUConnectedEvent
 import okhttp3.Response
 import okhttp3.WebSocket
 import okio.ByteString
@@ -40,7 +40,7 @@ internal class SignalEventsParser(
         connectionEventReceived = false
         closedByClient = false
 
-        sfuSocket.onConnectionResolved(ConnectedEvent(""))
+        sfuSocket.onConnectionResolved(SFUConnectedEvent(""))
     }
 
     override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
@@ -82,6 +82,7 @@ internal class SignalEventsParser(
     }
 
     private fun onFailure(streamError: Error.NetworkError) {
+        logger.i { "[onFailure] failure: $streamError" }
         // Called when socket is disconnected by client also (client.disconnect())
         onSocketError(Error.NetworkError.create(VideoErrorCode.SOCKET_FAILURE, streamError.cause))
     }
@@ -91,6 +92,7 @@ internal class SignalEventsParser(
     }
 
     private fun onSocketError(error: Error.NetworkError) {
+        logger.i { "[onSocketError] failure: $error" }
         if (!closedByClient) {
             sfuSocket.onSocketError(error)
         }

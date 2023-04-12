@@ -33,12 +33,16 @@ import retrofit2.http.Path
 interface ModerationApi {
     /**
      * Block user on a call
-     * Block a user, preventing them from joining the call until they are unblocked.  Sends events: - call.blocked_user  Required permissions: - BlockUser * Responses:
+     * Block a user, preventing them from joining the call until they are unblocked.  Sends events: - call.blocked_user  Required permissions: - BlockUser
+     * Responses:
      *  - 201: Successful response
      *  - 400: Bad request
      *  - 429: Too many requests
      *
-     * @param type * @param id * @param blockUserRequest * @return [BlockUserResponse]
+     * @param type
+     * @param id
+     * @param blockUserRequest
+     * @return [BlockUserResponse]
      */
     @POST("/video/call/{type}/{id}/block")
     suspend fun blockUser(
@@ -49,12 +53,16 @@ interface ModerationApi {
 
     /**
      * Mute users
-     * Mutes users in a call  Required permissions: - MuteUsers * Responses:
+     * Mutes users in a call  Required permissions: - MuteUsers
+     * Responses:
      *  - 201: Successful response
      *  - 400: Bad request
      *  - 429: Too many requests
      *
-     * @param type * @param id * @param muteUsersRequest * @return [MuteUsersResponse]
+     * @param type
+     * @param id
+     * @param muteUsersRequest
+     * @return [MuteUsersResponse]
      */
     @POST("/video/call/{type}/{id}/mute_users")
     suspend fun muteUsers(
@@ -65,12 +73,16 @@ interface ModerationApi {
 
     /**
      * Request permission
-     * Request permission to perform an action  Sends events: - call.permission_request * Responses:
+     * Request permission to perform an action  Sends events: - call.permission_request
+     * Responses:
      *  - 201: Successful response
      *  - 400: Bad request
      *  - 429: Too many requests
      *
-     * @param type * @param id * @param requestPermissionRequest * @return [RequestPermissionResponse]
+     * @param type
+     * @param id
+     * @param requestPermissionRequest
+     * @return [RequestPermissionResponse]
      */
     @POST("/video/call/{type}/{id}/request_permission")
     suspend fun requestPermission(
@@ -81,12 +93,16 @@ interface ModerationApi {
 
     /**
      * Unblocks user on a call
-     * Removes the block for a user on a call. The user will be able to join the call again.  Sends events: - call.unblocked_user  Required permissions: - BlockUser * Responses:
+     * Removes the block for a user on a call. The user will be able to join the call again.  Sends events: - call.unblocked_user  Required permissions: - BlockUser
+     * Responses:
      *  - 201: Successful response
      *  - 400: Bad request
      *  - 429: Too many requests
      *
-     * @param type * @param id * @param unblockUserRequest * @return [UnblockUserResponse]
+     * @param type
+     * @param id
+     * @param unblockUserRequest
+     * @return [UnblockUserResponse]
      */
     @POST("/video/call/{type}/{id}/unblock")
     suspend fun unblockUser(
@@ -97,12 +113,16 @@ interface ModerationApi {
 
     /**
      * Update user permissions
-     * Updates user permissions  Sends events: - call.permissions_updated  Required permissions: - UpdateCallPermissions * Responses:
+     * Updates user permissions  Sends events: - call.permissions_updated  Required permissions: - UpdateCallPermissions
+     * Responses:
      *  - 201: Successful response
      *  - 400: Bad request
      *  - 429: Too many requests
      *
-     * @param type * @param id * @param updateUserPermissionsRequest * @return [UpdateUserPermissionsResponse]
+     * @param type
+     * @param id
+     * @param updateUserPermissionsRequest
+     * @return [UpdateUserPermissionsResponse]
      */
     @POST("/video/call/{type}/{id}/user_permissions")
     suspend fun updateUserPermissions(

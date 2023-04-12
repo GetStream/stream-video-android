@@ -19,9 +19,6 @@ package io.getstream.video.android.xml.binding
 import androidx.lifecycle.LifecycleOwner
 import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.xml.widget.participant.PictureInPictureView
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.map
 
 /**
  * Binds [PictureInPictureView] with [CallViewModel], updating the view's state based on data provided by the ViewModel,
@@ -39,20 +36,20 @@ public fun PictureInPictureView.bindView(
     lifecycleOwner: LifecycleOwner,
 ) {
     startJob(lifecycleOwner) {
-        viewModel.callState.filterNotNull().collectLatest { call ->
-            setRendererInitializer { videoRenderer, trackId, trackType, onRender ->
-                call.initRenderer(videoRenderer, trackId, trackType, onRender)
-            }
-        }
+//        viewModel.callState.filterNotNull().collectLatest { call ->
+//            setRendererInitializer { videoRenderer, trackId, trackType, onRender ->
+//                call.initRenderer(videoRenderer, trackId, trackType, onRender)
+//            }
+//        }
     }
 
     startJob(lifecycleOwner) {
-        viewModel.screenSharingSessions.map { it.firstOrNull() }.collectLatest {
-            if (it != null) {
-                setScreenShareView { it.bindView(viewModel, lifecycleOwner) }
-            } else {
-                setCallParticipantView { it.bindPictureInPictureView(viewModel, lifecycleOwner) }
-            }
-        }
+//        viewModel.screenSharingSessions.map { it.firstOrNull() }.collectLatest {
+//            if (it != null) {
+//                setScreenShareView { it.bindView(viewModel, lifecycleOwner) }
+//            } else {
+//                setCallParticipantView { it.bindPictureInPictureView(viewModel, lifecycleOwner) }
+//            }
+//        }
     }
 }
