@@ -23,8 +23,8 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.model.User
-import org.webrtc.VideoTrack
 import java.util.UUID
+import org.webrtc.VideoTrack
 
 @InternalStreamVideoApi
 public object MockUtils {
@@ -36,7 +36,8 @@ public object MockUtils {
             streamVideo = StreamVideoBuilder(
                 context = context.applicationContext,
                 apiKey = "stream-api-key",
-                user = mockUsers.first()
+                user = mockUsers.first(),
+                userToken = "user-token"
             ).build()
         }
     }
