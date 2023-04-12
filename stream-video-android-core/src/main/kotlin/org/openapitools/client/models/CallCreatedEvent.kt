@@ -42,7 +42,7 @@ data class CallCreatedEvent(
     val callCid: kotlin.String,
 
     @Json(name = "created_at")
-    val createdAt: java.time.OffsetDateTime,
+    val createdAt: org.threeten.bp.OffsetDateTime,
 
     /* the members added to this call */
     @Json(name = "members")

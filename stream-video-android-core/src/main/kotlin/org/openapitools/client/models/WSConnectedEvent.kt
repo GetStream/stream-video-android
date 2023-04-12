@@ -39,7 +39,7 @@ data class WSConnectedEvent(
     val connectionId: kotlin.String,
 
     @Json(name = "created_at")
-    val createdAt: java.time.OffsetDateTime,
+    val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "me")
     val me: OwnUserResponse,

@@ -38,7 +38,7 @@ data class HealthCheckEvent(
     val connectionId: kotlin.String,
 
     @Json(name = "created_at")
-    val createdAt: java.time.OffsetDateTime,
+    val createdAt: org.threeten.bp.OffsetDateTime,
 
     /* The type of event: \"health.check\" in this case */
     @Json(name = "type")

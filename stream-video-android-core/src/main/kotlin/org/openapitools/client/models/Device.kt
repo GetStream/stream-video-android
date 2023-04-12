@@ -24,6 +24,7 @@
 package org.openapitools.client.models
 
 import com.squareup.moshi.Json
+import org.threeten.bp.OffsetDateTime
 
 /**
  * *
@@ -36,7 +37,7 @@ data class Device(
 
     /* Date/time of creation */
     @Json(name = "created_at")
-    val createdAt: java.time.OffsetDateTime,
+    val createdAt: OffsetDateTime,
 
     @Json(name = "id")
     val id: kotlin.String,

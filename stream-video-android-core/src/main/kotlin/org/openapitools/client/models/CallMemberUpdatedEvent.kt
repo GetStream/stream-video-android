@@ -41,7 +41,7 @@ data class CallMemberUpdatedEvent(
     val callCid: kotlin.String,
 
     @Json(name = "created_at")
-    val createdAt: java.time.OffsetDateTime,
+    val createdAt: org.threeten.bp.OffsetDateTime,
 
     /* The list of members that were updated */
     @Json(name = "members")
