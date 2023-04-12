@@ -71,7 +71,7 @@ public fun Avatar(
     initialsAvatarOffset: DpOffset = DpOffset(0.dp, 0.dp),
     onClick: (() -> Unit)? = null,
 ) {
-    if (!initials.isNullOrBlank()) {
+    if (imageUrl.isNullOrBlank() && !initials.isNullOrBlank()) {
         InitialsAvatar(
             modifier = modifier,
             initials = initials,

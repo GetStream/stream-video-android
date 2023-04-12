@@ -139,7 +139,8 @@ private fun CallBackgroundPreview() {
     VideoTheme {
         CallBackground(
             participants = listOf(),
-            callType = CallType.VIDEO, isIncoming = true
+            callType = CallType.VIDEO,
+            isIncoming = true
         ) {
             Box(modifier = Modifier.align(Alignment.Center)) {
                 AvatarImagePreview()

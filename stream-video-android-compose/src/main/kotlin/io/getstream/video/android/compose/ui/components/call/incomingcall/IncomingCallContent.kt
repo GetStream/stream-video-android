@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.compose.ui.components.call.incomingcall
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -36,6 +37,7 @@ import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.model.CallType
 import io.getstream.video.android.core.viewmodel.CallViewModel
+import io.getstream.video.android.ui.common.R
 
 /**
  * Represents the Incoming Call state and UI, when the user receives a call from other people.
@@ -85,6 +87,7 @@ public fun IncomingCallContent(
     isVideoEnabled: Boolean,
     modifier: Modifier = Modifier,
     showHeader: Boolean = true,
+    @DrawableRes previewPlaceholder: Int = R.drawable.stream_video_ic_preview_avatar,
     onBackPressed: () -> Unit,
     onCallAction: (CallAction) -> Unit,
 ) {
@@ -113,7 +116,8 @@ public fun IncomingCallContent(
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .padding(top = topPadding),
-                participants = participants
+                participants = participants,
+                previewPlaceholder = previewPlaceholder
             )
         }
 
@@ -130,13 +134,29 @@ public fun IncomingCallContent(
 
 @Preview
 @Composable
-private fun IncomingCallPreview() {
+private fun IncomingCallPreview1() {
+    MockUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        IncomingCallContent(
+            participants = mockParticipants.takeLast(1),
+            callType = CallType.VIDEO,
+            isVideoEnabled = false,
+            previewPlaceholder = R.drawable.stream_video_call_sample,
+            onBackPressed = {}
+        ) {}
+    }
+}
+
+@Preview
+@Composable
+private fun IncomingCallPreview2() {
     MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         IncomingCallContent(
             participants = mockParticipants,
             callType = CallType.VIDEO,
             isVideoEnabled = false,
+            previewPlaceholder = R.drawable.stream_video_call_sample,
             onBackPressed = {}
         ) {}
     }

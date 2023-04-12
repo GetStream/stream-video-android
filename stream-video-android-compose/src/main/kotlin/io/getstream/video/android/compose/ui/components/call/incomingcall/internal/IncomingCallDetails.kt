@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.compose.ui.components.call.incomingcall.internal
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,15 +32,20 @@ import io.getstream.video.android.compose.ui.components.participants.internal.Pa
 import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantInformation
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.CallStatus
+import io.getstream.video.android.ui.common.R
 
 @Composable
 internal fun IncomingCallDetails(
     modifier: Modifier = Modifier,
-    participants: List<ParticipantState>
+    participants: List<ParticipantState>,
+    @DrawableRes previewPlaceholder: Int = R.drawable.stream_video_ic_preview_avatar,
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
 
-        ParticipantAvatars(participants = participants)
+        ParticipantAvatars(
+            participants = participants,
+            previewPlaceholder = previewPlaceholder
+        )
 
         Spacer(modifier = Modifier.height(VideoTheme.dimens.callParticipantsAvatarsMargin))
 
@@ -56,7 +62,8 @@ private fun IncomingCallDetailsPreview() {
     MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         IncomingCallDetails(
-            participants = mockParticipantList
+            participants = mockParticipantList,
+            previewPlaceholder = R.drawable.stream_video_call_sample
         )
     }
 }
