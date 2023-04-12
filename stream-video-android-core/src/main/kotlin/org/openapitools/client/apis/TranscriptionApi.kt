@@ -32,10 +32,7 @@ interface TranscriptionApi {
      * @return [Unit]
      */
     @POST("/video/call/{type}/{id}/start_transcription")
-    suspend fun startTranscription(
-        @Path("type") type: String,
-        @Path("id") id: String
-    ): Unit
+    suspend fun startTranscription(@Path("type") type: String, @Path("id") id: String): Unit
 
     /**
      * Stop transcription
@@ -49,8 +46,5 @@ interface TranscriptionApi {
      * @return [Unit]
      */
     @POST("/video/call/{type}/{id}/stop_transcription")
-    suspend fun stoptranscription(
-        @Path("type") type: String,
-        @Path("id") id: String
-    ): Unit
+    suspend fun stoptranscription(@Path("type") type: String, @Path("id") id: String): Unit
 }

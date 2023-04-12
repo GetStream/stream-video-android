@@ -17,7 +17,6 @@
 package io.getstream.video.android.xml.binding
 
 import androidx.lifecycle.LifecycleOwner
-import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CallMediaState
 import io.getstream.video.android.core.call.state.FlipCamera
 import io.getstream.video.android.core.call.state.LeaveCall
@@ -28,7 +27,6 @@ import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.xml.R
 import io.getstream.video.android.xml.widget.control.CallControlItem
 import io.getstream.video.android.xml.widget.control.CallControlsView
-import kotlinx.coroutines.flow.combine
 import io.getstream.video.android.ui.common.R as RCommon
 
 /**
@@ -51,16 +49,16 @@ public fun CallControlsView.bindView(
     fetchCallMediaState: (CallMediaState, Boolean) -> List<CallControlItem> = { mediaState, isScreenSharingActive ->
         defaultControlList(mediaState, isScreenSharingActive)
     },
-    onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
+    // onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
 ) {
     this.onCallAction = onCallAction
 
     startJob(lifecycleOwner) {
-        viewModel.callMediaState.combine(viewModel.screenSharingSessions) { mediaState, screenSharingSessions ->
-            mediaState to screenSharingSessions.firstOrNull()
-        }.collect { (mediaState, screenSharingSession) ->
-            setItems(fetchCallMediaState(mediaState, screenSharingSession != null))
-        }
+//        viewModel.callMediaState.combine(viewModel.screenSharingSessions) { mediaState, screenSharingSessions ->
+//            mediaState to screenSharingSessions.firstOrNull()
+//        }.collect { (mediaState, screenSharingSession) ->
+//            setItems(fetchCallMediaState(mediaState, screenSharingSession != null))
+//        }
     }
 }
 

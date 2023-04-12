@@ -30,16 +30,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.common.util.mockVideoTrack
+import io.getstream.video.android.common.util.MockUtils
+import io.getstream.video.android.common.util.mockParticipants
+import io.getstream.video.android.common.util.mockVideoTrackWrapper
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.internal.OverlayScreenSharingAppBar
-import io.getstream.video.android.compose.ui.components.previews.ParticipantsProvider
+import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.model.Call
-import io.getstream.video.android.core.model.CallParticipantState
 import io.getstream.video.android.core.model.ScreenSharingSession
 
 /**
@@ -56,8 +57,8 @@ import io.getstream.video.android.core.model.ScreenSharingSession
 internal fun PortraitScreenSharingContent(
     call: Call?,
     session: ScreenSharingSession,
-    participants: List<CallParticipantState>,
-    primarySpeaker: CallParticipantState?,
+    participants: List<ParticipantState>,
+    primarySpeaker: ParticipantState?,
     paddingValues: PaddingValues,
     modifier: Modifier = Modifier,
     onRender: (View) -> Unit,
@@ -84,12 +85,11 @@ internal fun PortraitScreenSharingContent(
                 onRender = onRender,
             )
 
-            if (me?.id == sharingParticipant.id) {
+            if (me?.initialUser?.id == sharingParticipant.initialUser.id) {
                 OverlayScreenSharingAppBar(sharingParticipant, onBackPressed, onCallAction)
             } else {
                 ScreenShareTooltip(
-                    modifier = Modifier
-                        .align(Alignment.TopStart),
+                    modifier = Modifier.align(Alignment.TopStart),
                     sharingParticipant = sharingParticipant
                 )
             }
@@ -109,18 +109,17 @@ internal fun PortraitScreenSharingContent(
 @Preview
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-private fun PortraitScreenSharingContentPreview(
-    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<CallParticipantState>
-) {
+private fun PortraitScreenSharingContentPreview() {
+    MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         PortraitScreenSharingContent(
             call = null,
             session = ScreenSharingSession(
-                track = callParticipants[1].videoTrack ?: mockVideoTrack,
-                participant = callParticipants[1]
+                track = mockParticipants[1].videoTrackWrapped ?: mockVideoTrackWrapper,
+                participant = mockParticipants[1]
             ),
-            participants = callParticipants,
-            primarySpeaker = callParticipants[1],
+            participants = mockParticipants,
+            primarySpeaker = mockParticipants[1],
             paddingValues = PaddingValues(0.dp),
             modifier = Modifier.fillMaxSize(),
             onRender = {},
@@ -133,18 +132,16 @@ private fun PortraitScreenSharingContentPreview(
 @Preview
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-private fun PortraitScreenSharingMyContentPreview(
-    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<CallParticipantState>
-) {
+private fun PortraitScreenSharingMyContentPreview() {
     VideoTheme {
         PortraitScreenSharingContent(
             call = null,
             session = ScreenSharingSession(
-                track = callParticipants[0].videoTrack ?: mockVideoTrack,
-                participant = callParticipants[0]
+                track = mockParticipants[0].videoTrackWrapped ?: mockVideoTrackWrapper,
+                participant = mockParticipants[0]
             ),
-            participants = callParticipants,
-            primarySpeaker = callParticipants[0],
+            participants = mockParticipants,
+            primarySpeaker = mockParticipants[0],
             paddingValues = PaddingValues(0.dp),
             modifier = Modifier.fillMaxSize(),
             onRender = {},

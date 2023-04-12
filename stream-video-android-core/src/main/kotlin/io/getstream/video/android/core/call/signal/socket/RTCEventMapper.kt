@@ -21,12 +21,11 @@ import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.ConnectionQualityChangeEvent
 import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
 import io.getstream.video.android.core.events.ErrorEvent
-import io.getstream.video.android.core.events.HealthCheckResponseEvent
 import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.ParticipantJoinedEvent
 import io.getstream.video.android.core.events.ParticipantLeftEvent
-import io.getstream.video.android.core.events.PublisherAnswerEvent
+import io.getstream.video.android.core.events.SFUHealthCheckEvent
 import io.getstream.video.android.core.events.SfuDataEvent
 import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.events.TrackPublishedEvent
@@ -39,16 +38,14 @@ public object RTCEventMapper {
     public fun mapEvent(event: SfuEvent): SfuDataEvent {
         return when {
             event.subscriber_offer != null -> SubscriberOfferEvent(event.subscriber_offer.sdp)
-            event.publisher_answer != null -> with(event.publisher_answer) {
-                PublisherAnswerEvent(sdp)
-            }
 
             event.connection_quality_changed != null -> with(event.connection_quality_changed) {
                 ConnectionQualityChangeEvent(updates = connection_quality_updates)
             }
             event.audio_level_changed != null -> AudioLevelChangedEvent(
                 event.audio_level_changed.audio_levels.associate {
-                    it.user_id to UserAudioLevel(
+                    it.session_id to UserAudioLevel(
+                        it.user_id,
                         it.is_speaking,
                         it.level
                     )
@@ -78,8 +75,8 @@ public object RTCEventMapper {
             event.participant_left != null -> with(event.participant_left) {
                 ParticipantLeftEvent(participant!!, call_cid)
             }
-            event.dominant_speaker_changed != null -> DominantSpeakerChangedEvent(event.dominant_speaker_changed.user_id)
-            event.health_check_response != null -> HealthCheckResponseEvent
+            event.dominant_speaker_changed != null -> DominantSpeakerChangedEvent(event.dominant_speaker_changed.user_id, event.dominant_speaker_changed.session_id)
+            event.health_check_response != null -> SFUHealthCheckEvent
             event.join_response != null -> with(event.join_response) {
                 JoinCallResponseEvent(call_state!!)
             }

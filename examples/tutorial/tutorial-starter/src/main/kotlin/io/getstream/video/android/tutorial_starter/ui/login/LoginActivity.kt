@@ -96,11 +96,11 @@ class LoginActivity : AppCompatActivity() {
                 modifier = Modifier.fillMaxWidth(),
                 userItems = loginItems,
                 onClick = { credentials ->
-                    val updated = loginItemsState.value.map {
-                        it.copy(isSelected = it.user.token == credentials.user.token)
-                    }
-
-                    loginItemsState.value = updated
+//                    val updated = loginItemsState.value.map {
+//                        it.copy(isSelected = it.user.token == credentials.user.token)
+//                    }
+//
+//                    loginItemsState.value = updated
                 }
             )
 

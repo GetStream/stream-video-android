@@ -32,48 +32,49 @@ import retrofit2.http.Path
 interface CallTypesApi {
     /**
      * Create Call Type
-     * * Responses:
+     *
+     * Responses:
      *  - 201: Successful response
      *  - 400: Bad request
      *  - 429: Too many requests
      *
-     * @param createCallTypeRequest * @return [CreateCallTypeResponse]
+     * @param createCallTypeRequest
+     * @return [CreateCallTypeResponse]
      */
     @POST("/video/calltypes")
-    suspend fun createCallType(
-        @Body createCallTypeRequest: CreateCallTypeRequest
-    ): CreateCallTypeResponse
+    suspend fun createCallType(@Body createCallTypeRequest: CreateCallTypeRequest): CreateCallTypeResponse
 
     /**
      * Delete Call Type
-     * * Responses:
+     *
+     * Responses:
      *  - 400: Bad request
      *  - 429: Too many requests
      *
-     * @param name * @return [Unit]
+     * @param name
+     * @return [Unit]
      */
     @DELETE("/video/calltypes/{name}")
-    suspend fun deleteCallType(
-        @Path("name") name: String
-    ): Unit
+    suspend fun deleteCallType(@Path("name") name: String): Unit
 
     /**
      * Get Call Type
-     * * Responses:
+     *
+     * Responses:
      *  - 200: Successful response
      *  - 400: Bad request
      *  - 429: Too many requests
      *
-     * @param name * @return [GetCallTypeResponse]
+     * @param name
+     * @return [GetCallTypeResponse]
      */
     @GET("/video/calltypes/{name}")
-    suspend fun getCallType(
-        @Path("name") name: String
-    ): GetCallTypeResponse
+    suspend fun getCallType(@Path("name") name: String): GetCallTypeResponse
 
     /**
      * List Call Type
-     * * Responses:
+     *
+     * Responses:
      *  - 200: Successful response
      *  - 400: Bad request
      *  - 429: Too many requests
@@ -85,12 +86,15 @@ interface CallTypesApi {
 
     /**
      * Update Call Type
-     * * Responses:
+     *
+     * Responses:
      *  - 201: Successful response
      *  - 400: Bad request
      *  - 429: Too many requests
      *
-     * @param name * @param updateCallTypeRequest * @return [UpdateCallTypeResponse]
+     * @param name
+     * @param updateCallTypeRequest
+     * @return [UpdateCallTypeResponse]
      */
     @PUT("/video/calltypes/{name}")
     suspend fun updateCallType(

@@ -41,6 +41,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -221,10 +222,10 @@ class HomeActivity : AppCompatActivity() {
         ) {
             UserIcon()
 
-            val user = streamVideo.getUser()
+            val user by streamVideo.state.user.collectAsState()
 
-            val name = user.name.ifEmpty {
-                user.id
+            val name = user?.name?.ifEmpty {
+                user?.id
             }
 
             Text(
@@ -232,7 +233,7 @@ class HomeActivity : AppCompatActivity() {
                     .padding(horizontal = 16.dp)
                     .align(CenterVertically),
                 color = VideoTheme.colors.textHighEmphasis,
-                text = name,
+                text = name ?: "Missing name",
                 overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.Center
             )

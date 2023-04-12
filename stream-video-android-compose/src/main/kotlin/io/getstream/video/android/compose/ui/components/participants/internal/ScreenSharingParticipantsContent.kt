@@ -26,10 +26,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.ui.components.call.controls.internal.DefaultCallControlsContent
+import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CallMediaState
-import io.getstream.video.android.core.model.Call
-import io.getstream.video.android.core.model.CallParticipantState
 import io.getstream.video.android.core.model.ScreenSharingSession
 
 /**
@@ -52,12 +52,11 @@ import io.getstream.video.android.core.model.ScreenSharingSession
 internal fun ScreenSharingCallParticipantsContent(
     call: Call,
     session: ScreenSharingSession,
-    participants: List<CallParticipantState>,
+    participants: List<ParticipantState>,
     callMediaState: CallMediaState,
     onCallAction: (CallAction) -> Unit,
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues = PaddingValues(0.dp),
-    isFullscreen: Boolean = false,
     onRender: (View) -> Unit = {},
     onBackPressed: () -> Unit = {},
     callControlsContent: @Composable () -> Unit = {
@@ -70,14 +69,14 @@ internal fun ScreenSharingCallParticipantsContent(
 ) {
     val configuration = LocalConfiguration.current
     val orientation = configuration.orientation
-    val primarySpeaker by call.primarySpeaker.collectAsState(initial = null)
+    val screenSharingSession by call.state.screenSharingSession.collectAsState(initial = null)
 
     if (orientation == ORIENTATION_PORTRAIT) {
         PortraitScreenSharingContent(
             call = call,
             session = session,
             participants = participants,
-            primarySpeaker = primarySpeaker,
+            primarySpeaker = screenSharingSession?.participant,
             paddingValues = paddingValues,
             modifier = modifier,
             onRender = onRender,
@@ -89,7 +88,7 @@ internal fun ScreenSharingCallParticipantsContent(
             call = call,
             session = session,
             participants = participants,
-            primarySpeaker = primarySpeaker,
+            primarySpeaker = screenSharingSession?.participant,
             paddingValues = paddingValues,
             modifier = modifier,
             onRender = onRender,

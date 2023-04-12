@@ -20,6 +20,7 @@ package io.getstream.video.android.core.model
  * Represents the audio level and if a user is speaking.
  */
 public data class UserAudioLevel(
+    val userId: String,
     val isSpeaking: Boolean,
     val audioLevel: Float
 )

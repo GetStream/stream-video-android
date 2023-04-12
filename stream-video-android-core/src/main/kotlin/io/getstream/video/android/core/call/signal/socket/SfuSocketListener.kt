@@ -19,6 +19,7 @@ package io.getstream.video.android.core.call.signal.socket
 import io.getstream.result.Error
 import io.getstream.video.android.core.errors.DisconnectCause
 import io.getstream.video.android.core.events.ConnectedEvent
+import io.getstream.video.android.core.events.SFUConnectedEvent
 import io.getstream.video.android.core.events.SfuDataEvent
 
 /**
@@ -38,7 +39,7 @@ public interface SfuSocketListener {
      *
      * @param event The [ConnectedEvent] that contains the ID of the client socket connection.
      */
-    public fun onConnected(event: ConnectedEvent) {
+    public fun onConnected(event: SFUConnectedEvent) {
     }
 
     /**

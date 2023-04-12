@@ -19,10 +19,6 @@ package io.getstream.video.android.xml.binding
 import androidx.lifecycle.LifecycleOwner
 import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.xml.widget.participant.CallParticipantView
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.onStart
 
 /**
  * Binds [CallParticipantView] with [CallViewModel], updating the view's state based on data provided by the ViewModel,
@@ -40,20 +36,20 @@ public fun CallParticipantView.bindPictureInPictureView(
     lifecycleOwner: LifecycleOwner,
 ) {
     startJob(lifecycleOwner) {
-        viewModel.callState.filterNotNull().collectLatest { call ->
-            setRendererInitializer { videoRenderer, streamId, trackType, onRender ->
-                call.initRenderer(videoRenderer, streamId, trackType, onRender)
-            }
-        }
+//        viewModel.callState.filterNotNull().collectLatest { call ->
+//            setRendererInitializer { videoRenderer, streamId, trackType, onRender ->
+//                call.initRenderer(videoRenderer, streamId, trackType, onRender)
+//            }
+//        }
     }
 
     startJob(lifecycleOwner) {
-        viewModel.primarySpeaker.combine(viewModel.localParticipant) { primarySpeaker, localParticipant ->
-            primarySpeaker to localParticipant
-        }.onStart {
-            emit(viewModel.primarySpeaker.value to viewModel.localParticipant.value)
-        }.collectLatest { (primarySpeaker, localParticipant) ->
-            setParticipant(primarySpeaker ?: localParticipant ?: return@collectLatest)
-        }
+//        viewModel.primarySpeaker.combine(viewModel.localParticipant) { primarySpeaker, localParticipant ->
+//            primarySpeaker to localParticipant
+//        }.onStart {
+//            emit(viewModel.primarySpeaker.value to viewModel.localParticipant.value)
+//        }.collectLatest { (primarySpeaker, localParticipant) ->
+//            setParticipant(primarySpeaker ?: localParticipant ?: return@collectLatest)
+//        }
     }
 }

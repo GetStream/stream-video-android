@@ -20,12 +20,14 @@ import android.view.View
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import io.getstream.video.android.compose.ui.components.connection.ConnectionQualityIndicator
 import io.getstream.video.android.compose.ui.components.participants.ParticipantLabel
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
-import io.getstream.video.android.core.model.Call
+import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.model.ScreenSharingSession
 import stream.video.sfu.models.TrackType
 
@@ -54,7 +56,7 @@ public fun ScreenShareContent(
                 .fillMaxSize()
                 .align(Alignment.Center),
             call = call,
-            videoTrack = session.track,
+            videoTrackWrapper = session.track,
             onRender = onRender,
             trackType = TrackType.TRACK_TYPE_SCREEN_SHARE,
             sessionId = session.participant.sessionId
@@ -63,8 +65,9 @@ public fun ScreenShareContent(
         ParticipantLabel(screenShareParticipant, labelPosition)
 
         if (isShowConnectionQualityIndicator) {
+            val connectionQuality by screenShareParticipant.connectionQuality.collectAsState()
             ConnectionQualityIndicator(
-                connectionQuality = screenShareParticipant.connectionQuality,
+                connectionQuality = connectionQuality,
                 modifier = Modifier.align(Alignment.BottomEnd)
             )
         }

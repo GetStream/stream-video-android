@@ -20,6 +20,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.IntSize
@@ -27,7 +29,8 @@ import androidx.compose.ui.unit.dp
 import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.common.util.mockParticipant
 import io.getstream.video.android.common.util.mockParticipantList
-import io.getstream.video.android.common.util.mockVideoTrack
+import io.getstream.video.android.common.util.mockParticipants
+import io.getstream.video.android.common.util.mockVideoTrackWrapper
 import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.state.ui.internal.InviteUserItemState
 import io.getstream.video.android.compose.state.ui.internal.ParticipantList
@@ -47,7 +50,6 @@ import io.getstream.video.android.compose.ui.components.participants.internal.Po
 import io.getstream.video.android.core.model.CallStatus
 import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.core.model.ScreenSharingSession
-import io.getstream.video.android.core.model.toUser
 import org.junit.Rule
 import org.junit.Test
 
@@ -71,12 +73,13 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
             ParticipantInformation(
                 callStatus = CallStatus.Incoming,
                 participants = mockParticipantList.map {
+                    val user by it.user.collectAsState()
                     CallUser(
-                        id = it.id,
-                        name = it.name,
-                        role = it.role,
+                        id = user.id,
+                        name = user.name,
+                        role = user.role,
                         state = null,
-                        imageUrl = it.profileImageURL ?: "",
+                        imageUrl = user.imageUrl,
                         createdAt = null,
                         updatedAt = null,
                         teams = emptyList()
@@ -90,7 +93,7 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
     fun `snapshot InviteUserList composable`() {
         snapshotWithDarkMode {
             InviteUserList(
-                mockParticipantList.map { InviteUserItemState(it.toUser()) },
+                mockParticipantList.map { InviteUserItemState(it.user.value) },
                 onUserSelected = {}
             )
         }
@@ -181,14 +184,15 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
+            val participants = mockParticipants
 
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.appBackground)
             ) {
                 PortraitParticipants(
                     call = null,
-                    primarySpeaker = mockParticipantList[0],
-                    callParticipants = mockParticipantList.take(1),
+                    primarySpeaker = participants[0],
+                    callParticipants = participants.take(1),
                     modifier = Modifier.fillMaxSize(),
                     paddingValues = PaddingValues(0.dp),
                     parentSize = IntSize(screenWidth, screenHeight)
@@ -203,14 +207,15 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
+            val participants = mockParticipants
 
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.appBackground)
             ) {
                 PortraitParticipants(
                     call = null,
-                    primarySpeaker = mockParticipantList[0],
-                    callParticipants = mockParticipantList.take(2),
+                    primarySpeaker = participants[0],
+                    callParticipants = participants.take(2),
                     modifier = Modifier.fillMaxSize(),
                     paddingValues = PaddingValues(0.dp),
                     parentSize = IntSize(screenWidth, screenHeight)
@@ -225,14 +230,15 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
+            val participants = mockParticipants
 
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.appBackground)
             ) {
                 PortraitParticipants(
                     call = null,
-                    primarySpeaker = mockParticipantList[0],
-                    callParticipants = mockParticipantList.take(3),
+                    primarySpeaker = participants[0],
+                    callParticipants = participants.take(3),
                     modifier = Modifier.fillMaxSize(),
                     paddingValues = PaddingValues(0.dp),
                     parentSize = IntSize(screenWidth, screenHeight)
@@ -247,14 +253,15 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
+            val participants = mockParticipants
 
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.appBackground)
             ) {
                 PortraitParticipants(
                     call = null,
-                    primarySpeaker = mockParticipantList[0],
-                    callParticipants = mockParticipantList.take(4),
+                    primarySpeaker = participants[0],
+                    callParticipants = participants.take(4),
                     modifier = Modifier.fillMaxSize(),
                     paddingValues = PaddingValues(0.dp),
                     parentSize = IntSize(screenWidth, screenHeight)
@@ -269,14 +276,15 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
+            val participants = mockParticipants
 
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.appBackground)
             ) {
                 PortraitParticipants(
                     call = null,
-                    primarySpeaker = mockParticipantList[0],
-                    callParticipants = mockParticipantList.take(5),
+                    primarySpeaker = participants[0],
+                    callParticipants = participants.take(5),
                     modifier = Modifier.fillMaxSize(),
                     paddingValues = PaddingValues(0.dp),
                     parentSize = IntSize(screenWidth, screenHeight)
@@ -291,14 +299,15 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
+            val participants = mockParticipants
 
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.appBackground)
             ) {
                 PortraitParticipants(
                     call = null,
-                    primarySpeaker = mockParticipantList[0],
-                    callParticipants = mockParticipantList.take(6),
+                    primarySpeaker = participants[0],
+                    callParticipants = participants.take(6),
                     modifier = Modifier.fillMaxSize(),
                     paddingValues = PaddingValues(0.dp),
                     parentSize = IntSize(screenWidth, screenHeight)
@@ -313,16 +322,16 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
             PortraitScreenSharingContent(
                 call = null,
                 session = ScreenSharingSession(
-                    track = mockParticipantList[1].videoTrack ?: mockVideoTrack,
+                    track = mockParticipantList[1].videoTrackWrapped ?: mockVideoTrackWrapper,
                     participant = mockParticipantList[1]
                 ),
                 participants = mockParticipantList,
                 primarySpeaker = mockParticipantList[1],
                 paddingValues = PaddingValues(0.dp),
                 modifier = Modifier.fillMaxSize(),
-                onRender = {},
                 onBackPressed = {},
-                onCallAction = {}
+                onCallAction = {},
+                onRender = {}
             )
         }
     }
@@ -333,7 +342,7 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
             PortraitScreenSharingContent(
                 call = null,
                 session = ScreenSharingSession(
-                    track = mockParticipantList[0].videoTrack ?: mockVideoTrack,
+                    track = mockParticipantList[0].videoTrackWrapped ?: mockVideoTrackWrapper,
                     participant = mockParticipantList[0]
                 ),
                 participants = mockParticipantList,

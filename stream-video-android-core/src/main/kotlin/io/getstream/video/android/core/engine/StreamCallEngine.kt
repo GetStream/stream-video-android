@@ -17,6 +17,7 @@
 package io.getstream.video.android.core.engine
 
 import io.getstream.result.Error
+import io.getstream.video.android.core.events.CoordinatorEvent
 import io.getstream.video.android.core.events.SfuDataEvent
 import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.model.CallEventType
@@ -36,7 +37,7 @@ public interface StreamCallEngine {
     /**
      * Called when [VideoEvent] received from Coordinator.
      */
-    public fun onCoordinatorEvent(event: VideoEvent)
+    public fun onCoordinatorEvent(event: CoordinatorEvent)
 
     /**
      * Called when [SfuDataEvent] received from SFU.

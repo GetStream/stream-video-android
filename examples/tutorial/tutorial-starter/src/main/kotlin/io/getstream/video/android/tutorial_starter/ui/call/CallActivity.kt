@@ -19,10 +19,6 @@ package io.getstream.video.android.tutorial_starter.ui.call
 import android.content.Context
 import io.getstream.video.android.compose.ui.AbstractComposeCallActivity
 import io.getstream.video.android.core.StreamVideo
-import io.getstream.video.android.core.user.EmptyUsersProvider
-import io.getstream.video.android.core.viewmodel.CallViewModelFactory
-import io.getstream.video.android.tutorial_starter.BuildConfig
-import io.getstream.video.android.tutorial_starter.user.FakeUsersProvider
 import io.getstream.video.android.tutorial_starter.videoApp
 
 class CallActivity : AbstractComposeCallActivity() {
@@ -31,15 +27,4 @@ class CallActivity : AbstractComposeCallActivity() {
      * Provides the StreamVideo instance through the videoApp.
      */
     override fun getStreamVideo(context: Context): StreamVideo = context.videoApp.streamVideo
-
-    /**
-     * Provides a custom factory for the ViewModel, that provides fake users for invites.
-     */
-    override fun getCallViewModelFactory(): CallViewModelFactory {
-        return CallViewModelFactory(
-            streamVideo = getStreamVideo(this),
-            permissionManager = getPermissionManager(),
-            usersProvider = if (BuildConfig.DEBUG) FakeUsersProvider() else EmptyUsersProvider
-        )
-    }
 }

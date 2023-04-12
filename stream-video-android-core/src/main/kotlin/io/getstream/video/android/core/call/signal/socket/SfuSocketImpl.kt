@@ -22,8 +22,8 @@ import androidx.annotation.VisibleForTesting
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.video.android.core.errors.DisconnectCause
-import io.getstream.video.android.core.events.ConnectedEvent
-import io.getstream.video.android.core.events.HealthCheckResponseEvent
+import io.getstream.video.android.core.events.SFUConnectedEvent
+import io.getstream.video.android.core.events.SFUHealthCheckEvent
 import io.getstream.video.android.core.events.SfuDataEvent
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.socket.internal.EventsParser
@@ -115,6 +115,7 @@ internal class SfuSocketImpl(
                     callListeners { it.onDisconnected(DisconnectCause.ConnectionReleased) }
                 }
                 is State.DisconnectedTemporarily -> {
+                    logger.e { "[onStateChanged] DisconnectedTemporarily: ${newState.error}" }
                     shutdownSocketConnection()
                     healthMonitor.onDisconnected()
                     callListeners { it.onDisconnected(DisconnectCause.Error(newState.error)) }
@@ -138,6 +139,7 @@ internal class SfuSocketImpl(
     }
 
     override fun addListener(sfuSocketListener: SfuSocketListener) {
+
         synchronized(listeners) {
             listeners.add(sfuSocketListener)
         }
@@ -176,15 +178,20 @@ internal class SfuSocketImpl(
         state = State.DisconnectedByRequest
     }
 
-    override fun onConnectionResolved(event: ConnectedEvent) {
+    override fun onConnectionResolved(event: SFUConnectedEvent) {
         logger.i { "[onConnectionResolved] event: $event" }
         state = State.Connected(event)
+        callListeners { listener ->
+            logger.d { "[onEvent] Sfu Event: $event" }
+            listener.onEvent(event)
+        }
     }
 
     override fun onEvent(event: SfuDataEvent) {
+        logger.i { "received event $event" }
         healthMonitor.ack()
         callListeners { listener ->
-            if (event !is HealthCheckResponseEvent) {
+            if (event !is SFUHealthCheckEvent) {
                 logger.d { "[onEvent] Sfu Event: $event" }
                 listener.onEvent(event)
             }
@@ -199,6 +206,7 @@ internal class SfuSocketImpl(
 
     private fun setupSocket(connectionConf: SfuSocketFactory.ConnectionConf?) {
         logger.d { "[setupSocket] conf: $connectionConf" }
+        val sfuSocket = this
         state = when (connectionConf) {
             null -> State.DisconnectedPermanently(null)
             else -> {
@@ -237,7 +245,7 @@ internal class SfuSocketImpl(
     private fun callListeners(call: (SfuSocketListener) -> Unit) {
         synchronized(listeners) {
             listeners.forEach { listener ->
-                eventUiHandler.post { call(listener) }
+                call(listener)
             }
         }
     }
@@ -248,7 +256,7 @@ internal class SfuSocketImpl(
             override fun toString(): String = "Connecting"
         }
 
-        data class Connected(val event: ConnectedEvent) : State()
+        data class Connected(val event: SFUConnectedEvent) : State()
         object NetworkDisconnected : State() {
             override fun toString(): String = "NetworkDisconnected"
         }

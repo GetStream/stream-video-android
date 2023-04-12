@@ -100,7 +100,7 @@ class LoginActivity : AppCompatActivity() {
                 userItems = loginItems,
                 onClick = { credentials ->
                     val updated = loginItemsState.value.map {
-                        it.copy(isSelected = it.user.token == credentials.user.token)
+                        it
                     }
 
                     loginItemsState.value = updated

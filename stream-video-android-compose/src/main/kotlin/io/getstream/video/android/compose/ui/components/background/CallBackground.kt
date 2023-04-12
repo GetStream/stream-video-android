@@ -32,12 +32,10 @@ import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.animation.crossfade.CrossfadePlugin
 import com.skydoves.landscapist.coil.CoilImage
 import com.skydoves.landscapist.components.rememberImageComponent
-import io.getstream.video.android.common.util.mockUsers
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.AvatarImagePreview
 import io.getstream.video.android.core.model.CallType
 import io.getstream.video.android.core.model.CallUser
-import io.getstream.video.android.core.model.CallUserState
 import io.getstream.video.android.ui.common.R
 
 /**
@@ -133,20 +131,7 @@ private fun DefaultCallBackground() {
 private fun CallBackgroundPreview() {
     VideoTheme {
         CallBackground(
-            participants = listOf(
-                mockUsers.first().let {
-                    CallUser(
-                        id = it.id,
-                        name = it.name,
-                        imageUrl = it.profileImageURL ?: "",
-                        role = it.role,
-                        teams = emptyList(),
-                        updatedAt = null,
-                        createdAt = null,
-                        state = CallUserState("", false, false, false)
-                    )
-                }
-            ),
+            participants = listOf(),
             callType = CallType.VIDEO, isIncoming = true
         ) {
             Box(modifier = Modifier.align(Alignment.Center)) {

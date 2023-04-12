@@ -17,16 +17,13 @@
 package io.getstream.video.android.xml
 
 import android.content.res.Configuration
-import android.view.Menu
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
-import androidx.core.content.ContextCompat
 import io.getstream.video.android.common.AbstractCallActivity
 import io.getstream.video.android.xml.binding.bindView
 import io.getstream.video.android.xml.utils.extensions.orientationChanged
 import io.getstream.video.android.xml.widget.callcontainer.CallContainerView
-import io.getstream.video.android.ui.common.R as RCommon
 
 public abstract class AbstractXmlCallActivity : AbstractCallActivity() {
 
@@ -43,7 +40,7 @@ public abstract class AbstractXmlCallActivity : AbstractCallActivity() {
         callContent.bindView(
             viewModel = callViewModel,
             lifecycleOwner = this,
-            onCallAction = { handleCallAction(it) },
+            // onCallAction = { handleCallAction(it) },
             onBackPressed = { handleBackPressed() },
             onIdle = { finish() }
         )
@@ -64,13 +61,13 @@ public abstract class AbstractXmlCallActivity : AbstractCallActivity() {
         )
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.stream_video_call_menu, menu)
-        menu?.findItem(R.id.callParticipants)?.let {
-            it.icon?.setTint(ContextCompat.getColor(this, RCommon.color.stream_video_text_high_emphasis))
-        }
-        return true
-    }
+//    private fun onCreateOptionsMenu(menu: Menu?): Boolean {
+//        menuInflater.inflate(R.menu.stream_video_call_menu, menu)
+//        menu?.findItem(R.id.callParticipants)?.let {
+//            it.icon?.setTint(ContextCompat.getColor(this, RCommon.color.stream_text_high_emphasis))
+//        }
+//        return true
+//    }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)

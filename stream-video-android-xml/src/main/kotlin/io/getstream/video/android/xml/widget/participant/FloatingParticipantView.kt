@@ -19,7 +19,7 @@ package io.getstream.video.android.xml.widget.participant
 import android.content.Context
 import android.util.AttributeSet
 import androidx.cardview.widget.CardView
-import io.getstream.video.android.core.model.CallParticipantState
+import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.xml.databinding.StreamVideoViewFloatingParticipantBinding
 import io.getstream.video.android.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.xml.utils.extensions.streamThemeInflater
@@ -57,7 +57,7 @@ public class FloatingParticipantView : CardView, JobHolder {
      *
      * @param participant The call participant whose video we wish to show.
      */
-    public fun setParticipant(participant: CallParticipantState) {
+    public fun setParticipant(participant: ParticipantState) {
         binding.localParticipant.setParticipant(participant)
     }
 

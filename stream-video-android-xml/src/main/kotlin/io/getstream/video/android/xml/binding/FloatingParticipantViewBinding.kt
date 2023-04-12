@@ -19,8 +19,6 @@ package io.getstream.video.android.xml.binding
 import androidx.lifecycle.LifecycleOwner
 import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.xml.widget.participant.FloatingParticipantView
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.filterNotNull
 
 /**
  * Binds [FloatingParticipantView] with [CallViewModel], updating the view's state based on data provided by the
@@ -38,16 +36,16 @@ public fun FloatingParticipantView.bindView(
     lifecycleOwner: LifecycleOwner,
 ) {
     startJob(lifecycleOwner) {
-        viewModel.callState.filterNotNull().collectLatest { call ->
-            setRendererInitializer { videoRenderer, streamId, trackType, onRender ->
-                call.initRenderer(videoRenderer, streamId, trackType, onRender)
-            }
-        }
+//        viewModel.callState.filterNotNull().collectLatest { call ->
+//            setRendererInitializer { videoRenderer, streamId, trackType, onRender ->
+//                call.initRenderer(videoRenderer, streamId, trackType, onRender)
+//            }
+//        }
     }
 
     startJob(lifecycleOwner) {
-        viewModel.localParticipant.filterNotNull().collectLatest {
-            setParticipant(it)
-        }
+//        viewModel.localParticipant.filterNotNull().collectLatest {
+//            setParticipant(it)
+//        }
     }
 }

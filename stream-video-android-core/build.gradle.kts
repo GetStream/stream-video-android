@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 import io.getstream.video.android.Configuration
+import java.io.FileInputStream
+import java.util.*
 
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
@@ -53,6 +55,13 @@ android {
         consumerProguardFiles("consumer-proguard-rules.pro")
     }
 
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+            isReturnDefaultValues = true
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
@@ -67,6 +76,19 @@ android {
         }
     }
 
+    val envProps: File = rootProject.file(".env.properties")
+    if (envProps.exists()) {
+        val properties = Properties()
+        properties.load(FileInputStream(envProps))
+        buildTypes.forEach { buildType ->
+            properties
+                .filterKeys { "$it".startsWith("CORE") }
+                .forEach {
+                    buildType.buildConfigField("String", "${it.key}", "\"${it.value}\"")
+                }
+        }
+    }
+
     resourcePrefix = "stream_video_"
 
     sourceSets.configureEach {
@@ -74,7 +96,12 @@ android {
     }
 
     compileOptions {
-        isCoreLibraryDesugaringEnabled = true
+        isCoreLibraryDesugaringEnabled = false
+    }
+
+    packagingOptions {
+        exclude("META-INF/LICENSE.md")
+        exclude("META-INF/LICENSE-notice.md")
     }
 }
 
@@ -107,6 +134,8 @@ dependencies {
     implementation(libs.moshi)
     implementation(libs.moshi.kotlin)
     implementation(libs.moshi.adapters)
+    //implementation(libs.desugar)
+
 
     // Stream
     implementation(libs.stream.log)
@@ -115,6 +144,20 @@ dependencies {
 
     // unit test
     testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.test.junit)
+    testImplementation(libs.truth)
+    testImplementation(libs.mockk)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.test.core)
+    testImplementation(libs.androidx.test.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.kotlin.test.junit)
+
     androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.junit)
+    androidTestImplementation(libs.truth)
+    androidTestImplementation(libs.mockk)
+    androidTestImplementation(libs.androidx.test.core)
+    androidTestImplementation(libs.androidx.test.junit)
+    androidTestImplementation(libs.kotlinx.coroutines.test)
+    androidTestImplementation(libs.kotlin.test.junit)
 }

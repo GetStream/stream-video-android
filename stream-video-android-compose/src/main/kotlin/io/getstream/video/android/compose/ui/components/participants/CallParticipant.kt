@@ -32,6 +32,8 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.BottomEnd
 import androidx.compose.ui.Alignment.Companion.BottomStart
@@ -41,24 +43,23 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.common.model.getSoundIndicatorState
-import io.getstream.video.android.common.util.mockVideoTrack
-import io.getstream.video.android.compose.R
+import io.getstream.video.android.common.util.MockUtils
+import io.getstream.video.android.common.util.mockParticipants
+import io.getstream.video.android.common.util.mockVideoTrackWrapper
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.audio.SoundIndicator
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.compose.ui.components.connection.ConnectionQualityIndicator
-import io.getstream.video.android.compose.ui.components.previews.ParticipantsProvider
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
-import io.getstream.video.android.core.model.Call
-import io.getstream.video.android.core.model.CallParticipantState
-import io.getstream.video.android.core.model.toUser
+import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.ParticipantState
 import stream.video.sfu.models.TrackType
 
 /**
@@ -74,7 +75,7 @@ import stream.video.sfu.models.TrackType
 @Composable
 public fun CallParticipant(
     call: Call?,
-    participant: CallParticipantState,
+    participant: ParticipantState,
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues = PaddingValues(0.dp),
     labelPosition: Alignment = BottomStart,
@@ -114,8 +115,9 @@ public fun CallParticipant(
         ParticipantLabel(participant, labelPosition)
 
         if (isShowConnectionQualityIndicator) {
+            val connectionQuality by participant.connectionQuality.collectAsState()
             ConnectionQualityIndicator(
-                connectionQuality = participant.connectionQuality,
+                connectionQuality = connectionQuality,
                 modifier = Modifier.align(BottomEnd)
             )
         }
@@ -125,10 +127,10 @@ public fun CallParticipant(
 @Composable
 internal fun ParticipantVideo(
     call: Call?,
-    participant: CallParticipantState,
+    participant: ParticipantState,
     onRender: (View) -> Unit
 ) {
-    val track = participant.videoTrack
+    val track = participant.videoTrackWrapped
 
     val isVideoEnabled = try {
         track?.video?.enabled() == true
@@ -140,7 +142,7 @@ internal fun ParticipantVideo(
         VideoRenderer(
             modifier = Modifier.fillMaxSize(),
             call = call,
-            videoTrack = track ?: mockVideoTrack,
+            videoTrackWrapper = track ?: mockVideoTrackWrapper,
             sessionId = participant.sessionId,
             onRender = onRender,
             trackType = TrackType.TRACK_TYPE_VIDEO
@@ -148,10 +150,10 @@ internal fun ParticipantVideo(
         return
     }
 
-    if (track != null && isVideoEnabled && TrackType.TRACK_TYPE_VIDEO in participant.publishedTracks) {
+    if (track != null && isVideoEnabled) {
         VideoRenderer(
             call = call,
-            videoTrack = track,
+            videoTrackWrapper = track,
             sessionId = participant.sessionId,
             onRender = onRender,
             trackType = TrackType.TRACK_TYPE_VIDEO
@@ -159,24 +161,26 @@ internal fun ParticipantVideo(
     } else {
         UserAvatar(
             modifier = Modifier.onSizeChanged {
-                call.updateParticipantTrackSize(
+                call.state.updateParticipantTrackSize(
                     participant.sessionId, it.width, it.height
                 )
             },
-            shape = RectangleShape, user = participant.toUser()
+            shape = RectangleShape,
+            user = participant.user.collectAsState().value
         )
     }
 }
 
 @Composable
 internal fun BoxScope.ParticipantLabel(
-    participant: CallParticipantState,
+    participant: ParticipantState,
     labelPosition: Alignment
 ) {
+    val userNameOrId by participant.userNameOrId.collectAsState()
     val nameLabel = if (participant.isLocal) {
         stringResource(id = io.getstream.video.android.ui.common.R.string.stream_video_myself)
     } else {
-        participant.name.ifEmpty { participant.id }
+        userNameOrId
     }
 
     Row(
@@ -218,13 +222,12 @@ internal fun BoxScope.ParticipantLabel(
 
 @Preview
 @Composable
-private fun CallParticipantPreview(
-    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<CallParticipantState>
-) {
+private fun CallParticipantPreview() {
+    MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         CallParticipant(
             call = null,
-            participant = callParticipants[1],
+            participant = mockParticipants[1],
             isFocused = true
         )
     }
@@ -232,13 +235,12 @@ private fun CallParticipantPreview(
 
 @Preview
 @Composable
-private fun ParticipantLabelPreview(
-    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<CallParticipantState>
-) {
+private fun ParticipantLabelPreview() {
+    MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         Box {
             ParticipantLabel(
-                participant = callParticipants[1],
+                participant = mockParticipants[1],
                 BottomStart,
             )
         }
@@ -247,13 +249,12 @@ private fun ParticipantLabelPreview(
 
 @Preview
 @Composable
-private fun ParticipantVideoPreview(
-    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<CallParticipantState>
-) {
+private fun ParticipantVideoPreview() {
+    MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         ParticipantVideo(
             call = null,
-            participant = callParticipants[1],
+            participant = mockParticipants[1],
         ) {}
     }
 }

@@ -16,109 +16,125 @@
 
 package io.getstream.video.android.core
 
+import android.app.Notification
 import android.content.Context
 import androidx.lifecycle.ProcessLifecycleOwner
 import io.getstream.android.push.PushDeviceGenerator
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
-import io.getstream.video.android.core.engine.StreamCallEngine
-import io.getstream.video.android.core.engine.StreamCallEngineImpl
-import io.getstream.video.android.core.input.CallAndroidInput
-import io.getstream.video.android.core.input.CallAndroidInputLauncher
-import io.getstream.video.android.core.input.internal.DefaultCallAndroidInputLauncher
-import io.getstream.video.android.core.input.internal.StreamVideoStateLauncher
-import io.getstream.video.android.core.internal.module.CallCoordinatorClientModule
-import io.getstream.video.android.core.internal.module.HttpModule
-import io.getstream.video.android.core.internal.module.VideoModule
+import io.getstream.video.android.core.filter.AudioFilter
+import io.getstream.video.android.core.filter.VideoFilter
+import io.getstream.video.android.core.internal.module.ConnectionModule
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.ApiKey
 import io.getstream.video.android.core.model.User
+import io.getstream.video.android.core.model.UserType
 import io.getstream.video.android.core.user.UserPreferencesManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
+/**
+ * The StreamVideoBuilder is used to create a new instance of the StreamVideoClient.
+ *
+ * @sample
+ * val client = StreamVideoBuilder(
+ *      context = context,
+ *      apiKey = apiKey,
+ *      geo = GEO.GlobalEdgeNetwork,
+ *      user,
+ *      token,
+ *      loggingLevel = LoggingLevel.BODY
+ *  )
+ *
+ */
 public class StreamVideoBuilder(
     private val context: Context,
-    private val user: User,
+    /** Your Stream API Key, you can find it in the dashboard */
     private val apiKey: ApiKey,
-    private val config: StreamVideoConfig = StreamVideoConfigDefault,
-    private val androidInputs: Set<CallAndroidInput> = emptySet(),
-    private val inputLauncher: CallAndroidInputLauncher = DefaultCallAndroidInputLauncher,
-    private val loggingLevel: LoggingLevel = LoggingLevel.NONE,
-    private inline val callEngineBuilder: ((CoroutineScope) -> StreamCallEngine)? = null,
+    /** Your GEO routing policy, supports geofencing for privacy concerns */
+    private val geo: GEO = GEO.GlobalEdgeNetwork,
+    /** The user object, can be a regular user, guest user or anonymous */
+    private val user: User,
+    /** The token for this user generated using your API secret on your server */
+    private val userToken: String = "",
+    /** If a token is expired, the token provider makes a request to your backend for a new token */
+    private val tokenProvider: ((type: TokenType, user: User?, call: Call?) -> String)? = null,
+    /** Audio filters enable you to add custom effects to your audio before its send to the server */
+    private val audioFilters: List<AudioFilter> = emptyList(),
+    /** Video filters enable you to change the video before it's send. */
+    private val videoFilters: List<VideoFilter> = emptyList(),
+    /** Connection timeout in seconds */
+    private val connectionTimeoutInMs: Long = 10000,
+    /** Logging level */
+    private val loggingLevel: LoggingLevel = LoggingLevel.BASIC,
+    /** Overwrite the default notification logic for incoming calls */
+    private val ringNotification: ((call: Call) -> Notification?)? = null,
+    /** Support for different push providers */
     private val pushDeviceGenerators: List<PushDeviceGenerator> = emptyList(),
+    /** Enable push notifications if you want to receive calls etc */
+    private val enablePush: Boolean = false,
 ) {
+    /** URL overwrite to allow for testing against a local instance of video */
+    var videoDomain: String = "video.stream-io-api.com"
 
     public fun build(): StreamVideo {
         val lifecycle = ProcessLifecycleOwner.get().lifecycle
+        val scope = CoroutineScope(DispatcherProvider.IO)
 
-        if (apiKey.isBlank() ||
-            user.id.isBlank() ||
-            user.token.isBlank()
-        ) throw IllegalArgumentException("The API key, user ID and token cannot be empty!")
+        if (apiKey.isBlank()
+        ) throw IllegalArgumentException("The API key can not be empty")
 
+        if (userToken.isBlank() && tokenProvider == null && user.type == UserType.Authenticated) throw IllegalArgumentException("Either a user token or a token provider must be provided")
+
+        // TODO: Don't user userpreference manager
         val preferences = UserPreferencesManager.initialize(context).apply {
             storeUserCredentials(user)
             storeApiKey(apiKey)
-        }
-
-        val httpModule = HttpModule.getOrCreate(loggingLevel.httpLoggingLevel, preferences)
-
-        val module = VideoModule(
-            appContext = context,
-            preferences = preferences
-        )
-
-        val socket = module.socket()
-        val userState = module.userState()
-
-        val callCoordinatorClientModule = CallCoordinatorClientModule(
-            user = user,
-            preferences = preferences,
-            appContext = context,
-            lifecycle = lifecycle,
-            okHttpClient = httpModule.okHttpClient
-        )
-
-        val scope = CoroutineScope(DispatcherProvider.IO)
-
-        val engine: StreamCallEngine =
-            callEngineBuilder?.invoke(scope) ?: StreamCallEngineImpl(
-                parentScope = scope,
-                coordinatorClient = callCoordinatorClientModule.callCoordinatorClient(),
-                config = config,
-                getCurrentUserId = { preferences.getUserCredentials()?.id ?: "" }
-            )
-
-        return StreamVideoImpl(
-            context = context,
-            scope = scope,
-            config = config,
-            engine = engine,
-            loggingLevel = loggingLevel,
-            callCoordinatorClient = callCoordinatorClientModule.callCoordinatorClient(),
-            preferences = preferences,
-            lifecycle = lifecycle,
-            socket = socket,
-            socketStateService = module.socketStateService(),
-            userState = userState,
-            networkStateProvider = module.networkStateProvider()
-        ).also { streamVideo ->
-            StreamVideoStateLauncher(context, streamVideo, androidInputs, inputLauncher).run(scope)
-            scope.launch {
-                pushDeviceGenerators
-                    .firstOrNull { it.isValidForThisDevice(context) }
-                    ?.let {
-                        it.onPushDeviceGeneratorSelected()
-                        it.asyncGeneratePushDevice {
-                            scope.launch {
-                                streamVideo.createDevice(
-                                    token = it.token,
-                                    pushProvider = it.pushProvider.key
-                                )
-                            }
-                        }
-                    }
+            if (userToken.isNotEmpty()) {
+                storeUserToken(userToken)
             }
         }
+
+        // This connection module class exposes the connections to the various retrofit APIs
+        val module = ConnectionModule(
+            context = context,
+            scope = scope,
+            videoDomain = videoDomain,
+            preferences = preferences,
+            connectionTimeoutInMs = connectionTimeoutInMs,
+            user = user,
+            loggingLevel = loggingLevel,
+        )
+
+        // create the client
+        val client = StreamVideoImpl(
+            context = context,
+            scope = scope,
+            user = user,
+            loggingLevel = loggingLevel,
+            lifecycle = lifecycle,
+            connectionModule = module,
+            pushDeviceGenerators = pushDeviceGenerators
+        )
+        // addDevice for push
+        if (enablePush && user.type == UserType.Authenticated) {
+            scope.launch {
+                client.registerPushDevice()
+            }
+        }
+
+        return client
     }
+}
+
+sealed class GEO {
+    /** Run calls over our global edge network, this is the default and right for most applications */
+    object GlobalEdgeNetwork : GEO()
+}
+
+sealed class TokenType {
+    /** A user token */
+    object User : TokenType()
+
+    /** A call specific token */
+    object Call : TokenType()
 }

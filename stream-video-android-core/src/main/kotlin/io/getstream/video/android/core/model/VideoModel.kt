@@ -52,8 +52,8 @@ public data class CallMember(
 
 public data class CallInfo(
     val cid: String,
-    val id: String,
     val type: String,
+    val id: String,
     val createdByUserId: String,
     val broadcastingEnabled: Boolean,
     val recordingEnabled: Boolean,
