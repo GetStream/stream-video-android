@@ -34,6 +34,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.video.VideoScalingType.Companion.toCommonScalingType
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.model.TrackWrapper
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
@@ -54,11 +55,14 @@ public fun VideoRenderer(
     sessionId: String,
     trackType: TrackType,
     modifier: Modifier = Modifier,
+    videoScalingType: VideoScalingType = VideoScalingType.SCALE_ASPECT_BALANCED,
     onRender: (View) -> Unit = {},
 ) {
     if (LocalInspectionMode.current || call == null) {
         Image(
-            modifier = modifier.fillMaxSize().testTag("video_renderer"),
+            modifier = modifier
+                .fillMaxSize()
+                .testTag("video_renderer"),
             painter = painterResource(id = io.getstream.video.android.ui.common.R.drawable.stream_video_call_sample),
             contentScale = ContentScale.Crop,
             contentDescription = null
@@ -84,6 +88,7 @@ public fun VideoRenderer(
                     trackType = trackType,
                     onRender = onRender
                 )
+                setScalingType(scalingType = videoScalingType.toCommonScalingType())
                 setupVideo(trackState, videoTrackWrapper, this)
 
                 view = this

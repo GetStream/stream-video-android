@@ -814,6 +814,14 @@ public final class io/getstream/video/android/compose/ui/components/video/Compos
 }
 
 public final class io/getstream/video/android/compose/ui/components/video/VideoRendererKt {
-	public static final fun VideoRenderer (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/model/TrackWrapper;Ljava/lang/String;Lstream/video/sfu/models/TrackType;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+	public static final fun VideoRenderer (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/model/TrackWrapper;Ljava/lang/String;Lstream/video/sfu/models/TrackType;Landroidx/compose/ui/Modifier;Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class io/getstream/video/android/compose/ui/components/video/VideoScalingType : java/lang/Enum {
+	public static final field SCALE_ASPECT_BALANCED Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;
+	public static final field SCALE_ASPECT_FIT Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;
+	public static final field SCAPE_ASPECT_FILL Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;
+	public static fun valueOf (Ljava/lang/String;)Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;
+	public static fun values ()[Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;
 }
 
