@@ -3552,6 +3552,10 @@ public final class io/getstream/video/android/core/utils/ConstantsKt {
 	public static final field INTENT_EXTRA_NOTIFICATION_ID Ljava/lang/String;
 }
 
+public final class io/getstream/video/android/core/utils/DomainUtilsKt {
+	public static final synthetic fun toCallUser (Lio/getstream/video/android/core/ParticipantState;)Lio/getstream/video/android/core/model/CallUser;
+}
+
 public final class io/getstream/video/android/core/utils/LatencyResult {
 	public fun <init> (Ljava/lang/String;Ljava/util/List;DLjava/lang/Throwable;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/util/List;DLjava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V

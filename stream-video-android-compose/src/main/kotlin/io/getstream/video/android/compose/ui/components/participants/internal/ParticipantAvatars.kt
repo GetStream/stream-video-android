@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -41,8 +40,7 @@ internal fun ParticipantAvatars(
     participants: List<ParticipantState>
 ) {
     Box(
-        modifier = Modifier.fillMaxWidth(),
-        contentAlignment = Alignment.Center
+        modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center
     ) {
         if (participants.isNotEmpty()) {
             if (participants.size == 1) {
@@ -50,14 +48,14 @@ internal fun ParticipantAvatars(
 
                 UserAvatar(
                     modifier = Modifier.size(VideoTheme.dimens.singleAvatarSize),
-                    user = participant.user.collectAsState().value
+                    user = participant.initialUser
                 )
             } else {
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
                     items(participants.take(2)) { participant ->
                         UserAvatar(
                             modifier = Modifier.size(VideoTheme.dimens.callAvatarSize),
-                            user = participant.user.collectAsState().value
+                            user = participant.initialUser
                         )
                     }
 
@@ -65,7 +63,7 @@ internal fun ParticipantAvatars(
                         item {
                             UserAvatar(
                                 modifier = Modifier.size(VideoTheme.dimens.callAvatarSize),
-                                user = participants[2].user.collectAsState().value
+                                user = participants[2].initialUser
                             )
                         }
                     } else if (participants.size > 3) {

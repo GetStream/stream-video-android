@@ -245,19 +245,17 @@ class HomeActivity : AppCompatActivity() {
             logger.d { "[createMeeting] callId: $callId, participants: $participants" }
 
             loadingState.value = true
-//            val result = streamVideo.joinCall(
-//                "default", callId, participants, false
-//            )
-//
-//            result.onSuccess { data ->
-//                logger.v { "[createMeeting] successful: $data" }
-//                loadingState.value = false
-//            }
-//
-//            result.onError {
-//                logger.e { "[createMeeting] failed: $it" }
-//                Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
-//            }
+            val result = streamVideo.joinCall(type = "default", id = callId)
+
+            result.onSuccess { data ->
+                logger.v { "[createMeeting] successful: $data" }
+                loadingState.value = false
+            }
+
+            result.onError {
+                logger.e { "[createMeeting] failed: $it" }
+                Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
+            }
         }
     }
 

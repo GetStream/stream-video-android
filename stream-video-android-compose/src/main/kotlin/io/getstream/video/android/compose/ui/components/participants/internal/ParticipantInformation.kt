@@ -23,31 +23,38 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import io.getstream.video.android.common.util.MockUtils
 import io.getstream.video.android.common.util.buildLargeCallText
 import io.getstream.video.android.common.util.buildSmallCallText
 import io.getstream.video.android.common.util.mockParticipantList
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.CallStatus
-import io.getstream.video.android.core.model.CallUser
+import io.getstream.video.android.core.utils.toCallUser
 
 @Composable
 internal fun ParticipantInformation(
     callStatus: CallStatus,
-    participants: List<CallUser>
+    participants: List<ParticipantState>
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        val callUsers by remember { derivedStateOf { participants.map { it.toCallUser() } } }
         val text = if (participants.size < 3) {
-            buildSmallCallText(participants)
+            buildSmallCallText(callUsers)
         } else {
-            buildLargeCallText(participants)
+            buildLargeCallText(callUsers)
         }
 
         val fontSize = if (participants.size == 1) {
@@ -85,21 +92,11 @@ internal fun ParticipantInformation(
 @Preview
 @Composable
 private fun ParticipantInformationPreview() {
+    MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         ParticipantInformation(
             callStatus = CallStatus.Incoming,
-            participants = mockParticipantList.map {
-                CallUser(
-                    id = it.initialUser.id,
-                    name = it.initialUser.name,
-                    role = it.initialUser.role,
-                    imageUrl = it.initialUser.imageUrl,
-                    state = null,
-                    createdAt = null,
-                    updatedAt = null,
-                    teams = emptyList()
-                )
-            }
+            participants = mockParticipantList
         )
     }
 }

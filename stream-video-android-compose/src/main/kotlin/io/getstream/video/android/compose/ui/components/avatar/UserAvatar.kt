@@ -73,7 +73,7 @@ public fun UserAvatar(
     Box(modifier = modifier) {
         Avatar(
             modifier = Modifier.fillMaxSize(),
-            imageUrl = user.imageUrl.orEmpty(),
+            imageUrl = user.imageUrl,
             initials = user.name.ifBlank { user.id },
             textStyle = textStyle,
             shape = shape,

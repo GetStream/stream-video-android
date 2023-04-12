@@ -51,7 +51,7 @@ internal class SignalEventsParser(
 
         try {
             val rawEvent = SfuEvent.ADAPTER.decode(byteArray)
-            logger.v { "[onMessage] rawEvent: $rawEvent" }
+            logger.d { "[onMessage] rawEvent: $rawEvent" }
             val message = RTCEventMapper.mapEvent(rawEvent)
             sfuSocket.onEvent(message)
         } catch (error: Throwable) {
