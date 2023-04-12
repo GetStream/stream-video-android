@@ -95,5 +95,3 @@ jobs:
         run: |
           ./gradlew --scan --stacktrace \
               :stream-video-android-compose:testDebugUnitTest  
-    
-              
