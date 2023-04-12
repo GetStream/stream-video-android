@@ -90,5 +90,4 @@ class AndroidDeviceTest : IntegrationTestBase() {
         val participants = call.state.participants
         assertThat(participants.value.size).isEqualTo(1)
     }
-
 }

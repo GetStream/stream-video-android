@@ -24,12 +24,9 @@ import io.getstream.log.android.AndroidStreamLogger
 import io.getstream.video.android.core.GEO
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
-import io.getstream.video.android.core.input.CallActivityInput
-import io.getstream.video.android.core.input.CallServiceInput
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.user.UserPreferencesManager
-import io.getstream.video.android.tooling.handler.StreamGlobalExceptionHandler
 
 class DemoVideoApp : Application() {
 
@@ -58,7 +55,6 @@ class DemoVideoApp : Application() {
         StreamLog.i(TAG) { "[onCreate] no args" }
         UserPreferencesManager.initialize(this)
     }
-
 
     fun logOut() {
         streamVideo.logOut()

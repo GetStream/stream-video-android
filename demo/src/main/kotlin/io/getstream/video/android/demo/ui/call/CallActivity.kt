@@ -23,20 +23,15 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.demo.BuildConfig
-import io.getstream.video.android.demo.demoVideoApp
-import io.getstream.video.android.compose.ui.AbstractComposeCallActivity
 import io.getstream.video.android.compose.ui.components.call.CallContainer
 import io.getstream.video.android.compose.ui.components.call.activecall.DefaultPictureInPictureContent
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
-import io.getstream.video.android.core.permission.StreamPermissionManagerImpl
-import io.getstream.video.android.core.user.EmptyUsersProvider
 import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.core.viewmodel.CallViewModelFactory
+import io.getstream.video.android.demo.demoVideoApp
 
 class CallActivity : AppCompatActivity() {
 
@@ -48,7 +43,7 @@ class CallActivity : AppCompatActivity() {
 
     protected val callViewModel: CallViewModel by viewModels(factoryProducer = { defaultViewModelFactory() })
 
-    //private val permissionsManager = setupPermissionManager()
+    // private val permissionsManager = setupPermissionManager()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,8 +54,8 @@ class CallActivity : AppCompatActivity() {
                 CallContainer(
                     modifier = Modifier.background(color = VideoTheme.colors.appBackground),
                     viewModel = callViewModel,
-                    //onCallAction = ::handleCallAction,
-                    //onBackPressed = ::handleBackPressed,
+                    // onCallAction = ::handleCallAction,
+                    // onBackPressed = ::handleBackPressed,
                     pictureInPictureContent = { PictureInPictureContent(call = it) }
                 )
             }
@@ -79,18 +74,17 @@ class CallActivity : AppCompatActivity() {
         )
     }
 
-
 //    fun setupPermissionManager(): StreamPermissionManagerImpl {
 //        return StreamPermissionManagerImpl(
 //            fragmentActivity = this,
 //            onPermissionResult = { permission, isGranted ->
 //                when (permission) {
-////                    Manifest.permission.CAMERA -> callViewModel.onCallAction(ToggleCamera(isGranted))
-////                    Manifest.permission.RECORD_AUDIO -> callViewModel.onCallAction(
-////                        ToggleMicrophone(
-////                            isGranted
-////                        )
-////                    )
+// //                    Manifest.permission.CAMERA -> callViewModel.onCallAction(ToggleCamera(isGranted))
+// //                    Manifest.permission.RECORD_AUDIO -> callViewModel.onCallAction(
+// //                        ToggleMicrophone(
+// //                            isGranted
+// //                        )
+// //                    )
 //                }
 //            },
 //            onShowSettings = {

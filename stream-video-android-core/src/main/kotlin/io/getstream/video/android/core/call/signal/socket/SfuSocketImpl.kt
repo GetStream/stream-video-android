@@ -188,7 +188,7 @@ internal class SfuSocketImpl(
     }
 
     override fun onEvent(event: SfuDataEvent) {
-        logger.i {"received event $event"}
+        logger.i { "received event $event" }
         healthMonitor.ack()
         callListeners { listener ->
             if (event !is SFUHealthCheckEvent) {

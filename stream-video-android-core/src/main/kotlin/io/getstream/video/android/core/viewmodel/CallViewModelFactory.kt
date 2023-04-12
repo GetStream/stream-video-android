@@ -21,8 +21,6 @@ import androidx.lifecycle.ViewModelProvider
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.permission.PermissionManager
-import io.getstream.video.android.core.user.EmptyUsersProvider
-import io.getstream.video.android.core.user.UsersProvider
 
 public class CallViewModelFactory(
     private val streamVideo: StreamVideo,

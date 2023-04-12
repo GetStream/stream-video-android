@@ -28,7 +28,6 @@ import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.TrackWrapper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import org.webrtc.VideoTrack
 
 public class ParticipantContentView : LinearLayout {
 

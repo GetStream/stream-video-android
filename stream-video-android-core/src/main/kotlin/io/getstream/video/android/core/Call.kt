@@ -32,7 +32,6 @@ import io.getstream.video.android.core.model.SfuToken
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.toIceServer
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
-import kotlinx.coroutines.launch
 import org.openapitools.client.models.GetCallEdgeServerRequest
 import org.openapitools.client.models.GoLiveResponse
 import org.openapitools.client.models.SendReactionResponse

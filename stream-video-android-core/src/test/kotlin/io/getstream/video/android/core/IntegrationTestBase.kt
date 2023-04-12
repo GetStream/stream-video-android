@@ -23,12 +23,11 @@ import io.getstream.log.Priority
 import io.getstream.log.StreamLog
 import io.getstream.log.kotlin.KotlinStreamLogger
 import io.getstream.log.streamLog
+import io.getstream.result.Result
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.User
-import io.getstream.result.Result
-
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineScheduler
@@ -152,7 +151,6 @@ open class TestBase {
     }
 }
 
-
 object IntegrationTestState {
     var client: StreamVideo? = null
     var call: Call? = null
@@ -219,7 +217,6 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true) : TestBase(
                     nextEventCompleted = true
                     continuation.resume(value = it)
                 }
-
             }
         }
     }
@@ -259,7 +256,7 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true) : TestBase(
                 var finished = false
                 client.subscribe {
 
-                    if (!finished ) {
+                    if (!finished) {
                         if (it is T) {
                             continuation.resume(it)
                             finished = true
@@ -274,7 +271,6 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true) : TestBase(
                 }
             }
         }
-
 
     @Before
     fun resetTestVars() {

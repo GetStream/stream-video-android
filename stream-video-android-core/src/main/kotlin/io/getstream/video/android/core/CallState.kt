@@ -17,7 +17,6 @@
 package io.getstream.video.android.core
 
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.core.call.utils.stringify
 import io.getstream.video.android.core.events.AudioLevelChangedEvent
 import io.getstream.video.android.core.events.BlockedUserEvent
 import io.getstream.video.android.core.events.CallAcceptedEvent
@@ -60,9 +59,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.openapitools.client.models.CallSettingsResponse
 import org.openapitools.client.models.OwnCapability
-import org.webrtc.MediaStream
 import stream.video.sfu.models.Participant
-import stream.video.sfu.models.TrackType
 import java.util.*
 
 /**
@@ -84,7 +81,6 @@ public class CallState(val call: Call, user: User) {
     private val _screenSharingSession: MutableStateFlow<ScreenSharingSession?> =
         MutableStateFlow(null)
 
-
     private val _participants: MutableStateFlow<SortedMap<String, ParticipantState>> =
         MutableStateFlow(emptyMap<String, ParticipantState>().toSortedMap())
     public val participants: StateFlow<List<ParticipantState>> =
@@ -93,7 +89,6 @@ public class CallState(val call: Call, user: User) {
     /** participants who are currently speaking */
     public val activeSpeakers =
         _participants.mapState { it.values.filter { participant -> participant.speaking.value } }
-
 
     private val _dominantSpeaker: MutableStateFlow<ParticipantState?> =
         MutableStateFlow(null)
@@ -139,7 +134,6 @@ public class CallState(val call: Call, user: User) {
     )
     public val connection: StateFlow<ConnectionState> = _connection
 
-
     private val _endedAt: MutableStateFlow<Date?> = MutableStateFlow(null)
     val endedAt: StateFlow<Date?> = _endedAt
     private val _endedByUser: MutableStateFlow<User?> = MutableStateFlow(null)
@@ -153,11 +147,9 @@ public class CallState(val call: Call, user: User) {
         MutableStateFlow(emptyList())
     public val members: StateFlow<List<ParticipantState>> = _members
 
-
     private val _errors: MutableStateFlow<List<ErrorEvent>> =
         MutableStateFlow(emptyList())
     public val errors: StateFlow<List<ErrorEvent>> = _errors
-
 
     public fun updateParticipantTrackSize(
         sessionId: String,
@@ -290,7 +282,6 @@ public class CallState(val call: Call, user: User) {
         }
     }
 
-
     private fun updateFromJoinResponse(event: JoinCallResponseEvent) {
         // creates the participants
         val participantStates = event.callState.participants.map {
@@ -300,12 +291,10 @@ public class CallState(val call: Call, user: User) {
         upsertParticipants(participantStates)
     }
 
-
     private fun removeParticipant(sessionId: String) {
         val new = _participants.value.toSortedMap()
         new.remove(sessionId)
         _participants.value = new
-
     }
 
     private fun upsertParticipants(participants: List<ParticipantState>) {
@@ -406,7 +395,6 @@ public class CallState(val call: Call, user: User) {
         }
     }
 
-
     internal fun disconnect() {
         logger.i { "[disconnect] #sfu; no args" }
         // audioHandler.stop()
@@ -419,6 +407,4 @@ public class CallState(val call: Call, user: User) {
 //            track?.video?.dispose()
 //        }
     }
-
-
 }

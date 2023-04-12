@@ -18,47 +18,18 @@
 
 package io.getstream.video.android.core.viewmodel
 
-import android.hardware.camera2.CameraMetadata
-import android.view.View
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.ConnectionState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoImpl
-import io.getstream.video.android.core.call.state.AcceptCall
-import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.call.state.CallMediaState
-import io.getstream.video.android.core.call.state.CancelCall
-import io.getstream.video.android.core.call.state.CustomAction
-import io.getstream.video.android.core.call.state.DeclineCall
-import io.getstream.video.android.core.call.state.FlipCamera
-import io.getstream.video.android.core.call.state.InviteUsersToCall
-import io.getstream.video.android.core.call.state.LeaveCall
-import io.getstream.video.android.core.call.state.SelectAudioDevice
-import io.getstream.video.android.core.call.state.ShowCallInfo
-import io.getstream.video.android.core.call.state.ToggleCamera
-import io.getstream.video.android.core.call.state.ToggleMicrophone
-import io.getstream.video.android.core.call.state.ToggleScreenConfiguration
-import io.getstream.video.android.core.call.state.ToggleSpeakerphone
-import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.permission.PermissionManager
-import io.getstream.video.android.core.user.UsersProvider
-import io.getstream.video.android.core.utils.mapState
-import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
-import org.webrtc.RendererCommon
-import stream.video.sfu.models.TrackType
-import java.util.UUID
 
 private const val CONNECT_TIMEOUT = 30_000L
 
@@ -96,7 +67,7 @@ public class CallViewModel(
     private val _isFullscreen: MutableStateFlow<Boolean> = MutableStateFlow(false)
     public val isFullscreen: StateFlow<Boolean> = _isFullscreen
 
-     // what does this do?
+    // what does this do?
     private val _isShowingCallInfo = MutableStateFlow(false)
     public val isShowingCallInfo: StateFlow<Boolean> = _isShowingCallInfo
 

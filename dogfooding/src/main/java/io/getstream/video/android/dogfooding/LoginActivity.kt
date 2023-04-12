@@ -250,7 +250,6 @@ class LoginActivity : ComponentActivity() {
             println(response)
             inputStream.close()
 
-
             val userPreferences = UserPreferencesManager.initialize(applicationContext)
             userPreferences.storeUserToken(response)
 
@@ -261,8 +260,6 @@ class LoginActivity : ComponentActivity() {
             }
         }
     }
-
-
 
     private fun logIn(response: String) {
         val jsonArray = JSONArray(response)

@@ -22,7 +22,6 @@ import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.utils.mapState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import org.webrtc.VideoTrack
 import stream.video.sfu.models.ConnectionQuality
 import stream.video.sfu.models.Participant
 import stream.video.sfu.models.TrackType
@@ -53,7 +52,7 @@ public data class ParticipantState(
     /** A prefix to identify tracks, internal */
     internal var trackLookupPrefix: String = "",
 
-    ) {
+) {
 
     /** video track */
     val videoTrack by lazy {
@@ -81,7 +80,7 @@ public data class ParticipantState(
     val hasAudio: Boolean
         get() = audioTrack != null
 
-    //TODO
+    // TODO
     public var isSpeaking: Boolean = true
 
     /**
@@ -150,8 +149,6 @@ public data class ParticipantState(
     internal val _pinnedAt: MutableStateFlow<Date?> = MutableStateFlow(null)
     val pinnedAt: StateFlow<Date?> = _pinnedAt
 
-
-
     open suspend fun muteAudio(): Result<Unit> {
         // how do i mute another user?
         return call.muteUsers(MuteUsersData(audio = true, users = listOf(user.value.id)))
@@ -177,10 +174,9 @@ public data class ParticipantState(
         val currentUser = _user.value
         _user.value = currentUser.copy(
             name = participant.name,
-            imageUrl=participant.image,
-            //custom = participant.custom,
-            role=participant.roles.firstOrNull() ?: ""
+            imageUrl = participant.image,
+            // custom = participant.custom,
+            role = participant.roles.firstOrNull() ?: ""
         )
-
     }
 }

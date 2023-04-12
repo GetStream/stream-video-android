@@ -27,37 +27,64 @@ import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
 import io.getstream.result.onSuccessSuspend
-import io.getstream.video.android.core.*
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.DeviceStatus
+import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoImpl
 import io.getstream.video.android.core.call.connection.StreamPeerConnection
 import io.getstream.video.android.core.call.signal.socket.SfuSocketListener
 import io.getstream.video.android.core.call.state.ConnectionState
 import io.getstream.video.android.core.call.utils.stringify
 import io.getstream.video.android.core.errors.DisconnectCause
-import io.getstream.video.android.core.events.*
+import io.getstream.video.android.core.events.ChangePublishQualityEvent
+import io.getstream.video.android.core.events.ICETrickleEvent
+import io.getstream.video.android.core.events.JoinCallResponseEvent
+import io.getstream.video.android.core.events.SFUConnectedEvent
+import io.getstream.video.android.core.events.SfuDataEvent
+import io.getstream.video.android.core.events.SubscriberOfferEvent
+import io.getstream.video.android.core.events.TrackPublishedEvent
+import io.getstream.video.android.core.events.TrackUnpublishedEvent
+import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.internal.module.ConnectionModule
 import io.getstream.video.android.core.internal.module.SFUConnectionModule
-import io.getstream.video.android.core.model.*
 import io.getstream.video.android.core.model.IceCandidate
+import io.getstream.video.android.core.model.IceServer
+import io.getstream.video.android.core.model.StreamPeerType
+import io.getstream.video.android.core.model.TrackWrapper
+import io.getstream.video.android.core.model.toPeerType
 import io.getstream.video.android.core.user.UserPreferencesManager
-import io.getstream.video.android.core.utils.*
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import io.getstream.video.android.core.utils.buildConnectionConfiguration
 import io.getstream.video.android.core.utils.buildMediaConstraints
 import io.getstream.video.android.core.utils.buildRemoteIceServers
+import io.getstream.video.android.core.utils.mangleSDP
+import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.core.utils.stringify
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelChildren
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import org.webrtc.*
+import org.webrtc.CameraEnumerationAndroid
+import org.webrtc.MediaConstraints
+import org.webrtc.MediaStream
+import org.webrtc.MediaStreamTrack
+import org.webrtc.PeerConnection
+import org.webrtc.RTCStatsReport
+import org.webrtc.RtpParameters
+import org.webrtc.RtpTransceiver
+import org.webrtc.SessionDescription
+import org.webrtc.SurfaceTextureHelper
+import org.webrtc.VideoCapturer
 import retrofit2.HttpException
 import stream.video.sfu.event.JoinRequest
 import stream.video.sfu.event.JoinResponse
@@ -78,8 +105,7 @@ import stream.video.sfu.signal.UpdateMuteStatesRequest
 import stream.video.sfu.signal.UpdateMuteStatesResponse
 import stream.video.sfu.signal.UpdateSubscriptionsRequest
 import stream.video.sfu.signal.UpdateSubscriptionsResponse
-import java.util.*
-import kotlin.Error
+import java.util.UUID
 import kotlin.math.absoluteValue
 import kotlin.random.Random
 
@@ -128,10 +154,12 @@ public class RtcSession internal constructor(
     private val logger by taggedLogger("Call:RtcSession")
     private val clientImpl = client as StreamVideoImpl
     private val scope = clientImpl.scope
+
     /** session id is generated client side */
     private val sessionId = UUID.randomUUID().toString()
 
     private var connectionState: ConnectionState = ConnectionState.DISCONNECTED
+
     // run all calls on a supervisor job so we can easily cancel them
     private val supervisorJob = SupervisorJob()
     private val coroutineScope = CoroutineScope(scope.coroutineContext + supervisorJob)
@@ -142,11 +170,12 @@ public class RtcSession internal constructor(
     private val joinEventResponse: MutableStateFlow<JoinCallResponseEvent?> = MutableStateFlow(null)
 
     // participants by session id -> participant state
-    private val trackPrefixToSessionIdMap = call.state.participants.mapState { it.associate { it.trackLookupPrefix to it.sessionId }}
+    private val trackPrefixToSessionIdMap =
+        call.state.participants.mapState { it.associate { it.trackLookupPrefix to it.sessionId } }
 
     // We need to update tracks for all participants
     // It's cleaner to store here and have the participant state reference to it
-    var tracks: MutableMap<String, MutableMap<TrackType,TrackWrapper >> = mutableMapOf()
+    var tracks: MutableMap<String, MutableMap<TrackType, TrackWrapper>> = mutableMapOf()
 
     fun getTrack(sessionId: String, type: TrackType): TrackWrapper? {
         if (!tracks.containsKey(sessionId)) {
@@ -154,6 +183,7 @@ public class RtcSession internal constructor(
         }
         return tracks[sessionId]?.get(type)
     }
+
     fun setTrack(sessionId: String, type: TrackType, track: TrackWrapper) {
         if (!tracks.containsKey(sessionId)) {
             tracks[sessionId] = mutableMapOf()
@@ -181,10 +211,10 @@ public class RtcSession internal constructor(
 
     /** subscriber peer connection is used for subs */
     private var subscriber: StreamPeerConnection? = null
+
     /** publisher for publishing, using 2 peer connections prevents race conditions in the offer/answer cycle */
     @VisibleForTesting
     var publisher: StreamPeerConnection? = null
-
 
     private val mediaConstraints: MediaConstraints by lazy {
         buildMediaConstraints()
@@ -205,18 +235,18 @@ public class RtcSession internal constructor(
 
         sfuConnectionModule = connectionModule.createSFUConnectionModule(SFUUrl, SFUToken)
 
-        sfuConnectionModule.sfuSocket.addListener(object: SfuSocketListener {
+        sfuConnectionModule.sfuSocket.addListener(object : SfuSocketListener {
             public override fun onConnecting() {
-                logger.i {"SFU connecting"}
+                logger.i { "SFU connecting" }
             }
 
             public override fun onConnected(event: SFUConnectedEvent) {
                 clientImpl.fireEvent(event, call.cid)
-                logger.i {"SFU onConnected $event"}
+                logger.i { "SFU onConnected $event" }
             }
 
             public override fun onDisconnected(cause: DisconnectCause) {
-                logger.i {"SFU onDisconnected $cause"}
+                logger.i { "SFU onDisconnected $cause" }
             }
 
             public override fun onError(error: io.getstream.result.Error) {
@@ -225,12 +255,10 @@ public class RtcSession internal constructor(
             }
 
             public override fun onEvent(event: SfuDataEvent) {
-                logger.i {"SFU onEvent $event"}
+                logger.i { "SFU onEvent $event" }
                 clientImpl.fireEvent(event, call.cid)
             }
         })
-
-
     }
 
     suspend fun connect() {
@@ -257,7 +285,7 @@ public class RtcSession internal constructor(
     }
 
     /**
-    * A single media stream contains multiple tracks. We receive it from the subcriber peer connection
+     * A single media stream contains multiple tracks. We receive it from the subcriber peer connection
      *
      * Loop over the audio and video tracks
      * Update the local tracks
@@ -266,18 +294,20 @@ public class RtcSession internal constructor(
 
         val (trackPrefix, trackTypeString) = mediaStream.id.split(':')
         val sessionId = trackPrefixToSessionIdMap.value[trackPrefix]!!
-        val trackType = TrackType.fromValue(trackTypeString.toInt()) ?: throw IllegalStateException("unrecognized track type")
+        val trackType = TrackType.fromValue(trackTypeString.toInt()) ?: throw IllegalStateException(
+            "unrecognized track type"
+        )
 
         logger.i { "[] #sfu; mediaStream: $mediaStream" }
         mediaStream.audioTracks.forEach { track ->
             logger.v { "[addStream] #sfu; audioTrack: ${track.stringify()}" }
             track.setEnabled(true)
-            val wrappedTrack = TrackWrapper(mediaStream.id, audio=track)
+            val wrappedTrack = TrackWrapper(mediaStream.id, audio = track)
             setTrack(sessionId, trackType, wrappedTrack)
         }
 
         if (trackPrefixToSessionIdMap.value[trackPrefix].isNullOrEmpty()) {
-            logger.w { "[addStream] skipping unrecognized trackPrefix ${trackPrefix}" }
+            logger.w { "[addStream] skipping unrecognized trackPrefix $trackPrefix" }
             return
         }
 
@@ -301,7 +331,7 @@ public class RtcSession internal constructor(
             createPublisher()
         }
 
-        if (publishing ) {
+        if (publishing) {
             // step 2 ensure all tracks are setup correctly
             // start capturing the video
             val manager = context.getSystemService<AudioManager>()
@@ -326,7 +356,11 @@ public class RtcSession internal constructor(
             )
             // render it on the surface. but we need to start this before forwarding it to the publisher
             // TODO: clean this up, would be better to have some sensible API for this
-            call.mediaManager.videoCapturer?.initialize(surfaceTextureHelper, context, videoSource.capturerObserver)
+            call.mediaManager.videoCapturer?.initialize(
+                surfaceTextureHelper,
+                context,
+                videoSource.capturerObserver
+            )
             // TODO: understand how to start with only rendering on the surface view
             videoTrack.setEnabled(true)
             logger.v { "[createUserTracks] #sfu; videoTrack: ${videoTrack.stringify()}" }
@@ -399,7 +433,6 @@ public class RtcSession internal constructor(
         isCapturingVideo = false
     }
 
-
     /**
      * TODO: Probably partially move this
      * - set the camera track enabled
@@ -427,7 +460,6 @@ public class RtcSession internal constructor(
             getLocalTrack(TrackType.TRACK_TYPE_VIDEO)?.video?.setEnabled(isEnabled)
 
             updateMuteState(request).onSuccessSuspend {
-
             }
         }
     }
@@ -467,8 +499,6 @@ public class RtcSession internal constructor(
         return subscriber
     }
 
-
-
     private suspend fun executeJoinRequest(): Result<JoinResponse> {
 
         val sdp = mangleSDP(getGenericSdp())
@@ -488,11 +518,10 @@ public class RtcSession internal constructor(
             logger.d { "[executeJoinRequest] request is sent" }
             val currentValue = joinEventResponse.value
             println(currentValue)
-            logger.d{ "[executeJoinRequest] currentValue: $currentValue"}
+            logger.d { "[executeJoinRequest] currentValue: $currentValue" }
             val event = joinEventResponse.filterNotNull().first()
             logger.d { "[executeJoinRequest] completed: $event" }
             Success(JoinResponse())
-
         } catch (e: Throwable) {
             logger.e { "[executeJoinRequest] failed: $e" }
             val msg = "failed to join the event"
@@ -544,7 +573,7 @@ public class RtcSession internal constructor(
         // track prefix is only available after the join response
         val trackType = trackTypeVideo.toString()
         val trackPrefix = call.state?.me?.value?.trackLookupPrefix
-        return "$trackPrefix:${trackType}:${(Math.random() * 100).toInt()}"
+        return "$trackPrefix:$trackType:${(Math.random() * 100).toInt()}"
     }
 
     /**
@@ -589,10 +618,6 @@ public class RtcSession internal constructor(
             publisher?.videoTransceiver?.sender?.parameters = params
         }
     }
-
-
-
-
 
     /**
      * This is called when you are look at a different set of participants
@@ -684,9 +709,11 @@ public class RtcSession internal constructor(
                     is TrackPublishedEvent -> {
                         updatePublishState(event.userId, event.sessionId, event.trackType, true)
                     }
+
                     is TrackUnpublishedEvent -> {
                         updatePublishState(event.userId, event.sessionId, event.trackType, false)
                     }
+
                     else -> {
                         logger.d { "[onRtcEvent] skipped event: $event" }
                     }
@@ -696,7 +723,7 @@ public class RtcSession internal constructor(
     }
 
     /**
-    Section, basic webrtc calls
+     Section, basic webrtc calls
      */
 
     /**
@@ -876,7 +903,12 @@ public class RtcSession internal constructor(
     }
 
     suspend fun parseError(e: Throwable): Failure {
-        return Failure(io.getstream.result.Error.ThrowableError("CallClientImpl error needs to be handled", e))
+        return Failure(
+            io.getstream.result.Error.ThrowableError(
+                "CallClientImpl error needs to be handled",
+                e
+            )
+        )
     }
 
     // reply to when we get an offer from the SFU
@@ -899,5 +931,4 @@ public class RtcSession internal constructor(
 
     suspend fun updateMuteState(muteStateRequest: UpdateMuteStatesRequest): Result<UpdateMuteStatesResponse> =
         wrapAPICall { sfuConnectionModule.signalService.updateMuteStates(muteStateRequest) }
-
 }

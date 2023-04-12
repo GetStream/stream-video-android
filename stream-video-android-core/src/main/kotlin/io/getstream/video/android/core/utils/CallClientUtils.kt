@@ -21,7 +21,6 @@ import org.webrtc.MediaConstraints
 import org.webrtc.PeerConnection
 import org.webrtc.SessionDescription
 
-
 /**
  * Enabling DTX or RED requires mangling the SDP a bit
  */

@@ -92,7 +92,7 @@ internal class SignalEventsParser(
     }
 
     private fun onSocketError(error: Error.NetworkError) {
-        logger.i { "[onSocketError] failure: $error"}
+        logger.i { "[onSocketError] failure: $error" }
         if (!closedByClient) {
             sfuSocket.onSocketError(error)
         }

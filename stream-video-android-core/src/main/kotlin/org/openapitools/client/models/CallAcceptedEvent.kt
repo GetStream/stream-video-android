@@ -47,5 +47,4 @@ data class CallAcceptedEvent(
     @Json(name = "session_id")
     val sessionId: kotlin.String,
 
-
 )

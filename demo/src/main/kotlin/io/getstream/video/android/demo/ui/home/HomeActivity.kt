@@ -40,7 +40,6 @@ import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -48,20 +47,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
-import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.demo.model.HomeScreenOption
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.Avatar
 import io.getstream.video.android.core.user.UserPreferencesManager
 import io.getstream.video.android.core.utils.initials
 import io.getstream.video.android.demo.demoVideoApp
+import io.getstream.video.android.demo.model.HomeScreenOption
 import io.getstream.video.android.demo.ui.call.CallActivity
 import kotlinx.coroutines.launch
 
@@ -76,7 +73,6 @@ class HomeActivity : AppCompatActivity() {
 
     private val selectedOption: MutableState<HomeScreenOption> =
         mutableStateOf(HomeScreenOption.CREATE_CALL)
-
 
     private val callIdState: MutableState<String> = mutableStateOf("eoB8cs8QpEw4")
 
@@ -139,7 +135,6 @@ class HomeActivity : AppCompatActivity() {
                     Text(text = "Join call")
                 }
 
-
                 val isLoading by loadingState
 
                 if (isLoading) {
@@ -153,7 +148,6 @@ class HomeActivity : AppCompatActivity() {
 
     @Composable
     fun ColumnScope.CreateCallContent() {
-
     }
 
     @Composable
@@ -175,14 +169,14 @@ class HomeActivity : AppCompatActivity() {
         }
     }
 
-
     private fun createMeeting(callId: String, participants: List<String>) {
         lifecycleScope.launch {
             logger.d { "[createMeeting] callId: $callId, participants: $participants" }
 
             loadingState.value = true
             val result = streamVideo.call(
-                "default", callId).join()
+                "default", callId
+            ).join()
 
             result.onSuccess { data ->
                 logger.v { "[createMeeting] successful: $data" }
@@ -258,7 +252,6 @@ class HomeActivity : AppCompatActivity() {
                 ),
                 onClick = {
                     TODO()
-
                 },
                 content = {
                     Text(text = "Join Call")
@@ -283,7 +276,6 @@ class HomeActivity : AppCompatActivity() {
             },
         )
     }
-
 
     companion object {
         fun getIntent(context: Context): Intent = Intent(context, HomeActivity::class.java).apply {

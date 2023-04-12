@@ -17,7 +17,6 @@
 package io.getstream.video.android.core
 
 import android.content.Context
-import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.Lifecycle
 import io.getstream.android.push.PushDeviceGenerator
@@ -73,8 +72,6 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString

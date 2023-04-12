@@ -32,7 +32,6 @@ import io.getstream.video.android.core.socket.internal.SocketFactory
 import io.getstream.video.android.core.socket.internal.VideoSocketImpl
 import io.getstream.video.android.core.user.UserPreferences
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.Interceptor

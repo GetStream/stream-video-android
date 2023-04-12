@@ -22,7 +22,6 @@ import io.getstream.video.android.core.events.CallAcceptedEvent
 import io.getstream.video.android.core.events.CallEndedEvent
 import io.getstream.video.android.core.events.CallRejectedEvent
 import io.getstream.video.android.core.events.CallUpdatedEvent
-import io.getstream.video.android.core.events.ConnectedEvent
 import io.getstream.video.android.core.events.ConnectionQualityChangeEvent
 import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
 import io.getstream.video.android.core.events.ParticipantJoinedEvent
@@ -105,12 +104,12 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
     @Test
     fun `Accepting & rejecting a call`() = runTest {
-        val acceptedEvent = CallAcceptedEvent(callCid = call.cid, sentByUserId = "123", sessionId="123")
+        val acceptedEvent = CallAcceptedEvent(callCid = call.cid, sentByUserId = "123", sessionId = "123")
         clientImpl.fireEvent(acceptedEvent)
         assertThat(call.state.getParticipant("123")?.acceptedAt?.value).isNotNull()
 
         val rejectedEvent =
-            CallRejectedEvent(callCid = call.cid, user = User(id = "123"), updatedAt = Date(), sessionId="123")
+            CallRejectedEvent(callCid = call.cid, user = User(id = "123"), updatedAt = Date(), sessionId = "123")
         clientImpl.fireEvent(rejectedEvent)
         assertThat(call.state.getParticipant("123")?.rejectedAt?.value).isNotNull()
     }
@@ -246,5 +245,4 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
 //        clientImpl.fireEvent(eventUpdated)
         // TODO clean this up val eventDeleted = CallMembersDeletedEvent(user_id="thierry", is_speaking=true)
     }
-
 }
