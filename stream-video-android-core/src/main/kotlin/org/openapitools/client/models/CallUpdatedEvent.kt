@@ -52,11 +52,14 @@ data class CallUpdatedEvent (
     @Json(name = "type")
     val type: kotlin.String
 
-) : WSEvent(), WSCallEvent{
+): VideoEvent(), WSCallEvent{ 
     override fun getCallCID(): String {
         return callCid
     }
-}
 
+    override fun getEventType(): String {
+        return type
+    }
+}
 
 

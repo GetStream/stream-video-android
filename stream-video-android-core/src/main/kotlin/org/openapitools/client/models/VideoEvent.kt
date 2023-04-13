@@ -29,6 +29,7 @@ import org.openapitools.client.models.CallRecordingStoppedEvent
 import org.openapitools.client.models.CallRejectedEvent
 import org.openapitools.client.models.CallResponse
 import org.openapitools.client.models.CallUpdatedEvent
+import org.openapitools.client.models.ConnectedEvent
 import org.openapitools.client.models.CustomVideoEvent
 import org.openapitools.client.models.HealthCheckEvent
 import org.openapitools.client.models.MemberResponse
@@ -39,13 +40,12 @@ import org.openapitools.client.models.ReactionResponse
 import org.openapitools.client.models.UnblockedUserEvent
 import org.openapitools.client.models.UpdatedCallPermissionsEvent
 import org.openapitools.client.models.UserResponse
-import org.openapitools.client.models.WSConnectedEvent
 
 
 
 
 import com.squareup.moshi.*
-import org.json.JSONObject
+import org.openapitools.client.infrastructure.Serializer
 
 /**
  * The discriminator object for all websocket events, you should use this to map event payloads to their own type
@@ -53,24 +53,38 @@ import org.json.JSONObject
  */
 
 
-public sealed class WSEvent {
+public sealed class VideoEvent{ 
+    abstract fun getEventType(): String
 }
+class VideoEventAdapter : JsonAdapter<VideoEvent>() {
 
-class WSEventAdapter : JsonAdapter<WSEvent>() {
-    private val moshi = Moshi.Builder().build()
+    @FromJson
+    override fun fromJson(reader: JsonReader): VideoEvent? {
+        val peek = reader.peekJson()
+        var eventType: String? = null
+        reader.beginObject()
+        while (reader.hasNext()) {
+            if (reader.nextName() == "type") {
+                eventType = reader.nextString()
+            } else {
+                reader.skipValue()
+            }
+        }
+        reader.endObject()
 
-    override fun fromJson(reader: JsonReader): WSEvent? {
-        val jsonObject = reader.readJsonValue() as? JSONObject ?: return null
-        val type = jsonObject.optString("type", null) ?: return null
-        val jsonAdapter = moshi.adapter(getSubclass(type))
-        return jsonAdapter.fromJson(jsonObject.toString())
+        return eventType?.let {
+            peek.use { peekedReader ->
+                Serializer.moshi.adapter(getSubclass(eventType)).fromJson(peekedReader)
+            }
+        }
     }
 
-    override fun toJson(writer: JsonWriter, value: WSEvent?) {
+    @ToJson
+    override fun toJson(writer: JsonWriter, value: VideoEvent?) {
         throw UnsupportedOperationException("toJson not implemented")
     }
 
-    private fun getSubclass(type: String): Class<out WSEvent> {
+    private fun getSubclass(type: String): Class<out VideoEvent> {
         return when (type) {
             "call.accepted" -> CallAcceptedEvent::class.java
             "call.blocked_user" -> BlockedUserEvent::class.java
@@ -88,12 +102,11 @@ class WSEventAdapter : JsonAdapter<WSEvent>() {
             "call.unblocked_user" -> UnblockedUserEvent::class.java
             "call.updated" -> CallUpdatedEvent::class.java
             "call.updated_permission" -> CallMemberUpdatedPermissionEvent::class.java
-            "connection.ok" -> WSConnectedEvent::class.java
+            "connection.ok" -> ConnectedEvent::class.java
             "custom" -> CustomVideoEvent::class.java
             "health.check" -> HealthCheckEvent::class.java
             else -> throw IllegalArgumentException("Unknown type: $type")
         }
     }
 }
-
 

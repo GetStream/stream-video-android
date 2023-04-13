@@ -53,12 +53,20 @@ message HealthCheckRequest {
 }
 
 message HealthCheckResponse {
+  uint32 participant_count = 1;
 }
 
 message TrackPublished {
   string user_id = 1;
   string session_id = 2;
   models.TrackType type = 3;
+
+  // Participant information here is included as an optimisation
+  // for large calls where broadcasting on every participant join
+  // is expensive. You should **NOT** assume that this will always
+  // be available though you can use it to update the participant
+  // list when it is there.
+  models.Participant participant = 4;
 }
 
 message TrackUnpublished {
@@ -66,6 +74,13 @@ message TrackUnpublished {
   string session_id = 2;
   models.TrackType type = 3;
   models.TrackUnpublishReason cause = 4;
+
+  // Participant information here is included as an optimisation
+  // for large calls where broadcasting on every participant join
+  // is expensive. You should **NOT** assume that this will always
+  // be available though you can use it to update the participant
+  // list when it is there.
+  models.Participant participant = 5;
 }
 
 message JoinRequest {
@@ -81,6 +96,7 @@ message JoinRequest {
 message JoinResponse {
   // TODO: include full list of participants with track and audio info
   models.CallState call_state = 1;
+  uint32 participant_count = 2;
 }
 
 // ParticipantJoined is fired when a user joins a call

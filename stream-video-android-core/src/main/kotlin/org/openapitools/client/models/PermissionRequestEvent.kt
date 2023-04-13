@@ -52,11 +52,14 @@ data class PermissionRequestEvent (
     @Json(name = "user")
     val user: UserResponse
 
-) : WSEvent(), WSCallEvent{
+): VideoEvent(), WSCallEvent{ 
     override fun getCallCID(): String {
         return callCid
     }
-}
 
+    override fun getEventType(): String {
+        return type
+    }
+}
 
 

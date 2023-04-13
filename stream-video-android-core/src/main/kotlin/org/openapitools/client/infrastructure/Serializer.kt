@@ -2,7 +2,7 @@ package org.openapitools.client.infrastructure
 
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import org.openapitools.client.models.WSEventAdapter
+import org.openapitools.client.models.VideoEventAdapter
 
 object Serializer {
     @JvmStatic
@@ -13,9 +13,9 @@ object Serializer {
         .add(UUIDAdapter())
         .add(ByteArrayAdapter())
         .add(URIAdapter())
-        .add(KotlinJsonAdapterFactory())
+        .addLast(KotlinJsonAdapterFactory())
+        .add(VideoEventAdapter())
         .add(BigDecimalAdapter())
-        .add(WSEventAdapter())
         .add(BigIntegerAdapter())
 
     @JvmStatic

@@ -43,7 +43,7 @@ data class DeviceFieldsRequest (
     @Json(name = "push_provider_name")
     val pushProviderName: kotlin.String? = null
 
-) {
+)
     /**
      * 
      *
@@ -55,7 +55,5 @@ data class DeviceFieldsRequest (
         @Json(name = "huawei") huawei("huawei"),
         @Json(name = "xiaomi") xiaomi("xiaomi");
     }
-}
-
 
 

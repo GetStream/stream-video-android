@@ -28,4 +28,3 @@ import java.util.Date
 /**
  * Represents the events coming in from the socket.
  */
-typealias VideoEvent = WSEvent

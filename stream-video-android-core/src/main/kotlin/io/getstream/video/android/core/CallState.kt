@@ -33,7 +33,6 @@ import io.getstream.video.android.core.events.SFUHealthCheckEvent
 import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
-import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.core.model.User
@@ -261,7 +260,7 @@ public class CallState(val call: Call, user: User) {
                 _ownCapabilities.value = event.ownCapabilities
             }
 
-            is WSConnectedEvent -> {
+            is ConnectedEvent -> {
                 // this is handled by the client
             }
 

@@ -28,11 +28,11 @@ import com.squareup.moshi.Json
  * @param custom 
  * @param id 
  * @param role 
+ * @param teams 
  * @param updatedAt Date/time of the last update
  * @param deletedAt Date/time of deletion
  * @param image 
  * @param name 
- * @param teams 
  */
 
 
@@ -51,6 +51,9 @@ data class UserResponse (
     @Json(name = "role")
     val role: kotlin.String,
 
+    @Json(name = "teams")
+    val teams: kotlin.collections.List<kotlin.String>,
+
     /* Date/time of the last update */
     @Json(name = "updated_at")
     val updatedAt: java.time.OffsetDateTime,
@@ -63,10 +66,7 @@ data class UserResponse (
     val image: kotlin.String? = null,
 
     @Json(name = "name")
-    val name: kotlin.String? = null,
-
-    @Json(name = "teams")
-    val teams: kotlin.collections.List<kotlin.String>? = null
+    val name: kotlin.String? = null
 
 )
 

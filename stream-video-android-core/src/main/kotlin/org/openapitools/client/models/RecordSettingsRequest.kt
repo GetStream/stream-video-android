@@ -41,7 +41,7 @@ data class RecordSettingsRequest (
     @Json(name = "quality")
     val quality: RecordSettingsRequest.Quality? = null
 
-) {
+)
     /**
      * 
      *
@@ -65,7 +65,5 @@ data class RecordSettingsRequest (
         @Json(name = "1080p") _1080p("1080p"),
         @Json(name = "1440p") _1440p("1440p");
     }
-}
-
 
 

@@ -20,7 +20,6 @@ import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
 import io.getstream.video.android.core.call.ActiveSFUSession
-import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.model.CallMetadata
 import io.getstream.video.android.core.model.IceServer
@@ -29,11 +28,7 @@ import io.getstream.video.android.core.model.SendReactionData
 import io.getstream.video.android.core.model.SfuToken
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.toIceServer
-import org.openapitools.client.models.GetCallEdgeServerRequest
-import org.openapitools.client.models.GoLiveResponse
-import org.openapitools.client.models.SendReactionResponse
-import org.openapitools.client.models.StopLiveResponse
-import org.openapitools.client.models.UpdateCallResponse
+import org.openapitools.client.models.*
 
 public data class SFUConnection(
     internal val callUrl: String,
