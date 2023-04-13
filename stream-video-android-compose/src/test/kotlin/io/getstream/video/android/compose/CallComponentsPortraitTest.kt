@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.compose
 
+import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
@@ -28,7 +29,7 @@ import org.junit.Test
 internal class CallComponentsPortraitTest : BaseComposeTest() {
 
     @get:Rule
-    val paparazzi = Paparazzi()
+    val paparazzi = Paparazzi(deviceConfig = DeviceConfig.PIXEL_4A)
 
     override fun basePaparazzi(): Paparazzi = paparazzi
 

@@ -17,9 +17,9 @@
 package io.getstream.video.android.compose
 
 import androidx.compose.foundation.layout.size
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.common.util.mockParticipant
 import io.getstream.video.android.compose.base.BaseComposeTest
@@ -31,7 +31,7 @@ import org.junit.Test
 internal class AvatarTest : BaseComposeTest() {
 
     @get:Rule
-    val paparazzi = Paparazzi()
+    val paparazzi = Paparazzi(deviceConfig = DeviceConfig.PIXEL_4A)
 
     override fun basePaparazzi(): Paparazzi = paparazzi
 
@@ -49,7 +49,7 @@ internal class AvatarTest : BaseComposeTest() {
     fun `snapshot UserAvatar composable`() {
         snapshot {
             UserAvatar(
-                user = mockParticipant.user.collectAsState().value,
+                user = mockParticipant.initialUser,
                 modifier = Modifier.size(82.dp),
                 showOnlineIndicator = true
             )

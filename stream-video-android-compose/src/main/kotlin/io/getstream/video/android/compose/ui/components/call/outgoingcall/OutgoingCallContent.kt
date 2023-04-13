@@ -117,6 +117,7 @@ public fun OutgoingCallContent(
                     .align(Alignment.CenterHorizontally)
                     .padding(top = topPadding),
                 participants = participants,
+                previewPlaceholder = previewPlaceholder,
                 callType = callType
             )
         }
