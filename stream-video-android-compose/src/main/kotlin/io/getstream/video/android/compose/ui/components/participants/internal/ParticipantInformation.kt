@@ -30,7 +30,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.common.util.MockUtils
@@ -40,10 +43,12 @@ import io.getstream.video.android.common.util.mockParticipantList
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.CallStatus
+import io.getstream.video.android.core.model.CallType
 import io.getstream.video.android.core.utils.toCallUser
 
 @Composable
 internal fun ParticipantInformation(
+    callType: CallType,
     callStatus: CallStatus,
     participants: List<ParticipantState>
 ) {
@@ -76,8 +81,15 @@ internal fun ParticipantInformation(
         Text(
             modifier = Modifier.alpha(VideoTheme.dimens.onCallStatusTextAlpha),
             text = when (callStatus) {
-                CallStatus.Incoming -> "Incoming call..."
-                CallStatus.Outgoing -> "Calling..."
+                CallStatus.Incoming -> stringResource(
+                    id = io.getstream.video.android.ui.common.R.string.stream_video_call_status_incoming,
+                    callType.type.capitalize(Locale.current)
+                )
+
+                CallStatus.Outgoing -> stringResource(
+                    id = io.getstream.video.android.ui.common.R.string.stream_video_call_status_outgoing,
+                )
+
                 is CallStatus.Calling -> callStatus.duration
             },
             style = VideoTheme.typography.body,
@@ -95,6 +107,7 @@ private fun ParticipantInformationPreview() {
     MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         ParticipantInformation(
+            callType = CallType.VIDEO,
             callStatus = CallStatus.Incoming,
             participants = mockParticipantList
         )

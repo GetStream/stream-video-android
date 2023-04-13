@@ -22,67 +22,67 @@ import io.getstream.video.android.core.model.User
 /**
  * Represents various actions users can take while in a call.
  */
-public sealed class CallAction
+public sealed interface CallAction
 
 /**
  * Action to toggle if the speakerphone is on or off.
  */
 public data class ToggleSpeakerphone(
     val isEnabled: Boolean
-) : CallAction()
+) : CallAction
 
 /**
  * Action to select an audio device for playback.
  */
 public data class SelectAudioDevice(
     val audioDevice: AudioDevice
-) : CallAction()
+) : CallAction
 
 /**
  * Action to toggle if the camera is on or off.
  */
 public data class ToggleCamera(
     val isEnabled: Boolean
-) : CallAction()
+) : CallAction
 
 /**
  * Action to toggle if the microphone is on or off.
  */
 public data class ToggleMicrophone(
     val isEnabled: Boolean
-) : CallAction()
+) : CallAction
 
 /**
  * Action to flip the active camera.
  */
-public object FlipCamera : CallAction()
+public object FlipCamera : CallAction
 
 /**
  * Action to accept a call in Incoming Call state.
  */
-public object AcceptCall : CallAction()
+public object AcceptCall : CallAction
 
 /**
  * Action used to cancel an outgoing call.
  */
-public object CancelCall : CallAction()
+public object CancelCall : CallAction
 
 /**
  * Action to decline an oncoming call.
  */
-public object DeclineCall : CallAction()
+public object DeclineCall : CallAction
 
 /**
  * Action to leave the call.
  */
-public object LeaveCall : CallAction()
+public object LeaveCall : CallAction
 
 /**
  * Action to invite other users to a call.
  */
 public data class InviteUsersToCall(
     val users: List<User>
-) : CallAction()
+) : CallAction
 
 /**
  * Used to trigger Screen UI configuration changes when observing screen share sessions.
@@ -93,12 +93,12 @@ public data class InviteUsersToCall(
 public data class ToggleScreenConfiguration(
     val isFullscreen: Boolean,
     val isLandscape: Boolean
-) : CallAction()
+) : CallAction
 
 /**
  * Used to set the state to showing call info.
  */
-public object ShowCallInfo : CallAction()
+public object ShowCallInfo : CallAction
 
 /**
  * Custom action used to handle any custom behavior with the given [data], such as opening chat,
@@ -106,4 +106,4 @@ public object ShowCallInfo : CallAction()
  */
 public data class CustomAction(
     val data: Map<Any, Any> = emptyMap()
-) : CallAction()
+) : CallAction

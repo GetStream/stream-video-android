@@ -116,6 +116,7 @@ public fun IncomingCallContent(
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .padding(top = topPadding),
+                callType = callType,
                 participants = participants,
                 previewPlaceholder = previewPlaceholder
             )

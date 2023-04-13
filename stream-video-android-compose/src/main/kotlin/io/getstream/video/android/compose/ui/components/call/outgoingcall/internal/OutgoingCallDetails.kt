@@ -48,6 +48,7 @@ internal fun OutgoingCallDetails(
         }
 
         ParticipantInformation(
+            callType = callType,
             callStatus = CallStatus.Outgoing,
             participants = participants
         )

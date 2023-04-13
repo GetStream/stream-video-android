@@ -47,6 +47,7 @@ import io.getstream.video.android.compose.ui.components.participants.internal.Pa
 import io.getstream.video.android.compose.ui.components.participants.internal.PortraitParticipants
 import io.getstream.video.android.compose.ui.components.participants.internal.PortraitScreenSharingContent
 import io.getstream.video.android.core.model.CallStatus
+import io.getstream.video.android.core.model.CallType
 import io.getstream.video.android.core.model.ScreenSharingSession
 import org.junit.Rule
 import org.junit.Test
@@ -69,8 +70,9 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
     fun `snapshot ParticipantInformation composable`() {
         snapshotWithDarkMode {
             ParticipantInformation(
+                callType = CallType.VIDEO,
                 callStatus = CallStatus.Incoming,
-                participants = mockParticipants
+                participants = mockParticipants,
             )
         }
     }

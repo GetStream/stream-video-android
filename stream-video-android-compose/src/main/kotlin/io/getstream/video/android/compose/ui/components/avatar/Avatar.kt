@@ -22,6 +22,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -79,7 +80,8 @@ public fun Avatar(
         Image(
             modifier = modifier
                 .fillMaxSize()
-                .testTag("video_renderer"),
+                .clip(CircleShape)
+                .testTag("avatar"),
             painter = painterResource(id = previewPlaceholder),
             contentScale = ContentScale.Crop,
             contentDescription = null

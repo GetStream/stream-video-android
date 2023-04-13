@@ -44,7 +44,10 @@ internal class CallContentTest : BaseComposeTest() {
     @Test
     fun `snapshot IncomingCallContentDetails composable`() {
         snapshot {
-            IncomingCallDetails(participants = mockParticipantList)
+            IncomingCallDetails(
+                callType = CallType.VIDEO,
+                participants = mockParticipantList
+            )
         }
     }
 
