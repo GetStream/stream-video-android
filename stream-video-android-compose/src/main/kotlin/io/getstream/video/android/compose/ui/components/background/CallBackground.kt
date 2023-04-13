@@ -148,7 +148,7 @@ private fun CallBackgroundPreview() {
     MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         CallBackground(
-            participants = mockParticipants,
+            participants = mockParticipants.take(1),
             callType = CallType.VIDEO,
             isIncoming = true
         ) {
