@@ -229,7 +229,8 @@ public class RtcSession internal constructor(
             user?.id.isNullOrBlank()
         ) throw IllegalArgumentException("The API key, user ID and token cannot be empty!")
 
-
+        // step 1 setup the peer connections
+        createSubscriber()
         val getSdp = suspend {
             getSubscriberSdp().description
         }
@@ -316,8 +317,7 @@ public class RtcSession internal constructor(
     }
 
     suspend fun connectRtc(): Result<JoinResponse> {
-        // step 1 setup the peer connections
-        createSubscriber()
+
         // if we are allowed to publish, create a peer connection for it
         // TODO: real settings check
         val publishing = true
