@@ -19,6 +19,7 @@ package io.getstream.video.android.compose.ui.components.participants.internal
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
@@ -32,7 +33,6 @@ import androidx.compose.ui.unit.dp
 import io.getstream.video.android.common.util.MockUtils
 import io.getstream.video.android.common.util.mockParticipantList
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.avatar.InitialsAvatar
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.ui.common.R
@@ -55,31 +55,23 @@ internal fun ParticipantAvatars(
                     previewPlaceholder = previewPlaceholder
                 )
             } else {
-                LazyRow(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
-                    items(participants.take(2)) { participant ->
-                        UserAvatar(
-                            modifier = Modifier.size(VideoTheme.dimens.callAvatarSize),
-                            user = participant.initialUser,
-                            previewPlaceholder = previewPlaceholder
-                        )
-                    }
-
-                    if (participants.size == 3) {
-                        item {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
+                        items(participants.take(2)) { participant ->
                             UserAvatar(
                                 modifier = Modifier.size(VideoTheme.dimens.callAvatarSize),
-                                user = participants[2].initialUser,
+                                user = participant.initialUser,
                                 previewPlaceholder = previewPlaceholder
                             )
                         }
-                    } else if (participants.size > 3) {
-                        item {
-                            InitialsAvatar(
-                                modifier = Modifier.size(VideoTheme.dimens.callAvatarSize),
-                                initials = "+${participants.size - 2}",
-                                initialTransformer = { it }
-                            )
-                        }
+                    }
+
+                    if (participants.size >= 3) {
+                        UserAvatar(
+                            modifier = Modifier.size(VideoTheme.dimens.callAvatarSize),
+                            user = participants[2].initialUser,
+                            previewPlaceholder = previewPlaceholder
+                        )
                     }
                 }
             }

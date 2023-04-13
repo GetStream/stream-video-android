@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.compose.ui.components.call.outgoingcall
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -38,6 +39,7 @@ import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CallMediaState
 import io.getstream.video.android.core.model.CallType
 import io.getstream.video.android.core.viewmodel.CallViewModel
+import io.getstream.video.android.ui.common.R
 
 /**
  * Represents the Outgoing Call state and UI, when the user is calling other people.
@@ -86,6 +88,7 @@ public fun OutgoingCallContent(
     participants: List<ParticipantState>,
     callMediaState: CallMediaState,
     modifier: Modifier = Modifier,
+    @DrawableRes previewPlaceholder: Int = R.drawable.stream_video_ic_preview_avatar,
     onBackPressed: () -> Unit,
     onCallAction: (CallAction) -> Unit,
 ) {
@@ -147,6 +150,7 @@ private fun OutgoingCallVideoPreview() {
             callType = CallType.VIDEO,
             participants = mockParticipants,
             callMediaState = CallMediaState(),
+            previewPlaceholder = R.drawable.stream_video_call_sample,
             onBackPressed = {}
         ) {}
     }
@@ -161,6 +165,7 @@ private fun OutgoingCallAudioPreview() {
             callType = CallType.AUDIO,
             participants = mockParticipants,
             callMediaState = CallMediaState(),
+            previewPlaceholder = R.drawable.stream_video_call_sample,
             onBackPressed = {}
         ) {}
     }

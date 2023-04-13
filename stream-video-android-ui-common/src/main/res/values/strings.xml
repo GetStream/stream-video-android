@@ -36,6 +36,9 @@
     <string name="stream_video_invite_users_accept">Invite</string>
     <string name="stream_video_change_orientation">Change orientation</string>
     <string name="stream_video_toggle_fullscreen">Toggle fullscreen mode</string>
+    <string name="stream_video_call_participants_empty">No participants</string>
+    <string name="stream_video_call_participants_conjunction">and</string>
+    <string name="stream_video_call_participants_trailing">more</string>
 
     <string name="stream_video_call_status_incoming">Incoming %s call…</string>
     <string name="stream_video_call_status_outgoing">Calling…</string>

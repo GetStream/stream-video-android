@@ -55,11 +55,12 @@ internal fun ParticipantInformation(
     Column(
         modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        val context = LocalContext.current
         val callUsers by remember { derivedStateOf { participants.map { it.toCallUser() } } }
         val text = if (participants.size < 3) {
-            buildSmallCallText(callUsers)
+            buildSmallCallText(context, callUsers)
         } else {
-            buildLargeCallText(callUsers)
+            buildLargeCallText(context, callUsers)
         }
 
         val fontSize = if (participants.size == 1) {

@@ -24,7 +24,7 @@
     <dimen name="stream_video_smallButtonSize">32dp</dimen>
     <dimen name="stream_video_topAppbarHeight">64dp</dimen>
     <dimen name="stream_video_landscapeTopAppBarHeight">48dp</dimen>
-    <dimen name="stream_video_avatarAppbarPadding">100dp</dimen>
+    <dimen name="stream_video_avatarAppbarPadding">20dp</dimen>
     <dimen name="stream_video_singleAvatarAppbarPadding">20dp</dimen>
     <dimen name="stream_video_participantsTextPadding">65dp</dimen>
     <dimen name="stream_video_incomingCallOptionsBottomPadding">64dp</dimen>
