@@ -38,7 +38,7 @@ import kotlin.coroutines.suspendCoroutine
  * - Flow to avoid concurrency related bugs
  * - Ability to wait till the socket is connected (important to prevent race conditions)
  */
-open class PersistentSocket(
+open class PersistentSocket<T>(
     /** The URL to connect to */
     private val url: String,
     /** Inject your http client */
@@ -66,7 +66,7 @@ open class PersistentSocket(
     var connectionId: String = ""
 
     /** Continuation if the socket successfully connected and we've authenticated */
-    lateinit var connected : Continuation<Any>
+    lateinit var connected : Continuation<T>
 
     internal lateinit var socket: WebSocket
 
@@ -78,7 +78,7 @@ open class PersistentSocket(
     /**
      * Connect the socket, authenticate, start the healthmonitor and see if the network is online
      */
-    suspend fun  connect() = suspendCoroutine<Any> { connectedContinuation ->
+    suspend fun  connect() = suspendCoroutine<T> { connectedContinuation ->
         logger.i { "[connect]" }
         connected = connectedContinuation
         scope.launch {
@@ -179,14 +179,9 @@ open class PersistentSocket(
                 // TODO: rename when we fix event parsing
                 connectionId = processedEvent.clientId
                 _connectionState.value = SocketState.Connected(processedEvent)
-            } else if (processedEvent is JoinCallResponseEvent) {
+            } else if (processedEvent is JoinCallResponseEvent || processedEvent is ConnectedEvent) {
                 if (!continuationCompleted) {
-                    connected.resume(processedEvent)
-                    continuationCompleted = true
-                }
-            } else if (processedEvent is ConnectedEvent) {
-                if (!continuationCompleted) {
-                    connected.resume(processedEvent)
+                    connected.resume(processedEvent as T)
                     continuationCompleted = true
                 }
             }

@@ -2,6 +2,7 @@ package io.getstream.video.android.core.socket
 
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
+import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -22,7 +23,7 @@ public class SfuSocket(
     private val scope : CoroutineScope = CoroutineScope(DispatcherProvider.IO),
     private val httpClient: OkHttpClient,
     private val networkStateProvider: NetworkStateProvider
-): PersistentSocket(
+): PersistentSocket<JoinCallResponseEvent> (
     url=url,
     httpClient=httpClient,
     token=token,
