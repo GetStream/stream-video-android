@@ -168,29 +168,8 @@ class HomeActivity : AppCompatActivity() {
             logger.d { "[joinCall] callId: $callId" }
             loadingState.value = true
 
-            streamVideo.getOrCreateCall("default", id = callId)
-                .onSuccessSuspend { callMetadata ->
-                    val call = streamVideo.call(callMetadata.type, id = callMetadata.cid)
-                    call.join().onSuccess { joinedCall ->
-                        logger.v { "[joinCall] succeed: $joinedCall" }
-                        loadingState.value = false
-                    }.onError {
-                        logger.e { "[joinCall] failed: $it" }
-                        loadingState.value = false
-
-                        val throwable = it.extractCause()
-                        if (throwable is HttpException && throwable.code() == 401) {
-                            Toast.makeText(
-                                this@HomeActivity, R.string.unauthorized_error, Toast.LENGTH_SHORT
-                            ).show()
-                            logOut()
-                        } else {
-                            Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                }.onError {
-                    Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
-                }
+            val call = streamVideo.call("default", callId)
+            call.join()
         }
     }
 
