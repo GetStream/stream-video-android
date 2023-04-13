@@ -266,7 +266,7 @@ public class CallState(val call: Call, user: User) {
             is CallMemberAddedEvent -> TODO()
             is CallMemberUpdatedPermissionEvent -> TODO()
             is CallReactionEvent -> TODO()
-            is WSConnectedEvent -> TODO()
+            is ConnectedEvent -> TODO()
         }
     }
 

@@ -53,6 +53,7 @@ data class CallMemberRemovedEvent (
     val type: kotlin.String
 
 ): VideoEvent(), WSCallEvent{ 
+
     override fun getCallCID(): String {
         return callCid
     }
@@ -61,5 +62,6 @@ data class CallMemberRemovedEvent (
         return type
     }
 }
+
 
 

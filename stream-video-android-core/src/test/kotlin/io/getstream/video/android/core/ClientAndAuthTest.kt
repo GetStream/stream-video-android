@@ -20,8 +20,6 @@ import com.google.common.truth.Truth.assertThat
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.video.android.core.errors.VideoErrorCode
-import io.getstream.video.android.core.events.ConnectedEvent
-import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.model.QueryCallsData
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.UserType
@@ -29,6 +27,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.openapitools.client.models.ConnectedEvent
+import org.openapitools.client.models.VideoEvent
 import org.robolectric.RobolectricTestRunner
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine

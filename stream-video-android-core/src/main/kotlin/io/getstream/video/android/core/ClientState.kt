@@ -22,7 +22,6 @@ import kotlinx.coroutines.flow.StateFlow
 import org.openapitools.client.models.CallCreatedEvent
 import org.openapitools.client.models.ConnectedEvent
 import org.openapitools.client.models.VideoEvent
-import org.openapitools.client.models.WSConnectedEvent
 
 sealed class ConnectionState() {
     object PreConnect : ConnectionState()

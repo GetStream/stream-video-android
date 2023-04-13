@@ -54,6 +54,7 @@ data class CallMemberUpdatedEvent (
     val type: kotlin.String
 
 ): VideoEvent(), WSCallEvent{ 
+
     override fun getCallCID(): String {
         return callCid
     }
@@ -62,5 +63,6 @@ data class CallMemberUpdatedEvent (
         return type
     }
 }
+
 
 

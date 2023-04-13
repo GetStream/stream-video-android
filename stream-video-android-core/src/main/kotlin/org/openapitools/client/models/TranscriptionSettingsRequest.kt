@@ -38,6 +38,9 @@ data class TranscriptionSettingsRequest (
     val mode: TranscriptionSettingsRequest.Mode? = null
 
 )
+
+{
+
     /**
      * 
      *
@@ -48,5 +51,8 @@ data class TranscriptionSettingsRequest (
         @Json(name = "disabled") disabled("disabled"),
         @Json(name = "auto-on") autoOn("auto-on");
     }
+
+}
+
 
 

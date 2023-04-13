@@ -53,9 +53,11 @@ import org.openapitools.client.infrastructure.Serializer
  */
 
 
-public sealed class VideoEvent{ 
+public abstract class VideoEvent{ 
     abstract fun getEventType(): String
 }
+
+
 class VideoEventAdapter : JsonAdapter<VideoEvent>() {
 
     @FromJson

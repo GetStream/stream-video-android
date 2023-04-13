@@ -52,6 +52,7 @@ data class BlockedUserEvent (
     val blockedByUser: UserResponse? = null
 
 ): VideoEvent(), WSCallEvent{ 
+
     override fun getCallCID(): String {
         return callCid
     }
@@ -60,5 +61,6 @@ data class BlockedUserEvent (
         return type
     }
 }
+
 
 

@@ -54,6 +54,7 @@ data class UpdatedCallPermissionsEvent (
     val user: UserResponse
 
 ): VideoEvent(), WSCallEvent{ 
+
     override fun getCallCID(): String {
         return callCid
     }
@@ -62,5 +63,6 @@ data class UpdatedCallPermissionsEvent (
         return type
     }
 }
+
 
 

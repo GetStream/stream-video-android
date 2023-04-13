@@ -1,13 +1,12 @@
 #!/usr/bin/env bash
 
-# uncomment this if you run into problems
-#set -xe
+set -e
 
 BASEDIR=$(dirname "$(pwd)")
 PROTOCOL_ROOT="$BASEDIR/protocol"
 PROJECT_ROOT=$(pwd)
 GENERATED_CODE_ROOT="$BASEDIR/generated"
-PROTOCOL_PULL_LATEST="y"
+PROTOCOL_PULL_LATEST="n"
 
 echo "Enter path to protocol root. If the project is missing will clone the repo to the path, default: ($PROTOCOL_ROOT):"
 read -r PROTOCOL_ROOT_TEMP
@@ -44,13 +43,27 @@ else
   git clone git@github.com:GetStream/protocol.git "$PROTOCOL_ROOT"
 fi
 
-docker run --rm -v "${GENERATED_CODE_ROOT}:/local" ghcr.io/getstream/openapi-generator:master generate \
-   -i https://raw.githubusercontent.com/GetStream/protocol/main/openapi/video-openapi.yaml \
-   --additional-properties=library=jvm-retrofit2,useCoroutines \
-   -g kotlin \
-   -o /local
-
 CLIENT_ROOT="$GENERATED_CODE_ROOT/src/main/kotlin/org/openapitools/client"
+rm -rf "${CLIENT_ROOT}"
+
+# you can use this to use openapi templates from your laptop (openapi-generator needs to be in ~/src)
+#java -jar ~/src/openapi-generator/modules/openapi-generator-cli/target/openapi-generator-cli.jar generate \
+#   -i ~/src/protocol/openapi/video-openapi.yaml --additional-properties=library=jvm-retrofit2,useCoroutines \
+#   -t ~/src/openapi-generator/modules/openapi-generator/src/main/resources/kotlin-client/ \
+#   -g kotlin \
+#   -o "${GENERATED_CODE_ROOT}"
+
+docker pull ghcr.io/getstream/openapi-generator:master
+
+docker run --rm \
+  -v "${GENERATED_CODE_ROOT}:/local" \
+  -v "/Users/tommaso/src/protocol:/protocol" \
+  ghcr.io/getstream/openapi-generator:master generate \
+  -i https://raw.githubusercontent.com/GetStream/protocol/main/openapi/video-openapi.yaml \
+  --additional-properties=library=jvm-retrofit2,useCoroutines \
+  -g kotlin \
+  -o /local
+
 APIS_ROOT="$CLIENT_ROOT/apis"
 INFRASTRUCTURE_ROOT="$CLIENT_ROOT/infrastructure"
 
@@ -61,13 +74,13 @@ rm "$APIS_ROOT/UsersApi.kt"
 API_REQUEST_REGEX="@(?:POST|DELETE|GET|PUT)\(\"(.*?)\""
 RETROFIT_IMPORTS_REGEX="(Body)|^[[:space:]]*@([^()]*)\("
 
-for FILE in $APIS_ROOT/*.kt; do
-  echo Processing $FILE
-  sed -i '' 's/kotlin.//g; s/Response<//g; s/>//g' $FILE
+for FILE in "$APIS_ROOT"/*.kt; do
+  echo "Processing ${FILE}"
+  sed -i '' 's/kotlin.//g; s/Response<//g; s/>//g' "${FILE}"
 done
 
 for FILE in "$APIS_ROOT"/*.kt; do
-  echo Processing "$FILE"
+  echo "Processing ${FILE}"
 
   grep -iE "$API_REQUEST_REGEX" "$FILE" | while read -r line; do
     UPDATED_REQUEST=$(sed 's/("/("\/video\//g' <<<$line)
@@ -94,5 +107,6 @@ for FILE in "$APIS_ROOT"/*.kt; do
   sed -i '' "s/import retrofit2\.http\.\*/$PREPARED_IMPORTS/g" "$FILE"
 done
 
+rm -rf "${PROJECT_ROOT}/stream-video-android-core/src/main/kotlin/org/openapitools/client"
 cp -r "${CLIENT_ROOT}/" "${PROJECT_ROOT}/stream-video-android-core/src/main/kotlin/org/openapitools/client"
 cp -r "${PROTOCOL_ROOT}/protobuf/." "${PROJECT_ROOT}/stream-video-android-core/src/main/proto"

@@ -44,9 +44,11 @@ data class HealthCheckEvent (
     val type: kotlin.String
 
 ): VideoEvent(), WSClientEvent{ 
+
     override fun getEventType(): String {
         return type
     }
 }
+
 
 

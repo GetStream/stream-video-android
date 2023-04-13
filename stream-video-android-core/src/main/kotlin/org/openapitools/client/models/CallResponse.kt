@@ -15,6 +15,7 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.CallIngressResponse
 import org.openapitools.client.models.CallSettingsResponse
 import org.openapitools.client.models.OwnCapability
 import org.openapitools.client.models.UserResponse
@@ -35,6 +36,7 @@ import com.squareup.moshi.Json
  * @param createdBy 
  * @param custom Custom data for this object
  * @param id Call ID
+ * @param ingress 
  * @param ownCapabilities The capabilities of the current user
  * @param recording 
  * @param settings 
@@ -77,6 +79,9 @@ data class CallResponse (
     @Json(name = "id")
     val id: kotlin.String,
 
+    @Json(name = "ingress")
+    val ingress: CallIngressResponse,
+
     /* The capabilities of the current user */
     @Json(name = "own_capabilities")
     val ownCapabilities: kotlin.collections.List<OwnCapability>,
@@ -110,5 +115,7 @@ data class CallResponse (
     val team: kotlin.String? = null
 
 )
+
+
 
 

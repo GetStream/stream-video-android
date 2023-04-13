@@ -107,7 +107,7 @@ internal class StreamVideoImpl internal constructor(
     internal val preferences: UserPreferences,
 ) : StreamVideo {
 
-    private lateinit var connectContinuation: Continuation<Result<WSConnectedEvent>>
+    private lateinit var connectContinuation: Continuation<Result<ConnectedEvent>>
 
     var developmentMode = true // if true we fail fast on errors instead of logging them
 

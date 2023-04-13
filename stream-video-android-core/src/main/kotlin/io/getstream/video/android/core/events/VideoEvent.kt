@@ -16,14 +16,6 @@
 
 package io.getstream.video.android.core.events
 
-import io.getstream.video.android.core.model.CallDetails
-import io.getstream.video.android.core.model.CallInfo
-import io.getstream.video.android.core.model.CallUser
-import io.getstream.video.android.core.model.StreamCallCid
-import io.getstream.video.android.core.model.User
-import org.openapitools.client.models.OwnCapability
-import org.openapitools.client.models.WSEvent
-import java.util.Date
 
 /**
  * Represents the events coming in from the socket.

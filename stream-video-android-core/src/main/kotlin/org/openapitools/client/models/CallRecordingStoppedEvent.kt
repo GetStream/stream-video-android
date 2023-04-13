@@ -43,6 +43,7 @@ data class CallRecordingStoppedEvent (
     val type: kotlin.String
 
 ): VideoEvent(), WSCallEvent{ 
+
     override fun getCallCID(): String {
         return callCid
     }
@@ -51,5 +52,6 @@ data class CallRecordingStoppedEvent (
         return type
     }
 }
+
 
 

@@ -18,18 +18,10 @@ package io.getstream.video.android.core
 
 import com.google.common.truth.Truth.assertThat
 import io.getstream.video.android.core.events.AudioLevelChangedEvent
-import io.getstream.video.android.core.events.CallAcceptedEvent
-import io.getstream.video.android.core.events.CallEndedEvent
-import io.getstream.video.android.core.events.CallRejectedEvent
-import io.getstream.video.android.core.events.CallUpdatedEvent
 import io.getstream.video.android.core.events.ConnectionQualityChangeEvent
 import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
 import io.getstream.video.android.core.events.ParticipantJoinedEvent
 import io.getstream.video.android.core.events.ParticipantLeftEvent
-import io.getstream.video.android.core.events.PermissionRequestEvent
-import io.getstream.video.android.core.events.RecordingStartedEvent
-import io.getstream.video.android.core.events.RecordingStoppedEvent
-import io.getstream.video.android.core.events.UpdatedCallPermissionsEvent
 import io.getstream.video.android.core.model.CallInfo
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.UserAudioLevel
@@ -92,12 +84,12 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
     @Test
     fun `test start and stop recording`() = runTest {
         // start by sending the start recording event
-        val event = RecordingStartedEvent(callCid = call.cid, cid = call.cid, type = "123")
+        val event = CallRecordingStartedEvent(callCid = call.cid, type = "123")
         clientImpl.fireEvent(event)
         assertThat(call.state.recording.value).isTrue()
         // now stop recording
         val stopRecordingEvent =
-            RecordingStoppedEvent(callCid = call.cid, cid = call.cid, type = "123")
+            CallRecordingStoppedEvent(callCid = call.cid, type = "123")
         clientImpl.fireEvent(stopRecordingEvent)
         assertThat(call.state.recording.value).isFalse()
     }
@@ -178,6 +170,7 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
             capabilitiesByRole,
             info = callInfo,
             ownCapabilities = ownCapabilities
+            // {"admin: ["mute-user", ...], "user": ["send-audio", ...], "speaker": ["send-video", ...]}
         )
         clientImpl.fireEvent(event)
         // ensure we update call data and capabilities

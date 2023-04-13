@@ -14,17 +14,11 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.jsonPrimitive
 import okhttp3.*
 import okio.ByteString
 import org.openapitools.client.infrastructure.Serializer
 import org.openapitools.client.models.ConnectedEvent
-import org.openapitools.client.models.HealthCheckEvent
 import org.openapitools.client.models.VideoEvent
-import org.openapitools.client.models.WSEvent
 import stream.video.sfu.event.HealthCheckRequest
 import stream.video.sfu.event.SfuEvent
 import kotlin.coroutines.Continuation
@@ -201,7 +195,8 @@ open class PersistentSocket<T>(
             logger.d { "parsed event $processedEvent" }
 
             // emit the message
-            events.emit(processedEvent)
+            // TODO: raise an error!!
+            events.emit(processedEvent!!)
         }
     }
 

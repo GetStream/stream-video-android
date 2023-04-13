@@ -48,6 +48,7 @@ data class UnblockedUserEvent (
     val user: UserResponse
 
 ): VideoEvent(), WSCallEvent{ 
+
     override fun getCallCID(): String {
         return callCid
     }
@@ -56,5 +57,6 @@ data class UnblockedUserEvent (
         return type
     }
 }
+
 
 

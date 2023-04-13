@@ -47,6 +47,7 @@ data class CallAcceptedEvent (
     val user: UserResponse
 
 ): VideoEvent(), WSCallEvent{ 
+
     override fun getCallCID(): String {
         return callCid
     }
@@ -55,5 +56,6 @@ data class CallAcceptedEvent (
         return type
     }
 }
+
 
 
