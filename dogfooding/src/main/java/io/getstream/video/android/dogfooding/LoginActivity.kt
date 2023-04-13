@@ -272,6 +272,9 @@ class LoginActivity : ComponentActivity() {
                 id = authUser?.email ?: userJSON.getString("userId"),
                 name = authUser?.displayName ?: "",
                 imageUrl = authUser?.photoUrl?.toString() ?: "",
+                custom = mapOf(
+                    "email" to userJSON.getString("email")
+                )
             )
 
             startHome(user, token)
