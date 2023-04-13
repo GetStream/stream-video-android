@@ -38,7 +38,7 @@ data class UpdatedCallPermissionsEvent(
     val callCid: kotlin.String,
 
     @Json(name = "created_at")
-    val createdAt: java.time.OffsetDateTime,
+    val createdAt: org.threeten.bp.OffsetDateTime,
 
     /* The capabilities of the current user */
     @Json(name = "own_capabilities")

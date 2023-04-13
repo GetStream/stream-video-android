@@ -24,6 +24,7 @@
 package org.openapitools.client.models
 
 import com.squareup.moshi.Json
+import org.threeten.bp.OffsetDateTime
 
 /**
  * *
@@ -32,7 +33,7 @@ import com.squareup.moshi.Json
 data class CallTypeResponse(
 
     @Json(name = "created_at")
-    val createdAt: java.time.OffsetDateTime,
+    val createdAt: OffsetDateTime,
 
     @Json(name = "grants")
     val grants: kotlin.collections.Map<kotlin.String, kotlin.collections.List<kotlin.String>>,
@@ -44,6 +45,6 @@ data class CallTypeResponse(
     val settings: CallSettingsResponse,
 
     @Json(name = "updated_at")
-    val updatedAt: java.time.OffsetDateTime
+    val updatedAt: OffsetDateTime
 
 )

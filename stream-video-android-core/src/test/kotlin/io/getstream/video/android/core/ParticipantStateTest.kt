@@ -24,7 +24,6 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import stream.video.sfu.models.ConnectionQuality
 import stream.video.sfu.models.Participant
-import java.time.Instant
 import java.util.*
 
 @RunWith(RobolectricTestRunner::class)
@@ -44,11 +43,10 @@ class ParticipantStateTest : IntegrationTestBase(connectCoordinatorWS = false) {
         }
 
         // when we receive this event there is more info about the participant
-        val now = Instant.now()
         val participant = Participant(
             user_id = "test",
             session_id = "123",
-            joined_at = now,
+            joined_at = java.time.Instant.now(),
             track_lookup_prefix = "hello",
             connection_quality = ConnectionQuality.CONNECTION_QUALITY_GOOD,
             is_speaking = false,

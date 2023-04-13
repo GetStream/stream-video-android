@@ -24,6 +24,7 @@
 package org.openapitools.client.models
 
 import com.squareup.moshi.Json
+import org.threeten.bp.OffsetDateTime
 
 /**
  * This event is sent when a call is updated, clients should use this update the local state of the call.  This event also contains the capabilities by role for the call, clients should update the own_capability for the current.
@@ -45,7 +46,7 @@ data class CallUpdatedEvent(
     val capabilitiesByRole: kotlin.collections.Map<kotlin.String, kotlin.collections.List<kotlin.String>>,
 
     @Json(name = "created_at")
-    val createdAt: java.time.OffsetDateTime,
+    val createdAt: OffsetDateTime,
 
     /* The type of event: \"call.ended\" in this case */
     @Json(name = "type")

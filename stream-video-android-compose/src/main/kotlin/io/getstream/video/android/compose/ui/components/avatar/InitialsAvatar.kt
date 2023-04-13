@@ -50,6 +50,7 @@ internal fun InitialsAvatar(
     shape: Shape = VideoTheme.shapes.avatar,
     textStyle: TextStyle = VideoTheme.typography.title3Bold,
     avatarOffset: DpOffset = DpOffset(0.dp, 0.dp),
+    initialTransformer: (String) -> String = { it.initials() }
 ) {
     val initialsGradient = initialsGradient(initials = initials)
 
@@ -62,7 +63,7 @@ internal fun InitialsAvatar(
             modifier = Modifier
                 .align(Alignment.Center)
                 .offset(avatarOffset.x, avatarOffset.y),
-            text = initials.initials(),
+            text = initialTransformer.invoke(initials),
             style = textStyle,
             color = VideoTheme.colors.avatarInitials
         )

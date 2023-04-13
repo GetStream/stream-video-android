@@ -20,12 +20,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.common.util.mockParticipant
 import io.getstream.video.android.common.util.mockParticipantList
@@ -48,7 +48,7 @@ import io.getstream.video.android.compose.ui.components.participants.internal.Pa
 import io.getstream.video.android.compose.ui.components.participants.internal.PortraitParticipants
 import io.getstream.video.android.compose.ui.components.participants.internal.PortraitScreenSharingContent
 import io.getstream.video.android.core.model.CallStatus
-import io.getstream.video.android.core.model.CallUser
+import io.getstream.video.android.core.model.CallType
 import io.getstream.video.android.core.model.ScreenSharingSession
 import org.junit.Rule
 import org.junit.Test
@@ -56,7 +56,7 @@ import org.junit.Test
 internal class ParticipantsPortraitTest : BaseComposeTest() {
 
     @get:Rule
-    val paparazzi = Paparazzi()
+    val paparazzi = Paparazzi(deviceConfig = DeviceConfig.PIXEL_4A)
 
     override fun basePaparazzi(): Paparazzi = paparazzi
 
@@ -71,20 +71,9 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
     fun `snapshot ParticipantInformation composable`() {
         snapshotWithDarkMode {
             ParticipantInformation(
+                callType = CallType.VIDEO,
                 callStatus = CallStatus.Incoming,
-                participants = mockParticipantList.map {
-                    val user by it.user.collectAsState()
-                    CallUser(
-                        id = user.id,
-                        name = user.name,
-                        role = user.role,
-                        state = null,
-                        imageUrl = user.imageUrl,
-                        createdAt = null,
-                        updatedAt = null,
-                        teams = emptyList()
-                    )
-                }
+                participants = mockParticipants,
             )
         }
     }

@@ -24,6 +24,7 @@
 package org.openapitools.client.models
 
 import com.squareup.moshi.Json
+import org.threeten.bp.OffsetDateTime
 
 /**
  * This event is sent when a user requests access to a feature on a call, clients receiving this event should display a permission request to the user
@@ -38,7 +39,7 @@ data class PermissionRequestEvent(
     val callCid: kotlin.String,
 
     @Json(name = "created_at")
-    val createdAt: java.time.OffsetDateTime,
+    val createdAt: OffsetDateTime,
 
     /* The list of permissions requested by the user */
     @Json(name = "permissions")

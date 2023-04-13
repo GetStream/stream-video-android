@@ -19,6 +19,7 @@ package io.getstream.video.android.compose
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.ui.Alignment
+import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.common.model.Muted
 import io.getstream.video.android.common.model.Speaking
@@ -36,16 +37,18 @@ import stream.video.sfu.models.ConnectionQuality
 internal class IndicatorsTest : BaseComposeTest() {
 
     @get:Rule
-    val paparazzi = Paparazzi()
+    val paparazzi = Paparazzi(deviceConfig = DeviceConfig.PIXEL_4A)
 
     override fun basePaparazzi(): Paparazzi = paparazzi
 
     @Test
     fun `snapshot SoundIndicator composable`() {
         snapshot {
-            SoundIndicator(state = Speaking)
-            SoundIndicator(state = Unmuted)
-            SoundIndicator(state = Muted)
+            Row {
+                SoundIndicator(state = Speaking)
+                SoundIndicator(state = Unmuted)
+                SoundIndicator(state = Muted)
+            }
         }
     }
 
@@ -58,7 +61,7 @@ internal class IndicatorsTest : BaseComposeTest() {
 
     @Test
     fun `snapshot Connection ConnectionQualityIndicator composable`() {
-        snapshotWithDarkMode {
+        snapshot {
             Row {
                 ConnectionQualityIndicator(
                     connectionQuality = ConnectionQuality.CONNECTION_QUALITY_POOR
@@ -75,7 +78,7 @@ internal class IndicatorsTest : BaseComposeTest() {
 
     @Test
     fun `snapshot Connection ParticipantLabel composable`() {
-        snapshotWithDarkMode {
+        snapshot {
             Box {
                 ParticipantLabel(
                     participant = mockParticipantList[1],

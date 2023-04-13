@@ -17,7 +17,7 @@ androidxStartup = "1.1.1"
 androidxActivity = "1.5.1"
 googleService = "4.3.14"
 
-androidxComposeBom = "2023.03.00"
+androidxComposeBom = "2023.04.00"
 androidxComposeCompiler = "1.4.4"
 androidxComposeTracing = "1.0.0-alpha01"
 
@@ -28,6 +28,7 @@ wire = "4.4.1"
 okhttp = "4.10.0"
 retrofit = "2.9.0"
 moshi = "1.14.0"
+threetenAbp = "1.4.6"
 
 streamWebRTC = "1.0.2"
 streamResult = "1.1.0"
@@ -96,6 +97,7 @@ okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor",
 moshi = { group = "com.squareup.moshi", name = "moshi", version.ref = "moshi" }
 moshi-kotlin = { group = "com.squareup.moshi", name = "moshi-kotlin", version.ref = "moshi" }
 moshi-adapters = { group = "com.squareup.moshi", name = "moshi-adapters", version.ref = "moshi" }
+threentenabp = { group = "com.jakewharton.threetenabp", name = "threetenabp", version.ref = "threetenAbp" }
 
 stream-webrtc = { group = "io.getstream", name = "stream-webrtc-android", version.ref = "streamWebRTC" }
 stream-webrtc-ui = { group = "io.getstream", name = "stream-webrtc-android-ui", version.ref = "streamWebRTC" }
