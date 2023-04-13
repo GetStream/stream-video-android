@@ -84,12 +84,12 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
     @Test
     fun `test start and stop recording`() = runTest {
         // start by sending the start recording event
-        val event = CallRecordingStartedEvent(callCid = call.cid, type = "123")
+        val event = CallRecordingStartedEvent(callCid = call.cid, nowUtc,"call.recording_started")
         clientImpl.fireEvent(event)
         assertThat(call.state.recording.value).isTrue()
         // now stop recording
         val stopRecordingEvent =
-            CallRecordingStoppedEvent(callCid = call.cid, type = "123")
+            CallRecordingStoppedEvent(callCid = call.cid, nowUtc, "call.recording_stopped")
         clientImpl.fireEvent(stopRecordingEvent)
         assertThat(call.state.recording.value).isFalse()
     }
@@ -97,12 +97,14 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
     @Test
     fun `Accepting & rejecting a call`() = runTest {
 
-        val acceptedEvent = CallAcceptedEvent(callCid = call.cid, sentByUserId = "123", sessionId = "123")
+        val thierry = testData.users["thierry"]!!
+
+        val acceptedEvent = CallAcceptedEvent(callCid = call.cid, nowUtc, "call.accepted", user=thierry.toUserResponse())
         clientImpl.fireEvent(acceptedEvent)
         assertThat(call.state.getParticipant("123")?.acceptedAt?.value).isNotNull()
 
         val rejectedEvent =
-            CallRejectedEvent(callCid = call.cid, user = User(id = "123"), updatedAt = Date(), sessionId = "123")
+            CallRejectedEvent(callCid = call.cid, nowUtc, "call.rejected", user = User(id = "123").toUserResponse())
         clientImpl.fireEvent(rejectedEvent)
         assertThat(call.state.getParticipant("123")?.rejectedAt?.value).isNotNull()
     }
@@ -166,11 +168,11 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
             )
         )
         val event = CallUpdatedEvent(
+            call = call.toResponse(),
             callCid = call.cid,
-            capabilitiesByRole,
-            info = callInfo,
-            ownCapabilities = ownCapabilities
-            // {"admin: ["mute-user", ...], "user": ["send-audio", ...], "speaker": ["send-video", ...]}
+            capabilitiesByRole =capabilitiesByRole,
+            createdAt = nowUtc,
+            type = "call.ended",
         )
         clientImpl.fireEvent(event)
         // ensure we update call data and capabilities
@@ -185,7 +187,7 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
         // TODO: CID & Type?
         val permissions = mutableListOf<String>("screenshare")
         val requestEvent =
-            PermissionRequestEvent(call.cid, "whatsthis", permissions, testData.users["thierry"]!!)
+            PermissionRequestEvent(call.cid, nowUtc, permissions, "call.permission_request", testData.users["thierry"]!!.toUserResponse())
         clientImpl.fireEvent(requestEvent)
         // TODO: How do we show this in the state?
         // TODO: How is this different than call updates?
@@ -194,9 +196,10 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
         val ownCapabilities = mutableListOf(capability)
         val permissionsUpdated = UpdatedCallPermissionsEvent(
             call.cid,
-            "what",
+            nowUtc,
             ownCapabilities,
-            testData.users["thierry"]!!
+            "call.permissions_updated",
+            testData.users["thierry"]!!.toUserResponse()
         )
         clientImpl.fireEvent(permissionsUpdated, call.cid)
 
@@ -206,7 +209,7 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
     @Test
     fun `Call Ended`() = runTest {
         val call = client.call("default", randomUUID())
-        val event = CallEndedEvent(callCid = call.cid, endedByUser = testData.users["thierry"])
+        val event = CallEndedEvent(callCid = call.cid, nowUtc, "call.ended", user = testData.users["thierry"]!!.toUserResponse())
         clientImpl.fireEvent(event)
 
         // TODO: server. you want to know when the call ended and by who.
@@ -239,4 +242,34 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
 //        clientImpl.fireEvent(eventUpdated)
         // TODO clean this up val eventDeleted = CallMembersDeletedEvent(user_id="thierry", is_speaking=true)
     }
+}
+
+private fun Call.toResponse(): CallResponse {
+    return CallResponse(
+        backstage = false,
+        blockedUserIds = emptyList(),
+        broadcasting = false,
+        cid=cid,
+        createdAt =,
+        createdBy = ,
+            custom = custom,
+        id=id,
+    recording=false,
+        transcribing=false,
+    )
+}
+
+private fun User.toUserResponse(): UserResponse {
+    val response = UserResponse(
+        id = id,
+        role = role,
+        teams = teams,
+        image = image,
+        name = name,
+        custom = custom,
+        createdAt = createdAt,
+        updatedAt = updatedAt,
+        deletedAt = deletedAt,
+    )
+    return response
 }

@@ -51,7 +51,7 @@ public class CoordinatorSocket(
             userDetails = ConnectUserDetailsRequest(
                 id = user.id,
                 name = user.name,
-                image = user.imageUrl,
+                image = user.image,
             )
         )
         val message = adapter.toJson(authRequest)

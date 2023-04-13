@@ -40,6 +40,8 @@ import org.junit.Rule
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 import org.openapitools.client.models.VideoEvent
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 import java.util.UUID
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
@@ -89,7 +91,7 @@ class IntegrationTestHelper {
             "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidGhpZXJyeSJ9._4aZL6BR0VGKfZsKYdscsBm8yKVgG-2LatYeHRJUq0g"
 
         val thierry = User(
-            id = "thierry", role = "admin", name = "Thierry", imageUrl = "hello",
+            id = "thierry", role = "admin", name = "Thierry", image = "hello",
             teams = emptyList(), custom = mapOf()
         )
         users["thierry"] = thierry
@@ -182,6 +184,8 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true) : TestBase(
 
     var nextEventContinuation: Continuation<VideoEvent>? = null
     var nextEventCompleted: Boolean = false
+
+    val nowUtc = OffsetDateTime.now(ZoneOffset.UTC)
 
     init {
         builder = StreamVideoBuilder(

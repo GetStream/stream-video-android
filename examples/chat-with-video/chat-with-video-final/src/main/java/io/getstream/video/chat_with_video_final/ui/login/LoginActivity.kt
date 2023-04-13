@@ -80,7 +80,7 @@ class LoginActivity : ComponentActivity() {
         val userLogin = io.getstream.chat.android.client.models.User(
             id = user.id,
             name = user.name,
-            image = user.imageUrl ?: ""
+            image = user.image ?: ""
         )
 
         chatWithVideoApp.chatClient.connectUser(
@@ -143,7 +143,7 @@ class LoginActivity : ComponentActivity() {
                         modifier = Modifier
                             .size(40.dp)
                             .align(alignment = Alignment.Center),
-                        imageUrl = credentials.imageUrl
+                        imageUrl = credentials.image
                     )
                 }
 

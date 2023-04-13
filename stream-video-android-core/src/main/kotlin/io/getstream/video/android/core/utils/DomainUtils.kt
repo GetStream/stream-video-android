@@ -91,7 +91,7 @@ public fun ParticipantState.toCallUser(): CallUser {
     return CallUser(
         id = initialUser.id,
         name = initialUser.name,
-        imageUrl = initialUser.imageUrl,
+        imageUrl = initialUser.image,
         teams = initialUser.teams,
         role = initialUser.role,
         state = null,
@@ -125,7 +125,7 @@ internal fun UserResponse.toUser(): User {
         id = id,
         role = role,
         name = name ?: "",
-        imageUrl = image ?: "",
+        image = image ?: "",
         teams = teams ?: emptyList(),
         custom = custom.mapValues { it.value.toString() }
     )
