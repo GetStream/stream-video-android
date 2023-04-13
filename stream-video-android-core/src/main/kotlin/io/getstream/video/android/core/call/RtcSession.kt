@@ -501,7 +501,7 @@ public class RtcSession internal constructor(
 
     private suspend fun executeJoinRequest(): Result<JoinResponse> {
 
-        val sdp = mangleSDP(getGenericSdp())
+        val sdp = mangleSDP(getSubscriberSdp())
 
         val request = JoinRequest(
             session_id = sessionId,
@@ -529,7 +529,7 @@ public class RtcSession internal constructor(
         }
     }
 
-    private suspend fun getGenericSdp(): SessionDescription {
+    private suspend fun getSubscriberSdp(): SessionDescription {
 
         subscriber!!.connection.apply {
             addTransceiver(
