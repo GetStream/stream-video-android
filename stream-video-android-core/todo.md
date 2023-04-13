@@ -105,6 +105,7 @@ Other
 
 ### LLC TODO
 
+- [ ] Make call level client methods internal
 - [ ] Directly use the events from openAPI to prevent things being out of sync
 - [ ] List of backend changes
 - [ ] Join flow performance
@@ -118,7 +119,7 @@ Other
 
 ### RTC TODO
 
-- [ ] Media manager class to enable easy testing of all audio/video stuff
+- [X] Media manager class to enable easy testing of all audio/video stuff
 - 
 
 ### Disconnect suggestion
@@ -154,8 +155,7 @@ Other
 - Hash/copy/equality methods for participantstate (otherwise the participants stateflow will have bugs)
 - Measure latency isn't 100% ok. You can't set a timeout using withTimeout and collect the measurements that we have. This relates to threading vs coroutines and withTimeout not working
 - Logging setting needs to be passed to retrofit
-- Token refresh flow
 - Disconnect/ garbage collect flow needs a full round of review
 - MediaManager needs a full review and cleanup
 - Socket connection system needs a full review, cleanup and test coverage
-- Ringing support isn't implemented yet
+- Ringing support isn't fully implemented yet

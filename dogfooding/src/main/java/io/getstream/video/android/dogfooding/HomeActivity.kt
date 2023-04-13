@@ -169,7 +169,15 @@ class HomeActivity : AppCompatActivity() {
             loadingState.value = true
 
             val call = streamVideo.call("default", callId)
-            call.join()
+            val result = call.join()
+
+            result.onError {
+                Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
+            }
+            result.onSuccess {
+                logger.v { "[joinCall] succeed: $call" }
+                loadingState.value = false
+            }
         }
     }
 
