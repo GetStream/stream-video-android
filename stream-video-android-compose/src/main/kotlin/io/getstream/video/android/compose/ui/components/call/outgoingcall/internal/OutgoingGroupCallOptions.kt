@@ -55,25 +55,6 @@ internal fun OutgoingGroupCallOptions(
         modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        IconButton(
-            modifier = Modifier
-                .background(
-                    color = VideoTheme.colors.errorAccent,
-                    shape = VideoTheme.shapes.callButton
-                )
-                .size(VideoTheme.dimens.largeButtonSize),
-            onClick = { onCallAction(CancelCall) },
-            content = {
-                Icon(
-                    painter = painterResource(id = R.drawable.stream_video_ic_call_end),
-                    tint = Color.White,
-                    contentDescription = "End call"
-                )
-            }
-        )
-
-        Spacer(modifier = Modifier.height(32.dp))
-
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
@@ -132,6 +113,25 @@ internal fun OutgoingGroupCallOptions(
                 }
             )
         }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        IconButton(
+            modifier = Modifier
+                .background(
+                    color = VideoTheme.colors.errorAccent,
+                    shape = VideoTheme.shapes.callButton
+                )
+                .size(VideoTheme.dimens.largeButtonSize),
+            onClick = { onCallAction(CancelCall) },
+            content = {
+                Icon(
+                    painter = painterResource(id = R.drawable.stream_video_ic_call_end),
+                    tint = Color.White,
+                    contentDescription = "End call"
+                )
+            }
+        )
     }
 }
 

@@ -53,8 +53,9 @@ public final class io/getstream/video/android/common/util/MockUtilsKt {
 }
 
 public final class io/getstream/video/android/common/util/ParticipantsTextKt {
-	public static final fun buildLargeCallText (Ljava/util/List;)Ljava/lang/String;
-	public static final fun buildSmallCallText (Ljava/util/List;)Ljava/lang/String;
+	public static final fun buildLargeCallText (Landroid/content/Context;Ljava/util/List;)Ljava/lang/String;
+	public static final fun buildSmallCallText (Landroid/content/Context;Ljava/util/List;I)Ljava/lang/String;
+	public static synthetic fun buildSmallCallText$default (Landroid/content/Context;Ljava/util/List;IILjava/lang/Object;)Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/common/util/ResourcesKt {

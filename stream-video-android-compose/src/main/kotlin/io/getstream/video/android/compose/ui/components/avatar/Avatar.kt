@@ -17,9 +17,12 @@
 package io.getstream.video.android.compose.ui.components.avatar
 
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -27,6 +30,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
@@ -71,6 +76,19 @@ public fun Avatar(
     initialsAvatarOffset: DpOffset = DpOffset(0.dp, 0.dp),
     onClick: (() -> Unit)? = null,
 ) {
+    if (LocalInspectionMode.current && !imageUrl.isNullOrEmpty()) {
+        Image(
+            modifier = modifier
+                .fillMaxSize()
+                .clip(CircleShape)
+                .testTag("avatar"),
+            painter = painterResource(id = previewPlaceholder),
+            contentScale = ContentScale.Crop,
+            contentDescription = null
+        )
+        return
+    }
+
     if (!initials.isNullOrBlank()) {
         InitialsAvatar(
             modifier = modifier,

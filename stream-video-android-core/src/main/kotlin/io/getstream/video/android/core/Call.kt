@@ -128,7 +128,7 @@ public class Call(
 
         client.state.setActiveCall(this)
 
-        session?.let { it.connect() }
+        session?.connect()
 
         return Success(value = session!!)
     }

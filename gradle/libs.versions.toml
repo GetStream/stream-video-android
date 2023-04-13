@@ -17,7 +17,7 @@ androidxStartup = "1.1.1"
 androidxActivity = "1.5.1"
 googleService = "4.3.14"
 
-androidxComposeBom = "2023.03.00"
+androidxComposeBom = "2023.04.00"
 androidxComposeCompiler = "1.4.4"
 androidxComposeTracing = "1.0.0-alpha01"
 

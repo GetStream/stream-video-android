@@ -16,6 +16,8 @@
 
 package io.getstream.video.android.core.utils
 
+import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.model.CallData
 import io.getstream.video.android.core.model.CallDetails
 import io.getstream.video.android.core.model.CallMetadata
@@ -80,6 +82,21 @@ internal fun MemberResponse.toCallUser(): CallUser {
         state = null,
         createdAt = Date(createdAt.toEpochSecond()),
         updatedAt = Date(updatedAt.toEpochSecond()),
+    )
+}
+
+@JvmSynthetic
+@InternalStreamVideoApi
+public fun ParticipantState.toCallUser(): CallUser {
+    return CallUser(
+        id = initialUser.id,
+        name = initialUser.name,
+        imageUrl = initialUser.imageUrl,
+        teams = initialUser.teams,
+        role = initialUser.role,
+        state = null,
+        createdAt = null,
+        updatedAt = null,
     )
 }
 
