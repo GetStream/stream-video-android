@@ -99,6 +99,7 @@ import stream.video.coordinator.client_v1_rpc.MemberInput
 import stream.video.coordinator.client_v1_rpc.UpsertCallMembersRequest
 import stream.video.coordinator.push_v1.DeviceInput
 import kotlin.coroutines.Continuation
+import kotlin.coroutines.resume
 
 class EventSubscription(
     public val listener: VideoEventListener<VideoEvent>,
@@ -318,7 +319,6 @@ internal class StreamVideoImpl internal constructor(
     suspend fun connectAsync(): Deferred<Unit> {
         return scope.async {
             val result = socketImpl.connect()
-
             result
         }
     }

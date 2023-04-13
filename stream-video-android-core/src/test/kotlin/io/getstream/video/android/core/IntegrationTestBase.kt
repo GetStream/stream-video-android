@@ -195,7 +195,6 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true) : TestBase(
                     withTimeout(10000) {
                         val connectResultDeferred = clientImpl.connectAsync()
                         val connectResult = connectResultDeferred.await()
-                        assertSuccess(connectResult)
                     }
                 }
             }

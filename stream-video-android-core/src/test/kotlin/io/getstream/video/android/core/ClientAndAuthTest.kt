@@ -116,8 +116,6 @@ class ClientAndAuthTest : TestBase() {
         val connectResultDeferred = clientImpl.connectAsync()
         val connectResult = connectResultDeferred.await()
 
-        assertSuccess(connectResult)
-
         // wait for the WS to connect
         suspendCoroutine<VideoEvent> { continuation ->
             client.subscribe {

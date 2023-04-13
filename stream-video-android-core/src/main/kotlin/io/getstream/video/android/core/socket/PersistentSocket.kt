@@ -4,6 +4,7 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.call.signal.socket.RTCEventMapper
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.events.ConnectedEvent
+import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.socket.internal.EventMapper
@@ -64,11 +65,8 @@ open class PersistentSocket(
     /** the connection id */
     var connectionId: String = ""
 
-    /** Continuation if the socket successfully connected */
-    lateinit var connected : Continuation<Unit>
-
-    /** Continuation if you're authenticated, typically this is more important than connected. Since you need auth to receive events */
-    lateinit var authenticated : Continuation<Unit>
+    /** Continuation if the socket successfully connected and we've authenticated */
+    lateinit var connected : Continuation<Any>
 
     internal lateinit var socket: WebSocket
 
@@ -80,10 +78,11 @@ open class PersistentSocket(
     /**
      * Connect the socket, authenticate, start the healthmonitor and see if the network is online
      */
-    suspend fun connect() = suspendCoroutine<Unit> { continuation ->
+    suspend fun  connect() = suspendCoroutine<Any> { connectedContinuation ->
         logger.i { "[connect]" }
-        connected = continuation
+        connected = connectedContinuation
         scope.launch {
+
             _connectionState.value = SocketState.Connecting
             // step 1 create the socket
             socket = createSocket()
@@ -93,6 +92,7 @@ open class PersistentSocket(
             healthMonitor.start()
             // also monitor if we are offline/online
             networkStateProvider.subscribe(networkStateListener)
+
         }
     }
 
@@ -160,10 +160,7 @@ open class PersistentSocket(
 
     override fun onOpen(webSocket: WebSocket, response: Response) {
         logger.d { "[onOpen] response: $response" }
-        if (!continuationCompleted) {
-            connected.resume(Unit)
-            continuationCompleted = true
-        }
+
 
 
     }
@@ -182,6 +179,16 @@ open class PersistentSocket(
                 // TODO: rename when we fix event parsing
                 connectionId = processedEvent.clientId
                 _connectionState.value = SocketState.Connected(processedEvent)
+            } else if (processedEvent is JoinCallResponseEvent) {
+                if (!continuationCompleted) {
+                    connected.resume(processedEvent)
+                    continuationCompleted = true
+                }
+            } else if (processedEvent is ConnectedEvent) {
+                if (!continuationCompleted) {
+                    connected.resume(processedEvent)
+                    continuationCompleted = true
+                }
             }
 
             logger.d { "parsed event $processedEvent" }
