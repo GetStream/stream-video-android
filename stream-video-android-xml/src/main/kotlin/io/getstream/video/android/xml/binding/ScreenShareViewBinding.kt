@@ -19,9 +19,6 @@ package io.getstream.video.android.xml.binding
 import androidx.lifecycle.LifecycleOwner
 import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.xml.widget.screenshare.ScreenShareView
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.mapNotNull
 
 /**
  * Binds [ScreenShareView] with [CallViewModel], updating the view's state based on data provided by the ViewModel,
@@ -39,18 +36,18 @@ public fun ScreenShareView.bindView(
     lifecycleOwner: LifecycleOwner,
 ) {
     startJob(lifecycleOwner) {
-        viewModel.callState.filterNotNull().collectLatest { call ->
-            setRendererInitializer { videoRenderer, streamId, trackType, onRender ->
-                call.initRenderer(videoRenderer, streamId, trackType, onRender)
-            }
-        }
+//        viewModel.callState.filterNotNull().collectLatest { call ->
+//            setRendererInitializer { videoRenderer, streamId, trackType, onRender ->
+//                call.initRenderer(videoRenderer, streamId, trackType, onRender)
+//            }
+//        }
     }
 
     startJob(lifecycleOwner) {
-        viewModel.screenSharingSessions
-            .mapNotNull { it.firstOrNull() }
-            .collectLatest { screenSharingSession ->
-                setScreenSharingSession(screenSharingSession)
-            }
+//        viewModel.screenSharingSessions
+//            .mapNotNull { it.firstOrNull() }
+//            .collectLatest { screenSharingSession ->
+//                setScreenSharingSession(screenSharingSession)
+//            }
     }
 }

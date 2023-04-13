@@ -40,9 +40,9 @@ public data class User(
     val type: UserType = UserType.Authenticated,
     val name: String = "",
     val imageUrl: String = "",
+    val isOnline: Boolean = false,
     val teams: List<String> = emptyList(),
     val custom: Map<String, String> = emptyMap()
-
 ) {
     public fun isValid(): Boolean {
         return id.isNotEmpty()

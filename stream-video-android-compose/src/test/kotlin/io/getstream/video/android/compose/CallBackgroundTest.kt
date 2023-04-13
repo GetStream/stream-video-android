@@ -21,82 +21,38 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
-import io.getstream.video.android.common.util.mockUsers
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.common.util.mockParticipants
+import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.ui.components.avatar.Avatar
 import io.getstream.video.android.compose.ui.components.background.CallBackground
 import io.getstream.video.android.core.model.CallType
-import io.getstream.video.android.core.model.CallUser
-import io.getstream.video.android.core.model.CallUserState
 import io.getstream.video.android.ui.common.R
 import org.junit.Rule
 import org.junit.Test
 
-internal class CallBackgroundTest {
+internal class CallBackgroundTest : BaseComposeTest() {
+
     @get:Rule
-    val paparazzi = Paparazzi()
+    val paparazzi = Paparazzi(deviceConfig = DeviceConfig.PIXEL_4A)
+
+    override fun basePaparazzi(): Paparazzi = paparazzi
 
     @Test
-    fun `snapshot CallBackground composable with an image Avatar`() {
-        paparazzi.snapshot {
-            VideoTheme(isInDarkMode = false) {
-                CallBackground(
-                    participants = listOf(
-                        mockUsers.first().let {
-                            CallUser(
-                                id = it.id,
-                                name = it.name,
-                                imageUrl = it.profileImageURL ?: "",
-                                role = it.role,
-                                teams = emptyList(),
-                                updatedAt = null,
-                                createdAt = null,
-                                state = CallUserState("", false, false, false)
-                            )
-                        }
-                    ),
-                    callType = CallType.VIDEO,
-                    isIncoming = true
-                ) {
-                    Box(modifier = Modifier.align(Alignment.Center)) {
-                        Avatar(
-                            modifier = Modifier.size(82.dp),
-                            previewPlaceholder = R.drawable.stream_video_call_sample
-                        )
-                    }
-                }
-            }
-        }
-    }
-
-    @Test
-    fun `snapshot CallBackground composable with an initial Avatar`() {
-        paparazzi.snapshot {
-            VideoTheme(isInDarkMode = true) {
-                CallBackground(
-                    participants = listOf(
-                        mockUsers.first().let {
-                            CallUser(
-                                id = it.id,
-                                name = it.name,
-                                imageUrl = it.profileImageURL ?: "",
-                                role = it.role,
-                                teams = emptyList(),
-                                updatedAt = null,
-                                createdAt = null,
-                                state = CallUserState("", false, false, false)
-                            )
-                        }
-                    ),
-                    callType = CallType.VIDEO, isIncoming = true
-                ) {
-                    Box(modifier = Modifier.align(Alignment.Center)) {
-                        Avatar(
-                            modifier = Modifier.size(56.dp),
-                            initials = "Thierry"
-                        )
-                    }
+    fun `snapshot CallBackground composable with an initial Avatars`() {
+        snapshot {
+            CallBackground(
+                participants = mockParticipants.take(1),
+                callType = CallType.VIDEO,
+                isIncoming = true
+            ) {
+                Box(modifier = Modifier.align(Alignment.Center)) {
+                    Avatar(
+                        modifier = Modifier.size(72.dp),
+                        initials = null,
+                        previewPlaceholder = R.drawable.stream_video_call_sample
+                    )
                 }
             }
         }

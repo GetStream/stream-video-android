@@ -25,7 +25,6 @@ import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.ParticipantJoinedEvent
 import io.getstream.video.android.core.events.ParticipantLeftEvent
-import io.getstream.video.android.core.events.PublisherAnswerEvent
 import io.getstream.video.android.core.events.SFUHealthCheckEvent
 import io.getstream.video.android.core.events.SfuDataEvent
 import io.getstream.video.android.core.events.SubscriberOfferEvent
@@ -39,9 +38,6 @@ public object RTCEventMapper {
     public fun mapEvent(event: SfuEvent): SfuDataEvent {
         return when {
             event.subscriber_offer != null -> SubscriberOfferEvent(event.subscriber_offer.sdp)
-            event.publisher_answer != null -> with(event.publisher_answer) {
-                PublisherAnswerEvent(sdp)
-            }
 
             event.connection_quality_changed != null -> with(event.connection_quality_changed) {
                 ConnectionQualityChangeEvent(updates = connection_quality_updates)

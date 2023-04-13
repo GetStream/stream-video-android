@@ -26,13 +26,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
+import io.getstream.video.android.common.util.MockUtils
+import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.participants.CallParticipant
-import io.getstream.video.android.compose.ui.components.previews.ParticipantsProvider
-import io.getstream.video.android.core.model.Call
-import io.getstream.video.android.core.model.CallParticipantState
+import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.ParticipantState
 
 /**
  * Shows a column of call participants.
@@ -44,7 +45,8 @@ import io.getstream.video.android.core.model.CallParticipantState
 @Composable
 internal fun ParticipantsColumn(
     call: Call?,
-    participants: List<CallParticipantState>,
+    participants: List<ParticipantState>,
+    primarySpeaker: ParticipantState?,
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(
@@ -52,8 +54,10 @@ internal fun ParticipantsColumn(
         verticalArrangement = Arrangement.spacedBy(VideoTheme.dimens.screenShareParticipantsListItemMargin),
         horizontalAlignment = Alignment.CenterHorizontally,
         content = {
-            items(participants) { participant ->
-                ParticipantListItem(call, participant)
+            items(items = participants, key = { it.user.value.id }) { participant ->
+                ParticipantListItem(
+                    call = call, participant = participant, primarySpeaker = primarySpeaker
+                )
             }
         }
     )
@@ -68,7 +72,8 @@ internal fun ParticipantsColumn(
 @Composable
 private fun ParticipantListItem(
     call: Call?,
-    participant: CallParticipantState,
+    participant: ParticipantState,
+    primarySpeaker: ParticipantState?,
 ) {
     CallParticipant(
         modifier = Modifier
@@ -76,19 +81,20 @@ private fun ParticipantListItem(
             .clip(RoundedCornerShape(VideoTheme.dimens.screenShareParticipantsRadius)),
         call = call,
         participant = participant,
-        labelPosition = Alignment.BottomStart
+        labelPosition = Alignment.BottomStart,
+        isScreenSharing = true,
+        isFocused = participant.initialUser.id == primarySpeaker?.initialUser?.id,
+        isShowConnectionQualityIndicator = false
     )
 }
 
 @Preview
 @Composable
-private fun ParticipantsColumnPreview(
-    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<CallParticipantState>
-) {
+private fun ParticipantsColumnPreview() {
+    MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         ParticipantsColumn(
-            call = null,
-            participants = callParticipants
+            call = null, participants = mockParticipants, primarySpeaker = mockParticipants[0]
         )
     }
 }

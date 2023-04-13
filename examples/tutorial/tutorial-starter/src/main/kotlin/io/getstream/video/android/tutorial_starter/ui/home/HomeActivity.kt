@@ -82,7 +82,7 @@ class HomeActivity : AppCompatActivity() {
     private val participantsOptions: MutableState<List<AppUser>> by lazy {
         mutableStateOf(
             getUsers().filter {
-                it.id != streamVideo.getUser().id
+                it.id != streamVideo.user.id
             }.map { user ->
                 AppUser(
                     user,
@@ -253,14 +253,14 @@ class HomeActivity : AppCompatActivity() {
         lifecycleScope.launch {
             loadingState.value = true
 
-            streamVideo.joinCall(
-                "default",
-                id = callId,
-                participantIds = emptyList(),
-                ring = false
-            ).onError {
-                Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
-            }
+//            streamVideo.joinCall(
+//                "default",
+//                id = callId,
+//                participantIds = emptyList(),
+//                ring = false
+//            ).onError {
+//                Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
+//            }
 
             loadingState.value = false
         }

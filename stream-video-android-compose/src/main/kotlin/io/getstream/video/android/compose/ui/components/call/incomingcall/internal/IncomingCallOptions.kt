@@ -59,7 +59,7 @@ internal fun IncomingCallOptions(
             onClick = { onCallAction(DeclineCall) },
             content = {
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_call_end),
+                    painter = painterResource(id = R.drawable.stream_video_ic_call_end),
                     tint = Color.White,
                     contentDescription = "End call"
                 )
@@ -79,9 +79,9 @@ internal fun IncomingCallOptions(
                 content = {
                     val cameraIcon = painterResource(
                         id = if (isVideoEnabled) {
-                            R.drawable.ic_videocam_on
+                            R.drawable.stream_video_ic_videocam_on
                         } else {
-                            R.drawable.ic_videocam_off
+                            R.drawable.stream_video_ic_videocam_off
                         }
                     )
 
@@ -104,7 +104,7 @@ internal fun IncomingCallOptions(
             onClick = { onCallAction(AcceptCall) },
             content = {
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_call),
+                    painter = painterResource(id = R.drawable.stream_video_ic_call),
                     tint = Color.White,
                     contentDescription = "Accept call"
                 )

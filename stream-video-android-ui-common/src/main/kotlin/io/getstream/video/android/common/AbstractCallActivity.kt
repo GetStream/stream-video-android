@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.common
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.app.PictureInPictureParams
 import android.content.Intent
@@ -35,22 +34,15 @@ import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoProvider
-import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.call.state.CancelCall
-import io.getstream.video.android.core.call.state.ToggleCamera
-import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.call.state.ToggleScreenConfiguration
-import io.getstream.video.android.core.model.state.StreamCallState
 import io.getstream.video.android.core.permission.PermissionManager
 import io.getstream.video.android.core.permission.PermissionManagerProvider
 import io.getstream.video.android.core.permission.StreamPermissionManagerImpl
 import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.core.viewmodel.CallViewModelFactory
 import io.getstream.video.android.core.viewmodel.CallViewModelFactoryProvider
-import kotlinx.coroutines.flow.collectLatest
 
 public abstract class AbstractCallActivity :
     AppCompatActivity(),
@@ -74,6 +66,8 @@ public abstract class AbstractCallActivity :
         return CallViewModelFactory(
             streamVideo = streamVideo,
             permissionManager = callPermissionManager,
+            // TODO: ->
+            call = streamVideo.call("default", "123")
         )
     }
 
@@ -85,12 +79,12 @@ public abstract class AbstractCallActivity :
             fragmentActivity = this,
             onPermissionResult = { permission, isGranted ->
                 when (permission) {
-                    Manifest.permission.CAMERA -> callViewModel.onCallAction(ToggleCamera(isGranted))
-                    Manifest.permission.RECORD_AUDIO -> callViewModel.onCallAction(
-                        ToggleMicrophone(
-                            isGranted
-                        )
-                    )
+//                    Manifest.permission.CAMERA -> callViewModel.onCallAction(ToggleCamera(isGranted))
+//                    Manifest.permission.RECORD_AUDIO -> callViewModel.onCallAction(
+//                        ToggleMicrophone(
+//                            isGranted
+//                        )
+//                    )
                 }
             },
             onShowSettings = {
@@ -107,65 +101,13 @@ public abstract class AbstractCallActivity :
         super.onCreate(savedInstanceState)
         setupUi()
 
-        observeStreamCallState()
-        observeScreenSharing()
-        startVideoFlow()
+        callViewModel.joinCall()
     }
 
     /**
      * Override to setup ui.
      */
     public abstract fun setupUi()
-
-    /**
-     * Sets up stream call state observer. By default will end the call once it reaches [StreamCallState.Idle].
-     */
-    protected open fun observeStreamCallState() {
-        lifecycleScope.launchWhenCreated {
-            callViewModel.streamCallState.collect {
-                if (it is StreamCallState.Idle) {
-                    finish()
-                }
-            }
-        }
-    }
-
-    /**
-     * Sets up screen share observer.
-     */
-    protected open fun observeScreenSharing() {
-        lifecycleScope.launchWhenCreated {
-            callViewModel.screenSharingSessions.collectLatest {
-                if (it.isEmpty()) {
-                    requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_USER
-                    exitFullscreen()
-                    callViewModel.onCallAction(
-                        ToggleScreenConfiguration(
-                            isFullscreen = false,
-                            isLandscape = false
-                        )
-                    )
-                }
-            }
-        }
-    }
-
-    /**
-     * Default handler for [CallAction]s triggered in the UI.
-     *
-     * @param action Action to handle.
-     */
-    protected open fun handleCallAction(action: CallAction) {
-        when (action) {
-            is ToggleMicrophone -> toggleMicrophone(action)
-            is ToggleCamera -> toggleCamera(action)
-            is ToggleScreenConfiguration -> {
-                toggleFullscreen(action)
-                callViewModel.onCallAction(action)
-            }
-            else -> callViewModel.onCallAction(action)
-        }
-    }
 
     @SuppressLint("SourceLockedOrientationActivity")
     private fun toggleFullscreen(action: ToggleScreenConfiguration) {
@@ -224,22 +166,6 @@ public abstract class AbstractCallActivity :
         }
     }
 
-    private fun toggleMicrophone(action: ToggleMicrophone) {
-        if (!callPermissionManager.hasRecordAudioPermission.value && action.isEnabled) {
-            callPermissionManager.requestPermission(Manifest.permission.RECORD_AUDIO)
-        } else {
-            callViewModel.onCallAction(action)
-        }
-    }
-
-    private fun toggleCamera(action: ToggleCamera) {
-        if (!callPermissionManager.hasCameraPermission.value && action.isEnabled) {
-            callPermissionManager.requestPermission(Manifest.permission.CAMERA)
-        } else {
-            callViewModel.onCallAction(action)
-        }
-    }
-
     private fun startSettings() {
         startActivity(
             Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
@@ -247,12 +173,6 @@ public abstract class AbstractCallActivity :
                 data = uri
             }
         )
-    }
-
-    private fun startVideoFlow() {
-        val isInitialized = callViewModel.isVideoInitialized.value
-        if (isInitialized) return
-        callViewModel.connectToCall()
     }
 
     private fun showPermissionsDialog() {
@@ -284,12 +204,12 @@ public abstract class AbstractCallActivity :
      * the feature.
      */
     protected open fun handleBackPressed() {
-        val callState = callViewModel.streamCallState.value
-
-        if (callState !is StreamCallState.Connected) {
-            closeCall()
-            return
-        }
+//        val callState = callViewModel.streamCallState.value
+//
+//        if (callState !is StreamCallState.Connected) {
+//            closeCall()
+//            return
+//        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             try {
@@ -305,13 +225,12 @@ public abstract class AbstractCallActivity :
     @RequiresApi(Build.VERSION_CODES.N)
     private fun enterPictureInPicture() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            callViewModel.dismissOptions()
 
             val currentOrientation = resources.configuration.orientation
-            val screenSharing = callViewModel.callState.value?.isScreenSharingActive ?: false
+            val screenSharing = callViewModel.call.state.screenSharingSession.value
 
             val aspect =
-                if (currentOrientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT && !screenSharing) {
+                if (currentOrientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT && screenSharing == null) {
                     Rational(9, 16)
                 } else {
                     Rational(16, 9)
@@ -330,8 +249,7 @@ public abstract class AbstractCallActivity :
     }
 
     private fun closeCall() {
-        callViewModel.onCallAction(CancelCall)
-        callViewModel.clearState()
+        callViewModel.call.leave()
         finish()
     }
 
@@ -342,8 +260,7 @@ public abstract class AbstractCallActivity :
             val isInPiP = isInPictureInPictureMode
 
             if (isInPiP) {
-                callViewModel.onCallAction(CancelCall)
-                callViewModel.clearState()
+                closeCall()
             }
         }
     }

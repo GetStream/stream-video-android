@@ -19,7 +19,7 @@ package io.getstream.video.android.core
 import io.getstream.result.Result
 import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.User
-import io.getstream.video.android.core.model.VideoTrack
+import io.getstream.video.android.core.utils.mapState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import stream.video.sfu.models.ConnectionQuality
@@ -47,23 +47,49 @@ public data class ParticipantState(
     val initialUser: User,
     /** If this participant is the you/ the local participant */
     val isLocal: Boolean = false,
-    /** video track and size */
-    var videoTrack: VideoTrack? = null,
     var videoTrackSize: Pair<Int, Int> = Pair(0, 0),
-    /** screen sharing track and size */
-    var screenSharingTrack: VideoTrack? = null,
     var screenSharingTrackSize: Pair<Int, Int> = Pair(0, 0),
-    /** all published tracks including audio */
-    var publishedTracks: Set<TrackType> = emptySet(),
     /** A prefix to identify tracks, internal */
     internal var trackLookupPrefix: String = "",
 
 ) {
+
+    /** video track */
+    val videoTrack by lazy {
+        videoTrackWrapped?.video
+    }
+    val videoTrackWrapped by lazy {
+        call.session?.getTrack(sessionId, TrackType.TRACK_TYPE_VIDEO)
+    }
+    val audioTrack by lazy {
+        audioTrackWrapped?.audio
+    }
+    val audioTrackWrapped by lazy {
+        call.session?.getTrack(sessionId, TrackType.TRACK_TYPE_AUDIO)
+    }
+    val screenSharingTrack by lazy {
+        screenSharingTrackWrapped?.video
+    }
+    val screenSharingTrackWrapped by lazy {
+        call.session?.getTrack(sessionId, TrackType.TRACK_TYPE_SCREEN_SHARE)
+    }
+
+    val hasVideo: Boolean
+        get() = videoTrack != null
+
+    val hasAudio: Boolean
+        get() = audioTrack != null
+
+    // TODO
+    public var isSpeaking: Boolean = true
+
     /**
      * The user, automatically updates when we receive user events
      */
     internal val _user: MutableStateFlow<User> = MutableStateFlow(initialUser)
     val user: StateFlow<User> = _user
+
+    val userNameOrId: StateFlow<String> = _user.mapState { it.name.ifEmpty { it.id } }
 
     /**
      * When you joined the call
@@ -123,10 +149,6 @@ public data class ParticipantState(
     internal val _pinnedAt: MutableStateFlow<Date?> = MutableStateFlow(null)
     val pinnedAt: StateFlow<Date?> = _pinnedAt
 
-    open val audioTrack by lazy {
-        publishedTracks?.filter { it == TrackType.TRACK_TYPE_AUDIO }
-    }
-
     open suspend fun muteAudio(): Result<Unit> {
         // how do i mute another user?
         return call.muteUsers(MuteUsersData(audio = true, users = listOf(user.value.id)))
@@ -152,11 +174,9 @@ public data class ParticipantState(
         val currentUser = _user.value
         _user.value = currentUser.copy(
             name = participant.name,
-            imageUrl=participant.image,
-            //custom = participant.custom,
-            role=participant.roles.firstOrNull() ?: ""
+            imageUrl = participant.image,
+            // custom = participant.custom,
+            role = participant.roles.firstOrNull() ?: ""
         )
-
-        publishedTracks = participant.published_tracks.toSet()
     }
 }

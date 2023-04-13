@@ -55,30 +55,37 @@ internal fun OutgoingGroupCallOptions(
         modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        IconButton(
-            modifier = Modifier
-                .background(
-                    color = VideoTheme.colors.errorAccent,
-                    shape = VideoTheme.shapes.callButton
-                )
-                .size(VideoTheme.dimens.largeButtonSize),
-            onClick = { onCallAction(CancelCall) },
-            content = {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_call_end),
-                    tint = Color.White,
-                    contentDescription = "End call"
-                )
-            }
-        )
-
-        Spacer(modifier = Modifier.height(32.dp))
-
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
+            IconButton(
+                modifier = Modifier
+                    .toggleAlpha(isMicEnabled)
+                    .background(
+                        color = VideoTheme.colors.appBackground,
+                        shape = VideoTheme.shapes.callButton
+                    )
+                    .size(VideoTheme.dimens.mediumButtonSize),
+                onClick = { onCallAction(ToggleMicrophone(!callMediaState.isMicrophoneEnabled)) },
+                content = {
+                    val micIcon = painterResource(
+                        id = if (isMicEnabled) {
+                            R.drawable.stream_video_ic_mic_on
+                        } else {
+                            R.drawable.stream_video_ic_mic_off
+                        }
+                    )
+
+                    Icon(
+                        painter = micIcon,
+                        contentDescription = "Toggle Mic",
+                        tint = VideoTheme.colors.textHighEmphasis
+                    )
+                }
+            )
+
             IconButton(
                 modifier = Modifier
                     .toggleAlpha(isVideoEnabled)
@@ -92,9 +99,9 @@ internal fun OutgoingGroupCallOptions(
                     val cameraIcon =
                         painterResource(
                             id = if (isVideoEnabled) {
-                                R.drawable.ic_videocam_on
+                                R.drawable.stream_video_ic_videocam_on
                             } else {
-                                R.drawable.ic_videocam_off
+                                R.drawable.stream_video_ic_videocam_off
                             }
                         )
 
@@ -105,33 +112,26 @@ internal fun OutgoingGroupCallOptions(
                     )
                 }
             )
-
-            IconButton(
-                modifier = Modifier
-                    .toggleAlpha(isMicEnabled)
-                    .background(
-                        color = VideoTheme.colors.appBackground,
-                        shape = VideoTheme.shapes.callButton
-                    )
-                    .size(VideoTheme.dimens.mediumButtonSize),
-                onClick = { onCallAction(ToggleMicrophone(!callMediaState.isMicrophoneEnabled)) },
-                content = {
-                    val micIcon = painterResource(
-                        id = if (isMicEnabled) {
-                            R.drawable.ic_mic_on
-                        } else {
-                            R.drawable.ic_mic_off
-                        }
-                    )
-
-                    Icon(
-                        painter = micIcon,
-                        contentDescription = "Toggle Mic",
-                        tint = VideoTheme.colors.textHighEmphasis
-                    )
-                }
-            )
         }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        IconButton(
+            modifier = Modifier
+                .background(
+                    color = VideoTheme.colors.errorAccent,
+                    shape = VideoTheme.shapes.callButton
+                )
+                .size(VideoTheme.dimens.largeButtonSize),
+            onClick = { onCallAction(CancelCall) },
+            content = {
+                Icon(
+                    painter = painterResource(id = R.drawable.stream_video_ic_call_end),
+                    tint = Color.White,
+                    contentDescription = "End call"
+                )
+            }
+        )
     }
 }
 
@@ -139,9 +139,20 @@ internal fun OutgoingGroupCallOptions(
 @Composable
 private fun OutgoingCallGroupOptions() {
     VideoTheme {
-        OutgoingGroupCallOptions(
-            callMediaState = CallMediaState(),
-            onCallAction = { }
-        )
+        Column {
+            OutgoingGroupCallOptions(
+                callMediaState = CallMediaState(
+                    isMicrophoneEnabled = true,
+                    isSpeakerphoneEnabled = true,
+                    isCameraEnabled = true
+                ),
+                onCallAction = { }
+            )
+
+            OutgoingGroupCallOptions(
+                callMediaState = CallMediaState(),
+                onCallAction = { }
+            )
+        }
     }
 }

@@ -18,7 +18,6 @@ package io.getstream.video.android.core
 
 import android.content.Context
 import io.getstream.result.Result
-import io.getstream.video.android.core.call.SFUSession
 import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.model.CallEventType
@@ -38,15 +37,7 @@ import io.getstream.video.android.core.model.StreamCallId
 import io.getstream.video.android.core.model.StreamCallType
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.User
-import org.openapitools.client.models.GetCallEdgeServerRequest
-import org.openapitools.client.models.GetCallEdgeServerResponse
-import org.openapitools.client.models.GoLiveResponse
-import org.openapitools.client.models.JoinCallResponse
-import org.openapitools.client.models.ListRecordingsResponse
-import org.openapitools.client.models.SendEventResponse
-import org.openapitools.client.models.SendReactionResponse
-import org.openapitools.client.models.StopLiveResponse
-import org.openapitools.client.models.UpdateCallResponse
+import org.openapitools.client.models.*
 
 /**
  * The main interface to control the Video calls. [StreamVideoImpl] implements this interface.
@@ -123,7 +114,7 @@ public interface StreamVideo {
         id: StreamCallId,
         participantIds: List<String> = emptyList(),
         ring: Boolean = false,
-    ): Result<CallMetadata>
+    ): Result<GetOrCreateCallResponse>
 
     /**
      * Queries or creates a call with given information and then authenticates the user to join the
@@ -142,16 +133,6 @@ public interface StreamVideo {
         type: StreamCallType,
         id: StreamCallId
     ): Result<JoinCallResponse>
-
-    /**
-     * Authenticates the user to join a given Call using the [CallMetadata].
-     *
-     * @param call The existing call or room metadata which is used to join a Call.
-     *
-     * @return [Result] which contains the [JoinedCall] with the auth information required to fully
-     * connect.
-     */
-    public suspend fun joinCall(call: CallMetadata): Result<JoinedCall>
 
     public suspend fun selectEdgeServer(
         type: String,
@@ -391,16 +372,6 @@ public interface StreamVideo {
      * Clears the internal user state, removes push notification devices and clears the call state.
      */
     public fun logOut()
-
-    /**
-     * Returns current [SFUSession] instance.
-     */
-    public fun getActiveCallClient(): SFUSession?
-
-    /**
-     * Awaits [SFUSession] creation.
-     */
-    public suspend fun awaitCallClient(): SFUSession
 
     /**
      * Accepts incoming call.

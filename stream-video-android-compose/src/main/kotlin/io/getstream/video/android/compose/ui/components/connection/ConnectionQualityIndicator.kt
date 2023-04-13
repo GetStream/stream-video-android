@@ -27,7 +27,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -66,7 +65,13 @@ public fun ConnectionQualityIndicator(
                     .width(VideoTheme.dimens.connectionIndicatorBarWidth)
                     .fillMaxHeight(0.33f)
                     .background(
-                        color = if (quality >= 1) VideoTheme.colors.connectionQualityBar else Color.LightGray,
+                        color = if (quality > 1) {
+                            VideoTheme.colors.connectionQualityBarFilled
+                        } else if (quality == 1) {
+                            VideoTheme.colors.errorAccent
+                        } else {
+                            VideoTheme.colors.connectionQualityBar
+                        },
                         shape = VideoTheme.shapes.connectionIndicatorBar
                     )
             )
@@ -78,7 +83,11 @@ public fun ConnectionQualityIndicator(
                     .width(VideoTheme.dimens.connectionIndicatorBarWidth)
                     .fillMaxHeight(fraction = 0.66f)
                     .background(
-                        color = if (quality >= 2) VideoTheme.colors.connectionQualityBar else Color.LightGray,
+                        color = if (quality >= 2) {
+                            VideoTheme.colors.connectionQualityBarFilled
+                        } else {
+                            VideoTheme.colors.connectionQualityBar
+                        },
                         shape = VideoTheme.shapes.connectionIndicatorBar
                     )
             )
@@ -90,7 +99,11 @@ public fun ConnectionQualityIndicator(
                     .width(VideoTheme.dimens.connectionIndicatorBarWidth)
                     .fillMaxHeight(fraction = 1f)
                     .background(
-                        color = if (quality >= 3) VideoTheme.colors.connectionQualityBar else Color.LightGray,
+                        color = if (quality >= 3) {
+                            VideoTheme.colors.connectionQualityBarFilled
+                        } else {
+                            VideoTheme.colors.connectionQualityBar
+                        },
                         shape = VideoTheme.shapes.connectionIndicatorBar
                     )
             )
@@ -102,8 +115,16 @@ public fun ConnectionQualityIndicator(
 @Composable
 private fun ConnectionQualityIndicatorPreview() {
     VideoTheme {
-        ConnectionQualityIndicator(
-            connectionQuality = ConnectionQuality.CONNECTION_QUALITY_GOOD
-        )
+        Row {
+            ConnectionQualityIndicator(
+                connectionQuality = ConnectionQuality.CONNECTION_QUALITY_POOR
+            )
+            ConnectionQualityIndicator(
+                connectionQuality = ConnectionQuality.CONNECTION_QUALITY_GOOD
+            )
+            ConnectionQualityIndicator(
+                connectionQuality = ConnectionQuality.CONNECTION_QUALITY_EXCELLENT
+            )
+        }
     }
 }

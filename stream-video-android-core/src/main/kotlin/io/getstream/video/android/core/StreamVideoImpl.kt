@@ -25,9 +25,8 @@ import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
-import io.getstream.video.android.core.call.SFUSession
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
-import io.getstream.video.android.core.events.VideoEvent
+import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.internal.module.ConnectionModule
 import io.getstream.video.android.core.lifecycle.LifecycleHandler
@@ -52,9 +51,9 @@ import io.getstream.video.android.core.model.mapper.toTypeAndId
 import io.getstream.video.android.core.model.toIceServer
 import io.getstream.video.android.core.model.toInfo
 import io.getstream.video.android.core.model.toRequest
-import io.getstream.video.android.core.socket.SocketListener
-import io.getstream.video.android.core.socket.internal.SocketState
-import io.getstream.video.android.core.socket.internal.VideoSocketImpl
+import io.getstream.video.android.core.socket.ErrorResponse
+import io.getstream.video.android.core.socket.SocketState
+import io.getstream.video.android.core.user.UserPreferences
 import io.getstream.video.android.core.user.UserPreferencesManager
 import io.getstream.video.android.core.utils.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.core.utils.LatencyResult
@@ -69,8 +68,6 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
@@ -106,43 +103,24 @@ internal class StreamVideoImpl internal constructor(
     private val loggingLevel: LoggingLevel,
     internal val connectionModule: ConnectionModule,
     internal val pushDeviceGenerators: List<PushDeviceGenerator>,
-) : StreamVideo, SocketListener {
+    internal val tokenProvider: ((error: Error.NetworkError) -> String)?,
+    internal val preferences: UserPreferences,
+) : StreamVideo {
 
     private lateinit var connectContinuation: Continuation<Result<WSConnectedEvent>>
+
+    var developmentMode = true // if true we fail fast on errors instead of logging them
 
     @VisibleForTesting
     public var peerConnectionFactory = StreamPeerConnectionFactory(context)
     public override val userId = user.id
-
-    override fun onConnected(event: WSConnectedEvent) {
-        onEvent(event)
-    }
-
-    override fun onEvent(event: VideoEvent) {
-        // TODO: maybe merge fire event into this?
-        fireEvent(event)
-    }
 
     override val state = ClientState(this)
     private val logger by taggedLogger("Call:StreamVideo")
     private var subscriptions = mutableSetOf<EventSubscription>()
     private var calls = mutableMapOf<String, Call>()
 
-    val socketImpl = connectionModule.coordinatorSocket as VideoSocketImpl
-
-    // caller: JOIN after accepting incoming call by callee
-    /**
-     * @see StreamVideo.joinCall
-     */
-    override suspend fun joinCall(call: CallMetadata): Result<JoinedCall> =
-        withContext(scope.coroutineContext) {
-            logger.d { "[joinCallOnly] call: $call" }
-            // TODO: engine.onCallJoining(call)
-            joinCallInternal(call)
-                // .onSuccess { data -> engine.onCallJoined(data) }
-                // .onError { engine.onCallFailed(it) }
-                .also { logger.v { "[joinCallOnly] result: $it" } }
-        }
+    val socketImpl = connectionModule.coordinatorSocket
 
     /**
      * @see StreamVideo.createDevice
@@ -178,13 +156,28 @@ internal class StreamVideoImpl internal constructor(
             } catch (e: HttpException) {
                 val failure = parseError(e)
                 val parsedError = failure.value as Error.NetworkError
-                if (parsedError.serverErrorCode == 5) {
+                if (parsedError.serverErrorCode == VideoErrorCode.TOKEN_EXPIRED.code) {
                     // invalid token
                     // val newToken = tokenProvider.getToken()
+                    if (tokenProvider!= null) {
+                        val newToken = tokenProvider.invoke(parsedError)
+                        preferences.storeUserToken(newToken)
+                        connectionModule.updateToken(newToken)
+
+                    }
+                    // retry the API call once
+                    try {
+                        Success(apiCall())
+                    }catch (e: HttpException){
+                        parseError(e)
+                    }
+
                     // set the token, repeat API call
                     // keep track of retry count
+                } else {
+                    failure
                 }
-                failure
+
             }
         }
     }
@@ -213,14 +206,32 @@ internal class StreamVideoImpl internal constructor(
     private fun parseError(e: HttpException): Failure {
         val errorBytes = e.response()?.errorBody()?.bytes()
         val error = errorBytes?.let {
-            val errorBody = String(it, Charsets.UTF_8)
-            val format = Json {
-                prettyPrint = true
-                ignoreUnknownKeys = true
+            try {
+                val errorBody = String(it, Charsets.UTF_8)
+                val format = Json {
+                    prettyPrint = true
+                    ignoreUnknownKeys = true
+                }
+                format.decodeFromString<ErrorResponse>(errorBody)
+            } catch (e: Exception) {
+                return Failure(
+                    Error.NetworkError(
+                        "failed to parse error response from server: ${e.message}",
+                        VideoErrorCode.PARSER_ERROR.code
+                    )
+                )
             }
-            format.decodeFromString<Error.NetworkError>(errorBody)
-        } ?: Error.NetworkError("failed to parse error response from server", e.code())
-        return Failure(error)
+        } ?: return Failure(
+            Error.NetworkError("failed to parse error response from server", e.code())
+        )
+        return Failure(
+            Error.NetworkError(
+                message = error.message,
+                serverErrorCode = error.code,
+                statusCode = error.statusCode,
+                cause = Throwable(error.moreInfo)
+            )
+        )
     }
 
     public override fun subscribeFor(
@@ -250,14 +261,22 @@ internal class StreamVideoImpl internal constructor(
         StreamLifecycleObserver(
             lifecycle,
             object : LifecycleHandler {
-                override fun resume() = reconnectSocket()
+                override fun resume() {
+                    scope.launch {
+                        // We should only connect if we were previously connected
+                        if (connectionModule.coordinatorSocket.connectionState.value != SocketState.NotConnected) {
+                            connectionModule.coordinatorSocket.connect()
+                        }
+                    }
+                }
                 override fun stopped() {
-                    connectionModule.coordinatorSocket.releaseConnection()
+                    // We should only disconnect if we were previously connected
+                    if (connectionModule.coordinatorSocket.connectionState.value != SocketState.NotConnected) {
+                        connectionModule.coordinatorSocket.disconnect()
+                    }
                 }
             }
         )
-
-    private val SFUSessionHolder = MutableStateFlow<SFUSession?>(null)
 
     init {
         observeState()
@@ -266,18 +285,27 @@ internal class StreamVideoImpl internal constructor(
             lifecycleObserver.observe()
         }
 
-        // listen to socket events
-        connectionModule.coordinatorSocket.addListener(this)
+        // listen to socket events and errors
+        scope.launch {
+            connectionModule.coordinatorSocket.events.collect() {
+                fireEvent(it)
+            }
+        }
+        scope.launch {
+            connectionModule.coordinatorSocket.errors.collect() {
+                if (developmentMode) {
+                    throw it
+                } else {
+                    logger.e(it) { "permanent failure on socket connection"}
+                }
+            }
+        }
 
-        // TODO: Find the event listener
     }
 
-    suspend fun connectAsync(): Deferred<Result<WSConnectedEvent>> {
+    suspend fun connectAsync(): Deferred<Unit> {
         return scope.async {
             val result = socketImpl.connect()
-            if (result.isFailure) {
-                logger.e { "Failed to connect to coordinator, error $result.error" }
-            }
             result
         }
     }
@@ -382,7 +410,7 @@ internal class StreamVideoImpl internal constructor(
         if (selectedCid.isNotEmpty()) {
             calls[selectedCid]?.let {
                 it.state.handleEvent(event)
-                it.activeSession?.let {
+                it.session?.let {
                     it.handleEvent(event)
                 }
             }
@@ -421,45 +449,26 @@ internal class StreamVideoImpl internal constructor(
         id: String,
         participantIds: List<String>,
         ring: Boolean
-    ): Result<CallMetadata> = withContext(scope.coroutineContext) {
+    ): Result<GetOrCreateCallResponse> {
         logger.d { "[getOrCreateCall] type: $type, id: $id, participantIds: $participantIds" }
-        // engine.onCallStarting(type, id, participantIds, ring, forcedNewCall = false)
-
-        try {
-            Success(
-                connectionModule.videoCallsApi.getOrCreateCall(
-                    type = type,
-                    id = id,
-                    getOrCreateCallRequest = GetOrCreateCallRequest(
-                        data = CallRequest(
-                            members = participantIds.map {
-                                MemberRequest(
-                                    userId = it,
-                                    role = "admin"
-                                )
-                            },
-                        ),
-                        ring = ring
-                    )
+        return wrapAPICall {
+            connectionModule.videoCallsApi.getOrCreateCall(
+                type = type,
+                id = id,
+                getOrCreateCallRequest = GetOrCreateCallRequest(
+                    data = CallRequest(
+                        members = participantIds.map {
+                            MemberRequest(
+                                userId = it,
+                                role = "admin"
+                            )
+                        },
+                    ),
+                    ring = ring
                 )
             )
-                .also { logger.v { "[getOrCreateCall] Coordinator result: $it" } }
-                .map { response ->
-                    StartedCall(
-                        call = response.toCall(
-                            StreamCallKind.fromRinging(
-                                ring
-                            )
-                        )
-                    )
-                }
-//                .onSuccess { engine.onCallStarted(it.call) }
-//                .onError { engine.onCallFailed(it) }
-                .map { it.call }
-                .also { logger.v { "[getOrCreateCall] Final result: $it" } }
-        } catch (e: HttpException) {
-            parseError(e)
         }
+
     }
 
     /**
@@ -497,7 +506,7 @@ internal class StreamVideoImpl internal constructor(
                 connectionModule.videoCallsApi.joinCallTypeId0(
                     id = call.id,
                     type = call.type,
-                    connectionId = connectionModule.coordinatorSocket.getConnectionId(),
+                    connectionId = connectionModule.coordinatorSocket.connectionId,
                     joinCallRequest = JoinCallRequest()
                 )
             }
@@ -523,7 +532,6 @@ internal class StreamVideoImpl internal constructor(
             logger.v { "[joinCallInternal] selectEdgeServerResult: $selectEdgeServerResult" }
             when (selectEdgeServerResult) {
                 is Success -> {
-                    connectionModule.coordinatorSocket.updateCallState(call)
                     val credentials = selectEdgeServerResult.value.credentials
                     val url = credentials.server.url
                     val iceServers =
@@ -532,8 +540,6 @@ internal class StreamVideoImpl internal constructor(
                             .credentials
                             .iceServers
                             .map { it.toIceServer() }
-
-                    connectionModule.preferences.storeSfuToken(credentials.token)
 
                     Success(
                         JoinedCall(
@@ -596,51 +602,14 @@ internal class StreamVideoImpl internal constructor(
 
     override suspend fun joinCall(type: String, id: String): Result<JoinCallResponse> {
         val joinCallRequest = JoinCallRequest()
+        println("token is ${connectionModule.preferences.getUserToken()}")
         return wrapAPICall {
             connectionModule.videoCallsApi.joinCallTypeId0(
                 type,
                 id,
                 joinCallRequest,
-                connectionModule.coordinatorSocket.getConnectionId()
+                connectionModule.coordinatorSocket.connectionId
             )
-        }
-    }
-
-    suspend fun joinCallOld(
-        type: String,
-        id: String,
-        participantIds: List<String>,
-        ring: Boolean
-    ): Result<JoinedCall> {
-        logger.d { "[getOrCreateAndJoinCall] type: $type, id: $id, participantIds: $participantIds" }
-
-        // TODO: engine.onCallStarting(type, id, participantIds, ring, forcedNewCall = false)
-        // TODO: remove this, join call automatically gets the call, no need to do it twice
-//        getOrCreateCall(
-//            type = type,
-//            id = id,
-//            request = GetOrCreateCallRequest(
-//                data = CallRequest(
-//                    members = participantIds.map {
-//                        MemberRequest(
-//                            userId = it,
-//                            role = "admin"
-//                        )
-//                    },
-//                ),
-//                ring = ring
-//            )
-//        )
-//            .also { logger.v { "[getOrCreateCall] Coordinator result: $it" } }
-//            .map { response -> StartedCall(call = response.toCall(StreamCallKind.fromRinging(ring))) }
-//            .onSuccess { engine.onCallJoining(it.call) }
-//            .flatMap { joinCallInternal(it.call) }
-//            .onSuccess { engine.onCallJoined(it) }
-//            .onError { engine.onCallFailed(it) }
-//            .also { logger.v { "[getOrCreateAndJoinCall] result: $it" } }
-        return wrapAPICall {
-            // TODO: FiXME
-            JoinedCall(CallMetadata.empty(), "", "", emptyList())
         }
     }
 
@@ -784,7 +753,7 @@ internal class StreamVideoImpl internal constructor(
     override suspend fun queryCalls(queryCallsData: QueryCallsData): Result<QueriedCalls> {
         logger.d { "[queryCalls] queryCallsData: $queryCallsData" }
         val request = queryCallsData.toRequest()
-        val connectionId = connectionModule.coordinatorSocket.getConnectionId()
+        val connectionId = connectionModule.coordinatorSocket.connectionId
         return wrapAPICall {
             connectionModule.videoCallsApi.queryCalls(request, connectionId).toQueriedCalls()
         }
@@ -917,16 +886,6 @@ internal class StreamVideoImpl internal constructor(
     }
 
     /**
-     * Attempts to reconnect the socket if it's in a disconnected state and the user is available.
-     */
-    private fun reconnectSocket() {
-
-        if (connectionModule.coordinatorStateService.state !is SocketState.Connected && user.id.isNotBlank()) {
-            connectionModule.coordinatorSocket.reconnect()
-        }
-    }
-
-    /**
      * Creates an instance of the [SFUSession] for the given call input, which is persisted and
      * used to communicate with the BE.
      *
@@ -940,20 +899,6 @@ internal class StreamVideoImpl internal constructor(
      * @return An instance of [SFUSession] ready to connect to a call. Make sure to call
      * [SFUSession.connectToCall] when you're ready to fully join a call.
      */
-
-    /**
-     * @see StreamVideo.getActiveCallClient
-     */
-    override fun getActiveCallClient(): SFUSession? {
-        return SFUSessionHolder.value
-    }
-
-    /**
-     * @see StreamVideo.awaitCallClient
-     */
-    override suspend fun awaitCallClient(): SFUSession = withContext(scope.coroutineContext) {
-        SFUSessionHolder.first { it != null } ?: error("callClient must not be null")
-    }
 
     override suspend fun acceptCall(type: String, id: String) {
         TODO("Not yet implemented")
@@ -1013,6 +958,9 @@ internal class StreamVideoImpl internal constructor(
 //                    val event = CallCreatedEvent(
 //                        callCid = callMetadata.cid,
 //                        ringing = true,
+//                        users = callMetadata.users,
+//                        callInfo = callMetadata.toInfo(),
+//                        callDetails = callMetadata.callDetails
 //                    )
 
                     // TODO engine.onCoordinatorEvent(event)

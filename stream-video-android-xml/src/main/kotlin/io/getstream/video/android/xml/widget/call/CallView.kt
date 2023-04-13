@@ -29,7 +29,7 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.children
 import androidx.core.view.setPadding
 import androidx.core.view.updateLayoutParams
-import io.getstream.video.android.core.model.CallParticipantState
+import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.xml.R
 import io.getstream.video.android.xml.font.setTextStyle
 import io.getstream.video.android.xml.utils.extensions.clearConstraints
@@ -271,7 +271,7 @@ public class CallView : CallConstraintLayout {
      * bound to the view model.
      */
     public fun setFloatingParticipant(
-        participant: CallParticipantState?,
+        participant: ParticipantState?,
         onViewInitialized: (FloatingParticipantView) -> Unit = {},
     ) {
         if (participant == null) {

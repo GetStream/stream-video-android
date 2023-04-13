@@ -20,12 +20,12 @@ import io.getstream.video.android.app.BuildConfig
 import io.getstream.video.android.core.model.User
 
 fun getUsers(): List<User> {
+    // TODO: using buildconfig for this is not ideal
     return listOf(
         User(
             id = BuildConfig.SAMPLE_USER_00_ID,
             name = BuildConfig.SAMPLE_USER_00_NAME,
             imageUrl = BuildConfig.SAMPLE_USER_00_IMAGE,
-            token = BuildConfig.SAMPLE_USER_00_VIDEO_TOKEN,
             role = BuildConfig.SAMPLE_USER_00_ROLE,
             teams = emptyList(),
             custom = emptyMap()
@@ -34,7 +34,6 @@ fun getUsers(): List<User> {
             id = BuildConfig.SAMPLE_USER_01_ID,
             name = BuildConfig.SAMPLE_USER_01_NAME,
             imageUrl = BuildConfig.SAMPLE_USER_01_IMAGE,
-            token = BuildConfig.SAMPLE_USER_01_VIDEO_TOKEN,
             role = BuildConfig.SAMPLE_USER_01_ROLE,
             teams = emptyList(),
             custom = emptyMap()
@@ -43,7 +42,6 @@ fun getUsers(): List<User> {
             id = BuildConfig.SAMPLE_USER_02_ID,
             name = BuildConfig.SAMPLE_USER_02_NAME,
             imageUrl = BuildConfig.SAMPLE_USER_02_IMAGE,
-            token = BuildConfig.SAMPLE_USER_02_VIDEO_TOKEN,
             role = BuildConfig.SAMPLE_USER_02_ROLE,
             teams = emptyList(),
             custom = emptyMap()
@@ -52,7 +50,6 @@ fun getUsers(): List<User> {
             id = BuildConfig.SAMPLE_USER_03_ID,
             name = BuildConfig.SAMPLE_USER_03_NAME,
             imageUrl = BuildConfig.SAMPLE_USER_03_IMAGE,
-            token = BuildConfig.SAMPLE_USER_03_VIDEO_TOKEN,
             role = BuildConfig.SAMPLE_USER_03_ROLE,
             teams = emptyList(),
             custom = emptyMap()
@@ -61,7 +58,6 @@ fun getUsers(): List<User> {
             id = BuildConfig.SAMPLE_USER_04_ID,
             name = BuildConfig.SAMPLE_USER_04_NAME,
             imageUrl = BuildConfig.SAMPLE_USER_04_IMAGE,
-            token = BuildConfig.SAMPLE_USER_04_VIDEO_TOKEN,
             role = BuildConfig.SAMPLE_USER_04_ROLE,
             teams = emptyList(),
             custom = emptyMap()
@@ -70,7 +66,6 @@ fun getUsers(): List<User> {
             id = BuildConfig.SAMPLE_USER_05_ID,
             name = BuildConfig.SAMPLE_USER_05_NAME,
             imageUrl = BuildConfig.SAMPLE_USER_05_IMAGE,
-            token = BuildConfig.SAMPLE_USER_05_VIDEO_TOKEN,
             role = BuildConfig.SAMPLE_USER_05_ROLE,
             teams = emptyList(),
             custom = emptyMap()

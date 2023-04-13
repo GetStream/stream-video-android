@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.compose.ui.components.call.incomingcall
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -23,18 +24,20 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import io.getstream.video.android.common.util.mockParticipantList
+import io.getstream.video.android.common.util.MockUtils
+import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.background.CallBackground
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.call.incomingcall.internal.IncomingCallDetails
 import io.getstream.video.android.compose.ui.components.call.incomingcall.internal.IncomingCallOptions
+import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.call.state.CallMediaState
 import io.getstream.video.android.core.model.CallType
-import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.core.viewmodel.CallViewModel
+import io.getstream.video.android.ui.common.R
 
 /**
  * Represents the Incoming Call state and UI, when the user receives a call from other people.
@@ -49,19 +52,19 @@ public fun IncomingCallContent(
     viewModel: CallViewModel,
     modifier: Modifier = Modifier,
     onBackPressed: () -> Unit,
-    onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
+    // onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
 ) {
-    val callType: CallType by viewModel.callType.collectAsState()
-    val participants: List<CallUser> by viewModel.participants.collectAsState()
-    val callMediaState: CallMediaState by viewModel.callMediaState.collectAsState()
+    val participants: List<ParticipantState> by viewModel.call.state.participants.collectAsState()
+
+//    val callMediaState: CallMediaState by viewModel.callMediaState.collectAsState()
 
     IncomingCallContent(
+        callType = CallType.VIDEO,
         participants = participants,
-        callType = callType,
-        isVideoEnabled = callMediaState.isCameraEnabled,
+        isVideoEnabled = true,
         modifier = modifier,
         onBackPressed = onBackPressed,
-        onCallAction = onCallAction
+        onCallAction = {}
     )
 }
 
@@ -80,10 +83,11 @@ public fun IncomingCallContent(
 @Composable
 public fun IncomingCallContent(
     callType: CallType,
-    participants: List<CallUser>,
+    participants: List<ParticipantState>,
     isVideoEnabled: Boolean,
     modifier: Modifier = Modifier,
     showHeader: Boolean = true,
+    @DrawableRes previewPlaceholder: Int = R.drawable.stream_video_ic_preview_avatar,
     onBackPressed: () -> Unit,
     onCallAction: (CallAction) -> Unit,
 ) {
@@ -112,7 +116,9 @@ public fun IncomingCallContent(
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .padding(top = topPadding),
-                participants = participants
+                callType = callType,
+                participants = participants,
+                previewPlaceholder = previewPlaceholder
             )
         }
 
@@ -129,23 +135,29 @@ public fun IncomingCallContent(
 
 @Preview
 @Composable
-private fun IncomingCallPreview() {
+private fun IncomingCallPreview1() {
+    MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         IncomingCallContent(
-            participants = mockParticipantList.map {
-                CallUser(
-                    id = it.id,
-                    name = it.name,
-                    role = it.role,
-                    state = null,
-                    createdAt = null,
-                    updatedAt = null,
-                    imageUrl = it.profileImageURL ?: "",
-                    teams = emptyList()
-                )
-            },
+            participants = mockParticipants.takeLast(1),
             callType = CallType.VIDEO,
             isVideoEnabled = false,
+            previewPlaceholder = R.drawable.stream_video_call_sample,
+            onBackPressed = {}
+        ) {}
+    }
+}
+
+@Preview
+@Composable
+private fun IncomingCallPreview2() {
+    MockUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        IncomingCallContent(
+            participants = mockParticipants,
+            callType = CallType.VIDEO,
+            isVideoEnabled = false,
+            previewPlaceholder = R.drawable.stream_video_call_sample,
             onBackPressed = {}
         ) {}
     }

@@ -92,6 +92,9 @@ Check the docs on TestBase, TestHelper and IntegrationTestBase for more utility 
 
 * StreamVideoImpl makes the API calls to the coordinator. Internally there are 4 retrofit APIs it calls
 * CallClient makes the API calls to the SFU on the edge
+* StreamVideoImpl.developmentMode determines if we should log an error or fail fast. 
+Typically for development you want to fail fast and loud. For production you want to ignore most non-critical errors.
+* PersistentSocket is subclassed by CoordinatorSocket and SfuSocket. It keeps a websocket connection
 
 ### State management
 
@@ -102,25 +105,11 @@ Check the docs on TestBase, TestHelper and IntegrationTestBase for more utility 
 
 ## WebRTC layer
 
-* Ideally you setup your camera tracks and audio tracks before you join a call
-* Otherwise you end up joining and immediately triggering onNegotiationNeeded after that
-
-### How it currently works
-
-Join logic
-
-* connectToCall with args (2 versions of this function that do something different)
-* initializeCall
-* connectToCall no args version
-* executeJoinRequest -> (get a generic sdp)
-* createPeerConnections -> StreamPeerConnectionFactory enables simulcast
-* loadParticipantsData
-* createUserTracks
-* After that onNegotiationNeeded is triggered. this creates a new offer and calls SetPublisherRequest
-  (it also seems to enable simulcast here, which is a weird place to do this. should be enabled from the start)
+* RtcSession maintains all the tracks and the webrtc logic
 
 ### RTC offer/answer cycle
 
+* sessionId is created locally as a random UUID
 * create the peer connections
 * capture audio and video (if we're not doing so already, in many apps it should already be on for the preview screen)
 * execute the join request
@@ -143,10 +132,97 @@ Camera/device changes -> listener in ActiveSFUSession -> updates the tracks.
 * Each participant has a trackPrefix
 * New media streams have a streamID, which starts with the trackPrefix
   val (trackPrefix, trackType) = mediaStream.id.split(':');
+* Note that members are unique per user, not per session
 
-### Questions
+## Compose
 
-* Why does JoinRequest not specify tracks, but SetPublisherRequest does?
+Some of our customers will include the SDK and don't customize things.
+But the majority will either customize our UI components and partially or entirely build their own UI. 
 
-### Compose
+Because of this we need to make sure that our examples don't hide how the SDK works.
 
+For example this is bad:
+
+```
+CallComposable() 
+```
+
+A better approach is to show the underlying components, so people understand how to swap them out
+
+```
+Call {
+  ParticipantGrid(card= { ParticipantCard() })
+  CallControls {
+    ChatButton()
+    FlipVideoButton()
+    MuteAudioButton()
+    MuteVideoButton()
+  }
+}
+```
+
+The second approach is better since:
+
+* It clearly shows how to change the buttons if you want to
+* It shows how to change the participant card. Let's say you don't want to show names, or hide the network indicator etc.
+* Or if you want an entirely different layout of the participants
+* Or perhaps have the buttons in a bottom bar instead of an overlay
+
+With the second approach everything is easy to understand and customize.
+
+### Ringing
+
+* Push notifications or the coordinator WS can trigger a callCreatedEvent with ring=true
+* The UI should show an incoming call interface
+* Clicking accept or reject fires triggers the accept/reject API endpoints
+* Call members have an accepted_at, rejected_at field
+
+Ringing state on a call has the following options
+
+```kotlin
+sealed class RingingState() {
+    object Incoming : RingingState()
+    object Outgoing : RingingState()
+    object Active : RingingState()
+    object RejectedByAll : RingingState()
+    object TimeoutNoAnswer : RingingState()
+}
+```
+
+### Dogfooding vs Demo App
+
+* dogfooding has google authentication. demo app has no authentication
+* demo app allows you to type in the call id and join, or create a new
+* dogfooding joins via a url deeplink
+
+### V0 to V1 migration tips
+
+Participant state now lives in ParticipantState
+```kotlin
+// old
+CallParticipantState(name="hello")
+// new
+ParticipantState(initialUser= User(name="hello"))
+```
+
+The participant state object exposes stateflow objects
+
+```kotlin
+// old
+participant.connectionQuality
+// new
+participant.connectionQuality.collectAsState().value
+```
+
+Call now has a state object
+
+```kotlin
+// old call.callParticipants
+// new call.state.participants
+```
+
+Ringing call state has been simplified
+
+```kotlin
+// call.state.ringingState
+```

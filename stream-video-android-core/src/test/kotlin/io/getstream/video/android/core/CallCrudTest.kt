@@ -87,7 +87,7 @@ public class CallCrudTest : IntegrationTestBase() {
         val updateEvent = assertEventReceived(CallCreatedEvent::class.java)
 
         getResult.onSuccess {
-            assertThat(it.custom["color"]).isEqualTo(secret)
+            assertThat(it.call.custom["color"]).isEqualTo(secret)
         }
     }
 

@@ -23,32 +23,44 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import io.getstream.video.android.common.util.MockUtils
 import io.getstream.video.android.common.util.buildLargeCallText
 import io.getstream.video.android.common.util.buildSmallCallText
 import io.getstream.video.android.common.util.mockParticipantList
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.CallStatus
-import io.getstream.video.android.core.model.CallUser
+import io.getstream.video.android.core.model.CallType
+import io.getstream.video.android.core.utils.toCallUser
 
 @Composable
 internal fun ParticipantInformation(
+    callType: CallType,
     callStatus: CallStatus,
-    participants: List<CallUser>
+    participants: List<ParticipantState>
 ) {
     Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        val context = LocalContext.current
+        val callUsers by remember { derivedStateOf { participants.map { it.toCallUser() } } }
         val text = if (participants.size < 3) {
-            buildSmallCallText(participants)
+            buildSmallCallText(context, callUsers)
         } else {
-            buildLargeCallText(participants)
+            buildLargeCallText(context, callUsers)
         }
 
         val fontSize = if (participants.size == 1) {
@@ -61,7 +73,7 @@ internal fun ParticipantInformation(
             modifier = Modifier.padding(horizontal = VideoTheme.dimens.participantsTextPadding),
             text = text,
             fontSize = fontSize,
-            color = VideoTheme.colors.textHighEmphasis,
+            color = VideoTheme.colors.callDescription,
             textAlign = TextAlign.Center,
         )
 
@@ -70,14 +82,21 @@ internal fun ParticipantInformation(
         Text(
             modifier = Modifier.alpha(VideoTheme.dimens.onCallStatusTextAlpha),
             text = when (callStatus) {
-                CallStatus.Incoming -> "Incoming call..."
-                CallStatus.Outgoing -> "Calling..."
+                CallStatus.Incoming -> stringResource(
+                    id = io.getstream.video.android.ui.common.R.string.stream_video_call_status_incoming,
+                    callType.type.capitalize(Locale.current)
+                )
+
+                CallStatus.Outgoing -> stringResource(
+                    id = io.getstream.video.android.ui.common.R.string.stream_video_call_status_outgoing,
+                )
+
                 is CallStatus.Calling -> callStatus.duration
             },
             style = VideoTheme.typography.body,
             fontSize = VideoTheme.dimens.onCallStatusTextSize,
             fontWeight = FontWeight.Bold,
-            color = VideoTheme.colors.textHighEmphasis,
+            color = VideoTheme.colors.callDescription,
             textAlign = TextAlign.Center,
         )
     }
@@ -86,21 +105,12 @@ internal fun ParticipantInformation(
 @Preview
 @Composable
 private fun ParticipantInformationPreview() {
+    MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         ParticipantInformation(
+            callType = CallType.VIDEO,
             callStatus = CallStatus.Incoming,
-            participants = mockParticipantList.map {
-                CallUser(
-                    id = it.id,
-                    name = it.name,
-                    role = it.role,
-                    state = null,
-                    imageUrl = it.profileImageURL ?: "",
-                    createdAt = null,
-                    updatedAt = null,
-                    teams = emptyList()
-                )
-            }
+            participants = mockParticipantList
         )
     }
 }

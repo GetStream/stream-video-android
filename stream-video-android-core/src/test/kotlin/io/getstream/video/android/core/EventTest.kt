@@ -22,7 +22,6 @@ import io.getstream.video.android.core.events.CallAcceptedEvent
 import io.getstream.video.android.core.events.CallEndedEvent
 import io.getstream.video.android.core.events.CallRejectedEvent
 import io.getstream.video.android.core.events.CallUpdatedEvent
-import io.getstream.video.android.core.events.ConnectedEvent
 import io.getstream.video.android.core.events.ConnectionQualityChangeEvent
 import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
 import io.getstream.video.android.core.events.ParticipantJoinedEvent
@@ -37,7 +36,7 @@ import io.getstream.video.android.core.model.UserAudioLevel
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.openapitools.client.models.OwnCapability
+import org.openapitools.client.models.*
 import org.robolectric.RobolectricTestRunner
 import stream.video.sfu.event.ConnectionQualityInfo
 import stream.video.sfu.models.ConnectionQuality
@@ -105,12 +104,13 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
     @Test
     fun `Accepting & rejecting a call`() = runTest {
-        val acceptedEvent = CallAcceptedEvent(callCid = call.cid, sentByUserId = "123")
+
+        val acceptedEvent = CallAcceptedEvent(callCid = call.cid, sentByUserId = "123", sessionId = "123")
         clientImpl.fireEvent(acceptedEvent)
         assertThat(call.state.getParticipant("123")?.acceptedAt?.value).isNotNull()
 
         val rejectedEvent =
-            CallRejectedEvent(callCid = call.cid, user = User(id = "123"), updatedAt = Date())
+            CallRejectedEvent(callCid = call.cid, user = User(id = "123"), updatedAt = Date(), sessionId = "123")
         clientImpl.fireEvent(rejectedEvent)
         assertThat(call.state.getParticipant("123")?.rejectedAt?.value).isNotNull()
     }
@@ -245,35 +245,5 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
 //        val eventUpdated = CallMembersUpdatedEvent(emptyMap(), info=callInfo, details=callDetails)
 //        clientImpl.fireEvent(eventUpdated)
         // TODO clean this up val eventDeleted = CallMembersDeletedEvent(user_id="thierry", is_speaking=true)
-    }
-
-    @Test
-    fun testEvent() = runTest {
-        val myEvent = ConnectedEvent(clientId = "test123")
-        clientImpl.fireEvent(myEvent)
-//        when(e) {
-        // TODO: how to treat blocking...
-//            is BlockedUserEvent -> TODO()
-        //            is UnblockedUserEvent -> TODO()
-        // TODO: What's call cancelled? This seems redundant
-//            is CallCancelledEvent -> TODO()
-        // TODO: decide on how to expose this...
-//            is ConnectedEvent -> TODO()
-//            is CoordinatorHealthCheckEvent -> TODO() // socket level health check
-//            SFUHealthCheckEvent -> TODO()
-
-        // TODO: what does this mean compared to the create and participant joined events?
-//            is JoinCallResponseEvent -> TODO()
-
-        // TODO: Webrtc stuff
-//            is ICETrickleEvent -> TODO()
-//            is PublisherAnswerEvent -> TODO()
-//            is SubscriberOfferEvent -> TODO()
-//            is TrackPublishedEvent -> TODO()
-//            is TrackUnpublishedEvent -> TODO()
-//            is ChangePublishQualityEvent -> TODO()
-//            is VideoQualityChangedEvent -> TODO()
-//            is ErrorEvent -> TODO() // Maybe just console log it for now?
-//        }
     }
 }

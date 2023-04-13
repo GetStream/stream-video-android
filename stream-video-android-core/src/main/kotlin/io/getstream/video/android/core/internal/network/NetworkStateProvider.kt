@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  * @property connectivityManager Android manager which provides information about the current
  * connection state.
  */
-internal class NetworkStateProvider(private val connectivityManager: ConnectivityManager) {
+public class NetworkStateProvider(private val connectivityManager: ConnectivityManager) {
 
     private val lock: Any = Any()
 

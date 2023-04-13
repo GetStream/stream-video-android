@@ -16,6 +16,8 @@
 
 package io.getstream.video.android.xml.widget.control
 
+import androidx.annotation.ColorRes
+import androidx.annotation.DrawableRes
 import io.getstream.video.android.core.call.state.CallAction
 
 /**
@@ -27,9 +29,9 @@ import io.getstream.video.android.core.call.state.CallAction
  * @param action The [CallAction] to be performed.
  */
 public data class CallControlItem(
-    val icon: Int,
-    val iconTint: Int,
-    val backgroundTint: Int,
+    @DrawableRes val icon: Int,
+    @ColorRes val iconTint: Int,
+    @ColorRes val backgroundTint: Int,
     val action: CallAction,
     val enabled: Boolean = true
 )

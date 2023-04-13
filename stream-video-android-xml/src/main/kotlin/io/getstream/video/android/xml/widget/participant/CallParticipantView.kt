@@ -23,10 +23,9 @@ import android.view.View
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.isVisible
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.core.model.CallParticipantState
+import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.core.model.TrackWrapper
 import io.getstream.video.android.core.model.User
-import io.getstream.video.android.core.model.VideoTrack
-import io.getstream.video.android.core.model.toUser
 import io.getstream.video.android.xml.databinding.StreamVideoViewCallParticipantBinding
 import io.getstream.video.android.xml.font.setTextStyle
 import io.getstream.video.android.xml.utils.extensions.clearConstraints
@@ -64,7 +63,7 @@ public class CallParticipantView : CallCardView, VideoRenderer {
     /**
      * The track of the current participant.
      */
-    private var track: VideoTrack? = null
+    private var track: TrackWrapper? = null
 
     /**
      * Handler when the video renders.
@@ -140,10 +139,10 @@ public class CallParticipantView : CallCardView, VideoRenderer {
      *
      * @param participant The call participant whose video we wish to show.
      */
-    public fun setParticipant(participant: CallParticipantState) {
+    public fun setParticipant(participant: ParticipantState) {
         binding.labelHolder.isVisible = !participant.isLocal
-        setUserData(participant.toUser())
-        setTrack(participant.videoTrack)
+        setUserData(participant.user.value)
+        setTrack(participant.videoTrackWrapped)
         setAvatarVisibility(participant)
         setHasAudio(participant.hasAudio)
     }
@@ -158,7 +157,7 @@ public class CallParticipantView : CallCardView, VideoRenderer {
         val tint =
             if (hasAudio) style.participantAudioLevelTint else style.participantMicOffIconTint
         val icon =
-            if (hasAudio) context.getDrawableCompat(RCommon.drawable.ic_mic_on) else style.participantMicOffIcon
+            if (hasAudio) context.getDrawableCompat(RCommon.drawable.stream_video_ic_mic_on) else style.participantMicOffIcon
 
         binding.soundIndicator.setImageDrawable(icon)
         binding.soundIndicator.setColorFilter(tint)
@@ -177,9 +176,9 @@ public class CallParticipantView : CallCardView, VideoRenderer {
     /**
      * Updates the current track which contains the current participants video.
      *
-     * @param track The [VideoTrack] of the participant.
+     * @param track The [VideoTrackWrapper] of the participant.
      */
-    private fun setTrack(track: VideoTrack?) {
+    private fun setTrack(track: TrackWrapper?) {
         if (this.track == track) return
 
         try {
@@ -193,7 +192,7 @@ public class CallParticipantView : CallCardView, VideoRenderer {
         if (track == null) return
 
         try {
-            this.track!!.video.addSink(binding.participantVideoRenderer)
+            this.track!!.video?.addSink(binding.participantVideoRenderer)
             initRenderer()
         } catch (e: IllegalStateException) {
             logger.e { "[setTrack] Failed to add sink." }
@@ -224,16 +223,15 @@ public class CallParticipantView : CallCardView, VideoRenderer {
      *
      * @param participant The [CallParticipantState] for the current participant.
      */
-    private fun setAvatarVisibility(participant: CallParticipantState) {
-        val track = participant.videoTrack
+    private fun setAvatarVisibility(participant: ParticipantState) {
+        val track = participant.videoTrackWrapped
         val isVideoEnabled = try {
             track?.video?.enabled() == true
         } catch (error: Throwable) {
             false
         }
-        val shouldShowAvatar =
-            track == null || !isVideoEnabled || TrackType.TRACK_TYPE_VIDEO !in participant.publishedTracks
-
+        // TODO
+        val shouldShowAvatar = false
         binding.participantAvatar.isVisible = shouldShowAvatar
     }
 

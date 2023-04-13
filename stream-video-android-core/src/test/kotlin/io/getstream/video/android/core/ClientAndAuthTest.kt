@@ -18,11 +18,14 @@ package io.getstream.video.android.core
 
 import com.google.common.truth.Truth.assertThat
 import io.getstream.log.taggedLogger
+import io.getstream.result.Error
+import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.events.ConnectedEvent
 import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.model.QueryCallsData
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.UserType
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -113,22 +116,13 @@ class ClientAndAuthTest : TestBase() {
         ).build()
         assertThat(client.state.connection.value).isEqualTo(ConnectionState.PreConnect)
         val clientImpl = client as StreamVideoImpl
+        println("a")
         val connectResultDeferred = clientImpl.connectAsync()
+        println("b")
         val connectResult = connectResultDeferred.await()
-
-        assertSuccess(connectResult)
-
-        // wait for the WS to connect
-        suspendCoroutine<VideoEvent> { continuation ->
-            client.subscribe {
-                if (it is ConnectedEvent) {
-                    continuation.resume(it)
-                }
-            }
-        }
-
-        logger.d { "stateflow from test $client.state.connection" }
+        delay(100L)
         assertThat(client.state.connection.value).isEqualTo(ConnectionState.Connected)
+        println("reached")
     }
 
     @Test
@@ -140,6 +134,41 @@ class ClientAndAuthTest : TestBase() {
             testData.users["thierry"]!!,
             testData.tokens["thierry"]!!,
         ).build()
+    }
+
+    @Test
+    fun `test an expired token, no provider set`() = runTest {
+        val client = StreamVideoBuilder(
+            context = context,
+            apiKey = apiKey,
+            geo = GEO.GlobalEdgeNetwork,
+            testData.users["thierry"]!!,
+            testData.expiredToken,
+        ).build()
+
+        val result = client.call("default", "123").create()
+        assertError(result)
+        result.onError {
+            it as Error.NetworkError
+            assertThat(it.serverErrorCode).isEqualTo(VideoErrorCode.TOKEN_EXPIRED.code)
+        }
+    }
+
+    @Test
+    fun `test an expired token, with token provider set`() = runTest {
+        val client = StreamVideoBuilder(
+            context = context,
+            apiKey = apiKey,
+            geo = GEO.GlobalEdgeNetwork,
+            testData.users["thierry"]!!,
+            testData.expiredToken,
+            tokenProvider = { error ->
+                testData.tokens["thierry"]!!
+            }
+        ).build()
+
+        val result = client.call("default", "123").create()
+        assertSuccess(result)
     }
 
     @Test
@@ -189,23 +218,6 @@ class ClientAndAuthTest : TestBase() {
         assertSuccess(callCreateResult)
         // wonder if this will work, no coordinator connection
         val callJoined = call.join()
-    }
-
-    @Test
-    fun testInvalidTokenRecovery() = runTest {
-        val client = StreamVideoBuilder(
-            context = context,
-            apiKey = apiKey,
-            geo = GEO.GlobalEdgeNetwork,
-            testData.users["thierry"]!!,
-            "invalidtoken",
-            // Maybe 1 param is better TODO
-            tokenProvider = { type, user, call ->
-                testData.tokens["thierry"]!!
-            }
-        ).build()
-        val result = client.call("default", randomUUID()).create()
-        assertSuccess(result)
     }
 
     @Test

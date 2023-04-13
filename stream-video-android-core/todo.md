@@ -2,21 +2,21 @@
 ## Timeline
 
 ### Week 1: Refactor LLC & State. Setup testing
-### Week 2: LLC Stability
+### Week 2: LLC & State Stability. Compose testing & previews
+### Week 3: Sample app, update compose to LLC & State changes. New socket & token provider. Call UI
 
-- Token refresh flow
-- Openapi/Event integration. Events being out of sync is a large issue
+
+- Audio/video review
+- Tommaso to fix the event openapi thing, and we merge it
+- Jaewoong and Thierry to review the codebase. Monday evening
+- Make the UI work with the new LLC & State
+- Step 1: Render local video using the new API and compose
+- Step 2: Upload local video to the SFU
+- Step 3: Join a call and render participants
+
+Other
+
 - Cleanup the test suite
-- Clean up the active SFU session
-
-## Phase 2, find a way to make Call/SFUSession testable
-
-- MediaManager that has a dummy version of devices for test
-
-## Phase 3, Test using the UI
-
-
-
 
 ### Review each file, fix TODOS and document
 
@@ -54,13 +54,6 @@
 - [X] Join flow
 - [X] Active Session
 
-
-### Websockets
-
-- Review WS requirements for SFU socket connection
-- Test coverage for WS connection
-- Have 1 class for Coordinator and SFU persistent WS connection
-
 ### Refactoring
 
 - [X] Client builder refactoring. see https://www.notion.so/stream-wiki/Android-Changes-Discussion-10c5a9f303134eb786bdebcea55cf92a
@@ -78,8 +71,11 @@
 - [X] Merge the two concepts of Call. Call2 and model/Call.kt
 - [X] Use the new state in the view model
 - [X] User a map for sessionId -> ParticipantState. Fixes several bugs with userId vs sessionId
-- [ ] Verify all events are handled
-- [ ] Media manager class to abstract all the local audio/video stuff. Also makes it easy to test the codebase if you can swap out the media & webrtc stuff.
+- [X] Verify all events are handled
+- [X] Media manager class to abstract all the local audio/video stuff. Also makes it easy to test the codebase if you can swap out the media & webrtc stuff.
+- [X] Clean up the active SFU session]
+- [X] Socket implementation should be simple
+- [X] Token provider
 
 ### Features
 
@@ -92,6 +88,7 @@
 - [X] Opus RED
 - [X] Opus DTX
 - [X] Muting other users/ Moderation
+- [X] Token provider
 
 ### Documentation (code level)
 
@@ -108,6 +105,7 @@
 
 ### LLC TODO
 
+- [ ] Make call level client methods internal
 - [ ] Directly use the events from openAPI to prevent things being out of sync
 - [ ] List of backend changes
 - [ ] Join flow performance
@@ -122,7 +120,7 @@
 
 ### RTC TODO
 
-- [ ] Media manager class to enable easy testing of all audio/video stuff
+- [X] Media manager class to enable easy testing of all audio/video stuff
 - 
 
 ### Disconnect suggestion
@@ -153,9 +151,12 @@
 ### Available tasks up for grabs
 
 - Participant sorting rules. See Call sortedParticipants
-- Pinning of participants
+- Pinning of participants. You pin/unpin and it sets pinnedAt and sorting takes it into account
 - Currently we use UserPreferencesManager. Jaewoong mentioned we should perhaps explore https://developer.android.com/topic/libraries/architecture/datastore
+- Hash/copy/equality methods for participantstate (otherwise the participants stateflow will have bugs)
 - Measure latency isn't 100% ok. You can't set a timeout using withTimeout and collect the measurements that we have. This relates to threading vs coroutines and withTimeout not working
 - Logging setting needs to be passed to retrofit
 - Disconnect/ garbage collect flow needs a full round of review
-- Hash/copy/equality methods for participantstate (otherwise the participants stateflow will have bugs)
+- MediaManager needs a full review and cleanup
+- Socket connection system needs a full review, cleanup and test coverage
+- Ringing support isn't fully implemented yet

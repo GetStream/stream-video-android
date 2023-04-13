@@ -33,8 +33,8 @@
 
     <io.getstream.video.android.xml.widget.control.ControlButtonView
         android:id="@+id/changeOrientationButton"
-        android:layout_width="@dimen/screenShareButtonSize"
-        android:layout_height="@dimen/screenShareButtonSize"
+        android:layout_width="@dimen/stream_video_screenShareButtonSize"
+        android:layout_height="@dimen/stream_video_screenShareButtonSize"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
         android:background="@drawable/stream_video_bg_call_option"
@@ -45,8 +45,8 @@
 
     <io.getstream.video.android.xml.widget.control.ControlButtonView
         android:id="@+id/fullscreenButton"
-        android:layout_width="@dimen/screenShareButtonSize"
-        android:layout_height="@dimen/screenShareButtonSize"
+        android:layout_width="@dimen/stream_video_screenShareButtonSize"
+        android:layout_height="@dimen/stream_video_screenShareButtonSize"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
         android:background="@drawable/stream_video_bg_call_option"

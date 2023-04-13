@@ -24,7 +24,6 @@ import stream.video.sfu.models.Error
 import stream.video.sfu.models.Participant
 import stream.video.sfu.models.PeerType
 import stream.video.sfu.models.TrackType
-import stream.video.sfu.models.VideoQuality
 
 public sealed class SfuDataEvent : VideoEvent()
 
@@ -38,10 +37,6 @@ public data class ICETrickleEvent(
 ) : SfuDataEvent()
 
 public data class SubscriberOfferEvent(
-    val sdp: String
-) : SfuDataEvent()
-
-public data class PublisherAnswerEvent(
     val sdp: String
 ) : SfuDataEvent()
 

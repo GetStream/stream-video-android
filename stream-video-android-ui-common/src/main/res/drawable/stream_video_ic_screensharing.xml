@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (c) 2023 Stream.io Inc. All rights reserved.
+
+     Licensed under the Stream License;
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:autoMirrored="true"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#000000"
+        android:fillType="evenOdd"
+        android:pathData="M2,6.682C2,5.577 2.895,4.682 4,4.682H20C21.105,4.682 22,5.577 22,6.682V16.318C22,17.423 21.105,18.318 20,18.318H4C2.895,18.318 2,17.423 2,16.318V6.682ZM10.421,11.524L8.363,11.5L12,7.258L15.636,11.5L13.507,11.525V15.742L10.421,15.742V11.524Z" />
+    <group>
+        <clip-path
+            android:fillType="evenOdd"
+            android:pathData="M2,6.682C2,5.577 2.895,4.682 4,4.682H20C21.105,4.682 22,5.577 22,6.682V16.318C22,17.423 21.105,18.318 20,18.318H4C2.895,18.318 2,17.423 2,16.318V6.682ZM10.421,11.524L8.363,11.5L12,7.258L15.636,11.5L13.507,11.525V15.742L10.421,15.742V11.524Z" />
+        <path android:pathData="M8.363,11.5L6.845,10.198L4.059,13.449L8.34,13.5L8.363,11.5ZM10.421,11.524H12.421V9.548L10.445,9.524L10.421,11.524ZM12,7.258L13.518,5.956L12,4.184L10.481,5.956L12,7.258ZM15.636,11.5L15.659,13.5L19.942,13.45L17.155,10.198L15.636,11.5ZM13.507,11.525L13.483,9.525L11.507,9.548V11.525H13.507ZM13.507,15.742L13.507,17.742L15.507,17.742V15.742H13.507ZM10.421,15.742H8.421V17.742H10.421L10.421,15.742ZM4,2.682C1.791,2.682 0,4.473 0,6.682H4V6.682V2.682ZM20,2.682H4V6.682H20V2.682ZM24,6.682C24,4.473 22.209,2.682 20,2.682V6.682H24ZM24,16.318V6.682H20V16.318H24ZM20,20.318C22.209,20.318 24,18.527 24,16.318H20V16.318V20.318ZM4,20.318H20V16.318H4V20.318ZM0,16.318C0,18.527 1.791,20.318 4,20.318V16.318H4H0ZM0,6.682V16.318H4V6.682H0ZM8.34,13.5L10.397,13.524L10.445,9.524L8.387,9.5L8.34,13.5ZM10.481,5.956L6.845,10.198L9.882,12.802L13.518,8.559L10.481,5.956ZM17.155,10.198L13.518,5.956L10.481,8.559L14.118,12.802L17.155,10.198ZM13.53,13.525L15.659,13.5L15.613,9.5L13.483,9.525L13.53,13.525ZM11.507,11.525V15.742H15.507V11.525H11.507ZM13.507,13.742L10.421,13.742L10.421,17.742L13.507,17.742L13.507,13.742ZM12.421,15.742V11.524H8.421V15.742H12.421Z" />
+    </group>
+</vector>

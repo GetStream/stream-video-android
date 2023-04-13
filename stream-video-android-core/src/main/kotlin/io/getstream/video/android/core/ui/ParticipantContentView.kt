@@ -25,7 +25,7 @@ import android.widget.LinearLayout
 import io.getstream.video.android.R
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
-import io.getstream.video.android.core.model.VideoTrack
+import io.getstream.video.android.core.model.TrackWrapper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -92,7 +92,7 @@ public class ParticipantContentView : LinearLayout {
         renderTrack(
             findViewById(R.id.firstParticipant),
             call,
-            callParticipant.videoTrack
+            callParticipant.videoTrackWrapped
         )
     }
 
@@ -109,13 +109,13 @@ public class ParticipantContentView : LinearLayout {
         renderTrack(
             findViewById(R.id.firstParticipant),
             call,
-            first.videoTrack
+            first.videoTrackWrapped
         )
 
         renderTrack(
             findViewById(R.id.secondParticipant),
             call,
-            second.videoTrack
+            second.videoTrackWrapped
         )
     }
 
@@ -131,19 +131,19 @@ public class ParticipantContentView : LinearLayout {
         renderTrack(
             findViewById(R.id.firstParticipant),
             call,
-            first.videoTrack
+            first.videoTrackWrapped
         )
 
         renderTrack(
             findViewById(R.id.secondParticipant),
             call,
-            second.videoTrack
+            second.videoTrackWrapped
         )
 
         renderTrack(
             findViewById(R.id.thirdParticipant),
             call,
-            third.videoTrack
+            third.videoTrackWrapped
         )
     }
 
@@ -160,32 +160,32 @@ public class ParticipantContentView : LinearLayout {
         renderTrack(
             findViewById(R.id.firstParticipant),
             call,
-            first.videoTrack
+            first.videoTrackWrapped
         )
 
         renderTrack(
             findViewById(R.id.secondParticipant),
             call,
-            second.videoTrack
+            second.videoTrackWrapped
         )
 
         renderTrack(
             findViewById(R.id.thirdParticipant),
             call,
-            third.videoTrack
+            third.videoTrackWrapped
         )
 
         renderTrack(
             findViewById(R.id.fourthParticipant),
             call,
-            fourth.videoTrack
+            fourth.videoTrackWrapped
         )
     }
 
     private fun renderTrack(
         participantItemView: ParticipantItemView,
         call: Call,
-        track: VideoTrack?
+        track: TrackWrapper?
     ) {
         val video = track?.video
 

@@ -17,7 +17,6 @@
 package io.getstream.video.android.compose.ui.components.call
 
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -57,7 +56,7 @@ public fun CallAppBar(
     isShowingOverlays: Boolean = false,
     onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = {},
-    title: String = stringResource(id = R.string.default_app_bar_title),
+    title: String = stringResource(id = R.string.stream_video_default_app_bar_title),
     leadingContent: @Composable () -> Unit = {
         DefaultCallAppBarLeadingContent(isShowingOverlays, onBackPressed)
     },
@@ -81,7 +80,6 @@ public fun CallAppBar(
         modifier = modifier
             .fillMaxWidth()
             .height(height)
-            .background(color = VideoTheme.colors.barsBackground)
             .padding(VideoTheme.dimens.callAppBarPadding),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -110,9 +108,9 @@ internal fun DefaultCallAppBarLeadingContent(
         )
     ) {
         Icon(
-            painter = painterResource(id = R.drawable.ic_arrow_back),
-            contentDescription = stringResource(id = R.string.back_button_content_description),
-            tint = VideoTheme.colors.textHighEmphasis
+            painter = painterResource(id = R.drawable.stream_video_ic_arrow_back),
+            contentDescription = stringResource(id = R.string.stream_video_back_button_content_description),
+            tint = VideoTheme.colors.callDescription,
         )
     }
 }
@@ -131,7 +129,7 @@ internal fun RowScope.DefaultCallAppBarCenterContent(title: String) {
             ),
         text = title,
         fontSize = VideoTheme.dimens.topAppbarTextSize,
-        color = VideoTheme.colors.textHighEmphasis,
+        color = VideoTheme.colors.callDescription,
         textAlign = TextAlign.Start,
     )
 }
@@ -149,9 +147,9 @@ internal fun DefaultCallAppBarTrailingContent(onCallAction: (CallAction) -> Unit
         )
     ) {
         Icon(
-            painter = painterResource(id = R.drawable.ic_participants),
-            contentDescription = stringResource(id = R.string.call_participants_menu_content_description),
-            tint = VideoTheme.colors.textHighEmphasis
+            painter = painterResource(id = R.drawable.stream_video_ic_participants),
+            contentDescription = stringResource(id = R.string.stream_video_call_participants_menu_content_description),
+            tint = VideoTheme.colors.callDescription,
         )
     }
 }

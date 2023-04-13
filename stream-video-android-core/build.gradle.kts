@@ -96,7 +96,12 @@ android {
     }
 
     compileOptions {
-        isCoreLibraryDesugaringEnabled = true
+        isCoreLibraryDesugaringEnabled = false
+    }
+
+    packagingOptions {
+        exclude("META-INF/LICENSE.md")
+        exclude("META-INF/LICENSE-notice.md")
     }
 }
 
@@ -129,6 +134,9 @@ dependencies {
     implementation(libs.moshi)
     implementation(libs.moshi.kotlin)
     implementation(libs.moshi.adapters)
+    //implementation(libs.desugar)
+
+    implementation(libs.threentenabp)
 
     // Stream
     implementation(libs.stream.log)
@@ -136,7 +144,6 @@ dependencies {
     implementation(libs.stream.push.delegate)
 
     // unit test
-    testImplementation(libs.stream.webrtc)
     testImplementation(libs.junit)
     testImplementation(libs.truth)
     testImplementation(libs.mockk)
@@ -147,4 +154,11 @@ dependencies {
     testImplementation(libs.kotlin.test.junit)
 
     androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.junit)
+    androidTestImplementation(libs.truth)
+    androidTestImplementation(libs.mockk)
+    androidTestImplementation(libs.androidx.test.core)
+    androidTestImplementation(libs.androidx.test.junit)
+    androidTestImplementation(libs.kotlinx.coroutines.test)
+    androidTestImplementation(libs.kotlin.test.junit)
 }

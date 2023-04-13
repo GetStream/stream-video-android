@@ -17,6 +17,7 @@
 package io.getstream.video.android.compose.ui.components.participants
 
 import androidx.compose.animation.core.animateOffsetAsState
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,20 +35,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import io.getstream.video.android.common.util.MockUtils
+import io.getstream.video.android.common.util.mockCall
 import io.getstream.video.android.common.util.mockParticipant
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.core.model.Call
-import io.getstream.video.android.core.model.CallParticipantState
+import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.ui.common.R
 
 /**
  * Represents a floating item used to feature a participant video, usually the local participant.
@@ -63,7 +71,7 @@ import io.getstream.video.android.core.model.CallParticipantState
 @Composable
 public fun LocalVideoContent(
     call: Call?,
-    localParticipant: CallParticipantState,
+    localParticipant: ParticipantState,
     parentBounds: IntSize,
     paddingValues: PaddingValues,
     modifier: Modifier = Modifier
@@ -83,7 +91,28 @@ public fun LocalVideoContent(
 
     val track = localParticipant.videoTrack
 
-    if (LocalInspectionMode.current || track != null) {
+    if (LocalInspectionMode.current || call == null) {
+        Card(
+            elevation = 8.dp,
+            modifier = Modifier
+                .then(modifier)
+                .padding(VideoTheme.dimens.floatingVideoPadding)
+                .onGloballyPositioned { videoSize = it.size },
+            shape = RoundedCornerShape(16.dp)
+        ) {
+            Image(
+                modifier = modifier
+                    .fillMaxSize()
+                    .testTag("video_renderer"),
+                painter = painterResource(id = R.drawable.stream_video_call_sample),
+                contentScale = ContentScale.Crop,
+                contentDescription = null
+            )
+        }
+        return
+    }
+
+    if (track != null) {
         Card(
             elevation = 8.dp,
             modifier = Modifier
@@ -132,7 +161,8 @@ public fun LocalVideoContent(
                     .fillMaxSize()
                     .clip(RoundedCornerShape(16.dp)),
                 call = call,
-                participant = localParticipant
+                participant = localParticipant,
+                isShowConnectionQualityIndicator = false
             )
         }
     }
@@ -167,13 +197,14 @@ private fun calculateVerticalOffsetBounds(
 @Preview
 @Composable
 private fun LocalVideoContentPreview() {
+    MockUtils.initializeStreamVideo(LocalContext.current)
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp
     val screenHeight = configuration.screenHeightDp
 
     VideoTheme {
         LocalVideoContent(
-            call = null,
+            call = mockCall,
             modifier = Modifier.fillMaxSize(),
             localParticipant = mockParticipant,
             parentBounds = IntSize(screenWidth, screenHeight),

@@ -5,10 +5,7 @@ public abstract class io/getstream/video/android/common/AbstractCallActivity : a
 	public fun getCallViewModelFactory ()Lio/getstream/video/android/core/viewmodel/CallViewModelFactory;
 	public fun getPermissionManager ()Lio/getstream/video/android/core/permission/PermissionManager;
 	protected fun handleBackPressed ()V
-	protected fun handleCallAction (Lio/getstream/video/android/core/call/state/CallAction;)V
 	public fun initPermissionManager ()Lio/getstream/video/android/core/permission/PermissionManager;
-	protected fun observeScreenSharing ()V
-	protected fun observeStreamCallState ()V
 	public fun onConfigurationChanged (Landroid/content/res/Configuration;)V
 	protected fun onCreate (Landroid/os/Bundle;)V
 	protected fun onStop ()V
@@ -38,16 +35,27 @@ public final class io/getstream/video/android/common/util/ColorUtilsKt {
 	public static final fun adjustColorBrightness (IF)I
 }
 
+public final class io/getstream/video/android/common/util/MockUtils {
+	public static final field INSTANCE Lio/getstream/video/android/common/util/MockUtils;
+	public static field streamVideo Lio/getstream/video/android/core/StreamVideo;
+	public final fun getStreamVideo ()Lio/getstream/video/android/core/StreamVideo;
+	public final fun initializeStreamVideo (Landroid/content/Context;)V
+	public final fun setStreamVideo (Lio/getstream/video/android/core/StreamVideo;)V
+}
+
 public final class io/getstream/video/android/common/util/MockUtilsKt {
-	public static final fun getMockParticipant ()Lio/getstream/video/android/core/model/CallParticipantState;
+	public static final fun getMockCall ()Lio/getstream/video/android/core/Call;
+	public static final fun getMockParticipant ()Lio/getstream/video/android/core/ParticipantState;
 	public static final fun getMockParticipantList ()Ljava/util/List;
+	public static final fun getMockParticipants ()Ljava/util/List;
 	public static final fun getMockUsers ()Ljava/util/List;
-	public static final fun getMockVideoTrack ()Lio/getstream/video/android/core/model/VideoTrack;
+	public static final fun getMockVideoTrackWrapper ()Lio/getstream/video/android/core/model/TrackWrapper;
 }
 
 public final class io/getstream/video/android/common/util/ParticipantsTextKt {
-	public static final fun buildLargeCallText (Ljava/util/List;)Ljava/lang/String;
-	public static final fun buildSmallCallText (Ljava/util/List;)Ljava/lang/String;
+	public static final fun buildLargeCallText (Landroid/content/Context;Ljava/util/List;)Ljava/lang/String;
+	public static final fun buildSmallCallText (Landroid/content/Context;Ljava/util/List;I)Ljava/lang/String;
+	public static synthetic fun buildSmallCallText$default (Landroid/content/Context;Ljava/util/List;IILjava/lang/Object;)Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/common/util/ResourcesKt {

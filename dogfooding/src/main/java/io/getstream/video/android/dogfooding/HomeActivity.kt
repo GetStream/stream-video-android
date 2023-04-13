@@ -41,6 +41,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -55,6 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import io.getstream.log.taggedLogger
 import io.getstream.result.extractCause
+import io.getstream.result.onSuccessSuspend
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.Avatar
 import io.getstream.video.android.core.user.UserPreferencesManager
@@ -165,23 +167,16 @@ class HomeActivity : AppCompatActivity() {
         lifecycleScope.launch {
             logger.d { "[joinCall] callId: $callId" }
             loadingState.value = true
-            val result = streamVideo.joinCall(
-                "default", id = callId
-            )
-            loadingState.value = false
-            result.onSuccess { joinedCall -> logger.v { "[joinCall] succeed: $joinedCall" } }
-            result.onError {
-                logger.e { "[joinCall] failed: $it" }
 
-                val throwable = it.extractCause()
-                if (throwable is HttpException && throwable.code() == 401) {
-                    Toast.makeText(
-                        this@HomeActivity, R.string.unauthorized_error, Toast.LENGTH_SHORT
-                    ).show()
-                    logOut()
-                } else {
-                    Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
-                }
+            val call = streamVideo.call("default", callId)
+            val result = call.join()
+
+            result.onError {
+                Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
+            }
+            result.onSuccess {
+                logger.v { "[joinCall] succeed: $call" }
+                loadingState.value = false
             }
         }
     }
@@ -221,10 +216,10 @@ class HomeActivity : AppCompatActivity() {
         ) {
             UserIcon()
 
-            val user = streamVideo.getUser()
+            val user by streamVideo.state.user.collectAsState()
 
-            val name = user.name.ifEmpty {
-                user.id
+            val name = user?.name?.ifEmpty {
+                user?.id
             }
 
             Text(
@@ -232,7 +227,7 @@ class HomeActivity : AppCompatActivity() {
                     .padding(horizontal = 16.dp)
                     .align(CenterVertically),
                 color = VideoTheme.colors.textHighEmphasis,
-                text = name,
+                text = name ?: "Missing name",
                 overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.Center
             )
@@ -247,8 +242,8 @@ class HomeActivity : AppCompatActivity() {
             modifier = Modifier
                 .size(40.dp)
                 .padding(top = 8.dp, start = 8.dp),
-            imageUrl = user.imageUrl.orEmpty(),
-            initials = if (user.imageUrl == null) {
+            imageUrl = user.imageUrl,
+            initials = if (user.imageUrl.isEmpty()) {
                 user.name.initials()
             } else {
                 null

@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.compose.ui.components.call.controls.internal
 
+import android.content.res.Configuration
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.padding
@@ -108,6 +109,7 @@ public fun RegularCallControlsActions(
 }
 
 @Preview
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun RegularCallControlsActionsPreview() {
     VideoTheme {

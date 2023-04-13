@@ -16,10 +16,12 @@
 
 package io.getstream.video.android.core
 
+import android.view.View
+import io.getstream.log.taggedLogger
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
-import io.getstream.video.android.core.call.ActiveSFUSession
+import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.model.CallMetadata
 import io.getstream.video.android.core.model.IceServer
@@ -29,6 +31,10 @@ import io.getstream.video.android.core.model.SfuToken
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.toIceServer
 import org.openapitools.client.models.*
+import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
+import org.openapitools.client.models.*
+import org.webrtc.RendererCommon
+import stream.video.sfu.models.TrackType
 
 public data class SFUConnection(
     internal val callUrl: String,
@@ -44,14 +50,14 @@ public class Call(
     val user: User,
 ) {
     private val clientImpl = client as StreamVideoImpl
-    var activeSession: ActiveSFUSession? = null
+    var session: RtcSession? = null
     val cid = "$type:$id"
     val state = CallState(this, user)
-    val mediaManager = MediaManagerImpl(client.context)
 
-    val camera = mediaManager.camera
-    val microphone = mediaManager.microphone
-    val speaker = mediaManager.speaker
+    val mediaManager by lazy { MediaManagerImpl(client.context) }
+    val camera by lazy { mediaManager.camera }
+    val microphone by lazy { mediaManager.microphone }
+    val speaker by lazy { mediaManager.speaker }
 
     public var custom: Map<String, Any>? = null
 
@@ -62,7 +68,7 @@ public class Call(
         return muteUsers(MuteUsersData(audio = true, muteAllUsers = true))
     }
 
-    suspend fun join(): Result<ActiveSFUSession> {
+    suspend fun join(): Result<RtcSession> {
 
         /**
          * Alright, how to make this solid
@@ -110,23 +116,65 @@ public class Call(
                 .iceServers
                 .map { it.toIceServer() }
 
-        activeSession = ActiveSFUSession(
+        session = RtcSession(
             client = client,
             call = this,
-            SFUUrl = url,
-            SFUToken = credentials.token,
+            sfuUrl = url,
+            sfuToken = credentials.token,
             connectionModule = (client as StreamVideoImpl).connectionModule,
             remoteIceServers = iceServers,
             latencyResults = measurements.associate { it.latencyUrl to it.measurements }
         )
 
-        client.state.setActiveCall(this)
+        session?.connect()
 
-        return Success(value = activeSession!!)
+        return Success(value = session!!)
     }
 
     suspend fun sendReaction(data: SendReactionData): Result<SendReactionResponse> {
         return client.sendReaction(type, id, data)
+    }
+
+    private val logger by taggedLogger("Call")
+
+    // TODO: review this
+    public fun initRenderer(
+        videoRenderer: VideoTextureViewRenderer,
+        sessionId: String,
+        trackType: TrackType,
+        onRender: (View) -> Unit = {}
+    ) {
+        logger.d { "[initRenderer] #sfu; sessionId: $sessionId" }
+
+        // Note this comes from peerConnectionFactory.eglBase
+        videoRenderer.init(
+            clientImpl.peerConnectionFactory.eglBase.eglBaseContext,
+            object : RendererCommon.RendererEvents {
+                override fun onFirstFrameRendered() {
+                    logger.v { "[initRenderer.onFirstFrameRendered] #sfu; sessionId: $sessionId" }
+                    if (trackType != TrackType.TRACK_TYPE_SCREEN_SHARE) {
+                        state.updateParticipantTrackSize(
+                            sessionId,
+                            videoRenderer.measuredWidth,
+                            videoRenderer.measuredHeight
+                        )
+                    }
+                    onRender(videoRenderer)
+                }
+
+                override fun onFrameResolutionChanged(p0: Int, p1: Int, p2: Int) {
+                    logger.v { "[initRenderer.onFrameResolutionChanged] #sfu; sessionId: $sessionId" }
+
+                    if (trackType != TrackType.TRACK_TYPE_SCREEN_SHARE) {
+                        state.updateParticipantTrackSize(
+                            sessionId,
+                            videoRenderer.measuredWidth,
+                            videoRenderer.measuredHeight
+                        )
+                    }
+                }
+            }
+        )
     }
 
     suspend fun goLive(): Result<GoLiveResponse> {
@@ -146,11 +194,11 @@ public class Call(
     }
 
     /** Basic crud operations */
-    suspend fun get(): Result<CallMetadata> {
+    suspend fun get(): Result<GetOrCreateCallResponse> {
         return client.getOrCreateCall(type, id)
     }
 
-    suspend fun create(): Result<CallMetadata> {
+    suspend fun create(): Result<GetOrCreateCallResponse> {
         return client.getOrCreateCall(type, id)
     }
 

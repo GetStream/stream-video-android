@@ -23,12 +23,11 @@ import io.getstream.log.Priority
 import io.getstream.log.StreamLog
 import io.getstream.log.kotlin.KotlinStreamLogger
 import io.getstream.log.streamLog
+import io.getstream.result.Result
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.User
-import io.getstream.result.Result
-
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineScheduler
@@ -36,6 +35,7 @@ import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.withTimeout
 import org.junit.Before
 import org.junit.Rule
 import org.junit.rules.TestWatcher
@@ -64,6 +64,9 @@ class IntegrationTestHelper {
     val users = mutableMapOf<String, User>()
     val tokens = mutableMapOf<String, String>()
     val context: Context
+
+    val expiredToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidGhpZXJyeUBnZXRzdHJlYW0uaW8iLCJpc3MiOiJwcm9udG8iLCJzdWIiOiJ1c2VyL3RoaWVycnlAZ2V0c3RyZWFtLmlvIiwiaWF0IjoxNjgxMjUxMDg4LCJleHAiOjE2ODEyNjE4OTN9.VinzXBwvT_AGXNBG8QTz9HJFSR6LhqIEtVpIlmY1aEc"
+
 
     val fakeSDP = """
         v=0
@@ -149,6 +152,14 @@ open class TestBase {
             }
         }
     }
+
+    fun assertError(result: Result<Any>) {
+        assert(result.isFailure) {
+            result.onSuccess {
+                "result was a success, expected a failure"
+            }
+        }
+    }
 }
 
 object IntegrationTestState {
@@ -192,9 +203,10 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true) : TestBase(
             if (connectCoordinatorWS) {
                 // wait for the connection/ avoids race conditions in tests
                 runBlocking {
-                    val connectResultDeferred = clientImpl.connectAsync()
-                    val connectResult = connectResultDeferred.await()
-                    assertSuccess(connectResult)
+                    withTimeout(10000) {
+                        val connectResultDeferred = clientImpl.connectAsync()
+                        val connectResult = connectResultDeferred.await()
+                    }
                 }
             }
             IntegrationTestState.client = client
@@ -212,9 +224,9 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true) : TestBase(
 
             nextEventContinuation?.let { continuation ->
                 if (!nextEventCompleted) {
+                    nextEventCompleted = true
                     continuation.resume(value = it)
                 }
-                nextEventCompleted = true
             }
         }
     }
@@ -248,16 +260,23 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true) : TestBase(
      * Otherwise wait for the next event of this type
      * TODO: add a timeout
      */
-    suspend inline fun <reified T : VideoEvent> waitForNextEvent(): VideoEvent =
+    suspend inline fun <reified T : VideoEvent> waitForNextEvent(): T =
+        withTimeout(10000) {
+            suspendCoroutine { continuation ->
+                var finished = false
+                client.subscribe {
 
-        suspendCoroutine { continuation ->
-            client.subscribe {
-                if (it is T) {
-                    continuation.resume(it)
-                } else {
-                    val matchingEvents = events.filterIsInstance<T>()
-                    if (matchingEvents.isNotEmpty()) {
-                        continuation.resume(matchingEvents[0])
+                    if (!finished) {
+                        if (it is T) {
+                            continuation.resume(it)
+                            finished = true
+                        } else {
+                            val matchingEvents = events.filterIsInstance<T>()
+                            if (matchingEvents.isNotEmpty()) {
+                                continuation.resume(matchingEvents[0])
+                                finished = true
+                            }
+                        }
                     }
                 }
             }

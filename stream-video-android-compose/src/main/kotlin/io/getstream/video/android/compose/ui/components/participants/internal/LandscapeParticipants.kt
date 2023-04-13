@@ -20,27 +20,34 @@ import android.view.View
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import io.getstream.video.android.common.util.MockUtils
+import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.participants.CallParticipant
 import io.getstream.video.android.compose.ui.components.participants.LocalVideoContent
-import io.getstream.video.android.compose.ui.components.previews.ParticipantsProvider
-import io.getstream.video.android.core.model.Call
-import io.getstream.video.android.core.model.CallParticipantState
+import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.ParticipantState
 
 /**
  * Renders call participants based on the number of people in a call, in landscape mode.
@@ -56,49 +63,128 @@ import io.getstream.video.android.core.model.CallParticipantState
 @Composable
 internal fun BoxScope.LandscapeParticipants(
     call: Call?,
-    primarySpeaker: CallParticipantState?,
-    callParticipants: List<CallParticipantState>,
+    primarySpeaker: ParticipantState?,
+    callParticipants: List<ParticipantState>,
     modifier: Modifier,
     paddingValues: PaddingValues,
     parentSize: IntSize,
     onRender: (View) -> Unit
 ) {
-    val nonLocal = callParticipants.filter { !it.isLocal }.take(3)
+    val remoteParticipants = callParticipants.filter { !it.isLocal }.take(3)
+    val primarySpeakingUser = primarySpeaker?.initialUser
 
-    val renderedParticipantCount = 1 + nonLocal.size
-    val rowItemWeight = 1f / renderedParticipantCount
+    when (callParticipants.size) {
+        0 -> Unit
+        1 -> {
+            val participant = callParticipants.first()
 
-    Row(modifier = modifier) {
-        nonLocal.forEach { participant ->
             CallParticipant(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .weight(rowItemWeight),
+                modifier = Modifier.fillMaxHeight(),
                 call = call,
                 participant = participant,
-                isFocused = primarySpeaker?.id == participant.id
+                onRender = onRender,
+                isFocused = primarySpeakingUser?.id == participant.initialUser.id,
+                paddingValues = paddingValues
             )
         }
 
-        if (callParticipants.size == 1 || callParticipants.size >= 4) {
-            val local = callParticipants.firstOrNull { it.isLocal }
+        2, 3 -> {
+            val rowItemWeight = 1f / callParticipants.size
 
-            if (local != null) {
-                CallParticipant(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .weight(rowItemWeight),
-                    call = call,
-                    participant = local,
-                    onRender = onRender,
-                    isFocused = primarySpeaker?.id == local.id,
-                    paddingValues = paddingValues
-                )
+            Row(modifier = modifier) {
+                remoteParticipants.forEach { participant ->
+                    CallParticipant(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .weight(rowItemWeight),
+                        call = call,
+                        participant = participant,
+                        isFocused = primarySpeakingUser?.id == participant.initialUser.id,
+                        paddingValues = paddingValues
+                    )
+                }
+            }
+        }
+
+        5 -> {
+            val firstParticipant = callParticipants[0]
+            val secondParticipant = callParticipants[1]
+            val thirdParticipant = callParticipants[2]
+            val fourthParticipant = callParticipants[3]
+            val fiveParticipant = callParticipants[4]
+
+            Column(modifier) {
+                Row(modifier = Modifier.weight(1f)) {
+                    CallParticipant(
+                        modifier = Modifier.weight(1f),
+                        call = call,
+                        participant = firstParticipant,
+                        isFocused = primarySpeakingUser?.id == firstParticipant.initialUser.id
+                    )
+
+                    CallParticipant(
+                        modifier = Modifier.weight(1f),
+                        call = call,
+                        participant = secondParticipant,
+                        isFocused = primarySpeakingUser?.id == secondParticipant.initialUser.id
+                    )
+                }
+
+                Row(modifier = Modifier.weight(1f)) {
+                    CallParticipant(
+                        modifier = Modifier.weight(1f),
+                        call = call,
+                        participant = thirdParticipant,
+                        isFocused = primarySpeakingUser?.id == thirdParticipant.initialUser.id,
+                        paddingValues = paddingValues
+                    )
+
+                    CallParticipant(
+                        modifier = Modifier.weight(1f),
+                        call = call,
+                        participant = fourthParticipant,
+                        onRender = onRender,
+                        isFocused = primarySpeakingUser?.id == fourthParticipant.initialUser.id,
+                        paddingValues = paddingValues
+                    )
+
+                    CallParticipant(
+                        modifier = Modifier.weight(1f),
+                        call = call,
+                        participant = fiveParticipant,
+                        onRender = onRender,
+                        isFocused = primarySpeakingUser?.id == fiveParticipant.initialUser.id,
+                        paddingValues = paddingValues
+                    )
+                }
+            }
+        }
+
+        else -> {
+            val rowCount = callParticipants.size / 2
+            val heightDivision = 2
+            val maxGridItemCount = 6
+            LazyVerticalGrid(
+                modifier = modifier, columns = GridCells.Fixed(rowCount)
+            ) {
+                items(
+                    items = callParticipants.take(maxGridItemCount),
+                    key = { it.initialUser.id }
+                ) { participant ->
+                    CallParticipant(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(parentSize.height.dp / heightDivision),
+                        call = call,
+                        participant = participant,
+                        isFocused = primarySpeakingUser?.id == participant.initialUser.id
+                    )
+                }
             }
         }
     }
 
-    if (renderedParticipantCount in 2..3) {
+    if (callParticipants.size in 2..3) {
         LocalVideoContent(
             call = call,
             localParticipant = callParticipants.first { it.isLocal },
@@ -117,21 +203,21 @@ internal fun BoxScope.LandscapeParticipants(
 
 @Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1440, heightDp = 720)
 @Composable
-private fun LandscapeParticipantsPreview1(
-    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<CallParticipantState>
-) {
+private fun LandscapeParticipantsPreview1() {
+    MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         val configuration = LocalConfiguration.current
         val screenWidth = configuration.screenWidthDp
         val screenHeight = configuration.screenHeightDp
+        val participants = mockParticipants
 
         Box(
             modifier = Modifier.background(color = VideoTheme.colors.appBackground)
         ) {
             LandscapeParticipants(
                 call = null,
-                primarySpeaker = callParticipants[0],
-                callParticipants = callParticipants.take(1),
+                primarySpeaker = participants[0],
+                callParticipants = participants.take(1),
                 modifier = Modifier.fillMaxSize(),
                 paddingValues = PaddingValues(0.dp),
                 parentSize = IntSize(screenWidth, screenHeight)
@@ -142,21 +228,21 @@ private fun LandscapeParticipantsPreview1(
 
 @Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1440, heightDp = 720)
 @Composable
-private fun LandscapeParticipantsPreview2(
-    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<CallParticipantState>
-) {
+private fun LandscapeParticipantsPreview2() {
+    MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         val configuration = LocalConfiguration.current
         val screenWidth = configuration.screenWidthDp
         val screenHeight = configuration.screenHeightDp
+        val participants = mockParticipants
 
         Box(
             modifier = Modifier.background(color = VideoTheme.colors.appBackground)
         ) {
             LandscapeParticipants(
                 call = null,
-                primarySpeaker = callParticipants[0],
-                callParticipants = callParticipants.take(2),
+                primarySpeaker = participants[0],
+                callParticipants = participants.take(2),
                 modifier = Modifier.fillMaxSize(),
                 paddingValues = PaddingValues(0.dp),
                 parentSize = IntSize(screenWidth, screenHeight)
@@ -167,21 +253,21 @@ private fun LandscapeParticipantsPreview2(
 
 @Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1440, heightDp = 720)
 @Composable
-private fun LandscapeParticipantsPreview3(
-    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<CallParticipantState>
-) {
+private fun LandscapeParticipantsPreview3() {
+    MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         val configuration = LocalConfiguration.current
         val screenWidth = configuration.screenWidthDp
         val screenHeight = configuration.screenHeightDp
+        val participants = mockParticipants
 
         Box(
             modifier = Modifier.background(color = VideoTheme.colors.appBackground)
         ) {
             LandscapeParticipants(
                 call = null,
-                primarySpeaker = callParticipants[0],
-                callParticipants = callParticipants.take(3),
+                primarySpeaker = participants[0],
+                callParticipants = participants.take(3),
                 modifier = Modifier.fillMaxSize(),
                 paddingValues = PaddingValues(0.dp),
                 parentSize = IntSize(screenWidth, screenHeight)
@@ -192,21 +278,71 @@ private fun LandscapeParticipantsPreview3(
 
 @Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1440, heightDp = 720)
 @Composable
-private fun LandscapeParticipantsPreview4(
-    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<CallParticipantState>
-) {
+private fun LandscapeParticipantsPreview4() {
+    MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         val configuration = LocalConfiguration.current
         val screenWidth = configuration.screenWidthDp
         val screenHeight = configuration.screenHeightDp
+        val participants = mockParticipants
 
         Box(
             modifier = Modifier.background(color = VideoTheme.colors.appBackground)
         ) {
             LandscapeParticipants(
                 call = null,
-                primarySpeaker = callParticipants[0],
-                callParticipants = callParticipants.take(4),
+                primarySpeaker = participants[0],
+                callParticipants = participants.take(4),
+                modifier = Modifier.fillMaxSize(),
+                paddingValues = PaddingValues(0.dp),
+                parentSize = IntSize(screenWidth, screenHeight)
+            ) {}
+        }
+    }
+}
+
+@Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1440, heightDp = 720)
+@Composable
+private fun LandscapeParticipantsPreview5() {
+    MockUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        val configuration = LocalConfiguration.current
+        val screenWidth = configuration.screenWidthDp
+        val screenHeight = configuration.screenHeightDp
+        val participants = mockParticipants
+
+        Box(
+            modifier = Modifier.background(color = VideoTheme.colors.appBackground)
+        ) {
+            LandscapeParticipants(
+                call = null,
+                primarySpeaker = participants[0],
+                callParticipants = participants.take(5),
+                modifier = Modifier.fillMaxSize(),
+                paddingValues = PaddingValues(0.dp),
+                parentSize = IntSize(screenWidth, screenHeight)
+            ) {}
+        }
+    }
+}
+
+@Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1440, heightDp = 720)
+@Composable
+private fun LandscapeParticipantsPreview6() {
+    MockUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        val configuration = LocalConfiguration.current
+        val screenWidth = configuration.screenWidthDp
+        val screenHeight = configuration.screenHeightDp
+        val participants = mockParticipants
+
+        Box(
+            modifier = Modifier.background(color = VideoTheme.colors.appBackground)
+        ) {
+            LandscapeParticipants(
+                call = null,
+                primarySpeaker = participants[0],
+                callParticipants = participants.take(6),
                 modifier = Modifier.fillMaxSize(),
                 paddingValues = PaddingValues(0.dp),
                 parentSize = IntSize(screenWidth, screenHeight)

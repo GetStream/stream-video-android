@@ -88,10 +88,11 @@ class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val user = UserPreferencesManager.initialize(this).getUserCredentials()
+        val preferenceManager = UserPreferencesManager.initialize(this)
+        val user = preferenceManager.getUserCredentials()
 
         if (user != null && user.isValid() && !BuildConfig.BENCHMARK) {
-            startHome(user)
+            startHome(user, preferenceManager.getUserToken())
             finish()
         }
 
@@ -249,6 +250,11 @@ class LoginActivity : ComponentActivity() {
             println(response)
             inputStream.close()
 
+
+
+            val userPreferences = UserPreferencesManager.initialize(applicationContext)
+            userPreferences.storeUserToken(response)
+
             logIn(response)
 
             withContext(Dispatchers.Main) {
@@ -265,24 +271,24 @@ class LoginActivity : ComponentActivity() {
         if (userJSON != null) {
             val token = userJSON.getString("token")
             val user = User(
-                authUser?.email ?: userJSON.getString("userId"),
-                "admin",
-                authUser?.displayName ?: "",
-                token,
-                authUser?.photoUrl?.toString() ?: "",
-                emptyList(),
-                emptyMap()
+                id = authUser?.email ?: userJSON.getString("userId"),
+                name = authUser?.displayName ?: "",
+                imageUrl = authUser?.photoUrl?.toString() ?: "",
+                custom = mapOf(
+                    "email" to userJSON.getString("email")
+                )
             )
 
-            startHome(user)
+            startHome(user, token)
         }
     }
 
-    private fun startHome(user: User) {
+    private fun startHome(user: User, token: String) {
         dogfoodingApp.initializeStreamVideo(
             apiKey = API_KEY,
             user = user,
-            loggingLevel = LoggingLevel.BODY
+            loggingLevel = LoggingLevel.BODY,
+            token = token
         )
         startActivity(HomeActivity.getIntent(this))
     }

@@ -16,11 +16,12 @@
 
 package io.getstream.video.android.core
 
-import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.openapitools.client.models.CallCreatedEvent
+import org.openapitools.client.models.ConnectedEvent
+import org.openapitools.client.models.VideoEvent
 import org.openapitools.client.models.WSConnectedEvent
 
 sealed class ConnectionState() {
@@ -44,8 +45,8 @@ class ClientState(client: StreamVideo) {
     /**
      * Current user object
      */
-    private val _currentUser: MutableStateFlow<User?> = MutableStateFlow(null)
-    public val currentUser: StateFlow<User?> = _currentUser
+    private val _user: MutableStateFlow<User?> = MutableStateFlow(client.user)
+    public val user: StateFlow<User?> = _user
 
     /**
      * connectionState shows if we've established a connection with the coordinator
@@ -74,9 +75,9 @@ class ClientState(client: StreamVideo) {
      */
 
     fun handleEvent(event: VideoEvent) {
-        val isConnectedEvent = event is WSConnectedEvent
         // mark connected
-        if (event is WSConnectedEvent) {
+        if (event is ConnectedEvent) {
+            println("setting ConnectionState to connected")
             _connection.value = ConnectionState.Connected
         } else if (event is CallCreatedEvent) {
             // what's the right thing to do here?

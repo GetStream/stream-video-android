@@ -17,7 +17,7 @@ androidxStartup = "1.1.1"
 androidxActivity = "1.5.1"
 googleService = "4.3.14"
 
-androidxComposeBom = "2023.03.00"
+androidxComposeBom = "2023.04.00"
 androidxComposeCompiler = "1.4.4"
 androidxComposeTracing = "1.0.0-alpha01"
 
@@ -28,6 +28,7 @@ wire = "4.4.1"
 okhttp = "4.10.0"
 retrofit = "2.9.0"
 moshi = "1.14.0"
+threetenAbp = "1.4.6"
 
 streamWebRTC = "1.0.2"
 streamResult = "1.1.0"
@@ -48,6 +49,8 @@ junit = "4.13.2"
 truth = "1.1.3"
 mockk = "1.13.4"
 kotlinTestJunit = "1.8.20"
+
+desugar = "1.2.2"
 
 leakCanary = "2.10"
 
@@ -79,6 +82,8 @@ androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "u
 androidx-compose-tracing = { group = "androidx.compose.runtime", name = "runtime-tracing", version.ref = "androidxComposeTracing" }
 
 coil = { group = "io.coil-kt", name = "coil", version.ref = "coil" }
+desugar = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "desugar" }
+
 landscapist-coil = { group = "com.github.skydoves", name = "landscapist-coil", version.ref = "landscapist" }
 landscapist-animation = { group = "com.github.skydoves", name = "landscapist-animation", version.ref = "landscapist" }
 landscapist-placeholder = { group = "com.github.skydoves", name = "landscapist-placeholder", version.ref = "landscapist" }
@@ -92,6 +97,7 @@ okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor",
 moshi = { group = "com.squareup.moshi", name = "moshi", version.ref = "moshi" }
 moshi-kotlin = { group = "com.squareup.moshi", name = "moshi-kotlin", version.ref = "moshi" }
 moshi-adapters = { group = "com.squareup.moshi", name = "moshi-adapters", version.ref = "moshi" }
+threentenabp = { group = "com.jakewharton.threetenabp", name = "threetenabp", version.ref = "threetenAbp" }
 
 stream-webrtc = { group = "io.getstream", name = "stream-webrtc-android", version.ref = "streamWebRTC" }
 stream-webrtc-ui = { group = "io.getstream", name = "stream-webrtc-android-ui", version.ref = "streamWebRTC" }

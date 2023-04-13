@@ -82,7 +82,7 @@ class HomeActivity : AppCompatActivity() {
     private val participantsOptions: MutableState<List<AppUser>> by lazy {
         mutableStateOf(
             getUsers().filter {
-                it.id != streamVideo.getUser().id
+                it.id != streamVideo.user.id
             }.map { user ->
                 AppUser(
                     user, false
@@ -245,9 +245,7 @@ class HomeActivity : AppCompatActivity() {
             logger.d { "[createMeeting] callId: $callId, participants: $participants" }
 
             loadingState.value = true
-            val result = streamVideo.joinCall(
-                "default", callId, participants, false
-            )
+            val result = streamVideo.joinCall(type = "default", id = callId)
 
             result.onSuccess { data ->
                 logger.v { "[createMeeting] successful: $data" }
@@ -282,14 +280,14 @@ class HomeActivity : AppCompatActivity() {
         lifecycleScope.launch {
             logger.d { "[joinCall] callId: $callId" }
             loadingState.value = true
-            streamVideo.joinCall(
-                "default", id = callId, participantIds = emptyList(), ring = false
-            ).onSuccess { data ->
-                logger.v { "[joinCall] succeed: $data" }
-            }.onError {
-                logger.e { "[joinCall] failed: $it" }
-                Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
-            }
+//            streamVideo.joinCall(
+//                "default", id = callId, participantIds = emptyList(), ring = false
+//            ).onSuccess { data ->
+//                logger.v { "[joinCall] succeed: $data" }
+//            }.onError {
+//                logger.e { "[joinCall] failed: $it" }
+//                Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
+//            }
             loadingState.value = false
         }
     }

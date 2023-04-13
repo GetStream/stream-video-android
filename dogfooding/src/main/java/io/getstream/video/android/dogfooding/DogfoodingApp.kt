@@ -24,13 +24,13 @@ import io.getstream.log.Priority
 import io.getstream.log.android.AndroidStreamLogger
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
-import io.getstream.video.android.core.input.CallActivityInput
-import io.getstream.video.android.core.input.CallServiceInput
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.ApiKey
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.user.UserPreferencesManager
-import io.getstream.video.android.tooling.handler.StreamGlobalExceptionHandler
+import java.io.BufferedReader
+import java.io.InputStreamReader
+import java.net.URL
 
 class DogfoodingApp : Application() {
 
@@ -46,10 +46,10 @@ class DogfoodingApp : Application() {
     override fun onCreate() {
         super.onCreate()
         AndroidStreamLogger.installOnDebuggableApp(this, minPriority = Priority.DEBUG)
-        StreamGlobalExceptionHandler.install(
-            application = this,
-            packageName = LoginActivity::class.java.name
-        )
+//        StreamGlobalExceptionHandler.install(
+//            application = this,
+//            packageName = LoginActivity::class.java.name
+//        )
         UserPreferencesManager.initialize(this)
     }
 
@@ -58,20 +58,37 @@ class DogfoodingApp : Application() {
      */
     fun initializeStreamVideo(
         user: User,
+        token: String,
         apiKey: ApiKey,
         loggingLevel: LoggingLevel
     ): StreamVideo {
         return StreamVideoBuilder(
             context = this,
             user = user,
+            userToken = token,
             apiKey = apiKey,
             loggingLevel = loggingLevel,
             pushDeviceGenerators = listOf(FirebasePushDeviceGenerator()),
-            androidInputs = setOf(
-                CallServiceInput.from(CallService::class),
-                // CallActivityInput.from(XmlCallActivity::class),
-                CallActivityInput.from(CallActivity::class),
-            )
+            tokenProvider = {
+                val email = user.custom["email"]
+                val request = URL(
+                    "https://stream-calls-dogfood.vercel.app/api/auth/create-token?user_id=$email&api_key=$API_KEY"
+                )
+                val connection = request.openConnection()
+
+                connection.connect()
+
+                // Read and print the input
+                val inputStream = BufferedReader(InputStreamReader(connection.getInputStream()))
+                val response = inputStream.readLines().toString()
+                inputStream.close()
+                response
+            }
+//            androidInputs = setOf(
+//                CallServiceInput.from(CallService::class),
+//                // CallActivityInput.from(XmlCallActivity::class),
+//                CallActivityInput.from(CallActivity::class),
+//            )
         ).build().also {
             video = it
         }
@@ -87,6 +104,7 @@ class DogfoodingApp : Application() {
         val credentials = UserPreferencesManager.initialize(this)
         val user = credentials.getUserCredentials()
         val apiKey = credentials.getApiKey()
+        val token = credentials.getUserToken()
 
         if (user == null || apiKey.isBlank()) {
             return false
@@ -95,7 +113,8 @@ class DogfoodingApp : Application() {
         dogfoodingApp.initializeStreamVideo(
             apiKey = apiKey,
             user = user,
-            loggingLevel = LoggingLevel.NONE
+            loggingLevel = LoggingLevel.NONE,
+            token = token
         )
         return true
     }

@@ -51,18 +51,6 @@ public interface UserPreferences {
      */
     public fun storeApiKey(apiKey: ApiKey)
 
-    /**
-     * Stores the active call token.
-     *
-     * @param sfuToken The token to store.
-     */
-    public fun storeSfuToken(sfuToken: SfuToken?)
-
-    /**
-     * @return Active call token.
-     */
-    public fun getSfuToken(): SfuToken
-
     public fun storeUserToken(userToken: String)
     public fun getUserToken(): String
 

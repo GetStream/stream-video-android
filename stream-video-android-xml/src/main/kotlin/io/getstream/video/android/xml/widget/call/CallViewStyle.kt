@@ -108,57 +108,57 @@ public data class CallViewStyle(
 
                 val localParticipantHeight = it.getDimension(
                     R.styleable.CallView_streamVideoCallViewLocalParticipantHeight,
-                    context.getDimension(RCommon.dimen.floatingVideoHeight).toFloat()
+                    context.getDimension(RCommon.dimen.stream_video_floatingVideoHeight).toFloat()
                 )
 
                 val localParticipantWidth = it.getDimension(
                     R.styleable.CallView_streamVideoCallViewLocalParticipantWidth,
-                    context.getDimension(RCommon.dimen.floatingVideoWidth).toFloat()
+                    context.getDimension(RCommon.dimen.stream_video_floatingVideoWidth).toFloat()
                 )
 
                 val localParticipantPadding = it.getDimension(
                     R.styleable.CallView_streamVideoCallViewLocalParticipantPadding,
-                    context.getDimension(RCommon.dimen.floatingVideoPadding).toFloat()
+                    context.getDimension(RCommon.dimen.stream_video_floatingVideoPadding).toFloat()
                 )
 
                 val localParticipantRadius = it.getDimension(
                     R.styleable.CallView_streamVideoCallViewLocalParticipantRadius,
-                    context.getDimension(RCommon.dimen.floatingVideoRadius).toFloat()
+                    context.getDimension(RCommon.dimen.stream_video_floatingVideoRadius).toFloat()
                 )
 
                 val participantListHeight = it.getDimension(
                     R.styleable.CallView_streamVideoCallViewListHeight,
-                    context.getDimension(RCommon.dimen.screenShareParticipantsListHeight).toFloat()
+                    context.getDimension(RCommon.dimen.stream_video_screenShareParticipantsListHeight).toFloat()
                 ).toInt()
 
                 val participantListPadding = it.getDimension(
                     R.styleable.CallView_streamVideoCallViewListPadding,
-                    context.getDimension(RCommon.dimen.screenShareParticipantsListPadding).toFloat()
+                    context.getDimension(RCommon.dimen.stream_video_screenShareParticipantsListPadding).toFloat()
                 ).toInt()
 
                 val participantListItemMargin = it.getDimension(
                     R.styleable.CallView_streamVideoCallViewListItemMargin,
-                    context.getDimension(RCommon.dimen.screenShareParticipantsListItemMargin).toFloat()
+                    context.getDimension(RCommon.dimen.stream_video_screenShareParticipantsListItemMargin).toFloat()
                 ).toInt()
 
                 val participantListItemWidth = it.getDimension(
                     R.styleable.CallView_streamVideoCallViewListItemWidth,
-                    context.getDimension(RCommon.dimen.screenShareParticipantItemSize).toFloat()
+                    context.getDimension(RCommon.dimen.stream_video_screenShareParticipantItemSize).toFloat()
                 ).toInt()
 
                 val screenShareMargin = it.getDimension(
                     R.styleable.CallView_streamVideoCallViewScreenShareListMargin,
-                    context.getDimension(RCommon.dimen.screenShareParticipantsRadius).toFloat()
+                    context.getDimension(RCommon.dimen.stream_video_screenShareParticipantsRadius).toFloat()
                 ).toInt()
 
                 val presenterTextStyle = TextStyle.Builder(it)
                     .size(
                         R.styleable.CallView_streamVideoCallViewPresenterInfoTextSize,
-                        context.getDimension(RCommon.dimen.title3TextSize)
+                        context.getDimension(RCommon.dimen.stream_video_title3TextSize)
                     )
                     .color(
                         R.styleable.CallView_streamVideoCallViewPresenterInfoTextColor,
-                        context.getColorCompat(RCommon.color.stream_text_high_emphasis)
+                        context.getColorCompat(RCommon.color.stream_video_text_high_emphasis)
                     )
                     .font(
                         R.styleable.CallView_streamVideoCallViewPresenterInfoFontAsset,
@@ -172,26 +172,26 @@ public data class CallViewStyle(
 
                 val presenterTextMargin = it.getDimension(
                     R.styleable.CallView_streamVideoCallViewPresenterTextMargin,
-                    context.getDimension(RCommon.dimen.screenSharePresenterTitleMargin).toFloat()
+                    context.getDimension(RCommon.dimen.stream_video_screenSharePresenterTooltipMargin).toFloat()
                 ).toInt()
 
                 val presenterTextPadding = it.getDimension(
                     R.styleable.CallView_streamVideoCallViewPresenterTextPadding,
-                    context.getDimension(RCommon.dimen.screenSharePresenterPadding).toFloat()
+                    context.getDimension(RCommon.dimen.stream_video_screenSharePresenterPadding).toFloat()
                 ).toInt()
 
                 val preConnectionImage = it.getDrawable(
                     R.styleable.CallView_streamVideoCallViewPreConnectionImage
-                ) ?: context.getDrawableCompat(RCommon.drawable.ic_call)!!
+                ) ?: context.getDrawableCompat(RCommon.drawable.stream_video_ic_call)!!
 
                 val callControlsHeight = it.getDimension(
                     R.styleable.CallView_streamVideoCallViewCallControlsHeight,
-                    context.getDimension(RCommon.dimen.callControlsSheetHeight).toFloat()
+                    context.getDimension(RCommon.dimen.stream_video_callControlsSheetHeight).toFloat()
                 ).toInt()
 
                 val callControlsWidthLandscape = it.getDimension(
                     R.styleable.CallView_streamVideoCallViewCallControlsWidthLandscape,
-                    context.getDimension(RCommon.dimen.landscapeCallControlsSheetWidth).toFloat()
+                    context.getDimension(RCommon.dimen.stream_video_landscapeCallControlsSheetWidth).toFloat()
                 ).toInt()
 
                 val shouldShowGridUsersAsListLandscape = it.getBoolean(

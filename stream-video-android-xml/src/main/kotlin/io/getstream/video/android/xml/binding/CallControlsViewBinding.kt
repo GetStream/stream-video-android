@@ -17,7 +17,6 @@
 package io.getstream.video.android.xml.binding
 
 import androidx.lifecycle.LifecycleOwner
-import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CallMediaState
 import io.getstream.video.android.core.call.state.FlipCamera
 import io.getstream.video.android.core.call.state.LeaveCall
@@ -28,7 +27,6 @@ import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.xml.R
 import io.getstream.video.android.xml.widget.control.CallControlItem
 import io.getstream.video.android.xml.widget.control.CallControlsView
-import kotlinx.coroutines.flow.combine
 import io.getstream.video.android.ui.common.R as RCommon
 
 /**
@@ -51,16 +49,16 @@ public fun CallControlsView.bindView(
     fetchCallMediaState: (CallMediaState, Boolean) -> List<CallControlItem> = { mediaState, isScreenSharingActive ->
         defaultControlList(mediaState, isScreenSharingActive)
     },
-    onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
+    // onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
 ) {
     this.onCallAction = onCallAction
 
     startJob(lifecycleOwner) {
-        viewModel.callMediaState.combine(viewModel.screenSharingSessions) { mediaState, screenSharingSessions ->
-            mediaState to screenSharingSessions.firstOrNull()
-        }.collect { (mediaState, screenSharingSession) ->
-            setItems(fetchCallMediaState(mediaState, screenSharingSession != null))
-        }
+//        viewModel.callMediaState.combine(viewModel.screenSharingSessions) { mediaState, screenSharingSessions ->
+//            mediaState to screenSharingSessions.firstOrNull()
+//        }.collect { (mediaState, screenSharingSession) ->
+//            setItems(fetchCallMediaState(mediaState, screenSharingSession != null))
+//        }
     }
 }
 
@@ -68,9 +66,9 @@ internal fun defaultControlList(callMediaState: CallMediaState, isScreenSharingA
     return listOf(
         CallControlItem(
             icon = if (callMediaState.isSpeakerphoneEnabled) {
-                RCommon.drawable.ic_speaker_on
+                RCommon.drawable.stream_video_ic_speaker_on
             } else {
-                RCommon.drawable.ic_speaker_off
+                RCommon.drawable.stream_video_ic_speaker_off
             },
             iconTint = R.color.stream_video_black,
             backgroundTint = R.color.stream_video_white,
@@ -78,9 +76,9 @@ internal fun defaultControlList(callMediaState: CallMediaState, isScreenSharingA
         ),
         CallControlItem(
             icon = if (callMediaState.isCameraEnabled) {
-                RCommon.drawable.ic_videocam_on
+                RCommon.drawable.stream_video_ic_videocam_on
             } else {
-                RCommon.drawable.ic_videocam_off
+                RCommon.drawable.stream_video_ic_videocam_off
             },
             iconTint = R.color.stream_video_black,
             backgroundTint = R.color.stream_video_white,
@@ -88,25 +86,25 @@ internal fun defaultControlList(callMediaState: CallMediaState, isScreenSharingA
         ),
         CallControlItem(
             icon = if (callMediaState.isMicrophoneEnabled) {
-                RCommon.drawable.ic_mic_on
+                RCommon.drawable.stream_video_ic_mic_on
             } else {
-                RCommon.drawable.ic_mic_off
+                RCommon.drawable.stream_video_ic_mic_off
             },
             iconTint = R.color.stream_video_black,
             backgroundTint = R.color.stream_video_white,
             action = ToggleMicrophone(!callMediaState.isMicrophoneEnabled)
         ),
         CallControlItem(
-            icon = RCommon.drawable.ic_camera_flip,
+            icon = RCommon.drawable.stream_video_ic_camera_flip,
             iconTint = R.color.stream_video_black,
-            backgroundTint = if (!isScreenSharingActive) R.color.stream_video_white else RCommon.color.stream_disabled,
+            backgroundTint = if (!isScreenSharingActive) R.color.stream_video_white else RCommon.color.stream_video_disabled,
             action = FlipCamera,
             enabled = !isScreenSharingActive
         ),
         CallControlItem(
-            icon = RCommon.drawable.ic_call_end,
+            icon = RCommon.drawable.stream_video_ic_call_end,
             iconTint = R.color.stream_video_white,
-            backgroundTint = RCommon.color.stream_error_accent,
+            backgroundTint = RCommon.color.stream_video_error_accent,
             action = LeaveCall
         ),
     )

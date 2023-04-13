@@ -65,7 +65,7 @@ internal fun InviteUsersDialog(
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                         .padding(top = 32.dp),
-                    text = stringResource(R.string.invite_users_title),
+                    text = stringResource(R.string.stream_video_invite_users_title),
                     style = VideoTheme.typography.bodyBold,
                     color = VideoTheme.colors.textHighEmphasis
                 )
@@ -74,7 +74,7 @@ internal fun InviteUsersDialog(
 
                 Text(
                     modifier = Modifier.padding(start = 16.dp, end = 16.dp),
-                    text = stringResource(R.string.invite_users_message, users.size),
+                    text = stringResource(R.string.stream_video_invite_users_message, users.size),
                     style = VideoTheme.typography.body,
                     color = VideoTheme.colors.textHighEmphasis
                 )
@@ -89,14 +89,14 @@ internal fun InviteUsersDialog(
                         onClick = onDismiss,
                         colors = ButtonDefaults.textButtonColors(contentColor = VideoTheme.colors.primaryAccent)
                     ) {
-                        Text(text = stringResource(R.string.invite_users_cancel))
+                        Text(text = stringResource(R.string.stream_video_invite_users_cancel))
                     }
 
                     TextButton(
                         onClick = { onInviteUsers(users) },
                         colors = ButtonDefaults.textButtonColors(contentColor = VideoTheme.colors.primaryAccent)
                     ) {
-                        Text(text = stringResource(R.string.invite_users_accept))
+                        Text(text = stringResource(R.string.stream_video_invite_users_accept))
                     }
                 }
             }

@@ -26,6 +26,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,14 +35,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.ShowCallInfo
-import io.getstream.video.android.core.model.CallParticipantState
 import io.getstream.video.android.ui.common.R
 
 @Composable
 internal fun OverlayScreenSharingAppBar(
-    sharingParticipant: CallParticipantState,
+    sharingParticipant: ParticipantState,
     onBackPressed: () -> Unit,
     onCallAction: (CallAction) -> Unit
 ) {
@@ -60,8 +61,8 @@ internal fun OverlayScreenSharingAppBar(
             )
         ) {
             Icon(
-                painter = painterResource(id = R.drawable.ic_arrow_back),
-                contentDescription = stringResource(id = R.string.back_button_content_description),
+                painter = painterResource(id = R.drawable.stream_video_ic_arrow_back),
+                contentDescription = stringResource(id = R.string.stream_video_back_button_content_description),
                 tint = Color.White
             )
         }
@@ -70,7 +71,7 @@ internal fun OverlayScreenSharingAppBar(
             modifier = Modifier.weight(1f),
             text = stringResource(
                 id = R.string.stream_video_screen_sharing_title,
-                sharingParticipant.name.ifEmpty { sharingParticipant.id }
+                sharingParticipant.user.collectAsState().value.name.ifEmpty { sharingParticipant.user }
             ),
             color = Color.White,
             style = VideoTheme.typography.title3Bold,
@@ -86,8 +87,8 @@ internal fun OverlayScreenSharingAppBar(
                         color = VideoTheme.colors.barsBackground
                     )
                     .padding(8.dp),
-                painter = painterResource(id = R.drawable.ic_participants),
-                contentDescription = stringResource(id = R.string.call_participants_menu_content_description),
+                painter = painterResource(id = R.drawable.stream_video_ic_participants),
+                contentDescription = stringResource(id = R.string.stream_video_call_participants_menu_content_description),
                 tint = VideoTheme.colors.textHighEmphasis
             )
         }

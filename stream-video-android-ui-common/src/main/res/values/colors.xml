@@ -16,51 +16,60 @@
 -->
 <resources>
     <!-- Default colors -->
-    <color name="stream_text_high_emphasis">#000000</color>
-    <color name="stream_text_low_emphasis">#72767E</color>
-    <color name="stream_disabled">#B4B7BB</color>
-    <color name="stream_borders">#DBDDE1</color>
-    <color name="stream_input_background">#E9EAED</color>
-    <color name="stream_app_background">#F7F7F8</color>
-    <color name="stream_bars_background">#FFFFFF</color>
-    <color name="stream_link_background">#E9F1FF</color>
-    <color name="stream_overlay_regular">#80000000</color>
-    <color name="stream_overlay_dark">#99000000</color>
-    <color name="stream_primary_accent">#005FFF</color>
-    <color name="stream_error_accent">#FF3742</color>
-    <color name="stream_info_accent">#20E070</color>
-    <color name="stream_highlight">#FBF4DD</color>
-    <color name="stream_text_avatar_initials">#FFFFFF</color>
+    <color name="stream_video_text_high_emphasis">#000000</color>
+    <color name="stream_video_text_low_emphasis">#72767E</color>
+    <color name="stream_video_disabled">#B4B7BB</color>
+    <color name="stream_video_borders">#DBDDE1</color>
+    <color name="stream_video_input_background">#E9EAED</color>
+    <color name="stream_video_app_background">#F7F7F8</color>
+    <color name="stream_video_bars_background">#FFFFFF</color>
+    <color name="stream_video_link_background">#E9F1FF</color>
+    <color name="stream_video_overlay_regular">#80000000</color>
+    <color name="stream_video_overlay_dark">#99000000</color>
+    <color name="stream_video_primary_accent">#005FFF</color>
+    <color name="stream_video_connection_quality_background">#D9303030</color>
+    <color name="stream_video_participant_label_background">#D9303030</color>
+    <color name="stream_video_connection_quality_bar_background">#FFFFFF</color>
+    <color name="stream_video_screen_sharing_tooltip_background">#D9000000</color>
+    <color name="stream_video_screen_sharing_tooltip_content">#FCFCFC</color>
+    <color name="stream_video_error_accent">#FF3742</color>
+    <color name="stream_video_info_accent">#20E070</color>
+    <color name="stream_video_focused_border_color">#005FFF</color>
+    <color name="stream_video_highlight">#FBF4DD</color>
+    <color name="stream_video_text_avatar_initials">#FFFFFF</color>
+    <color name="stream_video_call_gradient_start">#545A64</color>
+    <color name="stream_video_call_gradient_end">#272A30</color>
+    <color name="stream_video_call_description">#FFFFFF</color>
 
     <!-- Default Dark colors -->
-    <color name="stream_text_high_emphasis_dark">#FFFFFF</color>
-    <color name="stream_text_low_emphasis_dark">#72767E</color>
-    <color name="stream_disabled_dark">#4C525C</color>
-    <color name="stream_borders_dark">#272A30</color>
-    <color name="stream_input_background_dark">#1C1E22</color>
-    <color name="stream_app_background_dark">#000000</color>
-    <color name="stream_bars_background_dark">#121416</color>
-    <color name="stream_link_background_dark">#00193D</color>
-    <color name="stream_overlay_regular_dark">#33000000</color>
-    <color name="stream_overlay_dark_dark">#99FFFFFF</color>
-    <color name="stream_primary_accent_dark">#337EFF</color>
-    <color name="stream_error_accent_dark">#FF3742</color>
-    <color name="stream_info_accent_dark">#20E070</color>
-    <color name="stream_highlight_dark">#302D22</color>
+    <color name="stream_video_text_high_emphasis_dark">#FFFFFF</color>
+    <color name="stream_video_text_low_emphasis_dark">#72767E</color>
+    <color name="stream_video_disabled_dark">#4C525C</color>
+    <color name="stream_video_borders_dark">#272A30</color>
+    <color name="stream_video_input_background_dark">#1C1E22</color>
+    <color name="stream_video_app_background_dark">#000000</color>
+    <color name="stream_video_bars_background_dark">#121416</color>
+    <color name="stream_video_link_background_dark">#00193D</color>
+    <color name="stream_video_overlay_regular_dark">#33000000</color>
+    <color name="stream_video_overlay_dark_dark">#99FFFFFF</color>
+    <color name="stream_video_primary_accent_dark">#337EFF</color>
+    <color name="stream_video_error_accent_dark">#FF3742</color>
+    <color name="stream_video_info_accent_dark">#20E070</color>
+    <color name="stream_video_highlight_dark">#302D22</color>
 
     <!-- Avatar gradient colors -->
-    <color name="stream_avatar_gradient_orange">#FF8A65</color>
-    <color name="stream_avatar_gradient_green">#81C784</color>
-    <color name="stream_avatar_gradient_blue">#4FC3F7</color>
-    <color name="stream_avatar_gradient_brown">#A1887F</color>
-    <color name="stream_avatar_gradient_yellow">#FFF176</color>
-    <color name="stream_avatar_gradient_red">#E57373</color>
-    <array name="stream_avatar_gradient_colors">
-        <item>@color/stream_avatar_gradient_orange</item>
-        <item>@color/stream_avatar_gradient_green</item>
-        <item>@color/stream_avatar_gradient_blue</item>
-        <item>@color/stream_avatar_gradient_brown</item>
-        <item>@color/stream_avatar_gradient_yellow</item>
-        <item>@color/stream_avatar_gradient_red</item>
+    <color name="stream_video_avatar_gradient_orange">#FF8A65</color>
+    <color name="stream_video_avatar_gradient_green">#81C784</color>
+    <color name="stream_video_avatar_gradient_blue">#4FC3F7</color>
+    <color name="stream_video_avatar_gradient_brown">#A1887F</color>
+    <color name="stream_video_avatar_gradient_yellow">#FFF176</color>
+    <color name="stream_video_avatar_gradient_red">#E57373</color>
+    <array name="stream_video_avatar_gradient_colors">
+        <item>@color/stream_video_avatar_gradient_orange</item>
+        <item>@color/stream_video_avatar_gradient_green</item>
+        <item>@color/stream_video_avatar_gradient_blue</item>
+        <item>@color/stream_video_avatar_gradient_brown</item>
+        <item>@color/stream_video_avatar_gradient_yellow</item>
+        <item>@color/stream_video_avatar_gradient_red</item>
     </array>
 </resources>

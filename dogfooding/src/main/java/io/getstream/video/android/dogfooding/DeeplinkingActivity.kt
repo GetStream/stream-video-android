@@ -72,11 +72,13 @@ class DeeplinkingActivity : AppCompatActivity() {
         val userPreferences = UserPreferencesManager.initialize(this)
         val user = userPreferences.getUserCredentials()
         val apiKey = userPreferences.getApiKey()
+        val token = userPreferences.getUserToken()
 
         if (user != null) {
             logger.d { "[logIn] selectedUser: $user" }
             dogfoodingApp.initializeStreamVideo(
                 user = user,
+                token = token,
                 apiKey = apiKey,
                 loggingLevel = LoggingLevel.BODY
             )
