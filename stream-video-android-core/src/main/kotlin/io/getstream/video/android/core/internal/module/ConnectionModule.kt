@@ -32,6 +32,7 @@ import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import okhttp3.Response
 import okhttp3.logging.HttpLoggingInterceptor
 import org.openapitools.client.apis.EventsApi
 import org.openapitools.client.apis.LivestreamingApi
@@ -80,6 +81,60 @@ internal data class InterceptorWrapper(
     val token: String
 )
 
+internal class BaseUrlInterceptor(var baseUrl: HttpUrl?): Interceptor {
+    private val REPLACEMENT_HOST = "replacement.url"
+
+    override fun intercept(chain: Interceptor.Chain): Response {
+        baseUrl = baseUrl ?: return chain.proceed(chain.request())
+        val host = baseUrl?.host!!
+        val original = chain.request()
+        return if (original.url.host == REPLACEMENT_HOST) {
+            val updatedBaseUrl = original.url.newBuilder()
+                .host(host)
+                .build()
+            val updated = original.newBuilder()
+                .url(updatedBaseUrl)
+                .build()
+            chain.proceed(updated)
+        } else {
+            chain.proceed(chain.request())
+        }
+    }
+
+}
+
+internal class CoordinatorAuthInterceptor(var apiKey: String, var token: String): Interceptor {
+    private val REPLACEMENT_HOST = "replacement.url"
+    /**
+     * Query key used to authenticate to the API.
+     */
+    private val API_KEY = "api_key"
+    private val STREAM_AUTH_TYPE = "stream-auth-type"
+    private val HEADER_AUTHORIZATION = "Authorization"
+
+
+    override fun intercept(chain: Interceptor.Chain): Response {
+        val original = chain.request()
+
+        val updatedUrl = if (original.url.toString().contains("video")) {
+            original.url.newBuilder()
+                .addQueryParameter(API_KEY, apiKey)
+                .build()
+        } else {
+            original.url
+        }
+
+        val updated = original.newBuilder()
+            .url(updatedUrl)
+            .addHeader(HEADER_AUTHORIZATION, token)
+            .header(STREAM_AUTH_TYPE, "jwt")
+            .build()
+
+        return chain.proceed(updated)
+    }
+
+}
+
 /**
  * ConnectionModule provides several helpful attributes
  *
@@ -101,6 +156,8 @@ internal class ConnectionModule(
     internal val loggingLevel: LoggingLevel = LoggingLevel.NONE,
     private val user: User,
 ) {
+    private var baseUrlInterceptor: BaseUrlInterceptor
+    private var authInterceptor: CoordinatorAuthInterceptor
     internal var okHttpClient: OkHttpClient
     internal var oldService: ClientRPCService
     internal var videoCallsApi: VideoCallsApi
@@ -115,9 +172,12 @@ internal class ConnectionModule(
     init {
         // setup the OKHttpClient
         val userToken = preferences.getUserToken()
+        authInterceptor = CoordinatorAuthInterceptor(preferences.getApiKey(), preferences.getUserToken())
+        baseUrlInterceptor = BaseUrlInterceptor(null)
+
         okHttpClient = buildOkHttpClient(
             preferences,
-            interceptorWrapper = InterceptorWrapper(null, token = userToken)
+            null
         )
 
         networkStateProvider = NetworkStateProvider(
@@ -165,74 +225,25 @@ internal class ConnectionModule(
     /**
      * Key used to prove authorization to the API.
      */
-    private val HEADER_AUTHORIZATION = "Authorization"
-
-    /**
-     * Query key used to authenticate to the API.
-     */
-    private val API_KEY = "api_key"
-    private val STREAM_AUTH_TYPE = "stream-auth-type"
-
-    private fun buildHostSelectionInterceptor(interceptorWrapper: InterceptorWrapper): Interceptor =
-        Interceptor { chain ->
-            interceptorWrapper.baseUrl =
-                interceptorWrapper.baseUrl ?: return@Interceptor chain.proceed(chain.request())
-            // TODO: Remove !!
-            val host = interceptorWrapper.baseUrl?.host!!
-            val original = chain.request()
-            if (original.url.host == REPLACEMENT_HOST) {
-                val updatedBaseUrl = original.url.newBuilder()
-                    .host(host)
-                    .build()
-                val updated = original.newBuilder()
-                    .url(updatedBaseUrl)
-                    .build()
-                chain.proceed(updated)
-            } else {
-                chain.proceed(chain.request())
-            }
-        }
-
-    private fun buildCredentialsInterceptor(
-        interceptorWrapper: InterceptorWrapper
-    ): Interceptor = Interceptor {
-        val original = it.request()
-
-        val updatedUrl = if (original.url.toString().contains("video")) {
-            original.url.newBuilder()
-                .addQueryParameter(API_KEY, preferences.getApiKey())
-                .build()
-        } else {
-            original.url
-        }
-
-        val updated = original.newBuilder()
-            .url(updatedUrl)
-            .addHeader(HEADER_AUTHORIZATION, interceptorWrapper.token)
-            .header(STREAM_AUTH_TYPE, "jwt")
-            .build()
-
-        it.proceed(updated)
-    }
 
     private fun buildOkHttpClient(
         preferences: UserPreferences,
-        interceptorWrapper: InterceptorWrapper
+        baseUrl: HttpUrl?
     ): OkHttpClient {
         // create a new OkHTTP client and set timeouts
         // TODO: map logging level
         return OkHttpClient.Builder()
             .addInterceptor(
-                buildCredentialsInterceptor(
-                    interceptorWrapper = interceptorWrapper
-                )
+                authInterceptor
             )
             .addInterceptor(
                 HttpLoggingInterceptor().apply {
                     level = HttpLoggingInterceptor.Level.BASIC
                 }
             )
-            .addInterceptor(buildHostSelectionInterceptor(interceptorWrapper = interceptorWrapper))
+            .addInterceptor(
+                baseUrlInterceptor
+            )
             .connectTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
             .writeTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
             .readTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
@@ -269,9 +280,13 @@ internal class ConnectionModule(
                                                getSubscriberSdp: suspend () -> String,
                                                ): SFUConnectionModule {
         val updatedSignalUrl = sfuUrl.removeSuffix(suffix = "/twirp")
-        val wrapper = InterceptorWrapper(baseUrl = updatedSignalUrl.toHttpUrl(), sfuToken)
-        val okHttpClient = buildOkHttpClient(preferences, interceptorWrapper = wrapper)
+        val baseUrl = updatedSignalUrl.toHttpUrl()
+        val okHttpClient = buildOkHttpClient(preferences, baseUrl)
 
         return SFUConnectionModule(sfuUrl, sessionId, sfuToken, getSubscriberSdp, scope, okHttpClient, networkStateProvider)
+    }
+
+    fun updateToken(newToken: String) {
+        authInterceptor.token = newToken
     }
 }

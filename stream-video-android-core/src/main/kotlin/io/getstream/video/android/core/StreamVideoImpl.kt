@@ -165,6 +165,7 @@ internal class StreamVideoImpl internal constructor(
                     if (tokenProvider!= null) {
                         val newToken = tokenProvider.invoke(parsedError)
                         preferences.storeUserToken(newToken)
+                        connectionModule.updateToken(newToken)
 
                     }
                     // retry the API call once

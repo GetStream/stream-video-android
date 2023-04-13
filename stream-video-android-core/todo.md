@@ -3,7 +3,8 @@
 
 ### Week 1: Refactor LLC & State. Setup testing
 ### Week 2: LLC & State Stability. Compose testing & previews
-### Week 3: Sample app, update compose to LLC & State changes
+### Week 3: Sample app, update compose to LLC & State changes. New socket & token provider. Call UI
+
 
 - Audio/video review
 - Tommaso to fix the event openapi thing, and we merge it
@@ -53,12 +54,6 @@ Other
 - [X] Join flow
 - [X] Active Session
 
-### Websockets
-
-- Review WS requirements for SFU socket connection
-- Test coverage for WS connection
-- Have 1 class for Coordinator and SFU persistent WS connection
-
 ### Refactoring
 
 - [X] Client builder refactoring. see https://www.notion.so/stream-wiki/Android-Changes-Discussion-10c5a9f303134eb786bdebcea55cf92a
@@ -79,6 +74,8 @@ Other
 - [X] Verify all events are handled
 - [X] Media manager class to abstract all the local audio/video stuff. Also makes it easy to test the codebase if you can swap out the media & webrtc stuff.
 - [X] Clean up the active SFU session]
+- [X] Socket implementation should be simple
+- [X] Token provider
 
 ### Features
 
@@ -91,6 +88,7 @@ Other
 - [X] Opus RED
 - [X] Opus DTX
 - [X] Muting other users/ Moderation
+- [X] Token provider
 
 ### Documentation (code level)
 
