@@ -4,6 +4,7 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.call.signal.socket.RTCEventMapper
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.events.ConnectedEvent
+import io.getstream.video.android.core.events.CoordinatorHealthCheckEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
@@ -81,17 +82,23 @@ open class PersistentSocket<T>(
     suspend fun  connect() = suspendCoroutine<T> { connectedContinuation ->
         logger.i { "[connect]" }
         connected = connectedContinuation
-        scope.launch {
 
-            _connectionState.value = SocketState.Connecting
-            // step 1 create the socket
-            socket = createSocket()
+        _connectionState.value = SocketState.Connecting
+        // step 1 create the socket
+        socket = createSocket()
+
+        println("1")
+        scope.launch {
             // step 2 authenticate the user/call etc
+            println("2")
             authenticate()
+            println("3")
             // step 3 monitor for health every 30 seconds
             healthMonitor.start()
+            println("4")
             // also monitor if we are offline/online
             networkStateProvider.subscribe(networkStateListener)
+            println("5")
 
         }
     }
@@ -173,13 +180,23 @@ open class PersistentSocket<T>(
             // parse the message
             val data = Json.decodeFromString<JsonObject>(text)
             val eventType = EventType.from(data["type"]?.jsonPrimitive?.content!!)
-            val processedEvent = EventMapper.mapEvent(eventType, text)
+            var processedEvent = EventMapper.mapEvent(eventType, text)
+
+            // TODO: remove hack when we have good parsing
+            if (processedEvent is CoordinatorHealthCheckEvent) {
+                processedEvent = ConnectedEvent(clientId = processedEvent.clientId)
+            }
 
             if (processedEvent is ConnectedEvent) {
                 // TODO: rename when we fix event parsing
                 connectionId = processedEvent.clientId
                 _connectionState.value = SocketState.Connected(processedEvent)
-            } else if (processedEvent is JoinCallResponseEvent || processedEvent is ConnectedEvent) {
+                if (!continuationCompleted) {
+                    connected.resume(processedEvent as T)
+                    continuationCompleted = true
+                }
+
+            } else if (processedEvent is JoinCallResponseEvent) {
                 if (!continuationCompleted) {
                     connected.resume(processedEvent as T)
                     continuationCompleted = true

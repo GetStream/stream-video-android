@@ -35,11 +35,9 @@ import io.getstream.video.android.core.StreamVideoImpl
 import io.getstream.video.android.core.call.connection.StreamPeerConnection
 import io.getstream.video.android.core.call.state.ConnectionState
 import io.getstream.video.android.core.call.utils.stringify
-import io.getstream.video.android.core.errors.DisconnectCause
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
-import io.getstream.video.android.core.events.SFUConnectedEvent
 import io.getstream.video.android.core.events.SfuDataEvent
 import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.events.TrackPublishedEvent
@@ -85,7 +83,6 @@ import org.webrtc.SessionDescription
 import org.webrtc.SurfaceTextureHelper
 import org.webrtc.VideoCapturer
 import retrofit2.HttpException
-import stream.video.sfu.event.JoinRequest
 import stream.video.sfu.event.JoinResponse
 import stream.video.sfu.models.ICETrickle
 import stream.video.sfu.models.PeerType
@@ -144,8 +141,8 @@ public class RtcSession internal constructor(
     private val client: StreamVideo,
     private val connectionModule: ConnectionModule,
     private val call: Call,
-    private val SFUUrl: String,
-    private val SFUToken: String,
+    private val sfuUrl: String,
+    private val sfuToken: String,
     private val latencyResults: Map<String, List<Float>>,
     private val remoteIceServers: List<IceServer>,
 ) {
@@ -239,7 +236,7 @@ public class RtcSession internal constructor(
         scope.launch {
 
         }
-        sfuConnectionModule = connectionModule.createSFUConnectionModule(SFUUrl, sessionId, SFUToken, getSdp)
+        sfuConnectionModule = connectionModule.createSFUConnectionModule(sfuUrl, sessionId, sfuToken, getSdp)
         // listen to socket events and errors
         scope.launch {
             sfuConnectionModule.sfuSocket.events.collect() {
@@ -497,15 +494,6 @@ public class RtcSession internal constructor(
     }
 
     private suspend fun executeJoinRequest(): Result<JoinResponse> {
-
-        val sdp = mangleSDP(getSubscriberSdp())
-
-        val request = JoinRequest(
-            session_id = sessionId,
-            token = SFUToken,
-            subscriber_sdp = sdp.description
-        )
-        logger.d { "[executeJoinRequest] request: $request" }
 
         return try {
             val connected = call.state.connection.value

@@ -65,6 +65,9 @@ class IntegrationTestHelper {
     val tokens = mutableMapOf<String, String>()
     val context: Context
 
+    val expiredToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidGhpZXJyeUBnZXRzdHJlYW0uaW8iLCJpc3MiOiJwcm9udG8iLCJzdWIiOiJ1c2VyL3RoaWVycnlAZ2V0c3RyZWFtLmlvIiwiaWF0IjoxNjgxMjUxMDg4LCJleHAiOjE2ODEyNjE4OTN9.VinzXBwvT_AGXNBG8QTz9HJFSR6LhqIEtVpIlmY1aEc"
+
+
     val fakeSDP = """
         v=0
         o=Node 1 1 IN IP4 172.30.8.37
@@ -146,6 +149,14 @@ open class TestBase {
         assert(result.isSuccess) {
             result.onError {
                 "result wasn't a success, got an error $it."
+            }
+        }
+    }
+
+    fun assertError(result: Result<Any>) {
+        assert(result.isFailure) {
+            result.onSuccess {
+                "result was a success, expected a failure"
             }
         }
     }

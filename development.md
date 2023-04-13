@@ -94,6 +94,7 @@ Check the docs on TestBase, TestHelper and IntegrationTestBase for more utility 
 * CallClient makes the API calls to the SFU on the edge
 * StreamVideoImpl.developmentMode determines if we should log an error or fail fast. 
 Typically for development you want to fail fast and loud. For production you want to ignore most non-critical errors.
+* PersistentSocket is subclassed by CoordinatorSocket and SfuSocket. It keeps a websocket connection
 
 ### State management
 

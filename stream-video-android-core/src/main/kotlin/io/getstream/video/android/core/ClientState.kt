@@ -77,6 +77,7 @@ class ClientState(client: StreamVideo) {
         val isConnectedEvent = event is ConnectedEvent
         // mark connected
         if (event is ConnectedEvent) {
+            println("setting ConnectionState to connected")
             _connection.value = ConnectionState.Connected
         } else if (event is CallCreatedEvent) {
             // what's the right thing to do here?

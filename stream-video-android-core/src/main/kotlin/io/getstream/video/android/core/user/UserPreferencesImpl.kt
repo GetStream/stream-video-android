@@ -62,17 +62,6 @@ internal class UserPreferencesImpl(
         }
     }
 
-    // TODO: SFU tokens aren't reusable, we should probably not store these
-
-    override fun getSfuToken(): SfuToken =
-        sharedPreferences.getString(KEY_SFU_TOKEN, "") ?: ""
-
-    override fun storeSfuToken(sfuToken: SfuToken?) {
-        sharedPreferences.edit {
-            putString(KEY_SFU_TOKEN, sfuToken)
-        }
-    }
-
     override fun getUserToken(): String =
         sharedPreferences.getString(KEY_USER_TOKEN, "") ?: ""
 

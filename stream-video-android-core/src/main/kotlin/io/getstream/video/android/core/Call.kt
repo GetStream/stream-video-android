@@ -32,11 +32,7 @@ import io.getstream.video.android.core.model.SfuToken
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.toIceServer
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
-import org.openapitools.client.models.GetCallEdgeServerRequest
-import org.openapitools.client.models.GoLiveResponse
-import org.openapitools.client.models.SendReactionResponse
-import org.openapitools.client.models.StopLiveResponse
-import org.openapitools.client.models.UpdateCallResponse
+import org.openapitools.client.models.*
 import org.webrtc.RendererCommon
 import stream.video.sfu.models.TrackType
 
@@ -123,8 +119,8 @@ public class Call(
         session = RtcSession(
             client = client,
             call = this,
-            SFUUrl = url,
-            SFUToken = credentials.token,
+            sfuUrl = url,
+            sfuToken = credentials.token,
             connectionModule = (client as StreamVideoImpl).connectionModule,
             remoteIceServers = iceServers,
             latencyResults = measurements.associate { it.latencyUrl to it.measurements }
@@ -200,11 +196,11 @@ public class Call(
     }
 
     /** Basic crud operations */
-    suspend fun get(): Result<CallMetadata> {
+    suspend fun get(): Result<GetOrCreateCallResponse> {
         return client.getOrCreateCall(type, id)
     }
 
-    suspend fun create(): Result<CallMetadata> {
+    suspend fun create(): Result<GetOrCreateCallResponse> {
         return client.getOrCreateCall(type, id)
     }
 

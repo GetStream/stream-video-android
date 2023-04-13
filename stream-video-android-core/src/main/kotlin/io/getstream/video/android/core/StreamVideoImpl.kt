@@ -55,6 +55,8 @@ import io.getstream.video.android.core.model.toIceServer
 import io.getstream.video.android.core.model.toInfo
 import io.getstream.video.android.core.model.toRequest
 import io.getstream.video.android.core.socket.ErrorResponse
+import io.getstream.video.android.core.socket.SocketState
+import io.getstream.video.android.core.user.UserPreferences
 import io.getstream.video.android.core.user.UserPreferencesManager
 import io.getstream.video.android.core.utils.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.core.utils.LatencyResult
@@ -73,25 +75,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import org.openapitools.client.models.BlockUserRequest
-import org.openapitools.client.models.CallRequest
-import org.openapitools.client.models.CallSettingsRequest
-import org.openapitools.client.models.GetCallEdgeServerRequest
-import org.openapitools.client.models.GetCallEdgeServerResponse
-import org.openapitools.client.models.GetOrCreateCallRequest
-import org.openapitools.client.models.GoLiveResponse
-import org.openapitools.client.models.JoinCallRequest
-import org.openapitools.client.models.JoinCallResponse
-import org.openapitools.client.models.ListRecordingsResponse
-import org.openapitools.client.models.MemberRequest
-import org.openapitools.client.models.RequestPermissionRequest
-import org.openapitools.client.models.SendEventRequest
-import org.openapitools.client.models.SendEventResponse
-import org.openapitools.client.models.SendReactionResponse
-import org.openapitools.client.models.StopLiveResponse
-import org.openapitools.client.models.UnblockUserRequest
-import org.openapitools.client.models.UpdateCallRequest
-import org.openapitools.client.models.UpdateCallResponse
+import org.openapitools.client.models.*
 import retrofit2.HttpException
 import stream.video.coordinator.client_v1_rpc.CreateDeviceRequest
 import stream.video.coordinator.client_v1_rpc.DeleteDeviceRequest
@@ -99,7 +83,6 @@ import stream.video.coordinator.client_v1_rpc.MemberInput
 import stream.video.coordinator.client_v1_rpc.UpsertCallMembersRequest
 import stream.video.coordinator.push_v1.DeviceInput
 import kotlin.coroutines.Continuation
-import kotlin.coroutines.resume
 
 class EventSubscription(
     public val listener: VideoEventListener<VideoEvent>,
@@ -123,6 +106,8 @@ internal class StreamVideoImpl internal constructor(
     private val loggingLevel: LoggingLevel,
     internal val connectionModule: ConnectionModule,
     internal val pushDeviceGenerators: List<PushDeviceGenerator>,
+    internal val tokenProvider: ((error: Error.NetworkError) -> String)?,
+    internal val preferences: UserPreferences,
 ) : StreamVideo {
 
     private lateinit var connectContinuation: Continuation<Result<ConnectedEvent>>
@@ -139,20 +124,6 @@ internal class StreamVideoImpl internal constructor(
     private var calls = mutableMapOf<String, Call>()
 
     val socketImpl = connectionModule.coordinatorSocket
-
-    // caller: JOIN after accepting incoming call by callee
-    /**
-     * @see StreamVideo.joinCall
-     */
-    override suspend fun joinCall(call: CallMetadata): Result<JoinedCall> =
-        withContext(scope.coroutineContext) {
-            logger.d { "[joinCallOnly] call: $call" }
-            // TODO: engine.onCallJoining(call)
-            joinCallInternal(call)
-                // .onSuccess { data -> engine.onCallJoined(data) }
-                // .onError { engine.onCallFailed(it) }
-                .also { logger.v { "[joinCallOnly] result: $it" } }
-        }
 
     /**
      * @see StreamVideo.createDevice
@@ -188,13 +159,27 @@ internal class StreamVideoImpl internal constructor(
             } catch (e: HttpException) {
                 val failure = parseError(e)
                 val parsedError = failure.value as Error.NetworkError
-                if (parsedError.serverErrorCode == VideoErrorCode.AUTHENTICATION_ERROR.code) {
+                if (parsedError.serverErrorCode == VideoErrorCode.TOKEN_EXPIRED.code) {
                     // invalid token
                     // val newToken = tokenProvider.getToken()
+                    if (tokenProvider!= null) {
+                        val newToken = tokenProvider.invoke(parsedError)
+                        preferences.storeUserToken(newToken)
+
+                    }
+                    // retry the API call once
+                    try {
+                        Success(apiCall())
+                    }catch (e: HttpException){
+                        parseError(e)
+                    }
+
                     // set the token, repeat API call
                     // keep track of retry count
+                } else {
+                    failure
                 }
-                failure
+
             }
         }
     }
@@ -280,13 +265,17 @@ internal class StreamVideoImpl internal constructor(
             object : LifecycleHandler {
                 override fun resume() {
                     scope.launch {
-                        // TODO: we should only connect if we were previously connected
-                        connectionModule.coordinatorSocket.connect()
+                        // We should only connect if we were previously connected
+                        if (connectionModule.coordinatorSocket.connectionState.value != SocketState.NotConnected) {
+                            connectionModule.coordinatorSocket.connect()
+                        }
                     }
                 }
                 override fun stopped() {
-                    // TODO: we should only disconnect if we were previously connected
-                    connectionModule.coordinatorSocket.disconnect()
+                    // We should only disconnect if we were previously connected
+                    if (connectionModule.coordinatorSocket.connectionState.value != SocketState.NotConnected) {
+                        connectionModule.coordinatorSocket.disconnect()
+                    }
                 }
             }
         )
@@ -458,45 +447,26 @@ internal class StreamVideoImpl internal constructor(
         id: String,
         participantIds: List<String>,
         ring: Boolean
-    ): Result<CallMetadata> = withContext(scope.coroutineContext) {
+    ): Result<GetOrCreateCallResponse> {
         logger.d { "[getOrCreateCall] type: $type, id: $id, participantIds: $participantIds" }
-        // engine.onCallStarting(type, id, participantIds, ring, forcedNewCall = false)
-
-        try {
-            Success(
-                connectionModule.videoCallsApi.getOrCreateCall(
-                    type = type,
-                    id = id,
-                    getOrCreateCallRequest = GetOrCreateCallRequest(
-                        data = CallRequest(
-                            members = participantIds.map {
-                                MemberRequest(
-                                    userId = it,
-                                    role = "admin"
-                                )
-                            },
-                        ),
-                        ring = ring
-                    )
+        return wrapAPICall {
+            connectionModule.videoCallsApi.getOrCreateCall(
+                type = type,
+                id = id,
+                getOrCreateCallRequest = GetOrCreateCallRequest(
+                    data = CallRequest(
+                        members = participantIds.map {
+                            MemberRequest(
+                                userId = it,
+                                role = "admin"
+                            )
+                        },
+                    ),
+                    ring = ring
                 )
             )
-                .also { logger.v { "[getOrCreateCall] Coordinator result: $it" } }
-                .map { response ->
-                    StartedCall(
-                        call = response.toCall(
-                            StreamCallKind.fromRinging(
-                                ring
-                            )
-                        )
-                    )
-                }
-//                .onSuccess { engine.onCallStarted(it.call) }
-//                .onError { engine.onCallFailed(it) }
-                .map { it.call }
-                .also { logger.v { "[getOrCreateCall] Final result: $it" } }
-        } catch (e: HttpException) {
-            parseError(e)
         }
+
     }
 
     /**
@@ -569,8 +539,6 @@ internal class StreamVideoImpl internal constructor(
                             .iceServers
                             .map { it.toIceServer() }
 
-                    connectionModule.preferences.storeSfuToken(credentials.token)
-
                     Success(
                         JoinedCall(
                             call = call,
@@ -632,6 +600,7 @@ internal class StreamVideoImpl internal constructor(
 
     override suspend fun joinCall(type: String, id: String): Result<JoinCallResponse> {
         val joinCallRequest = JoinCallRequest()
+        println("token is ${connectionModule.preferences.getUserToken()}")
         return wrapAPICall {
             connectionModule.videoCallsApi.joinCallTypeId0(
                 type,
@@ -984,13 +953,13 @@ internal class StreamVideoImpl internal constructor(
                 is Success -> {
                     val callMetadata = result.value
 
-                    val event = CallCreatedEvent(
-                        callCid = callMetadata.cid,
-                        ringing = true,
-                        users = callMetadata.users,
-                        callInfo = callMetadata.toInfo(),
-                        callDetails = callMetadata.callDetails
-                    )
+//                    val event = CallCreatedEvent(
+//                        callCid = callMetadata.cid,
+//                        ringing = true,
+//                        users = callMetadata.users,
+//                        callInfo = callMetadata.toInfo(),
+//                        callDetails = callMetadata.callDetails
+//                    )
 
                     // TODO engine.onCoordinatorEvent(event)
                     Success(Unit)
