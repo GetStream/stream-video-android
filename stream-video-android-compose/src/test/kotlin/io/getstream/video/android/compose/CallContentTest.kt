@@ -42,10 +42,20 @@ internal class CallContentTest : BaseComposeTest() {
     override fun basePaparazzi(): Paparazzi = paparazzi
 
     @Test
-    fun `snapshot IncomingCallContentDetails composable`() {
+    fun `snapshot IncomingCallContentDetails Video composable`() {
         snapshot {
             IncomingCallDetails(
                 callType = CallType.VIDEO,
+                participants = mockParticipantList
+            )
+        }
+    }
+
+    @Test
+    fun `snapshot IncomingCallContentDetails Audio composable`() {
+        snapshot {
+            IncomingCallDetails(
+                callType = CallType.AUDIO,
                 participants = mockParticipantList
             )
         }
@@ -91,7 +101,17 @@ internal class CallContentTest : BaseComposeTest() {
     }
 
     @Test
-    fun `snapshot OutgoingCallDetails composable`() {
+    fun `snapshot OutgoingCallDetails Video composable`() {
+        snapshot {
+            OutgoingCallDetails(
+                callType = CallType.VIDEO,
+                participants = mockParticipants
+            )
+        }
+    }
+
+    @Test
+    fun `snapshot OutgoingCallDetails Audio composable`() {
         snapshot {
             OutgoingCallDetails(
                 callType = CallType.VIDEO,

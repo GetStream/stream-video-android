@@ -140,11 +140,25 @@ public fun OutgoingCallContent(
 
 @Preview
 @Composable
-private fun OutgoingCallPreview() {
+private fun OutgoingCallVideoPreview() {
     MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         OutgoingCallContent(
             callType = CallType.VIDEO,
+            participants = mockParticipants,
+            callMediaState = CallMediaState(),
+            onBackPressed = {}
+        ) {}
+    }
+}
+
+@Preview
+@Composable
+private fun OutgoingCallAudioPreview() {
+    MockUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        OutgoingCallContent(
+            callType = CallType.AUDIO,
             participants = mockParticipants,
             callMediaState = CallMediaState(),
             onBackPressed = {}
