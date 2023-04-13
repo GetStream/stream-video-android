@@ -1,7 +1,10 @@
 package io.getstream.video.android.core.socket
 
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import stream.video.sfu.event.JoinRequest
 import stream.video.sfu.event.SfuRequest
@@ -13,15 +16,17 @@ import stream.video.sfu.event.SfuRequest
  */
 public class SfuSocket(
     private val url: String,
-    private val httpClient: OkHttpClient,
     private val sessionId: String,
     private val token: String,
-    private val getSubscriberSdp: () -> String,
+    private val getSubscriberSdp: suspend () -> String,
+    private val scope : CoroutineScope = CoroutineScope(DispatcherProvider.IO),
+    private val httpClient: OkHttpClient,
     private val networkStateProvider: NetworkStateProvider
 ): PersistentSocket(
     url=url,
     httpClient=httpClient,
     token=token,
+    scope = scope,
     networkStateProvider=networkStateProvider
 ) {
 
@@ -29,13 +34,14 @@ public class SfuSocket(
 
     override fun authenticate() {
         logger.d { "[authenticate] sessionId: $sessionId" }
-        val request = JoinRequest(
-            session_id = sessionId,
-            token = token,
-            subscriber_sdp = getSubscriberSdp()
-        )
-        socket.send(SfuRequest(join_request = request).encodeByteString())
-
+        scope.launch {
+            val request = JoinRequest(
+                session_id = sessionId,
+                token = token,
+                subscriber_sdp = getSubscriberSdp()
+            )
+            socket.send(SfuRequest(join_request = request).encodeByteString())
+        }
     }
 
 }

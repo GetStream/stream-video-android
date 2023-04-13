@@ -55,9 +55,6 @@ import io.getstream.video.android.core.model.toIceServer
 import io.getstream.video.android.core.model.toInfo
 import io.getstream.video.android.core.model.toRequest
 import io.getstream.video.android.core.socket.ErrorResponse
-import io.getstream.video.android.core.socket.SocketListener
-import io.getstream.video.android.core.socket.internal.SocketState
-import io.getstream.video.android.core.socket.internal.VideoSocketImpl
 import io.getstream.video.android.core.user.UserPreferencesManager
 import io.getstream.video.android.core.utils.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.core.utils.LatencyResult
@@ -125,7 +122,7 @@ internal class StreamVideoImpl internal constructor(
     private val loggingLevel: LoggingLevel,
     internal val connectionModule: ConnectionModule,
     internal val pushDeviceGenerators: List<PushDeviceGenerator>,
-) : StreamVideo, SocketListener {
+) : StreamVideo {
 
     private lateinit var connectContinuation: Continuation<Result<ConnectedEvent>>
 
@@ -135,21 +132,12 @@ internal class StreamVideoImpl internal constructor(
     public var peerConnectionFactory = StreamPeerConnectionFactory(context)
     public override val userId = user.id
 
-    override fun onConnected(event: ConnectedEvent) {
-        onEvent(event)
-    }
-
-    override fun onEvent(event: VideoEvent) {
-        // TODO: maybe merge fire event into this?
-        fireEvent(event)
-    }
-
     override val state = ClientState(this)
     private val logger by taggedLogger("Call:StreamVideo")
     private var subscriptions = mutableSetOf<EventSubscription>()
     private var calls = mutableMapOf<String, Call>()
 
-    val socketImpl = connectionModule.coordinatorSocket as VideoSocketImpl
+    val socketImpl = connectionModule.coordinatorSocket
 
     // caller: JOIN after accepting incoming call by callee
     /**
@@ -289,9 +277,15 @@ internal class StreamVideoImpl internal constructor(
         StreamLifecycleObserver(
             lifecycle,
             object : LifecycleHandler {
-                override fun resume() = reconnectSocket()
+                override fun resume() {
+                    scope.launch {
+                        // TODO: we should only connect if we were previously connected
+                        connectionModule.coordinatorSocket.connect()
+                    }
+                }
                 override fun stopped() {
-                    connectionModule.coordinatorSocket.releaseConnection()
+                    // TODO: we should only disconnect if we were previously connected
+                    connectionModule.coordinatorSocket.disconnect()
                 }
             }
         )
@@ -303,16 +297,28 @@ internal class StreamVideoImpl internal constructor(
             lifecycleObserver.observe()
         }
 
-        // listen to socket events
-        connectionModule.coordinatorSocket.addListener(this)
+        // listen to socket events and errors
+        scope.launch {
+            connectionModule.coordinatorSocket.events.collect() {
+                fireEvent(it)
+            }
+        }
+        scope.launch {
+            connectionModule.coordinatorSocket.errors.collect() {
+                if (developmentMode) {
+                    throw it
+                } else {
+                    logger.e(it) { "permanent failure on socket connection"}
+                }
+            }
+        }
+
     }
 
-    suspend fun connectAsync(): Deferred<Result<ConnectedEvent>> {
+    suspend fun connectAsync(): Deferred<Unit> {
         return scope.async {
             val result = socketImpl.connect()
-            if (result.isFailure) {
-                logger.e { "Failed to connect to coordinator, error $result.error" }
-            }
+
             result
         }
     }
@@ -528,7 +534,7 @@ internal class StreamVideoImpl internal constructor(
                 connectionModule.videoCallsApi.joinCallTypeId0(
                     id = call.id,
                     type = call.type,
-                    connectionId = connectionModule.coordinatorSocket.getConnectionId(),
+                    connectionId = connectionModule.coordinatorSocket.connectionId,
                     joinCallRequest = JoinCallRequest()
                 )
             }
@@ -554,7 +560,6 @@ internal class StreamVideoImpl internal constructor(
             logger.v { "[joinCallInternal] selectEdgeServerResult: $selectEdgeServerResult" }
             when (selectEdgeServerResult) {
                 is Success -> {
-                    connectionModule.coordinatorSocket.updateCallState(call)
                     val credentials = selectEdgeServerResult.value.credentials
                     val url = credentials.server.url
                     val iceServers =
@@ -632,7 +637,7 @@ internal class StreamVideoImpl internal constructor(
                 type,
                 id,
                 joinCallRequest,
-                connectionModule.coordinatorSocket.getConnectionId()
+                connectionModule.coordinatorSocket.connectionId
             )
         }
     }
@@ -777,7 +782,7 @@ internal class StreamVideoImpl internal constructor(
     override suspend fun queryCalls(queryCallsData: QueryCallsData): Result<QueriedCalls> {
         logger.d { "[queryCalls] queryCallsData: $queryCallsData" }
         val request = queryCallsData.toRequest()
-        val connectionId = connectionModule.coordinatorSocket.getConnectionId()
+        val connectionId = connectionModule.coordinatorSocket.connectionId
         return wrapAPICall {
             connectionModule.videoCallsApi.queryCalls(request, connectionId).toQueriedCalls()
         }
@@ -907,16 +912,6 @@ internal class StreamVideoImpl internal constructor(
 
         removeDevices(preferences.getDevices())
         preferences.clear()
-    }
-
-    /**
-     * Attempts to reconnect the socket if it's in a disconnected state and the user is available.
-     */
-    private fun reconnectSocket() {
-
-        if (connectionModule.coordinatorStateService.state !is SocketState.Connected && user.id.isNotBlank()) {
-            connectionModule.coordinatorSocket.reconnect()
-        }
     }
 
     /**

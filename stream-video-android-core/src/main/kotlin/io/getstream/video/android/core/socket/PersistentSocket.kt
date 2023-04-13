@@ -8,7 +8,6 @@ import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.socket.internal.EventMapper
 import io.getstream.video.android.core.socket.internal.EventType
-import io.getstream.video.android.core.socket.internal.EventsParser
 import io.getstream.video.android.core.socket.internal.HealthMonitor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -68,6 +67,9 @@ open class PersistentSocket(
     /** Continuation if the socket successfully connected */
     lateinit var connected : Continuation<Unit>
 
+    /** Continuation if you're authenticated, typically this is more important than connected. Since you need auth to receive events */
+    lateinit var authenticated : Continuation<Unit>
+
     internal lateinit var socket: WebSocket
 
     // prevent us from resuming the continuation twice
@@ -102,7 +104,7 @@ open class PersistentSocket(
         closedByClient = true
         continuationCompleted = false
         _connectionState.value = SocketState.DisconnectedByRequest
-        socket.close(EventsParser.CODE_CLOSE_SOCKET_FROM_CLIENT, "Connection close by client")
+        socket.close(CODE_CLOSE_SOCKET_FROM_CLIENT, "Connection close by client")
         connectionId = ""
         healthMonitor.stop()
         networkStateProvider.unsubscribe(networkStateListener)
@@ -228,7 +230,7 @@ open class PersistentSocket(
      */
     override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
         logger.d { "[onClosed] code: $code, reason: $reason" }
-        if (code == EventsParser.CODE_CLOSE_SOCKET_FROM_CLIENT) {
+        if (code == CODE_CLOSE_SOCKET_FROM_CLIENT) {
             closedByClient = true
         } else {
             // Treat as failure and reconnect, socket shouldn't be closed by server
@@ -270,6 +272,10 @@ open class PersistentSocket(
             }
         }
     })
+
+    internal companion object {
+        internal const val CODE_CLOSE_SOCKET_FROM_CLIENT = 1000
+    }
 
 
 }

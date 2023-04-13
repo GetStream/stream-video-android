@@ -2,7 +2,7 @@ package io.getstream.video.android.core
 
 import android.content.Context
 import android.net.ConnectivityManager
-import io.getstream.video.android.core.call.signal.socket.SfuSocketImpl
+import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.internal.module.ConnectionModule
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.socket.CoordinatorSocket
@@ -40,8 +40,11 @@ import java.util.concurrent.TimeUnit
  * @see Socket
  * @see SFUConnectionModule
  * @see FiniteStateMachine
+ * @see SocketStateService
  *
  * TODO:
+ * - swap ConnectionModule / SFUSocket setup
+ * - authenticated continuation or different approach
  * - Lots more testing
  */
 @RunWith(RobolectricTestRunner::class)
@@ -78,7 +81,8 @@ class SocketTest: TestBase() {
             connectivityManager = context
                 .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         )
-        val socket = CoordinatorSocket(coordinatorUrl, buildOkHttp(), testData.users["thierry"]!!, testData.tokens["thierry"]!!, networkStateProvider)
+        val scope = CoroutineScope(DispatcherProvider.IO)
+        val socket = CoordinatorSocket(coordinatorUrl, testData.users["thierry"]!!, testData.tokens["thierry"]!!, scope , buildOkHttp(), networkStateProvider)
         socket.connect()
 
         launch {
@@ -108,7 +112,8 @@ class SocketTest: TestBase() {
         val updateSdp:  () -> String = {
             "hello"
         }
-        val socket = SfuSocket(sfuUrl, buildOkHttp(), sessionId, sfuToken, updateSdp, networkStateProvider)
+        val scope = CoroutineScope(DispatcherProvider.IO)
+        val socket = SfuSocket(sfuUrl, sessionId, sfuToken, updateSdp, scope, buildOkHttp(), networkStateProvider)
         socket.connect()
 
         launch {

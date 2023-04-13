@@ -2,8 +2,10 @@ package io.getstream.video.android.core.socket
 
 import com.squareup.moshi.JsonAdapter
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.model.User
+import kotlinx.coroutines.CoroutineScope
 import okhttp3.OkHttpClient
 import org.openapitools.client.infrastructure.Serializer
 import org.openapitools.client.models.ConnectUserDetailsRequest
@@ -16,13 +18,15 @@ import org.openapitools.client.models.WSAuthMessageRequest
  */
 public class CoordinatorSocket(
     private val url: String,
-    private val httpClient: OkHttpClient,
     private val user: User,
     private val token: String,
-    private val networkStateProvider: NetworkStateProvider
-): PersistentSocket(
+    private val scope : CoroutineScope = CoroutineScope(DispatcherProvider.IO),
+    private val httpClient: OkHttpClient,
+    private val networkStateProvider: NetworkStateProvider,
+    ): PersistentSocket(
     url=url,
     httpClient=httpClient,
+    scope = scope,
     token=token,
     networkStateProvider=networkStateProvider
 ) {

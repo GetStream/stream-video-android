@@ -20,16 +20,12 @@ import android.content.Context
 import android.net.ConnectivityManager
 import io.getstream.video.android.core.api.ClientRPCService
 import io.getstream.video.android.core.api.SignalServerService
-import io.getstream.video.android.core.call.signal.socket.SfuSocketFactory
-import io.getstream.video.android.core.call.signal.socket.SfuSocketImpl
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.User
-import io.getstream.video.android.core.socket.SocketStateService
-import io.getstream.video.android.core.socket.VideoSocket
-import io.getstream.video.android.core.socket.internal.SocketFactory
-import io.getstream.video.android.core.socket.internal.VideoSocketImpl
+import io.getstream.video.android.core.socket.CoordinatorSocket
+import io.getstream.video.android.core.socket.SfuSocket
 import io.getstream.video.android.core.user.UserPreferences
 import kotlinx.coroutines.CoroutineScope
 import okhttp3.HttpUrl
@@ -50,12 +46,16 @@ import retrofit2.converter.wire.WireConverterFactory
 import java.util.concurrent.TimeUnit
 
 internal class SFUConnectionModule(
+    sfuUrl: String,
+    sessionId: String,
+    sfuToken: String,
+    getSubscriberSdp: suspend () -> String,
+    scope: CoroutineScope = CoroutineScope(DispatcherProvider.IO),
     okHttpClient: OkHttpClient,
-    SFUUrl: String,
     networkStateProvider: NetworkStateProvider
 ) {
-    internal lateinit var sfuSocket: SfuSocketImpl
-    val updatedSignalUrl = SFUUrl.removeSuffix(suffix = "/twirp")
+    internal lateinit var sfuSocket: SfuSocket
+    val updatedSignalUrl = sfuUrl.removeSuffix(suffix = "/twirp")
 
     internal val signalRetrofitClient: Retrofit by lazy {
         Retrofit.Builder()
@@ -70,13 +70,8 @@ internal class SFUConnectionModule(
     }
 
     init {
-        val socketFactory = SfuSocketFactory(okHttpClient)
-        sfuSocket = SfuSocketImpl(
-            wssUrl = "$updatedSignalUrl/ws".replace("https", "wss"),
-            networkStateProvider = networkStateProvider,
-            coroutineScope = CoroutineScope(DispatcherProvider.IO),
-            sfuSocketFactory = socketFactory
-        )
+        val socketUrl = "$updatedSignalUrl/ws".replace("https", "wss")
+        sfuSocket = SfuSocket(socketUrl, sessionId, sfuToken, getSubscriberSdp, scope, okHttpClient, networkStateProvider)
     }
 }
 
@@ -114,7 +109,7 @@ internal class ConnectionModule(
     internal var livestreamingApi: LivestreamingApi
 
     internal var eventsApi: EventsApi
-    internal var coordinatorSocket: VideoSocket
+    internal var coordinatorSocket: CoordinatorSocket
     internal var networkStateProvider: NetworkStateProvider
 
     init {
@@ -252,28 +247,31 @@ internal class ConnectionModule(
     /**
      * @return The WebSocket handler that is used to connect to different calls.
      */
-    internal fun createCoordinatorSocket(): VideoSocket {
-        val wssURL = "wss://$videoDomain/video/connect"
+    internal fun createCoordinatorSocket(): CoordinatorSocket {
+        val coordinatorUrl = "wss://$videoDomain/video/connect"
 
-        return VideoSocketImpl(
-            wssUrl = wssURL,
-            preferences = preferences,
-            user = user,
-            socketFactory = SocketFactory(),
-            networkStateProvider = networkStateProvider,
-            coroutineScope = scope
+        val token = preferences.getUserToken()
+
+        return CoordinatorSocket(
+            coordinatorUrl,
+            user,
+            token,
+            scope,
+            okHttpClient,
+            networkStateProvider = networkStateProvider
         )
     }
 
-    internal val coordinatorStateService: SocketStateService by lazy {
-        SocketStateService()
-    }
 
-    internal fun createSFUConnectionModule(SFUUrl: String, SFUToken: String): SFUConnectionModule {
-        val updatedSignalUrl = SFUUrl.removeSuffix(suffix = "/twirp")
-        val wrapper = InterceptorWrapper(baseUrl = updatedSignalUrl.toHttpUrl(), SFUToken)
+    internal fun createSFUConnectionModule(    sfuUrl: String,
+                                               sessionId: String,
+                                               sfuToken: String,
+                                               getSubscriberSdp: suspend () -> String,
+                                               ): SFUConnectionModule {
+        val updatedSignalUrl = sfuUrl.removeSuffix(suffix = "/twirp")
+        val wrapper = InterceptorWrapper(baseUrl = updatedSignalUrl.toHttpUrl(), sfuToken)
         val okHttpClient = buildOkHttpClient(preferences, interceptorWrapper = wrapper)
 
-        return SFUConnectionModule(okHttpClient, SFUUrl, networkStateProvider)
+        return SFUConnectionModule(sfuUrl, sessionId, sfuToken, getSubscriberSdp, scope, okHttpClient, networkStateProvider)
     }
 }
