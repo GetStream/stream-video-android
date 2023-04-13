@@ -16,26 +16,34 @@
 
 package io.getstream.video.android.compose.ui.components.background
 
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.animation.crossfade.CrossfadePlugin
 import com.skydoves.landscapist.coil.CoilImage
 import com.skydoves.landscapist.components.rememberImageComponent
+import io.getstream.video.android.common.util.MockUtils
+import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.AvatarImagePreview
+import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.CallType
 import io.getstream.video.android.core.model.CallUser
+import io.getstream.video.android.core.utils.toCallUser
 import io.getstream.video.android.ui.common.R
 
 /**
@@ -49,17 +57,19 @@ import io.getstream.video.android.ui.common.R
  */
 @Composable
 public fun CallBackground(
-    participants: List<CallUser>,
+    participants: List<ParticipantState>,
     callType: CallType,
     isIncoming: Boolean,
     modifier: Modifier = Modifier,
     content: @Composable BoxScope.() -> Unit
 ) {
+    val callUser by remember(participants) { derivedStateOf { participants.map { it.toCallUser() } } }
+
     Box(modifier = modifier) {
         if (isIncoming) {
-            IncomingCallBackground(participants)
+            IncomingCallBackground(callUser)
         } else {
-            OutgoingCallBackground(participants, callType)
+            OutgoingCallBackground(callUser, callType)
         }
 
         content()
@@ -118,21 +128,29 @@ private fun ParticipantImageBackground(
 
 @Composable
 private fun DefaultCallBackground() {
-    Image(
-        modifier = Modifier.fillMaxSize(),
-        painter = painterResource(id = R.drawable.stream_video_bg_call),
-        contentScale = ContentScale.FillBounds,
-        contentDescription = null
+    val backgroundBrush = Brush.linearGradient(
+        listOf(
+            VideoTheme.colors.callGradientStart,
+            VideoTheme.colors.callGradientEnd,
+        )
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(backgroundBrush),
     )
 }
 
 @Preview
 @Composable
 private fun CallBackgroundPreview() {
+    MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         CallBackground(
-            participants = listOf(),
-            callType = CallType.VIDEO, isIncoming = true
+            participants = mockParticipants,
+            callType = CallType.VIDEO,
+            isIncoming = true
         ) {
             Box(modifier = Modifier.align(Alignment.Center)) {
                 AvatarImagePreview()

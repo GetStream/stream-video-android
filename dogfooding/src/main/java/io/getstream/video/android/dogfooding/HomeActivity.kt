@@ -56,6 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import io.getstream.log.taggedLogger
 import io.getstream.result.extractCause
+import io.getstream.result.onSuccessSuspend
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.Avatar
 import io.getstream.video.android.core.user.UserPreferencesManager
@@ -166,24 +167,30 @@ class HomeActivity : AppCompatActivity() {
         lifecycleScope.launch {
             logger.d { "[joinCall] callId: $callId" }
             loadingState.value = true
-            val result = streamVideo.joinCall(
-                "default", id = callId
-            )
-            loadingState.value = false
-            result.onSuccess { joinedCall -> logger.v { "[joinCall] succeed: $joinedCall" } }
-            result.onError {
-                logger.e { "[joinCall] failed: $it" }
 
-                val throwable = it.extractCause()
-                if (throwable is HttpException && throwable.code() == 401) {
-                    Toast.makeText(
-                        this@HomeActivity, R.string.unauthorized_error, Toast.LENGTH_SHORT
-                    ).show()
-                    logOut()
-                } else {
+            streamVideo.getOrCreateCall("default", id = callId)
+                .onSuccessSuspend { callMetadata ->
+                    val call = streamVideo.call(callMetadata.type, id = callMetadata.cid)
+                    call.join().onSuccess { joinedCall ->
+                        logger.v { "[joinCall] succeed: $joinedCall" }
+                        loadingState.value = false
+                    }.onError {
+                        logger.e { "[joinCall] failed: $it" }
+                        loadingState.value = false
+
+                        val throwable = it.extractCause()
+                        if (throwable is HttpException && throwable.code() == 401) {
+                            Toast.makeText(
+                                this@HomeActivity, R.string.unauthorized_error, Toast.LENGTH_SHORT
+                            ).show()
+                            logOut()
+                        } else {
+                            Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }.onError {
                     Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
                 }
-            }
         }
     }
 
@@ -248,8 +255,8 @@ class HomeActivity : AppCompatActivity() {
             modifier = Modifier
                 .size(40.dp)
                 .padding(top = 8.dp, start = 8.dp),
-            imageUrl = user.imageUrl.orEmpty(),
-            initials = if (user.imageUrl == null) {
+            imageUrl = user.imageUrl,
+            initials = if (user.imageUrl.isEmpty()) {
                 user.name.initials()
             } else {
                 null

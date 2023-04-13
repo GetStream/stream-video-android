@@ -25,15 +25,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import io.getstream.video.android.common.util.MockUtils
+import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.previews.ParticipantsProvider
-import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.ui.common.R
 
@@ -73,7 +73,7 @@ public fun UserAvatar(
     Box(modifier = modifier) {
         Avatar(
             modifier = Modifier.fillMaxSize(),
-            imageUrl = user.imageUrl.orEmpty(),
+            imageUrl = user.imageUrl,
             initials = user.name.ifBlank { user.id },
             textStyle = textStyle,
             shape = shape,
@@ -102,12 +102,11 @@ internal fun BoxScope.DefaultOnlineIndicator(onlineIndicatorAlignment: OnlineInd
 
 @Preview
 @Composable
-private fun UserAvatarPreview(
-    @PreviewParameter(ParticipantsProvider::class) callParticipants: List<ParticipantState>
-) {
+private fun UserAvatarPreview() {
+    MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         UserAvatar(
-            user = callParticipants[0].initialUser,
+            user = mockParticipants[0].initialUser,
             modifier = Modifier.size(82.dp)
         )
     }

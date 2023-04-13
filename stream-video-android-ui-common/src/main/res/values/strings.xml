@@ -36,9 +36,12 @@
     <string name="stream_video_invite_users_accept">Invite</string>
     <string name="stream_video_change_orientation">Change orientation</string>
     <string name="stream_video_toggle_fullscreen">Toggle fullscreen mode</string>
+    <string name="stream_video_call_participants_empty">No participants</string>
+    <string name="stream_video_call_participants_conjunction">and</string>
+    <string name="stream_video_call_participants_trailing">more</string>
 
-    <string name="stream_video_call_status_incoming">Incoming call...</string>
-    <string name="stream_video_call_status_outgoing">Calling...</string>
+    <string name="stream_video_call_status_incoming">Incoming %s call…</string>
+    <string name="stream_video_call_status_outgoing">Calling…</string>
 
     <string name="stream_video_permissions_title">Permissions required to launch the app</string>
     <string name="stream_video_permissions_message">Open settings to allow camera and microphone permissions.</string>

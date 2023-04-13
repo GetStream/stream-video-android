@@ -20,8 +20,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import app.cash.paparazzi.Paparazzi
-import io.getstream.video.android.common.util.mockParticipant
 import io.getstream.video.android.common.util.mockParticipantList
+import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.ui.components.call.incomingcall.IncomingCallContent
 import io.getstream.video.android.compose.ui.components.call.incomingcall.internal.IncomingCallDetails
@@ -31,7 +31,6 @@ import io.getstream.video.android.compose.ui.components.call.outgoingcall.intern
 import io.getstream.video.android.compose.ui.components.call.outgoingcall.internal.OutgoingGroupCallOptions
 import io.getstream.video.android.core.call.state.CallMediaState
 import io.getstream.video.android.core.model.CallType
-import io.getstream.video.android.core.model.CallUser
 import org.junit.Rule
 import org.junit.Test
 
@@ -43,21 +42,21 @@ internal class CallContentTest : BaseComposeTest() {
     override fun basePaparazzi(): Paparazzi = paparazzi
 
     @Test
-    fun `snapshot IncomingCallContentDetails composable`() {
+    fun `snapshot IncomingCallContentDetails Video composable`() {
         snapshot {
             IncomingCallDetails(
-                participants = mockParticipantList.map {
-                    CallUser(
-                        id = it.initialUser.id,
-                        name = it.initialUser.name,
-                        role = it.initialUser.role,
-                        imageUrl = it.initialUser.imageUrl,
-                        state = null,
-                        createdAt = null,
-                        updatedAt = null,
-                        teams = emptyList()
-                    )
-                }
+                callType = CallType.VIDEO,
+                participants = mockParticipantList
+            )
+        }
+    }
+
+    @Test
+    fun `snapshot IncomingCallContentDetails Audio composable`() {
+        snapshot {
+            IncomingCallDetails(
+                callType = CallType.AUDIO,
+                participants = mockParticipantList
             )
         }
     }
@@ -78,20 +77,7 @@ internal class CallContentTest : BaseComposeTest() {
         snapshot {
             IncomingCallContent(
                 callType = CallType.VIDEO,
-                participants = listOf(
-                    mockParticipant.let {
-                        CallUser(
-                            id = it.initialUser.id,
-                            name = it.initialUser.name,
-                            role = it.initialUser.role,
-                            imageUrl = it.initialUser.imageUrl,
-                            state = null,
-                            createdAt = null,
-                            updatedAt = null,
-                            teams = emptyList()
-                        )
-                    }
-                ),
+                participants = mockParticipants,
                 isVideoEnabled = false,
                 modifier = Modifier.fillMaxSize(),
                 onBackPressed = {},
@@ -105,18 +91,7 @@ internal class CallContentTest : BaseComposeTest() {
         snapshot {
             IncomingCallContent(
                 callType = CallType.VIDEO,
-                participants = mockParticipantList.map {
-                    CallUser(
-                        id = it.initialUser.id,
-                        name = it.initialUser.name,
-                        role = it.initialUser.role,
-                        imageUrl = it.initialUser.imageUrl,
-                        state = null,
-                        createdAt = null,
-                        updatedAt = null,
-                        teams = emptyList()
-                    )
-                },
+                participants = mockParticipants,
                 isVideoEnabled = false,
                 modifier = Modifier.fillMaxSize(),
                 onBackPressed = {},
@@ -126,22 +101,21 @@ internal class CallContentTest : BaseComposeTest() {
     }
 
     @Test
-    fun `snapshot OutgoingCallDetails composable`() {
+    fun `snapshot OutgoingCallDetails Video composable`() {
         snapshot {
             OutgoingCallDetails(
                 callType = CallType.VIDEO,
-                participants = mockParticipantList.map {
-                    CallUser(
-                        id = it.initialUser.id,
-                        name = it.initialUser.name,
-                        role = it.initialUser.role,
-                        imageUrl = it.initialUser.imageUrl,
-                        state = null,
-                        createdAt = null,
-                        updatedAt = null,
-                        teams = emptyList()
-                    )
-                }
+                participants = mockParticipants
+            )
+        }
+    }
+
+    @Test
+    fun `snapshot OutgoingCallDetails Audio composable`() {
+        snapshot {
+            OutgoingCallDetails(
+                callType = CallType.VIDEO,
+                participants = mockParticipants
             )
         }
     }
@@ -171,20 +145,7 @@ internal class CallContentTest : BaseComposeTest() {
         snapshot {
             OutgoingCallContent(
                 callType = CallType.VIDEO,
-                participants = listOf(
-                    mockParticipant.let {
-                        CallUser(
-                            id = it.initialUser.id,
-                            name = it.initialUser.name,
-                            role = it.initialUser.role,
-                            imageUrl = it.initialUser.imageUrl,
-                            state = null,
-                            createdAt = null,
-                            updatedAt = null,
-                            teams = emptyList()
-                        )
-                    }
-                ),
+                participants = mockParticipants,
                 callMediaState = CallMediaState(),
                 modifier = Modifier.fillMaxSize(),
                 onBackPressed = {},
@@ -198,19 +159,7 @@ internal class CallContentTest : BaseComposeTest() {
         snapshot {
             OutgoingCallContent(
                 callType = CallType.VIDEO,
-                participants =
-                mockParticipantList.map {
-                    CallUser(
-                        id = it.initialUser.id,
-                        name = it.initialUser.name,
-                        role = it.initialUser.role,
-                        imageUrl = it.initialUser.imageUrl,
-                        state = null,
-                        createdAt = null,
-                        updatedAt = null,
-                        teams = emptyList()
-                    )
-                },
+                participants = mockParticipants,
                 callMediaState = CallMediaState(),
                 modifier = Modifier.fillMaxSize(),
                 onBackPressed = {},

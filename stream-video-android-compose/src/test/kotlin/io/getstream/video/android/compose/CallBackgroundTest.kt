@@ -27,8 +27,6 @@ import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.ui.components.avatar.Avatar
 import io.getstream.video.android.compose.ui.components.background.CallBackground
 import io.getstream.video.android.core.model.CallType
-import io.getstream.video.android.core.model.CallUser
-import io.getstream.video.android.core.model.CallUserState
 import org.junit.Rule
 import org.junit.Test
 
@@ -43,20 +41,7 @@ internal class CallBackgroundTest : BaseComposeTest() {
     fun `snapshot CallBackground composable with an initial Avatars`() {
         snapshot {
             CallBackground(
-                participants = listOf(
-                    mockParticipants.first().let {
-                        CallUser(
-                            id = it.initialUser.id,
-                            name = it.initialUser.name,
-                            imageUrl = it.initialUser.imageUrl,
-                            role = it.initialUser.role,
-                            teams = emptyList(),
-                            updatedAt = null,
-                            createdAt = null,
-                            state = CallUserState("", false, false, false)
-                        )
-                    }
-                ),
+                participants = mockParticipants,
                 callType = CallType.VIDEO, isIncoming = true
             ) {
                 Box(modifier = Modifier.align(Alignment.Center)) {
