@@ -1,14 +1,11 @@
 package io.getstream.video.android.core.socket
 
+import com.squareup.moshi.JsonAdapter
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.call.signal.socket.RTCEventMapper
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
-import io.getstream.video.android.core.events.ConnectedEvent
-import io.getstream.video.android.core.events.CoordinatorHealthCheckEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
-import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
-import io.getstream.video.android.core.socket.internal.EventMapper
 import io.getstream.video.android.core.socket.internal.EventType
 import io.getstream.video.android.core.socket.internal.HealthMonitor
 import kotlinx.coroutines.CoroutineScope
@@ -23,6 +20,11 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import okhttp3.*
 import okio.ByteString
+import org.openapitools.client.infrastructure.Serializer
+import org.openapitools.client.models.ConnectedEvent
+import org.openapitools.client.models.HealthCheckEvent
+import org.openapitools.client.models.VideoEvent
+import org.openapitools.client.models.WSEvent
 import stream.video.sfu.event.HealthCheckRequest
 import stream.video.sfu.event.SfuEvent
 import kotlin.coroutines.Continuation
@@ -178,18 +180,11 @@ open class PersistentSocket<T>(
 
         scope.launch {
             // parse the message
-            val data = Json.decodeFromString<JsonObject>(text)
-            val eventType = EventType.from(data["type"]?.jsonPrimitive?.content!!)
-            var processedEvent = EventMapper.mapEvent(eventType, text)
-
-            // TODO: remove hack when we have good parsing
-            if (processedEvent is CoordinatorHealthCheckEvent) {
-                processedEvent = ConnectedEvent(clientId = processedEvent.clientId)
-            }
+            val jsonAdapter: JsonAdapter<VideoEvent> = Serializer.moshi.adapter(VideoEvent::class.java)
+            var processedEvent = jsonAdapter.fromJson(text)
 
             if (processedEvent is ConnectedEvent) {
-                // TODO: rename when we fix event parsing
-                connectionId = processedEvent.clientId
+                connectionId = processedEvent.connectionId
                 _connectionState.value = SocketState.Connected(processedEvent)
                 if (!continuationCompleted) {
                     connected.resume(processedEvent as T)
