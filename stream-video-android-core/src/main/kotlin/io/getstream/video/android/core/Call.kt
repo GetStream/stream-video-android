@@ -103,9 +103,7 @@ public class Call(
         val selectEdgeServerResult = client.selectEdgeServer(
             type = type,
             id = id,
-            request = GetCallEdgeServerRequest(
-                latencyMeasurements = measurements.associate { it.latencyUrl to it.measurements }
-            )
+            request = GetCallEdgeServerRequest(latencyMeasurements = measurements.associate { it.latencyUrl to it.measurements })
         )
         if (selectEdgeServerResult !is Success) {
             return result as Failure
@@ -114,11 +112,7 @@ public class Call(
         val credentials = selectEdgeServerResult.value.credentials
         val url = credentials.server.url
         val iceServers =
-            selectEdgeServerResult
-                .value
-                .credentials
-                .iceServers
-                .map { it.toIceServer() }
+            selectEdgeServerResult.value.credentials.iceServers.map { it.toIceServer() }
 
         session = RtcSession(
             client = client,
@@ -160,9 +154,7 @@ public class Call(
                     logger.v { "[initRenderer.onFirstFrameRendered] #sfu; sessionId: $sessionId" }
                     if (trackType != TrackType.TRACK_TYPE_SCREEN_SHARE) {
                         state.updateParticipantTrackSize(
-                            sessionId,
-                            videoRenderer.measuredWidth,
-                            videoRenderer.measuredHeight
+                            sessionId, videoRenderer.measuredWidth, videoRenderer.measuredHeight
                         )
                     }
                     onRender(videoRenderer)
@@ -173,9 +165,7 @@ public class Call(
 
                     if (trackType != TrackType.TRACK_TYPE_SCREEN_SHARE) {
                         state.updateParticipantTrackSize(
-                            sessionId,
-                            videoRenderer.measuredWidth,
-                            videoRenderer.measuredHeight
+                            sessionId, videoRenderer.measuredWidth, videoRenderer.measuredHeight
                         )
                     }
                 }
