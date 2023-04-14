@@ -107,6 +107,7 @@ Other
 
 - [ ] Clean up tests
 - [ ] Test coverage
+- [ ] Moderation API endpoints
 - [ ] Make call level client methods internal
 - [ ] Guest and anon user support
 - [ ] Remove unused code
