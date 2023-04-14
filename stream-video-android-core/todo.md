@@ -105,22 +105,30 @@ Other
 
 ### LLC TODO
 
+- [ ] Clean up tests
+- [ ] Test coverage
 - [ ] Make call level client methods internal
-- [ ] Directly use the events from openAPI to prevent things being out of sync
-- [ ] List of backend changes
+- [ ] Guest and anon user support
+- [ ] Remove unused code
 - [ ] Join flow performance
-- [ ] Reconnect flow (https://www.notion.so/Reconnection-Failure-handling-f6991fd2e5584380bb2d2cb5e8ac5303)
+- [ ] Reconnect after SFU breaks (https://www.notion.so/Reconnection-Failure-handling-f6991fd2e5584380bb2d2cb5e8ac5303)
 - [ ] Audio filter example
 - [ ] Video filter example
+- [X] Directly use the events from openAPI to prevent things being out of sync
+- [X] List of backend changes
 
 ### State TODO
 
 - [ ] Call settings need to be used everywhere. There are still some hardcoded settings
+- [ ] Call state isn't setup fully on join
+- [ ] Member state isn't updated correctly or implemented
+- 
 
 ### RTC TODO
 
 - [X] Media manager class to enable easy testing of all audio/video stuff
-- 
+- [ ] Move muting and clean it up
+- [ ] Review how UI changes & pagination are connected to the video tracks
 
 ### Disconnect suggestion
 
