@@ -73,8 +73,8 @@ public class CallCrudTest : IntegrationTestBase() {
 
         // set a custom field and update
         val secret = randomUUID()
-        call.custom = mutableMapOf("secret" to secret)
-        val updateResult = call.update()
+        val custom = mutableMapOf("secret" to secret)
+        val updateResult = call.update(custom=custom)
         assertSuccess(updateResult)
 
         // get the call object
@@ -95,7 +95,8 @@ public class CallCrudTest : IntegrationTestBase() {
     fun `Create a call with members and custom data`() = runTest {
         val members = mutableListOf("thierry", "tommaso")
         // TODO: Rename participants to members
-        val result = client.getOrCreateCall("default", "tommaso-thierry", members)
+        val call = client.call("default", "tommaso-thierry")
+        val result = call.create(memberIds = members)
         assert(result.isSuccess)
     }
 

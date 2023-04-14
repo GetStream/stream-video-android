@@ -98,24 +98,6 @@ public interface StreamVideo {
     ): Result<UpdateCallResponse>
 
     /**
-     * Creates a call with given information. You can then use the [CallMetadata] and join it and get auth
-     * information to fully connect.
-     *
-     * @param type The call type.
-     * @param id The call ID.
-     * @param participantIds List of other people to invite to the call.
-     * @param ring If you want to ring participants or not.
-     *
-     * @return [Result] which contains the [CallMetadata] and its information.
-     */
-    public suspend fun getOrCreateCall(
-        type: StreamCallType,
-        id: StreamCallId,
-        participantIds: List<String> = emptyList(),
-        ring: Boolean = false,
-    ): Result<GetOrCreateCallResponse>
-
-    /**
      * Queries or creates a call with given information and then authenticates the user to join the
      * said [CallMetadata].
      *

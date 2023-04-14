@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core
+package io.getstream.video.android.core.stories
 
+import io.getstream.video.android.core.IntegrationTestBase
 import io.getstream.video.android.core.model.QueryCallsData
 import io.getstream.video.android.core.model.SendReactionData
 import kotlinx.coroutines.test.runTest

@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core
+package io.getstream.video.android.core.stories
 
 import com.google.common.truth.Truth.assertThat
+import io.getstream.video.android.core.IntegrationTestBase
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.openapitools.client.models.*
 import org.robolectric.RobolectricTestRunner
-import stream.video.coordinator.event_v1.CallMembersUpdated
 
 @RunWith(RobolectricTestRunner::class)
 /**

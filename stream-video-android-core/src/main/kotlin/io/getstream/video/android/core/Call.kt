@@ -54,8 +54,6 @@ public class Call(
     val microphone by lazy { mediaManager.microphone }
     val speaker by lazy { mediaManager.speaker }
 
-    public var custom: Map<String, Any>? = null
-
     // should be a stateflow
     private var sfuConnection: SFUConnection? = null
 
@@ -195,16 +193,47 @@ public class Call(
     }
 
     /** Basic crud operations */
-    suspend fun get(): Result<GetOrCreateCallResponse> {
-        return client.getOrCreateCall(type, id)
+    suspend fun get(): Result<GetCallResponse> {
+        val response = clientImpl.getCall(type, id)
+        response.onSuccess {
+            state.updateFromResponse(it)
+        }
+        return response
     }
 
-    suspend fun create(): Result<GetOrCreateCallResponse> {
-        return client.getOrCreateCall(type, id)
+    suspend fun create(memberIds: List<String>? = null,
+                       custom: Map<String, Any>? = null,
+                       settingsOverride: CallSettingsRequest? = null,
+                       startsAt: org.threeten.bp.OffsetDateTime? = null,
+                       team: String? = null,
+                       ring: Boolean = false): Result<GetOrCreateCallResponse> {
+        val response = clientImpl.getOrCreateCall(
+            type = type,
+            id = id,
+            memberIds = memberIds,
+            custom = custom,
+            settingsOverride = settingsOverride,
+            startsAt = startsAt,
+            team = team,
+            ring = ring
+        )
+
+        response.onSuccess {
+            state.updateFromResponse(it)
+        }
+        return response
     }
 
-    suspend fun update(): Result<UpdateCallResponse> {
-        return client.updateCall(type, id, custom ?: emptyMap())
+    suspend fun update(custom: Map<String, Any>? = null,
+                       settingsOverride: CallSettingsRequest? = null,
+                       startsAt: org.threeten.bp.OffsetDateTime? = null,
+                       team: String? = null): Result<UpdateCallResponse> {
+        val response = client.updateCall(type, id, custom ?: emptyMap())
+        // TODO: pass on the arguments
+        response.onSuccess {
+            state.updateFromResponse(it)
+        }
+        return response
     }
 
     /** Permissions */

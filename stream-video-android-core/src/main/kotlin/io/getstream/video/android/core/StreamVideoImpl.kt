@@ -43,13 +43,10 @@ import io.getstream.video.android.core.model.QueriedCalls
 import io.getstream.video.android.core.model.QueryCallsData
 import io.getstream.video.android.core.model.QueryMembersData
 import io.getstream.video.android.core.model.SendReactionData
-import io.getstream.video.android.core.model.StartedCall
-import io.getstream.video.android.core.model.StreamCallKind
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.mapper.toTypeAndId
 import io.getstream.video.android.core.model.toIceServer
-import io.getstream.video.android.core.model.toInfo
 import io.getstream.video.android.core.model.toRequest
 import io.getstream.video.android.core.socket.ErrorResponse
 import io.getstream.video.android.core.socket.SocketState
@@ -58,7 +55,6 @@ import io.getstream.video.android.core.user.UserPreferencesManager
 import io.getstream.video.android.core.utils.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.core.utils.LatencyResult
 import io.getstream.video.android.core.utils.getLatencyMeasurementsOKHttp
-import io.getstream.video.android.core.utils.toCall
 import io.getstream.video.android.core.utils.toCallUser
 import io.getstream.video.android.core.utils.toEdge
 import io.getstream.video.android.core.utils.toQueriedCalls
@@ -440,29 +436,68 @@ internal class StreamVideoImpl internal constructor(
         }
     }
 
+    suspend fun getCall(type: String, id: String): Result<GetCallResponse> {
+        return wrapAPICall {
+            connectionModule.videoCallsApi.getCall(type, id)
+        }
+    }
+
     // caller: DIAL and wait answer
     /**
      * @see StreamVideo.getOrCreateCall
      */
-    override suspend fun getOrCreateCall(
+    suspend fun getOrCreateCall(
         type: String,
         id: String,
-        participantIds: List<String>,
+        memberIds: List<String>? = null,
+        custom: Map<String, Any>? = null,
+        settingsOverride: CallSettingsRequest? = null,
+        startsAt: org.threeten.bp.OffsetDateTime? = null,
+        team: String? = null,
         ring: Boolean
     ): Result<GetOrCreateCallResponse> {
-        logger.d { "[getOrCreateCall] type: $type, id: $id, participantIds: $participantIds" }
+
+        val members = memberIds?.map {
+            MemberRequest(
+                userId = it
+            )
+        }
+
+        return getOrCreateCallFullMembers(
+            type = type,
+            id = id,
+            members = members,
+            custom = custom,
+            settingsOverride = settingsOverride,
+            startsAt = startsAt,
+            team = team,
+            ring = ring)
+
+    }
+
+    suspend fun getOrCreateCallFullMembers(
+        type: String,
+        id: String,
+        members: List<MemberRequest>? = null,
+        custom: Map<String, Any>? = null,
+        settingsOverride: CallSettingsRequest? = null,
+        startsAt: org.threeten.bp.OffsetDateTime? = null,
+        team: String? = null,
+        ring: Boolean
+    ): Result<GetOrCreateCallResponse> {
+        logger.d { "[getOrCreateCall] type: $type, id: $id, members: $members" }
+
         return wrapAPICall {
             connectionModule.videoCallsApi.getOrCreateCall(
                 type = type,
                 id = id,
                 getOrCreateCallRequest = GetOrCreateCallRequest(
                     data = CallRequest(
-                        members = participantIds.map {
-                            MemberRequest(
-                                userId = it,
-                                role = "admin"
-                            )
-                        },
+                        members = members,
+                        custom = custom,
+                        settingsOverride = settingsOverride,
+                        startsAt = startsAt,
+                        team = team,
                     ),
                     ring = ring
                 )
@@ -760,9 +795,21 @@ internal class StreamVideoImpl internal constructor(
         logger.d { "[queryCalls] queryCallsData: $queryCallsData" }
         val request = queryCallsData.toRequest()
         val connectionId = connectionModule.coordinatorSocket.connectionId
-        return wrapAPICall {
+        val result = wrapAPICall {
             connectionModule.videoCallsApi.queryCalls(request, connectionId).toQueriedCalls()
         }
+        if (result.isSuccess) {
+            // update state for these calls
+            result.onSuccess {
+                it.calls.forEach { callData ->
+                    val call = this.call(callData.call.type, callData.call.id)
+                    call.state.updateFromResponse(callData)
+
+                }
+            }
+        }
+
+        return result
     }
 
     /**
@@ -957,7 +1004,7 @@ internal class StreamVideoImpl internal constructor(
 
             val (type, id) = callCid.toTypeAndId()
 
-            when (val result = getOrCreateCall(type, id, emptyList(), false)) {
+            when (val result = getCall(type, id)) {
                 is Success -> {
                     val callMetadata = result.value
 

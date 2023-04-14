@@ -25,7 +25,6 @@ import io.getstream.log.kotlin.KotlinStreamLogger
 import io.getstream.log.streamLog
 import io.getstream.result.Result
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
-import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.User
 import kotlinx.coroutines.Dispatchers
@@ -40,6 +39,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
+import org.openapitools.client.models.VideoEvent
 import java.util.UUID
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume

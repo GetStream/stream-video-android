@@ -17,6 +17,7 @@
 package io.getstream.video.android.core
 
 import io.getstream.log.taggedLogger
+import io.getstream.result.Result
 import io.getstream.video.android.core.events.AudioLevelChangedEvent
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.ConnectionQualityChangeEvent
@@ -31,10 +32,7 @@ import io.getstream.video.android.core.events.SFUHealthCheckEvent
 import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
-import io.getstream.video.android.core.model.CallUser
-import io.getstream.video.android.core.model.ScreenSharingSession
-import io.getstream.video.android.core.model.TrackWrapper
-import io.getstream.video.android.core.model.User
+import io.getstream.video.android.core.model.*
 import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.core.utils.toUser
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -43,6 +41,8 @@ import org.openapitools.client.models.*
 import org.webrtc.MediaStream
 import org.openapitools.client.models.CallSettingsResponse
 import org.openapitools.client.models.OwnCapability
+import org.threeten.bp.Clock
+import org.threeten.bp.OffsetDateTime
 import stream.video.sfu.models.Participant
 import java.util.*
 
@@ -128,8 +128,8 @@ public class CallState(val call: Call, user: User) {
     )
     public val connection: StateFlow<ConnectionState> = _connection
 
-    private val _endedAt: MutableStateFlow<Date?> = MutableStateFlow(null)
-    val endedAt: StateFlow<Date?> = _endedAt
+    private val _endedAt: MutableStateFlow<OffsetDateTime?> = MutableStateFlow(null)
+    val endedAt: StateFlow<OffsetDateTime?> = _endedAt
     private val _endedByUser: MutableStateFlow<User?> = MutableStateFlow(null)
     val endedByUser: StateFlow<User?> = _endedByUser
 
@@ -175,7 +175,7 @@ public class CallState(val call: Call, user: User) {
             }
 
             is CallEndedEvent -> {
-                _endedAt.value = Date()
+                _endedAt.value = OffsetDateTime.now(Clock.systemUTC())
                 _endedByUser.value = event.user?.toUser()
             }
 
@@ -405,5 +405,87 @@ public class CallState(val call: Call, user: User) {
 //            it.videoTrackWrapper = null
 //            track?.video?.dispose()
 //        }
+
+    }
+
+    private val _backstage: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val backstage: StateFlow<Boolean> = _backstage
+
+    private val _broadcasting: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val broadcasting: StateFlow<Boolean> = _broadcasting
+
+    private val _transcribing: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val transcribing: StateFlow<Boolean> = _transcribing
+
+    private val _startsAt: MutableStateFlow<OffsetDateTime?> = MutableStateFlow(null)
+    val startsAt: StateFlow<OffsetDateTime?> = _startsAt
+
+    private val _updatedAt: MutableStateFlow<OffsetDateTime?> = MutableStateFlow(null)
+    val updatedAt: StateFlow<OffsetDateTime?> = _updatedAt
+
+    private val _createdAt: MutableStateFlow<OffsetDateTime?> = MutableStateFlow(null)
+    val createdAt: StateFlow<OffsetDateTime?> = _createdAt
+
+    private val _blockedUserIds: MutableStateFlow<List<String>> = MutableStateFlow(emptyList())
+    val blockedUserIds: StateFlow<List<String>> = _blockedUserIds
+
+    private val _custom: MutableStateFlow<Map<String,Any>> = MutableStateFlow(emptyMap())
+    val custom: StateFlow<Map<String,Any>> = _custom
+
+    private val _team: MutableStateFlow<String?> = MutableStateFlow(null)
+    val team: StateFlow<String?> = _team
+
+    private val _createdBy: MutableStateFlow<User?> = MutableStateFlow(null)
+    val createdBy: StateFlow<User?> = _createdBy
+
+    private val _ingress: MutableStateFlow<CallIngressResponse?> = MutableStateFlow(null)
+    val ingress: StateFlow<CallIngressResponse?> = _ingress
+
+    fun updateFromResponse(response: CallResponse) {
+        _backstage.value = response.backstage
+        _blockedUserIds.value = response.blockedUserIds
+        _broadcasting.value = response.broadcasting
+        _createdAt.value = response.createdAt
+        _updatedAt.value = response.updatedAt
+        _endedAt.value = response.endedAt
+        _startsAt.value = response.startsAt
+        _createdBy.value = response.createdBy.toUser()
+        _custom.value = response.custom
+        _ingress.value = response.ingress
+        _ownCapabilities.value = response.ownCapabilities
+        _recording.value = response.recording
+        _settings.value = response.settings
+        _transcribing.value = response.transcribing
+        _team.value = response.team
+
+    }
+
+    fun updateFromResponse(response: GetOrCreateCallResponse) {
+        val members = response.members
+        val callResponse = response.call
+        updateFromResponse(callResponse)
+    }
+
+    fun updateFromResponse(response: UpdateCallResponse) {
+        val callResponse = response.call
+        updateFromResponse(callResponse)
+    }
+
+    /**
+     * @see MemberResponse
+     * @see CallUser
+     */
+    fun updateFromResponse(response: CallData) {
+        // note that the member response is different
+        // @see MemberResponse
+
+
+
+
+
+    }
+
+    fun updateFromResponse(response: GetCallResponse) {
+        updateFromResponse(response.call)
     }
 }
