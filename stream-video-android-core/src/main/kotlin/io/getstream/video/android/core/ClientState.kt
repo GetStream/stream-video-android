@@ -16,12 +16,12 @@
 
 package io.getstream.video.android.core
 
-import io.getstream.video.android.core.events.CallCreatedEvent
-import io.getstream.video.android.core.events.ConnectedEvent
-import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import org.openapitools.client.models.CallCreatedEvent
+import org.openapitools.client.models.ConnectedEvent
+import org.openapitools.client.models.VideoEvent
 
 sealed class ConnectionState() {
     object PreConnect : ConnectionState()
@@ -74,7 +74,6 @@ class ClientState(client: StreamVideo) {
      */
 
     fun handleEvent(event: VideoEvent) {
-        val isConnectedEvent = event is ConnectedEvent
         // mark connected
         if (event is ConnectedEvent) {
             println("setting ConnectionState to connected")

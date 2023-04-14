@@ -273,7 +273,7 @@ class LoginActivity : ComponentActivity() {
             val user = User(
                 id = authUser?.email ?: userJSON.getString("userId"),
                 name = authUser?.displayName ?: "",
-                imageUrl = authUser?.photoUrl?.toString() ?: "",
+                image = authUser?.photoUrl?.toString() ?: "",
                 custom = mapOf(
                     "email" to userJSON.getString("email")
                 )

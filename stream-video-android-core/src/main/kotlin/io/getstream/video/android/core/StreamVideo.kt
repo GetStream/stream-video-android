@@ -18,7 +18,6 @@ package io.getstream.video.android.core
 
 import android.content.Context
 import io.getstream.result.Result
-import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.model.CallEventType
 import io.getstream.video.android.core.model.CallInfo

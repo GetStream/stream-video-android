@@ -67,7 +67,7 @@ public class AvatarView : ShapeableImageView {
      */
     public fun setData(user: User) {
         load(
-            data = user.imageUrl,
+            data = user.image,
             placeholderDrawable = AvatarPlaceholderDrawable(
                 context = context,
                 initials = user.name.ifEmpty { user.id }.initials(),

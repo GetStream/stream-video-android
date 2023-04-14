@@ -25,7 +25,7 @@ fun getUsers(): List<User> {
         User(
             id = BuildConfig.SAMPLE_USER_00_ID,
             name = BuildConfig.SAMPLE_USER_00_NAME,
-            imageUrl = BuildConfig.SAMPLE_USER_00_IMAGE,
+            image = BuildConfig.SAMPLE_USER_00_IMAGE,
             role = BuildConfig.SAMPLE_USER_00_ROLE,
             teams = emptyList(),
             custom = emptyMap()
@@ -33,7 +33,7 @@ fun getUsers(): List<User> {
         User(
             id = BuildConfig.SAMPLE_USER_01_ID,
             name = BuildConfig.SAMPLE_USER_01_NAME,
-            imageUrl = BuildConfig.SAMPLE_USER_01_IMAGE,
+            image = BuildConfig.SAMPLE_USER_01_IMAGE,
             role = BuildConfig.SAMPLE_USER_01_ROLE,
             teams = emptyList(),
             custom = emptyMap()
@@ -41,7 +41,7 @@ fun getUsers(): List<User> {
         User(
             id = BuildConfig.SAMPLE_USER_02_ID,
             name = BuildConfig.SAMPLE_USER_02_NAME,
-            imageUrl = BuildConfig.SAMPLE_USER_02_IMAGE,
+            image = BuildConfig.SAMPLE_USER_02_IMAGE,
             role = BuildConfig.SAMPLE_USER_02_ROLE,
             teams = emptyList(),
             custom = emptyMap()
@@ -49,7 +49,7 @@ fun getUsers(): List<User> {
         User(
             id = BuildConfig.SAMPLE_USER_03_ID,
             name = BuildConfig.SAMPLE_USER_03_NAME,
-            imageUrl = BuildConfig.SAMPLE_USER_03_IMAGE,
+            image = BuildConfig.SAMPLE_USER_03_IMAGE,
             role = BuildConfig.SAMPLE_USER_03_ROLE,
             teams = emptyList(),
             custom = emptyMap()
@@ -57,7 +57,7 @@ fun getUsers(): List<User> {
         User(
             id = BuildConfig.SAMPLE_USER_04_ID,
             name = BuildConfig.SAMPLE_USER_04_NAME,
-            imageUrl = BuildConfig.SAMPLE_USER_04_IMAGE,
+            image = BuildConfig.SAMPLE_USER_04_IMAGE,
             role = BuildConfig.SAMPLE_USER_04_ROLE,
             teams = emptyList(),
             custom = emptyMap()
@@ -65,7 +65,7 @@ fun getUsers(): List<User> {
         User(
             id = BuildConfig.SAMPLE_USER_05_ID,
             name = BuildConfig.SAMPLE_USER_05_NAME,
-            imageUrl = BuildConfig.SAMPLE_USER_05_IMAGE,
+            image = BuildConfig.SAMPLE_USER_05_IMAGE,
             role = BuildConfig.SAMPLE_USER_05_ROLE,
             teams = emptyList(),
             custom = emptyMap()

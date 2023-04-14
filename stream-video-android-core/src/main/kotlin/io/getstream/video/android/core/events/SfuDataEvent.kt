@@ -17,6 +17,7 @@
 package io.getstream.video.android.core.events
 
 import io.getstream.video.android.core.model.UserAudioLevel
+import org.openapitools.client.models.VideoEvent
 import stream.video.sfu.event.ChangePublishQuality
 import stream.video.sfu.event.ConnectionQualityInfo
 import stream.video.sfu.models.CallState
@@ -25,7 +26,11 @@ import stream.video.sfu.models.Participant
 import stream.video.sfu.models.PeerType
 import stream.video.sfu.models.TrackType
 
-public sealed class SfuDataEvent : VideoEvent()
+public sealed class SfuDataEvent : VideoEvent() {
+    override fun getEventType(): String {
+        return "SfuDataEvent"
+    }
+}
 
 public data class SFUConnectedEvent(
     val clientId: String,
@@ -67,12 +72,12 @@ public data class TrackUnpublishedEvent(
 public data class ParticipantJoinedEvent(
 
     val participant: Participant,
-    override val callCid: String,
+    val callCid: String,
 ) : SfuDataEvent()
 
 public data class ParticipantLeftEvent(
     val participant: Participant,
-    override val callCid: String,
+    val callCid: String,
 ) : SfuDataEvent()
 
 public data class DominantSpeakerChangedEvent(

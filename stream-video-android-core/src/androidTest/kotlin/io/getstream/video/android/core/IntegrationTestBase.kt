@@ -88,7 +88,7 @@ class IntegrationTestHelper {
             "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidGhpZXJyeSJ9._4aZL6BR0VGKfZsKYdscsBm8yKVgG-2LatYeHRJUq0g"
 
         val thierry = User(
-            id = "thierry", role = "admin", name = "Thierry", imageUrl = "hello",
+            id = "thierry", role = "admin", name = "Thierry", image = "hello",
             teams = emptyList(), custom = mapOf()
         )
         users["thierry"] = thierry

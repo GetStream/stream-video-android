@@ -25,7 +25,6 @@ import io.getstream.log.kotlin.KotlinStreamLogger
 import io.getstream.log.streamLog
 import io.getstream.result.Result
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
-import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.User
 import kotlinx.coroutines.Dispatchers
@@ -40,6 +39,10 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
+import org.openapitools.client.models.VideoEvent
+import org.threeten.bp.Clock
+import org.threeten.bp.OffsetDateTime
+import java.time.ZoneOffset
 import java.util.UUID
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
@@ -89,7 +92,7 @@ class IntegrationTestHelper {
             "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidGhpZXJyeSJ9._4aZL6BR0VGKfZsKYdscsBm8yKVgG-2LatYeHRJUq0g"
 
         val thierry = User(
-            id = "thierry", role = "admin", name = "Thierry", imageUrl = "hello",
+            id = "thierry", role = "admin", name = "Thierry", image = "hello",
             teams = emptyList(), custom = mapOf()
         )
         users["thierry"] = thierry
@@ -182,6 +185,8 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true) : TestBase(
 
     var nextEventContinuation: Continuation<VideoEvent>? = null
     var nextEventCompleted: Boolean = false
+
+    val nowUtc = OffsetDateTime.now(Clock.systemUTC())
 
     init {
         builder = StreamVideoBuilder(

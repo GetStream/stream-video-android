@@ -55,14 +55,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import io.getstream.log.taggedLogger
-import io.getstream.result.extractCause
-import io.getstream.result.onSuccessSuspend
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.Avatar
 import io.getstream.video.android.core.user.UserPreferencesManager
 import io.getstream.video.android.core.utils.initials
 import kotlinx.coroutines.launch
-import retrofit2.HttpException
 import kotlin.random.Random
 
 class HomeActivity : AppCompatActivity() {
@@ -242,8 +239,8 @@ class HomeActivity : AppCompatActivity() {
             modifier = Modifier
                 .size(40.dp)
                 .padding(top = 8.dp, start = 8.dp),
-            imageUrl = user.imageUrl,
-            initials = if (user.imageUrl.isEmpty()) {
+            imageUrl = user.image,
+            initials = if (user.image.isEmpty()) {
                 user.name.initials()
             } else {
                 null

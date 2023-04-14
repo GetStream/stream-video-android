@@ -18,10 +18,10 @@ package io.getstream.video.android.core
 
 import com.google.common.truth.Truth.assertThat
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.core.events.CallCreatedEvent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.openapitools.client.models.CallCreatedEvent
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)

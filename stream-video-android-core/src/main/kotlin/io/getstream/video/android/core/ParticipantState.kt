@@ -174,7 +174,7 @@ public data class ParticipantState(
         val currentUser = _user.value
         _user.value = currentUser.copy(
             name = participant.name,
-            imageUrl = participant.image,
+            image = participant.image,
             // custom = participant.custom,
             role = participant.roles.firstOrNull() ?: ""
         )

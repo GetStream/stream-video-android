@@ -22,7 +22,6 @@ import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
 import io.getstream.video.android.core.call.RtcSession
-import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.model.CallMetadata
 import io.getstream.video.android.core.model.IceServer
@@ -31,6 +30,7 @@ import io.getstream.video.android.core.model.SendReactionData
 import io.getstream.video.android.core.model.SfuToken
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.toIceServer
+import org.openapitools.client.models.*
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import org.openapitools.client.models.*
 import org.webrtc.RendererCommon
@@ -125,8 +125,6 @@ public class Call(
             remoteIceServers = iceServers,
             latencyResults = measurements.associate { it.latencyUrl to it.measurements }
         )
-
-        client.state.setActiveCall(this)
 
         session?.connect()
 

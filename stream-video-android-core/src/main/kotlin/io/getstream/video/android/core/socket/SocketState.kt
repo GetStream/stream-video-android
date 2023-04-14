@@ -1,7 +1,7 @@
 package io.getstream.video.android.core.socket
 
 import io.getstream.result.Error
-import io.getstream.video.android.core.events.VideoEvent
+import org.openapitools.client.models.VideoEvent
 
 public sealed class SocketState {
     /** We haven't started to connect yet */

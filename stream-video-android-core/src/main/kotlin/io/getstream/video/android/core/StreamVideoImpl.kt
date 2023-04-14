@@ -27,9 +27,6 @@ import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.getstream.video.android.core.errors.VideoErrorCode
-import io.getstream.video.android.core.events.CallCreatedEvent
-import io.getstream.video.android.core.events.ConnectedEvent
-import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.internal.module.ConnectionModule
 import io.getstream.video.android.core.lifecycle.LifecycleHandler
@@ -405,7 +402,11 @@ internal class StreamVideoImpl internal constructor(
         state.handleEvent(event)
 
         // update state for the calls. calls handle updating participants and members
-        val selectedCid = cid.ifEmpty { event.callCid }
+        val selectedCid = cid.ifEmpty {
+            val callEvent = event as? WSCallEvent
+            callEvent?.getCallCID()
+        } ?: ""
+
         if (selectedCid.isNotEmpty()) {
             calls[selectedCid]?.let {
                 it.state.handleEvent(event)
