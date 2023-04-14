@@ -136,7 +136,7 @@ dependencies {
     implementation(libs.moshi.adapters)
     //implementation(libs.desugar)
 
-    implementation(libs.threentenabp)
+    implementation(libs.threentenabp2)
 
     // Stream
     implementation(libs.stream.log)
