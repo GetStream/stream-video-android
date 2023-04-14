@@ -43,7 +43,7 @@ import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
 import io.getstream.video.android.core.internal.module.ConnectionModule
-import io.getstream.video.android.core.internal.module.SFUConnectionModule
+import io.getstream.video.android.core.internal.module.SfuConnectionModule
 import io.getstream.video.android.core.model.IceCandidate
 import io.getstream.video.android.core.model.IceServer
 import io.getstream.video.android.core.model.StreamPeerType
@@ -220,7 +220,7 @@ public class RtcSession internal constructor(
         buildAudioConstraints()
     }
 
-    private var sfuConnectionModule: SFUConnectionModule
+    private var sfuConnectionModule: SfuConnectionModule
 
     init {
         val preferences = UserPreferencesManager.getPreferences()

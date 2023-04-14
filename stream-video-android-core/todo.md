@@ -21,11 +21,11 @@
 
 - [ ] Clean up tests
 - [ ] Test coverage
-- [ ] Moderation API endpoints 
+- [X] Make call level client methods internal
+- [X] Moderation API endpoints 
   https://www.notion.so/stream-wiki/Moderation-Permissions-for-video-37a3376268654095b9aafaba12d4bb69
   https://www.notion.so/stream-wiki/Call-Permissions-832f914ad4c545cf8f048012900ad21d
-- [ ] Make call level client methods internal
-- [ ] Guest and anon user support
+- [X] Guest and anon user support
 - [ ] Remove unused code
 - [ ] Join flow performance
 - [ ] Reconnect after SFU breaks (https://www.notion.so/Reconnection-Failure-handling-f6991fd2e5584380bb2d2cb5e8ac5303)
@@ -36,19 +36,19 @@
 
 ### State TODO
 
-- [ ] Member state isn't implemented fully. Could be either a state or just a data class
 - [ ] Call settings need to be used everywhere. There are still some hardcoded settings
-- [ ] Call state isn't setup fully on join
-- [ ] Member state isn't updated correctly or implemented
--
+- [X] Member state isn't implemented fully. Could be either a state or just a data class
+- [X] Call state isn't setup fully on join
+- [X] Member state isn't updated correctly or implemented
 
 ### Review each file, fix TODOS and document
 
 - [X] StreamVideoBuilder
 - [X] ParticipantState
 - [X] ClientState
+- [X] MemberState
 - [ ] CallState
-- [ ] ConnectionModule
+- [X] ConnectionModule
 - [ ] StreamVideoImpl
 - [ ] Call
 
@@ -162,10 +162,10 @@
 
 ### Available tasks up for grabs
 
+- use standard debug, verbose, info, warning and error debug levels on StreamVideoBuilder
 - Participant sorting rules. See Call sortedParticipants
 - Pinning of participants. You pin/unpin and it sets pinnedAt and sorting takes it into account
 - Currently we use UserPreferencesManager. Jaewoong mentioned we should perhaps explore https://developer.android.com/topic/libraries/architecture/datastore
-- Hash/copy/equality methods for participantstate (otherwise the participants stateflow will have bugs)
 - Measure latency isn't 100% ok. You can't set a timeout using withTimeout and collect the measurements that we have. This relates to threading vs coroutines and withTimeout not working
 - Logging setting needs to be passed to retrofit
 - Disconnect/ garbage collect flow needs a full round of review

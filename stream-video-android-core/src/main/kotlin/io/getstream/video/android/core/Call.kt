@@ -25,7 +25,6 @@ import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.model.*
 import io.getstream.video.android.core.model.toIceServer
-import org.openapitools.client.models.*
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import org.openapitools.client.models.*
 import org.webrtc.RendererCommon
@@ -41,7 +40,6 @@ public class Call(
     internal val client: StreamVideo,
     val type: String,
     val id: String,
-    private val token: String = "",
     val user: User,
 ) {
     private val clientImpl = client as StreamVideoImpl
@@ -49,7 +47,7 @@ public class Call(
     val cid = "$type:$id"
     val state = CallState(this, user)
 
-    val mediaManager by lazy { MediaManagerImpl(client.context) }
+    val mediaManager by lazy { MediaManagerImpl(clientImpl.context) }
     val camera by lazy { mediaManager.camera }
     val microphone by lazy { mediaManager.microphone }
     val speaker by lazy { mediaManager.speaker }
@@ -64,7 +62,7 @@ public class Call(
             video=video,
             screenShare = screenShare,
         )
-        return client.muteUsers(type, id, request)
+        return clientImpl.muteUsers(type, id, request)
     }
 
     suspend fun join(): Result<RtcSession> {
@@ -73,7 +71,7 @@ public class Call(
          * Alright, how to make this solid
          *
          * - There are 2 methods.
-         * -- Client.JoinCall which makes the API call and gets a response
+         * -- clientImpl.JoinCall which makes the API call and gets a response
          * -- The whole join process. Which measures latency, uploads it etc
          *
          * Latency measurement needs to be changed
@@ -81,7 +79,7 @@ public class Call(
          */
 
         // step 1. call the join endpoint to get a list of SFUs
-        val result = client.joinCall(type, id)
+        val result = clientImpl.joinCall(type, id)
         if (result !is Success) {
             return result as Failure
         }
@@ -95,7 +93,7 @@ public class Call(
         val measurements = clientImpl.measureLatency(edgeUrls)
 
         // upload our latency measurements to the server
-        val selectEdgeServerResult = client.selectEdgeServer(
+        val selectEdgeServerResult = clientImpl.selectEdgeServer(
             type = type,
             id = id,
             request = GetCallEdgeServerRequest(
@@ -131,7 +129,7 @@ public class Call(
     }
 
     suspend fun sendReaction(data: SendReactionData): Result<SendReactionResponse> {
-        return client.sendReaction(type, id, data)
+        return clientImpl.sendReaction(type, id, data)
     }
 
     private val logger by taggedLogger("Call")
@@ -177,11 +175,11 @@ public class Call(
     }
 
     suspend fun goLive(): Result<GoLiveResponse> {
-        return client.goLive(type, id)
+        return clientImpl.goLive(type, id)
     }
 
     suspend fun stopLive(): Result<StopLiveResponse> {
-        return client.stopLive(type, id)
+        return clientImpl.stopLive(type, id)
     }
 
     fun leave() {
@@ -189,7 +187,7 @@ public class Call(
     }
 
     suspend fun end(): Result<Unit> {
-        return client.endCall(type, id)
+        return clientImpl.endCall(type, id)
     }
 
     /** Basic crud operations */
@@ -261,23 +259,23 @@ public class Call(
 
     /** Permissions */
     suspend fun requestPermissions(vararg permission: String): Result<Unit> {
-        return client.requestPermissions(type, id, permission.toList())
+        return clientImpl.requestPermissions(type, id, permission.toList())
     }
 
     suspend fun startRecording(): Result<Any> {
-        return client.startRecording(type, id)
+        return clientImpl.startRecording(type, id)
     }
 
     suspend fun stopRecording(): Result<Any> {
-        return client.stopRecording(type, id)
+        return clientImpl.stopRecording(type, id)
     }
 
     suspend fun startBroadcasting(): Result<Any> {
-        return client.startBroadcasting(type, id)
+        return clientImpl.startBroadcasting(type, id)
     }
 
     suspend fun stopBroadcasting(): Result<Any> {
-        return client.stopBroadcasting(type, id)
+        return clientImpl.stopBroadcasting(type, id)
     }
 
     private var subscriptions = mutableSetOf<EventSubscription>()
@@ -351,6 +349,10 @@ public class Call(
         }
     }
 
+    suspend fun listRecordings(): Result<ListRecordingsResponse> {
+        return clientImpl.listRecordings(type, id, "what")
+    }
+
     suspend fun muteUser(userId: String, audio: Boolean = true, video: Boolean=false, screenShare: Boolean=false): Result<MuteUsersResponse> {
         val request = MuteUsersData(
             users = listOf(userId),
@@ -359,7 +361,7 @@ public class Call(
             video=video,
             screenShare = screenShare,
         )
-        return client.muteUsers(type, id, request)
+        return clientImpl.muteUsers(type, id, request)
     }
 
     suspend fun muteUsers(userIds: List<String>, audio: Boolean = true, video: Boolean=false, screenShare: Boolean=false): Result<MuteUsersResponse> {
@@ -370,6 +372,6 @@ public class Call(
             video=video,
             screenShare = screenShare,
         )
-        return client.muteUsers(type, id, request)
+        return clientImpl.muteUsers(type, id, request)
     }
 }
