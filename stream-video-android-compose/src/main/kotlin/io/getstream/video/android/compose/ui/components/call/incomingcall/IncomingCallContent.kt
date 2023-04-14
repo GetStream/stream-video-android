@@ -33,8 +33,10 @@ import io.getstream.video.android.compose.ui.components.background.CallBackgroun
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.call.incomingcall.internal.IncomingCallDetails
 import io.getstream.video.android.compose.ui.components.call.incomingcall.internal.IncomingCallOptions
+import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallAction
+import io.getstream.video.android.core.call.state.CallDeviceState
 import io.getstream.video.android.core.model.CallType
 import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.ui.common.R
@@ -52,19 +54,36 @@ public fun IncomingCallContent(
     viewModel: CallViewModel,
     modifier: Modifier = Modifier,
     onBackPressed: () -> Unit,
-    // onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
+    onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
 ) {
-    val participants: List<ParticipantState> by viewModel.call.state.participants.collectAsState()
+    val callDeviceState: CallDeviceState by viewModel.callDeviceState.collectAsState()
 
-//    val callMediaState: CallMediaState by viewModel.callMediaState.collectAsState()
+    IncomingCallContent(
+        call = viewModel.call,
+        callDeviceState = callDeviceState,
+        modifier = modifier,
+        onBackPressed = onBackPressed,
+        onCallAction = onCallAction
+    )
+}
+
+@Composable
+public fun IncomingCallContent(
+    call: Call,
+    callDeviceState: CallDeviceState,
+    modifier: Modifier = Modifier,
+    onBackPressed: () -> Unit,
+    onCallAction: (CallAction) -> Unit = {},
+) {
+    val participants: List<ParticipantState> by call.state.participants.collectAsState()
 
     IncomingCallContent(
         callType = CallType.VIDEO,
         participants = participants,
-        isVideoEnabled = true,
+        isVideoEnabled = callDeviceState.isCameraEnabled,
         modifier = modifier,
         onBackPressed = onBackPressed,
-        onCallAction = {}
+        onCallAction = onCallAction
     )
 }
 
@@ -81,7 +100,7 @@ public fun IncomingCallContent(
  * @param onCallAction Handler used when the user interacts with Call UI.
  */
 @Composable
-public fun IncomingCallContent(
+private fun IncomingCallContent(
     callType: CallType,
     participants: List<ParticipantState>,
     isVideoEnabled: Boolean,

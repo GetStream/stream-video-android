@@ -119,8 +119,8 @@ public fun CallContent(
 @Composable
 public fun CallContent(
     call: Call,
-    callDeviceState: CallDeviceState,
     modifier: Modifier = Modifier,
+    callDeviceState: CallDeviceState,
     isShowingCallInfo: Boolean = false,
     isInPictureInPicture: Boolean = false,
     onBackPressed: () -> Unit = { },

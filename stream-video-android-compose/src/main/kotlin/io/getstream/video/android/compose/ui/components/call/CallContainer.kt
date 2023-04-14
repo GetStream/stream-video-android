@@ -40,6 +40,7 @@ import io.getstream.video.android.compose.ui.components.participants.CallPartici
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.call.state.CallAction
+import io.getstream.video.android.core.call.state.CallDeviceState
 import io.getstream.video.android.core.call.state.InviteUsersToCall
 import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.model.User
@@ -83,7 +84,7 @@ public fun CallContainer(
             modifier = modifier.testTag("incoming_call_content"),
             viewModel = viewModel,
             onBackPressed = onBackPressed,
-            // onCallAction = onCallAction
+            onCallAction = onCallAction
         )
     },
     outgoingCallContent: @Composable () -> Unit = {
@@ -91,7 +92,7 @@ public fun CallContainer(
             modifier = modifier.testTag("outgoing_call_content"),
             viewModel = viewModel,
             onBackPressed = onBackPressed,
-            // onCallAction = onCallAction
+            onCallAction = onCallAction
         )
     },
     callContent: @Composable () -> Unit = {
@@ -105,8 +106,68 @@ public fun CallContainer(
         )
     }
 ) {
-    val ringingStateHolder =
-        viewModel.call.state.ringingState.collectAsState(initial = RingingState.Idle)
+    val callDeviceState by viewModel.callDeviceState.collectAsState()
+
+    CallContainer(
+        call = viewModel.call,
+        callDeviceState = callDeviceState,
+        modifier = modifier,
+        onBackPressed = onBackPressed,
+        onCallAction = onCallAction,
+        callControlsContent = callControlsContent,
+        pictureInPictureContent = pictureInPictureContent,
+        incomingCallContent = incomingCallContent,
+        outgoingCallContent = outgoingCallContent,
+        callContent = callContent,
+    )
+}
+
+@Composable
+public fun CallContainer(
+    call: Call,
+    callDeviceState: CallDeviceState,
+    modifier: Modifier = Modifier,
+    onBackPressed: () -> Unit = {},
+    onCallAction: (CallAction) -> Unit = {},
+    callControlsContent: @Composable () -> Unit = {
+        DefaultCallControlsContent(
+            call = call,
+            callDeviceState = callDeviceState,
+            onCallAction = onCallAction
+        )
+    },
+    pictureInPictureContent: @Composable (Call) -> Unit = { DefaultPictureInPictureContent(it) },
+    incomingCallContent: @Composable () -> Unit = {
+        IncomingCallContent(
+            call = call,
+            callDeviceState = callDeviceState,
+            modifier = modifier.testTag("incoming_call_content"),
+            onBackPressed = onBackPressed,
+            onCallAction = onCallAction
+        )
+    },
+    outgoingCallContent: @Composable () -> Unit = {
+        OutgoingCallContent(
+            modifier = modifier.testTag("outgoing_call_content"),
+            call = call,
+            callDeviceState = callDeviceState,
+            onBackPressed = onBackPressed,
+            onCallAction = onCallAction
+        )
+    },
+    callContent: @Composable () -> Unit = {
+        CallContent(
+            call = call,
+            modifier = modifier,
+            callDeviceState = callDeviceState,
+            onBackPressed = onBackPressed,
+            onCallAction = onCallAction,
+            callControlsContent = callControlsContent,
+            pictureInPictureContent = pictureInPictureContent
+        )
+    }
+) {
+    val ringingStateHolder = call.state.ringingState.collectAsState(initial = RingingState.Idle)
     val ringingState = ringingStateHolder.value
 
     if (ringingState is RingingState.Incoming && !ringingState.acceptedByMe) {

@@ -34,6 +34,7 @@ import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.call.outgoingcall.internal.OutgoingCallDetails
 import io.getstream.video.android.compose.ui.components.call.outgoingcall.internal.OutgoingGroupCallOptions
 import io.getstream.video.android.compose.ui.components.call.outgoingcall.internal.OutgoingSingleCallOptions
+import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CallDeviceState
@@ -54,22 +55,39 @@ public fun OutgoingCallContent(
     viewModel: CallViewModel,
     modifier: Modifier = Modifier,
     onBackPressed: () -> Unit,
-//     onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
+    onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
 ) {
-//    val callType: CallType by viewModel.call.state.t.collectAsState()
-    val participants: List<ParticipantState> by viewModel.call.state.participants.collectAsState()
+    val callDeviceState: CallDeviceState by viewModel.callDeviceState.collectAsState()
 
-//    val callMediaState: CallMediaState by viewModel.callMediaState.collectAsState()
+    OutgoingCallContent(
+        call = viewModel.call,
+        callDeviceState = callDeviceState,
+        modifier = modifier,
+        onBackPressed = onBackPressed,
+        onCallAction = onCallAction
+    )
+}
+
+@Composable
+public fun OutgoingCallContent(
+    call: Call,
+    callDeviceState: CallDeviceState,
+    modifier: Modifier = Modifier,
+    onBackPressed: () -> Unit,
+    onCallAction: (CallAction) -> Unit = {},
+) {
+    val participants: List<ParticipantState> by call.state.participants.collectAsState()
 
     OutgoingCallContent(
         callType = CallType.VIDEO,
         participants = participants,
-        callDeviceState = CallDeviceState(),
+        callDeviceState = callDeviceState,
         modifier = modifier,
         onBackPressed = onBackPressed,
-        onCallAction = {}
+        onCallAction = onCallAction
     )
 }
+
 
 /**
  * Stateless variant of the Outgoing call UI, which you can use to build your own custom logic that
