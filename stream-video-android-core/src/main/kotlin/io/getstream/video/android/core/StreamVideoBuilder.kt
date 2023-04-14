@@ -104,7 +104,7 @@ public class StreamVideoBuilder(
         }
 
         // This connection module class exposes the connections to the various retrofit APIs
-        val module = ConnectionModule(
+        val connectionModule = ConnectionModule(
             context = context,
             scope = scope,
             videoDomain = videoDomain,
@@ -123,14 +123,19 @@ public class StreamVideoBuilder(
             tokenProvider=tokenProvider,
             loggingLevel = loggingLevel,
             lifecycle = lifecycle,
-            connectionModule = module,
+            connectionModule = connectionModule,
             pushDeviceGenerators = pushDeviceGenerators
         )
-        // addDevice for push
-        if (enablePush && user.type == UserType.Authenticated) {
-            scope.launch {
+        scope.launch {
+            // addDevice for push
+            if (enablePush && user.type == UserType.Authenticated) {
                 client.registerPushDevice()
             }
+        }
+        if (user.type == UserType.Guest) {
+            client.setupGuestUser(user)
+        } else if (user.type == UserType.Anonymous) {
+            connectionModule.updateAuthType("anonymous")
         }
 
         return client

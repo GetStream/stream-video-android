@@ -55,7 +55,7 @@ class ClientAndAuthTest : TestBase() {
             context = context,
             apiKey = apiKey,
             geo = GEO.GlobalEdgeNetwork,
-            user = User(id = "anon", type = UserType.Anonymous)
+            user = User(id = "anonymous", type = UserType.Anonymous)
         ).build()
     }
 
@@ -65,13 +65,14 @@ class ClientAndAuthTest : TestBase() {
         // the ID is generated, client side...
         // verify that we get the token
         // API call is getGuestUser or something like that
-        // TODO: Implement
         StreamVideoBuilder(
             context = context,
             apiKey = apiKey,
             geo = GEO.GlobalEdgeNetwork,
             user = User(id = "guest", type = UserType.Guest)
         ).build()
+
+
     }
 
     @Test

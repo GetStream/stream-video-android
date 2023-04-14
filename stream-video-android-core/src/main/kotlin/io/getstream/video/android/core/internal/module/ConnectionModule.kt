@@ -103,7 +103,7 @@ internal class BaseUrlInterceptor(var baseUrl: HttpUrl?): Interceptor {
 
 }
 
-internal class CoordinatorAuthInterceptor(var apiKey: String, var token: String): Interceptor {
+internal class CoordinatorAuthInterceptor(var apiKey: String, var token: String, var authType:String = "jwt"): Interceptor {
     private val REPLACEMENT_HOST = "replacement.url"
     /**
      * Query key used to authenticate to the API.
@@ -127,7 +127,7 @@ internal class CoordinatorAuthInterceptor(var apiKey: String, var token: String)
         val updated = original.newBuilder()
             .url(updatedUrl)
             .addHeader(HEADER_AUTHORIZATION, token)
-            .header(STREAM_AUTH_TYPE, "jwt")
+            .header(STREAM_AUTH_TYPE, authType)
             .build()
 
         return chain.proceed(updated)
@@ -288,5 +288,8 @@ internal class ConnectionModule(
 
     fun updateToken(newToken: String) {
         authInterceptor.token = newToken
+    }
+    fun updateAuthType(authType: String) {
+        authInterceptor.authType = authType
     }
 }

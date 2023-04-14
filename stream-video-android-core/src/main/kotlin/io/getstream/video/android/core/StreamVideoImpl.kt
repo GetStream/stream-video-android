@@ -103,6 +103,7 @@ internal class StreamVideoImpl internal constructor(
     internal val preferences: UserPreferences,
 ) : StreamVideo {
 
+    private var guestUserJob: Deferred<Unit>? = null
     private lateinit var connectContinuation: Continuation<Result<ConnectedEvent>>
 
     var developmentMode = true // if true we fail fast on errors instead of logging them
@@ -298,6 +299,8 @@ internal class StreamVideoImpl internal constructor(
 
     suspend fun connectAsync(): Deferred<Unit> {
         return scope.async {
+            // wait for the guest user setup if we're using guest users
+            guestUserJob?.let { it.await() }
             val result = socketImpl.connect()
             result
         }
@@ -359,6 +362,26 @@ internal class StreamVideoImpl internal constructor(
             }
 
             operations.awaitAll()
+        }
+    }
+
+    fun setupGuestUser(user: User) {
+        guestUserJob = scope.async {
+            val response = createGuestUser(user)
+            if (response.isFailure) {
+                throw IllegalStateException("Failed to create guest user")
+            }
+            response.onSuccess {
+                preferences.storeUserCredentials(it)
+                preferences.storeUserToken(it.token)
+                connectionModule.updateToken(it.token)
+            }
+        }
+    }
+
+    fun createGuestUser(user: User) {
+        return wrapAPICall {
+            connectionModule.videoCallsApi.createGuestUser(user)
         }
     }
 
