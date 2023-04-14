@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.core.call.state
 
-public data class CallMediaState(
+public data class CallDeviceState(
     val isMicrophoneEnabled: Boolean = false,
     val isSpeakerphoneEnabled: Boolean = false,
     val isCameraEnabled: Boolean = false

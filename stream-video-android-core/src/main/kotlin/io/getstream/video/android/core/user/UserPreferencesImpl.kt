@@ -20,7 +20,6 @@ import android.content.SharedPreferences
 import androidx.core.content.edit
 import io.getstream.video.android.core.model.ApiKey
 import io.getstream.video.android.core.model.Device
-import io.getstream.video.android.core.model.SfuToken
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.UserDevices
 import kotlinx.serialization.decodeFromString

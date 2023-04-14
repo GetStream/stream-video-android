@@ -81,7 +81,7 @@ internal data class InterceptorWrapper(
     val token: String
 )
 
-internal class BaseUrlInterceptor(var baseUrl: HttpUrl?): Interceptor {
+internal class BaseUrlInterceptor(var baseUrl: HttpUrl?) : Interceptor {
     private val REPLACEMENT_HOST = "replacement.url"
 
     override fun intercept(chain: Interceptor.Chain): Response {
@@ -100,10 +100,9 @@ internal class BaseUrlInterceptor(var baseUrl: HttpUrl?): Interceptor {
             chain.proceed(chain.request())
         }
     }
-
 }
 
-internal class CoordinatorAuthInterceptor(var apiKey: String, var token: String): Interceptor {
+internal class CoordinatorAuthInterceptor(var apiKey: String, var token: String) : Interceptor {
     private val REPLACEMENT_HOST = "replacement.url"
     /**
      * Query key used to authenticate to the API.
@@ -111,7 +110,6 @@ internal class CoordinatorAuthInterceptor(var apiKey: String, var token: String)
     private val API_KEY = "api_key"
     private val STREAM_AUTH_TYPE = "stream-auth-type"
     private val HEADER_AUTHORIZATION = "Authorization"
-
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val original = chain.request()
@@ -132,7 +130,6 @@ internal class CoordinatorAuthInterceptor(var apiKey: String, var token: String)
 
         return chain.proceed(updated)
     }
-
 }
 
 /**
@@ -273,12 +270,12 @@ internal class ConnectionModule(
         )
     }
 
-
-    internal fun createSFUConnectionModule(    sfuUrl: String,
-                                               sessionId: String,
-                                               sfuToken: String,
-                                               getSubscriberSdp: suspend () -> String,
-                                               ): SFUConnectionModule {
+    internal fun createSFUConnectionModule(
+        sfuUrl: String,
+        sessionId: String,
+        sfuToken: String,
+        getSubscriberSdp: suspend () -> String,
+    ): SFUConnectionModule {
         val updatedSignalUrl = sfuUrl.removeSuffix(suffix = "/twirp")
         val baseUrl = updatedSignalUrl.toHttpUrl()
         val okHttpClient = buildOkHttpClient(preferences, baseUrl)

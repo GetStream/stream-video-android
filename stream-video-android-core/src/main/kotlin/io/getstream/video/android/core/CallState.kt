@@ -65,7 +65,7 @@ import java.util.*
 /**
  *
  */
-public class CallState(val call: Call, user: User) {
+public class CallState(private val call: Call, user: User) {
     private val logger by taggedLogger("CallState")
 
     private val _ringingState: MutableStateFlow<RingingState?> = MutableStateFlow(null)

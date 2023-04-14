@@ -33,10 +33,15 @@ import io.getstream.video.android.compose.ui.components.call.activecall.CallCont
 import io.getstream.video.android.compose.ui.components.call.activecall.DefaultPictureInPictureContent
 import io.getstream.video.android.compose.ui.components.call.activecall.internal.InviteUsersDialog
 import io.getstream.video.android.compose.ui.components.call.controls.CallControls
+import io.getstream.video.android.compose.ui.components.call.controls.internal.DefaultCallControlsContent
 import io.getstream.video.android.compose.ui.components.call.incomingcall.IncomingCallContent
 import io.getstream.video.android.compose.ui.components.call.outgoingcall.OutgoingCallContent
 import io.getstream.video.android.compose.ui.components.participants.CallParticipantsInfoMenu
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.RingingState
+import io.getstream.video.android.core.call.state.CallAction
+import io.getstream.video.android.core.call.state.InviteUsersToCall
+import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.viewmodel.CallViewModel
 
@@ -65,13 +70,13 @@ public fun CallContainer(
     viewModel: CallViewModel,
     modifier: Modifier = Modifier,
     onBackPressed: () -> Unit = {},
-    // onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
-//    callControlsContent: @Composable () -> Unit = {
-//        DefaultCallControlsContent(
-//            viewModel
-//            //onCallAction
-//        )
-//    },
+    onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
+    callControlsContent: @Composable () -> Unit = {
+        DefaultCallControlsContent(
+            viewModel = viewModel,
+            onCallAction = onCallAction
+        )
+    },
     pictureInPictureContent: @Composable (Call) -> Unit = { DefaultPictureInPictureContent(it) },
     incomingCallContent: @Composable () -> Unit = {
         IncomingCallContent(
@@ -94,22 +99,23 @@ public fun CallContainer(
             viewModel = viewModel,
             modifier = modifier,
             onBackPressed = onBackPressed,
-            // onCallAction = onCallAction,
-            // callControlsContent = callControlsContent,
+            onCallAction = onCallAction,
+            callControlsContent = callControlsContent,
             pictureInPictureContent = pictureInPictureContent
         )
     }
 ) {
-//    val stateHolder = viewModel.streamCallState.collectAsState(initial = State.Idle)
-//    val state = stateHolder.value
-//
-//    if (state is State.Incoming && !state.acceptedByMe) {
-//        incomingCallContent()
-//    } else if (state is State.Outgoing && !state.acceptedByCallee) {
-//        outgoingCallContent()
-//    } else {
-//        callContent()
-//    }
+    val ringingStateHolder =
+        viewModel.call.state.ringingState.collectAsState(initial = RingingState.Idle)
+    val ringingState = ringingStateHolder.value
+
+    if (ringingState is RingingState.Incoming && !ringingState.acceptedByMe) {
+        incomingCallContent()
+    } else if (ringingState is RingingState.Outgoing && !ringingState.acceptedByCallee) {
+        outgoingCallContent()
+    } else {
+        callContent()
+    }
 }
 
 @Composable
@@ -117,41 +123,38 @@ internal fun DefaultCallContent(
     viewModel: CallViewModel,
     modifier: Modifier = Modifier,
     onBackPressed: () -> Unit = {},
-    // onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
+    onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
+    callControlsContent: @Composable () -> Unit,
     pictureInPictureContent: @Composable (Call) -> Unit = { DefaultPictureInPictureContent(it) }
 ) {
     CallContent(
         modifier = modifier.testTag("call_content"),
         callViewModel = viewModel,
-        // onBackPressed = onBackPressed,
-        // onCallAction = onCallAction,
-        // callControlsContent = callControlsContent,
+        onBackPressed = onBackPressed,
+        onCallAction = onCallAction,
+        callControlsContent = callControlsContent,
         pictureInPictureContent = pictureInPictureContent
     )
 
-    val isShowingParticipantsInfo by viewModel.isShowingCallInfo.collectAsState()
+    val isShowingParticipantsInfo by viewModel.isShowingCallInfoMenu.collectAsState()
     val participantsState by viewModel.call.state.participants.collectAsState(initial = emptyList())
     var usersToInvite by remember { mutableStateOf(emptyList<User>()) }
 
     if (isShowingParticipantsInfo && participantsState.isNotEmpty()) {
-        val users by viewModel.client.state.user.collectAsState()
-
         CallParticipantsInfoMenu(
             modifier = Modifier
                 .fillMaxSize()
                 .background(VideoTheme.colors.appBackground),
-            participantsState = participantsState
-        )
-        // users = users,
-        // onDismiss = { viewModel.dismissOptions() },
-        { action ->
+            participantsState = participantsState,
+            onDismiss = { viewModel.dismissCallInfoMenu() },
+        ) { action ->
             when (action) {
                 is InviteUsers -> {
-                    // viewModel.dismissOptions()
                     usersToInvite = action.users
+                    viewModel.dismissCallInfoMenu()
                 }
 
-                // is ChangeMuteState -> onCallAction(ToggleMicrophone(action.isEnabled))
+                is ChangeMuteState -> onCallAction(ToggleMicrophone(action.isEnabled))
                 is ChangeMuteState -> TODO()
             }
         }
@@ -163,7 +166,7 @@ internal fun DefaultCallContent(
             onDismiss = { usersToInvite = emptyList() },
             onInviteUsers = {
                 usersToInvite = emptyList()
-                // viewModel.onCallAction(InviteUsersToCall(it))
+                viewModel.onCallAction(InviteUsersToCall(it))
             }
         )
     }

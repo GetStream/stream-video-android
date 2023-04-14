@@ -235,7 +235,6 @@ public class RtcSession internal constructor(
             getSubscriberSdp().description
         }
         scope.launch {
-
         }
         sfuConnectionModule = connectionModule.createSFUConnectionModule(sfuUrl, sessionId, sfuToken, getSdp)
         // listen to socket events and errors
@@ -249,11 +248,10 @@ public class RtcSession internal constructor(
                 if (clientImpl.developmentMode) {
                     throw it
                 } else {
-                    logger.e(it) { "permanent failure on socket connection"}
+                    logger.e(it) { "permanent failure on socket connection" }
                 }
             }
         }
-
     }
 
     suspend fun connect() {

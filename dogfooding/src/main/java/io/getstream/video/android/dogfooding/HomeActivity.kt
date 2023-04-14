@@ -55,14 +55,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import io.getstream.log.taggedLogger
-import io.getstream.result.extractCause
-import io.getstream.result.onSuccessSuspend
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.Avatar
 import io.getstream.video.android.core.user.UserPreferencesManager
 import io.getstream.video.android.core.utils.initials
 import kotlinx.coroutines.launch
-import retrofit2.HttpException
 import kotlin.random.Random
 
 class HomeActivity : AppCompatActivity() {
@@ -74,11 +71,8 @@ class HomeActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
-            VideoTheme {
-                HomeScreen()
-            }
-        }
+
+        setContent { VideoTheme { HomeScreen() } }
     }
 
     private val logger by taggedLogger("Call:HomeView")
@@ -86,10 +80,6 @@ class HomeActivity : AppCompatActivity() {
     private val callIdState: MutableState<String> = mutableStateOf("call" + Random.nextInt(1000))
 
     private val loadingState: MutableState<Boolean> = mutableStateOf(false)
-
-    init {
-        logger.i { "<init> this: $this" }
-    }
 
     @Composable
     private fun HomeScreen() {
@@ -168,14 +158,19 @@ class HomeActivity : AppCompatActivity() {
             logger.d { "[joinCall] callId: $callId" }
             loadingState.value = true
 
-            val call = streamVideo.call("default", callId)
-            val result = call.join()
+            val (type, id) = "default" to "123"
+            val call = streamVideo.call(type = type, id = id)
 
-            result.onError {
-                Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
-            }
+            val result = call.join()
             result.onSuccess {
-                logger.v { "[joinCall] succeed: $call" }
+                logger.d { "[joinCall] succeed: $call" }
+
+                val intent = CallActivity.getIntent(this@HomeActivity, type, id)
+                startActivity(intent)
+            }.onError {
+                logger.d { "[joinCall] failed: $it" }
+
+                Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
                 loadingState.value = false
             }
         }

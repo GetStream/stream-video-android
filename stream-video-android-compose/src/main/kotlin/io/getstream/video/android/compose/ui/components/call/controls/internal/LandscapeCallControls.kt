@@ -33,13 +33,13 @@ import io.getstream.video.android.compose.state.ui.call.CallControlAction
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.controls.buildDefaultCallControlActions
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.call.state.CallMediaState
+import io.getstream.video.android.core.call.state.CallDeviceState
 import io.getstream.video.android.core.call.state.FlipCamera
 
 /**
  * Shows the call controls in a different way when in landscape mode.
  *
- * @param callMediaState The state of the call media, such as video, audio.
+ * @param callDeviceState The state of the call media, such as video, audio.
  * @param isScreenSharing If there's currently an active screen sharing session.
  * @param modifier Modifier for styling.
  * @param actions Actions to show to the user with different controls.
@@ -47,10 +47,10 @@ import io.getstream.video.android.core.call.state.FlipCamera
  */
 @Composable
 internal fun LandscapeCallControls(
-    callMediaState: CallMediaState,
+    callDeviceState: CallDeviceState,
     isScreenSharing: Boolean,
     modifier: Modifier = Modifier,
-    actions: List<CallControlAction> = buildDefaultCallControlActions(callMediaState = callMediaState),
+    actions: List<CallControlAction> = buildDefaultCallControlActions(callDeviceState = callDeviceState),
     onCallAction: (CallAction) -> Unit
 ) {
 
@@ -85,7 +85,7 @@ internal fun LandscapeCallControls(
 private fun LandscapeCallControlsPreview() {
     VideoTheme {
         LandscapeCallControls(
-            callMediaState = CallMediaState(),
+            callDeviceState = CallDeviceState(),
             isScreenSharing = true,
         ) {}
     }

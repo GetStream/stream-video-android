@@ -17,7 +17,7 @@
 package io.getstream.video.android.xml.binding
 
 import androidx.lifecycle.LifecycleOwner
-import io.getstream.video.android.core.call.state.CallMediaState
+import io.getstream.video.android.core.call.state.CallDeviceState
 import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.xml.utils.extensions.getFirstViewInstance
 import io.getstream.video.android.xml.widget.call.CallView
@@ -41,7 +41,7 @@ import io.getstream.video.android.xml.widget.control.CallControlsView
 public fun CallView.bindView(
     viewModel: CallViewModel,
     lifecycleOwner: LifecycleOwner,
-    fetchCallMediaState: (CallMediaState, Boolean) -> List<CallControlItem> = { mediaState, isScreenSharingActive ->
+    fetchCallMediaState: (CallDeviceState, Boolean) -> List<CallControlItem> = { mediaState, isScreenSharingActive ->
         defaultControlList(mediaState, isScreenSharingActive)
     },
     // onCallAction: (CallAction) -> Unit = viewModel::onCallAction,

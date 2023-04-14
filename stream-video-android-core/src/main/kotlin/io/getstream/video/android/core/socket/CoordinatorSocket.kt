@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.core.socket
 
 import com.squareup.moshi.JsonAdapter
@@ -21,18 +37,17 @@ public class CoordinatorSocket(
     private val url: String,
     private val user: User,
     private val token: String,
-    private val scope : CoroutineScope = CoroutineScope(DispatcherProvider.IO),
+    private val scope: CoroutineScope = CoroutineScope(DispatcherProvider.IO),
     private val httpClient: OkHttpClient,
     private val networkStateProvider: NetworkStateProvider,
-    ): PersistentSocket<ConnectedEvent>(
-    url=url,
-    httpClient=httpClient,
+) : PersistentSocket<ConnectedEvent>(
+    url = url,
+    httpClient = httpClient,
     scope = scope,
-    token=token,
-    networkStateProvider=networkStateProvider
+    token = token,
+    networkStateProvider = networkStateProvider
 ) {
     override val logger by taggedLogger("PersistentCoordinatorSocket")
-
 
     override fun authenticate() {
         logger.d { "[authenticateUser] user: $user" }
@@ -58,5 +73,4 @@ public class CoordinatorSocket(
 
         super.socket.send(message)
     }
-
 }

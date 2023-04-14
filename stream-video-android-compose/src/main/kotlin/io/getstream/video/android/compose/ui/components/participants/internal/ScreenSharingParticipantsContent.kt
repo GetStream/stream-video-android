@@ -29,7 +29,7 @@ import io.getstream.video.android.compose.ui.components.call.controls.internal.D
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.call.state.CallMediaState
+import io.getstream.video.android.core.call.state.CallDeviceState
 import io.getstream.video.android.core.model.ScreenSharingSession
 
 /**
@@ -40,7 +40,7 @@ import io.getstream.video.android.core.model.ScreenSharingSession
  * @param call The call that contains all the participants state and tracks.
  * @param session The screen sharing session which is active.
  * @param participants List of participants currently in the call.
- * @param callMediaState The state of the call media, such as audio, video.
+ * @param callDeviceState The state of the call media, such as audio, video.
  * @param onCallAction Handler when the user triggers a Call Control Action.
  * @param modifier Modifier for styling.
  * @param paddingValues Padding within the parent.
@@ -53,7 +53,7 @@ internal fun ScreenSharingCallParticipantsContent(
     call: Call,
     session: ScreenSharingSession,
     participants: List<ParticipantState>,
-    callMediaState: CallMediaState,
+    callDeviceState: CallDeviceState,
     onCallAction: (CallAction) -> Unit,
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues = PaddingValues(0.dp),
@@ -62,7 +62,7 @@ internal fun ScreenSharingCallParticipantsContent(
     callControlsContent: @Composable () -> Unit = {
         DefaultCallControlsContent(
             call = call,
-            callMediaState = callMediaState,
+            callDeviceState = callDeviceState,
             onCallAction = onCallAction
         )
     }

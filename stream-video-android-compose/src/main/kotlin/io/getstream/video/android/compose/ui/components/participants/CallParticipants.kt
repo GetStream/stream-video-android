@@ -28,9 +28,7 @@ import io.getstream.video.android.compose.ui.components.participants.internal.Re
 import io.getstream.video.android.compose.ui.components.participants.internal.ScreenSharingCallParticipantsContent
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.call.state.CallMediaState
-import io.getstream.video.android.core.model.ScreenSharingSession
-import io.getstream.video.android.core.model.state.StreamCallState
+import io.getstream.video.android.core.call.state.CallDeviceState
 
 /**
  * Renders all the CallParticipants, based on the number of people in a call and the call state.
@@ -39,11 +37,9 @@ import io.getstream.video.android.core.model.state.StreamCallState
  *
  * @param call The call that contains all the participants state and tracks.
  * @param onCallAction Handler when the user triggers a Call Control Action.
- * @param callMediaState The state of the call media, such as audio, video.
- * @param callState The state of the call itself.
+ * @param callDeviceState The state of the call media, such as audio, video.
  * @param modifier Modifier for styling.
  * @param paddingValues Padding within the parent.
- * @param isFullscreen If we're rendering a full screen activity.
  * @param onRender Handler when each of the Video views render their first frame.
  * @param onBackPressed Handler when the user taps back.
  * @param callControlsContent Content shown that allows users to trigger different actions.
@@ -51,23 +47,23 @@ import io.getstream.video.android.core.model.state.StreamCallState
 @Composable
 public fun CallParticipants(
     call: Call,
-    onCallAction: (CallAction) -> Unit,
-    callMediaState: CallMediaState,
-    callState: StreamCallState,
     modifier: Modifier = Modifier,
+    onCallAction: (CallAction) -> Unit = {},
+    callDeviceState: CallDeviceState,
     paddingValues: PaddingValues = PaddingValues(0.dp),
-    screenSharing: ScreenSharingSession? = null,
-    isFullscreen: Boolean = false,
     onRender: (View) -> Unit = {},
     onBackPressed: () -> Unit = {},
     callControlsContent: @Composable () -> Unit = {
         DefaultCallControlsContent(
             call = call,
-            callMediaState = callMediaState,
+            callDeviceState = callDeviceState,
             onCallAction = onCallAction
         )
     }
 ) {
+    val screenSharingSession = call.state.screenSharingSession.collectAsState()
+    val screenSharing = screenSharingSession.value
+
     if (screenSharing == null) {
         RegularCallParticipantsContent(
             call = call,
@@ -76,8 +72,7 @@ public fun CallParticipants(
             onRender = onRender,
             onCallAction = onCallAction,
             onBackPressed = onBackPressed,
-            callMediaState = callMediaState,
-            callState = callState,
+            callDeviceState = callDeviceState,
             callControlsContent = callControlsContent
         )
     } else {
@@ -91,7 +86,7 @@ public fun CallParticipants(
             paddingValues = paddingValues,
             onRender = onRender,
             onCallAction = onCallAction,
-            callMediaState = callMediaState,
+            callDeviceState = callDeviceState,
             onBackPressed = onBackPressed,
             callControlsContent = callControlsContent
         )

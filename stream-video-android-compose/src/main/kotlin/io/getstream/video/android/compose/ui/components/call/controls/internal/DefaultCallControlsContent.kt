@@ -22,13 +22,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.call.controls.CallControls
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.call.state.CallMediaState
+import io.getstream.video.android.core.call.state.CallDeviceState
 import io.getstream.video.android.core.viewmodel.CallViewModel
 
 /**
@@ -40,16 +44,15 @@ import io.getstream.video.android.core.viewmodel.CallViewModel
 @Composable
 internal fun DefaultCallControlsContent(
     viewModel: CallViewModel,
-    onCallAction: (CallAction) -> Unit
+    onCallAction: (CallAction) -> Unit = {}
 ) {
-//    val call by viewModel.call.state.collectAsState(initial = null)
-//    val callMediaState by viewModel.callMediaState.collectAsState(initial = CallMediaState())
-//
-//    DefaultCallControlsContent(
-//        call = call,
-//        callMediaState = callMediaState,
-//        onCallAction = onCallAction
-//    )
+    val callDeviceState by viewModel.callDeviceState.collectAsState()
+
+    DefaultCallControlsContent(
+        call = viewModel.call,
+        callDeviceState = callDeviceState,
+        onCallAction = onCallAction
+    )
 }
 
 /**
@@ -57,19 +60,18 @@ internal fun DefaultCallControlsContent(
  * Shows the default Call controls content that allow the user to trigger various actions.
  *
  * @param call State of the Call.
- * @param callMediaState Media state of the call.
+ * @param callDeviceState Media state of the call.
  * @param onCallAction Handler when the user triggers a Call Control Action.
  */
 @Composable
 internal fun DefaultCallControlsContent(
-    call: Call?,
-    callMediaState: CallMediaState,
-    onCallAction: (CallAction) -> Unit
+    call: Call,
+    callDeviceState: CallDeviceState,
+    onCallAction: (CallAction) -> Unit = {}
 ) {
-    // val screenShareSessionsState = call?.screenSharingSessions ?: emptyFlow()
-    // val state by screenShareSessionsState.collectAsState(initial = emptyList())
-
-    // val isScreenSharing = state.isNotEmpty()
+    val screenSharingSession = call.state.screenSharingSession.collectAsState()
+    val screenSharing = screenSharingSession.value
+    val isScreenSharing by remember(screenSharing) { derivedStateOf { screenSharing != null } }
 
     val orientation = LocalConfiguration.current.orientation
 
@@ -83,10 +85,10 @@ internal fun DefaultCallControlsContent(
             .height(VideoTheme.dimens.callControlsSheetHeight)
     }
 
-//    CallControls(
-//        modifier = modifier,
-//        callMediaState = callMediaState,
-//       // isScreenSharing = isScreenSharing,
-//        onCallAction = onCallAction
-//    )
+    CallControls(
+        modifier = modifier,
+        callDeviceState = callDeviceState,
+        isScreenSharing = isScreenSharing,
+        onCallAction = onCallAction
+    )
 }

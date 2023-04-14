@@ -24,6 +24,8 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoImpl
+import io.getstream.video.android.core.call.state.CallAction
+import io.getstream.video.android.core.call.state.CallDeviceState
 import io.getstream.video.android.core.permission.PermissionManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -63,13 +65,11 @@ public class CallViewModel(
     private val _isInPictureInPicture: MutableStateFlow<Boolean> = MutableStateFlow(false)
     public val isInPictureInPicture: StateFlow<Boolean> = _isInPictureInPicture
 
-    /** if the call is fullscreen */
-    private val _isFullscreen: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    public val isFullscreen: StateFlow<Boolean> = _isFullscreen
+    private val _isShowingCallInfoMenu = MutableStateFlow(false)
+    public val isShowingCallInfoMenu: StateFlow<Boolean> = _isShowingCallInfoMenu
 
-    // what does this do?
-    private val _isShowingCallInfo = MutableStateFlow(false)
-    public val isShowingCallInfo: StateFlow<Boolean> = _isShowingCallInfo
+    private val _callDeviceState = MutableStateFlow(CallDeviceState())
+    public val callDeviceState: StateFlow<CallDeviceState> = _callDeviceState
 
     public fun joinCall() {
         viewModelScope.launch {
@@ -81,7 +81,16 @@ public class CallViewModel(
 
     override fun onCleared() {
         super.onCleared()
+        dismissCallInfoMenu()
         // TODO: properly clean up
+    }
+
+    public fun onCallAction(callAction: CallAction) {
+        // TODO: handle some call actions
+    }
+
+    public fun dismissCallInfoMenu() {
+        this._isShowingCallInfoMenu.value = false
     }
 
     public fun onPictureInPictureModeChanged(inPictureInPictureMode: Boolean) {

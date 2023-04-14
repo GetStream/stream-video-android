@@ -27,7 +27,6 @@ import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.getstream.video.android.core.errors.VideoErrorCode
-import io.getstream.video.android.core.events.CallCreatedEvent
 import io.getstream.video.android.core.events.ConnectedEvent
 import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.events.VideoEventListener
@@ -46,13 +45,10 @@ import io.getstream.video.android.core.model.QueriedCalls
 import io.getstream.video.android.core.model.QueryCallsData
 import io.getstream.video.android.core.model.QueryMembersData
 import io.getstream.video.android.core.model.SendReactionData
-import io.getstream.video.android.core.model.StartedCall
-import io.getstream.video.android.core.model.StreamCallKind
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.mapper.toTypeAndId
 import io.getstream.video.android.core.model.toIceServer
-import io.getstream.video.android.core.model.toInfo
 import io.getstream.video.android.core.model.toRequest
 import io.getstream.video.android.core.socket.ErrorResponse
 import io.getstream.video.android.core.socket.SocketState
@@ -61,7 +57,6 @@ import io.getstream.video.android.core.user.UserPreferencesManager
 import io.getstream.video.android.core.utils.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.core.utils.LatencyResult
 import io.getstream.video.android.core.utils.getLatencyMeasurementsOKHttp
-import io.getstream.video.android.core.utils.toCall
 import io.getstream.video.android.core.utils.toCallUser
 import io.getstream.video.android.core.utils.toEdge
 import io.getstream.video.android.core.utils.toQueriedCalls
@@ -75,7 +70,26 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import org.openapitools.client.models.*
+import org.openapitools.client.models.BlockUserRequest
+import org.openapitools.client.models.CallRequest
+import org.openapitools.client.models.CallSettingsRequest
+import org.openapitools.client.models.GetCallEdgeServerRequest
+import org.openapitools.client.models.GetCallEdgeServerResponse
+import org.openapitools.client.models.GetOrCreateCallRequest
+import org.openapitools.client.models.GetOrCreateCallResponse
+import org.openapitools.client.models.GoLiveResponse
+import org.openapitools.client.models.JoinCallRequest
+import org.openapitools.client.models.JoinCallResponse
+import org.openapitools.client.models.ListRecordingsResponse
+import org.openapitools.client.models.MemberRequest
+import org.openapitools.client.models.RequestPermissionRequest
+import org.openapitools.client.models.SendEventRequest
+import org.openapitools.client.models.SendEventResponse
+import org.openapitools.client.models.SendReactionResponse
+import org.openapitools.client.models.StopLiveResponse
+import org.openapitools.client.models.UnblockUserRequest
+import org.openapitools.client.models.UpdateCallRequest
+import org.openapitools.client.models.UpdateCallResponse
 import retrofit2.HttpException
 import stream.video.coordinator.client_v1_rpc.CreateDeviceRequest
 import stream.video.coordinator.client_v1_rpc.DeleteDeviceRequest
@@ -162,16 +176,15 @@ internal class StreamVideoImpl internal constructor(
                 if (parsedError.serverErrorCode == VideoErrorCode.TOKEN_EXPIRED.code) {
                     // invalid token
                     // val newToken = tokenProvider.getToken()
-                    if (tokenProvider!= null) {
+                    if (tokenProvider != null) {
                         val newToken = tokenProvider.invoke(parsedError)
                         preferences.storeUserToken(newToken)
                         connectionModule.updateToken(newToken)
-
                     }
                     // retry the API call once
                     try {
                         Success(apiCall())
-                    }catch (e: HttpException){
+                    } catch (e: HttpException) {
                         parseError(e)
                     }
 
@@ -180,7 +193,6 @@ internal class StreamVideoImpl internal constructor(
                 } else {
                     failure
                 }
-
             }
         }
     }
@@ -299,11 +311,10 @@ internal class StreamVideoImpl internal constructor(
                 if (developmentMode) {
                     throw it
                 } else {
-                    logger.e(it) { "permanent failure on socket connection"}
+                    logger.e(it) { "permanent failure on socket connection" }
                 }
             }
         }
-
     }
 
     suspend fun connectAsync(): Deferred<Unit> {
@@ -467,7 +478,6 @@ internal class StreamVideoImpl internal constructor(
                 )
             )
         }
-
     }
 
     /**

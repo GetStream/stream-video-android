@@ -30,7 +30,7 @@ import io.getstream.video.android.compose.ui.components.call.incomingcall.intern
 import io.getstream.video.android.compose.ui.components.call.outgoingcall.OutgoingCallContent
 import io.getstream.video.android.compose.ui.components.call.outgoingcall.internal.OutgoingCallDetails
 import io.getstream.video.android.compose.ui.components.call.outgoingcall.internal.OutgoingGroupCallOptions
-import io.getstream.video.android.core.call.state.CallMediaState
+import io.getstream.video.android.core.call.state.CallDeviceState
 import io.getstream.video.android.core.model.CallType
 import io.getstream.video.android.ui.common.R
 import org.junit.Rule
@@ -125,7 +125,7 @@ internal class CallContentTest : BaseComposeTest() {
         snapshotWithDarkMode {
             Column {
                 OutgoingGroupCallOptions(
-                    callMediaState = CallMediaState(
+                    callDeviceState = CallDeviceState(
                         isMicrophoneEnabled = true,
                         isSpeakerphoneEnabled = true,
                         isCameraEnabled = true
@@ -133,7 +133,7 @@ internal class CallContentTest : BaseComposeTest() {
                     onCallAction = { }
                 )
                 OutgoingGroupCallOptions(
-                    callMediaState = CallMediaState(),
+                    callDeviceState = CallDeviceState(),
                     onCallAction = { }
                 )
             }
@@ -146,7 +146,7 @@ internal class CallContentTest : BaseComposeTest() {
             OutgoingCallContent(
                 callType = CallType.VIDEO,
                 participants = mockParticipants.take(1),
-                callMediaState = CallMediaState(),
+                callDeviceState = CallDeviceState(),
                 modifier = Modifier.fillMaxSize(),
                 onBackPressed = {},
                 onCallAction = {}
@@ -160,7 +160,7 @@ internal class CallContentTest : BaseComposeTest() {
             OutgoingCallContent(
                 callType = CallType.VIDEO,
                 participants = mockParticipants,
-                callMediaState = CallMediaState(),
+                callDeviceState = CallDeviceState(),
                 previewPlaceholder = R.drawable.stream_video_call_sample,
                 onBackPressed = {}
             ) {}

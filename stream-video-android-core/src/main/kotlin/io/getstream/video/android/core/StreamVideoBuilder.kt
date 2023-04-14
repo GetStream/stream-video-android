@@ -120,7 +120,7 @@ public class StreamVideoBuilder(
             scope = scope,
             user = user,
             preferences = preferences,
-            tokenProvider=tokenProvider,
+            tokenProvider = tokenProvider,
             loggingLevel = loggingLevel,
             lifecycle = lifecycle,
             connectionModule = module,

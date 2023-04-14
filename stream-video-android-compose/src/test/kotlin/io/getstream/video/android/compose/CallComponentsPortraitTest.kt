@@ -22,7 +22,7 @@ import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.call.controls.CallControls
 import io.getstream.video.android.compose.ui.components.call.controls.internal.RegularCallControls
-import io.getstream.video.android.core.call.state.CallMediaState
+import io.getstream.video.android.core.call.state.CallDeviceState
 import org.junit.Rule
 import org.junit.Test
 
@@ -44,7 +44,7 @@ internal class CallComponentsPortraitTest : BaseComposeTest() {
     fun `snapshot RegularCallControls composable`() {
         snapshotWithDarkMode {
             RegularCallControls(
-                callMediaState = CallMediaState(), isScreenSharing = false
+                callDeviceState = CallDeviceState(), isScreenSharing = false
             ) {}
         }
     }
@@ -53,7 +53,7 @@ internal class CallComponentsPortraitTest : BaseComposeTest() {
     fun `snapshot CallControls composable`() {
         snapshotWithDarkMode {
             CallControls(
-                callMediaState = CallMediaState(), isScreenSharing = false
+                callDeviceState = CallDeviceState(), isScreenSharing = false
             ) {}
         }
     }

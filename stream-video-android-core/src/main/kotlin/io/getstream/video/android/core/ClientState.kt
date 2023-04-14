@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core
 
+import android.content.Context
 import io.getstream.video.android.core.events.CallCreatedEvent
 import io.getstream.video.android.core.events.ConnectedEvent
 import io.getstream.video.android.core.events.VideoEvent
@@ -23,18 +24,20 @@ import io.getstream.video.android.core.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-sealed class ConnectionState() {
-    object PreConnect : ConnectionState()
-    object Loading : ConnectionState()
-    object Connected : ConnectionState()
-    object Reconnecting : ConnectionState()
-    object Disconnected : ConnectionState()
-    class Failed(error: Error) : ConnectionState()
+sealed interface ConnectionState {
+    object Idle : ConnectionState
+    object PreConnect : ConnectionState
+    object Loading : ConnectionState
+    object Connected : ConnectionState
+    object Reconnecting : ConnectionState
+    object Disconnected : ConnectionState
+    class Failed(error: Error) : ConnectionState
 }
 
-sealed class RingingState() {
-    object Incoming : RingingState()
-    object Outgoing : RingingState()
+sealed class RingingState {
+    object Idle : RingingState()
+    data class Incoming(public val acceptedByMe: Boolean) : RingingState()
+    data class Outgoing(public val acceptedByCallee: Boolean) : RingingState()
     object Active : RingingState()
     object RejectedByAll : RingingState()
     object TimeoutNoAnswer : RingingState()
@@ -101,4 +104,14 @@ class ClientState(client: StreamVideo) {
     fun removeActiveCall() {
         this._activeCall.value = null
     }
+}
+
+public fun ConnectionState.formatAsTitle(context: Context): String = when (this) {
+    ConnectionState.Idle -> "Idle"
+    ConnectionState.PreConnect -> "PreConnect"
+    ConnectionState.Loading -> "Loading"
+    ConnectionState.Connected -> "Connected"
+    ConnectionState.Reconnecting -> "Reconnecting"
+    ConnectionState.Disconnected -> "Disconnected"
+    is ConnectionState.Failed -> "Failed"
 }

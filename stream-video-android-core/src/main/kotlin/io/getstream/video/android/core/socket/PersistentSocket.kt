@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2014-2023 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.core.socket
 
 import io.getstream.log.taggedLogger
@@ -21,7 +37,11 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import okhttp3.*
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
+import okhttp3.WebSocket
+import okhttp3.WebSocketListener
 import okio.ByteString
 import stream.video.sfu.event.HealthCheckRequest
 import stream.video.sfu.event.SfuEvent
@@ -50,16 +70,18 @@ open class PersistentSocket<T>(
     /** Inject your network state provider */
     private val networkStateProvider: NetworkStateProvider,
     /** Set the scope everything should run in */
-    private val scope : CoroutineScope = CoroutineScope(DispatcherProvider.IO)
+    private val scope: CoroutineScope = CoroutineScope(DispatcherProvider.IO)
 ) : WebSocketListener() {
     internal open val logger by taggedLogger("PersistentSocket")
 
     /** flow with all the events, listen to this */
     val events = MutableSharedFlow<VideoEvent>()
+
     /** flow with temporary and permanent errors */
     val errors = MutableSharedFlow<Throwable>()
 
     val _connectionState = MutableStateFlow<SocketState>(SocketState.NotConnected)
+
     /** the current connection state of the socket */
     val connectionState: StateFlow<SocketState> = _connectionState
 
@@ -67,19 +89,20 @@ open class PersistentSocket<T>(
     var connectionId: String = ""
 
     /** Continuation if the socket successfully connected and we've authenticated */
-    lateinit var connected : Continuation<T>
+    lateinit var connected: Continuation<T>
 
     internal lateinit var socket: WebSocket
 
     // prevent us from resuming the continuation twice
     private var continuationCompleted: Boolean = false
+
     // we don't raise errors if you're closing the connection yourself
     private var closedByClient: Boolean = false
 
     /**
      * Connect the socket, authenticate, start the healthmonitor and see if the network is online
      */
-    suspend fun  connect() = suspendCoroutine<T> { connectedContinuation ->
+    suspend fun connect() = suspendCoroutine<T> { connectedContinuation ->
         logger.i { "[connect]" }
         connected = connectedContinuation
 
@@ -99,7 +122,6 @@ open class PersistentSocket<T>(
             // also monitor if we are offline/online
             networkStateProvider.subscribe(networkStateListener)
             println("5")
-
         }
     }
 
@@ -129,7 +151,6 @@ open class PersistentSocket<T>(
     }
 
     open fun authenticate() {
-
     }
 
     private val networkStateListener = object : NetworkStateProvider.NetworkStateListener {
@@ -167,9 +188,6 @@ open class PersistentSocket<T>(
 
     override fun onOpen(webSocket: WebSocket, response: Response) {
         logger.d { "[onOpen] response: $response" }
-
-
-
     }
 
     /** Invoked when a text (type `0x1`) message has been received. */
@@ -195,7 +213,6 @@ open class PersistentSocket<T>(
                     connected.resume(processedEvent as T)
                     continuationCompleted = true
                 }
-
             } else if (processedEvent is JoinCallResponseEvent) {
                 if (!continuationCompleted) {
                     connected.resume(processedEvent as T)
@@ -257,7 +274,6 @@ open class PersistentSocket<T>(
         }
     }
 
-
     /**
      * Invoked when a web socket has been closed due to an error reading from or writing to the
      * network. Both outgoing and incoming messages may have been lost. No further calls to this
@@ -295,6 +311,4 @@ open class PersistentSocket<T>(
     internal companion object {
         internal const val CODE_CLOSE_SOCKET_FROM_CLIENT = 1000
     }
-
-
 }

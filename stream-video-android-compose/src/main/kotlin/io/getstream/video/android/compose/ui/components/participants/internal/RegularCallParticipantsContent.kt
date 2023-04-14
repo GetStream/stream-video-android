@@ -40,15 +40,13 @@ import io.getstream.video.android.compose.ui.components.call.controls.internal.D
 import io.getstream.video.android.compose.ui.components.internal.OverlayAppBar
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.call.state.CallMediaState
-import io.getstream.video.android.core.model.state.StreamCallState
+import io.getstream.video.android.core.call.state.CallDeviceState
 
 /**
  * Renders the CallParticipants when there are no screen sharing sessions, based on the orientation.
  *
  * @param call The call that contains all the participants state and tracks.
- * @param callMediaState The state of the call media, such as audio, video.
- * @param callState The state of the call itself.
+ * @param callDeviceState The state of the call media, such as audio, video.
  * @param onCallAction Handler when the user triggers a Call Control Action.
  * @param onBackPressed Handler when the user taps back.
  * @param modifier Modifier for styling.
@@ -59,8 +57,7 @@ import io.getstream.video.android.core.model.state.StreamCallState
 @Composable
 internal fun RegularCallParticipantsContent(
     call: Call,
-    callMediaState: CallMediaState,
-    callState: StreamCallState,
+    callDeviceState: CallDeviceState,
     onCallAction: (CallAction) -> Unit,
     onBackPressed: () -> Unit,
     modifier: Modifier = Modifier,
@@ -69,7 +66,7 @@ internal fun RegularCallParticipantsContent(
     callControlsContent: @Composable () -> Unit = {
         DefaultCallControlsContent(
             call = call,
-            callMediaState = callMediaState,
+            callDeviceState = callDeviceState,
             onCallAction = onCallAction
         )
     }
@@ -97,7 +94,7 @@ internal fun RegularCallParticipantsContent(
 
                 if (orientation == ORIENTATION_LANDSCAPE) {
                     OverlayAppBar(
-                        callState = callState,
+                        call = call,
                         onBackPressed = onBackPressed,
                         onCallAction = onCallAction
                     )

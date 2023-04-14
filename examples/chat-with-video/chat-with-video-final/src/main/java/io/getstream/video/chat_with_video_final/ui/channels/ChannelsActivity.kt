@@ -41,7 +41,6 @@ import io.getstream.chat.android.compose.ui.theme.ChatTheme
 import io.getstream.chat.android.compose.viewmodel.channels.ChannelListViewModel
 import io.getstream.chat.android.compose.viewmodel.channels.ChannelViewModelFactory
 import io.getstream.video.chat_with_video_final.application.chatWithVideoApp
-import io.getstream.video.chat_with_video_final.ui.messages.MessagesActivity
 
 class ChannelsActivity : ComponentActivity() {
 
@@ -98,7 +97,7 @@ class ChannelsActivity : ComponentActivity() {
     }
 
     private fun openMessages(channel: Channel) {
-        startActivity(MessagesActivity.getIntent(this, channel.cid))
+//        startActivity(MessagesActivity.getIntent(this, channel.cid))
     }
 
     private fun logOut() {
