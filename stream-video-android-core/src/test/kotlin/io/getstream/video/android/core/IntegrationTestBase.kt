@@ -40,7 +40,8 @@ import org.junit.Rule
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 import org.openapitools.client.models.VideoEvent
-import java.time.OffsetDateTime
+import org.threeten.bp.Clock
+import org.threeten.bp.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.UUID
 import kotlin.coroutines.Continuation
@@ -185,7 +186,7 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true) : TestBase(
     var nextEventContinuation: Continuation<VideoEvent>? = null
     var nextEventCompleted: Boolean = false
 
-    val nowUtc = OffsetDateTime.now(ZoneOffset.UTC)
+    val nowUtc = OffsetDateTime.now(Clock.systemUTC())
 
     init {
         builder = StreamVideoBuilder(

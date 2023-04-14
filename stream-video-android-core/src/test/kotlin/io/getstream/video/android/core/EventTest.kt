@@ -268,9 +268,9 @@ private fun User.toUserResponse(): UserResponse {
         image = image,
         name = name,
         custom = custom,
-        createdAt = java.time.OffsetDateTime.now(ZoneOffset.UTC),
-        updatedAt = java.time.OffsetDateTime.now(ZoneOffset.UTC),
-        deletedAt = java.time.OffsetDateTime.now(ZoneOffset.UTC),
+        createdAt = OffsetDateTime.now(),
+        updatedAt = OffsetDateTime.now(),
+        deletedAt = OffsetDateTime.now(),
     )
     return response
 }
