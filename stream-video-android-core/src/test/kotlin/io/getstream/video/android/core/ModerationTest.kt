@@ -20,9 +20,7 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.openapitools.client.models.BlockedUserEvent
-import org.openapitools.client.models.CallMemberRemovedEvent
-import org.openapitools.client.models.CallMemberUpdatedEvent
+import org.openapitools.client.models.*
 import org.robolectric.RobolectricTestRunner
 import stream.video.coordinator.event_v1.CallMembersUpdated
 
@@ -57,11 +55,28 @@ class ModerationTest : IntegrationTestBase() {
 
         val response = call.requestPermissions("screenshare")
         assertSuccess(response)
+        waitForNextEvent<PermissionRequestEvent>().also {
+            assertThat(it.user.id).isEqualTo(client.user.id)
+            assertThat(it.permissions).contains("screenshare")
+        }
+
         val updatePermissionResponse = call.grantPermissions("thierry", listOf("screenshare"))
         assertSuccess(updatePermissionResponse)
-        // TODO: what event is received?
         val removePermissionResult = call.revokePermissions("thierry", listOf("screenshare"))
         assertSuccess(removePermissionResult)
+
+        waitForNextEvent<CallMemberUpdatedPermissionEvent>().also {
+
+        }
+    }
+
+    @Test
+    fun `Basic moderation - Call settings`() = runTest {
+        // see if we are allowed to request this permission.
+        // the way this works is a bit weird, since i'd like to see if i
+        // canRequest("screenshare"), hasPermission("screenshare"), grantPermission("screenshare")
+        val settings = call.state.settings.value
+        assertThat(settings!!.audio.accessRequestEnabled).isTrue()
     }
 
     @Test
