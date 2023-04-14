@@ -30,9 +30,11 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.openapitools.client.models.*
 import org.robolectric.RobolectricTestRunner
+import org.threeten.bp.OffsetDateTime
 import stream.video.sfu.event.ConnectionQualityInfo
 import stream.video.sfu.models.ConnectionQuality
 import stream.video.sfu.models.Participant
+import java.time.ZoneOffset
 
 @RunWith(RobolectricTestRunner::class)
 class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
@@ -149,23 +151,23 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
         val capability = OwnCapability.decode("end-call")!!
         val ownCapabilities = mutableListOf<OwnCapability>(capability)
         val custom = mutableMapOf<String, Any>("fruit" to "apple")
-        val callInfo = CallInfo(
-            call.cid,
-            call.type,
-            call.id,
-            createdByUserId = "thierry",
-            false,
-            false,
-            null,
-            Date(),
-            custom
-        )
-        val capabilitiesByRole = mutableMapOf<String, List<String>>(
-            "admin" to mutableListOf(
-                "end-call",
-                "create-call"
-            )
-        )
+//        val callInfo = CallInfo(
+//            call.cid,
+//            call.type,
+//            call.id,
+//            createdByUserId = "thierry",
+//            false,
+//            false,
+//            null,
+//            Date(),
+//            custom
+//        )
+//        val capabilitiesByRole = mutableMapOf<String, List<String>>(
+//            "admin" to mutableListOf(
+//                "end-call",
+//                "create-call"
+//            )
+//        )
 //        val event = CallUpdatedEvent(
 //            call = call.toResponse(),
 //            callCid = call.cid,
@@ -266,9 +268,9 @@ private fun User.toUserResponse(): UserResponse {
         image = image,
         name = name,
         custom = custom,
-        createdAt = createdAt!!,
-        updatedAt = updatedAt!!,
-        deletedAt = deletedAt,
+        createdAt = java.time.OffsetDateTime.now(ZoneOffset.UTC),
+        updatedAt = java.time.OffsetDateTime.now(ZoneOffset.UTC),
+        deletedAt = java.time.OffsetDateTime.now(ZoneOffset.UTC),
     )
     return response
 }
