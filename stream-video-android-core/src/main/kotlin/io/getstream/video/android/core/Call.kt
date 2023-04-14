@@ -23,12 +23,7 @@ import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.events.VideoEventListener
-import io.getstream.video.android.core.model.CallMetadata
-import io.getstream.video.android.core.model.IceServer
-import io.getstream.video.android.core.model.MuteUsersData
-import io.getstream.video.android.core.model.SendReactionData
-import io.getstream.video.android.core.model.SfuToken
-import io.getstream.video.android.core.model.User
+import io.getstream.video.android.core.model.*
 import io.getstream.video.android.core.model.toIceServer
 import org.openapitools.client.models.*
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
@@ -64,8 +59,14 @@ public class Call(
     // should be a stateflow
     private var sfuConnection: SFUConnection? = null
 
-    suspend fun muteAllUsers(): Result<Unit> {
-        return muteUsers(MuteUsersData(audio = true, muteAllUsers = true))
+    suspend fun muteAllUsers(audio: Boolean = true, video: Boolean=false, screenShare: Boolean=false): Result<MuteUsersResponse> {
+        val request = MuteUsersData(
+            muteAllUsers=false,
+            audio=audio,
+            video=video,
+            screenShare = screenShare,
+        )
+        return client.muteUsers(type, id, request)
     }
 
     suspend fun join(): Result<RtcSession> {
@@ -249,6 +250,37 @@ public class Call(
         return sub
     }
 
+    public suspend fun blockUser(userId: String): Result<BlockUserResponse> {
+        return clientImpl.blockUser(type, id, userId)
+    }
+
+    public suspend fun removeMembers(userIds: List<String>): Result<UpdateCallMembersResponse> {
+        val request = UpdateCallMembersRequest(removeMembers = userIds)
+        return clientImpl.updateMembers(type, id, request)
+    }
+
+    public suspend fun grantPermissions(userId: String, permissions: List<String>): Result<UpdateUserPermissionsResponse> {
+        val request = UpdateUserPermissionsData(
+            userId = userId,
+            grantedPermissions = permissions
+        )
+        return clientImpl.updateUserPermissions(type, id, request)
+    }
+
+    public suspend fun revokePermissions(userId: String, permissions: List<String>): Result<UpdateUserPermissionsResponse> {
+        val request = UpdateUserPermissionsData(
+            userId = userId,
+            revokedPermissions = permissions
+        )
+        return clientImpl.updateUserPermissions(type, id, request)
+    }
+
+    public suspend fun updateMembers(memberRequests: List<MemberRequest>): Result<UpdateCallMembersResponse> {
+        val request = UpdateCallMembersRequest(updateMembers = memberRequests)
+        return clientImpl.updateMembers(type, id, request)
+    }
+
+
     fun fireEvent(event: VideoEvent) {
         subscriptions.forEach { sub ->
             if (!sub.isDisposed) {
@@ -267,7 +299,25 @@ public class Call(
         }
     }
 
-    suspend fun muteUsers(muteUsersData: MuteUsersData): Result<Unit> {
-        return client.muteUsers(type, id, muteUsersData)
+    suspend fun muteUser(userId: String, audio: Boolean = true, video: Boolean=false, screenShare: Boolean=false): Result<MuteUsersResponse> {
+        val request = MuteUsersData(
+            users = listOf(userId),
+            muteAllUsers=false,
+            audio=audio,
+            video=video,
+            screenShare = screenShare,
+        )
+        return client.muteUsers(type, id, request)
+    }
+
+    suspend fun muteUsers(userIds: List<String>, audio: Boolean = true, video: Boolean=false, screenShare: Boolean=false): Result<MuteUsersResponse> {
+        val request = MuteUsersData(
+            users = userIds,
+            muteAllUsers=false,
+            audio=audio,
+            video=video,
+            screenShare = screenShare,
+        )
+        return client.muteUsers(type, id, request)
     }
 }

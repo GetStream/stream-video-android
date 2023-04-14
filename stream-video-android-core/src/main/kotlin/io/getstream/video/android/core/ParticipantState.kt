@@ -22,6 +22,7 @@ import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.utils.mapState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import org.openapitools.client.models.MuteUsersResponse
 import stream.video.sfu.models.ConnectionQuality
 import stream.video.sfu.models.Participant
 import stream.video.sfu.models.TrackType
@@ -149,17 +150,17 @@ public data class ParticipantState(
     internal val _pinnedAt: MutableStateFlow<Date?> = MutableStateFlow(null)
     val pinnedAt: StateFlow<Date?> = _pinnedAt
 
-    open suspend fun muteAudio(): Result<Unit> {
+    open suspend fun muteAudio(): Result<MuteUsersResponse> {
         // how do i mute another user?
-        return call.muteUsers(MuteUsersData(audio = true, users = listOf(user.value.id)))
+        return call.muteUser(user.value.id, audio=true, video=false, screenShare = false)
     }
 
-    open suspend fun muteVideo(): Result<Unit> {
-        return call.muteUsers(MuteUsersData(video = true, users = listOf(user.value.id)))
+    open suspend fun muteVideo(): Result<MuteUsersResponse> {
+        return call.muteUser(user.value.id, audio=false, video=true, screenShare = false)
     }
 
-    open suspend fun muteScreenshare(): Result<Unit> {
-        return call.muteUsers(MuteUsersData(screenShare = true, users = listOf(user.value.id)))
+    open suspend fun muteScreenshare(): Result<MuteUsersResponse> {
+        return call.muteUser(user.value.id, audio=false, video=false, screenShare = true)
     }
 
     fun updateFromParticipantInfo(participant: Participant) {

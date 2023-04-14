@@ -17,9 +17,30 @@
 - Step 2: Upload local video to the SFU
 - Step 3: Join a call and render participants
 
-Other
+### LLC TODO
 
-- Cleanup the test suite
+- [ ] Clean up tests
+- [ ] Test coverage
+- [ ] Moderation API endpoints 
+  https://www.notion.so/stream-wiki/Moderation-Permissions-for-video-37a3376268654095b9aafaba12d4bb69
+  https://www.notion.so/stream-wiki/Call-Permissions-832f914ad4c545cf8f048012900ad21d
+- [ ] Make call level client methods internal
+- [ ] Guest and anon user support
+- [ ] Remove unused code
+- [ ] Join flow performance
+- [ ] Reconnect after SFU breaks (https://www.notion.so/Reconnection-Failure-handling-f6991fd2e5584380bb2d2cb5e8ac5303)
+- [ ] Audio filter example
+- [ ] Video filter example
+- [X] Directly use the events from openAPI to prevent things being out of sync
+- [X] List of backend changes
+
+### State TODO
+
+- [ ] Member state isn't implemented fully. Could be either a state or just a data class
+- [ ] Call settings need to be used everywhere. There are still some hardcoded settings
+- [ ] Call state isn't setup fully on join
+- [ ] Member state isn't updated correctly or implemented
+-
 
 ### Review each file, fix TODOS and document
 
@@ -106,28 +127,7 @@ Other
 - [ ] Docs on client setup
 
 
-### LLC TODO
 
-- [ ] Clean up tests
-- [ ] Test coverage
-- [ ] Moderation API endpoints
-- [ ] Make call level client methods internal
-- [ ] Guest and anon user support
-- [ ] Remove unused code
-- [ ] Join flow performance
-- [ ] Reconnect after SFU breaks (https://www.notion.so/Reconnection-Failure-handling-f6991fd2e5584380bb2d2cb5e8ac5303)
-- [ ] Audio filter example
-- [ ] Video filter example
-- [X] Directly use the events from openAPI to prevent things being out of sync
-- [X] List of backend changes
-
-### State TODO
-
-- [ ] Member state isn't implemented fully. Could be either a state or just a data class
-- [ ] Call settings need to be used everywhere. There are still some hardcoded settings
-- [ ] Call state isn't setup fully on join
-- [ ] Member state isn't updated correctly or implemented
-- 
 
 ### RTC TODO
 

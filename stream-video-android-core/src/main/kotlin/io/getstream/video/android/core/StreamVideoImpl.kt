@@ -613,6 +613,12 @@ internal class StreamVideoImpl internal constructor(
         }
     }
 
+    suspend fun updateMembers(type: String, id: String, request: UpdateCallMembersRequest): Result<UpdateCallMembersResponse> {
+        return wrapAPICall {
+            connectionModule.videoCallsApi.updateCallMembers(type, id, request)
+        }
+    }
+
     // callee: SEND Accepted or Rejected
     /**
      * @see StreamVideo.sendEvent
@@ -681,7 +687,7 @@ internal class StreamVideoImpl internal constructor(
     /**
      * @see StreamVideo.blockUser
      */
-    override suspend fun blockUser(type: String, id: String, userId: String): Result<Unit> {
+    override suspend fun blockUser(type: String, id: String, userId: String): Result<BlockUserResponse> {
         logger.d { "[blockUser] callCid: $type:$id, userId: $userId" }
 
         return wrapAPICall {
@@ -739,7 +745,7 @@ internal class StreamVideoImpl internal constructor(
         type: String,
         id: String,
         muteUsersData: MuteUsersData
-    ): Result<Unit> {
+    ): Result<MuteUsersResponse> {
 
         val request = muteUsersData.toRequest()
         return wrapAPICall {
@@ -820,7 +826,7 @@ internal class StreamVideoImpl internal constructor(
         type: String,
         id: String,
         updateUserPermissionsData: UpdateUserPermissionsData
-    ): Result<Unit> {
+    ): Result<UpdateUserPermissionsResponse> {
         return wrapAPICall {
             connectionModule.moderationApi.updateUserPermissions(
                 type,

@@ -16,32 +16,85 @@
 
 package io.getstream.video.android.core
 
+import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.openapitools.client.models.BlockedUserEvent
+import org.openapitools.client.models.CallMemberRemovedEvent
+import org.openapitools.client.models.CallMemberUpdatedEvent
 import org.robolectric.RobolectricTestRunner
+import stream.video.coordinator.event_v1.CallMembersUpdated
 
 @RunWith(RobolectricTestRunner::class)
+/**
+ *   https://www.notion.so/stream-wiki/Moderation-Permissions-for-video-37a3376268654095b9aafaba12d4bb69
+ *   https://www.notion.so/stream-wiki/Call-Permissions-832f914ad4c545cf8f048012900ad21d
+ */
 class ModerationTest : IntegrationTestBase() {
+
+    @Test
+    fun `Basic moderation - Block a user`() = runTest {
+        val response = call.blockUser("tommaso")
+        assertSuccess(response)
+        val event = waitForNextEvent<BlockedUserEvent>()
+        assertThat(event.user.id).isEqualTo("tommaso")
+    }
+
+    @Test
+    fun `Basic moderation - Remove a member`() = runTest {
+        val response = call.removeMembers(listOf("tommaso"))
+        assertSuccess(response)
+        val event = waitForNextEvent<CallMemberRemovedEvent>()
+        assertThat(event.members).contains("tommaso")
+    }
+
+    @Test
+    fun `Basic moderation - Request permission to share your screen`() = runTest {
+
+        val hasPermission = call.state.hasPermission("screenshare").value
+        assertThat(hasPermission).isFalse()
+
+        val response = call.requestPermissions("screenshare")
+        assertSuccess(response)
+        val updatePermissionResponse = call.grantPermissions("thierry", listOf("screenshare"))
+        assertSuccess(updatePermissionResponse)
+        // TODO: what event is received?
+        val removePermissionResult = call.revokePermissions("thierry", listOf("screenshare"))
+        assertSuccess(removePermissionResult)
+    }
+
+    @Test
+    fun `Basic moderation - Mute everyone other than yourself`() = runTest {
+        val result = call.muteAllUsers()
+        assertSuccess(result)
+    }
+
+    @Test
+    fun `Basic moderation - Mute a specific person`() = runTest {
+        // TODO: what's the behaviour for muting a user?
+        val result = call.muteUser("tommaso")
+        assertSuccess(result)
+        //TODO: check event?
+    }
+
     @Test
     fun `Edtech style moderation`() = runTest {
 
         // a teacher mutes the audio for a student
-        val result = call.state.getOrCreateParticipant("tommaso", "tommaso").muteAudio()
-        assertSuccess(result)
+
+        // a teacher mutes everything for a student
 
         // this needs to fire an event that update's Tommaso's permissions...
-        TODO()
 
         // the student is not able to unmute themselves
         // so state for the microphone is on/off/not allowed
-        call.microphone.status // on/off/no permission
+        call.microphone.status // on/off/no call permission/ no android permission
 
         // they can request to unmute though
         call.requestPermissions("unmute")
 
         // the teacher grants this request
-        TODO()
 
         // again, an event should update permissions
 
@@ -53,10 +106,9 @@ class ModerationTest : IntegrationTestBase() {
     fun `Zoom style moderation`() = runTest {
         // on a large call someone will keep background noise going
         // you want to mute everyone at once
-        val result = call.muteAllUsers()
-        assertSuccess(result)
+
 
         // people can unmute themselves
-        TODO()
+
     }
 }

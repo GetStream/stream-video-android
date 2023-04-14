@@ -201,7 +201,7 @@ public interface StreamVideo {
         type: String,
         id: String,
         userId: String
-    ): Result<Unit>
+    ): Result<BlockUserResponse>
 
     /**
      * Unlocks the user from a call so they can join.
@@ -259,7 +259,7 @@ public interface StreamVideo {
         type: String,
         id: String,
         muteUsersData: MuteUsersData
-    ): Result<Unit>
+    ): Result<MuteUsersResponse>
 
     /**
      * Queries calls with a given filter predicate and pagination.
@@ -334,7 +334,7 @@ public interface StreamVideo {
         type: String,
         id: String,
         updateUserPermissionsData: UpdateUserPermissionsData
-    ): Result<Unit>
+    ): Result<UpdateUserPermissionsResponse>
 
     /**
      * Loads all recordings of a call for a given session.

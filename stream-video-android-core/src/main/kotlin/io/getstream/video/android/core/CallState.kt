@@ -106,9 +106,19 @@ public class CallState(val call: Call, user: User) {
 
     private val _screenSharingTrack: MutableStateFlow<TrackWrapper?> = MutableStateFlow(null)
 
+
+    // TODO: maybe this should just be a list of string, seems more forward compatible
     private val _ownCapabilities: MutableStateFlow<List<OwnCapability>> =
         MutableStateFlow(emptyList())
     public val ownCapabilities: StateFlow<List<OwnCapability>> = _ownCapabilities
+
+
+    public fun hasPermission(permission: String): StateFlow<Boolean> {
+        val flow = _ownCapabilities.mapState { it.map { it.toString() }.contains(permission) }
+        // TODO: store this in a map so we don't have to create a new flow every time
+        return flow
+    }
+
 
     /**
      * connection shows if we've established a connection with the SFU
