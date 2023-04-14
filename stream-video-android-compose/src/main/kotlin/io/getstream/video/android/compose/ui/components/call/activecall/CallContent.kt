@@ -36,9 +36,9 @@ import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.activecall.internal.ActiveCallAppBar
 import io.getstream.video.android.compose.ui.components.call.controls.internal.DefaultCallControlsContent
-import io.getstream.video.android.compose.ui.components.participants.CallSingleVideoRenderer
-import io.getstream.video.android.compose.ui.components.participants.CallVideoRenderer
-import io.getstream.video.android.compose.ui.components.participants.internal.ScreenShareAspectRatio
+import io.getstream.video.android.compose.ui.components.call.renderer.CallSingleVideoRenderer
+import io.getstream.video.android.compose.ui.components.call.renderer.CallVideoRenderer
+import io.getstream.video.android.compose.ui.components.call.renderer.internal.ScreenShareAspectRatio
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.state.CallAction

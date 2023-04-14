@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.participants.internal
+package io.getstream.video.android.compose.ui.components.call.renderer.internal
 
 import android.view.View
 import androidx.compose.foundation.background
@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -37,7 +36,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -45,13 +43,13 @@ import io.getstream.video.android.common.util.MockUtils
 import io.getstream.video.android.common.util.mockCall
 import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.participants.CallSingleVideoRenderer
-import io.getstream.video.android.compose.ui.components.participants.LocalVideoContent
+import io.getstream.video.android.compose.ui.components.call.renderer.CallSingleVideoRenderer
+import io.getstream.video.android.compose.ui.components.call.renderer.LocalVideoContent
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 
 /**
- * Renders call participants based on the number of people in a call, in landscape mode.
+ * Renders call participants based on the number of people in a call, in portrait mode.
  *
  * @param call The state of the call.
  * @param primarySpeaker The primary speaker in the call.
@@ -62,7 +60,7 @@ import io.getstream.video.android.core.ParticipantState
  * @param onRender Handler when the video content renders.
  */
 @Composable
-internal fun BoxScope.LandscapeVideoRenderer(
+internal fun BoxScope.PortraitVideoRenderer(
     call: Call,
     primarySpeaker: ParticipantState?,
     callParticipants: List<ParticipantState>,
@@ -71,8 +69,7 @@ internal fun BoxScope.LandscapeVideoRenderer(
     parentSize: IntSize,
     onRender: (View) -> Unit
 ) {
-    val remoteParticipants = callParticipants.filter { !it.isLocal }.take(3)
-    val primarySpeakingUser = primarySpeaker?.initialUser
+    val remoteParticipants = callParticipants.filter { !it.isLocal }
 
     when (callParticipants.size) {
         0 -> Unit
@@ -80,30 +77,48 @@ internal fun BoxScope.LandscapeVideoRenderer(
             val participant = callParticipants.first()
 
             CallSingleVideoRenderer(
-                modifier = Modifier.fillMaxHeight(),
+                modifier = modifier,
                 call = call,
                 participant = participant,
                 onRender = onRender,
-                isFocused = primarySpeakingUser?.id == participant.initialUser.id,
+                isFocused = primarySpeaker?.sessionId == participant.sessionId,
                 paddingValues = paddingValues
             )
         }
 
-        2, 3 -> {
-            val rowItemWeight = 1f / callParticipants.size
+        2 -> {
+            val participant = remoteParticipants.first()
 
-            Row(modifier = modifier) {
-                remoteParticipants.forEach { participant ->
-                    CallSingleVideoRenderer(
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .weight(rowItemWeight),
-                        call = call,
-                        participant = participant,
-                        isFocused = primarySpeakingUser?.id == participant.initialUser.id,
-                        paddingValues = paddingValues
-                    )
-                }
+            CallSingleVideoRenderer(
+                modifier = modifier,
+                call = call,
+                participant = participant,
+                onRender = onRender,
+                isFocused = primarySpeaker?.sessionId == participant.sessionId,
+                paddingValues = paddingValues
+            )
+        }
+
+        3 -> {
+            val firstParticipant = remoteParticipants[0]
+            val secondParticipant = remoteParticipants[1]
+
+            Column(modifier) {
+                CallSingleVideoRenderer(
+                    modifier = Modifier.weight(1f),
+                    call = call,
+                    participant = firstParticipant,
+                    isFocused = primarySpeaker?.sessionId == firstParticipant.sessionId
+                )
+
+                CallSingleVideoRenderer(
+                    modifier = Modifier.weight(1f),
+                    call = call,
+                    participant = secondParticipant,
+                    onRender = onRender,
+                    isFocused = primarySpeaker?.sessionId == secondParticipant.sessionId,
+                    paddingValues = paddingValues
+                )
             }
         }
 
@@ -114,29 +129,29 @@ internal fun BoxScope.LandscapeVideoRenderer(
             val fourthParticipant = callParticipants[3]
             val fiveParticipant = callParticipants[4]
 
-            Column(modifier) {
-                Row(modifier = Modifier.weight(1f)) {
+            Row(modifier) {
+                Column(modifier = Modifier.weight(1f)) {
                     CallSingleVideoRenderer(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = firstParticipant,
-                        isFocused = primarySpeakingUser?.id == firstParticipant.initialUser.id
+                        isFocused = primarySpeaker?.sessionId == firstParticipant.sessionId
                     )
 
                     CallSingleVideoRenderer(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = secondParticipant,
-                        isFocused = primarySpeakingUser?.id == secondParticipant.initialUser.id
+                        isFocused = primarySpeaker?.sessionId == secondParticipant.sessionId
                     )
                 }
 
-                Row(modifier = Modifier.weight(1f)) {
+                Column(modifier = Modifier.weight(1f)) {
                     CallSingleVideoRenderer(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = thirdParticipant,
-                        isFocused = primarySpeakingUser?.id == thirdParticipant.initialUser.id,
+                        isFocused = primarySpeaker?.sessionId == thirdParticipant.sessionId,
                         paddingValues = paddingValues
                     )
 
@@ -145,7 +160,7 @@ internal fun BoxScope.LandscapeVideoRenderer(
                         call = call,
                         participant = fourthParticipant,
                         onRender = onRender,
-                        isFocused = primarySpeakingUser?.id == fourthParticipant.initialUser.id,
+                        isFocused = primarySpeaker?.sessionId == fourthParticipant.sessionId,
                         paddingValues = paddingValues
                     )
 
@@ -154,7 +169,7 @@ internal fun BoxScope.LandscapeVideoRenderer(
                         call = call,
                         participant = fiveParticipant,
                         onRender = onRender,
-                        isFocused = primarySpeakingUser?.id == fiveParticipant.initialUser.id,
+                        isFocused = primarySpeaker?.initialUser?.id == fiveParticipant.initialUser.id,
                         paddingValues = paddingValues
                     )
                 }
@@ -162,11 +177,12 @@ internal fun BoxScope.LandscapeVideoRenderer(
         }
 
         else -> {
-            val rowCount = callParticipants.size / 2
-            val heightDivision = 2
+            val columnCount = 2
+            val heightDivision = callParticipants.size / 2
             val maxGridItemCount = 6
             LazyVerticalGrid(
-                modifier = modifier, columns = GridCells.Fixed(rowCount)
+                modifier = modifier,
+                columns = GridCells.Fixed(columnCount)
             ) {
                 items(
                     items = callParticipants.take(maxGridItemCount),
@@ -178,7 +194,7 @@ internal fun BoxScope.LandscapeVideoRenderer(
                             .height(parentSize.height.dp / heightDivision),
                         call = call,
                         participant = participant,
-                        isFocused = primarySpeakingUser?.id == participant.initialUser.id
+                        isFocused = primarySpeaker?.initialUser?.id == participant.initialUser.id
                     )
                 }
             }
@@ -186,9 +202,11 @@ internal fun BoxScope.LandscapeVideoRenderer(
     }
 
     if (callParticipants.size in 2..3) {
+        val currentLocal = callParticipants.first { it.isLocal }
+
         LocalVideoContent(
             call = call,
-            localParticipant = callParticipants.first { it.isLocal },
+            localParticipant = currentLocal,
             parentBounds = parentSize,
             modifier = Modifier
                 .size(
@@ -202,9 +220,9 @@ internal fun BoxScope.LandscapeVideoRenderer(
     }
 }
 
-@Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1440, heightDp = 720)
+@Preview
 @Composable
-private fun LandscapeParticipantsPreview1() {
+private fun PortraitParticipantsPreview1() {
     MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         val configuration = LocalConfiguration.current
@@ -215,7 +233,7 @@ private fun LandscapeParticipantsPreview1() {
         Box(
             modifier = Modifier.background(color = VideoTheme.colors.appBackground)
         ) {
-            LandscapeVideoRenderer(
+            PortraitVideoRenderer(
                 call = mockCall,
                 primarySpeaker = participants[0],
                 callParticipants = participants.take(1),
@@ -227,9 +245,9 @@ private fun LandscapeParticipantsPreview1() {
     }
 }
 
-@Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1440, heightDp = 720)
+@Preview
 @Composable
-private fun LandscapeParticipantsPreview2() {
+private fun PortraitParticipantsPreview2() {
     MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         val configuration = LocalConfiguration.current
@@ -240,9 +258,9 @@ private fun LandscapeParticipantsPreview2() {
         Box(
             modifier = Modifier.background(color = VideoTheme.colors.appBackground)
         ) {
-            LandscapeVideoRenderer(
+            PortraitVideoRenderer(
                 call = mockCall,
-                primarySpeaker = participants[0],
+                primarySpeaker = mockParticipants[0],
                 callParticipants = participants.take(2),
                 modifier = Modifier.fillMaxSize(),
                 paddingValues = PaddingValues(0.dp),
@@ -252,9 +270,9 @@ private fun LandscapeParticipantsPreview2() {
     }
 }
 
-@Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1440, heightDp = 720)
+@Preview
 @Composable
-private fun LandscapeParticipantsPreview3() {
+private fun PortraitParticipantsPreview3() {
     MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         val configuration = LocalConfiguration.current
@@ -265,7 +283,7 @@ private fun LandscapeParticipantsPreview3() {
         Box(
             modifier = Modifier.background(color = VideoTheme.colors.appBackground)
         ) {
-            LandscapeVideoRenderer(
+            PortraitVideoRenderer(
                 call = mockCall,
                 primarySpeaker = participants[0],
                 callParticipants = participants.take(3),
@@ -277,9 +295,9 @@ private fun LandscapeParticipantsPreview3() {
     }
 }
 
-@Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1440, heightDp = 720)
+@Preview
 @Composable
-private fun LandscapeParticipantsPreview4() {
+private fun PortraitParticipantsPreview4() {
     MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         val configuration = LocalConfiguration.current
@@ -290,7 +308,7 @@ private fun LandscapeParticipantsPreview4() {
         Box(
             modifier = Modifier.background(color = VideoTheme.colors.appBackground)
         ) {
-            LandscapeVideoRenderer(
+            PortraitVideoRenderer(
                 call = mockCall,
                 primarySpeaker = participants[0],
                 callParticipants = participants.take(4),
@@ -302,9 +320,9 @@ private fun LandscapeParticipantsPreview4() {
     }
 }
 
-@Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1440, heightDp = 720)
+@Preview
 @Composable
-private fun LandscapeParticipantsPreview5() {
+private fun PortraitParticipantsPreview5() {
     MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         val configuration = LocalConfiguration.current
@@ -315,7 +333,7 @@ private fun LandscapeParticipantsPreview5() {
         Box(
             modifier = Modifier.background(color = VideoTheme.colors.appBackground)
         ) {
-            LandscapeVideoRenderer(
+            PortraitVideoRenderer(
                 call = mockCall,
                 primarySpeaker = participants[0],
                 callParticipants = participants.take(5),
@@ -327,9 +345,9 @@ private fun LandscapeParticipantsPreview5() {
     }
 }
 
-@Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1440, heightDp = 720)
+@Preview
 @Composable
-private fun LandscapeParticipantsPreview6() {
+private fun PortraitParticipantsPreview6() {
     MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         val configuration = LocalConfiguration.current
@@ -340,7 +358,7 @@ private fun LandscapeParticipantsPreview6() {
         Box(
             modifier = Modifier.background(color = VideoTheme.colors.appBackground)
         ) {
-            LandscapeVideoRenderer(
+            PortraitVideoRenderer(
                 call = mockCall,
                 primarySpeaker = participants[0],
                 callParticipants = participants.take(6),

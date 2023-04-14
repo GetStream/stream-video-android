@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.participants
+package io.getstream.video.android.compose.ui.components.call.renderer
 
 import android.view.View
 import androidx.compose.foundation.BorderStroke

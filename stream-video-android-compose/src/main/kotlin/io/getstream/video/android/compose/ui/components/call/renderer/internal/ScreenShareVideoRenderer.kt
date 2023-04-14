@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.participants.internal
+package io.getstream.video.android.compose.ui.components.call.renderer.internal
 
 import android.view.View
 import androidx.compose.foundation.layout.Box
@@ -24,8 +24,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantLabel
 import io.getstream.video.android.compose.ui.components.connection.ConnectionQualityIndicator
-import io.getstream.video.android.compose.ui.components.participants.ParticipantLabel
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.model.ScreenSharingSession
@@ -40,7 +40,7 @@ import stream.video.sfu.models.TrackType
  * @param onRender Handler when the video content renders.
  */
 @Composable
-public fun ScreenShareContent(
+public fun ScreenShareVideoRenderer(
     call: Call?,
     session: ScreenSharingSession,
     modifier: Modifier = Modifier,

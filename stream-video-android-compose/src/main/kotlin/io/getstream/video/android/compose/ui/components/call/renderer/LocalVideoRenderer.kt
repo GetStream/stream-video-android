@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.participants
+package io.getstream.video.android.compose.ui.components.call.renderer
 
 import androidx.compose.animation.core.animateOffsetAsState
 import androidx.compose.foundation.Image

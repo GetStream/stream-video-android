@@ -35,18 +35,18 @@ import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.state.ui.internal.InviteUserItemState
 import io.getstream.video.android.compose.state.ui.internal.ParticipantList
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.participants.CallSingleVideoRenderer
-import io.getstream.video.android.compose.ui.components.participants.LocalVideoContent
-import io.getstream.video.android.compose.ui.components.participants.ParticipantVideoRenderer
+import io.getstream.video.android.compose.ui.components.call.renderer.CallSingleVideoRenderer
+import io.getstream.video.android.compose.ui.components.call.renderer.LocalVideoContent
+import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideoRenderer
+import io.getstream.video.android.compose.ui.components.call.renderer.internal.LazyColumnVideoRenderer
+import io.getstream.video.android.compose.ui.components.call.renderer.internal.PortraitScreenSharingVideoRenderer
+import io.getstream.video.android.compose.ui.components.call.renderer.internal.PortraitVideoRenderer
 import io.getstream.video.android.compose.ui.components.participants.internal.CallParticipantsInfoAppBar
 import io.getstream.video.android.compose.ui.components.participants.internal.CallParticipantsInfoOptions
 import io.getstream.video.android.compose.ui.components.participants.internal.CallParticipantsList
 import io.getstream.video.android.compose.ui.components.participants.internal.InviteUserList
-import io.getstream.video.android.compose.ui.components.participants.internal.LazyColumnVideoRenderer
 import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantAvatars
 import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantInformation
-import io.getstream.video.android.compose.ui.components.participants.internal.PortraitScreenSharingContent
-import io.getstream.video.android.compose.ui.components.participants.internal.PortraitVideoRenderer
 import io.getstream.video.android.core.model.CallStatus
 import io.getstream.video.android.core.model.CallType
 import io.getstream.video.android.core.model.ScreenSharingSession
@@ -308,7 +308,7 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
     @Test
     fun `snapshot PortraitScreenSharingContent for other participant composable`() {
         snapshot(isInDarkMode = true) {
-            PortraitScreenSharingContent(
+            PortraitScreenSharingVideoRenderer(
                 call = mockCall,
                 session = ScreenSharingSession(
                     track = mockParticipantList[1].videoTrackWrapped ?: mockVideoTrackWrapper,
@@ -328,7 +328,7 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
     @Test
     fun `snapshot PortraitScreenSharingContent for myself composable`() {
         snapshot(isInDarkMode = true) {
-            PortraitScreenSharingContent(
+            PortraitScreenSharingVideoRenderer(
                 call = mockCall,
                 session = ScreenSharingSession(
                     track = mockParticipantList[0].videoTrackWrapped ?: mockVideoTrackWrapper,

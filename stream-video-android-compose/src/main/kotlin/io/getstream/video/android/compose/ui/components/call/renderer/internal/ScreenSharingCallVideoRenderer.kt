@@ -14,55 +14,51 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.participants.internal
+package io.getstream.video.android.compose.ui.components.call.renderer.internal
 
-import android.content.res.Configuration.ORIENTATION_LANDSCAPE
+import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import android.view.View
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.controls.internal.DefaultCallControlsContent
-import io.getstream.video.android.compose.ui.components.internal.OverlayAppBar
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CallDeviceState
+import io.getstream.video.android.core.model.ScreenSharingSession
 
 /**
- * Renders the CallParticipants when there are no screen sharing sessions, based on the orientation.
+ * Renders all the CallParticipants, based on the number of people in a call and the call state.
+ * Also takes into account if there are any screen sharing sessions active and adjusts the UI
+ * accordingly.
  *
  * @param call The call that contains all the participants state and tracks.
+ * @param session The screen sharing session which is active.
+ * @param participants List of participants currently in the call.
  * @param callDeviceState The state of the call media, such as audio, video.
  * @param onCallAction Handler when the user triggers a Call Control Action.
- * @param onBackPressed Handler when the user taps back.
  * @param modifier Modifier for styling.
  * @param paddingValues Padding within the parent.
+ * @param isFullscreen If we're rendering a full screen activity.
  * @param onRender Handler when each of the Video views render their first frame.
  * @param callControlsContent Content shown that allows users to trigger different actions.
  */
 @Composable
-internal fun RegularCallParticipantsContent(
+internal fun ScreenSharingCallVideoRenderer(
     call: Call,
+    session: ScreenSharingSession,
+    participants: List<ParticipantState>,
     callDeviceState: CallDeviceState,
     onCallAction: (CallAction) -> Unit,
-    onBackPressed: () -> Unit,
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues = PaddingValues(0.dp),
     onRender: (View) -> Unit = {},
+    onBackPressed: () -> Unit = {},
     callControlsContent: @Composable () -> Unit = {
         DefaultCallControlsContent(
             call = call,
@@ -71,39 +67,33 @@ internal fun RegularCallParticipantsContent(
         )
     }
 ) {
-    var parentSize: IntSize by remember { mutableStateOf(IntSize(0, 0)) }
-    val orientation = LocalConfiguration.current.orientation
+    val configuration = LocalConfiguration.current
+    val orientation = configuration.orientation
+    val screenSharingSession by call.state.screenSharingSession.collectAsState(initial = null)
 
-    Row(modifier = modifier.background(color = VideoTheme.colors.appBackground)) {
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .padding(paddingValues)
-        ) {
-            val roomParticipants by call.state.participants.collectAsState(emptyList())
-
-            if (roomParticipants.isNotEmpty()) {
-                Participants(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .onSizeChanged { parentSize = it },
-                    call = call,
-                    onRender = onRender,
-                    parentSize = parentSize
-                )
-
-                if (orientation == ORIENTATION_LANDSCAPE) {
-                    OverlayAppBar(
-                        call = call,
-                        onBackPressed = onBackPressed,
-                        onCallAction = onCallAction
-                    )
-                }
-            }
-        }
-
-        if (orientation == ORIENTATION_LANDSCAPE) {
-            callControlsContent()
-        }
+    if (orientation == ORIENTATION_PORTRAIT) {
+        PortraitScreenSharingVideoRenderer(
+            call = call,
+            session = session,
+            participants = participants,
+            primarySpeaker = screenSharingSession?.participant,
+            paddingValues = paddingValues,
+            modifier = modifier,
+            onRender = onRender,
+            onCallAction = onCallAction,
+            onBackPressed = onBackPressed,
+        )
+    } else {
+        LandscapeScreenSharingVideoRenderer(
+            call = call,
+            session = session,
+            participants = participants,
+            primarySpeaker = screenSharingSession?.participant,
+            paddingValues = paddingValues,
+            modifier = modifier,
+            onRender = onRender,
+            onCallAction = onCallAction,
+            onBackPressed = onBackPressed,
+        )
     }
 }

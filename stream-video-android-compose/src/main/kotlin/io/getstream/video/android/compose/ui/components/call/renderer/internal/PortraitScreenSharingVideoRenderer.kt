@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.participants.internal
+package io.getstream.video.android.compose.ui.components.call.renderer.internal
 
 import android.content.res.Configuration
 import android.view.View
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.common.util.MockUtils
@@ -45,7 +45,7 @@ import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.model.ScreenSharingSession
 
 /**
- * Represents the landscape screen sharing content.
+ * Represents the portrait screen sharing content.
  *
  * @param call The call containing state.
  * @param session Screen sharing session to render.
@@ -53,11 +53,9 @@ import io.getstream.video.android.core.model.ScreenSharingSession
  * @param paddingValues Padding values from the parent.
  * @param modifier Modifier for styling.
  * @param onRender Handler when the video renders.
- * @param onCallAction Handler when the user performs various call actions.
- * @param onBackPressed Handler when the user taps back.
  */
 @Composable
-internal fun LandscapeScreenSharingContent(
+internal fun PortraitScreenSharingVideoRenderer(
     call: Call,
     session: ScreenSharingSession,
     participants: List<ParticipantState>,
@@ -71,19 +69,18 @@ internal fun LandscapeScreenSharingContent(
     val sharingParticipant = session.participant
     val me = participants.firstOrNull { it.isLocal }
 
-    Row(
+    Column(
         modifier = modifier
-            .fillMaxSize()
             .background(VideoTheme.colors.screenSharingBackground)
             .padding(paddingValues)
     ) {
         Box(
             modifier = Modifier
-                .fillMaxHeight()
-                .weight(0.65f)
+                .fillMaxWidth()
+                .weight(1f)
         ) {
-            ScreenShareContent(
-                modifier = Modifier.fillMaxSize(),
+            ScreenShareVideoRenderer(
+                modifier = Modifier.fillMaxWidth(),
                 call = call,
                 session = session,
                 onRender = onRender,
@@ -99,31 +96,24 @@ internal fun LandscapeScreenSharingContent(
             }
         }
 
-        LazyColumnVideoRenderer(
-            modifier = Modifier
-                .width(156.dp)
-                .fillMaxHeight(),
+        Spacer(modifier = Modifier.height(VideoTheme.dimens.screenShareParticipantsScreenShareListMargin))
+
+        LazyRowVideoRenderer(
+            modifier = Modifier.height(VideoTheme.dimens.screenShareParticipantsRowHeight),
             call = call,
-            participants = participants,
-            primarySpeaker = primarySpeaker
+            primarySpeaker = primarySpeaker,
+            participants = participants
         )
     }
 }
 
-@Preview(
-    device = Devices.AUTOMOTIVE_1024p, widthDp = 1440, heightDp = 720
-)
-@Preview(
-    uiMode = Configuration.UI_MODE_NIGHT_YES,
-    device = Devices.AUTOMOTIVE_1024p,
-    widthDp = 1440,
-    heightDp = 720
-)
+@Preview
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-private fun LandscapeScreenSharingContentPreview() {
+private fun PortraitScreenSharingContentPreview() {
     MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        LandscapeScreenSharingContent(
+        PortraitScreenSharingVideoRenderer(
             call = mockCall,
             session = ScreenSharingSession(
                 track = mockParticipants[1].videoTrackWrapped ?: mockVideoTrackWrapper,
@@ -134,26 +124,18 @@ private fun LandscapeScreenSharingContentPreview() {
             paddingValues = PaddingValues(0.dp),
             modifier = Modifier.fillMaxSize(),
             onRender = {},
-            onCallAction = {},
-            onBackPressed = {}
+            onBackPressed = {},
+            onCallAction = {}
         )
     }
 }
 
-@Preview(
-    device = Devices.AUTOMOTIVE_1024p, widthDp = 1440, heightDp = 720
-)
-@Preview(
-    uiMode = Configuration.UI_MODE_NIGHT_YES,
-    device = Devices.AUTOMOTIVE_1024p,
-    widthDp = 1440,
-    heightDp = 720
-)
+@Preview
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-private fun LandscapeScreenSharingMyContentPreview() {
-    MockUtils.initializeStreamVideo(LocalContext.current)
+private fun PortraitScreenSharingMyContentPreview() {
     VideoTheme {
-        LandscapeScreenSharingContent(
+        PortraitScreenSharingVideoRenderer(
             call = mockCall,
             session = ScreenSharingSession(
                 track = mockParticipants[0].videoTrackWrapped ?: mockVideoTrackWrapper,
@@ -164,8 +146,8 @@ private fun LandscapeScreenSharingMyContentPreview() {
             paddingValues = PaddingValues(0.dp),
             modifier = Modifier.fillMaxSize(),
             onRender = {},
-            onCallAction = {},
-            onBackPressed = {}
+            onBackPressed = {},
+            onCallAction = {}
         )
     }
 }

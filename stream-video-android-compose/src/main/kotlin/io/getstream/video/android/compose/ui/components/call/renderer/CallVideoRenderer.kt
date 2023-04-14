@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.participants
+package io.getstream.video.android.compose.ui.components.call.renderer
 
 import android.view.View
 import androidx.compose.foundation.layout.PaddingValues
@@ -24,8 +24,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.ui.components.call.controls.internal.DefaultCallControlsContent
-import io.getstream.video.android.compose.ui.components.participants.internal.RegularCallParticipantsContent
-import io.getstream.video.android.compose.ui.components.participants.internal.ScreenSharingCallParticipantsContent
+import io.getstream.video.android.compose.ui.components.call.renderer.internal.RegularCallVideoRenderer
+import io.getstream.video.android.compose.ui.components.call.renderer.internal.ScreenSharingCallVideoRenderer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CallDeviceState
@@ -65,7 +65,7 @@ public fun CallVideoRenderer(
     val screenSharing = screenSharingSession.value
 
     if (screenSharing == null) {
-        RegularCallParticipantsContent(
+        RegularCallVideoRenderer(
             call = call,
             modifier = modifier,
             paddingValues = paddingValues,
@@ -78,7 +78,7 @@ public fun CallVideoRenderer(
     } else {
         val participants by call.state.participants.collectAsState()
 
-        ScreenSharingCallParticipantsContent(
+        ScreenSharingCallVideoRenderer(
             call = call,
             session = screenSharing,
             participants = participants,

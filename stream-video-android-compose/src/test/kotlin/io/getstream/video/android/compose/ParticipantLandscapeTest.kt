@@ -33,9 +33,9 @@ import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.common.util.mockVideoTrackWrapper
 import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.participants.internal.LandscapeScreenSharingContent
-import io.getstream.video.android.compose.ui.components.participants.internal.LandscapeVideoRenderer
-import io.getstream.video.android.compose.ui.components.participants.internal.LazyRowVideoRenderer
+import io.getstream.video.android.compose.ui.components.call.renderer.internal.LandscapeScreenSharingVideoRenderer
+import io.getstream.video.android.compose.ui.components.call.renderer.internal.LandscapeVideoRenderer
+import io.getstream.video.android.compose.ui.components.call.renderer.internal.LazyRowVideoRenderer
 import io.getstream.video.android.core.model.ScreenSharingSession
 import org.junit.Rule
 import org.junit.Test
@@ -188,7 +188,7 @@ internal class ParticipantLandscapeTest : BaseComposeTest() {
     @Test
     fun `snapshot LandscapeScreenSharingContent for other participant composable`() {
         snapshot(isInDarkMode = true) {
-            LandscapeScreenSharingContent(
+            LandscapeScreenSharingVideoRenderer(
                 call = mockCall,
                 session = ScreenSharingSession(
                     track = mockParticipantList[1].videoTrackWrapped ?: mockVideoTrackWrapper,
@@ -208,7 +208,7 @@ internal class ParticipantLandscapeTest : BaseComposeTest() {
     @Test
     fun `snapshot LandscapeScreenSharingContent for myself composable`() {
         snapshot(isInDarkMode = true) {
-            LandscapeScreenSharingContent(
+            LandscapeScreenSharingVideoRenderer(
                 call = mockCall,
                 session = ScreenSharingSession(
                     track = mockParticipantList[0].videoTrackWrapped ?: mockVideoTrackWrapper,
