@@ -22,7 +22,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class CallTest : IntegrationTestBase() {
+class CallMediaTest : IntegrationTestBase() {
 
     /**
      * Muting is tricky
