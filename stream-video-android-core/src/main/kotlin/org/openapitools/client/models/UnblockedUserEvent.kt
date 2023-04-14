@@ -38,11 +38,11 @@ data class UnblockedUserEvent (
     val callCid: kotlin.String,
 
     @Json(name = "created_at")
-    val createdAt: java.time.OffsetDateTime,
+    val createdAt: org.threeten.bp.OffsetDateTime,
 
     /* The type of event: \"call.unblocked_user\" in this case */
     @Json(name = "type")
-    val type: kotlin.String,
+    val type: kotlin.String = "call.unblocked_user",
 
     @Json(name = "user")
     val user: UserResponse

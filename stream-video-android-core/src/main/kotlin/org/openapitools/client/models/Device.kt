@@ -38,7 +38,7 @@ data class Device (
 
     /* Date/time of creation */
     @Json(name = "created_at")
-    val createdAt: java.time.OffsetDateTime,
+    val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "id")
     val id: kotlin.String,

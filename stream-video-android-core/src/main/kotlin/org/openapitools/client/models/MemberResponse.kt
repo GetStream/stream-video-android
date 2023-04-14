@@ -39,7 +39,7 @@ data class MemberResponse (
 
     /* Date/time of creation */
     @Json(name = "created_at")
-    val createdAt: java.time.OffsetDateTime,
+    val createdAt: org.threeten.bp.OffsetDateTime,
 
     /* Custom member response data */
     @Json(name = "custom")
@@ -47,7 +47,7 @@ data class MemberResponse (
 
     /* Date/time of the last update */
     @Json(name = "updated_at")
-    val updatedAt: java.time.OffsetDateTime,
+    val updatedAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "user")
     val user: UserResponse,
@@ -57,7 +57,7 @@ data class MemberResponse (
 
     /* Date/time of deletion */
     @Json(name = "deleted_at")
-    val deletedAt: java.time.OffsetDateTime? = null,
+    val deletedAt: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "role")
     val role: kotlin.String? = null

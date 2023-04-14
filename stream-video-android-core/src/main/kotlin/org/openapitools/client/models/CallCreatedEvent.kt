@@ -44,7 +44,7 @@ data class CallCreatedEvent (
     val callCid: kotlin.String,
 
     @Json(name = "created_at")
-    val createdAt: java.time.OffsetDateTime,
+    val createdAt: org.threeten.bp.OffsetDateTime,
 
     /* the members added to this call */
     @Json(name = "members")
@@ -56,7 +56,7 @@ data class CallCreatedEvent (
 
     /* The type of event: \"call.created\" in this case */
     @Json(name = "type")
-    val type: kotlin.String
+    val type: kotlin.String = "call.created"
 
 ): VideoEvent(), WSCallEvent{ 
 

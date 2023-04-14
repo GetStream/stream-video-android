@@ -39,14 +39,14 @@ data class ConnectedEvent (
     val connectionId: kotlin.String,
 
     @Json(name = "created_at")
-    val createdAt: java.time.OffsetDateTime,
+    val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "me")
     val me: OwnUserResponse,
 
     /* The type of event: \"connection.ok\" in this case */
     @Json(name = "type")
-    val type: kotlin.String
+    val type: kotlin.String = "connection.ok"
 
 ): VideoEvent(), WSClientEvent{ 
 

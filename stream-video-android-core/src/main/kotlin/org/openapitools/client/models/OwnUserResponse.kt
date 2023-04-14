@@ -41,7 +41,7 @@ import com.squareup.moshi.Json
 data class OwnUserResponse (
 
     @Json(name = "created_at")
-    val createdAt: java.time.OffsetDateTime,
+    val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "custom")
     val custom: kotlin.collections.Map<kotlin.String, kotlin.Any>,
@@ -59,10 +59,10 @@ data class OwnUserResponse (
     val teams: kotlin.collections.List<kotlin.String>,
 
     @Json(name = "updated_at")
-    val updatedAt: java.time.OffsetDateTime,
+    val updatedAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "deleted_at")
-    val deletedAt: java.time.OffsetDateTime? = null,
+    val deletedAt: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "image")
     val image: kotlin.String? = null,

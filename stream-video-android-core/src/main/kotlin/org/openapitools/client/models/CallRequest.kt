@@ -55,7 +55,7 @@ data class CallRequest (
     val settingsOverride: CallSettingsRequest? = null,
 
     @Json(name = "starts_at")
-    val startsAt: java.time.OffsetDateTime? = null,
+    val startsAt: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "team")
     val team: kotlin.String? = null

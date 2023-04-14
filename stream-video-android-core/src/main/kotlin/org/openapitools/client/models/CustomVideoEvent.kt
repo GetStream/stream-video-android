@@ -39,7 +39,7 @@ data class CustomVideoEvent (
     val callCid: kotlin.String,
 
     @Json(name = "created_at")
-    val createdAt: java.time.OffsetDateTime,
+    val createdAt: org.threeten.bp.OffsetDateTime,
 
     /* Custom data for this object */
     @Json(name = "custom")
@@ -47,7 +47,7 @@ data class CustomVideoEvent (
 
     /* The type of event, \"custom\" in this case */
     @Json(name = "type")
-    val type: kotlin.String,
+    val type: kotlin.String = "custom",
 
     @Json(name = "user")
     val user: UserResponse

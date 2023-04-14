@@ -46,11 +46,11 @@ data class CallUpdatedEvent (
     val capabilitiesByRole: kotlin.collections.Map<kotlin.String, kotlin.collections.List<kotlin.String>>,
 
     @Json(name = "created_at")
-    val createdAt: java.time.OffsetDateTime,
+    val createdAt: org.threeten.bp.OffsetDateTime,
 
     /* The type of event: \"call.ended\" in this case */
     @Json(name = "type")
-    val type: kotlin.String
+    val type: kotlin.String = "call.updated"
 
 ): VideoEvent(), WSCallEvent{ 
 

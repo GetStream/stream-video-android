@@ -42,7 +42,7 @@ data class CallMemberRemovedEvent (
     val callCid: kotlin.String,
 
     @Json(name = "created_at")
-    val createdAt: java.time.OffsetDateTime,
+    val createdAt: org.threeten.bp.OffsetDateTime,
 
     /* the list of member IDs removed from the call */
     @Json(name = "members")
@@ -50,7 +50,7 @@ data class CallMemberRemovedEvent (
 
     /* The type of event: \"call.member_added\" in this case */
     @Json(name = "type")
-    val type: kotlin.String
+    val type: kotlin.String = "call.member_removed"
 
 ): VideoEvent(), WSCallEvent{ 
 

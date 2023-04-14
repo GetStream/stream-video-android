@@ -34,13 +34,13 @@ import com.squareup.moshi.Json
 data class CallRecording (
 
     @Json(name = "end_time")
-    val endTime: java.time.OffsetDateTime,
+    val endTime: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "filename")
     val filename: kotlin.String,
 
     @Json(name = "start_time")
-    val startTime: java.time.OffsetDateTime,
+    val startTime: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "url")
     val url: kotlin.String

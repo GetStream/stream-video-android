@@ -38,14 +38,14 @@ data class CallReactionEvent (
     val callCid: kotlin.String,
 
     @Json(name = "created_at")
-    val createdAt: java.time.OffsetDateTime,
+    val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "reaction")
     val reaction: ReactionResponse,
 
     /* The type of event: \"call.reaction_new\" in this case */
     @Json(name = "type")
-    val type: kotlin.String
+    val type: kotlin.String = "call.reaction_new"
 
 ): VideoEvent(), WSCallEvent{ 
 

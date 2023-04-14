@@ -39,7 +39,7 @@ data class PermissionRequestEvent (
     val callCid: kotlin.String,
 
     @Json(name = "created_at")
-    val createdAt: java.time.OffsetDateTime,
+    val createdAt: org.threeten.bp.OffsetDateTime,
 
     /* The list of permissions requested by the user */
     @Json(name = "permissions")
@@ -47,7 +47,7 @@ data class PermissionRequestEvent (
 
     /* The type of event: \"call.permission_request\" in this case */
     @Json(name = "type")
-    val type: kotlin.String,
+    val type: kotlin.String = "call.permission_request",
 
     @Json(name = "user")
     val user: UserResponse

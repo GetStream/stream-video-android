@@ -48,7 +48,7 @@ rm -rf "${CLIENT_ROOT}"
 
 # you can use this to use openapi templates from your laptop (openapi-generator needs to be in ~/src)
 #java -jar ~/src/openapi-generator/modules/openapi-generator-cli/target/openapi-generator-cli.jar generate \
-#   -i ~/src/protocol/openapi/video-openapi.yaml --additional-properties=library=jvm-retrofit2,useCoroutines \
+#   -i ~/src/protocol/openapi/video-openapi.yaml --additional-properties=library=jvm-retrofit2,useCoroutines,dateLibrary=threetenbp \
 #   -t ~/src/openapi-generator/modules/openapi-generator/src/main/resources/kotlin-client/ \
 #   -g kotlin \
 #   -o "${GENERATED_CODE_ROOT}"
@@ -60,7 +60,7 @@ docker run --rm \
   -v "/Users/tommaso/src/protocol:/protocol" \
   ghcr.io/getstream/openapi-generator:master generate \
   -i https://raw.githubusercontent.com/GetStream/protocol/main/openapi/video-openapi.yaml \
-  --additional-properties=library=jvm-retrofit2,useCoroutines \
+  --additional-properties=library=jvm-retrofit2,useCoroutines,dateLibrary=threetenbp \
   -g kotlin \
   -o /local
 
