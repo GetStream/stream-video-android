@@ -21,6 +21,8 @@
 
 - [ ] Clean up tests
 - [ ] Test coverage
+- [ ] Support for accepting/rejecting calls etc. HTTP endpoints seem cleaner
+- [ ] Move SFU event to swap between SFUs and handle failure
 - [ ] Remove unused code
 - [ ] Join flow performance
 - [ ] Reconnect after SFU breaks (https://www.notion.so/Reconnection-Failure-handling-f6991fd2e5584380bb2d2cb5e8ac5303)

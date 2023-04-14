@@ -91,7 +91,7 @@ class AudioRoomTest : IntegrationTestBase() {
     fun `sometimes listeners will join with a token`() = runTest {
 
         // TODO: server support
-        val call = client.call("audio_room", randomUUID(), "token")
+        val call = client.call("audio_room", randomUUID())
         val result = call.get()
         assertSuccess(result)
     }

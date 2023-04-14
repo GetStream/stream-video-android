@@ -71,11 +71,11 @@ internal class StreamNotificationBuilderImpl(
         scope.launch {
             actionReceiver.registerAsFlow().collect {
                 logger.v { "[observeAction] action: $it" }
-                when (it) {
-                    is NotificationAction.Accept -> streamVideo.acceptCall(it.guid.type, it.guid.id)
-                    is NotificationAction.Reject -> streamVideo.rejectCall(it.guid.type, it.guid.id)
-                    is NotificationAction.Cancel -> streamVideo.cancelCall(it.guid.type, it.guid.id)
-                }
+//                when (it) {
+////                    is NotificationAction.Accept -> streamVideo.acceptCall(it.guid.type, it.guid.id)
+////                    is NotificationAction.Reject -> streamVideo.rejectCall(it.guid.type, it.guid.id)
+////                    is NotificationAction.Cancel -> streamVideo.cancelCall(it.guid.type, it.guid.id)
+//                }
             }
         }
     }

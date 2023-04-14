@@ -87,7 +87,7 @@ class LivestreamTest : IntegrationTestBase() {
     @Test
     fun `join a call with a viewing only token, that's not authenticated`() = runTest {
         // TODO: not implemented on the server
-        val call = client.call("livestream", randomUUID(), "mytoken")
+        val call = client.call("livestream", randomUUID())
     }
 
     @Test

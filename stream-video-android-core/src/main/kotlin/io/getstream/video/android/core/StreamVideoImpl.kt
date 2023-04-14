@@ -336,22 +336,22 @@ internal class StreamVideoImpl internal constructor(
 
     fun setupGuestUser(user: User) {
         guestUserJob = scope.async {
-            val response = createGuestUser(user)
-            if (response.isFailure) {
-                throw IllegalStateException("Failed to create guest user")
-            }
-            response.onSuccess {
-                preferences.storeUserCredentials(it)
-                preferences.storeUserToken(it.token)
-                connectionModule.updateToken(it.token)
-            }
+//            val response = createGuestUser(user)
+//            if (response.isFailure) {
+//                throw IllegalStateException("Failed to create guest user")
+//            }
+//            response.onSuccess {
+//                preferences.storeUserCredentials(it)
+//                preferences.storeUserToken(it.token)
+//                connectionModule.updateToken(it.token)
+//            }
         }
     }
 
     suspend fun createGuestUser(user: User) {
-        return wrapAPICall {
-            connectionModule.videoCallsApi.createGuestUser(user)
-        }
+//        return wrapAPICall {
+//            connectionModule.videoCallsApi.createGuestUser(user)
+//        }
     }
 
     override suspend fun registerPushDevice() {
@@ -905,7 +905,6 @@ internal class StreamVideoImpl internal constructor(
 //                        callDetails = callMetadata.callDetails
 //                    )
 
-                    // TODO engine.onCoordinatorEvent(event)
                     Success(Unit)
                 }
 

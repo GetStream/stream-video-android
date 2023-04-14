@@ -62,7 +62,6 @@ public abstract class AbstractNotificationActivity : AppCompatActivity(), Stream
 
         lifecycleScope.launch {
             if (hasAcceptedCall) {
-                streamVideo.acceptCall(type, id)
                 dismissIncomingCallNotifications()
             } else {
                 loadCallData(callCid)
@@ -77,10 +76,10 @@ public abstract class AbstractNotificationActivity : AppCompatActivity(), Stream
      * @param callCid The CID containing the call ID and type.
      */
     private suspend fun loadCallData(callCid: String) {
-        when (streamVideo.handlePushMessage(mapOf(INTENT_EXTRA_CALL_CID to callCid))) {
-            is Result.Success -> Unit
-            is Result.Failure -> finish()
-        }
+//        when (streamVideo.handlePushMessage(mapOf(INTENT_EXTRA_CALL_CID to callCid))) {
+//            is Result.Success -> Unit
+//            is Result.Failure -> finish()
+//        }
         dismissIncomingCallNotifications()
     }
 

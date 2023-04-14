@@ -240,7 +240,7 @@ class ClientAndAuthTest : TestBase() {
         ).build()
         // client.connect()
         val filters = mutableMapOf("active" to true)
-        client.joinCall("default", "123")
+        client.call("default", "123").join()
 
         val result = client.queryCalls(QueryCallsData(filters))
         assert(result.isSuccess)

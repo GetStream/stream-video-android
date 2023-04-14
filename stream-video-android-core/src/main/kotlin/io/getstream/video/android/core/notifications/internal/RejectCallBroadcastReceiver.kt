@@ -73,10 +73,10 @@ internal class RejectCallBroadcastReceiver : BroadcastReceiver() {
                 ).build()
 
                 CoroutineScope(Dispatchers.IO).launch {
-                    when (val rejectResult = streamVideo.rejectCall(type, id)) {
-                        is Success -> logger.d { "[onReceive] rejectCall, Success: $rejectResult" }
-                        is Failure -> logger.d { "[onReceive] rejectCall, Failure: $rejectResult" }
-                    }
+//                    when (val rejectResult = streamVideo.rejectCall(type, id)) {
+//                        is Success -> logger.d { "[onReceive] rejectCall, Success: $rejectResult" }
+//                        is Failure -> logger.d { "[onReceive] rejectCall, Failure: $rejectResult" }
+//                    }
                 }
                 val notificationId = intent.getIntExtra(INTENT_EXTRA_NOTIFICATION_ID, 0)
                 NotificationManagerCompat.from(context).cancel(notificationId)
