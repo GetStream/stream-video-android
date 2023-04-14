@@ -186,7 +186,7 @@ public fun CallContent(
  * @param call The state of the call, with its participants.
  */
 @Composable
-public fun DefaultPictureInPictureContent(call: Call) {
+internal fun DefaultPictureInPictureContent(call: Call) {
     val screenSharingSession by call.state.screenSharingSession.collectAsState(initial = null)
     val session = screenSharingSession
     if (session != null) {

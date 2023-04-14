@@ -23,13 +23,10 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.core.os.bundleOf
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.CallContainer
-import io.getstream.video.android.compose.ui.components.call.activecall.DefaultPictureInPictureContent
-import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.core.viewmodel.CallViewModelFactory
@@ -48,9 +45,7 @@ class CallActivity : AppCompatActivity() {
                 CallContainer(
                     modifier = Modifier.background(color = VideoTheme.colors.appBackground),
                     viewModel = vm,
-                    // onCallAction = ::handleCallAction,
                     onBackPressed = { finish() },
-                    pictureInPictureContent = { PictureInPictureContent(call = it) }
                 )
             }
         }
@@ -69,11 +64,6 @@ class CallActivity : AppCompatActivity() {
                 permissionManager = null
             )
         }
-    }
-
-    @Composable
-    private fun PictureInPictureContent(call: Call) {
-        DefaultPictureInPictureContent(call = call)
     }
 
     companion object {

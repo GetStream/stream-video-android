@@ -88,7 +88,6 @@ public fun OutgoingCallContent(
     )
 }
 
-
 /**
  * Stateless variant of the Outgoing call UI, which you can use to build your own custom logic that
  * powers the state and handlers.
