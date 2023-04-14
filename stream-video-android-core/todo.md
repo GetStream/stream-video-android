@@ -21,11 +21,6 @@
 
 - [ ] Clean up tests
 - [ ] Test coverage
-- [X] Make call level client methods internal
-- [X] Moderation API endpoints 
-  https://www.notion.so/stream-wiki/Moderation-Permissions-for-video-37a3376268654095b9aafaba12d4bb69
-  https://www.notion.so/stream-wiki/Call-Permissions-832f914ad4c545cf8f048012900ad21d
-- [X] Guest and anon user support
 - [ ] Remove unused code
 - [ ] Join flow performance
 - [ ] Reconnect after SFU breaks (https://www.notion.so/Reconnection-Failure-handling-f6991fd2e5584380bb2d2cb5e8ac5303)
@@ -33,6 +28,11 @@
 - [ ] Video filter example
 - [X] Directly use the events from openAPI to prevent things being out of sync
 - [X] List of backend changes
+- [X] Make call level client methods internal
+- [X] Moderation API endpoints
+  https://www.notion.so/stream-wiki/Moderation-Permissions-for-video-37a3376268654095b9aafaba12d4bb69
+  https://www.notion.so/stream-wiki/Call-Permissions-832f914ad4c545cf8f048012900ad21d
+- [X] Guest and anon user support
 
 ### State TODO
 

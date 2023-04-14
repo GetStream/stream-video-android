@@ -155,6 +155,7 @@ internal class ConnectionModule(
             .addInterceptor(
                 baseUrlInterceptor
             )
+            .retryOnConnectionFailure(true)
             .connectTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
             .writeTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
             .readTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
