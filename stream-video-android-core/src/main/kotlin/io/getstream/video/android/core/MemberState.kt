@@ -20,11 +20,14 @@ import io.getstream.video.android.core.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-public class MemberState(user: User) {
-    /**
-     * If you are a participant or not
-     */
-    private val _isParticipant: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    val isParticipant: StateFlow<Boolean> = _isParticipant
-    // TODO: implement the memberstate
+public data class MemberState(
+    val user: User,
+    val custom: Map<String, Any>,
+    val role: String?,
+    val createdAt: org.threeten.bp.OffsetDateTime,
+    val updatedAt: org.threeten.bp.OffsetDateTime,
+    val deletedAt: org.threeten.bp.OffsetDateTime?,
+
+) {
+    // Probably an easy way to get the participant would be nice
 }

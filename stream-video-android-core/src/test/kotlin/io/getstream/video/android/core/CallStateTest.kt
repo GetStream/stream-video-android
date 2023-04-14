@@ -17,9 +17,13 @@
 package io.getstream.video.android.core
 
 import com.google.common.truth.Truth.assertThat
+import io.getstream.video.android.core.model.QueryCallsData
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.openapitools.client.models.CallSettingsRequest
+import org.openapitools.client.models.MemberRequest
+import org.openapitools.client.models.ScreensharingSettingsRequest
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertNotNull
 
@@ -36,32 +40,62 @@ class CallStateTest : IntegrationTestBase() {
 
     @Test
     fun `Creating a call should populate the state`() = runTest {
+        val call = client.call("default", randomUUID())
+        // test with custom field, members and a settings overwrite
+        val custom = mapOf("foo" to "bar")
+        val response = call.create(
+            custom = custom,
+            members = listOf(MemberRequest("tommaso", mutableMapOf("color" to "green"))),
+            // block screensharing completely for this call
+            settingsOverride = CallSettingsRequest(screensharing = ScreensharingSettingsRequest(accessRequestEnabled=false, enabled=false))
+        )
+        assertSuccess(response)
 
+        // verify we can't screenshare
+        call.state.settings.value?.apply {
+            assertThat(this).isNotNull()
+            assertThat(screensharing.enabled).isFalse()
+            assertThat(screensharing.accessRequestEnabled).isFalse()
+        }
+        assertThat(call.state.members.value.size).isEqualTo(1)
+        val memberNames = call.state.members.value.map { it.user.id }
+        assertThat(memberNames).containsExactly("tommaso")
+        val tommasoMember = call.state.members.value.first { it.user.id == "tommaso" }
+        assertThat(tommasoMember.custom["color"]).isEqualTo("green")
+
+        assertThat(call.state.custom.value["foo"]).isEqualTo("bar")
     }
 
     @Test
     fun `Getting a call should populate the state`() = runTest {
-        val call = client.call("default", randomUUID())
-        // TODO: custom field, members and a setting overwrite
-
-        val response = call.create()
+        val response = call.get()
         assertSuccess(response)
-
-        call.state.settings.value?.apply {
-            assertThat(this).isNotNull()
-            assertThat(backstage.enabled).isFalse()
-        }
-
+        assertThat(call.state.settings.value).isNotNull()
     }
 
     @Test
     fun `Joining a call should populate the state`() = runTest {
-
+        val call = client.call("default", randomUUID())
+        val response = call.join()
+        assertSuccess(response)
+        assertThat(call.state.settings.value).isNotNull()
     }
 
     @Test
     fun `Querying calls should populate the state`() = runTest {
-
+//        val createResult = client.call("default", randomUUID()).create(custom=mapOf("color" to "green"))
+//        assertSuccess(createResult)
+        val filters = mutableMapOf("color" to "green")
+        val queryResult = client.queryCalls(QueryCallsData(filters, limit = 1))
+        assertSuccess(queryResult)
+        // verify the call has settings setup correctly
+        queryResult.onSuccess {
+            assertThat(it.calls.size).isGreaterThan(0)
+            it.calls.forEach {
+                val call = clientImpl.call(it.call.type, it.call.id)
+                assertThat(call.state.settings.value).isNotNull()
+            }
+        }
     }
 
 }

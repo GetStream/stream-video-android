@@ -84,18 +84,6 @@ public interface StreamVideo {
      */
     public suspend fun deleteDevice(id: String): Result<Unit>
 
-    /**
-     * Removes the given devices from the current user's list of registered push devices.
-     *
-     * @param devices The list of devices to remove.
-     */
-    public fun removeDevices(devices: List<Device>)
-
-    public suspend fun updateCall(
-        type: StreamCallType,
-        id: StreamCallId,
-        custom: Map<String, Any>
-    ): Result<UpdateCallResponse>
 
     /**
      * Queries or creates a call with given information and then authenticates the user to join the

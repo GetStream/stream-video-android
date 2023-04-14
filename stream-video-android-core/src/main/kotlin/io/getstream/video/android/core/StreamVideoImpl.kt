@@ -181,20 +181,17 @@ internal class StreamVideoImpl internal constructor(
     /**
      * @see StreamVideo.updateCall
      */
-    override suspend fun updateCall(
+    suspend fun updateCall(
         type: String,
         id: String,
-        custom: Map<String, Any>,
+        request: UpdateCallRequest,
     ): Result<UpdateCallResponse> {
-        logger.d { "[updateCall] type: $type, id: $id, participantIds: $custom" }
+        logger.d { "[updateCall] type: $type, id: $id, request: $request" }
         return wrapAPICall {
             connectionModule.videoCallsApi.updateCall(
                 type = type,
                 id = id,
-                updateCallRequest = UpdateCallRequest(
-                    custom = custom,
-                    settingsOverride = CallSettingsRequest()
-                )
+                updateCallRequest = request
             )
         }
     }
@@ -355,7 +352,7 @@ internal class StreamVideoImpl internal constructor(
     /**
      * @see StreamVideo.removeDevices
      */
-    override fun removeDevices(devices: List<Device>) {
+    fun removeDevices(devices: List<Device>) {
         scope.launch {
             val operations = devices.map {
                 async { deleteDevice(it.token) }

@@ -202,21 +202,37 @@ public class Call(
     }
 
     suspend fun create(memberIds: List<String>? = null,
+                       members: List<MemberRequest>? = null,
                        custom: Map<String, Any>? = null,
                        settingsOverride: CallSettingsRequest? = null,
                        startsAt: org.threeten.bp.OffsetDateTime? = null,
                        team: String? = null,
                        ring: Boolean = false): Result<GetOrCreateCallResponse> {
-        val response = clientImpl.getOrCreateCall(
-            type = type,
-            id = id,
-            memberIds = memberIds,
-            custom = custom,
-            settingsOverride = settingsOverride,
-            startsAt = startsAt,
-            team = team,
-            ring = ring
-        )
+
+        val response = if (members != null) {
+            clientImpl.getOrCreateCallFullMembers(
+                type = type,
+                id = id,
+                members = members,
+                custom = custom,
+                settingsOverride = settingsOverride,
+                startsAt = startsAt,
+                team = team,
+                ring = ring
+            )
+
+        } else {
+            clientImpl.getOrCreateCall(
+                type = type,
+                id = id,
+                memberIds = memberIds,
+                custom = custom,
+                settingsOverride = settingsOverride,
+                startsAt = startsAt,
+                team = team,
+                ring = ring
+            )
+        }
 
         response.onSuccess {
             state.updateFromResponse(it)
@@ -228,8 +244,15 @@ public class Call(
                        settingsOverride: CallSettingsRequest? = null,
                        startsAt: org.threeten.bp.OffsetDateTime? = null,
                        team: String? = null): Result<UpdateCallResponse> {
-        val response = client.updateCall(type, id, custom ?: emptyMap())
-        // TODO: pass on the arguments
+
+        val request = UpdateCallRequest(
+            custom = custom,
+            settingsOverride = settingsOverride,
+            // TODO: fix me
+//            startsAt = startsAt,
+//            team = team
+        )
+        val response = clientImpl.updateCall(type, id, request)
         response.onSuccess {
             state.updateFromResponse(it)
         }

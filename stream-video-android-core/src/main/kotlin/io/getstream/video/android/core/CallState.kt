@@ -137,9 +137,9 @@ public class CallState(val call: Call, user: User) {
         MutableStateFlow(emptyMap())
     val capabilitiesByRole: StateFlow<Map<String, List<String>>> = _capabilitiesByRole
 
-    private val _members: MutableStateFlow<List<ParticipantState>> =
+    private val _members: MutableStateFlow<List<MemberState>> =
         MutableStateFlow(emptyList())
-    public val members: StateFlow<List<ParticipantState>> = _members
+    public val members: StateFlow<List<MemberState>> = _members
 
     private val _errors: MutableStateFlow<List<ErrorEvent>> =
         MutableStateFlow(emptyList())
@@ -345,16 +345,11 @@ public class CallState(val call: Call, user: User) {
     }
 
     private fun getOrCreateMember(entry: MemberResponse): MemberState {
-        val member = getOrCreateMember(entry.userId)
-        // TODO: update fields
-        return member
-    }
-
-    private fun getOrCreateMember(userId: String): MemberState {
+        val userId = entry.user.id
         return if (memberMap.contains(userId)) {
             memberMap[userId]!!
         } else {
-            val member = MemberState(User(id = userId))
+            val member = entry.toMemberState()
             memberMap[userId] = member
             member
         }
@@ -462,8 +457,13 @@ public class CallState(val call: Call, user: User) {
 
     fun updateFromResponse(response: GetOrCreateCallResponse) {
         val members = response.members
+        updateFromResponse(members)
         val callResponse = response.call
         updateFromResponse(callResponse)
+    }
+
+    private fun updateFromResponse(members: List<MemberResponse>) {
+        val memberStates = members.map { getOrCreateMember(it) }
     }
 
     fun updateFromResponse(response: UpdateCallResponse) {
@@ -488,4 +488,17 @@ public class CallState(val call: Call, user: User) {
     fun updateFromResponse(response: GetCallResponse) {
         updateFromResponse(response.call)
     }
+}
+
+private fun MemberResponse.toMemberState(): MemberState {
+
+    return MemberState(
+        user = user.toUser(),
+        custom = custom,
+        role = role,
+        createdAt = createdAt,
+        updatedAt = updatedAt,
+        deletedAt = deletedAt,
+    )
+
 }
