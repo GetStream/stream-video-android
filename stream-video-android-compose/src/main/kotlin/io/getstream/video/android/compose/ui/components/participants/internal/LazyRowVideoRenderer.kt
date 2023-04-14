@@ -29,9 +29,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.common.util.MockUtils
+import io.getstream.video.android.common.util.mockCall
 import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.participants.CallParticipant
+import io.getstream.video.android.compose.ui.components.participants.CallSingleVideoRenderer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 
@@ -43,8 +44,8 @@ import io.getstream.video.android.core.ParticipantState
  * @param modifier Modifier for styling.
  */
 @Composable
-internal fun ParticipantsRow(
-    call: Call?,
+internal fun LazyRowVideoRenderer(
+    call: Call,
     participants: List<ParticipantState>,
     primarySpeaker: ParticipantState?,
     modifier: Modifier = Modifier
@@ -55,7 +56,7 @@ internal fun ParticipantsRow(
         verticalAlignment = Alignment.CenterVertically,
         content = {
             items(items = participants, key = { it.user.value.id }) { participant ->
-                ParticipantListItem(
+                ListVideoRenderer(
                     call = call, participant = participant, primarySpeaker = primarySpeaker
                 )
             }
@@ -70,12 +71,12 @@ internal fun ParticipantsRow(
  * @param participant The participant to render.
  */
 @Composable
-private fun ParticipantListItem(
-    call: Call?,
+private fun ListVideoRenderer(
+    call: Call,
     participant: ParticipantState,
     primarySpeaker: ParticipantState?,
 ) {
-    CallParticipant(
+    CallSingleVideoRenderer(
         modifier = Modifier
             .size(VideoTheme.dimens.screenShareParticipantItemSize)
             .clip(RoundedCornerShape(VideoTheme.dimens.screenShareParticipantsRadius)),
@@ -93,8 +94,8 @@ private fun ParticipantListItem(
 private fun ParticipantsRowPreview() {
     MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        ParticipantsRow(
-            call = null, participants = mockParticipants, primarySpeaker = mockParticipants[0]
+        LazyRowVideoRenderer(
+            call = mockCall, participants = mockParticipants, primarySpeaker = mockParticipants[0]
         )
     }
 }

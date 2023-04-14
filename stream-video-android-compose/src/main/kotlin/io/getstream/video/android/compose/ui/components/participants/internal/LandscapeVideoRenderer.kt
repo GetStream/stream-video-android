@@ -42,9 +42,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.common.util.MockUtils
+import io.getstream.video.android.common.util.mockCall
 import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.participants.CallParticipant
+import io.getstream.video.android.compose.ui.components.participants.CallSingleVideoRenderer
 import io.getstream.video.android.compose.ui.components.participants.LocalVideoContent
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
@@ -61,8 +62,8 @@ import io.getstream.video.android.core.ParticipantState
  * @param onRender Handler when the video content renders.
  */
 @Composable
-internal fun BoxScope.LandscapeParticipants(
-    call: Call?,
+internal fun BoxScope.LandscapeVideoRenderer(
+    call: Call,
     primarySpeaker: ParticipantState?,
     callParticipants: List<ParticipantState>,
     modifier: Modifier,
@@ -78,7 +79,7 @@ internal fun BoxScope.LandscapeParticipants(
         1 -> {
             val participant = callParticipants.first()
 
-            CallParticipant(
+            CallSingleVideoRenderer(
                 modifier = Modifier.fillMaxHeight(),
                 call = call,
                 participant = participant,
@@ -93,7 +94,7 @@ internal fun BoxScope.LandscapeParticipants(
 
             Row(modifier = modifier) {
                 remoteParticipants.forEach { participant ->
-                    CallParticipant(
+                    CallSingleVideoRenderer(
                         modifier = Modifier
                             .fillMaxHeight()
                             .weight(rowItemWeight),
@@ -115,14 +116,14 @@ internal fun BoxScope.LandscapeParticipants(
 
             Column(modifier) {
                 Row(modifier = Modifier.weight(1f)) {
-                    CallParticipant(
+                    CallSingleVideoRenderer(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = firstParticipant,
                         isFocused = primarySpeakingUser?.id == firstParticipant.initialUser.id
                     )
 
-                    CallParticipant(
+                    CallSingleVideoRenderer(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = secondParticipant,
@@ -131,7 +132,7 @@ internal fun BoxScope.LandscapeParticipants(
                 }
 
                 Row(modifier = Modifier.weight(1f)) {
-                    CallParticipant(
+                    CallSingleVideoRenderer(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = thirdParticipant,
@@ -139,7 +140,7 @@ internal fun BoxScope.LandscapeParticipants(
                         paddingValues = paddingValues
                     )
 
-                    CallParticipant(
+                    CallSingleVideoRenderer(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = fourthParticipant,
@@ -148,7 +149,7 @@ internal fun BoxScope.LandscapeParticipants(
                         paddingValues = paddingValues
                     )
 
-                    CallParticipant(
+                    CallSingleVideoRenderer(
                         modifier = Modifier.weight(1f),
                         call = call,
                         participant = fiveParticipant,
@@ -171,7 +172,7 @@ internal fun BoxScope.LandscapeParticipants(
                     items = callParticipants.take(maxGridItemCount),
                     key = { it.initialUser.id }
                 ) { participant ->
-                    CallParticipant(
+                    CallSingleVideoRenderer(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(parentSize.height.dp / heightDivision),
@@ -214,8 +215,8 @@ private fun LandscapeParticipantsPreview1() {
         Box(
             modifier = Modifier.background(color = VideoTheme.colors.appBackground)
         ) {
-            LandscapeParticipants(
-                call = null,
+            LandscapeVideoRenderer(
+                call = mockCall,
                 primarySpeaker = participants[0],
                 callParticipants = participants.take(1),
                 modifier = Modifier.fillMaxSize(),
@@ -239,8 +240,8 @@ private fun LandscapeParticipantsPreview2() {
         Box(
             modifier = Modifier.background(color = VideoTheme.colors.appBackground)
         ) {
-            LandscapeParticipants(
-                call = null,
+            LandscapeVideoRenderer(
+                call = mockCall,
                 primarySpeaker = participants[0],
                 callParticipants = participants.take(2),
                 modifier = Modifier.fillMaxSize(),
@@ -264,8 +265,8 @@ private fun LandscapeParticipantsPreview3() {
         Box(
             modifier = Modifier.background(color = VideoTheme.colors.appBackground)
         ) {
-            LandscapeParticipants(
-                call = null,
+            LandscapeVideoRenderer(
+                call = mockCall,
                 primarySpeaker = participants[0],
                 callParticipants = participants.take(3),
                 modifier = Modifier.fillMaxSize(),
@@ -289,8 +290,8 @@ private fun LandscapeParticipantsPreview4() {
         Box(
             modifier = Modifier.background(color = VideoTheme.colors.appBackground)
         ) {
-            LandscapeParticipants(
-                call = null,
+            LandscapeVideoRenderer(
+                call = mockCall,
                 primarySpeaker = participants[0],
                 callParticipants = participants.take(4),
                 modifier = Modifier.fillMaxSize(),
@@ -314,8 +315,8 @@ private fun LandscapeParticipantsPreview5() {
         Box(
             modifier = Modifier.background(color = VideoTheme.colors.appBackground)
         ) {
-            LandscapeParticipants(
-                call = null,
+            LandscapeVideoRenderer(
+                call = mockCall,
                 primarySpeaker = participants[0],
                 callParticipants = participants.take(5),
                 modifier = Modifier.fillMaxSize(),
@@ -339,8 +340,8 @@ private fun LandscapeParticipantsPreview6() {
         Box(
             modifier = Modifier.background(color = VideoTheme.colors.appBackground)
         ) {
-            LandscapeParticipants(
-                call = null,
+            LandscapeVideoRenderer(
+                call = mockCall,
                 primarySpeaker = participants[0],
                 callParticipants = participants.take(6),
                 modifier = Modifier.fillMaxSize(),

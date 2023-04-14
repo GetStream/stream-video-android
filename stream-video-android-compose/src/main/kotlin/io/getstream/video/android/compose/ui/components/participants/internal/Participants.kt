@@ -52,7 +52,7 @@ internal fun BoxScope.Participants(
     val orientation = LocalConfiguration.current.orientation
 
     if (orientation == ORIENTATION_LANDSCAPE) {
-        LandscapeParticipants(
+        LandscapeVideoRenderer(
             call = call,
             primarySpeaker = primarySpeaker,
             callParticipants = roomParticipants,
@@ -62,7 +62,7 @@ internal fun BoxScope.Participants(
             onRender = onRender
         )
     } else {
-        PortraitParticipants(
+        PortraitVideoRenderer(
             call = call,
             primarySpeaker = primarySpeaker,
             callParticipants = roomParticipants,

@@ -156,7 +156,7 @@ public fun LocalVideoContent(
                 .onGloballyPositioned { videoSize = it.size },
             shape = RoundedCornerShape(16.dp)
         ) {
-            CallParticipant(
+            CallSingleVideoRenderer(
                 modifier = Modifier
                     .fillMaxSize()
                     .clip(RoundedCornerShape(16.dp)),

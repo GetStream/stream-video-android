@@ -45,7 +45,7 @@ import io.getstream.video.android.core.call.state.CallDeviceState
  * @param callControlsContent Content shown that allows users to trigger different actions.
  */
 @Composable
-public fun CallParticipants(
+public fun CallVideoRenderer(
     call: Call,
     modifier: Modifier = Modifier,
     onCallAction: (CallAction) -> Unit = {},

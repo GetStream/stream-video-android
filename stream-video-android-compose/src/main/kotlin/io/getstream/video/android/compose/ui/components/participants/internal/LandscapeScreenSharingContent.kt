@@ -34,6 +34,7 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.common.util.MockUtils
+import io.getstream.video.android.common.util.mockCall
 import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.common.util.mockVideoTrackWrapper
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -57,7 +58,7 @@ import io.getstream.video.android.core.model.ScreenSharingSession
  */
 @Composable
 internal fun LandscapeScreenSharingContent(
-    call: Call?,
+    call: Call,
     session: ScreenSharingSession,
     participants: List<ParticipantState>,
     primarySpeaker: ParticipantState?,
@@ -98,7 +99,7 @@ internal fun LandscapeScreenSharingContent(
             }
         }
 
-        ParticipantsColumn(
+        LazyColumnVideoRenderer(
             modifier = Modifier
                 .width(156.dp)
                 .fillMaxHeight(),
@@ -123,7 +124,7 @@ private fun LandscapeScreenSharingContentPreview() {
     MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         LandscapeScreenSharingContent(
-            call = null,
+            call = mockCall,
             session = ScreenSharingSession(
                 track = mockParticipants[1].videoTrackWrapped ?: mockVideoTrackWrapper,
                 participant = mockParticipants[1]
@@ -153,7 +154,7 @@ private fun LandscapeScreenSharingMyContentPreview() {
     MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         LandscapeScreenSharingContent(
-            call = null,
+            call = mockCall,
             session = ScreenSharingSession(
                 track = mockParticipants[0].videoTrackWrapped ?: mockVideoTrackWrapper,
                 participant = mockParticipants[0]

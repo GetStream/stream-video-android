@@ -36,8 +36,8 @@ import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.activecall.internal.ActiveCallAppBar
 import io.getstream.video.android.compose.ui.components.call.controls.internal.DefaultCallControlsContent
-import io.getstream.video.android.compose.ui.components.participants.CallParticipant
-import io.getstream.video.android.compose.ui.components.participants.CallParticipants
+import io.getstream.video.android.compose.ui.components.participants.CallSingleVideoRenderer
+import io.getstream.video.android.compose.ui.components.participants.CallVideoRenderer
 import io.getstream.video.android.compose.ui.components.participants.internal.ScreenShareAspectRatio
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
@@ -123,8 +123,8 @@ public fun CallContent(
     callDeviceState: CallDeviceState,
     isShowingCallInfo: Boolean = false,
     isInPictureInPicture: Boolean = false,
-    onBackPressed: () -> Unit = { },
-    onCallAction: (CallAction) -> Unit = { },
+    onBackPressed: () -> Unit = {},
+    onCallAction: (CallAction) -> Unit = {},
     callControlsContent: @Composable () -> Unit = {
         DefaultCallControlsContent(
             call,
@@ -164,7 +164,7 @@ public fun CallContent(
                         .coerceAtLeast(0.dp)
                 )
 
-                CallParticipants(
+                CallVideoRenderer(
                     modifier = Modifier.fillMaxSize(),
                     call = call,
                     paddingValues = paddings,
@@ -201,7 +201,7 @@ internal fun DefaultPictureInPictureContent(call: Call) {
         val activeSpeakers by call.state.activeSpeakers.collectAsState(initial = emptyList())
 
         if (activeSpeakers.isNotEmpty()) {
-            CallParticipant(
+            CallSingleVideoRenderer(
                 call = call,
                 participant = activeSpeakers.first(),
                 labelPosition = Alignment.BottomStart

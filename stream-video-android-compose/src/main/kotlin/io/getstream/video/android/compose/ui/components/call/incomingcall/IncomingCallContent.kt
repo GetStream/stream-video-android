@@ -100,7 +100,7 @@ public fun IncomingCallContent(
  * @param onCallAction Handler used when the user interacts with Call UI.
  */
 @Composable
-private fun IncomingCallContent(
+internal fun IncomingCallContent(
     callType: CallType,
     participants: List<ParticipantState>,
     isVideoEnabled: Boolean,

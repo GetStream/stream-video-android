@@ -34,6 +34,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.common.util.MockUtils
+import io.getstream.video.android.common.util.mockCall
 import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.common.util.mockVideoTrackWrapper
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -55,7 +56,7 @@ import io.getstream.video.android.core.model.ScreenSharingSession
  */
 @Composable
 internal fun PortraitScreenSharingContent(
-    call: Call?,
+    call: Call,
     session: ScreenSharingSession,
     participants: List<ParticipantState>,
     primarySpeaker: ParticipantState?,
@@ -97,7 +98,7 @@ internal fun PortraitScreenSharingContent(
 
         Spacer(modifier = Modifier.height(VideoTheme.dimens.screenShareParticipantsScreenShareListMargin))
 
-        ParticipantsRow(
+        LazyRowVideoRenderer(
             modifier = Modifier.height(VideoTheme.dimens.screenShareParticipantsRowHeight),
             call = call,
             primarySpeaker = primarySpeaker,
@@ -113,7 +114,7 @@ private fun PortraitScreenSharingContentPreview() {
     MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         PortraitScreenSharingContent(
-            call = null,
+            call = mockCall,
             session = ScreenSharingSession(
                 track = mockParticipants[1].videoTrackWrapped ?: mockVideoTrackWrapper,
                 participant = mockParticipants[1]
@@ -135,7 +136,7 @@ private fun PortraitScreenSharingContentPreview() {
 private fun PortraitScreenSharingMyContentPreview() {
     VideoTheme {
         PortraitScreenSharingContent(
-            call = null,
+            call = mockCall,
             session = ScreenSharingSession(
                 track = mockParticipants[0].videoTrackWrapped ?: mockVideoTrackWrapper,
                 participant = mockParticipants[0]

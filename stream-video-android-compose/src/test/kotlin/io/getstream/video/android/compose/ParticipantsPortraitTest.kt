@@ -20,13 +20,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
+import io.getstream.video.android.common.util.mockCall
 import io.getstream.video.android.common.util.mockParticipant
 import io.getstream.video.android.common.util.mockParticipantList
 import io.getstream.video.android.common.util.mockParticipants
@@ -35,18 +35,18 @@ import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.state.ui.internal.InviteUserItemState
 import io.getstream.video.android.compose.state.ui.internal.ParticipantList
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.participants.CallParticipant
+import io.getstream.video.android.compose.ui.components.participants.CallSingleVideoRenderer
 import io.getstream.video.android.compose.ui.components.participants.LocalVideoContent
-import io.getstream.video.android.compose.ui.components.participants.ParticipantVideo
+import io.getstream.video.android.compose.ui.components.participants.ParticipantVideoRenderer
 import io.getstream.video.android.compose.ui.components.participants.internal.CallParticipantsInfoAppBar
 import io.getstream.video.android.compose.ui.components.participants.internal.CallParticipantsInfoOptions
 import io.getstream.video.android.compose.ui.components.participants.internal.CallParticipantsList
 import io.getstream.video.android.compose.ui.components.participants.internal.InviteUserList
+import io.getstream.video.android.compose.ui.components.participants.internal.LazyColumnVideoRenderer
 import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantAvatars
 import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantInformation
-import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantsColumn
-import io.getstream.video.android.compose.ui.components.participants.internal.PortraitParticipants
 import io.getstream.video.android.compose.ui.components.participants.internal.PortraitScreenSharingContent
+import io.getstream.video.android.compose.ui.components.participants.internal.PortraitVideoRenderer
 import io.getstream.video.android.core.model.CallStatus
 import io.getstream.video.android.core.model.CallType
 import io.getstream.video.android.core.model.ScreenSharingSession
@@ -112,8 +112,8 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
     @Test
     fun `snapshot CallParticipant a local call composable`() {
         snapshot {
-            CallParticipant(
-                call = null,
+            CallSingleVideoRenderer(
+                call = mockCall,
                 participant = mockParticipantList[0],
                 isFocused = true
             )
@@ -123,8 +123,8 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
     @Test
     fun `snapshot CallParticipant a remote call composable`() {
         snapshot {
-            CallParticipant(
-                call = null,
+            CallSingleVideoRenderer(
+                call = mockCall,
                 participant = mockParticipantList[1],
                 isFocused = true
             )
@@ -134,8 +134,8 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
     @Test
     fun `snapshot ParticipantVideo composable`() {
         snapshot {
-            ParticipantVideo(
-                call = null,
+            ParticipantVideoRenderer(
+                call = mockCall,
                 participant = mockParticipant
             ) {}
         }
@@ -148,7 +148,7 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
             LocalVideoContent(
-                call = null,
+                call = mockCall,
                 modifier = Modifier.fillMaxSize(),
                 localParticipant = mockParticipant,
                 parentBounds = IntSize(screenWidth, screenHeight),
@@ -178,8 +178,8 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.appBackground)
             ) {
-                PortraitParticipants(
-                    call = null,
+                PortraitVideoRenderer(
+                    call = mockCall,
                     primarySpeaker = participants[0],
                     callParticipants = participants.take(1),
                     modifier = Modifier.fillMaxSize(),
@@ -201,8 +201,8 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.appBackground)
             ) {
-                PortraitParticipants(
-                    call = null,
+                PortraitVideoRenderer(
+                    call = mockCall,
                     primarySpeaker = participants[0],
                     callParticipants = participants.take(2),
                     modifier = Modifier.fillMaxSize(),
@@ -224,8 +224,8 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.appBackground)
             ) {
-                PortraitParticipants(
-                    call = null,
+                PortraitVideoRenderer(
+                    call = mockCall,
                     primarySpeaker = participants[0],
                     callParticipants = participants.take(3),
                     modifier = Modifier.fillMaxSize(),
@@ -247,8 +247,8 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.appBackground)
             ) {
-                PortraitParticipants(
-                    call = null,
+                PortraitVideoRenderer(
+                    call = mockCall,
                     primarySpeaker = participants[0],
                     callParticipants = participants.take(4),
                     modifier = Modifier.fillMaxSize(),
@@ -270,8 +270,8 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.appBackground)
             ) {
-                PortraitParticipants(
-                    call = null,
+                PortraitVideoRenderer(
+                    call = mockCall,
                     primarySpeaker = participants[0],
                     callParticipants = participants.take(5),
                     modifier = Modifier.fillMaxSize(),
@@ -293,8 +293,8 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.appBackground)
             ) {
-                PortraitParticipants(
-                    call = null,
+                PortraitVideoRenderer(
+                    call = mockCall,
                     primarySpeaker = participants[0],
                     callParticipants = participants.take(6),
                     modifier = Modifier.fillMaxSize(),
@@ -309,7 +309,7 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
     fun `snapshot PortraitScreenSharingContent for other participant composable`() {
         snapshot(isInDarkMode = true) {
             PortraitScreenSharingContent(
-                call = null,
+                call = mockCall,
                 session = ScreenSharingSession(
                     track = mockParticipantList[1].videoTrackWrapped ?: mockVideoTrackWrapper,
                     participant = mockParticipantList[1]
@@ -329,7 +329,7 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
     fun `snapshot PortraitScreenSharingContent for myself composable`() {
         snapshot(isInDarkMode = true) {
             PortraitScreenSharingContent(
-                call = null,
+                call = mockCall,
                 session = ScreenSharingSession(
                     track = mockParticipantList[0].videoTrackWrapped ?: mockVideoTrackWrapper,
                     participant = mockParticipantList[0]
@@ -348,8 +348,8 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
     @Test
     fun `snapshot ParticipantsColumn composable`() {
         snapshotWithDarkModeRow {
-            ParticipantsColumn(
-                call = null,
+            LazyColumnVideoRenderer(
+                call = mockCall,
                 participants = mockParticipantList,
                 primarySpeaker = mockParticipant,
             )
