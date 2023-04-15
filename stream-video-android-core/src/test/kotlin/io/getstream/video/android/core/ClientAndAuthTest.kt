@@ -117,13 +117,13 @@ class ClientAndAuthTest : TestBase() {
         ).build()
         assertThat(client.state.connection.value).isEqualTo(ConnectionState.PreConnect)
         val clientImpl = client as StreamVideoImpl
-        println("a")
+        
         val connectResultDeferred = clientImpl.connectAsync()
-        println("b")
+        
         val connectResult = connectResultDeferred.await()
         delay(100L)
         assertThat(client.state.connection.value).isEqualTo(ConnectionState.Connected)
-        println("reached")
+        
     }
 
     @Test
@@ -197,7 +197,7 @@ class ClientAndAuthTest : TestBase() {
         ).build()
         val clientImpl = client as StreamVideoImpl
         client.subscribe {
-            println(it)
+            
         }
         val deferred = clientImpl.connectAsync()
         deferred.join()

@@ -57,11 +57,11 @@ class ClientState(client: StreamVideo) {
     /**
      * Incoming call. True when we receive an event or notification with an incoming call
      */
-    private val _incomingCall: MutableStateFlow<Call?> = MutableStateFlow(null)
-    public val incomingCall: StateFlow<Call?> = _incomingCall
+    private val _ringingCall: MutableStateFlow<Call?> = MutableStateFlow(null)
+    public val ringingCall: StateFlow<Call?> = _ringingCall
 
     /**
-     * Active call. The currently active call
+     * Active call. The call that you've currently joined
      */
     private val _activeCall: MutableStateFlow<Call?> = MutableStateFlow(null)
     public val activeCall: StateFlow<Call?> = _activeCall
@@ -76,7 +76,7 @@ class ClientState(client: StreamVideo) {
     fun handleEvent(event: VideoEvent) {
         // mark connected
         if (event is ConnectedEvent) {
-            println("setting ConnectionState to connected")
+            
             _connection.value = ConnectionState.Connected
         } else if (event is CallCreatedEvent) {
             // what's the right thing to do here?
@@ -88,7 +88,7 @@ class ClientState(client: StreamVideo) {
             call.state.updateFromEvent(event)
 
             if (event.ringing) {
-                _incomingCall.value = call
+                _ringingCall.value = call
             }
         }
     }
@@ -99,5 +99,10 @@ class ClientState(client: StreamVideo) {
 
     fun removeActiveCall() {
         this._activeCall.value = null
+    }
+
+    fun addRingingCall(call: Call) {
+        // TODO: behaviour if you are already in a call
+        _ringingCall.value = call
     }
 }

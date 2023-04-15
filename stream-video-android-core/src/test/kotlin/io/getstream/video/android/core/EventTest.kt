@@ -118,7 +118,7 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
         // ensure we update call data and capabilities
         // TODO: change the map structure
-        println(call.state.getParticipant("thierry")?.audioLevel?.value)
+        
     }
 
     @Test

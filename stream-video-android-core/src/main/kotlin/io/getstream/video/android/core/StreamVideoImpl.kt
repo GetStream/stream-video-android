@@ -552,7 +552,7 @@ internal class StreamVideoImpl internal constructor(
 
     suspend fun joinCall(type: String, id: String): Result<JoinCallResponse> {
         val joinCallRequest = JoinCallRequest()
-        println("token is ${connectionModule.preferences.getUserToken()}")
+        
         return wrapAPICall {
             connectionModule.videoCallsApi.joinCallTypeId0(
                 type,

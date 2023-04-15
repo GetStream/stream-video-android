@@ -247,7 +247,7 @@ class LoginActivity : ComponentActivity() {
             // Read and print the input
             val inputStream = BufferedReader(InputStreamReader(connection.getInputStream()))
             val response = inputStream.readLines().toString()
-            println(response)
+            
             inputStream.close()
 
 

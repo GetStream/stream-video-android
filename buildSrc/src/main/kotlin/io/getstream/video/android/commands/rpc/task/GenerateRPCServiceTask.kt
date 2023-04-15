@@ -102,7 +102,7 @@ open class GenerateRPCServiceTask : DefaultTask() {
                     if (!outputFile.exists() && !outputFile.createNewFile()) throw FileNotFoundException("Failed to create a file for ${service.name}")
                     outputFile.writeText(serviceFile)
                 } catch (exception: IOException) {
-                    println("Exception for service: ${service.name} inside ${protoFile.name}")
+                    
                     exception.printStackTrace()
                 }
             }

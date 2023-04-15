@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.model
 
+import androidx.annotation.VisibleForTesting
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Serializer
@@ -24,6 +25,7 @@ import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
+import org.openapitools.client.models.UserResponse
 import org.threeten.bp.OffsetDateTime
 import org.threeten.bp.format.DateTimeFormatter
 
@@ -75,5 +77,22 @@ public data class User(
 ) {
     public fun isValid(): Boolean {
         return id.isNotEmpty()
+    }
+
+    @VisibleForTesting
+    internal fun toResponse(): UserResponse {
+
+        return UserResponse(
+            id = id,
+            role = role,
+            name = name,
+            image = image,
+            teams = teams,
+            custom = custom,
+            createdAt = createdAt ?: OffsetDateTime.now(),
+            updatedAt = updatedAt ?: OffsetDateTime.now(),
+            deletedAt = deletedAt,
+        )
+
     }
 }

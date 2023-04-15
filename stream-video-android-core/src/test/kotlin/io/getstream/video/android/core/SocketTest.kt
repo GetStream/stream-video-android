@@ -83,24 +83,24 @@ class SocketTest: TestBase() {
         )
         val scope = CoroutineScope(DispatcherProvider.IO)
         val socket = CoordinatorSocket(coordinatorUrl, testData.users["thierry"]!!, testData.tokens["thierry"]!!, scope , buildOkHttp(), networkStateProvider)
-        println("a")
+        
         socket.connect()
 
-        println("b")
+        
         val job = launch {
-            println("watching events")
+            
             socket.events.collect() {
-                println("event: $it")
+                
             }
         }
-        println("c")
+        
         val job2 = launch {
-            println("watching errors")
+            
             socket.errors.collect() {
                 throw it
             }
         }
-        println("reached")
+        
         // wait for the socket to connect (connect response or error)
 
         socket.disconnect()
@@ -124,14 +124,14 @@ class SocketTest: TestBase() {
         socket.connect()
 
         launch {
-            println("watching events")
+            
             socket.events.collect() {
-                println("event: $it")
+                
             }
         }
 
         launch {
-            println("watching errors")
+            
             socket.errors.collect() {
                 throw it
             }

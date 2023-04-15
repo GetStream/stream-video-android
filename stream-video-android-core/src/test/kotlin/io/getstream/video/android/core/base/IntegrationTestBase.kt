@@ -96,6 +96,14 @@ class IntegrationTestHelper {
             teams = emptyList(), custom = mapOf()
         )
         users["thierry"] = thierry
+        users["tommaso"] = User(
+            id = "tommaso", role = "admin", name = "Tommaso", image = "hello",
+            teams = emptyList(), custom = mapOf()
+        )
+        users["jaewoong"] = User(
+            id = "jaewoong", role = "admin", name = "Jaewoong", image = "hello",
+            teams = emptyList(), custom = mapOf()
+        )
         tokens["thierry"] = token
         context = ApplicationProvider.getApplicationContext()
     }
@@ -107,9 +115,9 @@ class IntegrationTestHelper {
 internal class StreamTestLogger : KotlinStreamLogger() {
 
     override fun log(priority: Priority, tag: String, message: String, throwable: Throwable?) {
-        println("$priority $tag: $message")
+        
         if (throwable != null) {
-            println(throwable)
+            
         }
     }
 }
@@ -223,9 +231,9 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true) : TestBase(
         // monitor for events
         events = mutableListOf()
         client.subscribe {
-            println("sub received an event: $it")
+            
             events.add(it)
-            println("events in loop $events")
+            
 
             nextEventContinuation?.let { continuation ->
                 if (!nextEventCompleted) {

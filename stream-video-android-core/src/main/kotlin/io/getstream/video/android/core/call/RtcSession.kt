@@ -501,7 +501,7 @@ public class RtcSession internal constructor(
             logger.d { "[executeJoinRequest] sfu join request is sent" }
             logger.d { "[executeJoinRequest] request is sent" }
             val currentValue = joinEventResponse.value
-            println(currentValue)
+            
             logger.d { "[executeJoinRequest] currentValue: $currentValue" }
             val event = joinEventResponse.filterNotNull().first()
             logger.d { "[executeJoinRequest] completed: $event" }

@@ -83,18 +83,18 @@ open class PersistentSocket<T>(
         // step 1 create the socket
         socket = createSocket()
 
-        println("1")
+        
         scope.launch {
             // step 2 authenticate the user/call etc
-            println("2")
+            
             authenticate()
-            println("3")
+            
             // step 3 monitor for health every 30 seconds
             healthMonitor.start()
-            println("4")
+            
             // also monitor if we are offline/online
             networkStateProvider.subscribe(networkStateListener)
-            println("5")
+            
 
         }
     }

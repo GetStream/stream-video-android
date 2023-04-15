@@ -86,7 +86,7 @@ public class Call(
 
         // step 2. measure latency
         // TODO: setup the initial call state based on this
-        println(result.value.call.settings)
+        
 
         val edgeUrls = result.value.edges.map { it.latencyUrl }
         // measure latency in parallel
@@ -234,6 +234,9 @@ public class Call(
 
         response.onSuccess {
             state.updateFromResponse(it)
+            if (ring) {
+                client.state.addRingingCall(this)
+            }
         }
         return response
     }

@@ -26,8 +26,11 @@ public data class MemberState(
     val role: String?,
     val createdAt: org.threeten.bp.OffsetDateTime,
     val updatedAt: org.threeten.bp.OffsetDateTime,
-    val deletedAt: org.threeten.bp.OffsetDateTime?,
+    val deletedAt: org.threeten.bp.OffsetDateTime? = null,
+    val acceptedAt: org.threeten.bp.OffsetDateTime? = null,
+    val rejectedAt: org.threeten.bp.OffsetDateTime? = null,
 
-) {
+
+    ) {
     // Probably an easy way to get the participant would be nice
 }
