@@ -25,7 +25,6 @@ import org.openapitools.client.models.CallSettingsRequest
 import org.openapitools.client.models.MemberRequest
 import org.openapitools.client.models.ScreensharingSettingsRequest
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.assertNotNull
 
 @RunWith(RobolectricTestRunner::class)
 class CallStateTest : IntegrationTestBase() {
@@ -76,9 +75,10 @@ class CallStateTest : IntegrationTestBase() {
     @Test
     fun `Joining a call should populate the state`() = runTest {
         val call = client.call("default", randomUUID())
-        val response = call.join()
+        val response = call.joinRequest(create=CreateCallOptions(custom=mapOf("color" to "green")))
         assertSuccess(response)
         assertThat(call.state.settings.value).isNotNull()
+        assertThat(call.state.custom.value["color"]).isEqualTo("green")
     }
 
     @Test

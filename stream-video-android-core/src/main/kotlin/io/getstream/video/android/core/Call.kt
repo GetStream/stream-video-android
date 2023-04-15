@@ -17,6 +17,7 @@
 package io.getstream.video.android.core
 
 import android.view.View
+import androidx.annotation.VisibleForTesting
 import io.getstream.log.taggedLogger
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
@@ -29,6 +30,20 @@ import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import org.openapitools.client.models.*
 import org.webrtc.RendererCommon
 import stream.video.sfu.models.TrackType
+
+public data class CreateCallOptions (
+    val memberIds: List<String>? = null,
+    val members: List<MemberRequest>? = null,
+    val custom: Map<String, Any>? = null,
+    val settingsOverride: CallSettingsRequest? = null,
+    val startsAt: org.threeten.bp.OffsetDateTime? = null,
+    val team: String? = null,
+    val ring: Boolean = false
+) {
+    fun memberRequestsFromIds(): List<MemberRequest>? {
+        return memberIds?.map { MemberRequest(userId=it) } ?: members
+    }
+}
 
 public data class SFUConnection(
     internal val callUrl: String,
@@ -65,7 +80,24 @@ public class Call(
         return clientImpl.muteUsers(type, id, request)
     }
 
-    suspend fun join(): Result<RtcSession> {
+    @VisibleForTesting
+    internal suspend fun joinRequest(create: CreateCallOptions? = null): Result<JoinCallResponse> {
+        val result = clientImpl.joinCall(type, id,
+            create=create != null,
+            members = create?.memberRequestsFromIds(),
+            custom = create?.custom,
+            settingsOverride = create?.settingsOverride,
+            startsAt = create?.startsAt,
+            team = create?.team,
+            ring = create?.ring ?: false,
+        )
+        result.onSuccess {
+            state.updateFromResponse(it)
+        }
+        return result
+    }
+
+    suspend fun join(create: CreateCallOptions? = null): Result<RtcSession> {
 
         /**
          * Alright, how to make this solid
@@ -79,15 +111,14 @@ public class Call(
          */
 
         // step 1. call the join endpoint to get a list of SFUs
-        val result = clientImpl.joinCall(type, id)
+        val result = joinRequest(create)
+
         if (result !is Success) {
             return result as Failure
         }
 
-        // step 2. measure latency
-        // TODO: setup the initial call state based on this
-        
 
+        // step 2. measure latency
         val edgeUrls = result.value.edges.map { it.latencyUrl }
         // measure latency in parallel
         val measurements = clientImpl.measureLatency(edgeUrls)
@@ -244,14 +275,13 @@ public class Call(
     suspend fun update(custom: Map<String, Any>? = null,
                        settingsOverride: CallSettingsRequest? = null,
                        startsAt: org.threeten.bp.OffsetDateTime? = null,
-                       team: String? = null): Result<UpdateCallResponse> {
+                       ): Result<UpdateCallResponse> {
 
         val request = UpdateCallRequest(
             custom = custom,
             settingsOverride = settingsOverride,
             // TODO: fix me
 //            startsAt = startsAt,
-//            team = team
         )
         val response = clientImpl.updateCall(type, id, request)
         response.onSuccess {

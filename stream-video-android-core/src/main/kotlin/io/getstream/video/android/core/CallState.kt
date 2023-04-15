@@ -58,17 +58,22 @@ public class CallState(val call: Call, user: User) {
     private val _settings: MutableStateFlow<CallSettingsResponse?> = MutableStateFlow(null)
     public val settings: MutableStateFlow<CallSettingsResponse?> = _settings
 
-    private val memberMap: MutableMap<String, MemberState> = mutableMapOf()
+    private val _members: MutableStateFlow<SortedMap<String, MemberState>> = MutableStateFlow(emptyMap<String, MemberState>().toSortedMap())
+    public val members: StateFlow<List<MemberState>> =
+        _members.mapState { it.values.toList() }
+
+    private val _participants: MutableStateFlow<SortedMap<String, ParticipantState>> =
+        MutableStateFlow(emptyMap<String, ParticipantState>().toSortedMap())
+    public val participants: StateFlow<List<ParticipantState>> =
+        _participants.mapState { it.values.toList() }
+
     private val _recording: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val recording: StateFlow<Boolean> = _recording
 
     private val _screenSharingSession: MutableStateFlow<ScreenSharingSession?> =
         MutableStateFlow(null)
 
-    private val _participants: MutableStateFlow<SortedMap<String, ParticipantState>> =
-        MutableStateFlow(emptyMap<String, ParticipantState>().toSortedMap())
-    public val participants: StateFlow<List<ParticipantState>> =
-        _participants.mapState { it.values.toList() }
+
 
     /** participants who are currently speaking */
     public val activeSpeakers =
@@ -137,9 +142,7 @@ public class CallState(val call: Call, user: User) {
         MutableStateFlow(emptyMap())
     val capabilitiesByRole: StateFlow<Map<String, List<String>>> = _capabilitiesByRole
 
-    private val _members: MutableStateFlow<List<MemberState>> =
-        MutableStateFlow(emptyList())
-    public val members: StateFlow<List<MemberState>> = _members
+
 
     private val _errors: MutableStateFlow<List<ErrorEvent>> =
         MutableStateFlow(emptyList())
@@ -180,9 +183,7 @@ public class CallState(val call: Call, user: User) {
             }
 
             is CallMemberUpdatedEvent -> {
-                event.members.forEach { entry ->
-                    getOrCreateMember(entry)
-                }
+                getOrCreateMembers(event.members)
             }
 
             is CallMemberRemovedEvent -> TODO()
@@ -344,15 +345,20 @@ public class CallState(val call: Call, user: User) {
         return participantState
     }
 
-    private fun getOrCreateMember(entry: MemberResponse): MemberState {
-        val userId = entry.user.id
-        return if (memberMap.contains(userId)) {
-            memberMap[userId]!!
-        } else {
-            val member = entry.toMemberState()
-            memberMap[userId] = member
-            member
+    private fun getOrCreateMembers(members: List<MemberResponse>) {
+        val memberMap = _members.value.toSortedMap()
+
+        val memberStates = members.map {
+            val userId = it.user.id
+            val memberState = if (memberMap.contains(userId)) {
+                memberMap[userId]!!
+            } else {
+                val member = it.toMemberState()
+                memberMap[userId] = member
+                member
+            }
         }
+        _members.value = memberMap
     }
 
     fun requireParticipant(sessionId: String): ParticipantState {
@@ -463,12 +469,13 @@ public class CallState(val call: Call, user: User) {
     }
 
     private fun updateFromResponse(members: List<MemberResponse>) {
-        val memberStates = members.map { getOrCreateMember(it) }
+        getOrCreateMembers(members)
     }
 
+
+
     fun updateFromResponse(response: UpdateCallResponse) {
-        val callResponse = response.call
-        updateFromResponse(callResponse)
+        updateFromResponse(response.call)
     }
 
     /**
@@ -478,15 +485,17 @@ public class CallState(val call: Call, user: User) {
     fun updateFromResponse(response: CallData) {
         // note that the member response is different
         // @see MemberResponse
-
-
-
-
-
     }
 
     fun updateFromResponse(response: GetCallResponse) {
         updateFromResponse(response.call)
+        updateFromResponse(response.members)
+    }
+
+    fun updateFromResponse(response: JoinCallResponse) {
+        updateFromResponse(response.call)
+        updateFromResponse(response.members)
+
     }
 }
 

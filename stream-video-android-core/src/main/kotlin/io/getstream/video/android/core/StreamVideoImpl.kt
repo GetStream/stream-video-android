@@ -550,10 +550,20 @@ internal class StreamVideoImpl internal constructor(
         }
     }
 
-    suspend fun joinCall(type: String, id: String): Result<JoinCallResponse> {
-        val joinCallRequest = JoinCallRequest()
+    suspend fun joinCall(type: String, id: String, create: Boolean= false, members: List<MemberRequest>? = null,
+                         custom: Map<String, Any>? = null,
+                         settingsOverride: CallSettingsRequest? = null,
+                         startsAt: org.threeten.bp.OffsetDateTime? = null,
+                         team: String? = null,
+                         ring: Boolean = false): Result<JoinCallResponse> {
+
+        val joinCallRequest = JoinCallRequest(
+            create=create,
+            data = CallRequest(members=members, custom=custom, settingsOverride=settingsOverride, startsAt=startsAt, team=team),
+            ring=ring,
+        )
         
-        return wrapAPICall {
+        val result = wrapAPICall {
             connectionModule.videoCallsApi.joinCallTypeId0(
                 type,
                 id,
@@ -561,6 +571,7 @@ internal class StreamVideoImpl internal constructor(
                 connectionModule.coordinatorSocket.connectionId
             )
         }
+        return result
     }
 
     suspend fun updateMembers(type: String, id: String, request: UpdateCallMembersRequest): Result<UpdateCallMembersResponse> {
