@@ -282,7 +282,6 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
         // other times they will be show on the main call UI
         assertThat(call.state.reactions.value.map { it.type }).contains("like")
-)
     }
 
     @Test
