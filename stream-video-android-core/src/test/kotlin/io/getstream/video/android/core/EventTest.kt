@@ -22,7 +22,6 @@ import io.getstream.video.android.core.events.ConnectionQualityChangeEvent
 import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
 import io.getstream.video.android.core.events.ParticipantJoinedEvent
 import io.getstream.video.android.core.events.ParticipantLeftEvent
-import io.getstream.video.android.core.model.CallInfo
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.UserAudioLevel
 import kotlinx.coroutines.test.runTest
@@ -34,7 +33,6 @@ import org.threeten.bp.OffsetDateTime
 import stream.video.sfu.event.ConnectionQualityInfo
 import stream.video.sfu.models.ConnectionQuality
 import stream.video.sfu.models.Participant
-import java.time.ZoneOffset
 
 @RunWith(RobolectricTestRunner::class)
 class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
@@ -102,12 +100,12 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
         val acceptedEvent = CallAcceptedEvent(callCid = call.cid, nowUtc, "call.accepted", user=thierry.toUserResponse())
         clientImpl.fireEvent(acceptedEvent)
-        assertThat(call.state.getParticipant("123")?.acceptedAt?.value).isNotNull()
+        assertThat(call.state.getMember("thierry")?.acceptedAt).isNotNull()
 
         val rejectedEvent =
             CallRejectedEvent(callCid = call.cid, nowUtc, "call.rejected", user = User(id = "123").toUserResponse())
         clientImpl.fireEvent(rejectedEvent)
-        assertThat(call.state.getParticipant("123")?.rejectedAt?.value).isNotNull()
+        assertThat(call.state.getMember("123")?.rejectedAt).isNotNull()
     }
 
     @Test
@@ -127,7 +125,6 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
         clientImpl.fireEvent(event, call.cid)
 
         // ensure we update call data and capabilities
-        // TODO: is nesting state objects ok?
         assertThat(call.state.dominantSpeaker.value?.user?.value?.id).isEqualTo("jaewoong")
     }
 
@@ -233,6 +230,62 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
     }
 
     @Test
+    fun `Block and unblock a user`() = runTest {
+
+        val blockEvent = BlockedUserEvent(
+            callCid=call.cid,
+            createdAt=nowUtc,
+            type="call.blocked_user",
+            user = testData.users["thierry"]!!.toUserResponse()
+        )
+        clientImpl.fireEvent(blockEvent)
+        assertThat(call.state.blockedUsers.value).contains("thierry")
+
+        val unBlockEvent = UnblockedUserEvent(
+            callCid=call.cid,
+            createdAt=nowUtc,
+            type="call.blocked_user",
+            user = testData.users["thierry"]!!.toUserResponse()
+        )
+        clientImpl.fireEvent(unBlockEvent)
+        assertThat(call.state.blockedUsers.value).doesNotContain("thierry")
+
+    }
+
+    @Test
+    fun `Permission request event`() = runTest {
+
+
+    }
+
+    @Test
+    fun `Member added or removed event`() = runTest {
+
+
+    }
+
+    @Test
+    fun `Reaction event`() = runTest {
+        val reactionEvent = CallReactionEvent(
+            callCid=call.cid,
+            createdAt=nowUtc,
+            type="call.reaction",
+            reaction = ReactionResponse(
+                type = "like",
+                user = testData.users["thierry"]!!.toUserResponse(),
+                custom = mutableMapOf("fruit" to "apple")
+            ),
+        )
+        clientImpl.fireEvent(reactionEvent)
+        // reactions are sometimes shown on the given participant's UI
+        TODO()
+
+        // other times they will be show on the main call UI
+        assertThat(call.state.reactions.value.map { it.type }).contains("like")
+)
+    }
+
+    @Test
     fun `Update and delete members`() = runTest {
         val call = client.call("default", randomUUID())
         // TODO: call details/ call info structure is super weird
@@ -261,7 +314,7 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
 //}
 
 private fun User.toUserResponse(): UserResponse {
-    val response = UserResponse(
+    return UserResponse(
         id = id,
         role = role,
         teams = teams,
@@ -272,5 +325,4 @@ private fun User.toUserResponse(): UserResponse {
         updatedAt = OffsetDateTime.now(),
         deletedAt = OffsetDateTime.now(),
     )
-    return response
 }

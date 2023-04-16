@@ -52,6 +52,10 @@ import java.util.*
 public class CallState(val call: Call, user: User) {
     private val logger by taggedLogger("CallState")
 
+
+    private val _blockedUsers : MutableStateFlow<Set<String>> = MutableStateFlow(emptySet())
+    val blockedUsers : StateFlow<Set<String>> = _blockedUsers
+
     private val _ringingState: MutableStateFlow<RingingState?> = MutableStateFlow(null)
     public val ringingState: MutableStateFlow<RingingState?> = _ringingState
 
@@ -142,6 +146,8 @@ public class CallState(val call: Call, user: User) {
         MutableStateFlow(emptyMap())
     val capabilitiesByRole: StateFlow<Map<String, List<String>>> = _capabilitiesByRole
 
+    internal val _reactions = MutableStateFlow<List<ReactionResponse>>(emptyList())
+    val reactions: StateFlow<List<ReactionResponse>> = _reactions
 
 
     private val _errors: MutableStateFlow<List<ErrorEvent>> =
@@ -164,17 +170,34 @@ public class CallState(val call: Call, user: User) {
     fun handleEvent(event: VideoEvent) {
         logger.d { "Updating call state with event $event" }
         when (event) {
-            is BlockedUserEvent -> TODO()
+            is BlockedUserEvent -> {
+                val newBlockedUsers = _blockedUsers.value.toMutableSet()
+                newBlockedUsers.add(event.user.id)
+                _blockedUsers.value = newBlockedUsers
+            }
+            is UnblockedUserEvent -> {
+                val newBlockedUsers = _blockedUsers.value.toMutableSet()
+                newBlockedUsers.remove(event.user.id)
+                _blockedUsers.value = newBlockedUsers
+            }
             is CallAcceptedEvent -> {
-//                val participant = getOrCreateParticipant(event.sessionId, event.sentByUserId)
-//                participant._acceptedAt.value = Date()
+                val member = getMember(event.user.id)
+                val newMember = member?.copy(acceptedAt = OffsetDateTime.now(Clock.systemUTC()))
+                val newMembersMap = _members.value.toSortedMap()
+                newMember?.let {
+                    newMembersMap[event.user.id] = it
+                    _members.value = newMembersMap
+                }
             }
 
             is CallRejectedEvent -> {
-                // TODO: we don't have a RTC session yet. So how do we do this?
-                // TODO: these are not participants. Keep track on the member instead of participant
-//                val participant = getOrCreateParticipant(event.sessionId, event.user.id, event.user)
-//                participant._rejectedAt.value = Date()
+                val member = getMember(event.user.id)
+                val newMember = member?.copy(rejectedAt = OffsetDateTime.now(Clock.systemUTC()))
+                val newMembersMap = _members.value.toSortedMap()
+                newMember?.let {
+                    newMembersMap[event.user.id] = it
+                    _members.value = newMembersMap
+                }
             }
 
             is CallEndedEvent -> {
@@ -186,7 +209,13 @@ public class CallState(val call: Call, user: User) {
                 getOrCreateMembers(event.members)
             }
 
-            is CallMemberRemovedEvent -> TODO()
+            is CallMemberRemovedEvent -> {
+                val newMembersMap = _members.value.toSortedMap()
+                event.members.forEach {
+                    newMembersMap.remove(it)
+                }
+                _members.value = newMembersMap
+            }
 
             is CallCreatedEvent -> {
                 // this is handled by the client
@@ -208,8 +237,26 @@ public class CallState(val call: Call, user: User) {
                 // safe to ignore, app level custom event
             }
 
-            is HealthCheckEvent -> TODO()
-            is PermissionRequestEvent -> TODO()
+            is HealthCheckEvent -> {
+                // we don't do anything with this, handled by the socket
+            }
+            is PermissionRequestEvent -> {
+                // TODO: define the behaviour/UI for requesting permissions
+            }
+            is CallMemberUpdatedPermissionEvent -> TODO()
+
+            is CallMemberAddedEvent -> {
+                getOrCreateMembers(event.members)
+            }
+            is CallReactionEvent -> {
+                val reactions = _reactions.value.toMutableList()
+                reactions.add(event.reaction)
+                _reactions.value = reactions
+                val user = event.reaction.user
+                // get the participants for this user
+
+
+            }
             is CallRecordingStartedEvent -> {
                 _recording.value = true
             }
@@ -217,8 +264,6 @@ public class CallState(val call: Call, user: User) {
             is CallRecordingStoppedEvent -> {
                 _recording.value = false
             }
-
-            is UnblockedUserEvent -> TODO()
 
             is AudioLevelChangedEvent -> {
                 event.levels.forEach { entry ->
@@ -268,16 +313,22 @@ public class CallState(val call: Call, user: User) {
                 removeParticipant(event.participant.session_id)
             }
 
-            is SubscriberOfferEvent -> TODO()
-            is TrackPublishedEvent -> TODO()
-            is TrackUnpublishedEvent -> TODO()
+            is SubscriberOfferEvent -> {
+                // handled by ActiveSFUSession
+            }
+            is TrackPublishedEvent -> {
+                // handled by ActiveSFUSession
+            }
+            is TrackUnpublishedEvent -> {
+                // handled by ActiveSFUSession
+            }
             is SFUConnectedEvent -> {
                 _connection.value = ConnectionState.Connected
             }
-            is CallMemberAddedEvent -> TODO()
-            is CallMemberUpdatedPermissionEvent -> TODO()
-            is CallReactionEvent -> TODO()
-            is ConnectedEvent -> TODO()
+
+            is ConnectedEvent -> {
+                // handled by socket
+            }
         }
     }
 
@@ -496,6 +547,10 @@ public class CallState(val call: Call, user: User) {
         updateFromResponse(response.call)
         updateFromResponse(response.members)
 
+    }
+
+    fun getMember(userId: String): MemberState? {
+        return _members.value[userId]
     }
 }
 

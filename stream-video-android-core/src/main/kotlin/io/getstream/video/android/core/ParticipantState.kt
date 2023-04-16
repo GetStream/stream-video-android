@@ -23,6 +23,7 @@ import io.getstream.video.android.core.utils.mapState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.openapitools.client.models.MuteUsersResponse
+import org.openapitools.client.models.ReactionResponse
 import stream.video.sfu.models.ConnectionQuality
 import stream.video.sfu.models.Participant
 import stream.video.sfu.models.TrackType
@@ -112,15 +113,6 @@ public data class ParticipantState(
     val connectionQuality: StateFlow<ConnectionQuality> = _connectionQuality
 
     /**
-     * For ringing calls we track when the participant accepted or rejected
-     */
-    internal val _acceptedAt: MutableStateFlow<Date?> = MutableStateFlow(null)
-    val acceptedAt: StateFlow<Date?> = _acceptedAt
-
-    internal val _rejectedAt: MutableStateFlow<Date?> = MutableStateFlow(null)
-    val rejectedAt: StateFlow<Date?> = _rejectedAt
-
-    /**
      * State that indicates whether the camera is capturing and sending video or not.
      */
     internal val _videoEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
@@ -149,6 +141,10 @@ public data class ParticipantState(
 
     internal val _pinnedAt: MutableStateFlow<Date?> = MutableStateFlow(null)
     val pinnedAt: StateFlow<Date?> = _pinnedAt
+
+    internal val _reactions = MutableStateFlow<List<ReactionResponse>>(emptyList())
+    val reactions: StateFlow<List<ReactionResponse>> = _reactions
+
 
     open suspend fun muteAudio(): Result<MuteUsersResponse> {
         // how do i mute another user?
