@@ -20,32 +20,26 @@ import java.util.concurrent.TimeUnit
 
 
 /**
- * Coordinator socket URL
+ * Test coverage for the sockets
  *
- * * https://video.stream-io-api.com/video/connect?api_key=hd8szvscpxvd&stream-auth-type=jwt&X-Stream-Client=stream-video-android
- * *
+ * @see PersistentSocket
+ * @see CoordinatorSocket
+ * @see SfuSocket
  *
- * SFU Socket URL
+ * The socket does a few things
+ * - health check/ping every 30 seconds
+ * - monitors network state
+ * - in case of temporary errors retry and for permanent ones fail
  *
- * * https://sfu-000c954.fdc-ams1.stream-io-video.com/ws?api_key=hd8szvscpxvd
- * * SFU Token:
-  *
- * @see ConnectionModule
- * @see SfuSocketImpl
- * @see VideoSocketImpl
- * @see EventsParser
- * @see SignalEventsParser
- * @see EventMapper
- * @see SocketFactory
- * @see Socket
- * @see SFUConnectionModule
- * @see FiniteStateMachine
- * @see SocketStateService
+ * The Sfu and coordinator have slightly different implements
+ * Auth receives different events
  *
- * TODO:
- * - swap ConnectionModule / SFUSocket setup
- * - authenticated continuation or different approach
- * - Lots more testing
+ * @see JoinCallEvent (for the sfu)
+ * @see ConnectedEvent (for the coordinator)
+ *
+ * The sfu uses binary messages and the coordinator text
+ * Other than it's mostly the same logic
+ *
  */
 @RunWith(RobolectricTestRunner::class)
 class SocketTest: TestBase() {
@@ -140,12 +134,13 @@ class SocketTest: TestBase() {
 
     @Test
     fun `if we get a temporary error we should retry`() = runTest {
-
+        // for instance a network failure
     }
 
     @Test
     fun `a permanent error shouldn't be retried`() = runTest {
-
+        // for authentication failures
+        
     }
 
     @Test

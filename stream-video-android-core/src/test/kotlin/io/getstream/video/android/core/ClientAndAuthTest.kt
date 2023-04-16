@@ -223,14 +223,6 @@ class ClientAndAuthTest : TestBase() {
 
     @Test
     fun testConnectionId() = runTest {
-        // all requests should have a connection id
-        // the connection id comes from the websocket
-        // TODO:
-        // - you shouldn't immediately connect to the WS
-        // - maybe a manual connect step is best
-        // - maybe it doesn't wait for WS
-        // - there is no .connect on android, when should it connect?
-
         val client = StreamVideoBuilder(
             context = context,
             apiKey = apiKey,

@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core
+package io.getstream.video.android.core.rtc
 
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.MediaManagerImpl
+import io.getstream.video.android.core.TestBase
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith

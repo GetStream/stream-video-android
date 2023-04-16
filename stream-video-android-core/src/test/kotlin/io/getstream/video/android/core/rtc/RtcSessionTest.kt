@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core
+package io.getstream.video.android.core.rtc
 
 import com.google.common.truth.Truth
+import io.getstream.video.android.core.ConnectionState
+import io.getstream.video.android.core.IntegrationTestBase
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.events.SFUConnectedEvent
