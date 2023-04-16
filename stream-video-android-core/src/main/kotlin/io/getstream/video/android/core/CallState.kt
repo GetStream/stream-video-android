@@ -115,6 +115,9 @@ public class CallState(val call: Call, user: User) {
 
     private val _screenSharingTrack: MutableStateFlow<TrackWrapper?> = MutableStateFlow(null)
 
+    private val userToSessionIdMap = participants.mapState { participants ->
+        participants.map { it.user.value.id to it.sessionId }.toMap()
+    }
 
     // TODO: maybe this should just be a list of string, seems more forward compatible
     private val _ownCapabilities: MutableStateFlow<List<OwnCapability>> =
@@ -149,6 +152,8 @@ public class CallState(val call: Call, user: User) {
     internal val _reactions = MutableStateFlow<List<ReactionResponse>>(emptyList())
     val reactions: StateFlow<List<ReactionResponse>> = _reactions
 
+    internal val _permissionRequests = MutableStateFlow<List<PermissionRequestEvent>>(emptyList())
+    val permissionRequests: StateFlow<List<PermissionRequestEvent>> = _permissionRequests
 
     private val _errors: MutableStateFlow<List<ErrorEvent>> =
         MutableStateFlow(emptyList())
@@ -241,9 +246,13 @@ public class CallState(val call: Call, user: User) {
                 // we don't do anything with this, handled by the socket
             }
             is PermissionRequestEvent -> {
-                // TODO: define the behaviour/UI for requesting permissions
+                val newRequests = _permissionRequests.value.toMutableList()
+                newRequests.add(event)
+                _permissionRequests.value = newRequests
             }
-            is CallMemberUpdatedPermissionEvent -> TODO()
+            is CallMemberUpdatedPermissionEvent -> {
+                _capabilitiesByRole.value = event.capabilitiesByRole
+            }
 
             is CallMemberAddedEvent -> {
                 getOrCreateMembers(event.members)
@@ -254,6 +263,17 @@ public class CallState(val call: Call, user: User) {
                 _reactions.value = reactions
                 val user = event.reaction.user
                 // get the participants for this user
+                val userToSessionIdMap = userToSessionIdMap.value
+                val sessionId = userToSessionIdMap[user.id]
+                sessionId?.let {
+                    val participant = getParticipant(sessionId)
+                    participant?.let {
+                        val newReactions = participant._reactions.value.toMutableList()
+                        newReactions.add(event.reaction)
+                        participant._reactions.value = newReactions
+                    }
+                }
+
 
 
             }

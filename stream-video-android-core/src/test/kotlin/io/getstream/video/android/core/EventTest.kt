@@ -254,13 +254,35 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
     @Test
     fun `Permission request event`() = runTest {
+        val permissionRequestEvent = PermissionRequestEvent(
+            callCid=call.cid,
+            createdAt=nowUtc,
+            type="call.permission_request",
+            permissions = mutableListOf("screenshare"),
+            user = testData.users["thierry"]!!.toUserResponse()
+        )
+        clientImpl.fireEvent(permissionRequestEvent)
+        assertThat(call.state.permissionRequests.value).contains(permissionRequestEvent)
+    }
 
-
+    @Test
+    fun `Call member permissions updated`() = runTest {
+        //TODO: Implement call to response
+//        val event = CallMemberUpdatedPermissionEvent(
+//            callCid=call.cid,
+//            createdAt=nowUtc,
+//            type="call.updated_permission",
+//            capabilitiesByRole = mutableMapOf("admin" to mutableListOf("end-call", "create-call")),
+//        )
+//        clientImpl.fireEvent(event)
+//        assertThat(call.state.capabilitiesByRole.value).isEqualTo(event.capabilitiesByRole)
     }
 
     @Test
     fun `Member added or removed event`() = runTest {
-
+//        val event = CallMemberAddedEvent(
+//            callCid = call.cid
+//        )
 
     }
 
@@ -278,39 +300,15 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
         )
         clientImpl.fireEvent(reactionEvent)
         // reactions are sometimes shown on the given participant's UI
-        TODO()
+        val participant = call.state.getParticipant("thierry")
+        assertThat(participant!!.reactions.value.map { it.type }).contains("like")
 
         // other times they will be show on the main call UI
         assertThat(call.state.reactions.value.map { it.type }).contains("like")
     }
 
-    @Test
-    fun `Update and delete members`() = runTest {
-        val call = client.call("default", randomUUID())
-        // TODO: call details/ call info structure is super weird
-//        val callUser = CallUser(id="thierry")
-//        val callInfo = CallInfo()
-//        val callDetails = CallDetails(mutableListOf("thierry"), mutableMapOf("thierry" to callUser), emptyList())
-//        val eventUpdated = CallMembersUpdatedEvent(emptyMap(), info=callInfo, details=callDetails)
-//        clientImpl.fireEvent(eventUpdated)
-        // TODO clean this up val eventDeleted = CallMembersDeletedEvent(user_id="thierry", is_speaking=true)
-    }
 }
 
-//private fun Call.toResponse(): CallResponse {
-//    return CallResponse(
-//        backstage = false,
-//        blockedUserIds = emptyList(),
-//        broadcasting = false,
-//        cid=cid,
-//        createdAt =,
-//        createdBy = ,
-//            custom = custom,
-//        id=id,
-//    recording=false,
-//        transcribing=false,
-//    )
-//}
 
 private fun User.toUserResponse(): UserResponse {
     return UserResponse(

@@ -165,6 +165,7 @@
 - List of error codes via openapi
 - getCall doesn't support member limits
 - ReactionResponse, custom should be optional
+- CallMemberUpdatedPermissionEvent. Weird that call and members are included
 
 ### Available tasks up for grabs
 
