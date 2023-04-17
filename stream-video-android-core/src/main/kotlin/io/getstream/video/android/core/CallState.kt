@@ -55,6 +55,7 @@ import org.openapitools.client.models.CallRecordingStoppedEvent
 import org.openapitools.client.models.CallRejectedEvent
 import org.openapitools.client.models.CallResponse
 import org.openapitools.client.models.CallSettingsResponse
+import org.openapitools.client.models.CallStateResponseFields
 import org.openapitools.client.models.CallUpdatedEvent
 import org.openapitools.client.models.ConnectedEvent
 import org.openapitools.client.models.CustomVideoEvent
@@ -576,15 +577,6 @@ public class CallState(private val call: Call, user: User) {
         updateFromResponse(response.call)
     }
 
-    /**
-     * @see MemberResponse
-     * @see CallUser
-     */
-    fun updateFromResponse(response: CallData) {
-        // note that the member response is different
-        // @see MemberResponse
-    }
-
     fun updateFromResponse(response: GetCallResponse) {
         updateFromResponse(response.call)
         updateFromResponse(response.members)
@@ -597,6 +589,12 @@ public class CallState(private val call: Call, user: User) {
 
     fun getMember(userId: String): MemberState? {
         return _members.value[userId]
+    }
+
+    fun updateFromResponse(callData: CallStateResponseFields) {
+        updateFromResponse(callData.call)
+        updateFromResponse(callData.members)
+        // TODO: what about the blocked users?
     }
 }
 
