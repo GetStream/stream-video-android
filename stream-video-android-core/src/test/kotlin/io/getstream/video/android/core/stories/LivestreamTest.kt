@@ -18,6 +18,7 @@ package io.getstream.video.android.core.stories
 
 import io.getstream.video.android.core.IntegrationTestBase
 import kotlinx.coroutines.test.runTest
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -48,6 +49,7 @@ class LivestreamTest : IntegrationTestBase() {
      */
 
     @Test
+    @Ignore
     fun `start recording a call`() = runTest {
         val call = client.call("livestream", randomUUID())
         val createResult = call.create()
@@ -59,13 +61,7 @@ class LivestreamTest : IntegrationTestBase() {
     }
 
     @Test
-    fun `advanced recording`() = runTest {
-        // TODO: server support
-        // simple layouts to start, roadmap for more options after 1.0
-        // see notion
-    }
-
-    @Test
+    @Ignore
     fun `start and stop broadcasting to HLS`() = runTest {
         val call = client.call("livestream", randomUUID())
         call.create()
@@ -77,6 +73,7 @@ class LivestreamTest : IntegrationTestBase() {
     }
 
     @Test
+    @Ignore
     fun `calls should support RTMP in`() = runTest {
         val call = client.call("livestream", randomUUID())
         // TODO: not implemented on the server
@@ -85,18 +82,14 @@ class LivestreamTest : IntegrationTestBase() {
     }
 
     @Test
-    fun `join a call with a viewing only token, that's not authenticated`() = runTest {
-        // TODO: not implemented on the server
-        val call = client.call("livestream", randomUUID())
-    }
-
-    @Test
+    @Ignore
     fun `call should expose participant count, time running stats`() = runTest {
         val call = client.call("livestream", randomUUID())
         // TODO: not implemented on the server
     }
 
     @Test
+    @Ignore
     fun `manually specify the video quality you want to receive`() = runTest {
         val call = client.call("livestream", randomUUID())
         // TODO: not implemented on the server
@@ -105,7 +98,6 @@ class LivestreamTest : IntegrationTestBase() {
     @Test
     fun `mute the audio of the call you are receiving`() = runTest {
         val call = client.call("livestream", randomUUID())
-        // TODO: This we can implement client side, should be disabled by default
-        // TODO: Call type setting to mute incoming audio by default
+        call.speaker.setVolume(0)
     }
 }

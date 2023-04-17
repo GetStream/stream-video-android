@@ -80,6 +80,7 @@ import org.openapitools.client.models.JoinCallResponse
 import org.openapitools.client.models.ListRecordingsResponse
 import org.openapitools.client.models.MemberRequest
 import org.openapitools.client.models.MuteUsersResponse
+import org.openapitools.client.models.QueryCallsResponse
 import org.openapitools.client.models.RequestPermissionRequest
 import org.openapitools.client.models.SendEventRequest
 import org.openapitools.client.models.SendEventResponse
@@ -303,8 +304,15 @@ internal class StreamVideoImpl internal constructor(
         return scope.async {
             // wait for the guest user setup if we're using guest users
             guestUserJob?.let { it.await() }
-            val result = socketImpl.connect()
-            result
+            try {
+                val result = socketImpl.connect()
+                result
+            } catch (e: ErrorResponse) {
+                if (e.code == 40) {
+                    TODO("Token should be refreshed")
+                }
+            }
+
         }
     }
 
@@ -723,12 +731,12 @@ internal class StreamVideoImpl internal constructor(
     /**
      * @see StreamVideo.queryCalls
      */
-    override suspend fun queryCalls(queryCallsData: QueryCallsData): Result<QueriedCalls> {
+    override suspend fun queryCalls(queryCallsData: QueryCallsData): Result<QueryCallsResponse> {
         logger.d { "[queryCalls] queryCallsData: $queryCallsData" }
         val request = queryCallsData.toRequest()
         val connectionId = connectionModule.coordinatorSocket.connectionId
         val result = wrapAPICall {
-            connectionModule.videoCallsApi.queryCalls(request, connectionId).toQueriedCalls()
+            connectionModule.videoCallsApi.queryCalls(request, connectionId)
         }
         if (result.isSuccess) {
             // update state for these calls

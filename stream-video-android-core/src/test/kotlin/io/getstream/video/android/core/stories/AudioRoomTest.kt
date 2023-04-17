@@ -71,7 +71,7 @@ class AudioRoomTest : IntegrationTestBase() {
     }
 
     @Test
-    fun `maybe send a reaction`() = runTest {
+    fun `send a reaction`() = runTest {
         val response = call.sendReaction(SendReactionData("raise-hand"))
         assertSuccess(response)
     }
@@ -80,17 +80,6 @@ class AudioRoomTest : IntegrationTestBase() {
     fun `for audio rooms it's common to request permissions`() = runTest {
         val result = call.requestPermissions("screenshare", "send-audio")
         assertSuccess(result)
-    }
-
-    @Test
-    fun `sometimes listeners will join as an anonymous user`() = runTest {
-        // TODO support and test this
-    }
-
-    @Test
-    fun `sometimes listeners with a call only token`() = runTest {
-
-        // TODO: call only token
     }
 
     @Test
