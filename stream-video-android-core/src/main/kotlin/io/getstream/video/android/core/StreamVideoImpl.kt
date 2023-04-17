@@ -124,7 +124,7 @@ internal class StreamVideoImpl internal constructor(
     private val loggingLevel: LoggingLevel,
     internal val connectionModule: ConnectionModule,
     internal val pushDeviceGenerators: List<PushDeviceGenerator>,
-    internal val tokenProvider: ((error: Error.NetworkError) -> String)?,
+    internal val tokenProvider: ((error: Throwable?) -> String)?,
     internal val preferences: UserPreferences,
 ) : StreamVideo {
 
@@ -182,7 +182,8 @@ internal class StreamVideoImpl internal constructor(
                     // invalid token
                     // val newToken = tokenProvider.getToken()
                     if (tokenProvider != null) {
-                        val newToken = tokenProvider.invoke(parsedError)
+                        // TODO - handle this better, error structure is not great right now
+                        val newToken = tokenProvider.invoke(null)
                         preferences.storeUserToken(newToken)
                         connectionModule.updateToken(newToken)
                     }
@@ -327,7 +328,15 @@ internal class StreamVideoImpl internal constructor(
                 result
             } catch (e: ErrorResponse) {
                 if (e.code == 40) {
-                    TODO("Token should be refreshed")
+                    // refresh the the token
+                    if (tokenProvider != null) {
+                        val newToken = tokenProvider.invoke(e)
+                        preferences.storeUserToken(newToken)
+                        connectionModule.updateToken(newToken)
+                    }
+                    // quickly reconnect with the new token
+                    val result = socketImpl.reconnect(0)
+                    result
                 }
             }
 
@@ -857,7 +866,6 @@ internal class StreamVideoImpl internal constructor(
         id: String,
         sessionId: String
     ): Result<ListRecordingsResponse> {
-        // TODO: Result structure isn't flexible
         return wrapAPICall {
             val result = connectionModule.recordingApi.listRecordings(type, id, sessionId)
             result

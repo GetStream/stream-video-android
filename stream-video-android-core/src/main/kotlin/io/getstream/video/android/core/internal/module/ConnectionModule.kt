@@ -207,6 +207,9 @@ internal class ConnectionModule(
     }
 
     fun updateToken(newToken: String) {
+        // the coordinator socket also needs to update the token
+        coordinatorSocket.token = newToken
+        // update the auth token as well
         authInterceptor.token = newToken
     }
 

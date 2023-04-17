@@ -36,7 +36,7 @@ import org.openapitools.client.models.WSAuthMessageRequest
 public class CoordinatorSocket(
     private val url: String,
     private val user: User,
-    private val token: String,
+    internal var token: String,
     private val scope: CoroutineScope = CoroutineScope(DispatcherProvider.IO),
     private val httpClient: OkHttpClient,
     private val networkStateProvider: NetworkStateProvider,

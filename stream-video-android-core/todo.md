@@ -18,6 +18,7 @@
 
 ### LLC TODO
 
+- [ ] Error.NetworkError vs ErrorResponse. Having 2 classes is confusing
 - [ ] Clean up tests
 - [ ] Test coverage
 - [ ] Remove unused code
@@ -37,7 +38,7 @@
 
 ### State TODO
 
-- [ ] Call settings need to be used everywhere. There are still some hardcoded settings
+- [X] Call settings need to be used everywhere. There are still some hardcoded settings
 - [X] Member state isn't implemented fully. Could be either a state or just a data class
 - [X] Call state isn't setup fully on join
 - [X] Member state isn't updated correctly or implemented
@@ -50,8 +51,8 @@
 - [X] MemberState
 - [X] ConnectionModule
 - [X] Call
-- [ ] CallState
 - [ ] StreamVideoImpl
+- [ ] CallState
 
 ### TODOs
 
@@ -130,6 +131,7 @@
 ### RTC TODO
 
 - [X] Media manager class to enable easy testing of all audio/video stuff
+- [ ] Leave & End flows
 - [ ] Move muting and clean it up
 - [ ] Review how UI changes & pagination are connected to the video tracks. See call initRenderer
 - [ ] Implement dynascale
@@ -176,4 +178,3 @@
 - Currently we use UserPreferencesManager. Jaewoong mentioned we should perhaps explore https://developer.android.com/topic/libraries/architecture/datastore
 - Measure latency isn't 100% ok. You can't set a timeout using withTimeout and collect the measurements that we have. This relates to threading vs coroutines and withTimeout not working
 - Disconnect/ garbage collect flow needs a full round of review
-- MediaManager needs a full review and cleanup
