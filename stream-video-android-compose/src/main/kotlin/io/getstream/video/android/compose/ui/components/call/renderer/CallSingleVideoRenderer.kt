@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.participants
+package io.getstream.video.android.compose.ui.components.call.renderer
 
 import android.view.View
 import androidx.compose.foundation.BorderStroke
@@ -51,6 +51,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.common.model.getSoundIndicatorState
 import io.getstream.video.android.common.util.MockUtils
+import io.getstream.video.android.common.util.mockCall
 import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.common.util.mockVideoTrackWrapper
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -73,8 +74,8 @@ import stream.video.sfu.models.TrackType
  * @param onRender Handler when the Video renders.
  */
 @Composable
-public fun CallParticipant(
-    call: Call?,
+public fun CallSingleVideoRenderer(
+    call: Call,
     participant: ParticipantState,
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues = PaddingValues(0.dp),
@@ -110,7 +111,7 @@ public fun CallParticipant(
             }
         }
     ) {
-        ParticipantVideo(call = call, participant = participant, onRender = onRender)
+        ParticipantVideoRenderer(call = call, participant = participant, onRender = onRender)
 
         ParticipantLabel(participant, labelPosition)
 
@@ -125,8 +126,8 @@ public fun CallParticipant(
 }
 
 @Composable
-internal fun ParticipantVideo(
-    call: Call?,
+internal fun ParticipantVideoRenderer(
+    call: Call,
     participant: ParticipantState,
     onRender: (View) -> Unit
 ) {
@@ -138,7 +139,7 @@ internal fun ParticipantVideo(
         false
     }
 
-    if ((LocalInspectionMode.current || call == null)) {
+    if ((LocalInspectionMode.current)) {
         VideoRenderer(
             modifier = Modifier.fillMaxSize(),
             call = call,
@@ -225,8 +226,8 @@ internal fun BoxScope.ParticipantLabel(
 private fun CallParticipantPreview() {
     MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        CallParticipant(
-            call = null,
+        CallSingleVideoRenderer(
+            call = mockCall,
             participant = mockParticipants[1],
             isFocused = true
         )
@@ -252,8 +253,8 @@ private fun ParticipantLabelPreview() {
 private fun ParticipantVideoPreview() {
     MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        ParticipantVideo(
-            call = null,
+        ParticipantVideoRenderer(
+            call = mockCall,
             participant = mockParticipants[1],
         ) {}
     }

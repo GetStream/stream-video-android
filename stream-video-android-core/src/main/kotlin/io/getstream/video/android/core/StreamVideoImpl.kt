@@ -33,11 +33,9 @@ import io.getstream.video.android.core.lifecycle.LifecycleHandler
 import io.getstream.video.android.core.lifecycle.internal.StreamLifecycleObserver
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.CallEventType
-import io.getstream.video.android.core.model.CallMetadata
 import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.core.model.Device
 import io.getstream.video.android.core.model.EdgeData
-import io.getstream.video.android.core.model.JoinedCall
 import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.QueriedCalls
 import io.getstream.video.android.core.model.QueryCallsData
@@ -46,7 +44,6 @@ import io.getstream.video.android.core.model.SendReactionData
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.mapper.toTypeAndId
-import io.getstream.video.android.core.model.toIceServer
 import io.getstream.video.android.core.model.toRequest
 import io.getstream.video.android.core.socket.ErrorResponse
 import io.getstream.video.android.core.socket.SocketState
@@ -58,7 +55,6 @@ import io.getstream.video.android.core.utils.getLatencyMeasurementsOKHttp
 import io.getstream.video.android.core.utils.toCallUser
 import io.getstream.video.android.core.utils.toEdge
 import io.getstream.video.android.core.utils.toQueriedCalls
-import io.getstream.video.android.core.utils.toRecording
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -68,7 +64,35 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import org.openapitools.client.models.*
+import org.openapitools.client.models.BlockUserRequest
+import org.openapitools.client.models.BlockUserResponse
+import org.openapitools.client.models.CallRequest
+import org.openapitools.client.models.CallSettingsRequest
+import org.openapitools.client.models.ConnectedEvent
+import org.openapitools.client.models.GetCallEdgeServerRequest
+import org.openapitools.client.models.GetCallEdgeServerResponse
+import org.openapitools.client.models.GetCallResponse
+import org.openapitools.client.models.GetOrCreateCallRequest
+import org.openapitools.client.models.GetOrCreateCallResponse
+import org.openapitools.client.models.GoLiveResponse
+import org.openapitools.client.models.JoinCallRequest
+import org.openapitools.client.models.JoinCallResponse
+import org.openapitools.client.models.ListRecordingsResponse
+import org.openapitools.client.models.MemberRequest
+import org.openapitools.client.models.MuteUsersResponse
+import org.openapitools.client.models.RequestPermissionRequest
+import org.openapitools.client.models.SendEventRequest
+import org.openapitools.client.models.SendEventResponse
+import org.openapitools.client.models.SendReactionResponse
+import org.openapitools.client.models.StopLiveResponse
+import org.openapitools.client.models.UnblockUserRequest
+import org.openapitools.client.models.UpdateCallMembersRequest
+import org.openapitools.client.models.UpdateCallMembersResponse
+import org.openapitools.client.models.UpdateCallRequest
+import org.openapitools.client.models.UpdateCallResponse
+import org.openapitools.client.models.UpdateUserPermissionsResponse
+import org.openapitools.client.models.VideoEvent
+import org.openapitools.client.models.WSCallEvent
 import retrofit2.HttpException
 import stream.video.coordinator.client_v1_rpc.CreateDeviceRequest
 import stream.video.coordinator.client_v1_rpc.DeleteDeviceRequest
@@ -156,16 +180,15 @@ internal class StreamVideoImpl internal constructor(
                 if (parsedError.serverErrorCode == VideoErrorCode.TOKEN_EXPIRED.code) {
                     // invalid token
                     // val newToken = tokenProvider.getToken()
-                    if (tokenProvider!= null) {
+                    if (tokenProvider != null) {
                         val newToken = tokenProvider.invoke(parsedError)
                         preferences.storeUserToken(newToken)
                         connectionModule.updateToken(newToken)
-
                     }
                     // retry the API call once
                     try {
                         Success(apiCall())
-                    }catch (e: HttpException){
+                    } catch (e: HttpException) {
                         parseError(e)
                     }
 
@@ -174,7 +197,6 @@ internal class StreamVideoImpl internal constructor(
                 } else {
                     failure
                 }
-
             }
         }
     }
@@ -263,6 +285,7 @@ internal class StreamVideoImpl internal constructor(
                         }
                     }
                 }
+
                 override fun stopped() {
                     // We should only disconnect if we were previously connected
                     if (connectionModule.coordinatorSocket.connectionState.value != SocketState.NotConnected) {
@@ -288,11 +311,10 @@ internal class StreamVideoImpl internal constructor(
                 if (developmentMode) {
                     throw it
                 } else {
-                    logger.e(it) { "permanent failure on socket connection"}
+                    logger.e(it) { "permanent failure on socket connection" }
                 }
             }
         }
-
     }
 
     suspend fun connectAsync(): Deferred<Unit> {
@@ -460,8 +482,8 @@ internal class StreamVideoImpl internal constructor(
             settingsOverride = settingsOverride,
             startsAt = startsAt,
             team = team,
-            ring = ring)
-
+            ring = ring
+        )
     }
 
     internal suspend fun getOrCreateCallFullMembers(
@@ -492,7 +514,6 @@ internal class StreamVideoImpl internal constructor(
                 )
             )
         }
-
     }
 
     /**
@@ -550,19 +571,30 @@ internal class StreamVideoImpl internal constructor(
         }
     }
 
-    suspend fun joinCall(type: String, id: String, create: Boolean= false, members: List<MemberRequest>? = null,
-                         custom: Map<String, Any>? = null,
-                         settingsOverride: CallSettingsRequest? = null,
-                         startsAt: org.threeten.bp.OffsetDateTime? = null,
-                         team: String? = null,
-                         ring: Boolean = false): Result<JoinCallResponse> {
+    suspend fun joinCall(
+        type: String,
+        id: String,
+        create: Boolean = false,
+        members: List<MemberRequest>? = null,
+        custom: Map<String, Any>? = null,
+        settingsOverride: CallSettingsRequest? = null,
+        startsAt: org.threeten.bp.OffsetDateTime? = null,
+        team: String? = null,
+        ring: Boolean = false
+    ): Result<JoinCallResponse> {
 
         val joinCallRequest = JoinCallRequest(
-            create=create,
-            data = CallRequest(members=members, custom=custom, settingsOverride=settingsOverride, startsAt=startsAt, team=team),
-            ring=ring,
+            create = create,
+            data = CallRequest(
+                members = members,
+                custom = custom,
+                settingsOverride = settingsOverride,
+                startsAt = startsAt,
+                team = team
+            ),
+            ring = ring,
         )
-        
+
         val result = wrapAPICall {
             connectionModule.videoCallsApi.joinCallTypeId0(
                 type,
@@ -574,7 +606,11 @@ internal class StreamVideoImpl internal constructor(
         return result
     }
 
-    suspend fun updateMembers(type: String, id: String, request: UpdateCallMembersRequest): Result<UpdateCallMembersResponse> {
+    suspend fun updateMembers(
+        type: String,
+        id: String,
+        request: UpdateCallMembersRequest
+    ): Result<UpdateCallMembersResponse> {
         return wrapAPICall {
             connectionModule.videoCallsApi.updateCallMembers(type, id, request)
         }
@@ -727,7 +763,6 @@ internal class StreamVideoImpl internal constructor(
                 it.calls.forEach { callData ->
                     val call = this.call(callData.call.type, callData.call.id)
                     call.state.updateFromResponse(callData)
-
                 }
             }
         }
@@ -877,7 +912,6 @@ internal class StreamVideoImpl internal constructor(
     suspend fun acceptCall(type: String, id: String) {
         TODO("Not yet implemented")
     }
-
 
     /**
      * @see StreamVideo.rejectCall

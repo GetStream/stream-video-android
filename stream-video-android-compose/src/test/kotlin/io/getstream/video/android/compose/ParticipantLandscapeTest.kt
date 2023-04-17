@@ -26,15 +26,16 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
+import io.getstream.video.android.common.util.mockCall
 import io.getstream.video.android.common.util.mockParticipant
 import io.getstream.video.android.common.util.mockParticipantList
 import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.common.util.mockVideoTrackWrapper
 import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.participants.internal.LandscapeParticipants
-import io.getstream.video.android.compose.ui.components.participants.internal.LandscapeScreenSharingContent
-import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantsRow
+import io.getstream.video.android.compose.ui.components.call.renderer.internal.LandscapeScreenSharingVideoRenderer
+import io.getstream.video.android.compose.ui.components.call.renderer.internal.LandscapeVideoRenderer
+import io.getstream.video.android.compose.ui.components.call.renderer.internal.LazyRowVideoRenderer
 import io.getstream.video.android.core.model.ScreenSharingSession
 import org.junit.Rule
 import org.junit.Test
@@ -57,8 +58,8 @@ internal class ParticipantLandscapeTest : BaseComposeTest() {
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.appBackground)
             ) {
-                LandscapeParticipants(
-                    call = null,
+                LandscapeVideoRenderer(
+                    call = mockCall,
                     primarySpeaker = participants[0],
                     callParticipants = participants.take(1),
                     modifier = Modifier.fillMaxSize(),
@@ -80,8 +81,8 @@ internal class ParticipantLandscapeTest : BaseComposeTest() {
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.appBackground)
             ) {
-                LandscapeParticipants(
-                    call = null,
+                LandscapeVideoRenderer(
+                    call = mockCall,
                     primarySpeaker = participants[0],
                     callParticipants = participants.take(2),
                     modifier = Modifier.fillMaxSize(),
@@ -103,8 +104,8 @@ internal class ParticipantLandscapeTest : BaseComposeTest() {
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.appBackground)
             ) {
-                LandscapeParticipants(
-                    call = null,
+                LandscapeVideoRenderer(
+                    call = mockCall,
                     primarySpeaker = participants[0],
                     callParticipants = participants.take(3),
                     modifier = Modifier.fillMaxSize(),
@@ -126,8 +127,8 @@ internal class ParticipantLandscapeTest : BaseComposeTest() {
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.appBackground)
             ) {
-                LandscapeParticipants(
-                    call = null,
+                LandscapeVideoRenderer(
+                    call = mockCall,
                     primarySpeaker = participants[0],
                     callParticipants = participants.take(4),
                     modifier = Modifier.fillMaxSize(),
@@ -149,8 +150,8 @@ internal class ParticipantLandscapeTest : BaseComposeTest() {
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.appBackground)
             ) {
-                LandscapeParticipants(
-                    call = null,
+                LandscapeVideoRenderer(
+                    call = mockCall,
                     primarySpeaker = participants[0],
                     callParticipants = participants.take(5),
                     modifier = Modifier.fillMaxSize(),
@@ -172,8 +173,8 @@ internal class ParticipantLandscapeTest : BaseComposeTest() {
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.appBackground)
             ) {
-                LandscapeParticipants(
-                    call = null,
+                LandscapeVideoRenderer(
+                    call = mockCall,
                     primarySpeaker = participants[0],
                     callParticipants = participants.take(6),
                     modifier = Modifier.fillMaxSize(),
@@ -187,8 +188,8 @@ internal class ParticipantLandscapeTest : BaseComposeTest() {
     @Test
     fun `snapshot LandscapeScreenSharingContent for other participant composable`() {
         snapshot(isInDarkMode = true) {
-            LandscapeScreenSharingContent(
-                call = null,
+            LandscapeScreenSharingVideoRenderer(
+                call = mockCall,
                 session = ScreenSharingSession(
                     track = mockParticipantList[1].videoTrackWrapped ?: mockVideoTrackWrapper,
                     participant = mockParticipantList[1]
@@ -207,8 +208,8 @@ internal class ParticipantLandscapeTest : BaseComposeTest() {
     @Test
     fun `snapshot LandscapeScreenSharingContent for myself composable`() {
         snapshot(isInDarkMode = true) {
-            LandscapeScreenSharingContent(
-                call = null,
+            LandscapeScreenSharingVideoRenderer(
+                call = mockCall,
                 session = ScreenSharingSession(
                     track = mockParticipantList[0].videoTrackWrapped ?: mockVideoTrackWrapper,
                     participant = mockParticipantList[0]
@@ -227,8 +228,8 @@ internal class ParticipantLandscapeTest : BaseComposeTest() {
     @Test
     fun `snapshot ParticipantsRow composable`() {
         snapshotWithDarkMode {
-            ParticipantsRow(
-                call = null,
+            LazyRowVideoRenderer(
+                call = mockCall,
                 participants = mockParticipantList,
                 primarySpeaker = mockParticipant,
             )

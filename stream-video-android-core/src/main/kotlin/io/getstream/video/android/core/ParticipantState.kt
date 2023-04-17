@@ -17,7 +17,6 @@
 package io.getstream.video.android.core
 
 import io.getstream.result.Result
-import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.utils.mapState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -145,18 +144,17 @@ public data class ParticipantState(
     internal val _reactions = MutableStateFlow<List<ReactionResponse>>(emptyList())
     val reactions: StateFlow<List<ReactionResponse>> = _reactions
 
-
     open suspend fun muteAudio(): Result<MuteUsersResponse> {
         // how do i mute another user?
-        return call.muteUser(user.value.id, audio=true, video=false, screenShare = false)
+        return call.muteUser(user.value.id, audio = true, video = false, screenShare = false)
     }
 
     open suspend fun muteVideo(): Result<MuteUsersResponse> {
-        return call.muteUser(user.value.id, audio=false, video=true, screenShare = false)
+        return call.muteUser(user.value.id, audio = false, video = true, screenShare = false)
     }
 
     open suspend fun muteScreenshare(): Result<MuteUsersResponse> {
-        return call.muteUser(user.value.id, audio=false, video=false, screenShare = true)
+        return call.muteUser(user.value.id, audio = false, video = false, screenShare = true)
     }
 
     fun updateFromParticipantInfo(participant: Participant) {

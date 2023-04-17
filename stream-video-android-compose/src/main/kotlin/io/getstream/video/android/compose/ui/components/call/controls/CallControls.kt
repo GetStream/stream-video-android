@@ -28,13 +28,13 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.controls.internal.LandscapeCallControls
 import io.getstream.video.android.compose.ui.components.call.controls.internal.RegularCallControls
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.call.state.CallMediaState
+import io.getstream.video.android.core.call.state.CallDeviceState
 
 /**
  * Represents the set of controls the user can use to change their audio and video device state, or
  * browse other types of settings, leave the call, or implement something custom.
  *
- * @param callMediaState The state of the media devices for the current user.
+ * @param callDeviceState The state of the media devices for the current user.
  * @param isScreenSharing If there is a screen sharing session active.
  * @param modifier Modifier for styling.
  * @param actions Actions to show to the user with different controls.
@@ -42,10 +42,10 @@ import io.getstream.video.android.core.call.state.CallMediaState
  */
 @Composable
 public fun CallControls(
-    callMediaState: CallMediaState,
+    callDeviceState: CallDeviceState,
     isScreenSharing: Boolean,
     modifier: Modifier = Modifier,
-    actions: List<CallControlAction> = buildDefaultCallControlActions(callMediaState = callMediaState),
+    actions: List<CallControlAction> = buildDefaultCallControlActions(callDeviceState = callDeviceState),
     onCallAction: (CallAction) -> Unit
 ) {
     val orientation = LocalConfiguration.current.orientation
@@ -53,7 +53,7 @@ public fun CallControls(
     if (orientation == ORIENTATION_PORTRAIT) {
         RegularCallControls(
             modifier = modifier,
-            callMediaState = callMediaState,
+            callDeviceState = callDeviceState,
             isScreenSharing = isScreenSharing,
             onCallAction = onCallAction,
             actions = actions
@@ -61,7 +61,7 @@ public fun CallControls(
     } else if (orientation == ORIENTATION_LANDSCAPE) {
         LandscapeCallControls(
             modifier = modifier,
-            callMediaState = callMediaState,
+            callDeviceState = callDeviceState,
             onCallAction = onCallAction,
             isScreenSharing = true,
             actions = actions
@@ -75,13 +75,13 @@ private fun CallControlsPreview() {
     Column {
         VideoTheme {
             CallControls(
-                callMediaState = CallMediaState(),
+                callDeviceState = CallDeviceState(),
                 isScreenSharing = false
             ) {}
         }
         VideoTheme(isInDarkMode = true) {
             CallControls(
-                callMediaState = CallMediaState(),
+                callDeviceState = CallDeviceState(),
                 isScreenSharing = false
             ) {}
         }

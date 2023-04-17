@@ -247,10 +247,8 @@ class LoginActivity : ComponentActivity() {
             // Read and print the input
             val inputStream = BufferedReader(InputStreamReader(connection.getInputStream()))
             val response = inputStream.readLines().toString()
-            
+
             inputStream.close()
-
-
 
             val userPreferences = UserPreferencesManager.initialize(applicationContext)
             userPreferences.storeUserToken(response)

@@ -19,7 +19,6 @@ package io.getstream.video.android.dogfooding
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import io.getstream.log.taggedLogger
@@ -52,19 +51,19 @@ class DeeplinkingActivity : AppCompatActivity() {
 
     private fun joinCall(callId: String) {
         lifecycleScope.launch {
-            val createCallResult = controller.joinCall("default", callId)
-
-            createCallResult.onSuccess {
-                /**
-                 * Since we're using launchers, we don't need to worry about starting the
-                 * CallActivity ourselves.
-                 */
-                Log.d("Joined", it.toString())
-            }
-            createCallResult.onError {
-                Log.d("Couldn't select server", it.message ?: "")
-                Toast.makeText(this@DeeplinkingActivity, it.message, Toast.LENGTH_SHORT).show()
-            }
+//            val createCallResult = controller.joinCall("default", callId)
+//
+//            createCallResult.onSuccess {
+//                /**
+//                 * Since we're using launchers, we don't need to worry about starting the
+//                 * CallActivity ourselves.
+//                 */
+//                Log.d("Joined", it.toString())
+//            }
+//            createCallResult.onError {
+//                Log.d("Couldn't select server", it.message ?: "")
+//                Toast.makeText(this@DeeplinkingActivity, it.message, Toast.LENGTH_SHORT).show()
+//            }
         }
     }
 

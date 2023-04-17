@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.participants.internal
+package io.getstream.video.android.compose.ui.components.call.renderer.internal
 
 import android.content.res.Configuration
 import android.view.View
@@ -34,6 +34,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.common.util.MockUtils
+import io.getstream.video.android.common.util.mockCall
 import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.common.util.mockVideoTrackWrapper
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -54,8 +55,8 @@ import io.getstream.video.android.core.model.ScreenSharingSession
  * @param onRender Handler when the video renders.
  */
 @Composable
-internal fun PortraitScreenSharingContent(
-    call: Call?,
+internal fun PortraitScreenSharingVideoRenderer(
+    call: Call,
     session: ScreenSharingSession,
     participants: List<ParticipantState>,
     primarySpeaker: ParticipantState?,
@@ -78,7 +79,7 @@ internal fun PortraitScreenSharingContent(
                 .fillMaxWidth()
                 .weight(1f)
         ) {
-            ScreenShareContent(
+            ScreenShareVideoRenderer(
                 modifier = Modifier.fillMaxWidth(),
                 call = call,
                 session = session,
@@ -97,7 +98,7 @@ internal fun PortraitScreenSharingContent(
 
         Spacer(modifier = Modifier.height(VideoTheme.dimens.screenShareParticipantsScreenShareListMargin))
 
-        ParticipantsRow(
+        LazyRowVideoRenderer(
             modifier = Modifier.height(VideoTheme.dimens.screenShareParticipantsRowHeight),
             call = call,
             primarySpeaker = primarySpeaker,
@@ -112,8 +113,8 @@ internal fun PortraitScreenSharingContent(
 private fun PortraitScreenSharingContentPreview() {
     MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        PortraitScreenSharingContent(
-            call = null,
+        PortraitScreenSharingVideoRenderer(
+            call = mockCall,
             session = ScreenSharingSession(
                 track = mockParticipants[1].videoTrackWrapped ?: mockVideoTrackWrapper,
                 participant = mockParticipants[1]
@@ -134,8 +135,8 @@ private fun PortraitScreenSharingContentPreview() {
 @Composable
 private fun PortraitScreenSharingMyContentPreview() {
     VideoTheme {
-        PortraitScreenSharingContent(
-            call = null,
+        PortraitScreenSharingVideoRenderer(
+            call = mockCall,
             session = ScreenSharingSession(
                 track = mockParticipants[0].videoTrackWrapped ?: mockVideoTrackWrapper,
                 participant = mockParticipants[0]

@@ -20,24 +20,22 @@ import androidx.annotation.VisibleForTesting
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Serializer
-import kotlinx.serialization.descriptors.PrimitiveKind
-import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
-import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import org.openapitools.client.models.UserResponse
 import org.threeten.bp.OffsetDateTime
 import org.threeten.bp.format.DateTimeFormatter
 
-
 @Serializable
 sealed class UserType {
     /** A user that's authenticated in your system */
     @Serializable
     object Authenticated : UserType()
+
     /** A temporary guest user, that can have an image, name etc */
     @Serializable
     object Guest : UserType()
+
     /** Not authentication, anonymous user. Commonly used for audio rooms and livestreams */
     @Serializable
     object Anonymous : UserType()
@@ -93,6 +91,5 @@ public data class User(
             updatedAt = updatedAt ?: OffsetDateTime.now(),
             deletedAt = deletedAt,
         )
-
     }
 }

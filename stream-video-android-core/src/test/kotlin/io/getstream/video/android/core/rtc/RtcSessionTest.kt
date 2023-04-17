@@ -60,9 +60,8 @@ class RtcSessionTest : IntegrationTestBase() {
     @Test
     fun `Constraints`() = runTest {
         val mediaConstraints = buildMediaConstraints()
-        
+
         val audioConstraints = buildAudioConstraints()
-        
     }
 
     @Test
@@ -70,7 +69,6 @@ class RtcSessionTest : IntegrationTestBase() {
         val joinResult = call.join()
         assertSuccess(joinResult)
         val subscriber = call.session!!.createSubscriber()
-        
     }
 
     @Test
@@ -78,7 +76,6 @@ class RtcSessionTest : IntegrationTestBase() {
         val joinResult = call.join()
         assertSuccess(joinResult)
         val publisher = call.session!!.createPublisher()
-        
     }
 
     @Test

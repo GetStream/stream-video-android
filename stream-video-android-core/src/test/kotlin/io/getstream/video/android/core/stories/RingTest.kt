@@ -21,7 +21,8 @@ import io.getstream.video.android.core.IntegrationTestBase
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.openapitools.client.models.*
+import org.openapitools.client.models.CallAcceptedEvent
+import org.openapitools.client.models.CallRejectedEvent
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
@@ -30,7 +31,7 @@ class RingTest : IntegrationTestBase() {
     @Test
     fun `Starting a ringing call, should add it to ringing calls`() = runTest {
         val call = client.call("default", randomUUID())
-        val response = call.create(ring=true)
+        val response = call.create(ring = true)
         assertSuccess(response)
 
         assertThat(client.state.ringingCall.value).isEqualTo(call)
@@ -43,22 +44,30 @@ class RingTest : IntegrationTestBase() {
 
         // tommaso accepts
         val userResponse = testData.users["tommaso"]!!.toResponse()
-        clientImpl.fireEvent(CallAcceptedEvent(callCid = call.cid, createdAt = nowUtc, user=userResponse))
-        val tommaso = call.state.members.value.first {it.user.id=="tommaso"}
+        clientImpl.fireEvent(
+            CallAcceptedEvent(
+                callCid = call.cid,
+                createdAt = nowUtc,
+                user = userResponse
+            )
+        )
+        val tommaso = call.state.members.value.first { it.user.id == "tommaso" }
         assertThat(tommaso.acceptedAt).isNotNull()
 
         // jaewoong rejects
         val userResponse2 = testData.users["jaewoong"]!!.toResponse()
-        clientImpl.fireEvent(CallRejectedEvent(callCid = call.cid, createdAt = nowUtc, user=userResponse2))
-        val jaewoong = call.state.members.value.first {it.user.id=="jaewoong"}
+        clientImpl.fireEvent(
+            CallRejectedEvent(
+                callCid = call.cid,
+                createdAt = nowUtc,
+                user = userResponse2
+            )
+        )
+        val jaewoong = call.state.members.value.first { it.user.id == "jaewoong" }
         assertThat(tommaso.rejectedAt).isNotNull()
     }
 
     @Test
     fun `Calls should drop if nobody answers within the timeout`() = runTest {
-
     }
-
-
-
 }

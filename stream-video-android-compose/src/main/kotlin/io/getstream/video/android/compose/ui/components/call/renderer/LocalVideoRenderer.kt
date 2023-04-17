@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.participants
+package io.getstream.video.android.compose.ui.components.call.renderer
 
 import androidx.compose.animation.core.animateOffsetAsState
 import androidx.compose.foundation.Image
@@ -156,7 +156,7 @@ public fun LocalVideoContent(
                 .onGloballyPositioned { videoSize = it.size },
             shape = RoundedCornerShape(16.dp)
         ) {
-            CallParticipant(
+            CallSingleVideoRenderer(
                 modifier = Modifier
                     .fillMaxSize()
                     .clip(RoundedCornerShape(16.dp)),

@@ -18,7 +18,6 @@ package io.getstream.video.android.core.user
 
 import io.getstream.video.android.core.model.ApiKey
 import io.getstream.video.android.core.model.Device
-import io.getstream.video.android.core.model.SfuToken
 import io.getstream.video.android.core.model.User
 
 public interface UserPreferences {

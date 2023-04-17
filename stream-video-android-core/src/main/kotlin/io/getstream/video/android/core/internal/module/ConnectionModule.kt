@@ -46,7 +46,6 @@ import retrofit2.converter.scalars.ScalarsConverterFactory
 import retrofit2.converter.wire.WireConverterFactory
 import java.util.concurrent.TimeUnit
 
-
 /**
  * ConnectionModule provides several helpful attributes
  *
@@ -83,7 +82,8 @@ internal class ConnectionModule(
 
     init {
         // setup the OKHttpClient
-        authInterceptor = CoordinatorAuthInterceptor(preferences.getApiKey(), preferences.getUserToken())
+        authInterceptor =
+            CoordinatorAuthInterceptor(preferences.getApiKey(), preferences.getUserToken())
         baseUrlInterceptor = BaseUrlInterceptor(null)
 
         okHttpClient = buildOkHttpClient(
@@ -185,22 +185,31 @@ internal class ConnectionModule(
         )
     }
 
-
-    internal fun createSFUConnectionModule(    sfuUrl: String,
-                                               sessionId: String,
-                                               sfuToken: String,
-                                               getSubscriberSdp: suspend () -> String,
+    internal fun createSFUConnectionModule(
+        sfuUrl: String,
+        sessionId: String,
+        sfuToken: String,
+        getSubscriberSdp: suspend () -> String,
     ): SfuConnectionModule {
         val updatedSignalUrl = sfuUrl.removeSuffix(suffix = "/twirp")
         val baseUrl = updatedSignalUrl.toHttpUrl()
         val okHttpClient = buildOkHttpClient(preferences, baseUrl)
 
-        return SfuConnectionModule(sfuUrl, sessionId, sfuToken, getSubscriberSdp, scope, okHttpClient, networkStateProvider)
+        return SfuConnectionModule(
+            sfuUrl,
+            sessionId,
+            sfuToken,
+            getSubscriberSdp,
+            scope,
+            okHttpClient,
+            networkStateProvider
+        )
     }
 
     fun updateToken(newToken: String) {
         authInterceptor.token = newToken
     }
+
     fun updateAuthType(authType: String) {
         authInterceptor.authType = authType
     }
@@ -242,14 +251,22 @@ internal class SfuConnectionModule(
 
     init {
         val socketUrl = "$updatedSignalUrl/ws".replace("https", "wss")
-        sfuSocket = SfuSocket(socketUrl, sessionId, sfuToken, getSubscriberSdp, scope, okHttpClient, networkStateProvider)
+        sfuSocket = SfuSocket(
+            socketUrl,
+            sessionId,
+            sfuToken,
+            getSubscriberSdp,
+            scope,
+            okHttpClient,
+            networkStateProvider
+        )
     }
 }
 
 /**
  * Interceptor that changes urls for the coordinator
  */
-internal class BaseUrlInterceptor(var baseUrl: HttpUrl?): Interceptor {
+internal class BaseUrlInterceptor(var baseUrl: HttpUrl?) : Interceptor {
     private val REPLACEMENT_HOST = "replacement.url"
 
     override fun intercept(chain: Interceptor.Chain): Response {
@@ -268,21 +285,24 @@ internal class BaseUrlInterceptor(var baseUrl: HttpUrl?): Interceptor {
             chain.proceed(chain.request())
         }
     }
-
 }
 
 /**
  * CoordinatorAuthInterceptor adds the token authentication to the API calls
  */
-internal class CoordinatorAuthInterceptor(var apiKey: String, var token: String, var authType:String = "jwt"): Interceptor {
+internal class CoordinatorAuthInterceptor(
+    var apiKey: String,
+    var token: String,
+    var authType: String = "jwt"
+) : Interceptor {
     private val REPLACEMENT_HOST = "replacement.url"
+
     /**
      * Query key used to authenticate to the API.
      */
     private val API_KEY = "api_key"
     private val STREAM_AUTH_TYPE = "stream-auth-type"
     private val HEADER_AUTHORIZATION = "Authorization"
-
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val original = chain.request()
@@ -303,7 +323,4 @@ internal class CoordinatorAuthInterceptor(var apiKey: String, var token: String,
 
         return chain.proceed(updated)
     }
-
 }
-
-

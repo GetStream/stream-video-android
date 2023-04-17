@@ -46,7 +46,7 @@ class CallStateTest : IntegrationTestBase() {
             custom = custom,
             members = listOf(MemberRequest("tommaso", mutableMapOf("color" to "green"))),
             // block screensharing completely for this call
-            settingsOverride = CallSettingsRequest(screensharing = ScreensharingSettingsRequest(accessRequestEnabled=false, enabled=false))
+            settingsOverride = CallSettingsRequest(screensharing = ScreensharingSettingsRequest(accessRequestEnabled = false, enabled = false))
         )
         assertSuccess(response)
 
@@ -75,7 +75,7 @@ class CallStateTest : IntegrationTestBase() {
     @Test
     fun `Joining a call should populate the state`() = runTest {
         val call = client.call("default", randomUUID())
-        val response = call.joinRequest(create=CreateCallOptions(custom=mapOf("color" to "green")))
+        val response = call.joinRequest(create = CreateCallOptions(custom = mapOf("color" to "green")))
         assertSuccess(response)
         assertThat(call.state.settings.value).isNotNull()
         assertThat(call.state.custom.value["color"]).isEqualTo("green")
@@ -97,5 +97,4 @@ class CallStateTest : IntegrationTestBase() {
             }
         }
     }
-
 }

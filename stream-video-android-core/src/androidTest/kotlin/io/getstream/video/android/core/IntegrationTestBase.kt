@@ -103,9 +103,8 @@ class IntegrationTestHelper {
 internal class StreamTestLogger : KotlinStreamLogger() {
 
     override fun log(priority: Priority, tag: String, message: String, throwable: Throwable?) {
-        
+
         if (throwable != null) {
-            
         }
     }
 }
@@ -210,9 +209,8 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true) : TestBase(
         // monitor for events
         events = mutableListOf()
         client.subscribe {
-            
+
             events.add(it)
-            
 
             nextEventContinuation?.let { continuation ->
                 if (!nextEventCompleted) {

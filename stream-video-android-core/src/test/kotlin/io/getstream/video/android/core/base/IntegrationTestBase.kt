@@ -42,7 +42,6 @@ import org.junit.runner.Description
 import org.openapitools.client.models.VideoEvent
 import org.threeten.bp.Clock
 import org.threeten.bp.OffsetDateTime
-import java.time.ZoneOffset
 import java.util.UUID
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
@@ -69,7 +68,6 @@ class IntegrationTestHelper {
     val context: Context
 
     val expiredToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidGhpZXJyeUBnZXRzdHJlYW0uaW8iLCJpc3MiOiJwcm9udG8iLCJzdWIiOiJ1c2VyL3RoaWVycnlAZ2V0c3RyZWFtLmlvIiwiaWF0IjoxNjgxMjUxMDg4LCJleHAiOjE2ODEyNjE4OTN9.VinzXBwvT_AGXNBG8QTz9HJFSR6LhqIEtVpIlmY1aEc"
-
 
     val fakeSDP = """
         v=0
@@ -115,9 +113,8 @@ class IntegrationTestHelper {
 internal class StreamTestLogger : KotlinStreamLogger() {
 
     override fun log(priority: Priority, tag: String, message: String, throwable: Throwable?) {
-        
+
         if (throwable != null) {
-            
         }
     }
 }
@@ -231,9 +228,8 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true) : TestBase(
         // monitor for events
         events = mutableListOf()
         client.subscribe {
-            
+
             events.add(it)
-            
 
             nextEventContinuation?.let { continuation ->
                 if (!nextEventCompleted) {

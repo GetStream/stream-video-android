@@ -36,7 +36,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
-import io.getstream.chat.android.client.models.Attachment
 import io.getstream.chat.android.compose.ui.messages.composer.MessageComposer
 import io.getstream.chat.android.compose.ui.messages.header.MessageListHeader
 import io.getstream.chat.android.compose.ui.messages.list.MessageList
@@ -44,9 +43,6 @@ import io.getstream.chat.android.compose.ui.theme.ChatTheme
 import io.getstream.chat.android.compose.viewmodel.messages.MessageComposerViewModel
 import io.getstream.chat.android.compose.viewmodel.messages.MessageListViewModel
 import io.getstream.chat.android.compose.viewmodel.messages.MessagesViewModelFactory
-import io.getstream.chat.android.uiutils.extension.getDisplayName
-import io.getstream.result.Result.Success
-import io.getstream.video.chat_with_video_final.R
 import io.getstream.video.chat_with_video_final.application.chatWithVideoApp
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -114,32 +110,32 @@ class MessagesActivity : ComponentActivity() {
         lifecycleScope.launch {
             val callId = UUID.randomUUID().toString()
 
-            val createCallResult = videoClient.getOrCreateCall(
-                id = callId,
-                type = "default",
-                ring = false,
-                memberIds = emptyList()
-            )
+//            val createCallResult = videoClient.getOrCreateCall(
+//                id = callId,
+//                type = "default",
+//                ring = false,
+//                memberIds = emptyList()
+//            )
+//
+//            if (createCallResult is Success) {
+//                val data = createCallResult.value
 
-            if (createCallResult is Success) {
-                val data = createCallResult.value
-
-                val customAttachment = Attachment(
-                    type = "custom",
-                    authorName = videoClient.user.name,
-                    extraData = mutableMapOf(
-                        "callCid" to data.cid,
-                        "members" to data.users.map { it.value.name },
-                        "callName" to messageListViewModel.channel.getDisplayName(
-                            context = this@MessagesActivity,
-                            fallback = R.string.call_name_placeholder
-                        )
-                    )
-                )
-
-                val newMessage = composerViewModel.buildNewMessage("", listOf(customAttachment))
-                composerViewModel.sendMessage(newMessage)
-            }
+//                val customAttachment = Attachment(
+//                    type = "custom",
+//                    authorName = videoClient.user.name,
+//                    extraData = mutableMapOf(
+//                        "callCid" to data.cid,
+//                        "members" to data.users.map { it.value.name },
+//                        "callName" to messageListViewModel.channel.getDisplayName(
+//                            context = this@MessagesActivity,
+//                            fallback = R.string.call_name_placeholder
+//                        )
+//                    )
+//                )
+//
+//                val newMessage = composerViewModel.buildNewMessage("", listOf(customAttachment))
+//                composerViewModel.sendMessage(newMessage)
+//            }
         }
     }
 

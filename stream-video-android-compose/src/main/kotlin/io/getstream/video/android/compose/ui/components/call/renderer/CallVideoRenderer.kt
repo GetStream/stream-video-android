@@ -14,23 +14,21 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.participants.internal
+package io.getstream.video.android.compose.ui.components.call.renderer
 
-import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import android.view.View
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.ui.components.call.controls.internal.DefaultCallControlsContent
+import io.getstream.video.android.compose.ui.components.call.renderer.internal.RegularCallVideoRenderer
+import io.getstream.video.android.compose.ui.components.call.renderer.internal.ScreenSharingCallVideoRenderer
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.call.state.CallMediaState
-import io.getstream.video.android.core.model.ScreenSharingSession
+import io.getstream.video.android.core.call.state.CallDeviceState
 
 /**
  * Renders all the CallParticipants, based on the number of people in a call and the call state.
@@ -38,62 +36,59 @@ import io.getstream.video.android.core.model.ScreenSharingSession
  * accordingly.
  *
  * @param call The call that contains all the participants state and tracks.
- * @param session The screen sharing session which is active.
- * @param participants List of participants currently in the call.
- * @param callMediaState The state of the call media, such as audio, video.
  * @param onCallAction Handler when the user triggers a Call Control Action.
+ * @param callDeviceState The state of the call media, such as audio, video.
  * @param modifier Modifier for styling.
  * @param paddingValues Padding within the parent.
- * @param isFullscreen If we're rendering a full screen activity.
  * @param onRender Handler when each of the Video views render their first frame.
+ * @param onBackPressed Handler when the user taps back.
  * @param callControlsContent Content shown that allows users to trigger different actions.
  */
 @Composable
-internal fun ScreenSharingCallParticipantsContent(
+public fun CallVideoRenderer(
     call: Call,
-    session: ScreenSharingSession,
-    participants: List<ParticipantState>,
-    callMediaState: CallMediaState,
-    onCallAction: (CallAction) -> Unit,
     modifier: Modifier = Modifier,
+    onCallAction: (CallAction) -> Unit = {},
+    callDeviceState: CallDeviceState,
     paddingValues: PaddingValues = PaddingValues(0.dp),
     onRender: (View) -> Unit = {},
     onBackPressed: () -> Unit = {},
     callControlsContent: @Composable () -> Unit = {
         DefaultCallControlsContent(
             call = call,
-            callMediaState = callMediaState,
+            callDeviceState = callDeviceState,
             onCallAction = onCallAction
         )
     }
 ) {
-    val configuration = LocalConfiguration.current
-    val orientation = configuration.orientation
-    val screenSharingSession by call.state.screenSharingSession.collectAsState(initial = null)
+    val screenSharingSession = call.state.screenSharingSession.collectAsState()
+    val screenSharing = screenSharingSession.value
 
-    if (orientation == ORIENTATION_PORTRAIT) {
-        PortraitScreenSharingContent(
+    if (screenSharing == null) {
+        RegularCallVideoRenderer(
             call = call,
-            session = session,
-            participants = participants,
-            primarySpeaker = screenSharingSession?.participant,
-            paddingValues = paddingValues,
             modifier = modifier,
+            paddingValues = paddingValues,
             onRender = onRender,
             onCallAction = onCallAction,
             onBackPressed = onBackPressed,
+            callDeviceState = callDeviceState,
+            callControlsContent = callControlsContent
         )
     } else {
-        LandscapeScreenSharingContent(
+        val participants by call.state.participants.collectAsState()
+
+        ScreenSharingCallVideoRenderer(
             call = call,
-            session = session,
+            session = screenSharing,
             participants = participants,
-            primarySpeaker = screenSharingSession?.participant,
-            paddingValues = paddingValues,
             modifier = modifier,
+            paddingValues = paddingValues,
             onRender = onRender,
             onCallAction = onCallAction,
+            callDeviceState = callDeviceState,
             onBackPressed = onBackPressed,
+            callControlsContent = callControlsContent
         )
     }
 }

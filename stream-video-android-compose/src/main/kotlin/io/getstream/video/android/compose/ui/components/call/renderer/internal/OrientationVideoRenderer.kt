@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.participants.internal
+package io.getstream.video.android.compose.ui.components.call.renderer.internal
 
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import android.view.View
@@ -39,7 +39,7 @@ import io.getstream.video.android.core.Call
  * @param parentSize The size of the parent.
  */
 @Composable
-internal fun BoxScope.Participants(
+internal fun BoxScope.OrientationVideoRenderer(
     call: Call,
     onRender: (View) -> Unit,
     modifier: Modifier = Modifier,
@@ -52,7 +52,7 @@ internal fun BoxScope.Participants(
     val orientation = LocalConfiguration.current.orientation
 
     if (orientation == ORIENTATION_LANDSCAPE) {
-        LandscapeParticipants(
+        LandscapeVideoRenderer(
             call = call,
             primarySpeaker = primarySpeaker,
             callParticipants = roomParticipants,
@@ -62,7 +62,7 @@ internal fun BoxScope.Participants(
             onRender = onRender
         )
     } else {
-        PortraitParticipants(
+        PortraitVideoRenderer(
             call = call,
             primarySpeaker = primarySpeaker,
             callParticipants = roomParticipants,

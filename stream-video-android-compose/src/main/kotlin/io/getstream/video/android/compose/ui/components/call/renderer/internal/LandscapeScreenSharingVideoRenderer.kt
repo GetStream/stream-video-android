@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.participants.internal
+package io.getstream.video.android.compose.ui.components.call.renderer.internal
 
 import android.content.res.Configuration
 import android.view.View
@@ -34,6 +34,7 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.common.util.MockUtils
+import io.getstream.video.android.common.util.mockCall
 import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.common.util.mockVideoTrackWrapper
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -56,8 +57,8 @@ import io.getstream.video.android.core.model.ScreenSharingSession
  * @param onBackPressed Handler when the user taps back.
  */
 @Composable
-internal fun LandscapeScreenSharingContent(
-    call: Call?,
+internal fun LandscapeScreenSharingVideoRenderer(
+    call: Call,
     session: ScreenSharingSession,
     participants: List<ParticipantState>,
     primarySpeaker: ParticipantState?,
@@ -81,7 +82,7 @@ internal fun LandscapeScreenSharingContent(
                 .fillMaxHeight()
                 .weight(0.65f)
         ) {
-            ScreenShareContent(
+            ScreenShareVideoRenderer(
                 modifier = Modifier.fillMaxSize(),
                 call = call,
                 session = session,
@@ -98,7 +99,7 @@ internal fun LandscapeScreenSharingContent(
             }
         }
 
-        ParticipantsColumn(
+        LazyColumnVideoRenderer(
             modifier = Modifier
                 .width(156.dp)
                 .fillMaxHeight(),
@@ -122,8 +123,8 @@ internal fun LandscapeScreenSharingContent(
 private fun LandscapeScreenSharingContentPreview() {
     MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        LandscapeScreenSharingContent(
-            call = null,
+        LandscapeScreenSharingVideoRenderer(
+            call = mockCall,
             session = ScreenSharingSession(
                 track = mockParticipants[1].videoTrackWrapped ?: mockVideoTrackWrapper,
                 participant = mockParticipants[1]
@@ -152,8 +153,8 @@ private fun LandscapeScreenSharingContentPreview() {
 private fun LandscapeScreenSharingMyContentPreview() {
     MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        LandscapeScreenSharingContent(
-            call = null,
+        LandscapeScreenSharingVideoRenderer(
+            call = mockCall,
             session = ScreenSharingSession(
                 track = mockParticipants[0].videoTrackWrapped ?: mockVideoTrackWrapper,
                 participant = mockParticipants[0]

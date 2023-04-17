@@ -19,24 +19,12 @@ package io.getstream.video.android.core
 import android.content.Context
 import io.getstream.result.Result
 import io.getstream.video.android.core.events.VideoEventListener
-import io.getstream.video.android.core.model.CallEventType
-import io.getstream.video.android.core.model.CallInfo
-import io.getstream.video.android.core.model.CallMetadata
-import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.core.model.Device
 import io.getstream.video.android.core.model.EdgeData
-import io.getstream.video.android.core.model.JoinedCall
-import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.QueriedCalls
 import io.getstream.video.android.core.model.QueryCallsData
-import io.getstream.video.android.core.model.QueryMembersData
-import io.getstream.video.android.core.model.ReactionData
-import io.getstream.video.android.core.model.SendReactionData
-import io.getstream.video.android.core.model.StreamCallId
-import io.getstream.video.android.core.model.StreamCallType
-import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.User
-import org.openapitools.client.models.*
+import org.openapitools.client.models.VideoEvent
 
 /**
  * The main interface to control the Video calls. [StreamVideoImpl] implements this interface.
@@ -51,7 +39,6 @@ public interface StreamVideo {
     public val userId: String
 
     val state: ClientState
-
 
     /**
      * Create a call with the given type and id
@@ -70,7 +57,6 @@ public interface StreamVideo {
     public suspend fun queryCalls(
         queryCallsData: QueryCallsData
     ): Result<QueriedCalls>
-
 
     /** Subscribe for a specific list of events */
     public fun subscribeFor(

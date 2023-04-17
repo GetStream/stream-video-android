@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.participants.internal
+package io.getstream.video.android.compose.ui.components.call.renderer.internal
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -29,33 +29,34 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.common.util.MockUtils
+import io.getstream.video.android.common.util.mockCall
 import io.getstream.video.android.common.util.mockParticipants
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.participants.CallParticipant
+import io.getstream.video.android.compose.ui.components.call.renderer.CallSingleVideoRenderer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 
 /**
- * Shows a column of call participants.
+ * Shows a row of call participants.
  *
  * @param call The state of the call.
  * @param participants List of participants to show.
  * @param modifier Modifier for styling.
  */
 @Composable
-internal fun ParticipantsColumn(
-    call: Call?,
+internal fun LazyRowVideoRenderer(
+    call: Call,
     participants: List<ParticipantState>,
     primarySpeaker: ParticipantState?,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
-    LazyColumn(
-        modifier = modifier.padding(vertical = VideoTheme.dimens.screenShareParticipantsRowPadding),
-        verticalArrangement = Arrangement.spacedBy(VideoTheme.dimens.screenShareParticipantsListItemMargin),
-        horizontalAlignment = Alignment.CenterHorizontally,
+    LazyRow(
+        modifier = modifier.padding(horizontal = VideoTheme.dimens.screenShareParticipantsRowPadding),
+        horizontalArrangement = Arrangement.spacedBy(VideoTheme.dimens.screenShareParticipantsListItemMargin),
+        verticalAlignment = Alignment.CenterVertically,
         content = {
             items(items = participants, key = { it.user.value.id }) { participant ->
-                ParticipantListItem(
+                ListVideoRenderer(
                     call = call, participant = participant, primarySpeaker = primarySpeaker
                 )
             }
@@ -70,12 +71,12 @@ internal fun ParticipantsColumn(
  * @param participant The participant to render.
  */
 @Composable
-private fun ParticipantListItem(
-    call: Call?,
+private fun ListVideoRenderer(
+    call: Call,
     participant: ParticipantState,
     primarySpeaker: ParticipantState?,
 ) {
-    CallParticipant(
+    CallSingleVideoRenderer(
         modifier = Modifier
             .size(VideoTheme.dimens.screenShareParticipantItemSize)
             .clip(RoundedCornerShape(VideoTheme.dimens.screenShareParticipantsRadius)),
@@ -90,11 +91,11 @@ private fun ParticipantListItem(
 
 @Preview
 @Composable
-private fun ParticipantsColumnPreview() {
+private fun ParticipantsRowPreview() {
     MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        ParticipantsColumn(
-            call = null, participants = mockParticipants, primarySpeaker = mockParticipants[0]
+        LazyRowVideoRenderer(
+            call = mockCall, participants = mockParticipants, primarySpeaker = mockParticipants[0]
         )
     }
 }

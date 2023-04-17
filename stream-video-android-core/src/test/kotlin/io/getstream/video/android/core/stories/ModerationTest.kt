@@ -21,7 +21,10 @@ import io.getstream.video.android.core.IntegrationTestBase
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.openapitools.client.models.*
+import org.openapitools.client.models.BlockedUserEvent
+import org.openapitools.client.models.CallMemberRemovedEvent
+import org.openapitools.client.models.CallMemberUpdatedPermissionEvent
+import org.openapitools.client.models.PermissionRequestEvent
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
@@ -66,7 +69,6 @@ class ModerationTest : IntegrationTestBase() {
         assertSuccess(removePermissionResult)
 
         waitForNextEvent<CallMemberUpdatedPermissionEvent>().also {
-
         }
     }
 
@@ -90,7 +92,7 @@ class ModerationTest : IntegrationTestBase() {
         // TODO: what's the behaviour for muting a user?
         val result = call.muteUser("tommaso")
         assertSuccess(result)
-        //TODO: check event?
+        // TODO: check event?
     }
 
     @Test
@@ -122,8 +124,6 @@ class ModerationTest : IntegrationTestBase() {
         // on a large call someone will keep background noise going
         // you want to mute everyone at once
 
-
         // people can unmute themselves
-
     }
 }

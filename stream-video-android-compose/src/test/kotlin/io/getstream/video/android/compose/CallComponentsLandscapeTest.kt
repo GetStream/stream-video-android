@@ -20,7 +20,7 @@ import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.ui.components.call.controls.internal.LandscapeCallControls
-import io.getstream.video.android.core.call.state.CallMediaState
+import io.getstream.video.android.core.call.state.CallDeviceState
 import org.junit.Rule
 import org.junit.Test
 
@@ -35,7 +35,7 @@ internal class CallComponentsLandscapeTest : BaseComposeTest() {
     fun `snapshot LandscapeCallControls composable`() {
         snapshot {
             LandscapeCallControls(
-                callMediaState = CallMediaState(), isScreenSharing = false
+                callDeviceState = CallDeviceState(), isScreenSharing = false
             ) {}
         }
     }

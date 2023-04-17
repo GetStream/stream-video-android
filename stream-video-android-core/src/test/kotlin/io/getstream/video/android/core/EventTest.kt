@@ -27,7 +27,19 @@ import io.getstream.video.android.core.model.UserAudioLevel
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.openapitools.client.models.*
+import org.openapitools.client.models.BlockedUserEvent
+import org.openapitools.client.models.CallAcceptedEvent
+import org.openapitools.client.models.CallEndedEvent
+import org.openapitools.client.models.CallReactionEvent
+import org.openapitools.client.models.CallRecordingStartedEvent
+import org.openapitools.client.models.CallRecordingStoppedEvent
+import org.openapitools.client.models.CallRejectedEvent
+import org.openapitools.client.models.OwnCapability
+import org.openapitools.client.models.PermissionRequestEvent
+import org.openapitools.client.models.ReactionResponse
+import org.openapitools.client.models.UnblockedUserEvent
+import org.openapitools.client.models.UpdatedCallPermissionsEvent
+import org.openapitools.client.models.UserResponse
 import org.robolectric.RobolectricTestRunner
 import org.threeten.bp.OffsetDateTime
 import stream.video.sfu.event.ConnectionQualityInfo
@@ -83,7 +95,7 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
     @Test
     fun `test start and stop recording`() = runTest {
         // start by sending the start recording event
-        val event = CallRecordingStartedEvent(callCid = call.cid, nowUtc,"call.recording_started")
+        val event = CallRecordingStartedEvent(callCid = call.cid, nowUtc, "call.recording_started")
         clientImpl.fireEvent(event)
         assertThat(call.state.recording.value).isTrue()
         // now stop recording
@@ -98,12 +110,15 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
         val thierry = testData.users["thierry"]!!
 
-        val acceptedEvent = CallAcceptedEvent(callCid = call.cid, nowUtc, "call.accepted", user=thierry.toUserResponse())
+        val acceptedEvent = CallAcceptedEvent(
+            callCid = call.cid, nowUtc, "call.accepted", user = thierry.toUserResponse()
+        )
         clientImpl.fireEvent(acceptedEvent)
         assertThat(call.state.getMember("thierry")?.acceptedAt).isNotNull()
 
-        val rejectedEvent =
-            CallRejectedEvent(callCid = call.cid, nowUtc, "call.rejected", user = User(id = "123").toUserResponse())
+        val rejectedEvent = CallRejectedEvent(
+            callCid = call.cid, nowUtc, "call.rejected", user = User(id = "123").toUserResponse()
+        )
         clientImpl.fireEvent(rejectedEvent)
         assertThat(call.state.getMember("123")?.rejectedAt).isNotNull()
     }
@@ -116,7 +131,6 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
         // ensure we update call data and capabilities
         // TODO: change the map structure
-        
     }
 
     @Test
@@ -132,8 +146,7 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
     fun `Network connection quality changes`() = runTest {
         // TODO: this is a list, other events its a map, make up your mind
         val quality = ConnectionQualityInfo(
-            user_id = "thierry",
-            connection_quality = ConnectionQuality.CONNECTION_QUALITY_EXCELLENT
+            user_id = "thierry", connection_quality = ConnectionQuality.CONNECTION_QUALITY_EXCELLENT
         )
         val event = ConnectionQualityChangeEvent(updates = mutableListOf(quality))
         clientImpl.fireEvent(event, call.cid)
@@ -184,8 +197,13 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
         // TODO: CID & Type?
         val permissions = mutableListOf<String>("screenshare")
-        val requestEvent =
-            PermissionRequestEvent(call.cid, nowUtc, permissions, "call.permission_request", testData.users["thierry"]!!.toUserResponse())
+        val requestEvent = PermissionRequestEvent(
+            call.cid,
+            nowUtc,
+            permissions,
+            "call.permission_request",
+            testData.users["thierry"]!!.toUserResponse()
+        )
         clientImpl.fireEvent(requestEvent)
         // TODO: How do we show this in the state?
         // TODO: How is this different than call updates?
@@ -207,7 +225,12 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
     @Test
     fun `Call Ended`() = runTest {
         val call = client.call("default", randomUUID())
-        val event = CallEndedEvent(callCid = call.cid, nowUtc, "call.ended", user = testData.users["thierry"]!!.toUserResponse())
+        val event = CallEndedEvent(
+            callCid = call.cid,
+            nowUtc,
+            "call.ended",
+            user = testData.users["thierry"]!!.toUserResponse()
+        )
         clientImpl.fireEvent(event)
 
         // TODO: server. you want to know when the call ended and by who.
@@ -233,31 +256,30 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
     fun `Block and unblock a user`() = runTest {
 
         val blockEvent = BlockedUserEvent(
-            callCid=call.cid,
-            createdAt=nowUtc,
-            type="call.blocked_user",
+            callCid = call.cid,
+            createdAt = nowUtc,
+            type = "call.blocked_user",
             user = testData.users["thierry"]!!.toUserResponse()
         )
         clientImpl.fireEvent(blockEvent)
         assertThat(call.state.blockedUsers.value).contains("thierry")
 
         val unBlockEvent = UnblockedUserEvent(
-            callCid=call.cid,
-            createdAt=nowUtc,
-            type="call.blocked_user",
+            callCid = call.cid,
+            createdAt = nowUtc,
+            type = "call.blocked_user",
             user = testData.users["thierry"]!!.toUserResponse()
         )
         clientImpl.fireEvent(unBlockEvent)
         assertThat(call.state.blockedUsers.value).doesNotContain("thierry")
-
     }
 
     @Test
     fun `Permission request event`() = runTest {
         val permissionRequestEvent = PermissionRequestEvent(
-            callCid=call.cid,
-            createdAt=nowUtc,
-            type="call.permission_request",
+            callCid = call.cid,
+            createdAt = nowUtc,
+            type = "call.permission_request",
             permissions = mutableListOf("screenshare"),
             user = testData.users["thierry"]!!.toUserResponse()
         )
@@ -267,7 +289,7 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
     @Test
     fun `Call member permissions updated`() = runTest {
-        //TODO: Implement call to response
+        // TODO: Implement call to response
 //        val event = CallMemberUpdatedPermissionEvent(
 //            callCid=call.cid,
 //            createdAt=nowUtc,
@@ -283,15 +305,14 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
 //        val event = CallMemberAddedEvent(
 //            callCid = call.cid
 //        )
-
     }
 
     @Test
     fun `Reaction event`() = runTest {
         val reactionEvent = CallReactionEvent(
-            callCid=call.cid,
-            createdAt=nowUtc,
-            type="call.reaction",
+            callCid = call.cid,
+            createdAt = nowUtc,
+            type = "call.reaction",
             reaction = ReactionResponse(
                 type = "like",
                 user = testData.users["thierry"]!!.toUserResponse(),
@@ -306,9 +327,7 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
         // other times they will be show on the main call UI
         assertThat(call.state.reactions.value.map { it.type }).contains("like")
     }
-
 }
-
 
 private fun User.toUserResponse(): UserResponse {
     return UserResponse(

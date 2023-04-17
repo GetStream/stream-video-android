@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.core.events
 
-
 /**
  * Represents the events coming in from the socket.
  */

@@ -74,7 +74,7 @@ public class CallCrudTest : IntegrationTestBase() {
         // set a custom field and update
         val secret = randomUUID()
         val custom = mutableMapOf("secret" to secret)
-        val updateResult = call.update(custom=custom)
+        val updateResult = call.update(custom = custom)
         assertSuccess(updateResult)
 
         // get the call object

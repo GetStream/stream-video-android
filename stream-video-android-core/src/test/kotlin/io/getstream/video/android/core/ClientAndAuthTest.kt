@@ -30,8 +30,6 @@ import org.junit.runner.RunWith
 import org.openapitools.client.models.ConnectedEvent
 import org.openapitools.client.models.VideoEvent
 import org.robolectric.RobolectricTestRunner
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 @RunWith(RobolectricTestRunner::class)
 class ClientAndAuthTest : TestBase() {
@@ -71,8 +69,6 @@ class ClientAndAuthTest : TestBase() {
             geo = GEO.GlobalEdgeNetwork,
             user = User(id = "guest", type = UserType.Guest)
         ).build()
-
-
     }
 
     @Test
@@ -117,13 +113,12 @@ class ClientAndAuthTest : TestBase() {
         ).build()
         assertThat(client.state.connection.value).isEqualTo(ConnectionState.PreConnect)
         val clientImpl = client as StreamVideoImpl
-        
+
         val connectResultDeferred = clientImpl.connectAsync()
-        
+
         val connectResult = connectResultDeferred.await()
         delay(100L)
         assertThat(client.state.connection.value).isEqualTo(ConnectionState.Connected)
-        
     }
 
     @Test
@@ -197,7 +192,6 @@ class ClientAndAuthTest : TestBase() {
         ).build()
         val clientImpl = client as StreamVideoImpl
         client.subscribe {
-            
         }
         val deferred = clientImpl.connectAsync()
         deferred.join()

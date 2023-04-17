@@ -17,8 +17,6 @@
 package io.getstream.video.android.core
 
 import io.getstream.video.android.core.model.User
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 
 public data class MemberState(
     val user: User,
@@ -30,7 +28,6 @@ public data class MemberState(
     val acceptedAt: org.threeten.bp.OffsetDateTime? = null,
     val rejectedAt: org.threeten.bp.OffsetDateTime? = null,
 
-
-    ) {
+) {
     // Probably an easy way to get the participant would be nice
 }
