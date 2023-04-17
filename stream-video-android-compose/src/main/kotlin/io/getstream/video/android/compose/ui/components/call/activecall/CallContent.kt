@@ -18,14 +18,11 @@ package io.getstream.video.android.compose.ui.components.call.activecall
 
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -39,13 +36,16 @@ import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.activecall.internal.ActiveCallAppBar
 import io.getstream.video.android.compose.ui.components.call.controls.internal.DefaultCallControlsContent
-import io.getstream.video.android.compose.ui.components.participants.CallParticipants
+import io.getstream.video.android.compose.ui.components.call.renderer.CallSingleVideoRenderer
+import io.getstream.video.android.compose.ui.components.call.renderer.CallVideoRenderer
+import io.getstream.video.android.compose.ui.components.call.renderer.internal.ScreenShareAspectRatio
+import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.call.state.CallMediaState
-import io.getstream.video.android.core.model.ScreenSharingSession
-import io.getstream.video.android.core.model.state.StreamCallState
+import io.getstream.video.android.core.call.state.CallDeviceState
+import io.getstream.video.android.core.call.state.LeaveCall
 import io.getstream.video.android.core.viewmodel.CallViewModel
+import stream.video.sfu.models.TrackType
 
 /**
  * Represents the UI in an Active call that shows participants and their video, as well as some
@@ -63,52 +63,42 @@ import io.getstream.video.android.core.viewmodel.CallViewModel
 public fun CallContent(
     callViewModel: CallViewModel,
     modifier: Modifier = Modifier,
-    // onBackPressed: () -> Unit = { callViewModel.onCallAction(LeaveCall) },
-    // onCallAction: (CallAction) -> Unit = callViewModel::onCallAction,
+    onBackPressed: () -> Unit = { callViewModel.onCallAction(LeaveCall) },
+    onCallAction: (CallAction) -> Unit = callViewModel::onCallAction,
     callControlsContent: @Composable () -> Unit = {
-//        DefaultCallControlsContent(
-//            callViewModel,
-//            //onCallAction
-//        )
+        DefaultCallControlsContent(
+            callViewModel,
+            onCallAction
+        )
     },
     pictureInPictureContent: @Composable (Call) -> Unit = { DefaultPictureInPictureContent(it) }
 ) {
-    // val call by callViewModel.callState.collectAsState(initial = null)
-    val isShowingCallInfo by callViewModel.isShowingCallInfo.collectAsState(false)
-
-    // val callMediaState by callViewModel.callMediaState.collectAsState(initial = CallMediaState())
+    val callDeviceState by callViewModel.callDeviceState.collectAsState(initial = CallDeviceState())
 
     val isInPiPMode by callViewModel.isInPictureInPicture.collectAsState()
-    val isFullscreen by callViewModel.isFullscreen.collectAsState()
-    // val callState by callViewModel.streamCallState.collectAsState(StreamCallState.Idle)
-
-    val screenSharingSessions = callViewModel.call.state.screenSharingSession.collectAsState()
-    val screenSharing = screenSharingSessions.value
+    val isShowingCallInfo by callViewModel.isShowingCallInfoMenu.collectAsState(false)
 
     val backAction = {
         if (isShowingCallInfo) {
-            // callViewModel.dismissOptions()
+            callViewModel.dismissCallInfoMenu()
         } else {
-            // onBackPressed()
+            onBackPressed()
         }
     }
 
     BackHandler { backAction() }
 
-//    CallContent(
-//        modifier = modifier,
-//        call = call,
-//        callState = callState,
-//        callMediaState = callMediaState,
-//        isShowingCallInfo = isShowingCallInfo,
-//        isInPictureInPicture = isInPiPMode,
-//        isFullscreen = isFullscreen,
-//        screenSharing = screenSharing,
-//        onBackPressed = onBackPressed,
-//        onCallAction = onCallAction,
-//        callControlsContent = callControlsContent,
-//        pictureInPictureContent = pictureInPictureContent
-//    )
+    CallContent(
+        modifier = modifier,
+        call = callViewModel.call,
+        callDeviceState = callDeviceState,
+        isShowingCallInfo = isShowingCallInfo,
+        isInPictureInPicture = isInPiPMode,
+        onBackPressed = onBackPressed,
+        onCallAction = onCallAction,
+        callControlsContent = callControlsContent,
+        pictureInPictureContent = pictureInPictureContent
+    )
 }
 
 /**
@@ -116,13 +106,10 @@ public fun CallContent(
  * extra UI features to control the call settings, browse participants and more.
  *
  * @param call The state of the call with its participants.
- * @param callState StreamCallEngine state representing in which state of the call the user is.
- * @param callMediaState Media state of the call, for audio and video.
+ * @param callDeviceState Media state of the call, for audio and video.
  * @param modifier Modifier for styling.
  * @param isShowingCallInfo If the call info menu is being shown.
  * @param isInPictureInPicture If the user has engaged in Picture-In-Picture mode.
- * @param isFullscreen If the user is in fullscreen.
- * @param screenSharing The active screen sharing session, if it exists.
  * @param onBackPressed Handler when the user taps on the back button.
  * @param onCallAction Handler when the user triggers a Call Control Action.
  * @param callControlsContent Content shown that allows users to trigger different actions.
@@ -131,20 +118,17 @@ public fun CallContent(
  */
 @Composable
 public fun CallContent(
-    call: Call?,
-    callState: StreamCallState,
-    callMediaState: CallMediaState,
+    call: Call,
     modifier: Modifier = Modifier,
+    callDeviceState: CallDeviceState,
     isShowingCallInfo: Boolean = false,
     isInPictureInPicture: Boolean = false,
-    isFullscreen: Boolean = false,
-    screenSharing: ScreenSharingSession? = null,
-    onBackPressed: () -> Unit = { },
-    onCallAction: (CallAction) -> Unit = { },
+    onBackPressed: () -> Unit = {},
+    onCallAction: (CallAction) -> Unit = {},
     callControlsContent: @Composable () -> Unit = {
         DefaultCallControlsContent(
             call,
-            callMediaState,
+            callDeviceState,
             onCallAction
         )
     },
@@ -157,9 +141,9 @@ public fun CallContent(
             modifier = modifier,
             contentColor = VideoTheme.colors.appBackground,
             topBar = {
-                if (!isFullscreen && orientation != ORIENTATION_LANDSCAPE) {
+                if (orientation != ORIENTATION_LANDSCAPE) {
                     ActiveCallAppBar(
-                        callState = callState,
+                        call = call,
                         isShowingCallInfo = isShowingCallInfo,
                         onBackPressed = onBackPressed,
                         onCallAction = onCallAction
@@ -167,7 +151,7 @@ public fun CallContent(
                 }
             },
             bottomBar = {
-                if (!isFullscreen && orientation != ORIENTATION_LANDSCAPE) {
+                if (orientation != ORIENTATION_LANDSCAPE) {
                     callControlsContent()
                 }
             },
@@ -180,38 +164,19 @@ public fun CallContent(
                         .coerceAtLeast(0.dp)
                 )
 
-                if (call == null) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(paddings)
-                            .background(VideoTheme.colors.appBackground)
-                    ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.align(Alignment.Center),
-                            color = VideoTheme.colors.primaryAccent
-                        )
-                    }
-                } else {
-                    CallParticipants(
-                        modifier = Modifier.fillMaxSize(),
-                        call = call,
-                        paddingValues = paddings,
-                        isFullscreen = isFullscreen,
-                        callMediaState = callMediaState,
-                        callState = callState,
-                        onCallAction = onCallAction,
-                        onBackPressed = onBackPressed,
-                        callControlsContent = callControlsContent,
-                        screenSharing = screenSharing
-                    )
-                }
+                CallVideoRenderer(
+                    modifier = Modifier.fillMaxSize(),
+                    call = call,
+                    paddingValues = paddings,
+                    callDeviceState = callDeviceState,
+                    onCallAction = onCallAction,
+                    onBackPressed = onBackPressed,
+                    callControlsContent = callControlsContent
+                )
             }
         )
     } else {
-        if (call != null) {
-            pictureInPictureContent(call)
-        }
+        pictureInPictureContent(call)
     }
 }
 
@@ -221,31 +186,26 @@ public fun CallContent(
  * @param call The state of the call, with its participants.
  */
 @Composable
-public fun DefaultPictureInPictureContent(call: Call) {
-//    val screenSharingSessions by call.state.screenSharingSession.collectAsState(initial = emptyList())
-//
-//    val currentSessions = screenSharingSessions
+internal fun DefaultPictureInPictureContent(call: Call) {
+    val screenSharingSession by call.state.screenSharingSession.collectAsState(initial = null)
+    val session = screenSharingSession
+    if (session != null) {
+        VideoRenderer(
+            modifier = Modifier.aspectRatio(ScreenShareAspectRatio, false),
+            call = call,
+            videoTrackWrapper = session.track,
+            trackType = TrackType.TRACK_TYPE_SCREEN_SHARE,
+            sessionId = session.participant.sessionId
+        )
+    } else {
+        val activeSpeakers by call.state.activeSpeakers.collectAsState(initial = emptyList())
 
-//    if (currentSessions.isNotEmpty()) {
-//        val session = currentSessions.first()
-//
-//        VideoRenderer(
-//            modifier = Modifier.aspectRatio(ScreenShareAspectRatio, false),
-//            call = call,
-//            videoTrackWrapper = session.track,
-//            trackType = TrackType.TRACK_TYPE_SCREEN_SHARE,
-//            sessionId = session.participant.sessionId
-//        )
-//    } else {
-//        val primarySpeaker by call.primarySpeaker.collectAsState(initial = null)
-//        val currentPrimary = primarySpeaker
-//
-//        if (currentPrimary != null) {
-//            CallParticipant(
-//                call = call,
-//                participant = currentPrimary,
-//                labelPosition = Alignment.BottomStart
-//            )
-//        }
-//    }
+        if (activeSpeakers.isNotEmpty()) {
+            CallSingleVideoRenderer(
+                call = call,
+                participant = activeSpeakers.first(),
+                labelPosition = Alignment.BottomStart
+            )
+        }
+    }
 }

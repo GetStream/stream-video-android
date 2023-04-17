@@ -26,8 +26,12 @@ package org.openapitools.client.models
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param userId * @param grantPermissions * @param revokePermissions */
+ *
+ *
+ * @param userId
+ * @param grantPermissions
+ * @param revokePermissions
+ */
 
 data class UpdateUserPermissionsRequest(
 

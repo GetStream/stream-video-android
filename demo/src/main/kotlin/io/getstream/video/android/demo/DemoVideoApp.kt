@@ -45,7 +45,7 @@ class DemoVideoApp : Application() {
             apiKey = "hd8szvscpxvd",
             geo = GEO.GlobalEdgeNetwork,
             User(
-                id = "thierry", role = "admin", name = "Thierry", imageUrl = "hello",
+                id = "thierry", role = "admin", name = "Thierry", image = "hello",
                 teams = emptyList(), custom = mapOf()
             ),
             token,

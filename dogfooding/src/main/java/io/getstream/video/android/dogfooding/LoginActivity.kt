@@ -247,7 +247,7 @@ class LoginActivity : ComponentActivity() {
             // Read and print the input
             val inputStream = BufferedReader(InputStreamReader(connection.getInputStream()))
             val response = inputStream.readLines().toString()
-            println(response)
+
             inputStream.close()
 
             val userPreferences = UserPreferencesManager.initialize(applicationContext)
@@ -271,7 +271,10 @@ class LoginActivity : ComponentActivity() {
             val user = User(
                 id = authUser?.email ?: userJSON.getString("userId"),
                 name = authUser?.displayName ?: "",
-                imageUrl = authUser?.photoUrl?.toString() ?: "",
+                image = authUser?.photoUrl?.toString() ?: "",
+                custom = mapOf(
+                    "email" to userJSON.getString("email")
+                )
             )
 
             startHome(user, token)

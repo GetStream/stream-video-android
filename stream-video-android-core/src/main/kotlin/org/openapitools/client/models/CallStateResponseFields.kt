@@ -26,9 +26,13 @@ package org.openapitools.client.models
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param blockedUsers * @param call * @param members List of call members
- * @param membership */
+ *
+ *
+ * @param blockedUsers
+ * @param call
+ * @param members List of call members
+ * @param membership
+ */
 
 data class CallStateResponseFields(
 

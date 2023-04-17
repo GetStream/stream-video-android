@@ -18,17 +18,18 @@ package io.getstream.video.android.core
 
 import com.google.common.truth.Truth.assertThat
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.core.events.ConnectedEvent
-import io.getstream.video.android.core.events.VideoEvent
+import io.getstream.result.Error
+import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.model.QueryCallsData
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.UserType
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.openapitools.client.models.ConnectedEvent
+import org.openapitools.client.models.VideoEvent
 import org.robolectric.RobolectricTestRunner
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 @RunWith(RobolectricTestRunner::class)
 class ClientAndAuthTest : TestBase() {
@@ -52,7 +53,7 @@ class ClientAndAuthTest : TestBase() {
             context = context,
             apiKey = apiKey,
             geo = GEO.GlobalEdgeNetwork,
-            user = User(id = "anon", type = UserType.Anonymous)
+            user = User(id = "anonymous", type = UserType.Anonymous)
         ).build()
     }
 
@@ -62,7 +63,6 @@ class ClientAndAuthTest : TestBase() {
         // the ID is generated, client side...
         // verify that we get the token
         // API call is getGuestUser or something like that
-        // TODO: Implement
         StreamVideoBuilder(
             context = context,
             apiKey = apiKey,
@@ -113,21 +113,11 @@ class ClientAndAuthTest : TestBase() {
         ).build()
         assertThat(client.state.connection.value).isEqualTo(ConnectionState.PreConnect)
         val clientImpl = client as StreamVideoImpl
+
         val connectResultDeferred = clientImpl.connectAsync()
+
         val connectResult = connectResultDeferred.await()
-
-        assertSuccess(connectResult)
-
-        // wait for the WS to connect
-        suspendCoroutine<VideoEvent> { continuation ->
-            client.subscribe {
-                if (it is ConnectedEvent) {
-                    continuation.resume(it)
-                }
-            }
-        }
-
-        logger.d { "stateflow from test $client.state.connection" }
+        delay(100L)
         assertThat(client.state.connection.value).isEqualTo(ConnectionState.Connected)
     }
 
@@ -140,6 +130,41 @@ class ClientAndAuthTest : TestBase() {
             testData.users["thierry"]!!,
             testData.tokens["thierry"]!!,
         ).build()
+    }
+
+    @Test
+    fun `test an expired token, no provider set`() = runTest {
+        val client = StreamVideoBuilder(
+            context = context,
+            apiKey = apiKey,
+            geo = GEO.GlobalEdgeNetwork,
+            testData.users["thierry"]!!,
+            testData.expiredToken,
+        ).build()
+
+        val result = client.call("default", "123").create()
+        assertError(result)
+        result.onError {
+            it as Error.NetworkError
+            assertThat(it.serverErrorCode).isEqualTo(VideoErrorCode.TOKEN_EXPIRED.code)
+        }
+    }
+
+    @Test
+    fun `test an expired token, with token provider set`() = runTest {
+        val client = StreamVideoBuilder(
+            context = context,
+            apiKey = apiKey,
+            geo = GEO.GlobalEdgeNetwork,
+            testData.users["thierry"]!!,
+            testData.expiredToken,
+            tokenProvider = { error ->
+                testData.tokens["thierry"]!!
+            }
+        ).build()
+
+        val result = client.call("default", "123").create()
+        assertSuccess(result)
     }
 
     @Test
@@ -167,7 +192,6 @@ class ClientAndAuthTest : TestBase() {
         ).build()
         val clientImpl = client as StreamVideoImpl
         client.subscribe {
-            println(it)
         }
         val deferred = clientImpl.connectAsync()
         deferred.join()
@@ -192,32 +216,7 @@ class ClientAndAuthTest : TestBase() {
     }
 
     @Test
-    fun testInvalidTokenRecovery() = runTest {
-        val client = StreamVideoBuilder(
-            context = context,
-            apiKey = apiKey,
-            geo = GEO.GlobalEdgeNetwork,
-            testData.users["thierry"]!!,
-            "invalidtoken",
-            // Maybe 1 param is better TODO
-            tokenProvider = { type, user, call ->
-                testData.tokens["thierry"]!!
-            }
-        ).build()
-        val result = client.call("default", randomUUID()).create()
-        assertSuccess(result)
-    }
-
-    @Test
     fun testConnectionId() = runTest {
-        // all requests should have a connection id
-        // the connection id comes from the websocket
-        // TODO:
-        // - you shouldn't immediately connect to the WS
-        // - maybe a manual connect step is best
-        // - maybe it doesn't wait for WS
-        // - there is no .connect on android, when should it connect?
-
         val client = StreamVideoBuilder(
             context = context,
             apiKey = apiKey,
@@ -227,7 +226,7 @@ class ClientAndAuthTest : TestBase() {
         ).build()
         // client.connect()
         val filters = mutableMapOf("active" to true)
-        client.joinCall("default", "123")
+        client.call("default", "123").join()
 
         val result = client.queryCalls(QueryCallsData(filters))
         assert(result.isSuccess)

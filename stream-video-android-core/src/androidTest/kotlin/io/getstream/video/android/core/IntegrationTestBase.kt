@@ -25,7 +25,6 @@ import io.getstream.log.kotlin.KotlinStreamLogger
 import io.getstream.log.streamLog
 import io.getstream.result.Result
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
-import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.User
 import kotlinx.coroutines.Dispatchers
@@ -40,6 +39,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
+import org.openapitools.client.models.VideoEvent
 import java.util.UUID
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
@@ -65,6 +65,8 @@ class IntegrationTestHelper {
     val tokens = mutableMapOf<String, String>()
     val context: Context
 
+    val expiredToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidGhpZXJyeUBnZXRzdHJlYW0uaW8iLCJpc3MiOiJwcm9udG8iLCJzdWIiOiJ1c2VyL3RoaWVycnlAZ2V0c3RyZWFtLmlvIiwiaWF0IjoxNjgxMjUxMDg4LCJleHAiOjE2ODEyNjE4OTN9.VinzXBwvT_AGXNBG8QTz9HJFSR6LhqIEtVpIlmY1aEc"
+
     val fakeSDP = """
         v=0
         o=Node 1 1 IN IP4 172.30.8.37
@@ -86,7 +88,7 @@ class IntegrationTestHelper {
             "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidGhpZXJyeSJ9._4aZL6BR0VGKfZsKYdscsBm8yKVgG-2LatYeHRJUq0g"
 
         val thierry = User(
-            id = "thierry", role = "admin", name = "Thierry", imageUrl = "hello",
+            id = "thierry", role = "admin", name = "Thierry", image = "hello",
             teams = emptyList(), custom = mapOf()
         )
         users["thierry"] = thierry
@@ -101,9 +103,8 @@ class IntegrationTestHelper {
 internal class StreamTestLogger : KotlinStreamLogger() {
 
     override fun log(priority: Priority, tag: String, message: String, throwable: Throwable?) {
-        println("$priority $tag: $message")
+
         if (throwable != null) {
-            println(throwable)
         }
     }
 }
@@ -208,9 +209,8 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true) : TestBase(
         // monitor for events
         events = mutableListOf()
         client.subscribe {
-            println("sub received an event: $it")
+
             events.add(it)
-            println("events in loop $events")
 
             nextEventContinuation?.let { continuation ->
                 if (!nextEventCompleted) {

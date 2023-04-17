@@ -26,8 +26,12 @@ package org.openapitools.client.models
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param name * @param grants * @param settings */
+ *
+ *
+ * @param name
+ * @param grants
+ * @param settings
+ */
 
 data class CreateCallTypeRequest(
 

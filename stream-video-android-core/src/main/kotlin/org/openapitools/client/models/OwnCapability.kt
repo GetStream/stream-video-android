@@ -28,79 +28,84 @@ import com.squareup.moshi.Json
 /**
  * All possibility of string to use
  *
- * Values: blockMinusUsers,createMinusCall,createMinusReaction,endMinusCall,joinMinusBackstage,joinMinusCall,joinMinusEndedMinusCall,muteMinusUsers,readMinusCall,removeMinusCallMinusMember,screenshare,sendMinusAudio,sendMinusVideo,startMinusBroadcastMinusCall,startMinusRecordMinusCall,startMinusTranscriptionMinusCall,stopMinusBroadcastMinusCall,stopMinusRecordMinusCall,stopMinusTranscriptionMinusCall,updateMinusCall,updateMinusCallMinusMember,updateMinusCallMinusPermissions,updateMinusCallMinusSettings
+ * Values: blockUsers,createCall,createReaction,endCall,joinBackstage,joinCall,joinEndedCall,muteUsers,readCall,removeCallMember,screenshare,sendAudio,sendVideo,startBroadcastCall,startRecordCall,startTranscriptionCall,stopBroadcastCall,stopRecordCall,stopTranscriptionCall,updateCall,updateCallMember,updateCallPermissions,updateCallSettings
  */
 
 enum class OwnCapability(val value: kotlin.String) {
 
     @Json(name = "block-users")
-    blockMinusUsers("block-users"),
+    blockUsers("block-users"),
 
     @Json(name = "create-call")
-    createMinusCall("create-call"),
+    createCall("create-call"),
 
     @Json(name = "create-reaction")
-    createMinusReaction("create-reaction"),
+    createReaction("create-reaction"),
 
     @Json(name = "end-call")
-    endMinusCall("end-call"),
+    endCall("end-call"),
 
     @Json(name = "join-backstage")
-    joinMinusBackstage("join-backstage"),
+    joinBackstage("join-backstage"),
 
     @Json(name = "join-call")
-    joinMinusCall("join-call"),
+    joinCall("join-call"),
 
     @Json(name = "join-ended-call")
-    joinMinusEndedMinusCall("join-ended-call"),
+    joinEndedCall("join-ended-call"),
 
     @Json(name = "mute-users")
-    muteMinusUsers("mute-users"),
+    muteUsers("mute-users"),
 
     @Json(name = "read-call")
-    readMinusCall("read-call"),
+    readCall("read-call"),
 
     @Json(name = "remove-call-member")
-    removeMinusCallMinusMember("remove-call-member"),
+    removeCallMember("remove-call-member"),
 
     @Json(name = "screenshare")
     screenshare("screenshare"),
 
     @Json(name = "send-audio")
-    sendMinusAudio("send-audio"),
+    sendAudio("send-audio"),
 
     @Json(name = "send-video")
-    sendMinusVideo("send-video"),
+    sendVideo("send-video"),
 
     @Json(name = "start-broadcast-call")
-    startMinusBroadcastMinusCall("start-broadcast-call"),
+    startBroadcastCall("start-broadcast-call"),
 
     @Json(name = "start-record-call")
-    startMinusRecordMinusCall("start-record-call"),
+    startRecordCall("start-record-call"),
 
     @Json(name = "start-transcription-call")
-    startMinusTranscriptionMinusCall("start-transcription-call"),
+    startTranscriptionCall("start-transcription-call"),
 
     @Json(name = "stop-broadcast-call")
-    stopMinusBroadcastMinusCall("stop-broadcast-call"),
+    stopBroadcastCall("stop-broadcast-call"),
 
     @Json(name = "stop-record-call")
-    stopMinusRecordMinusCall("stop-record-call"),
+    stopRecordCall("stop-record-call"),
 
     @Json(name = "stop-transcription-call")
-    stopMinusTranscriptionMinusCall("stop-transcription-call"),
+    stopTranscriptionCall("stop-transcription-call"),
 
     @Json(name = "update-call")
-    updateMinusCall("update-call"),
+    updateCall("update-call"),
 
     @Json(name = "update-call-member")
-    updateMinusCallMinusMember("update-call-member"),
+    updateCallMember("update-call-member"),
 
     @Json(name = "update-call-permissions")
-    updateMinusCallMinusPermissions("update-call-permissions"),
+    updateCallPermissions("update-call-permissions"),
 
     @Json(name = "update-call-settings")
-    updateMinusCallMinusSettings("update-call-settings");
+    updateCallSettings("update-call-settings"),
+
+    /**
+     * This case is used when decoding an unknown value.
+     */
+    unknown("unknown");
 
     /**
      * Override toString() to avoid using the enum variable name as the value, and instead use
@@ -118,13 +123,13 @@ enum class OwnCapability(val value: kotlin.String) {
         fun encode(data: kotlin.Any?): kotlin.String? = if (data is OwnCapability) "$data" else null
 
         /**
-         * Returns a valid [OwnCapability] for [data], null otherwise.
+         * Returns a valid [OwnCapability] for [data], unknown otherwise.
          */
         fun decode(data: kotlin.Any?): OwnCapability? = data?.let {
             val normalizedData = "$it".lowercase()
             values().firstOrNull { value ->
                 it == value || normalizedData == "$value".lowercase()
-            }
+            } ?: unknown
         }
     }
 }

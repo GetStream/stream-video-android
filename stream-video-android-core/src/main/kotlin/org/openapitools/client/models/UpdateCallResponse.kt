@@ -28,7 +28,9 @@ import com.squareup.moshi.Json
 /**
  * Represents a call
  *
- * @param call * @param duration */
+ * @param call
+ * @param duration
+ */
 
 data class UpdateCallResponse(
 

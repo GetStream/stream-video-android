@@ -21,6 +21,7 @@ import android.content.Context
 import androidx.lifecycle.ProcessLifecycleOwner
 import com.jakewharton.threetenabp.AndroidThreeTen
 import io.getstream.android.push.PushDeviceGenerator
+import io.getstream.result.Error
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.filter.AudioFilter
 import io.getstream.video.android.core.filter.VideoFilter
@@ -58,7 +59,7 @@ public class StreamVideoBuilder(
     /** The token for this user generated using your API secret on your server */
     private val userToken: String = "",
     /** If a token is expired, the token provider makes a request to your backend for a new token */
-    private val tokenProvider: ((type: TokenType, user: User?, call: Call?) -> String)? = null,
+    private val tokenProvider: ((error: Error.NetworkError) -> String)? = null,
     /** Audio filters enable you to add custom effects to your audio before its send to the server */
     private val audioFilters: List<AudioFilter> = emptyList(),
     /** Video filters enable you to change the video before it's send. */
@@ -103,7 +104,7 @@ public class StreamVideoBuilder(
         }
 
         // This connection module class exposes the connections to the various retrofit APIs
-        val module = ConnectionModule(
+        val connectionModule = ConnectionModule(
             context = context,
             scope = scope,
             videoDomain = videoDomain,
@@ -118,16 +119,23 @@ public class StreamVideoBuilder(
             context = context,
             scope = scope,
             user = user,
+            preferences = preferences,
+            tokenProvider = tokenProvider,
             loggingLevel = loggingLevel,
             lifecycle = lifecycle,
-            connectionModule = module,
+            connectionModule = connectionModule,
             pushDeviceGenerators = pushDeviceGenerators
         )
-        // addDevice for push
-        if (enablePush && user.type == UserType.Authenticated) {
-            scope.launch {
+        scope.launch {
+            // addDevice for push
+            if (enablePush && user.type == UserType.Authenticated) {
                 client.registerPushDevice()
             }
+        }
+        if (user.type == UserType.Guest) {
+            client.setupGuestUser(user)
+        } else if (user.type == UserType.Anonymous) {
+            connectionModule.updateAuthType("anonymous")
         }
 
         return client

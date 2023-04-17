@@ -21,8 +21,6 @@ import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationManagerCompat
 import io.getstream.log.taggedLogger
-import io.getstream.result.Result.Failure
-import io.getstream.result.Result.Success
 import io.getstream.video.android.core.GEO
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.notifications.internal.RejectCallBroadcastReceiver.Companion.ACTION_REJECT_CALL
@@ -73,10 +71,10 @@ internal class RejectCallBroadcastReceiver : BroadcastReceiver() {
                 ).build()
 
                 CoroutineScope(Dispatchers.IO).launch {
-                    when (val rejectResult = streamVideo.rejectCall(type, id)) {
-                        is Success -> logger.d { "[onReceive] rejectCall, Success: $rejectResult" }
-                        is Failure -> logger.d { "[onReceive] rejectCall, Failure: $rejectResult" }
-                    }
+//                    when (val rejectResult = streamVideo.rejectCall(type, id)) {
+//                        is Success -> logger.d { "[onReceive] rejectCall, Success: $rejectResult" }
+//                        is Failure -> logger.d { "[onReceive] rejectCall, Failure: $rejectResult" }
+//                    }
                 }
                 val notificationId = intent.getIntExtra(INTENT_EXTRA_NOTIFICATION_ID, 0)
                 NotificationManagerCompat.from(context).cancel(notificationId)

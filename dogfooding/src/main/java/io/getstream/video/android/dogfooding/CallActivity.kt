@@ -17,49 +17,65 @@
 package io.getstream.video.android.dogfooding
 
 import android.content.Context
-import android.media.MediaPlayer
+import android.content.Intent
 import android.os.Bundle
+import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
+import androidx.compose.foundation.background
+import androidx.compose.ui.Modifier
+import androidx.core.os.bundleOf
+import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.call.CallContainer
 import io.getstream.video.android.core.StreamVideo
-import kotlinx.coroutines.launch
+import io.getstream.video.android.core.viewmodel.CallViewModel
+import io.getstream.video.android.core.viewmodel.CallViewModelFactory
 
 class CallActivity : AppCompatActivity() {
 
-    private val mediaPlayer by lazy {
-        MediaPlayer.create(this, R.raw.ringing).apply { isLooping = true }
-    }
+    private val streamVideo: StreamVideo by lazy { dogfoodingApp.streamVideo }
+    private val factory by callViewModelFactory()
+    private val vm by viewModels<CallViewModel> { factory }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-//                getStreamVideo(this@CallActivity).callState.collect { call ->
-//                    when (call) {
-//                        is StreamCallState.Joining -> mediaPlayer.start()
-//                        is StreamCallState.Connected -> mediaPlayer.stop()
-//                        else -> Unit
-//                    }
-//                }
+        setContent {
+            VideoTheme {
+                CallContainer(
+                    modifier = Modifier.background(color = VideoTheme.colors.appBackground),
+                    viewModel = vm,
+                    onBackPressed = { finish() },
+                )
             }
         }
     }
 
-    override fun onPause() {
-        super.onPause()
+    private fun callViewModelFactory(): Lazy<CallViewModelFactory> {
+        val type = intent.getStringExtra(EXTRA_TYPE)
+            ?: throw IllegalArgumentException("You must pass correct call type.")
+        val id = intent.getStringExtra(EXTRA_ID)
+            ?: throw IllegalArgumentException("You must pass correct call id.")
 
-        try {
-            mediaPlayer.stop()
-            mediaPlayer.release()
-        } catch (e: Exception) {
+        return lazy {
+            CallViewModelFactory(
+                streamVideo = streamVideo,
+                call = streamVideo.call(type = type, id = id),
+                permissionManager = null
+            )
         }
     }
 
-    /**
-     * Provides the StreamVideo instance through the videoApp.
-     */
-    fun getStreamVideo(context: Context): StreamVideo = context.dogfoodingApp.streamVideo
+    companion object {
+        internal const val EXTRA_TYPE = "type"
+        internal const val EXTRA_ID = "id"
+
+        fun getIntent(context: Context, type: String, id: String): Intent {
+            return Intent(context, CallActivity::class.java).apply {
+                putExtras(
+                    bundleOf(EXTRA_TYPE to type, EXTRA_ID to id)
+                )
+            }
+        }
+    }
 }

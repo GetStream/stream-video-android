@@ -1,0 +1,10 @@
+root = true
+[*]
+# Most of the standard properties are supported
+max_line_length=100
+
+# don't use wildcard for Java/Kotlin imports
+[*.{java,kt}]
+wildcard_import_limit = 999
+ij_kotlin_name_count_to_use_star_import = 999
+ij_kotlin_name_count_to_use_star_import_for_members = 999

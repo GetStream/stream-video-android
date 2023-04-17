@@ -16,19 +16,42 @@
 
 package io.getstream.video.android.core.model
 
+import androidx.annotation.VisibleForTesting
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Serializer
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+import org.openapitools.client.models.UserResponse
+import org.threeten.bp.OffsetDateTime
+import org.threeten.bp.format.DateTimeFormatter
 
 @Serializable
 sealed class UserType {
     /** A user that's authenticated in your system */
     @Serializable
     object Authenticated : UserType()
+
     /** A temporary guest user, that can have an image, name etc */
     @Serializable
     object Guest : UserType()
+
     /** Not authentication, anonymous user. Commonly used for audio rooms and livestreams */
     @Serializable
     object Anonymous : UserType()
+}
+
+@Serializer(forClass = OffsetDateTime::class)
+object OffsetDateTimeSerializer : KSerializer<OffsetDateTime> {
+    private val formatter: DateTimeFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
+
+    override fun serialize(encoder: Encoder, value: OffsetDateTime) {
+        encoder.encodeString(value.format(formatter))
+    }
+
+    override fun deserialize(decoder: Decoder): OffsetDateTime {
+        return OffsetDateTime.parse(decoder.decodeString(), formatter)
+    }
 }
 
 @Serializable
@@ -39,12 +62,34 @@ public data class User(
     val role: String = "",
     val type: UserType = UserType.Authenticated,
     val name: String = "",
-    val imageUrl: String = "",
+    val image: String = "",
     val isOnline: Boolean = false,
     val teams: List<String> = emptyList(),
-    val custom: Map<String, String> = emptyMap()
+    val custom: Map<String, String> = emptyMap(),
+    @Serializable(with = OffsetDateTimeSerializer::class)
+    val createdAt: OffsetDateTime? = null,
+    @Serializable(with = OffsetDateTimeSerializer::class)
+    val updatedAt: OffsetDateTime? = null,
+    @Serializable(with = OffsetDateTimeSerializer::class)
+    val deletedAt: OffsetDateTime? = null,
 ) {
     public fun isValid(): Boolean {
         return id.isNotEmpty()
+    }
+
+    @VisibleForTesting
+    internal fun toResponse(): UserResponse {
+
+        return UserResponse(
+            id = id,
+            role = role,
+            name = name,
+            image = image,
+            teams = teams,
+            custom = custom,
+            createdAt = createdAt ?: OffsetDateTime.now(),
+            updatedAt = updatedAt ?: OffsetDateTime.now(),
+            deletedAt = deletedAt,
+        )
     }
 }

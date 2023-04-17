@@ -245,17 +245,17 @@ class HomeActivity : AppCompatActivity() {
             logger.d { "[createMeeting] callId: $callId, participants: $participants" }
 
             loadingState.value = true
-            val result = streamVideo.joinCall(type = "default", id = callId)
-
-            result.onSuccess { data ->
-                logger.v { "[createMeeting] successful: $data" }
-                loadingState.value = false
-            }
-
-            result.onError {
-                logger.e { "[createMeeting] failed: $it" }
-                Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
-            }
+//            val result = streamVideo.joinCall(type = "default", id = callId)
+//
+//            result.onSuccess { data ->
+//                logger.v { "[createMeeting] successful: $data" }
+//                loadingState.value = false
+//            }
+//
+//            result.onError {
+//                logger.e { "[createMeeting] failed: $it" }
+//                Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
+//            }
         }
     }
 
@@ -264,14 +264,14 @@ class HomeActivity : AppCompatActivity() {
             logger.d { "[dialUsers] callId: $callId, participants: $participants" }
 
             loadingState.value = true
-            streamVideo.getOrCreateCall(
-                "default", callId, participants, ring = true
-            ).onSuccess {
-                logger.v { "[dialUsers] completed: $it" }
-            }.onError {
-                logger.e { "[dialUsers] failed: $it" }
-                Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
-            }
+//            streamVideo.getOrCreateCall(
+//                "default", callId, participants, ring = true
+//            ).onSuccess {
+//                logger.v { "[dialUsers] completed: $it" }
+//            }.onError {
+//                logger.e { "[dialUsers] failed: $it" }
+//                Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
+//            }
             loadingState.value = false
         }
     }
@@ -366,8 +366,8 @@ class HomeActivity : AppCompatActivity() {
             modifier = Modifier
                 .size(40.dp)
                 .padding(top = 8.dp, start = 8.dp),
-            imageUrl = user.imageUrl.orEmpty(),
-            initials = if (user.imageUrl == null) {
+            imageUrl = user.image.orEmpty(),
+            initials = if (user.image == null) {
                 user.name.initials()
             } else {
                 null

@@ -26,8 +26,13 @@ package org.openapitools.client.models
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param custom * @param type * @param user * @param emojiCode */
+ *
+ *
+ * @param custom
+ * @param type
+ * @param user
+ * @param emojiCode
+ */
 
 data class ReactionResponse(
 

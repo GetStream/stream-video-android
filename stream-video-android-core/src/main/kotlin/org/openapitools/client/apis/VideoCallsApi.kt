@@ -49,46 +49,42 @@ import retrofit2.http.Query
 interface VideoCallsApi {
     /**
      * End call
-     *   Sends events: - call.ended  Required permissions: - EndCall
-     * Responses:
+     *   Sends events: - call.ended  Required permissions: - EndCall * Responses:
      *  - 201: Successful response
      *  - 400: Bad request
      *  - 429: Too many requests
      *
-     * @param type
-     * @param id
-     * @return [EndCallResponse]
+     * @param type * @param id * @return [EndCallResponse]
      */
     @POST("/video/call/{type}/{id}/mark_ended")
-    suspend fun endCall(@Path("type") type: String, @Path("id") id: String): EndCallResponse
+    suspend fun endCall(
+        @Path("type") type: String,
+        @Path("id") id: String
+    ): EndCallResponse
 
     /**
      * Get Call
-     *   Required permissions: - ReadCall
-     * Responses:
+     *   Required permissions: - ReadCall * Responses:
      *  - 200: Successful response
      *  - 400: Bad request
      *  - 429: Too many requests
      *
-     * @param type
-     * @param id
-     * @return [GetCallResponse]
+     * @param type * @param id * @return [GetCallResponse]
      */
     @GET("/video/call/{type}/{id}")
-    suspend fun getCall(@Path("type") type: String, @Path("id") id: String): GetCallResponse
+    suspend fun getCall(
+        @Path("type") type: String,
+        @Path("id") id: String
+    ): GetCallResponse
 
     /**
      * Get Call Edge Server
-     * Retrieve the edge server information and credentials for a call.  Required permissions: - JoinCall
-     * Responses:
+     * Retrieve the edge server information and credentials for a call.  Required permissions: - JoinCall * Responses:
      *  - 201: Successful response
      *  - 400: Bad request
      *  - 429: Too many requests
      *
-     * @param type
-     * @param id
-     * @param getCallEdgeServerRequest
-     * @return [GetCallEdgeServerResponse]
+     * @param type * @param id * @param getCallEdgeServerRequest * @return [GetCallEdgeServerResponse]
      */
     @POST("/video/call/{type}/{id}/get_edge_server")
     suspend fun getCallEdgeServer(
@@ -99,8 +95,7 @@ interface VideoCallsApi {
 
     /**
      * Get Edges
-     * Returns the list of all edges available for video calls.
-     * Responses:
+     * Returns the list of all edges available for video calls. * Responses:
      *  - 200: Successful response
      *  - 400: Bad request
      *  - 429: Too many requests
@@ -112,16 +107,12 @@ interface VideoCallsApi {
 
     /**
      * Get or create a call
-     * Gets or creates a new call  Sends events: - call.created  Required permissions: - CreateCall - ReadCall - UpdateCallSettings
-     * Responses:
+     * Gets or creates a new call  Sends events: - call.created  Required permissions: - CreateCall - ReadCall - UpdateCallSettings * Responses:
      *  - 201: Successful response
      *  - 400: Bad request
      *  - 429: Too many requests
      *
-     * @param type
-     * @param id
-     * @param getOrCreateCallRequest
-     * @return [GetOrCreateCallResponse]
+     * @param type * @param id * @param getOrCreateCallRequest * @return [GetOrCreateCallResponse]
      */
     @POST("/video/call/{type}/{id}")
     suspend fun getOrCreateCall(
@@ -132,31 +123,27 @@ interface VideoCallsApi {
 
     /**
      * Set call as live
-     *   Sends events: - call.updated  Required permissions: - UpdateCall
-     * Responses:
+     *   Sends events: - call.updated  Required permissions: - UpdateCall * Responses:
      *  - 201: Successful response
      *  - 400: Bad request
      *  - 429: Too many requests
      *
-     * @param type
-     * @param id
-     * @return [GoLiveResponse]
+     * @param type * @param id * @return [GoLiveResponse]
      */
     @POST("/video/call/{type}/{id}/go_live")
-    suspend fun goLive(@Path("type") type: String, @Path("id") id: String): GoLiveResponse
+    suspend fun goLive(
+        @Path("type") type: String,
+        @Path("id") id: String
+    ): GoLiveResponse
 
     /**
      * Join call (type, id)
-     * Request to join a call  Required permissions: - CreateCall - JoinCall
-     * Responses:
+     * Request to join a call  Required permissions: - CreateCall - JoinCall * Responses:
      *  - 201: Successful response
      *  - 400: Bad request
      *  - 429: Too many requests
      *
-     * @param type
-     * @param id
-     * @param joinCallRequest
-     * @param connectionId  (optional)
+     * @param type * @param id * @param joinCallRequest * @param connectionId  (optional)
      * @return [JoinCallResponse]
      */
     @POST("/video/join_call/{type}/{id}")
@@ -169,16 +156,12 @@ interface VideoCallsApi {
 
     /**
      * Join call (type, id)
-     * Request to join a call  Required permissions: - CreateCall - JoinCall
-     * Responses:
+     * Request to join a call  Required permissions: - CreateCall - JoinCall * Responses:
      *  - 201: Successful response
      *  - 400: Bad request
      *  - 429: Too many requests
      *
-     * @param type
-     * @param id
-     * @param joinCallRequest
-     * @param connectionId  (optional)
+     * @param type * @param id * @param joinCallRequest * @param connectionId  (optional)
      * @return [JoinCallResponse]
      */
     @POST("/video/call/{type}/{id}/join")
@@ -191,14 +174,12 @@ interface VideoCallsApi {
 
     /**
      * Query call
-     * Query calls with filter query  Required permissions: - ReadCall
-     * Responses:
+     * Query calls with filter query  Required permissions: - ReadCall * Responses:
      *  - 201: Successful response
      *  - 400: Bad request
      *  - 429: Too many requests
      *
-     * @param queryCallsRequest
-     * @param connectionId  (optional)
+     * @param queryCallsRequest * @param connectionId  (optional)
      * @return [QueryCallsResponse]
      */
     @POST("/video/calls")
@@ -209,30 +190,26 @@ interface VideoCallsApi {
 
     /**
      * Query call members
-     * Query call members with filter query  Required permissions: - ReadCall
-     * Responses:
+     * Query call members with filter query  Required permissions: - ReadCall * Responses:
      *  - 201: Successful response
      *  - 400: Bad request
      *  - 429: Too many requests
      *
-     * @param queryMembersRequest
-     * @return [QueryMembersResponse]
+     * @param queryMembersRequest * @return [QueryMembersResponse]
      */
     @POST("/video/call/members")
-    suspend fun queryMembers(@Body queryMembersRequest: QueryMembersRequest): QueryMembersResponse
+    suspend fun queryMembers(
+        @Body queryMembersRequest: QueryMembersRequest
+    ): QueryMembersResponse
 
     /**
      * Send reaction to the call
-     * Sends reaction to the call  Sends events: - call.reaction_new  Required permissions: - CreateCallReaction
-     * Responses:
+     * Sends reaction to the call  Sends events: - call.reaction_new  Required permissions: - CreateCallReaction * Responses:
      *  - 201: Successful response
      *  - 400: Bad request
      *  - 429: Too many requests
      *
-     * @param type
-     * @param id
-     * @param sendReactionRequest
-     * @return [SendReactionResponse]
+     * @param type * @param id * @param sendReactionRequest * @return [SendReactionResponse]
      */
     @POST("/video/call/{type}/{id}/reaction")
     suspend fun sendVideoReaction(
@@ -243,31 +220,27 @@ interface VideoCallsApi {
 
     /**
      * Set call as not live
-     *   Sends events: - call.updated  Required permissions: - UpdateCall
-     * Responses:
+     *   Sends events: - call.updated  Required permissions: - UpdateCall * Responses:
      *  - 201: Successful response
      *  - 400: Bad request
      *  - 429: Too many requests
      *
-     * @param type
-     * @param id
-     * @return [StopLiveResponse]
+     * @param type * @param id * @return [StopLiveResponse]
      */
     @POST("/video/call/{type}/{id}/stop_live")
-    suspend fun stopLive(@Path("type") type: String, @Path("id") id: String): StopLiveResponse
+    suspend fun stopLive(
+        @Path("type") type: String,
+        @Path("id") id: String
+    ): StopLiveResponse
 
     /**
      * Unblocks user on a call
-     * Removes the block for a user on a call. The user will be able to join the call again.  Sends events: - call.unblocked_user  Required permissions: - BlockUser
-     * Responses:
+     * Removes the block for a user on a call. The user will be able to join the call again.  Sends events: - call.unblocked_user  Required permissions: - BlockUser * Responses:
      *  - 201: Successful response
      *  - 400: Bad request
      *  - 429: Too many requests
      *
-     * @param type
-     * @param id
-     * @param unblockUserRequest
-     * @return [UnblockUserResponse]
+     * @param type * @param id * @param unblockUserRequest * @return [UnblockUserResponse]
      */
     @POST("/video/call/{type}/{id}/unblock")
     suspend fun unblockUser(
@@ -278,16 +251,12 @@ interface VideoCallsApi {
 
     /**
      * Update Call
-     *   Sends events: - call.updated  Required permissions: - UpdateCall
-     * Responses:
+     *   Sends events: - call.updated  Required permissions: - UpdateCall * Responses:
      *  - 200: Call
      *  - 400: Bad request
      *  - 429: Too many requests
      *
-     * @param type
-     * @param id
-     * @param updateCallRequest
-     * @return [UpdateCallResponse]
+     * @param type * @param id * @param updateCallRequest * @return [UpdateCallResponse]
      */
     @PATCH("call/{type}/{id}")
     suspend fun updateCall(
@@ -298,16 +267,12 @@ interface VideoCallsApi {
 
     /**
      * Update Call Member
-     *   Required permissions: - RemoveCallMember - UpdateCallMember - UpdateCallMemberRole
-     * Responses:
+     *   Required permissions: - RemoveCallMember - UpdateCallMember - UpdateCallMemberRole * Responses:
      *  - 201: Successful response
      *  - 400: Bad request
      *  - 429: Too many requests
      *
-     * @param type
-     * @param id
-     * @param updateCallMembersRequest
-     * @return [UpdateCallMembersResponse]
+     * @param type * @param id * @param updateCallMembersRequest * @return [UpdateCallMembersResponse]
      */
     @POST("/video/call/{type}/{id}/members")
     suspend fun updateCallMembers(

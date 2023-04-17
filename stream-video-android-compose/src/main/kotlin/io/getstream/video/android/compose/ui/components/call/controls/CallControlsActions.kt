@@ -22,7 +22,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import io.getstream.video.android.compose.state.ui.call.CallControlAction
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.core.call.state.CallMediaState
+import io.getstream.video.android.core.call.state.CallDeviceState
 import io.getstream.video.android.core.call.state.FlipCamera
 import io.getstream.video.android.core.call.state.LeaveCall
 import io.getstream.video.android.core.call.state.ToggleCamera
@@ -31,18 +31,18 @@ import io.getstream.video.android.core.call.state.ToggleSpeakerphone
 import io.getstream.video.android.ui.common.R
 
 /**
- * Builds the default set of Call Control actions based on the [callMediaState].
+ * Builds the default set of Call Control actions based on the [callDeviceState].
  *
- * @param callMediaState Information of whether microphone, speaker and camera are on or off.
+ * @param callDeviceState Information of whether microphone, speaker and camera are on or off.
  * @return [List] of [CallControlAction]s that the user can trigger.
  */
 @Composable
 public fun buildDefaultCallControlActions(
-    callMediaState: CallMediaState
+    callDeviceState: CallDeviceState
 ): List<CallControlAction> {
     val speakerphoneIcon =
         painterResource(
-            id = if (callMediaState.isSpeakerphoneEnabled) {
+            id = if (callDeviceState.isSpeakerphoneEnabled) {
                 R.drawable.stream_video_ic_speaker_on
             } else {
                 R.drawable.stream_video_ic_speaker_off
@@ -51,7 +51,7 @@ public fun buildDefaultCallControlActions(
 
     val microphoneIcon =
         painterResource(
-            id = if (callMediaState.isMicrophoneEnabled) {
+            id = if (callDeviceState.isMicrophoneEnabled) {
                 R.drawable.stream_video_ic_mic_on
             } else {
                 R.drawable.stream_video_ic_mic_off
@@ -59,7 +59,7 @@ public fun buildDefaultCallControlActions(
         )
 
     val cameraIcon = painterResource(
-        id = if (callMediaState.isCameraEnabled) {
+        id = if (callDeviceState.isCameraEnabled) {
             R.drawable.stream_video_ic_videocam_on
         } else {
             R.drawable.stream_video_ic_videocam_off
@@ -71,21 +71,21 @@ public fun buildDefaultCallControlActions(
             actionBackgroundTint = Color.White,
             icon = speakerphoneIcon,
             iconTint = Color.DarkGray,
-            callAction = ToggleSpeakerphone(callMediaState.isSpeakerphoneEnabled.not()),
+            callAction = ToggleSpeakerphone(callDeviceState.isSpeakerphoneEnabled.not()),
             description = stringResource(R.string.stream_video_call_controls_toggle_speakerphone)
         ),
         CallControlAction(
             actionBackgroundTint = Color.White,
             icon = cameraIcon,
             iconTint = Color.DarkGray,
-            callAction = ToggleCamera(callMediaState.isCameraEnabled.not()),
+            callAction = ToggleCamera(callDeviceState.isCameraEnabled.not()),
             description = stringResource(R.string.stream_video_call_controls_toggle_camera)
         ),
         CallControlAction(
             actionBackgroundTint = Color.White,
             icon = microphoneIcon,
             iconTint = Color.DarkGray,
-            callAction = ToggleMicrophone(callMediaState.isMicrophoneEnabled.not()),
+            callAction = ToggleMicrophone(callDeviceState.isMicrophoneEnabled.not()),
             description = stringResource(R.string.stream_video_call_controls_toggle_microphone)
         ),
         CallControlAction(

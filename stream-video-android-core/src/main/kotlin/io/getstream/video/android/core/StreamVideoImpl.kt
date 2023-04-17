@@ -27,46 +27,34 @@ import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.getstream.video.android.core.errors.VideoErrorCode
-import io.getstream.video.android.core.events.CallCreatedEvent
-import io.getstream.video.android.core.events.ConnectedEvent
-import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.internal.module.ConnectionModule
 import io.getstream.video.android.core.lifecycle.LifecycleHandler
 import io.getstream.video.android.core.lifecycle.internal.StreamLifecycleObserver
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.CallEventType
-import io.getstream.video.android.core.model.CallMetadata
 import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.core.model.Device
 import io.getstream.video.android.core.model.EdgeData
-import io.getstream.video.android.core.model.JoinedCall
 import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.QueriedCalls
 import io.getstream.video.android.core.model.QueryCallsData
 import io.getstream.video.android.core.model.QueryMembersData
 import io.getstream.video.android.core.model.SendReactionData
-import io.getstream.video.android.core.model.StartedCall
-import io.getstream.video.android.core.model.StreamCallKind
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.mapper.toTypeAndId
-import io.getstream.video.android.core.model.toIceServer
-import io.getstream.video.android.core.model.toInfo
 import io.getstream.video.android.core.model.toRequest
 import io.getstream.video.android.core.socket.ErrorResponse
-import io.getstream.video.android.core.socket.SocketListener
-import io.getstream.video.android.core.socket.internal.SocketState
-import io.getstream.video.android.core.socket.internal.VideoSocketImpl
+import io.getstream.video.android.core.socket.SocketState
+import io.getstream.video.android.core.user.UserPreferences
 import io.getstream.video.android.core.user.UserPreferencesManager
 import io.getstream.video.android.core.utils.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.core.utils.LatencyResult
 import io.getstream.video.android.core.utils.getLatencyMeasurementsOKHttp
-import io.getstream.video.android.core.utils.toCall
 import io.getstream.video.android.core.utils.toCallUser
 import io.getstream.video.android.core.utils.toEdge
 import io.getstream.video.android.core.utils.toQueriedCalls
-import io.getstream.video.android.core.utils.toRecording
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -77,24 +65,34 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.openapitools.client.models.BlockUserRequest
+import org.openapitools.client.models.BlockUserResponse
 import org.openapitools.client.models.CallRequest
 import org.openapitools.client.models.CallSettingsRequest
+import org.openapitools.client.models.ConnectedEvent
 import org.openapitools.client.models.GetCallEdgeServerRequest
 import org.openapitools.client.models.GetCallEdgeServerResponse
+import org.openapitools.client.models.GetCallResponse
 import org.openapitools.client.models.GetOrCreateCallRequest
+import org.openapitools.client.models.GetOrCreateCallResponse
 import org.openapitools.client.models.GoLiveResponse
 import org.openapitools.client.models.JoinCallRequest
 import org.openapitools.client.models.JoinCallResponse
 import org.openapitools.client.models.ListRecordingsResponse
 import org.openapitools.client.models.MemberRequest
+import org.openapitools.client.models.MuteUsersResponse
 import org.openapitools.client.models.RequestPermissionRequest
 import org.openapitools.client.models.SendEventRequest
 import org.openapitools.client.models.SendEventResponse
 import org.openapitools.client.models.SendReactionResponse
 import org.openapitools.client.models.StopLiveResponse
 import org.openapitools.client.models.UnblockUserRequest
+import org.openapitools.client.models.UpdateCallMembersRequest
+import org.openapitools.client.models.UpdateCallMembersResponse
 import org.openapitools.client.models.UpdateCallRequest
 import org.openapitools.client.models.UpdateCallResponse
+import org.openapitools.client.models.UpdateUserPermissionsResponse
+import org.openapitools.client.models.VideoEvent
+import org.openapitools.client.models.WSCallEvent
 import retrofit2.HttpException
 import stream.video.coordinator.client_v1_rpc.CreateDeviceRequest
 import stream.video.coordinator.client_v1_rpc.DeleteDeviceRequest
@@ -125,8 +123,11 @@ internal class StreamVideoImpl internal constructor(
     private val loggingLevel: LoggingLevel,
     internal val connectionModule: ConnectionModule,
     internal val pushDeviceGenerators: List<PushDeviceGenerator>,
-) : StreamVideo, SocketListener {
+    internal val tokenProvider: ((error: Error.NetworkError) -> String)?,
+    internal val preferences: UserPreferences,
+) : StreamVideo {
 
+    private var guestUserJob: Deferred<Unit>? = null
     private lateinit var connectContinuation: Continuation<Result<ConnectedEvent>>
 
     var developmentMode = true // if true we fail fast on errors instead of logging them
@@ -135,35 +136,12 @@ internal class StreamVideoImpl internal constructor(
     public var peerConnectionFactory = StreamPeerConnectionFactory(context)
     public override val userId = user.id
 
-    override fun onConnected(event: ConnectedEvent) {
-        onEvent(event)
-    }
-
-    override fun onEvent(event: VideoEvent) {
-        // TODO: maybe merge fire event into this?
-        fireEvent(event)
-    }
-
     override val state = ClientState(this)
     private val logger by taggedLogger("Call:StreamVideo")
     private var subscriptions = mutableSetOf<EventSubscription>()
     private var calls = mutableMapOf<String, Call>()
 
-    val socketImpl = connectionModule.coordinatorSocket as VideoSocketImpl
-
-    // caller: JOIN after accepting incoming call by callee
-    /**
-     * @see StreamVideo.joinCall
-     */
-    override suspend fun joinCall(call: CallMetadata): Result<JoinedCall> =
-        withContext(scope.coroutineContext) {
-            logger.d { "[joinCallOnly] call: $call" }
-            // TODO: engine.onCallJoining(call)
-            joinCallInternal(call)
-                // .onSuccess { data -> engine.onCallJoined(data) }
-                // .onError { engine.onCallFailed(it) }
-                .also { logger.v { "[joinCallOnly] result: $it" } }
-        }
+    val socketImpl = connectionModule.coordinatorSocket
 
     /**
      * @see StreamVideo.createDevice
@@ -199,13 +177,26 @@ internal class StreamVideoImpl internal constructor(
             } catch (e: HttpException) {
                 val failure = parseError(e)
                 val parsedError = failure.value as Error.NetworkError
-                if (parsedError.serverErrorCode == VideoErrorCode.AUTHENTICATION_ERROR.code) {
+                if (parsedError.serverErrorCode == VideoErrorCode.TOKEN_EXPIRED.code) {
                     // invalid token
                     // val newToken = tokenProvider.getToken()
+                    if (tokenProvider != null) {
+                        val newToken = tokenProvider.invoke(parsedError)
+                        preferences.storeUserToken(newToken)
+                        connectionModule.updateToken(newToken)
+                    }
+                    // retry the API call once
+                    try {
+                        Success(apiCall())
+                    } catch (e: HttpException) {
+                        parseError(e)
+                    }
+
                     // set the token, repeat API call
                     // keep track of retry count
+                } else {
+                    failure
                 }
-                failure
             }
         }
     }
@@ -213,20 +204,17 @@ internal class StreamVideoImpl internal constructor(
     /**
      * @see StreamVideo.updateCall
      */
-    override suspend fun updateCall(
+    suspend fun updateCall(
         type: String,
         id: String,
-        custom: Map<String, Any>,
+        request: UpdateCallRequest,
     ): Result<UpdateCallResponse> {
-        logger.d { "[updateCall] type: $type, id: $id, participantIds: $custom" }
+        logger.d { "[updateCall] type: $type, id: $id, request: $request" }
         return wrapAPICall {
             connectionModule.videoCallsApi.updateCall(
                 type = type,
                 id = id,
-                updateCallRequest = UpdateCallRequest(
-                    custom = custom,
-                    settingsOverride = CallSettingsRequest()
-                )
+                updateCallRequest = request
             )
         }
     }
@@ -289,60 +277,52 @@ internal class StreamVideoImpl internal constructor(
         StreamLifecycleObserver(
             lifecycle,
             object : LifecycleHandler {
-                override fun resume() = reconnectSocket()
+                override fun resume() {
+                    scope.launch {
+                        // We should only connect if we were previously connected
+                        if (connectionModule.coordinatorSocket.connectionState.value != SocketState.NotConnected) {
+                            connectionModule.coordinatorSocket.connect()
+                        }
+                    }
+                }
+
                 override fun stopped() {
-                    connectionModule.coordinatorSocket.releaseConnection()
+                    // We should only disconnect if we were previously connected
+                    if (connectionModule.coordinatorSocket.connectionState.value != SocketState.NotConnected) {
+                        connectionModule.coordinatorSocket.disconnect()
+                    }
                 }
             }
         )
 
     init {
-        observeState()
-        // addSocketListener(CoordinatorSocketListenerAdapter(engine))
         scope.launch(Dispatchers.Main.immediate) {
             lifecycleObserver.observe()
         }
 
-        // listen to socket events
-        connectionModule.coordinatorSocket.addListener(this)
-    }
-
-    suspend fun connectAsync(): Deferred<Result<ConnectedEvent>> {
-        return scope.async {
-            val result = socketImpl.connect()
-            if (result.isFailure) {
-                logger.e { "Failed to connect to coordinator, error $result.error" }
+        // listen to socket events and errors
+        scope.launch {
+            connectionModule.coordinatorSocket.events.collect() {
+                fireEvent(it)
             }
-            result
+        }
+        scope.launch {
+            connectionModule.coordinatorSocket.errors.collect() {
+                if (developmentMode) {
+                    throw it
+                } else {
+                    logger.e(it) { "permanent failure on socket connection" }
+                }
+            }
         }
     }
 
-    private fun observeState() {
-        scope.launch {
-//            engine.callState.collect { state ->
-//                when (state) {
-//                    is StreamCallState.Drop -> if (config.cancelOnTimeout && state.reason is DropReason.Timeout) {
-//                        logger.i { "[observeState] call dropped by timeout" }
-//                        cancelCall(state.callGuid.type, state.callGuid.id)
-//                    }
-//                    is StreamCallState.Idle -> clearCallState()
-//                    is StreamCallState.Joined -> {
-//                        logger.i { "[observeState] caller joins a call: $state" }
-//                        createCallClient(
-//                            callGuid = state.callGuid,
-//                            signalUrl = state.callUrl,
-//                            sfuToken = state.sfuToken,
-//                            iceServers = state.iceServers,
-//                        )
-//                    }
-//                    is StreamCallState.Outgoing -> if (config.joinOnAcceptedByCallee && state.acceptedByCallee) {
-//                        logger.i { "[observeState] caller joins a call: $state" }
-//                        joinCall(state.toMetadata())
-//                    }
-//                    else -> { /* no-op */
-//                    }
-//                }
-//            }
+    suspend fun connectAsync(): Deferred<Unit> {
+        return scope.async {
+            // wait for the guest user setup if we're using guest users
+            guestUserJob?.let { it.await() }
+            val result = socketImpl.connect()
+            result
         }
     }
 
@@ -366,7 +346,7 @@ internal class StreamVideoImpl internal constructor(
     /**
      * @see StreamVideo.removeDevices
      */
-    override fun removeDevices(devices: List<Device>) {
+    fun removeDevices(devices: List<Device>) {
         scope.launch {
             val operations = devices.map {
                 async { deleteDevice(it.token) }
@@ -374,6 +354,26 @@ internal class StreamVideoImpl internal constructor(
 
             operations.awaitAll()
         }
+    }
+
+    fun setupGuestUser(user: User) {
+        guestUserJob = scope.async {
+//            val response = createGuestUser(user)
+//            if (response.isFailure) {
+//                throw IllegalStateException("Failed to create guest user")
+//            }
+//            response.onSuccess {
+//                preferences.storeUserCredentials(it)
+//                preferences.storeUserToken(it.token)
+//                connectionModule.updateToken(it.token)
+//            }
+        }
+    }
+
+    suspend fun createGuestUser(user: User) {
+//        return wrapAPICall {
+//            connectionModule.videoCallsApi.createGuestUser(user)
+//        }
     }
 
     override suspend fun registerPushDevice() {
@@ -409,7 +409,11 @@ internal class StreamVideoImpl internal constructor(
         state.handleEvent(event)
 
         // update state for the calls. calls handle updating participants and members
-        val selectedCid = cid.ifEmpty { event.callCid }
+        val selectedCid = cid.ifEmpty {
+            val callEvent = event as? WSCallEvent
+            callEvent?.getCallCID()
+        } ?: ""
+
         if (selectedCid.isNotEmpty()) {
             calls[selectedCid]?.let {
                 it.state.handleEvent(event)
@@ -443,60 +447,79 @@ internal class StreamVideoImpl internal constructor(
         }
     }
 
+    internal suspend fun getCall(type: String, id: String): Result<GetCallResponse> {
+        return wrapAPICall {
+            connectionModule.videoCallsApi.getCall(type, id)
+        }
+    }
+
     // caller: DIAL and wait answer
     /**
      * @see StreamVideo.getOrCreateCall
      */
-    override suspend fun getOrCreateCall(
+    internal suspend fun getOrCreateCall(
         type: String,
         id: String,
-        participantIds: List<String>,
+        memberIds: List<String>? = null,
+        custom: Map<String, Any>? = null,
+        settingsOverride: CallSettingsRequest? = null,
+        startsAt: org.threeten.bp.OffsetDateTime? = null,
+        team: String? = null,
         ring: Boolean
-    ): Result<CallMetadata> = withContext(scope.coroutineContext) {
-        logger.d { "[getOrCreateCall] type: $type, id: $id, participantIds: $participantIds" }
-        // engine.onCallStarting(type, id, participantIds, ring, forcedNewCall = false)
+    ): Result<GetOrCreateCallResponse> {
 
-        try {
-            Success(
-                connectionModule.videoCallsApi.getOrCreateCall(
-                    type = type,
-                    id = id,
-                    getOrCreateCallRequest = GetOrCreateCallRequest(
-                        data = CallRequest(
-                            members = participantIds.map {
-                                MemberRequest(
-                                    userId = it,
-                                    role = "admin"
-                                )
-                            },
-                        ),
-                        ring = ring
-                    )
+        val members = memberIds?.map {
+            MemberRequest(
+                userId = it
+            )
+        }
+
+        return getOrCreateCallFullMembers(
+            type = type,
+            id = id,
+            members = members,
+            custom = custom,
+            settingsOverride = settingsOverride,
+            startsAt = startsAt,
+            team = team,
+            ring = ring
+        )
+    }
+
+    internal suspend fun getOrCreateCallFullMembers(
+        type: String,
+        id: String,
+        members: List<MemberRequest>? = null,
+        custom: Map<String, Any>? = null,
+        settingsOverride: CallSettingsRequest? = null,
+        startsAt: org.threeten.bp.OffsetDateTime? = null,
+        team: String? = null,
+        ring: Boolean
+    ): Result<GetOrCreateCallResponse> {
+        logger.d { "[getOrCreateCall] type: $type, id: $id, members: $members" }
+
+        return wrapAPICall {
+            connectionModule.videoCallsApi.getOrCreateCall(
+                type = type,
+                id = id,
+                getOrCreateCallRequest = GetOrCreateCallRequest(
+                    data = CallRequest(
+                        members = members,
+                        custom = custom,
+                        settingsOverride = settingsOverride,
+                        startsAt = startsAt,
+                        team = team,
+                    ),
+                    ring = ring
                 )
             )
-                .also { logger.v { "[getOrCreateCall] Coordinator result: $it" } }
-                .map { response ->
-                    StartedCall(
-                        call = response.toCall(
-                            StreamCallKind.fromRinging(
-                                ring
-                            )
-                        )
-                    )
-                }
-//                .onSuccess { engine.onCallStarted(it.call) }
-//                .onError { engine.onCallFailed(it) }
-                .map { it.call }
-                .also { logger.v { "[getOrCreateCall] Final result: $it" } }
-        } catch (e: HttpException) {
-            parseError(e)
         }
     }
 
     /**
      * @see StreamVideo.inviteUsers
      */
-    override suspend fun inviteUsers(type: String, id: String, users: List<User>): Result<Unit> {
+    internal suspend fun inviteUsers(type: String, id: String, users: List<User>): Result<Unit> {
         logger.d { "[inviteUsers] users: $users" }
 
         return wrapAPICall {
@@ -514,89 +537,12 @@ internal class StreamVideoImpl internal constructor(
     }
 
     /**
-     * Once the call is set up, we can initiate the Join flow, by analyzing the latency of servers
-     * and choosing the correct one.
-     *
-     * @param call Information about the call.
-     * @return [Result] wrapper around [JoinedCall] once the correct server is chosen.
-     */
-    private suspend fun joinCallInternal(call: CallMetadata): Result<JoinedCall> {
-        return try {
-            logger.d { "[joinCallInternal] call: $call" }
-
-            val joinResult = wrapAPICall {
-                connectionModule.videoCallsApi.joinCallTypeId0(
-                    id = call.id,
-                    type = call.type,
-                    connectionId = connectionModule.coordinatorSocket.getConnectionId(),
-                    joinCallRequest = JoinCallRequest()
-                )
-            }
-            if (joinResult !is Success) {
-                logger.e { "[joinCallInternal] failed joinResult: $joinResult" }
-                return joinResult as Failure
-            }
-            logger.v { "[joinCallInternal] joinResult: $joinResult" }
-
-            val validEdges = joinResult.value.edges.filter {
-                it.latencyUrl.isNotBlank() && it.name.isNotBlank()
-            }
-
-            val latencyResults = measureLatency(validEdges.map { it.latencyUrl })
-            logger.v { "[joinCallInternal] latencyResults: $latencyResults" }
-            val selectEdgeServerResult = selectEdgeServer(
-                type = call.type,
-                id = call.id,
-                request = GetCallEdgeServerRequest(
-                    latencyMeasurements = latencyResults.associate { it.latencyUrl to it.measurements }
-                )
-            )
-            logger.v { "[joinCallInternal] selectEdgeServerResult: $selectEdgeServerResult" }
-            when (selectEdgeServerResult) {
-                is Success -> {
-                    connectionModule.coordinatorSocket.updateCallState(call)
-                    val credentials = selectEdgeServerResult.value.credentials
-                    val url = credentials.server.url
-                    val iceServers =
-                        selectEdgeServerResult
-                            .value
-                            .credentials
-                            .iceServers
-                            .map { it.toIceServer() }
-
-                    connectionModule.preferences.storeSfuToken(credentials.token)
-
-                    Success(
-                        JoinedCall(
-                            call = call,
-                            callUrl = url,
-                            sfuToken = credentials.token,
-                            iceServers = iceServers
-                        )
-                    )
-                }
-
-                is Failure -> Failure(selectEdgeServerResult.value)
-            }
-        } catch (error: Throwable) {
-            logger.e(error) { "[joinCallInternal] failed: $error" }
-            Failure(
-                Error.ThrowableError(
-                    error.message ?: "Couldn't join a call internal", error
-                )
-            )
-        }
-    }
-
-    /**
      * Measures and prepares the latency which describes how much time it takes to ping the server.
      *
      * @param edgeUrl The edge we want to measure.
      *
      * @return [List] of [Float] values which represent measurements from ping connections.
      */
-    // TODO - measure latencies in the following way:
-
     internal suspend fun measureLatency(edgeUrls: List<String>): List<LatencyResult> =
         withContext(scope.coroutineContext) {
             val jobs = edgeUrls.map {
@@ -611,7 +557,7 @@ internal class StreamVideoImpl internal constructor(
     /**
      * @see CallCoordinatorClient.selectEdgeServer for details.
      */
-    public override suspend fun selectEdgeServer(
+    public suspend fun selectEdgeServer(
         type: String,
         id: String,
         request: GetCallEdgeServerRequest
@@ -625,15 +571,48 @@ internal class StreamVideoImpl internal constructor(
         }
     }
 
-    override suspend fun joinCall(type: String, id: String): Result<JoinCallResponse> {
-        val joinCallRequest = JoinCallRequest()
-        return wrapAPICall {
+    suspend fun joinCall(
+        type: String,
+        id: String,
+        create: Boolean = false,
+        members: List<MemberRequest>? = null,
+        custom: Map<String, Any>? = null,
+        settingsOverride: CallSettingsRequest? = null,
+        startsAt: org.threeten.bp.OffsetDateTime? = null,
+        team: String? = null,
+        ring: Boolean = false
+    ): Result<JoinCallResponse> {
+
+        val joinCallRequest = JoinCallRequest(
+            create = create,
+            data = CallRequest(
+                members = members,
+                custom = custom,
+                settingsOverride = settingsOverride,
+                startsAt = startsAt,
+                team = team
+            ),
+            ring = ring,
+        )
+
+        val result = wrapAPICall {
             connectionModule.videoCallsApi.joinCallTypeId0(
                 type,
                 id,
                 joinCallRequest,
-                connectionModule.coordinatorSocket.getConnectionId()
+                connectionModule.coordinatorSocket.connectionId
             )
+        }
+        return result
+    }
+
+    suspend fun updateMembers(
+        type: String,
+        id: String,
+        request: UpdateCallMembersRequest
+    ): Result<UpdateCallMembersResponse> {
+        return wrapAPICall {
+            connectionModule.videoCallsApi.updateCallMembers(type, id, request)
         }
     }
 
@@ -641,29 +620,26 @@ internal class StreamVideoImpl internal constructor(
     /**
      * @see StreamVideo.sendEvent
      */
-    override suspend fun sendEvent(
+    internal suspend fun sendEvent(
         type: String,
         id: String,
         eventType: CallEventType
     ): Result<SendEventResponse> {
         logger.d { "[sendEvent] callCid: $type:$id, eventType: $eventType" }
-        val callCid = "$type:$id"
 
         return wrapAPICall {
             connectionModule.eventsApi.sendEvent(
                 type,
                 id,
                 SendEventRequest(type = eventType.eventType)
-            ).also {
-                // engine.onCallEventSent(callCid, eventType)
-            }
+            )
         }
     }
 
     /**
      * @see StreamVideo.sendCustomEvent
      */
-    override suspend fun sendCustomEvent(
+    internal suspend fun sendCustomEvent(
         type: String,
         id: String,
         dataJson: Map<String, Any>,
@@ -685,7 +661,7 @@ internal class StreamVideoImpl internal constructor(
     /**
      * @see StreamVideo.queryMembers
      */
-    override suspend fun queryMembers(
+    internal suspend fun queryMembers(
         type: String,
         id: String,
         queryMembersData: QueryMembersData
@@ -705,7 +681,7 @@ internal class StreamVideoImpl internal constructor(
     /**
      * @see StreamVideo.blockUser
      */
-    override suspend fun blockUser(type: String, id: String, userId: String): Result<Unit> {
+    suspend fun blockUser(type: String, id: String, userId: String): Result<BlockUserResponse> {
         logger.d { "[blockUser] callCid: $type:$id, userId: $userId" }
 
         return wrapAPICall {
@@ -720,7 +696,7 @@ internal class StreamVideoImpl internal constructor(
     /**
      * @see StreamVideo.unblockUser
      */
-    override suspend fun unblockUser(type: String, id: String, userId: String): Result<Unit> {
+    suspend fun unblockUser(type: String, id: String, userId: String): Result<Unit> {
         logger.d { "[unblockUser] callCid: $type:$id, userId: $userId" }
 
         return wrapAPICall {
@@ -735,14 +711,14 @@ internal class StreamVideoImpl internal constructor(
     /**
      * @see StreamVideo.endCall
      */
-    override suspend fun endCall(type: String, id: String): Result<Unit> {
+    suspend fun endCall(type: String, id: String): Result<Unit> {
         return wrapAPICall { connectionModule.videoCallsApi.endCall(type, id) }
     }
 
     /**
      * @see StreamVideo.goLive
      */
-    override suspend fun goLive(type: String, id: String): Result<GoLiveResponse> {
+    suspend fun goLive(type: String, id: String): Result<GoLiveResponse> {
         logger.d { "[goLive] callCid: $type:$id" }
 
         return wrapAPICall { connectionModule.videoCallsApi.goLive(type, id) }
@@ -751,7 +727,7 @@ internal class StreamVideoImpl internal constructor(
     /**
      * @see StreamVideo.stopLive
      */
-    override suspend fun stopLive(type: String, id: String): Result<StopLiveResponse> {
+    suspend fun stopLive(type: String, id: String): Result<StopLiveResponse> {
 
         return wrapAPICall { connectionModule.videoCallsApi.stopLive(type, id) }
     }
@@ -759,11 +735,11 @@ internal class StreamVideoImpl internal constructor(
     /**
      * @see StreamVideo.muteUsers
      */
-    override suspend fun muteUsers(
+    suspend fun muteUsers(
         type: String,
         id: String,
         muteUsersData: MuteUsersData
-    ): Result<Unit> {
+    ): Result<MuteUsersResponse> {
 
         val request = muteUsersData.toRequest()
         return wrapAPICall {
@@ -777,16 +753,27 @@ internal class StreamVideoImpl internal constructor(
     override suspend fun queryCalls(queryCallsData: QueryCallsData): Result<QueriedCalls> {
         logger.d { "[queryCalls] queryCallsData: $queryCallsData" }
         val request = queryCallsData.toRequest()
-        val connectionId = connectionModule.coordinatorSocket.getConnectionId()
-        return wrapAPICall {
+        val connectionId = connectionModule.coordinatorSocket.connectionId
+        val result = wrapAPICall {
             connectionModule.videoCallsApi.queryCalls(request, connectionId).toQueriedCalls()
         }
+        if (result.isSuccess) {
+            // update state for these calls
+            result.onSuccess {
+                it.calls.forEach { callData ->
+                    val call = this.call(callData.call.type, callData.call.id)
+                    call.state.updateFromResponse(callData)
+                }
+            }
+        }
+
+        return result
     }
 
     /**
      * @see StreamVideo.requestPermissions
      */
-    override suspend fun requestPermissions(
+    suspend fun requestPermissions(
         type: String,
         id: String,
         permissions: List<String>
@@ -805,7 +792,7 @@ internal class StreamVideoImpl internal constructor(
     /**
      * @see StreamVideo.startBroadcasting
      */
-    override suspend fun startBroadcasting(type: String, id: String): Result<Unit> {
+    suspend fun startBroadcasting(type: String, id: String): Result<Unit> {
         logger.d { "[startBroadcasting] callCid: $type $id" }
 
         return wrapAPICall { connectionModule.livestreamingApi.startBroadcasting(type, id) }
@@ -814,7 +801,7 @@ internal class StreamVideoImpl internal constructor(
     /**
      * @see StreamVideo.stopBroadcasting
      */
-    override suspend fun stopBroadcasting(type: String, id: String): Result<Unit> {
+    suspend fun stopBroadcasting(type: String, id: String): Result<Unit> {
 
         return wrapAPICall { connectionModule.livestreamingApi.stopBroadcasting(type, id) }
     }
@@ -822,7 +809,7 @@ internal class StreamVideoImpl internal constructor(
     /**
      * @see StreamVideo.startRecording
      */
-    override suspend fun startRecording(type: String, id: String): Result<Unit> {
+    suspend fun startRecording(type: String, id: String): Result<Unit> {
 
         return wrapAPICall { connectionModule.recordingApi.startRecording(type, id) }
     }
@@ -830,7 +817,7 @@ internal class StreamVideoImpl internal constructor(
     /**
      * @see StreamVideo.stopRecording
      */
-    override suspend fun stopRecording(type: String, id: String): Result<Unit> {
+    suspend fun stopRecording(type: String, id: String): Result<Unit> {
 
         return wrapAPICall {
             connectionModule.recordingApi.stopRecording(type, id)
@@ -840,11 +827,11 @@ internal class StreamVideoImpl internal constructor(
     /**
      * @see StreamVideo.updateUserPermissions
      */
-    override suspend fun updateUserPermissions(
+    suspend fun updateUserPermissions(
         type: String,
         id: String,
         updateUserPermissionsData: UpdateUserPermissionsData
-    ): Result<Unit> {
+    ): Result<UpdateUserPermissionsResponse> {
         return wrapAPICall {
             connectionModule.moderationApi.updateUserPermissions(
                 type,
@@ -857,7 +844,7 @@ internal class StreamVideoImpl internal constructor(
     /**
      * @see StreamVideo.listRecordings
      */
-    override suspend fun listRecordings(
+    suspend fun listRecordings(
         type: String,
         id: String,
         sessionId: String
@@ -865,8 +852,6 @@ internal class StreamVideoImpl internal constructor(
         // TODO: Result structure isn't flexible
         return wrapAPICall {
             val result = connectionModule.recordingApi.listRecordings(type, id, sessionId)
-
-            result.recordings.map { it.toRecording() }
             result
         }
     }
@@ -874,7 +859,7 @@ internal class StreamVideoImpl internal constructor(
     /**
      * @see StreamVideo.sendReaction
      */
-    override suspend fun sendReaction(
+    suspend fun sendReaction(
         type: String,
         id: String,
         sendReactionData: SendReactionData
@@ -910,16 +895,6 @@ internal class StreamVideoImpl internal constructor(
     }
 
     /**
-     * Attempts to reconnect the socket if it's in a disconnected state and the user is available.
-     */
-    private fun reconnectSocket() {
-
-        if (connectionModule.coordinatorStateService.state !is SocketState.Connected && user.id.isNotBlank()) {
-            connectionModule.coordinatorSocket.reconnect()
-        }
-    }
-
-    /**
      * Creates an instance of the [SFUSession] for the given call input, which is persisted and
      * used to communicate with the BE.
      *
@@ -934,36 +909,14 @@ internal class StreamVideoImpl internal constructor(
      * [SFUSession.connectToCall] when you're ready to fully join a call.
      */
 
-    override suspend fun acceptCall(type: String, id: String) {
+    suspend fun acceptCall(type: String, id: String) {
         TODO("Not yet implemented")
     }
 
     /**
-     * @see StreamVideo.acceptCall
-     */
-//    override suspend fun acceptCall(type: String, id: String): Result<JoinedCall> =
-//        withContext(scope.coroutineContext) {
-//            Result<JoinedCall>(JoinedCall())
-// //            try {
-// //
-// //                sendEvent(
-// //                    type, id,
-// //                    eventType = CallEventType.ACCEPTED
-// //                ).flatMap {
-// //                    joinCall(type, id)
-// //                }.also {
-// //                    logger.v { "[acceptCall] result: $it" }
-// //                }
-// //            } catch (e: Throwable) {
-// //                logger.e { "[acceptCall] failed: $e" }
-// //                Failure(VideoError(e.message, e))
-// //            }
-//        }
-
-    /**
      * @see StreamVideo.rejectCall
      */
-    override suspend fun rejectCall(type: String, id: String): Result<SendEventResponse> {
+    suspend fun rejectCall(type: String, id: String): Result<SendEventResponse> {
         logger.d { "[rejectCall] cid: $type:$id" }
         return sendEvent(type, id, CallEventType.REJECTED)
     }
@@ -971,33 +924,32 @@ internal class StreamVideoImpl internal constructor(
     /**
      * @see StreamVideo.cancelCall
      */
-    override suspend fun cancelCall(type: String, id: String): Result<SendEventResponse> {
+    suspend fun cancelCall(type: String, id: String): Result<SendEventResponse> {
         return sendEvent(type = type, id = id, CallEventType.CANCELLED)
     }
 
     /**
      * @see StreamVideo.handlePushMessage
      */
-    override suspend fun handlePushMessage(payload: Map<String, Any>): Result<Unit> =
+    suspend fun handlePushMessage(payload: Map<String, Any>): Result<Unit> =
         withContext(scope.coroutineContext) {
             val callCid = payload[INTENT_EXTRA_CALL_CID] as? String
                 ?: return@withContext Failure(Error.GenericError("Missing Call CID!"))
 
             val (type, id) = callCid.toTypeAndId()
 
-            when (val result = getOrCreateCall(type, id, emptyList(), false)) {
+            when (val result = getCall(type, id)) {
                 is Success -> {
                     val callMetadata = result.value
 
-                    val event = CallCreatedEvent(
-                        callCid = callMetadata.cid,
-                        ringing = true,
-                        users = callMetadata.users,
-                        callInfo = callMetadata.toInfo(),
-                        callDetails = callMetadata.callDetails
-                    )
+//                    val event = CallCreatedEvent(
+//                        callCid = callMetadata.cid,
+//                        ringing = true,
+//                        users = callMetadata.users,
+//                        callInfo = callMetadata.toInfo(),
+//                        callDetails = callMetadata.callDetails
+//                    )
 
-                    // TODO engine.onCoordinatorEvent(event)
                     Success(Unit)
                 }
 
@@ -1005,12 +957,12 @@ internal class StreamVideoImpl internal constructor(
             }
         }
 
-    override fun call(type: String, id: String, token: String): Call {
+    override fun call(type: String, id: String): Call {
         val cid = "$type:$id"
         return if (calls.contains(cid)) {
             calls[cid]!!
         } else {
-            val call = Call(this, type, id, token, user)
+            val call = Call(this, type, id, user)
             calls[cid] = call
             call
         }

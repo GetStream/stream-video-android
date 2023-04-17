@@ -28,6 +28,9 @@ import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.ApiKey
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.user.UserPreferencesManager
+import java.io.BufferedReader
+import java.io.InputStreamReader
+import java.net.URL
 
 class DogfoodingApp : Application() {
 
@@ -66,6 +69,21 @@ class DogfoodingApp : Application() {
             apiKey = apiKey,
             loggingLevel = loggingLevel,
             pushDeviceGenerators = listOf(FirebasePushDeviceGenerator()),
+            tokenProvider = {
+                val email = user.custom["email"]
+                val request = URL(
+                    "https://stream-calls-dogfood.vercel.app/api/auth/create-token?user_id=$email&api_key=$API_KEY"
+                )
+                val connection = request.openConnection()
+
+                connection.connect()
+
+                // Read and print the input
+                val inputStream = BufferedReader(InputStreamReader(connection.getInputStream()))
+                val response = inputStream.readLines().toString()
+                inputStream.close()
+                response
+            }
 //            androidInputs = setOf(
 //                CallServiceInput.from(CallService::class),
 //                // CallActivityInput.from(XmlCallActivity::class),

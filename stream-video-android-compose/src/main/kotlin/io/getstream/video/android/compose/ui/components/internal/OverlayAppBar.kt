@@ -26,6 +26,8 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,18 +36,21 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import io.getstream.video.android.common.util.MockUtils
+import io.getstream.video.android.common.util.mockCall
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.ConnectionState
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.ShowCallInfo
-import io.getstream.video.android.core.model.state.StreamCallState
-import io.getstream.video.android.core.utils.formatAsTitle
+import io.getstream.video.android.core.formatAsTitle
 import io.getstream.video.android.ui.common.R
 
 @Composable
 internal fun OverlayAppBar(
-    callState: StreamCallState,
-    onBackPressed: () -> Unit,
-    onCallAction: (CallAction) -> Unit
+    call: Call,
+    onBackPressed: () -> Unit = {},
+    onCallAction: (CallAction) -> Unit = {}
 ) {
     Row(
         modifier = Modifier
@@ -71,12 +76,12 @@ internal fun OverlayAppBar(
             )
         }
 
-        val callId = when (callState) {
-            is StreamCallState.Active -> callState.callGuid.id
+        val connectionState by call.state.connection.collectAsState()
+        val callId = when (connectionState) {
+            is ConnectionState.Connected -> call.id
             else -> ""
         }
-        val status = callState.formatAsTitle(LocalContext.current)
-
+        val status = connectionState.formatAsTitle(LocalContext.current)
         val title = when (callId.isBlank()) {
             true -> status
             else -> "$status: $callId"
@@ -110,9 +115,10 @@ internal fun OverlayAppBar(
 @Preview
 @Composable
 private fun OverlayAppBarPreview() {
+    MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         OverlayAppBar(
-            callState = StreamCallState.Idle,
+            call = mockCall,
             onBackPressed = {}
         ) {}
     }

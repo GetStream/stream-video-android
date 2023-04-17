@@ -26,8 +26,11 @@ package org.openapitools.client.models
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param enabled * @param hls */
+ *
+ *
+ * @param enabled
+ * @param hls
+ */
 
 data class BroadcastSettings(
 

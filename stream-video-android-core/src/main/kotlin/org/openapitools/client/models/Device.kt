@@ -24,20 +24,24 @@
 package org.openapitools.client.models
 
 import com.squareup.moshi.Json
-import org.threeten.bp.OffsetDateTime
 
 /**
- * *
+ *
+ *
  * @param createdAt Date/time of creation
- * @param id * @param pushProvider * @param userId * @param disabled Whether device is disabled or not
+ * @param id
+ * @param pushProvider
+ * @param userId
+ * @param disabled Whether device is disabled or not
  * @param disabledReason Reason explaining why device had been disabled
- * @param pushProviderName */
+ * @param pushProviderName
+ */
 
 data class Device(
 
     /* Date/time of creation */
     @Json(name = "created_at")
-    val createdAt: OffsetDateTime,
+    val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "id")
     val id: kotlin.String,

@@ -20,7 +20,6 @@ import android.content.SharedPreferences
 import androidx.core.content.edit
 import io.getstream.video.android.core.model.ApiKey
 import io.getstream.video.android.core.model.Device
-import io.getstream.video.android.core.model.SfuToken
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.UserDevices
 import kotlinx.serialization.decodeFromString
@@ -59,17 +58,6 @@ internal class UserPreferencesImpl(
     override fun storeApiKey(apiKey: ApiKey) {
         sharedPreferences.edit {
             putString(KEY_APIKEY, apiKey)
-        }
-    }
-
-    // TODO: SFU tokens aren't reusable, we should probably not store these
-
-    override fun getSfuToken(): SfuToken =
-        sharedPreferences.getString(KEY_SFU_TOKEN, "") ?: ""
-
-    override fun storeSfuToken(sfuToken: SfuToken?) {
-        sharedPreferences.edit {
-            putString(KEY_SFU_TOKEN, sfuToken)
         }
     }
 

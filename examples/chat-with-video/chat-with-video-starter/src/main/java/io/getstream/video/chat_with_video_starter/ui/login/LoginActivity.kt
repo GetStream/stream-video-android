@@ -128,7 +128,7 @@ class LoginActivity : ComponentActivity() {
                         modifier = Modifier
                             .size(40.dp)
                             .align(alignment = Alignment.Center),
-                        imageUrl = credentials.imageUrl
+                        imageUrl = credentials.image
                     )
                 }
 

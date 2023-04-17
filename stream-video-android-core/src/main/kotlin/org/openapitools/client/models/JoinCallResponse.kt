@@ -26,8 +26,16 @@ package org.openapitools.client.models
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param blockedUsers * @param call * @param created * @param duration * @param edges * @param members * @param membership */
+ *
+ *
+ * @param blockedUsers
+ * @param call
+ * @param created
+ * @param duration
+ * @param edges
+ * @param members
+ * @param membership
+ */
 
 data class JoinCallResponse(
 

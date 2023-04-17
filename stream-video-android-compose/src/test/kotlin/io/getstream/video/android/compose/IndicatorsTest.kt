@@ -28,8 +28,8 @@ import io.getstream.video.android.common.util.mockParticipantList
 import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.ui.components.audio.ActiveSoundLevels
 import io.getstream.video.android.compose.ui.components.audio.SoundIndicator
+import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantLabel
 import io.getstream.video.android.compose.ui.components.connection.ConnectionQualityIndicator
-import io.getstream.video.android.compose.ui.components.participants.ParticipantLabel
 import org.junit.Rule
 import org.junit.Test
 import stream.video.sfu.models.ConnectionQuality

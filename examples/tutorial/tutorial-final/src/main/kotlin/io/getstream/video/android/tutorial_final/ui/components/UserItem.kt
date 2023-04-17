@@ -104,7 +104,7 @@ fun UserItem(
                     modifier = Modifier
                         .size(40.dp)
                         .align(alignment = Alignment.Center),
-                    imageUrl = user.imageUrl ?: "",
+                    imageUrl = user.image ?: "",
                     initials = user.name.initials()
                 )
             }

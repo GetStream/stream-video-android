@@ -22,12 +22,9 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.CallContainer
-import io.getstream.video.android.compose.ui.components.call.activecall.DefaultPictureInPictureContent
-import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.core.viewmodel.CallViewModelFactory
@@ -56,7 +53,6 @@ class CallActivity : AppCompatActivity() {
                     viewModel = callViewModel,
                     // onCallAction = ::handleCallAction,
                     // onBackPressed = ::handleBackPressed,
-                    pictureInPictureContent = { PictureInPictureContent(call = it) }
                 )
             }
         }
@@ -94,9 +90,4 @@ class CallActivity : AppCompatActivity() {
     /**
      * Provides a custom factory for the ViewModel, that provides fake users for invites.
      */
-
-    @Composable
-    protected open fun PictureInPictureContent(call: Call) {
-        DefaultPictureInPictureContent(call = call)
-    }
 }

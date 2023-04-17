@@ -18,10 +18,11 @@ package io.getstream.video.android.core
 
 import com.google.common.truth.Truth.assertThat
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.core.events.CallCreatedEvent
+import io.getstream.result.Error
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.openapitools.client.models.CallCreatedEvent
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
@@ -58,23 +59,22 @@ public class CallCrudTest : IntegrationTestBase() {
         // verify that we received the create call event
         assertThat(events.size).isEqualTo(1)
         val event = assertEventReceived(CallCreatedEvent::class.java)
-
-        // TODO: The structure of the event we receive is weird,
-        //  seems out of sync with server, to investigate
     }
 
     @Test
     fun `update a call, verify it works and the event is fired`() = runTest {
         // create the call
-        val callId = randomUUID()
-        val call = client.call("default", callId)
+        val call = client.call("default", randomUUID())
         val createResult = call.create()
         assertSuccess(createResult)
+        createResult.onSuccess {
+            assertThat(it.call.cid).isEqualTo(call.cid)
+        }
 
         // set a custom field and update
         val secret = randomUUID()
-        call.custom = mutableMapOf("secret" to secret)
-        val updateResult = call.update()
+        val custom = mutableMapOf("secret" to secret)
+        val updateResult = call.update(custom = custom)
         assertSuccess(updateResult)
 
         // get the call object
@@ -83,45 +83,45 @@ public class CallCrudTest : IntegrationTestBase() {
 
         // verify that we received the create call event
         assertThat(events.size).isEqualTo(1)
-        val createEvent = assertEventReceived(CallCreatedEvent::class.java)
-        val updateEvent = assertEventReceived(CallCreatedEvent::class.java)
+        val createdEvent = waitForNextEvent<CallCreatedEvent>()
 
         getResult.onSuccess {
-            assertThat(it.custom["color"]).isEqualTo(secret)
+            assertThat(it.call.custom["color"]).isEqualTo(secret)
         }
     }
 
     @Test
     fun `Create a call with members and custom data`() = runTest {
         val members = mutableListOf("thierry", "tommaso")
-        // TODO: Rename participants to members
-        val result = client.getOrCreateCall("default", "tommaso-thierry", members)
+        val call = client.call("default", randomUUID())
+        val result = call.create(memberIds = members, custom = mapOf("color" to "red"))
         assert(result.isSuccess)
+
+        assertThat(call.state.custom.value["color"]).isEqualTo("red")
+        assertThat(call.state.members.value).hasSize(2)
     }
 
     @Test
     fun `Fail to update a call that doesn't exist`() = runTest {
         val result = client.call("default", randomUUID()).update()
         assert(result.isFailure)
-        result.onError { logger.e { it.toString() } }
-        // TODO: error is hidden, we need to fix that
+        result.onError {
+            assertThat((it as Error.NetworkError).serverErrorCode).isEqualTo(16)
+        }
     }
 
     @Test
     fun `Fail to create a call with a missing call type`() = runTest {
         val result = client.call("missing", "123").create()
         assert(result.isFailure)
-        result.onError { logger.e { it.toString() } }
-        // TODO: error is hidden, we need to fix that
-    }
-
-    @Test
-    fun `Read call stats`() = runTest {
-        // TODO
+        result.onError {
+            assertThat((it as Error.NetworkError).serverErrorCode).isEqualTo(16)
+        }
     }
 
     @Test
     fun `Paginate members`() = runTest {
-        // TODO
+        val response = call.get()
+        TODO()
     }
 }

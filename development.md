@@ -94,6 +94,7 @@ Check the docs on TestBase, TestHelper and IntegrationTestBase for more utility 
 * CallClient makes the API calls to the SFU on the edge
 * StreamVideoImpl.developmentMode determines if we should log an error or fail fast. 
 Typically for development you want to fail fast and loud. For production you want to ignore most non-critical errors.
+* PersistentSocket is subclassed by CoordinatorSocket and SfuSocket. It keeps a websocket connection
 
 ### State management
 
@@ -194,34 +195,24 @@ sealed class RingingState() {
 * demo app allows you to type in the call id and join, or create a new
 * dogfooding joins via a url deeplink
 
-### V0 to V1 migration tips
+### Participant State
 
-Participant state now lives in ParticipantState
-```kotlin
-// old
-CallParticipantState(name="hello")
-// new
-ParticipantState(initialUser= User(name="hello"))
-```
+Basically there are 2 possible approaches
 
-The participant state object exposes stateflow objects
+Option 1 - Call has a participants stateflow & the participant state is a data class
+Option 2 - Call has a participants stateflow, and each participant state has stateflows for its properties
 
-```kotlin
-// old
-participant.connectionQuality
-// new
-participant.connectionQuality.collectAsState().value
-```
+So participant.audioLevel can be a stateflow or a float property.
 
-Call now has a state object
+Option 1:
+- Pro: less stateflow objects
+- Con: frequent updates to the "participants" stateflow
 
-```kotlin
-// old call.callParticipants
-// new call.state.participants
-```
+Option 2:
+- Pro: more finegrained UI changes. only the audio level changes if that's the one thing that changes
+- Con: more stateflow objects
 
-Ringing call state has been simplified
+What's better seems to depend on internal optimizations in Compose
+- How well does it's diffing algorithm work
+- How well optimized are multiple stateflows & observing them
 
-```kotlin
-// call.state.ringingState
-```

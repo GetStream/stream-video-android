@@ -28,7 +28,10 @@ import com.squareup.moshi.Json
 /**
  * This event is sent when one or more members are updated
  *
- * @param call * @param callCid * @param createdAt * @param members The list of members that were updated
+ * @param call
+ * @param callCid
+ * @param createdAt
+ * @param members The list of members that were updated
  * @param type The type of event: \"call.member_added\" in this case
  */
 
@@ -49,6 +52,15 @@ data class CallMemberUpdatedEvent(
 
     /* The type of event: \"call.member_added\" in this case */
     @Json(name = "type")
-    val type: kotlin.String
+    val type: kotlin.String = "call.member_updated"
 
-)
+) : VideoEvent(), WSCallEvent {
+
+    override fun getCallCID(): String {
+        return callCid
+    }
+
+    override fun getEventType(): String {
+        return type
+    }
+}

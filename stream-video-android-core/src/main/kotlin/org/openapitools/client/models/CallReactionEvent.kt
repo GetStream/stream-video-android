@@ -28,7 +28,10 @@ import com.squareup.moshi.Json
 /**
  * This event is sent when a reaction is sent in a call, clients should use this to show the reaction in the call screen
  *
- * @param callCid * @param createdAt * @param reaction * @param type The type of event: \"call.reaction_new\" in this case
+ * @param callCid
+ * @param createdAt
+ * @param reaction
+ * @param type The type of event: \"call.reaction_new\" in this case
  */
 
 data class CallReactionEvent(
@@ -44,6 +47,15 @@ data class CallReactionEvent(
 
     /* The type of event: \"call.reaction_new\" in this case */
     @Json(name = "type")
-    val type: kotlin.String
+    val type: kotlin.String = "call.reaction_new"
 
-)
+) : VideoEvent(), WSCallEvent {
+
+    override fun getCallCID(): String {
+        return callCid
+    }
+
+    override fun getEventType(): String {
+        return type
+    }
+}

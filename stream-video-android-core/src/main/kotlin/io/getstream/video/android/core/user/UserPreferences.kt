@@ -18,7 +18,6 @@ package io.getstream.video.android.core.user
 
 import io.getstream.video.android.core.model.ApiKey
 import io.getstream.video.android.core.model.Device
-import io.getstream.video.android.core.model.SfuToken
 import io.getstream.video.android.core.model.User
 
 public interface UserPreferences {
@@ -50,18 +49,6 @@ public interface UserPreferences {
      * @param apiKey The [ApiKey] to store.
      */
     public fun storeApiKey(apiKey: ApiKey)
-
-    /**
-     * Stores the active call token.
-     *
-     * @param sfuToken The token to store.
-     */
-    public fun storeSfuToken(sfuToken: SfuToken?)
-
-    /**
-     * @return Active call token.
-     */
-    public fun getSfuToken(): SfuToken
 
     public fun storeUserToken(userToken: String)
     public fun getUserToken(): String

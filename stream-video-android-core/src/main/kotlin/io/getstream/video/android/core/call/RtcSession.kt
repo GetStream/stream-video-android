@@ -33,21 +33,17 @@ import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoImpl
 import io.getstream.video.android.core.call.connection.StreamPeerConnection
-import io.getstream.video.android.core.call.signal.socket.SfuSocketListener
 import io.getstream.video.android.core.call.state.ConnectionState
 import io.getstream.video.android.core.call.utils.stringify
-import io.getstream.video.android.core.errors.DisconnectCause
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
-import io.getstream.video.android.core.events.SFUConnectedEvent
 import io.getstream.video.android.core.events.SfuDataEvent
 import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
-import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.internal.module.ConnectionModule
-import io.getstream.video.android.core.internal.module.SFUConnectionModule
+import io.getstream.video.android.core.internal.module.SfuConnectionModule
 import io.getstream.video.android.core.model.IceCandidate
 import io.getstream.video.android.core.model.IceServer
 import io.getstream.video.android.core.model.StreamPeerType
@@ -74,6 +70,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.openapitools.client.models.VideoEvent
 import org.webrtc.CameraEnumerationAndroid
 import org.webrtc.MediaConstraints
 import org.webrtc.MediaStream
@@ -86,7 +83,6 @@ import org.webrtc.SessionDescription
 import org.webrtc.SurfaceTextureHelper
 import org.webrtc.VideoCapturer
 import retrofit2.HttpException
-import stream.video.sfu.event.JoinRequest
 import stream.video.sfu.event.JoinResponse
 import stream.video.sfu.models.ICETrickle
 import stream.video.sfu.models.PeerType
@@ -145,8 +141,8 @@ public class RtcSession internal constructor(
     private val client: StreamVideo,
     private val connectionModule: ConnectionModule,
     private val call: Call,
-    private val SFUUrl: String,
-    private val SFUToken: String,
+    private val sfuUrl: String,
+    private val sfuToken: String,
     private val latencyResults: Map<String, List<Float>>,
     private val remoteIceServers: List<IceServer>,
 ) {
@@ -224,7 +220,7 @@ public class RtcSession internal constructor(
         buildAudioConstraints()
     }
 
-    private var sfuConnectionModule: SFUConnectionModule
+    private var sfuConnectionModule: SfuConnectionModule
 
     init {
         val preferences = UserPreferencesManager.getPreferences()
@@ -233,32 +229,29 @@ public class RtcSession internal constructor(
             user?.id.isNullOrBlank()
         ) throw IllegalArgumentException("The API key, user ID and token cannot be empty!")
 
-        sfuConnectionModule = connectionModule.createSFUConnectionModule(SFUUrl, SFUToken)
-
-        sfuConnectionModule.sfuSocket.addListener(object : SfuSocketListener {
-            public override fun onConnecting() {
-                logger.i { "SFU connecting" }
+        // step 1 setup the peer connections
+        createSubscriber()
+        val getSdp = suspend {
+            getSubscriberSdp().description
+        }
+        scope.launch {
+        }
+        sfuConnectionModule = connectionModule.createSFUConnectionModule(sfuUrl, sessionId, sfuToken, getSdp)
+        // listen to socket events and errors
+        scope.launch {
+            sfuConnectionModule.sfuSocket.events.collect() {
+                clientImpl.fireEvent(it)
             }
-
-            public override fun onConnected(event: SFUConnectedEvent) {
-                clientImpl.fireEvent(event, call.cid)
-                logger.i { "SFU onConnected $event" }
+        }
+        scope.launch {
+            sfuConnectionModule.sfuSocket.errors.collect() {
+                if (clientImpl.developmentMode) {
+                    throw it
+                } else {
+                    logger.e(it) { "permanent failure on socket connection" }
+                }
             }
-
-            public override fun onDisconnected(cause: DisconnectCause) {
-                logger.i { "SFU onDisconnected $cause" }
-            }
-
-            public override fun onError(error: io.getstream.result.Error) {
-                logger.e { "SFU connection failed with error $error" }
-                TODO()
-            }
-
-            public override fun onEvent(event: SfuDataEvent) {
-                logger.i { "SFU onEvent $event" }
-                clientImpl.fireEvent(event, call.cid)
-            }
-        })
+        }
     }
 
     suspend fun connect() {
@@ -267,7 +260,7 @@ public class RtcSession internal constructor(
     }
 
     suspend fun connectWs() {
-        sfuConnectionModule.sfuSocket.connectSocket()
+        sfuConnectionModule.sfuSocket.connect()
     }
 
     suspend fun listenToMediaChanges() {
@@ -322,8 +315,7 @@ public class RtcSession internal constructor(
     }
 
     suspend fun connectRtc(): Result<JoinResponse> {
-        // step 1 setup the peer connections
-        createSubscriber()
+
         // if we are allowed to publish, create a peer connection for it
         // TODO: real settings check
         val publishing = true
@@ -422,7 +414,7 @@ public class RtcSession internal constructor(
         subscriber = null
         publisher = null
 
-        sfuConnectionModule.sfuSocket.releaseConnection()
+        sfuConnectionModule.sfuSocket.disconnect()
 
         videoCapturer?.stopCapture()
         videoCapturer?.dispose()
@@ -501,23 +493,13 @@ public class RtcSession internal constructor(
 
     private suspend fun executeJoinRequest(): Result<JoinResponse> {
 
-        val sdp = mangleSDP(getGenericSdp())
-
-        val request = JoinRequest(
-            session_id = sessionId,
-            token = SFUToken,
-            subscriber_sdp = sdp.description
-        )
-        logger.d { "[executeJoinRequest] request: $request" }
-
         return try {
             val connected = call.state.connection.value
             logger.d { "[executeJoinRequest] is connected: $connected" }
-            sfuConnectionModule.sfuSocket.sendJoinRequest(request)
             logger.d { "[executeJoinRequest] sfu join request is sent" }
             logger.d { "[executeJoinRequest] request is sent" }
             val currentValue = joinEventResponse.value
-            println(currentValue)
+
             logger.d { "[executeJoinRequest] currentValue: $currentValue" }
             val event = joinEventResponse.filterNotNull().first()
             logger.d { "[executeJoinRequest] completed: $event" }
@@ -529,7 +511,7 @@ public class RtcSession internal constructor(
         }
     }
 
-    private suspend fun getGenericSdp(): SessionDescription {
+    private suspend fun getSubscriberSdp(): SessionDescription {
 
         subscriber!!.connection.apply {
             addTransceiver(
@@ -549,7 +531,7 @@ public class RtcSession internal constructor(
         val result = subscriber!!.createOffer()
 
         return if (result is Success) {
-            result.value
+            mangleSDP(result.value)
         } else {
             throw Error("Couldn't create a generic SDP")
         }

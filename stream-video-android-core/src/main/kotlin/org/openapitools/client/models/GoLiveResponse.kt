@@ -26,8 +26,10 @@ package org.openapitools.client.models
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param call * @param duration Duration of the request in human-readable format
+ *
+ *
+ * @param call
+ * @param duration Duration of the request in human-readable format
  */
 
 data class GoLiveResponse(

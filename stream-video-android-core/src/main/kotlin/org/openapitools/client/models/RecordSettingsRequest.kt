@@ -26,8 +26,12 @@ package org.openapitools.client.models
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param audioOnly * @param mode * @param quality */
+ *
+ *
+ * @param audioOnly
+ * @param mode
+ * @param quality
+ */
 
 data class RecordSettingsRequest(
 
@@ -43,24 +47,36 @@ data class RecordSettingsRequest(
 ) {
 
     /**
-     * *
-     * Values: available,disabled,autoMinusOn
+     *
+     *
+     * Values: available,disabled,autoOn
      */
     enum class Mode(val value: kotlin.String) {
-        @Json(name = "available") available("available"),
-        @Json(name = "disabled") disabled("disabled"),
-        @Json(name = "auto-on") autoMinusOn("auto-on");
+        @Json(name = "available")
+        available("available"),
+        @Json(name = "disabled")
+        disabled("disabled"),
+        @Json(name = "auto-on")
+        autoOn("auto-on");
     }
+
     /**
-     * *
-     * Values: audioMinusOnly,_360p,_480p,_720p,_1080p,_1440p
+     *
+     *
+     * Values: audioOnly,_360p,_480p,_720p,_1080p,_1440p
      */
     enum class Quality(val value: kotlin.String) {
-        @Json(name = "audio-only") audioMinusOnly("audio-only"),
-        @Json(name = "360p") _360p("360p"),
-        @Json(name = "480p") _480p("480p"),
-        @Json(name = "720p") _720p("720p"),
-        @Json(name = "1080p") _1080p("1080p"),
-        @Json(name = "1440p") _1440p("1440p");
+        @Json(name = "audio-only")
+        audioOnly("audio-only"),
+        @Json(name = "360p")
+        _360p("360p"),
+        @Json(name = "480p")
+        _480p("480p"),
+        @Json(name = "720p")
+        _720p("720p"),
+        @Json(name = "1080p")
+        _1080p("1080p"),
+        @Json(name = "1440p")
+        _1440p("1440p");
     }
 }

@@ -18,55 +18,71 @@ package io.getstream.video.android.core
 
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.events.AudioLevelChangedEvent
-import io.getstream.video.android.core.events.BlockedUserEvent
-import io.getstream.video.android.core.events.CallAcceptedEvent
-import io.getstream.video.android.core.events.CallCancelledEvent
-import io.getstream.video.android.core.events.CallCreatedEvent
-import io.getstream.video.android.core.events.CallEndedEvent
-import io.getstream.video.android.core.events.CallMembersDeletedEvent
-import io.getstream.video.android.core.events.CallMembersUpdatedEvent
-import io.getstream.video.android.core.events.CallRejectedEvent
-import io.getstream.video.android.core.events.CallUpdatedEvent
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
-import io.getstream.video.android.core.events.ConnectedEvent
 import io.getstream.video.android.core.events.ConnectionQualityChangeEvent
-import io.getstream.video.android.core.events.CoordinatorHealthCheckEvent
-import io.getstream.video.android.core.events.CustomEvent
 import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
 import io.getstream.video.android.core.events.ErrorEvent
 import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.ParticipantJoinedEvent
 import io.getstream.video.android.core.events.ParticipantLeftEvent
-import io.getstream.video.android.core.events.PermissionRequestEvent
-import io.getstream.video.android.core.events.RecordingStartedEvent
-import io.getstream.video.android.core.events.RecordingStoppedEvent
 import io.getstream.video.android.core.events.SFUConnectedEvent
 import io.getstream.video.android.core.events.SFUHealthCheckEvent
 import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
-import io.getstream.video.android.core.events.UnblockedUserEvent
-import io.getstream.video.android.core.events.UnknownEvent
-import io.getstream.video.android.core.events.UpdatedCallPermissionsEvent
-import io.getstream.video.android.core.events.VideoEvent
+import io.getstream.video.android.core.model.CallData
 import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.core.model.TrackWrapper
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.utils.mapState
+import io.getstream.video.android.core.utils.toUser
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import org.openapitools.client.models.BlockedUserEvent
+import org.openapitools.client.models.CallAcceptedEvent
+import org.openapitools.client.models.CallCreatedEvent
+import org.openapitools.client.models.CallEndedEvent
+import org.openapitools.client.models.CallIngressResponse
+import org.openapitools.client.models.CallMemberAddedEvent
+import org.openapitools.client.models.CallMemberRemovedEvent
+import org.openapitools.client.models.CallMemberUpdatedEvent
+import org.openapitools.client.models.CallMemberUpdatedPermissionEvent
+import org.openapitools.client.models.CallReactionEvent
+import org.openapitools.client.models.CallRecordingStartedEvent
+import org.openapitools.client.models.CallRecordingStoppedEvent
+import org.openapitools.client.models.CallRejectedEvent
+import org.openapitools.client.models.CallResponse
 import org.openapitools.client.models.CallSettingsResponse
+import org.openapitools.client.models.CallUpdatedEvent
+import org.openapitools.client.models.ConnectedEvent
+import org.openapitools.client.models.CustomVideoEvent
+import org.openapitools.client.models.GetCallResponse
+import org.openapitools.client.models.GetOrCreateCallResponse
+import org.openapitools.client.models.HealthCheckEvent
+import org.openapitools.client.models.JoinCallResponse
+import org.openapitools.client.models.MemberResponse
 import org.openapitools.client.models.OwnCapability
+import org.openapitools.client.models.PermissionRequestEvent
+import org.openapitools.client.models.ReactionResponse
+import org.openapitools.client.models.UnblockedUserEvent
+import org.openapitools.client.models.UpdateCallResponse
+import org.openapitools.client.models.UpdatedCallPermissionsEvent
+import org.openapitools.client.models.VideoEvent
+import org.threeten.bp.Clock
+import org.threeten.bp.OffsetDateTime
 import stream.video.sfu.models.Participant
-import java.util.*
+import java.util.SortedMap
 
 /**
  *
  */
-public class CallState(val call: Call, user: User) {
+public class CallState(private val call: Call, user: User) {
     private val logger by taggedLogger("CallState")
+
+    private val _blockedUsers: MutableStateFlow<Set<String>> = MutableStateFlow(emptySet())
+    val blockedUsers: StateFlow<Set<String>> = _blockedUsers
 
     private val _ringingState: MutableStateFlow<RingingState?> = MutableStateFlow(null)
     public val ringingState: MutableStateFlow<RingingState?> = _ringingState
@@ -74,17 +90,21 @@ public class CallState(val call: Call, user: User) {
     private val _settings: MutableStateFlow<CallSettingsResponse?> = MutableStateFlow(null)
     public val settings: MutableStateFlow<CallSettingsResponse?> = _settings
 
-    private val memberMap: MutableMap<String, MemberState> = mutableMapOf()
-    private val _recording: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    val recording: StateFlow<Boolean> = _recording
-
-    private val _screenSharingSession: MutableStateFlow<ScreenSharingSession?> =
-        MutableStateFlow(null)
+    private val _members: MutableStateFlow<SortedMap<String, MemberState>> =
+        MutableStateFlow(emptyMap<String, MemberState>().toSortedMap())
+    public val members: StateFlow<List<MemberState>> =
+        _members.mapState { it.values.toList() }
 
     private val _participants: MutableStateFlow<SortedMap<String, ParticipantState>> =
         MutableStateFlow(emptyMap<String, ParticipantState>().toSortedMap())
     public val participants: StateFlow<List<ParticipantState>> =
         _participants.mapState { it.values.toList() }
+
+    private val _recording: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val recording: StateFlow<Boolean> = _recording
+
+    private val _screenSharingSession: MutableStateFlow<ScreenSharingSession?> =
+        MutableStateFlow(null)
 
     /** participants who are currently speaking */
     public val activeSpeakers =
@@ -122,9 +142,20 @@ public class CallState(val call: Call, user: User) {
 
     private val _screenSharingTrack: MutableStateFlow<TrackWrapper?> = MutableStateFlow(null)
 
+    private val userToSessionIdMap = participants.mapState { participants ->
+        participants.map { it.user.value.id to it.sessionId }.toMap()
+    }
+
+    // TODO: maybe this should just be a list of string, seems more forward compatible
     private val _ownCapabilities: MutableStateFlow<List<OwnCapability>> =
         MutableStateFlow(emptyList())
     public val ownCapabilities: StateFlow<List<OwnCapability>> = _ownCapabilities
+
+    public fun hasPermission(permission: String): StateFlow<Boolean> {
+        val flow = _ownCapabilities.mapState { it.map { it.toString() }.contains(permission) }
+        // TODO: store this in a map so we don't have to create a new flow every time
+        return flow
+    }
 
     /**
      * connection shows if we've established a connection with the SFU
@@ -134,8 +165,8 @@ public class CallState(val call: Call, user: User) {
     )
     public val connection: StateFlow<ConnectionState> = _connection
 
-    private val _endedAt: MutableStateFlow<Date?> = MutableStateFlow(null)
-    val endedAt: StateFlow<Date?> = _endedAt
+    private val _endedAt: MutableStateFlow<OffsetDateTime?> = MutableStateFlow(null)
+    val endedAt: StateFlow<OffsetDateTime?> = _endedAt
     private val _endedByUser: MutableStateFlow<User?> = MutableStateFlow(null)
     val endedByUser: StateFlow<User?> = _endedByUser
 
@@ -143,9 +174,11 @@ public class CallState(val call: Call, user: User) {
         MutableStateFlow(emptyMap())
     val capabilitiesByRole: StateFlow<Map<String, List<String>>> = _capabilitiesByRole
 
-    private val _members: MutableStateFlow<List<ParticipantState>> =
-        MutableStateFlow(emptyList())
-    public val members: StateFlow<List<ParticipantState>> = _members
+    internal val _reactions = MutableStateFlow<List<ReactionResponse>>(emptyList())
+    val reactions: StateFlow<List<ReactionResponse>> = _reactions
+
+    internal val _permissionRequests = MutableStateFlow<List<PermissionRequestEvent>>(emptyList())
+    val permissionRequests: StateFlow<List<PermissionRequestEvent>> = _permissionRequests
 
     private val _errors: MutableStateFlow<List<ErrorEvent>> =
         MutableStateFlow(emptyList())
@@ -167,30 +200,54 @@ public class CallState(val call: Call, user: User) {
     fun handleEvent(event: VideoEvent) {
         logger.d { "Updating call state with event $event" }
         when (event) {
-            is BlockedUserEvent -> TODO()
+            is BlockedUserEvent -> {
+                val newBlockedUsers = _blockedUsers.value.toMutableSet()
+                newBlockedUsers.add(event.user.id)
+                _blockedUsers.value = newBlockedUsers
+            }
+
+            is UnblockedUserEvent -> {
+                val newBlockedUsers = _blockedUsers.value.toMutableSet()
+                newBlockedUsers.remove(event.user.id)
+                _blockedUsers.value = newBlockedUsers
+            }
+
             is CallAcceptedEvent -> {
-                val participant = getOrCreateParticipant(event.sessionId, event.sentByUserId)
-                participant._acceptedAt.value = Date()
-            }
-
-            is CallRejectedEvent -> {
-                val participant = getOrCreateParticipant(event.sessionId, event.user.id, event.user)
-                participant._rejectedAt.value = Date()
-            }
-
-            is CallCancelledEvent -> TODO()
-            is CallEndedEvent -> {
-                _endedAt.value = Date()
-                _endedByUser.value = event.endedByUser
-            }
-
-            is CallMembersUpdatedEvent -> {
-                event.details.members.forEach { entry ->
-                    getOrCreateMember(entry.value)
+                val member = getMember(event.user.id)
+                val newMember = member?.copy(acceptedAt = OffsetDateTime.now(Clock.systemUTC()))
+                val newMembersMap = _members.value.toSortedMap()
+                newMember?.let {
+                    newMembersMap[event.user.id] = it
+                    _members.value = newMembersMap
                 }
             }
 
-            is CallMembersDeletedEvent -> TODO()
+            is CallRejectedEvent -> {
+                val member = getMember(event.user.id)
+                val newMember = member?.copy(rejectedAt = OffsetDateTime.now(Clock.systemUTC()))
+                val newMembersMap = _members.value.toSortedMap()
+                newMember?.let {
+                    newMembersMap[event.user.id] = it
+                    _members.value = newMembersMap
+                }
+            }
+
+            is CallEndedEvent -> {
+                _endedAt.value = OffsetDateTime.now(Clock.systemUTC())
+                _endedByUser.value = event.user?.toUser()
+            }
+
+            is CallMemberUpdatedEvent -> {
+                getOrCreateMembers(event.members)
+            }
+
+            is CallMemberRemovedEvent -> {
+                val newMembersMap = _members.value.toSortedMap()
+                event.members.forEach {
+                    newMembersMap.remove(it)
+                }
+                _members.value = newMembersMap
+            }
 
             is CallCreatedEvent -> {
                 // this is handled by the client
@@ -208,22 +265,53 @@ public class CallState(val call: Call, user: User) {
                 // this is handled by the client
             }
 
-            is CustomEvent -> {
+            is CustomVideoEvent -> {
                 // safe to ignore, app level custom event
             }
 
-            is CoordinatorHealthCheckEvent -> TODO()
-            is PermissionRequestEvent -> TODO()
-            is RecordingStartedEvent -> {
+            is HealthCheckEvent -> {
+                // we don't do anything with this, handled by the socket
+            }
+
+            is PermissionRequestEvent -> {
+                val newRequests = _permissionRequests.value.toMutableList()
+                newRequests.add(event)
+                _permissionRequests.value = newRequests
+            }
+
+            is CallMemberUpdatedPermissionEvent -> {
+                _capabilitiesByRole.value = event.capabilitiesByRole
+            }
+
+            is CallMemberAddedEvent -> {
+                getOrCreateMembers(event.members)
+            }
+
+            is CallReactionEvent -> {
+                val reactions = _reactions.value.toMutableList()
+                reactions.add(event.reaction)
+                _reactions.value = reactions
+                val user = event.reaction.user
+                // get the participants for this user
+                val userToSessionIdMap = userToSessionIdMap.value
+                val sessionId = userToSessionIdMap[user.id]
+                sessionId?.let {
+                    val participant = getParticipant(sessionId)
+                    participant?.let {
+                        val newReactions = participant._reactions.value.toMutableList()
+                        newReactions.add(event.reaction)
+                        participant._reactions.value = newReactions
+                    }
+                }
+            }
+
+            is CallRecordingStartedEvent -> {
                 _recording.value = true
             }
 
-            is RecordingStoppedEvent -> {
+            is CallRecordingStoppedEvent -> {
                 _recording.value = false
             }
-
-            is UnblockedUserEvent -> TODO()
-            UnknownEvent -> TODO()
 
             is AudioLevelChangedEvent -> {
                 event.levels.forEach { entry ->
@@ -273,11 +361,24 @@ public class CallState(val call: Call, user: User) {
                 removeParticipant(event.participant.session_id)
             }
 
-            is SubscriberOfferEvent -> TODO()
-            is TrackPublishedEvent -> TODO()
-            is TrackUnpublishedEvent -> TODO()
+            is SubscriberOfferEvent -> {
+                // handled by ActiveSFUSession
+            }
+
+            is TrackPublishedEvent -> {
+                // handled by ActiveSFUSession
+            }
+
+            is TrackUnpublishedEvent -> {
+                // handled by ActiveSFUSession
+            }
+
             is SFUConnectedEvent -> {
                 _connection.value = ConnectionState.Connected
+            }
+
+            is ConnectedEvent -> {
+                // handled by socket
             }
         }
     }
@@ -346,19 +447,20 @@ public class CallState(val call: Call, user: User) {
         return participantState
     }
 
-    private fun getOrCreateMember(callUser: CallUser): MemberState {
-        // TODO: update fields :)
-        return getOrCreateMember(callUser.id)
-    }
+    private fun getOrCreateMembers(members: List<MemberResponse>) {
+        val memberMap = _members.value.toSortedMap()
 
-    private fun getOrCreateMember(userId: String): MemberState {
-        return if (memberMap.contains(userId)) {
-            memberMap[userId]!!
-        } else {
-            val member = MemberState(User(id = userId))
-            memberMap[userId] = member
-            member
+        val memberStates = members.map {
+            val userId = it.user.id
+            val memberState = if (memberMap.contains(userId)) {
+                memberMap[userId]!!
+            } else {
+                val member = it.toMemberState()
+                memberMap[userId] = member
+                member
+            }
         }
+        _members.value = memberMap
     }
 
     fun requireParticipant(sessionId: String): ParticipantState {
@@ -388,7 +490,7 @@ public class CallState(val call: Call, user: User) {
             // update call info fields
         } else if (event is CallUpdatedEvent) {
             // update the own capabilities
-            _ownCapabilities.value = event.ownCapabilities
+            _ownCapabilities.value = event.call.ownCapabilities
             // update the capabilities by role
             _capabilitiesByRole.value = event.capabilitiesByRole
             // update call info fields
@@ -407,4 +509,105 @@ public class CallState(val call: Call, user: User) {
 //            track?.video?.dispose()
 //        }
     }
+
+    private val _backstage: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val backstage: StateFlow<Boolean> = _backstage
+
+    private val _broadcasting: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val broadcasting: StateFlow<Boolean> = _broadcasting
+
+    private val _transcribing: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val transcribing: StateFlow<Boolean> = _transcribing
+
+    private val _startsAt: MutableStateFlow<OffsetDateTime?> = MutableStateFlow(null)
+    val startsAt: StateFlow<OffsetDateTime?> = _startsAt
+
+    private val _updatedAt: MutableStateFlow<OffsetDateTime?> = MutableStateFlow(null)
+    val updatedAt: StateFlow<OffsetDateTime?> = _updatedAt
+
+    private val _createdAt: MutableStateFlow<OffsetDateTime?> = MutableStateFlow(null)
+    val createdAt: StateFlow<OffsetDateTime?> = _createdAt
+
+    private val _blockedUserIds: MutableStateFlow<List<String>> = MutableStateFlow(emptyList())
+    val blockedUserIds: StateFlow<List<String>> = _blockedUserIds
+
+    private val _custom: MutableStateFlow<Map<String, Any>> = MutableStateFlow(emptyMap())
+    val custom: StateFlow<Map<String, Any>> = _custom
+
+    private val _team: MutableStateFlow<String?> = MutableStateFlow(null)
+    val team: StateFlow<String?> = _team
+
+    private val _createdBy: MutableStateFlow<User?> = MutableStateFlow(null)
+    val createdBy: StateFlow<User?> = _createdBy
+
+    private val _ingress: MutableStateFlow<CallIngressResponse?> = MutableStateFlow(null)
+    val ingress: StateFlow<CallIngressResponse?> = _ingress
+
+    fun updateFromResponse(response: CallResponse) {
+        _backstage.value = response.backstage
+        _blockedUserIds.value = response.blockedUserIds
+        _broadcasting.value = response.broadcasting
+        _createdAt.value = response.createdAt
+        _updatedAt.value = response.updatedAt
+        _endedAt.value = response.endedAt
+        _startsAt.value = response.startsAt
+        _createdBy.value = response.createdBy.toUser()
+        _custom.value = response.custom
+        _ingress.value = response.ingress
+        _ownCapabilities.value = response.ownCapabilities
+        _recording.value = response.recording
+        _settings.value = response.settings
+        _transcribing.value = response.transcribing
+        _team.value = response.team
+    }
+
+    fun updateFromResponse(response: GetOrCreateCallResponse) {
+        val members = response.members
+        updateFromResponse(members)
+        val callResponse = response.call
+        updateFromResponse(callResponse)
+    }
+
+    private fun updateFromResponse(members: List<MemberResponse>) {
+        getOrCreateMembers(members)
+    }
+
+    fun updateFromResponse(response: UpdateCallResponse) {
+        updateFromResponse(response.call)
+    }
+
+    /**
+     * @see MemberResponse
+     * @see CallUser
+     */
+    fun updateFromResponse(response: CallData) {
+        // note that the member response is different
+        // @see MemberResponse
+    }
+
+    fun updateFromResponse(response: GetCallResponse) {
+        updateFromResponse(response.call)
+        updateFromResponse(response.members)
+    }
+
+    fun updateFromResponse(response: JoinCallResponse) {
+        updateFromResponse(response.call)
+        updateFromResponse(response.members)
+    }
+
+    fun getMember(userId: String): MemberState? {
+        return _members.value[userId]
+    }
+}
+
+private fun MemberResponse.toMemberState(): MemberState {
+
+    return MemberState(
+        user = user.toUser(),
+        custom = custom,
+        role = role,
+        createdAt = createdAt,
+        updatedAt = updatedAt,
+        deletedAt = deletedAt,
+    )
 }

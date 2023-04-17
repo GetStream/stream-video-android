@@ -55,14 +55,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import io.getstream.log.taggedLogger
-import io.getstream.result.extractCause
-import io.getstream.result.onSuccessSuspend
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.Avatar
 import io.getstream.video.android.core.user.UserPreferencesManager
 import io.getstream.video.android.core.utils.initials
 import kotlinx.coroutines.launch
-import retrofit2.HttpException
 import kotlin.random.Random
 
 class HomeActivity : AppCompatActivity() {
@@ -74,11 +71,8 @@ class HomeActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
-            VideoTheme {
-                HomeScreen()
-            }
-        }
+
+        setContent { VideoTheme { HomeScreen() } }
     }
 
     private val logger by taggedLogger("Call:HomeView")
@@ -86,10 +80,6 @@ class HomeActivity : AppCompatActivity() {
     private val callIdState: MutableState<String> = mutableStateOf("call" + Random.nextInt(1000))
 
     private val loadingState: MutableState<Boolean> = mutableStateOf(false)
-
-    init {
-        logger.i { "<init> this: $this" }
-    }
 
     @Composable
     private fun HomeScreen() {
@@ -168,29 +158,21 @@ class HomeActivity : AppCompatActivity() {
             logger.d { "[joinCall] callId: $callId" }
             loadingState.value = true
 
-            streamVideo.getOrCreateCall("default", id = callId)
-                .onSuccessSuspend { callMetadata ->
-                    val call = streamVideo.call(callMetadata.type, id = callMetadata.cid)
-                    call.join().onSuccess { joinedCall ->
-                        logger.v { "[joinCall] succeed: $joinedCall" }
-                        loadingState.value = false
-                    }.onError {
-                        logger.e { "[joinCall] failed: $it" }
-                        loadingState.value = false
+            val (type, id) = "default" to "123"
+            val call = streamVideo.call(type = type, id = id)
 
-                        val throwable = it.extractCause()
-                        if (throwable is HttpException && throwable.code() == 401) {
-                            Toast.makeText(
-                                this@HomeActivity, R.string.unauthorized_error, Toast.LENGTH_SHORT
-                            ).show()
-                            logOut()
-                        } else {
-                            Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                }.onError {
-                    Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
-                }
+            val result = call.join()
+            result.onSuccess {
+                logger.d { "[joinCall] succeed: $call" }
+
+                val intent = CallActivity.getIntent(this@HomeActivity, type, id)
+                startActivity(intent)
+            }.onError {
+                logger.d { "[joinCall] failed: $it" }
+
+                Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
+                loadingState.value = false
+            }
         }
     }
 
@@ -255,8 +237,8 @@ class HomeActivity : AppCompatActivity() {
             modifier = Modifier
                 .size(40.dp)
                 .padding(top = 8.dp, start = 8.dp),
-            imageUrl = user.imageUrl,
-            initials = if (user.imageUrl.isEmpty()) {
+            imageUrl = user.image,
+            initials = if (user.image.isEmpty()) {
                 user.name.initials()
             } else {
                 null

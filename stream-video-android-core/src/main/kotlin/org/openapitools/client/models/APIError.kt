@@ -26,7 +26,8 @@ package org.openapitools.client.models
 import com.squareup.moshi.Json
 
 /**
- * *
+ *
+ *
  * @param statusCode Response HTTP status code
  * @param code API error code
  * @param details Additional error-specific information
