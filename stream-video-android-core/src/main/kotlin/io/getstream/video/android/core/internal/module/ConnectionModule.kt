@@ -18,7 +18,6 @@ package io.getstream.video.android.core.internal.module
 
 import android.content.Context
 import android.net.ConnectivityManager
-import io.getstream.video.android.core.api.ClientRPCService
 import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
@@ -70,7 +69,6 @@ internal class ConnectionModule(
     private var baseUrlInterceptor: BaseUrlInterceptor
     private var authInterceptor: CoordinatorAuthInterceptor
     internal var okHttpClient: OkHttpClient
-    internal var oldService: ClientRPCService
     internal var videoCallsApi: VideoCallsApi
     internal var moderationApi: ModerationApi
     internal var recordingApi: RecordingApi
@@ -112,7 +110,6 @@ internal class ConnectionModule(
             .build()
 
         // setup the 4 retrofit APIs
-        oldService = protoRetrofitClient.create(ClientRPCService::class.java)
         videoCallsApi = retrofitClient.create(VideoCallsApi::class.java)
         eventsApi = retrofitClient.create(EventsApi::class.java)
         moderationApi = retrofitClient.create(ModerationApi::class.java)

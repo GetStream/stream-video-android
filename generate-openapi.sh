@@ -74,7 +74,7 @@ rm -rf "$CLIENT_ROOT/auth"
 rm "$INFRASTRUCTURE_ROOT/ApiClient.kt" "$INFRASTRUCTURE_ROOT/ResponseExt.kt"
 rm "$APIS_ROOT/UsersApi.kt"
 
-API_REQUEST_REGEX="@(?:POST|DELETE|GET|PUT)\(\"(.*?)\""
+API_REQUEST_REGEX="@(?:POST|DELETE|GET|PUT|PATCH)\(\"(.*?)\""
 RETROFIT_IMPORTS_REGEX="(Body)|^[[:space:]]*@([^()]*)\("
 
 for FILE in "$APIS_ROOT"/*.kt; do

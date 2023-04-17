@@ -151,29 +151,7 @@ interface VideoCallsApi {
     ): GoLiveResponse
 
     /**
-     * Join call (type, id)
-     * Request to join a call  Required permissions: - CreateCall - JoinCall 
-     * Responses:
-     *  - 201: Successful response
-     *  - 400: Bad request
-     *  - 429: Too many requests
-     *
-     * @param type 
-     * @param id 
-     * @param joinCallRequest 
-     * @param connectionId  (optional)
-     * @return [JoinCallResponse]
-     */
-    @POST("/video/join_call/{type}/{id}")
-    suspend fun joinCallTypeId0(
-        @Path("type") type: String, 
-        @Path("id") id: String, 
-        @Body joinCallRequest: JoinCallRequest, 
-        @Query("connection_id") connectionId: String? = null
-    ): JoinCallResponse
-
-    /**
-     * Join call (type, id)
+     * Join call
      * Request to join a call  Required permissions: - CreateCall - JoinCall 
      * Responses:
      *  - 201: Successful response
@@ -187,7 +165,7 @@ interface VideoCallsApi {
      * @return [JoinCallResponse]
      */
     @POST("/video/call/{type}/{id}/join")
-    suspend fun joinCallTypeId1(
+    suspend fun joinCall(
         @Path("type") type: String, 
         @Path("id") id: String, 
         @Body joinCallRequest: JoinCallRequest, 
@@ -299,7 +277,7 @@ interface VideoCallsApi {
      * @param updateCallRequest 
      * @return [UpdateCallResponse]
      */
-    @PATCH("call/{type}/{id}")
+    @PATCH("/video/call/{type}/{id}")
     suspend fun updateCall(
         @Path("type") type: String, 
         @Path("id") id: String, 

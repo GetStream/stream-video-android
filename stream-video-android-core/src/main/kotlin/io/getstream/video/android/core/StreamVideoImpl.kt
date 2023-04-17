@@ -94,11 +94,6 @@ import org.openapitools.client.models.UpdateUserPermissionsResponse
 import org.openapitools.client.models.VideoEvent
 import org.openapitools.client.models.WSCallEvent
 import retrofit2.HttpException
-import stream.video.coordinator.client_v1_rpc.CreateDeviceRequest
-import stream.video.coordinator.client_v1_rpc.DeleteDeviceRequest
-import stream.video.coordinator.client_v1_rpc.MemberInput
-import stream.video.coordinator.client_v1_rpc.UpsertCallMembersRequest
-import stream.video.coordinator.push_v1.DeviceInput
 import kotlin.coroutines.Continuation
 
 class EventSubscription(
@@ -149,21 +144,8 @@ internal class StreamVideoImpl internal constructor(
     override suspend fun createDevice(token: String, pushProvider: String): Result<Device> {
         logger.d { "[createDevice] token: $token, pushProvider: $pushProvider" }
         return wrapAPICall {
-            val deviceResponse = connectionModule.oldService.createDevice(
-                CreateDeviceRequest(
-                    DeviceInput(
-                        id = token,
-                        push_provider_id = pushProvider
-                    )
-                )
-            )
-            val device = Device(
-                token = deviceResponse.device?.id
-                    ?: error("CreateDeviceResponse has no device object "),
-                pushProvider = deviceResponse.device.push_provider_name
-            )
-            storeDevice(device)
-            device
+                // TODO: handle this when backend has it
+            error("TODO: not support yet")
         }
     }
 
@@ -339,8 +321,8 @@ internal class StreamVideoImpl internal constructor(
     override suspend fun deleteDevice(id: String): Result<Unit> {
         logger.d { "[deleteDevice] id: $id" }
 
-        val request = DeleteDeviceRequest(id = id)
-        return wrapAPICall { connectionModule.oldService.deleteDevice(request) }
+        // TODO: handle this when we have push on the backend
+        return wrapAPICall {}
     }
 
     /**
@@ -523,16 +505,7 @@ internal class StreamVideoImpl internal constructor(
         logger.d { "[inviteUsers] users: $users" }
 
         return wrapAPICall {
-            connectionModule.oldService.upsertCallMembers(
-                UpsertCallMembersRequest(
-                    call_cid = "$type:$id",
-                    members = users.map { user ->
-                        MemberInput(
-                            user_id = user.id, role = user.role
-                        )
-                    }
-                )
-            )
+            error("TODO: not support yet")
         }
     }
 
@@ -596,7 +569,7 @@ internal class StreamVideoImpl internal constructor(
         )
 
         val result = wrapAPICall {
-            connectionModule.videoCallsApi.joinCallTypeId0(
+            connectionModule.videoCallsApi.joinCall(
                 type,
                 id,
                 joinCallRequest,

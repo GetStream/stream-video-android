@@ -298,8 +298,7 @@ public class Call(
         val request = UpdateCallRequest(
             custom = custom,
             settingsOverride = settingsOverride,
-            // TODO: fix me
-//            startsAt = startsAt,
+            startsAt = startsAt,
         )
         val response = clientImpl.updateCall(type, id, request)
         response.onSuccess {
