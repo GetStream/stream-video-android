@@ -27,6 +27,7 @@ import io.getstream.result.Result
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.User
+import io.mockk.MockKAnnotations
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineScheduler
@@ -129,8 +130,13 @@ open class TestBase {
     /** Android context */
     val context = testData.context
 
+    val nowUtc = OffsetDateTime.now(Clock.systemUTC())
+
     /** API Key */
     val apiKey = "hd8szvscpxvd"
+
+    @Before
+    fun createMocks() = MockKAnnotations.init(this, relaxUnitFun = true) // turn relaxUnitFun on for all mocks
 
     private val testLogger = StreamTestLogger()
 
@@ -191,7 +197,7 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true) : TestBase(
     var nextEventContinuation: Continuation<VideoEvent>? = null
     var nextEventCompleted: Boolean = false
 
-    val nowUtc = OffsetDateTime.now(Clock.systemUTC())
+
 
     init {
         builder = StreamVideoBuilder(

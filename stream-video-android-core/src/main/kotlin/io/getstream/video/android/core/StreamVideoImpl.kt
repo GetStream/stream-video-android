@@ -321,8 +321,15 @@ internal class StreamVideoImpl internal constructor(
         return scope.async {
             // wait for the guest user setup if we're using guest users
             guestUserJob?.let { it.await() }
-            val result = socketImpl.connect()
-            result
+            try {
+                val result = socketImpl.connect()
+                result
+            } catch (e: ErrorResponse) {
+                if (e.code == 40) {
+                    TODO("Token should be refreshed")
+                }
+            }
+
         }
     }
 

@@ -16,15 +16,26 @@
 
 package io.getstream.video.android.core.socket
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import org.openapitools.client.models.VideoEvent
+
+@Serializable
+data class SocketError(
+    val error: ErrorResponse
+)
+
 
 @Serializable
 public data class ErrorResponse(
     val code: Int = -1,
-    var message: String = "",
+    override var message: String = "",
+    @SerialName("StatusCode")
     var statusCode: Int = -1,
+    var details: List<String> = emptyList(),
     val exceptionFields: Map<String, String> = mapOf(),
+    @SerialName("more_info")
     var moreInfo: String = ""
-) {
+) : Throwable() {
     var duration: String = ""
 }

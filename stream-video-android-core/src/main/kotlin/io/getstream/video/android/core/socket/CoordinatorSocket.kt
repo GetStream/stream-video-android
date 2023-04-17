@@ -52,8 +52,6 @@ public class CoordinatorSocket(
     override fun authenticate() {
         logger.d { "[authenticateUser] user: $user" }
 
-        // TODO: handle guest and anon users
-
         if (token.isEmpty()) {
             throw IllegalStateException("User token is empty")
         }
