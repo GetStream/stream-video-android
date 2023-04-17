@@ -95,35 +95,4 @@ class ModerationTest : IntegrationTestBase() {
         // TODO: check event?
     }
 
-    @Test
-    fun `Edtech style moderation`() = runTest {
-
-        // a teacher mutes the audio for a student
-
-        // a teacher mutes everything for a student
-
-        // this needs to fire an event that update's Tommaso's permissions...
-
-        // the student is not able to unmute themselves
-        // so state for the microphone is on/off/not allowed
-        call.microphone.status // on/off/no call permission/ no android permission
-
-        // they can request to unmute though
-        call.requestPermissions("unmute")
-
-        // the teacher grants this request
-
-        // again, an event should update permissions
-
-        // and the student can click unmute
-        // same applies for audio, video and screen sharing
-    }
-
-    @Test
-    fun `Zoom style moderation`() = runTest {
-        // on a large call someone will keep background noise going
-        // you want to mute everyone at once
-
-        // people can unmute themselves
-    }
 }

@@ -53,90 +53,115 @@ import org.openapitools.client.models.VideoEvent
 import org.webrtc.RendererCommon
 import stream.video.sfu.models.TrackType
 
-public data class CreateCallOptions(
-    val memberIds: List<String>? = null,
-    val members: List<MemberRequest>? = null,
-    val custom: Map<String, Any>? = null,
-    val settingsOverride: CallSettingsRequest? = null,
-    val startsAt: org.threeten.bp.OffsetDateTime? = null,
-    val team: String? = null,
-    val ring: Boolean = false
-) {
-    fun memberRequestsFromIds(): List<MemberRequest>? {
-        return memberIds?.map { MemberRequest(userId = it) } ?: members
-    }
-}
 
-public data class SFUConnection(
-    internal val callUrl: String,
-    internal val sfuToken: SfuToken,
-    internal val iceServers: List<IceServer>
-)
-
+/**
+ * The call class gives you access to all call level API calls
+ *
+ * @sample
+ *
+ * val call = client.call("default", "123")
+ * val result = call.create() // update, get etc.
+ * // join the call and get audio/video
+ * val result = call.join()
+ *
+ */
 public class Call(
     internal val client: StreamVideo,
     val type: String,
     val id: String,
     val user: User,
 ) {
-    private val clientImpl = client as StreamVideoImpl
-    var session: RtcSession? = null
-    val cid = "$type:$id"
+    private val logger by taggedLogger("Call")
+    /** The call state contains all state such as the participant list, reactions etc */
     val state = CallState(this, user)
 
-    val mediaManager by lazy { MediaManagerImpl(clientImpl.context) }
+    /** Camera gives you access to the local camera */
     val camera by lazy { mediaManager.camera }
     val microphone by lazy { mediaManager.microphone }
     val speaker by lazy { mediaManager.speaker }
 
-    // should be a stateflow
-    private var sfuConnection: SFUConnection? = null
+    /** The cid is type:id */
+    val cid = "$type:$id"
 
-    suspend fun muteAllUsers(
-        audio: Boolean = true,
-        video: Boolean = false,
-        screenShare: Boolean = false
-    ): Result<MuteUsersResponse> {
-        val request = MuteUsersData(
-            muteAllUsers = false,
-            audio = audio,
-            video = video,
-            screenShare = screenShare,
-        )
-        return clientImpl.muteUsers(type, id, request)
-    }
+    /** Session handles all real time communication for video and audio */
+    internal var session: RtcSession? = null
+    private val clientImpl = client as StreamVideoImpl
+    internal val mediaManager by lazy { MediaManagerImpl(clientImpl.context) }
 
-    @VisibleForTesting
-    internal suspend fun joinRequest(create: CreateCallOptions? = null): Result<JoinCallResponse> {
-        val result = clientImpl.joinCall(
-            type, id,
-            create = create != null,
-            members = create?.memberRequestsFromIds(),
-            custom = create?.custom,
-            settingsOverride = create?.settingsOverride,
-            startsAt = create?.startsAt,
-            team = create?.team,
-            ring = create?.ring ?: false,
-        )
-        result.onSuccess {
+    /** Basic crud operations */
+    suspend fun get(): Result<GetCallResponse> {
+        val response = clientImpl.getCall(type, id)
+        response.onSuccess {
             state.updateFromResponse(it)
         }
-        return result
+        return response
+    }
+
+    /** Create a call. You can create a call client side, many apps prefer to do this server side though */
+    suspend fun create(
+        memberIds: List<String>? = null,
+        members: List<MemberRequest>? = null,
+        custom: Map<String, Any>? = null,
+        settingsOverride: CallSettingsRequest? = null,
+        startsAt: org.threeten.bp.OffsetDateTime? = null,
+        team: String? = null,
+        ring: Boolean = false
+    ): Result<GetOrCreateCallResponse> {
+
+        val response = if (members != null) {
+            clientImpl.getOrCreateCallFullMembers(
+                type = type,
+                id = id,
+                members = members,
+                custom = custom,
+                settingsOverride = settingsOverride,
+                startsAt = startsAt,
+                team = team,
+                ring = ring
+            )
+        } else {
+            clientImpl.getOrCreateCall(
+                type = type,
+                id = id,
+                memberIds = memberIds,
+                custom = custom,
+                settingsOverride = settingsOverride,
+                startsAt = startsAt,
+                team = team,
+                ring = ring
+            )
+        }
+
+        response.onSuccess {
+            state.updateFromResponse(it)
+            if (ring) {
+                client.state.addRingingCall(this)
+            }
+        }
+        return response
+    }
+
+    /** Update a call */
+    suspend fun update(
+        custom: Map<String, Any>? = null,
+        settingsOverride: CallSettingsRequest? = null,
+        startsAt: org.threeten.bp.OffsetDateTime? = null,
+    ): Result<UpdateCallResponse> {
+
+        val request = UpdateCallRequest(
+            custom = custom,
+            settingsOverride = settingsOverride,
+            // TODO: fix me
+//            startsAt = startsAt,
+        )
+        val response = clientImpl.updateCall(type, id, request)
+        response.onSuccess {
+            state.updateFromResponse(it)
+        }
+        return response
     }
 
     suspend fun join(create: CreateCallOptions? = null): Result<RtcSession> {
-
-        /**
-         * Alright, how to make this solid
-         *
-         * - There are 2 methods.
-         * -- clientImpl.JoinCall which makes the API call and gets a response
-         * -- The whole join process. Which measures latency, uploads it etc
-         *
-         * Latency measurement needs to be changed
-         *
-         */
-
         // step 1. call the join endpoint to get a list of SFUs
         val result = joinRequest(create)
 
@@ -179,11 +204,34 @@ public class Call(
         return Success(value = session!!)
     }
 
+    /** Leave the call, but don't end it for other users */
+    fun leave() {
+        // TODO
+    }
+
+    /** ends the call for yourself as well as other users */
+    suspend fun end(): Result<Unit> {
+        return clientImpl.endCall(type, id)
+    }
+
     suspend fun sendReaction(data: SendReactionData): Result<SendReactionResponse> {
         return clientImpl.sendReaction(type, id, data)
     }
 
-    private val logger by taggedLogger("Call")
+
+    suspend fun muteAllUsers(
+        audio: Boolean = true,
+        video: Boolean = false,
+        screenShare: Boolean = false
+    ): Result<MuteUsersResponse> {
+        val request = MuteUsersData(
+            muteAllUsers = false,
+            audio = audio,
+            video = video,
+            screenShare = screenShare,
+        )
+        return clientImpl.muteUsers(type, id, request)
+    }
 
     // TODO: review this
     public fun initRenderer(
@@ -229,84 +277,8 @@ public class Call(
         return clientImpl.stopLive(type, id)
     }
 
-    fun leave() {
-        TODO()
-    }
 
-    suspend fun end(): Result<Unit> {
-        return clientImpl.endCall(type, id)
-    }
 
-    /** Basic crud operations */
-    suspend fun get(): Result<GetCallResponse> {
-        val response = clientImpl.getCall(type, id)
-        response.onSuccess {
-            state.updateFromResponse(it)
-        }
-        return response
-    }
-
-    suspend fun create(
-        memberIds: List<String>? = null,
-        members: List<MemberRequest>? = null,
-        custom: Map<String, Any>? = null,
-        settingsOverride: CallSettingsRequest? = null,
-        startsAt: org.threeten.bp.OffsetDateTime? = null,
-        team: String? = null,
-        ring: Boolean = false
-    ): Result<GetOrCreateCallResponse> {
-
-        val response = if (members != null) {
-            clientImpl.getOrCreateCallFullMembers(
-                type = type,
-                id = id,
-                members = members,
-                custom = custom,
-                settingsOverride = settingsOverride,
-                startsAt = startsAt,
-                team = team,
-                ring = ring
-            )
-        } else {
-            clientImpl.getOrCreateCall(
-                type = type,
-                id = id,
-                memberIds = memberIds,
-                custom = custom,
-                settingsOverride = settingsOverride,
-                startsAt = startsAt,
-                team = team,
-                ring = ring
-            )
-        }
-
-        response.onSuccess {
-            state.updateFromResponse(it)
-            if (ring) {
-                client.state.addRingingCall(this)
-            }
-        }
-        return response
-    }
-
-    suspend fun update(
-        custom: Map<String, Any>? = null,
-        settingsOverride: CallSettingsRequest? = null,
-        startsAt: org.threeten.bp.OffsetDateTime? = null,
-    ): Result<UpdateCallResponse> {
-
-        val request = UpdateCallRequest(
-            custom = custom,
-            settingsOverride = settingsOverride,
-            // TODO: fix me
-//            startsAt = startsAt,
-        )
-        val response = clientImpl.updateCall(type, id, request)
-        response.onSuccess {
-            state.updateFromResponse(it)
-        }
-        return response
-    }
 
     /** Permissions */
     suspend fun requestPermissions(vararg permission: String): Result<Unit> {
@@ -328,6 +300,14 @@ public class Call(
     suspend fun stopBroadcasting(): Result<Any> {
         return clientImpl.stopBroadcasting(type, id)
     }
+
+
+
+
+
+
+
+
 
     private var subscriptions = mutableSetOf<EventSubscription>()
 
@@ -439,5 +419,37 @@ public class Call(
             screenShare = screenShare,
         )
         return clientImpl.muteUsers(type, id, request)
+    }
+
+    @VisibleForTesting
+    internal suspend fun joinRequest(create: CreateCallOptions? = null): Result<JoinCallResponse> {
+        val result = clientImpl.joinCall(
+            type, id,
+            create = create != null,
+            members = create?.memberRequestsFromIds(),
+            custom = create?.custom,
+            settingsOverride = create?.settingsOverride,
+            startsAt = create?.startsAt,
+            team = create?.team,
+            ring = create?.ring ?: false,
+        )
+        result.onSuccess {
+            state.updateFromResponse(it)
+        }
+        return result
+    }
+}
+
+public data class CreateCallOptions(
+    val memberIds: List<String>? = null,
+    val members: List<MemberRequest>? = null,
+    val custom: Map<String, Any>? = null,
+    val settingsOverride: CallSettingsRequest? = null,
+    val startsAt: org.threeten.bp.OffsetDateTime? = null,
+    val team: String? = null,
+    val ring: Boolean = false
+) {
+    fun memberRequestsFromIds(): List<MemberRequest>? {
+        return memberIds?.map { MemberRequest(userId = it) } ?: members
     }
 }

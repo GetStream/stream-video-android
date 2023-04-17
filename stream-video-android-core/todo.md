@@ -49,9 +49,9 @@
 - [X] ClientState
 - [X] MemberState
 - [X] ConnectionModule
+- [X] Call
 - [ ] CallState
 - [ ] StreamVideoImpl
-- [ ] Call
 
 ### TODOs
 
@@ -131,7 +131,7 @@
 
 - [X] Media manager class to enable easy testing of all audio/video stuff
 - [ ] Move muting and clean it up
-- [ ] Review how UI changes & pagination are connected to the video tracks
+- [ ] Review how UI changes & pagination are connected to the video tracks. See call initRenderer
 - [ ] Implement dynascale
  
 ### Disconnect suggestion
@@ -148,15 +148,16 @@
 
 ### Server wishlist
 
+[X] queryChannels doesn’t return members but CallUsers, this is wrong
 - Update call endpoints doesn’t expose team or startsAt. I get why we don’t expose team, not sure about startsAt
 - Get/Create etc don’t specify connection_id, this breaks the ability to watch
-- queryChannels doesn’t return members but CallUsers, this is wrong
 - Not being able to edit settings on a call you created seems like the wrong default: “”User ‘thierry’ with role ‘user’ is not allowed to perform action UpdateCallSettings in scope ‘video:default’“, serverErrorCode=17, statusCode=-1, cause=java.lang.Throwable: ))”
 - Events for updating users
 - Participant count (for livestreams you cant rely on the list)
 - Participant.online field is weird. Aren't you always online as a participant?
 - ConnectionQualityInfo is a list, audio levels is a map. Lets standardize
 - Push setup
+- Accept/reject call endpoints
 - Watching calls for audio rooms
 - What about codec switching?
 - What about graceful SFU shutdown/ an event to make clients move SFU?
