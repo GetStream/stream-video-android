@@ -26,8 +26,11 @@ package org.openapitools.client.models
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param accessRequestEnabled * @param enabled */
+ *
+ *
+ * @param accessRequestEnabled
+ * @param enabled
+ */
 
 data class VideoSettings(
 

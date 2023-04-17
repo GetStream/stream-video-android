@@ -28,9 +28,12 @@ import com.squareup.moshi.Json
 /**
  * This event is sent to notify about permission changes for a user, clients receiving this event should update their UI accordingly
  *
- * @param callCid * @param createdAt * @param ownCapabilities The capabilities of the current user
+ * @param callCid
+ * @param createdAt
+ * @param ownCapabilities The capabilities of the current user
  * @param type The type of event: \"call.permissions_updated\" in this case
- * @param user */
+ * @param user
+ */
 
 data class UpdatedCallPermissionsEvent(
 
@@ -46,9 +49,18 @@ data class UpdatedCallPermissionsEvent(
 
     /* The type of event: \"call.permissions_updated\" in this case */
     @Json(name = "type")
-    val type: kotlin.String,
+    val type: kotlin.String = "call.permissions_updated",
 
     @Json(name = "user")
     val user: UserResponse
 
-)
+) : VideoEvent(), WSCallEvent {
+
+    override fun getCallCID(): String {
+        return callCid
+    }
+
+    override fun getEventType(): String {
+        return type
+    }
+}

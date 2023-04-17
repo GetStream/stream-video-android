@@ -19,7 +19,6 @@ package io.getstream.video.android.core
 import android.content.Context
 import android.net.ConnectivityManager
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
-import io.getstream.video.android.core.internal.module.ConnectionModule
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.socket.CoordinatorSocket
 import io.getstream.video.android.core.socket.SfuSocket
@@ -34,32 +33,26 @@ import org.robolectric.RobolectricTestRunner
 import java.util.concurrent.TimeUnit
 
 /**
- * Coordinator socket URL
+ * Test coverage for the sockets
  *
- * * https://video.stream-io-api.com/video/connect?api_key=hd8szvscpxvd&stream-auth-type=jwt&X-Stream-Client=stream-video-android
- * *
+ * @see PersistentSocket
+ * @see CoordinatorSocket
+ * @see SfuSocket
  *
- * SFU Socket URL
+ * The socket does a few things
+ * - health check/ping every 30 seconds
+ * - monitors network state
+ * - in case of temporary errors retry and for permanent ones fail
  *
- * * https://sfu-000c954.fdc-ams1.stream-io-video.com/ws?api_key=hd8szvscpxvd
- * * SFU Token:
+ * The Sfu and coordinator have slightly different implements
+ * Auth receives different events
  *
- * @see ConnectionModule
- * @see SfuSocketImpl
- * @see VideoSocketImpl
- * @see EventsParser
- * @see SignalEventsParser
- * @see EventMapper
- * @see SocketFactory
- * @see Socket
- * @see SFUConnectionModule
- * @see FiniteStateMachine
- * @see SocketStateService
+ * @see JoinCallEvent (for the sfu)
+ * @see ConnectedEvent (for the coordinator)
  *
- * TODO:
- * - swap ConnectionModule / SFUSocket setup
- * - authenticated continuation or different approach
- * - Lots more testing
+ * The sfu uses binary messages and the coordinator text
+ * Other than it's mostly the same logic
+ *
  */
 @RunWith(RobolectricTestRunner::class)
 class SocketTest : TestBase() {
@@ -98,32 +91,23 @@ class SocketTest : TestBase() {
                 .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         )
         val scope = CoroutineScope(DispatcherProvider.IO)
-        val socket = CoordinatorSocket(
-            coordinatorUrl,
-            testData.users["thierry"]!!,
-            testData.tokens["thierry"]!!,
-            scope,
-            buildOkHttp(),
-            networkStateProvider
-        )
-        println("a")
+        val socket = CoordinatorSocket(coordinatorUrl, testData.users["thierry"]!!, testData.tokens["thierry"]!!, scope, buildOkHttp(), networkStateProvider)
+
         socket.connect()
 
-        println("b")
         val job = launch {
-            println("watching events")
+
             socket.events.collect() {
-                println("event: $it")
             }
         }
-        println("c")
+
         val job2 = launch {
-            println("watching errors")
+
             socket.errors.collect() {
                 throw it
             }
         }
-        println("reached")
+
         // wait for the socket to connect (connect response or error)
 
         socket.disconnect()
@@ -154,14 +138,13 @@ class SocketTest : TestBase() {
         socket.connect()
 
         launch {
-            println("watching events")
+
             socket.events.collect() {
-                println("event: $it")
             }
         }
 
         launch {
-            println("watching errors")
+
             socket.errors.collect() {
                 throw it
             }
@@ -170,10 +153,12 @@ class SocketTest : TestBase() {
 
     @Test
     fun `if we get a temporary error we should retry`() = runTest {
+        // for instance a network failure
     }
 
     @Test
     fun `a permanent error shouldn't be retried`() = runTest {
+        // for authentication failures
     }
 
     @Test

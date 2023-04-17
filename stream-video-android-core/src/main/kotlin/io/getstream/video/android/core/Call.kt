@@ -17,28 +17,55 @@
 package io.getstream.video.android.core
 
 import android.view.View
+import androidx.annotation.VisibleForTesting
 import io.getstream.log.taggedLogger
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
 import io.getstream.video.android.core.call.RtcSession
-import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.model.IceServer
 import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.SendReactionData
 import io.getstream.video.android.core.model.SfuToken
+import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.toIceServer
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
+import org.openapitools.client.models.BlockUserResponse
+import org.openapitools.client.models.CallSettingsRequest
 import org.openapitools.client.models.GetCallEdgeServerRequest
+import org.openapitools.client.models.GetCallResponse
 import org.openapitools.client.models.GetOrCreateCallResponse
 import org.openapitools.client.models.GoLiveResponse
+import org.openapitools.client.models.JoinCallResponse
+import org.openapitools.client.models.ListRecordingsResponse
+import org.openapitools.client.models.MemberRequest
+import org.openapitools.client.models.MuteUsersResponse
 import org.openapitools.client.models.SendReactionResponse
 import org.openapitools.client.models.StopLiveResponse
+import org.openapitools.client.models.UpdateCallMembersRequest
+import org.openapitools.client.models.UpdateCallMembersResponse
+import org.openapitools.client.models.UpdateCallRequest
 import org.openapitools.client.models.UpdateCallResponse
+import org.openapitools.client.models.UpdateUserPermissionsResponse
+import org.openapitools.client.models.VideoEvent
 import org.webrtc.RendererCommon
 import stream.video.sfu.models.TrackType
+
+public data class CreateCallOptions(
+    val memberIds: List<String>? = null,
+    val members: List<MemberRequest>? = null,
+    val custom: Map<String, Any>? = null,
+    val settingsOverride: CallSettingsRequest? = null,
+    val startsAt: org.threeten.bp.OffsetDateTime? = null,
+    val team: String? = null,
+    val ring: Boolean = false
+) {
+    fun memberRequestsFromIds(): List<MemberRequest>? {
+        return memberIds?.map { MemberRequest(userId = it) } ?: members
+    }
+}
 
 public data class SFUConnection(
     internal val callUrl: String,
@@ -50,7 +77,6 @@ public class Call(
     internal val client: StreamVideo,
     val type: String,
     val id: String,
-    private val token: String = "",
     val user: User,
 ) {
     private val clientImpl = client as StreamVideoImpl
@@ -58,27 +84,53 @@ public class Call(
     val cid = "$type:$id"
     val state = CallState(this, user)
 
-    val mediaManager by lazy { MediaManagerImpl(client.context) }
+    val mediaManager by lazy { MediaManagerImpl(clientImpl.context) }
     val camera by lazy { mediaManager.camera }
     val microphone by lazy { mediaManager.microphone }
     val speaker by lazy { mediaManager.speaker }
 
-    public var custom: Map<String, Any>? = null
-
     // should be a stateflow
     private var sfuConnection: SFUConnection? = null
 
-    suspend fun muteAllUsers(): Result<Unit> {
-        return muteUsers(MuteUsersData(audio = true, muteAllUsers = true))
+    suspend fun muteAllUsers(
+        audio: Boolean = true,
+        video: Boolean = false,
+        screenShare: Boolean = false
+    ): Result<MuteUsersResponse> {
+        val request = MuteUsersData(
+            muteAllUsers = false,
+            audio = audio,
+            video = video,
+            screenShare = screenShare,
+        )
+        return clientImpl.muteUsers(type, id, request)
     }
 
-    suspend fun join(): Result<RtcSession> {
+    @VisibleForTesting
+    internal suspend fun joinRequest(create: CreateCallOptions? = null): Result<JoinCallResponse> {
+        val result = clientImpl.joinCall(
+            type, id,
+            create = create != null,
+            members = create?.memberRequestsFromIds(),
+            custom = create?.custom,
+            settingsOverride = create?.settingsOverride,
+            startsAt = create?.startsAt,
+            team = create?.team,
+            ring = create?.ring ?: false,
+        )
+        result.onSuccess {
+            state.updateFromResponse(it)
+        }
+        return result
+    }
+
+    suspend fun join(create: CreateCallOptions? = null): Result<RtcSession> {
 
         /**
          * Alright, how to make this solid
          *
          * - There are 2 methods.
-         * -- Client.JoinCall which makes the API call and gets a response
+         * -- clientImpl.JoinCall which makes the API call and gets a response
          * -- The whole join process. Which measures latency, uploads it etc
          *
          * Latency measurement needs to be changed
@@ -86,21 +138,19 @@ public class Call(
          */
 
         // step 1. call the join endpoint to get a list of SFUs
-        val result = client.joinCall(type, id)
+        val result = joinRequest(create)
+
         if (result !is Success) {
             return result as Failure
         }
 
         // step 2. measure latency
-        // TODO: setup the initial call state based on this
-        println(result.value.call.settings)
-
         val edgeUrls = result.value.edges.map { it.latencyUrl }
         // measure latency in parallel
         val measurements = clientImpl.measureLatency(edgeUrls)
 
         // upload our latency measurements to the server
-        val selectEdgeServerResult = client.selectEdgeServer(
+        val selectEdgeServerResult = clientImpl.selectEdgeServer(
             type = type,
             id = id,
             request = GetCallEdgeServerRequest(latencyMeasurements = measurements.associate { it.latencyUrl to it.measurements })
@@ -124,15 +174,13 @@ public class Call(
             latencyResults = measurements.associate { it.latencyUrl to it.measurements }
         )
 
-        client.state.setActiveCall(this)
-
         session?.connect()
 
         return Success(value = session!!)
     }
 
     suspend fun sendReaction(data: SendReactionData): Result<SendReactionResponse> {
-        return client.sendReaction(type, id, data)
+        return clientImpl.sendReaction(type, id, data)
     }
 
     private val logger by taggedLogger("Call")
@@ -174,11 +222,11 @@ public class Call(
     }
 
     suspend fun goLive(): Result<GoLiveResponse> {
-        return client.goLive(type, id)
+        return clientImpl.goLive(type, id)
     }
 
     suspend fun stopLive(): Result<StopLiveResponse> {
-        return client.stopLive(type, id)
+        return clientImpl.stopLive(type, id)
     }
 
     fun leave() {
@@ -186,41 +234,99 @@ public class Call(
     }
 
     suspend fun end(): Result<Unit> {
-        return client.endCall(type, id)
+        return clientImpl.endCall(type, id)
     }
 
     /** Basic crud operations */
-    suspend fun get(): Result<GetOrCreateCallResponse> {
-        return client.getOrCreateCall(type, id)
+    suspend fun get(): Result<GetCallResponse> {
+        val response = clientImpl.getCall(type, id)
+        response.onSuccess {
+            state.updateFromResponse(it)
+        }
+        return response
     }
 
-    suspend fun create(): Result<GetOrCreateCallResponse> {
-        return client.getOrCreateCall(type, id)
+    suspend fun create(
+        memberIds: List<String>? = null,
+        members: List<MemberRequest>? = null,
+        custom: Map<String, Any>? = null,
+        settingsOverride: CallSettingsRequest? = null,
+        startsAt: org.threeten.bp.OffsetDateTime? = null,
+        team: String? = null,
+        ring: Boolean = false
+    ): Result<GetOrCreateCallResponse> {
+
+        val response = if (members != null) {
+            clientImpl.getOrCreateCallFullMembers(
+                type = type,
+                id = id,
+                members = members,
+                custom = custom,
+                settingsOverride = settingsOverride,
+                startsAt = startsAt,
+                team = team,
+                ring = ring
+            )
+        } else {
+            clientImpl.getOrCreateCall(
+                type = type,
+                id = id,
+                memberIds = memberIds,
+                custom = custom,
+                settingsOverride = settingsOverride,
+                startsAt = startsAt,
+                team = team,
+                ring = ring
+            )
+        }
+
+        response.onSuccess {
+            state.updateFromResponse(it)
+            if (ring) {
+                client.state.addRingingCall(this)
+            }
+        }
+        return response
     }
 
-    suspend fun update(): Result<UpdateCallResponse> {
-        return client.updateCall(type, id, custom ?: emptyMap())
+    suspend fun update(
+        custom: Map<String, Any>? = null,
+        settingsOverride: CallSettingsRequest? = null,
+        startsAt: org.threeten.bp.OffsetDateTime? = null,
+    ): Result<UpdateCallResponse> {
+
+        val request = UpdateCallRequest(
+            custom = custom,
+            settingsOverride = settingsOverride,
+            // TODO: fix me
+//            startsAt = startsAt,
+        )
+        val response = clientImpl.updateCall(type, id, request)
+        response.onSuccess {
+            state.updateFromResponse(it)
+        }
+        return response
     }
 
     /** Permissions */
     suspend fun requestPermissions(vararg permission: String): Result<Unit> {
-        return client.requestPermissions(type, id, permission.toList())
+        return clientImpl.requestPermissions(type, id, permission.toList())
     }
 
     suspend fun startRecording(): Result<Any> {
-        return client.startRecording(type, id)
+        return clientImpl.startRecording(type, id)
     }
 
     suspend fun stopRecording(): Result<Any> {
-        return client.stopRecording(type, id)
+        return clientImpl.stopRecording(type, id)
     }
 
     suspend fun startBroadcasting(): Result<Any> {
-        return client.startBroadcasting(type, id)
+        return clientImpl.startBroadcasting(type, id)
     }
 
     suspend fun stopBroadcasting(): Result<Any> {
-        return client.stopBroadcasting(type, id)
+        return clientImpl.stopBroadcasting(type, id)
     }
 
     private var subscriptions = mutableSetOf<EventSubscription>()
@@ -245,6 +351,42 @@ public class Call(
         return sub
     }
 
+    public suspend fun blockUser(userId: String): Result<BlockUserResponse> {
+        return clientImpl.blockUser(type, id, userId)
+    }
+
+    public suspend fun removeMembers(userIds: List<String>): Result<UpdateCallMembersResponse> {
+        val request = UpdateCallMembersRequest(removeMembers = userIds)
+        return clientImpl.updateMembers(type, id, request)
+    }
+
+    public suspend fun grantPermissions(
+        userId: String,
+        permissions: List<String>
+    ): Result<UpdateUserPermissionsResponse> {
+        val request = UpdateUserPermissionsData(
+            userId = userId,
+            grantedPermissions = permissions
+        )
+        return clientImpl.updateUserPermissions(type, id, request)
+    }
+
+    public suspend fun revokePermissions(
+        userId: String,
+        permissions: List<String>
+    ): Result<UpdateUserPermissionsResponse> {
+        val request = UpdateUserPermissionsData(
+            userId = userId,
+            revokedPermissions = permissions
+        )
+        return clientImpl.updateUserPermissions(type, id, request)
+    }
+
+    public suspend fun updateMembers(memberRequests: List<MemberRequest>): Result<UpdateCallMembersResponse> {
+        val request = UpdateCallMembersRequest(updateMembers = memberRequests)
+        return clientImpl.updateMembers(type, id, request)
+    }
+
     fun fireEvent(event: VideoEvent) {
         subscriptions.forEach { sub ->
             if (!sub.isDisposed) {
@@ -263,7 +405,39 @@ public class Call(
         }
     }
 
-    suspend fun muteUsers(muteUsersData: MuteUsersData): Result<Unit> {
-        return client.muteUsers(type, id, muteUsersData)
+    suspend fun listRecordings(): Result<ListRecordingsResponse> {
+        return clientImpl.listRecordings(type, id, "what")
+    }
+
+    suspend fun muteUser(
+        userId: String,
+        audio: Boolean = true,
+        video: Boolean = false,
+        screenShare: Boolean = false
+    ): Result<MuteUsersResponse> {
+        val request = MuteUsersData(
+            users = listOf(userId),
+            muteAllUsers = false,
+            audio = audio,
+            video = video,
+            screenShare = screenShare,
+        )
+        return clientImpl.muteUsers(type, id, request)
+    }
+
+    suspend fun muteUsers(
+        userIds: List<String>,
+        audio: Boolean = true,
+        video: Boolean = false,
+        screenShare: Boolean = false
+    ): Result<MuteUsersResponse> {
+        val request = MuteUsersData(
+            users = userIds,
+            muteAllUsers = false,
+            audio = audio,
+            video = video,
+            screenShare = screenShare,
+        )
+        return clientImpl.muteUsers(type, id, request)
     }
 }

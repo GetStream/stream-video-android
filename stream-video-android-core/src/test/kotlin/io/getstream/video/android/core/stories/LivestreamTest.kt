@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core
+package io.getstream.video.android.core.stories
 
+import io.getstream.video.android.core.IntegrationTestBase
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -86,7 +87,7 @@ class LivestreamTest : IntegrationTestBase() {
     @Test
     fun `join a call with a viewing only token, that's not authenticated`() = runTest {
         // TODO: not implemented on the server
-        val call = client.call("livestream", randomUUID(), "mytoken")
+        val call = client.call("livestream", randomUUID())
     }
 
     @Test

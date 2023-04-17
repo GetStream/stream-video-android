@@ -24,13 +24,15 @@
 package org.openapitools.client.models
 
 import com.squareup.moshi.Json
-import org.threeten.bp.OffsetDateTime
 
 /**
  * This event is sent when a user is unblocked on a call,  this can be useful to notify the user that they can now join the call again
  *
- * @param callCid * @param createdAt * @param type The type of event: \"call.unblocked_user\" in this case
- * @param user */
+ * @param callCid
+ * @param createdAt
+ * @param type The type of event: \"call.unblocked_user\" in this case
+ * @param user
+ */
 
 data class UnblockedUserEvent(
 
@@ -38,13 +40,22 @@ data class UnblockedUserEvent(
     val callCid: kotlin.String,
 
     @Json(name = "created_at")
-    val createdAt: OffsetDateTime,
+    val createdAt: org.threeten.bp.OffsetDateTime,
 
     /* The type of event: \"call.unblocked_user\" in this case */
     @Json(name = "type")
-    val type: kotlin.String,
+    val type: kotlin.String = "call.unblocked_user",
 
     @Json(name = "user")
     val user: UserResponse
 
-)
+) : VideoEvent(), WSCallEvent {
+
+    override fun getCallCID(): String {
+        return callCid
+    }
+
+    override fun getEventType(): String {
+        return type
+    }
+}

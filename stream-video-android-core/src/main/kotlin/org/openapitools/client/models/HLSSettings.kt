@@ -26,8 +26,12 @@ package org.openapitools.client.models
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param autoOn * @param enabled * @param qualityTracks */
+ *
+ *
+ * @param autoOn
+ * @param enabled
+ * @param qualityTracks
+ */
 
 data class HLSSettings(
 

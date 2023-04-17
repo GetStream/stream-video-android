@@ -16,16 +16,12 @@
 
 package io.getstream.video.android.core.socket
 
+import com.squareup.moshi.JsonAdapter
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.call.signal.socket.RTCEventMapper
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
-import io.getstream.video.android.core.events.ConnectedEvent
-import io.getstream.video.android.core.events.CoordinatorHealthCheckEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
-import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
-import io.getstream.video.android.core.socket.internal.EventMapper
-import io.getstream.video.android.core.socket.internal.EventType
 import io.getstream.video.android.core.socket.internal.HealthMonitor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -33,16 +29,15 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.jsonPrimitive
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import okio.ByteString
+import org.openapitools.client.infrastructure.Serializer
+import org.openapitools.client.models.ConnectedEvent
+import org.openapitools.client.models.VideoEvent
 import stream.video.sfu.event.HealthCheckRequest
 import stream.video.sfu.event.SfuEvent
 import kotlin.coroutines.Continuation
@@ -110,18 +105,16 @@ open class PersistentSocket<T>(
         // step 1 create the socket
         socket = createSocket()
 
-        println("1")
         scope.launch {
             // step 2 authenticate the user/call etc
-            println("2")
+
             authenticate()
-            println("3")
+
             // step 3 monitor for health every 30 seconds
             healthMonitor.start()
-            println("4")
+
             // also monitor if we are offline/online
             networkStateProvider.subscribe(networkStateListener)
-            println("5")
         }
     }
 
@@ -196,18 +189,12 @@ open class PersistentSocket<T>(
 
         scope.launch {
             // parse the message
-            val data = Json.decodeFromString<JsonObject>(text)
-            val eventType = EventType.from(data["type"]?.jsonPrimitive?.content!!)
-            var processedEvent = EventMapper.mapEvent(eventType, text)
-
-            // TODO: remove hack when we have good parsing
-            if (processedEvent is CoordinatorHealthCheckEvent) {
-                processedEvent = ConnectedEvent(clientId = processedEvent.clientId)
-            }
+            val jsonAdapter: JsonAdapter<VideoEvent> =
+                Serializer.moshi.adapter(VideoEvent::class.java)
+            var processedEvent = jsonAdapter.fromJson(text)
 
             if (processedEvent is ConnectedEvent) {
-                // TODO: rename when we fix event parsing
-                connectionId = processedEvent.clientId
+                connectionId = processedEvent.connectionId
                 _connectionState.value = SocketState.Connected(processedEvent)
                 if (!continuationCompleted) {
                     connected.resume(processedEvent as T)
@@ -223,7 +210,8 @@ open class PersistentSocket<T>(
             logger.d { "parsed event $processedEvent" }
 
             // emit the message
-            events.emit(processedEvent)
+            // TODO: raise an error!!
+            events.emit(processedEvent!!)
         }
     }
 

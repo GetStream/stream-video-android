@@ -28,16 +28,25 @@ import com.squareup.moshi.Json
 /**
  * Represents a call
  *
- * @param backstage * @param blockedUserIds * @param broadcasting * @param cid The unique identifier for a call (<type>:<id>)
+ * @param backstage
+ * @param blockedUserIds
+ * @param broadcasting
+ * @param cid The unique identifier for a call (<type>:<id>)
  * @param createdAt Date/time of creation
- * @param createdBy * @param custom Custom data for this object
+ * @param createdBy
+ * @param custom Custom data for this object
  * @param id Call ID
+ * @param ingress
  * @param ownCapabilities The capabilities of the current user
- * @param recording * @param settings * @param transcribing * @param type The type of call
+ * @param recording
+ * @param settings
+ * @param transcribing
+ * @param type The type of call
  * @param updatedAt Date/time of the last update
  * @param endedAt Date/time when the call ended
  * @param startsAt Date/time when the call will start
- * @param team */
+ * @param team
+ */
 
 data class CallResponse(
 
@@ -68,6 +77,9 @@ data class CallResponse(
     /* Call ID */
     @Json(name = "id")
     val id: kotlin.String,
+
+    @Json(name = "ingress")
+    val ingress: CallIngressResponse,
 
     /* The capabilities of the current user */
     @Json(name = "own_capabilities")

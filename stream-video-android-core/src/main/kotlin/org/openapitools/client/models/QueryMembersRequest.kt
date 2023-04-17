@@ -26,8 +26,16 @@ package org.openapitools.client.models
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param filterConditions * @param type * @param id * @param limit * @param next * @param prev * @param sort */
+ *
+ *
+ * @param filterConditions
+ * @param type
+ * @param id
+ * @param limit
+ * @param next
+ * @param prev
+ * @param sort
+ */
 
 data class QueryMembersRequest(
 

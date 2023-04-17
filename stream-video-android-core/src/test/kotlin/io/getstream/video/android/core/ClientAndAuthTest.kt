@@ -20,8 +20,6 @@ import com.google.common.truth.Truth.assertThat
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.video.android.core.errors.VideoErrorCode
-import io.getstream.video.android.core.events.ConnectedEvent
-import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.model.QueryCallsData
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.UserType
@@ -29,6 +27,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.openapitools.client.models.ConnectedEvent
+import org.openapitools.client.models.VideoEvent
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
@@ -53,7 +53,7 @@ class ClientAndAuthTest : TestBase() {
             context = context,
             apiKey = apiKey,
             geo = GEO.GlobalEdgeNetwork,
-            user = User(id = "anon", type = UserType.Anonymous)
+            user = User(id = "anonymous", type = UserType.Anonymous)
         ).build()
     }
 
@@ -63,7 +63,6 @@ class ClientAndAuthTest : TestBase() {
         // the ID is generated, client side...
         // verify that we get the token
         // API call is getGuestUser or something like that
-        // TODO: Implement
         StreamVideoBuilder(
             context = context,
             apiKey = apiKey,
@@ -114,13 +113,12 @@ class ClientAndAuthTest : TestBase() {
         ).build()
         assertThat(client.state.connection.value).isEqualTo(ConnectionState.PreConnect)
         val clientImpl = client as StreamVideoImpl
-        println("a")
+
         val connectResultDeferred = clientImpl.connectAsync()
-        println("b")
+
         val connectResult = connectResultDeferred.await()
         delay(100L)
         assertThat(client.state.connection.value).isEqualTo(ConnectionState.Connected)
-        println("reached")
     }
 
     @Test
@@ -194,7 +192,6 @@ class ClientAndAuthTest : TestBase() {
         ).build()
         val clientImpl = client as StreamVideoImpl
         client.subscribe {
-            println(it)
         }
         val deferred = clientImpl.connectAsync()
         deferred.join()
@@ -220,14 +217,6 @@ class ClientAndAuthTest : TestBase() {
 
     @Test
     fun testConnectionId() = runTest {
-        // all requests should have a connection id
-        // the connection id comes from the websocket
-        // TODO:
-        // - you shouldn't immediately connect to the WS
-        // - maybe a manual connect step is best
-        // - maybe it doesn't wait for WS
-        // - there is no .connect on android, when should it connect?
-
         val client = StreamVideoBuilder(
             context = context,
             apiKey = apiKey,
@@ -237,7 +226,7 @@ class ClientAndAuthTest : TestBase() {
         ).build()
         // client.connect()
         val filters = mutableMapOf("active" to true)
-        client.joinCall("default", "123")
+        client.call("default", "123").join()
 
         val result = client.queryCalls(QueryCallsData(filters))
         assert(result.isSuccess)

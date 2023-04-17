@@ -24,20 +24,26 @@
 package org.openapitools.client.models
 
 import com.squareup.moshi.Json
-import org.threeten.bp.OffsetDateTime
 
 /**
- * *
+ *
+ *
  * @param createdAt Date/time of creation
- * @param custom * @param id * @param role * @param updatedAt Date/time of the last update
+ * @param custom
+ * @param id
+ * @param role
+ * @param teams
+ * @param updatedAt Date/time of the last update
  * @param deletedAt Date/time of deletion
- * @param image * @param name * @param teams */
+ * @param image
+ * @param name
+ */
 
 data class UserResponse(
 
     /* Date/time of creation */
     @Json(name = "created_at")
-    val createdAt: OffsetDateTime,
+    val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "custom")
     val custom: kotlin.collections.Map<kotlin.String, kotlin.Any>,
@@ -47,6 +53,9 @@ data class UserResponse(
 
     @Json(name = "role")
     val role: kotlin.String,
+
+    @Json(name = "teams")
+    val teams: kotlin.collections.List<kotlin.String>,
 
     /* Date/time of the last update */
     @Json(name = "updated_at")
@@ -60,9 +69,6 @@ data class UserResponse(
     val image: kotlin.String? = null,
 
     @Json(name = "name")
-    val name: kotlin.String? = null,
-
-    @Json(name = "teams")
-    val teams: kotlin.collections.List<kotlin.String>? = null
+    val name: kotlin.String? = null
 
 )

@@ -26,19 +26,33 @@ package org.openapitools.client.models
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param removeMembers List of userID to remove
- * @param updateMembers List of members to update or insert
+ * This event is sent when the WS connection is established and authenticated, this event contains the full user object as it is stored on the server
+ *
+ * @param connectionId The connection_id for this client
+ * @param createdAt
+ * @param me
+ * @param type The type of event: \"connection.ok\" in this case
  */
 
-data class UpdateCallMemberRequest(
+data class ConnectedEvent(
 
-    /* List of userID to remove */
-    @Json(name = "remove_members")
-    val removeMembers: kotlin.collections.List<kotlin.String>,
+    /* The connection_id for this client */
+    @Json(name = "connection_id")
+    val connectionId: kotlin.String,
 
-    /* List of members to update or insert */
-    @Json(name = "update_members")
-    val updateMembers: kotlin.collections.List<MemberRequest>? = null
+    @Json(name = "created_at")
+    val createdAt: org.threeten.bp.OffsetDateTime,
 
-)
+    @Json(name = "me")
+    val me: OwnUserResponse,
+
+    /* The type of event: \"connection.ok\" in this case */
+    @Json(name = "type")
+    val type: kotlin.String = "connection.ok"
+
+) : VideoEvent(), WSClientEvent {
+
+    override fun getEventType(): String {
+        return type
+    }
+}

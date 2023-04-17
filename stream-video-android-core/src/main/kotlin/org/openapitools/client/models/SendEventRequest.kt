@@ -26,8 +26,11 @@ package org.openapitools.client.models
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param type * @param custom */
+ *
+ *
+ * @param type
+ * @param custom
+ */
 
 data class SendEventRequest(
 

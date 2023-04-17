@@ -19,13 +19,13 @@ package io.getstream.video.android.core.socket
 import com.squareup.moshi.JsonAdapter
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
-import io.getstream.video.android.core.events.ConnectedEvent
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.model.User
 import kotlinx.coroutines.CoroutineScope
 import okhttp3.OkHttpClient
 import org.openapitools.client.infrastructure.Serializer
 import org.openapitools.client.models.ConnectUserDetailsRequest
+import org.openapitools.client.models.ConnectedEvent
 import org.openapitools.client.models.WSAuthMessageRequest
 
 /**
@@ -66,7 +66,7 @@ public class CoordinatorSocket(
             userDetails = ConnectUserDetailsRequest(
                 id = user.id,
                 name = user.name,
-                image = user.imageUrl,
+                image = user.image,
             )
         )
         val message = adapter.toJson(authRequest)

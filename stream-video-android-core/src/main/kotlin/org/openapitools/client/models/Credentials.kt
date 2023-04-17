@@ -26,8 +26,12 @@ package org.openapitools.client.models
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param iceServers * @param server * @param token */
+ *
+ *
+ * @param iceServers
+ * @param server
+ * @param token
+ */
 
 data class Credentials(
 

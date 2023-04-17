@@ -26,8 +26,13 @@ package org.openapitools.client.models
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param endTime * @param filename * @param startTime * @param url */
+ *
+ *
+ * @param endTime
+ * @param filename
+ * @param startTime
+ * @param url
+ */
 
 data class CallRecording(
 

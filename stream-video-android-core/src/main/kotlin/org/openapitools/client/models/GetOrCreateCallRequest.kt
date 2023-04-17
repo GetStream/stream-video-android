@@ -26,8 +26,11 @@ package org.openapitools.client.models
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param `data` * @param membersLimit * @param ring if provided it overrides the default ring setting for this call
+ *
+ *
+ * @param `data`
+ * @param membersLimit
+ * @param ring if provided it overrides the default ring setting for this call
  */
 
 data class GetOrCreateCallRequest(

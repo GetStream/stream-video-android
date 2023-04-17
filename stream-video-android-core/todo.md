@@ -3,28 +3,53 @@
 
 ### Week 1: Refactor LLC & State. Setup testing
 ### Week 2: LLC & State Stability. Compose testing & previews
-### Week 3: Sample app, update compose to LLC & State changes. New socket & token provider. Call UI
+### Week 3: Sample app, update compose to LLC & State changes. New events, socket & token provider. Call UI. Guest users & moderation endpoints
+### Week 4: 
 
+- Thierry: Improve LLC & state test coverage
+- Jaewoong to improve the demo and dogfooding apps
 
-- Audio/video review
-- Tommaso to fix the event openapi thing, and we merge it
-- Jaewoong and Thierry to review the codebase. Monday evening
-- Make the UI work with the new LLC & State
+### Week 5: Render video/join calls
+
+- RTC & Audio testing
 - Step 1: Render local video using the new API and compose
 - Step 2: Upload local video to the SFU
 - Step 3: Join a call and render participants
 
-Other
+### LLC TODO
 
-- Cleanup the test suite
+- [ ] Clean up tests
+- [ ] Test coverage
+- [ ] Remove unused code
+- [ ] Join flow performance
+- [ ] Move SFU event to swap between SFUs and handle failure
+- [ ] Reconnect after SFU breaks (https://www.notion.so/Reconnection-Failure-handling-f6991fd2e5584380bb2d2cb5e8ac5303)
+- [ ] Audio filter example
+- [ ] Video filter example
+- [X] Support for accepting/rejecting calls etc. HTTP endpoints seem cleaner
+- [X] Directly use the events from openAPI to prevent things being out of sync
+- [X] List of backend changes
+- [X] Make call level client methods internal
+- [X] Moderation API endpoints
+  https://www.notion.so/stream-wiki/Moderation-Permissions-for-video-37a3376268654095b9aafaba12d4bb69
+  https://www.notion.so/stream-wiki/Call-Permissions-832f914ad4c545cf8f048012900ad21d
+- [X] Guest and anon user support
+
+### State TODO
+
+- [ ] Call settings need to be used everywhere. There are still some hardcoded settings
+- [X] Member state isn't implemented fully. Could be either a state or just a data class
+- [X] Call state isn't setup fully on join
+- [X] Member state isn't updated correctly or implemented
 
 ### Review each file, fix TODOS and document
 
 - [X] StreamVideoBuilder
 - [X] ParticipantState
 - [X] ClientState
+- [X] MemberState
+- [X] ConnectionModule
 - [ ] CallState
-- [ ] ConnectionModule
 - [ ] StreamVideoImpl
 - [ ] Call
 
@@ -39,8 +64,8 @@ Other
 - [X] Mockk
 - [X] Build vars (run locally)
 - [X] Ability to run against local go codebase
+- [X] Make call level client API methods internal
 - [ ] Build vars (valid token generation)
-- [ ] Make call level client API methods internal
 
 ** Use cases **
 
@@ -102,26 +127,13 @@ Other
 - [ ] Authentication example
 - [ ] Docs on client setup
 
-
-### LLC TODO
-
-- [ ] Make call level client methods internal
-- [ ] Directly use the events from openAPI to prevent things being out of sync
-- [ ] List of backend changes
-- [ ] Join flow performance
-- [ ] Reconnect flow (https://www.notion.so/Reconnection-Failure-handling-f6991fd2e5584380bb2d2cb5e8ac5303)
-- [ ] Audio filter example
-- [ ] Video filter example
-
-### State TODO
-
-- [ ] Call settings need to be used everywhere. There are still some hardcoded settings
-
 ### RTC TODO
 
 - [X] Media manager class to enable easy testing of all audio/video stuff
-- 
-
+- [ ] Move muting and clean it up
+- [ ] Review how UI changes & pagination are connected to the video tracks
+- [ ] Implement dynascale
+ 
 ### Disconnect suggestion
 
 - supervisorJob at the call and client level
@@ -136,26 +148,31 @@ Other
 
 ### Server wishlist
 
-- Events as a sealed class
-- Tokens for calls
-- RTMP. How will the API interactions work?
-- HLS
+- Update call endpoints doesn’t expose team or startsAt. I get why we don’t expose team, not sure about startsAt
+- Get/Create etc don’t specify connection_id, this breaks the ability to watch
+- queryChannels doesn’t return members but CallUsers, this is wrong
+- Not being able to edit settings on a call you created seems like the wrong default: “”User ‘thierry’ with role ‘user’ is not allowed to perform action UpdateCallSettings in scope ‘video:default’“, serverErrorCode=17, statusCode=-1, cause=java.lang.Throwable: ))”
 - Events for updating users
 - Participant count (for livestreams you cant rely on the list)
 - Participant.online field is weird. Aren't you always online as a participant?
 - ConnectionQualityInfo is a list, audio levels is a map. Lets standardize
 - Push setup
-- Listening to events for a list of calls
+- Watching calls for audio rooms
+- What about codec switching?
+- What about graceful SFU shutdown/ an event to make clients move SFU?
+- Events for creating a channel on chat. so you lazy load the chat when the first person opens it
+- Endpoints for accepting/rejecting calls
+- List of error codes via openapi
+- getCall doesn't support member limits
+- ReactionResponse, custom should be optional
+- CallMemberUpdatedPermissionEvent. Weird that call and members are included
 
 ### Available tasks up for grabs
 
+- use standard debug, verbose, info, warning and error debug levels on StreamVideoBuilder
 - Participant sorting rules. See Call sortedParticipants
 - Pinning of participants. You pin/unpin and it sets pinnedAt and sorting takes it into account
 - Currently we use UserPreferencesManager. Jaewoong mentioned we should perhaps explore https://developer.android.com/topic/libraries/architecture/datastore
-- Hash/copy/equality methods for participantstate (otherwise the participants stateflow will have bugs)
 - Measure latency isn't 100% ok. You can't set a timeout using withTimeout and collect the measurements that we have. This relates to threading vs coroutines and withTimeout not working
-- Logging setting needs to be passed to retrofit
 - Disconnect/ garbage collect flow needs a full round of review
 - MediaManager needs a full review and cleanup
-- Socket connection system needs a full review, cleanup and test coverage
-- Ringing support isn't fully implemented yet

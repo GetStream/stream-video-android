@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core
+package io.getstream.video.android.core.rtc
 
 import com.google.common.truth.Truth.assertThat
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.ConnectionState
+import io.getstream.video.android.core.IntegrationTestBase
 import io.getstream.video.android.core.events.SFUConnectedEvent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test

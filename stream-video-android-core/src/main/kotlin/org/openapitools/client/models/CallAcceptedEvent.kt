@@ -28,7 +28,11 @@ import com.squareup.moshi.Json
 /**
  * This event is sent by a user accepting an incoming ringing call. Clients receiving this event should dismiss the call screen and move to the call.
  *
- * @param callCid * @param createdAt * @param type * @param user */
+ * @param callCid
+ * @param createdAt
+ * @param type
+ * @param user
+ */
 
 data class CallAcceptedEvent(
 
@@ -39,12 +43,18 @@ data class CallAcceptedEvent(
     val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "type")
-    val type: kotlin.String,
+    val type: kotlin.String = "call.accepted",
 
     @Json(name = "user")
-    val user: UserResponse,
+    val user: UserResponse
 
-    @Json(name = "session_id")
-    val sessionId: kotlin.String,
+) : VideoEvent(), WSCallEvent {
 
-)
+    override fun getCallCID(): String {
+        return callCid
+    }
+
+    override fun getEventType(): String {
+        return type
+    }
+}

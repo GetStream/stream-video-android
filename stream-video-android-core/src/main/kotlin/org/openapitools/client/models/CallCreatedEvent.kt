@@ -28,7 +28,10 @@ import com.squareup.moshi.Json
 /**
  * This event is sent when a call is created. Clients receiving this event should check if the ringing  field is set to true and if so, show the call screen
  *
- * @param call * @param callCid * @param createdAt * @param members the members added to this call
+ * @param call
+ * @param callCid
+ * @param createdAt
+ * @param members the members added to this call
  * @param ringing true when the call was created with ring enabled
  * @param type The type of event: \"call.created\" in this case
  */
@@ -54,6 +57,15 @@ data class CallCreatedEvent(
 
     /* The type of event: \"call.created\" in this case */
     @Json(name = "type")
-    val type: kotlin.String
+    val type: kotlin.String = "call.created"
 
-)
+) : VideoEvent(), WSCallEvent {
+
+    override fun getCallCID(): String {
+        return callCid
+    }
+
+    override fun getEventType(): String {
+        return type
+    }
+}

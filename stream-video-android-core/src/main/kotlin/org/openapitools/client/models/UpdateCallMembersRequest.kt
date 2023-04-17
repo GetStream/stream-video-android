@@ -26,7 +26,8 @@ package org.openapitools.client.models
 import com.squareup.moshi.Json
 
 /**
- * *
+ *
+ *
  * @param removeMembers List of userID to remove
  * @param updateMembers List of members to update or insert
  */

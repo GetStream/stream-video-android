@@ -26,8 +26,11 @@ package org.openapitools.client.models
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param edgeName * @param url */
+ *
+ *
+ * @param edgeName
+ * @param url
+ */
 
 data class SFUResponse(
 

@@ -46,92 +46,6 @@ import retrofit2.converter.scalars.ScalarsConverterFactory
 import retrofit2.converter.wire.WireConverterFactory
 import java.util.concurrent.TimeUnit
 
-internal class SFUConnectionModule(
-    sfuUrl: String,
-    sessionId: String,
-    sfuToken: String,
-    getSubscriberSdp: suspend () -> String,
-    scope: CoroutineScope = CoroutineScope(DispatcherProvider.IO),
-    okHttpClient: OkHttpClient,
-    networkStateProvider: NetworkStateProvider
-) {
-    internal lateinit var sfuSocket: SfuSocket
-    val updatedSignalUrl = sfuUrl.removeSuffix(suffix = "/twirp")
-
-    internal val signalRetrofitClient: Retrofit by lazy {
-        Retrofit.Builder()
-            .client(okHttpClient)
-            .addConverterFactory(WireConverterFactory.create())
-            .baseUrl(updatedSignalUrl)
-            .build()
-    }
-
-    internal val signalService: SignalServerService by lazy {
-        signalRetrofitClient.create(SignalServerService::class.java)
-    }
-
-    init {
-        val socketUrl = "$updatedSignalUrl/ws".replace("https", "wss")
-        sfuSocket = SfuSocket(socketUrl, sessionId, sfuToken, getSubscriberSdp, scope, okHttpClient, networkStateProvider)
-    }
-}
-
-internal data class InterceptorWrapper(
-    var baseUrl: HttpUrl?,
-    val token: String
-)
-
-internal class BaseUrlInterceptor(var baseUrl: HttpUrl?) : Interceptor {
-    private val REPLACEMENT_HOST = "replacement.url"
-
-    override fun intercept(chain: Interceptor.Chain): Response {
-        baseUrl = baseUrl ?: return chain.proceed(chain.request())
-        val host = baseUrl?.host!!
-        val original = chain.request()
-        return if (original.url.host == REPLACEMENT_HOST) {
-            val updatedBaseUrl = original.url.newBuilder()
-                .host(host)
-                .build()
-            val updated = original.newBuilder()
-                .url(updatedBaseUrl)
-                .build()
-            chain.proceed(updated)
-        } else {
-            chain.proceed(chain.request())
-        }
-    }
-}
-
-internal class CoordinatorAuthInterceptor(var apiKey: String, var token: String) : Interceptor {
-    private val REPLACEMENT_HOST = "replacement.url"
-    /**
-     * Query key used to authenticate to the API.
-     */
-    private val API_KEY = "api_key"
-    private val STREAM_AUTH_TYPE = "stream-auth-type"
-    private val HEADER_AUTHORIZATION = "Authorization"
-
-    override fun intercept(chain: Interceptor.Chain): Response {
-        val original = chain.request()
-
-        val updatedUrl = if (original.url.toString().contains("video")) {
-            original.url.newBuilder()
-                .addQueryParameter(API_KEY, apiKey)
-                .build()
-        } else {
-            original.url
-        }
-
-        val updated = original.newBuilder()
-            .url(updatedUrl)
-            .addHeader(HEADER_AUTHORIZATION, token)
-            .header(STREAM_AUTH_TYPE, "jwt")
-            .build()
-
-        return chain.proceed(updated)
-    }
-}
-
 /**
  * ConnectionModule provides several helpful attributes
  *
@@ -142,7 +56,7 @@ internal class CoordinatorAuthInterceptor(var apiKey: String, var token: String)
  *
  * coordinatorSocket
  *
- * buildSFUSocket ()?
+ * createSFUConnectionModule
  */
 internal class ConnectionModule(
     private val context: Context,
@@ -168,8 +82,8 @@ internal class ConnectionModule(
 
     init {
         // setup the OKHttpClient
-        val userToken = preferences.getUserToken()
-        authInterceptor = CoordinatorAuthInterceptor(preferences.getApiKey(), preferences.getUserToken())
+        authInterceptor =
+            CoordinatorAuthInterceptor(preferences.getApiKey(), preferences.getUserToken())
         baseUrlInterceptor = BaseUrlInterceptor(null)
 
         okHttpClient = buildOkHttpClient(
@@ -241,6 +155,7 @@ internal class ConnectionModule(
             .addInterceptor(
                 baseUrlInterceptor
             )
+            .retryOnConnectionFailure(true)
             .connectTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
             .writeTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
             .readTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
@@ -275,15 +190,137 @@ internal class ConnectionModule(
         sessionId: String,
         sfuToken: String,
         getSubscriberSdp: suspend () -> String,
-    ): SFUConnectionModule {
+    ): SfuConnectionModule {
         val updatedSignalUrl = sfuUrl.removeSuffix(suffix = "/twirp")
         val baseUrl = updatedSignalUrl.toHttpUrl()
         val okHttpClient = buildOkHttpClient(preferences, baseUrl)
 
-        return SFUConnectionModule(sfuUrl, sessionId, sfuToken, getSubscriberSdp, scope, okHttpClient, networkStateProvider)
+        return SfuConnectionModule(
+            sfuUrl,
+            sessionId,
+            sfuToken,
+            getSubscriberSdp,
+            scope,
+            okHttpClient,
+            networkStateProvider
+        )
     }
 
     fun updateToken(newToken: String) {
         authInterceptor.token = newToken
+    }
+
+    fun updateAuthType(authType: String) {
+        authInterceptor.authType = authType
+    }
+}
+
+/**
+ * Sets upt he signalService and socket for the SFU connection.
+ */
+internal class SfuConnectionModule(
+    /** The url of the SFU */
+    sfuUrl: String,
+    /** the session id, generated when we join/ client side */
+    sessionId: String,
+    /** A token which gives you access to the sfu */
+    sfuToken: String,
+    /** Function that gives a fresh SDP */
+    getSubscriberSdp: suspend () -> String,
+    /** The scope to use for the socket */
+    scope: CoroutineScope = CoroutineScope(DispatcherProvider.IO),
+    /** Inject your ok HttpClient */
+    okHttpClient: OkHttpClient,
+    /** Network monitoring */
+    networkStateProvider: NetworkStateProvider
+) {
+    internal lateinit var sfuSocket: SfuSocket
+    val updatedSignalUrl = sfuUrl.removeSuffix(suffix = "/twirp")
+
+    internal val signalRetrofitClient: Retrofit by lazy {
+        Retrofit.Builder()
+            .client(okHttpClient)
+            .addConverterFactory(WireConverterFactory.create())
+            .baseUrl(updatedSignalUrl)
+            .build()
+    }
+
+    internal val signalService: SignalServerService by lazy {
+        signalRetrofitClient.create(SignalServerService::class.java)
+    }
+
+    init {
+        val socketUrl = "$updatedSignalUrl/ws".replace("https", "wss")
+        sfuSocket = SfuSocket(
+            socketUrl,
+            sessionId,
+            sfuToken,
+            getSubscriberSdp,
+            scope,
+            okHttpClient,
+            networkStateProvider
+        )
+    }
+}
+
+/**
+ * Interceptor that changes urls for the coordinator
+ */
+internal class BaseUrlInterceptor(var baseUrl: HttpUrl?) : Interceptor {
+    private val REPLACEMENT_HOST = "replacement.url"
+
+    override fun intercept(chain: Interceptor.Chain): Response {
+        baseUrl = baseUrl ?: return chain.proceed(chain.request())
+        val host = baseUrl?.host!!
+        val original = chain.request()
+        return if (original.url.host == REPLACEMENT_HOST) {
+            val updatedBaseUrl = original.url.newBuilder()
+                .host(host)
+                .build()
+            val updated = original.newBuilder()
+                .url(updatedBaseUrl)
+                .build()
+            chain.proceed(updated)
+        } else {
+            chain.proceed(chain.request())
+        }
+    }
+}
+
+/**
+ * CoordinatorAuthInterceptor adds the token authentication to the API calls
+ */
+internal class CoordinatorAuthInterceptor(
+    var apiKey: String,
+    var token: String,
+    var authType: String = "jwt"
+) : Interceptor {
+    private val REPLACEMENT_HOST = "replacement.url"
+
+    /**
+     * Query key used to authenticate to the API.
+     */
+    private val API_KEY = "api_key"
+    private val STREAM_AUTH_TYPE = "stream-auth-type"
+    private val HEADER_AUTHORIZATION = "Authorization"
+
+    override fun intercept(chain: Interceptor.Chain): Response {
+        val original = chain.request()
+
+        val updatedUrl = if (original.url.toString().contains("video")) {
+            original.url.newBuilder()
+                .addQueryParameter(API_KEY, apiKey)
+                .build()
+        } else {
+            original.url
+        }
+
+        val updated = original.newBuilder()
+            .url(updatedUrl)
+            .addHeader(HEADER_AUTHORIZATION, token)
+            .header(STREAM_AUTH_TYPE, authType)
+            .build()
+
+        return chain.proceed(updated)
     }
 }

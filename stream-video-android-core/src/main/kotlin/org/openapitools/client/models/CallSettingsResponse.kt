@@ -26,8 +26,18 @@ package org.openapitools.client.models
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param audio * @param backstage * @param broadcasting * @param geofencing * @param recording * @param ring * @param screensharing * @param transcription * @param video */
+ *
+ *
+ * @param audio
+ * @param backstage
+ * @param broadcasting
+ * @param geofencing
+ * @param recording
+ * @param ring
+ * @param screensharing
+ * @param transcription
+ * @param video
+ */
 
 data class CallSettingsResponse(
 

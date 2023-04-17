@@ -24,12 +24,14 @@
 package org.openapitools.client.models
 
 import com.squareup.moshi.Json
-import org.threeten.bp.OffsetDateTime
 
 /**
  * This event is sent when one or more members are added to a call
  *
- * @param call * @param callCid * @param createdAt * @param members the members added to this call
+ * @param call
+ * @param callCid
+ * @param createdAt
+ * @param members the members added to this call
  * @param type The type of event: \"call.member_added\" in this case
  */
 
@@ -42,7 +44,7 @@ data class CallMemberAddedEvent(
     val callCid: kotlin.String,
 
     @Json(name = "created_at")
-    val createdAt: OffsetDateTime,
+    val createdAt: org.threeten.bp.OffsetDateTime,
 
     /* the members added to this call */
     @Json(name = "members")
@@ -50,6 +52,15 @@ data class CallMemberAddedEvent(
 
     /* The type of event: \"call.member_added\" in this case */
     @Json(name = "type")
-    val type: kotlin.String
+    val type: kotlin.String = "call.member_added"
 
-)
+) : VideoEvent(), WSCallEvent {
+
+    override fun getCallCID(): String {
+        return callCid
+    }
+
+    override fun getEventType(): String {
+        return type
+    }
+}

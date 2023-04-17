@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core
+package io.getstream.video.android.core.stories
 
+import io.getstream.video.android.core.IntegrationTestBase
 import io.getstream.video.android.core.model.QueryCallsData
 import io.getstream.video.android.core.model.SendReactionData
 import kotlinx.coroutines.test.runTest
@@ -87,12 +88,9 @@ class AudioRoomTest : IntegrationTestBase() {
     }
 
     @Test
-    fun `sometimes listeners will join with a token`() = runTest {
+    fun `sometimes listeners with a call only token`() = runTest {
 
-        // TODO: server support
-        val call = client.call("audio_room", randomUUID(), "token")
-        val result = call.get()
-        assertSuccess(result)
+        // TODO: call only token
     }
 
     @Test

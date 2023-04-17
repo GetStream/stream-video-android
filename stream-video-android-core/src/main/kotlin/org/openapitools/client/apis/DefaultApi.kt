@@ -14,29 +14,25 @@
  * limitations under the License.
  */
 
-@file:Suppress(
-    "ArrayInDataClass",
-    "EnumEntryName",
-    "RemoveRedundantQualifierName",
-    "UnusedImport"
-)
+package org.openapitools.client.apis
 
-package org.openapitools.client.models
+import org.openapitools.client.models.CreateGuestRequest
+import org.openapitools.client.models.CreateGuestResponse
+import retrofit2.http.Body
+import retrofit2.http.POST
 
-import com.squareup.moshi.Json
-
-/**
- * *
- * @param duration Duration of the request in human-readable format
- * @param members */
-
-data class UpdateCallMemberResponse(
-
-    /* Duration of the request in human-readable format */
-    @Json(name = "duration")
-    val duration: kotlin.String,
-
-    @Json(name = "members")
-    val members: kotlin.collections.List<MemberResponse>
-
-)
+interface DefaultApi {
+    /**
+     * Create Guest
+     * * Responses:
+     *  - 201: Successful response
+     *  - 400: Bad request
+     *  - 429: Too many requests
+     *
+     * @param createGuestRequest * @return [CreateGuestResponse]
+     */
+    @POST("/video/guest")
+    suspend fun createGuest(
+        @Body createGuestRequest: CreateGuestRequest
+    ): CreateGuestResponse
+}

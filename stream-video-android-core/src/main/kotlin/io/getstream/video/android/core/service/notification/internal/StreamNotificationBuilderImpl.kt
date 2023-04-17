@@ -28,7 +28,6 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.R
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.service.notification.IdentifiedNotification
-import io.getstream.video.android.core.service.notification.NotificationAction
 import io.getstream.video.android.core.service.notification.StreamNotificationBuilder
 import io.getstream.video.android.core.utils.notificationManager
 import kotlinx.coroutines.CoroutineScope
@@ -71,11 +70,11 @@ internal class StreamNotificationBuilderImpl(
         scope.launch {
             actionReceiver.registerAsFlow().collect {
                 logger.v { "[observeAction] action: $it" }
-                when (it) {
-                    is NotificationAction.Accept -> streamVideo.acceptCall(it.guid.type, it.guid.id)
-                    is NotificationAction.Reject -> streamVideo.rejectCall(it.guid.type, it.guid.id)
-                    is NotificationAction.Cancel -> streamVideo.cancelCall(it.guid.type, it.guid.id)
-                }
+//                when (it) {
+// //                    is NotificationAction.Accept -> streamVideo.acceptCall(it.guid.type, it.guid.id)
+// //                    is NotificationAction.Reject -> streamVideo.rejectCall(it.guid.type, it.guid.id)
+// //                    is NotificationAction.Cancel -> streamVideo.cancelCall(it.guid.type, it.guid.id)
+//                }
             }
         }
     }

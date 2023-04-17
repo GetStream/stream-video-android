@@ -17,14 +17,13 @@
 package io.getstream.video.android.core.engine
 
 import io.getstream.result.Error
-import io.getstream.video.android.core.events.CoordinatorEvent
 import io.getstream.video.android.core.events.SfuDataEvent
-import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.model.CallEventType
 import io.getstream.video.android.core.model.CallMetadata
 import io.getstream.video.android.core.model.JoinedCall
 import io.getstream.video.android.core.model.state.StreamCallState
 import kotlinx.coroutines.flow.StateFlow
+import org.openapitools.client.models.VideoEvent
 import stream.video.sfu.event.JoinRequest
 
 public interface StreamCallEngine {
@@ -37,7 +36,7 @@ public interface StreamCallEngine {
     /**
      * Called when [VideoEvent] received from Coordinator.
      */
-    public fun onCoordinatorEvent(event: CoordinatorEvent)
+    public fun onCoordinatorEvent(event: VideoEvent)
 
     /**
      * Called when [SfuDataEvent] received from SFU.

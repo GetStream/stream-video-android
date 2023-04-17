@@ -26,8 +26,11 @@ package org.openapitools.client.models
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param closedCaptionMode * @param mode */
+ *
+ *
+ * @param closedCaptionMode
+ * @param mode
+ */
 
 data class TranscriptionSettings(
 
@@ -40,12 +43,16 @@ data class TranscriptionSettings(
 ) {
 
     /**
-     * *
-     * Values: available,disabled,autoMinusOn
+     *
+     *
+     * Values: available,disabled,autoOn
      */
     enum class Mode(val value: kotlin.String) {
-        @Json(name = "available") available("available"),
-        @Json(name = "disabled") disabled("disabled"),
-        @Json(name = "auto-on") autoMinusOn("auto-on");
+        @Json(name = "available")
+        available("available"),
+        @Json(name = "disabled")
+        disabled("disabled"),
+        @Json(name = "auto-on")
+        autoOn("auto-on");
     }
 }

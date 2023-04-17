@@ -42,9 +42,8 @@ import io.getstream.video.android.core.events.SfuDataEvent
 import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
-import io.getstream.video.android.core.events.VideoEvent
 import io.getstream.video.android.core.internal.module.ConnectionModule
-import io.getstream.video.android.core.internal.module.SFUConnectionModule
+import io.getstream.video.android.core.internal.module.SfuConnectionModule
 import io.getstream.video.android.core.model.IceCandidate
 import io.getstream.video.android.core.model.IceServer
 import io.getstream.video.android.core.model.StreamPeerType
@@ -71,6 +70,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.openapitools.client.models.VideoEvent
 import org.webrtc.CameraEnumerationAndroid
 import org.webrtc.MediaConstraints
 import org.webrtc.MediaStream
@@ -220,7 +220,7 @@ public class RtcSession internal constructor(
         buildAudioConstraints()
     }
 
-    private var sfuConnectionModule: SFUConnectionModule
+    private var sfuConnectionModule: SfuConnectionModule
 
     init {
         val preferences = UserPreferencesManager.getPreferences()
@@ -499,7 +499,7 @@ public class RtcSession internal constructor(
             logger.d { "[executeJoinRequest] sfu join request is sent" }
             logger.d { "[executeJoinRequest] request is sent" }
             val currentValue = joinEventResponse.value
-            println(currentValue)
+
             logger.d { "[executeJoinRequest] currentValue: $currentValue" }
             val event = joinEventResponse.filterNotNull().first()
             logger.d { "[executeJoinRequest] completed: $event" }

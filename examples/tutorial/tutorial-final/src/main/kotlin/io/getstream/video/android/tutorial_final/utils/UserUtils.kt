@@ -23,7 +23,7 @@ fun getUsers(): List<User> {
         User(
             id = "filip",
             name = "Filip",
-            imageUrl = "https://avatars.githubusercontent.com/u/17215808?v=4",
+            image = "https://avatars.githubusercontent.com/u/17215808?v=4",
             role = "admin",
             teams = emptyList(),
             custom = emptyMap()
@@ -31,7 +31,7 @@ fun getUsers(): List<User> {
         User(
             id = "thierry",
             name = "Thierry",
-            imageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Mile_Kitic_from_BISO0675.jpg/300px-Mile_Kitic_from_BISO0675.jpg",
+            image = "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Mile_Kitic_from_BISO0675.jpg/300px-Mile_Kitic_from_BISO0675.jpg",
             role = "admin",
             teams = emptyList(),
             custom = emptyMap()
@@ -39,7 +39,7 @@ fun getUsers(): List<User> {
         User(
             id = "martin",
             name = "Martin",
-            imageUrl = "https://upload.wikimedia.org/wikipedia/commons/d/da/Toma_Zdravkovi%C4%87.jpg",
+            image = "https://upload.wikimedia.org/wikipedia/commons/d/da/Toma_Zdravkovi%C4%87.jpg",
             role = "admin",
             teams = emptyList(),
             custom = emptyMap()
@@ -47,7 +47,7 @@ fun getUsers(): List<User> {
         User(
             id = "oliver",
             name = "Oliver",
-            imageUrl = "https://www.biografija.org/wp-content/uploads/2020/01/boban-rajovic.jpg",
+            image = "https://www.biografija.org/wp-content/uploads/2020/01/boban-rajovic.jpg",
             role = "admin",
             teams = emptyList(),
             custom = emptyMap()
@@ -55,7 +55,7 @@ fun getUsers(): List<User> {
         User(
             id = "tomislav",
             name = "Tomislav",
-            imageUrl = "https://i.scdn.co/image/ab67616d0000b2730ae491943a8668e81e212594",
+            image = "https://i.scdn.co/image/ab67616d0000b2730ae491943a8668e81e212594",
             role = "admin",
             teams = emptyList(),
             custom = emptyMap()

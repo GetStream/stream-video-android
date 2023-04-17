@@ -28,8 +28,11 @@ import com.squareup.moshi.Json
 /**
  * This event is sent when a call is mark as ended for all its participants. Clients receiving this event should leave the call screen
  *
- * @param callCid * @param createdAt * @param type The type of event: \"call.ended\" in this case
- * @param user */
+ * @param callCid
+ * @param createdAt
+ * @param type The type of event: \"call.ended\" in this case
+ * @param user
+ */
 
 data class CallEndedEvent(
 
@@ -41,9 +44,18 @@ data class CallEndedEvent(
 
     /* The type of event: \"call.ended\" in this case */
     @Json(name = "type")
-    val type: kotlin.String,
+    val type: kotlin.String = "call.ended",
 
     @Json(name = "user")
     val user: UserResponse? = null
 
-)
+) : VideoEvent(), WSCallEvent {
+
+    override fun getCallCID(): String {
+        return callCid
+    }
+
+    override fun getEventType(): String {
+        return type
+    }
+}

@@ -24,11 +24,18 @@
 package org.openapitools.client.models
 
 import com.squareup.moshi.Json
-import org.threeten.bp.OffsetDateTime
 
 /**
- * *
- * @param createdBy * @param createdById * @param custom * @param members * @param settingsOverride * @param startsAt * @param team */
+ *
+ *
+ * @param createdBy
+ * @param createdById
+ * @param custom
+ * @param members
+ * @param settingsOverride
+ * @param startsAt
+ * @param team
+ */
 
 data class CallRequest(
 
@@ -48,7 +55,7 @@ data class CallRequest(
     val settingsOverride: CallSettingsRequest? = null,
 
     @Json(name = "starts_at")
-    val startsAt: OffsetDateTime? = null,
+    val startsAt: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "team")
     val team: kotlin.String? = null

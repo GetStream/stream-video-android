@@ -26,8 +26,11 @@ package org.openapitools.client.models
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param direction * @param `field` */
+ *
+ *
+ * @param direction
+ * @param `field`
+ */
 
 data class SortParamRequest(
 

@@ -26,8 +26,11 @@ package org.openapitools.client.models
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param latitude * @param longitude */
+ *
+ *
+ * @param latitude
+ * @param longitude
+ */
 
 data class Coordinates(
 

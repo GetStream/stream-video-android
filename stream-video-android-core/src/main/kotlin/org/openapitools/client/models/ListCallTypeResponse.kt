@@ -26,8 +26,11 @@ package org.openapitools.client.models
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param callTypes * @param duration */
+ *
+ *
+ * @param callTypes
+ * @param duration
+ */
 
 data class ListCallTypeResponse(
 

@@ -115,7 +115,7 @@ class MessagesActivity : ComponentActivity() {
                 id = callId,
                 type = "default",
                 ring = false,
-                participantIds = emptyList()
+                memberIds = emptyList()
             )
 
             if (createCallResult is Success) {

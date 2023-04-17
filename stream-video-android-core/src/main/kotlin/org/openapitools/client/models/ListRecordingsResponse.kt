@@ -26,8 +26,11 @@ package org.openapitools.client.models
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param duration * @param recordings */
+ *
+ *
+ * @param duration
+ * @param recordings
+ */
 
 data class ListRecordingsResponse(
 

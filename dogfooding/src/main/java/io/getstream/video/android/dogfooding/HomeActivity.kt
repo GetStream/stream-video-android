@@ -237,8 +237,8 @@ class HomeActivity : AppCompatActivity() {
             modifier = Modifier
                 .size(40.dp)
                 .padding(top = 8.dp, start = 8.dp),
-            imageUrl = user.imageUrl,
-            initials = if (user.imageUrl.isEmpty()) {
+            imageUrl = user.image,
+            initials = if (user.image.isEmpty()) {
                 user.name.initials()
             } else {
                 null

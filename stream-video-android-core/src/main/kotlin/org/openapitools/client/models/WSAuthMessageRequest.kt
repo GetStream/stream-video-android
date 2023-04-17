@@ -26,8 +26,12 @@ package org.openapitools.client.models
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param token * @param userDetails * @param device */
+ *
+ *
+ * @param token
+ * @param userDetails
+ * @param device
+ */
 
 data class WSAuthMessageRequest(
 

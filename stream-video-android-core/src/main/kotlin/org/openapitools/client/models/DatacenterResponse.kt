@@ -26,8 +26,12 @@ package org.openapitools.client.models
 import com.squareup.moshi.Json
 
 /**
- * *
- * @param coordinates * @param latencyUrl * @param name */
+ *
+ *
+ * @param coordinates
+ * @param latencyUrl
+ * @param name
+ */
 
 data class DatacenterResponse(
 
