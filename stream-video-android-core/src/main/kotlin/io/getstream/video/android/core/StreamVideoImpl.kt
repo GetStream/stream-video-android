@@ -439,7 +439,7 @@ internal class StreamVideoImpl internal constructor(
 
     internal suspend fun getCall(type: String, id: String): Result<GetCallResponse> {
         return wrapAPICall {
-            connectionModule.videoCallsApi.getCall(type, id)
+            connectionModule.videoCallsApi.getCall(type, id, connectionId = connectionModule.coordinatorSocket.connectionId)
         }
     }
 
@@ -501,10 +501,12 @@ internal class StreamVideoImpl internal constructor(
                         team = team,
                     ),
                     ring = ring
-                )
+                ),
+                connectionId = connectionModule.coordinatorSocket.connectionId
             )
         }
     }
+
 
     /**
      * @see StreamVideo.inviteUsers
