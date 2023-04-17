@@ -57,7 +57,6 @@ docker pull ghcr.io/getstream/openapi-generator:master
 
 docker run --rm \
   -v "${GENERATED_CODE_ROOT}:/local" \
-  -v "/Users/tommaso/src/protocol:/protocol" \
   ghcr.io/getstream/openapi-generator:master generate \
   -i https://raw.githubusercontent.com/GetStream/protocol/main/openapi/video-openapi.yaml \
   --additional-properties=library=jvm-retrofit2,useCoroutines,dateLibrary=threetenbp \
