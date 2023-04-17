@@ -31,8 +31,6 @@ import io.getstream.video.android.core.events.SFUHealthCheckEvent
 import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
-import io.getstream.video.android.core.model.CallData
-import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.core.model.TrackWrapper
 import io.getstream.video.android.core.model.User
@@ -190,7 +188,7 @@ public class CallState(private val call: Call, user: User) {
         measuredHeight: Int
     ) {
         logger.v { "[updateParticipantTrackSize] SessionId: $sessionId, width:$measuredWidth, height:$measuredHeight" }
-        val participant = getParticipant(sessionId)
+        val participant = getParticipantBySessionId(sessionId)
         participant?.let {
             val updated = participant.copy(videoTrackSize = measuredWidth to measuredHeight)
             updateParticipant(updated)
@@ -296,7 +294,7 @@ public class CallState(private val call: Call, user: User) {
                 val userToSessionIdMap = userToSessionIdMap.value
                 val sessionId = userToSessionIdMap[user.id]
                 sessionId?.let {
-                    val participant = getParticipant(sessionId)
+                    val participant = getParticipantBySessionId(sessionId)
                     participant?.let {
                         val newReactions = participant._reactions.value.toMutableList()
                         newReactions.add(event.reaction)
@@ -417,8 +415,11 @@ public class CallState(private val call: Call, user: User) {
         return participantStates
     }
 
-    private fun getOrCreateParticipant(participant: Participant): ParticipantState {
+    internal fun getOrCreateParticipant(participant: Participant): ParticipantState {
         // get or create the participant and update them
+        if (participant.session_id.isEmpty()) {
+            throw IllegalStateException("Participant session id is empty")
+        }
 
         val participantState = getOrCreateParticipant(participant.session_id, participant.user_id)
         participantState.updateFromParticipantInfo(participant)
@@ -446,7 +447,7 @@ public class CallState(private val call: Call, user: User) {
         return participantState
     }
 
-    private fun getOrCreateMembers(members: List<MemberResponse>) {
+    internal fun getOrCreateMembers(members: List<MemberResponse>) {
         val memberMap = _members.value.toSortedMap()
 
         val memberStates = members.map {
@@ -462,7 +463,7 @@ public class CallState(private val call: Call, user: User) {
         _members.value = memberMap
     }
 
-    fun getParticipant(sessionId: String): ParticipantState? {
+    fun getParticipantBySessionId(sessionId: String): ParticipantState? {
         return _participants.value[sessionId]
     }
 

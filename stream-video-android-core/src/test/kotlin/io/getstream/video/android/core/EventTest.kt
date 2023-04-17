@@ -34,6 +34,7 @@ import org.openapitools.client.models.CallReactionEvent
 import org.openapitools.client.models.CallRecordingStartedEvent
 import org.openapitools.client.models.CallRecordingStoppedEvent
 import org.openapitools.client.models.CallRejectedEvent
+import org.openapitools.client.models.MemberResponse
 import org.openapitools.client.models.OwnCapability
 import org.openapitools.client.models.PermissionRequestEvent
 import org.openapitools.client.models.ReactionResponse
@@ -109,6 +110,8 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
     fun `Accepting & rejecting a call`() = runTest {
 
         val thierry = testData.users["thierry"]!!
+        val member = MemberResponse(nowUtc, emptyMap(), nowUtc, user=thierry.toUserResponse(), userId=thierry.id, null, "role")
+        call.state.getOrCreateMembers(listOf(member))
 
         val acceptedEvent = CallAcceptedEvent(
             callCid = call.cid, nowUtc, "call.accepted", user = thierry.toUserResponse()
@@ -117,10 +120,10 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
         assertThat(call.state.getMember("thierry")?.acceptedAt).isNotNull()
 
         val rejectedEvent = CallRejectedEvent(
-            callCid = call.cid, nowUtc, "call.rejected", user = User(id = "123").toUserResponse()
+            callCid = call.cid, nowUtc, "call.rejected", user = User(id = "thierry").toUserResponse()
         )
         clientImpl.fireEvent(rejectedEvent)
-        assertThat(call.state.getMember("123")?.rejectedAt).isNotNull()
+        assertThat(call.state.getMember("thierry")?.rejectedAt).isNotNull()
     }
 
     @Test
@@ -143,14 +146,18 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
     @Test
     fun `Network connection quality changes`() = runTest {
-        // TODO: this is a list, other events its a map, make up your mind
+        // ensure we have a participant setup
+        val thierry = Participant(user_id = "thierry", is_speaking = true, session_id = "thierry")
+        call.state.getOrCreateParticipant(thierry)
+        // send the event
         val quality = ConnectionQualityInfo(
+            session_id="thierry",
             user_id = "thierry", connection_quality = ConnectionQuality.CONNECTION_QUALITY_EXCELLENT
         )
         val event = ConnectionQualityChangeEvent(updates = mutableListOf(quality))
         clientImpl.fireEvent(event, call.cid)
 
-        assertThat(call.state.getParticipant("thierry")?.connectionQuality?.value).isEqualTo(
+        assertThat(call.state.getParticipantBySessionId("thierry")?.connectionQuality?.value).isEqualTo(
             ConnectionQuality.CONNECTION_QUALITY_EXCELLENT
         )
     }
@@ -237,13 +244,13 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
     @Test
     fun `Participants join and leave`() = runTest {
         val call = client.call("default", randomUUID())
-        val participant = Participant(user_id = "thierry", is_speaking = true)
+        val participant = Participant(user_id = "thierry", is_speaking = true, session_id = "thierry")
         val joinEvent = ParticipantJoinedEvent(participant = participant, callCid = call.cid)
-        clientImpl.fireEvent(joinEvent)
-        assertThat(call.state.getParticipant("thierry")!!.speaking.value).isTrue()
+        clientImpl.fireEvent(joinEvent, call.cid)
+        assertThat(call.state.getParticipantBySessionId("thierry")!!.speaking.value).isTrue()
         val leaveEvent = ParticipantLeftEvent(participant, callCid = call.cid)
-        clientImpl.fireEvent(leaveEvent)
-        assertThat(call.state.getParticipant("thierry")).isNull()
+        clientImpl.fireEvent(leaveEvent, call.cid)
+        assertThat(call.state.getParticipantBySessionId("thierry")).isNull()
     }
 
     @Test
@@ -313,9 +320,12 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
                 custom = mutableMapOf("fruit" to "apple")
             ),
         )
+        // ensure the participant is setup
+        val thierry = Participant(user_id = "thierry", is_speaking = true, session_id = "thierry")
+        call.state.getOrCreateParticipant(thierry)
         clientImpl.fireEvent(reactionEvent)
         // reactions are sometimes shown on the given participant's UI
-        val participant = call.state.getParticipant("thierry")
+        val participant = call.state.getParticipantBySessionId("thierry")
         assertThat(participant!!.reactions.value.map { it.type }).contains("like")
 
         // other times they will be show on the main call UI

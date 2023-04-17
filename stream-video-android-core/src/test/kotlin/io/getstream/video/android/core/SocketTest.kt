@@ -66,7 +66,6 @@ import java.util.concurrent.TimeUnit
  * Other than it's mostly the same logic
  *
  */
-@RunWith(RobolectricTestRunner::class)
 open class SocketTestBase : TestBase() {
     val coordinatorUrl =
         "https://video.stream-io-api.com/video/connect?api_key=hd8szvscpxvd&stream-auth-type=jwt&X-Stream-Client=stream-video-android"
@@ -217,6 +216,7 @@ class CoordinatorSocketTest : SocketTestBase() {
 
 }
 
+@RunWith(RobolectricTestRunner::class)
 class SfuSocketTest : SocketTestBase() {
     fun collectEvents(socket: SfuSocket): Pair<List<VideoEvent>, List<Throwable>> {
         val events = mutableListOf<VideoEvent>()
