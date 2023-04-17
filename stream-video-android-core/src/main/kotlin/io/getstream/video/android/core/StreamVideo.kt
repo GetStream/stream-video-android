@@ -24,6 +24,7 @@ import io.getstream.video.android.core.model.EdgeData
 import io.getstream.video.android.core.model.QueriedCalls
 import io.getstream.video.android.core.model.QueryCallsData
 import io.getstream.video.android.core.model.User
+import org.openapitools.client.models.QueryCallsResponse
 import org.openapitools.client.models.VideoEvent
 
 /**
@@ -56,7 +57,7 @@ public interface StreamVideo {
      */
     public suspend fun queryCalls(
         queryCallsData: QueryCallsData
-    ): Result<QueriedCalls>
+    ): Result<QueryCallsResponse>
 
     /** Subscribe for a specific list of events */
     public fun subscribeFor(

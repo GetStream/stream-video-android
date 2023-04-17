@@ -130,7 +130,6 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
         clientImpl.fireEvent(event, call.cid)
 
         // ensure we update call data and capabilities
-        // TODO: change the map structure
     }
 
     @Test
@@ -195,7 +194,6 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
     @Test
     fun `Call permissions updated`() {
 
-        // TODO: CID & Type?
         val permissions = mutableListOf<String>("screenshare")
         val requestEvent = PermissionRequestEvent(
             call.cid,
@@ -205,9 +203,6 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
             testData.users["thierry"]!!.toUserResponse()
         )
         clientImpl.fireEvent(requestEvent)
-        // TODO: How do we show this in the state?
-        // TODO: How is this different than call updates?
-        // TODO: user field isn't clear, what user?
         val capability = OwnCapability.decode("screenshare")!!
         val ownCapabilities = mutableListOf(capability)
         val permissionsUpdated = UpdatedCallPermissionsEvent(
@@ -248,7 +243,6 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
         assertThat(call.state.getParticipant("thierry")!!.speaking.value).isTrue()
         val leaveEvent = ParticipantLeftEvent(participant, callCid = call.cid)
         clientImpl.fireEvent(leaveEvent)
-        // TODO: should participants be fully removed or marked as left?
         assertThat(call.state.getParticipant("thierry")).isNull()
     }
 

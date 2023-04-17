@@ -80,6 +80,7 @@ import org.openapitools.client.models.JoinCallResponse
 import org.openapitools.client.models.ListRecordingsResponse
 import org.openapitools.client.models.MemberRequest
 import org.openapitools.client.models.MuteUsersResponse
+import org.openapitools.client.models.QueryCallsResponse
 import org.openapitools.client.models.RequestPermissionRequest
 import org.openapitools.client.models.SendEventRequest
 import org.openapitools.client.models.SendEventResponse
@@ -118,7 +119,7 @@ internal class StreamVideoImpl internal constructor(
     private val loggingLevel: LoggingLevel,
     internal val connectionModule: ConnectionModule,
     internal val pushDeviceGenerators: List<PushDeviceGenerator>,
-    internal val tokenProvider: ((error: Error.NetworkError) -> String)?,
+    internal val tokenProvider: ((error: Throwable?) -> String)?,
     internal val preferences: UserPreferences,
 ) : StreamVideo {
 
@@ -163,7 +164,8 @@ internal class StreamVideoImpl internal constructor(
                     // invalid token
                     // val newToken = tokenProvider.getToken()
                     if (tokenProvider != null) {
-                        val newToken = tokenProvider.invoke(parsedError)
+                        // TODO - handle this better, error structure is not great right now
+                        val newToken = tokenProvider.invoke(null)
                         preferences.storeUserToken(newToken)
                         connectionModule.updateToken(newToken)
                     }
@@ -303,8 +305,23 @@ internal class StreamVideoImpl internal constructor(
         return scope.async {
             // wait for the guest user setup if we're using guest users
             guestUserJob?.let { it.await() }
-            val result = socketImpl.connect()
-            result
+            try {
+                val result = socketImpl.connect()
+                result
+            } catch (e: ErrorResponse) {
+                if (e.code == 40) {
+                    // refresh the the token
+                    if (tokenProvider != null) {
+                        val newToken = tokenProvider.invoke(e)
+                        preferences.storeUserToken(newToken)
+                        connectionModule.updateToken(newToken)
+                    }
+                    // quickly reconnect with the new token
+                    val result = socketImpl.reconnect(0)
+                    result
+                }
+            }
+
         }
     }
 
@@ -431,7 +448,7 @@ internal class StreamVideoImpl internal constructor(
 
     internal suspend fun getCall(type: String, id: String): Result<GetCallResponse> {
         return wrapAPICall {
-            connectionModule.videoCallsApi.getCall(type, id)
+            connectionModule.videoCallsApi.getCall(type, id, connectionId = connectionModule.coordinatorSocket.connectionId)
         }
     }
 
@@ -493,10 +510,12 @@ internal class StreamVideoImpl internal constructor(
                         team = team,
                     ),
                     ring = ring
-                )
+                ),
+                connectionId = connectionModule.coordinatorSocket.connectionId
             )
         }
     }
+
 
     /**
      * @see StreamVideo.inviteUsers
@@ -723,12 +742,12 @@ internal class StreamVideoImpl internal constructor(
     /**
      * @see StreamVideo.queryCalls
      */
-    override suspend fun queryCalls(queryCallsData: QueryCallsData): Result<QueriedCalls> {
+    override suspend fun queryCalls(queryCallsData: QueryCallsData): Result<QueryCallsResponse> {
         logger.d { "[queryCalls] queryCallsData: $queryCallsData" }
         val request = queryCallsData.toRequest()
         val connectionId = connectionModule.coordinatorSocket.connectionId
         val result = wrapAPICall {
-            connectionModule.videoCallsApi.queryCalls(request, connectionId).toQueriedCalls()
+            connectionModule.videoCallsApi.queryCalls(request, connectionId)
         }
         if (result.isSuccess) {
             // update state for these calls
@@ -822,7 +841,6 @@ internal class StreamVideoImpl internal constructor(
         id: String,
         sessionId: String
     ): Result<ListRecordingsResponse> {
-        // TODO: Result structure isn't flexible
         return wrapAPICall {
             val result = connectionModule.recordingApi.listRecordings(type, id, sessionId)
             result

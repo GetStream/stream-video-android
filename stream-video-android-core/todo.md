@@ -18,6 +18,7 @@
 
 ### LLC TODO
 
+- [ ] Error.NetworkError vs ErrorResponse. Having 2 classes is confusing
 - [ ] Clean up tests
 - [ ] Test coverage
 - [ ] Remove unused code
@@ -37,7 +38,7 @@
 
 ### State TODO
 
-- [ ] Call settings need to be used everywhere. There are still some hardcoded settings
+- [X] Call settings need to be used everywhere. There are still some hardcoded settings
 - [X] Member state isn't implemented fully. Could be either a state or just a data class
 - [X] Call state isn't setup fully on join
 - [X] Member state isn't updated correctly or implemented
@@ -49,9 +50,9 @@
 - [X] ClientState
 - [X] MemberState
 - [X] ConnectionModule
-- [ ] CallState
+- [X] Call
 - [ ] StreamVideoImpl
-- [ ] Call
+- [ ] CallState
 
 ### TODOs
 
@@ -130,8 +131,9 @@
 ### RTC TODO
 
 - [X] Media manager class to enable easy testing of all audio/video stuff
+- [ ] Leave & End flows
 - [ ] Move muting and clean it up
-- [ ] Review how UI changes & pagination are connected to the video tracks
+- [ ] Review how UI changes & pagination are connected to the video tracks. See call initRenderer
 - [ ] Implement dynascale
  
 ### Disconnect suggestion
@@ -148,15 +150,16 @@
 
 ### Server wishlist
 
+[X] queryChannels doesn’t return members but CallUsers, this is wrong
 - Update call endpoints doesn’t expose team or startsAt. I get why we don’t expose team, not sure about startsAt
 - Get/Create etc don’t specify connection_id, this breaks the ability to watch
-- queryChannels doesn’t return members but CallUsers, this is wrong
 - Not being able to edit settings on a call you created seems like the wrong default: “”User ‘thierry’ with role ‘user’ is not allowed to perform action UpdateCallSettings in scope ‘video:default’“, serverErrorCode=17, statusCode=-1, cause=java.lang.Throwable: ))”
 - Events for updating users
 - Participant count (for livestreams you cant rely on the list)
 - Participant.online field is weird. Aren't you always online as a participant?
 - ConnectionQualityInfo is a list, audio levels is a map. Lets standardize
 - Push setup
+- Accept/reject call endpoints
 - Watching calls for audio rooms
 - What about codec switching?
 - What about graceful SFU shutdown/ an event to make clients move SFU?
@@ -175,4 +178,3 @@
 - Currently we use UserPreferencesManager. Jaewoong mentioned we should perhaps explore https://developer.android.com/topic/libraries/architecture/datastore
 - Measure latency isn't 100% ok. You can't set a timeout using withTimeout and collect the measurements that we have. This relates to threading vs coroutines and withTimeout not working
 - Disconnect/ garbage collect flow needs a full round of review
-- MediaManager needs a full review and cleanup
