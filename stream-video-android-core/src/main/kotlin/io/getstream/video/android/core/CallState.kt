@@ -136,7 +136,6 @@ public class CallState(private val call: Call, user: User) {
     // making it a property requires cleaning up the properties of a participant
     val me: StateFlow<ParticipantState?> = _participants.mapState { it.get(user.id) }
 
-    // TODO: implement me properly
     public val screenSharingSession: StateFlow<ScreenSharingSession?> = _screenSharingSession
 
     public val isScreenSharing: StateFlow<Boolean> = _screenSharingSession.mapState { it != null }
@@ -389,7 +388,6 @@ public class CallState(private val call: Call, user: User) {
         val participantStates = event.callState.participants.map {
             getOrCreateParticipant(it)
         }
-        // TODO: update more fields
         upsertParticipants(participantStates)
     }
 
@@ -462,12 +460,6 @@ public class CallState(private val call: Call, user: User) {
             }
         }
         _members.value = memberMap
-    }
-
-    fun requireParticipant(sessionId: String): ParticipantState {
-        // TODO: after development lets just log instead throwing an error
-        return getParticipant(sessionId)
-            ?: throw IllegalStateException("No participant with sessionId $sessionId")
     }
 
     fun getParticipant(sessionId: String): ParticipantState? {
