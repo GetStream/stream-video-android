@@ -43,7 +43,6 @@ import io.getstream.chat.android.compose.ui.theme.ChatTheme
 import io.getstream.chat.android.compose.viewmodel.messages.MessageComposerViewModel
 import io.getstream.chat.android.compose.viewmodel.messages.MessageListViewModel
 import io.getstream.chat.android.compose.viewmodel.messages.MessagesViewModelFactory
-import io.getstream.result.Result.Success
 import io.getstream.video.chat_with_video_final.application.chatWithVideoApp
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -111,15 +110,15 @@ class MessagesActivity : ComponentActivity() {
         lifecycleScope.launch {
             val callId = UUID.randomUUID().toString()
 
-            val createCallResult = videoClient.getOrCreateCall(
-                id = callId,
-                type = "default",
-                ring = false,
-                memberIds = emptyList()
-            )
-
-            if (createCallResult is Success) {
-                val data = createCallResult.value
+//            val createCallResult = videoClient.getOrCreateCall(
+//                id = callId,
+//                type = "default",
+//                ring = false,
+//                memberIds = emptyList()
+//            )
+//
+//            if (createCallResult is Success) {
+//                val data = createCallResult.value
 
 //                val customAttachment = Attachment(
 //                    type = "custom",
@@ -136,7 +135,7 @@ class MessagesActivity : ComponentActivity() {
 //
 //                val newMessage = composerViewModel.buildNewMessage("", listOf(customAttachment))
 //                composerViewModel.sendMessage(newMessage)
-            }
+//            }
         }
     }
 

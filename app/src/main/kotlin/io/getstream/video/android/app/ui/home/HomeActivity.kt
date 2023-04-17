@@ -266,14 +266,14 @@ class HomeActivity : AppCompatActivity() {
             logger.d { "[dialUsers] callId: $callId, participants: $participants" }
 
             loadingState.value = true
-            streamVideo.getOrCreateCall(
-                "default", callId, participants, ring = true
-            ).onSuccess {
-                logger.v { "[dialUsers] completed: $it" }
-            }.onError {
-                logger.e { "[dialUsers] failed: $it" }
-                Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
-            }
+//            streamVideo.getOrCreateCall(
+//                "default", callId, participants, ring = true
+//            ).onSuccess {
+//                logger.v { "[dialUsers] completed: $it" }
+//            }.onError {
+//                logger.e { "[dialUsers] failed: $it" }
+//                Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
+//            }
             loadingState.value = false
         }
     }

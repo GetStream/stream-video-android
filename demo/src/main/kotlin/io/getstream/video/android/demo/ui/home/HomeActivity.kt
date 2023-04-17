@@ -269,7 +269,7 @@ class HomeActivity : AppCompatActivity() {
                 .size(40.dp)
                 .padding(top = 8.dp, start = 8.dp),
             imageUrl = user.image.orEmpty(),
-            initials = if (user.image == null) {
+            initials = if (user.image.isEmpty()) {
                 user.name.initials()
             } else {
                 null

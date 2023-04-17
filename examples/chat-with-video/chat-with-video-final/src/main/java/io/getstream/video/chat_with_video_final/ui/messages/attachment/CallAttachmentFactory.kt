@@ -46,7 +46,6 @@ import io.getstream.chat.android.compose.state.messages.attachments.AttachmentSt
 import io.getstream.chat.android.compose.ui.attachments.AttachmentFactory
 import io.getstream.chat.android.compose.ui.theme.ChatTheme
 import io.getstream.chat.android.ui.common.helper.DateFormatter
-import io.getstream.video.chat_with_video_final.application.chatWithVideoApp
 import kotlinx.coroutines.launch
 
 fun CallAttachmentFactory(): AttachmentFactory = AttachmentFactory(
@@ -155,5 +154,5 @@ private fun CallAttachment(
 
 private suspend fun joinCall(callId: String, context: Context) {
     val (type, id) = callId.split(":").take(2)
-    context.chatWithVideoApp.streamVideo.joinCall(type, id)
+//    context.chatWithVideoApp.streamVideo.joinCall(type, id)
 }
