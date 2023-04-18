@@ -109,5 +109,4 @@ class ModerationTest : IntegrationTestBase() {
         val result = call.muteUser("tommaso")
         assertSuccess(result)
     }
-
 }

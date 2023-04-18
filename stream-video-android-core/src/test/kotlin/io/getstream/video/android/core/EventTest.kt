@@ -110,7 +110,7 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
     fun `Accepting & rejecting a call`() = runTest {
 
         val thierry = testData.users["thierry"]!!
-        val member = MemberResponse(nowUtc, emptyMap(), nowUtc, user=thierry.toUserResponse(), userId=thierry.id, null, "role")
+        val member = MemberResponse(nowUtc, emptyMap(), nowUtc, user = thierry.toUserResponse(), userId = thierry.id, null, "role")
         call.state.getOrCreateMembers(listOf(member))
 
         val acceptedEvent = CallAcceptedEvent(
@@ -151,7 +151,7 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
         call.state.getOrCreateParticipant(thierry)
         // send the event
         val quality = ConnectionQualityInfo(
-            session_id="thierry",
+            session_id = "thierry",
             user_id = "thierry", connection_quality = ConnectionQuality.CONNECTION_QUALITY_EXCELLENT
         )
         val event = ConnectionQualityChangeEvent(updates = mutableListOf(quality))

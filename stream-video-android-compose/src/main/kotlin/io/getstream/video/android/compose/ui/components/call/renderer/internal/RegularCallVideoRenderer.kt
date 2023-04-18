@@ -63,7 +63,7 @@ internal fun RegularCallVideoRenderer(
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues = PaddingValues(0.dp),
     onRender: (View) -> Unit = {},
-    callControlsContent: @Composable () -> Unit = {
+    callControlsContent: @Composable (call: Call) -> Unit = {
         DefaultCallControlsContent(
             call = call,
             callDeviceState = callDeviceState,
@@ -103,7 +103,7 @@ internal fun RegularCallVideoRenderer(
         }
 
         if (orientation == ORIENTATION_LANDSCAPE) {
-            callControlsContent()
+            callControlsContent.invoke(call)
         }
     }
 }

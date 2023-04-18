@@ -163,7 +163,6 @@ public class CallState(private val call: Call, user: User) {
     private val _ringingState: MutableStateFlow<RingingState?> = MutableStateFlow(null)
     public val ringingState: MutableStateFlow<RingingState?> = _ringingState
 
-
     /** The settings for the call */
     private val _settings: MutableStateFlow<CallSettingsResponse?> = MutableStateFlow(null)
     public val settings: MutableStateFlow<CallSettingsResponse?> = _settings
@@ -180,7 +179,6 @@ public class CallState(private val call: Call, user: User) {
         }
     }
 
-
     private val _screenSharingTrack: MutableStateFlow<TrackWrapper?> = MutableStateFlow(null)
 
     private val userToSessionIdMap = participants.mapState { participants ->
@@ -193,10 +191,6 @@ public class CallState(private val call: Call, user: User) {
     public val ownCapabilities: StateFlow<List<OwnCapability>> = _ownCapabilities
 
     internal val _hasPermissionMap = mutableMapOf<String, StateFlow<Boolean>>()
-
-
-
-
 
     private val _endedAt: MutableStateFlow<OffsetDateTime?> = MutableStateFlow(null)
     val endedAt: StateFlow<OffsetDateTime?> = _endedAt

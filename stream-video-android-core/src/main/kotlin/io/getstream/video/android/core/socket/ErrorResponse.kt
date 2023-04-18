@@ -18,13 +18,11 @@ package io.getstream.video.android.core.socket
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import org.openapitools.client.models.VideoEvent
 
 @Serializable
 data class SocketError(
     val error: ErrorResponse
 )
-
 
 @Serializable
 public data class ErrorResponse(

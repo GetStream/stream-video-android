@@ -21,7 +21,6 @@ import android.content.Context
 import androidx.lifecycle.ProcessLifecycleOwner
 import com.jakewharton.threetenabp.AndroidThreeTen
 import io.getstream.android.push.PushDeviceGenerator
-import io.getstream.result.Error
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.filter.AudioFilter
 import io.getstream.video.android.core.filter.VideoFilter

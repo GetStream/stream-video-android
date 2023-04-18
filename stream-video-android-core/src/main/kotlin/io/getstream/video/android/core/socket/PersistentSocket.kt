@@ -26,7 +26,6 @@ import io.getstream.video.android.core.events.SfuSocketError
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.socket.internal.HealthMonitor
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -164,7 +163,7 @@ open class PersistentSocket<T>(
     suspend fun onInternetConnected() {
         val state = connectionState.value
         logger.i { "[onNetworkConnected] state: $state" }
-         if (state is SocketState.DisconnectedTemporarily || state == SocketState.NetworkDisconnected) {
+        if (state is SocketState.DisconnectedTemporarily || state == SocketState.NetworkDisconnected) {
             // reconnect instantly when the internet is back
             reconnect(0)
         }
@@ -230,7 +229,7 @@ open class PersistentSocket<T>(
             }
 
             // handle errors
-            if (text.isNotEmpty() && processedEvent==null) {
+            if (text.isNotEmpty() && processedEvent == null) {
                 val errorAdapter: JsonAdapter<SocketError> =
                     Serializer.moshi.adapter(SocketError::class.java)
                 val parsedError = errorAdapter.fromJson(text)
@@ -249,8 +248,6 @@ open class PersistentSocket<T>(
                     events.emit(processedEvent)
                 }
             }
-
-
         }
     }
 
@@ -284,14 +281,12 @@ open class PersistentSocket<T>(
         var isPermanent = true
         if (error is ErrorResponse) {
             val serverError = error as ErrorResponse
-
         } else {
             // there are several timeout & network errors that are all temporary
             // code errors are permanent
             isPermanent = when (error) {
                 is UnknownHostException -> false
                 else -> true
-
             }
         }
 
@@ -323,8 +318,6 @@ open class PersistentSocket<T>(
                 scope.launch { reconnect(reconnectTimeout) }
             }
         }
-
-
     }
 
     /**
@@ -355,7 +348,6 @@ open class PersistentSocket<T>(
      */
     override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
         logger.d { "[onFailure] t: $t, response: $response" }
-
 
         handleError(t)
     }

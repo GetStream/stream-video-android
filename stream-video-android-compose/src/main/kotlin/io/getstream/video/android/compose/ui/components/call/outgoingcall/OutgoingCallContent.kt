@@ -45,22 +45,22 @@ import io.getstream.video.android.ui.common.R
 /**
  * Represents the Outgoing Call state and UI, when the user is calling other people.
  *
- * @param viewModel The [CallViewModel] used to provide state and various handlers in the call.
+ * @param callViewModel The [CallViewModel] used to provide state and various handlers in the call.
  * @param modifier Modifier for styling.
  * @param onBackPressed Handler when the user taps on the back button.
  * @param onCallAction Handler when the user clicks on some of the call controls.
  */
 @Composable
 public fun OutgoingCallContent(
-    viewModel: CallViewModel,
+    callViewModel: CallViewModel,
     modifier: Modifier = Modifier,
     onBackPressed: () -> Unit,
-    onCallAction: (CallAction) -> Unit = viewModel::onCallAction,
+    onCallAction: (CallAction) -> Unit = callViewModel::onCallAction,
 ) {
-    val callDeviceState: CallDeviceState by viewModel.callDeviceState.collectAsState()
+    val callDeviceState: CallDeviceState by callViewModel.callDeviceState.collectAsState()
 
     OutgoingCallContent(
-        call = viewModel.call,
+        call = callViewModel.call,
         callDeviceState = callDeviceState,
         modifier = modifier,
         onBackPressed = onBackPressed,

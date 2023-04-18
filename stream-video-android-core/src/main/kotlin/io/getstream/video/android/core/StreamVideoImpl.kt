@@ -33,13 +33,10 @@ import io.getstream.video.android.core.lifecycle.LifecycleHandler
 import io.getstream.video.android.core.lifecycle.internal.StreamLifecycleObserver
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.CallEventType
-import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.core.model.Device
 import io.getstream.video.android.core.model.EdgeData
 import io.getstream.video.android.core.model.MuteUsersData
-import io.getstream.video.android.core.model.QueriedCalls
 import io.getstream.video.android.core.model.QueryCallsData
-import io.getstream.video.android.core.model.QueryMembersData
 import io.getstream.video.android.core.model.SendReactionData
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.User
@@ -52,9 +49,8 @@ import io.getstream.video.android.core.user.UserPreferencesManager
 import io.getstream.video.android.core.utils.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.core.utils.LatencyResult
 import io.getstream.video.android.core.utils.getLatencyMeasurementsOKHttp
-import io.getstream.video.android.core.utils.toCallUser
 import io.getstream.video.android.core.utils.toEdge
-import io.getstream.video.android.core.utils.toQueriedCalls
+import io.getstream.video.android.core.utils.toUser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -69,6 +65,8 @@ import org.openapitools.client.models.BlockUserResponse
 import org.openapitools.client.models.CallRequest
 import org.openapitools.client.models.CallSettingsRequest
 import org.openapitools.client.models.ConnectedEvent
+import org.openapitools.client.models.CreateGuestRequest
+import org.openapitools.client.models.CreateGuestResponse
 import org.openapitools.client.models.GetCallEdgeServerRequest
 import org.openapitools.client.models.GetCallEdgeServerResponse
 import org.openapitools.client.models.GetCallResponse
@@ -95,6 +93,7 @@ import org.openapitools.client.models.UpdateCallMembersResponse
 import org.openapitools.client.models.UpdateCallRequest
 import org.openapitools.client.models.UpdateCallResponse
 import org.openapitools.client.models.UpdateUserPermissionsResponse
+import org.openapitools.client.models.UserRequest
 import org.openapitools.client.models.VideoEvent
 import org.openapitools.client.models.WSCallEvent
 import retrofit2.HttpException
@@ -148,7 +147,7 @@ internal class StreamVideoImpl internal constructor(
     override suspend fun createDevice(token: String, pushProvider: String): Result<Device> {
         logger.d { "[createDevice] token: $token, pushProvider: $pushProvider" }
         return wrapAPICall {
-                // TODO: handle this when backend has it
+            // TODO: handle this when backend has it
             error("TODO: not support yet")
         }
     }
@@ -324,7 +323,6 @@ internal class StreamVideoImpl internal constructor(
                     result
                 }
             }
-
         }
     }
 
@@ -360,22 +358,33 @@ internal class StreamVideoImpl internal constructor(
 
     fun setupGuestUser(user: User) {
         guestUserJob = scope.async {
-//            val response = createGuestUser(user)
-//            if (response.isFailure) {
-//                throw IllegalStateException("Failed to create guest user")
-//            }
-//            response.onSuccess {
-//                preferences.storeUserCredentials(it)
-//                preferences.storeUserToken(it.token)
-//                connectionModule.updateToken(it.token)
-//            }
+            val response = createGuestUser(
+                userRequest = UserRequest(
+                    id = user.id,
+                    image = user.image,
+                    name = user.name,
+                    role = user.role,
+                    teams = user.teams,
+                    custom = user.custom,
+                )
+            )
+            if (response.isFailure) {
+                throw IllegalStateException("Failed to create guest user")
+            }
+            response.onSuccess {
+                preferences.storeUserCredentials(it.user.toUser())
+                preferences.storeUserToken(it.accessToken)
+                connectionModule.updateToken(it.accessToken)
+            }
         }
     }
 
-    suspend fun createGuestUser(user: User) {
-//        return wrapAPICall {
-//            connectionModule.videoCallsApi.createGuestUser(user)
-//        }
+    suspend fun createGuestUser(userRequest: UserRequest): Result<CreateGuestResponse> {
+        return wrapAPICall {
+            connectionModule.defaultApi.createGuest(
+                createGuestRequest = CreateGuestRequest(userRequest)
+            )
+        }
     }
 
     override suspend fun registerPushDevice() {
@@ -451,7 +460,11 @@ internal class StreamVideoImpl internal constructor(
 
     internal suspend fun getCall(type: String, id: String): Result<GetCallResponse> {
         return wrapAPICall {
-            connectionModule.videoCallsApi.getCall(type, id, connectionId = connectionModule.coordinatorSocket.connectionId)
+            connectionModule.videoCallsApi.getCall(
+                type,
+                id,
+                connectionId = connectionModule.coordinatorSocket.connectionId
+            )
         }
     }
 
@@ -518,7 +531,6 @@ internal class StreamVideoImpl internal constructor(
             )
         }
     }
-
 
     /**
      * @see StreamVideo.inviteUsers
@@ -668,10 +680,10 @@ internal class StreamVideoImpl internal constructor(
         return wrapAPICall {
             connectionModule.videoCallsApi.queryMembers(
                 QueryMembersRequest(
-                    type=type, id=id,
+                    type = type, id = id,
                     filterConditions = filter,
-                    sort=sort
-                    )
+                    sort = sort
+                )
             )
         }
     }

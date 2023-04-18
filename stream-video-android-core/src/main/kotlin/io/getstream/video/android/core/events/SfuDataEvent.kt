@@ -93,7 +93,7 @@ public data class JoinCallResponseEvent(
 
 public data class ErrorEvent(val error: Error?) : SfuDataEvent()
 
-public class SfuSocketError(val error: Error?): Throwable() {
+public class SfuSocketError(val error: Error?) : Throwable() {
     override val message: String?
         get() = error?.message
 }

@@ -26,10 +26,8 @@ import io.getstream.video.android.core.socket.PersistentSocket
 import io.getstream.video.android.core.socket.SfuSocket
 import io.getstream.video.android.core.socket.SocketState
 import io.getstream.video.android.core.socket.SocketState.Connected
-import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -130,13 +128,10 @@ open class SocketTestBase : TestBase() {
 
         return Pair(events, errors)
     }
-
-
 }
 
 @RunWith(RobolectricTestRunner::class)
 class CoordinatorSocketTest : SocketTestBase() {
-
 
     @Test
     fun `coordinator - connect the socket`() = runTest {
@@ -158,7 +153,6 @@ class CoordinatorSocketTest : SocketTestBase() {
         } catch (e: Throwable) {
             // ignore
         }
-
     }
 
     @Test
@@ -179,7 +173,7 @@ class CoordinatorSocketTest : SocketTestBase() {
         val socket = CoordinatorSocket(coordinatorUrl, testData.users["thierry"]!!, testData.tokens["thierry"]!!, scope, buildOkHttp(), networkStateProvider)
         socket.mockSocket = mockedWebSocket
         socket.reconnectTimeout = 0
-        val job1 = scope.launch {socket.connect() }
+        val job1 = scope.launch { socket.connect() }
         val job2 = scope.launch {
             // trigger an unknown host exception from onFailure
             val error = java.net.UnknownHostException("internet is down")
@@ -203,17 +197,15 @@ class CoordinatorSocketTest : SocketTestBase() {
         val job = scope.launch { socket.connect() }
         delay(100)
         socket.onInternetDisconnected()
-        //assertThat(socket.connectionState.value).isInstanceOf(SocketState.NetworkDisconnected::class.java)
+        // assertThat(socket.connectionState.value).isInstanceOf(SocketState.NetworkDisconnected::class.java)
         // go back online
-        val job2= scope.launch { socket.onInternetConnected()  }
+        val job2 = scope.launch { socket.onInternetConnected() }
         delay(100)
         job.cancel()
         job2.cancel()
         // TODO: this could be easier to test
-        //assertThat(socket.connectionState.value).isInstanceOf(SocketState.Connecting::class.java)
-
+        // assertThat(socket.connectionState.value).isInstanceOf(SocketState.Connecting::class.java)
     }
-
 }
 
 @RunWith(RobolectricTestRunner::class)
@@ -272,7 +264,6 @@ class SfuSocketTest : SocketTestBase() {
         println(events)
         println(errors)
     }
-
 
     @Test
     fun `sfu - a permanent error shouldn't be retried a`() = runTest {

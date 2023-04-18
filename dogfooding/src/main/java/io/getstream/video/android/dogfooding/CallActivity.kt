@@ -44,7 +44,7 @@ class CallActivity : AppCompatActivity() {
             VideoTheme {
                 CallContainer(
                     modifier = Modifier.background(color = VideoTheme.colors.appBackground),
-                    viewModel = vm,
+                    callViewModel = vm,
                     onBackPressed = { finish() },
                 )
             }

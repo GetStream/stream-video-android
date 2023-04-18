@@ -19,19 +19,15 @@ package io.getstream.video.android.core.rtc
 import com.google.common.truth.Truth
 import io.getstream.video.android.core.ConnectionState
 import io.getstream.video.android.core.IntegrationTestBase
-import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.events.SFUConnectedEvent
 import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.model.StreamPeerType
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import io.getstream.video.android.core.utils.buildMediaConstraints
-import io.mockk.impl.annotations.MockK
-import io.mockk.junit4.MockKRule
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Ignore
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -47,7 +43,6 @@ class RtcSessionTest : IntegrationTestBase() {
      * TODO: This test could use a mock of the client, it doesn't need the real client and could run faster
      * Integration testing is already handled in other parts of the codebase
      */
-
 
     @Before
     fun setup() {

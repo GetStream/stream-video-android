@@ -33,6 +33,7 @@ import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Response
 import okhttp3.logging.HttpLoggingInterceptor
+import org.openapitools.client.apis.DefaultApi
 import org.openapitools.client.apis.EventsApi
 import org.openapitools.client.apis.LivestreamingApi
 import org.openapitools.client.apis.ModerationApi
@@ -73,6 +74,7 @@ internal class ConnectionModule(
     internal var moderationApi: ModerationApi
     internal var recordingApi: RecordingApi
     internal var livestreamingApi: LivestreamingApi
+    internal var defaultApi: DefaultApi
 
     internal var eventsApi: EventsApi
     internal var coordinatorSocket: CoordinatorSocket
@@ -115,6 +117,7 @@ internal class ConnectionModule(
         moderationApi = retrofitClient.create(ModerationApi::class.java)
         recordingApi = retrofitClient.create(RecordingApi::class.java)
         livestreamingApi = retrofitClient.create(LivestreamingApi::class.java)
+        defaultApi = retrofitClient.create(DefaultApi::class.java)
 
         // Note that it doesn't connect when you create the socket
         coordinatorSocket = createCoordinatorSocket()

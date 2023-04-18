@@ -53,7 +53,7 @@ public fun CallVideoRenderer(
     paddingValues: PaddingValues = PaddingValues(0.dp),
     onRender: (View) -> Unit = {},
     onBackPressed: () -> Unit = {},
-    callControlsContent: @Composable () -> Unit = {
+    callControlsContent: @Composable (call: Call) -> Unit = {
         DefaultCallControlsContent(
             call = call,
             callDeviceState = callDeviceState,
