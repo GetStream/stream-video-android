@@ -272,9 +272,8 @@ class LoginActivity : ComponentActivity() {
                 id = authUser?.email ?: userJSON.getString("userId"),
                 name = authUser?.displayName ?: "",
                 image = authUser?.photoUrl?.toString() ?: "",
-                custom = mapOf(
-                    "email" to userJSON.getString("email")
-                )
+                role = "admin",
+                custom = mapOf("email" to userJSON.getString("userId"))
             )
 
             startHome(user, token)

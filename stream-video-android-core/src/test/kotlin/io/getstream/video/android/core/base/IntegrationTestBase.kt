@@ -147,7 +147,6 @@ open class TestBase {
     @Before
     fun setUp() = MockKAnnotations.init(this, relaxUnitFun = true) // turn relaxUnitFun on for all mocks
 
-
     private val testLogger = StreamTestLogger()
 
     init {
@@ -206,8 +205,6 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true) : TestBase(
 
     var nextEventContinuation: Continuation<VideoEvent>? = null
     var nextEventCompleted: Boolean = false
-
-
 
     init {
         MockKAnnotations.init(this, relaxUnitFun = true)

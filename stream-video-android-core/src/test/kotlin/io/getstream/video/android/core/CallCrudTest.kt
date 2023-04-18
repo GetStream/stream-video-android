@@ -23,7 +23,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.openapitools.client.models.CallCreatedEvent
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)

@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.core.socket
 
-import io.getstream.result.Error
 import org.openapitools.client.models.VideoEvent
 
 public sealed class SocketState {

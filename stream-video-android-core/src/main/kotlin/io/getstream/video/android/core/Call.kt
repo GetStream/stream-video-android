@@ -24,10 +24,8 @@ import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.events.VideoEventListener
-import io.getstream.video.android.core.model.IceServer
 import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.SendReactionData
-import io.getstream.video.android.core.model.SfuToken
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.model.toIceServer
@@ -54,7 +52,6 @@ import org.openapitools.client.models.UpdateUserPermissionsResponse
 import org.openapitools.client.models.VideoEvent
 import org.webrtc.RendererCommon
 import stream.video.sfu.models.TrackType
-
 
 /**
  * The call class gives you access to all call level API calls
@@ -153,7 +150,7 @@ public class Call(
         val request = UpdateCallRequest(
             custom = custom,
             settingsOverride = settingsOverride,
-            startsAt=startsAt
+            startsAt = startsAt
         )
         val response = clientImpl.updateCall(type, id, request)
         response.onSuccess {
@@ -219,16 +216,17 @@ public class Call(
         return clientImpl.sendReaction(type, id, data)
     }
 
-    suspend fun queryMembers(filter: Map<String, Any>,
-                            sort: List<SortParamRequest> = mutableListOf(SortParamRequest(-1, "created_at")),
-                            limit: Int = 100): Result<QueryMembersResponse> {
+    suspend fun queryMembers(
+        filter: Map<String, Any>,
+        sort: List<SortParamRequest> = mutableListOf(SortParamRequest(-1, "created_at")),
+        limit: Int = 100
+    ): Result<QueryMembersResponse> {
         val result = clientImpl.queryMembers(type, id, filter, sort, limit)
         result.onSuccess {
             state.updateFromResponse(it)
         }
         return result
     }
-
 
     suspend fun muteAllUsers(
         audio: Boolean = true,
@@ -308,14 +306,6 @@ public class Call(
     suspend fun stopBroadcasting(): Result<Any> {
         return clientImpl.stopBroadcasting(type, id)
     }
-
-
-
-
-
-
-
-
 
     private var subscriptions = mutableSetOf<EventSubscription>()
 
