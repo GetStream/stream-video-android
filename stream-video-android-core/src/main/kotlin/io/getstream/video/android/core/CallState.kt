@@ -179,6 +179,46 @@ public class CallState(private val call: Call, user: User) {
         }
     }
 
+    private val _backstage: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    /** if we are in backstage mode or not */
+    val backstage: StateFlow<Boolean> = _backstage
+
+    private val _broadcasting: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    /** if the call is being broadcasted to HLS */
+    val broadcasting: StateFlow<Boolean> = _broadcasting
+
+
+    /** if transcribing is on or not */
+    private val _transcribing: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val transcribing: StateFlow<Boolean> = _transcribing
+
+    /** startsAt */
+    private val _startsAt: MutableStateFlow<OffsetDateTime?> = MutableStateFlow(null)
+    val startsAt: StateFlow<OffsetDateTime?> = _startsAt
+
+    private val _updatedAt: MutableStateFlow<OffsetDateTime?> = MutableStateFlow(null)
+    /** updatedAt */
+    val updatedAt: StateFlow<OffsetDateTime?> = _updatedAt
+
+
+    private val _createdAt: MutableStateFlow<OffsetDateTime?> = MutableStateFlow(null)
+    val createdAt: StateFlow<OffsetDateTime?> = _createdAt
+
+    private val _blockedUserIds: MutableStateFlow<List<String>> = MutableStateFlow(emptyList())
+    val blockedUserIds: StateFlow<List<String>> = _blockedUserIds
+
+    private val _custom: MutableStateFlow<Map<String, Any>> = MutableStateFlow(emptyMap())
+    val custom: StateFlow<Map<String, Any>> = _custom
+
+    private val _team: MutableStateFlow<String?> = MutableStateFlow(null)
+    val team: StateFlow<String?> = _team
+
+    private val _createdBy: MutableStateFlow<User?> = MutableStateFlow(null)
+    val createdBy: StateFlow<User?> = _createdBy
+
+    private val _ingress: MutableStateFlow<CallIngressResponse?> = MutableStateFlow(null)
+    val ingress: StateFlow<CallIngressResponse?> = _ingress
+
     private val _screenSharingTrack: MutableStateFlow<TrackWrapper?> = MutableStateFlow(null)
 
     private val userToSessionIdMap = participants.mapState { participants ->
@@ -281,7 +321,8 @@ public class CallState(private val call: Call, user: User) {
             }
 
             is CallUpdatedEvent -> {
-                updateFromEvent(event)
+                updateFromResponse(event.call)
+                _capabilitiesByRole.value = event.capabilitiesByRole
             }
 
             is UpdatedCallPermissionsEvent -> {
@@ -502,24 +543,6 @@ public class CallState(private val call: Call, user: User) {
         _participants.value = new
     }
 
-    fun updateFromEvent(event: VideoEvent) {
-
-        if (event is CallCreatedEvent) {
-            // TODO fix this
-            // update the own capabilities
-//            me._ownCapabilities.value=event.call.ownCapabilities
-//            // update the capabilities by role
-//            _capabilitiesByRole.value = event.capabilitiesByRole
-            // update call info fields
-        } else if (event is CallUpdatedEvent) {
-            // update the own capabilities
-            _ownCapabilities.value = event.call.ownCapabilities
-            // update the capabilities by role
-            _capabilitiesByRole.value = event.capabilitiesByRole
-            // update call info fields
-        }
-    }
-
     internal fun disconnect() {
         logger.i { "[disconnect] #sfu; no args" }
         // audioHandler.stop()
@@ -533,38 +556,7 @@ public class CallState(private val call: Call, user: User) {
 //        }
     }
 
-    private val _backstage: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    val backstage: StateFlow<Boolean> = _backstage
 
-    private val _broadcasting: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    val broadcasting: StateFlow<Boolean> = _broadcasting
-
-    private val _transcribing: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    val transcribing: StateFlow<Boolean> = _transcribing
-
-    private val _startsAt: MutableStateFlow<OffsetDateTime?> = MutableStateFlow(null)
-    val startsAt: StateFlow<OffsetDateTime?> = _startsAt
-
-    private val _updatedAt: MutableStateFlow<OffsetDateTime?> = MutableStateFlow(null)
-    val updatedAt: StateFlow<OffsetDateTime?> = _updatedAt
-
-    private val _createdAt: MutableStateFlow<OffsetDateTime?> = MutableStateFlow(null)
-    val createdAt: StateFlow<OffsetDateTime?> = _createdAt
-
-    private val _blockedUserIds: MutableStateFlow<List<String>> = MutableStateFlow(emptyList())
-    val blockedUserIds: StateFlow<List<String>> = _blockedUserIds
-
-    private val _custom: MutableStateFlow<Map<String, Any>> = MutableStateFlow(emptyMap())
-    val custom: StateFlow<Map<String, Any>> = _custom
-
-    private val _team: MutableStateFlow<String?> = MutableStateFlow(null)
-    val team: StateFlow<String?> = _team
-
-    private val _createdBy: MutableStateFlow<User?> = MutableStateFlow(null)
-    val createdBy: StateFlow<User?> = _createdBy
-
-    private val _ingress: MutableStateFlow<CallIngressResponse?> = MutableStateFlow(null)
-    val ingress: StateFlow<CallIngressResponse?> = _ingress
 
     fun updateFromResponse(response: CallResponse) {
         _backstage.value = response.backstage
@@ -616,7 +608,6 @@ public class CallState(private val call: Call, user: User) {
     fun updateFromResponse(callData: CallStateResponseFields) {
         updateFromResponse(callData.call)
         updateFromResponse(callData.members)
-        // TODO: what about the blocked users?
     }
 
     fun updateFromResponse(it: QueryMembersResponse) {
