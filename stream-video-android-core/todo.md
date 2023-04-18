@@ -18,8 +18,7 @@
 
 ### LLC TODO
 
-- [ ] Error.NetworkError vs ErrorResponse. Having 2 classes is confusing
-- [ ] Clean up tests
+- [ ] Error.NetworkError vs ErrorResponse. Having 2 classes is confusing. Error format is slightly differences in 3 places. 
 - [ ] Test coverage
 - [ ] Remove unused code
 - [ ] Join flow performance
@@ -27,6 +26,7 @@
 - [ ] Reconnect after SFU breaks (https://www.notion.so/Reconnection-Failure-handling-f6991fd2e5584380bb2d2cb5e8ac5303)
 - [ ] Audio filter example
 - [ ] Video filter example
+- [X] Clean up tests
 - [X] Support for accepting/rejecting calls etc. HTTP endpoints seem cleaner
 - [X] Directly use the events from openAPI to prevent things being out of sync
 - [X] List of backend changes

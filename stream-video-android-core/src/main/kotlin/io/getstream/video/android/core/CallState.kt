@@ -76,40 +76,43 @@ import stream.video.sfu.models.Participant
 import java.util.SortedMap
 
 /**
+ * The CallState class keeps all state for a call
+ * It's available on every call object
+ *
+ * @sample
+ *
+ * val call = client.call("default", "123")
+ * call.get() // or create or join
+ * call.state.participants // list of participants
+ *
  *
  */
 public class CallState(private val call: Call, user: User) {
     private val logger by taggedLogger("CallState")
 
-    private val _blockedUsers: MutableStateFlow<Set<String>> = MutableStateFlow(emptySet())
-    val blockedUsers: StateFlow<Set<String>> = _blockedUsers
-
-    private val _ringingState: MutableStateFlow<RingingState?> = MutableStateFlow(null)
-    public val ringingState: MutableStateFlow<RingingState?> = _ringingState
-
-    private val _settings: MutableStateFlow<CallSettingsResponse?> = MutableStateFlow(null)
-    public val settings: MutableStateFlow<CallSettingsResponse?> = _settings
-
-    private val _members: MutableStateFlow<SortedMap<String, MemberState>> =
-        MutableStateFlow(emptyMap<String, MemberState>().toSortedMap())
-    public val members: StateFlow<List<MemberState>> =
-        _members.mapState { it.values.toList() }
+    /**
+     * connection shows if we've established a connection with the SFU
+     */
+    private val _connection: MutableStateFlow<ConnectionState> = MutableStateFlow(
+        ConnectionState.PreConnect
+    )
+    public val connection: StateFlow<ConnectionState> = _connection
 
     private val _participants: MutableStateFlow<SortedMap<String, ParticipantState>> =
         MutableStateFlow(emptyMap<String, ParticipantState>().toSortedMap())
+
+    /** Participants returns a list of participant state object. @see [ParticipantState] */
     public val participants: StateFlow<List<ParticipantState>> =
         _participants.mapState { it.values.toList() }
 
-    private val _recording: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    val recording: StateFlow<Boolean> = _recording
-
-    private val _screenSharingSession: MutableStateFlow<ScreenSharingSession?> =
-        MutableStateFlow(null)
+    /** Your own participant state */
+    val me: StateFlow<ParticipantState?> = _participants.mapState { it.get(user.id) }
 
     /** participants who are currently speaking */
     public val activeSpeakers =
         _participants.mapState { it.values.filter { participant -> participant.speaking.value } }
 
+    /** the dominant speaker */
     private val _dominantSpeaker: MutableStateFlow<ParticipantState?> =
         MutableStateFlow(null)
     public val dominantSpeaker: StateFlow<ParticipantState?> = _dominantSpeaker
@@ -123,7 +126,6 @@ public class CallState(private val call: Call, user: User) {
      * * audio only participants by when they joined
      *
      */
-
     public val sortedParticipants = _participants.mapState {
         it.values.sortedBy {
             // TODO: implement actual sorting
@@ -132,12 +134,52 @@ public class CallState(private val call: Call, user: User) {
         }
     }
 
-    // making it a property requires cleaning up the properties of a participant
-    val me: StateFlow<ParticipantState?> = _participants.mapState { it.get(user.id) }
+    /** Members contains the list of users who are permanently associated with this call. This includes users who are currently not active in the call
+     * As an example if you invite "john", "bob" and "jane" to a call and only Jane joins.
+     * All 3 of them will be members, but only Jane will be a participant
+     */
+    private val _members: MutableStateFlow<SortedMap<String, MemberState>> =
+        MutableStateFlow(emptyMap<String, MemberState>().toSortedMap())
+    public val members: StateFlow<List<MemberState>> =
+        _members.mapState { it.values.toList() }
 
+    /** if someone is sharing their screen */
+    private val _screenSharingSession: MutableStateFlow<ScreenSharingSession?> =
+        MutableStateFlow(null)
     public val screenSharingSession: StateFlow<ScreenSharingSession?> = _screenSharingSession
 
+    /** if anyone is screensharing */
     public val isScreenSharing: StateFlow<Boolean> = _screenSharingSession.mapState { it != null }
+
+    /** if the call is being recorded */
+    private val _recording: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val recording: StateFlow<Boolean> = _recording
+
+    /** The list of users that are blocked from joining this call */
+    private val _blockedUsers: MutableStateFlow<Set<String>> = MutableStateFlow(emptySet())
+    val blockedUsers: StateFlow<Set<String>> = _blockedUsers
+
+    /** Specific to ringing calls, additional state about incoming, outgoing calls */
+    private val _ringingState: MutableStateFlow<RingingState?> = MutableStateFlow(null)
+    public val ringingState: MutableStateFlow<RingingState?> = _ringingState
+
+
+    /** The settings for the call */
+    private val _settings: MutableStateFlow<CallSettingsResponse?> = MutableStateFlow(null)
+    public val settings: MutableStateFlow<CallSettingsResponse?> = _settings
+
+    /** Check if you have permissions to do things like share your audio, video, screen etc */
+    public fun hasPermission(permission: String): StateFlow<Boolean> {
+        // store this in a map so we don't have to create a new flow every time
+        return if (_hasPermissionMap.containsKey(permission)) {
+            _hasPermissionMap[permission]!!
+        } else {
+            val flow = _ownCapabilities.mapState { it.map { it.toString() }.contains(permission) }
+            _hasPermissionMap[permission] = flow
+            flow
+        }
+    }
+
 
     private val _screenSharingTrack: MutableStateFlow<TrackWrapper?> = MutableStateFlow(null)
 
@@ -152,24 +194,9 @@ public class CallState(private val call: Call, user: User) {
 
     internal val _hasPermissionMap = mutableMapOf<String, StateFlow<Boolean>>()
 
-    public fun hasPermission(permission: String): StateFlow<Boolean> {
-        // store this in a map so we don't have to create a new flow every time
-        return if (_hasPermissionMap.containsKey(permission)) {
-            _hasPermissionMap[permission]!!
-        } else {
-            val flow = _ownCapabilities.mapState { it.map { it.toString() }.contains(permission) }
-            _hasPermissionMap[permission] = flow
-            flow
-        }
-    }
 
-    /**
-     * connection shows if we've established a connection with the SFU
-     */
-    private val _connection: MutableStateFlow<ConnectionState> = MutableStateFlow(
-        ConnectionState.PreConnect
-    )
-    public val connection: StateFlow<ConnectionState> = _connection
+
+
 
     private val _endedAt: MutableStateFlow<OffsetDateTime?> = MutableStateFlow(null)
     val endedAt: StateFlow<OffsetDateTime?> = _endedAt
