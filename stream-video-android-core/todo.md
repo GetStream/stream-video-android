@@ -165,6 +165,8 @@
 [ ] List of error codes via openapi
 [ ] getCall doesn't support member limits
 [ ] CallMemberUpdatedPermissionEvent. Weird that call and members are included
+[ ] message=GetOrCreateCall failed with error: "The following users are involved in call create operation, but don't exist: [jaewoong]. Please create the user objects before setting up the call.
+[ ] review QueryMembersRequest
 
 ### Available tasks up for grabs
 

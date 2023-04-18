@@ -208,11 +208,13 @@ class ClientAndAuthTest : TestBase() {
             testData.tokens["thierry"]!!,
         ).build()
         val clientImpl = client as StreamVideoImpl
+        clientImpl.peerConnectionFactory = mockedPCFactory
+
         val call = client.call("default", randomUUID())
         val callCreateResult = call.create()
         assertSuccess(callCreateResult)
         // wonder if this will work, no coordinator connection
-        val callJoined = call.join()
+        // Can't fully test this without webrtc/ more mocking
     }
 
     @Test

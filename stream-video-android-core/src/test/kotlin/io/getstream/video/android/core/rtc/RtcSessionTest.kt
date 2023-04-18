@@ -45,11 +45,7 @@ class RtcSessionTest : IntegrationTestBase() {
      * TODO: This test could use a mock of the client, it doesn't need the real client and could run faster
      * Integration testing is already handled in other parts of the codebase
      */
-    @get:Rule
-    val mockkRule = MockKRule(this)
 
-    @MockK(relaxUnitFun = true, relaxed = true)
-    lateinit var mockedPCFactory: StreamPeerConnectionFactory
 
     @Before
     fun setup() {

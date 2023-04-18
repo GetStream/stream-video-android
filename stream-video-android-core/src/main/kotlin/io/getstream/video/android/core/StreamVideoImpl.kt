@@ -81,10 +81,13 @@ import org.openapitools.client.models.ListRecordingsResponse
 import org.openapitools.client.models.MemberRequest
 import org.openapitools.client.models.MuteUsersResponse
 import org.openapitools.client.models.QueryCallsResponse
+import org.openapitools.client.models.QueryMembersRequest
+import org.openapitools.client.models.QueryMembersResponse
 import org.openapitools.client.models.RequestPermissionRequest
 import org.openapitools.client.models.SendEventRequest
 import org.openapitools.client.models.SendEventResponse
 import org.openapitools.client.models.SendReactionResponse
+import org.openapitools.client.models.SortParamRequest
 import org.openapitools.client.models.StopLiveResponse
 import org.openapitools.client.models.UnblockUserRequest
 import org.openapitools.client.models.UpdateCallMembersRequest
@@ -656,17 +659,20 @@ internal class StreamVideoImpl internal constructor(
     internal suspend fun queryMembers(
         type: String,
         id: String,
-        queryMembersData: QueryMembersData
-    ): Result<List<CallUser>> {
-        logger.d { "[queryMembers] callCid: $type:$id, queryMembersData: $queryMembersData" }
+        // TODO: why can't the filter be null
+        filter: Map<String, Any>,
+        sort: List<SortParamRequest> = mutableListOf(SortParamRequest(-1, "created_at")),
+        limit: Int = 100
+    ): Result<QueryMembersResponse> {
 
         return wrapAPICall {
             connectionModule.videoCallsApi.queryMembers(
-                queryMembersData.toRequest(
-                    id,
-                    type
-                )
-            ).members.map { it.toCallUser() }
+                QueryMembersRequest(
+                    type=type, id=id,
+                    filterConditions = filter,
+                    sort=sort
+                    )
+            )
         }
     }
 

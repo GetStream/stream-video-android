@@ -234,8 +234,6 @@ public class RtcSession internal constructor(
         val getSdp = suspend {
             getSubscriberSdp().description
         }
-        scope.launch {
-        }
         sfuConnectionModule = connectionModule.createSFUConnectionModule(sfuUrl, sessionId, sfuToken, getSdp)
         // listen to socket events and errors
         scope.launch {

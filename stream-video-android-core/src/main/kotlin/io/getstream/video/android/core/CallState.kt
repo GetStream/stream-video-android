@@ -64,6 +64,7 @@ import org.openapitools.client.models.JoinCallResponse
 import org.openapitools.client.models.MemberResponse
 import org.openapitools.client.models.OwnCapability
 import org.openapitools.client.models.PermissionRequestEvent
+import org.openapitools.client.models.QueryMembersResponse
 import org.openapitools.client.models.ReactionResponse
 import org.openapitools.client.models.UnblockedUserEvent
 import org.openapitools.client.models.UpdateCallResponse
@@ -588,6 +589,10 @@ public class CallState(private val call: Call, user: User) {
         updateFromResponse(callData.call)
         updateFromResponse(callData.members)
         // TODO: what about the blocked users?
+    }
+
+    fun updateFromResponse(it: QueryMembersResponse) {
+        updateFromResponse(it.members)
     }
 }
 

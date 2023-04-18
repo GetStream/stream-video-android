@@ -42,7 +42,9 @@ import org.openapitools.client.models.JoinCallResponse
 import org.openapitools.client.models.ListRecordingsResponse
 import org.openapitools.client.models.MemberRequest
 import org.openapitools.client.models.MuteUsersResponse
+import org.openapitools.client.models.QueryMembersResponse
 import org.openapitools.client.models.SendReactionResponse
+import org.openapitools.client.models.SortParamRequest
 import org.openapitools.client.models.StopLiveResponse
 import org.openapitools.client.models.UpdateCallMembersRequest
 import org.openapitools.client.models.UpdateCallMembersResponse
@@ -215,6 +217,16 @@ public class Call(
 
     suspend fun sendReaction(data: SendReactionData): Result<SendReactionResponse> {
         return clientImpl.sendReaction(type, id, data)
+    }
+
+    suspend fun queryMembers(filter: Map<String, Any>,
+                            sort: List<SortParamRequest> = mutableListOf(SortParamRequest(-1, "created_at")),
+                            limit: Int = 100): Result<QueryMembersResponse> {
+        val result = clientImpl.queryMembers(type, id, filter, sort, limit)
+        result.onSuccess {
+            state.updateFromResponse(it)
+        }
+        return result
     }
 
 

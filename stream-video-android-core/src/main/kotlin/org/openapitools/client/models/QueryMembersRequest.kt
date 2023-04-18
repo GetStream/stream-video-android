@@ -40,15 +40,18 @@ data class QueryMembersRequest (
     @Json(name = "filter_conditions")
     val filterConditions: kotlin.collections.Map<kotlin.String, kotlin.Any>,
 
+    // What's type?
     @Json(name = "type")
     val type: kotlin.String,
 
     @Json(name = "id")
     val id: kotlin.String? = null,
 
+    // Where is the offset?
     @Json(name = "limit")
     val limit: kotlin.Int? = null,
 
+    // What do next and prev mean on a request. I'd expect to see it on a response, not a request
     @Json(name = "next")
     val next: kotlin.String? = null,
 

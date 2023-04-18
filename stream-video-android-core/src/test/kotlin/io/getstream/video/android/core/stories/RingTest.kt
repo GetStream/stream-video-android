@@ -40,7 +40,10 @@ class RingTest : IntegrationTestBase() {
     @Test
     fun `Accepting or rejecting calls should be updated on members`() = runTest {
         val call = client.call("default", randomUUID())
-        call.create(memberIds = listOf("tommaso", "thierry", "jaewoong"), ring = true)
+        val createResponse = call.create(memberIds = listOf("tommaso", "thierry"), ring = true)
+        assertSuccess(createResponse)
+
+        assertThat(call.state.members.value.size).isEqualTo(2)
 
         // tommaso accepts
         val userResponse = testData.users["tommaso"]!!.toResponse()
@@ -55,7 +58,7 @@ class RingTest : IntegrationTestBase() {
         assertThat(tommaso.acceptedAt).isNotNull()
 
         // jaewoong rejects
-        val userResponse2 = testData.users["jaewoong"]!!.toResponse()
+        val userResponse2 = testData.users["tommaso"]!!.toResponse()
         clientImpl.fireEvent(
             CallRejectedEvent(
                 callCid = call.cid,
@@ -63,11 +66,8 @@ class RingTest : IntegrationTestBase() {
                 user = userResponse2
             )
         )
-        val jaewoong = call.state.members.value.first { it.user.id == "jaewoong" }
-        assertThat(tommaso.rejectedAt).isNotNull()
+        val tommaso2 = call.state.members.value.first { it.user.id == "tommaso" }
+        assertThat(tommaso2.rejectedAt).isNotNull()
     }
 
-    @Test
-    fun `Calls should drop if nobody answers within the timeout`() = runTest {
-    }
 }
