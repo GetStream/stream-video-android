@@ -26,7 +26,6 @@ import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.socket.CoordinatorSocket
 import io.getstream.video.android.core.socket.SfuSocket
 import io.getstream.video.android.core.user.UserPreferences
-import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CoroutineScope
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -45,6 +44,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
 import retrofit2.converter.wire.WireConverterFactory
+import java.util.concurrent.TimeUnit
 
 /**
  * ConnectionModule provides several helpful attributes

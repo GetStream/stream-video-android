@@ -65,7 +65,7 @@ public fun CallContent(
     modifier: Modifier = Modifier,
     onBackPressed: () -> Unit = { callViewModel.onCallAction(LeaveCall) },
     onCallAction: (CallAction) -> Unit = callViewModel::onCallAction,
-    callControlsContent: @Composable () -> Unit = {
+    callControlsContent: @Composable (call: Call) -> Unit = {
         DefaultCallControlsContent(
             callViewModel,
             onCallAction
@@ -125,7 +125,7 @@ public fun CallContent(
     isInPictureInPicture: Boolean = false,
     onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = {},
-    callControlsContent: @Composable () -> Unit = {
+    callControlsContent: @Composable (call: Call) -> Unit = {
         DefaultCallControlsContent(
             call,
             callDeviceState,
@@ -152,7 +152,7 @@ public fun CallContent(
             },
             bottomBar = {
                 if (orientation != ORIENTATION_LANDSCAPE) {
-                    callControlsContent()
+                    callControlsContent.invoke(call)
                 }
             },
             content = {

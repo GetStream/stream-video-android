@@ -55,14 +55,14 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.User
 import io.getstream.video.android.core.user.UserPreferencesManager
-import java.io.BufferedReader
-import java.io.InputStreamReader
-import java.net.URL
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.BufferedReader
+import java.io.InputStreamReader
+import java.net.URL
 
 class LoginActivity : ComponentActivity() {
 

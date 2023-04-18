@@ -28,11 +28,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
+import io.getstream.video.android.common.util.MockUtils
+import io.getstream.video.android.common.util.mockCall
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.video.VideoScalingType.Companion.toCommonScalingType
 import io.getstream.video.android.core.Call
@@ -50,7 +53,7 @@ import stream.video.sfu.models.TrackType
  */
 @Composable
 public fun VideoRenderer(
-    call: Call?,
+    call: Call,
     videoTrackWrapper: TrackWrapper,
     sessionId: String,
     trackType: TrackType,
@@ -58,7 +61,7 @@ public fun VideoRenderer(
     videoScalingType: VideoScalingType = VideoScalingType.SCALE_ASPECT_BALANCED,
     onRender: (View) -> Unit = {},
 ) {
-    if (LocalInspectionMode.current || call == null) {
+    if (LocalInspectionMode.current) {
         Image(
             modifier = modifier
                 .fillMaxSize()
@@ -125,9 +128,10 @@ private fun setupVideo(
 @Preview
 @Composable
 private fun VideoRendererPreview() {
+    MockUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         VideoRenderer(
-            call = null,
+            call = mockCall,
             videoTrackWrapper = TrackWrapper("", org.webrtc.VideoTrack(123)),
             sessionId = "",
             trackType = TrackType.TRACK_TYPE_VIDEO
