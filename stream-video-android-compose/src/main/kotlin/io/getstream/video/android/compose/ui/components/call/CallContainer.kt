@@ -216,7 +216,6 @@ internal fun DefaultCallContent(
                 }
 
                 is ChangeMuteState -> onCallAction(ToggleMicrophone(action.isEnabled))
-                is ChangeMuteState -> TODO()
             }
         }
     }

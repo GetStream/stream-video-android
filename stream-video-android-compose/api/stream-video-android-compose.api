@@ -89,8 +89,7 @@ public final class io/getstream/video/android/compose/state/ui/participants/Invi
 	public fun toString ()Ljava/lang/String;
 }
 
-public abstract class io/getstream/video/android/compose/state/ui/participants/ParticipantInfoAction {
-	public static final field $stable I
+public abstract interface class io/getstream/video/android/compose/state/ui/participants/ParticipantInfoAction {
 }
 
 public final class io/getstream/video/android/compose/theme/StreamColors {
