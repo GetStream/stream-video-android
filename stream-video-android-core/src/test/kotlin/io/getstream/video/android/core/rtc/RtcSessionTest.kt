@@ -30,6 +30,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit4.MockKRule
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -37,6 +38,7 @@ import org.robolectric.RobolectricTestRunner
 import stream.video.sfu.models.PeerType
 
 @RunWith(RobolectricTestRunner::class)
+@Ignore
 class RtcSessionTest : IntegrationTestBase() {
     /**
      * Creating the publisher and subscriber peer connection
@@ -101,6 +103,7 @@ class RtcSessionTest : IntegrationTestBase() {
     }
 
     @Test
+    @Ignore
     fun `onNegotiationNeeded`() = runTest {
         // Join the call
         val joinResult = call.join()

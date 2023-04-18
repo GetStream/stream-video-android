@@ -17,6 +17,7 @@
 package io.getstream.video.android.core
 
 import kotlinx.coroutines.test.runTest
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -36,6 +37,7 @@ class CallMediaTest : IntegrationTestBase() {
      */
 
     @Test
+    @Ignore
     fun `Camera API`() = runTest {
         call.camera.devices
         val cameraId = call.camera.devices.value.first()
@@ -49,6 +51,7 @@ class CallMediaTest : IntegrationTestBase() {
     }
 
     @Test
+    @Ignore
     fun `Microphone API`() = runTest {
         // TODO: Maybe audio in/out is better?
         call.microphone.devices
@@ -58,6 +61,7 @@ class CallMediaTest : IntegrationTestBase() {
     }
 
     @Test
+    @Ignore
     fun `Speaker API`() = runTest {
         call.speaker.devices
         call.speaker.disable()

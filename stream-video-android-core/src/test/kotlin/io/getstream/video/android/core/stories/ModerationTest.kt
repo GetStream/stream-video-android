@@ -44,10 +44,27 @@ class ModerationTest : IntegrationTestBase() {
 
     @Test
     fun `Basic moderation - Remove a member`() = runTest {
+        // create a call with Thierry & Tommaso
+        val members = mutableListOf("thierry", "tommaso")
+        val call = client.call("default", randomUUID())
+        val createResult = call.create(memberIds = members, custom = mapOf("color" to "red"))
+        assertSuccess(createResult)
+        assertThat(call.state.members.value.map { it.user.id }).contains("tommaso")
+        // now remove Tommaso
         val response = call.removeMembers(listOf("tommaso"))
         assertSuccess(response)
+
+        // Verify call.get no longer returns Tommaso
+        val callResult = call.get()
+        assertSuccess(callResult)
+        callResult.onSuccess {
+            assertThat(it.members.map { it.user.id }).doesNotContain("tommaso")
+        }
+        // TODO: verify we receive the event (this doesn't work)
         val event = waitForNextEvent<CallMemberRemovedEvent>()
         assertThat(event.members).contains("tommaso")
+        // verify state is updated
+        assertThat(call.state.members.value.map { it.user.id }).doesNotContain("tommaso")
     }
 
     @Test
@@ -89,10 +106,8 @@ class ModerationTest : IntegrationTestBase() {
 
     @Test
     fun `Basic moderation - Mute a specific person`() = runTest {
-        // TODO: what's the behaviour for muting a user?
         val result = call.muteUser("tommaso")
         assertSuccess(result)
-        // TODO: check event?
     }
 
 }

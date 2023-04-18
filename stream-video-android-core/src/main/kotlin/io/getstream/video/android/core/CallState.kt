@@ -150,10 +150,17 @@ public class CallState(private val call: Call, user: User) {
         MutableStateFlow(emptyList())
     public val ownCapabilities: StateFlow<List<OwnCapability>> = _ownCapabilities
 
+    internal val _hasPermissionMap = mutableMapOf<String, StateFlow<Boolean>>()
+
     public fun hasPermission(permission: String): StateFlow<Boolean> {
-        val flow = _ownCapabilities.mapState { it.map { it.toString() }.contains(permission) }
-        // TODO: store this in a map so we don't have to create a new flow every time
-        return flow
+        // store this in a map so we don't have to create a new flow every time
+        return if (_hasPermissionMap.containsKey(permission)) {
+            _hasPermissionMap[permission]!!
+        } else {
+            val flow = _ownCapabilities.mapState { it.map { it.toString() }.contains(permission) }
+            _hasPermissionMap[permission] = flow
+            flow
+        }
     }
 
     /**

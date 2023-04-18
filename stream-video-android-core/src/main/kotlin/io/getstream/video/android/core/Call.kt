@@ -236,7 +236,7 @@ public class Call(
         screenShare: Boolean = false
     ): Result<MuteUsersResponse> {
         val request = MuteUsersData(
-            muteAllUsers = false,
+            muteAllUsers = true,
             audio = audio,
             video = video,
             screenShare = screenShare,
