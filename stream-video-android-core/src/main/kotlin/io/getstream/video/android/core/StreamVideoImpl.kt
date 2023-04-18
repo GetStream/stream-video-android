@@ -50,6 +50,7 @@ import io.getstream.video.android.core.utils.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.core.utils.LatencyResult
 import io.getstream.video.android.core.utils.getLatencyMeasurementsOKHttp
 import io.getstream.video.android.core.utils.toEdge
+import io.getstream.video.android.core.utils.toUser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -64,6 +65,8 @@ import org.openapitools.client.models.BlockUserResponse
 import org.openapitools.client.models.CallRequest
 import org.openapitools.client.models.CallSettingsRequest
 import org.openapitools.client.models.ConnectedEvent
+import org.openapitools.client.models.CreateGuestRequest
+import org.openapitools.client.models.CreateGuestResponse
 import org.openapitools.client.models.GetCallEdgeServerRequest
 import org.openapitools.client.models.GetCallEdgeServerResponse
 import org.openapitools.client.models.GetCallResponse
@@ -90,6 +93,7 @@ import org.openapitools.client.models.UpdateCallMembersResponse
 import org.openapitools.client.models.UpdateCallRequest
 import org.openapitools.client.models.UpdateCallResponse
 import org.openapitools.client.models.UpdateUserPermissionsResponse
+import org.openapitools.client.models.UserRequest
 import org.openapitools.client.models.VideoEvent
 import org.openapitools.client.models.WSCallEvent
 import retrofit2.HttpException
@@ -354,22 +358,33 @@ internal class StreamVideoImpl internal constructor(
 
     fun setupGuestUser(user: User) {
         guestUserJob = scope.async {
-//            val response = createGuestUser(user)
-//            if (response.isFailure) {
-//                throw IllegalStateException("Failed to create guest user")
-//            }
-//            response.onSuccess {
-//                preferences.storeUserCredentials(it)
-//                preferences.storeUserToken(it.token)
-//                connectionModule.updateToken(it.token)
-//            }
+            val response = createGuestUser(
+                userRequest = UserRequest(
+                    id = user.id,
+                    image = user.image,
+                    name = user.name,
+                    role = user.role,
+                    teams = user.teams,
+                    custom = user.custom,
+                )
+            )
+            if (response.isFailure) {
+                throw IllegalStateException("Failed to create guest user")
+            }
+            response.onSuccess {
+                preferences.storeUserCredentials(it.user.toUser())
+                preferences.storeUserToken(it.accessToken)
+                connectionModule.updateToken(it.accessToken)
+            }
         }
     }
 
-    suspend fun createGuestUser(user: User) {
-//        return wrapAPICall {
-//            connectionModule.videoCallsApi.createGuestUser(user)
-//        }
+    suspend fun createGuestUser(userRequest: UserRequest): Result<CreateGuestResponse> {
+        return wrapAPICall {
+            connectionModule.defaultApi.createGuest(
+                createGuestRequest = CreateGuestRequest(userRequest)
+            )
+        }
     }
 
     override suspend fun registerPushDevice() {
@@ -445,7 +460,11 @@ internal class StreamVideoImpl internal constructor(
 
     internal suspend fun getCall(type: String, id: String): Result<GetCallResponse> {
         return wrapAPICall {
-            connectionModule.videoCallsApi.getCall(type, id, connectionId = connectionModule.coordinatorSocket.connectionId)
+            connectionModule.videoCallsApi.getCall(
+                type,
+                id,
+                connectionId = connectionModule.coordinatorSocket.connectionId
+            )
         }
     }
 
