@@ -82,9 +82,11 @@ class AndroidDeviceTest : IntegrationTestBase() {
     fun joinACall() = runTest {
         val joinResult = call.join()
         assertSuccess(joinResult)
-        waitForNextEvent<SFUConnectedEvent>()
-        assertThat(call.state.connection.value).isEqualTo(ConnectionState.Connected)
+        println("showing events")
+        println(events)
         val joinResponse = waitForNextEvent<JoinCallResponseEvent>()
+        assertThat(call.state.connection.value).isEqualTo(ConnectionState.Connected)
+
         val participantsResponse = joinResponse.callState.participants
         assertThat(participantsResponse.size).isEqualTo(1)
         val participants = call.state.participants

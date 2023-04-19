@@ -17,6 +17,7 @@
 package io.getstream.video.android.core.call.signal.socket
 
 import io.getstream.video.android.core.events.AudioLevelChangedEvent
+import io.getstream.video.android.core.events.CallGrantsUpdatedEvent
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.ConnectionQualityChangeEvent
 import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
@@ -25,6 +26,7 @@ import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.ParticipantJoinedEvent
 import io.getstream.video.android.core.events.ParticipantLeftEvent
+import io.getstream.video.android.core.events.PublisherAnswerEvent
 import io.getstream.video.android.core.events.SFUHealthCheckEvent
 import io.getstream.video.android.core.events.SfuDataEvent
 import io.getstream.video.android.core.events.SubscriberOfferEvent
@@ -32,12 +34,14 @@ import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
 import io.getstream.video.android.core.model.UserAudioLevel
 import stream.video.sfu.event.SfuEvent
+import stream.video.sfu.models.CallGrants
 
 public object RTCEventMapper {
 
     public fun mapEvent(event: SfuEvent): SfuDataEvent {
         return when {
             event.subscriber_offer != null -> SubscriberOfferEvent(event.subscriber_offer.sdp)
+// publisher_answer
 
             event.connection_quality_changed != null -> with(event.connection_quality_changed) {
                 ConnectionQualityChangeEvent(updates = connection_quality_updates)
@@ -83,9 +87,15 @@ public object RTCEventMapper {
             event.ice_trickle != null -> with(event.ice_trickle) {
                 ICETrickleEvent(ice_candidate, peer_type)
             }
+            event.publisher_answer != null -> PublisherAnswerEvent(sdp=event.publisher_answer.sdp)
             event.error != null -> ErrorEvent(event.error.error)
 
-            else -> throw IllegalStateException("Unknown event")
+            event.call_grants_updated != null -> CallGrantsUpdatedEvent(event.call_grants_updated.current_grants, event.call_grants_updated.message)
+
+            else -> {
+                // TODO: don't raise an error if we're not in development
+                throw IllegalStateException("Unknown event")
+            }
         }
     }
 }

@@ -4,28 +4,43 @@
 ### Week 1: Refactor LLC & State. Setup testing
 ### Week 2: LLC & State Stability. Compose testing & previews
 ### Week 3: Sample app, update compose to LLC & State changes. New events, socket & token provider. Call UI. Guest users & moderation endpoints
-### Week 4: 
+### Week 4: LLC & state test coverage + Demo & Dogfooding apps
 
-- Thierry: Improve LLC & state test coverage
-- Jaewoong to improve the demo and dogfooding apps
+
 
 ### Week 5: Render video/join calls
 
 - RTC & Audio testing
+- How to ensure that video resolutions are sent to the server
+- 
 - Step 1: Render local video using the new API and compose
 - Step 2: Upload local video to the SFU
 - Step 3: Join a call and render participants
 
+### RTC TODO
+
+- [X] Media manager class to enable easy testing of all audio/video stuff
+- [ ] Move setCameraEnabled & setMicrophoneEnabled
+- [ ] Move muting and clean it up
+- [ ] Leave & End flows
+- [ ] Review how UI changes & pagination are connected to the video tracks. See call initRenderer and updateParticipantsSubscriptions
+- [ ] Implement dynascale
+
+### TODOs
+
+- Review the 200 todos
+
+
 ### LLC TODO
 
 - [ ] Error.NetworkError vs ErrorResponse. Having 2 classes is confusing. Error format is slightly differences in 3 places. 
-- [ ] Test coverage
 - [ ] Remove unused code
 - [ ] Join flow performance
 - [ ] Move SFU event to swap between SFUs and handle failure
 - [ ] Reconnect after SFU breaks (https://www.notion.so/Reconnection-Failure-handling-f6991fd2e5584380bb2d2cb5e8ac5303)
 - [ ] Audio filter example
 - [ ] Video filter example
+- [X] Test coverage
 - [X] Clean up tests
 - [X] Support for accepting/rejecting calls etc. HTTP endpoints seem cleaner
 - [X] Directly use the events from openAPI to prevent things being out of sync
@@ -51,12 +66,9 @@
 - [X] MemberState
 - [X] ConnectionModule
 - [X] Call
-- [ ] StreamVideoImpl
-- [ ] CallState
+- [X] StreamVideoImpl
+- [X] CallState
 
-### TODOs
-
-- Review the 200 todos
 
 ### Testing
 
@@ -128,13 +140,7 @@
 - [ ] Authentication example
 - [ ] Docs on client setup
 
-### RTC TODO
 
-- [X] Media manager class to enable easy testing of all audio/video stuff
-- [ ] Leave & End flows
-- [ ] Move muting and clean it up
-- [ ] Review how UI changes & pagination are connected to the video tracks. See call initRenderer
-- [ ] Implement dynascale
  
 ### Disconnect suggestion
 
