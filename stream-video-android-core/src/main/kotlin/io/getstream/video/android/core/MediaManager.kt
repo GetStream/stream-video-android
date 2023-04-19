@@ -168,6 +168,8 @@ public class CameraManager(public val mediaManager: MediaManagerImpl) {
  *
  * @see RtcSession
  *
+ * The Rtc session observes these stateflows and updates accordingly
+ *
  * Also see:
  *
  * @see AudioSwitchHandler

@@ -772,7 +772,11 @@ public class RtcSession internal constructor(
                 val data = mangleSDP(originalSDP, true, enableDtx = true)
                 logger.v { "[negotiate] #$id; #sfu; #${peerType.stringify()}; offerSdp: $data" }
 
-                peerConnection.setLocalDescription(data)
+                val result = peerConnection.setLocalDescription(data)
+                if (result.isFailure) {
+                    // TODO: better error handling
+                    throw IllegalStateException(result.toString())
+                }
 
                 val trackInfos = peerConnection.connection.transceivers.filter {
                     it.direction == RtpTransceiver.RtpTransceiverDirection.SEND_ONLY && it.sender?.track() != null
