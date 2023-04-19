@@ -105,7 +105,9 @@ public class CallState(private val call: Call, user: User) {
         _participants.mapState { it.values.toList() }
 
     /** Your own participant state */
-    val me: StateFlow<ParticipantState?> = _participants.mapState { it.get(user.id) }
+    val me: StateFlow<ParticipantState?> = _participants.mapState {
+        it.get(call.clientImpl.sessionId)
+    }
 
     /** participants who are currently speaking */
     public val activeSpeakers =

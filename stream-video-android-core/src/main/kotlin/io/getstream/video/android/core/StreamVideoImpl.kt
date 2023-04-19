@@ -97,6 +97,7 @@ import org.openapitools.client.models.UserRequest
 import org.openapitools.client.models.VideoEvent
 import org.openapitools.client.models.WSCallEvent
 import retrofit2.HttpException
+import java.util.*
 import kotlin.coroutines.Continuation
 
 /**
@@ -116,6 +117,9 @@ internal class StreamVideoImpl internal constructor(
 
     /** the state for the client, includes the current user */
     override val state = ClientState(this)
+
+    /** session id is generated client side */
+    public val sessionId = UUID.randomUUID().toString()
 
     /** if true we fail fast on errors instead of logging them */
     var developmentMode = true

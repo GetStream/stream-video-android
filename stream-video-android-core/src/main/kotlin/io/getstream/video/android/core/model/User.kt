@@ -63,7 +63,6 @@ public data class User(
     val type: UserType = UserType.Authenticated,
     val name: String = "",
     val image: String = "",
-    val isOnline: Boolean = false,
     val teams: List<String> = emptyList(),
     val custom: Map<String, String> = emptyMap(),
     @Serializable(with = OffsetDateTimeSerializer::class)

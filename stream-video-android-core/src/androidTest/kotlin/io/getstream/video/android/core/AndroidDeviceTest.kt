@@ -22,6 +22,8 @@ import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
+import org.webrtc.MediaSource
+import org.webrtc.MediaStreamTrack
 
 /**
  * Things to test in a real android environment
@@ -36,7 +38,7 @@ import org.junit.Test
  * * Does the SFU WS connect
  * * Do we receive the join event
  */
-class AndroidDeviceTest : IntegrationTestBase() {
+class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS=false) {
 
     private val logger by taggedLogger("Test:AndroidDeviceTest")
 
@@ -81,8 +83,6 @@ class AndroidDeviceTest : IntegrationTestBase() {
     fun joinACall() = runTest {
         val joinResult = call.join()
         assertSuccess(joinResult)
-        println("showing events")
-        println(events)
         val joinResponse = waitForNextEvent<JoinCallResponseEvent>()
         assertThat(call.state.connection.value).isEqualTo(ConnectionState.Connected)
 
@@ -90,5 +90,41 @@ class AndroidDeviceTest : IntegrationTestBase() {
         assertThat(participantsResponse.size).isEqualTo(1)
         val participants = call.state.participants
         assertThat(participants.value.size).isEqualTo(1)
+    }
+
+    @Test
+    fun localTrack() = runTest {
+        // join will automatically start the audio and video capture
+        // based on the call settings
+        val joinResult = call.join()
+        assertSuccess(joinResult)
+
+        // verify the video track is present and working
+        val videoWrapper = call.state.me.value?.videoTrackWrapped
+        assertThat(videoWrapper?.video?.enabled()).isTrue()
+        assertThat(videoWrapper?.video?.state()).isEqualTo(MediaStreamTrack.State.LIVE)
+
+        // verify the audio track is present and working
+        val audioWrapper = call.state.me.value?.audioTrackWrapped
+        assertThat(audioWrapper?.audio?.enabled()).isTrue()
+        assertThat(audioWrapper?.audio?.state()).isEqualTo(MediaStreamTrack.State.LIVE)
+    }
+
+    @Test
+    fun publishing() = runTest {
+        // join will automatically start the audio and video capture
+        // based on the call settings
+        val joinResult = call.join()
+        assertSuccess(joinResult)
+
+        // verify the video track is present and working
+        val videoWrapper = call.state.me.value?.videoTrackWrapped
+        assertThat(videoWrapper?.video?.enabled()).isTrue()
+        assertThat(videoWrapper?.video?.state()).isEqualTo(MediaStreamTrack.State.LIVE)
+
+        // verify the audio track is present and working
+        val audioWrapper = call.state.me.value?.audioTrackWrapped
+        assertThat(audioWrapper?.audio?.enabled()).isTrue()
+        assertThat(audioWrapper?.audio?.state()).isEqualTo(MediaStreamTrack.State.LIVE)
     }
 }

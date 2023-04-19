@@ -64,8 +64,8 @@ class SpeakerManager(val mediaManager: MediaManagerImpl) {
         mediaManager.selectCamera(deviceId)
     }
 
-    fun enable(isEnabled: Boolean) {
-        mediaManager.setSpeakerphoneEnabled(isEnabled)
+    fun enable() {
+        mediaManager.setSpeakerphoneEnabled(true)
     }
 
     fun setVolume(volumeLevel: Long) {
@@ -74,6 +74,10 @@ class SpeakerManager(val mediaManager: MediaManagerImpl) {
     fun setSpeakerPhone(speakerPhone: Boolean) {
         mediaManager.setSpeakerphoneEnabled(speakerPhone)
         _speakerPhoneEnabled.value = speakerPhone
+    }
+
+    fun setEnabled(enabled: Boolean) {
+        mediaManager.setCameraEnabled(enabled)
     }
 
     fun disable() {
@@ -99,12 +103,14 @@ class MicrophoneManager(val mediaManager: MediaManagerImpl) {
     fun select(deviceId: String) {
         mediaManager.selectCamera(deviceId)
     }
-
+    fun setEnabled(enabled: Boolean) {
+        mediaManager.setCameraEnabled(enabled)
+    }
     fun startCapture() {
     }
 
-    fun enable(isEnabled: Boolean) {
-        mediaManager.setCameraEnabled(isEnabled)
+    fun enable() {
+        mediaManager.setCameraEnabled(true)
     }
 
     fun disable() {
@@ -140,8 +146,12 @@ public class CameraManager(public val mediaManager: MediaManagerImpl) {
         val capturer = mediaManager.buildCameraCapturer()
     }
 
-    fun enable(isEnabled: Boolean) {
-        mediaManager.setCameraEnabled(isEnabled)
+    fun enable() {
+        mediaManager.setCameraEnabled(true)
+    }
+
+    fun setEnabled(enabled: Boolean) {
+        mediaManager.setCameraEnabled(enabled)
     }
 
     fun disable() {
@@ -183,6 +193,10 @@ class MediaManagerImpl(val context: Context) {
     val speaker = SpeakerManager(this)
 
     val enumerator = Camera2Enumerator(context)
+
+    fun toggle() {
+        TODO()
+    }
 
     fun setSpeakerphoneEnabled(isEnabled: Boolean) {
         val devices = getAudioDevices()

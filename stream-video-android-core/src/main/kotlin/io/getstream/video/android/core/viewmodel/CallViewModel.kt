@@ -102,9 +102,9 @@ public class CallViewModel(
 
     public fun onCallAction(callAction: CallAction) {
         when (callAction) {
-            is ToggleSpeakerphone -> call.speaker.enable(callAction.isEnabled)
-            is ToggleCamera -> call.camera.enable(callAction.isEnabled)
-            is ToggleMicrophone -> call.microphone.enable(callAction.isEnabled)
+            is ToggleSpeakerphone -> call.speaker.setEnabled(callAction.isEnabled)
+            is ToggleCamera -> call.camera.setEnabled(callAction.isEnabled)
+            is ToggleMicrophone -> call.microphone.setEnabled(callAction.isEnabled)
             is FlipCamera -> call.camera.flip()
             is LeaveCall -> call.leave()
             else -> Unit

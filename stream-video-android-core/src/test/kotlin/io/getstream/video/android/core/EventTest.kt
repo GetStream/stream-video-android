@@ -20,6 +20,7 @@ import com.google.common.truth.Truth.assertThat
 import io.getstream.video.android.core.events.AudioLevelChangedEvent
 import io.getstream.video.android.core.events.ConnectionQualityChangeEvent
 import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
+import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.ParticipantJoinedEvent
 import io.getstream.video.android.core.events.ParticipantLeftEvent
 import io.getstream.video.android.core.model.User
@@ -299,13 +300,6 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
 //        )
 //        clientImpl.fireEvent(event)
 //        assertThat(call.state.capabilitiesByRole.value).isEqualTo(event.capabilitiesByRole)
-    }
-
-    @Test
-    fun `Member added or removed event`() = runTest {
-//        val event = CallMemberAddedEvent(
-//            callCid = call.cid
-//        )
     }
 
     @Test

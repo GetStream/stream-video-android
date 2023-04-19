@@ -70,6 +70,7 @@ public class Call(
     val id: String,
     val user: User,
 ) {
+    internal val clientImpl = client as StreamVideoImpl
     private val logger by taggedLogger("Call")
     /** The call state contains all state such as the participant list, reactions etc */
     val state = CallState(this, user)
@@ -84,7 +85,6 @@ public class Call(
 
     /** Session handles all real time communication for video and audio */
     internal var session: RtcSession? = null
-    private val clientImpl = client as StreamVideoImpl
     internal val mediaManager by lazy { MediaManagerImpl(clientImpl.context) }
 
     /** Basic crud operations */

@@ -150,8 +150,7 @@ public class RtcSession internal constructor(
     private val clientImpl = client as StreamVideoImpl
     private val scope = clientImpl.scope
 
-    /** session id is generated client side */
-    private val sessionId = UUID.randomUUID().toString()
+    private val sessionId = clientImpl.sessionId
 
     private var connectionState: ConnectionState = ConnectionState.DISCONNECTED
 
@@ -338,11 +337,14 @@ public class RtcSession internal constructor(
                 source = audioSource, trackId = buildTrackId(TrackType.TRACK_TYPE_AUDIO)
             )
             audioTrack.setEnabled(true)
+            setLocalTrack(TrackType.TRACK_TYPE_AUDIO, TrackWrapper(streamId=buildTrackId(TrackType.TRACK_TYPE_AUDIO), audio=audioTrack))
+
             publisher?.addAudioTransceiver(audioTrack, listOf(sessionId))
             // step 5 create the video track
             val videoTrack = clientImpl.peerConnectionFactory.makeVideoTrack(
                 source = videoSource, trackId = buildTrackId(TrackType.TRACK_TYPE_VIDEO)
             )
+            setLocalTrack(TrackType.TRACK_TYPE_VIDEO, TrackWrapper(streamId=buildTrackId(TrackType.TRACK_TYPE_VIDEO), video=videoTrack))
             // render it on the surface. but we need to start this before forwarding it to the publisher
             // TODO: clean this up, would be better to have some sensible API for this
             call.mediaManager.videoCapturer?.initialize(
@@ -354,6 +356,7 @@ public class RtcSession internal constructor(
             videoTrack.setEnabled(true)
             logger.v { "[createUserTracks] #sfu; videoTrack: ${videoTrack.stringify()}" }
             publisher?.addVideoTransceiver(videoTrack!!, listOf(sessionId))
+            println(publisher)
         }
 
         // step 6 - onNegotiationNeeded will trigger and complete the setup using SetPublisherRequest
