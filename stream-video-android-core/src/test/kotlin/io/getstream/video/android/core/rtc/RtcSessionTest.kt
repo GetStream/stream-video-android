@@ -91,10 +91,10 @@ class RtcSessionTest : IntegrationTestBase() {
         val candidate =
             """{"sdpMid": "test", "sdpMLineIndex": 0, "candidate": "test", "usernameFragment": "test"}"""
         val publisherTrickle = ICETrickleEvent(candidate, PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED)
-        call.session?.handleTrickle(publisherTrickle)
+        call.session?.handleIceTrickle(publisherTrickle)
         // subscriber trickle
         val subscriberTrickle = ICETrickleEvent(candidate, PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED)
-        call.session?.handleTrickle(subscriberTrickle)
+        call.session?.handleIceTrickle(subscriberTrickle)
     }
 
     @Test

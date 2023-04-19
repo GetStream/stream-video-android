@@ -19,6 +19,7 @@ package io.getstream.video.android.core.model
 import org.webrtc.AudioTrack
 import org.webrtc.VideoTrack
 
+// sealed class would be cleaner TODO
 public data class TrackWrapper(
     public val streamId: String,
     public val video: VideoTrack? = null,

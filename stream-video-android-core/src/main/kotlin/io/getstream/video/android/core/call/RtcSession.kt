@@ -64,7 +64,6 @@ import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
@@ -100,7 +99,6 @@ import stream.video.sfu.signal.UpdateMuteStatesRequest
 import stream.video.sfu.signal.UpdateMuteStatesResponse
 import stream.video.sfu.signal.UpdateSubscriptionsRequest
 import stream.video.sfu.signal.UpdateSubscriptionsResponse
-import java.util.UUID
 import kotlin.math.absoluteValue
 import kotlin.random.Random
 
@@ -204,7 +202,7 @@ public class RtcSession internal constructor(
     }
 
     /** subscriber peer connection is used for subs */
-    private var subscriber: StreamPeerConnection? = null
+    public var subscriber: StreamPeerConnection? = null
 
     /** publisher for publishing, using 2 peer connections prevents race conditions in the offer/answer cycle */
     @VisibleForTesting
@@ -661,7 +659,7 @@ public class RtcSession internal constructor(
             coroutineScope.launch {
                 logger.v { "[onRtcEvent] event: $event" }
                 when (event) {
-                    is ICETrickleEvent -> handleTrickle(event)
+                    is ICETrickleEvent -> handleIceTrickle(event)
                     is SubscriberOfferEvent -> handleSubscriberOffer(event)
                     is PublisherAnswerEvent -> TODO()
                     // this dynascale event tells the SDK to change the quality of the video it's uploading
@@ -706,10 +704,10 @@ public class RtcSession internal constructor(
 
     @VisibleForTesting
     /**
-     * Triggered whenver we receive new ice candidate from the SFU
+     * Triggered whenever we receive new ice candidate from the SFU
      */
-    suspend fun handleTrickle(event: ICETrickleEvent) {
-        logger.d { "[handleTrickle] #sfu; #${event.peerType.stringify()}; candidate: ${event.candidate}" }
+    suspend fun handleIceTrickle(event: ICETrickleEvent) {
+        logger.d { "[handleIceTrickle] #sfu; #${event.peerType.stringify()}; candidate: ${event.candidate}" }
         val iceCandidate: IceCandidate = Json.decodeFromString(event.candidate)
         val result = if (event.peerType == PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED) {
             publisher?.addIceCandidate(iceCandidate)
@@ -838,8 +836,8 @@ public class RtcSession internal constructor(
     /**
      * @return [StateFlow] that holds [RTCStatsReport] that the publisher exposes.
      */
-    fun getPublisherStats(): StateFlow<RTCStatsReport?> {
-        return publisher?.getStats() ?: MutableStateFlow(null)
+    fun getPublisherStats(): StateFlow<RTCStatsReport?>? {
+        return publisher?.getStats()
     }
 
     /**

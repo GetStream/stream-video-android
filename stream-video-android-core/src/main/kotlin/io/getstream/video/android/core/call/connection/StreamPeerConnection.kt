@@ -397,11 +397,11 @@ public class StreamPeerConnection(
      */
     private fun observeStats() = coroutineScope.launch {
         while (isActive) {
-            delay(10_000L)
             connection.getStats {
                 logger.v { "[observeStats] #sfu; #$typeTag; stats: $it" }
                 statsFlow.value = it
             }
+            delay(10_000L)
         }
     }
 
