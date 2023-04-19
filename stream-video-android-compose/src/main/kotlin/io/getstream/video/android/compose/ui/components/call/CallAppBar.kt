@@ -16,7 +16,9 @@
 
 package io.getstream.video.android.compose.ui.components.call
 
+import android.content.res.Configuration
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -80,6 +82,7 @@ public fun CallAppBar(
         modifier = modifier
             .fillMaxWidth()
             .height(height)
+            .background(VideoTheme.colors.appBackground)
             .padding(VideoTheme.dimens.callAppBarPadding),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -155,6 +158,7 @@ internal fun DefaultCallAppBarTrailingContent(onCallAction: (CallAction) -> Unit
 }
 
 @Preview
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun CallTopAppbarPreview() {
     VideoTheme {

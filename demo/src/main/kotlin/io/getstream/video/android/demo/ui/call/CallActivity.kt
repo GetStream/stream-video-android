@@ -17,7 +17,9 @@
 package io.getstream.video.android.demo.ui.call
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -26,6 +28,8 @@ import androidx.compose.ui.Modifier
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.CallContainer
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.model.StreamCallId
+import io.getstream.video.android.core.model.typeToId
 import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.core.viewmodel.CallViewModelFactory
 import io.getstream.video.android.demo.demoVideoApp
@@ -35,24 +39,30 @@ class CallActivity : AppCompatActivity() {
     /**
      * Provides the StreamVideo instance through the videoApp.
      */
-    fun getStreamVideo(context: Context): StreamVideo = context.demoVideoApp.streamVideo
-    private val streamVideo: StreamVideo by lazy { getStreamVideo(this) }
+    private val streamVideo: StreamVideo by lazy { demoVideoApp.streamVideo }
 
-    protected val callViewModel: CallViewModel by viewModels(factoryProducer = { defaultViewModelFactory() })
+    private val factory by lazy { callViewModelFactory() }
+    private val vm by viewModels<CallViewModel> { factory }
 
     // private val permissionsManager = setupPermissionManager()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        callViewModel.joinCall()
+
+        vm.joinCall {
+            Toast.makeText(
+                this,
+                "failed to join call (${vm.call.cid}): $it", Toast.LENGTH_SHORT
+            ).show()
+            finish()
+        }
 
         setContent {
             VideoTheme {
                 CallContainer(
                     modifier = Modifier.background(color = VideoTheme.colors.appBackground),
-                    callViewModel = callViewModel,
-                    // onCallAction = ::handleCallAction,
-                    // onBackPressed = ::handleBackPressed,
+                    callViewModel = vm,
+                    onBackPressed = { finish() },
                 )
             }
         }
@@ -61,13 +71,26 @@ class CallActivity : AppCompatActivity() {
     /**
      * Provides the default ViewModel factory.
      */
-    public fun defaultViewModelFactory(): CallViewModelFactory {
+    private fun callViewModelFactory(): CallViewModelFactory {
+        val (type, id) = intent.getStringExtra(EXTRA_CID)?.typeToId
+            ?: throw IllegalArgumentException("You must pass correct channel id.")
+
         return CallViewModelFactory(
             streamVideo = streamVideo,
-            permissionManager = null,
-            // TODO: ->
-            call = streamVideo.call("default", "123")
+            call = streamVideo.call(type = type, id = id),
+            permissionManager = null
         )
+    }
+
+    companion object {
+        internal const val EXTRA_CID = "EXTRA_CID"
+
+        fun getIntent(context: Context, cid: StreamCallId): Intent {
+            return Intent(context, CallActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                putExtra(EXTRA_CID, cid)
+            }
+        }
     }
 
 //    fun setupPermissionManager(): StreamPermissionManagerImpl {

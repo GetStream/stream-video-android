@@ -2786,7 +2786,8 @@ public final class io/getstream/video/android/core/viewmodel/CallViewModel : and
 	public final fun getClient ()Lio/getstream/video/android/core/StreamVideo;
 	public final fun isInPictureInPicture ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun isShowingCallInfoMenu ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun joinCall ()V
+	public final fun joinCall (Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun joinCall$default (Lio/getstream/video/android/core/viewmodel/CallViewModel;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public final fun onCallAction (Lio/getstream/video/android/core/call/state/CallAction;)V
 	public final fun onPictureInPictureModeChanged (Z)V
 }

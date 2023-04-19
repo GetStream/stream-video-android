@@ -19,6 +19,8 @@
     package="io.getstream.video.android.demo"
     >
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:name=".DemoVideoApp"
         android:allowBackup="true"
