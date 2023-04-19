@@ -51,8 +51,8 @@
 - [X] MemberState
 - [X] ConnectionModule
 - [X] Call
-- [ ] StreamVideoImpl
-- [ ] CallState
+- [X] StreamVideoImpl
+- [X] CallState
 
 ### TODOs
 

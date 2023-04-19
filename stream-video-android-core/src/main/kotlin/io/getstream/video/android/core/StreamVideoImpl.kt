@@ -99,19 +99,8 @@ import org.openapitools.client.models.WSCallEvent
 import retrofit2.HttpException
 import kotlin.coroutines.Continuation
 
-class EventSubscription(
-    public val listener: VideoEventListener<VideoEvent>,
-    public val filter: ((VideoEvent) -> Boolean)? = null,
-) {
-    var isDisposed: Boolean = false
-
-    fun dispose() {
-        isDisposed = true
-    }
-}
-
 /**
- * @param lifecycle The lifecycle used to observe changes in the process. // TODO - docs
+ * @param lifecycle The lifecycle used to observe changes in the process
  */
 internal class StreamVideoImpl internal constructor(
     override val context: Context,
@@ -125,16 +114,22 @@ internal class StreamVideoImpl internal constructor(
     internal val preferences: UserPreferences,
 ) : StreamVideo {
 
+    /** the state for the client, includes the current user */
+    override val state = ClientState(this)
+
+    /** if true we fail fast on errors instead of logging them */
+    var developmentMode = true
+
     private var guestUserJob: Deferred<Unit>? = null
     private lateinit var connectContinuation: Continuation<Result<ConnectedEvent>>
 
-    var developmentMode = true // if true we fail fast on errors instead of logging them
+
 
     @VisibleForTesting
     public var peerConnectionFactory = StreamPeerConnectionFactory(context)
     public override val userId = user.id
 
-    override val state = ClientState(this)
+
     private val logger by taggedLogger("Call:StreamVideo")
     private var subscriptions = mutableSetOf<EventSubscription>()
     private var calls = mutableMapOf<String, Call>()

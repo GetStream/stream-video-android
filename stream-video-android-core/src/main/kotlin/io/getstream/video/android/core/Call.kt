@@ -286,6 +286,10 @@ public class Call(
         return clientImpl.stopLive(type, id)
     }
 
+    suspend fun sendCustomEvent(): Result<StopLiveResponse> {
+        TODO()
+    }
+
     /** Permissions */
     suspend fun requestPermissions(vararg permission: String): Result<Unit> {
         return clientImpl.requestPermissions(type, id, permission.toList())

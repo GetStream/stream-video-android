@@ -38,6 +38,7 @@ import io.getstream.video.android.core.call.utils.stringify
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
+import io.getstream.video.android.core.events.PublisherAnswerEvent
 import io.getstream.video.android.core.events.SfuDataEvent
 import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.events.TrackPublishedEvent
@@ -238,7 +239,7 @@ public class RtcSession internal constructor(
         // listen to socket events and errors
         scope.launch {
             sfuConnectionModule.sfuSocket.events.collect() {
-                clientImpl.fireEvent(it)
+                clientImpl.fireEvent(it, call.cid)
             }
         }
         scope.launch {
@@ -253,7 +254,7 @@ public class RtcSession internal constructor(
     }
 
     suspend fun connect() {
-        connectWs()
+        connectWs() // This is where it hangs
         connectRtc()
     }
 
@@ -312,7 +313,7 @@ public class RtcSession internal constructor(
         }
     }
 
-    suspend fun connectRtc(): Result<JoinResponse> {
+    suspend fun connectRtc() {
 
         // if we are allowed to publish, create a peer connection for it
         // TODO: real settings check
@@ -357,13 +358,11 @@ public class RtcSession internal constructor(
             publisher?.addVideoTransceiver(videoTrack!!, listOf(sessionId))
         }
 
-        // step 6 - execute the join request
-        val result = executeJoinRequest()
-        // step 7 - onNegotiationNeeded will trigger and complete the setup using SetPublisherRequest
-        // step 8 - We will receive the JoinCallResponseEvent event
+        // step 6 - onNegotiationNeeded will trigger and complete the setup using SetPublisherRequest
+        // step 7 - We will receive the JoinCallResponseEvent event
 
         listenToMediaChanges()
-        return result
+        return
     }
 
     /**
@@ -487,26 +486,6 @@ public class RtcSession internal constructor(
         )
         logger.i { "[createSubscriber] #sfu; subscriber: $subscriber" }
         return subscriber
-    }
-
-    private suspend fun executeJoinRequest(): Result<JoinResponse> {
-
-        return try {
-            val connected = call.state.connection.value
-            logger.d { "[executeJoinRequest] is connected: $connected" }
-            logger.d { "[executeJoinRequest] sfu join request is sent" }
-            logger.d { "[executeJoinRequest] request is sent" }
-            val currentValue = joinEventResponse.value
-
-            logger.d { "[executeJoinRequest] currentValue: $currentValue" }
-            val event = joinEventResponse.filterNotNull().first()
-            logger.d { "[executeJoinRequest] completed: $event" }
-            Success(JoinResponse())
-        } catch (e: Throwable) {
-            logger.e { "[executeJoinRequest] failed: $e" }
-            val msg = "failed to join the event"
-            Failure(io.getstream.result.Error.GenericError(msg))
-        }
     }
 
     private suspend fun getSubscriberSdp(): SessionDescription {
@@ -683,6 +662,7 @@ public class RtcSession internal constructor(
                 when (event) {
                     is ICETrickleEvent -> handleTrickle(event)
                     is SubscriberOfferEvent -> handleSubscriberOffer(event)
+                    is PublisherAnswerEvent -> TODO()
                     // this dynascale event tells the SDK to change the quality of the video it's uploading
                     is ChangePublishQualityEvent -> updatePublishQuality(event)
 

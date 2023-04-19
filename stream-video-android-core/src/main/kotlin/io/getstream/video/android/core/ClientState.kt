@@ -88,7 +88,6 @@ class ClientState(client: StreamVideo) {
             // get or create the call and update it
             val (type, id) = event.callCid.split(":")
             val call = clientImpl.call(type, id)
-            call.state.updateFromEvent(event)
 
             if (event.ringing) {
                 _ringingCall.value = call

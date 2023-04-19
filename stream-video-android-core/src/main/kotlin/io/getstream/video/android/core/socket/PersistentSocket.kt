@@ -214,14 +214,10 @@ open class PersistentSocket<T>(
                 Serializer.moshi.adapter(VideoEvent::class.java)
             var processedEvent = jsonAdapter.fromJson(text)
 
+            // TODO: This logic is specific to the Coordinator socket, move it
             if (processedEvent is ConnectedEvent) {
                 connectionId = processedEvent.connectionId
                 _connectionState.value = SocketState.Connected(processedEvent)
-                if (!continuationCompleted) {
-                    connected.resume(processedEvent as T)
-                    continuationCompleted = true
-                }
-            } else if (processedEvent is JoinCallResponseEvent) {
                 if (!continuationCompleted) {
                     connected.resume(processedEvent as T)
                     continuationCompleted = true
@@ -265,6 +261,14 @@ open class PersistentSocket<T>(
                 if (message is ErrorEvent) {
                     val errorEvent = message as ErrorEvent
                     handleError(SfuSocketError(errorEvent.error))
+                }
+                // TODO: This logic is specific to the SfuSocket, move it
+                if (message is JoinCallResponseEvent) {
+                    _connectionState.value = SocketState.Connected(message)
+                    if (!continuationCompleted) {
+                        connected.resume(message as T)
+                        continuationCompleted = true
+                    }
                 }
                 events.emit(message)
             } catch (error: Throwable) {

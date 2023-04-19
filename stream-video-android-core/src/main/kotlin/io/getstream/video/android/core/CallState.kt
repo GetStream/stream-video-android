@@ -317,7 +317,10 @@ public class CallState(private val call: Call, user: User) {
             }
 
             is CallCreatedEvent -> {
-                // this is handled by the client
+                updateFromResponse(event.call)
+                getOrCreateMembers(event.members)
+                // TODO: ringing state
+
             }
 
             is CallUpdatedEvent -> {
@@ -417,6 +420,7 @@ public class CallState(private val call: Call, user: User) {
             }
 
             is JoinCallResponseEvent -> {
+                _connection.value = ConnectionState.Connected
                 // time to update call state based on the join response
                 updateFromJoinResponse(event)
             }
@@ -439,10 +443,6 @@ public class CallState(private val call: Call, user: User) {
 
             is TrackUnpublishedEvent -> {
                 // handled by ActiveSFUSession
-            }
-
-            is SFUConnectedEvent -> {
-                _connection.value = ConnectionState.Connected
             }
 
             is ConnectedEvent -> {

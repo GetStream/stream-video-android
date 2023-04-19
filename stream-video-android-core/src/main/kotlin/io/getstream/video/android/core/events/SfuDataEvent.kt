@@ -20,6 +20,7 @@ import io.getstream.video.android.core.model.UserAudioLevel
 import org.openapitools.client.models.VideoEvent
 import stream.video.sfu.event.ChangePublishQuality
 import stream.video.sfu.event.ConnectionQualityInfo
+import stream.video.sfu.models.CallGrants
 import stream.video.sfu.models.CallState
 import stream.video.sfu.models.Error
 import stream.video.sfu.models.Participant
@@ -31,6 +32,15 @@ public sealed class SfuDataEvent : VideoEvent() {
         return "SfuDataEvent"
     }
 }
+
+public data class PublisherAnswerEvent(
+    val sdp: String
+): SfuDataEvent()
+
+public data class CallGrantsUpdatedEvent(
+    val current_grants: CallGrants?,
+    val message: String = "",
+) : SfuDataEvent()
 
 public data class SFUConnectedEvent(
     val clientId: String,
