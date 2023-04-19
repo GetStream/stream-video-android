@@ -40,6 +40,7 @@ public final class io/getstream/video/android/core/Call {
 	public final fun removeMembers (Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun requestPermissions ([Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun revokePermissions (Ljava/lang/String;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun sendCustomEvent (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun sendReaction (Lio/getstream/video/android/core/model/SendReactionData;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun startBroadcasting (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun startRecording (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -92,7 +93,6 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun handleEvent (Lorg/openapitools/client/models/VideoEvent;)V
 	public final fun hasPermission (Ljava/lang/String;)Lkotlinx/coroutines/flow/StateFlow;
 	public final fun isScreenSharing ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun updateFromEvent (Lorg/openapitools/client/models/VideoEvent;)V
 	public final fun updateFromResponse (Lorg/openapitools/client/models/CallResponse;)V
 	public final fun updateFromResponse (Lorg/openapitools/client/models/CallStateResponseFields;)V
 	public final fun updateFromResponse (Lorg/openapitools/client/models/GetCallResponse;)V
@@ -856,6 +856,20 @@ public final class io/getstream/video/android/core/events/AudioLevelChangedEvent
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class io/getstream/video/android/core/events/CallGrantsUpdatedEvent : io/getstream/video/android/core/events/SfuDataEvent {
+	public fun <init> (Lstream/video/sfu/models/CallGrants;Ljava/lang/String;)V
+	public synthetic fun <init> (Lstream/video/sfu/models/CallGrants;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lstream/video/sfu/models/CallGrants;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Lstream/video/sfu/models/CallGrants;Ljava/lang/String;)Lio/getstream/video/android/core/events/CallGrantsUpdatedEvent;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/events/CallGrantsUpdatedEvent;Lstream/video/sfu/models/CallGrants;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/events/CallGrantsUpdatedEvent;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCurrent_grants ()Lstream/video/sfu/models/CallGrants;
+	public final fun getMessage ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class io/getstream/video/android/core/events/ChangePublishQualityEvent : io/getstream/video/android/core/events/SfuDataEvent {
 	public fun <init> (Lstream/video/sfu/event/ChangePublishQuality;)V
 	public final fun component1 ()Lstream/video/sfu/event/ChangePublishQuality;
@@ -948,6 +962,17 @@ public final class io/getstream/video/android/core/events/ParticipantLeftEvent :
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCallCid ()Ljava/lang/String;
 	public final fun getParticipant ()Lstream/video/sfu/models/Participant;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/events/PublisherAnswerEvent : io/getstream/video/android/core/events/SfuDataEvent {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/core/events/PublisherAnswerEvent;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/events/PublisherAnswerEvent;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/events/PublisherAnswerEvent;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getSdp ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }

@@ -35,7 +35,7 @@ public sealed class SfuDataEvent : VideoEvent() {
 
 public data class PublisherAnswerEvent(
     val sdp: String
-): SfuDataEvent()
+) : SfuDataEvent()
 
 public data class CallGrantsUpdatedEvent(
     val current_grants: CallGrants?,
