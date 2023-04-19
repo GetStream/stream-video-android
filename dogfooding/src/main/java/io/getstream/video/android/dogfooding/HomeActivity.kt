@@ -55,7 +55,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import io.getstream.log.taggedLogger
-import io.getstream.result.flatMapSuspend
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.Avatar
 import io.getstream.video.android.core.ConnectionState
@@ -160,21 +159,13 @@ class HomeActivity : AppCompatActivity() {
             val (type, id) = callCidState.value.typeToId
             val call = streamVideo.call(type = type, id = id)
 
-            val me = streamVideo.user
-            val create = call.create(memberIds = listOf(me.id))
-            create.flatMapSuspend {
-                logger.d { "[createCall] succeed: $call" }
-
-                val join = call.join()
-                join.onSuccess {
-                    logger.d { "[joinCall] succeed: $call" }
-
-                    val intent = CallActivity.getIntent(this@HomeActivity, type, id)
-                    startActivity(intent)
-                }
+            val result = call.create(memberIds = listOf(streamVideo.userId))
+            result.onSuccess {
+                logger.d { "[joinCall] onSuccess: $it" }
+                val intent = CallActivity.getIntent(this@HomeActivity, type, id)
+                startActivity(intent)
             }.onError {
-                logger.d { "failed: $it" }
-
+                logger.d { "[joinCall] onError: $it" }
                 Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
             }
         }

@@ -21,9 +21,11 @@ package io.getstream.video.android.core.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.getstream.log.taggedLogger
+import io.getstream.result.Error
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoImpl
+import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CallDeviceState
 import io.getstream.video.android.core.call.state.FlipCamera
@@ -76,10 +78,18 @@ public class CallViewModel(
     private val _callDeviceState = MutableStateFlow(CallDeviceState())
     public val callDeviceState: StateFlow<CallDeviceState> = _callDeviceState
 
-    public fun joinCall() {
+    public fun joinCall(
+        onSuccess: (RtcSession) -> Unit = {},
+        onFailure: (Error) -> Unit = {}
+    ) {
         viewModelScope.launch {
             withTimeout(CONNECT_TIMEOUT) {
-                call.join()
+                val result = call.join()
+                result.onSuccess {
+                    onSuccess.invoke(it)
+                }.onError {
+                    onFailure.invoke(it)
+                }
             }
         }
     }

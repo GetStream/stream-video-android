@@ -25,7 +25,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -114,23 +113,26 @@ class HomeActivity : AppCompatActivity() {
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                         .align(CenterHorizontally),
-                    enabled = isDataValid, onClick = {
-                        TODO()
+                    enabled = isDataValid,
+                    onClick = {
+                        createMeeting(
+                            callId = callIdState.value,
+                            participants = listOf(streamVideo.userId)
+                        )
                     }
                 ) {
-                    Text(text = "Create call")
+                    Text(text = "Create and Join call")
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
-                val context = LocalContext.current
+
                 Button(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                         .align(CenterHorizontally),
-                    enabled = isDataValid, onClick = {
-                        context.startActivity(Intent(context, CallActivity::class.java))
-                    }
+                    enabled = isDataValid,
+                    onClick = { startCallActivity() }
                 ) {
                     Text(text = "Join call")
                 }
@@ -146,64 +148,29 @@ class HomeActivity : AppCompatActivity() {
         }
     }
 
-    @Composable
-    fun ColumnScope.CreateCallContent() {
-    }
-
-    @Composable
-    fun ColumnScope.JoinCallContent() {
-        CallIdInput()
-
-        val isDataValid = callIdState.value.isNotBlank()
-
-        Button(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .align(CenterHorizontally),
-            enabled = isDataValid, onClick = {
-                joinCall(callId = callIdState.value)
-            }
-        ) {
-            Text(text = "Join call")
-        }
-    }
-
     private fun createMeeting(callId: String, participants: List<String>) {
         lifecycleScope.launch {
             logger.d { "[createMeeting] callId: $callId, participants: $participants" }
 
             loadingState.value = true
-            val result = streamVideo.call(
-                "default", callId
-            ).join()
+            val call = streamVideo.call("default", callId)
 
+            val result = call.create(memberIds = participants)
             result.onSuccess { data ->
-                logger.v { "[createMeeting] successful: $data" }
+                logger.d { "[createMeeting] successful: $data" }
                 loadingState.value = false
-            }
 
-            result.onError {
+                startCallActivity()
+            }.onError {
                 logger.e { "[createMeeting] failed: $it" }
                 Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
             }
         }
     }
 
-    private fun joinCall(callId: String) {
-        lifecycleScope.launch {
-            logger.d { "[joinCall] callId: $callId" }
-            loadingState.value = true
-            val call = streamVideo.call("default", callId)
-
-            call.join().onSuccess { data ->
-                logger.v { "[joinCall] succeed: $data" }
-            }.onError {
-                logger.e { "[joinCall] failed: $it" }
-                Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
-            }
-            loadingState.value = false
-        }
+    private fun startCallActivity() {
+        val intent = CallActivity.getIntent(this@HomeActivity, "default", callIdState.value)
+        startActivity(intent)
     }
 
     @Composable
