@@ -107,15 +107,12 @@ public final class io/getstream/video/android/core/CallState {
 public final class io/getstream/video/android/core/CameraManager {
 	public fun <init> (Lio/getstream/video/android/core/MediaManagerImpl;)V
 	public final fun disable ()V
-	public final fun enable ()V
+	public final fun enable (Z)V
 	public final fun flip ()V
 	public final fun getDevices ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getMediaManager ()Lio/getstream/video/android/core/MediaManagerImpl;
 	public final fun getSelectedDevice ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getStatus ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun get_devices ()Lkotlinx/coroutines/flow/MutableStateFlow;
-	public final fun get_selectedDevice ()Lkotlinx/coroutines/flow/MutableStateFlow;
-	public final fun get_status ()Lkotlinx/coroutines/flow/MutableStateFlow;
 	public final fun select (Ljava/lang/String;)V
 	public final fun startCapture ()V
 }
@@ -149,10 +146,6 @@ public final class io/getstream/video/android/core/ConnectionState$Disconnected 
 
 public final class io/getstream/video/android/core/ConnectionState$Failed : io/getstream/video/android/core/ConnectionState {
 	public fun <init> (Ljava/lang/Error;)V
-}
-
-public final class io/getstream/video/android/core/ConnectionState$Idle : io/getstream/video/android/core/ConnectionState {
-	public static final field INSTANCE Lio/getstream/video/android/core/ConnectionState$Idle;
 }
 
 public final class io/getstream/video/android/core/ConnectionState$Loading : io/getstream/video/android/core/ConnectionState {
@@ -276,7 +269,7 @@ public final class io/getstream/video/android/core/MicrophoneManager {
 	public fun <init> (Lio/getstream/video/android/core/MediaManagerImpl;)V
 	public final fun devices ()Ljava/util/List;
 	public final fun disable ()V
-	public final fun enable ()V
+	public final fun enable (Z)V
 	public final fun getDevices ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getMediaManager ()Lio/getstream/video/android/core/MediaManagerImpl;
 	public final fun getSelectedDevice ()Lkotlinx/coroutines/flow/StateFlow;
@@ -340,7 +333,7 @@ public final class io/getstream/video/android/core/ParticipantState {
 	public final fun updateFromParticipantInfo (Lstream/video/sfu/models/Participant;)V
 }
 
-public abstract class io/getstream/video/android/core/RingingState {
+public abstract interface class io/getstream/video/android/core/RingingState {
 }
 
 public final class io/getstream/video/android/core/RingingState$Active : io/getstream/video/android/core/RingingState {
@@ -385,7 +378,7 @@ public final class io/getstream/video/android/core/SpeakerManager {
 	public fun <init> (Lio/getstream/video/android/core/MediaManagerImpl;)V
 	public final fun devices ()Ljava/util/List;
 	public final fun disable ()V
-	public final fun enable ()V
+	public final fun enable (Z)V
 	public final fun getDevices ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getMediaManager ()Lio/getstream/video/android/core/MediaManagerImpl;
 	public final fun getSelectedDevice ()Lkotlinx/coroutines/flow/StateFlow;
@@ -1887,6 +1880,7 @@ public final class io/getstream/video/android/core/model/StartedCall {
 
 public final class io/getstream/video/android/core/model/StreamCallCidKt {
 	public static final fun StreamCallCid (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+	public static final fun getTypeToId (Ljava/lang/String;)Lkotlin/Pair;
 }
 
 public final class io/getstream/video/android/core/model/StreamCallGuid : java/io/Serializable {
