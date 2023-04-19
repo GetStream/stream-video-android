@@ -4,28 +4,44 @@
 ### Week 1: Refactor LLC & State. Setup testing
 ### Week 2: LLC & State Stability. Compose testing & previews
 ### Week 3: Sample app, update compose to LLC & State changes. New events, socket & token provider. Call UI. Guest users & moderation endpoints
-### Week 4: 
+### Week 4: LLC & state test coverage + Demo & Dogfooding apps
 
-- Thierry: Improve LLC & state test coverage
-- Jaewoong to improve the demo and dogfooding apps
+
 
 ### Week 5: Render video/join calls
 
 - RTC & Audio testing
+- How to ensure that video resolutions are sent to the server
+- 
 - Step 1: Render local video using the new API and compose
 - Step 2: Upload local video to the SFU
 - Step 3: Join a call and render participants
 
+### RTC TODO
+
+- [X] Media manager class to enable easy testing of all audio/video stuff
+- [ ] Move setCameraEnabled & setMicrophoneEnabled
+- [ ] Move muting and clean it up
+- [ ] Leave & End flows
+- [ ] Review how UI changes & pagination are connected to the video tracks. See call initRenderer and updateParticipantsSubscriptions
+- [ ] Implement dynascale
+
+### TODOs
+
+- Review the 200 todos
+
+
 ### LLC TODO
 
-- [ ] Clean up tests
-- [ ] Test coverage
+- [ ] Error.NetworkError vs ErrorResponse. Having 2 classes is confusing. Error format is slightly differences in 3 places. 
 - [ ] Remove unused code
 - [ ] Join flow performance
 - [ ] Move SFU event to swap between SFUs and handle failure
 - [ ] Reconnect after SFU breaks (https://www.notion.so/Reconnection-Failure-handling-f6991fd2e5584380bb2d2cb5e8ac5303)
 - [ ] Audio filter example
 - [ ] Video filter example
+- [X] Test coverage
+- [X] Clean up tests
 - [X] Support for accepting/rejecting calls etc. HTTP endpoints seem cleaner
 - [X] Directly use the events from openAPI to prevent things being out of sync
 - [X] List of backend changes
@@ -37,7 +53,7 @@
 
 ### State TODO
 
-- [ ] Call settings need to be used everywhere. There are still some hardcoded settings
+- [X] Call settings need to be used everywhere. There are still some hardcoded settings
 - [X] Member state isn't implemented fully. Could be either a state or just a data class
 - [X] Call state isn't setup fully on join
 - [X] Member state isn't updated correctly or implemented
@@ -49,13 +65,10 @@
 - [X] ClientState
 - [X] MemberState
 - [X] ConnectionModule
-- [ ] CallState
-- [ ] StreamVideoImpl
-- [ ] Call
+- [X] Call
+- [X] StreamVideoImpl
+- [X] CallState
 
-### TODOs
-
-- Review the 200 todos
 
 ### Testing
 
@@ -127,12 +140,7 @@
 - [ ] Authentication example
 - [ ] Docs on client setup
 
-### RTC TODO
 
-- [X] Media manager class to enable easy testing of all audio/video stuff
-- [ ] Move muting and clean it up
-- [ ] Review how UI changes & pagination are connected to the video tracks
-- [ ] Implement dynascale
  
 ### Disconnect suggestion
 
@@ -148,24 +156,23 @@
 
 ### Server wishlist
 
-- Update call endpoints doesn’t expose team or startsAt. I get why we don’t expose team, not sure about startsAt
-- Get/Create etc don’t specify connection_id, this breaks the ability to watch
-- queryChannels doesn’t return members but CallUsers, this is wrong
-- Not being able to edit settings on a call you created seems like the wrong default: “”User ‘thierry’ with role ‘user’ is not allowed to perform action UpdateCallSettings in scope ‘video:default’“, serverErrorCode=17, statusCode=-1, cause=java.lang.Throwable: ))”
-- Events for updating users
-- Participant count (for livestreams you cant rely on the list)
-- Participant.online field is weird. Aren't you always online as a participant?
-- ConnectionQualityInfo is a list, audio levels is a map. Lets standardize
-- Push setup
-- Watching calls for audio rooms
-- What about codec switching?
-- What about graceful SFU shutdown/ an event to make clients move SFU?
-- Events for creating a channel on chat. so you lazy load the chat when the first person opens it
-- Endpoints for accepting/rejecting calls
-- List of error codes via openapi
-- getCall doesn't support member limits
-- ReactionResponse, custom should be optional
-- CallMemberUpdatedPermissionEvent. Weird that call and members are included
+[X] queryChannels doesn’t return members but CallUsers, this is wrong
+[X] Update call endpoints doesn’t expose team or startsAt. I get why we don’t expose team, not sure about startsAt
+[X] Get/Create etc don’t specify connection_id, this breaks the ability to watch
+[X] Not being able to edit settings on a call you created seems like the wrong default: “”User ‘thierry’ with role ‘user’ is not allowed to perform action UpdateCallSettings in scope ‘video:default’“, serverErrorCode=17, statusCode=-1, cause=java.lang.Throwable: ))”
+[ ] Events for updating users 
+[ ] Participant count (for livestreams you cant rely on the list)
+[ ] Participant.online field is weird. Aren't you always online as a participant?
+[ ] ConnectionQualityInfo is a list, audio levels is a map. Lets standardize
+[ ] Accept/reject call endpoints
+[ ] What about codec switching?
+[ ] What about graceful SFU shutdown/ an event to make clients move SFU?
+[ ] Events for creating a channel on chat. so you lazy load the chat when the first person opens it
+[ ] List of error codes via openapi
+[ ] getCall doesn't support member limits
+[ ] CallMemberUpdatedPermissionEvent. Weird that call and members are included
+[ ] message=GetOrCreateCall failed with error: "The following users are involved in call create operation, but don't exist: [jaewoong]. Please create the user objects before setting up the call.
+[ ] review QueryMembersRequest
 
 ### Available tasks up for grabs
 
@@ -175,4 +182,3 @@
 - Currently we use UserPreferencesManager. Jaewoong mentioned we should perhaps explore https://developer.android.com/topic/libraries/architecture/datastore
 - Measure latency isn't 100% ok. You can't set a timeout using withTimeout and collect the measurements that we have. This relates to threading vs coroutines and withTimeout not working
 - Disconnect/ garbage collect flow needs a full round of review
-- MediaManager needs a full review and cleanup

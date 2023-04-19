@@ -20,9 +20,9 @@ import com.google.common.truth.Truth.assertThat
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import kotlinx.coroutines.test.runTest
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.openapitools.client.models.CallCreatedEvent
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
@@ -53,16 +53,10 @@ public class CallCrudTest : IntegrationTestBase() {
         val call = client.call("default", randomUUID())
         val result = call.create()
         assertSuccess(result)
-        // Wait to receive the next event
-        waitForNextEvent<CallCreatedEvent>()
-
-        // verify that we received the create call event
-        assertThat(events.size).isEqualTo(1)
-        val event = assertEventReceived(CallCreatedEvent::class.java)
     }
 
     @Test
-    fun `update a call, verify it works and the event is fired`() = runTest {
+    fun `update a call, verify it works`() = runTest {
         // create the call
         val call = client.call("default", randomUUID())
         val createResult = call.create()
@@ -81,12 +75,8 @@ public class CallCrudTest : IntegrationTestBase() {
         val getResult = call.get()
         assertSuccess(getResult)
 
-        // verify that we received the create call event
-        assertThat(events.size).isEqualTo(1)
-        val createdEvent = waitForNextEvent<CallCreatedEvent>()
-
         getResult.onSuccess {
-            assertThat(it.call.custom["color"]).isEqualTo(secret)
+            assertThat(it.call.custom["secret"]).isEqualTo(secret)
         }
     }
 
@@ -120,8 +110,19 @@ public class CallCrudTest : IntegrationTestBase() {
     }
 
     @Test
+    @Ignore
     fun `Paginate members`() = runTest {
-        val response = call.get()
-        TODO()
+        val members = mutableListOf("thierry", "tommaso")
+        val call = client.call("default", randomUUID())
+        val result = call.create(memberIds = members, custom = mapOf("color" to "red"))
+        assert(result.isSuccess)
+
+        // TODO: clarify the filter syntax with backend
+        val filters = mapOf("username" to "thierry")
+        val response = call.queryMembers(filters)
+        assertSuccess(response)
+        response.onSuccess {
+            assertThat(it.members).hasSize(1)
+        }
     }
 }

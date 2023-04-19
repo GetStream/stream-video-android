@@ -18,7 +18,6 @@ package io.getstream.video.android.core.internal.module
 
 import android.content.Context
 import android.net.ConnectivityManager
-import io.getstream.video.android.core.api.ClientRPCService
 import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
@@ -34,6 +33,7 @@ import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Response
 import okhttp3.logging.HttpLoggingInterceptor
+import org.openapitools.client.apis.DefaultApi
 import org.openapitools.client.apis.EventsApi
 import org.openapitools.client.apis.LivestreamingApi
 import org.openapitools.client.apis.ModerationApi
@@ -70,11 +70,11 @@ internal class ConnectionModule(
     private var baseUrlInterceptor: BaseUrlInterceptor
     private var authInterceptor: CoordinatorAuthInterceptor
     internal var okHttpClient: OkHttpClient
-    internal var oldService: ClientRPCService
     internal var videoCallsApi: VideoCallsApi
     internal var moderationApi: ModerationApi
     internal var recordingApi: RecordingApi
     internal var livestreamingApi: LivestreamingApi
+    internal var defaultApi: DefaultApi
 
     internal var eventsApi: EventsApi
     internal var coordinatorSocket: CoordinatorSocket
@@ -112,12 +112,12 @@ internal class ConnectionModule(
             .build()
 
         // setup the 4 retrofit APIs
-        oldService = protoRetrofitClient.create(ClientRPCService::class.java)
         videoCallsApi = retrofitClient.create(VideoCallsApi::class.java)
         eventsApi = retrofitClient.create(EventsApi::class.java)
         moderationApi = retrofitClient.create(ModerationApi::class.java)
         recordingApi = retrofitClient.create(RecordingApi::class.java)
         livestreamingApi = retrofitClient.create(LivestreamingApi::class.java)
+        defaultApi = retrofitClient.create(DefaultApi::class.java)
 
         // Note that it doesn't connect when you create the socket
         coordinatorSocket = createCoordinatorSocket()
@@ -207,6 +207,9 @@ internal class ConnectionModule(
     }
 
     fun updateToken(newToken: String) {
+        // the coordinator socket also needs to update the token
+        coordinatorSocket.token = newToken
+        // update the auth token as well
         authInterceptor.token = newToken
     }
 

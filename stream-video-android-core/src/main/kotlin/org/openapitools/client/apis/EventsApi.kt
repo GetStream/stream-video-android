@@ -30,7 +30,10 @@ interface EventsApi {
      *  - 400: Bad request
      *  - 429: Too many requests
      *
-     * @param type * @param id * @param sendEventRequest * @return [SendEventResponse]
+     * @param type type
+     * @param id id
+     * @param sendEventRequest send
+     * @return [SendEventResponse] response
      */
     @POST("/video/call/{type}/{id}/event")
     suspend fun sendEvent(

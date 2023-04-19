@@ -57,12 +57,14 @@ docker pull ghcr.io/getstream/openapi-generator:master
 
 docker run --rm \
   -v "${GENERATED_CODE_ROOT}:/local" \
-  -v "/Users/tommaso/src/protocol:/protocol" \
   ghcr.io/getstream/openapi-generator:master generate \
   -i https://raw.githubusercontent.com/GetStream/protocol/main/openapi/video-openapi.yaml \
   --additional-properties=library=jvm-retrofit2,useCoroutines,dateLibrary=threetenbp \
   -g kotlin \
   -o /local
+
+# delete all files in the target path of openapi to make sure we do not leave legacy code around
+rm -rf "${PROJECT_ROOT}/stream-video-android-core/src/main/kotlin/org/openapitools/client"
 
 APIS_ROOT="$CLIENT_ROOT/apis"
 INFRASTRUCTURE_ROOT="$CLIENT_ROOT/infrastructure"
@@ -71,7 +73,7 @@ rm -rf "$CLIENT_ROOT/auth"
 rm "$INFRASTRUCTURE_ROOT/ApiClient.kt" "$INFRASTRUCTURE_ROOT/ResponseExt.kt"
 rm "$APIS_ROOT/UsersApi.kt"
 
-API_REQUEST_REGEX="@(?:POST|DELETE|GET|PUT)\(\"(.*?)\""
+API_REQUEST_REGEX="@(?:POST|DELETE|GET|PUT|PATCH)\(\"(.*?)\""
 RETROFIT_IMPORTS_REGEX="(Body)|^[[:space:]]*@([^()]*)\("
 
 for FILE in "$APIS_ROOT"/*.kt; do
@@ -107,6 +109,9 @@ for FILE in "$APIS_ROOT"/*.kt; do
   sed -i '' "s/import retrofit2\.http\.\*/$PREPARED_IMPORTS/g" "$FILE"
 done
 
-rm -rf "${PROJECT_ROOT}/stream-video-android-core/src/main/kotlin/org/openapitools/client"
+# copy the massaged openapi generated code in the right path
 cp -r "${CLIENT_ROOT}/" "${PROJECT_ROOT}/stream-video-android-core/src/main/kotlin/org/openapitools/client"
+
+# delete all files in the target path of proto to avoid leaving legacy stuff around
+rm -rf ${PROJECT_ROOT}/stream-video-android-core/src/main/proto
 cp -r "${PROTOCOL_ROOT}/protobuf/." "${PROJECT_ROOT}/stream-video-android-core/src/main/proto"

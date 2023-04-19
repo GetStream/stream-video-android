@@ -19,7 +19,6 @@ package io.getstream.video.android.core
 import com.google.common.truth.Truth.assertThat
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.events.JoinCallResponseEvent
-import io.getstream.video.android.core.events.SFUConnectedEvent
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -82,9 +81,11 @@ class AndroidDeviceTest : IntegrationTestBase() {
     fun joinACall() = runTest {
         val joinResult = call.join()
         assertSuccess(joinResult)
-        waitForNextEvent<SFUConnectedEvent>()
-        assertThat(call.state.connection.value).isEqualTo(ConnectionState.Connected)
+        println("showing events")
+        println(events)
         val joinResponse = waitForNextEvent<JoinCallResponseEvent>()
+        assertThat(call.state.connection.value).isEqualTo(ConnectionState.Connected)
+
         val participantsResponse = joinResponse.callState.participants
         assertThat(participantsResponse.size).isEqualTo(1)
         val participants = call.state.participants

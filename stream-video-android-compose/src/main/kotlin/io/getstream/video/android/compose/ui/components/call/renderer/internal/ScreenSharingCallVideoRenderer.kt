@@ -18,18 +18,14 @@ package io.getstream.video.android.compose.ui.components.call.renderer.internal
 
 import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import android.view.View
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.ui.components.call.controls.internal.DefaultCallControlsContent
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.call.state.CallDeviceState
 import io.getstream.video.android.core.model.ScreenSharingSession
 
 /**
@@ -40,32 +36,19 @@ import io.getstream.video.android.core.model.ScreenSharingSession
  * @param call The call that contains all the participants state and tracks.
  * @param session The screen sharing session which is active.
  * @param participants List of participants currently in the call.
- * @param callDeviceState The state of the call media, such as audio, video.
  * @param onCallAction Handler when the user triggers a Call Control Action.
  * @param modifier Modifier for styling.
- * @param paddingValues Padding within the parent.
- * @param isFullscreen If we're rendering a full screen activity.
  * @param onRender Handler when each of the Video views render their first frame.
- * @param callControlsContent Content shown that allows users to trigger different actions.
  */
 @Composable
 internal fun ScreenSharingCallVideoRenderer(
     call: Call,
     session: ScreenSharingSession,
     participants: List<ParticipantState>,
-    callDeviceState: CallDeviceState,
     onCallAction: (CallAction) -> Unit,
     modifier: Modifier = Modifier,
-    paddingValues: PaddingValues = PaddingValues(0.dp),
     onRender: (View) -> Unit = {},
-    onBackPressed: () -> Unit = {},
-    callControlsContent: @Composable () -> Unit = {
-        DefaultCallControlsContent(
-            call = call,
-            callDeviceState = callDeviceState,
-            onCallAction = onCallAction
-        )
-    }
+    onBackPressed: () -> Unit = {}
 ) {
     val configuration = LocalConfiguration.current
     val orientation = configuration.orientation
@@ -77,7 +60,6 @@ internal fun ScreenSharingCallVideoRenderer(
             session = session,
             participants = participants,
             primarySpeaker = screenSharingSession?.participant,
-            paddingValues = paddingValues,
             modifier = modifier,
             onRender = onRender,
             onCallAction = onCallAction,
@@ -89,7 +71,6 @@ internal fun ScreenSharingCallVideoRenderer(
             session = session,
             participants = participants,
             primarySpeaker = screenSharingSession?.participant,
-            paddingValues = paddingValues,
             modifier = modifier,
             onRender = onRender,
             onCallAction = onCallAction,

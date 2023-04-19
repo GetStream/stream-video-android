@@ -64,8 +64,8 @@ class SpeakerManager(val mediaManager: MediaManagerImpl) {
         mediaManager.selectCamera(deviceId)
     }
 
-    fun enable() {
-        mediaManager.setCameraEnabled(true)
+    fun enable(isEnabled: Boolean) {
+        mediaManager.setSpeakerphoneEnabled(isEnabled)
     }
 
     fun setVolume(volumeLevel: Long) {
@@ -103,8 +103,8 @@ class MicrophoneManager(val mediaManager: MediaManagerImpl) {
     fun startCapture() {
     }
 
-    fun enable() {
-        mediaManager.setCameraEnabled(true)
+    fun enable(isEnabled: Boolean) {
+        mediaManager.setCameraEnabled(isEnabled)
     }
 
     fun disable() {
@@ -112,20 +112,20 @@ class MicrophoneManager(val mediaManager: MediaManagerImpl) {
     }
 }
 
-class CameraManager(val mediaManager: MediaManagerImpl) {
+public class CameraManager(public val mediaManager: MediaManagerImpl) {
 
-    val _status = MutableStateFlow<DeviceStatus>(DeviceStatus.Disabled)
-    val status: StateFlow<DeviceStatus> = _status
+    private val _status = MutableStateFlow<DeviceStatus>(DeviceStatus.Disabled)
+    public val status: StateFlow<DeviceStatus> = _status
 
-    val _selectedDevice = MutableStateFlow<String?>(null)
-    val selectedDevice: StateFlow<String?> = _selectedDevice
+    private val _selectedDevice = MutableStateFlow<String?>(null)
+    public val selectedDevice: StateFlow<String?> = _selectedDevice
 
     fun flip() {
         mediaManager.flipCamera()
     }
 
-    val _devices = MutableStateFlow<List<String>>(emptyList())
-    val devices: StateFlow<List<String>> = _devices
+    private val _devices = MutableStateFlow<List<String>>(emptyList())
+    public val devices: StateFlow<List<String>> = _devices
 
 //    fun devices(): List<String> {
 //        return mediaManager.getCameraDevices()
@@ -140,8 +140,8 @@ class CameraManager(val mediaManager: MediaManagerImpl) {
         val capturer = mediaManager.buildCameraCapturer()
     }
 
-    fun enable() {
-        mediaManager.setCameraEnabled(true)
+    fun enable(isEnabled: Boolean) {
+        mediaManager.setCameraEnabled(isEnabled)
     }
 
     fun disable() {
@@ -305,7 +305,7 @@ class MediaManagerImpl(val context: Context) {
     }
 
     fun flipCamera() {
-        (videoCapturer as? Camera2Capturer)?.switchCamera(null)
+        videoCapturer?.switchCamera(null)
     }
 
     fun setCameraEnabled(b: Boolean) {

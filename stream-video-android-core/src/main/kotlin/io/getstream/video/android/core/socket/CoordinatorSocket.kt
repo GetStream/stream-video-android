@@ -36,7 +36,7 @@ import org.openapitools.client.models.WSAuthMessageRequest
 public class CoordinatorSocket(
     private val url: String,
     private val user: User,
-    private val token: String,
+    internal var token: String,
     private val scope: CoroutineScope = CoroutineScope(DispatcherProvider.IO),
     private val httpClient: OkHttpClient,
     private val networkStateProvider: NetworkStateProvider,
@@ -51,8 +51,6 @@ public class CoordinatorSocket(
 
     override fun authenticate() {
         logger.d { "[authenticateUser] user: $user" }
-
-        // TODO: handle guest and anon users
 
         if (token.isEmpty()) {
             throw IllegalStateException("User token is empty")

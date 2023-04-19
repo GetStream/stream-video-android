@@ -20,7 +20,9 @@ import com.squareup.moshi.JsonAdapter
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.call.signal.socket.RTCEventMapper
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
+import io.getstream.video.android.core.events.ErrorEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
+import io.getstream.video.android.core.events.SfuSocketError
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.socket.internal.HealthMonitor
 import kotlinx.coroutines.CoroutineScope
@@ -40,6 +42,7 @@ import org.openapitools.client.models.ConnectedEvent
 import org.openapitools.client.models.VideoEvent
 import stream.video.sfu.event.HealthCheckRequest
 import stream.video.sfu.event.SfuEvent
+import java.net.UnknownHostException
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -65,9 +68,14 @@ open class PersistentSocket<T>(
     /** Inject your network state provider */
     private val networkStateProvider: NetworkStateProvider,
     /** Set the scope everything should run in */
-    private val scope: CoroutineScope = CoroutineScope(DispatcherProvider.IO)
+    private val scope: CoroutineScope = CoroutineScope(DispatcherProvider.IO),
 ) : WebSocketListener() {
     internal open val logger by taggedLogger("PersistentSocket")
+
+    /** Mock the socket for testing */
+    internal var mockSocket: WebSocket? = null
+
+    var reconnectTimeout: Long = 500
 
     /** flow with all the events, listen to this */
     val events = MutableSharedFlow<VideoEvent>()
@@ -102,12 +110,12 @@ open class PersistentSocket<T>(
         connected = connectedContinuation
 
         _connectionState.value = SocketState.Connecting
+        println("setting state to connecting")
         // step 1 create the socket
-        socket = createSocket()
+        socket = mockSocket ?: createSocket()
 
         scope.launch {
             // step 2 authenticate the user/call etc
-
             authenticate()
 
             // step 3 monitor for health every 30 seconds
@@ -135,10 +143,16 @@ open class PersistentSocket<T>(
     /**
      * Increment the reconnection attempts, disconnect and reconnect
      */
-    suspend fun reconnect(timeout: Long = 500) {
+    suspend fun reconnect(timeout: Long = reconnectTimeout) {
         logger.i { "[reconnect] reconnectionAttempts: $reconnectionAttempts" }
+        if (connectionState.value == SocketState.Connecting) {
+            logger.i { "[reconnect] already connecting" }
+            return
+        }
+        _connectionState.value = SocketState.Connecting
         reconnectionAttempts++
         disconnect()
+        // reconnect after the timeout
         delay(timeout)
         connect()
     }
@@ -146,26 +160,33 @@ open class PersistentSocket<T>(
     open fun authenticate() {
     }
 
-    private val networkStateListener = object : NetworkStateProvider.NetworkStateListener {
-        override fun onConnected() {
-            val state = connectionState.value
-            logger.i { "[onNetworkConnected] state: $state" }
-            if (state is SocketState.DisconnectedTemporarily || state == SocketState.NetworkDisconnected) {
-                scope.launch {
-                    reconnect()
-                }
-            }
-        }
-
-        override fun onDisconnected() {
-            logger.i { "[onNetworkDisconnected] state: $connectionState.value" }
-            if (connectionState.value is SocketState.Connected || connectionState.value is SocketState.Connecting) {
-                _connectionState.value = SocketState.NetworkDisconnected
-            }
+    suspend fun onInternetConnected() {
+        val state = connectionState.value
+        logger.i { "[onNetworkConnected] state: $state" }
+        if (state is SocketState.DisconnectedTemporarily || state == SocketState.NetworkDisconnected) {
+            // reconnect instantly when the internet is back
+            reconnect(0)
         }
     }
 
-    private var reconnectionAttempts = 0
+    suspend fun onInternetDisconnected() {
+        logger.i { "[onNetworkDisconnected] state: $connectionState.value" }
+        if (connectionState.value is SocketState.Connected || connectionState.value is SocketState.Connecting) {
+            _connectionState.value = SocketState.NetworkDisconnected
+        }
+    }
+
+    private val networkStateListener = object : NetworkStateProvider.NetworkStateListener {
+        override fun onConnected() {
+            scope.launch { onInternetConnected() }
+        }
+
+        override fun onDisconnected() {
+            scope.launch { onInternetDisconnected() }
+        }
+    }
+
+    internal var reconnectionAttempts = 0
 
     fun createSocket(): WebSocket {
         logger.d { "[createSocket] url: $url" }
@@ -193,6 +214,7 @@ open class PersistentSocket<T>(
                 Serializer.moshi.adapter(VideoEvent::class.java)
             var processedEvent = jsonAdapter.fromJson(text)
 
+            // TODO: This logic is specific to the Coordinator socket, move it
             if (processedEvent is ConnectedEvent) {
                 connectionId = processedEvent.connectionId
                 _connectionState.value = SocketState.Connected(processedEvent)
@@ -200,18 +222,28 @@ open class PersistentSocket<T>(
                     connected.resume(processedEvent as T)
                     continuationCompleted = true
                 }
-            } else if (processedEvent is JoinCallResponseEvent) {
-                if (!continuationCompleted) {
-                    connected.resume(processedEvent as T)
-                    continuationCompleted = true
-                }
             }
 
-            logger.d { "parsed event $processedEvent" }
+            // handle errors
+            if (text.isNotEmpty() && processedEvent == null) {
+                val errorAdapter: JsonAdapter<SocketError> =
+                    Serializer.moshi.adapter(SocketError::class.java)
+                val parsedError = errorAdapter.fromJson(text)
 
-            // emit the message
-            // TODO: raise an error!!
-            events.emit(processedEvent!!)
+                parsedError?.let {
+                    logger.w { "[onMessage] socketErrorEvent: $parsedError.error" }
+                    handleError(it.error)
+                }
+            } else {
+                logger.d { "parsed event $processedEvent" }
+
+                // emit the message
+                if (processedEvent == null) {
+                    logger.w { "[onMessage] failed to parse event: $text" }
+                } else {
+                    events.emit(processedEvent)
+                }
+            }
         }
     }
 
@@ -226,18 +258,69 @@ open class PersistentSocket<T>(
                 val rawEvent = SfuEvent.ADAPTER.decode(byteArray)
                 logger.v { "[onMessage] rawEvent: $rawEvent" }
                 val message = RTCEventMapper.mapEvent(rawEvent)
+                if (message is ErrorEvent) {
+                    val errorEvent = message as ErrorEvent
+                    handleError(SfuSocketError(errorEvent.error))
+                }
+                // TODO: This logic is specific to the SfuSocket, move it
+                if (message is JoinCallResponseEvent) {
+                    _connectionState.value = SocketState.Connected(message)
+                    if (!continuationCompleted) {
+                        connected.resume(message as T)
+                        continuationCompleted = true
+                    }
+                }
                 events.emit(message)
             } catch (error: Throwable) {
                 logger.e { "[onMessage] failed: $error" }
-                emitError(error)
+                handleError(error)
             }
         }
     }
 
-    internal fun emitError(error: Throwable) {
-        scope.launch {
-            errors.emit(error)
-            error.printStackTrace()
+    internal fun isPermanentError(error: Throwable): Boolean {
+        // errors returned by the server can be permanent. IE an invalid API call
+        // or an expired token (required a refresh)
+        // or temporary
+        var isPermanent = true
+        if (error is ErrorResponse) {
+            val serverError = error as ErrorResponse
+        } else {
+            // there are several timeout & network errors that are all temporary
+            // code errors are permanent
+            isPermanent = when (error) {
+                is UnknownHostException -> false
+                else -> true
+            }
+        }
+
+        return isPermanent
+    }
+
+    internal fun handleError(error: Throwable) {
+
+        // onFailure, onClosed and the 2 onMessage can all generate errors
+        // temporary errors should be logged and retried
+        // permanent errors should be emitted so the app can decide how to handle it
+        val permanentError = isPermanentError(error)
+        if (permanentError) {
+            // close the connection loop
+            if (!continuationCompleted) {
+                connected.resumeWithException(error)
+                continuationCompleted = true
+            }
+            logger.e { "[handleError] permanent error: $error" }
+            // mark us permanently disconnected
+            _connectionState.value = SocketState.DisconnectedPermanently(error)
+            scope.launch {
+                errors.emit(error)
+            }
+        } else {
+            logger.w { "[handleError] temporary error: $error" }
+            _connectionState.value = SocketState.DisconnectedTemporarily(error)
+            if (_connectionState.value != SocketState.Connecting) {
+                scope.launch { reconnect(reconnectTimeout) }
+            }
         }
     }
 
@@ -258,7 +341,7 @@ open class PersistentSocket<T>(
             closedByClient = true
         } else {
             // Treat as failure and reconnect, socket shouldn't be closed by server
-            emitError(IllegalStateException("socket closed by server, this shouldnt happen"))
+            handleError(IllegalStateException("socket closed by server, this shouldnt happen"))
         }
     }
 
@@ -269,12 +352,8 @@ open class PersistentSocket<T>(
      */
     override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
         logger.d { "[onFailure] t: $t, response: $response" }
-        if (!continuationCompleted) {
-            connected.resumeWithException(t)
-            continuationCompleted = true
-        }
 
-        emitError(t)
+        handleError(t)
     }
 
     private val healthMonitor = HealthMonitor(object : HealthMonitor.HealthCallback {

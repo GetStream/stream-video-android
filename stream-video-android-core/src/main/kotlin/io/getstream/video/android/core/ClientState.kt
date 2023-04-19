@@ -24,23 +24,22 @@ import org.openapitools.client.models.CallCreatedEvent
 import org.openapitools.client.models.ConnectedEvent
 import org.openapitools.client.models.VideoEvent
 
-sealed interface ConnectionState {
-    object Idle : ConnectionState
-    object PreConnect : ConnectionState
-    object Loading : ConnectionState
-    object Connected : ConnectionState
-    object Reconnecting : ConnectionState
-    object Disconnected : ConnectionState
-    class Failed(error: Error) : ConnectionState
+public sealed interface ConnectionState {
+    public object PreConnect : ConnectionState
+    public object Loading : ConnectionState
+    public object Connected : ConnectionState
+    public object Reconnecting : ConnectionState
+    public object Disconnected : ConnectionState
+    public class Failed(error: Error) : ConnectionState
 }
 
-sealed class RingingState {
-    object Idle : RingingState()
-    data class Incoming(public val acceptedByMe: Boolean) : RingingState()
-    data class Outgoing(public val acceptedByCallee: Boolean) : RingingState()
-    object Active : RingingState()
-    object RejectedByAll : RingingState()
-    object TimeoutNoAnswer : RingingState()
+public sealed interface RingingState {
+    public object Idle : RingingState
+    public data class Incoming(public val acceptedByMe: Boolean) : RingingState
+    public data class Outgoing(public val acceptedByCallee: Boolean) : RingingState
+    public object Active : RingingState
+    public object RejectedByAll : RingingState
+    public object TimeoutNoAnswer : RingingState
 }
 
 class ClientState(client: StreamVideo) {
@@ -88,7 +87,6 @@ class ClientState(client: StreamVideo) {
             // get or create the call and update it
             val (type, id) = event.callCid.split(":")
             val call = clientImpl.call(type, id)
-            call.state.updateFromEvent(event)
 
             if (event.ringing) {
                 _ringingCall.value = call
@@ -111,7 +109,6 @@ class ClientState(client: StreamVideo) {
 }
 
 public fun ConnectionState.formatAsTitle(context: Context): String = when (this) {
-    ConnectionState.Idle -> "Idle"
     ConnectionState.PreConnect -> "PreConnect"
     ConnectionState.Loading -> "Loading"
     ConnectionState.Connected -> "Connected"

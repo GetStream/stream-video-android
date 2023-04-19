@@ -70,7 +70,7 @@ import io.getstream.video.android.ui.common.R
  */
 @Composable
 public fun LocalVideoContent(
-    call: Call?,
+    call: Call,
     localParticipant: ParticipantState,
     parentBounds: IntSize,
     paddingValues: PaddingValues,
@@ -91,7 +91,7 @@ public fun LocalVideoContent(
 
     val track = localParticipant.videoTrack
 
-    if (LocalInspectionMode.current || call == null) {
+    if (LocalInspectionMode.current) {
         Card(
             elevation = 8.dp,
             modifier = Modifier
@@ -188,8 +188,7 @@ private fun calculateVerticalOffsetBounds(
     density: Density,
     offset: Float
 ): Float {
-    val bottomPadding =
-        density.run { paddingValues.calculateBottomPadding().toPx() }
+    val bottomPadding = density.run { paddingValues.calculateBottomPadding().toPx() }
 
     return parentBounds.height - bottomPadding - floatingVideoSize.height - offset
 }

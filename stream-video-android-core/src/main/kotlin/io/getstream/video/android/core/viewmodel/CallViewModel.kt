@@ -21,11 +21,18 @@ package io.getstream.video.android.core.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.getstream.log.taggedLogger
+import io.getstream.result.Error
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoImpl
+import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CallDeviceState
+import io.getstream.video.android.core.call.state.FlipCamera
+import io.getstream.video.android.core.call.state.LeaveCall
+import io.getstream.video.android.core.call.state.ToggleCamera
+import io.getstream.video.android.core.call.state.ToggleMicrophone
+import io.getstream.video.android.core.call.state.ToggleSpeakerphone
 import io.getstream.video.android.core.permission.PermissionManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -71,10 +78,18 @@ public class CallViewModel(
     private val _callDeviceState = MutableStateFlow(CallDeviceState())
     public val callDeviceState: StateFlow<CallDeviceState> = _callDeviceState
 
-    public fun joinCall() {
+    public fun joinCall(
+        onSuccess: (RtcSession) -> Unit = {},
+        onFailure: (Error) -> Unit = {}
+    ) {
         viewModelScope.launch {
             withTimeout(CONNECT_TIMEOUT) {
-                call.join()
+                val result = call.join()
+                result.onSuccess {
+                    onSuccess.invoke(it)
+                }.onError {
+                    onFailure.invoke(it)
+                }
             }
         }
     }
@@ -86,7 +101,14 @@ public class CallViewModel(
     }
 
     public fun onCallAction(callAction: CallAction) {
-        // TODO: handle some call actions
+        when (callAction) {
+            is ToggleSpeakerphone -> call.speaker.enable(callAction.isEnabled)
+            is ToggleCamera -> call.camera.enable(callAction.isEnabled)
+            is ToggleMicrophone -> call.microphone.enable(callAction.isEnabled)
+            is FlipCamera -> call.camera.flip()
+            is LeaveCall -> call.leave()
+            else -> Unit
+        }
     }
 
     public fun dismissCallInfoMenu() {

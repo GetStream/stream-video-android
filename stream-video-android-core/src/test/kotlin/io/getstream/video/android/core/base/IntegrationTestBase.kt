@@ -24,9 +24,13 @@ import io.getstream.log.StreamLog
 import io.getstream.log.kotlin.KotlinStreamLogger
 import io.getstream.log.streamLog
 import io.getstream.result.Result
+import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.User
+import io.mockk.MockKAnnotations
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit4.MockKRule
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineScheduler
@@ -129,8 +133,19 @@ open class TestBase {
     /** Android context */
     val context = testData.context
 
+    val nowUtc = OffsetDateTime.now(Clock.systemUTC())
+
     /** API Key */
     val apiKey = "hd8szvscpxvd"
+
+    @get:Rule
+    val mockkRule = MockKRule(this)
+
+    @MockK(relaxUnitFun = true, relaxed = true)
+    lateinit var mockedPCFactory: StreamPeerConnectionFactory
+
+    @Before
+    fun setUp() = MockKAnnotations.init(this, relaxUnitFun = true) // turn relaxUnitFun on for all mocks
 
     private val testLogger = StreamTestLogger()
 
@@ -191,9 +206,9 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true) : TestBase(
     var nextEventContinuation: Continuation<VideoEvent>? = null
     var nextEventCompleted: Boolean = false
 
-    val nowUtc = OffsetDateTime.now(Clock.systemUTC())
-
     init {
+        MockKAnnotations.init(this, relaxUnitFun = true)
+
         builder = StreamVideoBuilder(
             context = ApplicationProvider.getApplicationContext(),
             apiKey = "hd8szvscpxvd",
@@ -209,6 +224,8 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true) : TestBase(
         if (IntegrationTestState.client == null) {
             client = builder.build()
             clientImpl = client as StreamVideoImpl
+            // always mock the peer connection factory, it can't work in unit tests
+            clientImpl.peerConnectionFactory = mockedPCFactory
             // Connect to the WS if needed
             if (connectCoordinatorWS) {
                 // wait for the connection/ avoids race conditions in tests

@@ -107,7 +107,7 @@ public data class StreamColors(
             callFocusedBorder = colorResource(id = R.color.stream_video_focused_border_color),
             callGradientStart = colorResource(id = R.color.stream_video_call_gradient_start),
             callGradientEnd = colorResource(id = R.color.stream_video_call_gradient_end),
-            callDescription = colorResource(id = R.color.stream_video_call_description),
+            callDescription = colorResource(id = R.color.stream_video_text_high_emphasis),
         )
 
         /**

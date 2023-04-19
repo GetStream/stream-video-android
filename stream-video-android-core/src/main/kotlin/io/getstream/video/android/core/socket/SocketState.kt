@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.core.socket
 
-import io.getstream.result.Error
 import org.openapitools.client.models.VideoEvent
 
 public sealed class SocketState {
@@ -39,9 +38,9 @@ public sealed class SocketState {
     }
 
     /** A temporary error broken the connection, socket will retry */
-    data class DisconnectedTemporarily(val error: Error.NetworkError?) : SocketState()
+    data class DisconnectedTemporarily(val error: Throwable) : SocketState()
     /** A permanent error broken the connection, socket will not retry */
-    data class DisconnectedPermanently(val error: Error.NetworkError?) : SocketState()
+    data class DisconnectedPermanently(val error: Throwable) : SocketState()
 
     /** You called socket.disconnect(), socket is disconnected */
     object DisconnectedByRequest : SocketState() {

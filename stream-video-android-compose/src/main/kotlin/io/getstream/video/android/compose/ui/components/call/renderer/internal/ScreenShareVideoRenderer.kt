@@ -41,7 +41,7 @@ import stream.video.sfu.models.TrackType
  */
 @Composable
 public fun ScreenShareVideoRenderer(
-    call: Call?,
+    call: Call,
     session: ScreenSharingSession,
     modifier: Modifier = Modifier,
     labelPosition: Alignment = Alignment.BottomStart,

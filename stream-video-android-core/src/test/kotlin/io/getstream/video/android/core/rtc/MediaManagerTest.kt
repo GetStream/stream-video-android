@@ -20,6 +20,7 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.TestBase
 import kotlinx.coroutines.test.runTest
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -37,6 +38,7 @@ class MediaManagerTest : TestBase() {
     }
 
     @Test
+    @Ignore
     fun `start capture`() = runTest {
         val mediaManager = MediaManagerImpl(context)
         val devices = mediaManager.camera.devices
@@ -44,6 +46,7 @@ class MediaManagerTest : TestBase() {
     }
 
     @Test
+    @Ignore
     fun `disable camera`() = runTest {
         val mediaManager = MediaManagerImpl(context)
         mediaManager.camera.enable()

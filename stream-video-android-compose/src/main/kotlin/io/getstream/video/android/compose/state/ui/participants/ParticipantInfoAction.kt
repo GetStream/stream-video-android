@@ -21,7 +21,7 @@ import io.getstream.video.android.core.model.User
 /**
  * Actions which can be taken in the participants info UI in a call.
  */
-public sealed class ParticipantInfoAction
+public sealed interface ParticipantInfoAction
 
 /**
  * Triggers a mute change state for the active participant.
@@ -30,11 +30,11 @@ public sealed class ParticipantInfoAction
  */
 public data class ChangeMuteState(
     val isEnabled: Boolean
-) : ParticipantInfoAction()
+) : ParticipantInfoAction
 
 /**
  * Triggers an invite action for users.
  *
  * @param users The users to invite.
  */
-public data class InviteUsers(val users: List<User>) : ParticipantInfoAction()
+public data class InviteUsers(val users: List<User>) : ParticipantInfoAction
