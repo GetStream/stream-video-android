@@ -20,11 +20,9 @@ import android.content.res.Configuration
 import android.view.View
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -62,7 +60,6 @@ internal fun LandscapeScreenSharingVideoRenderer(
     session: ScreenSharingSession,
     participants: List<ParticipantState>,
     primarySpeaker: ParticipantState?,
-    paddingValues: PaddingValues,
     modifier: Modifier = Modifier,
     onRender: (View) -> Unit,
     onCallAction: (CallAction) -> Unit,
@@ -75,7 +72,6 @@ internal fun LandscapeScreenSharingVideoRenderer(
         modifier = modifier
             .fillMaxSize()
             .background(VideoTheme.colors.screenSharingBackground)
-            .padding(paddingValues)
     ) {
         Box(
             modifier = Modifier
@@ -131,7 +127,6 @@ private fun LandscapeScreenSharingContentPreview() {
             ),
             participants = mockParticipants,
             primarySpeaker = mockParticipants[1],
-            paddingValues = PaddingValues(0.dp),
             modifier = Modifier.fillMaxSize(),
             onRender = {},
             onCallAction = {},
@@ -161,7 +156,6 @@ private fun LandscapeScreenSharingMyContentPreview() {
             ),
             participants = mockParticipants,
             primarySpeaker = mockParticipants[0],
-            paddingValues = PaddingValues(0.dp),
             modifier = Modifier.fillMaxSize(),
             onRender = {},
             onCallAction = {},

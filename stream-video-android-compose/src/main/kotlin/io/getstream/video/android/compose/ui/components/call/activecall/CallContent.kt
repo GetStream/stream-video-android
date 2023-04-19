@@ -18,11 +18,14 @@ package io.getstream.video.android.compose.ui.components.call.activecall
 
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -164,15 +167,24 @@ public fun CallContent(
                         .coerceAtLeast(0.dp)
                 )
 
-                CallVideoRenderer(
-                    modifier = Modifier.fillMaxSize(),
-                    call = call,
-                    paddingValues = paddings,
-                    callDeviceState = callDeviceState,
-                    onCallAction = onCallAction,
-                    onBackPressed = onBackPressed,
-                    callControlsContent = callControlsContent
-                )
+                Row(
+                    modifier = modifier
+                        .background(color = VideoTheme.colors.appBackground)
+                        .padding(paddings)
+                ) {
+                    CallVideoRenderer(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .weight(1f),
+                        call = call,
+                        onCallAction = onCallAction,
+                        onBackPressed = onBackPressed,
+                    )
+
+                    if (orientation == ORIENTATION_LANDSCAPE) {
+                        callControlsContent.invoke(call)
+                    }
+                }
             }
         )
     } else {
