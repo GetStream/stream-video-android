@@ -20,6 +20,9 @@
 ### RTC TODO
 
 - [X] Media manager class to enable easy testing of all audio/video stuff
+- [ ] Tests that verify the local track is working
+- [ ] Tests that verify we are sending our local track
+- [ ] setLocalTrack is not called
 - [ ] Move setCameraEnabled & setMicrophoneEnabled
 - [ ] Move muting and clean it up
 - [ ] Leave & End flows

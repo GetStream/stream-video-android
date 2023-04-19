@@ -126,6 +126,11 @@ Camera/device changes -> listener in ActiveSFUSession -> updates the tracks.
   * Or when the UI layout changes
 * The SFU tells us what resolution to publish using the ChangePublishQualityEvent event
 
+For dynascale to work, we always need which participants are displayed and at what resolution.
+The current approach calls `updateParticipantsSubscriptions` from the viewModel.
+If someone doesn't use our viewmodel, dynascale stops working. 
+Ideally we find a way to integrate this in such a way that customers can't forget to use it by accident.
+
 ### ParticipantState
 
 * Participants have a session id. the session id is unique
