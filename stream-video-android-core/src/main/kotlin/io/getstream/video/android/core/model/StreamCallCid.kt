@@ -32,6 +32,15 @@ public typealias StreamCallType = String
 public typealias StreamCallId = String
 
 /**
+ * Create a type-id pair from a [StreamCallId].
+ */
+public val StreamCallId.typeToId: Pair<String, String>
+    inline get() {
+        val (type, id) = split(":").take(2)
+        return type to id
+    }
+
+/**
  * Generates [StreamCallCid] from [StreamCallType] and [StreamCallId].
  */
 public fun StreamCallCid(type: StreamCallType, id: StreamCallId): StreamCallCid {

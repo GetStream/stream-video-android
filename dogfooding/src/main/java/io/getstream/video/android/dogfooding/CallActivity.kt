@@ -34,7 +34,7 @@ import io.getstream.video.android.core.viewmodel.CallViewModelFactory
 class CallActivity : AppCompatActivity() {
 
     private val streamVideo: StreamVideo by lazy { dogfoodingApp.streamVideo }
-    private val factory by callViewModelFactory()
+    private val factory by lazy { callViewModelFactory() }
     private val vm by viewModels<CallViewModel> { factory }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,19 +51,17 @@ class CallActivity : AppCompatActivity() {
         }
     }
 
-    private fun callViewModelFactory(): Lazy<CallViewModelFactory> {
+    private fun callViewModelFactory(): CallViewModelFactory {
         val type = intent.getStringExtra(EXTRA_TYPE)
             ?: throw IllegalArgumentException("You must pass correct call type.")
         val id = intent.getStringExtra(EXTRA_ID)
             ?: throw IllegalArgumentException("You must pass correct call id.")
 
-        return lazy {
-            CallViewModelFactory(
-                streamVideo = streamVideo,
-                call = streamVideo.call(type = type, id = id),
-                permissionManager = null
-            )
-        }
+        return CallViewModelFactory(
+            streamVideo = streamVideo,
+            call = streamVideo.call(type = type, id = id),
+            permissionManager = null
+        )
     }
 
     companion object {

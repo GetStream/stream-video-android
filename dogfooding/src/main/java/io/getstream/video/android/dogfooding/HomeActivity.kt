@@ -55,10 +55,15 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import io.getstream.log.taggedLogger
+import io.getstream.result.flatMapSuspend
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.Avatar
+import io.getstream.video.android.core.ConnectionState
+import io.getstream.video.android.core.model.StreamCallId
+import io.getstream.video.android.core.model.typeToId
 import io.getstream.video.android.core.user.UserPreferencesManager
 import io.getstream.video.android.core.utils.initials
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
@@ -77,9 +82,11 @@ class HomeActivity : AppCompatActivity() {
 
     private val logger by taggedLogger("Call:HomeView")
 
-    private val callIdState: MutableState<String> = mutableStateOf("call" + Random.nextInt(1000))
+    private val callCidState: MutableState<StreamCallId> = mutableStateOf(
+        "default:${Random.nextInt(1000)}"
+    )
 
-    private val loadingState: MutableState<Boolean> = mutableStateOf(false)
+    private val connectionState: StateFlow<ConnectionState> by lazy { streamVideo.state.connection }
 
     @Composable
     private fun HomeScreen() {
@@ -109,9 +116,9 @@ class HomeActivity : AppCompatActivity() {
                 )
             }
 
-            val isLoading by loadingState
+            val connectionState by connectionState.collectAsState()
 
-            if (isLoading) {
+            if (connectionState is ConnectionState.Loading) {
                 Spacer(modifier = Modifier.height(16.dp))
 
                 CircularProgressIndicator(
@@ -132,8 +139,6 @@ class HomeActivity : AppCompatActivity() {
     fun ColumnScope.JoinCallContent() {
         CallIdInput()
 
-        val isDataValid = callIdState.value.isNotBlank()
-
         Button(
             modifier = Modifier
                 .fillMaxWidth()
@@ -144,49 +149,48 @@ class HomeActivity : AppCompatActivity() {
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = VideoTheme.colors.primaryAccent
             ),
-            enabled = isDataValid,
-            onClick = {
-                joinCall(callId = callIdState.value)
-            }
+            onClick = { joinCall() }
         ) {
             Text(text = "Join call", color = Color.White)
         }
     }
 
-    private fun joinCall(callId: String) {
+    private fun joinCall() {
         lifecycleScope.launch {
-            logger.d { "[joinCall] callId: $callId" }
-            loadingState.value = true
-
-            val (type, id) = "default" to "123"
+            val (type, id) = callCidState.value.typeToId
             val call = streamVideo.call(type = type, id = id)
 
-            val result = call.join()
-            result.onSuccess {
-                logger.d { "[joinCall] succeed: $call" }
+            val me = streamVideo.user
+            val create = call.create(memberIds = listOf(me.id))
+            create.flatMapSuspend {
+                logger.d { "[createCall] succeed: $call" }
 
-                val intent = CallActivity.getIntent(this@HomeActivity, type, id)
-                startActivity(intent)
+                val join = call.join()
+                join.onSuccess {
+                    logger.d { "[joinCall] succeed: $call" }
+
+                    val intent = CallActivity.getIntent(this@HomeActivity, type, id)
+                    startActivity(intent)
+                }
             }.onError {
-                logger.d { "[joinCall] failed: $it" }
+                logger.d { "failed: $it" }
 
                 Toast.makeText(this@HomeActivity, it.message, Toast.LENGTH_SHORT).show()
-                loadingState.value = false
             }
         }
     }
 
     @Composable
     fun CallIdInput() {
-        val inputState by remember { callIdState }
+        val inputState by remember { callCidState }
 
         OutlinedTextField(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            value = inputState,
+            value = inputState.replace(":", ""),
             onValueChange = { input ->
-                callIdState.value = input
+                callCidState.value = input
             },
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 textColor = VideoTheme.colors.textHighEmphasis,
