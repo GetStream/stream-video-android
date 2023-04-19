@@ -25,10 +25,11 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
 import androidx.compose.ui.Modifier
-import androidx.core.os.bundleOf
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.CallContainer
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.model.StreamCallId
+import io.getstream.video.android.core.model.typeToId
 import io.getstream.video.android.core.viewmodel.CallViewModel
 import io.getstream.video.android.core.viewmodel.CallViewModelFactory
 
@@ -61,10 +62,8 @@ class CallActivity : AppCompatActivity() {
     }
 
     private fun callViewModelFactory(): CallViewModelFactory {
-        val type = intent.getStringExtra(EXTRA_TYPE)
-            ?: throw IllegalArgumentException("You must pass correct call type.")
-        val id = intent.getStringExtra(EXTRA_ID)
-            ?: throw IllegalArgumentException("You must pass correct call id.")
+        val (type, id) = intent.getStringExtra(EXTRA_CID)?.typeToId
+            ?: throw IllegalArgumentException("You must pass correct channel id.")
 
         return CallViewModelFactory(
             streamVideo = streamVideo,
@@ -74,14 +73,12 @@ class CallActivity : AppCompatActivity() {
     }
 
     companion object {
-        internal const val EXTRA_TYPE = "type"
-        internal const val EXTRA_ID = "id"
+        internal const val EXTRA_CID = "EXTRA_CID"
 
-        fun getIntent(context: Context, type: String, id: String): Intent {
+        fun getIntent(context: Context, cid: StreamCallId): Intent {
             return Intent(context, CallActivity::class.java).apply {
-                putExtras(
-                    bundleOf(EXTRA_TYPE to type, EXTRA_ID to id)
-                )
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                putExtra(EXTRA_CID, cid)
             }
         }
     }

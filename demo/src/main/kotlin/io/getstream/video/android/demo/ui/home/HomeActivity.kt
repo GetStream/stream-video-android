@@ -16,8 +16,6 @@
 
 package io.getstream.video.android.demo.ui.home
 
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.compose.setContent
@@ -169,7 +167,7 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun startCallActivity() {
-        val intent = CallActivity.getIntent(this@HomeActivity, "default", callIdState.value)
+        val intent = CallActivity.getIntent(this@HomeActivity, "default:${callIdState.value}")
         startActivity(intent)
     }
 
@@ -242,11 +240,5 @@ class HomeActivity : AppCompatActivity() {
                 null
             },
         )
-    }
-
-    companion object {
-        fun getIntent(context: Context): Intent = Intent(context, HomeActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        }
     }
 }

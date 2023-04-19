@@ -162,7 +162,7 @@ class HomeActivity : AppCompatActivity() {
             val result = call.create(memberIds = listOf(streamVideo.userId))
             result.onSuccess {
                 logger.d { "[joinCall] onSuccess: $it" }
-                val intent = CallActivity.getIntent(this@HomeActivity, type, id)
+                val intent = CallActivity.getIntent(this@HomeActivity, callCidState.value)
                 startActivity(intent)
             }.onError {
                 logger.d { "[joinCall] onError: $it" }
