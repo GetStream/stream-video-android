@@ -17,7 +17,6 @@
 package io.getstream.video.android.core
 
 import android.content.Context
-import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.Lifecycle
 import io.getstream.android.push.PushDeviceGenerator
 import io.getstream.log.taggedLogger
@@ -28,6 +27,7 @@ import io.getstream.result.Result.Success
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.events.VideoEventListener
+import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.internal.module.ConnectionModule
 import io.getstream.video.android.core.lifecycle.LifecycleHandler
 import io.getstream.video.android.core.lifecycle.internal.StreamLifecycleObserver
@@ -123,7 +123,7 @@ internal class StreamVideoImpl internal constructor(
     private var guestUserJob: Deferred<Unit>? = null
     private lateinit var connectContinuation: Continuation<Result<ConnectedEvent>>
 
-    @VisibleForTesting
+    @InternalStreamVideoApi
     public var peerConnectionFactory = StreamPeerConnectionFactory(context)
     public override val userId = user.id
 

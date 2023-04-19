@@ -256,7 +256,7 @@ public class Call(
             clientImpl.peerConnectionFactory.eglBase.eglBaseContext,
             object : RendererCommon.RendererEvents {
                 override fun onFirstFrameRendered() {
-                    logger.v { "[initRenderer.onFirstFrameRendered] #sfu; sessionId: $sessionId" }
+                    logger.d { "[initRenderer.onFirstFrameRendered] #sfu; sessionId: $sessionId" }
                     if (trackType != TrackType.TRACK_TYPE_SCREEN_SHARE) {
                         state.updateParticipantTrackSize(
                             sessionId, videoRenderer.measuredWidth, videoRenderer.measuredHeight
@@ -266,7 +266,7 @@ public class Call(
                 }
 
                 override fun onFrameResolutionChanged(p0: Int, p1: Int, p2: Int) {
-                    logger.v { "[initRenderer.onFrameResolutionChanged] #sfu; sessionId: $sessionId" }
+                    logger.d { "[initRenderer.onFrameResolutionChanged] #sfu; sessionId: $sessionId" }
 
                     if (trackType != TrackType.TRACK_TYPE_SCREEN_SHARE) {
                         state.updateParticipantTrackSize(
