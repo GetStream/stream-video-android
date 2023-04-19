@@ -354,7 +354,8 @@ public class RtcSession internal constructor(
             videoTrack.setEnabled(true)
             logger.v { "[createUserTracks] #sfu; videoTrack: ${videoTrack.stringify()}" }
             publisher?.addVideoTransceiver(videoTrack!!, listOf(sessionId))
-            println(publisher)
+            setCameraEnabled(true)
+            setMicrophoneEnabled(true)
         }
 
         // step 6 - onNegotiationNeeded will trigger and complete the setup using SetPublisherRequest
@@ -431,9 +432,7 @@ public class RtcSession internal constructor(
         logger.d { "[setCameraEnabled] #sfu; isEnabled: $isEnabled" }
 
         coroutineScope.launch {
-            if (!isCapturingVideo && isEnabled) {
-                call.mediaManager.startCapturingLocalVideo(CameraMetadata.LENS_FACING_FRONT)
-            }
+
             val request = UpdateMuteStatesRequest(
                 session_id = sessionId,
                 mute_states = listOf(
@@ -443,10 +442,6 @@ public class RtcSession internal constructor(
                     )
                 ),
             )
-
-            // set the track enabled
-            getLocalTrack(TrackType.TRACK_TYPE_VIDEO)?.video?.setEnabled(isEnabled)
-
             updateMuteState(request).onSuccessSuspend {
             }
         }
@@ -464,9 +459,6 @@ public class RtcSession internal constructor(
                     )
                 ),
             )
-
-            val localAudioTrack = getLocalTrack(TrackType.TRACK_TYPE_AUDIO)
-            localAudioTrack?.audio?.setEnabled(isEnabled)
 
             updateMuteState(request).onSuccessSuspend {
             }

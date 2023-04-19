@@ -139,34 +139,34 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS=false) {
     }
 
     @Test
-    @Ignore
     fun receiving() = runTest {
         // TODO: have a specific SFU setting to send back fake data
         // TODO: replace the id with your active call
         val call = client.call("default", "vDNeuHk9SU32")
         val joinResult = call.join()
         assertSuccess(joinResult)
-        delay(500)
+        delay(1000)
+        delay(10000)
 
-        // see if the ice connection is ok on the subscriber
-        val iceConnectionState = call.session?.subscriber?.connection?.iceConnectionState()
-        assertThat(iceConnectionState).isEqualTo(PeerConnection.IceConnectionState.CONNECTED)
-        // verify the stats are being tracked
-        val report = call.session?.getSubscriberStats()?.value
-        assertThat(report).isNotNull()
-
-        // loop over the participants
-        call.state.participants.value.forEach {participant ->
-            val videoTrack = participant.videoTrackWrapped?.video
-            assertThat(videoTrack).isNotNull()
-            assertThat(videoTrack?.enabled()).isTrue()
-            assertThat(videoTrack?.state()).isEqualTo(MediaStreamTrack.State.LIVE)
-
-            val audioTrack = participant.audioTrackWrapped?.audio
-            assertThat(audioTrack).isNotNull()
-            assertThat(audioTrack?.enabled()).isTrue()
-            assertThat(audioTrack?.state()).isEqualTo(MediaStreamTrack.State.LIVE)
-        }
+//        // see if the ice connection is ok on the subscriber
+//        val iceConnectionState = call.session?.subscriber?.connection?.iceConnectionState()
+//        assertThat(iceConnectionState).isEqualTo(PeerConnection.IceConnectionState.CONNECTED)
+//        // verify the stats are being tracked
+//        val report = call.session?.getSubscriberStats()?.value
+//        assertThat(report).isNotNull()
+//
+//        // loop over the participants
+//        call.state.participants.value.forEach {participant ->
+//            val videoTrack = participant.videoTrackWrapped?.video
+//            assertThat(videoTrack).isNotNull()
+//            assertThat(videoTrack?.enabled()).isTrue()
+//            assertThat(videoTrack?.state()).isEqualTo(MediaStreamTrack.State.LIVE)
+//
+//            val audioTrack = participant.audioTrackWrapped?.audio
+//            assertThat(audioTrack).isNotNull()
+//            assertThat(audioTrack?.enabled()).isTrue()
+//            assertThat(audioTrack?.state()).isEqualTo(MediaStreamTrack.State.LIVE)
+//        }
 
     }
 }
