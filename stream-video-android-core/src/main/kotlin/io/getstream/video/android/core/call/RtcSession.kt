@@ -64,7 +64,6 @@ import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -84,7 +83,6 @@ import org.webrtc.SessionDescription
 import org.webrtc.SurfaceTextureHelper
 import org.webrtc.VideoCapturer
 import retrofit2.HttpException
-import stream.video.sfu.event.JoinResponse
 import stream.video.sfu.models.ICETrickle
 import stream.video.sfu.models.PeerType
 import stream.video.sfu.models.TrackInfo

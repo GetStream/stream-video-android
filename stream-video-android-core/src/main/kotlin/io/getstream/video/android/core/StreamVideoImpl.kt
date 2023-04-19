@@ -123,12 +123,9 @@ internal class StreamVideoImpl internal constructor(
     private var guestUserJob: Deferred<Unit>? = null
     private lateinit var connectContinuation: Continuation<Result<ConnectedEvent>>
 
-
-
     @VisibleForTesting
     public var peerConnectionFactory = StreamPeerConnectionFactory(context)
     public override val userId = user.id
-
 
     private val logger by taggedLogger("Call:StreamVideo")
     private var subscriptions = mutableSetOf<EventSubscription>()

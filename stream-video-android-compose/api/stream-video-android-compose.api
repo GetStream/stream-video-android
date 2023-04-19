@@ -89,8 +89,7 @@ public final class io/getstream/video/android/compose/state/ui/participants/Invi
 	public fun toString ()Ljava/lang/String;
 }
 
-public abstract class io/getstream/video/android/compose/state/ui/participants/ParticipantInfoAction {
-	public static final field $stable I
+public abstract interface class io/getstream/video/android/compose/state/ui/participants/ParticipantInfoAction {
 }
 
 public final class io/getstream/video/android/compose/theme/StreamColors {
@@ -657,7 +656,7 @@ public final class io/getstream/video/android/compose/ui/components/call/rendere
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/renderer/CallVideoRendererKt {
-	public static final fun CallVideoRenderer (Lio/getstream/video/android/core/Call;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;Lio/getstream/video/android/core/call/state/CallDeviceState;Landroidx/compose/foundation/layout/PaddingValues;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;II)V
+	public static final fun CallVideoRenderer (Lio/getstream/video/android/core/Call;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/renderer/ComposableSingletons$CallSingleVideoRendererKt {
@@ -669,6 +668,13 @@ public final class io/getstream/video/android/compose/ui/components/call/rendere
 	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda-2$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda-3$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class io/getstream/video/android/compose/ui/components/call/renderer/ComposableSingletons$CallVideoRendererKt {
+	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/call/renderer/ComposableSingletons$CallVideoRendererKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/renderer/LocalVideoRendererKt {
@@ -739,6 +745,13 @@ public final class io/getstream/video/android/compose/ui/components/call/rendere
 	public final fun getLambda-4$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda-5$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda-6$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class io/getstream/video/android/compose/ui/components/call/renderer/internal/ComposableSingletons$RegularCallVideoRendererKt {
+	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/call/renderer/internal/ComposableSingletons$RegularCallVideoRendererKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$stream_video_android_compose_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/renderer/internal/ScreenShareVideoRendererKt {

@@ -26,7 +26,6 @@ import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.ParticipantJoinedEvent
 import io.getstream.video.android.core.events.ParticipantLeftEvent
-import io.getstream.video.android.core.events.SFUConnectedEvent
 import io.getstream.video.android.core.events.SFUHealthCheckEvent
 import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.events.TrackPublishedEvent
@@ -187,7 +186,6 @@ public class CallState(private val call: Call, user: User) {
     /** if the call is being broadcasted to HLS */
     val broadcasting: StateFlow<Boolean> = _broadcasting
 
-
     /** if transcribing is on or not */
     private val _transcribing: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val transcribing: StateFlow<Boolean> = _transcribing
@@ -199,7 +197,6 @@ public class CallState(private val call: Call, user: User) {
     private val _updatedAt: MutableStateFlow<OffsetDateTime?> = MutableStateFlow(null)
     /** updatedAt */
     val updatedAt: StateFlow<OffsetDateTime?> = _updatedAt
-
 
     private val _createdAt: MutableStateFlow<OffsetDateTime?> = MutableStateFlow(null)
     val createdAt: StateFlow<OffsetDateTime?> = _createdAt
@@ -320,7 +317,6 @@ public class CallState(private val call: Call, user: User) {
                 updateFromResponse(event.call)
                 getOrCreateMembers(event.members)
                 // TODO: ringing state
-
             }
 
             is CallUpdatedEvent -> {
@@ -555,8 +551,6 @@ public class CallState(private val call: Call, user: User) {
 //            track?.video?.dispose()
 //        }
     }
-
-
 
     fun updateFromResponse(response: CallResponse) {
         _backstage.value = response.backstage

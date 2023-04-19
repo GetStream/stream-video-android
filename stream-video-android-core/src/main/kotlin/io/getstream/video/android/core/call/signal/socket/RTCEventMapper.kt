@@ -34,7 +34,6 @@ import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
 import io.getstream.video.android.core.model.UserAudioLevel
 import stream.video.sfu.event.SfuEvent
-import stream.video.sfu.models.CallGrants
 
 public object RTCEventMapper {
 
@@ -87,7 +86,7 @@ public object RTCEventMapper {
             event.ice_trickle != null -> with(event.ice_trickle) {
                 ICETrickleEvent(ice_candidate, peer_type)
             }
-            event.publisher_answer != null -> PublisherAnswerEvent(sdp=event.publisher_answer.sdp)
+            event.publisher_answer != null -> PublisherAnswerEvent(sdp = event.publisher_answer.sdp)
             event.error != null -> ErrorEvent(event.error.error)
 
             event.call_grants_updated != null -> CallGrantsUpdatedEvent(event.call_grants_updated.current_grants, event.call_grants_updated.message)
