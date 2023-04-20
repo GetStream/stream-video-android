@@ -354,11 +354,6 @@ public class RtcSession internal constructor(
             setLocalTrack(TrackType.TRACK_TYPE_VIDEO, TrackWrapper(streamId = buildTrackId(TrackType.TRACK_TYPE_VIDEO), video = videoTrack))
             // render it on the surface. but we need to start this before forwarding it to the publisher
             // TODO: clean this up, would be better to have some sensible API for this
-//            call.mediaManager.videoCapturer?.initialize(
-//                surfaceTextureHelper,
-//                context,
-//                videoSource.capturerObserver
-//            )
 
             call.mediaManager.setVideoSource(videoSource)
 
@@ -535,7 +530,8 @@ public class RtcSession internal constructor(
         // track prefix is only available after the join response
         val trackType = trackTypeVideo.value
         val trackPrefix = call.state?.me?.value?.trackLookupPrefix
-        return "$trackPrefix:$trackType:${(Math.random() * 100).toInt()}"
+        val old = "$trackPrefix:$trackType:${(Math.random() * 100).toInt()}"
+        return old//UUID.randomUUID().toString()
     }
 
     /**

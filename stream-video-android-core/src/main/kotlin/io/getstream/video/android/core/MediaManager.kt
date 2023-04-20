@@ -25,13 +25,13 @@ import android.media.AudioManager
 import android.os.Build
 import androidx.core.content.getSystemService
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.audio.AudioDevice
 import io.getstream.video.android.core.audio.AudioHandler
 import io.getstream.video.android.core.audio.AudioSwitchHandler
 import io.getstream.video.android.core.model.CallSettings
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.webrtc.Camera2Capturer
 import org.webrtc.Camera2Enumerator
@@ -48,6 +48,17 @@ sealed class DeviceStatus {
     object Disabled : DeviceStatus()
     object Enabled : DeviceStatus()
     object NoPermission : DeviceStatus()
+}
+
+
+data class CameraDeviceWrapped(
+    val id: String,
+    val cameraLensFacing: Int,
+    val characteristics: CameraCharacteristics,
+    val supportedFormats: MutableList<CameraEnumerationAndroid.CaptureFormat>?,
+    val maxResolution: Int
+) {
+
 }
 
 class SpeakerManager(val mediaManager: MediaManagerImpl) {
@@ -105,28 +116,75 @@ class MicrophoneManager(val mediaManager: MediaManagerImpl) {
     val devices: StateFlow<List<String>> = _devices
 
     fun devices(): List<String> {
-        return mediaManager.getCameraDevices()
+        return emptyList()
     }
 
     fun select(deviceId: String) {
-        mediaManager.selectCamera(deviceId)
     }
     fun setEnabled(enabled: Boolean) {
-        mediaManager.setCameraEnabled(enabled)
     }
     fun startCapture() {
     }
 
     fun enable() {
-        mediaManager.setCameraEnabled(true)
     }
 
     fun disable() {
-        mediaManager.setCameraEnabled(false)
     }
 }
 
+class AudioManager(val context: Context) {
+    private val logger by taggedLogger("Media:AudioManager")
+
+    var audioManager = context.getSystemService<AudioManager>()
+    val audioHandler = AudioSwitchHandler(context)
+
+//    val audioSource = clientImpl.peerConnectionFactory.makeAudioSource(audioConstraints)
+//    val audioTrack = clientImpl.peerConnectionFactory.makeAudioTrack(
+//        source = audioSource, trackId = "audioTrack"
+//    )
+
+    init {
+        audioHandler.start()
+        audioManager?.mode = AudioManager.MODE_IN_COMMUNICATION
+
+        val speakerOn = true
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val devices = audioManager?.availableCommunicationDevices ?: throw java.lang.IllegalStateException("No devices found")
+            val deviceType = if (speakerOn) {
+                AudioDeviceInfo.TYPE_BUILTIN_SPEAKER
+            } else {
+                AudioDeviceInfo.TYPE_BUILTIN_EARPIECE
+            }
+
+            val device = devices.firstOrNull { it.type == deviceType } ?: throw java.lang.IllegalStateException("No devices found")
+
+            val isCommunicationDeviceSet = audioManager?.setCommunicationDevice(device)
+            logger.d { "[setupAudio] #sfu; isCommunicationDeviceSet: $isCommunicationDeviceSet" }
+        }
+
+        // listing devices..
+        val allDevices =  audioHandler.availableAudioDevices
+    }
+
+    fun setDevice(device: AudioDevice) {
+        audioHandler.selectDevice(device)
+    }
+//
+//    fun setSpeaker(speakerOn: Boolean = true) {
+//        val activeDevice = allDevices.firstOrNull {
+//            if (true) {
+//                it.name.contains("speaker", true)
+//            } else {
+//                !it.name.contains("speaker", true)
+//            }
+//        }
+//    }
+}
+
+
 public class CameraManager(public val mediaManager: MediaManagerImpl) {
+    private val logger by taggedLogger("Media:CameraManager")
 
     private val _status = MutableStateFlow<DeviceStatus>(DeviceStatus.Disabled)
     public val status: StateFlow<DeviceStatus> = _status
@@ -156,6 +214,10 @@ public class CameraManager(public val mediaManager: MediaManagerImpl) {
     }
 
     fun enable() {
+        // 1. update our local state
+        // 2. Rtc listens to this and enables/disables the track
+        // 3. Rtc sends the update mute state request
+
         mediaManager.setCameraEnabled(true)
     }
 
@@ -185,8 +247,10 @@ public class CameraManager(public val mediaManager: MediaManagerImpl) {
  * @see AudioSwitch
  * @see BluetoothHeadsetManager
  */
+// TODO: add the call, or the settings object
 class MediaManagerImpl(val context: Context, val scope: CoroutineScope, eglBaseContext: EglBase.Context) : CapturerObserver {
 
+    private lateinit var videoSource: VideoSource
     private var audioManager = context.getSystemService<AudioManager>()
     internal var captureResolution: CameraEnumerationAndroid.CaptureFormat? = null
     private var isCapturingVideo: Boolean = false
@@ -350,9 +414,13 @@ class MediaManagerImpl(val context: Context, val scope: CoroutineScope, eglBaseC
         videoCapturer?.switchCamera(null)
     }
 
-    fun setCameraEnabled(b: Boolean) {
-        TODO()
-        // activeSession!!.setCameraEnabled(false)
+    fun setCameraEnabled(enabled: Boolean) {
+        if (enabled) {
+            startCapturingLocalVideo(0)
+        } else {
+            videoCapturer?.stopCapture()
+        }
+
     }
 
     fun selectCamera(cameraId: String) {
@@ -380,7 +448,15 @@ class MediaManagerImpl(val context: Context, val scope: CoroutineScope, eglBaseC
         //
     }
 
+    fun selectDesiredResolution(supportedFormats: MutableList<CameraEnumerationAndroid.CaptureFormat>?, targetResolution:Int = 960,): CameraEnumerationAndroid.CaptureFormat? {
+        // needs the settings that we're going for
+        // sort and get the one closest to 960
+        val sorted = supportedFormats?.toList()?.sortedBy { kotlin.math.abs(it.height - targetResolution) }
+        return sorted?.first()
+    }
+
     fun setVideoSource(videoSource: VideoSource) {
+        this.videoSource = videoSource
         runBlocking(scope.coroutineContext) {
             videoCapturer?.initialize(
                 surfaceTextureHelper,

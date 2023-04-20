@@ -143,6 +143,7 @@ dependencies {
     implementation(libs.stream.push)
     implementation(libs.stream.push.delegate)
 
+
     // unit test
     testImplementation(libs.junit)
     testImplementation(libs.truth)
@@ -162,4 +163,5 @@ dependencies {
     androidTestImplementation(libs.androidx.test.junit)
     androidTestImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.kotlin.test.junit)
+    androidTestImplementation("androidx.test:rules:1.5.0")
 }

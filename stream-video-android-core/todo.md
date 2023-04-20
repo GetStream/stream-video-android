@@ -14,14 +14,14 @@
 
 ### RTC & Media TODO
 
-- [ ] Error classes for Media/Camera/Mic & Joining a call. That wrap the many things that can go wrong.
-- [ ] Ensure errors from sfu are bubbled up
-- [ ] Clean up the media manager class
+- [ ] Move enabling/disabling/state and clean it up
 - [ ] Move setCameraEnabled & setMicrophoneEnabled
-- [ ] Move muting and clean it up
+- [ ] Clean up the media manager class
+- [ ] Error classes for Media/Camera/Mic & Joining a call. That wrap the many things that can go wrong.
 - [ ] Leave & End flows
 - [ ] Review how UI changes & pagination are connected to the video tracks. See call initRenderer and updateParticipantsSubscriptions
 - [ ] Implement dynascale
+- [X] Ensure errors from sfu are bubbled up
 - [X] Media manager class to enable easy testing of all audio/video stuff
 - [X] Tests that verify the local track is working
 - [X] Tests that verify we are sending our local track
