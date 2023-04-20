@@ -144,10 +144,10 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
     @Test
     fun logging() = runTest {
-        logger.e { "androidTest logging e "}
-        logger.w { "androidTest logging w "}
-        logger.i { "androidTest logging i "}
-        logger.d { "androidTest logging d "}
+        logger.e { "androidTest logging e " }
+        logger.w { "androidTest logging w " }
+        logger.i { "androidTest logging i " }
+        logger.d { "androidTest logging d " }
     }
 
     @Test
@@ -169,7 +169,7 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         assertThat(report).isNotNull()
 
         // loop over the participants
-        call.state.participants.value.forEach {participant ->
+        call.state.participants.value.forEach { participant ->
             val videoTrack = participant.videoTrackWrapped?.video
             assertThat(videoTrack).isNotNull()
             assertThat(videoTrack?.enabled()).isTrue()
@@ -180,6 +180,5 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
             assertThat(audioTrack?.enabled()).isTrue()
             assertThat(audioTrack?.state()).isEqualTo(MediaStreamTrack.State.LIVE)
         }
-
     }
 }

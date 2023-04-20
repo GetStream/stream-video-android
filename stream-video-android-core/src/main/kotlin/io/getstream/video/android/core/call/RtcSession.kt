@@ -34,7 +34,6 @@ import io.getstream.video.android.core.StreamVideoImpl
 import io.getstream.video.android.core.call.connection.StreamPeerConnection
 import io.getstream.video.android.core.call.state.ConnectionState
 import io.getstream.video.android.core.call.utils.stringify
-import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
@@ -60,8 +59,6 @@ import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.core.utils.stringify
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancelChildren
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -416,7 +413,7 @@ public class RtcSession internal constructor(
 
     fun clear() {
         logger.i { "[clear] #sfu; no args" }
-        //supervisorJob.cancelChildren()
+        // supervisorJob.cancelChildren()
 
         connectionState = ConnectionState.DISCONNECTED
 
@@ -832,7 +829,6 @@ public class RtcSession internal constructor(
                         }
                     }
 
-
                     TrackInfo(
                         track_id = track.id(),
                         track_type = trackType,
@@ -858,7 +854,6 @@ public class RtcSession internal constructor(
                     )
                     // set the remote peer connection, and handle queued ice candidates
                     peerConnection.setRemoteDescription(answerDescription)
-
                 }.onError {
                     throw IllegalStateException("[negotiate] #$id; #sfu; #${peerType.stringify()}; failed: $it")
                     logger.e { "[negotiate] #$id; #sfu; #${peerType.stringify()}; failed: $it" }
