@@ -21,6 +21,7 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.forEach
 import kotlinx.coroutines.test.runTest
 import org.junit.Ignore
@@ -156,6 +157,7 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS=false) {
         delay(1000)
         delay(100000)
 
+        call.state.participants.collect()
         // see if the ice connection is ok on the subscriber
         val iceConnectionState = call.session?.subscriber?.connection?.iceConnectionState()
         assertThat(iceConnectionState).isEqualTo(PeerConnection.IceConnectionState.CONNECTED)

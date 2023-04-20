@@ -364,7 +364,6 @@ public class RtcSession internal constructor(
         }
 
         // step 6 - onNegotiationNeeded will trigger and complete the setup using SetPublisherRequest
-        // step 7 - We will receive the JoinCallResponseEvent event
 
         listenToMediaChanges()
         return
@@ -825,8 +824,12 @@ public class RtcSession internal constructor(
                     session_id = sessionId,
                     tracks = trackInfos
                 )
+                val setPublisherResult = setPublisher(request)
 
-                setPublisher(request).onSuccessSuspend {
+                setPublisherResult.onSuccessSuspend {
+                    if (it.error != null) {
+                        throw IllegalStateException(it.error.toString())
+                    }
                     logger.v { "[negotiate] #$id; #sfu; #${peerType.stringify()}; answerSdp: $it" }
 
                     val answerDescription = SessionDescription(
@@ -836,6 +839,7 @@ public class RtcSession internal constructor(
                     peerConnection.setRemoteDescription(answerDescription)
 
                 }.onError {
+                    throw IllegalStateException("[negotiate] #$id; #sfu; #${peerType.stringify()}; failed: $it")
                     logger.e { "[negotiate] #$id; #sfu; #${peerType.stringify()}; failed: $it" }
                 }
             }
