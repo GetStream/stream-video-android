@@ -18,15 +18,15 @@ package io.getstream.video.android.core
 
 import com.google.common.truth.Truth.assertThat
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.utils.buildAudioConstraints
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.forEach
 import kotlinx.coroutines.test.runTest
 import org.junit.Ignore
 import org.junit.Test
-import org.webrtc.MediaSource
 import org.webrtc.MediaStreamTrack
 import org.webrtc.PeerConnection
 
@@ -43,13 +43,18 @@ import org.webrtc.PeerConnection
  * * Does the SFU WS connect
  * * Do we receive the join event
  */
-class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS=false) {
+class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
     private val logger by taggedLogger("Test:AndroidDeviceTest")
+    val manager = MediaManagerImpl(
+        context,
+        CoroutineScope( DispatcherProvider.IO),
+        clientImpl.peerConnectionFactory.eglBase.eglBaseContext
+    )
 
     @Test
     fun camera() = runTest {
-        val manager = MediaManagerImpl(context)
+
         val camera = manager.camera
         assertThat(camera).isNotNull()
         camera.startCapture()
@@ -57,7 +62,6 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS=false) {
 
     @Test
     fun microphone() = runTest {
-        val manager = MediaManagerImpl(context)
         val mic = manager.microphone
         assertThat(mic).isNotNull()
         mic.startCapture()
@@ -136,7 +140,6 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS=false) {
         // TODO: PeerConnection.IceConnectionState.CONNECTED isn't reached
         // it is RTCOutboundRtpStreamStats && it.bytesSent > 0
         report?.statsMap?.values?.any { it is Throwable }
-
     }
 
     @Test
@@ -151,7 +154,7 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS=false) {
     fun receiving() = runTest {
         // TODO: have a specific SFU setting to send back fake data
         // TODO: replace the id with your active call
-        val call = client.call("default", "vDNeuHk9SU32")
+        val call = client.call("default", "rXmr0HUSshWz")
         val joinResult = call.join()
         assertSuccess(joinResult)
         delay(1000)

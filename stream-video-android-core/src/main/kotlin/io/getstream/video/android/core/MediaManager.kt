@@ -28,13 +28,21 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.audio.AudioHandler
 import io.getstream.video.android.core.audio.AudioSwitchHandler
 import io.getstream.video.android.core.model.CallSettings
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.webrtc.Camera2Capturer
 import org.webrtc.Camera2Enumerator
 import org.webrtc.CameraEnumerationAndroid
 import org.webrtc.CameraEnumerator
+import org.webrtc.CapturerObserver
+import org.webrtc.EglBase
+import org.webrtc.SurfaceTextureHelper
 import org.webrtc.VideoCapturer
+import org.webrtc.VideoFrame
+import org.webrtc.VideoSource
 
 sealed class DeviceStatus {
     object Disabled : DeviceStatus()
@@ -142,8 +150,9 @@ public class CameraManager(public val mediaManager: MediaManagerImpl) {
     }
 
     fun startCapture() {
+
         mediaManager.startCapturingLocalVideo(CameraMetadata.LENS_FACING_FRONT)
-        val capturer = mediaManager.buildCameraCapturer()
+
     }
 
     fun enable() {
@@ -176,7 +185,7 @@ public class CameraManager(public val mediaManager: MediaManagerImpl) {
  * @see AudioSwitch
  * @see BluetoothHeadsetManager
  */
-class MediaManagerImpl(val context: Context) {
+class MediaManagerImpl(val context: Context, val scope: CoroutineScope, eglBaseContext: EglBase.Context) : CapturerObserver {
 
     private var audioManager = context.getSystemService<AudioManager>()
     internal var captureResolution: CameraEnumerationAndroid.CaptureFormat? = null
@@ -240,8 +249,22 @@ class MediaManagerImpl(val context: Context) {
         return audioHandler as? AudioSwitchHandler
     }
 
+    private val surfaceTextureHelper by lazy {
+        SurfaceTextureHelper.create(
+            "CaptureThread", eglBaseContext
+        )
+    }
+
     fun startCapturingLocalVideo(position: Int) {
-        val capturer = videoCapturer ?: return
+        val mediaManager = this
+        videoCapturer = buildCameraCapturer() as Camera2Capturer?
+        runBlocking(scope.coroutineContext) {
+            videoCapturer?.initialize(
+                surfaceTextureHelper,
+                context,
+                mediaManager
+            )
+        }
         val enumerator = cameraEnumerator as? Camera2Enumerator ?: return
 
         val frontCamera = enumerator.deviceNames.first {
@@ -254,14 +277,17 @@ class MediaManagerImpl(val context: Context) {
 
         val supportedFormats = enumerator.getSupportedFormats(frontCamera) ?: emptyList()
 
+        // TODO: server uses 960 480 240
         val resolution = supportedFormats.firstOrNull {
             (it.width == 720 || it.width == 480 || it.width == 360)
-        } ?: return
-
-        capturer.startCapture(resolution.width, resolution.height, 30)
+        } ?: throw java.lang.IllegalStateException("No supported resolution found")
+        runBlocking(scope.coroutineContext) {
+            videoCapturer!!.startCapture(resolution.width, resolution.height, 30)
+        }
         isCapturingVideo = true
         captureResolution = resolution
     }
+
 
     fun buildCameraCapturer(): VideoCapturer? {
         val manager = cameraManager ?: return null
@@ -340,5 +366,27 @@ class MediaManagerImpl(val context: Context) {
         }
 
         capturer!!.startCapture(resolution!!.width, resolution.height, 30)
+    }
+
+    override fun onCapturerStarted(success: Boolean) {
+        //
+    }
+
+    override fun onCapturerStopped() {
+        //
+    }
+
+    override fun onFrameCaptured(frame: VideoFrame?) {
+        //
+    }
+
+    fun setVideoSource(videoSource: VideoSource) {
+        runBlocking(scope.coroutineContext) {
+            videoCapturer?.initialize(
+                surfaceTextureHelper,
+                context,
+                videoSource.capturerObserver
+            )
+        }
     }
 }

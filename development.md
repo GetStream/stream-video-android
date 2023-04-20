@@ -195,6 +195,14 @@ sealed class RingingState() {
 }
 ```
 
+### Media Manager
+
+The media manager should support capturing local video with or without joining a call
+
+* Camera2Capturer starts capture the video
+* It captures it on SurfaceTextureHelper
+* The webrtc part needs to know the video capture resolution
+
 ### Dogfooding vs Demo App
 
 * dogfooding has google authentication. demo app has no authentication

@@ -72,6 +72,7 @@ public class Call(
 ) {
     internal val clientImpl = client as StreamVideoImpl
     private val logger by taggedLogger("Call")
+
     /** The call state contains all state such as the participant list, reactions etc */
     val state = CallState(this, user)
 
@@ -85,7 +86,7 @@ public class Call(
 
     /** Session handles all real time communication for video and audio */
     internal var session: RtcSession? = null
-    internal val mediaManager by lazy { MediaManagerImpl(clientImpl.context) }
+    internal val mediaManager by lazy { MediaManagerImpl(clientImpl.context, clientImpl.scope, clientImpl.peerConnectionFactory.eglBase.eglBaseContext) }
 
     /** Basic crud operations */
     suspend fun get(): Result<GetCallResponse> {
@@ -203,8 +204,9 @@ public class Call(
     }
 
     /** Leave the call, but don't end it for other users */
-    fun leave() {
+    fun leave(): Result<Unit> {
         // TODO
+        return Result.Success(Unit)
     }
 
     /** ends the call for yourself as well as other users */

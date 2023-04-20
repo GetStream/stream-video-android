@@ -19,10 +19,13 @@
 
 ### RTC TODO
 
+- [ ] Error classes for Media/Camera/Mic & Joining a call. That wrap the many things that can go wrong.
+- [ ] Ensure errors from sfu are bubbled up
+- [ ] Clean up the media manager class
 - [X] Media manager class to enable easy testing of all audio/video stuff
-- [ ] Tests that verify the local track is working
-- [ ] Tests that verify we are sending our local track
-- [ ] setLocalTrack is not called
+- [X] Tests that verify the local track is working
+- [X] Tests that verify we are sending our local track
+- [X] setLocalTrack is not called
 - [ ] Move setCameraEnabled & setMicrophoneEnabled
 - [ ] Move muting and clean it up
 - [ ] Leave & End flows

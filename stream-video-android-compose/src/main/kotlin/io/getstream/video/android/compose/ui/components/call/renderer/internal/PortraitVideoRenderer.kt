@@ -71,8 +71,11 @@ internal fun BoxScope.PortraitVideoRenderer(
 ) {
     val remoteParticipants = callParticipants.filter { !it.isLocal }
 
+    if (callParticipants.isEmpty() ||
+        (remoteParticipants.isEmpty() && callParticipants.size > 1)
+    ) return
+
     when (callParticipants.size) {
-        0 -> Unit
         1 -> {
             val participant = callParticipants.first()
 

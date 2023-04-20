@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.core.call
 
-import android.hardware.camera2.CameraMetadata
 import android.media.AudioAttributes.ALLOW_CAPTURE_BY_ALL
 import android.media.AudioManager
 import android.os.Build
@@ -286,9 +285,16 @@ public class RtcSession internal constructor(
 
         val (trackPrefix, trackTypeString) = mediaStream.id.split(':')
         val sessionId = trackPrefixToSessionIdMap.value[trackPrefix]!!
-        val trackType = TrackType.fromValue(trackTypeString.toInt()) ?: throw IllegalStateException(
-            "unrecognized track type"
+
+        val trackTypeMap = mapOf(
+            "TRACK_TYPE_UNSPECIFIED" to TrackType.TRACK_TYPE_UNSPECIFIED,
+            "TRACK_TYPE_AUDIO" to TrackType.TRACK_TYPE_AUDIO,
+            "TRACK_TYPE_VIDEO" to TrackType.TRACK_TYPE_VIDEO,
+            "TRACK_TYPE_SCREEN_SHARE" to TrackType.TRACK_TYPE_SCREEN_SHARE,
+            "TRACK_TYPE_SCREEN_SHARE_AUDIO" to TrackType.TRACK_TYPE_SCREEN_SHARE_AUDIO,
         )
+        val trackType = trackTypeMap[trackTypeString] ?: TrackType.fromValue(trackTypeString.toInt())
+        ?: throw IllegalStateException("trackType not recognized: $trackTypeString")
 
         logger.i { "[] #sfu; mediaStream: $mediaStream" }
         mediaStream.audioTracks.forEach { track ->
@@ -340,21 +346,24 @@ public class RtcSession internal constructor(
                 source = audioSource, trackId = buildTrackId(TrackType.TRACK_TYPE_AUDIO)
             )
             audioTrack.setEnabled(true)
-            setLocalTrack(TrackType.TRACK_TYPE_AUDIO, TrackWrapper(streamId=buildTrackId(TrackType.TRACK_TYPE_AUDIO), audio=audioTrack))
+            setLocalTrack(TrackType.TRACK_TYPE_AUDIO, TrackWrapper(streamId = buildTrackId(TrackType.TRACK_TYPE_AUDIO), audio = audioTrack))
 
             publisher?.addAudioTransceiver(audioTrack, listOf(sessionId))
             // step 5 create the video track
             val videoTrack = clientImpl.peerConnectionFactory.makeVideoTrack(
                 source = videoSource, trackId = buildTrackId(TrackType.TRACK_TYPE_VIDEO)
             )
-            setLocalTrack(TrackType.TRACK_TYPE_VIDEO, TrackWrapper(streamId=buildTrackId(TrackType.TRACK_TYPE_VIDEO), video=videoTrack))
+            setLocalTrack(TrackType.TRACK_TYPE_VIDEO, TrackWrapper(streamId = buildTrackId(TrackType.TRACK_TYPE_VIDEO), video = videoTrack))
             // render it on the surface. but we need to start this before forwarding it to the publisher
             // TODO: clean this up, would be better to have some sensible API for this
-            call.mediaManager.videoCapturer?.initialize(
-                surfaceTextureHelper,
-                context,
-                videoSource.capturerObserver
-            )
+//            call.mediaManager.videoCapturer?.initialize(
+//                surfaceTextureHelper,
+//                context,
+//                videoSource.capturerObserver
+//            )
+
+            call.mediaManager.setVideoSource(videoSource)
+
             // TODO: understand how to start with only rendering on the surface view
             videoTrack.setEnabled(true)
             logger.v { "[createUserTracks] #sfu; videoTrack: ${videoTrack.stringify()}" }
@@ -526,7 +535,7 @@ public class RtcSession internal constructor(
 
     private fun buildTrackId(trackTypeVideo: TrackType): String {
         // track prefix is only available after the join response
-        val trackType = trackTypeVideo.toString()
+        val trackType = trackTypeVideo.value
         val trackPrefix = call.state?.me?.value?.trackLookupPrefix
         return "$trackPrefix:$trackType:${(Math.random() * 100).toInt()}"
     }
@@ -804,12 +813,18 @@ public class RtcSession internal constructor(
                     val layers: List<VideoLayer> = if (trackType != TrackType.TRACK_TYPE_VIDEO) {
                         emptyList()
                     } else {
+                        // we tell the Sfu which resolutions we're sending
                         transceiver.sender.parameters.encodings.map {
+                            val scaleDownFactor = mapOf("q" to 4, "h" to 2, "f" to 1)
+                            val scale = scaleDownFactor[it.rid]
+                            val width = captureResolution?.width?.div(scale!!) ?: 0
+                            val height = scale?.let { it1 -> captureResolution?.height?.div(it1) }
+                                ?: 0
                             VideoLayer(
                                 rid = it.rid ?: "",
                                 video_dimension = VideoDimension(
-                                    width = captureResolution?.width ?: 0,
-                                    height = captureResolution?.height ?: 0
+                                    width = width,
+                                    height = height,
                                 ),
                                 bitrate = it.maxBitrateBps ?: 0,
                                 fps = captureResolution?.framerate?.max ?: 0
