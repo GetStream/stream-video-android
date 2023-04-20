@@ -27,7 +27,7 @@ public final class io/getstream/video/android/core/Call {
 	public static synthetic fun initRenderer$default (Lio/getstream/video/android/core/Call;Lio/getstream/webrtc/android/ui/VideoTextureViewRenderer;Ljava/lang/String;Lstream/video/sfu/models/TrackType;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public final fun join (Lio/getstream/video/android/core/CreateCallOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun join$default (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/CreateCallOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public final fun leave ()V
+	public final fun leave ()Lio/getstream/result/Result;
 	public final fun listRecordings (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun muteAllUsers (ZZZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun muteAllUsers$default (Lio/getstream/video/android/core/Call;ZZZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
@@ -107,13 +107,14 @@ public final class io/getstream/video/android/core/CallState {
 public final class io/getstream/video/android/core/CameraManager {
 	public fun <init> (Lio/getstream/video/android/core/MediaManagerImpl;)V
 	public final fun disable ()V
-	public final fun enable (Z)V
+	public final fun enable ()V
 	public final fun flip ()V
 	public final fun getDevices ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getMediaManager ()Lio/getstream/video/android/core/MediaManagerImpl;
 	public final fun getSelectedDevice ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getStatus ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun select (Ljava/lang/String;)V
+	public final fun setEnabled (Z)V
 	public final fun startCapture ()V
 }
 
@@ -237,6 +238,7 @@ public final class io/getstream/video/android/core/MediaManagerImpl {
 	public final fun setSpeakerphoneEnabled (Z)V
 	public final fun setVideoCapturer (Lorg/webrtc/Camera2Capturer;)V
 	public final fun startCapturingLocalVideo (I)V
+	public final fun toggle ()V
 }
 
 public final class io/getstream/video/android/core/MemberState {
@@ -269,7 +271,7 @@ public final class io/getstream/video/android/core/MicrophoneManager {
 	public fun <init> (Lio/getstream/video/android/core/MediaManagerImpl;)V
 	public final fun devices ()Ljava/util/List;
 	public final fun disable ()V
-	public final fun enable (Z)V
+	public final fun enable ()V
 	public final fun getDevices ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getMediaManager ()Lio/getstream/video/android/core/MediaManagerImpl;
 	public final fun getSelectedDevice ()Lkotlinx/coroutines/flow/StateFlow;
@@ -278,6 +280,7 @@ public final class io/getstream/video/android/core/MicrophoneManager {
 	public final fun get_selectedDevice ()Lkotlinx/coroutines/flow/MutableStateFlow;
 	public final fun get_status ()Lkotlinx/coroutines/flow/MutableStateFlow;
 	public final fun select (Ljava/lang/String;)V
+	public final fun setEnabled (Z)V
 	public final fun startCapture ()V
 }
 
@@ -378,7 +381,7 @@ public final class io/getstream/video/android/core/SpeakerManager {
 	public fun <init> (Lio/getstream/video/android/core/MediaManagerImpl;)V
 	public final fun devices ()Ljava/util/List;
 	public final fun disable ()V
-	public final fun enable (Z)V
+	public final fun enable ()V
 	public final fun getDevices ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getMediaManager ()Lio/getstream/video/android/core/MediaManagerImpl;
 	public final fun getSelectedDevice ()Lkotlinx/coroutines/flow/StateFlow;
@@ -389,6 +392,7 @@ public final class io/getstream/video/android/core/SpeakerManager {
 	public final fun get_speakerPhoneEnabled ()Lkotlinx/coroutines/flow/MutableStateFlow;
 	public final fun get_status ()Lkotlinx/coroutines/flow/MutableStateFlow;
 	public final fun select (Ljava/lang/String;)V
+	public final fun setEnabled (Z)V
 	public final fun setSpeakerPhone (Z)V
 	public final fun setVolume (J)V
 }
@@ -556,12 +560,13 @@ public final class io/getstream/video/android/core/call/RtcSession {
 	public final fun getLocalTrack (Lstream/video/sfu/models/TrackType;)Lio/getstream/video/android/core/model/TrackWrapper;
 	public final fun getPublisher ()Lio/getstream/video/android/core/call/connection/StreamPeerConnection;
 	public final fun getPublisherStats ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getSubscriber ()Lio/getstream/video/android/core/call/connection/StreamPeerConnection;
 	public final fun getSubscriberStats ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getTrack (Ljava/lang/String;Lstream/video/sfu/models/TrackType;)Lio/getstream/video/android/core/model/TrackWrapper;
 	public final fun getTracks ()Ljava/util/Map;
 	public final fun handleEvent (Lorg/openapitools/client/models/VideoEvent;)V
+	public final fun handleIceTrickle (Lio/getstream/video/android/core/events/ICETrickleEvent;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun handleSubscriberOffer (Lio/getstream/video/android/core/events/SubscriberOfferEvent;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun handleTrickle (Lio/getstream/video/android/core/events/ICETrickleEvent;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun listenToMediaChanges (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun onNegotiationNeeded (Lio/getstream/video/android/core/call/connection/StreamPeerConnection;Lio/getstream/video/android/core/model/StreamPeerType;)V
 	public final fun parseError (Ljava/lang/Throwable;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -572,6 +577,7 @@ public final class io/getstream/video/android/core/call/RtcSession {
 	public final fun setMicrophoneEnabled (Z)V
 	public final fun setPublisher (Lio/getstream/video/android/core/call/connection/StreamPeerConnection;)V
 	public final fun setPublisher (Lstream/video/sfu/signal/SetPublisherRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun setSubscriber (Lio/getstream/video/android/core/call/connection/StreamPeerConnection;)V
 	public final fun setTrack (Ljava/lang/String;Lstream/video/sfu/models/TrackType;Lio/getstream/video/android/core/model/TrackWrapper;)V
 	public final fun setTracks (Ljava/util/Map;)V
 	public final fun updateMuteState (Lstream/video/sfu/signal/UpdateMuteStatesRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -1970,22 +1976,21 @@ public final class io/getstream/video/android/core/model/UpdateUserPermissionsDa
 
 public final class io/getstream/video/android/core/model/User {
 	public static final field Companion Lio/getstream/video/android/core/model/User$Companion;
-	public synthetic fun <init> (ILjava/lang/String;Ljava/lang/String;Lio/getstream/video/android/core/model/UserType;Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/util/Map;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;Lkotlinx/serialization/internal/SerializationConstructorMarker;)V
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lio/getstream/video/android/core/model/UserType;Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/util/Map;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lio/getstream/video/android/core/model/UserType;Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/util/Map;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (ILjava/lang/String;Ljava/lang/String;Lio/getstream/video/android/core/model/UserType;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;Lkotlinx/serialization/internal/SerializationConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lio/getstream/video/android/core/model/UserType;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lio/getstream/video/android/core/model/UserType;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component10 ()Lorg/threeten/bp/OffsetDateTime;
-	public final fun component11 ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()Lio/getstream/video/android/core/model/UserType;
 	public final fun component4 ()Ljava/lang/String;
 	public final fun component5 ()Ljava/lang/String;
-	public final fun component6 ()Z
-	public final fun component7 ()Ljava/util/List;
-	public final fun component8 ()Ljava/util/Map;
+	public final fun component6 ()Ljava/util/List;
+	public final fun component7 ()Ljava/util/Map;
+	public final fun component8 ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun component9 ()Lorg/threeten/bp/OffsetDateTime;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lio/getstream/video/android/core/model/UserType;Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/util/Map;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;)Lio/getstream/video/android/core/model/User;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/model/User;Ljava/lang/String;Ljava/lang/String;Lio/getstream/video/android/core/model/UserType;Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;Ljava/util/Map;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;ILjava/lang/Object;)Lio/getstream/video/android/core/model/User;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lio/getstream/video/android/core/model/UserType;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;)Lio/getstream/video/android/core/model/User;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/model/User;Ljava/lang/String;Ljava/lang/String;Lio/getstream/video/android/core/model/UserType;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;ILjava/lang/Object;)Lio/getstream/video/android/core/model/User;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCreatedAt ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun getCustom ()Ljava/util/Map;
@@ -1998,7 +2003,6 @@ public final class io/getstream/video/android/core/model/User {
 	public final fun getType ()Lio/getstream/video/android/core/model/UserType;
 	public final fun getUpdatedAt ()Lorg/threeten/bp/OffsetDateTime;
 	public fun hashCode ()I
-	public final fun isOnline ()Z
 	public final fun isValid ()Z
 	public fun toString ()Ljava/lang/String;
 	public static final fun write$Self (Lio/getstream/video/android/core/model/User;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
@@ -2790,6 +2794,7 @@ public final class io/getstream/video/android/core/viewmodel/CallViewModel : and
 	public static synthetic fun joinCall$default (Lio/getstream/video/android/core/viewmodel/CallViewModel;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public final fun onCallAction (Lio/getstream/video/android/core/call/state/CallAction;)V
 	public final fun onPictureInPictureModeChanged (Z)V
+	public final fun setOnLeaveCall (Lkotlin/jvm/functions/Function1;)V
 }
 
 public final class io/getstream/video/android/core/viewmodel/CallViewModelFactory : androidx/lifecycle/ViewModelProvider$Factory {
