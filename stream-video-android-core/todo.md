@@ -4,33 +4,28 @@
 ### Week 1: Refactor LLC & State. Setup testing
 ### Week 2: LLC & State Stability. Compose testing & previews
 ### Week 3: Sample app, update compose to LLC & State changes. New events, socket & token provider. Call UI. Guest users & moderation endpoints
-### Week 4: LLC & state test coverage + Demo & Dogfooding apps
+### Week 4: LLC & state test coverage + Demo & Dogfooding apps + RTC & Media fixes
 
 
 
-### Week 5: Render video/join calls
+### Week 5: Dogfooding & Example apps
 
-- RTC & Audio testing
-- How to ensure that video resolutions are sent to the server
-- 
-- Step 1: Render local video using the new API and compose
-- Step 2: Upload local video to the SFU
-- Step 3: Join a call and render participants
 
-### RTC TODO
+
+### RTC & Media TODO
 
 - [ ] Error classes for Media/Camera/Mic & Joining a call. That wrap the many things that can go wrong.
 - [ ] Ensure errors from sfu are bubbled up
 - [ ] Clean up the media manager class
-- [X] Media manager class to enable easy testing of all audio/video stuff
-- [X] Tests that verify the local track is working
-- [X] Tests that verify we are sending our local track
-- [X] setLocalTrack is not called
 - [ ] Move setCameraEnabled & setMicrophoneEnabled
 - [ ] Move muting and clean it up
 - [ ] Leave & End flows
 - [ ] Review how UI changes & pagination are connected to the video tracks. See call initRenderer and updateParticipantsSubscriptions
 - [ ] Implement dynascale
+- [X] Media manager class to enable easy testing of all audio/video stuff
+- [X] Tests that verify the local track is working
+- [X] Tests that verify we are sending our local track
+- [X] setLocalTrack is not called
 
 ### TODOs
 
