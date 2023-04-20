@@ -241,14 +241,12 @@ internal class SfuConnectionModule(
     internal lateinit var sfuSocket: SfuSocket
     val updatedSignalUrl = sfuUrl.removeSuffix(suffix = "/twirp")
 
-    private fun buildSfuOkHttpClient(
-
-    ): OkHttpClient {
+    private fun buildSfuOkHttpClient(): OkHttpClient {
         val connectionTimeoutInMs = 10000L
         // create a new OkHTTP client and set timeouts
         // TODO: map logging level
         val authInterceptor =
-            CoordinatorAuthInterceptor(apiKey,  sfuToken)
+            CoordinatorAuthInterceptor(apiKey, sfuToken)
         val baseUrlInterceptor = BaseUrlInterceptor(null)
         return OkHttpClient.Builder()
             .addInterceptor(

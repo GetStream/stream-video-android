@@ -26,7 +26,6 @@ import kotlinx.coroutines.flow.forEach
 import kotlinx.coroutines.test.runTest
 import org.junit.Ignore
 import org.junit.Test
-import org.webrtc.MediaSource
 import org.webrtc.MediaStreamTrack
 import org.webrtc.PeerConnection
 
@@ -43,7 +42,7 @@ import org.webrtc.PeerConnection
  * * Does the SFU WS connect
  * * Do we receive the join event
  */
-class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS=false) {
+class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
     private val logger by taggedLogger("Test:AndroidDeviceTest")
 
@@ -136,15 +135,14 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS=false) {
         // TODO: PeerConnection.IceConnectionState.CONNECTED isn't reached
         // it is RTCOutboundRtpStreamStats && it.bytesSent > 0
         report?.statsMap?.values?.any { it is Throwable }
-
     }
 
     @Test
     fun logging() = runTest {
-        logger.e { "androidTest logging e "}
-        logger.w { "androidTest logging w "}
-        logger.i { "androidTest logging i "}
-        logger.d { "androidTest logging d "}
+        logger.e { "androidTest logging e " }
+        logger.w { "androidTest logging w " }
+        logger.i { "androidTest logging i " }
+        logger.d { "androidTest logging d " }
     }
 
     @Test
@@ -166,7 +164,7 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS=false) {
         assertThat(report).isNotNull()
 
         // loop over the participants
-        call.state.participants.value.forEach {participant ->
+        call.state.participants.value.forEach { participant ->
             val videoTrack = participant.videoTrackWrapped?.video
             assertThat(videoTrack).isNotNull()
             assertThat(videoTrack?.enabled()).isTrue()
@@ -177,6 +175,5 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS=false) {
             assertThat(audioTrack?.enabled()).isTrue()
             assertThat(audioTrack?.state()).isEqualTo(MediaStreamTrack.State.LIVE)
         }
-
     }
 }

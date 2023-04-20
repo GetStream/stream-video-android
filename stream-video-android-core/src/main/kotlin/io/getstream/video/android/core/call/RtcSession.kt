@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.core.call
 
-import android.hardware.camera2.CameraMetadata
 import android.media.AudioAttributes.ALLOW_CAPTURE_BY_ALL
 import android.media.AudioManager
 import android.os.Build
@@ -35,7 +34,6 @@ import io.getstream.video.android.core.StreamVideoImpl
 import io.getstream.video.android.core.call.connection.StreamPeerConnection
 import io.getstream.video.android.core.call.state.ConnectionState
 import io.getstream.video.android.core.call.utils.stringify
-import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
@@ -61,8 +59,6 @@ import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.core.utils.stringify
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancelChildren
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -340,14 +336,14 @@ public class RtcSession internal constructor(
                 source = audioSource, trackId = buildTrackId(TrackType.TRACK_TYPE_AUDIO)
             )
             audioTrack.setEnabled(true)
-            setLocalTrack(TrackType.TRACK_TYPE_AUDIO, TrackWrapper(streamId=buildTrackId(TrackType.TRACK_TYPE_AUDIO), audio=audioTrack))
+            setLocalTrack(TrackType.TRACK_TYPE_AUDIO, TrackWrapper(streamId = buildTrackId(TrackType.TRACK_TYPE_AUDIO), audio = audioTrack))
 
             publisher?.addAudioTransceiver(audioTrack, listOf(sessionId))
             // step 5 create the video track
             val videoTrack = clientImpl.peerConnectionFactory.makeVideoTrack(
                 source = videoSource, trackId = buildTrackId(TrackType.TRACK_TYPE_VIDEO)
             )
-            setLocalTrack(TrackType.TRACK_TYPE_VIDEO, TrackWrapper(streamId=buildTrackId(TrackType.TRACK_TYPE_VIDEO), video=videoTrack))
+            setLocalTrack(TrackType.TRACK_TYPE_VIDEO, TrackWrapper(streamId = buildTrackId(TrackType.TRACK_TYPE_VIDEO), video = videoTrack))
             // render it on the surface. but we need to start this before forwarding it to the publisher
             // TODO: clean this up, would be better to have some sensible API for this
             call.mediaManager.videoCapturer?.initialize(
@@ -406,7 +402,7 @@ public class RtcSession internal constructor(
 
     fun clear() {
         logger.i { "[clear] #sfu; no args" }
-        //supervisorJob.cancelChildren()
+        // supervisorJob.cancelChildren()
 
         connectionState = ConnectionState.DISCONNECTED
 
@@ -816,7 +812,6 @@ public class RtcSession internal constructor(
                         }
                     }
 
-
                     TrackInfo(
                         track_id = track.id(),
                         track_type = trackType,
@@ -842,7 +837,6 @@ public class RtcSession internal constructor(
                     )
                     // set the remote peer connection, and handle queued ice candidates
                     peerConnection.setRemoteDescription(answerDescription)
-
                 }.onError {
                     throw IllegalStateException("[negotiate] #$id; #sfu; #${peerType.stringify()}; failed: $it")
                     logger.e { "[negotiate] #$id; #sfu; #${peerType.stringify()}; failed: $it" }

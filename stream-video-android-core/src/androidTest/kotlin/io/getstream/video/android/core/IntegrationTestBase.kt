@@ -21,7 +21,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth
 import io.getstream.log.Priority
 import io.getstream.log.StreamLog
-import io.getstream.log.kotlin.KotlinStreamLogger
+import io.getstream.log.android.AndroidStreamLogger
 import io.getstream.log.streamLog
 import io.getstream.result.Result
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
@@ -65,7 +65,8 @@ class IntegrationTestHelper {
     val tokens = mutableMapOf<String, String>()
     val context: Context
 
-    val expiredToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidGhpZXJyeUBnZXRzdHJlYW0uaW8iLCJpc3MiOiJwcm9udG8iLCJzdWIiOiJ1c2VyL3RoaWVycnlAZ2V0c3RyZWFtLmlvIiwiaWF0IjoxNjgxMjUxMDg4LCJleHAiOjE2ODEyNjE4OTN9.VinzXBwvT_AGXNBG8QTz9HJFSR6LhqIEtVpIlmY1aEc"
+    val expiredToken =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidGhpZXJyeUBnZXRzdHJlYW0uaW8iLCJpc3MiOiJwcm9udG8iLCJzdWIiOiJ1c2VyL3RoaWVycnlAZ2V0c3RyZWFtLmlvIiwiaWF0IjoxNjgxMjUxMDg4LCJleHAiOjE2ODEyNjE4OTN9.VinzXBwvT_AGXNBG8QTz9HJFSR6LhqIEtVpIlmY1aEc"
 
     val fakeSDP = """
         v=0
@@ -97,18 +98,6 @@ class IntegrationTestHelper {
     }
 }
 
-/**
- * A logger that prints to stdout
- */
-internal class StreamTestLogger : KotlinStreamLogger() {
-
-    override fun log(priority: Priority, tag: String, message: String, throwable: Throwable?) {
-
-        if (throwable != null) {
-        }
-    }
-}
-
 open class TestBase {
     @get:Rule
     val dispatcherRule = DispatcherRule()
@@ -122,13 +111,13 @@ open class TestBase {
     /** API Key */
     val apiKey = "hd8szvscpxvd"
 
-    private val testLogger = StreamTestLogger()
+    private val testAndroidLogger = AndroidStreamLogger()
 
     init {
         if (!StreamLog.isInstalled) {
             StreamLog.setValidator { priority, _ -> priority > Priority.VERBOSE }
-            StreamLog.install(logger = testLogger)
-            testLogger.streamLog { "test logger installed" }
+            StreamLog.install(logger = testAndroidLogger)
+            testAndroidLogger.streamLog { "test logger installed" }
         }
     }
 

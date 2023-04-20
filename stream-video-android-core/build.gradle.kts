@@ -153,6 +153,7 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.kotlin.test.junit)
 
+    androidTestImplementation(libs.stream.log.android)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.junit)
     androidTestImplementation(libs.truth)
