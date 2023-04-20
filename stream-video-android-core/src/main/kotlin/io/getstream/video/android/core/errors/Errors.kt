@@ -28,4 +28,5 @@ class RtcException(
     message: String? = null, cause: Throwable? = null,
     retryCurrentSfu: Boolean = false,
     switchSfu: Boolean = false,
+    error: stream.video.sfu.models.Error? = null,
 ) : Exception(message, cause)

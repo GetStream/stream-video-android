@@ -34,6 +34,7 @@ import io.getstream.video.android.core.StreamVideoImpl
 import io.getstream.video.android.core.call.connection.StreamPeerConnection
 import io.getstream.video.android.core.call.state.ConnectionState
 import io.getstream.video.android.core.call.utils.stringify
+import io.getstream.video.android.core.errors.RtcException
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
@@ -886,7 +887,17 @@ public class RtcSession internal constructor(
                 val result = apiCall()
                 Success(result)
             } catch (e: HttpException) {
+                // TODO: understand the error conditions here
                 parseError(e)
+            } catch (e: RtcException) {
+                // TODO: understand the error conditions here
+                throw e
+                Failure(
+                    io.getstream.result.Error.ThrowableError(
+                        e.message ?: "RtcException",
+                        e
+                    )
+                )
             }
         }
     }
@@ -905,21 +916,49 @@ public class RtcSession internal constructor(
     suspend fun sendAnswer(request: SendAnswerRequest): Result<SendAnswerResponse> =
         wrapAPICall {
             val result = sfuConnectionModule.signalService.sendAnswer(request)
+            result.error?.let {
+                throw RtcException(error=it, message=it.message)
+            }
             result
         }
 
     // send whenever we have a new ice candidate
     suspend fun sendIceCandidate(request: ICETrickle): Result<ICETrickleResponse> =
-        wrapAPICall { sfuConnectionModule.signalService.iceTrickle(request) }
+        wrapAPICall {
+            val result = sfuConnectionModule.signalService.iceTrickle(request)
+            result.error?.let {
+                throw RtcException(error=it, message=it.message)
+            }
+            result
+        }
 
     // call after onNegotiation Needed
     suspend fun setPublisher(request: SetPublisherRequest): Result<SetPublisherResponse> =
-        wrapAPICall { sfuConnectionModule.signalService.setPublisher(request) }
+        wrapAPICall {
+            val result = sfuConnectionModule.signalService.setPublisher(request)
+            result.error?.let {
+                throw RtcException(error=it, message=it.message)
+            }
+            result
+        }
 
     // share what size and which participants we're looking at
     suspend fun updateSubscriptions(request: UpdateSubscriptionsRequest): Result<UpdateSubscriptionsResponse> =
-        wrapAPICall { sfuConnectionModule.signalService.updateSubscriptions(request) }
+        wrapAPICall {
+            val result = sfuConnectionModule.signalService.updateSubscriptions(request)
+            result.error?.let {
+                throw RtcException(error=it, message=it.message)
+            }
+            result
 
-    suspend fun updateMuteState(muteStateRequest: UpdateMuteStatesRequest): Result<UpdateMuteStatesResponse> =
-        wrapAPICall { sfuConnectionModule.signalService.updateMuteStates(muteStateRequest) }
+        }
+
+    suspend fun updateMuteState(request: UpdateMuteStatesRequest): Result<UpdateMuteStatesResponse> =
+        wrapAPICall {
+            val result = sfuConnectionModule.signalService.updateMuteStates(request)
+            result.error?.let {
+                throw RtcException(error=it, message=it.message)
+            }
+            result
+        }
 }
