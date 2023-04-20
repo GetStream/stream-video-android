@@ -70,37 +70,31 @@ public val mockUsers: List<User>
             id = "filip_babic",
             name = "Filip",
             image = "https://avatars.githubusercontent.com/u/17215808?v=4",
-            isOnline = true
         ),
         User(
             id = "jaewoong",
             name = "Jaewoong Eum",
             image = "https://ca.slack-edge.com/T02RM6X6B-U02HU1XR9LM-626fb91c334e-128",
-            isOnline = true
         ),
         User(
             id = "toma_zdravkovic",
             name = "Toma Zdravkovic",
             image = "https://upload.wikimedia.org/wikipedia/commons/d/da/Toma_Zdravkovi%C4%87.jpg",
-            isOnline = true
         ),
         User(
             id = "tyrone_bailey",
             name = "Tyrone Bailey",
             image = "https://getstream.io/chat/docs/sdk/avatars/jpg/Tyrone%20Bailey.jpg",
-            isOnline = true
         ),
         User(
             id = "willard",
             name = "Willard Hessel",
             image = "https://getstream.io/chat/docs/sdk/avatars/jpg/Willard%20Hessel.jpg",
-            isOnline = true
         ),
         User(
             id = "blanche",
             name = "Blanche Schoen",
             image = "https://getstream.io/chat/docs/sdk/avatars/jpg/Blanche%20Schoen.jpg",
-            isOnline = true
         ),
     )
 

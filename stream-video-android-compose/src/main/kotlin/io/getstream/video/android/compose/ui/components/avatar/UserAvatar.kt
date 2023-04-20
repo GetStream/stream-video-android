@@ -86,7 +86,7 @@ public fun UserAvatar(
             initialsAvatarOffset = initialsAvatarOffset
         )
 
-        if (showOnlineIndicator && user.isOnline) {
+        if (showOnlineIndicator) {
             onlineIndicator()
         }
     }

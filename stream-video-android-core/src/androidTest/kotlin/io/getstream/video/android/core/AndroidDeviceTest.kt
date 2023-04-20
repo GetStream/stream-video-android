@@ -21,11 +21,9 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.forEach
 import kotlinx.coroutines.test.runTest
 import org.junit.Ignore
 import org.junit.Test
-import org.webrtc.MediaSource
 import org.webrtc.MediaStreamTrack
 import org.webrtc.PeerConnection
 
@@ -42,7 +40,7 @@ import org.webrtc.PeerConnection
  * * Does the SFU WS connect
  * * Do we receive the join event
  */
-class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS=false) {
+class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
     private val logger by taggedLogger("Test:AndroidDeviceTest")
 
@@ -135,7 +133,6 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS=false) {
         // TODO: PeerConnection.IceConnectionState.CONNECTED isn't reached
         // it is RTCOutboundRtpStreamStats && it.bytesSent > 0
         report?.statsMap?.values?.any { it is Throwable }
-
     }
 
     @Test
@@ -167,6 +164,5 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS=false) {
 //            assertThat(audioTrack?.enabled()).isTrue()
 //            assertThat(audioTrack?.state()).isEqualTo(MediaStreamTrack.State.LIVE)
 //        }
-
     }
 }

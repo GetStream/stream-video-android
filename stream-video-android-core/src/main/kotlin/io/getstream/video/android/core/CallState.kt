@@ -86,7 +86,7 @@ import java.util.SortedMap
  *
  *
  */
-public class CallState(private val call: Call, user: User) {
+public class CallState(private val call: Call, private val user: User) {
     private val logger by taggedLogger("CallState")
 
     /**
@@ -181,10 +181,12 @@ public class CallState(private val call: Call, user: User) {
     }
 
     private val _backstage: MutableStateFlow<Boolean> = MutableStateFlow(false)
+
     /** if we are in backstage mode or not */
     val backstage: StateFlow<Boolean> = _backstage
 
     private val _broadcasting: MutableStateFlow<Boolean> = MutableStateFlow(false)
+
     /** if the call is being broadcasted to HLS */
     val broadcasting: StateFlow<Boolean> = _broadcasting
 
@@ -197,6 +199,7 @@ public class CallState(private val call: Call, user: User) {
     val startsAt: StateFlow<OffsetDateTime?> = _startsAt
 
     private val _updatedAt: MutableStateFlow<OffsetDateTime?> = MutableStateFlow(null)
+
     /** updatedAt */
     val updatedAt: StateFlow<OffsetDateTime?> = _updatedAt
 
@@ -507,7 +510,12 @@ public class CallState(private val call: Call, user: User) {
         val participantState = if (participantMap.contains(sessionId)) {
             participantMap[sessionId]!!
         } else {
-            ParticipantState(sessionId = sessionId, call = call, initialUser = user ?: User(userId))
+            ParticipantState(
+                sessionId = sessionId,
+                call = call,
+                initialUser = user ?: User(userId),
+                isLocal = userId == this.user.id
+            )
         }
         if (updateFlow) {
             upsertParticipants(listOf(participantState))

@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.core.call
 
-import android.hardware.camera2.CameraMetadata
 import android.media.AudioAttributes.ALLOW_CAPTURE_BY_ALL
 import android.media.AudioManager
 import android.os.Build
@@ -335,14 +334,14 @@ public class RtcSession internal constructor(
                 source = audioSource, trackId = buildTrackId(TrackType.TRACK_TYPE_AUDIO)
             )
             audioTrack.setEnabled(true)
-            setLocalTrack(TrackType.TRACK_TYPE_AUDIO, TrackWrapper(streamId=buildTrackId(TrackType.TRACK_TYPE_AUDIO), audio=audioTrack))
+            setLocalTrack(TrackType.TRACK_TYPE_AUDIO, TrackWrapper(streamId = buildTrackId(TrackType.TRACK_TYPE_AUDIO), audio = audioTrack))
 
             publisher?.addAudioTransceiver(audioTrack, listOf(sessionId))
             // step 5 create the video track
             val videoTrack = clientImpl.peerConnectionFactory.makeVideoTrack(
                 source = videoSource, trackId = buildTrackId(TrackType.TRACK_TYPE_VIDEO)
             )
-            setLocalTrack(TrackType.TRACK_TYPE_VIDEO, TrackWrapper(streamId=buildTrackId(TrackType.TRACK_TYPE_VIDEO), video=videoTrack))
+            setLocalTrack(TrackType.TRACK_TYPE_VIDEO, TrackWrapper(streamId = buildTrackId(TrackType.TRACK_TYPE_VIDEO), video = videoTrack))
             // render it on the surface. but we need to start this before forwarding it to the publisher
             // TODO: clean this up, would be better to have some sensible API for this
             call.mediaManager.videoCapturer?.initialize(
