@@ -106,6 +106,7 @@ Typically for development you want to fail fast and loud. For production you wan
 ## WebRTC layer
 
 * RtcSession maintains all the tracks and the webrtc logic
+  https://www.notion.so/stream-wiki/WebRTC-SFU-Setup-37b5a4a260264d3f92332774e5ec9ee9#ee96064deb73480383f6be2a6a36a315
 
 ### RTC offer/answer cycle
 

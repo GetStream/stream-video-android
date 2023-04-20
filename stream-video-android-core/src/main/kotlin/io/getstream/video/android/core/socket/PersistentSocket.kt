@@ -263,6 +263,7 @@ open class PersistentSocket<T>(
                     handleError(SfuSocketError(errorEvent.error))
                 }
                 // TODO: This logic is specific to the SfuSocket, move it
+                events.emit(message)
                 if (message is JoinCallResponseEvent) {
                     _connectionState.value = SocketState.Connected(message)
                     if (!continuationCompleted) {
@@ -270,7 +271,6 @@ open class PersistentSocket<T>(
                         continuationCompleted = true
                     }
                 }
-                events.emit(message)
             } catch (error: Throwable) {
                 logger.e { "[onMessage] failed: $error" }
                 handleError(error)

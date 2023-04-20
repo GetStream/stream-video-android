@@ -35,6 +35,7 @@ import io.getstream.video.android.core.StreamVideoImpl
 import io.getstream.video.android.core.call.connection.StreamPeerConnection
 import io.getstream.video.android.core.call.state.ConnectionState
 import io.getstream.video.android.core.call.utils.stringify
+import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
@@ -61,9 +62,11 @@ import io.getstream.video.android.core.utils.stringify
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
@@ -249,7 +252,9 @@ public class RtcSession internal constructor(
     }
 
     suspend fun connect() {
-        connectWs() // This is where it hangs
+        connectWs()
+        // ensure that the join event has been handled before starting RTC
+        joinEventResponse.first { it != null }
         connectRtc()
     }
 
@@ -402,7 +407,7 @@ public class RtcSession internal constructor(
 
     fun clear() {
         logger.i { "[clear] #sfu; no args" }
-        supervisorJob.cancelChildren()
+        //supervisorJob.cancelChildren()
 
         connectionState = ConnectionState.DISCONNECTED
 
@@ -648,7 +653,7 @@ public class RtcSession internal constructor(
             joinEventResponse.value = event
         }
         if (event is SfuDataEvent) {
-            coroutineScope.launch {
+            scope.launch {
                 logger.v { "[onRtcEvent] event: $event" }
                 when (event) {
                     is ICETrickleEvent -> handleIceTrickle(event)
@@ -778,7 +783,13 @@ public class RtcSession internal constructor(
                     throw IllegalStateException(result.toString())
                 }
 
-                val trackInfos = peerConnection.connection.transceivers.filter {
+                // the Sfu WS needs to be connected before calling SetPublisherRequest
+                if (joinEventResponse.value == null) {
+                    throw IllegalStateException("SFU WS isn't connected")
+                }
+
+                val transceivers = peerConnection.connection.transceivers
+                val trackInfos = transceivers.filter {
                     it.direction == RtpTransceiver.RtpTransceiverDirection.SEND_ONLY && it.sender?.track() != null
                 }.map { transceiver ->
                     val track = transceiver.sender.track()!!
@@ -821,7 +832,9 @@ public class RtcSession internal constructor(
                     val answerDescription = SessionDescription(
                         SessionDescription.Type.ANSWER, it.sdp
                     )
+                    // set the remote peer connection, and handle queued ice candidates
                     peerConnection.setRemoteDescription(answerDescription)
+
                 }.onError {
                     logger.e { "[negotiate] #$id; #sfu; #${peerType.stringify()}; failed: $it" }
                 }
