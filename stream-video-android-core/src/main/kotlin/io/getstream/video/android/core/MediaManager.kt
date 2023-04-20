@@ -179,7 +179,7 @@ public class CameraManager(public val mediaManager: MediaManagerImpl) {
 class MediaManagerImpl(val context: Context) {
 
     private var audioManager = context.getSystemService<AudioManager>()
-    private var captureResolution: CameraEnumerationAndroid.CaptureFormat? = null
+    internal var captureResolution: CameraEnumerationAndroid.CaptureFormat? = null
     private var isCapturingVideo: Boolean = false
     var videoCapturer: Camera2Capturer? = null
     private val logger by taggedLogger("Call:MediaManagerImpl")

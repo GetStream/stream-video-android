@@ -402,7 +402,8 @@ public class RtcSession internal constructor(
 
     private var videoCapturer: VideoCapturer? = null
     private var isCapturingVideo: Boolean = false
-    private var captureResolution: CameraEnumerationAndroid.CaptureFormat? = null
+    // TODO: nicer way to monitor this
+    private val captureResolution by lazy { call.mediaManager.captureResolution }
 
     fun clear() {
         logger.i { "[clear] #sfu; no args" }
@@ -800,7 +801,7 @@ public class RtcSession internal constructor(
                         else -> TrackType.TRACK_TYPE_UNSPECIFIED
                     }
 
-                    val layers: List<VideoLayer> = if (trackType == TrackType.TRACK_TYPE_AUDIO) {
+                    val layers: List<VideoLayer> = if (trackType != TrackType.TRACK_TYPE_VIDEO) {
                         emptyList()
                     } else {
                         transceiver.sender.parameters.encodings.map {
@@ -893,7 +894,8 @@ public class RtcSession internal constructor(
     // reply to when we get an offer from the SFU
     suspend fun sendAnswer(request: SendAnswerRequest): Result<SendAnswerResponse> =
         wrapAPICall {
-            sfuConnectionModule.signalService.sendAnswer(request)
+            val result = sfuConnectionModule.signalService.sendAnswer(request)
+            result
         }
 
     // send whenever we have a new ice candidate
