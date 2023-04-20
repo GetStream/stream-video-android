@@ -800,17 +800,22 @@ public class RtcSession internal constructor(
                         else -> TrackType.TRACK_TYPE_UNSPECIFIED
                     }
 
-                    val layers: List<VideoLayer> = transceiver.sender.parameters.encodings.map {
-                        VideoLayer(
-                            rid = it.rid ?: "",
-                            video_dimension = VideoDimension(
-                                width = captureResolution?.width ?: 0,
-                                height = captureResolution?.height ?: 0
-                            ),
-                            bitrate = it.maxBitrateBps ?: 0,
-                            fps = captureResolution?.framerate?.max ?: 0
-                        )
+                    val layers: List<VideoLayer> = if (trackType == TrackType.TRACK_TYPE_AUDIO) {
+                        emptyList()
+                    } else {
+                        transceiver.sender.parameters.encodings.map {
+                            VideoLayer(
+                                rid = it.rid ?: "",
+                                video_dimension = VideoDimension(
+                                    width = captureResolution?.width ?: 0,
+                                    height = captureResolution?.height ?: 0
+                                ),
+                                bitrate = it.maxBitrateBps ?: 0,
+                                fps = captureResolution?.framerate?.max ?: 0
+                            )
+                        }
                     }
+
 
                     TrackInfo(
                         track_id = track.id(),
@@ -867,7 +872,8 @@ public class RtcSession internal constructor(
     internal suspend fun <T : Any> wrapAPICall(apiCall: suspend () -> T): Result<T> {
         return withContext(scope.coroutineContext) {
             try {
-                Success(apiCall())
+                val result = apiCall()
+                Success(result)
             } catch (e: HttpException) {
                 parseError(e)
             }
@@ -883,6 +889,7 @@ public class RtcSession internal constructor(
         )
     }
 
+    // TODO: handle the .error field on the Response objects
     // reply to when we get an offer from the SFU
     suspend fun sendAnswer(request: SendAnswerRequest): Result<SendAnswerResponse> =
         wrapAPICall {
