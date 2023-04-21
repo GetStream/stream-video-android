@@ -221,11 +221,11 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
     fun receiving() = runTest {
         // TODO: have a specific SFU setting to send back fake data
         // TODO: replace the id with your active call
-        val call = client.call("default", "AYIh97yMpCXV")
+        val call = client.call("default", "j8B8hMm2wSAj")
         val joinResult = call.join()
         assertSuccess(joinResult)
-        delay(1000)
-        delay(100000)
+        delay(20000)
+        clientImpl.debugInfo.log()
 
         call.state.participants.collect()
         // see if the ice connection is ok on the subscriber

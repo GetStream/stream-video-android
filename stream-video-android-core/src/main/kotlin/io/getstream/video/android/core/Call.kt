@@ -162,16 +162,19 @@ public class Call(
 
     suspend fun join(create: CreateCallOptions? = null): Result<RtcSession> {
         // step 1. call the join endpoint to get a list of SFUs
+        val timer = clientImpl.debugInfo.trackTime("call.join")
         val result = joinRequest(create)
 
         if (result !is Success) {
             return result as Failure
         }
+        timer.split("join request completed")
 
         // step 2. measure latency
         val edgeUrls = result.value.edges.map { it.latencyUrl }
         // measure latency in parallel
         val measurements = clientImpl.measureLatency(edgeUrls)
+        timer.split("latency measured")
 
         // upload our latency measurements to the server
         val selectEdgeServerResult = clientImpl.selectEdgeServer(
@@ -198,7 +201,11 @@ public class Call(
             latencyResults = measurements.associate { it.latencyUrl to it.measurements }
         )
 
+        timer.split("rtc session init")
+
         session?.connect()
+
+        timer.finish("rtc connect completed")
 
         return Success(value = session!!)
     }

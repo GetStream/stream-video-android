@@ -71,7 +71,6 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.openapitools.client.models.VideoEvent
-import org.webrtc.CameraEnumerationAndroid
 import org.webrtc.MediaConstraints
 import org.webrtc.MediaStream
 import org.webrtc.MediaStreamTrack
@@ -250,7 +249,9 @@ public class RtcSession internal constructor(
     }
 
     suspend fun connect() {
+        val timer = clientImpl.debugInfo.trackTime("sfu ws")
         connectWs()
+        timer.finish()
         // ensure that the join event has been handled before starting RTC
         joinEventResponse.first { it != null }
         connectRtc()
@@ -321,6 +322,7 @@ public class RtcSession internal constructor(
 
     suspend fun connectRtc() {
         val settings = call.state.settings.value
+        val timer = clientImpl.debugInfo.trackTime("connectRtc")
 
         // TODO: this should come from settings
         val defaultDirection = CameraDirection.Front
@@ -329,6 +331,7 @@ public class RtcSession internal constructor(
         val publishing = true
         if (publishing) {
             createPublisher()
+            timer.split("createPublisher")
         }
 
         if (publishing) {
@@ -344,6 +347,8 @@ public class RtcSession internal constructor(
             call.mediaManager.camera.enable()
             call.mediaManager.microphone.enable()
 
+            timer.split("media enabled")
+
             // step 4 add the audio track to the publisher
             setLocalTrack(TrackType.TRACK_TYPE_AUDIO, TrackWrapper(streamId = buildTrackId(TrackType.TRACK_TYPE_AUDIO), audio = call.mediaManager.audioTrack))
             publisher?.addAudioTransceiver(call.mediaManager.audioTrack, listOf(sessionId))
@@ -355,7 +360,7 @@ public class RtcSession internal constructor(
         }
 
         // step 6 - onNegotiationNeeded will trigger and complete the setup using SetPublisherRequest
-
+        timer.finish()
         listenToMediaChanges()
         return
     }
@@ -511,6 +516,9 @@ public class RtcSession internal constructor(
      */
     private fun updatePublishQuality(event: ChangePublishQualityEvent) {
         val transceiver = publisher?.videoTransceiver ?: return
+
+        return
+        // TODO: fixme
 
         val enabledRids =
             event.changePublishQuality.video_senders.firstOrNull()?.layers?.filter { it.active }

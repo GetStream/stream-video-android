@@ -100,6 +100,61 @@ import retrofit2.HttpException
 import java.util.*
 import kotlin.coroutines.Continuation
 
+internal data class Timer(val name: String, val start: Long) {
+    var end: Long = 0
+    var duration: Long = 0
+    var splits: List<Pair<String, Long>> = mutableListOf<Pair<String, Long>>()
+    var durations: List<Pair<String, Long>> = mutableListOf<Pair<String, Long>>()
+
+    fun split(s: String) {
+        val now = System.currentTimeMillis()
+        val last = splits.lastOrNull()?.second ?: start
+        splits += s to now
+        durations += s to (now - last)
+    }
+
+    fun finish(s: String?=null): Long {
+        s?.let {
+            split(s)
+        }
+        end = System.currentTimeMillis()
+        duration = end - start
+        return duration
+    }
+}
+
+/**
+ * Handy helper gathering all relevant debug information
+ */
+internal class DebugInfo () {
+    private val logger by taggedLogger("DebugInfo")
+    // timers to help track performance issues in prod
+    val timers = mutableListOf<Timer>()
+    // last 20 events
+
+    // phone type
+
+    // android version
+
+    fun log() {
+        logger.i { "Debug info" }
+        timers.forEach {
+            logger.i { "${it.name} took ${it.duration}"}
+            it.durations.forEach { (s, t) ->
+                logger.i {" - ${it.name}:$s took $t"}
+            }
+        }
+    }
+
+
+    fun trackTime(s: String): Timer {
+        val timer = Timer(s, System.currentTimeMillis())
+        timers += timer
+        return timer
+    }
+
+}
+
 /**
  * @param lifecycle The lifecycle used to observe changes in the process
  */
@@ -117,6 +172,8 @@ internal class StreamVideoImpl internal constructor(
 
     /** the state for the client, includes the current user */
     override val state = ClientState(this)
+
+    val debugInfo = DebugInfo()
 
     /** session id is generated client side */
     public val sessionId = UUID.randomUUID().toString()
@@ -304,7 +361,9 @@ internal class StreamVideoImpl internal constructor(
             // wait for the guest user setup if we're using guest users
             guestUserJob?.let { it.await() }
             try {
+                val timer = debugInfo.trackTime("coordinator connect")
                 val result = socketImpl.connect()
+                timer.finish()
                 result
             } catch (e: ErrorResponse) {
                 if (e.code == 40) {
