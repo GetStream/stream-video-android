@@ -10,33 +10,42 @@
 
 ### Week 5: Dogfooding & Example apps
 
+### High level issues
+
+- [ ] Join flow is too slow
+- [ ] Reconnection support needs work
+- [ ] Docs need a lot of work
+- [ ] SDK doesn't handle all edge cases yet
 
 
 ### RTC & Media TODO
 
-- [ ] Move enabling/disabling/state and clean it up
-- [ ] Move setCameraEnabled & setMicrophoneEnabled
-- [ ] Clean up the media manager class
+- [ ] Opus Red
+- [ ] Opus DTX
+- [ ] Clean up the media manager class Mic management
 - [ ] Error classes for Media/Camera/Mic & Joining a call. That wrap the many things that can go wrong.
 - [ ] Leave & End flows
 - [ ] Review how UI changes & pagination are connected to the video tracks. See call initRenderer and updateParticipantsSubscriptions
 - [ ] Implement dynascale
+- [ ] Talking while muted notification
+- [X] Move enabling/disabling/state and clean it up
+- [X] Move setCameraEnabled & setMicrophoneEnabled
+- [X] Clean up the media manager class Camera management
 - [X] Ensure errors from sfu are bubbled up
 - [X] Media manager class to enable easy testing of all audio/video stuff
 - [X] Tests that verify the local track is working
 - [X] Tests that verify we are sending our local track
 - [X] setLocalTrack is not called
 
-### TODOs
+### Other
 
 - Review the 200 todos
-
+- Unit test on Android that customer success can run to test the SDK/ edit things for a customer
 
 ### LLC TODO
 
 - [ ] Error.NetworkError vs ErrorResponse. Having 2 classes is confusing. Error format is slightly differences in 3 places. 
 - [ ] Remove unused code
-- [ ] Join flow performance
 - [ ] Move SFU event to swap between SFUs and handle failure
 - [ ] Reconnect after SFU breaks (https://www.notion.so/Reconnection-Failure-handling-f6991fd2e5584380bb2d2cb5e8ac5303)
 - [ ] Audio filter example
@@ -161,9 +170,9 @@
 [X] Update call endpoints doesn’t expose team or startsAt. I get why we don’t expose team, not sure about startsAt
 [X] Get/Create etc don’t specify connection_id, this breaks the ability to watch
 [X] Not being able to edit settings on a call you created seems like the wrong default: “”User ‘thierry’ with role ‘user’ is not allowed to perform action UpdateCallSettings in scope ‘video:default’“, serverErrorCode=17, statusCode=-1, cause=java.lang.Throwable: ))”
+[X] Participant.online field is weird. Aren't you always online as a participant?
 [ ] Events for updating users 
 [ ] Participant count (for livestreams you cant rely on the list)
-[ ] Participant.online field is weird. Aren't you always online as a participant?
 [ ] ConnectionQualityInfo is a list, audio levels is a map. Lets standardize
 [ ] Accept/reject call endpoints
 [ ] What about codec switching?
@@ -174,8 +183,11 @@
 [ ] CallMemberUpdatedPermissionEvent. Weird that call and members are included
 [ ] message=GetOrCreateCall failed with error: "The following users are involved in call create operation, but don't exist: [jaewoong]. Please create the user objects before setting up the call.
 [ ] review QueryMembersRequest
-[ ] call setting for front or back
-[ ] call setting for desired resolution
+[ ] target resolution / max resolution (default 960)
+[ ] if we should default to front or back camera
+[ ] should video be default on or off?
+[ ] should audio be default on or off?
+[ ] am i allowed to publish (IE should i create the publisher peer connection)
 
 ### Available tasks up for grabs
 
