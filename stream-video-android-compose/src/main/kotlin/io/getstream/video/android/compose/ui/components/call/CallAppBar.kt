@@ -34,6 +34,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.call.state.CallAction
@@ -133,6 +134,8 @@ internal fun RowScope.DefaultCallAppBarCenterContent(title: String) {
         text = title,
         fontSize = VideoTheme.dimens.topAppbarTextSize,
         color = VideoTheme.colors.callDescription,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
         textAlign = TextAlign.Start,
     )
 }
