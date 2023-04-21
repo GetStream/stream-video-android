@@ -27,6 +27,7 @@ import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
 import io.getstream.result.onSuccessSuspend
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.CameraDirection
 import io.getstream.video.android.core.DeviceStatus
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.StreamVideo
@@ -263,12 +264,13 @@ public class RtcSession internal constructor(
         coroutineScope.launch {
             // update the tracks when the camera or microphone status changes
             call.mediaManager.camera.status.collectLatest {
-                val track = getTrack(sessionId, TrackType.TRACK_TYPE_VIDEO)
-                track?.video?.setEnabled(it == DeviceStatus.Enabled)
+                // set the mute /unumute status
+                setMuteState(isEnabled = it == DeviceStatus.Enabled, TrackType.TRACK_TYPE_VIDEO)
             }
 
-            call.mediaManager.camera.selectedDevice.collectLatest {
-                // update the track with the new device
+            call.mediaManager.microphone.status.collectLatest {
+                // set the mute /unumute status
+                setMuteState(isEnabled = it == DeviceStatus.Enabled, TrackType.TRACK_TYPE_AUDIO)
             }
         }
     }
@@ -318,7 +320,10 @@ public class RtcSession internal constructor(
     }
 
     suspend fun connectRtc() {
+        val settings = call.state.settings.value
 
+        // TODO: this should come from settings
+        val defaultDirection = CameraDirection.Front
         // if we are allowed to publish, create a peer connection for it
         // TODO: real settings check
         val publishing = true
@@ -333,36 +338,20 @@ public class RtcSession internal constructor(
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 manager?.allowedCapturePolicy = ALLOW_CAPTURE_BY_ALL
             }
-            call.mediaManager.camera.startCapture()
-            call.mediaManager.microphone.startCapture()
-            // step 3 tracks for video and audio
-            val videoSource = clientImpl.peerConnectionFactory.makeVideoSource(false)
-            val audioSource = clientImpl.peerConnectionFactory.makeAudioSource(audioConstraints)
+
+            // TODO: hook up the settings, front or back...
+
+            call.mediaManager.camera.enable()
+            call.mediaManager.microphone.enable()
 
             // step 4 add the audio track to the publisher
-            val audioTrack = clientImpl.peerConnectionFactory.makeAudioTrack(
-                source = audioSource, trackId = buildTrackId(TrackType.TRACK_TYPE_AUDIO)
-            )
-            audioTrack.setEnabled(true)
-            setLocalTrack(TrackType.TRACK_TYPE_AUDIO, TrackWrapper(streamId = buildTrackId(TrackType.TRACK_TYPE_AUDIO), audio = audioTrack))
-
-            publisher?.addAudioTransceiver(audioTrack, listOf(sessionId))
+            setLocalTrack(TrackType.TRACK_TYPE_AUDIO, TrackWrapper(streamId = buildTrackId(TrackType.TRACK_TYPE_AUDIO), audio = call.mediaManager.audioTrack))
+            publisher?.addAudioTransceiver(call.mediaManager.audioTrack, listOf(sessionId))
             // step 5 create the video track
-            val videoTrack = clientImpl.peerConnectionFactory.makeVideoTrack(
-                source = videoSource, trackId = buildTrackId(TrackType.TRACK_TYPE_VIDEO)
-            )
-            setLocalTrack(TrackType.TRACK_TYPE_VIDEO, TrackWrapper(streamId = buildTrackId(TrackType.TRACK_TYPE_VIDEO), video = videoTrack))
+            setLocalTrack(TrackType.TRACK_TYPE_VIDEO, TrackWrapper(streamId = buildTrackId(TrackType.TRACK_TYPE_VIDEO), video = call.mediaManager.videoTrack))
             // render it on the surface. but we need to start this before forwarding it to the publisher
-            // TODO: clean this up, would be better to have some sensible API for this
-
-            call.mediaManager.setVideoSource(videoSource)
-
-            // TODO: understand how to start with only rendering on the surface view
-            videoTrack.setEnabled(true)
-            logger.v { "[createUserTracks] #sfu; videoTrack: ${videoTrack.stringify()}" }
-            publisher?.addVideoTransceiver(videoTrack!!, listOf(sessionId))
-            setCameraEnabled(true)
-            setMicrophoneEnabled(true)
+            logger.v { "[createUserTracks] #sfu; videoTrack: ${call.mediaManager.videoTrack.stringify()}" }
+            publisher?.addVideoTransceiver(call.mediaManager.videoTrack!!, listOf(sessionId))
         }
 
         // step 6 - onNegotiationNeeded will trigger and complete the setup using SetPublisherRequest
@@ -435,8 +424,8 @@ public class RtcSession internal constructor(
      * - updateMuteStateRequest
      *
      */
-    fun setCameraEnabled(isEnabled: Boolean) {
-        logger.d { "[setCameraEnabled] #sfu; isEnabled: $isEnabled" }
+    fun setMuteState(isEnabled: Boolean, trackType: TrackType) {
+        logger.d { "[setMuteState] #sfu; isEnabled: $isEnabled" }
 
         coroutineScope.launch {
 
@@ -444,29 +433,11 @@ public class RtcSession internal constructor(
                 session_id = sessionId,
                 mute_states = listOf(
                     TrackMuteState(
-                        track_type = TrackType.TRACK_TYPE_VIDEO,
+                        track_type = trackType,
                         muted = !isEnabled
                     )
                 ),
             )
-            updateMuteState(request).onSuccessSuspend {
-            }
-        }
-    }
-
-    fun setMicrophoneEnabled(isEnabled: Boolean) {
-        logger.d { "[setMicrophoneEnabled] #sfu; isEnabled: $isEnabled" }
-        coroutineScope.launch {
-            val request = UpdateMuteStatesRequest(
-                session_id = sessionId,
-                mute_states = listOf(
-                    TrackMuteState(
-                        track_type = TrackType.TRACK_TYPE_AUDIO,
-                        muted = !isEnabled
-                    )
-                ),
-            )
-
             updateMuteState(request).onSuccessSuspend {
             }
         }

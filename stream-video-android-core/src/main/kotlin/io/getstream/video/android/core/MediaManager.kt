@@ -75,15 +75,13 @@ class SpeakerManager(val mediaManager: MediaManagerImpl) {
     val speakerPhoneEnabled: StateFlow<Boolean> = _speakerPhoneEnabled
 
     fun devices(): List<String> {
-        return mediaManager.getCameraDevices()
+        return emptyList()
     }
 
     fun select(deviceId: String) {
-        mediaManager.selectCamera(deviceId)
     }
 
     fun enable() {
-        mediaManager.setSpeakerphoneEnabled(true)
     }
 
     fun setVolume(volumeLevel: Long) {
@@ -95,11 +93,9 @@ class SpeakerManager(val mediaManager: MediaManagerImpl) {
     }
 
     fun setEnabled(enabled: Boolean) {
-        mediaManager.setCameraEnabled(enabled)
     }
 
     fun disable() {
-        mediaManager.setCameraEnabled(false)
     }
 }
 
@@ -312,7 +308,7 @@ public class CameraManager(public val mediaManager: MediaManagerImpl, eglBaseCon
             videoCapturer?.initialize(
                 surfaceTextureHelper,
                 mediaManager.context,
-                mediaManager
+                mediaManager.videoSource.capturerObserver
             )
         }
 
@@ -397,20 +393,6 @@ public class CameraManager(public val mediaManager: MediaManagerImpl, eglBaseCon
         return sorted?.first()
     }
 
-    /**
-     * When the track becomes available TODO: remove htis
-     */
-    internal fun setVideoSource(videoSource: VideoSource) {
-        this.videoSource = videoSource
-        runBlocking(scope.coroutineContext) {
-            videoCapturer?.initialize(
-                surfaceTextureHelper,
-                context,
-                videoSource.capturerObserver
-            )
-        }
-    }
-
 }
 
 /**
@@ -431,16 +413,11 @@ public class CameraManager(public val mediaManager: MediaManagerImpl, eglBaseCon
  * @see BluetoothHeadsetManager
  */
 // TODO: add the call, or the settings object
-class MediaManagerImpl(val context: Context, val call: Call, val scope: CoroutineScope, val eglBaseContext: EglBase.Context) : CapturerObserver {
-
-    private var audioManager = context.getSystemService<AudioManager>()
-    internal var captureResolution: CameraEnumerationAndroid.CaptureFormat? = null
-    private var isCapturingVideo: Boolean = false
-    var videoCapturer: Camera2Capturer? = null
+class MediaManagerImpl(val context: Context, val call: Call, val scope: CoroutineScope, val eglBaseContext: EglBase.Context) {
     private val logger by taggedLogger("Call:MediaManagerImpl")
+    private var audioManager = context.getSystemService<AudioManager>()
 
-
-
+    // source & tracks
     val videoSource = call.clientImpl.peerConnectionFactory.makeVideoSource(false)
     val audioSource = call.clientImpl.peerConnectionFactory.makeAudioSource(buildAudioConstraints())
     val audioTrack = call.clientImpl.peerConnectionFactory.makeAudioTrack(
@@ -451,11 +428,9 @@ class MediaManagerImpl(val context: Context, val call: Call, val scope: Coroutin
     )
 
     val camera = CameraManager(this, eglBaseContext)
-
     val microphone = MicrophoneManager(this)
     val speaker = SpeakerManager(this)
 
-    val enumerator = Camera2Enumerator(context)
 
 
 
@@ -483,8 +458,6 @@ class MediaManagerImpl(val context: Context, val call: Call, val scope: Coroutin
     public fun getAudioHandler(): AudioSwitchHandler? {
         return audioHandler as? AudioSwitchHandler
     }
-
-
 
     fun getAudioDevices(): List<io.getstream.video.android.core.audio.AudioDevice> {
         logger.d { "[getAudioDevices] #sfu; no args" }
@@ -516,20 +489,6 @@ class MediaManagerImpl(val context: Context, val call: Call, val scope: Coroutin
             logger.d { "[setupAudio] #sfu; isCommunicationDeviceSet: $isCommunicationDeviceSet" }
         }
     }
-
-    override fun onCapturerStarted(success: Boolean) {
-        //
-    }
-
-    override fun onCapturerStopped() {
-        //
-    }
-
-    override fun onFrameCaptured(frame: VideoFrame?) {
-        //
-    }
-
-
 
 
 }
