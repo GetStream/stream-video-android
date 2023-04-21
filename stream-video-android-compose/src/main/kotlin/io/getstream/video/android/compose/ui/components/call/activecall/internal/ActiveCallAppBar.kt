@@ -35,7 +35,7 @@ public fun ActiveCallAppBar(
 ) {
     val connectionState by call.state.connection.collectAsState()
     val callId = when (connectionState) {
-        is ConnectionState.Connected -> call.id
+        is ConnectionState.Connected -> call.cid
         else -> ""
     }
     val status = connectionState.formatAsTitle(LocalContext.current)
